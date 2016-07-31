@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "in_openmpt", "in_openmpt.vcxproj", "{D75AEB78-5537-49BD-9085-F92DEEFA84E8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "..\vs2012xp-ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "..\vs2012xp-ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\vs2012xp-ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D75AEB78-5537-49BD-9085-F92DEEFA84E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D75AEB78-5537-49BD-9085-F92DEEFA84E8}.Debug|Win32.Build.0 = Debug|Win32
+		{D75AEB78-5537-49BD-9085-F92DEEFA84E8}.Release|Win32.ActiveCfg = Release|Win32
+		{D75AEB78-5537-49BD-9085-F92DEEFA84E8}.Release|Win32.Build.0 = Release|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
+		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.Debug|Win32.Build.0 = Debug|Win32
+		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.Release|Win32.ActiveCfg = Release|Win32
+		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.Release|Win32.Build.0 = Release|Win32
+		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Debug|Win32.Build.0 = Debug|Win32
+		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Release|Win32.ActiveCfg = Release|Win32
+		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Release|Win32.Build.0 = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

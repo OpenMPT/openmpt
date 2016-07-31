@@ -4,7 +4,7 @@ if _ACTION ~= "vs2008" then
  project "libopenmpt_example_cxx"
   uuid "ce5b5a74-cdb1-4654-b928-f91725fb57c9"
   language "C++"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
   objdir "../../build/obj/libopenmpt_example_cxx"
   dofile "../../build/premake/premake-defaults-EXE.lua"
@@ -38,7 +38,7 @@ end
  project "libopenmpt_example_c"
   uuid "3f39804d-01c0-479c-ab8b-025683529c57"
   language "C"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
   objdir "../../build/obj/libopenmpt_example_c"
   dofile "../../build/premake/premake-defaults-EXE.lua"
@@ -69,7 +69,7 @@ end
  project "libopenmpt_example_c_mem"
   uuid "4db3da91-fafd-43af-b3b7-35699b80aba1"
   language "C"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
   objdir "../../build/obj/libopenmpt_example_c_mem"
   dofile "../../build/premake/premake-defaults-EXE.lua"
@@ -100,7 +100,7 @@ end
  project "libopenmpt_example_c_unsafe"
   uuid "696a79ac-65eb-445f-981a-7639c54569f8"
   language "C"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
   objdir "../../build/obj/libopenmpt_example_c_unsafe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
@@ -131,7 +131,7 @@ end
  project "libopenmpt_example_c_probe"
   uuid "3fbc000d-2574-4a02-96ba-db82d7e7d7bb"
   language "C"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
   objdir "../../build/obj/libopenmpt_example_c_probe"
   dofile "../../build/premake/premake-defaults-EXE.lua"

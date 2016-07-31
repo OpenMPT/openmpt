@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libopenmpt">
+      <UniqueIdentifier>{FFE9848F-EBA1-C6DC-54A9-9F38408061CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib">
+      <UniqueIdentifier>{050BB116-F1D7-0B22-1AF1-F9C9061D41B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib\plugins">
+      <UniqueIdentifier>{F688F7E8-E281-163B-0BB4-FBBFF70BF646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib\plugins\dmo">
+      <UniqueIdentifier>{A591FA3A-9120-8404-3A3F-98FF26AD94AA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\BuildSettings.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\CompilerDetect.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\ComponentManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Endianness.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\FileReader.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\FlagSet.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Logging.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Profiler.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\StringFixer.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\WriteMemoryDump.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\misc_util.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptAtomic.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBufferIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptCPU.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptCRC.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptFileIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptLibrary.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptMutex.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptOS.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptPathString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptRandom.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringFormat.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringParse.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptThread.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptTime.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptTypeTraits.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptUUID.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\serialization_utils.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\stdafx.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\typedefs.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\version.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\versionNumber.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt.hpp">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_config.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.hpp">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_impl.hpp">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_internal.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\AudioReadTarget.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ChunkReader.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Dither.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Dlsbank.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\FloatMixer.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ITCompression.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ITTools.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\IntMixer.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Loaders.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MIDIEvents.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MIDIMacros.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MPEGFrame.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Message.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MixFuncTable.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Mixer.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MixerInterface.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MixerLoops.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\MixerSettings.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModChannel.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModInstrument.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModSample.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModSequence.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\OggStream.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Resampler.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\RowVisitor.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\S3MTools.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\SampleFormat.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\SampleFormatConverters.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\SampleIO.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Snd_defs.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Sndfile.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Tables.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\Tagging.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\WAVTools.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\WindowedFIR.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\XMTools.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\mod_specifications.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\modcommand.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\modsmp_ctrl.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\pattern.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\patternContainer.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginManager.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\tuning.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\tuningbase.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\tuningcollection.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\ComponentManager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\FileReader.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\Logging.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\Profiler.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\misc_util.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptCPU.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptFileIO.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptIO.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptLibrary.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptOS.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptPathString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptRandom.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringFormat.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringParse.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptTime.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptUUID.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\serialization_utils.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\stdafx.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\typedefs.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\version.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp">
+      <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp">
+      <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext.cpp">
+      <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp">
+      <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Dither.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Dlsbank.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Fastmix.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ITCompression.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ITTools.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_669.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_amf.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ams.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dbm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_digi.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dmf.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_far.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_imf.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_it.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_itp.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mdl.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_med.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mid.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mo3.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mod.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mt2.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mtm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_okt.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_plm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_psm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ptm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_s3m.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_sfx.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_stm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ult.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_umx.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_wav.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_xm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MIDIMacros.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MPEGFrame.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Message.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixFuncTable.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixerLoops.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixerSettings.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Mmcmp.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModChannel.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModInstrument.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModSample.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModSequence.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\OggStream.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\S3MTools.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormats.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleIO.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Snd_flt.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Snd_fx.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Sndfile.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Sndmix.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Tables.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Tagging.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\UpgradeModule.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\WAVTools.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\WindowedFIR.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\XMTools.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\load_j2b.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\mod_specifications.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\modcommand.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\modsmp_ctrl.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\pattern.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\patternContainer.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\tuning.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

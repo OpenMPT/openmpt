@@ -2,7 +2,7 @@
  project "smbPitchShift"
   uuid "89AF16DD-32CC-4A7E-B219-5F117D761F9F"
   language "C++"
-  location ( "../../build/" .. _ACTION .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
   objdir "../../build/obj/smbPitchShift"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

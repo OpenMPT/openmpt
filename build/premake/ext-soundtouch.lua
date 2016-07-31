@@ -2,7 +2,7 @@
  project "soundtouch"
   uuid "F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD"
   language "C++"
-  location ( "../../build/" .. _ACTION .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
   objdir "../../build/obj/soundtouch"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

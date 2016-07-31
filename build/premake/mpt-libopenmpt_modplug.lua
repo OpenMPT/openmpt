@@ -2,7 +2,7 @@
  project "libopenmpt_modplug"
   uuid "F1397660-35F6-4734-837E-88DCE80E4837"
   language "C++"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../libopenmpt/" }
   objdir "../../build/obj/libopenmpt_modplug"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
