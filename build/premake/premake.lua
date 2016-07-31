@@ -35,6 +35,17 @@ newoption {
  }
 }
 
+newoption {
+	trigger = "xp",
+	description = "Generate XP targetting projects",
+}
+
+if not _OPTIONS["xp"] then
+	mpt_projectpathname = _ACTION;
+else
+	mpt_projectpathname = _ACTION .. "xp";
+end
+
 function replace_in_file (filename, from, to)
 	local text
 	local infile
@@ -140,13 +151,61 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
 
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_example_c_probe.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_example_c_unsafe.vcxproj")
+  postprocess_vs2010_main("build/vs2010xp/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2010xp/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2010xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2010xp/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2010xp/PluginBridge.vcxproj")
+  
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_example_c_probe.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_example_c_unsafe.vcxproj")
+  postprocess_vs2010_main("build/vs2012xp/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2012xp/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2012xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2012xp/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2012xp/PluginBridge.vcxproj")
+	
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_c_probe.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_c_unsafe.vcxproj")
+  postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013xp/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013xp/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013xp/PluginBridge.vcxproj")
+
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_probe.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_unsafe.vcxproj")
+  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015xp/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015xp/PluginBridge.vcxproj")
+
  end
 }
 
 if _OPTIONS["group"] == "libopenmpt-all" then
 
 solution "libopenmpt-all"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
@@ -172,7 +231,7 @@ end
 if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
@@ -186,7 +245,7 @@ end
 if _OPTIONS["group"] == "foo_openmpt" then
 
 solution "foo_openmpt"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
@@ -201,7 +260,7 @@ end
 if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
@@ -216,7 +275,7 @@ end
 if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
@@ -232,7 +291,7 @@ end
 if _OPTIONS["group"] == "libopenmpt-small" then
 
 solution "libopenmpt-small"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
 else
@@ -250,7 +309,7 @@ end
 if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
 else
@@ -272,7 +331,7 @@ end
 if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
 else
@@ -293,7 +352,7 @@ end
 if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
  platforms { "x86", "x86_64" }
 
@@ -306,7 +365,7 @@ if 1 == 0 then
 if _OPTIONS["group"] == "OpenMPT-VSTi" then
 
 solution "OpenMPT-VSTi"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
  
@@ -332,7 +391,7 @@ end
 if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
- location ( "../../build/" .. _ACTION )
+ location ( "../../build/" .. mpt_projectpathname )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
 else
@@ -363,7 +422,7 @@ end
 if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
- location ( "../../build/" .. _ACTION .. "-ext" )
+ location ( "../../build/" .. mpt_projectpathname .. "-ext" )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
 else

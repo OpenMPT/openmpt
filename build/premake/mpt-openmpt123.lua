@@ -2,7 +2,7 @@
  project "openmpt123"
   uuid "2879F62E-9E2F-4EAB-AE7D-F60C194DD5CB"
   language "C++"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../openmpt123/" }
   objdir "../../build/obj/openmpt123"
   dofile "../../build/premake/premake-defaults-EXE.lua"

@@ -1,6 +1,18 @@
 
   filter {}
 
+	filter {}
+		if _OPTIONS["xp"] then
+			if _ACTION == "vs2012" then
+				toolset "v110_xp"
+			elseif _ACTION == "vs2013" then
+				toolset "v120_xp"
+			elseif _ACTION == "vs2015" then
+				toolset "v140_xp"
+			end
+			defines { "MPT_BUILD_TARGET_XP" }
+		end
+
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../build/lib/x86/Debug"
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86" }

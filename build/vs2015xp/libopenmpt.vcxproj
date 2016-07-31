@@ -1,0 +1,588 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|Win32">
+      <Configuration>DebugShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|x64">
+      <Configuration>DebugShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|Win32">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|x64">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9C5101EF-3E20-4558-809B-277FDD50E878}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libopenmpt</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\lib\x86\Debug\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86\Debug\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\lib\x86_64\Debug\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86_64\Debug\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\lib\x86\Release\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86\Release\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\lib\x86_64\Release\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86_64\Release\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\bin\Win32-Shared-Debug\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86\DebugShared\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\bin\x64-Shared-Debug\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86_64\DebugShared\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\bin\Win32-Shared\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86\ReleaseShared\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\bin\x64-Shared\</OutDir>
+    <IntDir>..\obj\libopenmpt\x86_64\ReleaseShared\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>..\..\bin\Win32-Shared-Debug\libopenmpt.lib</ImportLibrary>
+      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>..\..\bin\x64-Shared-Debug\libopenmpt.lib</ImportLibrary>
+      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>..\..\bin\Win32-Shared\libopenmpt.lib</ImportLibrary>
+      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>..\..\bin\x64-Shared\libopenmpt.lib</ImportLibrary>
+      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\BuildSettings.h" />
+    <ClInclude Include="..\..\common\CompilerDetect.h" />
+    <ClInclude Include="..\..\common\ComponentManager.h" />
+    <ClInclude Include="..\..\common\Endianness.h" />
+    <ClInclude Include="..\..\common\FileReader.h" />
+    <ClInclude Include="..\..\common\FlagSet.h" />
+    <ClInclude Include="..\..\common\Logging.h" />
+    <ClInclude Include="..\..\common\Profiler.h" />
+    <ClInclude Include="..\..\common\StringFixer.h" />
+    <ClInclude Include="..\..\common\WriteMemoryDump.h" />
+    <ClInclude Include="..\..\common\misc_util.h" />
+    <ClInclude Include="..\..\common\mptAtomic.h" />
+    <ClInclude Include="..\..\common\mptBufferIO.h" />
+    <ClInclude Include="..\..\common\mptCPU.h" />
+    <ClInclude Include="..\..\common\mptCRC.h" />
+    <ClInclude Include="..\..\common\mptFileIO.h" />
+    <ClInclude Include="..\..\common\mptIO.h" />
+    <ClInclude Include="..\..\common\mptLibrary.h" />
+    <ClInclude Include="..\..\common\mptMutex.h" />
+    <ClInclude Include="..\..\common\mptOS.h" />
+    <ClInclude Include="..\..\common\mptPathString.h" />
+    <ClInclude Include="..\..\common\mptRandom.h" />
+    <ClInclude Include="..\..\common\mptString.h" />
+    <ClInclude Include="..\..\common\mptStringFormat.h" />
+    <ClInclude Include="..\..\common\mptStringParse.h" />
+    <ClInclude Include="..\..\common\mptThread.h" />
+    <ClInclude Include="..\..\common\mptTime.h" />
+    <ClInclude Include="..\..\common\mptTypeTraits.h" />
+    <ClInclude Include="..\..\common\mptUUID.h" />
+    <ClInclude Include="..\..\common\serialization_utils.h" />
+    <ClInclude Include="..\..\common\stdafx.h" />
+    <ClInclude Include="..\..\common\typedefs.h" />
+    <ClInclude Include="..\..\common\version.h" />
+    <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_config.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_impl.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_internal.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
+    <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
+    <ClInclude Include="..\..\soundlib\ChunkReader.h" />
+    <ClInclude Include="..\..\soundlib\Dither.h" />
+    <ClInclude Include="..\..\soundlib\Dlsbank.h" />
+    <ClInclude Include="..\..\soundlib\FloatMixer.h" />
+    <ClInclude Include="..\..\soundlib\ITCompression.h" />
+    <ClInclude Include="..\..\soundlib\ITTools.h" />
+    <ClInclude Include="..\..\soundlib\IntMixer.h" />
+    <ClInclude Include="..\..\soundlib\Loaders.h" />
+    <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
+    <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
+    <ClInclude Include="..\..\soundlib\Message.h" />
+    <ClInclude Include="..\..\soundlib\MixFuncTable.h" />
+    <ClInclude Include="..\..\soundlib\Mixer.h" />
+    <ClInclude Include="..\..\soundlib\MixerInterface.h" />
+    <ClInclude Include="..\..\soundlib\MixerLoops.h" />
+    <ClInclude Include="..\..\soundlib\MixerSettings.h" />
+    <ClInclude Include="..\..\soundlib\ModChannel.h" />
+    <ClInclude Include="..\..\soundlib\ModInstrument.h" />
+    <ClInclude Include="..\..\soundlib\ModSample.h" />
+    <ClInclude Include="..\..\soundlib\ModSequence.h" />
+    <ClInclude Include="..\..\soundlib\OggStream.h" />
+    <ClInclude Include="..\..\soundlib\Resampler.h" />
+    <ClInclude Include="..\..\soundlib\RowVisitor.h" />
+    <ClInclude Include="..\..\soundlib\S3MTools.h" />
+    <ClInclude Include="..\..\soundlib\SampleFormat.h" />
+    <ClInclude Include="..\..\soundlib\SampleFormatConverters.h" />
+    <ClInclude Include="..\..\soundlib\SampleIO.h" />
+    <ClInclude Include="..\..\soundlib\Snd_defs.h" />
+    <ClInclude Include="..\..\soundlib\Sndfile.h" />
+    <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h" />
+    <ClInclude Include="..\..\soundlib\Tables.h" />
+    <ClInclude Include="..\..\soundlib\Tagging.h" />
+    <ClInclude Include="..\..\soundlib\WAVTools.h" />
+    <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
+    <ClInclude Include="..\..\soundlib\XMTools.h" />
+    <ClInclude Include="..\..\soundlib\mod_specifications.h" />
+    <ClInclude Include="..\..\soundlib\modcommand.h" />
+    <ClInclude Include="..\..\soundlib\modsmp_ctrl.h" />
+    <ClInclude Include="..\..\soundlib\pattern.h" />
+    <ClInclude Include="..\..\soundlib\patternContainer.h" />
+    <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
+    <ClInclude Include="..\..\soundlib\tuning.h" />
+    <ClInclude Include="..\..\soundlib\tuningbase.h" />
+    <ClInclude Include="..\..\soundlib\tuningcollection.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\ComponentManager.cpp" />
+    <ClCompile Include="..\..\common\FileReader.cpp" />
+    <ClCompile Include="..\..\common\Logging.cpp" />
+    <ClCompile Include="..\..\common\Profiler.cpp" />
+    <ClCompile Include="..\..\common\misc_util.cpp" />
+    <ClCompile Include="..\..\common\mptCPU.cpp" />
+    <ClCompile Include="..\..\common\mptFileIO.cpp" />
+    <ClCompile Include="..\..\common\mptIO.cpp" />
+    <ClCompile Include="..\..\common\mptLibrary.cpp" />
+    <ClCompile Include="..\..\common\mptOS.cpp" />
+    <ClCompile Include="..\..\common\mptPathString.cpp" />
+    <ClCompile Include="..\..\common\mptRandom.cpp" />
+    <ClCompile Include="..\..\common\mptString.cpp" />
+    <ClCompile Include="..\..\common\mptStringFormat.cpp" />
+    <ClCompile Include="..\..\common\mptStringParse.cpp" />
+    <ClCompile Include="..\..\common\mptTime.cpp" />
+    <ClCompile Include="..\..\common\mptUUID.cpp" />
+    <ClCompile Include="..\..\common\serialization_utils.cpp" />
+    <ClCompile Include="..\..\common\stdafx.cpp" />
+    <ClCompile Include="..\..\common\typedefs.cpp" />
+    <ClCompile Include="..\..\common\version.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp" />
+    <ClCompile Include="..\..\soundlib\Dither.cpp" />
+    <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
+    <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
+    <ClCompile Include="..\..\soundlib\ITCompression.cpp" />
+    <ClCompile Include="..\..\soundlib\ITTools.cpp" />
+    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_669.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_amf.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_ams.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_dbm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_digi.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_dmf.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_dsm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_far.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_gdm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_imf.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_it.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_itp.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mdl.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_med.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mid.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mo3.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mod.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mt2.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mtm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_okt.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_plm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_psm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_ptm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_s3m.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_sfx.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_stm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_ult.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_umx.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_wav.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_xm.cpp" />
+    <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
+    <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />
+    <ClCompile Include="..\..\soundlib\Message.cpp" />
+    <ClCompile Include="..\..\soundlib\MixFuncTable.cpp" />
+    <ClCompile Include="..\..\soundlib\MixerLoops.cpp" />
+    <ClCompile Include="..\..\soundlib\MixerSettings.cpp" />
+    <ClCompile Include="..\..\soundlib\Mmcmp.cpp" />
+    <ClCompile Include="..\..\soundlib\ModChannel.cpp" />
+    <ClCompile Include="..\..\soundlib\ModInstrument.cpp" />
+    <ClCompile Include="..\..\soundlib\ModSample.cpp" />
+    <ClCompile Include="..\..\soundlib\ModSequence.cpp" />
+    <ClCompile Include="..\..\soundlib\OggStream.cpp" />
+    <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
+    <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormats.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleIO.cpp" />
+    <ClCompile Include="..\..\soundlib\Snd_flt.cpp" />
+    <ClCompile Include="..\..\soundlib\Snd_fx.cpp" />
+    <ClCompile Include="..\..\soundlib\Sndfile.cpp" />
+    <ClCompile Include="..\..\soundlib\Sndmix.cpp" />
+    <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp" />
+    <ClCompile Include="..\..\soundlib\Tables.cpp" />
+    <ClCompile Include="..\..\soundlib\Tagging.cpp" />
+    <ClCompile Include="..\..\soundlib\UpgradeModule.cpp" />
+    <ClCompile Include="..\..\soundlib\WAVTools.cpp" />
+    <ClCompile Include="..\..\soundlib\WindowedFIR.cpp" />
+    <ClCompile Include="..\..\soundlib\XMTools.cpp" />
+    <ClCompile Include="..\..\soundlib\load_j2b.cpp" />
+    <ClCompile Include="..\..\soundlib\mod_specifications.cpp" />
+    <ClCompile Include="..\..\soundlib\modcommand.cpp" />
+    <ClCompile Include="..\..\soundlib\modsmp_ctrl.cpp" />
+    <ClCompile Include="..\..\soundlib\pattern.cpp" />
+    <ClCompile Include="..\..\soundlib\patternContainer.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp" />
+    <ClCompile Include="..\..\soundlib\tuning.cpp" />
+    <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
+    <ClCompile Include="..\..\soundlib\tuningbase.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\vs2015xp-ext\vorbis.vcxproj">
+      <Project>{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vs2015xp-ext\ogg.vcxproj">
+      <Project>{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vs2015xp-ext\zlib.vcxproj">
+      <Project>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

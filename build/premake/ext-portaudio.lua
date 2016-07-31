@@ -2,7 +2,7 @@
  project "portaudio"
   uuid "189B867F-FF4B-45A1-B741-A97492EE69AF"
   language "C"
-  location ( "../../build/" .. _ACTION .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
   objdir "../../build/obj/portaudio"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

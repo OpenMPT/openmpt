@@ -2,7 +2,7 @@
  project "PluginBridge"
   uuid "1A147336-891E-49AC-9EAD-A750599A224C"
   language "C++"
-  location ( "../../build/" .. _ACTION )
+  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../pluginBridge/" }
   objdir "../../build/obj/PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
