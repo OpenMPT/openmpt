@@ -21,7 +21,11 @@
 #if MPT_OS_WINDOWS
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+#if defined(MPT_BUILD_TARGET_XP)
+#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
+#else
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
+#endif
 #else
 #define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
 #endif
@@ -403,6 +407,13 @@
 
 // fixing stuff up
 
+#if defined(MPT_BUILD_TARGET_XP)
+// Also support Wine 1.6 in addiion to Windows XP
+#ifndef MPT_QUIRK_NO_CPP_THREAD
+#define MPT_QUIRK_NO_CPP_THREAD
+#endif
+#endif
+
 #if defined(MPT_BUILD_ANALYZED) || defined(MPT_BUILD_CHECKED) 
 #ifdef NO_ASSERTS
 #undef NO_ASSERTS // static or dynamic analyzers want assertions on
@@ -713,3 +724,4 @@
 #define ZLIB_DLL
 #endif
 #endif
+
