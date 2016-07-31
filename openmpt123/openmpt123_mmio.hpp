@@ -24,8 +24,16 @@ namespace openmpt123 {
 	} \
 } while(0)
 
+#define UNCHECKED(x) do { \
+	HRESULT err = x; \
+	if ( err != 0 ) { \
+		log << "error writing wave file" << std::endl; \
+	} \
+} while(0)
+
 class mmio_stream_raii : public file_audio_stream_base {
 private:
+	std::ostream & log;
 	commandlineflags flags;
 	WAVEFORMATEX waveformatex;
 	HMMIO mmio;
@@ -34,7 +42,7 @@ private:
 	MMCKINFO data_chunk;
 	MMIOINFO data_info;
 public:
-	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), mmio(NULL) {
+	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ ) : log(log_), flags(flags_), mmio(NULL) {
 
 		ZeroMemory( &waveformatex, sizeof( WAVEFORMATEX ) );
 		waveformatex.cbSize = 0;
@@ -109,13 +117,13 @@ public:
 	~mmio_stream_raii() {
 
 				data_info.dwFlags |= MMIO_DIRTY;
-				CHECKED(mmioSetInfo( mmio, &data_info, 0 ));
+				UNCHECKED(mmioSetInfo( mmio, &data_info, 0 ));
 
-			CHECKED(mmioAscend( mmio, &data_chunk, 0 ));
+			UNCHECKED(mmioAscend( mmio, &data_chunk, 0 ));
 
-		CHECKED(mmioAscend( mmio, &WAVE_chunk, 0 ));
+		UNCHECKED(mmioAscend( mmio, &WAVE_chunk, 0 ));
 
-		CHECKED(mmioClose( mmio, 0 ));
+		UNCHECKED(mmioClose( mmio, 0 ));
 		mmio = NULL;
 
 	}
