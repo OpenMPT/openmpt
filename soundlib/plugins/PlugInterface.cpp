@@ -549,20 +549,20 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= sizeof(uint32))
 	{
-		std::pair<mpt::span<const char>, mpt::IO::Offset> memFile = std::make_pair(mpt::as_span(m_pMixStruct->pPluginData, m_pMixStruct->nPluginDataSize), 0);
-		uint32 type = 0;
-		mpt::IO::ReadIntLE<uint32>(memFile, type);
-		if (type == 0)
+		FileReader memFile(m_pMixStruct->pPluginData, m_pMixStruct->nPluginDataSize);
+		uint32 type = memFile.ReadUint32LE();
+		if(type == 0)
 		{
-			const uint32 numParams = std::min<uint32>(GetNumParameters(), (m_pMixStruct->nPluginDataSize - sizeof(uint32)) / sizeof(IEEE754binary32LE));
-			BeginSetProgram(-1);
-			for (uint32 i = 0; i < numParams; i++)
+			const uint32 numParams = GetNumParameters();
+			if((m_pMixStruct->nPluginDataSize - sizeof(uint32)) >= (numParams * sizeof(IEEE754binary32LE)))
 			{
-				IEEE754binary32LE v(0.0f);
-				mpt::IO::Read(memFile, v);
-				SetParameter(i, v);
+				BeginSetProgram(-1);
+				for(uint32 i = 0; i < numParams; i++)
+				{
+					SetParameter(i, memFile.ReadFloatLE());
+				}
+				EndSetProgram();
 			}
-			EndSetProgram();
 		}
 	}
 }
