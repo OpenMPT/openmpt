@@ -80,6 +80,7 @@ protected:
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
+	void DoPaste(bool mixPaste);
 
 	// Sets sample data on sample draw.
 	template<class T, class uT>
@@ -142,6 +143,7 @@ protected:
 	afx_msg void OnEditCut();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
+	afx_msg void OnEditMixPaste();
 	afx_msg void OnEditUndo();
 	afx_msg void OnEditRedo();
 	afx_msg void OnSetLoop();

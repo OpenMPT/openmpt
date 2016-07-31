@@ -223,4 +223,36 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////////////////////////
+// Sample mix dialog
+
+//=================================
+class CMixSampleDlg: public CDialog
+//=================================
+{
+protected:
+	// Dialog controls
+	CEdit m_EditOffset;
+	CNumberEdit m_EditVolOriginal, m_EditVolMix;
+	CSpinButtonCtrl m_SpinOffset, m_SpinVolOriginal, m_SpinVolMix;
+
+	// Maximum allowed value for offset spin control
+	SmpLength maxSampleOffset;
+
+public:
+	static SmpLength sampleOffset;
+	static int amplifyOriginal;
+	static int amplifyMix;
+
+public:
+
+	CMixSampleDlg(CWnd *parent, const ModSample &modSample);
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
 OPENMPT_NAMESPACE_END
