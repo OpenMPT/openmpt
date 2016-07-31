@@ -13,7 +13,9 @@
 
 #include <vector> // some C++ header in order to have the C++ standard library version information available
 
-#if MPT_OS_ANDROID
+#if defined(MPT_QUIRK_NO_CPP_THREAD)
+#define MPT_STD_THREAD 0
+#elif MPT_OS_ANDROID
 #define MPT_STD_THREAD 0
 #elif MPT_COMPILER_GENERIC
 #define MPT_STD_THREAD 1
