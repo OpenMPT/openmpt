@@ -10,8 +10,9 @@
 
 #include "stdafx.h"
 #include "modsmp_ctrl.h"
-#include "../soundlib/AudioCriticalSection.h"
+#include "AudioCriticalSection.h"
 #include "Sndfile.h"
+#include "SampleFormatConverters.h"
 
 #define new DEBUG_NEW
 
@@ -481,8 +482,7 @@ namespace
 		for(SmpLength i = 0; i < nLength; i++, p++)
 		{
 			double dVal = (*p) * dAmplify + dOffset;
-			Limit(dVal, (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
-			*p = static_cast<T>(dVal);
+			*p = mpt::saturate_cast<T>(dVal);
 		}
 	}
 }
@@ -684,8 +684,7 @@ static void XFadeSampleImpl(const T *srcIn, const T *srcOut, T *output, const Sm
 		int32 val = static_cast<int32>(
 			static_cast<double>(*srcIn) * fact1 +
 			static_cast<double>(*srcOut) * fact2);
-		Limit(val, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		*output = static_cast<T>(val);
+		*output = mpt::saturate_cast<T>(val);
 	}
 }
 
@@ -875,6 +874,44 @@ bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile)
 	ReplaceSample(smp, newSample, smp.nLength, sndFile);
 
 	PrecomputeLoops(smp, sndFile, false);
+	return true;
+}
+
+
+// Convert 16-bit sample to 8-bit
+bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
+//-----------------------------------------------------
+{
+	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 2)
+		return false;
+
+	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16> > >(smp.pSample8, smp.nLength * smp.GetNumChannels(), 1, smp.pSample16, smp.GetSampleSizeInBytes(), 1);
+	smp.uFlags.reset(CHN_16BIT);
+	for(CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if(sndFile.m_PlayState.Chn[j].pModSample == &smp)
+	{
+		sndFile.m_PlayState.Chn[j].dwFlags.reset(CHN_16BIT);
+	}
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+
+// Convert 8-bit sample to 16-bit
+bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
+//------------------------------------------------------
+{
+	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 1)
+		return false;
+
+	int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(smp.nLength, 2 * smp.GetNumChannels()));
+	if(newSample == nullptr)
+		return false;
+
+	CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, smp.nLength * smp.GetNumChannels(), 1, smp.pSample8, smp.GetSampleSizeInBytes(), 1);
+	smp.uFlags.set(CHN_16BIT);
+	ctrlSmp::ReplaceSample(smp, newSample, smp.nLength, sndFile);
+	smp.PrecomputeLoops(sndFile, false);
 	return true;
 }
 
