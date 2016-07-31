@@ -97,6 +97,7 @@ public:
 	virtual CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
 	virtual CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
 
+	static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception);
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
 	virtual bool HasEditor() const { return (m_Effect.flags & effFlagsHasEditor) != 0; }

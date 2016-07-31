@@ -321,7 +321,8 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 //----------------------------------------------------------------------
 {
-	library.category = static_cast<VSTPluginLib::PluginCategory>(effect->dispatcher(effect, effGetPlugCategory, 0, 0, nullptr, 0));
+	unsigned long exception = 0;
+	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(effect, effGetPlugCategory, 0, 0, nullptr, 0, exception));
 	library.isInstrument = ((effect->flags & effFlagsIsSynth) || !effect->numInputs);
 
 	if(library.isInstrument)
@@ -334,7 +335,7 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 
 #ifdef MODPLUG_TRACKER
 	CStringA s;
-	effect->dispatcher(effect, effGetVendorString, 0, 0, s.GetBuffer(256), 0);
+	CVstPlugin::DispatchSEH(effect, effGetVendorString, 0, 0, s.GetBuffer(256), 0, exception);
 	s.ReleaseBuffer();
 	library.vendor = mpt::ToCString(mpt::CharsetLocale, s);
 #endif // MODPLUG_TRACKER
@@ -425,40 +426,39 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	}
 
 #ifndef NO_VST
-	try
+	unsigned long exception = 0;
+	// Always scan plugins in a separate process
+	HINSTANCE hLib = NULL;
+	AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
+
+	if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 	{
-		// Always scan plugins in a separate process
-		HINSTANCE hLib = NULL;
-		AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
+		CVstPlugin::DispatchSEH(pEffect, effOpen, 0, 0, 0, 0, exception);
 
-		if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
-		{
-			pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
+		plug->pluginId1 = pEffect->magic;
+		plug->pluginId2 = pEffect->uniqueID;
 
-			plug->pluginId1 = pEffect->magic;
-			plug->pluginId2 = pEffect->uniqueID;
-
-			GetPluginInformation(pEffect, *plug);
+		GetPluginInformation(pEffect, *plug);
 
 #ifdef VST_LOG
-			int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, nullptr, 0);
-			if (!nver) nver = pEffect->version;
-			Log("%-20s: v%d.0, %d in, %d out, %2d programs, %2d params, flags=0x%04X realQ=%d offQ=%d\n",
-				plug->libraryName.ToLocale().c_str(), nver,
-				pEffect->numInputs, pEffect->numOutputs,
-				pEffect->numPrograms, pEffect->numParams,
-				pEffect->flags, pEffect->realQualities, pEffect->offQualities);
+		int nver = CVstPlugin::DispatchSEH(pEffect, effGetVstVersion, 0,0, nullptr, 0, exception);
+		if (!nver) nver = pEffect->version;
+		Log("%-20s: v%d.0, %d in, %d out, %2d programs, %2d params, flags=0x%04X realQ=%d offQ=%d\n",
+			plug->libraryName.ToLocale().c_str(), nver,
+			pEffect->numInputs, pEffect->numOutputs,
+			pEffect->numPrograms, pEffect->numParams,
+			pEffect->flags, pEffect->realQualities, pEffect->offQualities);
 #endif // VST_LOG
 
-			pEffect->dispatcher(pEffect, effClose, 0, 0, 0, 0);
+		CVstPlugin::DispatchSEH(pEffect, effClose, 0, 0, 0, 0, exception);
 
-			validPlug = true;
-		}
+		validPlug = true;
+	}
 
-		FreeLibrary(hLib);
-	} catch(...)
+	FreeLibrary(hLib);
+	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to load plugin \"%1\"!\n", plug->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception %1 while trying to load plugin \"%2\"!\n", mpt::wfmt::HEX<8>(exception), plug->libraryName));
 	}
 #endif // NO_VST
 
@@ -489,21 +489,14 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 		if(plug == pFactory)
 		{
 			// Kill all instances of this plugin
-			try
-			{
-				CriticalSection cs;
+			CriticalSection cs;
 
-				while(plug->pPluginsList != nullptr)
-				{
-					plug->pPluginsList->Release();
-				}
-				pluginList.erase(p);
-				delete plug;
-			} catch (...)
+			while(plug->pPluginsList != nullptr)
 			{
-				CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to release plugin \"%1\"!\n", pFactory->libraryName));
+				plug->pPluginsList->Release();
 			}
-
+			pluginList.erase(p);
+			delete plug;
 			return true;
 		}
 	}
@@ -599,33 +592,28 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
-		try
+		pEffect = CVstPlugin::LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
+
+		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
 		{
-			pEffect = CVstPlugin::LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
+			validPlugin = true;
 
-			if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
+			GetPluginInformation(pEffect, *pFound);
+
+			// Update cached information
+			pFound->WriteToCache();
+
+			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+			if(pVstPlug == nullptr)
 			{
-				validPlugin = true;
-
-				GetPluginInformation(pEffect, *pFound);
-
-				// Update cached information
-				pFound->WriteToCache();
-
-				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
-				if(pVstPlug == nullptr)
-				{
-					validPlugin = false;
-				}
+				validPlugin = false;
 			}
+		}
 
-			if(!validPlugin)
-			{
-				FreeLibrary(hLibrary);
-			}
-		} catch(...)
+		if(!validPlugin)
 		{
-			CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
+			FreeLibrary(hLibrary);
+			CVstPluginManager::ReportPlugException(mpt::String::Print(L"Unable to create plugin \"%1\"!\n", pFound->libraryName));
 		}
 		return validPlugin;
 	} else
