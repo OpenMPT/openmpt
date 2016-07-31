@@ -549,7 +549,7 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= sizeof(uint32))
 	{
-		FileReader memFile(mpt::as_span(mpt::byte_cast<mpt::byte *>(m_pMixStruct->pPluginData), m_pMixStruct->nPluginDataSize));
+		FileReader memFile(mpt::as_span(mpt::byte_cast<const mpt::byte *>(m_pMixStruct->pPluginData), m_pMixStruct->nPluginDataSize));
 		uint32 type = memFile.ReadUint32LE();
 		if(type == 0)
 		{
