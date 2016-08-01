@@ -548,13 +548,10 @@ void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CMixSampleDlg::CMixSampleDlg(CWnd *parent, const ModSample &modSample)
+CMixSampleDlg::CMixSampleDlg(CWnd *parent)
 	: CDialog(IDD_MIXSAMPLES, parent)
-//--------------------------------------------------------------------
-{
-	maxSampleOffset = modSample.nLength;
-	sampleOffset = std::min(sampleOffset, maxSampleOffset);
-}
+//----------------------------------------
+{ }
 
 
 BOOL CMixSampleDlg::OnInitDialog()
@@ -563,7 +560,7 @@ BOOL CMixSampleDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Offset
-	m_SpinOffset.SetRange32(0, maxSampleOffset);
+	m_SpinOffset.SetRange32(0, MAX_SAMPLE_LENGTH);
 	SetDlgItemInt(IDC_EDIT_OFFSET, sampleOffset);
 
 	// Volumes
@@ -586,7 +583,7 @@ void CMixSampleDlg::OnOK()
 //------------------------
 {
 	CDialog::OnOK();
-	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, maxSampleOffset);
+	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, MAX_SAMPLE_LENGTH);
 	amplifyOriginal = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL1), -10000, 10000);
 	amplifyMix = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL2), -10000, 10000);
 }
