@@ -236,9 +236,6 @@ protected:
 	CNumberEdit m_EditVolOriginal, m_EditVolMix;
 	CSpinButtonCtrl m_SpinOffset, m_SpinVolOriginal, m_SpinVolMix;
 
-	// Maximum allowed value for offset spin control
-	SmpLength maxSampleOffset;
-
 public:
 	static SmpLength sampleOffset;
 	static int amplifyOriginal;
@@ -246,7 +243,7 @@ public:
 
 public:
 
-	CMixSampleDlg(CWnd *parent, const ModSample &modSample);
+	CMixSampleDlg(CWnd *parent);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

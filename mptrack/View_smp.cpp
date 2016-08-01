@@ -2229,7 +2229,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			// Show mix paste dialog
 			if(pasteMode == kMixPaste)
 			{
-				CMixSampleDlg dlg(this, sample);
+				CMixSampleDlg dlg(this);
 				if(dlg.DoModal() != IDOK)
 				{
 					CloseClipboard();
@@ -2960,7 +2960,7 @@ void CViewSample::OnAddSilence()
 
 	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples && dlg.m_nEditOption != addsilence_resize)
 	{
-		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
+		CString str; str.Format(_T("Cannot add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
 		Reporting::Information(str);
 		return;
 	}
@@ -3018,10 +3018,10 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	static BYTE midivolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
-	BYTE midibyte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
-	BYTE midibyte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
+	uint8 midibyte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
+	uint8 midibyte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
-	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	if (!pSndFile) return 0;
 
 	uint8 nNote = midibyte1 + NOTE_MIN;
