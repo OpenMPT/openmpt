@@ -371,7 +371,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		if(i > 0) Order.AddSequence(false);
 		Order.SetSequence(i);
 		Order.clear();
-		Order.m_sName = name;
+		Order.SetName(name);
 #endif // MPT_DBM_USE_REAL_SUBSONGS
 
 		uint16 numOrders = songChunk.ReadUint16BE();
