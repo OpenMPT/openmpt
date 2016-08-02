@@ -235,7 +235,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
 
 		// Enable/disable multisequence controls according the current modtype.
-		const BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1) ? TRUE : FALSE;
+		const BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1 || m_sndFile.Order.GetNumSequences() > 1) ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow(isMultiSeqAvail);
@@ -634,17 +634,11 @@ void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	if (pos)
 	{
 		m_SpinInstrument.SetPos(0);
-		int nmax = m_CbnInstrument.GetCount();
-		int nins = m_CbnInstrument.GetCurSel() - pos;
-		if (nins < 0) nins = nmax-1;
-		if (nins >= nmax) nins = 0;
-		m_CbnInstrument.SetCurSel(nins);
-		OnInstrumentChanged();
+		if(pos < 0)
+			OnPrevInstrument();
+		else
+			OnNextInstrument();
 	}
-// 	if ((nSBCode == SB_ENDSCROLL) && (m_hWndView))
-// 	{
-// 		SwitchToView();
-// 	}
 }
 
 
@@ -663,8 +657,7 @@ void CCtrlPatterns::OnSequenceNext()
 	m_OrderList.SetFocus();
 }
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
+
 void CCtrlPatterns::OnChannelManager()
 //------------------------------------
 {
@@ -679,7 +672,6 @@ void CCtrlPatterns::OnChannelManager()
 		}
 	}
 }
-// -! NEW_FEATURE#0015
 
 
 void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -719,12 +711,7 @@ void CCtrlPatterns::OnInstrumentChanged()
 			m_parent.InstrumentChanged(m_nInstrument);
 		}
 		SwitchToView();
-		//rewbs.instroVST
-		if (HasValidPlug(m_nInstrument))
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
-		else
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
-		//rewbs.instroVST
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), HasValidPlug(m_nInstrument));
 	}
 }
 
