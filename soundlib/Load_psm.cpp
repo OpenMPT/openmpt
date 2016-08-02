@@ -14,7 +14,7 @@
  *          - Sinaria - Seems to work (never played the game, so I can't really tell...)
  *
  *          Effect conversion should be about right...
- *          If OpenMPT will ever support subtunes properly (with restart position, channel setup, etc. for each subtune), the subtune crap should be rewritten completely.
+ *          If OpenMPT will ever support subtunes properly (with tempo, channel setup, etc. for each subtune), the subtune crap should be rewritten completely.
  * Authors: Johannes Schultz
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -23,6 +23,10 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+
+#ifdef LIBOPENMPT_BUILD
+#define MPT_PSM_USE_REAL_SUBSONGS
+#endif
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -136,22 +140,15 @@ struct PACKED PSMOldSampleHeader
 		mptSmp.nC5Speed = c5Freq;
 		mptSmp.nLength = sampleLength;
 		mptSmp.nLoopStart = loopStart;
-		mptSmp.nLoopEnd = loopEnd;	// Hmm... apparently we should add +1 for Extreme Pinball tunes here? See sample 8 in the medieval table music.
+		// It is not entirely clear if/when we should add +1 to the loopEnd value.
+		// Sample 8 in the medieval table music of Extreme Pinball and CONVERT.EXE v1.36 suggest that we should do so.
+		// But for other tunes it's not correct, e.g. the OMF 2097 music!
+		mptSmp.nLoopEnd = loopEnd;
 		mptSmp.nPan = 128;
 		mptSmp.nVolume = (defaultVolume + 1) * 2;
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
-	}
-
-	// Retrieve the internal sample format flags for this sample.
-	static SampleIO GetSampleFormat()
-	{
-		return SampleIO(
-			SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::deltaPCM);
 	}
 };
 
@@ -202,16 +199,6 @@ struct PACKED PSMNewSampleHeader
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
 	}
-
-	// Retrieve the internal sample format flags for this sample.
-	static SampleIO GetSampleFormat()
-	{
-		return SampleIO(
-			SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::deltaPCM);
-	}
 };
 
 STATIC_ASSERT(sizeof(PSMNewSampleHeader) == 96);
@@ -237,7 +224,8 @@ struct PSMSubSong // For internal use (pattern conversion)
 		MemsetZero(songName);
 		defaultTempo = 125;
 		defaultSpeed = 6;
-		startOrder = endOrder = restartPos = ORDERINDEX_INVALID;
+		startOrder = endOrder = ORDERINDEX_INVALID;
+		restartPos = 0;
 	}
 };
 
@@ -255,6 +243,24 @@ static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
 }
 
 
+// Read a Pattern ID (something like "P0  " or "P13 " in the old format, or "PATT0   " in Sinaria)
+static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &newFormat)
+//------------------------------------------------------------------------
+{
+	char patternID[5];
+	uint8 offset = 1;
+	file.ReadString<mpt::String::spacePadded>(patternID, 4);
+	if(!memcmp(patternID, "PATT", 4))
+	{
+		file.ReadString<mpt::String::spacePadded>(patternID, 4);
+		newFormat = true;
+		offset = 0;
+	}
+	return ConvertStrTo<uint16>(&patternID[offset]);
+
+}
+
+
 bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -264,6 +270,27 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
+
+#ifdef MPT_PSM_DECRYPT
+	// CONVERT.EXE /K - I don't think any game ever used this.
+	std::vector<mpt::byte> decrypted;
+	if(!memcmp(fileHeader.formatID, "QUP$", 4)
+		&& !memcmp(fileHeader.fileInfoID, "OSWQ", 4))
+	{
+		if(loadFlags == onlyVerifyHeader)
+			return true;
+		file.Rewind();
+		decrypted.resize(file.GetLength());
+		file.ReadRaw(&decrypted[0], decrypted.size());
+		uint8 i = 0;
+		for(std::vector<mpt::byte>::iterator c = decrypted.begin(); c != decrypted.end(); c++)
+		{
+			*c -= ++i;
+		}
+		file = FileReader(mpt::as_span(decrypted));
+		file.ReadConvertEndianness(fileHeader);
+	}
+#endif // MPT_PSM_DECRYPT
 
 	// Check header
 	if(memcmp(fileHeader.formatID, "PSM ", 4)
@@ -281,88 +308,54 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "SDFT" - Format info (song data starts here)
 	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
-	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
-	{
+	else if(loadFlags == onlyVerifyHeader)
 		return true;
-	}
 
 	// Yep, this seems to be a valid file.
 	InitializeGlobals(MOD_TYPE_PSM);
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 
-	// pattern offset and identifier
-	PATTERNINDEX numPatterns = 0;		// used for setting up the orderlist - final pattern count
-	std::vector<FileReader> patternChunks;	// pattern offsets (sorted as they occour in the file)
-	std::vector<uint32> patternIDs;			// pattern IDs (sorted as they occour in the file)
-	std::vector<FileReader *> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
-	Order.clear();
-	// subsong setup
-	std::vector<PSMSubSong> subsongs;
-	bool subsongPanningDiffers = false; // do we have subsongs with different panning positions?
-	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
-
 	// "TITL" - Song Title
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
 	titleChunk.ReadString<mpt::String::spacePadded>(m_songName, titleChunk.GetLength());
 
-	// "PBOD" - Pattern data of a single pattern
-	std::vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
-	for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
-	{
-		ChunkReader chunk(*patternIter);
-		if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
-			|| chunk.GetLength() < 8)
-		{
-			continue;
-		}
-
-		// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
-		char patternID[5];
-		if(!chunk.ReadString<mpt::String::spacePadded>(patternID, 4) || patternID[0] != 'P')
-		{
-			continue;
-		}
-		if(!memcmp(patternID, "PATT", 4))
-		{
-			// New format has four additional bytes - read patternID again.
-			newFormat = true;
-			chunk.ReadString<mpt::String::spacePadded>(patternID, 4);
-		}
-		patternIDs.push_back(ConvertStrTo<uint32>(&patternID[newFormat ? 0 : 1]));
-		// We're going to read the rest of the pattern data later.
-		patternChunks.push_back(chunk.ReadChunk(chunk.BytesLeft()));
-
-		// Convert later as we have to know how many channels there are.
-	}
+	Order.clear();
+	// Subsong setup
+	std::vector<PSMSubSong> subsongs;
+	bool subsongPanningDiffers = false; // Do we have subsongs with different panning positions?
+	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
 	// "SONG" - Subsong information (channel count etc)
 	std::vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
-
 	for(std::vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
 	{
 		ChunkReader chunk(*subsongIter);
 		PSMSongHeader songHeader;
-		if(!chunk.ReadStruct(songHeader))
+		if(!chunk.ReadStruct(songHeader)
+			|| songHeader.compression != 0x01)	// No compression for PSM files
 		{
-			return false;
-		}
-		if(songHeader.compression != 0x01)
-		{
-			// No compression for PSM files
 			return false;
 		}
 		// Subsongs *might* have different channel count
 		m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
 
 		PSMSubSong subsong;
-		subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
-		mpt::String::Read<mpt::String::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
+		mpt::String::Read<mpt::String::nullTerminated>(subsong.songName, songHeader.songType);
 
-		// Read "Sub sub chunks"
+#ifdef MPT_PSM_USE_REAL_SUBSONGS
+		if(Order.GetLength() != 0)
+		{
+			// Add a new sequence for this subsong
+			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
+				break;
+			Order.clear();
+		}
+		Order.SetName(subsong.songName);
+#endif // MPT_PSM_USE_REAL_SUBSONGS
+
+		// Read "Sub chunks"
 		ChunkReader::ChunkList<PSMChunk> subChunks = chunk.ReadChunks<PSMChunk>(1);
-		
 		for(ChunkReader::ChunkList<PSMChunk>::iterator subChunkIter = subChunks.begin(); subChunkIter != subChunks.end(); subChunkIter++)
 		{
 			FileReader subChunk(subChunkIter->GetData());
@@ -375,7 +368,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					char cversion[7];
 					subChunk.ReadString<mpt::String::maybeNullTerminated>(cversion, 6);
-					int version = ConvertStrTo<int>(cversion);
+					uint32 version = ConvertStrTo<uint32>(cversion);
 					// Sinaria song dates (just to go sure...)
 					if(version == 800211 || version == 940902 || version == 940903 ||
 						version == 940906 || version == 940914 || version == 941213)
@@ -393,7 +386,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					// Now, the interesting part begins!
 					uint16 chunkCount = 0, firstOrderChunk = uint16_max;
 
-					// "Sub sub sub chunks" (grrrr, silly format)
+					// "Sub sub chunks" (grrrr, silly format)
 					while(subChunk.CanRead(1))
 					{
 						uint8 subChunkID = subChunk.ReadUint8();
@@ -406,48 +399,21 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						switch(subChunkID)
 						{
 						case 0x01: // Order list item
-							// Pattern name follows - find pattern (this is the orderlist)
-							{
-								char patternID[5]; // temporary
-								if(newFormat)
-								{
-									subChunk.Skip(4);
-									subChunk.ReadString<mpt::String::spacePadded>(patternID, 4);
-								} else
-								{
-									subChunk.Skip(1);
-									subChunk.ReadString<mpt::String::spacePadded>(patternID, 3);
-								}
-								uint32 pat = ConvertStrTo<uint32>(patternID);
-
-								// seek which pattern has this ID
-								for(size_t i = 0; i < patternIDs.size(); i++)
-								{
-									if(patternIDs[i] == pat)
-									{
-										// found the right pattern, copy offset + start / end positions.
-										if(subsong.startOrder == ORDERINDEX_INVALID)
-											subsong.startOrder = static_cast<ORDERINDEX>(orderOffsets.size());
-										subsong.endOrder = static_cast<ORDERINDEX>(orderOffsets.size());
-
-										// every pattern in the order will be unique, so store the pointer + pattern ID
-										orderOffsets.push_back(&patternChunks[i]);
-										Order.Append(numPatterns);
-										numPatterns++;
-										break;
-									}
-								}
-							}
+							if(subsong.startOrder == ORDERINDEX_INVALID)
+								subsong.startOrder = Order.size();
+							subsong.endOrder = Order.size();
+							Order.Append(ReadPSMPatternIndex(subChunk, newFormat));
 							// Decide whether this is the first order chunk or not (for finding out the correct restart position)
-							if(firstOrderChunk == uint16_max) firstOrderChunk = chunkCount;
+							if(firstOrderChunk == uint16_max)
+								firstOrderChunk = chunkCount;
 							break;
 
 						case 0x04: // Restart position
 							{
 								uint16 restartChunk = subChunk.ReadUint16LE();
-								ORDERINDEX restartPosition = 0;
-								if(restartChunk >= firstOrderChunk) restartPosition = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
-								subsong.restartPos += restartPosition;
+								if(restartChunk >= firstOrderChunk)
+									subsong.restartPos = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
+								Order.SetRestartPos(subsong.restartPos);
 							}
 							break;
 
@@ -504,26 +470,25 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							}
 							break;
 
-						case 0x0E: // Channel volume table (0...255) - apparently always 255
+						case 0x0E: // Channel volume table (0...255) - can be set using CONVERT.EXE /E, is 255 in all "official" PSMs except for some OMF 2097 tracks
 							{
 								uint8 chn = subChunk.ReadUint8();
 								uint8 vol = subChunk.ReadUint8();
 								if(chn < subsong.channelVolume.size())
 								{
-									subsong.channelVolume[chn] = (vol / 4) + 1;
+									subsong.channelVolume[chn] = (vol / 4u) + 1;
 								}
 							}
 							break;
 
-						default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
-							// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
+						default:
+							// Should never happen in "real" PSM files. But in this case, we have to quit as we don't know how big the chunk really is.
 							return false;
 
 						}
 						chunkCount++;
 					}
-					// separate subsongs by "---" patterns
-					orderOffsets.push_back(static_cast<FileReader*>(nullptr)); // GCC 4.3 does not like .push_back(nullptr) here
+					// Separate subsongs by "---" patterns
 					Order.Append();
 				}
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
@@ -532,13 +497,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
 					if(!subChunk.CanRead(2))
-					{
 						break;
-					}
 
 					uint8 type = subChunk.ReadUint8();
 					uint8 pan = subChunk.ReadUint8();
-
 					switch(type)
 					{
 					case 0: // use panning
@@ -577,10 +539,15 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
+		// Attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
 		if(subsong.startOrder != ORDERINDEX_INVALID && subsong.endOrder != ORDERINDEX_INVALID)
 			subsongs.push_back(subsong);
 	}
+
+#ifdef MPT_PSM_USE_REAL_SUBSONGS
+	Order.SetSequence(0);
+#endif // MPT_PSM_USE_REAL_SUBSONGS
+
 	if(subsongs.empty())
 		return false;
 
@@ -590,7 +557,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
 		for(std::vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
 		{
-			FileReader chunk(*sampleIter);
+			FileReader &chunk(*sampleIter);
+			SAMPLEINDEX smp;
 			if(!newFormat)
 			{
 				// Original header
@@ -600,14 +568,13 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-				if(smp < MAX_SAMPLES)
+				smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
 					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 				}
 			} else
 			{
@@ -618,15 +585,22 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
-				if(smp < MAX_SAMPLES)
+				smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
+				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
 					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
-					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 				}
+			}
+			if(smp > 0 && smp < MAX_SAMPLES)
+			{
+				SampleIO(
+					SampleIO::_8bit,
+					SampleIO::mono,
+					SampleIO::littleEndian,
+					SampleIO::deltaPCM).ReadSample(Samples[smp], chunk);
 			}
 		}
 	}
@@ -650,24 +624,24 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	// "PBOD" - Pattern data of a single pattern
 	// Now that we know the number of channels, we can go through all the patterns.
-	// This is a bit stupid since we will even read duplicate patterns twice, but hey, we do this just once... so who cares?
-	PATTERNINDEX pat = 0;
-	for(ORDERINDEX ord = 0; ord < Order.size(); ord++)
+	std::vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
+	for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 	{
-		if(orderOffsets[ord] == nullptr)
+		FileReader &chunk(*patternIter);
+		if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
+			|| !chunk.LengthIsAtLeast(8))
 		{
-			// Separator pattern
 			continue;
 		}
 
-		FileReader patternChunk = *orderOffsets[ord];
-
-		uint16 numRows = patternChunk.ReadUint16LE();
+		PATTERNINDEX pat = ReadPSMPatternIndex(chunk, newFormat);
+		uint16 numRows = chunk.ReadUint16LE();
 
 		if(!Patterns.Insert(pat, numRows))
 		{
-			break;
+			continue;
 		}
 
 		enum
@@ -679,16 +653,16 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		};
 
 		// Read pattern.
-		for(int row = 0; row < numRows; row++)
+		for(ROWINDEX row = 0; row < numRows; row++)
 		{
 			PatternRow rowBase = Patterns[pat].GetRow(row);
-			uint16 rowSize = patternChunk.ReadUint16LE();
+			uint16 rowSize = chunk.ReadUint16LE();
 			if(rowSize <= 2)
 			{
 				continue;
 			}
 
-			FileReader rowChunk = patternChunk.ReadChunk(rowSize - 2);
+			FileReader rowChunk = chunk.ReadChunk(rowSize - 2);
 
 			while(rowChunk.CanRead(2))
 			{
@@ -888,48 +862,45 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
-
-		pat++;
 	}
 
 	if(subsongs.size() > 1)
 	{
-		// write subsong "configuration" to patterns (only if there are multiple subsongs)
+		// Write subsong "configuration" to patterns (only if there are multiple subsongs)
 		for(size_t i = 0; i < subsongs.size(); i++)
 		{
+#ifdef MPT_PSM_USE_REAL_SUBSONGS
+			ModSequence &order = Order.GetSequence(static_cast<SEQUENCEINDEX>(i));
+#else
+			ModSequence &order = Order;
+#endif // MPT_PSM_USE_REAL_SUBSONGS
 			const PSMSubSong &subsong = subsongs[i];
-			PATTERNINDEX startPattern = Order[subsong.startOrder], endPattern = Order[subsong.endOrder];
+			PATTERNINDEX startPattern = order[subsong.startOrder], endPattern = order[subsong.endOrder];
 			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
-			// set the subsong name to all pattern names
-			for(PATTERNINDEX p = startPattern; p <= endPattern; p++)
-			{
-				Patterns[p].SetName(subsong.songName);
-			}
-
+			startPattern = order.EnsureUnique(subsong.startOrder);
 			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
 			if(subsongPanningDiffers)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
 					if(subsong.channelSurround[chn])
-					{
 						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
-					} else
-					{
+					else
 						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
-					}
 				}
 			}
-			// write default tempo/speed to pattern
+			// Write default tempo/speed to pattern
 			Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsong.defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
 			Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsong.defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
 
-			// don't write channel volume for now, as it's always set to 100% anyway
+			// Don't write channel volume for now, as it's always set to 100% anyway
 
-			// there's a restart pos, so let's try to insert a Bxx command in the last pattern
-			if(subsong.restartPos != ORDERINDEX_INVALID && Patterns.IsValidPat(endPattern))
+#ifndef MPT_PSM_USE_REAL_SUBSONGS
+			// There's a restart pos, so let's try to insert a Bxx command in the last pattern
+			if(Patterns.IsValidPat(endPattern))
 			{
+				endPattern = order.EnsureUnique(subsong.endOrder);
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
 				ModCommand *m;
 				m = Patterns[endPattern];
@@ -941,8 +912,16 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					}
 				}
-				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(subsong.restartPos)).Row(lastRow).Retry(EffectWriter::rmTryPreviousRow));
+				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, mpt::saturate_cast<ModCommand::PARAM>(subsong.startOrder + subsong.restartPos)).Row(lastRow).Retry(EffectWriter::rmTryPreviousRow));
 			}
+
+			// Set the subsong name to all pattern names
+			for(ORDERINDEX ord = subsong.startOrder; ord <= subsong.endOrder; ord++)
+			{
+				if(Patterns.IsValidIndex(order[ord]))
+					Patterns[order[ord]].SetName(subsong.songName);
+			}
+#endif // MPT_PSM_USE_REAL_SUBSONGS
 		}
 	}
 
