@@ -16,6 +16,10 @@
 #include "plugins/DigiBoosterEcho.h"
 #endif // NO_PLUGINS
 
+#ifdef LIBOPENMPT_BUILD
+#define MPT_DBM_USE_REAL_SUBSONGS
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -363,12 +367,12 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			m_songName = name;
 		}
-#ifdef DBM_USE_REAL_SUBSONGS
+#ifdef MPT_DBM_USE_REAL_SUBSONGS
 		if(i > 0) Order.AddSequence(false);
 		Order.SetSequence(i);
 		Order.clear();
 		Order.m_sName = name;
-#endif // DBM_USE_REAL_SUBSONGS
+#endif // MPT_DBM_USE_REAL_SUBSONGS
 
 		uint16 numOrders = songChunk.ReadUint16BE();
 		const ORDERINDEX startIndex = Order.GetLength();
@@ -383,9 +387,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-#ifdef DBM_USE_REAL_SUBSONGS
+#ifdef MPT_DBM_USE_REAL_SUBSONGS
 	Order.SetSequence(0);
-#endif // DBM_USE_REAL_SUBSONGS
+#endif // MPT_DBM_USE_REAL_SUBSONGS
 
 	// Read instruments
 	FileReader instChunk = chunks.GetChunk(DBMChunk::idINST);
@@ -515,7 +519,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 						std::swap(param1, param2);
 					}
 
-					ModCommand::TwoRegularCommandsToMPT(cmd1, param1,  cmd2, param2);
+					ModCommand::TwoRegularCommandsToMPT(cmd1, param1, cmd2, param2);
 
 					m.volcmd = cmd1;
 					m.vol = param1;
