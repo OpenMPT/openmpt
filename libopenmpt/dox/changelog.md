@@ -7,10 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [**Bug**] PSM loader was broken on big-endian platforms since forever.
+
  *  There is a new `"subsong"` ctl, which can return the currently selected
     subsong.
  *  Samples in DSM files were sometimes detuned and some pattern commands were
     not imported correctly.
+ *  Several valid (but slightly corrupted possibly due to disk failures or data
+    transfer errors) SoundTracker files were no longer loading since beta 18.
 
 ### libopenmpt 0.2-beta19 (2016-07-23)
 

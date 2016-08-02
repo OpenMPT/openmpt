@@ -368,10 +368,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader subChunk(subChunkIter->GetData());
 			PSMChunk subChunkHead = subChunkIter->GetHeader();
 			
-			switch(subChunkHead.id)
+			switch(subChunkHead.GetID())
 			{
 			case PSMChunk::idDATE: // "DATE" - Conversion date (YYMMDD)
-				if(subChunkHead.length == 6)
+				if(subChunkHead.GetLength() == 6)
 				{
 					char cversion[7];
 					subChunk.ReadString<mpt::String::maybeNullTerminated>(cversion, 6);
@@ -384,7 +384,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 
 			case PSMChunk::idOPLH: // "OPLH" - Order list, channel + module settings
-				if(subChunkHead.length >= 9)
+				if(subChunkHead.GetLength() >= 9)
 				{
 					// First two bytes = Number of chunks that follow
 					//uint16 totalChunks = subChunk.ReadUint16LE();
@@ -528,7 +528,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
 				// In some Sinaria tunes, this is actually longer than 2 * channels...
-				MPT_ASSERT(subChunkHead.length >= m_nChannels * 2u);
+				MPT_ASSERT(subChunkHead.GetLength() >= m_nChannels * 2u);
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
 					if(!subChunk.CanRead(2))
