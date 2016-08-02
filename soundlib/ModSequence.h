@@ -56,7 +56,7 @@ public:
 	// Sequence will automatically grow if needed and if it can't grow enough, some tail 
 	// orders will be discarded.
 	// Return: Number of orders inserted.
-	ORDERINDEX Insert(ORDERINDEX nPos, ORDERINDEX nCount) {return Insert(nPos, nCount, GetInvalidPatIndex());}
+	ORDERINDEX Insert(ORDERINDEX nPos, ORDERINDEX nCount) { return Insert(nPos, nCount, GetInvalidPatIndex()); }
 	ORDERINDEX Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX nFill);
 
 	// Removes orders from range [nPosBegin, nPosEnd].
@@ -99,6 +99,10 @@ public:
 
 	// Find an order item that contains a given pattern number.
 	ORDERINDEX FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder = 0, bool searchForward = true) const;
+
+	// Ensures that the pattern at the specified order position is used only once (across all sequences).
+	// If another usage is found, the pattern is replaced by a copy and the new index is returned.
+	PATTERNINDEX EnsureUnique(ORDERINDEX ord);
 
 	ModSequence& operator=(const ModSequence& seq);
 

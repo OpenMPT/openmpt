@@ -366,6 +366,33 @@ ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, 
 }
 
 
+PATTERNINDEX ModSequence::EnsureUnique(ORDERINDEX ord)
+//----------------------------------------------------
+{
+	PATTERNINDEX pat = At(ord);
+	SEQUENCEINDEX seqs = m_sndFile.Order.GetNumSequences();
+	for(SEQUENCEINDEX s = 0; s < seqs; s++)
+	{
+		ModSequence &sequence = m_sndFile.Order.GetSequence(s);
+		ORDERINDEX ords = sequence.GetLength();
+		for(ORDERINDEX o = 0; o < ords; o++)
+		{
+			if(sequence[o] == pat && (o != ord || &sequence != this))
+			{
+				// Found duplicate usage.
+				ORDERINDEX newPat = m_sndFile.Patterns.Duplicate(pat);
+				if(newPat != PATTERNINDEX_INVALID)
+				{
+					At(ord) = newPat;
+					return newPat;
+				}
+			}
+		}
+	}
+	return pat;
+}
+
+
 /////////////////////////////////////
 // ModSequenceSet
 /////////////////////////////////////
@@ -581,16 +608,20 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 {
 	bool result = false;
 	std::vector<GetLengthType> length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
-	ModSequence order = GetSequence(seq);
-	for(size_t i = 0; i < length.size(); i++)
+	ModSequence &order = GetSequence(seq);
+	for(std::vector<GetLengthType>::const_iterator it = length.begin(); it != length.end(); it++)
 	{
-		if(length[i].endOrder != ORDERINDEX_INVALID && length[i].endRow != ROWINDEX_INVALID)
+		if(it->endOrder != ORDERINDEX_INVALID && it->endRow != ROWINDEX_INVALID)
 		{
 			if(Util::TypeCanHoldValue<ModCommand::PARAM>(order.GetRestartPos()))
-				result = m_sndFile.Patterns[order[length[i].endOrder]].WriteEffect(
-					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
-			else
+			{
+				PATTERNINDEX writePat = order.EnsureUnique(it->endOrder);
+				result = m_sndFile.Patterns[writePat].WriteEffect(
+					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(it->endRow).Retry(EffectWriter::rmTryNextRow));
+			} else
+			{
 				result = false;
+			}
 		}
 	}
 	order.SetRestartPos(0);
