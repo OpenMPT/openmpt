@@ -369,7 +369,6 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 #ifdef MPT_DBM_USE_REAL_SUBSONGS
 		if(i > 0) Order.AddSequence(false);
-		Order.SetSequence(i);
 		Order.clear();
 		Order.SetName(name);
 #endif // MPT_DBM_USE_REAL_SUBSONGS

@@ -331,8 +331,11 @@ ModSequence& ModSequence::operator=(const ModSequence& seq)
 {
 	if (&seq == this)
 		return *this;
-	resize(seq.GetLength());
-	std::copy(seq.begin(), seq.end(), begin());
+	if(seq.GetLength() > 0)
+	{
+		resize(seq.GetLength());
+		std::copy(seq.begin(), seq.end(), begin());
+	}
 	m_sName = seq.m_sName;
 	m_restartPos = seq.m_restartPos;
 	return *this;
@@ -460,6 +463,8 @@ void ModSequenceSet::CopyStorageToCache()
 void ModSequenceSet::SetSequence(SEQUENCEINDEX n)
 //-----------------------------------------------
 {
+	if(n >= m_Sequences.size())
+		return;
 	CopyCacheToStorage();
 	m_nCurrentSeq = n;
 	CopyStorageToCache();
@@ -471,7 +476,7 @@ SEQUENCEINDEX ModSequenceSet::AddSequence(bool bDuplicate)
 {
 	if(GetNumSequences() == MAX_SEQUENCES)
 		return SEQUENCEINDEX_INVALID;
-	m_Sequences.push_back(ModSequence(m_sndFile, s_nCacheSize)); 
+	m_Sequences.push_back(ModSequence(m_sndFile, s_nCacheSize));
 	if (bDuplicate)
 	{
 		m_Sequences.back() = *this;
