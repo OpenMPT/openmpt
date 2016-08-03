@@ -4,16 +4,6 @@
  * Purpose: PSM16 and new PSM (ProTracker Studio) module loader
  * Notes  : This is partly based on http://www.shikadi.net/moddingwiki/ProTracker_Studio_Module
  *          and partly reverse-engineered. Also thanks to the author of foo_dumb, the source code gave me a few clues. :)
- *
- *          What's playing?
- *          - Epic Pinball - Perfect! (menu and order song are pitched up a bit in the PSM16 format for unknown reasons, but that shouldn't bother anyone)
- *          - Extreme Pinball - Perfect! (subtunes included!)
- *          - Jazz Jackrabbit - Perfect!
- *          - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
- *          - Silverball - Seems to work (I don't have all tables so I can't compare)
- *          - Sinaria - Seems to work (never played the game, so I can't really tell...)
- *
- *          Effect conversion should be about right...
  * Authors: Johannes Schultz
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
