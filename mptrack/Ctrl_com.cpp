@@ -174,6 +174,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	m_nLockCount--;
 }
 
+
 void CCtrlComments::OnCommentsChanged()
 //-------------------------------------
 {
@@ -225,6 +226,19 @@ void CCtrlComments::OnCommentsChanged()
 
 		delete[] p;
 	}
+}
+
+
+BOOL CCtrlComments::PreTranslateMessage(MSG *pMsg)
+//------------------------------------------------
+{
+	if(pMsg->message == WM_KEYDOWN && pMsg->wParam == 'A' && GetKeyState(VK_CONTROL) < 0)
+	{
+		// Ctrl-A is not handled by multiline edit boxes
+		if(::GetFocus() == m_EditComments.m_hWnd)
+			m_EditComments.SetSel(0, -1);
+	}
+	return CModControlDlg::PreTranslateMessage(pMsg);
 }
 
 
