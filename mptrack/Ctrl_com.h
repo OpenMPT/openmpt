@@ -37,6 +37,7 @@ public:
 	virtual CRuntimeClass *GetAssociatedViewClass();
 	virtual void OnActivatePage(LPARAM);
 	virtual void OnDeactivatePage();
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlComments)
