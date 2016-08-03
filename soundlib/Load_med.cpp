@@ -708,7 +708,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
 				if(m_songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmps->name);
-				uint16 n = BigEndianW(pmps->length);
+				ORDERINDEX n = std::min<ORDERINDEX>(BigEndianW(pmps->length), ORDERINDEX_MAX - nOrders);
 				if (n <= (dwMemLength - pseq + 42) / 2u)
 				{
 					Order.resize(nOrders + n);
