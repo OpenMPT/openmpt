@@ -14,7 +14,6 @@
  *          - Sinaria - Seems to work (never played the game, so I can't really tell...)
  *
  *          Effect conversion should be about right...
- *          If OpenMPT will ever support subtunes properly (with tempo, channel setup, etc. for each subtune), the subtune crap should be rewritten completely.
  * Authors: Johannes Schultz
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -96,14 +95,14 @@ struct PACKED PSMSongHeader
 {
 	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
 	uint8 compression;		// 1 - uncompressed
-	uint8 numChannels;		// Number of channels, usually 4
+	uint8 numChannels;		// Number of channels
 
 };
 
 STATIC_ASSERT(sizeof(PSMSongHeader) == 11);
 
 // Regular sample header
-struct PACKED PSMOldSampleHeader
+struct PACKED PSMSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
@@ -115,11 +114,11 @@ struct PACKED PSMOldSampleHeader
 	uint32 loopStart;
 	uint32 loopEnd;			// FF FF FF FF = end of sample
 	uint8  unknown3;
-	uint8  defaulPan;		// unused?
+	uint8  finetune;		// unused? always 0
 	uint8  defaultVolume;
 	uint32 unknown4;
-	uint16 c5Freq;
-	uint8  unknown5[21];	// 00 ... 00
+	uint32 c5Freq;			// MASI ignores the high 16 bits
+	uint8  padding[19];		// 00 ... 00
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -152,10 +151,10 @@ struct PACKED PSMOldSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PSMOldSampleHeader) == 96);
+STATIC_ASSERT(sizeof(PSMSampleHeader) == 96);
 
 // Sinaria sample header (and possibly other games)
-struct PACKED PSMNewSampleHeader
+struct PACKED PSMSinariaSampleHeader
 {
 	uint8  flags;
 	char   fileName[8];		// Filename of the original module (without extension)
@@ -167,11 +166,11 @@ struct PACKED PSMNewSampleHeader
 	uint32 loopStart;
 	uint32 loopEnd;
 	uint16 unknown3;
-	uint8  defaultPan;		// unused?
+	uint8  finetune;		// Possibly finetune like in PSM16, but sounds even worse than just ignoring it
 	uint8  defaultVolume;
 	uint32 unknown4;
 	uint16 c5Freq;
-	char   unknown5[16];	// 00 ... 00
+	char   padding[16];		// 00 ... 00
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -201,7 +200,7 @@ struct PACKED PSMNewSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PSMNewSampleHeader) == 96);
+STATIC_ASSERT(sizeof(PSMSinariaSampleHeader) == 96);
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
@@ -231,10 +230,10 @@ struct PSMSubSong // For internal use (pattern conversion)
 
 
 // Portamento effect conversion (depending on format version)
-static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
-//-------------------------------------------------------
+static uint8 ConvertPSMPorta(uint8 param, bool sinariaFormat)
+//-----------------------------------------------------------
 {
-	if(newFormat)
+	if(sinariaFormat)
 		return param;
 	if(param < 4)
 		return (param | 0xF0);
@@ -244,8 +243,8 @@ static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
 
 
 // Read a Pattern ID (something like "P0  " or "P13 " in the old format, or "PATT0   " in Sinaria)
-static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &newFormat)
-//------------------------------------------------------------------------
+static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
+//----------------------------------------------------------------------------
 {
 	char patternID[5];
 	uint8 offset = 1;
@@ -253,7 +252,7 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &newFormat)
 	if(!memcmp(patternID, "PATT", 4))
 	{
 		file.ReadString<mpt::String::spacePadded>(patternID, 4);
-		newFormat = true;
+		sinariaFormat = true;
 		offset = 0;
 	}
 	return ConvertStrTo<uint16>(&patternID[offset]);
@@ -324,7 +323,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// Subsong setup
 	std::vector<PSMSubSong> subsongs;
 	bool subsongPanningDiffers = false; // Do we have subsongs with different panning positions?
-	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
+	bool sinariaFormat = false; // The game "Sinaria" uses a slightly modified PSM structure - in some ways it's more like PSM16 (e.g. effects).
 
 	// "SONG" - Subsong information (channel count etc)
 	std::vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
@@ -372,7 +371,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					// Sinaria song dates (just to go sure...)
 					if(version == 800211 || version == 940902 || version == 940903 ||
 						version == 940906 || version == 940914 || version == 941213)
-						newFormat = true;
+						sinariaFormat = true;
 				}
 				break;
 
@@ -402,7 +401,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							if(subsong.startOrder == ORDERINDEX_INVALID)
 								subsong.startOrder = Order.size();
 							subsong.endOrder = Order.size();
-							Order.Append(ReadPSMPatternIndex(subChunk, newFormat));
+							Order.Append(ReadPSMPatternIndex(subChunk, sinariaFormat));
 							// Decide whether this is the first order chunk or not (for finding out the correct restart position)
 							if(firstOrderChunk == uint16_max)
 								firstOrderChunk = chunkCount;
@@ -412,7 +411,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								uint16 restartChunk = subChunk.ReadUint16LE();
 								if(restartChunk >= firstOrderChunk)
-									subsong.restartPos = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);
+									subsong.restartPos = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);	// Close enough - we assume that order list is continuous (like in any real-world PSM)
 								Order.SetRestartPos(subsong.restartPos);
 							}
 							break;
@@ -425,17 +424,21 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							subsong.defaultTempo =  subChunk.ReadUint8();
 							break;
 
-						case 0x0C: // Sample map table (???)
+						case 0x0C: // Sample map table
 							// Never seems to be different, so...
-							if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||
-								subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||
-								subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)
+							// This is probably a part of the never-implemented "mini programming language" mentioned in the PSM docs.
+							// Output of PLAY.EXE: "SMapTabl from pos 0 to pos -1 starting at 0 and adding 1 to it each time"
+							// It appears that this maps e.g. what is "I0" in the file to sample 1.
+							// If we were being fancy, we could implement this, but in practice it won't matter.
+							if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||	// "0 to -1" (does not seem to do anything)
+								subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||	// "at 0" (actually this appears to be the adding part - changing this to 0x01 0x00 offsets all samples by 1)
+								subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)	// "adding 1" (does not seem to do anything)
 							{
 								return false;
 							}
 							break;
 
-						case 0x0D: // Channel panning table
+						case 0x0D: // Channel panning table - can be set using CONVERT.EXE /E
 							{
 								uint8 chn = subChunk.ReadUint8();
 								uint8 pan = subChunk.ReadUint8();
@@ -559,10 +562,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			FileReader &chunk(*sampleIter);
 			SAMPLEINDEX smp;
-			if(!newFormat)
+			if(!sinariaFormat)
 			{
 				// Original header
-				PSMOldSampleHeader sampleHeader;
+				PSMSampleHeader sampleHeader;
 				if(!chunk.ReadConvertEndianness(sampleHeader))
 				{
 					continue;
@@ -579,7 +582,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			} else
 			{
 				// Sinaria uses a slightly different sample header
-				PSMNewSampleHeader sampleHeader;
+				PSMSinariaSampleHeader sampleHeader;
 				if(!chunk.ReadConvertEndianness(sampleHeader))
 				{
 					continue;
@@ -617,7 +620,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
-	m_madeWithTracker = newFormat ? "Epic MegaGames MASI (New Version / Sinaria)" : "Epic MegaGames MASI (New Version)";
+	m_madeWithTracker = sinariaFormat ? "Epic MegaGames MASI (New Version / Sinaria)" : "Epic MegaGames MASI (New Version)";
 
 	if(!(loadFlags & loadPatternData) || m_nChannels == 0)
 	{
@@ -636,7 +639,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		PATTERNINDEX pat = ReadPSMPatternIndex(chunk, newFormat);
+		PATTERNINDEX pat = ReadPSMPatternIndex(chunk, sinariaFormat);
 		uint16 numRows = chunk.ReadUint16LE();
 
 		if(!Patterns.Insert(pat, numRows))
@@ -664,7 +667,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 			FileReader rowChunk = chunk.ReadChunk(rowSize - 2);
 
-			while(rowChunk.CanRead(2))
+			while(rowChunk.CanRead(3))
 			{
 				uint8 flags = rowChunk.ReadUint8();
 				uint8 channel = rowChunk.ReadUint8();
@@ -675,9 +678,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Note present
 					uint8 note = rowChunk.ReadUint8();
-					if(!newFormat)
+					if(!sinariaFormat)
 					{
-						if(note == 0xFF)
+						if(note == 0xFF)	// Can be found in a few files but is apparently not supported by MASI
 							note = NOTE_NOTECUT;
 						else
 							if(note < 129) note = (note & 0x0F) + 12 * (note >> 4) + 13;
@@ -708,50 +711,51 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					m.command = rowChunk.ReadUint8();
 					m.param = rowChunk.ReadUint8();
 
+					// This list is annoyingly similar to PSM16, but not quite identical.
 					switch(m.command)
 					{
 					// Volslides
 					case 0x01: // fine volslide up
 						m.command = CMD_VOLUMESLIDE;
-						if (newFormat) m.param = (m.param << 4) | 0x0F;
+						if (sinariaFormat) m.param = (m.param << 4) | 0x0F;
 						else m.param = ((m.param & 0x1E) << 3) | 0x0F;
 						break;
 					case 0x02: // volslide up
 						m.command = CMD_VOLUMESLIDE;
-						if (newFormat) m.param = 0xF0 & (m.param << 4);
+						if (sinariaFormat) m.param = 0xF0 & (m.param << 4);
 						else m.param = 0xF0 & (m.param << 3);
 						break;
 					case 0x03: // fine volslide down
 						m.command = CMD_VOLUMESLIDE;
-						if (newFormat) m.param |= 0xF0;
+						if (sinariaFormat) m.param |= 0xF0;
 						else m.param = 0xF0 | (m.param >> 1);
 						break;
 					case 0x04: // volslide down
 						m.command = CMD_VOLUMESLIDE;
-						if (newFormat) m.param &= 0x0F;
+						if (sinariaFormat) m.param &= 0x0F;
 						else if(m.param < 2) m.param |= 0xF0; else m.param = (m.param >> 1) & 0x0F;
 						break;
 
 					// Portamento
 					case 0x0B: // fine portamento up
 						m.command = CMD_PORTAMENTOUP;
-						m.param = 0xF0 | ConvertPSMPorta(m.param, newFormat);
+						m.param = 0xF0 | ConvertPSMPorta(m.param, sinariaFormat);
 						break;
 					case 0x0C: // portamento up
 						m.command = CMD_PORTAMENTOUP;
-						m.param = ConvertPSMPorta(m.param, newFormat);
+						m.param = ConvertPSMPorta(m.param, sinariaFormat);
 						break;
 					case 0x0D: // fine portamento down
 						m.command = CMD_PORTAMENTODOWN;
-						m.param = 0xF0 | ConvertPSMPorta(m.param, newFormat);
+						m.param = 0xF0 | ConvertPSMPorta(m.param, sinariaFormat);
 						break;
 					case 0x0E: // portamento down
 						m.command = CMD_PORTAMENTODOWN;
-						m.param = ConvertPSMPorta(m.param, newFormat);
+						m.param = ConvertPSMPorta(m.param, sinariaFormat);
 						break;
 					case 0x0F: // tone portamento
 						m.command = CMD_TONEPORTAMENTO;
-						if(!newFormat) m.param >>= 2;
+						if(!sinariaFormat) m.param >>= 2;
 						break;
 					case 0x11: // glissando control
 						m.command = CMD_S3MCMDEX;
@@ -764,6 +768,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x12: // tone portamento + volslide down
 						m.command = CMD_TONEPORTAVOL;
 						m.param = (m.param >> 4) & 0x0F;
+						break;
+
+					case 0x13: // ScreamTracker command S - actually hangs / crashes MASI
+						m.command = CMD_S3MCMDEX;
 						break;
 
 					// Vibrato
@@ -810,14 +818,17 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					// Position change
-					case 0x33: // position jump
+					case 0x33: // position jump - MASI seems to ignore this command
 						m.command = CMD_POSITIONJUMP;
-						m.param >>= 1;
+						m.param /= 2u;	// actually it is probably just an index into the order table
 						rowChunk.Skip(1);
 						break;
 					case 0x34: // pattern break
 						m.command = CMD_PATTERNBREAK;
-						m.param >>= 1;
+						// When converting from S3M, the parameter is double-BDC-encoded (wtf!)
+						// When converting from MOD, it's in binary.
+						// MASI ignores the parameter entirely, and so do we.
+						m.param = 0;
 						break;
 					case 0x35: // loop pattern
 						m.command = CMD_S3MCMDEX;
@@ -847,11 +858,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x49: // set balance
 						m.command = CMD_S3MCMDEX;
 						m.param = 0x80 | (m.param & 0x0F);
-						break;
-
-					case CMD_MODCMDEX:
-						// for some strange home-made tunes
-						m.command = CMD_S3MCMDEX;
 						break;
 
 					default:
