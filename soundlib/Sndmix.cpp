@@ -1403,17 +1403,24 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				}
 				if(note != pChn->nNote || GetType() == MOD_TYPE_STM)
 				{
-					if(m_SongFlags[SONG_PT_MODE] && note >= NOTE_MIDDLEC + 24)
+					if(m_SongFlags[SONG_PT_MODE])
 					{
 						// Weird arpeggio wrap-around in ProTracker.
 						// Test case: ArpWraparound.mod, and the snare sound in "Jim is dead" by doh.
-						note -= 37;
+						if(note == NOTE_MIDDLEC + 24)
+						{
+							period = int32_max;
+							return;
+						} else if(note > NOTE_MIDDLEC + 24)
+						{
+							note -= 37;
+						}
 					}
 					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
 					// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
 					// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
-					if(GetType() == MOD_TYPE_STM)
+					if(GetType() & (MOD_TYPE_STM | MOD_TYPE_PSM))
 					{
 						pChn->nPeriod = period;
 					}
@@ -1900,7 +1907,7 @@ bool CSoundFile::ReadNote()
 	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
 		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
-		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
+		// This occurs for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
 		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->leftVol|pChn->rightVol)) && !m_playBehaviour[kFT2ProcessSilentChannels])
 		{
@@ -2028,8 +2035,9 @@ bool CSoundFile::ReadNote()
 			// Preserve Amiga freq limits.
 			// In ST3, the frequency is always clamped to periods 113 to 856, while in ProTracker,
 			// the limit is variable, depending on the finetune of the sample.
+			// The int32_max test is for the arpeggio wrap-around in ProcessArpeggio().
 			// Test case: AmigaLimits.s3m, AmigaLimitsFinetune.mod
-			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT_MODE])
+			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT_MODE] && period != int32_max)
 			{
 				int limitLow = 113 * 4, limitHigh = 856 * 4;
 				if(GetType() != MOD_TYPE_S3M)
