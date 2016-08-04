@@ -210,6 +210,8 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
 	unpackedData.resize(mmh.filesize);
+	// 8-bit deltas
+	uint8 ptable[256] = { 0 };
 
 	for (uint32 nBlock=0; nBlock<mmh.nblocks; nBlock++)
 	{
@@ -339,12 +341,13 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			uint32 dwPos = 0;
 			uint32 numbits = blk.num_bits;
 			uint32 oldval = 0;
-			if(!file.Seek(memPos)) return false;
-			const uint8 *ptable = file.GetRawData<uint8>();
+			if(blk.tt_entries > sizeof(ptable)
+				|| !file.Seek(memPos)
+				|| file.ReadRaw(ptable, blk.tt_entries) < blk.tt_entries)
+				return false;
 
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
-			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
 			bb.pSrc = file.GetRawData<uint8>();
 			bb.bytesLeft = blk.pk_size - blk.tt_entries;
@@ -376,7 +379,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				{
 					newval = d;
 				}
-				if (newval < 0x100)
+				if (newval < sizeof(ptable))
 				{
 					int n = ptable[newval];
 					if (blk.flags & MMCMP_DELTA)
