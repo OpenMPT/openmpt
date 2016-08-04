@@ -352,6 +352,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			
 			switch(subChunkHead.GetID())
 			{
+#if 0
 			case PSMChunk::idDATE: // "DATE" - Conversion date (YYMMDD)
 				if(subChunkHead.GetLength() == 6)
 				{
@@ -364,6 +365,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						sinariaFormat = true;
 				}
 				break;
+#endif
 
 			case PSMChunk::idOPLH: // "OPLH" - Order list, channel + module settings
 				if(subChunkHead.GetLength() >= 9)
@@ -378,26 +380,41 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					// "Sub sub chunks" (grrrr, silly format)
 					while(subChunk.CanRead(1))
 					{
-						uint8 subChunkID = subChunk.ReadUint8();
-						if(!subChunkID)
+						uint8 opcode = subChunk.ReadUint8();
+						if(!opcode)
 						{
 							// Last chunk was reached.
 							break;
 						}
 
-						switch(subChunkID)
+						// Note: This is more like a playlist than a collection of global values.
+						// In theory, a tempo item inbetween two order items should modify the
+						// tempo when switching patterns. No module uses this feature in practice
+						// though, so we can keep our loader simple.
+						// Unimplemented opcodes do nothing or freeze MASI.
+						switch(opcode)
 						{
-						case 0x01: // Order list item
-							if(subsong.startOrder == ORDERINDEX_INVALID)
-								subsong.startOrder = Order.size();
-							subsong.endOrder = Order.size();
-							Order.Append(ReadPSMPatternIndex(subChunk, sinariaFormat));
-							// Decide whether this is the first order chunk or not (for finding out the correct restart position)
-							if(firstOrderChunk == uint16_max)
-								firstOrderChunk = chunkCount;
+						case 0x01: // Play order list item
+							{
+								if(subsong.startOrder == ORDERINDEX_INVALID)
+									subsong.startOrder = Order.size();
+								subsong.endOrder = Order.size();
+								PATTERNINDEX pat = ReadPSMPatternIndex(subChunk, sinariaFormat);
+								if(pat == 0xFF)
+									pat = Order.GetInvalidPatIndex();
+								else if(pat == 0xFE)
+									pat = Order.GetIgnoreIndex();
+								Order.Append(pat);
+								// Decide whether this is the first order chunk or not (for finding out the correct restart position)
+								if(firstOrderChunk == uint16_max)
+									firstOrderChunk = chunkCount;
+							}
 							break;
 
-						case 0x04: // Restart position
+						// 0x02: Play Range
+						// 0x03: Jump Loop
+
+						case 0x04: // Jump Line (Restart position)
 							{
 								uint16 restartChunk = subChunk.ReadUint16LE();
 								if(restartChunk >= firstOrderChunk)
@@ -405,6 +422,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 								Order.SetRestartPos(subsong.restartPos);
 							}
 							break;
+
+						// 0x05: Channel Flip
+						// 0x06: Transpose
 
 						case 0x07: // Default Speed
 							subsong.defaultSpeed = subChunk.ReadUint8();
@@ -481,8 +501,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						chunkCount++;
 					}
-					// Separate subsongs by "---" patterns
-					Order.Append();
 				}
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
 				// In some Sinaria tunes, this is actually longer than 2 * channels...
@@ -534,7 +552,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
 		if(subsong.startOrder != ORDERINDEX_INVALID && subsong.endOrder != ORDERINDEX_INVALID)
+		{
+			// Separate subsongs by "---" patterns
+			Order.Append();
 			subsongs.push_back(subsong);
+		}
 	}
 
 #ifdef MPT_PSM_USE_REAL_SUBSONGS
@@ -1032,12 +1054,9 @@ struct PACKED PSM16SampleHeader
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nC5Speed = c2freq;
-
 		// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF!
 		// Why on earth would you want to use both systems at the same time?
-		mptSmp.FrequencyToTranspose();
-		mptSmp.nC5Speed = ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
+		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, (finetune - 112) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
 
 		mptSmp.nVolume = volume << 2;
 		mptSmp.nGlobalVol = 256;
