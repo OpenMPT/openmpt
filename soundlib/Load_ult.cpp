@@ -76,13 +76,11 @@ struct PACKED UltSample
 		mptSmp.nSustainStart = loopStart;
 		mptSmp.nSustainEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
 		mptSmp.nVolume = volume;
-		mptSmp.nGlobalVol = 64;
 
-		// mikmod does some weird integer math here, but it didn't really work for me
 		mptSmp.nC5Speed = speed;
 		if(finetune)
 		{
-			mptSmp.nC5Speed = Util::Round<uint32>(mptSmp.nC5Speed * pow(2.0, finetune / (12.0 * 32768)));
+			mptSmp.nC5Speed = Util::Round<uint32>(mptSmp.nC5Speed * pow(2.0, finetune / (12.0 * 32768.0)));
 		}
 
 		if(flags & ULT_LOOP)
@@ -157,7 +155,7 @@ static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 			effect = CMD_S3MCMDEX;
 			param = 0x9F;
 		}
-		if((param & 0x0F) == 0x0C || (param & 0xF0) == 0xC0 && version >= '3')
+		if(((param & 0x0F) == 0x0C || (param & 0xF0) == 0xC0) && version >= '3')
 		{
 			effect = CMD_KEYOFF;
 			param = 0;
@@ -252,15 +250,15 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 	{
 		uint32 off = ((param1 << 8) | param2) >> 6;
 		cmd1 = CMD_NONE;
-		param1 = (uint8)MIN(off, 0xFFu);
+		param1 = mpt::saturate_cast<uint8>(off);
 	} else if(cmd1 == CMD_OFFSET)
 	{
 		uint32 off = param1 * 4;
-		param1 = (uint8)MIN(off, 0xFFu);
+		param1 = mpt::saturate_cast<uint8>(off);
 	} else if(cmd2 == CMD_OFFSET)
 	{
 		uint32 off = param2 * 4;
-		param2 = (uint8)MIN(off, 0xFFu);
+		param2 = mpt::saturate_cast<uint8>(off);
 	} else if(cmd1 == cmd2)
 	{
 		// don't try to figure out how ultratracker does this, it's quite random
