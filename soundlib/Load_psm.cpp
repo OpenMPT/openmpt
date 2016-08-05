@@ -502,6 +502,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						chunkCount++;
 					}
 				}
+				break;
+
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
 				// In some Sinaria tunes, this is actually longer than 2 * channels...
 				MPT_ASSERT(subChunkHead.GetLength() >= m_nChannels * 2u);
@@ -530,7 +532,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					default:
-						MPT_ASSERT_NOTREACHED();
 						break;
 					}
 				}
@@ -894,25 +895,26 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MPT_PSM_USE_REAL_SUBSONGS
 			const PSMSubSong &subsong = subsongs[i];
 			PATTERNINDEX startPattern = order[subsong.startOrder], endPattern = order[subsong.endOrder];
-			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
-			startPattern = order.EnsureUnique(subsong.startOrder);
-			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
-			if(subsongPanningDiffers)
+			if(Patterns.IsValidPat(startPattern))
 			{
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				startPattern = order.EnsureUnique(subsong.startOrder);
+				// Subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
+				// Don't write channel volume for now, as there is no real-world module which needs it.
+				if(subsongPanningDiffers)
 				{
-					if(subsong.channelSurround[chn])
-						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
-					else
-						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+					for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+					{
+						if(subsong.channelSurround[chn])
+							Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+						else
+							Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+					}
 				}
+				// Write default tempo/speed to pattern
+				Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsong.defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
+				Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsong.defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
 			}
-			// Write default tempo/speed to pattern
-			Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsong.defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
-			Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsong.defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
-
-			// Don't write channel volume for now, as it's always set to 100% anyway
 
 #ifndef MPT_PSM_USE_REAL_SUBSONGS
 			// There's a restart pos, so let's try to insert a Bxx command in the last pattern
