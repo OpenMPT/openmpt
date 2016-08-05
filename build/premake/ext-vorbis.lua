@@ -16,6 +16,8 @@
   characterset "MBCS"
   files {
    "../../include/vorbis/include/vorbis/codec.h",
+   "../../include/vorbis/include/vorbis/vorbisenc.h",
+   "../../include/vorbis/include/vorbis/vorbisfile.h",
   }
   files {
    "../../include/vorbis/lib/analysis.c",

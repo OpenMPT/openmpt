@@ -919,6 +919,14 @@
 							RelativePath="..\..\include\vorbis\include\vorbis\codec.h"
 							>
 						</File>
+						<File
+							RelativePath="..\..\include\vorbis\include\vorbis\vorbisenc.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\vorbis\include\vorbis\vorbisfile.h"
+							>
+						</File>
 					</Filter>
 				</Filter>
 				<Filter
