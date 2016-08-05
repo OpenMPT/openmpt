@@ -317,8 +317,10 @@ uint16 Version::GetMinimumKernelLevel()
 {
 	uint16 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		#if MPT_MSVC_AT_LEAST(2012, 0)
+		#if MPT_MSVC_AT_LEAST(2012, 0) && !defined(MPT_BUILD_TARGET_XP)
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
+		#elif MPT_MSVC_AT_LEAST(2012, 0) && defined(MPT_BUILD_TARGET_XP)
+			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinXP);
 		#elif MPT_MSVC_AT_LEAST(2010, 0)
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
 		#elif MPT_MSVC_AT_LEAST(2008, 0)
