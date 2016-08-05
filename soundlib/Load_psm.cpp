@@ -894,8 +894,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSequence &order = Order;
 #endif // MPT_PSM_USE_REAL_SUBSONGS
 			const PSMSubSong &subsong = subsongs[i];
-			PATTERNINDEX startPattern = order[subsong.startOrder], endPattern = order[subsong.endOrder];
-
+			PATTERNINDEX startPattern = order[subsong.startOrder];
 			if(Patterns.IsValidPat(startPattern))
 			{
 				startPattern = order.EnsureUnique(subsong.startOrder);
@@ -917,7 +916,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 #ifndef MPT_PSM_USE_REAL_SUBSONGS
-			// There's a restart pos, so let's try to insert a Bxx command in the last pattern
+			// Add restart position to the last pattern
+			PATTERNINDEX endPattern = order[subsong.endOrder];
 			if(Patterns.IsValidPat(endPattern))
 			{
 				endPattern = order.EnsureUnique(subsong.endOrder);
