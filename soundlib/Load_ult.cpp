@@ -73,8 +73,8 @@ struct PACKED UltSample
 		}
 
 		mptSmp.nLength = sizeEnd - sizeStart;
-		mptSmp.nLoopStart = loopStart;
-		mptSmp.nLoopEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
+		mptSmp.nSustainStart = loopStart;
+		mptSmp.nSustainEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
 		mptSmp.nVolume = volume;
 		mptSmp.nGlobalVol = 64;
 
@@ -82,18 +82,18 @@ struct PACKED UltSample
 		mptSmp.nC5Speed = speed;
 		if(finetune)
 		{
-			mptSmp.nC5Speed = static_cast<uint32>((static_cast<double>(mptSmp.nC5Speed)) * pow(2.0, ((static_cast<double>(finetune)) / (12.0 * 32768))));
+			mptSmp.nC5Speed = Util::Round<uint32>(mptSmp.nC5Speed * pow(2.0, finetune / (12.0 * 32768)));
 		}
 
 		if(flags & ULT_LOOP)
-			mptSmp.uFlags.set(CHN_LOOP);
+			mptSmp.uFlags.set(CHN_SUSTAINLOOP);
 		if(flags & ULT_PINGPONGLOOP)
-			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+			mptSmp.uFlags.set(CHN_PINGPONGSUSTAIN);
 		if(flags & ULT_16BIT)
 		{
 			mptSmp.uFlags.set(CHN_16BIT);
-			mptSmp.nLoopStart /= 2;
-			mptSmp.nLoopEnd /= 2;
+			mptSmp.nSustainStart /= 2;
+			mptSmp.nSustainEnd /= 2;
 		}
 		
 	}
@@ -107,7 +107,6 @@ STATIC_ASSERT(sizeof(UltSample) == 66);
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)
-5xC - end loop and finish sample
 9xx - set sample offset to xx * 1024
     with 9yy: set sample offset to xxyy * 4
 E0x - set vibrato strength (2 is normal)
@@ -117,8 +116,8 @@ much anywhere for that matter. I don't even think Ultra Tracker tries to
 convert them. */
 
 
-static void TranslateULTCommands(uint8 *pe, uint8 *pp)
-//----------------------------------------------------
+static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
+//--------------------------------------------------------------------------
 {
 
 	static const uint8 ultEffTrans[] =
@@ -142,83 +141,95 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 	};
 
 
-	uint8 e = *pe & 0x0F;
-	uint8 p = *pp;
+	uint8 e = effect & 0x0F;
+	effect = ultEffTrans[e];
 
-	*pe = ultEffTrans[e];
-
-	switch (e)
+	switch(e)
 	{
 	case 0x00:
-		if(!p)
-			*pe = CMD_NONE;
+		if(!param || version < '3')
+			effect = CMD_NONE;
 		break;
 	case 0x05:
 		// play backwards
-		if((p & 0x0F) == 0x02)
+		switch(param & 0x0F)
 		{
-			*pe = CMD_S3MCMDEX;
-			p = 0x9F;
+		case 0x02:
+			effect = CMD_S3MCMDEX;
+			param = 0x9F;
+			break;
+		case 0x0C:
+			if(version >= '3')
+			{
+				effect = CMD_KEYOFF;
+				param = 0;
+			}
+			break;
 		}
+		break;
+	case 0x07:
+		if(version < '4')
+			effect = CMD_NONE;
 		break;
 	case 0x0A:
 		// blah, this sucks
-		if(p & 0xF0)
-			p &= 0xF0;
+		if(param & 0xF0)
+			param &= 0xF0;
 		break;
 	case 0x0B:
 		// mikmod does this wrong, resulting in values 0-225 instead of 0-255
-		p = (p & 0x0F) * 0x11;
+		param = (param & 0x0F) * 0x11;
 		break;
 	case 0x0C: // volume
-		p >>= 2;
+		param >>= 2;
 		break;
 	case 0x0D: // pattern break
-		p = 10 * (p >> 4) + (p & 0x0F);
+		param = 10 * (param >> 4) + (param & 0x0F);
 	case 0x0E: // special
-		switch(p >> 4)
+		switch(param >> 4)
 		{
 		case 0x01:
-			*pe = CMD_PORTAMENTOUP;
-			p = 0xF0 | (p & 0x0F);
+			effect = CMD_PORTAMENTOUP;
+			param = 0xF0 | (param & 0x0F);
 			break;
 		case 0x02:
-			*pe = CMD_PORTAMENTODOWN;
-			p = 0xF0 | (p & 0x0F);
+			effect = CMD_PORTAMENTODOWN;
+			param = 0xF0 | (param & 0x0F);
 			break;
 		case 0x08:
-			*pe = CMD_S3MCMDEX;
-			p = 0x60 | (p & 0x0F);
+			if(version >= '4')
+			{
+				effect = CMD_S3MCMDEX;
+				param = 0x60 | (param & 0x0F);
+			}
 			break;
 		case 0x09:
-			*pe = CMD_RETRIG;
-			p &= 0x0F;
+			effect = CMD_RETRIG;
+			param &= 0x0F;
 			break;
 		case 0x0A:
-			*pe = CMD_VOLUMESLIDE;
-			p = ((p & 0x0F) << 4) | 0x0F;
+			effect = CMD_VOLUMESLIDE;
+			param = ((param & 0x0F) << 4) | 0x0F;
 			break;
 		case 0x0B:
-			*pe = CMD_VOLUMESLIDE;
-			p = 0xF0 | (p & 0x0F);
+			effect = CMD_VOLUMESLIDE;
+			param = 0xF0 | (param & 0x0F);
 			break;
 		case 0x0C: case 0x0D:
-			*pe = CMD_S3MCMDEX;
+			effect = CMD_S3MCMDEX;
 			break;
 		}
 		break;
 	case 0x0F:
-		if(p > 0x2F)
-			*pe = CMD_TEMPO;
+		if(param > 0x2F)
+			effect = CMD_TEMPO;
 		break;
 	}
-
-	*pp = p;
 }
 
 
-static int ReadULTEvent(ModCommand &m, FileReader &file)
-//------------------------------------------------------
+static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
+//---------------------------------------------------------------------
 {
 	uint8 b, repeat = 1;
 	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
@@ -238,8 +249,8 @@ static int ReadULTEvent(ModCommand &m, FileReader &file)
 	cmd2 = b >> 4;
 	param1 = file.ReadUint8();
 	param2 = file.ReadUint8();
-	TranslateULTCommands(&cmd1, &param1);
-	TranslateULTCommands(&cmd2, &param2);
+	TranslateULTCommands(cmd1, param1, version);
+	TranslateULTCommands(cmd2, param2, version);
 
 	// sample offset -- this is even more special than digitrakker's
 	if(cmd1 == CMD_OFFSET && cmd2 == CMD_OFFSET)
@@ -439,7 +450,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 			ROWINDEX row = 0;
 			while(row < 64)
 			{
-				int repeat = ReadULTEvent(evnote, file);
+				int repeat = ReadULTEvent(evnote, file, fileHeader.version);
 				if(repeat + row > 64)
 					repeat = 64 - row;
 				if(repeat == 0) break;
