@@ -12,6 +12,7 @@
   includedirs {
    "../../include/ogg/include",
    "../../include/vorbis/include",
+   "../../include/vorbis/lib",
   }
   characterset "MBCS"
   files {

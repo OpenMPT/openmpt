@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -114,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -182,7 +182,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -199,7 +199,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -251,7 +251,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -268,7 +268,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -319,7 +319,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -336,7 +336,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -388,7 +388,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -405,7 +405,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -456,7 +456,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
@@ -474,7 +474,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -526,7 +526,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
@@ -544,7 +544,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -595,7 +595,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -612,7 +612,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -676,7 +676,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -693,7 +693,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -756,7 +756,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -773,7 +773,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -839,7 +839,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4101 /wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -856,7 +856,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\vorbis\lib"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
