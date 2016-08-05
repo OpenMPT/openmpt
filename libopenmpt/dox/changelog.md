@@ -11,6 +11,8 @@ is just a high-level summary.
 
  *  There is a new `"subsong"` ctl, which can return the currently selected
     subsong.
+ *  More accurate ProTracker arpeggio wrap-around emulation.
+ *  More accurate sample tuning in PSM16 files.
  *  Samples in DSM files were sometimes detuned and some pattern commands were
     not imported correctly.
  *  Several valid (but slightly corrupted possibly due to disk failures or data
