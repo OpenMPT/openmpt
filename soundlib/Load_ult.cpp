@@ -152,19 +152,15 @@ static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 		break;
 	case 0x05:
 		// play backwards
-		switch(param & 0x0F)
+		if((param & 0x0F) == 0x02 || (param & 0xF0) == 0x20)
 		{
-		case 0x02:
 			effect = CMD_S3MCMDEX;
 			param = 0x9F;
-			break;
-		case 0x0C:
-			if(version >= '3')
-			{
-				effect = CMD_KEYOFF;
-				param = 0;
-			}
-			break;
+		}
+		if((param & 0x0F) == 0x0C || (param & 0xF0) == 0xC0 && version >= '3')
+		{
+			effect = CMD_KEYOFF;
+			param = 0;
 		}
 		break;
 	case 0x07:
@@ -172,19 +168,18 @@ static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 			effect = CMD_NONE;
 		break;
 	case 0x0A:
-		// blah, this sucks
 		if(param & 0xF0)
 			param &= 0xF0;
 		break;
 	case 0x0B:
-		// mikmod does this wrong, resulting in values 0-225 instead of 0-255
 		param = (param & 0x0F) * 0x11;
 		break;
 	case 0x0C: // volume
-		param >>= 2;
+		param /= 4u;
 		break;
 	case 0x0D: // pattern break
 		param = 10 * (param >> 4) + (param & 0x0F);
+		break;
 	case 0x0E: // special
 		switch(param >> 4)
 		{
