@@ -373,7 +373,7 @@ static void ConvertMDLCommand(uint8_t &cmd, uint8_t &param)
 		break;
 #endif // MODPLUG_TRACKER
 	case 0x08: // Panning
-		param = mpt::saturate_cast<uint8>(param * 2u);
+		param = (param & 0x7F) * 2u;
 		break;
 	case 0x0C:	// Global volume
 		param = (param + 1) / 2u;
@@ -486,14 +486,12 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 		01 at address 12300 (in hex).
 	Kind of screwy, but I guess it's better than the mess required to do it with IT (which effectively
 	requires 3 rows in order to set the offset past 0xff00). If we had access to the entire track, we
-	*might* be able to shove the high offset SAy into surrounding rows (or MPTM #xx), but it wouldn't
+	*might* be able to shove the high offset SAy into surrounding rows (or 2x MPTM #xx), but it wouldn't
 	always be possible, it'd make the loader a lot uglier, and generally would be more trouble than
 	it'd be worth to implement.
 
 	What's more is, if there's another effect in the second column, it's ALSO processed in addition to the
-	offset, and the second data byte is shared between the two effects.
-	And: an offset effect without a note will retrigger the previous note, but I'm not even going to try to
-	handle that behavior. */
+	offset, and the second data byte is shared between the two effects. */
 	if(e1 == CMD_OFFSET)
 	{
 		// EFy -xx => offset yxx00
