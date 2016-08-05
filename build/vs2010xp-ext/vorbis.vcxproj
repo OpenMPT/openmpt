@@ -493,6 +493,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\vorbis\include\vorbis\codec.h" />
+    <ClInclude Include="..\..\include\vorbis\include\vorbis\vorbisenc.h" />
+    <ClInclude Include="..\..\include\vorbis\include\vorbis\vorbisfile.h" />
     <ClInclude Include="..\..\include\vorbis\lib\backends.h" />
     <ClInclude Include="..\..\include\vorbis\lib\bitrate.h" />
     <ClInclude Include="..\..\include\vorbis\lib\books\coupled\res_books_51.h" />

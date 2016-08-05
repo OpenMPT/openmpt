@@ -42,6 +42,12 @@
     <ClInclude Include="..\..\include\vorbis\include\vorbis\codec.h">
       <Filter>include\vorbis\include\vorbis</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\vorbis\include\vorbis\vorbisenc.h">
+      <Filter>include\vorbis\include\vorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\vorbis\include\vorbis\vorbisfile.h">
+      <Filter>include\vorbis\include\vorbis</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\vorbis\lib\backends.h">
       <Filter>include\vorbis\lib</Filter>
     </ClInclude>
