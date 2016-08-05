@@ -1014,8 +1014,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 #if defined( WIN32 )
 
-			while ( kbhit() ) {
-				int c = getch();
+			while ( _kbhit() ) {
+				int c = _getch();
 				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
