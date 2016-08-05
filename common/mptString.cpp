@@ -25,9 +25,11 @@
 #include <cwctype>
 #endif // MODPLUG_TRACKER
 
+#if defined(MODPLUG_TRACKER)
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strncasecmp
 #endif
+#endif // MODPLUG_TRACKER
 
 #if defined(MODPLUG_TRACKER)
 #include <wctype.h>
