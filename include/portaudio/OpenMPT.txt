@@ -6,6 +6,8 @@
  - src/hostapi/dsound/pa_win_ds.c unconditionally defined _WIN32_WINNT.
    Only define it if it has not been defined already.
    Modifications have been marked with // OpenMPT.
+ - src/os/win/pa_x86_plain_converters.c has been modified to exclude inline asm for Clang/C2.
+   Modifications have been marked with // OpenMPT.
  - build/msvc/portaudio.def has been modified. Modifications are marked with
    ";OpenMPT".
  - For building, premake is used to generate Visual Studio project files.

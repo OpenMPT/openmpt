@@ -122,6 +122,12 @@ void PaUtil_InitializeX86PlainConverters( void )
 {
 }
 
+#elif defined(_MSC_VER) && defined(__clang__) && defined(__c2__) /* OpenMPT */
+ /* OpenMPT */
+void PaUtil_InitializeX86PlainConverters( void ) /* OpenMPT */
+{ /* OpenMPT */
+} /* OpenMPT */
+ /* OpenMPT */
 #else
 
 /* -------------------------------------------------------------------------- */
