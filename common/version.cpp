@@ -129,7 +129,7 @@ static int GetRevision()
 	#else
 		#if MPT_COMPILER_MSVC
 			#pragma message("SVN revision unknown. Please check your build system.")
-		#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+		#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 			#warning "SVN revision unknown. Please check your build system."
 		#else
 			// There is no portable way to display a warning.
@@ -391,6 +391,8 @@ std::string GetBuildCompilerString()
 		retval += mpt::format("GNU Compiler Collection %1.%2.%3")(MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
 	#elif MPT_COMPILER_CLANG
 		retval += mpt::format("Clang %1.%2.%3")(MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
+	#elif MPT_COMPILER_MSVCCLANGC2
+		retval += mpt::format("MSVC-Clang/C2 %1")(MPT_COMPILER_MSVCCLANGC2_VERSION);
 	#else
 		retval += "*unknown";
 	#endif
