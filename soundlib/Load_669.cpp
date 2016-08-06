@@ -270,11 +270,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 					{
 					case 0:
 						// balance fine slide left
-						m->param = 0x8F;
+						m->param = 0x4F;
 						break;
 					case 1:
 						// balance fine slide right
-						m->param = 0xF8;
+						m->param = 0xF4;
 						break;
 					default:
 						m->command = CMD_NONE;
