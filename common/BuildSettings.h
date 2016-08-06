@@ -20,7 +20,7 @@
 
 #if MPT_OS_WINDOWS
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)) || MPT_COMPILER_MSVCCLANGC2
 #if defined(MPT_BUILD_TARGET_XP)
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #else
@@ -63,7 +63,7 @@
 
 
 // Dependencies from the MSVC build system
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 
 // This section defines which dependencies are available when building with
 // MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
@@ -119,7 +119,7 @@
 //#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
-#if MPT_COMPILER_MSVC && (_WIN32_WINNT >= 0x0601)
+#if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
 #endif
 #endif
@@ -140,7 +140,7 @@
 //#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
-#if MPT_COMPILER_MSVC && (_WIN32_WINNT >= 0x0601)
+#if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
 #endif
 #endif
@@ -158,7 +158,7 @@
 
 #endif // LIBOPENMPT_BUILD
 
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 
 
 
@@ -682,6 +682,16 @@
 #endif // MPT_BUILD_ANALYZED
 
 #endif // MPT_COMPILER_MSVC
+
+#if MPT_COMPILER_MSVCCLANGC2
+
+#if MPT_OS_WINDOWS
+// As Clang defines __STDC__ 1, Windows headers will use named union fields. The MediaFoundation headers do not support this, though.
+// Clang supports nameless union fields just fine, and luckily there is a way to override the Windows headers behaviour.
+#define _FORCENAMELESSUNION
+#endif // MPT_OS_WINDOWS
+
+#endif // MPT_COMPILER_MSVCCLANGC2
 
 
 
