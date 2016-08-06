@@ -40,6 +40,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+#if defined(_MSC_VER) && defined(__clang__) && defined(__c2__) // OPENMPT ADDITION
+struct IUnknown; // OPENMPT ADDITION
+#endif // OPENMPT ADDITION
 #include <windows.h>
 #include <prsht.h>
 #include <shlwapi.h>

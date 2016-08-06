@@ -4,6 +4,7 @@ All modifications to existing files have been done in a manner so that no
 existing lines were edited; only new lines were added.
 UnRAR API has been extended with RARGetCommentW to allow for reading the
 archive comment as a Unicode string.
+Work-arounds for tiny problems with Clang/C2 have been implemented.
 Added lines can be found by looking for "// OPENMPT ADDITION" comments.
 
 Optimizations have been done to elimiate dead code that would never be used in
