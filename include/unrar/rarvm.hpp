@@ -33,7 +33,9 @@ enum VM_StandardFilters {
   VMSF_DELTA
 };
 
+#if !(defined(_MSC_VER) && defined(__clang__) && defined(__c2__)) // OPENMPT ADDITION
 enum VM_Flags {VM_FC=1,VM_FZ=2,VM_FS=0x80000000};
+#endif // OPENMPT ADDITION
 
 enum VM_OpType {VM_OPREG,VM_OPINT,VM_OPREGMEM,VM_OPNONE};
 
