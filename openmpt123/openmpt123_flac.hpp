@@ -15,6 +15,12 @@
 
 #if defined(MPT_WITH_FLAC)
 
+#if defined(_MSC_VER) && defined(__clang__) && defined(__c2__)
+#include <sys/types.h>
+#if __STDC__
+typedef _off_t off_t;
+#endif
+#endif
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
 #include <FLAC/stream_encoder.h>

@@ -1900,12 +1900,10 @@ public:
 class FD_binary_raii {
 private:
 	FILE * file;
-	bool set_binary;
 	int old_mode;
 public:
 	FD_binary_raii(FILE * file, bool set_binary)
 		: file(file)
-		, set_binary(set_binary)
 		, old_mode(-1)
 	{
 		if ( set_binary ) {
