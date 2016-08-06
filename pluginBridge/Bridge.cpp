@@ -1180,7 +1180,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 
 	case audioMasterGetChunkFile:
 		// Name in [ptr]
-		strcpy(ptr, extraData);
+		strcpy(ptrC, extraData);
 		break;
 	}
 
