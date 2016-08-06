@@ -36,7 +36,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 #pragma comment(lib, "rpcrt4.lib")
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 #pragma comment(lib, "mf.lib")
@@ -49,12 +49,12 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")
 #endif // !NO_DMO
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 
 #if MPT_MUTEX_NONE && !MPT_OS_EMSCRIPTEN
 #if MPT_COMPILER_MSVC
 #pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #warning "Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available."
 #else
 // There is no portable way to display a warning.
