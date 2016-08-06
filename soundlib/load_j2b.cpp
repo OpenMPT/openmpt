@@ -39,12 +39,9 @@ static const uint8 j2bAutoVibratoTrans[] =
 struct PACKED J2BFileHeader
 {
 	// Magic Bytes
-	enum J2BMagic
-	{
-		// 32-Bit J2B header identifiers
-		magicDEADBEAF	= 0xAFBEADDE,
-		magicDEADBABE	= 0xBEBAADDE,
-	};
+	// 32-Bit J2B header identifiers
+	static const uint32 magicDEADBEAF = 0xAFBEADDEu;
+	static const uint32 magicDEADBABE = 0xBEBAADDEu;
 
 	char   signature[4];	// MUSE
 	uint32 deadbeaf;		// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)

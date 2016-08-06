@@ -22,10 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 struct PACKED UMXFileHeader
 {
 	// Magic Bytes
-	enum UMXMagic
-	{
-		magicBytes = 0x9E2A83C1,
-	};
+	static const uint32 magicBytes = 0x9E2A83C1u;
 
 	uint32 magic;
 	uint16 packageVersion;
