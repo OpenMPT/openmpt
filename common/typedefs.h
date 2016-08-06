@@ -50,7 +50,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #if MPT_COMPILER_GCC && MPT_OS_WINDOWS
 // Some versions of mingw64 need this when windows-hosted. Strange.
 #define NEEDS_PRAGMA_PACK
@@ -66,7 +66,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC
 #define forceinline __forceinline
 #define MPT_NOINLINE __declspec(noinline)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define forceinline __attribute__((always_inline)) inline
 #define MPT_NOINLINE __attribute__((noinline))
 #else
@@ -77,7 +77,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Use MPT_RESTRICT to indicate that a pointer is guaranteed to not be aliased.
-#if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_RESTRICT __restrict
 #else
 #define MPT_RESTRICT
@@ -89,7 +89,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Tag them with "MPT_DEPRECATED".
 #if MPT_COMPILER_MSVC
 #define MPT_DEPRECATED __declspec(deprecated)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_DEPRECATED __attribute__((deprecated))
 #else
 #define MPT_DEPRECATED
@@ -291,7 +291,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #endif
 #endif
 
-#if MPT_COMPILER_CLANG
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_MAYBE_CONSTANT_IF(x) \
   _Pragma("clang diagnostic push") \
   _Pragma("clang diagnostic ignored \"-Wunknown-pragmas\"") \
@@ -343,7 +343,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
 #endif
 
-#elif MPT_COMPILER_CLANG
+#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #ifdef NDEBUG
@@ -460,7 +460,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 // Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
 #if MPT_COMPILER_MSVC
 #define MPT_FALLTHROUGH __fallthrough
-#elif MPT_COMPILER_CLANG
+#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_FALLTHROUGH [[clang::fallthrough]]
 #else
 #define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
@@ -570,7 +570,7 @@ STATIC_ASSERT(sizeof(mpt::byte) == 1);
 
 
 
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
 #else
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
