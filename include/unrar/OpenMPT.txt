@@ -12,7 +12,7 @@ OpenMPT's context.
 
 The following files have been modified:
 arcread.cpp, dll.cpp, dll,hpp, dll.def, extract.cpp, filcreat.cpp, file.cpp,
-filefn.cpp, find.cpp, match.cpp, os.hpp, pathfn.cpp, rdwrfn.cpp,
+filefn.cpp, find.cpp, match.cpp, os.hpp, pathfn.cpp, rdwrfn.cpp, rarvm.hpp,
 secpassword.cpp, system.cpp, timefn.cpp, volume.cpp, win32acl.cpp,
 win32lnk.cpp
 

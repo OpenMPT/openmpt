@@ -1042,13 +1042,8 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Header is valid, now unpack the RIFF AM file using inflate
 	uLongf destSize = fileHeader.unpackedLength;
-	Bytef *amFileData = new (std::nothrow) Bytef[destSize];
-	if(amFileData == nullptr)
-	{
-		return false;
-	}
-
-	int retVal = uncompress(amFileData, &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
+	std::vector<Bytef> amFileData(destSize);
+	int retVal = uncompress(&amFileData[0], &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
 
 	bool result = false;
 
@@ -1057,10 +1052,9 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 	{
 		// Success, now load the RIFF AM(FF) module.
-		FileReader amFile(mpt::as_span(mpt::byte_cast<const mpt::byte*>(amFileData), destSize));
+		FileReader amFile(mpt::as_span(amFileData));
 		result = ReadAM(amFile, loadFlags);
 	}
-	delete[] amFileData;
 
 	return result;
 

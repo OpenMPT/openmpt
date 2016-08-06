@@ -831,7 +831,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					// Position change
-					case 0x33: // position jump - MASI seems to ignore this command
+					case 0x33: // position jump - MASI seems to ignore this command, and CONVERT.EXE never writes it
 						m.command = CMD_POSITIONJUMP;
 						m.param /= 2u;	// actually it is probably just an index into the order table
 						rowChunk.Skip(1);
@@ -1058,7 +1058,7 @@ struct PACKED PSM16SampleHeader
 		mptSmp.nLoopEnd = loopEnd;
 		// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF!
 		// Why on earth would you want to use both systems at the same time?
-		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, (finetune - 112) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
+		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, ((finetune ^ 0x08) - 0x78) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
 
 		mptSmp.nVolume = volume << 2;
 		mptSmp.nGlobalVol = 256;
@@ -1179,7 +1179,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Read samples
 	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPSAH)
 	{
-		FileReader sampleChunk = file.ReadChunk(file.BytesLeft());
+		FileReader sampleChunk = file.ReadChunk(fileHeader.numSamples * sizeof(PSM16SampleHeader));
 
 		for(SAMPLEINDEX fileSample = 0; fileSample < fileHeader.numSamples; fileSample++)
 		{
@@ -1197,8 +1197,10 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 				sampleHeader.ConvertToMPT(Samples[smp]);
 
-				file.Seek(sampleHeader.offset);
-				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
+				if((loadFlags & loadSampleData) && file.Seek(sampleHeader.offset))
+				{
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
+				}
 			}
 		}
 	}
