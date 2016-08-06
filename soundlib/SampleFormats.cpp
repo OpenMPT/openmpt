@@ -94,7 +94,7 @@ extern "C" {
 #elif (MPG123_API_VERSION < 25) // < 1.12.0
 #if MPT_COMPILER_MSVC
 #pragma message("libmpg123 API version with split largefile support detected. This has not been tested at all.")
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #warning "libmpg123 API version with split largefile support detected. This has not been tested at all."
 #else
 // There is no portable way to display a warning.
@@ -3329,38 +3329,58 @@ public:
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_open_handle_64 )(mpg123_handle*, void*);
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVCCLANGC2
 	int (*mpg123_replace_reader_handle)(mpg123_handle*,
-		size_t(*)(void *, void *, size_t),
-		off_t(*)(void *, off_t, int),
-		void(*)(void *));
+		size_t(*r_read)(void *, void *, size_t),
+		_off_t(*r_lseek)(void *, _off_t, int),
+		void(*cleanup)(void *));
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
-		size_t(*)(void *, void *, size_t),
-		off_t(*)(void *, off_t, int),
-		void(*)(void *));
+		size_t(*r_read)(void *, void *, size_t),
+		_off_t(*r_lseek)(void *, _off_t, int),
+		void(*cleanup)(void *));
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
+#elif MPT_COMPILER_MSVC
+	int (*mpg123_replace_reader_handle)(mpg123_handle*,
+		size_t(*r_read)(void *, void *, size_t),
+		off_t(*r_lseek)(void *, off_t, int),
+		void(*cleanup)(void *));
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
+		size_t(*r_read)(void *, void *, size_t),
+		off_t(*r_lseek)(void *, off_t, int),
+		void(*cleanup)(void *));
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #else // !MPT_COMPILER_MSVC
 	int (*mpg123_replace_reader_handle)(mpg123_handle*,
-		ssize_t(*)(void *, void *, size_t),
-		off_t(*)(void *, off_t, int),
-		void(*)(void *));
+		ssize_t(*r_read)(void *, void *, size_t),
+		off_t(*r_lseek)(void *, off_t, int),
+		void(*cleanup)(void *));
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
-		ssize_t(*)(void *, void *, size_t),
-		off_t(*)(void *, off_t, int),
-		void(*)(void *));
+		ssize_t(*r_read)(void *, void *, size_t),
+		off_t(*r_lseek)(void *, off_t, int),
+		void(*cleanup)(void *));
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #endif // MPT_COMPILER_MSVC
 	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
+#if MPT_COMPILER_MSVCCLANGC2
+	_off_t (*mpg123_length )(mpg123_handle*);
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	_off_t (*mpg123_length_64 )(mpg123_handle*);
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
+#else
 	off_t (*mpg123_length )(mpg123_handle*);
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	off_t (*mpg123_length_64 )(mpg123_handle*);
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
+#endif
 
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVCCLANGC2
+	static size_t FileReaderRead(void *fp, void *buf, size_t count)
+#elif MPT_COMPILER_MSVC
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
 #else // !MPT_COMPILER_MSVC
 	static ssize_t FileReaderRead(void *fp, void *buf, size_t count)
@@ -3371,7 +3391,11 @@ public:
 		file.ReadRaw(static_cast<char *>(buf), readBytes);
 		return readBytes;
 	}
+#if MPT_COMPILER_MSVCCLANGC2
+	static _off_t FileReaderLSeek(void *fp, _off_t offset, int whence)
+#else
 	static off_t FileReaderLSeek(void *fp, off_t offset, int whence)
+#endif
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
@@ -4016,6 +4040,8 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	DWORD mfSampleFlags = 0;
 	IMFMediaBuffer *buffer = NULL;
 
+	SmpLength length = 0;
+
 	MPT_MF_CHECKED(MFCreateSourceResolver(&sourceResolver));
 	MPT_MF_CHECKED(sourceResolver->CreateObjectFromURL(diskfile.GetFilename().AsNative().c_str(), MF_RESOLUTION_MEDIASOURCE | MF_RESOLUTION_CONTENT_DOES_NOT_HAVE_TO_MATCH_EXTENSION_OR_MIME_TYPE | MF_RESOLUTION_READ, NULL, &objectType, &unknownMediaSource));
 	if(objectType != MF_OBJECT_MEDIASOURCE) goto fail;
@@ -4067,7 +4093,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 
 	sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(tags));
 
-	SmpLength length = rawData.size() / numChannels / (bitsPerSample/8);
+	length = rawData.size() / numChannels / (bitsPerSample/8);
 
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
