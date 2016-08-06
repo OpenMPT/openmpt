@@ -12,8 +12,9 @@
 
 
 
-#define MPT_COMPILER_MAKE_VERSION2(version,sp)         ((version) * 100 + (sp))
-#define MPT_COMPILER_MAKE_VERSION3(major,minor,patch)  ((major) * 10000 + (minor) * 100 + (patch))
+#define MPT_COMPILER_MAKE_VERSION2(version,sp)              ((version) * 100 + (sp))
+#define MPT_COMPILER_MAKE_VERSION3(major,minor,patch)       ((major) * 10000 + (minor) * 100 + (patch))
+#define MPT_COMPILER_MAKE_VERSION3_BUILD(major,minor,build) ((major) * 10000000 + (minor) * 100000 + (patch))
 
 
 
@@ -21,6 +22,13 @@
 
 #undef MPT_COMPILER_GENERIC
 #define MPT_COMPILER_GENERIC                         1
+
+#elif defined(__clang__) && defined(_MSC_VER) && defined(__c2__)
+
+#define MPT_COMPILER_MSVCCLANGC2                     1
+#define MPT_COMPILER_MSVCCLANGC2_VERSION             (__c2_version__)
+#define MPT_MSVCCLANGC2_AT_LEAST(major,minor,build)  (MPT_COMPILER_MSVCCLANGC2_VERSION >= MPT_COMPILER_MAKE_VERSION3_BUILD((major),(minor),(build)))
+#define MPT_MSVCCLANGC2_BEFORE(major,minor,build)    (MPT_COMPILER_MSVCCLANGC2_VERSION <  MPT_COMPILER_MAKE_VERSION3_BUILD((major),(minor),(build)))
 
 #elif defined(__clang__)
 
@@ -90,18 +98,23 @@
 #ifndef MPT_COMPILER_GENERIC
 #define MPT_COMPILER_GENERIC                  0
 #endif
+#ifndef MPT_COMPILER_MSVCCLANGC2
+#define MPT_COMPILER_MSVCCLANGC2                    0
+#define MPT_MSVCCLANGC2_AT_LEAST(major,minor,build) 0
+#define MPT_MSVCCLANGC2_BEFORE(major,minor,build)   0
+#endif
 #ifndef MPT_COMPILER_CLANG
-#define MPT_COMPILER_CLANG 0
+#define MPT_COMPILER_CLANG                    0
 #define MPT_CLANG_AT_LEAST(major,minor,patch) 0
 #define MPT_CLANG_BEFORE(major,minor,patch)   0
 #endif
 #ifndef MPT_COMPILER_GCC
-#define MPT_COMPILER_GCC   0
+#define MPT_COMPILER_GCC                      0
 #define MPT_GCC_AT_LEAST(major,minor,patch)   0
 #define MPT_GCC_BEFORE(major,minor,patch)     0
 #endif
 #ifndef MPT_COMPILER_MSVC
-#define MPT_COMPILER_MSVC  0
+#define MPT_COMPILER_MSVC                     0
 #define MPT_MSVC_AT_LEAST(version,sp)         0
 #define MPT_MSVC_BEFORE(version,sp)           0
 #endif
@@ -118,7 +131,7 @@
 			#define MPT_PLATFORM_LITTLE_ENDIAN
 		#endif
 	#endif
-#elif MPT_COMPILER_CLANG
+#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 	#if MPT_CLANG_AT_LEAST(3,2,0)
 		#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 			#define MPT_PLATFORM_BIG_ENDIAN
@@ -172,7 +185,7 @@
 		#define MPT_ARCH_BITS_64 0
 	#endif
 
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 
 	#if defined(__SIZEOF_POINTER__)
 		#if (__SIZEOF_POINTER__ == 8)
@@ -203,6 +216,8 @@
 
 #if MPT_COMPILER_GENERIC
 	#define MPT_CXX_VERSION __cplusplus
+#elif MPT_COMPILER_MSVCCLANGC2
+	#define MPT_CXX_VERSION MPT_CXX_14_PARTIAL
 #elif MPT_COMPILER_CLANG
 	#if MPT_CLANG_AT_LEAST(3,5,0)
 		#define MPT_CXX_VERSION MPT_CXX_11_FULL
@@ -243,6 +258,8 @@
 #if MPT_CLANG_AT_LEAST(3,0,0)
 #define MPT_COMPILER_HAS_RVALUE_REF 1
 #endif
+#elif MPT_COMPILER_MSVCCLANGC2
+#define MPT_COMPILER_HAS_RVALUE_REF 1
 #endif
 
 #ifndef MPT_COMPILER_HAS_RVALUE_REF
@@ -257,6 +274,8 @@
 #if MPT_CLANG_AT_LEAST(3,0,0)
 #define MPT_COMPILER_HAS_VARIADIC_MACROS 1
 #endif
+#elif MPT_COMPILER_MSVCCLANGC2
+#define MPT_COMPILER_HAS_VARIADIC_MACROS 1
 #elif MPT_COMPILER_MSVC
 #if MPT_MSVC_AT_LEAST(2005,0)
 #define MPT_COMPILER_HAS_VARIADIC_MACROS 1
