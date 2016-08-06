@@ -46,6 +46,15 @@
 #endif
 
 
+#if MPT_OS_WINDOWS
+#if MPT_COMPILER_MSVCCLANGC2
+// windows.h references IUnknown in a template function without having it even forward-declared.
+// Clang does not like that. Forward-declaration fixes it.
+struct IUnknown;
+#endif
+#endif
+
+
 // this will be available everywhere
 
 #include "../common/typedefs.h"
