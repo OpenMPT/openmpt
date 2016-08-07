@@ -340,6 +340,18 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			break;
 
 		case CMD_VOLUMESLIDE:
+		case CMD_TONEPORTAVOL:	// Can't do fine slides and portamento/vibrato at the same time :(
+		case CMD_VIBRATOVOL:	// ditto
+			if(volcmd == VOLCMD_NONE && ((param & 0xF0) && ((param & 0x0F) == 0x0F)) || ((param & 0x0F) && ((param & 0xF0) == 0xF0)))
+			{
+				// Try to salvage portamento/vibrato
+				if(command == CMD_TONEPORTAVOL)
+					volcmd = VOLCMD_TONEPORTAMENTO;
+				else if(command == CMD_VIBRATOVOL)
+					volcmd = VOLCMD_VIBRATODEPTH;
+				vol = 0;
+			}
+
 			if((param & 0xF0) && ((param & 0x0F) == 0x0F))
 			{
 				command = CMD_MODCMDEX;
@@ -911,15 +923,15 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
 		// large to fit. (volume column Ex/Fx are four times stronger than effect column)
-		if(!force && ((param & 3) || param > 9 * 4 + 3))
+		if(!force && ((param & 3) || param >= 0xE0))
 			return false;
-		param = std::min<PARAM>(param / 4, 9);
+		param /= 4;
 		effect = VOLCMD_PORTAUP;
 		break;
 	case CMD_PORTAMENTODOWN:
-		if(!force && ((param & 3) || param > 9 * 4 + 3))
+		if(!force && ((param & 3) || param >= 0xE0))
 			return false;
-		param = std::min<PARAM>(param / 4, 9);
+		param /= 4;
 		effect = VOLCMD_PORTADOWN;
 		break;
 	case CMD_TONEPORTAMENTO:
@@ -969,37 +981,18 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 			return false;
 		if((param & 0xF) == 0)	// Dx0 / Cx
 		{
-			if(force)
-				param = std::min<PARAM>(param >> 4, 9);
-			else if((param >> 4) > 9)
-				return false;
-			else
-				param >>= 4;
+			param >>= 4;
 			effect = VOLCMD_VOLSLIDEUP;
 		} else if((param & 0xF0) == 0)	// D0x / Dx
 		{
-			if(force)
-				param = std::min<PARAM>(param, 9);
-			else if(param > 9)
-				return false;
 			effect = VOLCMD_VOLSLIDEDOWN;
 		} else if((param & 0xF) == 0xF)	// DxF / Ax
 		{
-			if(force)
-				param = std::min<PARAM>(param >> 4, 9);
-			else if((param >> 4) > 9)
-				return false;
-			else
-				param >>= 4;
+			param >>= 4;
 			effect = VOLCMD_FINEVOLUP;
-		} else if((param & 0xf0) == 0xf0)	// DFx / Bx
+		} else if((param & 0xF0) == 0xF0)	// DFx / Bx
 		{
-			if(force)
-				param = std::min<PARAM>(param, 9);
-			else if((param & 0xF) > 9)
-				return false;
-			else
-				param &= 0xF;
+			param &= 0xF;
 			effect = VOLCMD_FINEVOLDOWN;
 		} else // ???
 		{
@@ -1011,7 +1004,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		{
 		case 8:
 			effect = VOLCMD_PANNING;
-			param = ((param & 0xf) << 2) + 2;
+			param = ((param & 0xF) << 2) + 2;
 			return true;
 		case 0: case 1: case 2: case 0xF:
 			if(force)
