@@ -241,7 +241,7 @@ inline bool ReadIntLE(Tfile & f, T & v)
 	}
 	T val = 0;
 	std::memcpy(&val, bytes, sizeof(T));
-	v = SwapBytesReturnLE(val);
+	v = SwapBytesLE(val);
 	return result;
 }
 
@@ -262,7 +262,7 @@ inline bool ReadIntBE(Tfile & f, T & v)
 	}
 	T val = 0;
 	std::memcpy(&val, bytes, sizeof(T));
-	v = SwapBytesReturnBE(val);
+	v = SwapBytesBE(val);
 	return result;
 }
 
@@ -357,7 +357,7 @@ template <typename T, typename Tfile>
 inline bool WriteIntLE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	const T val = SwapBytesReturnLE(v);
+	const T val = SwapBytesLE(v);
 	mpt::byte bytes[sizeof(T)];
 	std::memcpy(bytes, &val, sizeof(T));
 	return IO::WriteRaw(f, bytes, sizeof(T));
@@ -367,7 +367,7 @@ template <typename T, typename Tfile>
 inline bool WriteIntBE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	const T val = SwapBytesReturnBE(v);
+	const T val = SwapBytesBE(v);
 	mpt::byte bytes[sizeof(T)];
 	std::memcpy(bytes, &val, sizeof(T));
 	return IO::WriteRaw(f, bytes, sizeof(T));
@@ -489,11 +489,9 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 }
 
 template <typename T, typename Tfile>
-inline bool WriteConvertEndianness(Tfile & f, T & v)
+inline bool WriteStruct(Tfile & f, T & v, size_t size = sizeof(T))
 {
-	v.ConvertEndianness();
-	bool result = IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(&v), sizeof(T));
-	v.ConvertEndianness();
+	bool result = IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(&v), size);
 	return result;
 }
 

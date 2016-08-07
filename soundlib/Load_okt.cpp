@@ -14,11 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED OktIffChunk
+struct OktIffChunk
 {
 	// IFF chunk names
 	enum ChunkIdentifiers
@@ -33,44 +29,24 @@ struct PACKED OktIffChunk
 		idSBOD	= MAGIC4BE('S','B','O','D'),
 	};
 
-	uint32 signature;	// IFF chunk name
-	uint32 chunksize;	// chunk size without header
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(signature);
-		SwapBytesBE(chunksize);
-	}
+	uint32be signature;	// IFF chunk name
+	uint32be chunksize;	// chunk size without header
 };
 
 STATIC_ASSERT(sizeof(OktIffChunk) == 8);
 
-struct PACKED OktSample
+struct OktSample
 {
-	char   name[20];
-	uint32 length;		// length in bytes
-	uint16 loopStart;	// *2 for real value
-	uint16 loopLength;	// ditto
-	uint16 volume;		// default volume
-	uint16 type;		// 7-/8-bit sample
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(length);
-		SwapBytesBE(loopStart);
-		SwapBytesBE(loopLength);
-		SwapBytesBE(volume);
-		SwapBytesBE(type);
-	}
+	char     name[20];
+	uint32be length;		// length in bytes
+	uint16be loopStart;		// *2 for real value
+	uint16be loopLength;	// ditto
+	uint16be volume;		// default volume
+	uint16be type;			// 7-/8-bit sample
 };
 
 STATIC_ASSERT(sizeof(OktSample) == 32);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 // Parse the sample header block
 static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile *pSndFile)
@@ -83,7 +59,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 	{
 		ModSample &mptSmp = pSndFile->GetSample(nSmp);
 		OktSample oktSmp;
-		chunk.ReadConvertEndianness(oktSmp);
+		chunk.ReadStruct(oktSmp);
 
 		oktSmp.length = oktSmp.length;
 		oktSmp.loopStart = oktSmp.loopStart * 2;
@@ -303,7 +279,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	while(file.CanRead(sizeof(OktIffChunk)))
 	{
 		OktIffChunk iffHead;
-		if(!file.ReadConvertEndianness(iffHead))
+		if(!file.ReadStruct(iffHead))
 		{
 			break;
 		}

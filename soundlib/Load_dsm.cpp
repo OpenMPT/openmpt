@@ -24,77 +24,48 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED DSMChunk
+struct DSMChunk
 {
-	char   magic[4];
-	uint32 size;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(size);
-	}
+	char     magic[4];
+	uint32le size;
 };
 
 STATIC_ASSERT(sizeof(DSMChunk) == 8);
 
 
-struct PACKED DSMSongHeader
+struct DSMSongHeader
 {
-	char   songName[28];
-	char   reserved1[2];
-	uint16 flags;
-	char   reserved2[4];
-	uint16 numOrders;
-	uint16 numSamples;
-	uint16 numPatterns;
-	uint16 numChannels;
-	uint8  globalVol;
-	uint8  mastervol;
-	uint8  speed;
-	uint8  bpm;
-	uint8  panPos[16];
-	uint8  orders[128];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(flags);
-		SwapBytesLE(numOrders);
-		SwapBytesLE(numSamples);
-		SwapBytesLE(numPatterns);
-		SwapBytesLE(numChannels);
-	}
+	char     songName[28];
+	char     reserved1[2];
+	uint16le flags;
+	char     reserved2[4];
+	uint16le numOrders;
+	uint16le numSamples;
+	uint16le numPatterns;
+	uint16le numChannels;
+	uint8le  globalVol;
+	uint8le  mastervol;
+	uint8le  speed;
+	uint8le  bpm;
+	uint8le  panPos[16];
+	uint8le  orders[128];
 };
 
 STATIC_ASSERT(sizeof(DSMSongHeader) == 192);
 
 
-struct PACKED DSMSampleHeader
+struct DSMSampleHeader
 {
-	char   filename[13];
-	uint8  flags;
-	char   reserved1;
-	uint8  volume;
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	char   reserved2[4];
-	uint32 sampleRate;
-	char   sampleName[28];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sampleRate);
-	}
+	char     filename[13];
+	uint8le  flags;
+	char     reserved1;
+	uint8le  volume;
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	char     reserved2[4];
+	uint32le sampleRate;
+	char     sampleName[28];
 
 	// Convert a DSM sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -107,7 +78,7 @@ struct PACKED DSMSampleHeader
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nVolume = std::min(volume, uint8(64)) * 4;
+		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
 	}
 
 	// Retrieve the internal sample format flags for this sample.
@@ -129,20 +100,12 @@ struct PACKED DSMSampleHeader
 STATIC_ASSERT(sizeof(DSMSampleHeader) == 64);
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-
 bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
-	char fileMagic0[4];
-	char fileMagic1[4];
-	char fileMagic2[4];
-
+	char fileMagic0[4], fileMagic1[4], fileMagic2[4];
 	if(!file.ReadArray(fileMagic0)) return false;
 	if(!file.ReadArray(fileMagic1)) return false;
 	if(!file.ReadArray(fileMagic2)) return false;
@@ -164,7 +127,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	DSMChunk chunkHeader;
 
-	file.ReadConvertEndianness(chunkHeader);
+	file.ReadStruct(chunkHeader);
 	// Technically, the song chunk could be anywhere in the file, but we're going to simplify
 	// things by not using a chunk header here and just expect it to be right at the beginning.
 	if(memcmp(chunkHeader.magic, "SONG", 4))
@@ -177,14 +140,13 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	DSMSongHeader songHeader;
 	file.ReadStructPartial(songHeader, chunkHeader.size);
-	songHeader.ConvertEndianness();
 
 	InitializeGlobals(MOD_TYPE_DSM);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, songHeader.songName);
-	m_nChannels = Clamp(songHeader.numChannels, uint16(1), uint16(16));
+	m_nChannels = Clamp<uint16, uint16>(songHeader.numChannels, 1, 16);
 	m_nDefaultSpeed = songHeader.speed;
 	m_nDefaultTempo.Set(songHeader.bpm);
-	m_nDefaultGlobalVolume = std::min(songHeader.globalVol, uint8(64)) * 4u;
+	m_nDefaultGlobalVolume = std::min<uint8>(songHeader.globalVol, 64) * 4u;
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)
 	{
@@ -208,7 +170,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read pattern and sample chunks
 	PATTERNINDEX patNum = 0;
-	while(file.ReadConvertEndianness(chunkHeader))
+	while(file.ReadStruct(chunkHeader))
 	{
 		FileReader chunk = file.ReadChunk(chunkHeader.size);
 
@@ -289,7 +251,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[m_nSamples];
 
 			DSMSampleHeader sampleHeader;
-			chunk.ReadConvertEndianness(sampleHeader);
+			chunk.ReadStruct(sampleHeader);
 			sampleHeader.ConvertToMPT(sample);
 
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[m_nSamples], sampleHeader.sampleName);

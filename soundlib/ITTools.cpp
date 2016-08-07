@@ -18,23 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITFileHeader::ConvertEndianness()
-//------------------------------------
-{
-	SwapBytesLE(ordnum);
-	SwapBytesLE(insnum);
-	SwapBytesLE(smpnum);
-	SwapBytesLE(patnum);
-	SwapBytesLE(cwtv);
-	SwapBytesLE(cmwt);
-	SwapBytesLE(flags);
-	SwapBytesLE(special);
-	SwapBytesLE(msglength);
-	SwapBytesLE(msgoffset);
-}
-
-
 // Convert OpenMPT's internal envelope format into an IT/MPTM envelope.
 void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault)
 //-----------------------------------------------------------------------------------------------
@@ -113,15 +96,6 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITOldInstrument::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(fadeout);
-	SwapBytesLE(trkvers);
-}
-
-
 // Convert an ITOldInstrument to OpenMPT's internal instrument representation.
 void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 //-------------------------------------------------------------
@@ -187,16 +161,6 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 
 	if(std::max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.size()) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
 	if(std::max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.size()) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITInstrument::ConvertEndianness()
-//------------------------------------
-{
-	SwapBytesLE(fadeout);
-	SwapBytesLE(trkvers);
-	SwapBytesLE(mbank);
 }
 
 
@@ -303,8 +267,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));
 
 	// Random Variation
-	mptIns.nVolSwing = std::min(rv, uint8(100));
-	mptIns.nPanSwing = std::min(rp, uint8(64));
+	mptIns.nVolSwing = std::min<uint8>(rv, 100);
+	mptIns.nPanSwing = std::min<uint8>(rp, 64);
 
 	// NNA Stuff
 	mptIns.nNNA = nna;
@@ -366,14 +330,6 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	}
 
 	return sizeof(ITInstrument);
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITInstrumentEx::ConvertEndianness()
-//--------------------------------------
-{
-	iti.ConvertEndianness();
 }
 
 
@@ -446,20 +402,6 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	}
 
 	return sizeof(ITInstrumentEx);
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITSample::ConvertEndianness()
-//--------------------------------
-{
-	SwapBytesLE(length);
-	SwapBytesLE(loopbegin);
-	SwapBytesLE(loopend);
-	SwapBytesLE(C5Speed);
-	SwapBytesLE(susloopbegin);
-	SwapBytesLE(susloopend);
-	SwapBytesLE(samplepointer);
 }
 
 
@@ -654,16 +596,6 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 	}
 
 	return sampleIO;
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITHistoryStruct::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(fatdate);
-	SwapBytesLE(fattime);
-	SwapBytesLE(runtime);
 }
 
 

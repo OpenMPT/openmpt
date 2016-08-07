@@ -76,7 +76,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_IT);
 	m_playBehaviour.reset();
-	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, file.ReadUint32LE());
+	file.ReadSizedString<uint32le, mpt::String::maybeNullTerminated>(m_songName);
 
 	// Song comments
 	m_songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
@@ -228,7 +228,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		SAMPLEINDEX realSample = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
 		ITSample sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		FileReader sampleData = file.ReadChunk(file.ReadUint32LE());
 
 		if(realSample >= 1 && realSample <= GetNumSamples() && !memcmp(sampleHeader.id, "IMPS", 4) && (loadFlags & loadSampleData))

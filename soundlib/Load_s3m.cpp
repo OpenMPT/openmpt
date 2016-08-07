@@ -191,7 +191,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Is it a valid S3M file?
 	S3MFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2)
 		|| memcmp(fileHeader.magic, "SCRM", 4)
 		|| fileHeader.fileType != S3MFileHeader::idS3MType
@@ -392,7 +392,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		S3MSampleHeader sampleHeader;
 
-		if(!file.Seek(sampleOffsets[smp] * 16) || !file.ReadConvertEndianness(sampleHeader))
+		if(!file.Seek(sampleOffsets[smp] * 16) || !file.ReadStruct(sampleHeader))
 		{
 			continue;
 		}
@@ -655,7 +655,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		}
 	}
 
-	fileHeader.ConvertEndianness();
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 	Order.WriteAsByte(f, writeOrders);
 
@@ -672,12 +671,11 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// ...which must be a multiple of 16, because parapointers omit the lowest 4 bits.
 	sampleHeaderOffset = (sampleHeaderOffset + 15) & ~15;
 
-	std::vector<uint16> sampleOffsets(writeSamples);
+	std::vector<uint16le> sampleOffsets(writeSamples);
 	for(SAMPLEINDEX smp = 0; smp < writeSamples; smp++)
 	{
 		STATIC_ASSERT((sizeof(S3MSampleHeader) % 16) == 0);
 		sampleOffsets[smp] = static_cast<uint16>((sampleHeaderOffset + smp * sizeof(S3MSampleHeader)) / 16);
-		SwapBytesLE(sampleOffsets[smp]);
 	}
 
 	if(writeSamples != 0)
@@ -687,7 +685,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 	size_t patternPointerOffset = ftell(f);
 	size_t firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
-	std::vector<uint16> patternOffsets(writePatterns);
+	std::vector<uint16le> patternOffsets(writePatterns);
 
 	// Need to calculate the real offsets later.
 	if(writePatterns != 0)
@@ -734,7 +732,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		}
 		MPT_ASSERT((patOffset % 16) == 0);
 		patternOffsets[pat] = static_cast<uint16>(patOffset / 16);
-		SwapBytesLE(patternOffsets[pat]);
 
 		std::vector<uint8> buffer;
 		buffer.reserve(5 * 1024);
@@ -757,7 +754,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 				CHANNELINDEX writeChannels = MIN(32, GetNumChannels());
 				for(CHANNELINDEX chn = 0; chn < writeChannels; chn++)
 				{
-					ModCommand &m = rowBase[chn];
+					const ModCommand &m = rowBase[chn];
 
 					uint8 info = static_cast<uint8>(chn);
 					uint8 note = m.note;
@@ -907,8 +904,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 				sampleDataOffset += fillSize;
 			}
 		}
-
-		sampleHeader[smp].ConvertEndianness();
 	}
 
 	// Now we know where the patterns are.

@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "WAVTools.h"
+#include "Tagging.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
@@ -32,7 +33,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	isDLS = false;
 	extFormat = 0;
 	mayBeCoolEdit16_8 = false;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| (fileHeader.magic != RIFFHeader::idRIFF && fileHeader.magic != RIFFHeader::idLIST)
 		|| (fileHeader.type != RIFFHeader::idWAVE && fileHeader.type != RIFFHeader::idwave))
 	{
@@ -66,7 +67,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	// Read format chunk
 	FileReader formatChunk = chunks.GetChunk(RIFFChunk::idfmt_);
-	if(!formatChunk.ReadConvertEndianness(formatInfo))
+	if(!formatChunk.ReadStruct(formatInfo))
 	{
 		return;
 	}
@@ -83,7 +84,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	} else if(formatInfo.format == WAVFormatChunk::fmtExtensible)
 	{
 		WAVFormatChunkExtension extFormat;
-		if(!formatChunk.ReadConvertEndianness(extFormat))
+		if(!formatChunk.ReadStruct(extFormat))
 		{
 			return;
 		}
@@ -168,16 +169,16 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Convert loops
 	WAVSampleInfoChunk sampleInfo;
 	smplChunk.Rewind();
-	if(smplChunk.ReadConvertEndianness(sampleInfo))
+	if(smplChunk.ReadStruct(sampleInfo))
 	{
 		WAVSampleLoop loopData;
-		if(sampleInfo.numLoops > 1 && smplChunk.ReadConvertEndianness(loopData))
+		if(sampleInfo.numLoops > 1 && smplChunk.ReadStruct(loopData))
 		{
 			// First loop: Sustain loop
 			loopData.ApplyToSample(sample.nSustainStart, sample.nSustainEnd, sample.nLength, sample.uFlags, CHN_SUSTAINLOOP, CHN_PINGPONGSUSTAIN, isOldMPT);
 		}
 		// First loop (if only one loop is present) or second loop (if more than one loop is present): Normal sample loop
-		if(smplChunk.ReadConvertEndianness(loopData))
+		if(smplChunk.ReadStruct(loopData))
 		{
 			loopData.ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);
 		}
@@ -192,7 +193,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		for(uint32 i = 0; i < numPoints; i++)
 		{
 			WAVCuePoint cuePoint;
-			cueChunk.ReadConvertEndianness(cuePoint);
+			cueChunk.ReadStruct(cuePoint);
 			sample.cues[i] = cuePoint.position;
 		}
 	}
@@ -200,13 +201,13 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Read MPT extra info
 	WAVExtraChunk mptInfo;
 	xtraChunk.Rewind();
-	if(xtraChunk.ReadConvertEndianness(mptInfo))
+	if(xtraChunk.ReadStruct(mptInfo))
 	{
 		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags.set(CHN_PANNING);
 
-		sample.nPan = std::min(mptInfo.defaultPan, uint16(256));
-		sample.nVolume = std::min(mptInfo.defaultVolume, uint16(256));
-		sample.nGlobalVol = std::min(mptInfo.globalVolume, uint16(64));
+		sample.nPan = std::min<uint16>(mptInfo.defaultPan, 256);
+		sample.nVolume = std::min<uint16>(mptInfo.defaultVolume, 256);
+		sample.nGlobalVol = std::min<uint16>(mptInfo.globalVolume, 64);
 		sample.nVibType = mptInfo.vibratoType;
 		sample.nVibSweep = mptInfo.vibratoSweep;
 		sample.nVibDepth = mptInfo.vibratoDepth;
@@ -320,7 +321,6 @@ size_t WAVWriter::Finalize()
 	fileHeader.magic = RIFFHeader::idRIFF;
 	fileHeader.length = static_cast<uint32>(totalSize - 8);
 	fileHeader.type = RIFFHeader::idWAVE;
-	fileHeader.ConvertEndianness();
 
 	Seek(0);
 	Write(fileHeader);
@@ -352,7 +352,6 @@ void WAVWriter::FinalizeChunk()
 	{
 		const size_t chunkSize = position - (chunkStartPos + sizeof(RIFFChunk));
 		chunkHeader.length = chunkSize;
-		chunkHeader.ConvertEndianness();
 
 		size_t curPos = position;
 		Seek(chunkStartPos);
@@ -424,7 +423,6 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 	wavFormat.byteRate = wavFormat.sampleRate * wavFormat.blockAlign;
 	wavFormat.bitsPerSample = bitDepth;
 
-	wavFormat.ConvertEndianness();
 	Write(wavFormat);
 
 	if(extensible)
@@ -454,7 +452,6 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 		const uint8 guid[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 };
 		MemCopy<uint8[14]>(extFormat.guid, guid);
 
-		extFormat.ConvertEndianness();
 		Write(extFormat);
 	}
 }
@@ -493,7 +490,6 @@ void WAVWriter::WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext)
 		RIFFChunk chunk;
 		chunk.id = static_cast<uint32>(id);
 		chunk.length = length;
-		chunk.ConvertEndianness();
 		Write(chunk);
 		Write(text.c_str(), length);
 
@@ -543,11 +539,9 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 		loops[info.numLoops++].ConvertToWAV(0, 0, false);
 	}
 
-	info.ConvertEndianness();
 	Write(info);
 	for(uint32 i = 0; i < info.numLoops; i++)
 	{
-		loops[i].ConvertEndianness();
 		Write(loops[i]);
 	}
 }
@@ -559,14 +553,13 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
-		const uint32 numPoints = SwapBytesLE_(static_cast<uint32>(CountOf(sample.cues)));
+		const uint32 numPoints = SwapBytesLE(static_cast<uint32>(CountOf(sample.cues)));
 		Write(numPoints);
 	}
 	for(uint32 i = 0; i < CountOf(sample.cues); i++)
 	{
 		WAVCuePoint cuePoint;
 		cuePoint.ConvertToWAV(i, sample.cues[i]);
-		cuePoint.ConvertEndianness();
 		Write(cuePoint);
 	}
 }
@@ -580,7 +573,6 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 	WAVExtraChunk mptInfo;
 
 	mptInfo.ConvertToWAV(sample, modType);
-	mptInfo.ConvertEndianness();
 	Write(mptInfo);
 
 	if(sampleName != nullptr)

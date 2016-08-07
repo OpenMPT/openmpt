@@ -16,13 +16,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // S3M File Header
-struct PACKED S3MFileHeader
+struct S3MFileHeader
 {
 	// Magic Bytes
 	enum S3MMagic
@@ -67,36 +62,33 @@ struct PACKED S3MFileHeader
 		newVersion			= 0x02,	// New Version, unsigned samples
 	};
 
-	char   name[28];		// Song Title
-	uint8  dosEof;			// Supposed to be 0x1A, but even ST3 seems to ignore this sometimes (see STRSHINE.S3M by Purple Motion)
-	uint8  fileType;		// File Type, 0x10 = ST3 module
-	char   reserved1[2];	// Reserved
-	uint16 ordNum;			// Number of order items
-	uint16 smpNum;			// Number of sample parapointers
-	uint16 patNum;			// Number of pattern parapointers
-	uint16 flags;			// Flags, see S3MHeaderFlags
-	uint16 cwtv;			// "Made With" Tracker ID, see S3MTrackerVersions
-	uint16 formatVersion;	// Format Version, see S3MFormatVersion
-	char   magic[4];		// "SCRM" magic bytes
-	uint8  globalVol;		// Default Global Volume (0...64)
-	uint8  speed;			// Default Speed (1...254)
-	uint8  tempo;			// Default Tempo (33...255)
-	uint8  masterVolume;	// Sample Volume (0...127, stereo if high bit is set)
-	uint8  ultraClicks;		// Number of channels used for ultra click removal
-	uint8  usePanningTable;	// 0xFC => read extended panning table
-	char   reserved2[8];	// More reserved bytes
-	uint16 special;			// Pointer to special custom data (unused)
-	uint8  channels[32];	// Channel setup
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	char     name[28];			// Song Title
+	uint8le  dosEof;			// Supposed to be 0x1A, but even ST3 seems to ignore this sometimes (see STRSHINE.S3M by Purple Motion)
+	uint8le  fileType;			// File Type, 0x10 = ST3 module
+	char     reserved1[2];		// Reserved
+	uint16le ordNum;			// Number of order items
+	uint16le smpNum;			// Number of sample parapointers
+	uint16le patNum;			// Number of pattern parapointers
+	uint16le flags;				// Flags, see S3MHeaderFlags
+	uint16le cwtv;				// "Made With" Tracker ID, see S3MTrackerVersions
+	uint16le formatVersion;		// Format Version, see S3MFormatVersion
+	char     magic[4];			// "SCRM" magic bytes
+	uint8le  globalVol;			// Default Global Volume (0...64)
+	uint8le  speed;				// Default Speed (1...254)
+	uint8le  tempo;				// Default Tempo (33...255)
+	uint8le  masterVolume;		// Sample Volume (0...127, stereo if high bit is set)
+	uint8le  ultraClicks;		// Number of channels used for ultra click removal
+	uint8le  usePanningTable;	// 0xFC => read extended panning table
+	char     reserved2[8];		// More reserved bytes
+	uint16le special;			// Pointer to special custom data (unused)
+	uint8le  channels[32];		// Channel setup
 };
 
 STATIC_ASSERT(sizeof(S3MFileHeader) == 96);
 
 
 // S3M Sample Header
-struct PACKED S3MSampleHeader
+struct S3MSampleHeader
 {
 	enum SampleType
 	{
@@ -119,23 +111,21 @@ struct PACKED S3MSampleHeader
 		pADPCM		= 0x04,	// MODPlugin ADPCM :(
 	};
 
-	uint8  sampleType;			// Sample type, see SampleType
-	char   filename[12];		// Sample filename
-	uint8  dataPointer[3];		// Pointer to sample data (divided by 16)
-	uint32 length;				// Sample length, in samples
-	uint32 loopStart;			// Loop start, in samples
-	uint32 loopEnd;				// Loop end, in samples
-	uint8  defaultVolume;		// Default volume (0...64)
-	char   reserved1;			// Reserved
-	uint8  pack;				// Packing algorithm, SamplePacking
-	uint8  flags;				// Sample flags
-	uint32 c5speed;				// Middle-C frequency
-	char   reserved2[12];		// Reserved + Internal ST3 stuff
-	char   name[28];			// Sample name
-	char   magic[4];			// "SCRS" magic bytes ("SCRI" for Adlib instruments)
+	uint8le  sampleType;		// Sample type, see SampleType
+	char     filename[12];		// Sample filename
+	uint8le  dataPointer[3];	// Pointer to sample data (divided by 16)
+	uint32le length;			// Sample length, in samples
+	uint32le loopStart;			// Loop start, in samples
+	uint32le loopEnd;			// Loop end, in samples
+	uint8le  defaultVolume;		// Default volume (0...64)
+	char     reserved1;			// Reserved
+	uint8le  pack;				// Packing algorithm, SamplePacking
+	uint8le  flags;				// Sample flags
+	uint32le c5speed;			// Middle-C frequency
+	char     reserved2[12];		// Reserved + Internal ST3 stuff
+	char     name[28];			// Sample name
+	char     magic[4];			// "SCRS" magic bytes ("SCRI" for Adlib instruments)
 
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
 	// Convert an S3M sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const;
 	// Convert OpenMPT's internal sample header to an S3M sample header.
@@ -145,11 +135,6 @@ struct PACKED S3MSampleHeader
 };
 
 STATIC_ASSERT(sizeof(S3MSampleHeader) == 80);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 OPENMPT_NAMESPACE_END

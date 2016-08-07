@@ -21,37 +21,19 @@ class FileReader;
 namespace Ogg
 {
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED PageHeader
+struct PageHeader
 {
-	char   capture_pattern[4]; // "OggS"
-	uint8  version;
-	uint8  header_type;
-	uint64 granule_position;
-	uint32 bitstream_serial_number;
-	uint32 page_seqauence_number;
-	uint32 CRC_checksum;
-	uint8  page_segments;
-
-	void ConvertEndianness()
-	{
-		SwapBytesLE(granule_position);
-		SwapBytesLE(bitstream_serial_number);
-		SwapBytesLE(page_seqauence_number);
-		SwapBytesLE(CRC_checksum);
-	}
-
+	char      capture_pattern[4]; // "OggS"
+	uint8le  version;
+	uint8le  header_type;
+	uint64le granule_position;
+	uint32le bitstream_serial_number;
+	uint32le page_seqauence_number;
+	uint32le CRC_checksum;
+	uint8le  page_segments;
 };
 
 STATIC_ASSERT(sizeof(PageHeader) == 27);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 struct PageInfo
@@ -82,7 +64,7 @@ bool UpdatePageCRC(PageInfo &pageInfo, const std::vector<uint8> &pageData);
 template <typename Tfile>
 bool WritePage(Tfile & f, PageInfo &pageInfo, const std::vector<uint8> &pageData)
 {
-	if(!mpt::IO::WriteConvertEndianness(f, pageInfo.header))
+	if(!mpt::IO::WriteStruct(f, pageInfo.header))
 	{
 		return false;
 	}

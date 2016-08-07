@@ -126,21 +126,15 @@ enum
 
 
 // EQ
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
 struct PACKED EQPreset
 {
-	char szName[12]; // locale encoding
-	UINT Gains[MAX_EQ_BANDS];
-	UINT Freqs[MAX_EQ_BANDS];
+	char   szName[12]; // locale encoding
+	uint32 Gains[MAX_EQ_BANDS];
+	uint32 Freqs[MAX_EQ_BANDS];
 };
 
 static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 STATIC_ASSERT(sizeof(EQPreset) == 60);
 
 template<> inline SettingValue ToSettingValue(const EQPreset &val)

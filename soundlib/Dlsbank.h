@@ -18,10 +18,6 @@ OPENMPT_NAMESPACE_END
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 #define DLSMAXREGIONS		128
 #define DLSMAXENVELOPES		2048
 
@@ -33,31 +29,30 @@ OPENMPT_NAMESPACE_BEGIN
 #define DLSREGION_SELFNONEXCLUSIVE	0x80
 #define DLSREGION_SUSTAINLOOP		0x100
 
-typedef struct PACKED DLSREGION
+typedef struct DLSREGION
 {
-	uint32 ulLoopStart;
-	uint32 ulLoopEnd;
-	uint16 nWaveLink;
-	uint16 uPercEnv;
-	uint16 usVolume;		// 0..256
-	uint16 fuOptions;	// flags + key group
-	int16 sFineTune;	// 1..100
-	uint8 uKeyMin;
-	uint8 uKeyMax;
-	uint8 uUnityNote;
+	uint32le ulLoopStart;
+	uint32le ulLoopEnd;
+	uint16le nWaveLink;
+	uint16le uPercEnv;
+	uint16le usVolume;		// 0..256
+	uint16le fuOptions;	// flags + key group
+	int16le  sFineTune;	// 1..100
+	uint8le  uKeyMin;
+	uint8le  uKeyMax;
+	uint8le  uUnityNote;
 } DLSREGION;
 
 STATIC_ASSERT(sizeof(DLSREGION) == 21);
 
-typedef struct PACKED DLSENVELOPE
+typedef struct DLSENVELOPE
 {
 	// Volume Envelope
-	uint16 wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16 wVolDecay;			// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16 wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint8 nVolSustainLevel;	// Sustain Level: 0-128, 128=100%
-	// Default Pan
-	uint8 nDefPan;
+	uint16le wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16le wVolDecay;		// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16le wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint8le nVolSustainLevel;	// Sustain Level: 0-128, 128=100%	
+	uint8le nDefPan;			// Default Pan
 } DLSENVELOPE;
 
 STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
@@ -65,34 +60,30 @@ STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
 // Special Bank bits
 #define F_INSTRUMENT_DRUMS		0x80000000
 
-typedef struct PACKED DLSINSTRUMENT
+typedef struct DLSINSTRUMENT
 {
-	uint32 ulBank, ulInstrument;
-	uint32 nRegions, nMelodicEnv;
+	uint32le ulBank, ulInstrument;
+	uint32le nRegions, nMelodicEnv;
 	DLSREGION Regions[DLSMAXREGIONS];
 	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
-	uint16 wPresetBagNdx, wPresetBagNum;
+	uint16le wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
 
 STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
 
-typedef struct PACKED DLSSAMPLEEX
+typedef struct DLSSAMPLEEX
 {
-	char szName[20];
-	uint32 dwLen;
-	uint32 dwStartloop;
-	uint32 dwEndloop;
-	uint32 dwSampleRate;
-	uint8 byOriginalPitch;
-	char chPitchCorrection;
+	char      szName[20];
+	uint32le dwLen;
+	uint32le dwStartloop;
+	uint32le dwEndloop;
+	uint32le dwSampleRate;
+	uint8le  byOriginalPitch;
+	int8le   chPitchCorrection;
 } DLSSAMPLEEX;
 
 STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 #ifdef MODPLUG_TRACKER
@@ -150,7 +141,6 @@ public:
 	DLSINSTRUMENT *GetInstrument(uint32 iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
 	DLSINSTRUMENT *FindInstrument(bool bDrum, uint32 nBank=0xFF, uint32 dwProgram=0xFF, uint32 dwKey=0xFF, uint32 *pInsNo=NULL);
 	uint32 GetRegionFromKey(uint32 nIns, uint32 nKey);
-	bool FreeWaveForm(uint8 *p);
 	bool ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &waveData, uint32 &length);
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose=0);
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn);
@@ -165,10 +155,10 @@ protected:
 
 public:
 	// DLS Unit conversion
-	static LONG DLS32BitTimeCentsToMilliseconds(LONG lTimeCents);
-	static LONG DLS32BitRelativeGainToLinear(LONG lCentibels);	// 0dB = 0x10000
-	static LONG DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
-	static LONG DLSMidiVolumeToLinear(uint32 nMidiVolume);		// [0-127] -> [0-0x10000]
+	static int32 DLS32BitTimeCentsToMilliseconds(int32 lTimeCents);
+	static int32 DLS32BitRelativeGainToLinear(int32 lCentibels);	// 0dB = 0x10000
+	static int32 DLS32BitRelativeLinearToGain(int32 lGain);		// 0dB = 0x10000
+	static int32 DLSMidiVolumeToLinear(uint32 nMidiVolume);		// [0-127] -> [0-0x10000]
 };
 
 

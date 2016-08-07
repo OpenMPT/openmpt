@@ -21,95 +21,46 @@ OPENMPT_NAMESPACE_BEGIN
 
 //#define MMCMP_LOG
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED MMCMPFILEHEADER
+struct MMCMPFILEHEADER
 {
-	char id[8];	// "ziRCONia"
-	uint16 hdrsize;
-	void ConvertEndianness();
+	char     id[8];	// "ziRCONia"
+	uint16le hdrsize;
 };
 
 STATIC_ASSERT(sizeof(MMCMPFILEHEADER) == 10);
 
-struct PACKED MMCMPHEADER
+struct MMCMPHEADER
 {
-	uint16 version;
-	uint16 nblocks;
-	uint32 filesize;
-	uint32 blktable;
-	uint8 glb_comp;
-	uint8 fmt_comp;
-	void ConvertEndianness();
+	uint16le version;
+	uint16le nblocks;
+	uint32le filesize;
+	uint32le blktable;
+	uint8le  glb_comp;
+	uint8le  fmt_comp;
 };
 
 STATIC_ASSERT(sizeof(MMCMPHEADER) == 14);
 
-struct PACKED MMCMPBLOCK
+struct MMCMPBLOCK
 {
-	uint32 unpk_size;
-	uint32 pk_size;
-	uint32 xor_chk;
-	uint16 sub_blk;
-	uint16 flags;
-	uint16 tt_entries;
-	uint16 num_bits;
-	void ConvertEndianness();
+	uint32le unpk_size;
+	uint32le pk_size;
+	uint32le xor_chk;
+	uint16le sub_blk;
+	uint16le flags;
+	uint16le tt_entries;
+	uint16le num_bits;
 };
 
 STATIC_ASSERT(sizeof(MMCMPBLOCK) == 20);
 
-struct PACKED MMCMPSUBBLOCK
+struct MMCMPSUBBLOCK
 {
-	uint32 unpk_pos;
-	uint32 unpk_size;
-	void ConvertEndianness();
+	uint32le unpk_pos;
+	uint32le unpk_size;
 };
 
 STATIC_ASSERT(sizeof(MMCMPSUBBLOCK) == 8);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-void MMCMPFILEHEADER::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(hdrsize);
-}
-
-void MMCMPHEADER::ConvertEndianness()
-//-----------------------------------
-{
-	SwapBytesLE(version);
-	SwapBytesLE(nblocks);
-	SwapBytesLE(filesize);
-	SwapBytesLE(blktable);
-	SwapBytesLE(glb_comp);
-	SwapBytesLE(fmt_comp);
-}
-
-void MMCMPBLOCK::ConvertEndianness()
-//----------------------------------
-{
-	SwapBytesLE(unpk_size);
-	SwapBytesLE(pk_size);
-	SwapBytesLE(xor_chk);
-	SwapBytesLE(sub_blk);
-	SwapBytesLE(flags);
-	SwapBytesLE(tt_entries);
-	SwapBytesLE(num_bits);
-}
-
-void MMCMPSUBBLOCK::ConvertEndianness()
-//-------------------------------------
-{
-	SwapBytesLE(unpk_pos);
-	SwapBytesLE(unpk_size);
-}
 
 
 #define MMCMP_COMP		0x0001
@@ -198,11 +149,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	unpackedData.clear();
 
 	MMCMPFILEHEADER mfh;
-	if(!file.ReadConvertEndianness(mfh)) return false;
+	if(!file.ReadStruct(mfh)) return false;
 	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0) return false;
 	if(mfh.hdrsize != sizeof(MMCMPHEADER)) return false;
 	MMCMPHEADER mmh;
-	if(!file.ReadConvertEndianness(mmh)) return false;
+	if(!file.ReadStruct(mmh)) return false;
 	if(mmh.nblocks == 0) return false;
 	if(mmh.filesize == 0) return false;
 	if(mmh.filesize > 0x80000000) return false;
@@ -220,11 +171,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		uint32 blkPos = file.ReadUint32LE();
 		if(!file.Seek(blkPos)) return false;
 		MMCMPBLOCK blk;
-		if(!file.ReadConvertEndianness(blk)) return false;
+		if(!file.ReadStruct(blk)) return false;
 		std::vector<MMCMPSUBBLOCK> subblks(blk.sub_blk);
 		for(uint32 i=0; i<blk.sub_blk; ++i)
 		{
-			if(!file.ReadConvertEndianness(subblks[i])) return false;
+			if(!file.ReadStruct(subblks[i])) return false;
 		}
 		MMCMPSUBBLOCK *psubblk = blk.sub_blk > 0 ? &(subblks[0]) : nullptr;
 
@@ -411,35 +362,18 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 // XPK unpacker
 //
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED XPKFILEHEADER
+struct XPKFILEHEADER
 {
-	char   XPKF[4];
-	uint32 SrcLen;
-	char   SQSH[4];
-	uint32 DstLen;
-	char   Name[16];
-	uint32 Reserved;
-	void ConvertEndianness();
+	char      XPKF[4];
+	uint32be SrcLen;
+	char      SQSH[4];
+	uint32be DstLen;
+	char      Name[16];
+	uint32be Reserved;
 };
 
 STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-void XPKFILEHEADER::ConvertEndianness()
-//-------------------------------------
-{
-	SwapBytesBE(SrcLen);
-	SwapBytesBE(DstLen);
-	SwapBytesBE(Reserved);
-}
 
 struct XPK_error : public std::range_error
 {
@@ -738,7 +672,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	unpackedData.clear();
 
 	XPKFILEHEADER header;
-	if(!file.ReadConvertEndianness(header)) return false;
+	if(!file.ReadStruct(header)) return false;
 	if(std::memcmp(header.XPKF, "XPKF", 4) != 0) return false;
 	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
 	if(header.SrcLen == 0) return false;

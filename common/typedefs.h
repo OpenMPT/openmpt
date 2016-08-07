@@ -49,11 +49,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_MSVC
 #define PACKED __declspec(align(1))
-#define NEEDS_PRAGMA_PACK
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #if MPT_COMPILER_GCC && MPT_OS_WINDOWS
-// Some versions of mingw64 need this when windows-hosted. Strange.
-#define NEEDS_PRAGMA_PACK
 #endif
 #define PACKED __attribute__((packed)) __attribute__((aligned(1)))
 #else
@@ -347,7 +344,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #ifdef NDEBUG
-#error "Builds for static analyzers depend on std::asert being enabled, but the current build has #define NDEBUG. This makes no sense."
+#error "Builds for static analyzers depend on std::assert being enabled, but the current build has #define NDEBUG. This makes no sense."
 #endif
 OPENMPT_NAMESPACE_END
 #include <cassert>

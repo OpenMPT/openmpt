@@ -70,34 +70,27 @@ OPENMPT_NAMESPACE_BEGIN
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED ID3v2Header
+struct ID3v2Header
 {
-	uint8 signature[3];
-	uint8 version[2];
-	uint8 flags;
-	uint32 size;
+	uint8     signature[3];
+	uint8     version[2];
+	uint8be  flags;
+	uint32be size;
 	// Total: 10 bytes
 };
 
 STATIC_ASSERT(sizeof(ID3v2Header) == 10);
 
-struct PACKED ID3v2Frame
+struct ID3v2Frame
 {
-	uint32 frameid;
-	uint32 size;
-	uint16 flags;
+	char      frameid[4];
+	uint32be size;
+	uint16be flags;
 	// Total: 10 bytes
 };
 
 STATIC_ASSERT(sizeof(ID3v2Frame) == 10);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 // charset... choose text ending accordingly.
 // $00 = ISO-8859-1. Terminated with $00.
@@ -181,7 +174,6 @@ uint32 ID3V2Tagger::intToSynchsafe(uint32 in)
 		out |= (in & 0x7F) << steps;
 		steps += 8;
 	} while(in >>= 7);
-	SwapBytesBE(out);
 	return out;
 }
 
@@ -198,12 +190,10 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	totalID3v2Size = 0;
 
 	// Correct header will be written later (tag size missing)
-	tHeader.signature[0] = 'I';
-	tHeader.signature[1] = 'D';
-	tHeader.signature[2] = '3';
+	memcpy(tHeader.signature, "ID3", 3);
 	tHeader.version[0] = 0x04; // Version 2.4.0
 	tHeader.version[1] = 0x00; // Ditto
-	tHeader.flags = 0x00; // No flags
+	tHeader.flags = 0; // No flags
 	tHeader.size  = 0; // will be filled later
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 	totalID3v2Size += sizeof(tHeader);
@@ -310,7 +300,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		std::memcpy(&frame.frameid, "TXXX", 4);
 		frame.size = intToSynchsafe(content.size());
-		frame.flags = SwapBytesReturnBE(uint16(0x4000)); // discard if audio data changed
+		frame.flags = 0x4000; // discard if audio data changed
 		if(sizeof(ID3v2Frame) + content.size() <= GetMaxReplayGainTxxxTrackGainFrameSize())
 		{
 			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));
@@ -341,7 +331,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		std::memcpy(&frame.frameid, "TXXX", 4);
 		frame.size = intToSynchsafe(content.size());
-		frame.flags = SwapBytesReturnBE(uint16(0x4000)); // discard if audio data changed
+		frame.flags = 0x4000; // discard if audio data changed
 		if(sizeof(ID3v2Frame) + content.size() <= GetMaxReplayGainTxxxTrackPeakFrameSize())
 		{
 			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));

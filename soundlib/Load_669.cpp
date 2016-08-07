@@ -15,51 +15,27 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED _669FileHeader
+struct _669FileHeader
 {
-	enum MagicBytes
-	{
-		magic669	= 0x6669,	// 'if'
-		magic669Ext	= 0x4E4A	// 'JN'
-	};
-
-	uint16 sig;					// 'if' or 'JN'
-	char   songMessage[108];	// Song Message
-	uint8  samples;				// number of samples (1-64)
-	uint8  patterns;			// number of patterns (1-128)
-	uint8  restartPos;
-	uint8  orders[128];
-	uint8  tempoList[128];
-	uint8  breaks[128];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(sig);
-	}
+	char  magic[2];			// 'if' (0x6669, ha ha) or 'JN'
+	char  songMessage[108];	// Song Message
+	uint8 samples;			// number of samples (1-64)
+	uint8 patterns;			// number of patterns (1-128)
+	uint8 restartPos;
+	uint8 orders[128];
+	uint8 tempoList[128];
+	uint8 breaks[128];
 };
 
 STATIC_ASSERT(sizeof(_669FileHeader) == 497);
 
 
-struct PACKED _669Sample
+struct _669Sample
 {
-	char   filename[13];
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-	}
+	char     filename[13];
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
 
 	// Convert a 669 sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -85,10 +61,6 @@ struct PACKED _669Sample
 
 STATIC_ASSERT(sizeof(_669Sample) == 25);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
 
 bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
@@ -96,8 +68,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	_669FileHeader fileHeader;
 
 	file.Rewind();
-	if(!file.ReadConvertEndianness(fileHeader)
-		|| (fileHeader.sig != _669FileHeader::magic669 && fileHeader.sig != _669FileHeader::magic669Ext)
+	if(!file.ReadStruct(fileHeader)
+		|| (memcmp(fileHeader.magic, "if", 2) && memcmp(fileHeader.magic, "JN", 2))
 		|| fileHeader.samples > 64
 		|| fileHeader.restartPos >= 128
 		|| fileHeader.patterns > 128
@@ -128,7 +100,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES);
 #endif // MODPLUG_TRACKER
 
-	if(fileHeader.sig == _669FileHeader::magic669)
+	if(!memcmp(fileHeader.magic, "if", 4))
 		m_madeWithTracker = "Composer 669";
 	else
 		m_madeWithTracker = "UNIS 669";
@@ -137,7 +109,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		_669Sample sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		// Since 669 files have very unfortunate magic bytes ("if") and can
 		// hardly be validated, reject any file with far too big samples.
 		if(sampleHeader.length >= 0x4000000)

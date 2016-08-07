@@ -13,36 +13,25 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // File Header
-struct PACKED SFXFileHeader
+struct SFXFileHeader
 {
-	uint8 numOrders;
-	uint8 restartPos;
-	uint8 orderList[128];
+	uint8be numOrders;
+	uint8be restartPos;
+	uint8be orderList[128];
 };
 
 STATIC_ASSERT(sizeof(SFXFileHeader) == 130);
 
 // Sample Header
-struct PACKED SFXSampleHeader
+struct SFXSampleHeader
 {
-	char   name[22];
-	char   dummy[2];	// Supposedly sample length, but almost always incorrect
-	uint8  finetune;
-	uint8  volume;
-	uint16 loopStart;
-	uint16 loopLength;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(loopStart);
-		SwapBytesBE(loopLength);
-	}
+	char     name[22];
+	char     dummy[2];	// Supposedly sample length, but almost always incorrect
+	uint8be  finetune;
+	uint8be  volume;
+	uint16be loopStart;
+	uint16be loopLength;
 
 	// Convert an MOD sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp, uint32 length) const
@@ -50,7 +39,7 @@ struct PACKED SFXSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = 4u * std::min(volume, uint8(64));
+		mptSmp.nVolume = 4u * std::min<uint8>(volume, 64);
 
 		SmpLength lStart = loopStart;
 		SmpLength lLength = loopLength * 2u;
@@ -83,10 +72,6 @@ struct PACKED SFXSampleHeader
 };
 
 STATIC_ASSERT(sizeof(SFXSampleHeader) == 30);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
@@ -140,7 +125,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		SFXSampleHeader sampleHeader;
 
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp], sampleLen[smp - 1]);
 
 		// Get rid of weird characters in sample names.

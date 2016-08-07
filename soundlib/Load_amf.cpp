@@ -18,13 +18,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // ASYLUM AMF File Header
-struct PACKED AsylumFileHeader
+struct AsylumFileHeader
 {
 	char  signature[32];
 	uint8 defaultSpeed;
@@ -39,30 +34,22 @@ STATIC_ASSERT(sizeof(AsylumFileHeader) == 38);
 
 
 // ASYLUM AMF Sample Header
-struct PACKED AsylumSampleHeader
+struct AsylumSampleHeader
 {
-	char   name[22];
-	uint8  finetune;
-	uint8  defaultVolume;
-	int8   transpose;
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopLength;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopLength);
-	}
+	char     name[22];
+	uint8le  finetune;
+	uint8le  defaultVolume;
+	int8le   transpose;
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopLength;
 
 	// Convert an AMF sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = std::min(defaultVolume, uint8(64)) * 4u;
+		mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4u;
 		mptSmp.RelativeTone = transpose;
 		mptSmp.nLength = length;
 
@@ -79,29 +66,18 @@ STATIC_ASSERT(sizeof(AsylumSampleHeader) == 37);
 
 
 // DSMI AMF File Header
-struct PACKED AMFFileHeader
+struct AMFFileHeader
 {
-	char   amf[3];
-	uint8  version;
-	char   title[32];
-	uint8  numSamples;
-	uint8  numOrders;
-	uint16 numTracks;
-	uint8  numChannels;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numTracks);
-	}
+	char     amf[3];
+	uint8le  version;
+	char     title[32];
+	uint8le  numSamples;
+	uint8le  numOrders;
+	uint16le numTracks;
+	uint8le  numChannels;
 };
 
 STATIC_ASSERT(sizeof(AMFFileHeader) == 41);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
@@ -139,7 +115,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		AsylumSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
@@ -370,7 +346,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	AMFFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.amf, "AMF", 3)
 		|| fileHeader.version < 8 || fileHeader.version > 14
 		|| ((fileHeader.numChannels < 1 || fileHeader.numChannels > 32) && fileHeader.version >= 10))

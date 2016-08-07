@@ -21,11 +21,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED MT2FileHeader
+struct MT2FileHeader
 {
 	enum MT2HeaderFlags
 	{
@@ -35,88 +31,49 @@ struct PACKED MT2FileHeader
 		masterAutomation	= 0x10,
 	};
 
-	char   signature[4];	// "MT20"
-	uint32 userID;
-	uint16 version;
-	char   trackerName[32];	// "MadTracker 2.0"
-	char   songName[64];
-	uint16 numOrders;
-	uint16 restartPos;
-	uint16 numPatterns;
-	uint16 numChannels;
-	uint16 samplesPerTick;
-	uint8  ticksPerLine;
-	uint8  linesPerBeat;
-	uint32 flags;			// See HeaderFlags
-	uint16 numInstruments;
-	uint16 numSamples;
-	uint8  Orders[256];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(userID);
-		SwapBytesLE(version);
-		SwapBytesLE(numOrders);
-		SwapBytesLE(restartPos);
-		SwapBytesLE(numPatterns);
-		SwapBytesLE(numChannels);
-		SwapBytesLE(samplesPerTick);
-		SwapBytesLE(numInstruments);
-		SwapBytesLE(numSamples);
-	}
+	char     signature[4];		// "MT20"
+	uint32le userID;
+	uint16le version;
+	char     trackerName[32];	// "MadTracker 2.0"
+	char     songName[64];
+	uint16le numOrders;
+	uint16le restartPos;
+	uint16le numPatterns;
+	uint16le numChannels;
+	uint16le samplesPerTick;
+	uint8le  ticksPerLine;
+	uint8le  linesPerBeat;
+	uint32le flags;				// See HeaderFlags
+	uint16le numInstruments;
+	uint16le numSamples;
 };
 
-STATIC_ASSERT(sizeof(MT2FileHeader) == 382);
+STATIC_ASSERT(sizeof(MT2FileHeader) == 126);
 
 
-struct PACKED MT2DrumsData
+struct MT2DrumsData
 {
-	uint16 numDrumPatterns;
-	uint16 DrumSamples[8];
-	uint8  DrumPatternOrder[256];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numDrumPatterns);
-		for(size_t i = 0; i < CountOf(DrumSamples); i++)
-		{
-			SwapBytesLE(DrumSamples[i]);
-		}
-	}
+	uint16le numDrumPatterns;
+	uint16le DrumSamples[8];
+	uint8le  DrumPatternOrder[256];
 };
 
 STATIC_ASSERT(sizeof(MT2DrumsData) == 274);
 
 
-struct PACKED MT2TrackSettings
+struct MT2TrackSettings
 {
-	uint16 volume;
-	uint8  trackfx;		// Built-in effect type is used
-	uint8  output;
-	uint16 fxID;
-	uint16 trackEffectParam[64][8];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(volume);
-		SwapBytesLE(fxID);
-		for(size_t i = 0; i < CountOf(trackEffectParam); i++)
-		{
-			for(size_t j = 0; j < CountOf(trackEffectParam[0]); j++)
-			{
-				SwapBytesLE(trackEffectParam[i][j]);
-			}
-		}
-	}
+	uint16le volume;
+	uint8le  trackfx;	// Built-in effect type is used
+	uint8le  output;
+	uint16le fxID;
+	uint16le trackEffectParam[64][8];
 };
 
 STATIC_ASSERT(sizeof(MT2TrackSettings) == 1030);
 
 
-struct PACKED MT2Command
+struct MT2Command
 {
 	uint8 note;	// 0=nothing, 97=note off
 	uint8 instr;
@@ -130,23 +87,16 @@ struct PACKED MT2Command
 STATIC_ASSERT(sizeof(MT2Command) == 7);
 
 
-struct PACKED MT2EnvPoint
+struct MT2EnvPoint
 {
-	uint16 x;
-	uint16 y;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(x);
-		SwapBytesLE(y);
-	}
+	uint16le x;
+	uint16le y;
 };
 
 STATIC_ASSERT(sizeof(MT2EnvPoint) == 4);
 
 
-struct PACKED MT2Instrument
+struct MT2Instrument
 {
 	enum EnvTypes
 	{
@@ -156,42 +106,25 @@ struct PACKED MT2Instrument
 		FilterEnv	= 8,
 	};
 
-	uint16 numSamples;
-	uint8  groupMap[96];
-	uint8  vibtype, vibsweep, vibdepth, vibrate;
-	uint16 fadeout;
-	uint16 nna;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numSamples);
-		SwapBytesLE(fadeout);
-		SwapBytesLE(nna);
-	}
+	uint16le numSamples;
+	uint8le  groupMap[96];
+	uint8le  vibtype, vibsweep, vibdepth, vibrate;
+	uint16le fadeout;
+	uint16le nna;
 };
 
 STATIC_ASSERT(sizeof(MT2Instrument) == 106);
 
 
-struct PACKED MT2IEnvelope
+struct MT2IEnvelope
 {
-	uint8 flags;
-	uint8 numPoints;
-	uint8 sustainPos;
-	uint8 loopStart;
-	uint8 loopEnd;
-	uint8 reserved[3];
+	uint8le flags;
+	uint8le numPoints;
+	uint8le sustainPos;
+	uint8le loopStart;
+	uint8le loopEnd;
+	uint8le reserved[3];
 	MT2EnvPoint points[16];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(size_t i = 0; i < CountOf(points); i++)
-		{
-			points[i].ConvertEndianness();
-		}
-	}
 };
 
 STATIC_ASSERT(sizeof(MT2IEnvelope) == 72);
@@ -199,109 +132,74 @@ STATIC_ASSERT(sizeof(MT2IEnvelope) == 72);
 
 // Note: The order of these fields differs a bit in MTIOModule_MT2.cpp - maybe just typos, I'm not sure.
 // This struct follows the save format of MadTracker 2.6.1.
-struct PACKED MT2InstrSynth
+struct MT2InstrSynth
 {
-	uint8  synthID;
-	uint8  effectID;	// 0 = Lowpass filter, 1 = Highpass filter
-	uint16 cutoff;		// 100...11000 Hz
-	uint8  resonance;	// 0...128
-	uint8  attack;		// 0...128
-	uint8  decay;		// 0...128
-	uint8  midiChannel;	// 0...15
-	int8   device;		// VST slot (positive) or MIDI device (negative)
-	int8   unknown1;	// Missing in MTIOModule_MT2.cpp
-	uint8  volume;		// 0...255
-	int8   finetune;	// -96...96
-	int8   transpose;	// -48...48
-	uint8  unknown2;	// Seems to be equal to instrument number.
-	uint8  unknown3;
-	uint8  midiProgram;
-	uint8  reserved[16];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(cutoff);
-	}
+	uint8le  synthID;
+	uint8le  effectID;		// 0 = Lowpass filter, 1 = Highpass filter
+	uint16le cutoff;		// 100...11000 Hz
+	uint8le  resonance;		// 0...128
+	uint8le  attack;		// 0...128
+	uint8le  decay;			// 0...128
+	uint8le  midiChannel;	// 0...15
+	int8le   device;		// VST slot (positive) or MIDI device (negative)
+	int8le   unknown1;		// Missing in MTIOModule_MT2.cpp
+	uint8le  volume;		// 0...255
+	int8le   finetune;		// -96...96
+	int8le   transpose;		// -48...48
+	uint8le  unknown2;		// Seems to be equal to instrument number.
+	uint8le  unknown3;
+	uint8le  midiProgram;
+	uint8le  reserved[16];
 };
 
 STATIC_ASSERT(sizeof(MT2InstrSynth) == 32);
 
 
-struct PACKED MT2Sample
+struct MT2Sample
 {
-	uint32 length;
-	uint32 frequency;
-	uint8  depth;
-	uint8  channels;
-	uint8  flags;
-	uint8  loopType;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint16 volume;
-	int8   panning;
-	int8   note;
-	int16  spb;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(frequency);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(volume);
-		SwapBytesLE(spb);
-	}
+	uint32le length;
+	uint32le frequency;
+	uint8le  depth;
+	uint8le  channels;
+	uint8le  flags;
+	uint8le  loopType;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint16le volume;
+	int8le   panning;
+	int8le   note;
+	int16le  spb;
 };
 
 STATIC_ASSERT(sizeof(MT2Sample) == 26);
 
 
-struct PACKED MT2Group
+struct MT2Group
 {
-	uint8 sample;
-	uint8 vol;		// 0...128
-	int8  pitch;	// -128...127
-	uint8 reserved[5];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(pitch);
-	}
+	uint8le sample;
+	uint8le vol;		// 0...128
+	int8le  pitch;		// -128...127
+	uint8le reserved[5];
 };
 
 STATIC_ASSERT(sizeof(MT2Group) == 8);
 
 
-struct PACKED MT2VST
+struct MT2VST
 {
-	char   dll[64];
-	char   programName[28];
-	uint32 fxID;
-	uint32 fxVersion;
-	uint32 programNr;
-	uint8  useChunks;
-	uint8  track;
-	int8   pan;				// Not imported - could use pan mix mode for D/W ratio, but this is not implemented for instrument plugins!
-	char   reserved[17];
-	uint32 n;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(fxID);
-		SwapBytesLE(fxVersion);
-		SwapBytesLE(programNr);
-	}
+	char     dll[64];
+	char     programName[28];
+	uint32le fxID;
+	uint32le fxVersion;
+	uint32le programNr;
+	uint8le  useChunks;
+	uint8le  track;
+	int8le   pan;				// Not imported - could use pan mix mode for D/W ratio, but this is not implemented for instrument plugins!
+	char     reserved[17];
+	uint32le n;
 };
 
 STATIC_ASSERT(sizeof(MT2VST) == 128);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
@@ -502,13 +400,14 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	MT2FileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.signature, "MT20", 4)
 		|| fileHeader.version < 0x200 || fileHeader.version >= 0x300
 		|| fileHeader.numChannels < 1 || fileHeader.numChannels > 64
 		|| fileHeader.numOrders > 256
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
-		|| fileHeader.numSamples >= MAX_SAMPLES)
+		|| fileHeader.numSamples >= MAX_SAMPLES
+		|| !file.CanRead(256))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -521,18 +420,18 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, fileHeader.trackerName);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
-	Order.SetRestartPos(fileHeader.restartPos);
-	m_nDefaultSpeed = Clamp(fileHeader.ticksPerLine, uint8(1), uint8(31));
+	m_nDefaultSpeed = Clamp<uint8, uint8>(fileHeader.ticksPerLine, 1, 31);
 	m_nDefaultTempo.Set(125);
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
-	m_nDefaultRowsPerBeat = Clamp(fileHeader.linesPerBeat, uint8(1), uint8(32));
+	m_nDefaultRowsPerBeat = Clamp<uint8, uint8>(fileHeader.linesPerBeat, 1, 32);
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
 	m_nVSTiVolume = 48;
 	m_nSamplePreAmp = 48 * 2;	// Double pre-amp because we will halve the volume of all non-drum instruments, because the volume of drum samples can exceed that of normal samples
 
-	Order.ReadFromArray(fileHeader.Orders, fileHeader.numOrders);
+	Order.ReadAsByte(file, 256, fileHeader.numOrders);
+	Order.SetRestartPos(fileHeader.restartPos);
 
 	FileReader drumData = file.ReadChunk(file.ReadUint16LE());
 	FileReader extraData = file.ReadChunk(file.ReadUint32LE());
@@ -662,7 +561,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 			{
 				MT2TrackSettings trackSettings;
-				if(chunk.ReadConvertEndianness(trackSettings))
+				if(chunk.ReadStruct(trackSettings))
 				{
 					ChnSettings[c].nVolume = trackSettings.volume >> 10;	// 32768 is 0dB
 					trackRouting[c] = trackSettings.output;
@@ -727,7 +626,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			for(uint32 i = 0; i < std::min(numVST, uint32(MAX_MIXPLUGINS)); i++)
 			{
 				MT2VST vstHeader;
-				if(chunk.ReadConvertEndianness(vstHeader))
+				if(chunk.ReadStruct(vstHeader))
 				{
 					if(fileHeader.version >= 0x0250)
 						chunk.Skip(16 * 4);	// Parameter automation map for 16 parameters
@@ -842,7 +741,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	if(hasDrumChannels)
 	{
 		MT2DrumsData drumHeader;
-		drumData.ReadConvertEndianness(drumHeader);
+		drumData.ReadStruct(drumHeader);
 
 		// Allocate some instruments to handle the drum samples
 		for(INSTRUMENTINDEX i = 0; i < 8; i++)
@@ -974,7 +873,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 
 		MT2Instrument insHeader;
-		instrChunk.ReadConvertEndianness(insHeader);
+		instrChunk.ReadStruct(insHeader);
 		uint16 flags = 0;
 		if(fileHeader.version >= 0x0201) flags = instrChunk.ReadUint16LE();
 		uint32 envMask = MT2Instrument::VolumeEnv | MT2Instrument::PanningEnv;
@@ -994,7 +893,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			if(envMask & 1)
 			{
 				MT2IEnvelope mt2Env;
-				instrChunk.ReadConvertEndianness(mt2Env);
+				instrChunk.ReadStruct(mt2Env);
 
 				const EnvelopeType envType[4] = { ENV_VOLUME, ENV_PANNING, ENV_PITCH, ENV_PITCH };
 				InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType[env]);
@@ -1003,7 +902,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptEnv.dwFlags.set(ENV_ENABLED, (mt2Env.flags & 1) != 0);
 				mptEnv.dwFlags.set(ENV_SUSTAIN, (mt2Env.flags & 2) != 0);
 				mptEnv.dwFlags.set(ENV_LOOP, (mt2Env.flags & 4) != 0);
-				mptEnv.resize(std::min(mt2Env.numPoints, uint8(16)));
+				mptEnv.resize(std::min<uint8>(mt2Env.numPoints, 16));
 				mptEnv.nSustainStart = mptEnv.nSustainEnd = mt2Env.sustainPos;
 				mptEnv.nLoopStart = mt2Env.loopStart;
 				mptEnv.nLoopEnd = mt2Env.loopEnd;
@@ -1011,7 +910,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				for(uint32 p = 0; p < mptEnv.size(); p++)
 				{
 					mptEnv[p].tick = mt2Env.points[p].x;
-					mptEnv[p].value = static_cast<uint8>(Clamp(mt2Env.points[p].y, uint16(0), uint16(64)));
+					mptEnv[p].value = static_cast<uint8>(Clamp<uint16, uint16>(mt2Env.points[p].y, 0, 64));
 				}
 			}
 			envMask >>= 1;
@@ -1027,7 +926,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(flags)
 		{
 			MT2InstrSynth synthData;
-			instrChunk.ReadConvertEndianness(synthData);
+			instrChunk.ReadStruct(synthData);
 
 			// Translate frequency back to extended IT cutoff factor
 			float cutoff = 28.8539f * std::log(0.00764451f * synthData.cutoff);
@@ -1084,7 +983,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &mptSmp = Samples[i + 1];
 			mptSmp.Initialize(MOD_TYPE_IT);
 			MT2Sample sampleHeader;
-			sampleChunk.ReadConvertEndianness(sampleHeader);
+			sampleChunk.ReadStruct(sampleHeader);
 
 			mptSmp.nLength = sampleHeader.length;
 			mptSmp.nC5Speed = sampleHeader.frequency;
@@ -1142,12 +1041,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader &chunk = instrChunks[ins];
 			MT2Instrument insHeader;
 			chunk.Rewind();
-			chunk.ReadConvertEndianness(insHeader);
+			chunk.ReadStruct(insHeader);
 
 			std::vector<MT2Group> groups(insHeader.numSamples);
 			for(uint32 grp = 0; grp < insHeader.numSamples; grp++)
 			{
-				file.ReadConvertEndianness(groups[grp]);
+				file.ReadStruct(groups[grp]);
 			}
 
 			mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments

@@ -181,7 +181,7 @@ bool IsNegative(const T &val)
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
 		type tmp = input-> name; \
-		tmp = SwapBytesReturnLE(tmp); \
+		tmp = SwapBytesLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 	} \
 /**/
@@ -198,7 +198,7 @@ bool IsNegative(const T &val)
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
 		mpt::IO::WriteIntLE<uint16>(file, fsize); \
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesReturnLE(tmp); \
+		tmp = SwapBytesLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 	} else if(only_this_code == fcode)\
 	{ \
@@ -207,7 +207,7 @@ bool IsNegative(const T &val)
 		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
 		MPT_ASSERT(fixedsize >= fsize); \
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesReturnLE(tmp); \
+		tmp = SwapBytesLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 		if(fixedsize > fsize) \
 		{ \
@@ -243,7 +243,7 @@ bool IsNegative(const T &val)
 		{ \
 			type tmp; \
 			tmp = input-> name [i]; \
-			tmp = SwapBytesReturnLE(tmp); \
+			tmp = SwapBytesLE(tmp); \
 			fwrite(&tmp, 1, sizeof(type), file); \
 		} \
 	} \
@@ -275,14 +275,14 @@ bool IsNegative(const T &val)
 			{ \
 				type tmp; \
 				tmp = env[i]. envField; \
-				tmp = SwapBytesReturnLE(tmp); \
+				tmp = SwapBytesLE(tmp); \
 				fwrite(&tmp, 1, sizeof(type), file); \
 			} \
 			/* Not every instrument's envelope will be the same length. fill up with zeros. */ \
 			for(uint32 i = maxNodes; i < fsize/sizeof(type); ++i) \
 			{ \
 				type tmp = 0; \
-				tmp = SwapBytesReturnLE(tmp); \
+				tmp = SwapBytesLE(tmp); \
 				fwrite(&tmp, 1, sizeof(type), file); \
 			} \
 		} \

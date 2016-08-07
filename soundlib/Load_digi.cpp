@@ -13,45 +13,26 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // DIGI File Header
-struct PACKED DIGIFileHeader
+struct DIGIFileHeader
 {
-	char   signature[20];
-	char   versionStr[4];	// Supposed to be "V1.6" or similar, but other values like "TAP!" have been found as well.
-	uint8  versionInt;		// e.g. 0x16 = 1.6
-	uint8  numChannels;
-	uint8  packEnable;
-	char   unknown[19];
-	uint8  lastPatIndex;
-	uint8  lastOrdIndex;
-	uint8  orders[128];
-	uint32 smpLength[31];
-	uint32 smpLoopStart[31];
-	uint32 smpLoopLength[31];
-	uint8  smpVolume[31];
-	uint8  smpFinetune[31];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(SAMPLEINDEX i = 0; i < 31; i++)
-		{
-			SwapBytesBE(smpLength[i]);
-			SwapBytesBE(smpLoopStart[i]);
-			SwapBytesBE(smpLoopLength[i]);
-		}
-	}
+	char     signature[20];
+	char     versionStr[4];	// Supposed to be "V1.6" or similar, but other values like "TAP!" have been found as well.
+	uint8be  versionInt;	// e.g. 0x16 = 1.6
+	uint8be  numChannels;
+	uint8be  packEnable;
+	char     unknown[19];
+	uint8be  lastPatIndex;
+	uint8be  lastOrdIndex;
+	uint8be  orders[128];
+	uint32be smpLength[31];
+	uint32be smpLoopStart[31];
+	uint32be smpLoopLength[31];
+	uint8be  smpVolume[31];
+	uint8be  smpFinetune[31];
 };
 
 STATIC_ASSERT(sizeof(DIGIFileHeader) == 610);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
@@ -98,7 +79,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	DIGIFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.signature, "DIGI Booster module\0", 20)
 		|| !fileHeader.numChannels
 		|| fileHeader.numChannels > 8
@@ -135,7 +116,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		sample.SanitizeLoops();
 	
-		sample.nVolume = std::min(fileHeader.smpVolume[smp], uint8(64)) * 4;
+		sample.nVolume = std::min<uint8>(fileHeader.smpVolume[smp], 64) * 4;
 		sample.nFineTune = MOD2XMFineTune(fileHeader.smpFinetune[smp]);
 	}
 

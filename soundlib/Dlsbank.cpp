@@ -112,11 +112,6 @@ OPENMPT_NAMESPACE_BEGIN
 // Default Pan
 #define ART_DEFAULTPAN		MAKE_ART	(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_PAN)
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 //////////////////////////////////////////////////////////
 // DLS IFF Chunk IDs
 
@@ -156,152 +151,146 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////
 // DLS Structures definitions
 
-typedef struct PACKED IFFCHUNK
+typedef struct IFFCHUNK
 {
-	uint32 id;
-	uint32 len;
+	uint32le id;
+	uint32le len;
 } IFFCHUNK, *LPIFFCHUNK;
 
 STATIC_ASSERT(sizeof(IFFCHUNK) == 8);
 
-typedef struct PACKED RIFFCHUNKID
+typedef struct RIFFCHUNKID
 {
-	uint32 id_RIFF;
-	uint32 riff_len;
-	uint32 id_DLS;
+	uint32le id_RIFF;
+	uint32le riff_len;
+	uint32le id_DLS;
 } RIFFCHUNKID;
 
 STATIC_ASSERT(sizeof(RIFFCHUNKID) == 12);
 
-typedef struct PACKED LISTCHUNK
+typedef struct LISTCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 listid;
+	uint32le id;
+	uint32le len;
+	uint32le listid;
 } LISTCHUNK;
 
 STATIC_ASSERT(sizeof(LISTCHUNK) == 12);
 
-typedef struct PACKED DLSRGNRANGE
+typedef struct DLSRGNRANGE
 {
-	uint16 usLow;
-	uint16 usHigh;
+	uint16le usLow;
+	uint16le usHigh;
 } DLSRGNRANGE;
 
 STATIC_ASSERT(sizeof(DLSRGNRANGE) == 4);
 
-typedef struct PACKED COLHCHUNK
+typedef struct COLHCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 ulInstruments;
+	uint32le id;
+	uint32le len;
+	uint32le ulInstruments;
 } COLHCHUNK;
 
 STATIC_ASSERT(sizeof(COLHCHUNK) == 12);
 
-typedef struct PACKED VERSCHUNK
+typedef struct VERSCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint16 version[4];
+	uint32le id;
+	uint32le len;
+	uint16le version[4];
 } VERSCHUNK;
 
 STATIC_ASSERT(sizeof(VERSCHUNK) == 16);
 
-typedef struct PACKED PTBLCHUNK
+typedef struct PTBLCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 cbSize;
-	uint32 cCues;
-	uint32 ulOffsets[1];
+	uint32le id;
+	uint32le len;
+	uint32le cbSize;
+	uint32le cCues;
+	uint32le ulOffsets[1];
 } PTBLCHUNK;
 
 STATIC_ASSERT(sizeof(PTBLCHUNK) == 20);
 
-typedef struct PACKED INSHCHUNK
+typedef struct INSHCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 cRegions;
-	uint32 ulBank;
-	uint32 ulInstrument;
+	uint32le id;
+	uint32le len;
+	uint32le cRegions;
+	uint32le ulBank;
+	uint32le ulInstrument;
 } INSHCHUNK;
 
 STATIC_ASSERT(sizeof(INSHCHUNK) == 20);
 
-typedef struct PACKED RGNHCHUNK
+typedef struct RGNHCHUNK
 {
-	uint32 id;
-	uint32 len;
+	uint32le id;
+	uint32le len;
 	DLSRGNRANGE RangeKey;
 	DLSRGNRANGE RangeVelocity;
-	uint16 fusOptions;
-	uint16 usKeyGroup;
+	uint16le fusOptions;
+	uint16le usKeyGroup;
 } RGNHCHUNK;
 
 STATIC_ASSERT(sizeof(RGNHCHUNK) == 20);
 
-typedef struct PACKED WLNKCHUNK
+typedef struct WLNKCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint16 fusOptions;
-	uint16 usPhaseGroup;
-	uint32 ulChannel;
-	uint32 ulTableIndex;
+	uint32le id;
+	uint32le len;
+	uint16le fusOptions;
+	uint16le usPhaseGroup;
+	uint32le ulChannel;
+	uint32le ulTableIndex;
 } WLNKCHUNK;
 
 STATIC_ASSERT(sizeof(WLNKCHUNK) == 20);
 
-typedef struct PACKED ART1CHUNK
+typedef struct ART1CHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 cbSize;
-	uint32 cConnectionBlocks;
+	uint32le id;
+	uint32le len;
+	uint32le cbSize;
+	uint32le cConnectionBlocks;
 } ART1CHUNK;
 
 STATIC_ASSERT(sizeof(ART1CHUNK) == 16);
 
-typedef struct PACKED CONNECTIONBLOCK
+typedef struct CONNECTIONBLOCK
 {
-	uint16 usSource;
-	uint16 usControl;
-	uint16 usDestination;
-	uint16 usTransform;
-	LONG lScale;
+	uint16le usSource;
+	uint16le usControl;
+	uint16le usDestination;
+	uint16le usTransform;
+	int32le  lScale;
 } CONNECTIONBLOCK;
 
 STATIC_ASSERT(sizeof(CONNECTIONBLOCK) == 12);
 
-typedef struct PACKED WSMPCHUNK
+typedef struct WSMPCHUNK
 {
-	uint32 id;
-	uint32 len;
-	uint32 cbSize;
-	uint16 usUnityNote;
-	int16 sFineTune;
-	LONG lAttenuation;
-	uint32 fulOptions;
-	uint32 cSampleLoops;
+	uint32le id;
+	uint32le len;
+	uint32le cbSize;
+	uint16le usUnityNote;
+	int16le  sFineTune;
+	int32le  lAttenuation;
+	uint32le fulOptions;
+	uint32le cSampleLoops;
 } WSMPCHUNK;
 
 STATIC_ASSERT(sizeof(WSMPCHUNK) == 28);
 
-typedef struct PACKED WSMPSAMPLELOOP
+typedef struct WSMPSAMPLELOOP
 {
-	uint32 cbSize;
-	uint32 ulLoopType;
-	uint32 ulLoopStart;
-	uint32 ulLoopLength;
-	void ConvertEndianness()
-	{
-		SwapBytesLE(cbSize);
-		SwapBytesLE(ulLoopType);
-		SwapBytesLE(ulLoopStart);
-		SwapBytesLE(ulLoopLength);
-	}
+	uint32le cbSize;
+	uint32le ulLoopType;
+	uint32le ulLoopStart;
+	uint32le ulLoopLength;
+
 } WSMPSAMPLELOOP;
 
 STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
@@ -342,81 +331,77 @@ STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
 /////////////////////////////////////////////////////////////////////
 // SF2 Structures Definitions
 
-typedef struct PACKED SFPRESETHEADER
+typedef struct SFPRESETHEADER
 {
-	char achPresetName[20];
-	uint16 wPreset;
-	uint16 wBank;
-	uint16 wPresetBagNdx;
-	uint32 dwLibrary;
-	uint32 dwGenre;
-	uint32 dwMorphology;
+	char      achPresetName[20];
+	uint16le wPreset;
+	uint16le wBank;
+	uint16le wPresetBagNdx;
+	uint32le dwLibrary;
+	uint32le dwGenre;
+	uint32le dwMorphology;
 } SFPRESETHEADER;
 
 STATIC_ASSERT(sizeof(SFPRESETHEADER) == 38);
 
-typedef struct PACKED SFPRESETBAG
+typedef struct SFPRESETBAG
 {
-	uint16 wGenNdx;
-	uint16 wModNdx;
+	uint16le wGenNdx;
+	uint16le wModNdx;
 } SFPRESETBAG;
 
 STATIC_ASSERT(sizeof(SFPRESETBAG) == 4);
 
-typedef struct PACKED SFGENLIST
+typedef struct SFGENLIST
 {
-	uint16 sfGenOper;
-	uint16 genAmount;
+	uint16le sfGenOper;
+	uint16le genAmount;
 } SFGENLIST;
 
 STATIC_ASSERT(sizeof(SFGENLIST) == 4);
 
-typedef struct PACKED SFINST
+typedef struct SFINST
 {
-	char achInstName[20];
-	uint16 wInstBagNdx;
+	char      achInstName[20];
+	uint16le wInstBagNdx;
 } SFINST;
 
 STATIC_ASSERT(sizeof(SFINST) == 22);
 
-typedef struct PACKED SFINSTBAG
+typedef struct SFINSTBAG
 {
-	uint16 wGenNdx;
-	uint16 wModNdx;
+	uint16le wGenNdx;
+	uint16le wModNdx;
 } SFINSTBAG;
 
 STATIC_ASSERT(sizeof(SFINSTBAG) == 4);
 
-typedef struct PACKED SFINSTGENLIST
+typedef struct SFINSTGENLIST
 {
-	uint16 sfGenOper;
-	uint16 genAmount;
+	uint16le sfGenOper;
+	uint16le genAmount;
 } SFINSTGENLIST;
 
 STATIC_ASSERT(sizeof(SFINSTGENLIST) == 4);
 
-typedef struct PACKED SFSAMPLE
+typedef struct SFSAMPLE
 {
-	char achSampleName[20];
-	uint32 dwStart;
-	uint32 dwEnd;
-	uint32 dwStartloop;
-	uint32 dwEndloop;
-	uint32 dwSampleRate;
-	uint8 byOriginalPitch;
-	char chPitchCorrection;
-	uint16 wSampleLink;
-	uint16 sfSampleType;
+	char      achSampleName[20];
+	uint32le dwStart;
+	uint32le dwEnd;
+	uint32le dwStartloop;
+	uint32le dwEndloop;
+	uint32le dwSampleRate;
+	uint8le  byOriginalPitch;
+	char      chPitchCorrection;
+	uint16le wSampleLink;
+	uint16le sfSampleType;
 } SFSAMPLE;
 
 STATIC_ASSERT(sizeof(SFSAMPLE) == 46);
 
 // End of structures definitions
 /////////////////////////////////////////////////////////////////////
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 typedef struct SF2LOADERINFO
@@ -437,8 +422,8 @@ typedef struct SF2LOADERINFO
 /////////////////////////////////////////////////////////////////////
 // Unit conversion
 
-LONG CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
-//-------------------------------------------------------------
+int32 CDLSBank::DLS32BitTimeCentsToMilliseconds(int32 lTimeCents)
+//---------------------------------------------------------------
 {
 	// tc = log2(time[secs]) * 1200*65536
 	// time[secs] = 2^(tc/(1200*65536))
@@ -446,30 +431,30 @@ LONG CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
 	double fmsecs = 1000.0 * pow(2.0, ((double)lTimeCents)/(1200.0*65536.0));
 	if (fmsecs < -32767) return -32767;
 	if (fmsecs > 32767) return 32767;
-	return (LONG)fmsecs;
+	return (int32)fmsecs;
 }
 
 
 // 0dB = 0x10000
-LONG CDLSBank::DLS32BitRelativeGainToLinear(LONG lCentibels)
-//----------------------------------------------------------
+int32 CDLSBank::DLS32BitRelativeGainToLinear(int32 lCentibels)
+//------------------------------------------------------------
 {
 	// v = 10^(cb/(200*65536)) * V
-	return (LONG)(65536.0 * pow(10.0, ((double)lCentibels)/(200*65536.0)) );
+	return (int32)(65536.0 * pow(10.0, ((double)lCentibels)/(200*65536.0)) );
 }
 
 
-LONG CDLSBank::DLS32BitRelativeLinearToGain(LONG lGain)
-//-----------------------------------------------------
+int32 CDLSBank::DLS32BitRelativeLinearToGain(int32 lGain)
+//-------------------------------------------------------
 {
 	// cb = log10(v/V) * 200 * 65536
 	if (lGain <= 0) return -960 * 65536;
-	return (LONG)( 200*65536.0 * log10( ((double)lGain)/65536.0 ) );
+	return (int32)( 200*65536.0 * log10( ((double)lGain)/65536.0 ) );
 }
 
 
-LONG CDLSBank::DLSMidiVolumeToLinear(uint32 nMidiVolume)
-//------------------------------------------------------
+int32 CDLSBank::DLSMidiVolumeToLinear(uint32 nMidiVolume)
+//-------------------------------------------------------
 {
 	return (nMidiVolume * nMidiVolume << 16) / (127*127);
 }
@@ -539,7 +524,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	{
 		do
 		{
-			int len = BigEndian(riff.riff_len);
+			uint32 len = riff.riff_len;
+			len = SwapBytesBE(len);
 			if (len <= 4) break;
 			if (riff.id_DLS == IFFID_XDLS)
 			{
@@ -691,7 +677,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 				pregion->fuOptions |= DLSREGION_OVERRIDEWSMP;
 				pregion->uUnityNote = (uint8)p->usUnityNote;
 				pregion->sFineTune = p->sFineTune;
-				LONG lVolume = DLS32BitRelativeGainToLinear(p->lAttenuation) / 256;
+				int32 lVolume = DLS32BitRelativeGainToLinear(p->lAttenuation) / 256;
 				if (lVolume > 256) lVolume = 256;
 				if (lVolume < 4) lVolume = 4;
 				pregion->usVolume = (uint16)lVolume;
@@ -989,7 +975,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 	{
 		DLSENVELOPE dlsEnv;
 		uint32 nInstrNdx = 0;
-		LONG lAttenuation = 0;
+		int32 lAttenuation = 0;
 		// Default Envelope Values
 		dlsEnv.wVolAttack = 0;
 		dlsEnv.wVolDecay = 0;
@@ -1011,7 +997,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				{
 				case SF2_GEN_DECAYVOLENV:
 					{
-						LONG decaytime = DLS32BitTimeCentsToMilliseconds(((LONG)(short int)pgen->genAmount)<<16);
+						int32 decaytime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
 						if (decaytime > 20000) decaytime = 20000;
 						if (decaytime >= 20) dlsEnv.wVolDecay = (uint16)(decaytime / 20);
 						//Log("  vol decay time set to %d\n", decaytime);
@@ -1019,7 +1005,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					break;
 				case SF2_GEN_RELEASEVOLENV:
 					{
-						LONG releasetime = DLS32BitTimeCentsToMilliseconds(((LONG)(short int)pgen->genAmount)<<16);
+						int32 releasetime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
 						if (releasetime > 20000) releasetime = 20000;
 						if (releasetime >= 20) dlsEnv.wVolRelease = (uint16)(releasetime / 20);
 						//Log("  vol release time set to %d\n", releasetime);
@@ -1075,7 +1061,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				pDlsEnv = &m_Envelopes[pDlsIns->nMelodicEnv-1];
 			}
 			// Region Default Values
-			LONG lAttn = lAttenuation;
+			int32 lAttn = lAttenuation;
 			pRgn->uUnityNote = 0xFF;	// 0xFF means undefined -> use sample
 			// Load Generators
 			SFINSTBAG *pbag = psf2->pInstBags + ibagcnt;
@@ -1102,7 +1088,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					break;
 				case SF2_GEN_RELEASEVOLENV:
 					{
-						LONG releasetime = DLS32BitTimeCentsToMilliseconds(((LONG)(short int)pgen->genAmount)<<16);
+						int32 releasetime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
 						if (releasetime > 20000) releasetime = 20000;
 						if (releasetime >= 20) pDlsEnv->wVolRelease = (uint16)(releasetime / 20);
 						//Log("  vol release time set to %d\n", releasetime);
@@ -1131,7 +1117,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					break;
 				case SF2_GEN_SAMPLEMODES:
 					value &= 3;
-					pRgn->fuOptions &= ~(DLSREGION_SAMPLELOOP|DLSREGION_PINGPONGLOOP|DLSREGION_SUSTAINLOOP);
+					pRgn->fuOptions &= uint16(~(DLSREGION_SAMPLELOOP|DLSREGION_PINGPONGLOOP|DLSREGION_SUSTAINLOOP));
 					if (value == 1) pRgn->fuOptions |= DLSREGION_SAMPLELOOP; else
 					if (value == 2) pRgn->fuOptions |= DLSREGION_SAMPLELOOP|DLSREGION_PINGPONGLOOP; else
 					if (value == 3) pRgn->fuOptions |= DLSREGION_SAMPLELOOP|DLSREGION_SUSTAINLOOP;
@@ -1144,7 +1130,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
 				}
 			}
-			LONG lVolume = DLS32BitRelativeGainToLinear((lAttn/10) << 16) / 256;
+			int32 lVolume = DLS32BitRelativeGainToLinear((lAttn/10) << 16) / 256;
 			if (lVolume < 16) lVolume = 16;
 			if (lVolume > 256) lVolume = 256;
 			pRgn->usVolume = (uint16)lVolume;
@@ -1211,7 +1197,8 @@ bool CDLSBank::Open(FileReader file)
 	{
 		do {
 			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
-			int len = BigEndian(priff->riff_len);
+			uint32 len = priff->riff_len;
+			len = SwapBytesBE(len);
 			if ((len <= 4) || ((uint32)len >= dwMemLength - dwMemPos)) break;
 			if (priff->id_DLS == IFFID_XDLS)
 			{
@@ -1608,7 +1595,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				{
 					WSMPSAMPLELOOP loop;
 					wsmpChunk.Skip(8 + wsmp.cbSize);
-					wsmpChunk.ReadConvertEndianness(loop);
+					wsmpChunk.ReadStruct(loop);
 					if(loop.ulLoopLength > 3)
 					{
 						sample.uFlags.set(CHN_LOOP);
@@ -1854,20 +1841,20 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			{
 				if (part->nVolSustainLevel < 128)
 				{
-					LONG lStartTime = pIns->VolEnv.back().tick;
-					LONG lSusLevel = - DLS32BitRelativeLinearToGain(part->nVolSustainLevel << 9) / 65536;
-					LONG lDecayTime = 1;
+					int32 lStartTime = pIns->VolEnv.back().tick;
+					int32 lSusLevel = - DLS32BitRelativeLinearToGain(part->nVolSustainLevel << 9) / 65536;
+					int32 lDecayTime = 1;
 					if (lSusLevel > 0)
 					{
-						lDecayTime = (lSusLevel * (LONG)part->wVolDecay) / 960;
+						lDecayTime = (lSusLevel * (int32)part->wVolDecay) / 960;
 						for (uint32 i=0; i<7; i++)
 						{
-							LONG lFactor = 128 - (1 << i);
+							int32 lFactor = 128 - (1 << i);
 							if (lFactor <= part->nVolSustainLevel) break;
-							LONG lev = - DLS32BitRelativeLinearToGain(lFactor << 9) / 65536;
+							int32 lev = - DLS32BitRelativeLinearToGain(lFactor << 9) / 65536;
 							if (lev > 0)
 							{
-								LONG ltime = (lev * (LONG)part->wVolDecay) / 960;
+								int32 ltime = (lev * (int32)part->wVolDecay) / 960;
 								if ((ltime > 1) && (ltime < lDecayTime))
 								{
 									ltime += lStartTime;
@@ -1880,7 +1867,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 						}
 					}
 
-					if (lStartTime + lDecayTime > (LONG)pIns->VolEnv.back().tick)
+					if (lStartTime + lDecayTime > (int32)pIns->VolEnv.back().tick)
 					{
 						pIns->VolEnv.push_back(EnvelopeNode((uint16)(lStartTime+lDecayTime), (uint8)((part->nVolSustainLevel+1) / 2)));
 					}
@@ -1895,20 +1882,20 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			// Release section
 			if ((part->wVolRelease) && (pIns->VolEnv.back().value > 1))
 			{
-				LONG lReleaseTime = part->wVolRelease;
-				LONG lStartTime = pIns->VolEnv.back().tick;
-				LONG lStartFactor = pIns->VolEnv.back().value;
-				LONG lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
-				LONG lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
+				int32 lReleaseTime = part->wVolRelease;
+				int32 lStartTime = pIns->VolEnv.back().tick;
+				int32 lStartFactor = pIns->VolEnv.back().value;
+				int32 lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
+				int32 lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
 				lReleaseTime -= lDecayEndTime;
 				for (uint32 i=0; i<5; i++)
 				{
-					LONG lFactor = 1 + ((lStartFactor * 3) >> (i+2));
+					int32 lFactor = 1 + ((lStartFactor * 3) >> (i+2));
 					if ((lFactor <= 1) || (lFactor >= lStartFactor)) continue;
-					LONG lev = - DLS32BitRelativeLinearToGain(lFactor << 10) / 65536;
+					int32 lev = - DLS32BitRelativeLinearToGain(lFactor << 10) / 65536;
 					if (lev > 0)
 					{
-						LONG ltime = (((LONG)part->wVolRelease * lev) / 960) - lDecayEndTime;
+						int32 ltime = (((int32)part->wVolRelease * lev) / 960) - lDecayEndTime;
 						if ((ltime > 1) && (ltime < lReleaseTime))
 						{
 							ltime += lStartTime;

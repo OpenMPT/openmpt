@@ -14,11 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED IMFChannel
+struct IMFChannel
 {
 	char  name[12];	// Channel name (ASCIIZ-String, max 11 chars)
 	uint8 chorus;	// Default chorus
@@ -29,40 +25,31 @@ struct PACKED IMFChannel
 
 STATIC_ASSERT(sizeof(IMFChannel) == 16);
 
-struct PACKED IMFFileHeader
+struct IMFFileHeader
 {
 	enum SongFlags
 	{
 		linearSlides = 0x01,
 	};
 
-	char   title[32];			// Songname (ASCIIZ-String, max. 31 chars)
-	uint16 ordNum;				// Number of orders saved
-	uint16 patNum;				// Number of patterns saved
-	uint16 insNum;				// Number of instruments saved
-	uint16 flags;				// See SongFlags
-	uint8  unused1[8];
-	uint8  tempo;				// Default tempo (Axx, 1...255)
-	uint8  bpm;					// Default beats per minute (BPM) (Txx, 32...255)
-	uint8  master;				// Default master volume (Vxx, 0...64)
-	uint8  amp;					// Amplification factor (mixing volume, 4...127)
-	uint8  unused2[8];
-	char   im10[4];				// 'IM10'
+	char     title[32];			// Songname (ASCIIZ-String, max. 31 chars)
+	uint16le ordNum;			// Number of orders saved
+	uint16le patNum;			// Number of patterns saved
+	uint16le insNum;			// Number of instruments saved
+	uint16le flags;				// See SongFlags
+	uint8le  unused1[8];
+	uint8le  tempo;				// Default tempo (Axx, 1...255)
+	uint8le  bpm;				// Default beats per minute (BPM) (Txx, 32...255)
+	uint8le  master;			// Default master volume (Vxx, 0...64)
+	uint8le  amp;				// Amplification factor (mixing volume, 4...127)
+	uint8le  unused2[8];
+	char     im10[4];			// 'IM10'
 	IMFChannel channels[32];	// Channel settings
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(ordNum);
-		SwapBytesLE(patNum);
-		SwapBytesLE(insNum);
-		SwapBytesLE(flags);
-	}
 };
 
 STATIC_ASSERT(sizeof(IMFFileHeader) == 576);
 
-struct PACKED IMFEnvelope
+struct IMFEnvelope
 {
 	enum EnvFlags
 	{
@@ -73,23 +60,23 @@ struct PACKED IMFEnvelope
 
 	uint8 points;		// Number of envelope points
 	uint8 sustain;		// Envelope sustain point
-	uint8 loop_start;	// Envelope loop start point
-	uint8 loop_end;		// Envelope loop end point
+	uint8 loopStart;	// Envelope loop start point
+	uint8 loopEnd;		// Envelope loop end point
 	uint8 flags;		// See EnvFlags
 	uint8 unused[3];
 };
 
 STATIC_ASSERT(sizeof(IMFEnvelope) == 8);
 
-struct PACKED IMFEnvNode
+struct IMFEnvNode
 {
-	uint16 tick;
-	uint16 value;
+	uint16le tick;
+	uint16le value;
 };
 
 STATIC_ASSERT(sizeof(IMFEnvNode) == 4);
 
-struct PACKED IMFInstrument
+struct IMFInstrument
 {
 	enum EnvTypes
 	{
@@ -98,14 +85,14 @@ struct PACKED IMFInstrument
 		filterEnv = 2,
 	};
 
-	char  name[32];		// Inst. name (ASCIIZ-String, max. 31 chars)
-	uint8 map[120];		// Multisample settings
-	uint8 unused[8];
-	IMFEnvNode nodes[3][16];
+	char        name[32];	// Inst. name (ASCIIZ-String, max. 31 chars)
+	uint8le     map[120];	// Multisample settings
+	uint8le     unused[8];
+	IMFEnvNode  nodes[3][16];
 	IMFEnvelope env[3];
-	uint16 fadeout;		// Fadeout rate (0...0FFFH)
-	uint16 smpNum;		// Number of samples in instrument
-	char   ii10[4];		// 'II10'
+	uint16le    fadeout;	// Fadeout rate (0...0FFFH)
+	uint16le    smpNum;		// Number of samples in instrument
+	char        ii10[4];	// 'II10'
 
 	void ConvertEnvelope(InstrumentEnvelope &mptEnv, EnvTypes e) const
 	{
@@ -116,14 +103,14 @@ struct PACKED IMFInstrument
 		mptEnv.dwFlags.set(ENV_LOOP, (env[e].flags & 4) != 0);
 
 		mptEnv.resize(Clamp(env[e].points, uint8(2), uint8(16)));
-		mptEnv.nLoopStart = env[e].loop_start;
-		mptEnv.nLoopEnd = env[e].loop_end;
+		mptEnv.nLoopStart = env[e].loopStart;
+		mptEnv.nLoopEnd = env[e].loopEnd;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = env[e].sustain;
 
 		uint16 minTick = 0; // minimum tick value for next node
 		for(uint32 n = 0; n < mptEnv.size(); n++)
 		{
-			minTick = mptEnv[n].tick = std::max(minTick, nodes[e][n].tick);
+			minTick = mptEnv[n].tick = std::max<uint16>(minTick, nodes[e][n].tick);
 			minTick++;
 			mptEnv[n].value = static_cast<uint8>(std::min(nodes[e][n].value >> shift, ENVELOPE_MAX));
 		}
@@ -155,26 +142,11 @@ struct PACKED IMFInstrument
 		if(!mptIns.VolEnv.dwFlags[ENV_ENABLED] && !mptIns.nFadeOut)
 			mptIns.nFadeOut = 8192;
 	}
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(size_t e = 0; e < CountOf(nodes); e++)
-		{
-			for(size_t n = 0; n < CountOf(nodes[0]); n++)
-			{
-				SwapBytesLE(nodes[e][n].tick);
-				SwapBytesLE(nodes[e][n].value);
-			}
-		}
-		SwapBytesLE(fadeout);
-		SwapBytesLE(smpNum);
-	}
 };
 
 STATIC_ASSERT(sizeof(IMFInstrument) == 384);
 
-struct PACKED IMFSample
+struct IMFSample
 {
 	enum SampleFlags
 	{
@@ -184,20 +156,20 @@ struct PACKED IMFSample
 		smpPanning		= 0x08,
 	};
 
-	char   filename[13];	// Sample filename (12345678.ABC) */
-	uint8  unused1[3];
-	uint32 length;			// Length (in bytes)
-	uint32 loopStart;		// Loop start (in bytes)
-	uint32 loopEnd;			// Loop end (in bytes)
-	uint32 c5Speed;			// Samplerate
-	uint8  volume;			// Default volume (0...64)
-	uint8  panning;			// Default pan (0...255)
-	uint8  unused2[14];
-	uint8  flags;			// Sample flags
-	uint8  unused3[5];
-	uint16 ems;				// Reserved for internal usage
-	uint32 dram;			// Reserved for internal usage
-	char   is10[4];			// 'IS10'
+	char     filename[13];	// Sample filename (12345678.ABC) */
+	uint8le  unused1[3];
+	uint32le length;		// Length (in bytes)
+	uint32le loopStart;		// Loop start (in bytes)
+	uint32le loopEnd;		// Loop end (in bytes)
+	uint32le c5Speed;		// Samplerate
+	uint8le  volume;		// Default volume (0...64)
+	uint8le  panning;		// Default pan (0...255)
+	uint8le  unused2[14];
+	uint8le  flags;			// Sample flags
+	uint8le  unused3[5];
+	uint16le ems;			// Reserved for internal usage
+	uint32le dram;			// Reserved for internal usage
+	char     is10[4];		// 'IS10'
 
 	// Convert an IMFSample to OpenMPT's internal sample representation.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -225,22 +197,10 @@ struct PACKED IMFSample
 		if(flags & smpPanning)
 			mptSmp.uFlags.set(CHN_PANNING);
 	}
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c5Speed);
-	}
 };
 
 STATIC_ASSERT(sizeof(IMFSample) == 64);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 static const uint8 imfEffects[] =
 {
@@ -396,14 +356,14 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 {
 	IMFFileHeader fileHeader;
 	file.Rewind();
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.im10, "IM10", 4)
 		|| fileHeader.ordNum > 256
-		|| fileHeader.insNum >= MAX_INSTRUMENTS)
+		|| fileHeader.insNum >= MAX_INSTRUMENTS
+		|| !file.CanRead(256))
 	{
 		return false;
 	}
-
 
 	// Read channel configuration
 	std::bitset<32> ignoreChannels; // bit set for each channel that's completely disabled
@@ -463,8 +423,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = (fileHeader.flags & IMFFileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0);
 	m_nDefaultSpeed = fileHeader.tempo;
 	m_nDefaultTempo.Set(fileHeader.bpm);
-	m_nDefaultGlobalVolume = Clamp(fileHeader.master, uint8(0), uint8(64)) * 4;
-	m_nSamplePreAmp = Clamp(fileHeader.amp, uint8(4), uint8(127));
+	m_nDefaultGlobalVolume = Clamp<uint8, uint8>(fileHeader.master, 0, 64) * 4;
+	m_nSamplePreAmp = Clamp<uint8, uint8>(fileHeader.amp, 4, 127);
 
 	m_nInstruments = fileHeader.insNum;
 	m_nSamples = 0; // Will be incremented later
@@ -575,7 +535,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ModInstrument *instr = AllocateInstrument(ins + 1);
 		IMFInstrument instrumentHeader;
-		if(!file.ReadConvertEndianness(instrumentHeader) || instr == nullptr)
+		if(!file.ReadStruct(instrumentHeader) || instr == nullptr)
 		{
 			continue;
 		}
@@ -589,7 +549,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 0; smp < instrumentHeader.smpNum; smp++)
 		{
 			IMFSample sampleHeader;
-			file.ReadConvertEndianness(sampleHeader);
+			file.ReadStruct(sampleHeader);
 
 			const SAMPLEINDEX smpID = firstSample + smp;
 			if(memcmp(sampleHeader.is10, "IS10", 4) || smpID >= MAX_SAMPLES)
@@ -601,7 +561,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[smpID];
 
 			sampleHeader.ConvertToMPT(sample);
-			strcpy(m_szNames[smpID], sample.filename);
+			mpt::String::Copy(m_szNames[smpID], sample.filename);
 
 			if(sampleHeader.length)
 			{

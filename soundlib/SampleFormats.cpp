@@ -818,90 +818,55 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 /////////////////////////////////////////////////////////////
 // GUS Patches
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
-struct PACKED GF1PatchFileHeader
+struct GF1PatchFileHeader
 {
-	char   magic[8];		// "GF1PATCH"
-	char   version[4];		// "100", or "110"
-	char   id[10];			// "ID#000002"
-	char   copyright[60];	// Copyright
-	uint8  numInstr;		// Number of instruments in patch
-	uint8  voices;			// Number of voices, usually 14
-	uint8  channels;		// Number of wav channels that can be played concurently to the patch
-	uint16 numSamples;		// Total number of waveforms for all the .PAT
-	uint16 volume;			// Master volume
-	uint32 dataSize;
-	char   reserved2[36];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numSamples);
-		SwapBytesLE(volume);
-		SwapBytesLE(dataSize);
-	}
+	char     magic[8];		// "GF1PATCH"
+	char     version[4];	// "100", or "110"
+	char     id[10];		// "ID#000002"
+	char     copyright[60];	// Copyright
+	uint8le  numInstr;		// Number of instruments in patch
+	uint8le  voices;		// Number of voices, usually 14
+	uint8le  channels;		// Number of wav channels that can be played concurently to the patch
+	uint16le numSamples;	// Total number of waveforms for all the .PAT
+	uint16le volume;		// Master volume
+	uint32le dataSize;
+	char     reserved2[36];
 };
 
 STATIC_ASSERT(sizeof(GF1PatchFileHeader) == 129);
 
 
-struct PACKED GF1Instrument
+struct GF1Instrument
 {
-	uint16 id;				// Instrument id: 0-65535
-	char   name[16];		// Name of instrument. Gravis doesn't seem to use it
-	uint32 size;			// Number of bytes for the instrument with header. (To skip to next instrument)
-	uint8  layers;			// Number of layers in instrument: 1-4
-	char   reserved[40];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(id);
-		SwapBytesLE(size);
-	}
+	uint16le id;			// Instrument id: 0-65535
+	char     name[16];		// Name of instrument. Gravis doesn't seem to use it
+	uint32le size;			// Number of bytes for the instrument with header. (To skip to next instrument)
+	uint8    layers;		// Number of layers in instrument: 1-4
+	char     reserved[40];
 };
 
 STATIC_ASSERT(sizeof(GF1Instrument) == 63);
 
 
-struct PACKED GF1SampleHeader
+struct GF1SampleHeader
 {
-	char name[7];			// null terminated string. name of the wave.
-	uint8  fractions;		// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
-	uint32 length;			// total size of wavesample. limited to 65535 now by the drivers, not the card.
-	uint32 loopstart;		// start loop position in the wavesample
-	uint32 loopend;			// end loop position in the wavesample
-	uint16 freq;			// Rate at which the wavesample has been sampled
-	uint32 low_freq, high_freq, root_freq;	// check note.h for the correspondance.
-	int16  finetune;		// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
-	uint8  balance;			// Balance: 0-15. 0=full left, 15 = full right
-	uint8  env_rate[6];		// attack rates
-	uint8  env_volume[6];	// attack volumes
-	uint8  tremolo_sweep, tremolo_rate, tremolo_depth;
-	uint8  vibrato_sweep, vibrato_rate, vibrato_depth;
-	uint8  flags;
-	int16  scale_frequency;
-	uint16 scale_factor;
-	char reserved[36];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopstart);
-		SwapBytesLE(loopend);
-		SwapBytesLE(freq);
-		SwapBytesLE(low_freq);
-		SwapBytesLE(high_freq);
-		SwapBytesLE(root_freq);
-		SwapBytesLE(finetune);
-		SwapBytesLE(scale_frequency);
-		SwapBytesLE(scale_factor);
-	}
+	char     name[7];		// null terminated string. name of the wave.
+	uint8le  fractions;		// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
+	uint32le length;		// total size of wavesample. limited to 65535 now by the drivers, not the card.
+	uint32le loopstart;		// start loop position in the wavesample
+	uint32le loopend;		// end loop position in the wavesample
+	uint16le freq;			// Rate at which the wavesample has been sampled
+	uint32le low_freq, high_freq, root_freq;	// check note.h for the correspondance.
+	int16le  finetune;		// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
+	uint8le  balance;		// Balance: 0-15. 0=full left, 15 = full right
+	uint8le  env_rate[6];	// attack rates
+	uint8le  env_volume[6];	// attack volumes
+	uint8le  tremolo_sweep, tremolo_rate, tremolo_depth;
+	uint8le  vibrato_sweep, vibrato_rate, vibrato_depth;
+	uint8le  flags;
+	int16le  scale_frequency;
+	uint16le scale_factor;
+	char     reserved[36];
 };
 
 STATIC_ASSERT(sizeof(GF1SampleHeader) == 96);
@@ -937,27 +902,17 @@ STATIC_ASSERT(sizeof(GF1SampleHeader) == 96);
 // bit 7: off/on clamped release (6th point, env)
 
 
-struct PACKED GF1Layer
+struct GF1Layer
 {
-	uint8  previous;		// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
-	uint8  id;				// Layer id: 0-3
-	uint32 size;			// data size in bytes in the layer, without the header. to skip to next layer for example:
-	uint8  samples;			// number of wavesamples
-	char   reserved[40];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(size);
-	}
+	uint8le  previous;		// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
+	uint8le  id;			// Layer id: 0-3
+	uint32le size;			// data size in bytes in the layer, without the header. to skip to next layer for example:
+	uint8le  samples;		// number of wavesamples
+	char     reserved[40];
 };
 
 STATIC_ASSERT(sizeof(GF1Layer) == 47);
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 static int32 PatchFreqToNote(uint32 nFreq)
 //----------------------------------------
@@ -973,7 +928,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 {
 	ModSample &sample = that->GetSample(nSample);
 
-	file.ReadConvertEndianness(sampleHeader);
+	file.ReadStruct(sampleHeader);
 
 	sample.Initialize();
 	if(sampleHeader.flags & 4) sample.uFlags.set(CHN_LOOP);
@@ -1025,14 +980,14 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 	GF1PatchFileHeader fileHeader;
 	GF1Instrument instrHeader;	// We only support one instrument
 	GF1Layer layerHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
 		|| (memcmp(fileHeader.version, "110\0", 4) && memcmp(fileHeader.version, "100\0", 4))
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
-		|| !file.ReadConvertEndianness(instrHeader)
+		|| !file.ReadStruct(instrHeader)
 		//|| !instrHeader.layers	// DOO.PAT has 0 layers
-		|| !file.ReadConvertEndianness(layerHeader)
+		|| !file.ReadStruct(layerHeader)
 		|| !layerHeader.samples)
 	{
 		return false;
@@ -1058,14 +1013,14 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	GF1PatchFileHeader fileHeader;
 	GF1Instrument instrHeader;	// We only support one instrument
 	GF1Layer layerHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
 		|| (memcmp(fileHeader.version, "110\0", 4) && memcmp(fileHeader.version, "100\0", 4))
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
-		|| !file.ReadConvertEndianness(instrHeader)
+		|| !file.ReadStruct(instrHeader)
 		|| !instrHeader.layers
-		|| !file.ReadConvertEndianness(layerHeader)
+		|| !file.ReadStruct(layerHeader)
 		|| !layerHeader.samples)
 	{
 		return false;
@@ -1154,7 +1109,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 
 	S3MSampleHeader sampleHeader;
-	if(!file.ReadConvertEndianness(sampleHeader)
+	if(!file.ReadStruct(sampleHeader)
 		|| sampleHeader.sampleType != S3MSampleHeader::typePCM
 		|| memcmp(sampleHeader.magic, "SCRS", 4)
 		|| !file.Seek((sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20)))
@@ -1184,7 +1139,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	file.Rewind();
 
 	XIInstrumentHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.signature, "Extended Instrument: ", 21)
 		|| fileHeader.version != XIInstrumentHeader::fileVersion
 		|| fileHeader.eof != 0x1A)
@@ -1241,7 +1196,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	for(SAMPLEINDEX i = 0; i < fileHeader.numSamples; i++)
 	{
 		XMSample sampleHeader;
-		if(!file.ReadConvertEndianness(sampleHeader)
+		if(!file.ReadStruct(sampleHeader)
 			|| !sampleMap[i])
 		{
 			continue;
@@ -1310,7 +1265,6 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		header.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 	}
 
-	header.ConvertEndianness();
 	fwrite(&header, 1, sizeof(XIInstrumentHeader), f);
 
 	std::vector<SampleIO> sampleFlags(samples.size());
@@ -1330,7 +1284,6 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 
 		mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[i]]);
 
-		xmSample.ConvertEndianness();
 		fwrite(&xmSample, 1, sizeof(xmSample), f);
 	}
 
@@ -1343,8 +1296,10 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		}
 	}
 
-	int32 code = MAGIC4BE('M','P','T','X');
-	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
+	// Write 'MPTX' extension tag
+	char code[4];
+	memcpy(code, "XTPM", 4);
+	fwrite(code, 1, 4, f);
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
 	fclose(f);
@@ -1361,7 +1316,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 
 	XIInstrumentHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| !file.CanRead(sizeof(XMSample))
 		|| memcmp(fileHeader.signature, "Extended Instrument: ", 21)
 		|| fileHeader.version != XIInstrumentHeader::fileVersion
@@ -1378,7 +1333,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 
 	// Read first sample header
 	XMSample sampleHeader;
-	file.ReadConvertEndianness(sampleHeader);
+	file.ReadStruct(sampleHeader);
 	// Gotta skip 'em all!
 	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
 
@@ -1408,55 +1363,43 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 /////////////////////////////////////////////////////////////////////////////////////////
 // AIFF File I/O
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
 // AIFF header
-struct PACKED AIFFHeader
+struct AIFFHeader
 {
-	char   magic[4];	// FORM
-	uint32 length;		// Size of the file, not including magic and length
-	char   type[4];		// AIFF or AIFC
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		//SwapBytesBE(length);	// We ignore this field
-	}
+	char     magic[4];	// FORM
+	uint32be length;	// Size of the file, not including magic and length
+	char     type[4];	// AIFF or AIFC
 };
 
 STATIC_ASSERT(sizeof(AIFFHeader) == 12);
 
 
 // General IFF Chunk header
-struct PACKED AIFFChunk
+struct AIFFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idCOMM	= 0x434F4D4D,
-		idSSND	= 0x53534E44,
-		idINST	= 0x494E5354,
-		idMARK	= 0x4D41524B,
-		idNAME	= 0x4E414D45,
+		idCOMM	= MAGIC4BE('C','O','M','M'),
+		idSSND	= MAGIC4BE('S','S','N','D'),
+		idINST	= MAGIC4BE('I','N','S','T'),
+		idMARK	= MAGIC4BE('M','A','R','K'),
+		idNAME	= MAGIC4BE('N','A','M','E'),
 	};
 
 	typedef ChunkIdentifiers id_type;
 
-	uint32 id;		// See ChunkIdentifiers
-	uint32 length;	// Chunk size without header
+	uint32be id;		// See ChunkIdentifiers
+	uint32be length;	// Chunk size without header
 
 	size_t GetLength() const
 	{
-		return SwapBytesReturnBE(length);
+		return length;
 	}
 
 	id_type GetID() const
 	{
-		return static_cast<id_type>(SwapBytesReturnBE(id));
+		return static_cast<id_type>(id.get());
 	}
 };
 
@@ -1464,20 +1407,12 @@ STATIC_ASSERT(sizeof(AIFFChunk) == 8);
 
 
 // "Common" chunk (in AIFC, a compression ID and compression name follows this header, but apart from that it's identical)
-struct PACKED AIFFCommonChunk
+struct AIFFCommonChunk
 {
-	uint16 numChannels;
-	uint32 numSampleFrames;
-	uint16 sampleSize;
-	uint8  sampleRate[10];		// Sample rate in 80-Bit floating point
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(numChannels);
-		SwapBytesBE(numSampleFrames);
-		SwapBytesBE(sampleSize);
-	}
+	uint16be numChannels;
+	uint32be numSampleFrames;
+	uint16be sampleSize;
+	uint8be  sampleRate[10];		// Sample rate in 80-Bit floating point
 
 	// Convert sample rate to integer
 	uint32 GetSampleRate() const
@@ -1500,41 +1435,28 @@ STATIC_ASSERT(sizeof(AIFFCommonChunk) == 18);
 
 
 // Sound chunk
-struct PACKED AIFFSoundChunk
+struct AIFFSoundChunk
 {
-	uint32 offset;
-	uint32 blockSize;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(offset);
-		SwapBytesBE(blockSize);
-	}
+	uint32be offset;
+	uint32be blockSize;
 };
 
 STATIC_ASSERT(sizeof(AIFFSoundChunk) == 8);
 
 
 // Marker
-struct PACKED AIFFMarker
+struct AIFFMarker
 {
-	uint16 id;
-	uint32 position;		// Position in sample
-	uint8  nameLength;		// Not counting eventually existing padding byte in name string
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(id);
-		SwapBytesBE(position);
-	}};
+	uint16be id;
+	uint32be position;		// Position in sample
+	uint8be  nameLength;	// Not counting eventually existing padding byte in name string
+};
 
 STATIC_ASSERT(sizeof(AIFFMarker) == 7);
 
 
 // Instrument loop
-struct PACKED AIFFInstrumentLoop
+struct AIFFInstrumentLoop
 {
 	enum PlayModes
 	{
@@ -1543,48 +1465,28 @@ struct PACKED AIFFInstrumentLoop
 		loopBidi	= 2,
 	};
 
-	uint16 playMode;
-	uint16 beginLoop;		// Marker index
-	uint16 endLoop;			// Marker index
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(playMode);
-		SwapBytesBE(beginLoop);
-		SwapBytesBE(endLoop);
-	}
+	uint16be playMode;
+	uint16be beginLoop;	// Marker index
+	uint16be endLoop;		// Marker index
 };
 
 STATIC_ASSERT(sizeof(AIFFInstrumentLoop) == 6);
 
 
-struct PACKED AIFFInstrumentChunk
+struct AIFFInstrumentChunk
 {
-	uint8  baseNote;
-	uint8  detune;
-	uint8  lowNote;
-	uint8  highNote;
-	uint8  lowVelocity;
-	uint8  highVelocity;
-	uint16 gain;
+	uint8be  baseNote;
+	uint8be  detune;
+	uint8be  lowNote;
+	uint8be  highNote;
+	uint8be  lowVelocity;
+	uint8be  highVelocity;
+	uint16be gain;
 	AIFFInstrumentLoop sustainLoop;
 	AIFFInstrumentLoop releaseLoop;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		sustainLoop.ConvertEndianness();
-		releaseLoop.ConvertEndianness();
-	}
 };
 
 STATIC_ASSERT(sizeof(AIFFInstrumentChunk) == 20);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
@@ -1595,7 +1497,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 
 	// Verify header
 	AIFFHeader fileHeader;
-	if(!chunkFile.ReadConvertEndianness(fileHeader)
+	if(!chunkFile.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "FORM", 4)
 		|| (memcmp(fileHeader.type, "AIFF", 4) && memcmp(fileHeader.type, "AIFC", 4)))
 	{
@@ -1607,7 +1509,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read COMM chunk
 	FileReader commChunk(chunks.GetChunk(AIFFChunk::idCOMM));
 	AIFFCommonChunk sampleInfo;
-	if(!commChunk.ReadConvertEndianness(sampleInfo))
+	if(!commChunk.ReadStruct(sampleInfo))
 	{
 		return false;
 	}
@@ -1638,7 +1540,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read SSND chunk
 	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
 	AIFFSoundChunk sampleHeader;
-	if(!soundChunk.ReadConvertEndianness(sampleHeader)
+	if(!soundChunk.ReadStruct(sampleHeader)
 		|| !soundChunk.CanRead(sampleHeader.offset))
 	{
 		return false;
@@ -1695,7 +1597,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read MARK and INST chunk to extract sample loops
 	FileReader markerChunk(chunks.GetChunk(AIFFChunk::idMARK));
 	AIFFInstrumentChunk instrHeader;
-	if(markerChunk.IsValid() && chunks.GetChunk(AIFFChunk::idINST).ReadConvertEndianness(instrHeader))
+	if(markerChunk.IsValid() && chunks.GetChunk(AIFFChunk::idINST).ReadStruct(instrHeader))
 	{
 		uint16 numMarkers = markerChunk.ReadUint16BE();
 
@@ -1704,7 +1606,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		for(size_t i = 0; i < numMarkers; i++)
 		{
 			AIFFMarker marker;
-			if(!markerChunk.ReadConvertEndianness(marker))
+			if(!markerChunk.ReadStruct(marker))
 			{
 				break;
 			}
@@ -1785,17 +1687,19 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	switch(encoding)
 	{
 	case 1: sampleIO |= SampleIO::_16bit;			// u-law
-	        sampleIO |= SampleIO::uLaw; break;
+		sampleIO |= SampleIO::uLaw; break;
 	case 2: break;									// 8-bit linear PCM
 	case 3: sampleIO |= SampleIO::_16bit; break;	// 16-bit linear PCM
 	case 4: sampleIO |= SampleIO::_24bit; break;	// 24-bit linear PCM
 	case 5: sampleIO |= SampleIO::_32bit; break;	// 32-bit linear PCM
 	case 6: sampleIO |= SampleIO::_32bit;			// 32-bit IEEE floating point
-	        sampleIO |= SampleIO::floatPCM; break;
+		sampleIO |= SampleIO::floatPCM;
+		break;
 	case 7: sampleIO |= SampleIO::_64bit;			// 64-bit IEEE floating point
-	        sampleIO |= SampleIO::floatPCM; break;
+		sampleIO |= SampleIO::floatPCM;
+		break;
 	case 27: sampleIO |= SampleIO::_16bit;			// a-law
-	        sampleIO |= SampleIO::aLaw; break;
+		sampleIO |= SampleIO::aLaw; break;
 	default: return false;
 	}
 
@@ -1835,7 +1739,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	}
 
 	ITSample sampleHeader;
-	if(!file.ReadConvertEndianness(sampleHeader)
+	if(!file.ReadStruct(sampleHeader)
 		|| memcmp(sampleHeader.id, "IMPS", 4))
 	{
 		return false;
@@ -1890,7 +1794,7 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 	ITInstrument instrumentHeader;
 
 	file.Rewind();
-	if(!file.ReadConvertEndianness(instrumentHeader)
+	if(!file.ReadStruct(instrumentHeader)
 		|| memcmp(instrumentHeader.id, "IMPI", 4)
 		|| instrumentHeader.nos == 0)
 	{
@@ -1910,7 +1814,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	SAMPLEINDEX smp = 0, nsamples;
 
 	file.Rewind();
-	if(!file.ReadConvertEndianness(instrumentHeader)
+	if(!file.ReadStruct(instrumentHeader)
 		|| memcmp(instrumentHeader.id, "IMPI", 4))
 	{
 		return false;
@@ -2007,7 +1911,6 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	smpmap.clear();
 
 	uint32 filePos = instSize;
-	iti.ConvertEndianness();
 	fwrite(&iti, 1, instSize, f);
 
 	filePos += mpt::saturate_cast<uint32>(smptable.size() * sizeof(ITSample));
@@ -2023,7 +1926,6 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[*iter]);
 
 		itss.samplepointer = filePos;
-		itss.ConvertEndianness();
 		fwrite(&itss, 1, sizeof(itss), f);
 
 		// Write sample
@@ -2049,9 +1951,10 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	}
 
 	fseek(f, 0, SEEK_END);
-	int32 code = MAGIC4BE('M','P','T','X');
-	SwapBytesLE(code);
-	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
+	// Write 'MPTX' extension tag
+	char code[4];
+	memcpy(code, "XTPM", 4);
+	fwrite(&code, 1, 4, f);
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
 	fclose(f);
@@ -2064,85 +1967,61 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // 8SVX / 16SVX Samples
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // IFF File Header
-struct PACKED IFFHeader
+struct IFFHeader
 {
-	char   form[4];		// "FORM"
-	uint32 size;
-	char   magic[4];	// "8SVX" or "16SV"
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(size);
-	}
+	char     form[4];	// "FORM"
+	uint32be size;
+	char     magic[4];	// "8SVX" or "16SV"
 };
 
 STATIC_ASSERT(sizeof(IFFHeader) == 12);
 
 
 // General IFF Chunk header
-struct PACKED IFFChunk
+struct IFFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idVHDR	= 0x52444856,
-		idBODY	= 0x59444F42,
-		idNAME	= 0x454D414E,
+		idVHDR	= MAGIC4BE('V','H','D','R'),
+		idBODY	= MAGIC4BE('B','O','D','Y'),
+		idNAME	= MAGIC4BE('N','A','M','E'),
 	};
 
 	typedef ChunkIdentifiers id_type;
 
-	uint32 id;		// See ChunkIdentifiers
-	uint32 length;	// Chunk size without header
+	uint32be id;		// See ChunkIdentifiers
+	uint32be length;	// Chunk size without header
 
 	size_t GetLength() const
 	{
 		if(length == 0)	// Broken files
 			return std::numeric_limits<size_t>::max();
-		return SwapBytesReturnBE(length);
+		return length;
 	}
 
 	id_type GetID() const
 	{
-		return static_cast<id_type>(SwapBytesReturnLE(id));
+		return static_cast<id_type>(id.get());
 	}
 };
 
 STATIC_ASSERT(sizeof(IFFChunk) == 8);
 
 
-struct PACKED IFFSampleHeader
+struct IFFSampleHeader
 {
-	uint32 oneShotHiSamples;	// Samples in the high octave 1-shot part
-	uint32 repeatHiSamples;		// Samples in the high octave repeat part
-	uint32 samplesPerHiCycle;	// Samples/cycle in high octave, else 0
-	uint16 samplesPerSec;		// Data sampling rate
-	uint8  octave;				// Octaves of waveforms
-	uint8  compression;			// Data compression technique used
-	uint32 volume;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(oneShotHiSamples);
-		SwapBytesBE(repeatHiSamples);
-		SwapBytesBE(samplesPerHiCycle);
-		SwapBytesBE(samplesPerSec);
-		SwapBytesBE(volume);
-	}
+	uint32be oneShotHiSamples;	// Samples in the high octave 1-shot part
+	uint32be repeatHiSamples;	// Samples in the high octave repeat part
+	uint32be samplesPerHiCycle;	// Samples/cycle in high octave, else 0
+	uint16be samplesPerSec;		// Data sampling rate
+	uint8be  octave;			// Octaves of waveforms
+	uint8be  compression;		// Data compression technique used
+	uint32be volume;
 };
 
 STATIC_ASSERT(sizeof(IFFSampleHeader) == 20);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
@@ -2151,7 +2030,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 
 	IFFHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.form, "FORM", 4 )
 		|| (memcmp(fileHeader.magic, "8SVX", 4) && memcmp(fileHeader.magic, "16SV", 4)))
 	{
@@ -2166,7 +2045,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	IFFSampleHeader sampleHeader;
 	if(!bodyChunk.IsValid()
 		|| !vhdrChunk.IsValid()
-		|| !vhdrChunk.ReadConvertEndianness(sampleHeader))
+		|| !vhdrChunk.ReadStruct(sampleHeader))
 	{
 		return false;
 	}
@@ -2707,8 +2586,6 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		chunk.mptInfo.ConvertToWAV(sample, GetType());
 
 		const uint32 length = sizeof(RIFFChunk) + sizeof(WAVExtraChunk);
-		chunk.header.ConvertEndianness();
-		chunk.mptInfo.ConvertEndianness();
 
 		FLAC__metadata_object_application_set_data(metadata[1], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 	}
@@ -2741,10 +2618,6 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		}
 
 		const uint32 length = sizeof(RIFFChunk) + chunk.header.length;
-		chunk.header.ConvertEndianness();
-		chunk.info.ConvertEndianness();
-		chunk.loops[0].ConvertEndianness();
-		chunk.loops[1].ConvertEndianness();
 
 		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 		numBlocks++;
@@ -2757,22 +2630,20 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		struct
 		{
 			RIFFChunk header;
-			uint32 numPoints;
+			uint32le numPoints;
 			WAVCuePoint cues[CountOf(sample.cues)];
 		} chunk;
 
 		chunk.header.id = RIFFChunk::idcue_;
 		chunk.header.length = 4 + sizeof(chunk.cues);
-		chunk.numPoints = SwapBytesReturnLE(CountOf(sample.cues));
+		chunk.numPoints = CountOf(sample.cues);
 
 		for(uint32 i = 0; i < CountOf(sample.cues); i++)
 		{
 			chunk.cues[i].ConvertToWAV(i, sample.cues[i]);
-			chunk.cues[i].ConvertEndianness();
 		}
 
 		const uint32 length = sizeof(RIFFChunk) + chunk.header.length;
-		chunk.header.ConvertEndianness();
 
 		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 		numBlocks++;

@@ -196,39 +196,26 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 }
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
 // File Header
-struct PACKED MODFileHeader
+struct MODFileHeader
 {
-	uint8 numOrders;
-	uint8 restartPos;
-	uint8 orderList[128];
+	uint8be numOrders;
+	uint8be restartPos;
+	uint8be orderList[128];
 };
 
 STATIC_ASSERT(sizeof(MODFileHeader) == 130);
 
 
 // Sample Header
-struct PACKED MODSampleHeader
+struct MODSampleHeader
 {
-	char   name[22];
-	uint16 length;
-	uint8  finetune;
-	uint8  volume;
-	uint16 loopStart;
-	uint16 loopLength;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(length);
-		SwapBytesBE(loopStart);
-		SwapBytesBE(loopLength);
-	}
+	char     name[22];
+	uint16be length;
+	uint8be  finetune;
+	uint8be  volume;
+	uint16be loopStart;
+	uint16be loopLength;
 
 	// Convert an MOD sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -236,7 +223,7 @@ struct PACKED MODSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length * 2;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune & 0x0F);
-		mptSmp.nVolume = 4 * MIN(volume, 64);
+		mptSmp.nVolume = 4u * std::min<uint8>(volume, 64);
 
 		SmpLength lStart = loopStart * 2;
 		SmpLength lLength = loopLength * 2;
@@ -330,7 +317,7 @@ struct PACKED MODSampleHeader
 
 STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
 
-struct PACKED PT36IffChunk
+struct PT36IffChunk
 {
 	// IFF chunk names
 	enum ChunkIdentifiers
@@ -341,66 +328,34 @@ struct PACKED PT36IffChunk
 		idPTDT	= MAGIC4BE('P','T','D','T'),
 	};
 
-	uint32 signature;	// IFF chunk name
-	uint32 chunksize;	// chunk size without header
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(signature);
-		SwapBytesBE(chunksize);
-	}
+	uint32be signature;	// IFF chunk name
+	uint32be chunksize;	// chunk size without header
 };
 
 STATIC_ASSERT(sizeof(PT36IffChunk) == 8);
 
-struct PACKED PT36InfoChunk
+struct PT36InfoChunk
 {
-	char name[32];
-	uint16 numSamples;
-	uint16 numOrders;
-	uint16 numPatterns;
-	uint16 volume;
-	uint16 tempo;
-	uint16 flags;
-	uint16 dateDay;
-	uint16 dateMonth;
-	uint16 dateYear;
-	uint16 dateHour;
-	uint16 dateMinute;
-	uint16 dateSecond;
-	uint16 playtimeHour;
-	uint16 playtimeMinute;
-	uint16 playtimeSecond;
-	uint16 playtimeMsecond;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(numSamples);
-		SwapBytesBE(numOrders);
-		SwapBytesBE(numPatterns);
-		SwapBytesBE(volume);
-		SwapBytesBE(tempo);
-		SwapBytesBE(flags);
-		SwapBytesBE(dateDay);
-		SwapBytesBE(dateMonth);
-		SwapBytesBE(dateYear);
-		SwapBytesBE(dateHour);
-		SwapBytesBE(dateMinute);
-		SwapBytesBE(dateSecond);
-		SwapBytesBE(playtimeHour);
-		SwapBytesBE(playtimeMinute);
-		SwapBytesBE(playtimeSecond);
-		SwapBytesBE(playtimeMsecond);
-	}
+	char     name[32];
+	uint16be numSamples;
+	uint16be numOrders;
+	uint16be numPatterns;
+	uint16be volume;
+	uint16be tempo;
+	uint16be flags;
+	uint16be dateDay;
+	uint16be dateMonth;
+	uint16be dateYear;
+	uint16be dateHour;
+	uint16be dateMinute;
+	uint16be dateSecond;
+	uint16be playtimeHour;
+	uint16be playtimeMinute;
+	uint16be playtimeSecond;
+	uint16be playtimeMsecond;
 };
 
 STATIC_ASSERT(sizeof(PT36InfoChunk) == 64);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 // Check if header magic equals a given string.
@@ -414,7 +369,7 @@ static bool IsMagic(const char *magic1, const char *magic2)
 static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
 //------------------------------------------------------------------------------------------------------------------------------
 {
-	file.ReadConvertEndianness(sampleHeader);
+	file.ReadStruct(sampleHeader);
 	sampleHeader.ConvertToMPT(sample);
 
 	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
@@ -433,8 +388,8 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 
 
 // Parse the order list to determine how many patterns are used in the file.
-static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, ORDERINDEX numOrders, size_t totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, ORDERINDEX numOrders, SmpLength totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
 #ifdef _DEBUG
@@ -1533,7 +1488,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Go through IFF chunks...
 	PT36IffChunk iffHead;
-	if(!file.ReadConvertEndianness(iffHead))
+	if(!file.ReadStruct(iffHead))
 	{
 		return false;
 	}
@@ -1566,7 +1521,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		
 		case PT36IffChunk::idINFO:
-			infoOk = chunk.ReadConvertEndianness(info);
+			infoOk = chunk.ReadStruct(info);
 			break;
 		
 		case PT36IffChunk::idCMNT:
@@ -1577,13 +1532,13 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			ok = ReadMod(chunk, loadFlags);
 			break;
 		}
-	} while(file.CanRead(sizeof(PT36IffChunk)) && file.ReadConvertEndianness(iffHead));
+	} while(file.ReadStruct(iffHead));
 	
 	// both an info chunk and a module are required
 	if(ok && infoOk)
 	{
 		if(info.volume != 0)
-			m_nSamplePreAmp = std::min(uint16(64), info.volume);
+			m_nSamplePreAmp = std::min<uint16>(64, info.volume);
 		if(info.tempo != 0)
 			m_nDefaultTempo.Set(info.tempo);
 	
@@ -1663,7 +1618,6 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		MODSampleHeader sampleHeader;
 		mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
 		sampleLength[smp] = sampleHeader.ConvertToMOD(sampleSource[smp] <= GetNumSamples() ? GetSample(sampleSource[smp]) : ModSample(MOD_TYPE_MOD));
-		sampleHeader.ConvertEndianness();
 		fwrite(&sampleHeader, sizeof(sampleHeader), 1, f);
 	}
 
@@ -1672,23 +1626,24 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	MemsetZero(fileHeader);
 
 	PATTERNINDEX writePatterns = 0;
-	for(ORDERINDEX ord = 0; ord < Order.GetLength() && fileHeader.numOrders < 128; ord++)
+	uint8 writtenOrders = 0;
+	for(ORDERINDEX ord = 0; ord < Order.GetLength() && writtenOrders < 128; ord++)
 	{
 		// Ignore +++ and --- patterns in order list, as well as high patterns (MOD officially only supports up to 128 patterns)
+		if(ord == Order.GetRestartPos())
+		{
+			fileHeader.restartPos = writtenOrders;
+		}
 		if(Order[ord] < 128)
 		{
-			fileHeader.orderList[fileHeader.numOrders++] = static_cast<uint8>(Order[ord]);
+			fileHeader.orderList[writtenOrders++] = static_cast<uint8>(Order[ord]);
 			if(writePatterns <= Order[ord])
 			{
 				writePatterns = Order[ord] + 1;
 			}
 		}
 	}
-
-	if(Order.GetRestartPos() < 128)
-	{
-		fileHeader.restartPos = static_cast<uint8>(Order.GetRestartPos());
-	}
+	fileHeader.numOrders = writtenOrders;
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 
 	// Write magic bytes

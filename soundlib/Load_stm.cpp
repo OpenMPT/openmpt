@@ -14,25 +14,20 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
 // STM sample header struct
-struct PACKED STMSampleHeader
+struct STMSampleHeader
 {
-	char   filename[12];	// Can't have long comments - just filename comments :)
-	uint8  zero;
-	uint8  disk;			// A blast from the past
-	uint16 offset;			// 20-bit offset in file (lower 4 bits are zero)
-	uint16 length;			// Sample length
-	uint16 loopStart;		// Loop start point
-	uint16 loopEnd;			// Loop end point
-	uint8  volume;			// Volume
-	uint8  reserved2;
-	uint16 sampleRate;
-	uint8  reserved3[6];
+	char     filename[12];	// Can't have long comments - just filename comments :)
+	uint8le  zero;
+	uint8le  disk;			// A blast from the past
+	uint16le offset;		// 20-bit offset in file (lower 4 bits are zero)
+	uint16le length;		// Sample length
+	uint16le loopStart;	// Loop start point
+	uint16le loopEnd;		// Loop end point
+	uint8le  volume;		// Volume
+	uint8le  reserved2;
+	uint16le sampleRate;
+	uint8le  reserved3[6];
 
 	// Convert an STM sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -56,23 +51,13 @@ struct PACKED STMSampleHeader
 			mptSmp.nLoopEnd = std::min(mptSmp.nLoopEnd, mptSmp.nLength);
 		}
 	}
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(offset);
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sampleRate);
-	}
 };
 
 STATIC_ASSERT(sizeof(STMSampleHeader) == 32);
 
 
 // STM file header
-struct PACKED STMFileHeader
+struct STMFileHeader
 {
 	char  songname[20];
 	char  trackername[8];			// !SCREAM! for ST 2.xx
@@ -90,28 +75,23 @@ STATIC_ASSERT(sizeof(STMFileHeader) == 48);
 
 
 // Pattern note entry
-struct PACKED STMPatternEntry
+struct STMPatternEntry
 {
-	uint8 note;
-	uint8 insvol;
-	uint8 volcmd;
-	uint8 cmdinf;
+	uint8le note;
+	uint8le insvol;
+	uint8le volcmd;
+	uint8le cmdinf;
 };
 
 STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 
 
-struct PACKED STMPatternData
+struct STMPatternData
 {
 	STMPatternEntry entry[64 * 4];
 };
 
 STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
@@ -165,7 +145,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		STMSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.filename);
 		sampleOffsets[smp - 1] = sampleHeader.offset;
@@ -310,7 +290,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			if(sample.nLength)
 			{
 				FileReader::off_t sampleOffset = sampleOffsets[smp - 1] << 4;
-				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
+				// acidlamb.stm has some bogus samples with sample offsets past EOF
+				if(sampleOffset > sizeof(STMFileHeader) && file.LengthIsAtLeast(sampleOffset))
 				{
 					file.Seek(sampleOffset);
 					sampleIO.ReadSample(sample, file);
