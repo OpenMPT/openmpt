@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### libopenmpt 0.2-beta20 (2016-08-07)
 
  *  [**Bug**] PSM loader was broken on big-endian platforms since forever.
  *  [**Bug**] load.skip_samples ctl did not work for PSM16 modules.
@@ -22,7 +22,8 @@ is just a high-level summary.
  *  DMF sample loop lengths were off by one.
  *  Unis 669 pan slide effect was too deep.
  *  Several valid (but slightly corrupted possibly due to disk failures or data
-    transfer errors) SoundTracker files were no longer loading since beta 18.
+    transfer errors) SoundTracker files were no longer loading since libopenmpt
+    0.2-beta18.
 
 ### libopenmpt 0.2-beta19 (2016-07-23)
 
