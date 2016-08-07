@@ -494,6 +494,7 @@ protected:
 
 public:
 	static const uint32 fractMax = 0xFFFFFFFFu;
+	static forceinline uint32 GetFractMax() { return fractMax; }
 
 	SamplePosition() : v(0) { }
 	explicit SamplePosition(value_t v) : v(v) { }
