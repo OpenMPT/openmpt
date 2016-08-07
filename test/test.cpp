@@ -20,6 +20,7 @@
 #include "../common/mptCRC.h"
 #include "../common/StringFixer.h"
 #include "../common/serialization_utils.h"
+#include "../common/mptUUID.h"
 #include "../soundlib/Sndfile.h"
 #include "../common/FileReader.h"
 #include "../soundlib/mod_specifications.h"
