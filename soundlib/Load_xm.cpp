@@ -268,7 +268,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	XMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
 		|| mpt::CompareNoCaseAscii(fileHeader.signature, "Extended Module: ", 17)
@@ -344,11 +344,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	Order.SetRestartPos(fileHeader.restartPos);
 	m_nChannels = fileHeader.channels;
-	m_nInstruments = std::min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
+	m_nInstruments = std::min<uint16>(fileHeader.instruments, MAX_INSTRUMENTS - 1u);
 	if(fileHeader.speed)
 		m_nDefaultSpeed = fileHeader.speed;
 	if(fileHeader.tempo)
-		m_nDefaultTempo.Set(Clamp(fileHeader.tempo, uint16(32), uint16(512)));
+		m_nDefaultTempo.Set(Clamp<uint16, uint16>(fileHeader.tempo, 32, 512));
 
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
@@ -387,7 +387,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		file.SkipBack(4);
 		XMInstrumentHeader instrHeader;
 		file.ReadStructPartial(instrHeader, headerSize);
-		instrHeader.ConvertEndianness();
 
 		// Time for some version detection stuff.
 		if(madeWith == verOldModPlug)
@@ -477,7 +476,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			for(SAMPLEINDEX sample = 0; sample < instrHeader.numSamples; sample++)
 			{
 				XMSample sampleHeader;
-				file.ReadConvertEndianness(sampleHeader);
+				file.ReadStruct(sampleHeader);
 
 				sampleFlags.push_back(sampleHeader.GetSampleFormat());
 				sampleSize[sample] = sampleHeader.length;
@@ -780,7 +779,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	fileHeader.tempo = static_cast<uint16>(m_nDefaultTempo.GetInt());
 	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
 
-	fileHeader.ConvertEndianness();
 	fwrite(&fileHeader, 1, sizeof(fileHeader), f);
 
 	// write order list (without +++ and ---, explained above)
@@ -1015,7 +1013,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 		insHeader.Finalise();
 		size_t insHeaderSize = insHeader.size;
-		insHeader.ConvertEndianness();
 		fwrite(&insHeader, 1, insHeaderSize, f);
 
 		std::vector<SampleIO> sampleFlags(samples.size());
@@ -1035,7 +1032,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 			mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
 
-			xmSample.ConvertEndianness();
 			fwrite(&xmSample, 1, sizeof(xmSample), f);
 		}
 
@@ -1053,14 +1049,13 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		// Writing song comments
 		char magic[4];
-		int32 size;
+		int32le size;
 		if(!m_songMessage.empty())
 		{
 			memcpy(magic, "text", 4);
 			fwrite(magic, 1, 4, f);
 
 			size = m_songMessage.length();
-			SwapBytesLE(size);
 			fwrite(&size, 1, 4, f);
 
 			fwrite(m_songMessage.c_str(), 1, m_songMessage.length(), f);
@@ -1072,7 +1067,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 			fwrite(magic, 1, 4, f);
 
 			size = sizeof(MIDIMacroConfigData);
-			SwapBytesLE(size);
 			fwrite(&size, 1, 4, f);
 
 			fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
@@ -1085,7 +1079,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 			fwrite(magic, 1, 4, f);
 
 			size = numNamedPats * MAX_PATTERNNAME;
-			SwapBytesLE(size);
 			fwrite(&size, 1, 4, f);
 
 			for(PATTERNINDEX pat = 0; pat < numNamedPats; pat++)
@@ -1110,7 +1103,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 				fwrite(magic, 1, 4, f);
 
 				size = numNamedChannels * MAX_CHANNELNAME;
-				SwapBytesLE(size);
 				fwrite(&size, 1, 4, f);
 
 				for(CHANNELINDEX chn = 0; chn < numNamedChannels; chn++)

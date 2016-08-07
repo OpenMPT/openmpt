@@ -16,11 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED ITFileHeader
+struct ITFileHeader
 {
 	// Header Flags
 	enum ITHeaderFlags
@@ -45,38 +41,35 @@ struct PACKED ITFileHeader
 		embedMIDIConfiguration	= 0x08,
 	};
 
-	char   id[4];			// Magic Bytes (IMPM)
-	char   songname[26];	// Song Name, null-terminated (but may also contain nulls)
-	uint8  highlight_minor;	// Rows per Beat highlight
-	uint8  highlight_major;	// Rows per Measure highlight
-	uint16 ordnum;			// Number of Orders
-	uint16 insnum;			// Number of Instruments
-	uint16 smpnum;			// Number of Samples
-	uint16 patnum;			// Number of Patterns
-	uint16 cwtv;			// "Made With" Tracker
-	uint16 cmwt;			// "Compatible With" Tracker
-	uint16 flags;			// Header Flags
-	uint16 special;			// Special Flags, for embedding extra information
-	uint8  globalvol;		// Global Volume (0...128)
-	uint8  mv;				// Master Volume (0...128), referred to as Sample Volume in OpenMPT
-	uint8  speed;			// Initial Speed (1...255)
-	uint8  tempo;			// Initial Tempo (31...255)
-	uint8  sep;				// Pan Separation (0...128)
-	uint8  pwd;				// Pitch Wheel Depth
-	uint16 msglength;		// Length of Song Message
-	uint32 msgoffset;		// Offset of Song Message in File (IT crops message after first null)
-	char   reserved[4];		// Some IT versions save an edit timer here. ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
-	uint8  chnpan[64];		// Initial Channel Panning
-	uint8  chnvol[64];		// Initial Channel Volume
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	char     id[4];				// Magic Bytes (IMPM)
+	char     songname[26];		// Song Name, null-terminated (but may also contain nulls)
+	uint8le  highlight_minor;	// Rows per Beat highlight
+	uint8le  highlight_major;	// Rows per Measure highlight
+	uint16le ordnum;			// Number of Orders
+	uint16le insnum;			// Number of Instruments
+	uint16le smpnum;			// Number of Samples
+	uint16le patnum;			// Number of Patterns
+	uint16le cwtv;				// "Made With" Tracker
+	uint16le cmwt;				// "Compatible With" Tracker
+	uint16le flags;				// Header Flags
+	uint16le special;			// Special Flags, for embedding extra information
+	uint8le  globalvol;			// Global Volume (0...128)
+	uint8le  mv;				// Master Volume (0...128), referred to as Sample Volume in OpenMPT
+	uint8le  speed;				// Initial Speed (1...255)
+	uint8le  tempo;				// Initial Tempo (31...255)
+	uint8le  sep;				// Pan Separation (0...128)
+	uint8le  pwd;				// Pitch Wheel Depth
+	uint16le msglength;			// Length of Song Message
+	uint32le msgoffset;			// Offset of Song Message in File (IT crops message after first null)
+	char     reserved[4];		// Some IT versions save an edit timer here. ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
+	uint8le  chnpan[64];		// Initial Channel Panning
+	uint8le  chnvol[64];		// Initial Channel Volume
 };
 
 STATIC_ASSERT(sizeof(ITFileHeader) == 192);
 
 
-struct PACKED ITEnvelope
+struct ITEnvelope
 {
 	// Envelope Flags
 	enum ITEnvelopeFlags
@@ -107,7 +100,7 @@ STATIC_ASSERT(sizeof(ITEnvelope) == 82);
 
 
 // Old Impulse Instrument Format (cmwt < 0x200)
-struct PACKED ITOldInstrument
+struct ITOldInstrument
 {
 	enum ITOldInstrFlags
 	{
@@ -116,28 +109,25 @@ struct PACKED ITOldInstrument
 		envSustain	= 0x04,
 	};
 
-	char   id[4];			// Magic Bytes (IMPI)
-	char   filename[13];	// DOS Filename, null-terminated
-	uint8  flags;			// Volume Envelope Flags
-	uint8  vls;				// Envelope Loop Start
-	uint8  vle;				// Envelope Loop End
-	uint8  sls;				// Envelope Sustain Start
-	uint8  sle;				// Envelope Sustain End
-	char   reserved1[2];	// Reserved
-	uint16 fadeout;			// Instrument Fadeout (0...128)
-	uint8  nna;				// New Note Action
-	uint8  dnc;				// Duplicate Note Check Type
-	uint16 trkvers;			// Tracker ID
-	uint8  nos;				// Number of embedded samples
-	char   reserved2;		// Reserved
-	char   name[26];		// Instrument Name, null-terminated (but may also contain nulls)
-	char   reserved3[6];	// Even more reserved bytes
-	uint8  keyboard[240];	// Sample / Transpose map
-	uint8  volenv[200];		// This appears to be a pre-computed (interpolated) version of the volume envelope data found below.
-	uint8  nodes[25 * 2];	// Volume Envelope Node Positions / Values
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	char     id[4];			// Magic Bytes (IMPI)
+	char     filename[13];	// DOS Filename, null-terminated
+	uint8le  flags;			// Volume Envelope Flags
+	uint8le  vls;			// Envelope Loop Start
+	uint8le  vle;			// Envelope Loop End
+	uint8le  sls;			// Envelope Sustain Start
+	uint8le  sle;			// Envelope Sustain End
+	char     reserved1[2];	// Reserved
+	uint16le fadeout;		// Instrument Fadeout (0...128)
+	uint8le  nna;			// New Note Action
+	uint8le  dnc;			// Duplicate Note Check Type
+	uint16le trkvers;		// Tracker ID
+	uint8le  nos;			// Number of embedded samples
+	char     reserved2;		// Reserved
+	char     name[26];		// Instrument Name, null-terminated (but may also contain nulls)
+	char     reserved3[6];	// Even more reserved bytes
+	uint8le  keyboard[240];	// Sample / Transpose map
+	uint8le  volenv[200];	// This appears to be a pre-computed (interpolated) version of the volume envelope data found below.
+	uint8le  nodes[25 * 2];	// Volume Envelope Node Positions / Values
 
 	// Convert an ITOldInstrument to OpenMPT's internal instrument representation.
 	void ConvertToMPT(ModInstrument &mptIns) const;
@@ -147,7 +137,7 @@ STATIC_ASSERT(sizeof(ITOldInstrument) == 554);
 
 
 // Impulse Instrument Format
-struct PACKED ITInstrument
+struct ITInstrument
 {
 	enum ITInstrumentFlags
 	{
@@ -156,35 +146,32 @@ struct PACKED ITInstrument
 		enableResonance	= 0x80,
 	};
 
-	char   id[4];			// Magic Bytes (IMPI)
-	char   filename[13];	// DOS Filename, null-terminated
-	uint8  nna;				// New Note Action
-	uint8  dct;				// Duplicate Note Check Type
-	uint8  dca;				// Duplicate Note Check Action
-	uint16 fadeout;			// Instrument Fadeout (0...128)
-	int8   pps;				// Pitch/Pan Separatation
-	uint8  ppc;				// Pitch/Pan Centre
-	uint8  gbv;				// Global Volume
-	uint8  dfp;				// Panning
-	uint8  rv;				// Vol Swing
-	uint8  rp;				// Pan Swing
-	uint16 trkvers;			// Tracker ID
-	uint8  nos;				// Number of embedded samples
-	char   reserved1;		// Reserved
-	char   name[26];		// Instrument Name, null-terminated (but may also contain nulls)
-	uint8  ifc;				// Filter Cutoff
-	uint8  ifr;				// Filter Resonance
-	uint8  mch;				// MIDI Channel
-	uint8  mpr;				// MIDI Program
-	uint16 mbank;			// MIDI Bank
-	uint8  keyboard[240];	// Sample / Transpose map
+	char     id[4];			// Magic Bytes (IMPI)
+	char     filename[13];	// DOS Filename, null-terminated
+	uint8le  nna;			// New Note Action
+	uint8le  dct;			// Duplicate Note Check Type
+	uint8le  dca;			// Duplicate Note Check Action
+	uint16le fadeout;		// Instrument Fadeout (0...128)
+	int8le   pps;			// Pitch/Pan Separatation
+	uint8le  ppc;			// Pitch/Pan Centre
+	uint8le  gbv;			// Global Volume
+	uint8le  dfp;			// Panning
+	uint8le  rv;			// Vol Swing
+	uint8le  rp;			// Pan Swing
+	uint16le trkvers;		// Tracker ID
+	uint8le  nos;			// Number of embedded samples
+	char     reserved1;		// Reserved
+	char     name[26];		// Instrument Name, null-terminated (but may also contain nulls)
+	uint8le  ifc;			// Filter Cutoff
+	uint8le  ifr;			// Filter Resonance
+	uint8le  mch;			// MIDI Channel
+	uint8le  mpr;			// MIDI Program
+	uint16le mbank;			// MIDI Bank
+	uint8le  keyboard[240];	// Sample / Transpose map
 	ITEnvelope volenv;		// Volume Envelope
 	ITEnvelope panenv;		// Pan Envelope
 	ITEnvelope pitchenv;	// Pitch / Filter Envelope
-	char   dummy[4];		// IT saves some additional padding bytes to match the size of the old instrument format for simplified loading. We use them for some hacks.
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	char       dummy[4];	// IT saves some additional padding bytes to match the size of the old instrument format for simplified loading. We use them for some hacks.
 
 	// Convert OpenMPT's internal instrument representation to an ITInstrument. Returns amount of bytes that need to be written.
 	uint32 ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
@@ -196,14 +183,11 @@ STATIC_ASSERT(sizeof(ITInstrument) == 554);
 
 
 // MPT IT Instrument Extension
-struct PACKED ITInstrumentEx
+struct ITInstrumentEx
 {
 	ITInstrument iti;		// Normal IT Instrument
 	uint8 keyboardhi[120];	// High Byte of Sample map
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
-
+	
 	// Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written.
 	uint32 ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
 	// Convert an ITInstrumentEx to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
@@ -214,7 +198,7 @@ STATIC_ASSERT(sizeof(ITInstrumentEx) == sizeof(ITInstrument) + 120);
 
 
 // IT Sample Format
-struct PACKED ITSample
+struct ITSample
 {
 	// Magic Bytes
 	enum Magic
@@ -245,28 +229,25 @@ struct PACKED ITSample
 		cvtPTM8to16			= 0x08,
 	};
 
-	char   id[4];			// Magic Bytes (IMPS)
-	char   filename[13];	// DOS Filename, null-terminated
-	uint8  gvl;				// Global Volume
-	uint8  flags;			// Sample Flags
-	uint8  vol;				// Default Volume
-	char   name[26];		// Sample Name, null-terminated (but may also contain nulls)
-	uint8  cvt;				// Sample Import Format
-	uint8  dfp;				// Sample Panning
-	uint32 length;			// Sample Length (in samples)
-	uint32 loopbegin;		// Sample Loop Begin (in samples)
-	uint32 loopend;			// Sample Loop End (in samples)
-	uint32 C5Speed;			// C-5 frequency
-	uint32 susloopbegin;	// Sample Sustain Begin (in samples)
-	uint32 susloopend;		// Sample Sustain End (in samples)
-	uint32 samplepointer;	// Pointer to sample data
-	uint8  vis;				// Auto-Vibrato Rate (called Sweep in IT)
-	uint8  vid;				// Auto-Vibrato Depth
-	uint8  vir;				// Auto-Vibrato Sweep (called Rate in IT)
-	uint8  vit;				// Auto-Vibrato Type
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	char     id[4];			// Magic Bytes (IMPS)
+	char     filename[13];	// DOS Filename, null-terminated
+	uint8le  gvl;			// Global Volume
+	uint8le  flags;			// Sample Flags
+	uint8le  vol;			// Default Volume
+	char     name[26];		// Sample Name, null-terminated (but may also contain nulls)
+	uint8le  cvt;			// Sample Import Format
+	uint8le  dfp;			// Sample Panning
+	uint32le length;		// Sample Length (in samples)
+	uint32le loopbegin;		// Sample Loop Begin (in samples)
+	uint32le loopend;		// Sample Loop End (in samples)
+	uint32le C5Speed;		// C-5 frequency
+	uint32le susloopbegin;	// Sample Sustain Begin (in samples)
+	uint32le susloopend;	// Sample Sustain End (in samples)
+	uint32le samplepointer;	// Pointer to sample data
+	uint8le  vis;			// Auto-Vibrato Rate (called Sweep in IT)
+	uint8le  vid;			// Auto-Vibrato Depth
+	uint8le  vir;			// Auto-Vibrato Sweep (called Rate in IT)
+	uint8le  vit;			// Auto-Vibrato Type
 
 	// Convert OpenMPT's internal sample representation to an ITSample.
 	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215, bool allowExternal);
@@ -282,14 +263,11 @@ STATIC_ASSERT(sizeof(ITSample) == 80);
 struct FileHistory;
 
 // IT Header extension: Save history
-struct PACKED ITHistoryStruct
+struct ITHistoryStruct
 {
-	uint16 fatdate;	// DOS / FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
-	uint16 fattime;	// DOS / FAT time when the file was opened / created in the editor.
-	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness();
+	uint16le fatdate;	// DOS / FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
+	uint16le fattime;	// DOS / FAT time when the file was opened / created in the editor.
+	uint32le runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
 
 	// Convert an ITHistoryStruct to OpenMPT's internal edit history representation
 	void ConvertToMPT(FileHistory &mptHistory) const;
@@ -300,9 +278,6 @@ struct PACKED ITHistoryStruct
 
 STATIC_ASSERT(sizeof(ITHistoryStruct) == 8);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 enum IT_ReaderBitMasks
 {

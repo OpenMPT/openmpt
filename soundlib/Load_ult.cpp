@@ -14,11 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED UltFileHeader
+struct UltFileHeader
 {
 	char  signature[14];		// "MAS_UTrack_V00"
 	uint8 version;				// '1'...'4'
@@ -29,7 +25,7 @@ struct PACKED UltFileHeader
 STATIC_ASSERT(sizeof(UltFileHeader) == 48);
 
 
-struct PACKED UltSample
+struct UltSample
 {
 	enum UltSampleFlags
 	{
@@ -38,27 +34,16 @@ struct PACKED UltSample
 		ULT_PINGPONGLOOP = 16,
 	};
 
-	char   name[32];
-	char   filename[12];
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint32 sizeStart;
-	uint32 sizeEnd;
-	uint8  volume;		// 0-255, apparently prior to 1.4 this was logarithmic?
-	uint8  flags;		// above
-	uint16 speed;		// only exists for 1.4+
-	int16  finetune;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sizeStart);
-		SwapBytesLE(sizeEnd);
-		SwapBytesLE(speed);
-		SwapBytesLE(finetune);
-	}
+	char     name[32];
+	char     filename[12];
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint32le sizeStart;
+	uint32le sizeEnd;
+	uint8le  volume;	// 0-255, apparently prior to 1.4 this was logarithmic?
+	uint8le  flags;		// above
+	uint16le speed;		// only exists for 1.4+
+	int16le  finetune;
 
 	// Convert an ULT sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -99,9 +84,6 @@ struct PACKED UltSample
 
 STATIC_ASSERT(sizeof(UltSample) == 66);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)
@@ -349,8 +331,8 @@ struct PostFixUltCommands
 	}
 
 	std::vector<bool> isPortaActive;
-	bool writeT125;
 	CHANNELINDEX numChannels, curChannel;
+	bool writeT125;
 };
 
 
@@ -395,11 +377,10 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		// Annoying: v4 added a field before the end of the struct
 		if(fileHeader.version >= '4')
 		{
-			file.ReadConvertEndianness(sampleHeader);
+			file.ReadStruct(sampleHeader);
 		} else
 		{
 			file.ReadStructPartial(sampleHeader, 64);
-			sampleHeader.ConvertEndianness();
 			sampleHeader.finetune = sampleHeader.speed;
 			sampleHeader.speed = 8363;
 		}

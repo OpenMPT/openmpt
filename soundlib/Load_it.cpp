@@ -267,7 +267,7 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 	{
 		// Load old format (IT 1.xx) instrument
 		ITOldInstrument instrumentHeader;
-		if(!file.ReadConvertEndianness(instrumentHeader))
+		if(!file.ReadStruct(instrumentHeader))
 		{
 			return 0;
 		} else
@@ -282,7 +282,6 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 		// Try loading extended instrument... instSize will differ between normal and extended instruments.
 		ITInstrumentEx instrumentHeader;
 		file.ReadStructPartial(instrumentHeader);
-		instrumentHeader.ConvertEndianness();
 		size_t instSize = instrumentHeader.ConvertToMPT(ins, GetType());
 		file.Seek(offset + instSize);
 
@@ -351,7 +350,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	ITFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| (memcmp(fileHeader.id, "IMPM", 4) && memcmp(fileHeader.id, "tpm.", 4))
 		|| fileHeader.insnum > 0xFF
 		|| fileHeader.smpnum >= MAX_SAMPLES
@@ -474,14 +473,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo.Set(std::max(uint8(31), fileHeader.tempo));
-	m_nSamplePreAmp = std::min(fileHeader.mv, uint8(128));
+	m_nDefaultTempo.Set(std::max<uint8>(31, fileHeader.tempo));
+	m_nSamplePreAmp = std::min<uint8>(fileHeader.mv, 128);
 
 	// Reading Channels Pan Positions
 	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
 	{
 		ChnSettings[i].Reset();
-		ChnSettings[i].nVolume = Clamp(fileHeader.chnvol[i], uint8(0), uint8(64));
+		ChnSettings[i].nVolume = Clamp<uint8, uint8>(fileHeader.chnvol[i], 0, 64);
 		if(fileHeader.chnpan[i] & 0x80) ChnSettings[i].dwFlags.set(CHN_MUTE);
 		uint8 n = fileHeader.chnpan[i] & 0x7F;
 		if(n <= 64) ChnSettings[i].nPan = n * 4;
@@ -535,7 +534,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
 	{
-		minPtr = std::min(minPtr, fileHeader.msgoffset);
+		minPtr = std::min<uint32>(minPtr, fileHeader.msgoffset);
 	}
 
 	// Reading IT Edit History Info
@@ -555,7 +554,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				FileHistory mptHistory;
 				ITHistoryStruct itHistory;
-				file.ReadConvertEndianness(itHistory);
+				file.ReadStruct(itHistory);
 				itHistory.ConvertToMPT(mptHistory);
 				m_FileHistory.push_back(mptHistory);
 			}
@@ -633,7 +632,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = 0;
 	if(fileHeader.flags & ITFileHeader::instrumentMode)
 	{
-		m_nInstruments = std::min(fileHeader.insnum, INSTRUMENTINDEX(MAX_INSTRUMENTS - 1));
+		m_nInstruments = std::min<INSTRUMENTINDEX>(fileHeader.insnum, MAX_INSTRUMENTS - 1);
 	}
 	for(INSTRUMENTINDEX i = 0; i < GetNumInstruments(); i++)
 	{
@@ -659,12 +658,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading Samples
-	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
+	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpnum, MAX_SAMPLES - 1);
 	bool lastSampleCompressed = false;
 	for(SAMPLEINDEX i = 0; i < GetNumSamples(); i++)
 	{
 		ITSample sampleHeader;
-		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadConvertEndianness(sampleHeader))
+		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadStruct(sampleHeader))
 		{
 			if(!memcmp(sampleHeader.id, "IMPS", 4))
 			{
@@ -1047,7 +1046,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					// IT encrypts the total edit time of a module in the "reserved" fild
 					uint32 editTime;
 					memcpy(&editTime, fileHeader.reserved, 4);
-					SwapBytesLE(editTime);
+					editTime = SwapBytesLE(editTime);
 					if(fileHeader.cwtv >= 0x0208)
 					{
 						editTime ^= 0x4954524B;	// 'ITRK'
@@ -1187,8 +1186,7 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
 
 		ITHistoryStruct itHistory;
 		itHistory.ConvertToIT(mptHistory);
-		itHistory.ConvertEndianness();
-		fwrite(&itHistory, 1, sizeof(itHistory), f);
+		mpt::IO::WriteStruct(f, itHistory);
 	}
 
 	return bytesWritten;
@@ -1352,10 +1350,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Write file header
-	itHeader.ConvertEndianness();
-	fwrite(&itHeader, 1, sizeof(itHeader), f);
-	// Convert endianness again as we access some of the header variables with native endianness here.
-	itHeader.ConvertEndianness();
+	mpt::IO::WriteStruct(f, itHeader);
 
 	Order.WriteAsByte(f, itHeader.ordnum);
 	for(uint16 i = 0; i < itHeader.insnum; ++i)
@@ -1377,7 +1372,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing midi cfg
 	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
 	{
-		fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
+		mpt::IO::WriteStruct(f, static_cast<MIDIMacroConfigData &>(m_MidiCfg));
 	}
 
 	// Writing pattern names
@@ -1385,7 +1380,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		char magic[4];
 		memcpy(magic, "PNAM", 4);
-		fwrite(magic, 4, 1, f);
+		mpt::IO::WriteRaw(f, magic, 4);
 		mpt::IO::WriteIntLE<uint32>(f, numNamedPats * MAX_PATTERNNAME);
 
 		for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
@@ -1393,7 +1388,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			char name[MAX_PATTERNNAME];
 			MemsetZero(name);
 			Patterns[nPat].GetName(name);
-			fwrite(name, 1, MAX_PATTERNNAME, f);
+			mpt::IO::WriteRaw(f, name, MAX_PATTERNNAME);
 		}
 	}
 
@@ -1402,12 +1397,12 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		char magic[4];
 		memcpy(magic, "CNAM", 4);
-		fwrite(magic, 4, 1, f);
+		mpt::IO::WriteRaw(f, magic, 4);
 		mpt::IO::WriteIntLE<uint32>(f, dwChnNamLen);
 		uint32 nChnNames = dwChnNamLen / MAX_CHANNELNAME;
 		for(uint32 inam = 0; inam < nChnNames; inam++)
 		{
-			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
+			mpt::IO::WriteRaw(f, ChnSettings[inam].szName, MAX_CHANNELNAME);
 		}
 	}
 
@@ -1422,7 +1417,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
 		dwPos += msglength;
-		fwrite(m_songMessage.c_str(), 1, msglength, f);
+		mpt::IO::WriteRaw(f, m_songMessage.c_str(), msglength);
 	}
 
 	// Writing instruments
@@ -1444,8 +1439,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		// Writing instrument
 		inspos[nins - 1] = static_cast<uint32>(dwPos);
 		dwPos += instSize;
-		iti.ConvertEndianness();
-		fwrite(&iti, 1, instSize, f);
+		mpt::IO::WriteStruct(f, iti, instSize);
 	}
 
 	// Writing sample headers
@@ -1455,7 +1449,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		smppos[smp] = static_cast<uint32>(dwPos);
 		dwPos += sizeof(ITSample);
-		fwrite(&itss, 1, sizeof(ITSample), f);
+		mpt::IO::WriteStruct(f, itss);
 	}
 
 	// Writing Patterns
@@ -1479,14 +1473,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 		// Write pattern header
 		ROWINDEX writeRows = mpt::saturate_cast<uint16>(Patterns[pat].GetNumRows());
-		uint16 patinfo[4];
+		uint16 writeSize = 0;
+		uint16le patinfo[4];
 		patinfo[0] = 0;
 		patinfo[1] = (uint16)writeRows;
 		patinfo[2] = 0;
 		patinfo[3] = 0;
-		SwapBytesLE(patinfo[1]);
 
-		fwrite(patinfo, 8, 1, f);
+		mpt::IO::WriteStruct(f, patinfo);
 		dwPos += 8;
 
 		const CHANNELINDEX maxChannels = std::min(specs.channelsMax, GetNumChannels());
@@ -1629,20 +1623,21 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 				}
 			}
 			buf[len++] = 0;
-			if(patinfo[0] > uint16_max - len)
+			if(writeSize > uint16_max - len)
 			{
 				AddToLog(mpt::String::Print("%1 (%2 %3)", str_tooMuchPatternData, str_pattern, pat));
 				break;
 			} else
 			{
 				dwPos += len;
-				patinfo[0] += (uint16)len;
-				fwrite(buf, 1, len, f);
+				writeSize += (uint16)len;
+				mpt::IO::WriteRaw(f, buf, len);
 			}
 		}
+
 		fseek(f, dwPatPos, SEEK_SET);
-		SwapBytesLE(patinfo[0]);
-		fwrite(patinfo, 8, 1, f);
+		patinfo[0] = writeSize;
+		mpt::IO::WriteStruct(f, patinfo);
 		fseek(f, static_cast<long>(dwPos), SEEK_SET);
 	}
 	// Writing Sample Data
@@ -1671,9 +1666,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			itss.length = 0;
 		}
 		SmpLength smpLength = itss.length;	// Possibly truncated to 2^32 samples
-		itss.ConvertEndianness();
 		fseek(f, smppos[smp - 1], SEEK_SET);
-		fwrite(&itss, 1, sizeof(ITSample), f);
+		mpt::IO::WriteStruct(f, itss);
 		if(dwPos > uint32_max)
 		{
 			continue;
@@ -1833,31 +1827,29 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				id[1] = i < 100 ? 'X' : '0' + i / 100;
 				id[2] = '0' + (i / 10) % 10u;
 				id[3] = '0' + (i % 10u);
-				fwrite(id, 1, 4, f);
+				mpt::IO::WriteRaw(f, id, 4);
 
 				// write plugin size:
 				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
-				SNDMIXPLUGININFO tmpPluginInfo = m_MixPlugins[i].Info;
-				tmpPluginInfo.ConvertEndianness();
-				fwrite(&tmpPluginInfo, 1, sizeof(SNDMIXPLUGININFO), f);
+				mpt::IO::WriteStruct(f, m_MixPlugins[i].Info);
 				mpt::IO::WriteIntLE<uint32>(f, m_MixPlugins[i].nPluginDataSize);
 				if(m_MixPlugins[i].pPluginData)
 				{
-					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
+					mpt::IO::WriteRaw(f, m_MixPlugins[i].pPluginData, m_MixPlugins[i].nPluginDataSize);
 				}
 
 				mpt::IO::WriteIntLE<uint32>(f, MPTxPlugDataSize);
 
 				// Dry/Wet ratio
 				memcpy(id, "DWRT", 4);
-				fwrite(id, 1, 4, f);
+				mpt::IO::WriteRaw(f, id, 4);
 				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 				mpt::IO::Write(f, IEEE754binary32LE(m_MixPlugins[i].fDryRatio));
 
 				// Default program
 				memcpy(id, "PROG", 4);
-				fwrite(id, 1, 4, f);
+				mpt::IO::WriteRaw(f, id, 4);
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
 				mpt::IO::WriteIntLE<int32>(f, m_MixPlugins[i].defaultProgram);
@@ -1882,7 +1874,7 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 		if(f)
 		{
 			memcpy(id, "CHFX", 4);
-			fwrite(id, 1, 4, f);
+			mpt::IO::WriteRaw(f, id, 4);
 			mpt::IO::WriteIntLE<uint32>(f, nChInfo * 4);
 			for(uint32 i = 0; i < nChInfo; ++i)
 			{
@@ -1957,7 +1949,7 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 //-------------------------------------------------------------------------
 {
 	// MPT's standard plugin data. Size not specified in file.. grrr..
-	file.ReadConvertEndianness(plugin.Info);
+	file.ReadStruct(plugin.Info);
 	mpt::String::SetNullTerminator(plugin.Info.szName);
 	mpt::String::SetNullTerminator(plugin.Info.szLibraryName);
 	plugin.editorX = plugin.editorY = int32_min;
@@ -2067,14 +2059,14 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			if (ChnSettings[chn].dwFlags[CHN_SURROUND]) panvol[0] = 100;
 			if (ChnSettings[chn].dwFlags[CHN_MUTE]) panvol[0] |= 0x80;
 			panvol[1] = (uint8)ChnSettings[chn].nVolume;
-			fwrite(&panvol, sizeof(panvol), 1, f);
+			mpt::IO::WriteStruct(f, panvol);
 		}
 	}
 
 	{
 		WRITEMODULARHEADER(MAGIC4BE('T','M','.','.'), 1);
 		uint8 mode = static_cast<uint8>(m_nTempoMode);
-		fwrite(&mode, sizeof(mode), 1, f);
+		mpt::IO::WriteIntLE(f, mode);
 	}
 
 	const int32 tmpMixLevels = static_cast<int32>(m_nMixLevels);

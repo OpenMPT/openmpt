@@ -14,60 +14,39 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // FAR File Header
-struct PACKED FARFileHeader
+struct FARFileHeader
 {
-	uint8  magic[4];
-	char   songName[40];
-	uint8  eof[3];
-	uint16 headerLength;
-	uint8  version;
-	uint8  onOff[16];
-	uint8  editingState[9];	// Stuff we don't care about
-	uint8  defaultSpeed;
-	uint8  chnPanning[16];
-	uint8  patternState[4];	// More stuff we don't care about
-	uint16 messageLength;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(headerLength);
-		SwapBytesLE(messageLength);
-	}
+	uint8le  magic[4];
+	char     songName[40];
+	uint8le  eof[3];
+	uint16le headerLength;
+	uint8le  version;
+	uint8le  onOff[16];
+	uint8le  editingState[9];	// Stuff we don't care about
+	uint8le  defaultSpeed;
+	uint8le  chnPanning[16];
+	uint8le  patternState[4];	// More stuff we don't care about
+	uint16le messageLength;
 };
 
 STATIC_ASSERT(sizeof(FARFileHeader) == 98);
 
 
-struct PACKED FAROrderHeader
+struct FAROrderHeader
 {
-	uint8  orders[256];
-	uint8  numPatterns;	// supposed to be "number of patterns stored in the file"; apparently that's wrong
-	uint8  numOrders;
-	uint8  restartPos;
-	uint16 patternSize[256];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(size_t i = 0; i < CountOf(patternSize); i++)
-		{
-			SwapBytesLE(patternSize[i]);
-		}
-	}
+	uint8le  orders[256];
+	uint8le  numPatterns;	// supposed to be "number of patterns stored in the file"; apparently that's wrong
+	uint8le  numOrders;
+	uint8le  restartPos;
+	uint16le patternSize[256];
 };
 
 STATIC_ASSERT(sizeof(FAROrderHeader) == 771);
 
 
 // FAR Sample header
-struct PACKED FARSampleHeader
+struct FARSampleHeader
 {
 	// Sample flags
 	enum SampleFlags
@@ -76,22 +55,14 @@ struct PACKED FARSampleHeader
 		smpLoop		= 0x08,
 	};
 
-	char   name[32];
-	uint32 length;
-	uint8  finetune;
-	uint8  volume;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint8  type;
-	uint8  loop;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-	}
+	char     name[32];
+	uint32le length;
+	uint8le  finetune;
+	uint8le  volume;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint8le  type;
+	uint8le  loop;
 
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -113,7 +84,7 @@ struct PACKED FARSampleHeader
 
 		if((loop & 8) && mptSmp.nLoopEnd > mptSmp.nLoopStart)
 		{
-			mptSmp.uFlags |= CHN_LOOP;
+			mptSmp.uFlags.set(CHN_LOOP);
 		}
 	}
 
@@ -130,10 +101,6 @@ struct PACKED FARSampleHeader
 
 STATIC_ASSERT(sizeof(FARSampleHeader) == 48);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
 
 bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
@@ -141,7 +108,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	FARFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
 		|| memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
 		|| !file.LengthIsAtLeast(fileHeader.headerLength))
@@ -178,7 +145,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read orders
 	FAROrderHeader orderHeader;
-	if(!file.ReadConvertEndianness(orderHeader))
+	if(!file.ReadStruct(orderHeader))
 	{
 		return false;
 	}
@@ -308,7 +275,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		FARSampleHeader sampleHeader;
-		if(!file.ReadConvertEndianness(sampleHeader))
+		if(!file.ReadStruct(sampleHeader))
 		{
 			return true;
 		}

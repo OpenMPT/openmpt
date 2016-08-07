@@ -17,30 +17,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void S3MFileHeader::ConvertEndianness()
-//-------------------------------------
-{
-	SwapBytesLE(ordNum);
-	SwapBytesLE(smpNum);
-	SwapBytesLE(patNum);
-	SwapBytesLE(flags);
-	SwapBytesLE(cwtv);
-	SwapBytesLE(formatVersion);
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void S3MSampleHeader::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(length);
-	SwapBytesLE(loopStart);
-	SwapBytesLE(loopEnd);
-	SwapBytesLE(c5speed);
-}
-
-
 // Convert an S3M sample header to OpenMPT's internal sample header.
 void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 //---------------------------------------------------------

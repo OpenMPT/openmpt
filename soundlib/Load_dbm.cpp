@@ -22,11 +22,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED DBMFileHeader
+struct DBMFileHeader
 {
 	char  dbm0[4];
 	uint8 trkVerHi;
@@ -36,67 +32,57 @@ struct PACKED DBMFileHeader
 
 
 // RIFF-style Chunk
-struct PACKED DBMChunk
+struct DBMChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idNAME	= 0x454D414E,
-		idINFO	= 0x4F464E49,
-		idSONG	= 0x474E4F53,
-		idINST	= 0x54534E49,
-		idVENV	= 0x564E4556,
-		idPENV	= 0x564E4550,
-		idPATT	= 0x54544150,
-		idPNAM	= 0x4D414E50,
-		idSMPL	= 0x4C504D53,
-		idDSPE	= 0x45505344,
-		idMPEG	= 0x4745504D,
+		idNAME	= MAGIC4BE('N','A','M','E'),
+		idINFO	= MAGIC4BE('I','N','F','O'),
+		idSONG	= MAGIC4BE('S','O','N','G'),
+		idINST	= MAGIC4BE('I','N','S','T'),
+		idVENV	= MAGIC4BE('V','E','N','V'),
+		idPENV	= MAGIC4BE('P','E','N','V'),
+		idPATT	= MAGIC4BE('P','A','T','T'),
+		idPNAM	= MAGIC4BE('P','N','A','M'),
+		idSMPL	= MAGIC4BE('S','M','P','L'),
+		idDSPE	= MAGIC4BE('D','S','P','E'),
+		idMPEG	= MAGIC4BE('M','P','E','G'),
 	};
 
 	typedef ChunkIdentifiers id_type;
 
-	uint32 id;
-	uint32 length;
+	uint32be id;
+	uint32be length;
 
 	size_t GetLength() const
 	{
-		return SwapBytesReturnBE(length);
+		return length;
 	}
 
 	id_type GetID() const
 	{
-		return static_cast<id_type>(SwapBytesReturnLE(id));
+		return static_cast<id_type>(id.get());
 	}
 };
 
 STATIC_ASSERT(sizeof(DBMChunk) == 8);
 
 
-struct PACKED DBMInfoChunk
+struct DBMInfoChunk
 {
-	uint16 instruments;
-	uint16 samples;
-	uint16 songs;
-	uint16 patterns;
-	uint16 channels;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(instruments);
-		SwapBytesBE(samples);
-		SwapBytesBE(songs);
-		SwapBytesBE(patterns);
-		SwapBytesBE(channels);
-	}
+	uint16be instruments;
+	uint16be samples;
+	uint16be songs;
+	uint16be patterns;
+	uint16be channels;
 };
 
 STATIC_ASSERT(sizeof(DBMInfoChunk) == 10);
 
 
 // Instrument header
-struct PACKED DBMInstrument
+struct DBMInstrument
 {
 	enum DBMInstrFlags
 	{
@@ -104,33 +90,21 @@ struct PACKED DBMInstrument
 		smpPingPongLoop	= 0x02,
 	};
 
-	char   name[30];
-	uint16 sample;		// Sample reference
-	uint16 volume;		// 0...64
-	uint32 sampleRate;
-	uint32 loopStart;
-	uint32 loopLength;
-	int16  panning;		// -128...128
-	uint16 flags;		// See DBMInstrFlags
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(sample);
-		SwapBytesBE(volume);
-		SwapBytesBE(sampleRate);
-		SwapBytesBE(loopStart);
-		SwapBytesBE(loopLength);
-		SwapBytesBE(panning);
-		SwapBytesBE(flags);
-	}
+	char     name[30];
+	uint16be sample;		// Sample reference
+	uint16be volume;		// 0...64
+	uint32be sampleRate;
+	uint32be loopStart;
+	uint32be loopLength;
+	int16be  panning;		// -128...128
+	uint16be flags;			// See DBMInstrFlags
 };
 
 STATIC_ASSERT(sizeof(DBMInstrument) == 50);
 
 
 // Volume or panning envelope
-struct PACKED DBMEnvelope
+struct DBMEnvelope
 {
 	enum DBMEnvelopeFlags
 	{
@@ -139,32 +113,17 @@ struct PACKED DBMEnvelope
 		envLoop		= 0x04,
 	};
 
-	uint16 instrument;
-	uint8  flags;		// See DBMEnvelopeFlags
-	uint8  numSegments;	// Number of envelope points - 1
-	uint8  sustain1;
-	uint8  loopBegin;
-	uint8  loopEnd;
-	uint8  sustain2;	// Second sustain point
-	uint16 data[2 * 32];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(instrument);
-		for(size_t i = 0; i < CountOf(data); i++)
-		{
-			SwapBytesBE(data[i]);
-		}
-	}
+	uint16be instrument;
+	uint8be  flags;			// See DBMEnvelopeFlags
+	uint8be  numSegments;	// Number of envelope points - 1
+	uint8be  sustain1;
+	uint8be  loopBegin;
+	uint8be  loopEnd;
+	uint8be  sustain2;		// Second sustain point
+	uint16be data[2 * 32];
 };
 
 STATIC_ASSERT(sizeof(DBMEnvelope) == 136);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 // Note: Unlike in MOD, 1Fx, 2Fx, 5Fx / 5xF, 6Fx / 6xF and AFx / AxF are fine slides.
@@ -279,7 +238,7 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 	for(uint16 env = 0; env < numEnvs; env++)
 	{
 		DBMEnvelope dbmEnv;
-		chunk.ReadConvertEndianness(dbmEnv);
+		chunk.ReadStruct(dbmEnv);
 
 		ModInstrument *mptIns;
 		if(dbmEnv.instrument && dbmEnv.instrument < MAX_INSTRUMENTS && (mptIns = sndFile.Instruments[dbmEnv.instrument]) != nullptr)
@@ -338,7 +297,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	// Globals
 	FileReader infoChunk = chunks.GetChunk(DBMChunk::idINFO);
 	DBMInfoChunk infoData;
-	if(!infoChunk.ReadConvertEndianness(infoData))
+	if(!infoChunk.ReadStruct(infoData))
 	{
 		return false;
 	}
@@ -346,7 +305,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_DBM);
 	InitializeChannels();
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
-	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
+	m_nChannels = Clamp<uint16, uint16>(infoData.channels, 1, MAX_BASECHANNELS);	// note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
 	m_nInstruments = std::min<INSTRUMENTINDEX>(infoData.instruments, MAX_INSTRUMENTS - 1);
 	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
 	m_madeWithTracker = mpt::String::Print("DigiBooster Pro %1.%2", mpt::fmt::hex(fileHeader.trkVerHi), mpt::fmt::hex(fileHeader.trkVerLo));
@@ -359,7 +318,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	// Song chunk
 	FileReader songChunk = chunks.GetChunk(DBMChunk::idSONG);
 	Order.clear();
-	for(size_t i = 0; i < infoData.songs; i++)
+	uint16 numSongs = infoData.songs;
+	for(uint16 i = 0; i < numSongs; i++)
 	{
 		char name[44];
 		songChunk.ReadString<mpt::String::maybeNullTerminated>(name, 44);
@@ -368,8 +328,13 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			m_songName = name;
 		}
 #ifdef MPT_DBM_USE_REAL_SUBSONGS
-		if(i > 0) Order.AddSequence(false);
-		Order.clear();
+		if(Order.GetLength() != 0)
+		{
+			// Add a new sequence for this song
+			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
+				break;
+			Order.clear();
+		}
 		Order.SetName(name);
 #endif // MPT_DBM_USE_REAL_SUBSONGS
 
@@ -397,7 +362,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
 			DBMInstrument instrHeader;
-			instChunk.ReadConvertEndianness(instrHeader);
+			instChunk.ReadStruct(instrHeader);
 
 			ModInstrument *mptIns = AllocateInstrument(i, instrHeader.sample);
 			if(mptIns == nullptr || instrHeader.sample >= MAX_SAMPLES)
@@ -416,7 +381,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 			// Sample Info
 			mptSmp.Initialize();
-			mptSmp.nVolume = std::min(instrHeader.volume, uint16(64)) * 4u;
+			mptSmp.nVolume = std::min<uint16>(instrHeader.volume, 64) * 4u;
 			mptSmp.nC5Speed = instrHeader.sampleRate;
 
 			if(instrHeader.loopLength && (instrHeader.flags & (DBMInstrument::smpLoop | DBMInstrument::smpPingPongLoop)))
@@ -464,7 +429,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			std::string patName;
-			patternNameChunk.ReadString<mpt::String::maybeNullTerminated>(patName, patternNameChunk.ReadUint8());
+			patternNameChunk.ReadSizedString<uint8be, mpt::String::maybeNullTerminated>(patName);
 			Patterns[pat].SetName(patName);
 
 			PatternRow patRow = Patterns[pat].GetRow(0);

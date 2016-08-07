@@ -93,9 +93,8 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 		s.SetAllowPatternEdit((i8 & (1 << 5)) != 0);
 		uint16 i16 = file.ReadUint16LE();	//Channel, event, MIDIbyte1.
 		i8 = file.ReadUint8();		//Plugindex
-		uint32 i32;
+		uint32le i32;
 		file.ReadStructPartial(i32, psize - 3);
-		SwapBytesLE(i32);
 
 		s.SetChannel(((i16 & 1) != 0) ? 0 : 1 + ((i16 >> 1) & 0xF));
 		s.SetEvent(static_cast<uint8>((i16 >> 5) & 0xF));

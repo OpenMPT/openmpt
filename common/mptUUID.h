@@ -90,8 +90,6 @@ private:
 	uint8 Nn() const;
 	void MakeRFC4122(uint8 version);
 public:
-	void ConvertEndianness();
-public:
 #if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
 	explicit UUID(::UUID uuid);
 	operator ::UUID () const;

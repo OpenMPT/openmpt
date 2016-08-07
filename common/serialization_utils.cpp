@@ -128,15 +128,9 @@ mpt::ustring ID::AsString() const
 	{
 		return mpt::ustring();
 	}
-	uint64 val = 0;
-	uint8 bytes[8];
-	std::memset(bytes, 0, 8);
-	for(std::size_t i = 0; i < m_ID.length(); ++i)
-	{
-		bytes[i] = m_ID[i];
-	}
-	std::memcpy(&val, bytes, m_ID.length());
-	val = SwapBytesReturnLE(val);
+	uint64le val;
+	val.set(0);
+	std::memcpy(&val, &m_ID[0], m_ID.length());
 	return mpt::ToUString(val);
 }
 

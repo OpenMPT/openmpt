@@ -19,12 +19,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // DMF header
-struct PACKED DMFFileHeader
+struct DMFFileHeader
 {
 	char   signature[4];	// "DDMF"
 	uint8  version;			// 1 - 7 are beta versions, 8 is the official thing, 10 is xtracker32
@@ -38,7 +34,7 @@ struct PACKED DMFFileHeader
 
 STATIC_ASSERT(sizeof(DMFFileHeader) == 66);
 
-struct PACKED DMFChunk
+struct DMFChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -55,75 +51,55 @@ struct PACKED DMFChunk
 
 	typedef ChunkIdentifiers id_type;
 
-	uint32 id;
-	uint32 length;
+	uint32le id;
+	uint32le length;
 
 	size_t GetLength() const
 	{
-		return SwapBytesReturnLE(length);
+		return length;
 	}
 
 	id_type GetID() const
 	{
-		return static_cast<id_type>(SwapBytesReturnLE(id));
+		return static_cast<id_type>(id.get());
 	}
 };
 
 STATIC_ASSERT(sizeof(DMFChunk) == 8);
 
 // Order list
-struct PACKED DMFSequence
+struct DMFSequence
 {
-	uint16 loopStart;
-	uint16 loopEnd;
+	uint16le loopStart;
+	uint16le loopEnd;
 	// order list follows here ...
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-	}
 };
 
 STATIC_ASSERT(sizeof(DMFSequence) == 4);
 
 // Pattern header (global)
-struct PACKED DMFPatterns
+struct DMFPatterns
 {
-	uint16 numPatterns;	// 1..1024 patterns
-	uint8  numTracks;	// 1..32 channels
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numPatterns);
-	}
+	uint16le numPatterns;	// 1..1024 patterns
+	uint8le  numTracks;		// 1..32 channels
 };
 
 STATIC_ASSERT(sizeof(DMFPatterns) == 3);
 
 // Pattern header (for each pattern)
-struct PACKED DMFPatternHeader
+struct DMFPatternHeader
 {
-	uint8  numTracks;	// 1..32 channels
-	uint8  beat;		// [hi|lo] -> hi = rows per beat, lo = reserved
-	uint16 numRows;
-	uint32 patternLength;
+	uint8le  numTracks;	// 1..32 channels
+	uint8le  beat;		// [hi|lo] -> hi = rows per beat, lo = reserved
+	uint16le numRows;
+	uint32le patternLength;
 	// patttern data follows here ...
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numRows);
-		SwapBytesLE(patternLength);
-	}
 };
 
 STATIC_ASSERT(sizeof(DMFPatternHeader) == 8);
 
 // Sample header
-struct PACKED DMFSampleHeader
+struct DMFSampleHeader
 {
 	enum SampleFlags
 	{
@@ -137,12 +113,12 @@ struct PACKED DMFSampleHeader
 		smpLibrary	= 0x80,	// Sample is stored in a library
 	};
 
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint16 c3freq;		// 1000..45000hz
-	uint8  volume;		// 0 = ignore
-	uint8  flags;
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint16le c3freq;		// 1000..45000hz
+	uint8le  volume;		// 0 = ignore
+	uint8le  flags;
 
 	// Convert an DMFSampleHeader to OpenMPT's internal sample representation.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -171,31 +147,19 @@ struct PACKED DMFSampleHeader
 			mptSmp.nSustainEnd /= 2;
 		}
 	}
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c3freq);
-	}
 };
 
 STATIC_ASSERT(sizeof(DMFSampleHeader) == 16);
 
 // Sample header tail (between head and tail, there might be the library name of the sample, depending on the DMF version)
-struct PACKED DMFSampleHeaderTail
+struct DMFSampleHeaderTail
 {
-	uint16 filler;
-	uint32 crc32;
+	uint16le filler;
+	uint32le crc32;
 };
 
 STATIC_ASSERT(sizeof(DMFSampleHeaderTail) == 6);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 // Pattern translation memory
 struct DMFPatternSettings
@@ -219,7 +183,7 @@ struct DMFPatternSettings
 		}
 	};
 
-	std::vector<ChannelState> channels;			// Memory for each channel's state
+	std::vector<ChannelState> channels;		// Memory for each channel's state
 	bool realBPMmode;						// true = BPM mode
 	uint8 beat;								// Rows per beat
 	uint8 tempoTicks;						// Tick mode param
@@ -387,7 +351,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	file.Rewind();
 	
 	DMFPatternHeader patHead;
-	file.ReadConvertEndianness(patHead);
+	file.ReadStruct(patHead);
 
 	const ROWINDEX numRows = Clamp(ROWINDEX(patHead.numRows), ROWINDEX(1), MAX_PATTERN_ROWS);
 	const PATTERNINDEX pat = sndFile.Patterns.InsertAny(numRows);
@@ -962,7 +926,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	// Read order list
 	DMFSequence seqHeader;
 	chunk = chunks.GetChunk(DMFChunk::idSEQU);
-	if(!chunk.ReadConvertEndianness(seqHeader))
+	if(!chunk.ReadStruct(seqHeader))
 	{
 		return false;
 	}
@@ -979,8 +943,8 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	if(chunk.IsValid() && (loadFlags & loadPatternData))
 	{
 		DMFPatterns patHeader;
-		chunk.ReadConvertEndianness(patHeader);
-		m_nChannels = Clamp(patHeader.numTracks, uint8(1), uint8(32)) + 1;	// + 1 for global track (used for tempo stuff)
+		chunk.ReadStruct(patHeader);
+		m_nChannels = Clamp<uint8, uint8>(patHeader.numTracks, 1, 32) + 1;	// + 1 for global track (used for tempo stuff)
 
 		std::vector<FileReader> patternChunks;
 		patternChunks.reserve(patHeader.numPatterns);
@@ -989,7 +953,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		for(PATTERNINDEX pat = 0; pat < patHeader.numPatterns; pat++)
 		{
 			DMFPatternHeader header;
-			chunk.ReadConvertEndianness(header);
+			chunk.ReadStruct(header);
 			chunk.SkipBack(sizeof(header));
 			patternChunks.push_back(chunk.ReadChunk(sizeof(header) + header.patternLength));
 		}
@@ -1032,10 +996,10 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		chunk.ReadString<mpt::String::spacePadded>(m_szNames[smp], chunk.ReadUint8());
+		chunk.ReadSizedString<uint8le, mpt::String::spacePadded>(m_szNames[smp]);
 		DMFSampleHeader sampleHeader;
 		ModSample &sample = Samples[smp];
-		chunk.ReadConvertEndianness(sampleHeader);
+		chunk.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(sample);
 
 		if(fileHeader.version >= 8)

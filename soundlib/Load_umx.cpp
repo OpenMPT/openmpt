@@ -14,47 +14,23 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // UMX File Header
-struct PACKED UMXFileHeader
+struct UMXFileHeader
 {
-	// Magic Bytes
-	static const uint32 magicBytes = 0x9E2A83C1u;
-
-	uint32 magic;
-	uint16 packageVersion;
-	uint16 licenseMode;
-	uint32 flags;
-	uint32 nameCount;
-	uint32 nameOffset;
-	uint32 exportCount;
-	uint32 exportOffset;
-	uint32 importCount;
-	uint32 importOffset;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(magic);
-		SwapBytesLE(packageVersion);
-		// Don't need the rest.
-		SwapBytesLE(nameCount);
-		SwapBytesLE(nameOffset);
-		SwapBytesLE(exportCount);
-		SwapBytesLE(exportOffset);
-		SwapBytesLE(importCount);
-		SwapBytesLE(importOffset);
-	}
+	char     magic[4];	// C1 83 2A 9E
+	uint16le packageVersion;
+	uint16le licenseMode;
+	uint32le flags;
+	uint32le nameCount;
+	uint32le nameOffset;
+	uint32le exportCount;
+	uint32le exportOffset;
+	uint32le importCount;
+	uint32le importOffset;
 };
 
 STATIC_ASSERT(sizeof(UMXFileHeader) == 36);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 #ifdef MODPLUG_TRACKER
 #define MPT_IMPORT_UAX	// Support loading of sound files (load sounds into sample slots)
@@ -176,8 +152,8 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	UMXFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
-		|| fileHeader.magic != UMXFileHeader::magicBytes
+	if(!file.ReadStruct(fileHeader)
+		|| memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
 		|| !file.Seek(fileHeader.nameOffset))
 	{
 		return false;

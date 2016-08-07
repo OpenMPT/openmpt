@@ -74,12 +74,7 @@ enum
 };
 
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED MIDIMacroConfigData
+struct MIDIMacroConfigData
 {
 	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
 	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
@@ -88,9 +83,9 @@ struct PACKED MIDIMacroConfigData
 
 STATIC_ASSERT(sizeof(MIDIMacroConfigData) == 4896); // this is directly written to files, so the size must be correct!
 
-//=======================================================
-class PACKED MIDIMacroConfig : public MIDIMacroConfigData
-//=======================================================
+//================================================
+class MIDIMacroConfig : public MIDIMacroConfigData
+//================================================
 {
 
 public:
@@ -164,8 +159,5 @@ protected:
 
 STATIC_ASSERT(sizeof(MIDIMacroConfig) == sizeof(MIDIMacroConfigData)); // this is directly written to files, so the size must be correct!
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 OPENMPT_NAMESPACE_END

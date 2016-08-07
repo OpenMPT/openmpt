@@ -33,7 +33,7 @@ CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
 //--------------------------------------------------------------
 {
 	inFile.Rewind();
-	inFile.ReadConvertEndianness(header);
+	inFile.ReadStruct(header);
 
 	// Check header data + file size
 	if(header.magic1 != GZ_HMAGIC1 || header.magic2 != GZ_HMAGIC2 || header.method != GZ_HMDEFLATE || (header.flags & GZ_FRESERVED) != 0
@@ -65,7 +65,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	// Read trailer
 	GZtrailer trailer;
 	inFile.Seek(inFile.GetLength() - sizeof(GZtrailer));
-	inFile.ReadConvertEndianness(trailer);
+	inFile.ReadStruct(trailer);
 
 	// Continue reading header
 	inFile.Seek(sizeof(GZheader));

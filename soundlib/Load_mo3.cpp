@@ -129,11 +129,7 @@ MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
 
 #ifdef MPT_ENABLE_MO3_BUILTIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED MO3FileHeader
+struct MO3FileHeader
 {
 	enum MO3HeaderFlags
 	{
@@ -156,41 +152,29 @@ struct PACKED MO3FileHeader
 		extFilterRange	= 0x200000,
 	};
 
-	uint8  numChannels;		// 1...64 (limited by channel panning and volume)
-	uint16 numOrders;
-	uint16 restartPos;
-	uint16 numPatterns;
-	uint16 numTracks;
-	uint16 numInstruments;
-	uint16 numSamples;
-	uint8  defaultSpeed;
-	uint8  defaultTempo;
-	uint32 flags;			// See MO3HeaderFlags
-	uint8  globalVol;		// 0...128 in IT, 0...64 in S3M
-	uint8  panSeparation;	// 0...128 in IT
-	int8   sampleVolume;	// Only used in IT
-	uint8  chnVolume[64];	// 0...64
-	uint8  chnPan[64];		// 0...256, 127 = surround
-	uint8  sfxMacros[16];
-	uint8  fixedMacros[128][2];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numOrders);
-		SwapBytesLE(restartPos);
-		SwapBytesLE(numPatterns);
-		SwapBytesLE(numTracks);
-		SwapBytesLE(numInstruments);
-		SwapBytesLE(numSamples);
-		SwapBytesLE(flags);
-	}
+	uint8le  numChannels;	// 1...64 (limited by channel panning and volume)
+	uint16le numOrders;
+	uint16le restartPos;
+	uint16le numPatterns;
+	uint16le numTracks;
+	uint16le numInstruments;
+	uint16le numSamples;
+	uint8le  defaultSpeed;
+	uint8le  defaultTempo;
+	uint32le flags;			// See MO3HeaderFlags
+	uint8le  globalVol;		// 0...128 in IT, 0...64 in S3M
+	uint8le  panSeparation;	// 0...128 in IT
+	int8le   sampleVolume;	// Only used in IT
+	uint8le  chnVolume[64];	// 0...64
+	uint8le  chnPan[64];	// 0...256, 127 = surround
+	uint8le  sfxMacros[16];
+	uint8le  fixedMacros[128][2];
 };
 
 STATIC_ASSERT(sizeof(MO3FileHeader) == 422);
 
 
-struct PACKED MO3Envelope
+struct MO3Envelope
 {
 	enum MO3EnvelopeFlags
 	{
@@ -201,23 +185,13 @@ struct PACKED MO3Envelope
 		envCarry	= 0x20,
 	};
 
-	uint8 flags;			// See MO3EnvelopeFlags
-	uint8 numNodes;
-	uint8 sustainStart;
-	uint8 sustainEnd;
-	uint8 loopStart;
-	uint8 loopEnd;
-	int16 points[25][2];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(size_t i = 0; i < CountOf(points); i++)
-		{
-			SwapBytesLE(points[i][0]);
-			SwapBytesLE(points[i][1]);
-		}
-	}
+	uint8le flags;			// See MO3EnvelopeFlags
+	uint8le numNodes;
+	uint8le sustainStart;
+	uint8le sustainEnd;
+	uint8le loopStart;
+	uint8le loopEnd;
+	int16le points[25][2];
 
 	// Convert MO3 envelope data into OpenMPT's internal envelope format
 	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envShift) const
@@ -245,7 +219,7 @@ struct PACKED MO3Envelope
 STATIC_ASSERT(sizeof(MO3Envelope) == 106);
 
 
-struct PACKED MO3Instrument
+struct MO3Instrument
 {
 	enum MO3InstrumentFlags
 	{
@@ -253,52 +227,34 @@ struct PACKED MO3Instrument
 		mute		= 0x02,
 	};
 
-	uint32 flags;		// See MO3InstrumentFlags
-	uint16 sampleMap[120][2];
+	uint32le flags;		// See MO3InstrumentFlags
+	uint16le sampleMap[120][2];
 	MO3Envelope volEnv;
 	MO3Envelope panEnv;
 	MO3Envelope pitchEnv;
 	struct XMVibratoSettings
 	{
-		uint8  type;
-		uint8  sweep;
-		uint8  depth;
-		uint8  rate;
+		uint8le  type;
+		uint8le  sweep;
+		uint8le  depth;
+		uint8le  rate;
 	} vibrato;			// Applies to all samples of this instrument (XM)
-	uint16 fadeOut;
-	uint8  midiChannel;
-	uint8  midiBank;
-	uint8  midiPatch;
-	uint8  midiBend;
-	uint8  globalVol;	// 0...128
-	uint16 panning;		// 0...256 if enabled, 0xFFFF otherwise
-	uint8  nna;
-	uint8  pps;
-	uint8  ppc;
-	uint8  dct;
-	uint8  dca;
-	uint16 volSwing;	// 0...100
-	uint16 panSwing;	// 0...256
-	uint8  cutoff;		// 0...127, + 128 if enabled
-	uint8  resonance;	// 0...127, + 128 if enabled
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(size_t i = 0; i < CountOf(sampleMap); i++)
-		{
-			SwapBytesLE(sampleMap[i][0]);
-			SwapBytesLE(sampleMap[i][1]);
-		}
-
-		volEnv.ConvertEndianness();
-		panEnv.ConvertEndianness();
-		pitchEnv.ConvertEndianness();
-		SwapBytesLE(fadeOut);
-		SwapBytesLE(panning);
-		SwapBytesLE(volSwing);
-		SwapBytesLE(panSwing);
-	}
+	uint16le fadeOut;
+	uint8le  midiChannel;
+	uint8le  midiBank;
+	uint8le  midiPatch;
+	uint8le  midiBend;
+	uint8le  globalVol;	// 0...128
+	uint16le panning;	// 0...256 if enabled, 0xFFFF otherwise
+	uint8le  nna;
+	uint8le  pps;
+	uint8le  ppc;
+	uint8le  dct;
+	uint8le  dca;
+	uint16le volSwing;	// 0...100
+	uint16le panSwing;	// 0...256
+	uint8le  cutoff;	// 0...127, + 128 if enabled
+	uint8le  resonance;	// 0...127, + 128 if enabled
 
 	// Convert MO3 instrument data into OpenMPT's internal instrument format
 	void ConvertToMPT(ModInstrument &mptIns, MODTYPE type) const
@@ -338,7 +294,7 @@ struct PACKED MO3Instrument
 		mptIns.nMidiProgram = midiPatch;
 		mptIns.midiPWD =  midiBend;
 		if(type == MOD_TYPE_IT)
-			mptIns.nGlobalVol = std::min(globalVol, uint8(128)) / 2u;
+			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
 		if(panning <= 256)
 		{
 			mptIns.nPan = panning;
@@ -349,8 +305,8 @@ struct PACKED MO3Instrument
 		mptIns.nPPC = ppc;
 		mptIns.nDCT = dct;
 		mptIns.nDNA = dca;
-		mptIns.nVolSwing = static_cast<uint8>(std::min(volSwing, uint16(100)));
-		mptIns.nPanSwing = static_cast<uint8>(std::min(panSwing, uint16(256)) / 4u);
+		mptIns.nVolSwing = static_cast<uint8>(std::min<uint16>(volSwing, 100));
+		mptIns.nPanSwing = static_cast<uint8>(std::min<uint16>(panSwing, 256) / 4u);
 		mptIns.SetCutoff(cutoff & 0x7F, (cutoff & 0x80) != 0);
 		mptIns.SetResonance(resonance & 0x7F, (resonance & 0x80) != 0);
 	}
@@ -359,7 +315,7 @@ struct PACKED MO3Instrument
 STATIC_ASSERT(sizeof(MO3Instrument) == 826);
 
 
-struct PACKED MO3Sample
+struct MO3Sample
 {
 	enum MO3SampleFlags
 	{
@@ -377,38 +333,23 @@ struct PACKED MO3Sample
 		smpCompressionMask	= 0x1000 | 0x2000 | 0x4000
 	};
 
-	int32  freqFinetune;	// Frequency in S3M and IT, finetune (0...255) in MOD, MTM, XM
-	int8   transpose;
-	uint8  defaultVolume;	// 0...64
-	uint16 panning;			// 0...256 if enabled, 0xFFFF otherwise
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint16 flags;			// See MO3SampleFlags
-	uint8  vibType;
-	uint8  vibSweep;
-	uint8  vibDepth;
-	uint8  vibRate;
-	uint8  globalVol;		// 0...64 in IT, in XM it represents the instrument number
-	uint32 sustainStart;
-	uint32 sustainEnd;
-	int32  compressedSize;
-	uint16 encoderDelay;	// MP3: Ignore first n bytes of decoded output. Ogg: Shared Ogg header size
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(freqFinetune);
-		SwapBytesLE(panning);
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(flags);
-		SwapBytesLE(sustainStart);
-		SwapBytesLE(sustainEnd);
-		SwapBytesLE(compressedSize);
-		SwapBytesLE(encoderDelay);
-	}
+	int32le  freqFinetune;	// Frequency in S3M and IT, finetune (0...255) in MOD, MTM, XM
+	int8le   transpose;
+	uint8le  defaultVolume;	// 0...64
+	uint16le panning;		// 0...256 if enabled, 0xFFFF otherwise
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint16le flags;			// See MO3SampleFlags
+	uint8le  vibType;
+	uint8le  vibSweep;
+	uint8le  vibDepth;
+	uint8le  vibRate;
+	uint8le  globalVol;		// 0...64 in IT, in XM it represents the instrument number
+	uint32le sustainStart;
+	uint32le sustainEnd;
+	int32le  compressedSize;
+	uint16le encoderDelay;	// MP3: Ignore first n bytes of decoded output. Ogg: Shared Ogg header size
 
 	// Convert MO3 sample data into OpenMPT's internal instrument format
 	void ConvertToMPT(ModSample &mptSmp, MODTYPE type, bool frequencyIsHertz) const
@@ -426,7 +367,7 @@ struct PACKED MO3Sample
 			if(type != MOD_TYPE_MTM) mptSmp.nFineTune -= 128;
 			mptSmp.RelativeTone = transpose;
 		}
-		mptSmp.nVolume = std::min(defaultVolume, uint8(64)) * 4u;
+		mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4u;
 		if(panning <= 256)
 		{
 			mptSmp.nPan = panning;
@@ -446,18 +387,13 @@ struct PACKED MO3Sample
 		mptSmp.nVibRate = vibRate;
 
 		if(type == MOD_TYPE_IT)
-			mptSmp.nGlobalVol = std::min(globalVol, uint8(64));
+			mptSmp.nGlobalVol = std::min<uint8>(globalVol, 64);
 		mptSmp.nSustainStart = sustainStart;
 		mptSmp.nSustainEnd = sustainEnd;
 	}
 };
 
 STATIC_ASSERT(sizeof(MO3Sample) == 41);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 // We need all this information for Ogg-compressed samples with shared headers:
@@ -978,7 +914,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	musicChunk.ReadNullString(m_songMessage);
 
 	MO3FileHeader fileHeader;
-	if(!musicChunk.ReadConvertEndianness(fileHeader)
+	if(!musicChunk.ReadStruct(fileHeader)
 		|| fileHeader.numChannels == 0 || fileHeader.numChannels > MAX_BASECHANNELS
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
 		|| fileHeader.numSamples >= MAX_SAMPLES)
@@ -1035,7 +971,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX i = 0; i < headerChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
-			ChnSettings[i].nVolume = std::min(fileHeader.chnVolume[i], uint8(64));
+			ChnSettings[i].nVolume = std::min<uint8>(fileHeader.chnVolume[i], 64);
 		if(m_nType != MOD_TYPE_XM)
 		{
 			if(fileHeader.chnPan[i] == 127)
@@ -1432,7 +1368,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		MO3Instrument insHeader;
-		if(!musicChunk.ReadConvertEndianness(insHeader))
+		if(!musicChunk.ReadStruct(insHeader))
 			break;
 		insHeader.ConvertToMPT(*pIns, m_nType);
 
@@ -1459,7 +1395,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		MO3Sample smpHeader;
-		if(!musicChunk.ReadConvertEndianness(smpHeader))
+		if(!musicChunk.ReadStruct(smpHeader))
 			break;
 		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 
@@ -1666,10 +1602,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				dataStreamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
 				{
-					std::vector<uint32>::iterator it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+					std::vector<uint32>::iterator it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), oggPageInfo.header.bitstream_serial_number);
 					if(it == dataStreamSerials.end())
 					{
-						dataStreamSerials.push_back(read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+						dataStreamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
 					}
 				}
 
@@ -1677,10 +1613,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				headStreamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sharedChunk, oggPageInfo, oggPageData))
 				{
-					std::vector<uint32>::iterator it = std::find(headStreamSerials.begin(), headStreamSerials.end(), read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+					std::vector<uint32>::iterator it = std::find(headStreamSerials.begin(), headStreamSerials.end(), oggPageInfo.header.bitstream_serial_number);
 					if(it == headStreamSerials.end())
 					{
-						headStreamSerials.push_back(read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+						headStreamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
 						it = headStreamSerials.begin() + (headStreamSerials.size() - 1);
 					}
 					uint32 newSerial = 0;

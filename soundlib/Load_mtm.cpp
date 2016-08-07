@@ -14,55 +14,36 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // File Header
-struct PACKED MTMFileHeader
+struct MTMFileHeader
 {
-	char   id[3];			// MTM file marker
-	uint8  version;			// Tracker version
-	char   songName[20];	// ASCIIZ songname
-	uint16 numTracks;		// Number of tracks saved
-	uint8  lastPattern;		// Last pattern number saved
-	uint8  lastOrder;		// Last order number to play (songlength-1)
-	uint16 commentSize;		// Length of comment field
-	uint8  numSamples;		// Number of samples saved
-	uint8  attribute;		// Attribute byte (unused)
-	uint8  beatsPerTrack;	// Numbers of rows in every pattern (MultiTracker itself does not seem to support values != 64)
-	uint8  numChannels;		// Number of channels used
-	uint8  panPos[32];		// Channel pan positions
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numTracks);
-		SwapBytesLE(commentSize);
-	}
+	char     id[3];			// MTM file marker
+	uint8le  version;		// Tracker version
+	char     songName[20];	// ASCIIZ songname
+	uint16le numTracks;		// Number of tracks saved
+	uint8le  lastPattern;	// Last pattern number saved
+	uint8le  lastOrder;		// Last order number to play (songlength-1)
+	uint16le commentSize;	// Length of comment field
+	uint8le  numSamples;	// Number of samples saved
+	uint8le  attribute;		// Attribute byte (unused)
+	uint8le  beatsPerTrack;	// Numbers of rows in every pattern (MultiTracker itself does not seem to support values != 64)
+	uint8le  numChannels;	// Number of channels used
+	uint8le  panPos[32];	// Channel pan positions
 };
 
 STATIC_ASSERT(sizeof(MTMFileHeader) == 66);
 
 
 // Sample Header
-struct PACKED MTMSampleHeader
+struct MTMSampleHeader
 {
-	char   samplename[22];
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	int8   finetune;
-	uint8  volume;
-	uint8  attribute;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-	}
+	char     samplename[22];
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	int8le   finetune;
+	uint8le  volume;
+	uint8le  attribute;
 
 	// Convert an MTM sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -94,17 +75,12 @@ struct PACKED MTMSampleHeader
 STATIC_ASSERT(sizeof(MTMSampleHeader) == 37);
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-
 bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 	MTMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.id, "MTM", 3)
 		|| fileHeader.lastOrder > 127
 		|| fileHeader.numChannels > 32
@@ -128,7 +104,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		MTMSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.samplename);
 	}

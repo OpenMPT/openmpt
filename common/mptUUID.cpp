@@ -398,14 +398,6 @@ void UUID::MakeRFC4122(uint8 version)
 	Data3 |= static_cast<uint16>(Mm) << 8;
 }
 
-void UUID::ConvertEndianness()
-{
-	SwapBytesBE(Data1);
-	SwapBytesBE(Data2);
-	SwapBytesBE(Data3);
-	SwapBytesBE(Data4);
-}
-
 UUID::UUID()
 	: Data1(0)
 	, Data2(0)

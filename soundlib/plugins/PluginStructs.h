@@ -30,54 +30,34 @@ class CSoundFile;
 
 #ifndef NO_PLUGINS
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED SNDMIXPLUGININFO
+struct SNDMIXPLUGININFO
 {
 	// dwInputRouting flags
 	enum RoutingFlags
 	{
-		irApplyToMaster	= 0x01,		// Apply to master mix
-		irBypass		= 0x02,		// Bypass effect
-		irWetMix		= 0x04,		// Wet Mix (dry added)
-		irExpandMix		= 0x08,		// [0%,100%] -> [-200%,200%]
-		irAutoSuspend	= 0x10,		// Plugin will automatically suspend on silence
+		irApplyToMaster	= 0x01,	// Apply to master mix
+		irBypass		= 0x02,	// Bypass effect
+		irWetMix		= 0x04,	// Wet Mix (dry added)
+		irExpandMix		= 0x08,	// [0%,100%] -> [-200%,200%]
+		irAutoSuspend	= 0x10,	// Plugin will automatically suspend on silence
 	};
 
-	int32 dwPluginId1;				// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
-	int32 dwPluginId2;				// Plugin unique ID
-	uint8 routingFlags;				// See RoutingFlags
-	uint8 mixMode;
-	uint8 gain;						// Divide by 10 to get real gain
-	uint8 reserved;
-	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
-	uint32 dwReserved[4];			// Reserved for routing info
-	char szName[32];				// User-chosen plugin display name - this is locale ANSI!
-	char szLibraryName[64];			// original DLL name - this is UTF-8!
+	int32le dwPluginId1;			// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
+	int32le dwPluginId2;			// Plugin unique ID
+	uint8le routingFlags;			// See RoutingFlags
+	uint8le mixMode;
+	uint8le gain;					// Divide by 10 to get real gain
+	uint8le reserved;
+	uint32le dwOutputRouting;		// 0 = send to master 0x80 + x = send to plugin x
+	uint32le dwReserved[4];		// Reserved for routing info
+	char    szName[32];				// User-chosen plugin display name - this is locale ANSI!
+	char    szLibraryName[64];		// original DLL name - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
-	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= ~irBypass; }
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(dwPluginId1);
-		SwapBytesLE(dwPluginId2);
-		SwapBytesLE(dwOutputRouting);
-		SwapBytesLE(dwReserved[0]);
-		SwapBytesLE(dwReserved[1]);
-		SwapBytesLE(dwReserved[2]);
-		SwapBytesLE(dwReserved[3]);
-	}
+	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= uint8(~irBypass); }
 };
 
 STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 struct SNDMIXPLUGIN
@@ -119,14 +99,14 @@ struct SNDMIXPLUGIN
 	void SetMixMode(uint8 mixMode)
 		{ Info.mixMode = mixMode; }
 	void SetMasterEffect(bool master = true)
-		{ if(master) Info.routingFlags |= SNDMIXPLUGININFO::irApplyToMaster; else Info.routingFlags &= ~SNDMIXPLUGININFO::irApplyToMaster; }
+		{ if(master) Info.routingFlags |= SNDMIXPLUGININFO::irApplyToMaster; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irApplyToMaster); }
 	void SetWetMix(bool wetMix = true)
-		{ if(wetMix) Info.routingFlags |= SNDMIXPLUGININFO::irWetMix; else Info.routingFlags &= ~SNDMIXPLUGININFO::irWetMix; }
+		{ if(wetMix) Info.routingFlags |= SNDMIXPLUGININFO::irWetMix; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irWetMix); }
 	void SetExpandedMix(bool expanded = true)
-		{ if(expanded) Info.routingFlags |= SNDMIXPLUGININFO::irExpandMix; else Info.routingFlags &= ~SNDMIXPLUGININFO::irExpandMix; }
+		{ if(expanded) Info.routingFlags |= SNDMIXPLUGININFO::irExpandMix; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irExpandMix); }
 	void SetBypass(bool bypass = true);
 	void SetAutoSuspend(bool suspend = true)
-		{ if(suspend) Info.routingFlags |= SNDMIXPLUGININFO::irAutoSuspend; else Info.routingFlags &= ~SNDMIXPLUGININFO::irAutoSuspend; }
+		{ if(suspend) Info.routingFlags |= SNDMIXPLUGININFO::irAutoSuspend; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irAutoSuspend); }
 
 	// Output routing getters
 	bool IsOutputToMaster() const

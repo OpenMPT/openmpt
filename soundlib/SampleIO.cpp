@@ -827,11 +827,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			}
 			if(GetEncoding() == deltaPCM)
 			{
-				buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new - s_old));
+				buffer16[bufcount] = SwapBytesLE((int16)(s_new - s_old));
 				s_old = s_new;
 			} else
 			{
-				buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new + s_ofs));
+				buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
 			}
 			bufcount++;
 			if(bufcount >= CountOf(buffer16))
@@ -897,11 +897,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 				p += 2;
 				if (GetEncoding() == deltaPCM)
 				{
-					buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new - s_old));
+					buffer16[bufcount] = SwapBytesLE((int16)(s_new - s_old));
 					s_old = s_new;
 				} else
 				{
-					buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new + s_ofs));
+					buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
 				}
 				bufcount++;
 				if(bufcount >= CountOf(buffer16))

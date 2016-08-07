@@ -23,44 +23,27 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // This part of the header is identical for both presets and banks.
-struct PACKED ChunkHeader
+struct ChunkHeader
 {
-	char  chunkMagic[4];	///< 'CcnK'
-	int32 byteSize;			///< size of this chunk, excl. magic + byteSize
+	char    chunkMagic[4];	///< 'CcnK'
+	int32be byteSize;		///< size of this chunk, excl. magic + byteSize
 
-	char  fxMagic[4];		///< 'FxBk' (regular) or 'FBCh' (opaque chunk)
-	int32 version;			///< format version (1 or 2)
-	int32 fxID;				///< fx unique ID
-	int32 fxVersion;		///< fx version
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesBE(byteSize);
-		SwapBytesBE(version);
-		SwapBytesBE(fxID);
-		SwapBytesBE(fxVersion);
-	}
+	char    fxMagic[4];		///< 'FxBk' (regular) or 'FBCh' (opaque chunk)
+	int32be version;		///< format version (1 or 2)
+	int32be fxID;			///< fx unique ID
+	int32be fxVersion;		///< fx version
 };
 
 STATIC_ASSERT(sizeof(ChunkHeader) == 24);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 //------------------------------------------------------------------------------
 {
 	const bool firstChunk = file.GetPosition() == 0;
 	ChunkHeader header;
-	if(!file.ReadConvertEndianness(header) || memcmp(header.chunkMagic, "CcnK", 4))
+	if(!file.ReadStruct(header) || memcmp(header.chunkMagic, "CcnK", 4))
 	{
 		return invalidFile;
 	}
@@ -199,7 +182,7 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 		header.fxVersion = plugin.GetVersion();
 
 		// Write unfinished header... We need to update the size once we're done writing.
-		mpt::IO::WriteConvertEndianness(f, header);
+		mpt::IO::WriteStruct(f, header);
 
 		uint32 numProgs = std::max(plugin.GetNumPrograms(), int32(1)), curProg = plugin.GetCurrentProgram();
 		mpt::IO::WriteIntBE(f, numProgs);
@@ -237,7 +220,7 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 		header.byteSize = static_cast<int32>(end - 8);
 		memcpy(header.fxMagic, writeChunk ? "FBCh" : "FxBk", 4);
 		mpt::IO::SeekBegin(f);
-		mpt::IO::WriteConvertEndianness(f, header);
+		mpt::IO::WriteStruct(f, header);
 	}
 
 	return true;
@@ -257,7 +240,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 
 	// Write unfinished header... We need to update the size once we're done writing.
 	mpt::IO::Offset start = mpt::IO::TellWrite(f);
-	mpt::IO::WriteConvertEndianness(f, header);
+	mpt::IO::WriteStruct(f, header);
 
 	const uint32 numParams = plugin.GetNumParameters();
 	mpt::IO::WriteIntBE(f, numParams);
@@ -293,7 +276,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 	header.byteSize = static_cast<int32>(end - start - 8);
 	memcpy(header.fxMagic, writeChunk ? "FPCh" : "FxCk", 4);
 	mpt::IO::SeekAbsolute(f, start);
-	mpt::IO::WriteConvertEndianness(f, header);
+	mpt::IO::WriteStruct(f, header);
 	mpt::IO::SeekAbsolute(f, end);
 }
 

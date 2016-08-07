@@ -535,7 +535,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			std::string url = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				url += mpt::fmt::HEX0<8>(LittleEndian((**i).dwPluginId2));
+				url += mpt::fmt::HEX0<8>((**i).dwPluginId2.get());
 				url += (**i).szLibraryName;
 				url += "%0a";
 			}

@@ -18,42 +18,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void XMFileHeader::ConvertEndianness()
-//------------------------------------
-{
-	SwapBytesLE(version);
-	SwapBytesLE(size);
-	SwapBytesLE(orders);
-	SwapBytesLE(restartPos);
-	SwapBytesLE(channels);
-	SwapBytesLE(patterns);
-	SwapBytesLE(instruments);
-	SwapBytesLE(flags);
-	SwapBytesLE(speed);
-	SwapBytesLE(tempo);
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void XMInstrument::ConvertEndianness()
-//------------------------------------
-{
-	for(size_t i = 0; i < CountOf(volEnv); i++)
-	{
-		SwapBytesLE(volEnv[i]);
-		SwapBytesLE(panEnv[i]);
-	}
-	SwapBytesLE(volFade);
-	SwapBytesLE(midiProgram);
-	SwapBytesLE(pitchWheelRange);
-}
-
-
-
 // Convert OpenMPT's internal envelope representation to XM envelope data.
-void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, EnvType env)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le &numPoints, uint8le &flags, uint8le &sustain, uint8le &loopStart, uint8le &loopEnd, EnvType env)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	numPoints = static_cast<uint8>(std::min(12u, mptEnv.size()));
 
@@ -158,10 +125,10 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 
 
 // Convert XM envelope data to an OpenMPT's internal envelope representation.
-void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8le numPoints, uint8le flags, uint8le sustain, uint8le loopStart, uint8le loopEnd, EnvType env) const
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	mptEnv.resize(std::min(numPoints, uint8(12)));
+	mptEnv.resize(std::min<uint8>(numPoints, 12));
 
 	// Envelope Data
 	for(uint32 i = 0; i < mptEnv.size(); i++)
@@ -231,7 +198,7 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	{
 		mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		Limit(mptIns.nMidiChannel, uint8(MidiFirstChannel), uint8(MidiLastChannel));
-		mptIns.nMidiProgram = static_cast<uint8>(std::min(read_unaligned_field(midiProgram), uint16(127)) + 1);
+		mptIns.nMidiProgram = static_cast<uint8>(std::min<uint16>(midiProgram, 127) + 1);
 	}
 	mptIns.midiPWD = static_cast<int8>(pitchWheelRange);
 }
@@ -262,17 +229,6 @@ void XMInstrument::ApplyAutoVibratoToMPT(ModSample &mptSmp) const
 	mptSmp.nVibSweep = vibSweep;
 	mptSmp.nVibDepth = vibDepth;
 	mptSmp.nVibRate = vibRate;
-}
-
-
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void XMInstrumentHeader::ConvertEndianness()
-//------------------------------------------
-{
-	SwapBytesLE(size);
-	SwapBytesLE(sampleHeaderSize);
-	SwapBytesLE(numSamples);
-	instrument.ConvertEndianness();
 }
 
 
@@ -332,16 +288,6 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void XIInstrumentHeader::ConvertEndianness()
-//------------------------------------------
-{
-	SwapBytesLE(version);
-	SwapBytesLE(numSamples);
-	instrument.ConvertEndianness();
-}
-
-
 // Convert OpenMPT's internal sample representation to an XIInstrumentHeader.
 void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
 //-----------------------------------------------------------------------------------------
@@ -377,16 +323,6 @@ void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void XMSample::ConvertEndianness()
-//--------------------------------
-{
-	SwapBytesLE(length);
-	SwapBytesLE(loopStart);
-	SwapBytesLE(loopLength);
-}
-
-
 // Convert OpenMPT's internal sample representation to an XMSample.
 void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compatibilityExport)
 //---------------------------------------------------------------------------------------------
@@ -410,10 +346,10 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	}
 
 	flags = 0;
-	if(mptSmp.uFlags[CHN_LOOP])
-	{
-		flags |= mptSmp.uFlags[CHN_PINGPONGLOOP] ? XMSample::sampleBidiLoop : XMSample::sampleLoop;
-	}
+	if(mptSmp.uFlags[CHN_PINGPONGLOOP])
+		flags |= XMSample::sampleBidiLoop;
+	else if(mptSmp.uFlags[CHN_LOOP])
+		flags |= XMSample::sampleLoop;
 
 	// Sample Length and Loops
 	length = mpt::saturate_cast<uint32>(mptSmp.nLength);

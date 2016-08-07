@@ -21,111 +21,73 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
 // GDM File Header
-struct PACKED GDMFileHeader
+struct GDMFileHeader
 {
-	char   magic[4];				// ID: 'GDM\xFE'
-	char   songTitle[32];			// Music's title
-	char   songMusician[32];		// Name of music's composer
-	char   dosEOF[3];				// 13, 10, 26
-	char   magic2[4];				// ID: 'GMFS'
-	uint8  formatMajorVer;			// Format major version
-	uint8  formatMinorVer;			// Format minor version
-	uint16 trackerID;				// Composing Tracker ID code (00 = 2GDM)
-	uint8  trackerMajorVer;			// Tracker's major version
-	uint8  trackerMinorVer;			// Tracker's minor version
-	uint8  panMap[32];				// 0-Left to 15-Right, 255-N/U
-	uint8  masterVol;				// Range: 0...64
-	uint8  tempo;					// Initial music tempo (6)
-	uint8  bpm;						// Initial music BPM (125)
-	uint16 originalFormat;			// Original format ID:
+	char     magic[4];				// ID: 'GDM\xFE'
+	char     songTitle[32];			// Music's title
+	char     songMusician[32];		// Name of music's composer
+	char     dosEOF[3];				// 13, 10, 26
+	char     magic2[4];				// ID: 'GMFS'
+	uint8le  formatMajorVer;		// Format major version
+	uint8le  formatMinorVer;		// Format minor version
+	uint16le trackerID;				// Composing Tracker ID code (00 = 2GDM)
+	uint8le  trackerMajorVer;		// Tracker's major version
+	uint8le  trackerMinorVer;		// Tracker's minor version
+	uint8le  panMap[32];			// 0-Left to 15-Right, 255-N/U
+	uint8le  masterVol;				// Range: 0...64
+	uint8le  tempo;					// Initial music tempo (6)
+	uint8le  bpm;					// Initial music BPM (125)
+	uint16le originalFormat;		// Original format ID:
 		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED, 9-PSM
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
 		// 2GDM v1.17 will only spit out 0-byte files when trying to convert a PSM16 file,
 		// and fail outright when trying to convert a new PSM file.
 
-	uint32 orderOffset;
-	uint8  lastOrder;				// Number of orders in module - 1
-	uint32 patternOffset;
-	uint8  lastPattern;				// Number of patterns in module - 1
-	uint32 sampleHeaderOffset;
-	uint32 sampleDataOffset;
-	uint8  lastSample;				// Number of samples in module - 1
-	uint32 messageTextOffset;		// Offset of song message
-	uint32 messageTextLength;
-	uint32 scrollyScriptOffset;		// Offset of scrolly script (huh?)
-	uint16 scrollyScriptLength;
-	uint32 textGraphicOffset;		// Offset of text graphic (huh?)
-	uint16 textGraphicLength;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(trackerID);
-		SwapBytesLE(originalFormat);
-		SwapBytesLE(orderOffset);
-		SwapBytesLE(patternOffset);
-		SwapBytesLE(sampleHeaderOffset);
-		SwapBytesLE(sampleDataOffset);
-		SwapBytesLE(messageTextOffset);
-		SwapBytesLE(messageTextLength);
-		SwapBytesLE(messageTextOffset);
-		SwapBytesLE(messageTextLength);
-		SwapBytesLE(scrollyScriptOffset);
-		SwapBytesLE(scrollyScriptLength);
-		SwapBytesLE(textGraphicOffset);
-		SwapBytesLE(textGraphicLength);
-	}
+	uint32le orderOffset;
+	uint8le  lastOrder;				// Number of orders in module - 1
+	uint32le patternOffset;
+	uint8le  lastPattern;			// Number of patterns in module - 1
+	uint32le sampleHeaderOffset;
+	uint32le sampleDataOffset;
+	uint8le  lastSample;			// Number of samples in module - 1
+	uint32le messageTextOffset;		// Offset of song message
+	uint32le messageTextLength;
+	uint32le scrollyScriptOffset;		// Offset of scrolly script (huh?)
+	uint16le scrollyScriptLength;
+	uint32le textGraphicOffset;		// Offset of text graphic (huh?)
+	uint16le textGraphicLength;
 };
 
 STATIC_ASSERT(sizeof(GDMFileHeader) == 157);
 
 
 // GDM Sample Header
-struct PACKED GDMSampleHeader
+struct GDMSampleHeader
 {
 	enum SampleFlags
 	{
 		smpLoop		= 0x01,
-		smp16Bit	= 0x02,		// 16-Bit samples are not handled correctly by 2GDM (not implemented)
+		smp16Bit	= 0x02,	// 16-Bit samples are not handled correctly by 2GDM (not implemented)
 		smpVolume	= 0x04,
 		smpPanning	= 0x08,
-		smpLZW		= 0x10,		// LZW-compressed samples are not implemented in 2GDM
-		smpStereo	= 0x20,		// Stereo samples are not handled correctly by 2GDM (not implemented)
+		smpLZW		= 0x10,	// LZW-compressed samples are not implemented in 2GDM
+		smpStereo	= 0x20,	// Stereo samples are not handled correctly by 2GDM (not implemented)
 	};
 
-	char   name[32];		// sample's name
-	char   fileName[12];	// sample's filename
-	uint8  emsHandle;		// useless
-	uint32 length;			// length in bytes
-	uint32 loopBegin;		// loop start in samples
-	uint32 loopEnd;			// loop end in samples
-	uint8  flags;			// misc. flags
-	uint16 c4Hertz;			// frequency
-	uint8  volume;			// default volume
-	uint8  panning;			// default pan
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopBegin);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c4Hertz);
-	}
+	char     name[32];		// sample's name
+	char     fileName[12];	// sample's filename
+	uint8le  emsHandle;		// useless
+	uint32le length;		// length in bytes
+	uint32le loopBegin;		// loop start in samples
+	uint32le loopEnd;		// loop end in samples
+	uint8le  flags;			// misc. flags
+	uint16le c4Hertz;		// frequency
+	uint8le  volume;		// default volume
+	uint8le  panning;		// default pan
 };
 
 STATIC_ASSERT(sizeof(GDMSampleHeader) == 62);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
@@ -139,7 +101,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	};
 
 	GDMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "GDM\xFE", 4)
 		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
 		|| memcmp(fileHeader.magic2, "GMFS", 4)
@@ -188,6 +150,10 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		}
 	}
+	if(m_nChannels < 1)
+	{
+		return false;
+	}
 
 	m_nDefaultGlobalVolume = MIN(fileHeader.masterVol * 4, 256);
 	m_nDefaultSpeed = fileHeader.tempo;
@@ -211,7 +177,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		GDMSampleHeader gdmSample;
-		if(!file.ReadConvertEndianness(gdmSample))
+		if(!file.ReadStruct(gdmSample))
 		{
 			break;
 		}
@@ -256,7 +222,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
 			// Default volume is used... 0...64, 255 = no default volume
-			sample.nVolume = std::min(gdmSample.volume, uint8(64)) * 4;
+			sample.nVolume = std::min<uint8>(gdmSample.volume, 64) * 4;
 		} else
 		{
 			sample.nVolume = 256;

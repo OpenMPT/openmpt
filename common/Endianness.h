@@ -2,7 +2,7 @@
  * Endianness.h
  * ------------
  * Purpose: Code for deadling with endianness.
- * Notes  : VC++ didn't like my compile-time endianness check - or rather, it didn't decide at compile time. ;_;
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -18,12 +18,12 @@
 OPENMPT_NAMESPACE_BEGIN
 
 // Ending swaps:
-// BigEndian(x) may be used either to:
-// -Convert DWORD x, which is in big endian format(for example read from file),
+// SwapBytesBE(x) and variants may be used either to:
+// -Convert integer x, which is in big endian format (for example read from file),
 //		to endian format of current architecture.
 // -Convert value x from endian format of current architecture to big endian format.
-// Similarly LittleEndian(x) converts known little endian format to format of current
-// endian architecture or value x in format of current architecture to little endian 
+// Similarly SwapBytesLE(x) converts known little endian format to format of current
+// endian architecture or value x in format of current architecture to little endian
 // format.
 
 #if MPT_COMPILER_GCC
@@ -98,19 +98,6 @@ static forceinline uint64 mpt_bswap16(uint64 x) { return bswap64(x); }
 #endif
 
 
-// Deprecated. Use "SwapBytesXX" versions below.
-#ifdef MPT_PLATFORM_BIG_ENDIAN
-inline uint32 LittleEndian(uint32 x)	{ return MPT_bswap32(x); }
-inline uint16 LittleEndianW(uint16 x)	{ return MPT_bswap16(x); }
-#define BigEndian(x)					(x)
-#define BigEndianW(x)					(x)
-#else
-inline uint32 BigEndian(uint32 x)	{ return MPT_bswap32(x); }
-inline uint16 BigEndianW(uint16 x)	{ return MPT_bswap16(x); }
-#define LittleEndian(x)				(x)
-#define LittleEndianW(x)			(x)
-#endif
-
 #if defined(MPT_PLATFORM_BIG_ENDIAN)
 #define MPT_bswap64le(x) MPT_bswap64(x)
 #define MPT_bswap32le(x) MPT_bswap32(x)
@@ -127,43 +114,39 @@ inline uint16 BigEndianW(uint16 x)	{ return MPT_bswap16(x); }
 #define MPT_bswap16le(x) (x)
 #endif
 
-inline uint64 SwapBytesBE_(uint64 value) { return MPT_bswap64be(value); }
-inline uint32 SwapBytesBE_(uint32 value) { return MPT_bswap32be(value); }
-inline uint16 SwapBytesBE_(uint16 value) { return MPT_bswap16be(value); }
-inline uint64 SwapBytesLE_(uint64 value) { return MPT_bswap64le(value); }
-inline uint32 SwapBytesLE_(uint32 value) { return MPT_bswap32le(value); }
-inline uint16 SwapBytesLE_(uint16 value) { return MPT_bswap16le(value); }
-inline int64  SwapBytesBE_(int64  value) { return MPT_bswap64be(value); }
-inline int32  SwapBytesBE_(int32  value) { return MPT_bswap32be(value); }
-inline int16  SwapBytesBE_(int16  value) { return MPT_bswap16be(value); }
-inline int64  SwapBytesLE_(int64  value) { return MPT_bswap64le(value); }
-inline int32  SwapBytesLE_(int32  value) { return MPT_bswap32le(value); }
-inline int16  SwapBytesLE_(int16  value) { return MPT_bswap16le(value); }
+inline uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
+inline uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
+inline uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
+inline uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
+inline uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
+inline uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
+inline int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
+inline int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
+inline int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
+inline int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
+inline int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
+inline int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
 // endian-converting and casting back to int.
 // Thus these overloads.
-inline uint8  SwapBytesLE_(uint8  value) { return value; }
-inline int8   SwapBytesLE_(int8   value) { return value; }
-inline char   SwapBytesLE_(char   value) { return value; }
-inline uint8  SwapBytesBE_(uint8  value) { return value; }
-inline int8   SwapBytesBE_(int8   value) { return value; }
-inline char   SwapBytesBE_(char   value) { return value; }
+inline uint8  SwapBytesLE(uint8  value) { return value; }
+inline int8   SwapBytesLE(int8   value) { return value; }
+inline char   SwapBytesLE(char   value) { return value; }
+inline uint8  SwapBytesBE(uint8  value) { return value; }
+inline int8   SwapBytesBE(int8   value) { return value; }
+inline char   SwapBytesBE(char   value) { return value; }
 
-// SwapBytesLE/SwapBytesBE is mostly used throughout the code with in-place
-// argument-modifying semantics.
-// As GCC will (rightfully) not bind references to members of packed
-// structures, we implement reference semantics by explicitly assigning to a
-// macro argument.
-
-// In-place modifying version:
-#define SwapBytesBE(value) MPT_DO { (value) = SwapBytesBE_((value)); } MPT_WHILE_0
-#define SwapBytesLE(value) MPT_DO { (value) = SwapBytesLE_((value)); } MPT_WHILE_0
-
-// Alternative, function-style syntax:
-#define SwapBytesReturnBE(value) SwapBytesBE_((value))
-#define SwapBytesReturnLE(value) SwapBytesLE_((value))
+inline uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
+inline uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
+inline uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
+inline int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
+inline int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
+inline int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
+inline uint8  SwapBytes(uint8  value) { return value; }
+inline int8   SwapBytes(int8   value) { return value; }
+inline char   SwapBytes(char   value) { return value; }
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
@@ -580,134 +563,97 @@ STATIC_ASSERT(sizeof(IEEE754binary64LE) == 8);
 STATIC_ASSERT(sizeof(IEEE754binary64BE) == 8);
 
 
-// Small helper class to support unaligned memory access on all platforms.
-// This is only used to make old module loaders work everywhere.
-// Do not use in new code.
-template <typename T>
-class const_unaligned_ptr_le
+///////////////////////////////////////////////////////////////////////////////
+// On-disk integer types with defined endianness and no alignemnt requirements
+// Note: To easily debug module loaders (and anything else that uses this
+// wrapper struct), you can use the Debugger Visualizers available in
+// build/vs/debug/ to conveniently view the wrapped contents.
+
+namespace mpt { namespace detail {
+enum Endianness
 {
-public:
-	typedef T value_type;
-private:
-	const mpt::byte *mem;
-	value_type Read() const
-	{
-		mpt::byte bytes[sizeof(value_type)];
-		std::memcpy(bytes, mem, sizeof(value_type));
-		#if defined(MPT_PLATFORM_BIG_ENDIAN)
-			std::reverse(bytes, bytes + sizeof(value_type));
-		#endif
-		value_type val = value_type();
-		std::memcpy(&val, bytes, sizeof(value_type));
-		return val;
-	}
-public:
-	const_unaligned_ptr_le() : mem(nullptr) {}
-	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
-	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mem) {}
-	explicit const_unaligned_ptr_le(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
-	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
-	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }
-	const_unaligned_ptr_le & operator -- () { mem -= sizeof(value_type); return *this; }
-	const_unaligned_ptr_le operator ++ (int) { const_unaligned_ptr_le<value_type> result = *this; ++result; return result; }
-	const_unaligned_ptr_le operator -- (int) { const_unaligned_ptr_le<value_type> result = *this; --result; return result; }
-	const_unaligned_ptr_le operator + (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result += count; return result; }
-	const_unaligned_ptr_le operator - (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result -= count; return result; }
-	const value_type operator * () const { return Read(); }
-	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
-	operator bool () const { return mem != nullptr; }
+	BigEndian,
+	LittleEndian,
+#if defined(PLATFORM_BIG_ENDIAN)
+	NativeEndian = BigEndian,
+#else
+	NativeEndian = LittleEndian,
+#endif
+};
+} } // namespace mpt::detail
+
+struct BigEndian_tag
+{
+	static const mpt::detail::Endianness Endianness = mpt::detail::BigEndian;
 };
 
-template <typename T>
-class const_unaligned_ptr_be
+struct LittleEndian_tag
 {
-public:
-	typedef T value_type;
-private:
-	const mpt::byte *mem;
-	value_type Read() const
-	{
-		mpt::byte bytes[sizeof(value_type)];
-		std::memcpy(bytes, mem, sizeof(value_type));
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-			std::reverse(bytes, bytes + sizeof(value_type));
-		#endif
-		value_type val = value_type();
-		std::memcpy(&val, bytes, sizeof(value_type));
-		return val;
-	}
-public:
-	const_unaligned_ptr_be() : mem(nullptr) {}
-	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
-	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mem) {}
-	explicit const_unaligned_ptr_be(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
-	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
-	const_unaligned_ptr_be & operator ++ () { mem += sizeof(value_type); return *this; }
-	const_unaligned_ptr_be & operator -- () { mem -= sizeof(value_type); return *this; }
-	const_unaligned_ptr_be operator ++ (int) { const_unaligned_ptr_be<value_type> result = *this; ++result; return result; }
-	const_unaligned_ptr_be operator -- (int) { const_unaligned_ptr_be<value_type> result = *this; --result; return result; }
-	const_unaligned_ptr_be operator + (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result += count; return result; }
-	const_unaligned_ptr_be operator - (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result -= count; return result; }
-	const value_type operator * () const { return Read(); }
-	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
-	operator bool () const { return mem != nullptr; }
+	static const mpt::detail::Endianness Endianness = mpt::detail::LittleEndian;
 };
 
-template <typename T>
-class const_unaligned_ptr
+template<typename T, typename Tendian>
+struct PACKED packed
 {
 public:
-	typedef T value_type;
+	typedef typename T base_type;
+	typedef typename Tendian endian_type;
 private:
-	const mpt::byte *mem;
-	value_type Read() const
+	mpt::byte data[sizeof(base_type)];
+
+public:
+	forceinline void set(base_type val)
 	{
-		value_type val = value_type();
-		std::memcpy(&val, mem, sizeof(value_type));
+		MPT_MAYBE_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
+		{
+			val = SwapBytes(val);
+		}
+		std::memcpy(data, &val, sizeof(val));
+	}
+	forceinline base_type get() const
+	{
+		base_type val;
+		std::memcpy(&val, data, sizeof(val));
+		MPT_MAYBE_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
+		{
+			val = SwapBytes(val);
+		}
 		return val;
 	}
+	forceinline packed & operator = (const base_type & val) { set(val); return *this; }
+	forceinline operator base_type () const { return get(); }
 public:
-	const_unaligned_ptr() : mem(nullptr) {}
-	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
-	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr(const uint8 *mem) : mem(mem) {}
-	explicit const_unaligned_ptr(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
-	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
-	const_unaligned_ptr & operator ++ () { mem += sizeof(value_type); return *this; }
-	const_unaligned_ptr & operator -- () { mem -= sizeof(value_type); return *this; }
-	const_unaligned_ptr operator ++ (int) { const_unaligned_ptr<value_type> result = *this; ++result; return result; }
-	const_unaligned_ptr operator -- (int) { const_unaligned_ptr<value_type> result = *this; --result; return result; }
-	const_unaligned_ptr operator + (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result += count; return result; }
-	const_unaligned_ptr operator - (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result -= count; return result; }
-	const value_type operator * () const { return Read(); }
-	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
-	operator bool () const { return mem != nullptr; }
+	packed & operator &= (base_type val) { set(get() & val); return *this; }
+	packed & operator |= (base_type val) { set(get() | val); return *this; }
+	packed & operator ^= (base_type val) { set(get() ^ val); return *this; }
+	packed & operator += (base_type val) { set(get() + val); return *this; }
+	packed & operator -= (base_type val) { set(get() - val); return *this; }
+	packed & operator *= (base_type val) { set(get() * val); return *this; }
+	packed & operator /= (base_type val) { set(get() / val); return *this; }
+	packed & operator %= (base_type val) { set(get() % val); return *this; }
+	packed & operator ++ () { set(get() + 1); return *this; } // prefix
+	packed & operator -- () { set(get() - 1); return *this; } // prefix
+	base_type operator ++ (int) { base_type old = get(); set(old + 1); return old; } // postfix
+	base_type operator -- (int) { base_type old = get(); set(old - 1); return old; } // postfix
 };
 
-//  Reference binding to unaligned structure fields resulting from packed
-// structures result in undefined behaviour as soon as the reference gets used.
-//  Both Clang and GCC do not statically warn for this problem, but asan+ubsan
-// is able to catch it at runtime. Note however that this will not catch all
-// problematic accesses as actual alignedness may depend on the actual memory
-// layout at runtime and the sanitizers will only catch the cases where it is
-// actually misaligned at the particular point of occurence.
-//  read_unaligned_field() takes the argument by value which will cause the
-// compiler to copy it to an aligned stack slot or register.
-//  This has been verified to work with Clang (sanitizers won't warn anymore).
-// In case it does not work with GCC, at least all known offending call sites
-// can easily identified by grepping for read_unaligned_field.
-//  See https://bugs.openmpt.org/view.php?id=572 .
-// TODO: Verify this works as intended on GCC.
-template <typename T>
-T read_unaligned_field(T val)
-{
-	return val;
-}
+typedef packed< int64, LittleEndian_tag> int64le;
+typedef packed< int32, LittleEndian_tag> int32le;
+typedef packed< int16, LittleEndian_tag> int16le;
+typedef packed< int8 , LittleEndian_tag> int8le;
+typedef packed<uint64, LittleEndian_tag> uint64le;
+typedef packed<uint32, LittleEndian_tag> uint32le;
+typedef packed<uint16, LittleEndian_tag> uint16le;
+typedef packed<uint8 , LittleEndian_tag> uint8le;
+
+typedef packed< int64, BigEndian_tag> int64be;
+typedef packed< int32, BigEndian_tag> int32be;
+typedef packed< int16, BigEndian_tag> int16be;
+typedef packed< int8 , BigEndian_tag> int8be;
+typedef packed<uint64, BigEndian_tag> uint64be;
+typedef packed<uint32, BigEndian_tag> uint32be;
+typedef packed<uint16, BigEndian_tag> uint16be;
+typedef packed<uint8 , BigEndian_tag> uint8be;
 
 OPENMPT_NAMESPACE_END
 

@@ -3025,9 +3025,9 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 {
 	CHAR s[256];
 	if(IsLocked()) return;
-	UINT pinc = 1;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
+	const uint32 pinc = sample.GetBytesPerSample();
 	int pos;
 	bool redraw = false;
 
@@ -3036,9 +3036,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	if (sample.uFlags[CHN_16BIT])
 	{
 		pSample++;
-		pinc *= 2;
 	}
-	if (sample.uFlags[CHN_STEREO]) pinc *= 2;
 	// Loop Start
 	if ((pos = m_SpinLoopStart.GetPos32()) != 0)
 	{

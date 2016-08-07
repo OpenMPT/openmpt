@@ -1,7 +1,7 @@
 /*
  * Load_psm.cpp
  * ------------
- * Purpose: PSM16 and new PSM (ProTracker Studio) module loader
+ * Purpose: PSM16 and new PSM (ProTracker Studio / Epic MegaGames MASI) module loader
  * Notes  : This is partly based on http://www.shikadi.net/moddingwiki/ProTracker_Studio_Module
  *          and partly reverse-engineered. Also thanks to the author of foo_dumb, the source code gave me a few clues. :)
  * Authors: Johannes Schultz
@@ -19,33 +19,23 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 ////////////////////////////////////////////////////////////
 //
 //  New PSM support starts here. PSM16 structs are below.
 //
 
 // PSM File Header
-struct PACKED PSMFileHeader
+struct PSMFileHeader
 {
-	char   formatID[4];		// "PSM " (new format)
-	uint32 fileSize;		// Filesize - 12
-	char   fileInfoID[4];	// "FILE"
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(fileSize);
-	}
+	char     formatID[4];	// "PSM " (new format)
+	uint32le fileSize;		// Filesize - 12
+	char     fileInfoID[4];	// "FILE"
 };
 
 STATIC_ASSERT(sizeof(PSMFileHeader) == 12);
 
 // RIFF-style Chunk
-struct PACKED PSMChunk
+struct PSMChunk
 {
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
@@ -64,24 +54,24 @@ struct PACKED PSMChunk
 
 	typedef ChunkIdentifiers id_type;
 
-	uint32 id;
-	uint32 length;
+	uint32le id;
+	uint32le length;
 
 	size_t GetLength() const
 	{
-		return SwapBytesReturnLE(length);
+		return length;
 	}
 
 	id_type GetID() const
 	{
-		return static_cast<id_type>(SwapBytesReturnLE(id));
+		return static_cast<id_type>(id.get());
 	}
 };
 
 STATIC_ASSERT(sizeof(PSMChunk) == 8);
 
 // Song Information
-struct PACKED PSMSongHeader
+struct PSMSongHeader
 {
 	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
 	uint8 compression;		// 1 - uncompressed
@@ -92,33 +82,23 @@ struct PACKED PSMSongHeader
 STATIC_ASSERT(sizeof(PSMSongHeader) == 11);
 
 // Regular sample header
-struct PACKED PSMSampleHeader
+struct PSMSampleHeader
 {
-	uint8  flags;
-	char   fileName[8];		// Filename of the original module (without extension)
-	char   sampleID[4];		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
-	char   sampleName[33];
-	uint8  unknown1[6];		// 00 00 00 00 00 FF
-	uint16 sampleNumber;
-	uint32 sampleLength;
-	uint32 loopStart;
-	uint32 loopEnd;			// FF FF FF FF = end of sample
-	uint8  unknown3;
-	uint8  finetune;		// unused? always 0
-	uint8  defaultVolume;
-	uint32 unknown4;
-	uint32 c5Freq;			// MASI ignores the high 16 bits
-	uint8  padding[19];		// 00 ... 00
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(sampleNumber);
-		SwapBytesLE(sampleLength);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c5Freq);
-	}
+	uint8le  flags;
+	char     fileName[8];		// Filename of the original module (without extension)
+	char     sampleID[4];		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
+	char     sampleName[33];
+	uint8le  unknown1[6];		// 00 00 00 00 00 FF
+	uint16le sampleNumber;
+	uint32le sampleLength;
+	uint32le loopStart;
+	uint32le loopEnd;			// FF FF FF FF = end of sample
+	uint8le  unknown3;
+	uint8le  finetune;		// unused? always 0
+	uint8le  defaultVolume;
+	uint32le unknown4;
+	uint32le c5Freq;			// MASI ignores the high 16 bits
+	char     padding[19];		// 00 ... 00
 
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -144,33 +124,23 @@ struct PACKED PSMSampleHeader
 STATIC_ASSERT(sizeof(PSMSampleHeader) == 96);
 
 // Sinaria sample header (and possibly other games)
-struct PACKED PSMSinariaSampleHeader
+struct PSMSinariaSampleHeader
 {
-	uint8  flags;
-	char   fileName[8];		// Filename of the original module (without extension)
-	char   sampleID[8];		// INS0...INS99999
-	char   sampleName[33];
-	uint8  unknown1[6];		// 00 00 00 00 00 FF
-	uint16 sampleNumber;
-	uint32 sampleLength;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint16 unknown3;
-	uint8  finetune;		// Possibly finetune like in PSM16, but sounds even worse than just ignoring it
-	uint8  defaultVolume;
-	uint32 unknown4;
-	uint16 c5Freq;
-	char   padding[16];		// 00 ... 00
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(sampleNumber);
-		SwapBytesLE(sampleLength);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c5Freq);
-	}
+	uint8le  flags;
+	char     fileName[8];		// Filename of the original module (without extension)
+	char     sampleID[8];		// INS0...INS99999
+	char     sampleName[33];
+	uint8le  unknown1[6];		// 00 00 00 00 00 FF
+	uint16le sampleNumber;
+	uint32le sampleLength;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint16le unknown3;
+	uint8le  finetune;		// Possibly finetune like in PSM16, but sounds even worse than just ignoring it
+	uint8le  defaultVolume;
+	uint32le unknown4;
+	uint16le c5Freq;
+	char     padding[16];		// 00 ... 00
 
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -192,17 +162,13 @@ struct PACKED PSMSinariaSampleHeader
 
 STATIC_ASSERT(sizeof(PSMSinariaSampleHeader) == 96);
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
 
 struct PSMSubSong // For internal use (pattern conversion)
 {
 	std::vector<uint8> channelPanning, channelVolume;
 	std::vector<bool> channelSurround;
 	uint8 defaultTempo, defaultSpeed;
-	char  songName[10];
+	char songName[10];
 	ORDERINDEX startOrder, endOrder, restartPos;
 
 	PSMSubSong()
@@ -255,7 +221,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	PSMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
 	}
@@ -277,7 +243,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			*c -= ++i;
 		}
 		file = FileReader(mpt::as_span(decrypted));
-		file.ReadConvertEndianness(fileHeader);
+		file.ReadStruct(fileHeader);
 	}
 #endif // MPT_PSM_DECRYPT
 
@@ -579,7 +545,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Original header
 				PSMSampleHeader sampleHeader;
-				if(!chunk.ReadConvertEndianness(sampleHeader))
+				if(!chunk.ReadStruct(sampleHeader))
 				{
 					continue;
 				}
@@ -596,7 +562,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Sinaria uses a slightly different sample header
 				PSMSinariaSampleHeader sampleHeader;
-				if(!chunk.ReadConvertEndianness(sampleHeader))
+				if(!chunk.ReadStruct(sampleHeader))
 				{
 					continue;
 				}
@@ -953,65 +919,35 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 //  PSM16 support starts here.
 //
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED PSM16FileHeader
+struct PSM16FileHeader
 {
-	// 32-Bit chunk identifiers
-	enum PSM16Magic
-	{
-		idPORD	= MAGIC4LE('P','O','R','D'),
-		idPPAN	= MAGIC4LE('P','P','A','N'),
-		idPSAH	= MAGIC4LE('P','S','A','H'),
-		idPPAT	= MAGIC4LE('P','P','A','T'),
-	};
-
-	char   formatID[4];		// "PSM\xFE" (PSM16)
-	char   songName[59];	// Song title, padded with nulls
-	uint8  lineEnd;			// $1A
-	uint8  songType;		// Song Type bitfield
-	uint8  formatVersion;	// $10
-	uint8  patternVersion;  // 0 or 1
-	uint8  songSpeed;		// 1 ... 255
-	uint8  songTempo;		// 32 ... 255
-	uint8  masterVolume;	// 0 ... 255
-	uint16 songLength;		// 0 ... 255 (number of patterns to play in the song)
-	uint16 songOrders;		// 0 ... 255 (same as previous value as no subsongs are present)
-	uint16 numPatterns;		// 1 ... 255
-	uint16 numSamples;		// 1 ... 255
-	uint16 numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
-	uint16 numChannelsReal;	// 0 ... 32 (max. number of channels to process)
-	uint32 orderOffset;		// Pointer to order list
-	uint32 panOffset;		// Pointer to pan table
-	uint32 patOffset;		// Pointer to pattern data
-	uint32 smpOffset;		// Pointer to sample headers
-	uint32 commentsOffset;	// Pointer to song comment
-	uint32 patSize;			// Size of all patterns
-	uint8  filler[40];
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(songLength);
-		SwapBytesLE(songOrders);
-		SwapBytesLE(numPatterns);
-		SwapBytesLE(numSamples);
-		SwapBytesLE(numChannelsPlay);
-		SwapBytesLE(numChannelsReal);
-		SwapBytesLE(orderOffset);
-		SwapBytesLE(panOffset);
-		SwapBytesLE(patOffset);
-		SwapBytesLE(smpOffset);
-		SwapBytesLE(commentsOffset);
-		SwapBytesLE(patSize);
-	}
+	char     formatID[4];		// "PSM\xFE" (PSM16)
+	char     songName[59];		// Song title, padded with nulls
+	uint8le  lineEnd;			// $1A
+	uint8le  songType;			// Song Type bitfield
+	uint8le  formatVersion;		// $10
+	uint8le  patternVersion;	// 0 or 1
+	uint8le  songSpeed;			// 1 ... 255
+	uint8le  songTempo;			// 32 ... 255
+	uint8le  masterVolume;		// 0 ... 255
+	uint16le songLength;		// 0 ... 255 (number of patterns to play in the song)
+	uint16le songOrders;		// 0 ... 255 (same as previous value as no subsongs are present)
+	uint16le numPatterns;		// 1 ... 255
+	uint16le numSamples;		// 1 ... 255
+	uint16le numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
+	uint16le numChannelsReal;	// 0 ... 32 (max. number of channels to process)
+	uint32le orderOffset;		// Pointer to order list
+	uint32le panOffset;			// Pointer to pan table
+	uint32le patOffset;			// Pointer to pattern data
+	uint32le smpOffset;			// Pointer to sample headers
+	uint32le commentsOffset;	// Pointer to song comment
+	uint32le patSize;			// Size of all patterns
+	char     filler[40];
 };
 
 STATIC_ASSERT(sizeof(PSM16FileHeader) == 146);
 
-struct PACKED PSM16SampleHeader
+struct PSM16SampleHeader
 {
 	enum SampleFlags
 	{
@@ -1023,30 +959,18 @@ struct PACKED PSM16SampleHeader
 		smpLoop		= 0x80,
 	};
 
-	char   filename[13];	// null-terminated
-	char   name[24];		// ditto
-	uint32 offset;			// in file
-	uint32 memoffset;		// not used
-	uint16 sampleNumber;	// 1 ... 255
-	uint8  flags;			// sample flag bitfield
-	uint32 length;			// in bytes
-	uint32 loopStart;		// in samples?
-	uint32 loopEnd;			// in samples?
-	uint8  finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
-	uint8  volume;			// default volume
-	uint16 c2freq;			// Middle-C frequency, which has to be combined with the finetune and transpose.
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(offset);
-		SwapBytesLE(memoffset);
-		SwapBytesLE(sampleNumber);
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(c2freq);
-	}
+	char     filename[13];	// null-terminated
+	char     name[24];		// ditto
+	uint32le offset;		// in file
+	uint32le memoffset;		// not used
+	uint16le sampleNumber;	// 1 ... 255
+	uint8le  flags;			// sample flag bitfield
+	uint32le length;		// in bytes
+	uint32le loopStart;		// in samples?
+	uint32le loopEnd;		// in samples?
+	uint8le  finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
+	uint8le  volume;		// default volume
+	uint16le c2freq;		// Middle-C frequency, which has to be combined with the finetune and transpose.
 
 	// Convert sample header to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -1102,23 +1026,14 @@ struct PACKED PSM16SampleHeader
 
 STATIC_ASSERT(sizeof(PSM16SampleHeader) == 64);
 
-struct PACKED PSM16PatternHeader
+struct PSM16PatternHeader
 {
-	uint16 size;		// includes header bytes
-	uint8  numRows;		// 1 ... 64
-	uint8  numChans;	// 1 ... 32
-
-	void ConvertEndianness()
-	{
-		SwapBytesLE(size);
-	}
+	uint16le size;		// includes header bytes
+	uint8le  numRows;	// 1 ... 64
+	uint8le  numChans;	// 1 ... 32
 };
 
 STATIC_ASSERT(sizeof(PSM16PatternHeader) == 4);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
@@ -1128,7 +1043,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Is it a valid PSM16 file?
 	PSM16FileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.formatID, "PSM\xFE", 4)
 		|| fileHeader.lineEnd != 0x1A
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
@@ -1160,13 +1075,13 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
 
 	// Read orders
-	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPORD)
+	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadMagic("PORD"))
 	{
 		Order.ReadAsByte(file, fileHeader.songOrders);
 	}
 
 	// Read pan positions
-	if(fileHeader.panOffset > 4 && file.Seek(fileHeader.panOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPPAN)
+	if(fileHeader.panOffset > 4 && file.Seek(fileHeader.panOffset - 4) && file.ReadMagic("PPAN"))
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
@@ -1177,14 +1092,14 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read samples
-	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPSAH)
+	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadMagic("PSAH"))
 	{
 		FileReader sampleChunk = file.ReadChunk(fileHeader.numSamples * sizeof(PSM16SampleHeader));
 
 		for(SAMPLEINDEX fileSample = 0; fileSample < fileHeader.numSamples; fileSample++)
 		{
 			PSM16SampleHeader sampleHeader;
-			if(!sampleChunk.ReadConvertEndianness(sampleHeader))
+			if(!sampleChunk.ReadStruct(sampleHeader))
 			{
 				break;
 			}
@@ -1210,12 +1125,12 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	if(fileHeader.patOffset > 4 && file.Seek(fileHeader.patOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPPAT)
+	if(fileHeader.patOffset > 4 && file.Seek(fileHeader.patOffset - 4) && file.ReadMagic("PPAT"))
 	{
 		for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 		{
 			PSM16PatternHeader patternHeader;
-			if(!file.ReadConvertEndianness(patternHeader))
+			if(!file.ReadStruct(patternHeader))
 			{
 				break;
 			}

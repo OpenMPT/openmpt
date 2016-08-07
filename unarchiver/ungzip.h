@@ -21,45 +21,26 @@ class CGzipArchive : public ArchiveBase
 {
 protected:
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-	struct PACKED GZheader
+	struct GZheader
 	{
-		uint8  magic1;	// 0x1F
-		uint8  magic2;	// 0x8B
-		uint8  method;	// 0-7 = reserved, 8 = deflate
-		uint8  flags;	// See GZ_F* constants
-		uint32 mtime;	// UNIX time
-		uint8  xflags;	// Available for use by specific compression methods. We ignore this.
-		uint8  os;		// Which OS was used to compress the file? We also ignore this.
-
-		void ConvertEndianness()
-		{
-			SwapBytesLE(mtime);
-		}
+		uint8le  magic1;	// 0x1F
+		uint8le  magic2;	// 0x8B
+		uint8le  method;	// 0-7 = reserved, 8 = deflate
+		uint8le  flags;	// See GZ_F* constants
+		uint32le mtime;	// UNIX time
+		uint8le  xflags;	// Available for use by specific compression methods. We ignore this.
+		uint8le  os;		// Which OS was used to compress the file? We also ignore this.
 	};
 
 	STATIC_ASSERT(sizeof(GZheader) == 10);
 
-	struct PACKED GZtrailer
+	struct GZtrailer
 	{
-		uint32 crc32_;	// CRC32 of decompressed data
-		uint32 isize;	// Size of decompressed data
-
-		void ConvertEndianness()
-		{
-			SwapBytesLE(crc32_);
-			SwapBytesLE(isize);
-		}
+		uint32le crc32_;	// CRC32 of decompressed data
+		uint32le isize;	// Size of decompressed data
 	};
 
 	STATIC_ASSERT(sizeof(GZtrailer) == 8);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 	enum MagicBytes
 	{

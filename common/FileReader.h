@@ -557,7 +557,7 @@ public:
 		T target;
 		if(Read(target))
 		{
-			return SwapBytesReturnLE(target);
+			return SwapBytesLE(target);
 		} else
 		{
 			return 0;
@@ -573,7 +573,7 @@ public:
 		T target;
 		if(Read(target))
 		{
-			return SwapBytesReturnBE(target);
+			return SwapBytesBE(target);
 		} else
 		{
 			return 0;
@@ -613,7 +613,7 @@ public:
 		}
 		T target;
 		std::memcpy(&target, buf, sizeof(T));
-		return SwapBytesReturnLE(target);
+		return SwapBytesLE(target);
 	}
 
 	// Read a supplied-size little endian integer to a fixed size variable.
@@ -811,26 +811,10 @@ public:
 		return true;
 	}
 
-	// Read a "T" object from the stream.
-	// If not enough bytes can be read, false is returned.
-	// If successful, the file cursor is advanced by the size of "T" and the object's "ConvertEndianness()" method is called.
-	template <typename T>
-	bool ReadConvertEndianness(T &target)
-	{
-		if(Read(target))
-		{
-			target.ConvertEndianness();
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-
 	// Read a string of length srcSize into fixed-length char array destBuffer using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
 	// Returns true if at least one byte could be read or 0 bytes were requested.
-	template<mpt::String::ReadWriteMode mode, off_t destSize>
+	template<mpt::String::ReadWriteMode mode, size_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
 		FileReader::PinnedRawDataView source = ReadPinnedRawDataView(srcSize); // Make sure the string is cached properly.
@@ -841,7 +825,7 @@ public:
 
 	// Read a string of length srcSize into a std::string dest using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
-	// Returns true if at least one byte could be read or 0 bytes were requested.
+	// Returns true if at least one character could be read or 0 characters were requested.
 	template<mpt::String::ReadWriteMode mode>
 	bool ReadString(std::string &dest, const off_t srcSize)
 	{
@@ -851,8 +835,32 @@ public:
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
+	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a std::string dest using a given read mode.
+	// The file cursor is advanced by the string length.
+	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.
+	template<typename Tsize, mpt::String::ReadWriteMode mode, size_t destSize>
+	bool ReadSizedString(char (&destBuffer)[destSize], const off_t maxLength = std::numeric_limits<off_t>::max())
+	{
+		packed<Tsize::base_type, Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		if(!Read(srcSize))
+			return false;
+		return ReadString<mode>(destBuffer, std::min<off_t>(srcSize, maxLength));
+	}
+
+	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a std::string dest using a given read mode.
+	// The file cursor is advanced by the string length.
+	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.
+	template<typename Tsize, mpt::String::ReadWriteMode mode>
+	bool ReadSizedString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	{
+		packed<Tsize::base_type, Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		if(!Read(srcSize))
+			return false;
+		return ReadString<mode>(dest, std::min<off_t>(srcSize, maxLength));
+	}
+
 	// Read a null-terminated string into a std::string
-	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<std::size_t>::max())
+	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
 		dest.clear();
 		try

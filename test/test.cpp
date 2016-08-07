@@ -567,7 +567,7 @@ static MPT_NOINLINE void TestMisc()
 //---------------------------------
 {
 
-#define SwapBytesReturn(x) SwapBytesReturnLE(SwapBytesReturnBE(x))
+#define SwapBytesReturn(x) SwapBytesLE(SwapBytesBE(x))
 
 	VERIFY_EQUAL(SwapBytesReturn(uint8(0x12)), 0x12);
 	VERIFY_EQUAL(SwapBytesReturn(uint16(0x1234)), 0x3412);
@@ -614,6 +614,34 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(IEEE754binary64BE(0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00), 1.0);
 	VERIFY_EQUAL(IEEE754binary64LE(1.0), IEEE754binary64LE(0x00,0x00,0x00,0x00,0x00,0x00,0xf0,0x3f));
 	VERIFY_EQUAL(IEEE754binary64BE(1.0), IEEE754binary64BE(0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00));
+
+	// Packed integers with defined endianness
+	{
+		int8le le8; le8.set(-128);
+		int8be be8; be8.set(-128);
+		VERIFY_EQUAL(le8, -128);
+		VERIFY_EQUAL(be8, -128);
+		VERIFY_EQUAL(memcmp(&le8, "\x80", 1), 0);
+		VERIFY_EQUAL(memcmp(&be8, "\x80", 1), 0);
+		int16le le16; le16.set(0x1234);
+		int16be be16; be16.set(0x1234);
+		VERIFY_EQUAL(le16, 0x1234);
+		VERIFY_EQUAL(be16, 0x1234);
+		VERIFY_EQUAL(memcmp(&le16, "\x34\x12", 2), 0);
+		VERIFY_EQUAL(memcmp(&be16, "\x12\x34", 2), 0);
+		uint32le le32; le32.set(0xFFEEDDCCu);
+		uint32be be32; be32.set(0xFFEEDDCCu);
+		VERIFY_EQUAL(le32, 0xFFEEDDCCu);
+		VERIFY_EQUAL(be32, 0xFFEEDDCCu);
+		VERIFY_EQUAL(memcmp(&le32, "\xCC\xDD\xEE\xFF", 4), 0);
+		VERIFY_EQUAL(memcmp(&be32, "\xFF\xEE\xDD\xCC", 4), 0);
+		uint64le le64; le64.set(0xDEADC0DE15C0FFEEull);
+		uint64be be64; be64.set(0xDEADC0DE15C0FFEEull);
+		VERIFY_EQUAL(le64, 0xDEADC0DE15C0FFEEull);
+		VERIFY_EQUAL(be64, 0xDEADC0DE15C0FFEEull);
+		VERIFY_EQUAL(memcmp(&le64, "\xEE\xFF\xC0\x15\xDE\xC0\xAD\xDE", 8), 0);
+		VERIFY_EQUAL(memcmp(&be64, "\xDE\xAD\xC0\xDE\x15\xC0\xFF\xEE", 8), 0);
+	}
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);

@@ -22,27 +22,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-/////////////////////////////////////////////////////////////////////
-// Common code for both AMS formats
-
-// Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
-template<size_t destSize>
-static bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
-//-----------------------------------------------------------------------
-{
-	const size_t length = file.ReadUint8();
-	return file.ReadString<mpt::String::spacePadded>(destBuffer, length);
-}
-
-// Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
-static bool ReadAMSString(std::string &dest, FileReader &file)
-//------------------------------------------------------------
-{
-	const size_t length = file.ReadUint8();
-	return file.ReadString<mpt::String::spacePadded>(dest, length);
-}
-
-
 // Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
 static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk)
 //--------------------------------------------------------------------------------------
@@ -279,36 +258,24 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 /////////////////////////////////////////////////////////////////////
 // AMS (Extreme's Tracker) 1.x loader
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // AMS File Header
-struct PACKED AMSFileHeader
+struct AMSFileHeader
 {
-	uint8  versionLow;
-	uint8  versionHigh;
-	uint8  channelConfig;
-	uint8  numSamps;
-	uint16 numPats;
-	uint16 numOrds;
-	uint8  midiChannels;
-	uint16 extraSize;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numPats);
-		SwapBytesLE(numOrds);
-		SwapBytesLE(extraSize);
-	}
+	uint8le  versionLow;
+	uint8le  versionHigh;
+	uint8le  channelConfig;
+	uint8le  numSamps;
+	uint16le numPats;
+	uint16le numOrds;
+	uint8le  midiChannels;
+	uint16le extraSize;
 };
 
 STATIC_ASSERT(sizeof(AMSFileHeader) == 11);
 
 
 // AMS Sample Header
-struct PACKED AMSSampleHeader
+struct AMSSampleHeader
 {
 	enum SampleFlags
 	{
@@ -317,22 +284,13 @@ struct PACKED AMSSampleHeader
 		smpPacked	= 0x03,
 	};
 
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint8  panFinetune;		// High nibble = pan position, low nibble = finetune value
-	uint16 sampleRate;
-	uint8  volume;			// 0...127
-	uint8  flags;			// See SampleFlags
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sampleRate);
-	}
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint8le  panFinetune;	// High nibble = pan position, low nibble = finetune value
+	uint16le sampleRate;
+	uint8le  volume;		// 0...127
+	uint8le  flags;			// See SampleFlags
 
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -343,7 +301,7 @@ struct PACKED AMSSampleHeader
 		mptSmp.nLoopStart = std::min(loopStart, length);
 		mptSmp.nLoopEnd = std::min(loopEnd, length);
 
-		mptSmp.nVolume = (std::min(uint8(127), volume) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min<uint8>(127, volume) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -364,7 +322,7 @@ struct PACKED AMSSampleHeader
 			mptSmp.uFlags.set(CHN_LOOP);
 		}
 
-		if((flags & smp16Bit) || (flags & smp16BitOld))
+		if(flags & (smp16Bit | smp16BitOld))
 		{
 			mptSmp.uFlags.set(CHN_16BIT);
 		}
@@ -374,11 +332,6 @@ struct PACKED AMSSampleHeader
 STATIC_ASSERT(sizeof(AMSSampleHeader) == 17);
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-
 bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -386,7 +339,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 	AMSFileHeader fileHeader;
 	if(!file.ReadMagic("Extreme")
-		|| !file.ReadConvertEndianness(fileHeader)
+		|| !file.ReadStruct(fileHeader)
 		|| !file.Skip(fileHeader.extraSize)
 		|| !file.CanRead(fileHeader.numSamps * sizeof(AMSSampleHeader))
 		|| fileHeader.versionHigh != 0x01)
@@ -411,32 +364,32 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		AMSSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		packSample[smp - 1] = (sampleHeader.flags & AMSSampleHeader::smpPacked) != 0;
 	}
 
 	// Texts
-	ReadAMSString(m_songName, file);
+	file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_songName);
 
 	// Read sample names
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		ReadAMSString(m_szNames[smp], file);
+		file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_szNames[smp]);
 	}
 
 	// Read channel names
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].Reset();
-		ReadAMSString(ChnSettings[chn].szName, file);
+		file.ReadSizedString<uint8le, mpt::String::spacePadded>(ChnSettings[chn].szName);
 	}
 
 	// Read pattern names
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
 		char name[11];
-		ReadAMSString(name, file);
+		file.ReadSizedString<uint8le, mpt::String::spacePadded>(name);
 		// Create pattern now, so name won't be reset later.
 		if(Patterns.Insert(pat, 64))
 		{
@@ -514,39 +467,27 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 /////////////////////////////////////////////////////////////////////
 // AMS (Velvet Studio) 2.0 - 2.02 loader
 
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
 // AMS2 File Header
-struct PACKED AMS2FileHeader
+struct AMS2FileHeader
 {
 	enum FileFlags
 	{
 		linearSlides	= 0x40,
 	};
 
-	uint8  versionLow;		// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.02)
-	uint8  versionHigh;		// ditto
-	uint8  numIns;			// Nr of Instruments (0-255)
-	uint16 numPats;			// Nr of Patterns (1-1024)
-	uint16 numOrds;			// Nr of Positions (1-65535)
+	uint8le  versionLow;		// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.02)
+	uint8le  versionHigh;		// ditto
+	uint8le  numIns;			// Nr of Instruments (0-255)
+	uint16le numPats;			// Nr of Patterns (1-1024)
+	uint16le numOrds;			// Nr of Positions (1-65535)
 	// Rest of header differs between format revision 2.01 and 2.02
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(numPats);
-		SwapBytesLE(numOrds);
-	};
 };
 
 STATIC_ASSERT(sizeof(AMS2FileHeader) == 7);
 
 
 // AMS2 Instument Envelope
-struct PACKED AMS2Envelope
+struct AMS2Envelope
 {
 	uint8 speed;		// Envelope speed (currently not supported, always the same as current BPM)
 	uint8 sustainPoint;	// Envelope sustain point
@@ -590,7 +531,7 @@ STATIC_ASSERT(sizeof(AMS2Envelope) == 5);
 
 
 // AMS2 Instrument Data
-struct PACKED AMS2Instrument
+struct AMS2Instrument
 {
 	enum EnvelopeFlags
 	{
@@ -608,16 +549,9 @@ struct PACKED AMS2Instrument
 		fadeOutMask	= 0xFFF,
 	};
 
-	uint8  shadowInstr;		// Shadow Instrument. If non-zero, the value=the shadowed inst.
-	uint16 vibampFadeout;	// Vib.Amplify + Volume fadeout in one variable!
-	uint16 envFlags;		// See EnvelopeFlags
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(vibampFadeout);
-		SwapBytesLE(envFlags);
-	}
+	uint8le  shadowInstr;	// Shadow Instrument. If non-zero, the value=the shadowed inst.
+	uint16le vibampFadeout;	// Vib.Amplify + Volume fadeout in one variable!
+	uint16le envFlags;		// See EnvelopeFlags
 
 	void ApplyFlags(InstrumentEnvelope &mptEnv, EnvelopeFlags shift) const
 	{
@@ -642,7 +576,7 @@ STATIC_ASSERT(sizeof(AMS2Instrument) == 5);
 
 
 // AMS2 Sample Header
-struct PACKED AMS2SampleHeader
+struct AMS2SampleHeader
 {
 	enum SampleFlags
 	{
@@ -653,25 +587,15 @@ struct PACKED AMS2SampleHeader
 		smpReverse	= 0x40,
 	};
 
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint16 sampledRate;		// Whyyyy?
-	uint8  panFinetune;		// High nibble = pan position, low nibble = finetune value
-	uint16 c4speed;			// Why is all of this so redundant?
-	int8   relativeTone;	// q.e.d.
-	uint8  volume;			// 0...127
-	uint8  flags;			// See SampleFlags
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sampledRate);
-		SwapBytesLE(c4speed);
-	}
+	uint32le length;
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint16le sampledRate;		// Whyyyy?
+	uint8le  panFinetune;		// High nibble = pan position, low nibble = finetune value
+	uint16le c4speed;			// Why is all of this so redundant?
+	int8le   relativeTone;		// q.e.d.
+	uint8le  volume;			// 0...127
+	uint8le  flags;			// See SampleFlags
 
 	// Convert sample header to OpenMPT's internal format.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -691,7 +615,7 @@ struct PACKED AMS2SampleHeader
 		uint32 newC4speed = ModSample::TransposeToFrequency(relativeTone, MOD2XMFineTune(panFinetune & 0x0F));
 		mptSmp.nC5Speed = (mptSmp.nC5Speed * newC4speed) / 8363;
 
-		mptSmp.nVolume = (std::min(uint8(127), volume) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min<uint8>(volume, 127) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -712,28 +636,16 @@ STATIC_ASSERT(sizeof(AMS2SampleHeader) == 20);
 
 
 // AMS2 Song Description Header
-struct PACKED AMS2Description
+struct AMS2Description
 {
-	uint32 packedLen;		// Including header
-	uint32 unpackedLen;
-	uint8  packRoutine;		// 01
-	uint8  preProcessing;	// None!
-	uint8  packingMethod;	// RLE
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(packedLen);
-		SwapBytesLE(unpackedLen);
-	}
+	uint32le packedLen;		// Including header
+	uint32le unpackedLen;
+	uint8le  packRoutine;	// 01
+	uint8le  preProcessing;	// None!
+	uint8le  packingMethod;	// RLE
 };
 
 STATIC_ASSERT(sizeof(AMS2Description) == 11);
-
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 
 bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
@@ -749,8 +661,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_AMS2);
 
-	if(!ReadAMSString(m_songName, file)
-		|| !file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_songName)
+		|| !file.ReadStruct(fileHeader)
 		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
 	{
 		return false;
@@ -762,7 +674,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
 	SetupMODPanning(true);
-	m_madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh, mpt::fmt::dec0<2>(fileHeader.versionLow));
+	m_madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh.get(), mpt::fmt::dec0<2>(fileHeader.versionLow.get()));
 
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)
@@ -797,7 +709,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ModInstrument *instrument = AllocateInstrument(ins);
 		if(instrument == nullptr
-			|| !ReadAMSString(instrument->name, file))
+			|| !file.ReadSizedString<uint8le, mpt::String::spacePadded>(instrument->name))
 		{
 			return false;
 		}
@@ -825,7 +737,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		vibratoEnv.ConvertToMPT(instrument->PitchEnv, file);
 
 		AMS2Instrument instrHeader;
-		file.ReadConvertEndianness(instrHeader);
+		file.ReadStruct(instrHeader);
 		instrument->nFadeOut = (instrHeader.vibampFadeout & AMS2Instrument::fadeOutMask);
 		const int16 vibAmp = 1 << ((instrHeader.vibampFadeout & AMS2Instrument::vibAmpMask) >> AMS2Instrument::vibAmpShift);
 
@@ -862,10 +774,10 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 				file.Skip(sizeof(AMS2SampleHeader));
 				break;
 			}
-			ReadAMSString(m_szNames[firstSmp + smp], file);
+			file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_szNames[firstSmp + smp]);
 
 			AMS2SampleHeader sampleHeader;
-			file.ReadConvertEndianness(sampleHeader);
+			file.ReadStruct(sampleHeader);
 			sampleHeader.ConvertToMPT(Samples[firstSmp + smp]);
 
 			uint16 settings = (instrHeader.shadowInstr & instrIndexMask)
@@ -893,12 +805,12 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
 		ChnSettings[chn].Reset();
-		ReadAMSString(ChnSettings[chn].szName, file);
+		file.ReadSizedString<uint8le, mpt::String::spacePadded>(ChnSettings[chn].szName);
 	}
 
 	// RLE-Packed description text
 	AMS2Description descriptionHeader;
-	if(!file.ReadConvertEndianness(descriptionHeader))
+	if(!file.ReadStruct(descriptionHeader))
 	{
 		return true;
 	}
@@ -960,7 +872,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			char patternName[11];
-			ReadAMSString(patternName, patternChunk);
+			patternChunk.ReadSizedString<uint8le, mpt::String::spacePadded>(patternName);
 			Patterns[pat].SetName(patternName);
 
 			ReadAMSPattern(Patterns[pat], true, patternChunk);

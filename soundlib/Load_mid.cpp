@@ -32,32 +32,24 @@ OPENMPT_NAMESPACE_BEGIN
 //uint32 gnMidiImportSpeed = 3;
 //uint32 gnMidiPatternLen = 128;
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-typedef struct PACKED MIDIFILEHEADER
+struct MIDIFILEHEADER
 {
-	char  id[4];		// "MThd" = 0x6468544D
-	uint32 len;		// 6
-	uint16 w1;		// 1?
-	uint16 wTrks;		// 2?
-	uint16 wDivision;	// F0
-} MIDIFILEHEADER;
+	char     id[4];		// "MThd" = 0x6468544D
+	uint32be len;		// 6
+	uint16be w1;		// 1?
+	uint16be wTrks;		// 2?
+	uint16be wDivision;	// F0
+};
 
 STATIC_ASSERT(sizeof(MIDIFILEHEADER) == 14);
 
-typedef struct PACKED MIDITRACKHEADER
+struct MIDITRACKHEADER
 {
-	uint32 id;	// "MTrk" = 0x6B72544D
-	uint32 len;
-} MIDITRACKHEADER;
+	char     id[4];	// "MTrk"
+	uint32be len;
+};
 
 STATIC_ASSERT(sizeof(MIDITRACKHEADER) == 8);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // Midi Loader Internal Structures
@@ -65,7 +57,7 @@ STATIC_ASSERT(sizeof(MIDITRACKHEADER) == 8);
 #define CHNSTATE_NOTEOFFPENDING		0x0001
 
 // MOD Channel State description (current volume, panning, etc...)
-typedef struct MODCHANNELSTATE
+struct MODCHANNELSTATE
 {
 	uint32 flags;	// Channel Flags
 	uint16 idlecount;
@@ -73,10 +65,10 @@ typedef struct MODCHANNELSTATE
 	uint8 parent;	// Midi Channel parent
 	uint8 pan;		// Channel Panning			0-255
 	uint8 note;		// Note On # (0=available)
-} MODCHANNELSTATE;
+};
 
 // MIDI Channel State (Midi Channels 0-15)
-typedef struct MIDICHANNELSTATE
+struct MIDICHANNELSTATE
 {
 	uint32 flags;		// Channel Flags
 	uint16 pitchbend;		// Pitch Bend Amount (14-bits unsigned)
@@ -89,14 +81,14 @@ typedef struct MIDICHANNELSTATE
 	uint8 volume;		// Channel Volume			CC7		0-128		80	(100)
 	uint8 modulation;	// Modulation				CC1		0-127		0
 	uint8 pitchbendrange;// Pitch Bend Range								64
-} MIDICHANNELSTATE;
+};
 
-typedef struct MIDITRACK
+struct MIDITRACK
 {
 	const uint8 *ptracks, *ptrmax;
 	uint32 status;
-	LONG nexteventtime;
-} MIDITRACK;
+	int32 nexteventtime;
+};
 
 
 extern const char *szMidiGroupNames[17] =
@@ -524,7 +516,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	MIDIFILEHEADER pmfh;
 	if(!file.ReadStruct(pmfh)
 		|| memcmp(pmfh.id, "MThd", 4)
-		|| !file.Seek(8 + BigEndian(pmfh.len)))
+		|| !file.Seek(8 + pmfh.len))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -558,8 +550,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	Limit(importPatternLen, ROWINDEX(1), MAX_PATTERN_ROWS);
 
 	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
-	tracks = BigEndianW(pmfh.wTrks);
-	if ((pmth->id != 0x6B72544D) || (!tracks)) return false;
+	tracks = pmfh.wTrks;
+	if (memcmp(pmth->id, "MTrk", 4) || (!tracks)) return false;
 	else if(loadFlags == onlyVerifyHeader) return true;
 	miditracks.resize(tracks);
 
@@ -569,7 +561,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES;
 
 	// MIDI->MOD Tempo Conversion
-	division = BigEndianW(pmfh.wDivision);
+	division = pmfh.wDivision;
 	if (division < 0)
 	{
 		int nFrames = -(division>>8);
@@ -613,8 +605,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		miditracks[itrk].status = 0x2F;
 		pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
 		if (dwMemPos + 8 >= dwMemLength) break;
-		uint32 len = BigEndian(pmth->len);
-		if ((pmth->id == 0x6B72544D) && (len <= dwMemLength - (dwMemPos + 8)))
+		uint32 len = pmth->len;
+		if (!memcmp(pmth->id, "MTrk", 4) && (len <= dwMemLength - (dwMemPos + 8)))
 		{
 #ifdef MIDI_DETAILED_LOG
 			Log(" track%d at offset %d len=%d ", itrk, dwMemPos+8, len);
