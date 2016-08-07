@@ -108,14 +108,24 @@
    optimize "Full"
    floatingpoint "Fast"
 
-  filter { "configurations:Release", "not action:vs2008" }
-   vectorextensions "SSE2"
+	filter {}
 
-  filter { "configurations:ReleaseShared", "not action:vs2008" }
-   vectorextensions "SSE2"
+	if not _OPTIONS["xp"] then
 
-  filter { "configurations:ReleaseLTCG", "not action:vs2008" }
-   vectorextensions "SSE2"
+		filter {}
+
+		filter { "configurations:Release", "not action:vs2008" }
+			vectorextensions "SSE2"
+
+		filter { "configurations:ReleaseShared", "not action:vs2008" }
+		 vectorextensions "SSE2"
+
+		filter { "configurations:ReleaseLTCG", "not action:vs2008" }
+		 vectorextensions "SSE2"
+
+		filter {}
+
+	end
 
   filter {}
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
