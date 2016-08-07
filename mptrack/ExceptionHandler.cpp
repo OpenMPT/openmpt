@@ -139,6 +139,19 @@ bool DebugReporter::GenerateTraceLog()
 }
 
 
+static void SaveDocumentSafe(CModDoc *pModDoc, const mpt::PathString &filename)
+//-----------------------------------------------------------------------------
+{
+	__try
+	{
+		pModDoc->OnSaveDocument(filename);
+	} __except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		// nothing
+	}
+}
+
+
 // Rescue modified files...
 int DebugReporter::RescueFiles()
 //------------------------------
@@ -166,7 +179,7 @@ int DebugReporter::RescueFiles()
 
 			try
 			{
-				pModDoc->OnSaveDocument(filename);
+				SaveDocumentSafe(pModDoc, filename);
 			} catch(...)
 			{
 				continue;
@@ -310,6 +323,27 @@ bool DebugReporter::FreezeState(DumpMode mode)
 }
 
 
+static void StopSoundDeviceSafe(CMainFrame *pMainFrame)
+//-----------------------------------------------------
+{
+	__try
+	{
+		if(pMainFrame->gpSoundDevice)
+		{
+			pMainFrame->gpSoundDevice->Close();
+		}
+		if(pMainFrame->m_NotifyTimer)
+		{
+			pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
+			pMainFrame->m_NotifyTimer = 0;
+		}
+	} __except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		// nothing
+	}
+}
+
+
 void DebugReporter::StopSoundDevice()
 //-----------------------------------
 {
@@ -318,17 +352,10 @@ void DebugReporter::StopSoundDevice()
 	{
 		try
 		{
-			if(pMainFrame->gpSoundDevice)
-			{
-				pMainFrame->gpSoundDevice->Close();
-			}
-			if(pMainFrame->m_NotifyTimer)
-			{
-				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
-				pMainFrame->m_NotifyTimer = 0;
-			}
+			StopSoundDeviceSafe(pMainFrame);
 		} catch(...)
 		{
+			// nothing
 		}
 	}
 }
