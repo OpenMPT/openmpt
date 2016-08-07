@@ -11,6 +11,8 @@
 #pragma once
 
 
+#include "Endianness.h"
+
 #if MPT_OS_WINDOWS
 #if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <guiddef.h>
@@ -68,10 +70,10 @@ namespace mpt {
 struct UUID
 {
 private:
-	uint32 Data1;
-	uint16 Data2;
-	uint16 Data3;
-	uint64 Data4;
+	uint32be Data1;
+	uint16be Data2;
+	uint16be Data3;
+	uint64be Data4;
 public:
 	uint32 GetData1() const;
 	uint16 GetData2() const;
