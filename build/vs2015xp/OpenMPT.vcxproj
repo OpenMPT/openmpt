@@ -1136,6 +1136,7 @@
     <None Include="..\..\mptrack\res\splashno.png" />
     <None Include="..\..\mptrack\res\view_pat.bmp" />
     <None Include="..\..\mptrack\res\vumeters.bmp" />
+    <None Include="..\vs\debug\openmpt.natvis" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc" />

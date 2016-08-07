@@ -30,178 +30,238 @@ OPENMPT_NAMESPACE_BEGIN
 
 /////////////////////////////////////////////////////////////////////////
 
-// Returns the number of samples (in 16.16 format) that are going to be read from a sample, given a mix buffer length and the channel's playback speed.
-// Result is negative in case of backwards-playing sample.
-static forceinline int32 BufferLengthToSamples(int32 mixBufferCount, const ModChannel &chn)
-//-----------------------------------------------------------------------------------------
+struct MixLoopState
 {
-	return (mixBufferCount * chn.nInc + static_cast<int32>(chn.nPosLo));
-}
+	const int8 * samplePointer;
+	const int8 * lookaheadPointer;
+	SmpLength lookaheadStart;
+	uint32 maxSamples;
 
-
-// Returns the buffer length required to render a certain amount of samples, based on the channel's playback speed.
-static forceinline int32 SamplesToBufferLength(int32 numSamples, const ModChannel &chn)
-//-------------------------------------------------------------------------------------
-{
-	return std::max(1, ((numSamples << 16)/* + static_cast<int32>(chn.nPosLo) + 0xFFFF*/) / mpt::abs(chn.nInc));
-}
-
-
-// Check how many samples can be rendered without encountering loop or sample end, and also update loop position / direction
-static forceinline int32 GetSampleCount(ModChannel &chn, int32 nSamples, bool ITBidiMode)
-//---------------------------------------------------------------------------------------
-{
-	int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
-	int32 nInc = chn.nInc;
-
-	if ((nSamples <= 0) || (!nInc) || (!chn.nLength)) return 0;
-	// Under zero ?
-	if ((int32)chn.nPos < nLoopStart)
+	MixLoopState(const ModChannel &chn)
 	{
-		if (nInc < 0)
+		UpdateLookaheadPointers(chn);
+
+		// For platforms that have no fast 64-bit division, precompute this constant
+		// as it won't change during the invocation of CreateStereoMix.
+		SamplePosition increment = chn.increment;
+		if(increment.IsNegative())
+			increment.Negate();
+		maxSamples = 16384u / (increment.GetUInt() + 1u);
+		if(maxSamples < 2) maxSamples = 2;
+	}
+
+	// Calculate offset of loop wrap-around buffer for this sample.
+	void UpdateLookaheadPointers(const ModChannel &chn)
+	{
+		samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
+		lookaheadPointer = nullptr;
+		if(chn.nLoopEnd < InterpolationMaxLookahead)
+			lookaheadStart = chn.nLoopStart;
+		else
+			lookaheadStart = std::max(chn.nLoopStart, chn.nLoopEnd - InterpolationMaxLookahead);
+		// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
+		// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
+		if(chn.dwFlags[CHN_LOOP] && chn.resamplingMode != SRCMODE_NEAREST)
 		{
-			// Invert loop for bidi loops
-			int32 nDelta = ((nLoopStart - chn.nPos) << 16) - (chn.nPosLo & 0xffff);
-			chn.nPos = nLoopStart + (nDelta >> 16);
-			chn.nPosLo = nDelta & 0xffff;
-			if (((int32)chn.nPos < nLoopStart) || (chn.nPos >= (nLoopStart+chn.nLength)/2))
+			const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength && chn.pModSample->nLength >= InterpolationMaxLookahead;
+			const bool inSustainLoop = chn.InSustainLoop();
+
+			// Do not enable wraparound magic if we're previewing a custom loop!
+			if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
 			{
-				chn.nPos = nLoopStart; chn.nPosLo = 0;
+				SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
+				if(inSustainLoop)
+				{
+					lookaheadOffset += 4 * InterpolationMaxLookahead;
+				}
+				lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
 			}
-			nInc = -nInc;
-			chn.nInc = nInc;
-			if(chn.dwFlags[CHN_PINGPONGLOOP])
+		}
+	}
+
+	// Returns the buffer length required to render a certain amount of samples, based on the channel's playback speed.
+	static forceinline uint32 DistanceToBufferLength(SamplePosition from, SamplePosition to, SamplePosition inc)
+	{
+		return static_cast<uint32>((to - from - SamplePosition(1)) / inc) + 1;
+	}
+
+	// Check how many samples can be rendered without encountering loop or sample end, and also update loop position / direction
+	forceinline uint32 GetSampleCount(ModChannel &chn, uint32 nSamples, bool ITBidiMode) const
+	{
+		int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
+		SamplePosition nInc = chn.increment;
+
+		if ((nSamples <= 0) || nInc.IsZero() || (!chn.nLength)) return 0;
+
+		// Part 1: Making sure the play position is valid, and if necessary, invert the play direction in case we reached a loop boundary of a ping-pong loop.
+		bool loopRestart = false;
+		chn.pCurrentSample = samplePointer;
+
+		// Under zero ?
+		if (chn.position.GetInt() < nLoopStart)
+		{
+			if (nInc.IsNegative())
 			{
-				chn.dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+				// Invert loop for bidi loops
+				chn.position = SamplePosition(nLoopStart + nLoopStart, 0) - chn.position;
+				if ((chn.position.GetInt() < nLoopStart) || (chn.position.GetUInt() >= (nLoopStart + chn.nLength) / 2))
+				{
+					chn.position.Set(nLoopStart, 0);
+				}
+				nInc.Negate();
+				chn.increment = nInc;
+				if(chn.dwFlags[CHN_PINGPONGLOOP])
+				{
+					chn.dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+				} else
+				{
+					chn.dwFlags.set(CHN_PINGPONGFLAG);
+					chn.position.SetInt(chn.nLength - 1);
+					chn.increment.Negate();
+				}
+				if(!chn.dwFlags[CHN_LOOP] || chn.position.GetUInt() >= chn.nLength)
+				{
+					chn.position.Set(chn.nLength);
+					return 0;
+				}
 			} else
 			{
-				chn.dwFlags.set(CHN_PINGPONGFLAG);
-				chn.nPos = chn.nLength - 1;
-				chn.nInc = -nInc;
-			}
-			if(!chn.dwFlags[CHN_LOOP] || chn.nPos >= chn.nLength)
-			{
-				chn.nPos = chn.nLength;
-				chn.nPosLo = 0;
-				return 0;
+				// We probably didn't hit the loop end yet (first loop), so we do nothing
+				if (chn.position.GetInt() < 0) chn.position.SetInt(0);
 			}
 		} else
-		{
-			// We probably didn't hit the loop end yet (first loop), so we do nothing
-			if ((int32)chn.nPos < 0) chn.nPos = 0;
-		}
-	} else
-	// Past the end
-	if (chn.nPos >= chn.nLength)
-	{
-		if(!chn.dwFlags[CHN_LOOP]) return 0; // not looping -> stop this channel
-		if(chn.dwFlags[CHN_PINGPONGLOOP])
-		{
-			// Invert loop
-			if (nInc > 0)
+			// Past the end
+			if (chn.position.GetUInt() >= chn.nLength)
 			{
-				nInc = -nInc;
-				chn.nInc = nInc;
+				if(!chn.dwFlags[CHN_LOOP]) return 0; // not looping -> stop this channel
+				if(chn.dwFlags[CHN_PINGPONGLOOP])
+				{
+					// Invert loop
+					if (nInc.IsPositive())
+					{
+						nInc.Negate();
+						chn.increment = nInc;
+					}
+					chn.dwFlags.set(CHN_PINGPONGFLAG);
+					// adjust loop position
+
+					SamplePosition invFract = chn.position.GetInvertedFract();
+					chn.position = SamplePosition(chn.nLength - (chn.position.GetInt() - chn.nLength) - invFract.GetInt(), invFract.GetFract());
+					// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
+					if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength)) chn.position.SetInt(chn.nLength - (ITBidiMode ? 2 : 1));
+				} else
+				{
+					if (nInc.IsNegative()) // This is a bug
+					{
+						nInc.Negate();
+						chn.increment = nInc;
+					}
+					// Restart at loop start
+					chn.position += SamplePosition(nLoopStart - chn.nLength, 0);
+					MPT_ASSERT(chn.position.GetInt() >= nLoopStart);
+					// Interpolate correctly after wrapping around
+					loopRestart = true;
+				}
 			}
-			chn.dwFlags.set(CHN_PINGPONGFLAG);
-			// adjust loop position
-			int32 nDeltaHi = (chn.nPos - chn.nLength);
-			int32 nDeltaLo = 0x10000 - (chn.nPosLo & 0xffff);
-			chn.nPos = chn.nLength - nDeltaHi - (nDeltaLo>>16);
-			chn.nPosLo = nDeltaLo & 0xffff;
-			// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-			if ((chn.nPos <= chn.nLoopStart) || (chn.nPos >= chn.nLength)) chn.nPos = chn.nLength - (ITBidiMode ? 2 : 1);
-		} else
-		{
-			if (nInc < 0) // This is a bug
+
+			// Part 2: Compute how many samples we can render until we reach the end of sample / loop boundary / etc.
+
+			SamplePosition nPos = chn.position;
+			// too big increment, and/or too small loop length
+			if (nPos.GetInt() < nLoopStart)
 			{
-				nInc = -nInc;
-				chn.nInc = nInc;
+				if (nPos.IsNegative() || nInc.IsNegative()) return 0;
 			}
-			// Restart at loop start
-			chn.nPos += nLoopStart - chn.nLength;
-			if ((int32)chn.nPos < nLoopStart) chn.nPos = chn.nLoopStart;
-		}
-	}
-	int32 nPos = chn.nPos;
-	// too big increment, and/or too small loop length
-	if (nPos < nLoopStart)
-	{
-		if ((nPos < 0) || (nInc < 0)) return 0;
-	}
-	if ((nPos < 0) || (nPos >= (int32)chn.nLength)) return 0;
-	int32 nPosLo = (uint16)chn.nPosLo, nSmpCount = nSamples;
-	if (nInc < 0)
-	{
-		int32 nInv = -nInc;
-		int32 maxsamples = 16384 / ((nInv>>16)+1);
-		if (maxsamples < 2) maxsamples = 2;
-		if (nSamples > maxsamples) nSamples = maxsamples;
-		int32 nDeltaHi = (nInv>>16) * (nSamples - 1);
-		int32 nDeltaLo = (nInv&0xffff) * (nSamples - 1);
-		int32 nPosDest = nPos - nDeltaHi + ((nPosLo - nDeltaLo) >> 16);
-		if (nPosDest < nLoopStart)
-		{
-			nSmpCount = (uint32)(((((int64)nPos - nLoopStart) << 16) + nPosLo - 1) / nInv) + 1;
-		}
-	} else
-	{
-		int32 maxsamples = 16384 / ((nInc>>16)+1);
-		if (maxsamples < 2) maxsamples = 2;
-		if (nSamples > maxsamples) nSamples = maxsamples;
-		int32 nDeltaHi = (nInc>>16) * (nSamples - 1);
-		int32 nDeltaLo = (nInc&0xffff) * (nSamples - 1);
-		int32 nPosDest = nPos + nDeltaHi + ((nPosLo + nDeltaLo)>>16);
-		if (nPosDest >= (int32)chn.nLength)
-		{
-			nSmpCount = (uint32)(((((int64)chn.nLength - nPos) << 16) - nPosLo - 1) / nInc) + 1;
-		}
-	}
-#ifdef _DEBUG
-	{
-		int32 nDeltaHi = (nInc>>16) * (nSmpCount - 1);
-		int32 nDeltaLo = (nInc&0xffff) * (nSmpCount - 1);
-		int32 nPosDest = nPos + nDeltaHi + ((nPosLo + nDeltaLo)>>16);
-		if ((nPosDest < 0) || (nPosDest > (int32)chn.nLength))
-		{
-			Log("Incorrect delta:\n");
-			Log("nSmpCount=%d: nPos=%5d.x%04X Len=%5d Inc=%2d.x%04X\n",
-				nSmpCount, nPos, nPosLo, chn.nLength, chn.nInc>>16, chn.nInc&0xffff);
-			return 0;
-		}
-	}
+			if (nPos.IsNegative() || nPos.GetUInt() >= chn.nLength) return 0;
+			uint32 nSmpCount = nSamples;
+			SamplePosition nInv = nInc;
+			if (nInc.IsNegative())
+			{
+				nInv.Negate();
+			}
+			LimitMax(nSamples, maxSamples);
+			SamplePosition incSamples = nInc * (nSamples - 1);
+			int32 nPosDest = (nPos + incSamples).GetInt();
+
+			// Loop wrap-around magic.
+			bool checkDest = true;
+			if(lookaheadPointer != nullptr)
+			{
+				if(nPos.GetUInt() >= lookaheadStart)
+				{
+#if 0
+					const uint32 oldCount = nSmpCount;
+
+					// When going backwards - we can only go back up to lookaheadStart.
+					// When going forwards - read through the whole pre-computed wrap-around buffer if possible.
+					// TODO: ProTracker sample swapping needs hard cut at sample end.
+					int32 samplesToRead = nInc.IsNegative()
+						? (nPosInt - lookaheadStart)
+						//: 2 * InterpolationMaxLookahead - (nPosInt - mixLoopState.lookaheadStart);
+						: (chn.nLoopEnd - nPosInt);
+					//LimitMax(samplesToRead, chn.nLoopEnd - chn.nLoopStart);
+					nSmpCount = SamplesToBufferLength(samplesToRead, chn);
+					Limit(nSmpCount, 1u, oldCount);
+#else
+					if (nInc.IsNegative())
+					{
+						nSmpCount = DistanceToBufferLength(SamplePosition(lookaheadStart, 0), nPos, nInv);
+					} else
+					{
+						nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, 0), nInv);
+					}
 #endif
-	if (nSmpCount <= 1) return 1;
-	if (nSmpCount > nSamples) return nSamples;
-	return nSmpCount;
-}
-
-
-// Calculate offset of loop wrap-around buffer for this sample.
-static inline void UpdateLookaheadPointers(const int8* &samplePointer, const int8* &lookaheadPointer, SmpLength &lookaheadStart, const ModChannel &chn)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
-	lookaheadStart = chn.nLoopEnd - InterpolationMaxLookahead;
-	// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
-	// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
-	if(chn.dwFlags[CHN_LOOP] && chn.resamplingMode != SRCMODE_NEAREST)
-	{
-		const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength && chn.pModSample->nLength >= InterpolationMaxLookahead;
-		const bool inSustainLoop = chn.InSustainLoop();
-
-		// Do not enable wraparound magic if we're previewing a custom loop!
-		if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
-		{
-			SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
-			if(inSustainLoop)
-			{
-				lookaheadOffset += 4 * InterpolationMaxLookahead;
+					chn.pCurrentSample = lookaheadPointer;
+					checkDest = false;
+				} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
+				{
+					// We shouldn't read that far if we're not using the pre-computed wrap-around buffer.
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(lookaheadStart, 0), nInv);
+					checkDest = false;
+				} else if(loopRestart && nPos.GetUInt() < nLoopStart + InterpolationMaxLookahead)
+				{
+					// We just restarted the loop, so interpolate correctly after wrapping around
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
+					chn.pCurrentSample = lookaheadPointer + (chn.nLength - nLoopStart) * chn.pModSample->GetBytesPerSample();
+					checkDest = false;
+				}
 			}
-			lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
-		}
+
+			if(checkDest)
+			{
+				// Fix up sample count if target position is invalid
+				if (nInc.IsNegative())
+				{
+					if (nPosDest < nLoopStart)
+					{
+						nSmpCount = DistanceToBufferLength(SamplePosition(chn.nLoopStart, 0), nPos, nInv);
+					}
+				} else
+				{
+					if (nPosDest >= (int32)chn.nLength)
+					{
+						nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, 0), nInv);
+					}
+				}
+			}
+
+			Limit(nSmpCount, 1u, nSamples);
+
+#ifdef _DEBUG
+			{
+				SmpLength posDest = (nPos + nInc * (nSmpCount - 1)).GetUInt();
+				if (posDest < 0 || posDest > chn.nLength)
+				{
+					// We computed an invalid delta!
+					MPT_ASSERT_NOTREACHED();
+					return 0;
+				}
+			}
+#endif
+
+			return nSmpCount;
 	}
-}
+};
 
 
 // Render count * number of channels samples
@@ -219,7 +279,6 @@ void CSoundFile::CreateStereoMix(int count)
 	CHANNELINDEX nchmixed = 0;
 
 	const bool ITPingPongMode = m_playBehaviour[kITPingPongMode];
-	const bool realtimeMix = !IsRenderingToDisc();
 
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
 	{
@@ -275,11 +334,7 @@ void CSoundFile::CreateStereoMix(int count)
 		}
 #endif // NO_PLUGINS
 
-		const int8 * samplePointer = nullptr;
-		const int8 * lookaheadPointer = nullptr;
-		SmpLength lookaheadStart = 0;
-
-		UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn);
+		MixLoopState mixLoopState(chn);
 
 		////////////////////////////////////////////////////
 		CHANNELINDEX naddmix = 0;
@@ -294,13 +349,12 @@ void CSoundFile::CreateStereoMix(int count)
 				if (nrampsamples > chn.nRampLength) nrampsamples = chn.nRampLength;
 			}
 
-			if((nSmpCount = GetSampleCount(chn, nrampsamples, ITPingPongMode)) <= 0)
+			if((nSmpCount = mixLoopState.GetSampleCount(chn, nrampsamples, ITPingPongMode)) <= 0)
 			{
 				// Stopping the channel
 				chn.pCurrentSample = nullptr;
 				chn.nLength = 0;
-				chn.nPos = 0;
-				chn.nPosLo = 0;
+				chn.position.Set(0);
 				chn.nRampLength = 0;
 				EndChannelOfs(chn, pbuffer, nsamples);
 				*pOfsR += chn.nROfs;
@@ -311,54 +365,27 @@ void CSoundFile::CreateStereoMix(int count)
 			}
 
 			// Should we mix this channel ?
-			if((nchmixed >= m_MixerSettings.m_nMaxMixChannels && realtimeMix)	// Too many channels
-				|| (!chn.nRampLength && !(chn.leftVol | chn.rightVol)))			// Channel is completely silent
+			if((nchmixed >= m_MixerSettings.m_nMaxMixChannels)				// Too many channels
+				|| (!chn.nRampLength && !(chn.leftVol | chn.rightVol)))		// Channel is completely silent
 			{
-				int32 delta = BufferLengthToSamples(nSmpCount, chn);
-				chn.nPosLo = delta & 0xFFFF;
-				chn.nPos += (delta >> 16);
+				chn.position += chn.increment * nSmpCount;
 				chn.nROfs = chn.nLOfs = 0;
 				pbuffer += nSmpCount * 2;
 				naddmix = 0;
 			} else
 			{
 				// Do mixing
-
-				// Loop wrap-around magic.
-				if(lookaheadPointer != nullptr)
-				{
-					const int32 readLength = BufferLengthToSamples(nSmpCount, chn) >> 16;
-					
-					chn.pCurrentSample = samplePointer;
-					if(chn.nPos >= lookaheadStart)
-					{
-						const int32 oldCount = nSmpCount;
-
-						// When going backwards - we can only go back up to lookaheadStart.
-						// When going forwards - read through the whole pre-computed wrap-around buffer if possible.
-						const int32 samplesToRead = chn.nInc < 0
-							? (chn.nPos - lookaheadStart)
-							: 2 * InterpolationMaxLookahead - (chn.nPos - lookaheadStart);
-						nSmpCount = SamplesToBufferLength(samplesToRead, chn);
-						Limit(nSmpCount, 1, oldCount);
-						chn.pCurrentSample = lookaheadPointer;
-					} else if(chn.nInc > 0 && chn.nPos + readLength >= lookaheadStart && nSmpCount > 1)
-					{
-						// We shouldn't read that far if we're not using the pre-computed wrap-around buffer.
-						const int32 oldCount = nSmpCount;
-						nSmpCount = SamplesToBufferLength(lookaheadStart - chn.nPos, chn);
-						Limit(nSmpCount, 1, oldCount - 1);
-					}
-				}
-
-
 				mixsample_t *pbufmax = pbuffer + (nSmpCount * 2);
 				chn.nROfs = - *(pbufmax-2);
 				chn.nLOfs = - *(pbufmax-1);
 
-				uint32 targetpos = chn.nPos + (BufferLengthToSamples(nSmpCount, chn) >> 16);
+#ifdef _DEBUG
+				SamplePosition targetpos = chn.position + chn.increment * nSmpCount;
+#endif
 				MixFuncTable::Functions[functionNdx | (chn.nRampLength ? MixFuncTable::ndxRamp : 0)](chn, m_Resampler, pbuffer, nSmpCount);
-				MPT_ASSERT(chn.nPos == targetpos); MPT_UNUSED_VARIABLE(targetpos);
+#ifdef _DEBUG
+				MPT_ASSERT(chn.position.GetUInt() == targetpos.GetUInt());
+#endif
 
 				chn.nROfs += *(pbufmax-2);
 				chn.nLOfs += *(pbufmax-1);
@@ -386,7 +413,7 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			if(chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
+			if(chn.position.GetUInt() >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
 			{
 				if(m_playBehaviour[kMODSampleSwap] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
 				{
@@ -399,8 +426,8 @@ void CSoundFile::CreateStereoMix(int count)
 					chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
 					chn.nLoopStart = smp.nLoopStart;
 					chn.nLoopEnd = smp.nLoopEnd;
-					chn.nPos = chn.nLoopStart;
-					UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn);
+					chn.position.SetInt(chn.nLoopStart);
+					mixLoopState.UpdateLookaheadPointers(chn);
 					if(!chn.pCurrentSample)
 					{
 						break;
@@ -408,14 +435,14 @@ void CSoundFile::CreateStereoMix(int count)
 				} else if(m_playBehaviour[kMODOneShotLoops] && chn.nLoopStart == 0)
 				{
 					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
-					chn.nPos = 0;
+					chn.position.SetInt(0);
 					chn.nLoopEnd = chn.nLength = chn.pModSample->nLoopEnd;
 				}
 			}
 		} while(nsamples > 0);
 
 		// Restore sample pointer in case it got changed through loop wrap-around
-		chn.pCurrentSample = samplePointer;
+		chn.pCurrentSample = mixLoopState.samplePointer;
 		nchmixed += naddmix;
 	
 #ifndef NO_PLUGINS

@@ -929,6 +929,26 @@ static MPT_NOINLINE void TestMisc()
 	for(int32 transpose = -128; transpose < 128; transpose += 32)
 		for(int32 finetune = -128; finetune < 128; finetune += 64, freqIndex++)
 			VERIFY_EQUAL_EPS(transposeToFrequency[freqIndex], static_cast<int32>(ModSample::TransposeToFrequency(transpose, finetune)), 1);
+
+	// Check SamplePosition fixed-point type
+	VERIFY_EQUAL(SamplePosition(1).GetRaw(), 1);
+	VERIFY_EQUAL(SamplePosition(2).Set(1), SamplePosition(1, 0));
+	VERIFY_EQUAL(SamplePosition(2).SetInt(1), SamplePosition(1, 2));
+	VERIFY_EQUAL(SamplePosition(1).IsPositive(), true);
+	VERIFY_EQUAL(SamplePosition(0).IsZero(), true);
+	VERIFY_EQUAL(SamplePosition(1, 0).IsUnity(), true);
+	VERIFY_EQUAL(SamplePosition(1, 1).IsUnity(), false);
+	VERIFY_EQUAL(SamplePosition(-1).IsNegative(), true);
+	VERIFY_EQUAL(SamplePosition(int64_max).GetRaw(), int64_max);
+	VERIFY_EQUAL(SamplePosition(2, SamplePosition::fractMax).GetInt(), 2);
+	VERIFY_EQUAL(SamplePosition(2, SamplePosition::fractMax).GetFract(), SamplePosition::fractMax);
+	VERIFY_EQUAL(SamplePosition(1, SamplePosition::fractMax).GetInvertedFract(), SamplePosition(0, 1));
+	VERIFY_EQUAL(SamplePosition(1, 0).GetInvertedFract(), SamplePosition(1, 0));
+	VERIFY_EQUAL(SamplePosition(2, 0).Negate(), SamplePosition(-2, 0));
+	VERIFY_EQUAL(SamplePosition::Ratio(10, 5), SamplePosition(2, 0));
+	VERIFY_EQUAL(SamplePosition(1, 1) + SamplePosition(2, 2), SamplePosition(3, 3));
+	VERIFY_EQUAL(SamplePosition(1, 0) * 3, SamplePosition(3, 0));
+	VERIFY_EQUAL((SamplePosition(6, 0) / SamplePosition(2, 0)), 3);
 }
 
 

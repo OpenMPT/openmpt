@@ -995,7 +995,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Corrent sample is set up on this channel
 					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))					// And it hasn't completely faded out yet, so it's still playing
 				{
-					notification.pos[k] = chn.nPos;
+					notification.pos[k] = chn.position.GetInt();
 				} else
 				{
 					notification.pos[k] = Notification::PosInvalid;
@@ -1355,7 +1355,8 @@ void CMainFrame::UnsetPlaybackSoundFile()
 			{
 				if(!(m_pSndFile->m_PlayState.Chn[i].nMasterChn))
 				{
-					m_pSndFile->m_PlayState.Chn[i].nPos = m_pSndFile->m_PlayState.Chn[i].nPosLo = m_pSndFile->m_PlayState.Chn[i].nLength = 0;
+					m_pSndFile->m_PlayState.Chn[i].nLength = 0;
+					m_pSndFile->m_PlayState.Chn[i].position.Set(0);
 				}
 			}
 		}

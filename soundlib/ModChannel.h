@@ -36,22 +36,18 @@ struct ModChannel
 	};
 
 	// Information used in the mixer (should be kept tight for better caching)
-	// Byte sizes are for 32-bit builds and 32-bit integer / float mixer
+	SamplePosition position;	// Current play position (fixed point)
+	SamplePosition increment;	// Sample speed relative to mixing frequency (fixed point)
 	const void *pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
-	uint32 nPos;			// Current play position
-	uint32 nPosLo;			// 16-bit fractional part of play position
-	int32 nInc;				// 16.16 fixed point sample speed relative to mixing frequency (0x10000 = one sample per output sample, 0x20000 = two samples per output sample, etc...)
 	int32 leftVol;			// 0...4096 (12 bits, since 16 bits + 12 bits = 28 bits = 0dB in integer mixer, see MIXING_ATTENUATION)
 	int32 rightVol;			// Ditto
 	int32 leftRamp;			// Ramping delta, 20.12 fixed point (see VOLUMERAMPPRECISION)
 	int32 rightRamp;		// Ditto
-	// Up to here: 32 bytes
 	int32 rampLeftVol;		// Current ramping volume, 20.12 fixed point (see VOLUMERAMPPRECISION)
 	int32 rampRightVol;		// Ditto
 	mixsample_t nFilter_Y[2][2];					// Filter memory - two history items per sample channel
 	mixsample_t nFilter_A0, nFilter_B0, nFilter_B1;	// Filter coeffs
 	mixsample_t nFilter_HP;
-	// Up to here: 72 bytes
 
 	SmpLength nLength;
 	SmpLength nLoopStart;
@@ -59,7 +55,6 @@ struct ModChannel
 	FlagSet<ChannelFlags> dwFlags;
 	mixsample_t nROfs, nLOfs;
 	uint32 nRampLength;
-	// Up to here: 100 bytes
 
 	const ModSample *pModSample;			// Currently assigned sample slot (may already be stopped)
 

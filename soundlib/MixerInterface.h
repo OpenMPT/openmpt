@@ -65,12 +65,10 @@ struct NoInterpolation
 // FilterFunc: Functor for applying the resonant filter
 // MixFunc: Functor for mixing the computed sample data into the output buffer
 template<class Traits, class InterpolationFunc, class FilterFunc, class MixFunc>
-static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Traits::output_t * MPT_RESTRICT outBuffer, int numSamples)
+static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Traits::output_t * MPT_RESTRICT outBuffer, unsigned int numSamples)
 {
 	ModChannel &c = chn;
-	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample) + c.nPos * Traits::numChannelsIn;
-
-	int32 smpPos = c.nPosLo;	// 16.16 sample position relative to c.nPos
+	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample);
 
 	InterpolationFunc interpolate;
 	FilterFunc filter;
@@ -81,27 +79,29 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	filter.Start(c);
 	mix.Start(c);
 
-	int samples = numSamples;
+	unsigned int samples = numSamples;
+	SamplePosition smpPos = c.position;	// Fixed-point sample position
+	const SamplePosition increment = c.increment;	// Fixed-point sample increment
+
 	while(samples--)
 	{
 		typename Traits::outbuf_t outSample;
-		interpolate(outSample, inSample + (smpPos >> 16) * Traits::numChannelsIn, (smpPos & 0xFFFF));
+		interpolate(outSample, inSample + smpPos.GetInt() * Traits::numChannelsIn, static_cast<uint16>(smpPos.GetFract() >> 16));
 		filter(outSample, c);
 		mix(outSample, c, outBuffer);
 		outBuffer += Traits::numChannelsOut;
 
-		smpPos += c.nInc;
+		smpPos += increment;
 	}
 
 	mix.End(c);
 	filter.End(c);
 	interpolate.End(c);
 
-	c.nPos += smpPos >> 16;
-	c.nPosLo = smpPos & 0xFFFF;
+	c.position = smpPos;
 }
 
 // Type of the SampleLoop function above
-typedef void (*MixFuncInterface)(ModChannel &, const CResampler &, mixsample_t *, int);
+typedef void (*MixFuncInterface)(ModChannel &, const CResampler &, mixsample_t *, unsigned int);
 
 OPENMPT_NAMESPACE_END

@@ -1283,7 +1283,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	{
 		if(m_PlayState.Chn[i].pModSample == &sample)
 		{
-			m_PlayState.Chn[i].nPos = 0;
+			m_PlayState.Chn[i].position.Set(0);
 			m_PlayState.Chn[i].nLength = 0;
 			m_PlayState.Chn[i].pCurrentSample = nullptr;
 		}

@@ -101,8 +101,8 @@ struct PolyphaseInterpolation
 			// #pragma warning fails with this templated case for unknown reasons.
 			MPT_UNREFERENCED_PARAMETER(resampler);
 		#endif // MODPLUG_TRACKER
-		sinc = (((chn.nInc > 0x13000) || (chn.nInc < -0x13000)) ?
-			(((chn.nInc > 0x18000) || (chn.nInc < -0x18000)) ? resampler.gDownsample2x : resampler.gDownsample13x) : resampler.gKaiserSinc);
+		sinc = (((chn.increment > SamplePosition(0x130000000ll)) || (chn.increment < SamplePosition(-0x130000000ll))) ?
+			(((chn.increment > SamplePosition(0x180000000ll)) || (chn.increment < SamplePosition(-0x180000000ll))) ? resampler.gDownsample2x : resampler.gDownsample13x) : resampler.gKaiserSinc);
 	}
 
 	forceinline void End(const ModChannel &) { }

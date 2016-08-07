@@ -105,5 +105,9 @@
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
+  filter { "action:vs2015*" }
+    files {
+      "../../build/vs/debug/openmpt.natvis",
+    }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

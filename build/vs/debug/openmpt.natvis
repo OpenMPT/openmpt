@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <!-- Fixed-point type used for tempo -->
+  <Type Name="FPInt&lt;*,*&gt;">
+    <DisplayString>{v / double($T1)}</DisplayString>
+  </Type>
+
+  <!-- Fixed-point type used for sample position and increment values -->
+  <Type Name="SamplePosition">
+    <DisplayString>{v / 4294967296.}</DisplayString>
+  </Type>
+
+  <!-- Show enum inside FlagSet -->
+  <Type Name="FlagSet&lt;*,*&gt;">
+    <DisplayString>{($T1)bits_}</DisplayString>
+  </Type>
+  
+  <!-- Sample import/export formats -->
+  <Type Name="SampleIO">
+    <DisplayString>{(SampleIO::Bitdepth)(format &amp; 0xFF)} / {(SampleIO::Channels)((format >> 0x08) &amp; 0xFF)} / {(SampleIO::Endianness)((format >> 0x10) &amp; 0xFF)} / {(SampleIO::Encoding)((format >> 0x18) &amp; 0xFF)}</DisplayString>
+  </Type>
+  
+  <!-- Contents of memory-mapped files -->
+  <Type Name="FileDataContainerMemory">
+    <Expand>
+      <ArrayItems>
+        <Size>streamLength</Size>
+        <ValuePointer>streamData</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  
+  <!-- Memory spans -->
+  <Type Name="mpt::span&lt;*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>m_end - m_beg</Size>
+        <ValuePointer>m_beg</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- Signed Little-Endian -->
+  <Type Name="packed&lt;__int64,LittleEndian_tag&gt;">
+    <DisplayString>{(int64)data[0] | ((int64)data[1] &lt;&lt; 0x08) | ((int64)data[2] &lt;&lt; 0x10) | ((int64)data[3] &lt;&lt; 0x18) | ((int64)data[4] &lt;&lt; 0x20) | ((int64)data[5] &lt;&lt; 0x28) | ((int64)data[6] &lt;&lt; 0x30) | ((int64)data[7] &lt;&lt; 0x38)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;int,LittleEndian_tag&gt;">
+    <DisplayString>{(int32)data[0] | ((int32)data[1] &lt;&lt; 0x08) | ((int32)data[2] &lt;&lt; 0x10) | ((int32)data[3] &lt;&lt; 0x18)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;short,LittleEndian_tag&gt;">
+    <DisplayString>{(int16)data[0] | ((int16)data[1] &lt;&lt; 0x08)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;signed char,LittleEndian_tag&gt;">
+    <DisplayString>{(int8)data[0]}</DisplayString>
+  </Type>
+
+  <!--  Unsigned Little-Endian -->
+  <Type Name="packed&lt;unsigned __int64,LittleEndian_tag&gt;">
+    <DisplayString>{((uint64)data[0]) | (((uint64)data[1]) &lt;&lt; 0x08) | (((uint64)data[2]) &lt;&lt; 0x10) | (((uint64)data[3]) &lt;&lt; 0x18) | (((uint64)data[4]) &lt;&lt; 0x20) | (((uint64)data[5]) &lt;&lt; 0x28) | (((uint64)data[6]) &lt;&lt; 0x30) | (((uint64)data[7]) &lt;&lt; 0x38)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned int,LittleEndian_tag&gt;">
+    <DisplayString>{((uint32)data[0]) | (((uint32)data[1]) &lt;&lt; 0x08) | (((uint32)data[2]) &lt;&lt; 0x10) | (((uint32)data[3]) &lt;&lt; 0x18)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned short,LittleEndian_tag&gt;">
+    <DisplayString>{(uint16)data[0] | ((uint16)data[1] &lt;&lt; 0x08)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned char,LittleEndian_tag&gt;">
+    <DisplayString>{(uint8)data[0]}</DisplayString>
+  </Type>
+
+  <!--  Signed Big-Endian -->
+  <Type Name="packed&lt;__int64,BigEndian_tag&gt;">
+    <DisplayString>{(int64)data[7] | ((int64)data[6] &lt;&lt; 0x08) | ((int64)data[5] &lt;&lt; 0x10) | ((int64)data[4] &lt;&lt; 0x18) | ((int64)data[3] &lt;&lt; 0x20) | ((int64)data[2] &lt;&lt; 0x28) | ((int64)data[1] &lt;&lt; 0x30) | ((int64)data[0] &lt;&lt; 0x38)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;int,BigEndian_tag&gt;">
+    <DisplayString>{(int32)data[3] | ((int32)data[2] &lt;&lt; 0x08) | ((int32)data[1] &lt;&lt; 0x10) | ((int32)data[0] &lt;&lt; 0x18)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;short,BigEndian_tag&gt;">
+    <DisplayString>{(int16)data[1] | ((int16)data[0] &lt;&lt; 0x08)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;signed char,BigEndian_tag&gt;">
+    <DisplayString>{(int8)data[0]}</DisplayString>
+  </Type>
+
+  <!--  Unsigned Big-Endian -->
+  <Type Name="packed&lt;unsigned __int64,BigEndian_tag&gt;">
+    <DisplayString>{(uint64)data[7] | ((uint64)data[6] &lt;&lt; 0x08) | ((uint64)data[5] &lt;&lt; 0x10) | ((uint64)data[4] &lt;&lt; 0x18) | ((uint64)data[3] &lt;&lt; 0x20) | ((uint64)data[2] &lt;&lt; 0x28) | ((uint64)data[1] &lt;&lt; 0x30) | ((uint64)data[0] &lt;&lt; 0x38)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned int,BigEndian_tag&gt;">
+    <DisplayString>{(uint32)data[3] | ((uint32)data[2] &lt;&lt; 0x08) | ((uint32)data[1] &lt;&lt; 0x10) | ((uint32)data[0] &lt;&lt; 0x18)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned short,BigEndian_tag&gt;">
+    <DisplayString>{(uint16)data[1] | ((uint16)data[0] &lt;&lt; 0x08)}</DisplayString>
+  </Type>
+  <Type Name="packed&lt;unsigned char,BigEndian_tag&gt;">
+    <DisplayString>{(uint8)data[0]}</DisplayString>
+  </Type>
+</AutoVisualizer>

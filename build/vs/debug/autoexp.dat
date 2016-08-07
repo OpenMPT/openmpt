@@ -1,0 +1,111 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; OpenMPT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+# Fixed-point type used for tempo
+FPInt<*,*>{
+  preview(
+    #( $e.v / double($T1) )
+  )
+}
+
+# Fixed-point type used for sample position and increment values
+SamplePosition{
+  preview(
+    #( $e.v / 4294967296. )
+  )
+}
+
+# Show enum inside FlagSet
+FlagSet<enum *,*>{
+  preview(
+    #( ($T1)$e.bits_)
+  )
+}
+
+# Sample import/export formats
+SampleIO{
+  preview( #( (SampleIO::Bitdepth)($e.format & 0xFF), " / ", (SampleIO::Channels)(($e.format >> 0x08) & 0xFF), " / ", (SampleIO::Endianness)(($e.format >> 0x10) & 0xFF), " / ", (SampleIO::Encoding)(($e.format >> 0x18) & 0xFF) ) )
+}
+
+# Contents of memory-mapped files
+FileDataContainerMemory{
+  children (
+    #(
+      [raw members]: [$c,!],
+      #array (
+        expr: $e.streamData[$i],
+        size: $e.streamLength
+      )
+    )
+  )
+}
+
+# Memory spans
+mpt::span<*>{
+  children (
+    #(
+      [raw members]: [$c,!],
+      #array (
+        expr: $e.m_beg[$i],
+        size: $e.m_end - $e.m_beg
+      )
+    )
+  )
+}
+
+# Signed Little-Endian
+packed<__int64,LittleEndian_tag>{
+  preview( #( (int64)$e.data[0] | ((int64)$e.data[1] << 0x08) | ((int64)$e.data[2] << 0x10) | ((int64)$e.data[3] << 0x18) | ((int64)$e.data[4] << 0x20) | ((int64)$e.data[5] << 0x28) | ((int64)$e.data[6] << 0x30) | ((int64)$e.data[7] << 0x38) ) )
+}
+packed<int,LittleEndian_tag>{
+  preview( #( (int32)$e.data[0] | ((int32)$e.data[1] << 0x08) | ((int32)$e.data[2] << 0x10) | ((int32)$e.data[3] << 0x18) ) )
+}
+packed<short,LittleEndian_tag>{
+  preview( #( (int16)$e.data[0] | ((int16)$e.data[1] << 0x08) ) )
+}
+packed<signed char,LittleEndian_tag>{
+  preview( #( (int8)$e.data[0] ) )
+}
+
+# Unsigned Little-Endian
+packed<unsigned __int64,LittleEndian_tag>{
+  preview( #( ((uint64)$e.data[0]) | (((uint64)$e.data[1]) << 0x08) | (((uint64)$e.data[2]) << 0x10) | (((uint64)$e.data[3]) << 0x18) | (((uint64)$e.data[4]) << 0x20) | (((uint64)$e.data[5]) << 0x28) | (((uint64)$e.data[6]) << 0x30) | (((uint64)$e.data[7]) << 0x38) ) )
+}
+packed<unsigned int,LittleEndian_tag>{
+  preview( #( ((uint32)$e.data[0]) | (((uint32)$e.data[1]) << 0x08) | (((uint32)$e.data[2]) << 0x10) | (((uint32)$e.data[3]) << 0x18) ) )
+}
+packed<unsigned short,LittleEndian_tag>{
+  preview( #( (uint16)$e.data[0] | ((uint16)$e.data[1] << 0x08) ) )
+}
+packed<unsigned char,LittleEndian_tag>{
+  preview( #( (uint8)$e.data[0] ) )
+}
+
+# Signed Big-Endian
+packed<__int64,BigEndian_tag>{
+  preview( #( (int64)$e.data[7] | ((int64)$e.data[6] << 0x08) | ((int64)$e.data[5] << 0x10) | ((int64)$e.data[4] << 0x18) | ((int64)$e.data[3] << 0x20) | ((int64)$e.data[2] << 0x28) | ((int64)$e.data[1] << 0x30) | ((int64)$e.data[0] << 0x38) ) )
+}
+packed<int,BigEndian_tag>{
+  preview( #( (int32)$e.data[3] | ((int32)$e.data[2] << 0x08) | ((int32)$e.data[1] << 0x10) | ((int32)$e.data[0] << 0x18) ) )
+}
+packed<short,BigEndian_tag>{
+  preview( #( (int16)$e.data[1] | ((int16)$e.data[0] << 0x08) ) )
+}
+packed<signed char,BigEndian_tag>{
+  preview( #( (int8)$e.data[0] ) )
+}
+
+# Unsigned Big-Endian
+packed<unsigned __int64,BigEndian_tag>{
+  preview( #( (uint64)$e.data[7] | ((uint64)$e.data[6] << 0x08) | ((uint64)$e.data[5] << 0x10) | ((uint64)$e.data[4] << 0x18) | ((uint64)$e.data[3] << 0x20) | ((uint64)$e.data[2] << 0x28) | ((uint64)$e.data[1] << 0x30) | ((uint64)$e.data[0] << 0x38) ) )
+}
+packed<unsigned int,BigEndian_tag>{
+  preview( #( (uint32)$e.data[3] | ((uint32)$e.data[2] << 0x08) | ((uint32)$e.data[1] << 0x10) | ((uint32)$e.data[0] << 0x18) ) )
+}
+packed<unsigned short,BigEndian_tag>{
+  preview( #( (uint16)$e.data[1] | ((uint16)$e.data[0] << 0x08) ) )
+}
+packed<unsigned char,BigEndian_tag>{
+  preview( #( (uint8)$e.data[0] ) )
+}

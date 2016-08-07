@@ -1814,8 +1814,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 }
 
 
-uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const
-//-------------------------------------------------------------------------------------------
+SamplePosition CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const
+//---------------------------------------------------------------------------------------------------
 {
 	uint32 freq;
 
@@ -1834,7 +1834,7 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), pIns->pitchToTempoLock.GetRaw());
 	}
 
-	return Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
+	return SamplePosition::Ratio(freq, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
 
@@ -1926,7 +1926,7 @@ bool CSoundFile::ReadNote()
 			continue;
 		}
 		// Reset channel data
-		pChn->nInc = 0;
+		pChn->increment = SamplePosition(0);
 		pChn->nRealVolume = 0;
 		pChn->nCalcVolume = 0;
 
@@ -2105,15 +2105,15 @@ bool CSoundFile::ReadNote()
 			}
 
 
-			uint32 ninc = GetChannelIncrement(pChn, period, nPeriodFrac);
+			SamplePosition ninc = GetChannelIncrement(pChn, period, nPeriodFrac);
 #ifndef MODPLUG_TRACKER
-			ninc = Util::muldivr(ninc, m_nFreqFactor, 65536);
+			ninc.MulDiv(m_nFreqFactor, 65536);
 #endif // !MODPLUG_TRACKER
-			if(ninc == 0)
+			if(ninc.IsZero())
 			{
-				ninc = 1;
+				ninc.Set(0, 1);
 			}
-			pChn->nInc = ninc;
+			pChn->increment = ninc;
 		} else
 		{
 			// Avoid nasty noises...
@@ -2138,7 +2138,7 @@ bool CSoundFile::ReadNote()
 		// Check for too big nInc
 		//if (((pChn->nInc >> 16) + 1) >= (int32)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
 		pChn->newLeftVol = pChn->newRightVol = 0;
-		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->pSample && pChn->nLength && pChn->nInc) ? pChn->pModSample->pSample : nullptr;
+		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->pSample && pChn->nLength && !pChn->increment.IsZero()) ? pChn->pModSample->pSample : nullptr;
 		if (pChn->pCurrentSample)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
@@ -2213,7 +2213,7 @@ bool CSoundFile::ReadNote()
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 
-			if(pChn->nInc == 0x10000 && !(pChn->dwFlags[CHN_VIBRATO] || pChn->nAutoVibDepth))
+			if(pChn->increment.IsUnity() && !(pChn->dwFlags[CHN_VIBRATO] || pChn->nAutoVibDepth))
 			{
 				// Exact sample rate match, do not resample at all, regardless of selected resampler
 				// - unless vibrato is applied, because in this case the constant enabling and disabling
@@ -2246,7 +2246,7 @@ bool CSoundFile::ReadNote()
 			if(pChn->dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) pChn->newRightVol = - pChn->newRightVol;
 
 			// Checking Ping-Pong Loops
-			if(pChn->dwFlags[CHN_PINGPONGFLAG]) pChn->nInc = -pChn->nInc;
+			if(pChn->dwFlags[CHN_PINGPONGFLAG]) pChn->increment.Negate();
 
 			// Setting up volume ramp
 			ProcessRamping(pChn);

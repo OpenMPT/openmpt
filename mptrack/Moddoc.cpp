@@ -1125,8 +1125,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pchn.nLength))
 		if ((loopStart + 16 < loopEnd) && (loopStart >= 0) && (chn.pModSample != nullptr))
 		{
-			chn.nPos = loopStart;
-			chn.nPosLo = 0;
+			chn.position.Set(loopStart);
 			chn.nLoopStart = loopStart;
 			chn.nLoopEnd = loopEnd;
 			chn.nLength = std::min(loopEnd, chn.pModSample->nLength);
@@ -1138,7 +1137,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		// Handle custom start position
 		if(sampleOffset > 0 && chn.pModSample)
 		{
-			chn.nPos = sampleOffset;
+			chn.position.Set(sampleOffset);
 			// If start position is after loop end, set loop end to sample end so that the sample starts
 			// playing.
 			if(chn.nLoopEnd < sampleOffset)

@@ -803,7 +803,7 @@ protected:
 
 	void ProcessRamping(ModChannel *pChn) const;
 
-	uint32 GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const;
+	SamplePosition GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const;
 
 protected:
 	// Type of panning command
