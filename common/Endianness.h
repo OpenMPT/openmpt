@@ -574,7 +574,7 @@ enum Endianness
 {
 	BigEndian,
 	LittleEndian,
-#if defined(PLATFORM_BIG_ENDIAN)
+#if defined(MPT_PLATFORM_BIG_ENDIAN)
 	NativeEndian = BigEndian,
 #else
 	NativeEndian = LittleEndian,
