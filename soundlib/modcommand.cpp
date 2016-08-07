@@ -339,10 +339,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			ExtendedS3MtoMODEffect();
 			break;
 
-		case CMD_VOLUMESLIDE:
 		case CMD_TONEPORTAVOL:	// Can't do fine slides and portamento/vibrato at the same time :(
 		case CMD_VIBRATOVOL:	// ditto
-			if(volcmd == VOLCMD_NONE && ((param & 0xF0) && ((param & 0x0F) == 0x0F)) || ((param & 0x0F) && ((param & 0xF0) == 0xF0)))
+			if(volcmd == VOLCMD_NONE && (((param & 0xF0) && ((param & 0x0F) == 0x0F)) || ((param & 0x0F) && ((param & 0xF0) == 0xF0))))
 			{
 				// Try to salvage portamento/vibrato
 				if(command == CMD_TONEPORTAVOL)
@@ -352,6 +351,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				vol = 0;
 			}
 
+		MPT_FALLTHROUGH;
+		case CMD_VOLUMESLIDE:
 			if((param & 0xF0) && ((param & 0x0F) == 0x0F))
 			{
 				command = CMD_MODCMDEX;
