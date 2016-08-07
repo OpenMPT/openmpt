@@ -1551,7 +1551,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				streamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sharedChunk, oggPageInfo, oggPageData))
 				{
-					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), oggPageInfo.header.bitstream_serial_number);
 					if(it == streamSerials.end())
 					{
 						streamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
@@ -1566,7 +1566,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				streamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
 				{
-					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), read_unaligned_field(oggPageInfo.header.bitstream_serial_number));
+					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), oggPageInfo.header.bitstream_serial_number);
 					if(it == streamSerials.end())
 					{
 						streamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
