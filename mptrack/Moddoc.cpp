@@ -147,6 +147,7 @@ CModDoc::CModDoc()
 	, m_notifyItem(0)
 	, m_PatternUndo(*this)
 	, m_SampleUndo(*this)
+	, bModifiedAutosave(false)
 //---------------------------------------
 {
 	// Set the creation date of this file (or the load time if we're loading an existing file)
