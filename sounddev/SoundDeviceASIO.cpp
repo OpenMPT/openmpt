@@ -16,6 +16,7 @@
 #include "SoundDeviceASIO.h"
 
 #include "../common/misc_util.h"
+#include "../common/mptUUID.h"
 #include "../common/StringFixer.h"
 #include "../soundlib/SampleFormatConverters.h"
 

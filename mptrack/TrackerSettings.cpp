@@ -26,6 +26,7 @@
 #include "ExceptionHandler.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
+#include "../common/mptUUID.h"
 
 
 #include <algorithm>
