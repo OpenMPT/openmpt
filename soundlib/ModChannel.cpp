@@ -46,8 +46,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 	if(resetMask & resetSetPosAdvanced)
 	{
 		nPeriod = 0;
-		nPos = 0;
-		nPosLo = 0;
+		position.Set(0);
 		nLength = 0;
 		nLoopStart = 0;
 		nLoopEnd = 0;
@@ -99,12 +98,11 @@ void ModChannel::Stop()
 //---------------------
 {
 	nPeriod = 0;
-	nInc = 0;
-	nPos = nPosLo = 0;
+	increment.Set(0);
+	position.Set(0);
 	nLeftVU = nRightVU = 0;
 	nVolume = 0;
 	pCurrentSample = nullptr;
-	nInc = 0;
 }
 
 

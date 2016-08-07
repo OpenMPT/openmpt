@@ -462,16 +462,113 @@ public:
 	enum { Unity = 1u << 24 };
 	// Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
 	void Normalize();
-	void resize(size_type _Newsize, value_type val = Unity) { std::vector<uint32>::resize(_Newsize, val); Normalize(); }
+	void resize(size_type newSize, value_type val = Unity) { std::vector<uint32>::resize(newSize, val); Normalize(); }
 
 	static void Serialize(std::ostream &oStrm, const TempoSwing &swing);
 	static void Deserialize(std::istream &iStrm, TempoSwing &swing, const size_t);
 };
 
 
-// Fixed-point type, e.g. used for fractional tempos
+// Sample position and sample position increment value
+struct SamplePosition
+{
+	typedef int64 value_t;
+	typedef uint64 unsigned_value_t;
+protected:
+#ifdef _DEBUG
+	union
+	{
+		value_t v;
+		// The following struct is for debugging only - do not use it directly!
+		// Preferrably, use the Debugger Visualizers available in build/vs/debug/
+		// for even easier debugging.
+#ifdef MPT_PLATFORM_LITTLE_ENDIAN
+		struct { uint32 lo; int32 hi; };
+#else
+		struct { int32 hi; uint32 lo; };
+#endif // MPT_PLATFORM_LITTLE_ENDIAN
+	};
+#else
+	value_t v;
+#endif // _DEBUG
+
+public:
+	static const uint32 fractMax = 0xFFFFFFFFu;
+
+	SamplePosition() : v(0) { }
+	explicit SamplePosition(value_t v) : v(v) { }
+	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) << 32) | fractPart) { }
+	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
+
+#if 1
+	// Set integer and fractional part
+	forceinline SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
+	// Set integer part, keep fractional part
+	forceinline SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
+	// Get integer part (as sample length / position)
+	forceinline SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
+	// Get integer part
+	forceinline int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
+	// Get fractional part
+	forceinline uint32 GetFract() const { return static_cast<uint32>(v); }
+#else
+	// Set integer and fractional part
+	forceinline SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { hi = intPart; lo = fractPart; return *this; }
+	// Set integer part, keep fractional part
+	forceinline SamplePosition &SetInt(int32 intPart) { hi = intPart; return *this; }
+	// Get integer part (as sample length / position)
+	forceinline SmpLength GetUInt() const { return static_cast<SmpLength>(hi); }
+	// Get integer part
+	forceinline int32 GetInt() const { return hi; }
+	// Get fractional part
+	forceinline uint32 GetFract() const { return lo; }
+#endif
+	// Get the inverted fractional part
+	forceinline SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
+	// Get the raw fixed-point value
+	forceinline int64 GetRaw() const { return v; }
+	// Negate the current value
+	forceinline SamplePosition &Negate() { v = -v; return *this; }
+	// Multiply and divide by given integer scalars
+	forceinline SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
+	// Check if value is 1.0
+	forceinline bool IsUnity() const { return v == 0x100000000ll; }
+	// Check if value is 0
+	forceinline bool IsZero() const { return v == 0; }
+	// Check if value is > 0
+	forceinline bool IsPositive() const { return v > 0; }
+	// Check if value is < 0
+	forceinline bool IsNegative() const { return v < 0; }
+
+	// Addition / subtraction of another fixed-point number
+	SamplePosition operator+ (const SamplePosition &other) const { return SamplePosition(v + other.v); }
+	SamplePosition operator- (const SamplePosition &other) const { return SamplePosition(v - other.v); }
+	void operator+= (const SamplePosition &other) { v += other.v; }
+	void operator-= (const SamplePosition &other) { v -= other.v; }
+
+	// Multiplication with integer scalar
+	template<typename T>
+	SamplePosition operator* (T other) const { return SamplePosition(static_cast<value_t>(v * other)); }
+	template<typename T>
+	void operator*= (T other) { v = static_cast<value_t>(v *other); }
+
+	// Division by other fractional point number; returns scalar
+	value_t operator/ (SamplePosition other) const { return v / other.v; }
+
+	bool operator== (const SamplePosition &other) const { return v == other.v; }
+	bool operator!= (const SamplePosition &other) const { return v != other.v; }
+	bool operator<= (const SamplePosition &other) const { return v <= other.v; }
+	bool operator>= (const SamplePosition &other) const { return v >= other.v; }
+	bool operator< (const SamplePosition &other) const { return v < other.v; }
+	bool operator> (const SamplePosition &other) const { return v > other.v; }
+};
+
+
+// Aaaand another fixed-point type, e.g. used for fractional tempos
 // Note that this doesn't use classical bit shifting for the fixed point part.
 // This is mostly for the clarity of stored values and to be able to represent any value .0000 to .9999 properly.
+// For easier debugging, use the Debugger Visualizers available in build/vs/debug/
+// to easily display the stored values.
 template<size_t FFact, typename T>
 struct FPInt
 {

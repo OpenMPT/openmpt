@@ -1712,6 +1712,12 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
 	const uint8 numChannels = sample.GetNumChannels();
 
+	if(newRate < 1 || oldRate < 1)
+	{
+		MessageBeep(MB_ICONWARNING);
+		return;
+	}
+
 	void *newSample = ModSample::AllocateSample(newTotalLength, sample.GetBytesPerSample());
 
 	if(newSample != nullptr)
@@ -1823,8 +1829,8 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 			if(sample.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
 			ModChannel chn;
 			chn.pCurrentSample = sample.pSample;
-			chn.nInc = Util::muldivr_unsigned(oldRate, 0x10000, newRate);
-			chn.nPos = selection.nStart;
+			chn.increment = SamplePosition::Ratio(oldRate, newRate);
+			chn.position.Set(selection.nStart);
 			chn.leftVol = chn.rightVol = (1 << 8);
 			chn.nLength = sample.nLength;
 

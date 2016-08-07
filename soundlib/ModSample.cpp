@@ -190,14 +190,14 @@ size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerS
 //------------------------------------------------------------------------------------
 {
 	// Number of required lookahead samples:
-	// * 1x InterpolationMaxLookahead samples before the actual sample start. NOTE: This is currently hardcoded to 16!
+	// * 1x InterpolationMaxLookahead samples before the actual sample start. This is set to MaxSamplingPointSize due to the way AllocateSample/FreeSample currently work.
 	// * 1x InterpolationMaxLookahead samples of silence after the sample end (if normal loop end == sample end, this can be optimized out).
 	// * 2x InterpolationMaxLookahead before the loop point (because we start at InterpolationMaxLookahead before the loop point and will look backwards from there as well)
 	// * 2x InterpolationMaxLookahead after the loop point (for wrap-around)
 	// * 4x InterpolationMaxLookahead for the sustain loop (same as the two points above)
 	
 	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
-	const SmpLength lookaheadBufferSize = 16 + (1 + 4 + 4) * InterpolationMaxLookahead;
+	const SmpLength lookaheadBufferSize = (MaxSamplingPointSize + 1 + 4 + 4) * InterpolationMaxLookahead;
 
 	if(numSamples > MAX_SAMPLE_LENGTH || lookaheadBufferSize > maxSize - numSamples)
 	{

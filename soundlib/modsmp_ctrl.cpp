@@ -364,12 +364,15 @@ bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile)
 		chn.dwFlags.set(CHN_LOOP, looped);
 		chn.dwFlags.set(CHN_PINGPONGLOOP, looped && bidi);
 
-		if(chn.nPos > chn.nLength)
+		if(chn.position.GetUInt() > chn.nLength)
 		{
-			chn.nPos = chn.nLoopStart;
+			chn.position.Set(chn.nLoopStart);
 			chn.dwFlags.reset(CHN_PINGPONGFLAG);
 		}
-		
+		if(!bidi)
+		{
+			chn.dwFlags.reset(CHN_PINGPONGFLAG);
+		}
 		if(!looped)
 		{
 			chn.nLength = smp.nLength;
@@ -936,8 +939,8 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 		{
 			if (Chn[i].pCurrentSample != nullptr)
 				Chn[i].pCurrentSample = pNewSample;
-			if (Chn[i].nPos > nNewLength)
-				Chn[i].nPos = 0;
+			if (Chn[i].position.GetUInt() > nNewLength)
+				Chn[i].position.Set(0);
 			if (Chn[i].nLength > 0)
 				LimitMax(Chn[i].nLength, nNewLength);
 			if(Chn[i].InSustainLoop())

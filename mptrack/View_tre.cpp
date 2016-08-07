@@ -2440,7 +2440,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 	for(const ModChannel *chn = sndFile.m_PlayState.Chn; chn != sndFile.m_PlayState.Chn + CountOf(sndFile.m_PlayState.Chn); chn++)
 	{
-		if(chn->pCurrentSample != nullptr && chn->nLength != 0 && chn->nInc != 0)
+		if(chn->pCurrentSample != nullptr && chn->nLength != 0 && !chn->increment.IsZero())
 		{
 			if(updateSamples)
 			{
