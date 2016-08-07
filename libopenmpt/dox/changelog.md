@@ -8,6 +8,7 @@ is just a high-level summary.
 ### libopenmpt svn
 
  *  [**Bug**] PSM loader was broken on big-endian platforms since forever.
+ *  [**Bug**] load.skip_samples ctl did not work for PSM16 modules.
 
  *  There is a new `"subsong"` ctl, which can return the currently selected
     subsong.
@@ -15,6 +16,11 @@ is just a high-level summary.
  *  More accurate sample tuning in PSM16 files.
  *  Samples in DSM files were sometimes detuned and some pattern commands were
     not imported correctly.
+ *  More accurate import of MDL 7-bit panning command.
+ *  Only import pattern commands supported by the UltraTracker version that was
+    used to save ULT files. Add support for command 5-C (end loop).
+ *  DMF sample loop lengths were off by one.
+ *  Unis 669 pan slide effect was too deep.
  *  Several valid (but slightly corrupted possibly due to disk failures or data
     transfer errors) SoundTracker files were no longer loading since beta 18.
 
