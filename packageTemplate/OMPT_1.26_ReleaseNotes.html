@@ -119,6 +119,7 @@
         <a href="ReleaseNotesImages/1.26/compatibility.png"><img src="ReleaseNotesImages/1.26/compatibility.png" width="255" height="170" alt="Legacy playback compatibility dialog" title="Legacy playback compatibility dialog" /></a>
     </div>
     <ul>
+        <li><strong>MIDI Pitch Wheel</strong> messages can now be recorded as MIDI macros.</li>
         <li>Double-clicking an <strong>empty order list cell</strong> creates a new pattern.</li>
         <li>To make <strong>Data Entry</strong> more useful, it is now only applied to the first column type of selection, even if it spans several channels (e.g. if the selection starts in the volume column, only volume will be changed).</li>
         <li><strong>Find &amp; Replace</strong> can now find ranges of data (e.g. notes C-5 to D-6) and replace them also with relative values or percentages. PC events are now also fully supported by Find &amp; Replace.</li>
@@ -138,10 +139,11 @@
 
     <h3>Sample / Instrument Editor</h3>
     <ul>
+        <li>It is now possible to <strong>mix-paste</strong> from the clipboard and also <strong>insert</strong> the pasted sample at the cursor position rather than completely replacing the old sample.</li>
         <li>The <strong>resampler</strong> tool can now use any of OpenMPT's interpolation filters for resampling in addition to r8brain.</li>
         <li>Loop <strong>cross-fader</strong> now also works with sustain loops.</li>
         <li>Try to load <strong>SF2 instruments</strong> with left and right layer as stereo samples. Detuned SF2 samples are now finally fixed!</li>
-        <li>Ogg Vorbis and Opus sample loading support.</li>
+        <li>Ogg Vorbis, Opus, AU / SND (Sun Audio) sample loading support, and support for 64-bit float, &mu;-law and A-law samples in WAV and AIFF files.</li>
     </ul>
 
     <h3>Playback</h3>
