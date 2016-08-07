@@ -399,21 +399,19 @@ void UUID::MakeRFC4122(uint8 version)
 }
 
 UUID::UUID()
-	: Data1(0)
-	, Data2(0)
-	, Data3(0)
-	, Data4(0)
 {
-	return;
+	Data1 = 0;
+	Data2 = 0;
+	Data3 = 0;
+	Data4 = 0;
 }
 
 UUID::UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4)
-	: Data1(Data1)
-	, Data2(Data2)
-	, Data3(Data3)
-	, Data4(Data4)
 {
-	return;
+	this->Data1 = Data1;
+	this->Data2 = Data2;
+	this->Data3 = Data3;
+	this->Data4 = Data4;
 }
 
 bool operator==(const mpt::UUID & a, const mpt::UUID & b)
@@ -464,16 +462,16 @@ UUID UUID::FromString(const mpt::ustring &str)
 mpt::ustring UUID::ToUString() const
 {
 	return mpt::ustring()
-		+ mpt::ufmt::hex0<8>(Data1)
+		+ mpt::ufmt::hex0<8>(GetData1())
 		+ MPT_USTRING("-")
-		+ mpt::ufmt::hex0<4>(Data2)
+		+ mpt::ufmt::hex0<4>(GetData2())
 		+ MPT_USTRING("-")
-		+ mpt::ufmt::hex0<4>(Data3)
+		+ mpt::ufmt::hex0<4>(GetData3())
 		+ MPT_USTRING("-")
-		+ mpt::ufmt::hex0<4>(static_cast<uint16>(Data4 >> 48))
+		+ mpt::ufmt::hex0<4>(static_cast<uint16>(GetData4() >> 48))
 		+ MPT_USTRING("-")
-		+ mpt::ufmt::hex0<4>(static_cast<uint16>(Data4 >> 32))
-		+ mpt::ufmt::hex0<8>(static_cast<uint32>(Data4 >>  0))
+		+ mpt::ufmt::hex0<4>(static_cast<uint16>(GetData4() >> 32))
+		+ mpt::ufmt::hex0<8>(static_cast<uint32>(GetData4() >>  0))
 		;
 }
 
