@@ -149,23 +149,15 @@ struct PACKED DMFSampleHeader
 	{
 		mptSmp.Initialize();
 		mptSmp.nLength = length;
-		mptSmp.nSustainEnd = loopEnd;
 		mptSmp.nSustainStart = loopStart;
-		if(mptSmp.nSustainEnd > 0)
-		{
-			mptSmp.nSustainEnd--;
-		}
-		mptSmp.SanitizeLoops();
+		mptSmp.nSustainEnd = loopEnd;
 
 		mptSmp.nC5Speed = c3freq;
 		mptSmp.nGlobalVol = 64;
 		if(volume)
-		{
 			mptSmp.nVolume = volume + 1;
-		} else
-		{
+		else
 			mptSmp.nVolume = 256;
-		}
 
 		if((flags & smpLoop) != 0 && mptSmp.nSustainEnd > mptSmp.nSustainStart)
 		{
@@ -956,7 +948,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	FileHistory mptHistory;
 	MemsetZero(mptHistory);
-	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(0), uint8(31));
+	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(1), uint8(31));
 	mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
 	mptHistory.loadDate.tm_year = fileHeader.creationYear;
 	m_FileHistory.clear();
