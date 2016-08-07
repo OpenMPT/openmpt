@@ -781,6 +781,15 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
 	mpt::UUID a = mpt::UUID::Generate();
 	VERIFY_EQUAL(a, mpt::UUID::FromString(a.ToUString()));
+	mpt::byte uuiddata[16];
+	for(std::size_t i = 0; i < 16; ++i)
+	{
+		uuiddata[i] = static_cast<uint8>(i);
+	}
+	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
+	mpt::UUID uuid2;
+	std::memcpy(&uuid2, uuiddata, 16);
+	VERIFY_EQUAL(uuid2.ToUString(), MPT_USTRING("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
