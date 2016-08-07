@@ -596,8 +596,8 @@ template<typename T, typename Tendian>
 struct PACKED packed
 {
 public:
-	typedef typename T base_type;
-	typedef typename Tendian endian_type;
+	typedef T base_type;
+	typedef Tendian endian_type;
 private:
 	mpt::byte data[sizeof(base_type)];
 
