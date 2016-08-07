@@ -841,7 +841,7 @@ public:
 	template<typename Tsize, mpt::String::ReadWriteMode mode, size_t destSize>
 	bool ReadSizedString(char (&destBuffer)[destSize], const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
-		packed<Tsize::base_type, Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(srcSize))
 			return false;
 		return ReadString<mode>(destBuffer, std::min<off_t>(srcSize, maxLength));
@@ -853,7 +853,7 @@ public:
 	template<typename Tsize, mpt::String::ReadWriteMode mode>
 	bool ReadSizedString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
-		packed<Tsize::base_type, Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(srcSize))
 			return false;
 		return ReadString<mode>(dest, std::min<off_t>(srcSize, maxLength));
