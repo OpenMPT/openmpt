@@ -64,8 +64,6 @@
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
   defines { "OPENMPT_VST" }
-  exceptionhandling "SEH"
-  defines { "MPT_EXCEPTIONS_SEH" }
   characterset "MBCS"
   flags { "MFC", "ExtraWarnings", "WinMain" }
   links {
