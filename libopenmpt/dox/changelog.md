@@ -5,6 +5,9 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
  *  [**Bug**] PSM loader was broken on big-endian platforms since forever.
