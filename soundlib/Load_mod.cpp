@@ -1647,23 +1647,24 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 
 	// Write magic bytes
-	char modMagic[6];
+	std::string modMagic;
 	CHANNELINDEX writeChannels = std::min(CHANNELINDEX(99), GetNumChannels());
 	if(writeChannels == 4)
 	{
 		if(writePatterns < 64)
 		{
-			memcpy(modMagic, "M.K.", 4);
+			modMagic = "M.K.";
 		} else
 		{
 			// More than 64 patterns
-			memcpy(modMagic, "M!K!", 4);
+			modMagic = "M!K!";
 		}
 	} else
 	{
-		sprintf(modMagic, "%uCHN", writeChannels);
+		modMagic = mpt::format("%1CHN")(mpt::fmt::dec(writeChannels));
 	}
-	fwrite(&modMagic, 4, 1, f);
+	MPT_ASSERT(modMagic.length() >= 4);
+	fwrite(modMagic.c_str(), 4, 1, f);
 
 	// Write patterns
 	std::vector<uint8> events;
