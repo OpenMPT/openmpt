@@ -99,58 +99,6 @@ public:
 };
 
 
-#if defined(MPT_EXCEPTIONS_SEH)
-
-
-#define asioCall(asiocall) MPT_DO { \
-	try { \
-		ASIOError e = m_pAsioDrv-> asiocall ; \
-		if(e != ASE_OK) { \
-			throw ASIOCallError( #asiocall , e); \
-		} \
-	} catch(const ASIOException &) { \
-		throw; \
-	} catch(...) { \
-		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
-		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
-	} \
-} MPT_WHILE_0
-
-
-#define asioCallCheckedBool(asiocall) MPT_DO { \
-	try { \
-		ASIOBool e = m_pAsioDrv-> asiocall ; \
-		if(e != ASIOTrue) { \
-			throw ASIOCallBoolResult( #asiocall , e); \
-		} \
-	} catch(const ASIOException &) { \
-		throw; \
-	} catch(...) { \
-		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
-		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
-	} \
-} MPT_WHILE_0
-
-
-#define asioCallUnchecked(pasioresult, asiocall) MPT_DO { \
-	try { \
-		if(( pasioresult )) { \
-			*( pasioresult ) = ASE_InvalidParameter; \
-		} \
-		ASIOError e = m_pAsioDrv-> asiocall ; \
-		if(( pasioresult )) { \
-			*( pasioresult ) = e; \
-		} \
-	} catch(...) { \
-		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
-		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
-	} \
-} MPT_WHILE_0
-
-
-#else // !MPT_EXCEPTIONS_SEH
-
-
 struct ASIOCrash {};
 
 
@@ -350,9 +298,6 @@ struct SafeASIO
 		*( pasioresult ) = e; \
 	} \
 } MPT_WHILE_0
-
-
-#endif // MPT_EXCEPTIONS_SEH
 
 
 #define ASIO_MAXDRVNAMELEN	1024
