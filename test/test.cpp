@@ -941,7 +941,7 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(SamplePosition(-1).IsNegative(), true);
 	VERIFY_EQUAL(SamplePosition(int64_max).GetRaw(), int64_max);
 	VERIFY_EQUAL(SamplePosition(2, SamplePosition::fractMax).GetInt(), 2);
-	VERIFY_EQUAL(SamplePosition(2, SamplePosition::fractMax).GetFract(), SamplePosition::fractMax);
+	VERIFY_EQUAL(SamplePosition(2, SamplePosition::fractMax).GetFract(), SamplePosition::GetFractMax());
 	VERIFY_EQUAL(SamplePosition(1, SamplePosition::fractMax).GetInvertedFract(), SamplePosition(0, 1));
 	VERIFY_EQUAL(SamplePosition(1, 0).GetInvertedFract(), SamplePosition(1, 0));
 	VERIFY_EQUAL(SamplePosition(2, 0).Negate(), SamplePosition(-2, 0));
