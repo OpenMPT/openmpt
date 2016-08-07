@@ -16,6 +16,8 @@
 #include "PluginManager.h"
 #include "PlugInterface.h"
 
+#include "../../common/mptUUID.h"
+
 // Built-in plugins
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"

@@ -17,6 +17,7 @@
 #include "SoundDeviceDirectSound.h"
 
 #include "../common/misc_util.h"
+#include "../common/mptUUID.h"
 #include "../common/StringFixer.h"
 
 
