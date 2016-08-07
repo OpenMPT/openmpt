@@ -655,5 +655,116 @@ typedef packed<uint32, BigEndian_tag> uint32be;
 typedef packed<uint16, BigEndian_tag> uint16be;
 typedef packed<uint8 , BigEndian_tag> uint8be;
 
+
+// Small helper class to support unaligned memory access on all platforms.
+// This is only used to make old module loaders work everywhere.
+// Do not use in new code.
+template <typename T>
+class const_unaligned_ptr_le
+{
+public:
+	typedef T value_type;
+private:
+	const mpt::byte *mem;
+	value_type Read() const
+	{
+		mpt::byte bytes[sizeof(value_type)];
+		std::memcpy(bytes, mem, sizeof(value_type));
+		#if defined(MPT_PLATFORM_BIG_ENDIAN)
+			std::reverse(bytes, bytes + sizeof(value_type));
+		#endif
+		value_type val = value_type();
+		std::memcpy(&val, bytes, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr_le() : mem(nullptr) {}
+	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_le(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr_le operator ++ (int) { const_unaligned_ptr_le<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr_le operator -- (int) { const_unaligned_ptr_le<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr_le operator + (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr_le operator - (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
+template <typename T>
+class const_unaligned_ptr_be
+{
+public:
+	typedef T value_type;
+private:
+	const mpt::byte *mem;
+	value_type Read() const
+	{
+		mpt::byte bytes[sizeof(value_type)];
+		std::memcpy(bytes, mem, sizeof(value_type));
+		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			std::reverse(bytes, bytes + sizeof(value_type));
+		#endif
+		value_type val = value_type();
+		std::memcpy(&val, bytes, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr_be() : mem(nullptr) {}
+	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_be(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr_be operator ++ (int) { const_unaligned_ptr_be<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr_be operator -- (int) { const_unaligned_ptr_be<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr_be operator + (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr_be operator - (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
+template <typename T>
+class const_unaligned_ptr
+{
+public:
+	typedef T value_type;
+private:
+	const mpt::byte *mem;
+	value_type Read() const
+	{
+		value_type val = value_type();
+		std::memcpy(&val, mem, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr() : mem(nullptr) {}
+	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr operator ++ (int) { const_unaligned_ptr<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr operator -- (int) { const_unaligned_ptr<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr operator + (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr operator - (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
+
 OPENMPT_NAMESPACE_END
 
