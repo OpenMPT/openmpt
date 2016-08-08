@@ -671,23 +671,23 @@
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
-			RelativePathToProject="..\vs2008-ext\flac.vcproj"
+			RelativePathToProject=".\ext\flac.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{189B867F-FF4B-45A1-B741-A97492EE69AF}"
-			RelativePathToProject="..\vs2008-ext\portaudio.vcproj"
+			RelativePathToProject=".\ext\portaudio.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
-			RelativePathToProject="..\vs2008-ext\vorbis.vcproj"
+			RelativePathToProject=".\ext\vorbis.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
-			RelativePathToProject="..\vs2008-ext\ogg.vcproj"
+			RelativePathToProject=".\ext\ogg.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-			RelativePathToProject="..\vs2008-ext\zlib.vcproj"
+			RelativePathToProject=".\ext\zlib.vcproj"
 		/>
 	</References>
 	<Files>

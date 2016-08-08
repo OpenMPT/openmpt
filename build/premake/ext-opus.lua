@@ -2,7 +2,7 @@
  project "opus"
   uuid "9a2d9099-e1a2-4287-b845-e3598ad24d70"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/opus"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

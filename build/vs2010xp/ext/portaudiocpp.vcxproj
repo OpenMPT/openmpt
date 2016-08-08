@@ -1,0 +1,356 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|Win32">
+      <Configuration>DebugShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|x64">
+      <Configuration>DebugShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|Win32">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|x64">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>portaudiocpp</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\lib\x86\Debug\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86\Debug\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\lib\x86_64\Debug\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86_64\Debug\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\lib\x86\Release\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86\Release\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\lib\x86_64\Release\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86_64\Release\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <OutDir>..\..\lib\x86\DebugShared\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86\DebugShared\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <OutDir>..\..\lib\x86_64\DebugShared\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86_64\DebugShared\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <OutDir>..\..\lib\x86\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86\ReleaseShared\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <OutDir>..\..\lib\x86_64\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\portaudiocpp\x86_64\ReleaseShared\</IntDir>
+    <TargetName>openmpt-portaudiocpp</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\bindings\cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\AsioDeviceAdapter.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\AutoSystem.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\BlockingStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\CFunCallbackStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\CallbackInterface.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\CallbackStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\CppFunCallbackStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\Device.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\DirectionSpecificStreamParameters.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\Exception.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\HostApi.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\InterfaceCallbackStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\MemFunCallbackStream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\PortAudioCpp.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\SampleDataFormat.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\Stream.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\StreamParameters.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\System.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\SystemDeviceIterator.hxx" />
+    <ClInclude Include="..\..\..\include\portaudio\bindings\cpp\include\portaudiocpp\SystemHostApiIterator.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\AsioDeviceAdapter.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\BlockingStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\CFunCallbackStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\CallbackInterface.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\CallbackStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\CppFunCallbackStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\Device.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\DirectionSpecificStreamParameters.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\Exception.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\HostApi.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\InterfaceCallbackStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\MemFunCallbackStream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\Stream.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\StreamParameters.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\System.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\SystemDeviceIterator.cxx" />
+    <ClCompile Include="..\..\..\include\portaudio\bindings\cpp\source\portaudiocpp\SystemHostApiIterator.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="portaudio.vcxproj">
+      <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

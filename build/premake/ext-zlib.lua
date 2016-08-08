@@ -2,7 +2,7 @@
  project "zlib"
   uuid "1654FB18-FDE6-406F-9D84-BA12BFBD67B2"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/zlib"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

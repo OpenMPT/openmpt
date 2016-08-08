@@ -2,7 +2,7 @@
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/flac"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

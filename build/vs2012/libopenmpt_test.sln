@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_test", "libopenmpt_test.vcxproj", "{0A313F63-131E-46A0-931D-23C3A3D488F2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "..\vs2012-ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "..\vs2012-ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\vs2012-ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

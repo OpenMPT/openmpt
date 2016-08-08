@@ -2,7 +2,7 @@
  project "UnRAR"
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/unrar"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

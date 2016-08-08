@@ -2,7 +2,7 @@
  project "r8brain"
   uuid "BC116B29-9958-4389-B294-7529BB7C7D37"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/r8brain"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
