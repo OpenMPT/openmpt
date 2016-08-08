@@ -61,6 +61,12 @@ if not exist "build\externals" mkdir "build\externals"
 
 call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha9/premake-5.0.0-alpha9-src.zip" "premake-5.0-alpha9-src.zip" "premake-5.0.0-alpha9" "-" || goto error
 
+rem Premake does not ship VS2015 projects yet.
+rem VS2015 comes with incomplete toolsets for earlier VS versions,
+rem which confuses our detection logic.
+rem Just stick with VS2010 as default for now.
+rem See https://github.com/premake/premake-core/pull/562 .
+
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2010.cmd || goto error
  cd include\premake\build\vs2010 || goto error
