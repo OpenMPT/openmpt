@@ -73,6 +73,8 @@ static cpuid_result cpuid(uint32 function)
 }
 
 
+#if 0
+
 static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 //---------------------------------------------------------------
 {
@@ -95,6 +97,8 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 	#endif
 	return result;
 }
+
+#endif
 
 
 static MPT_NOINLINE bool has_cpuid()
