@@ -174,6 +174,7 @@ template <typename T> inline mpt::byte * GetRawBytes(T & v)
 
 #define MPT_BINARY_STRUCT(type, size) \
 	STATIC_ASSERT(sizeof( type ) == (size) ); \
+	STATIC_ASSERT(MPT_ALIGNOF( type ) == 1); \
 	namespace mpt { \
 		template <> struct is_binary_safe< type > : public mpt::true_type { }; \
 	} \
