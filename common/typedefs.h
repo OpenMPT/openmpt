@@ -59,6 +59,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
+#define MPT_ALIGNOF(type) __alignof( type )
+#elif MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,5,0)
+#define MPT_ALIGNOF(type) __alignof__( type )
+#else
+#define MPT_ALIGNOF(type) alignof( type )
+#endif
+
+
+
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define forceinline __forceinline
