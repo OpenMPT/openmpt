@@ -52,7 +52,7 @@ function replace_in_file (filename, from, to)
 	local outfile
 	local oldtext
 	local newtext
-	infile = io.open(filename, "r")
+	infile = io.open(filename, "rb")
 	text = infile:read("*all")
 	infile:close()
 	oldtext = text
@@ -62,18 +62,18 @@ function replace_in_file (filename, from, to)
    print("Failed to postprocess '" .. filename .. "': " .. from .. " -> " .. to)
    os.exit(1)
 	end
-	outfile = io.open(filename, "w")
+	outfile = io.open(filename, "wb")
 	outfile:write(text)
 	outfile:close()
 end
 
 -- related to issue https://github.com/premake/premake-core/issues/68
 function postprocess_vs2008_main (filename)
-	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
+	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\r\n", "")
 end
 
 function postprocess_vs2008_nonxcompat (filename)
-	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\DataExecutionPrevention=\"1\"\n")
+	replace_in_file(filename, "\t\t\t<Tool\r\n\t\t\t\tName=\"VCLinkerTool\"\r\n", "\t\t\t<Tool\r\n\t\t\t\tName=\"VCLinkerTool\"\r\n\t\t\t\t\DataExecutionPrevention=\"1\"\r\n")
 end
 
 -- related to issue https://github.com/premake/premake-core/issues/68
@@ -82,11 +82,11 @@ function postprocess_vs2010_main (filename)
 end
 
 function postprocess_vs2010_nonxcompat (filename)
-	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
+	replace_in_file(filename, "    </Link>\r\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\r\n    </Link>\r\n")
 end
 
 function postprocess_vs2010_disabledpiaware (filename)
-	replace_in_file(filename, "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\n", "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\n      <EnableDPIAwareness>false</EnableDPIAwareness>\n")
+	replace_in_file(filename, "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\r\n", "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\r\n      <EnableDPIAwareness>false</EnableDPIAwareness>\r\n")
 end
 
 newaction {
