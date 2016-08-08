@@ -530,8 +530,12 @@ public:
 	}
 };
 
-MPT_BINARY_STRUCT(IEEE754binary32Native, 4)
-MPT_BINARY_STRUCT(IEEE754binary64Native, 8)
+STATIC_ASSERT(sizeof(IEEE754binary32Native) == 4);
+STATIC_ASSERT(sizeof(IEEE754binary64Native) == 8);
+namespace mpt {
+template <> struct is_binary_safe< IEEE754binary32Native > : public mpt::true_type { };
+template <> struct is_binary_safe< IEEE754binary64Native > : public mpt::true_type { };
+}
 
 #if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 typedef IEEE754binary32Native                    IEEE754binary32LE;
