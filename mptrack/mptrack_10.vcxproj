@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -1215,46 +1215,46 @@
     <None Include="VTune\mptrack.vpj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\build\vs2010-ext\flac.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\flac.vcxproj">
       <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\lhasa.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\lhasa.vcxproj">
       <Project>{6b11f6a8-b131-4d2b-80ef-5731a9016436}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\ogg.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\ogg.vcxproj">
       <Project>{d8d5e11c-f959-49ef-b741-b3f6de52ded8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\opus.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\opus.vcxproj">
       <Project>{9a2d9099-e1a2-4287-b845-e3598ad24d70}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\opusfile.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\opusfile.vcxproj">
       <Project>{f8517509-9317-4a46-b5ed-06ae5a399e6c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\portaudio.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\portmidi.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\portmidi.vcxproj">
       <Project>{2512e2ca-578a-4f10-9363-4bfc9a5ef960}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\r8brain.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\r8brain.vcxproj">
       <Project>{bc116b29-9958-4389-b294-7529bb7c7d37}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\smbPitchShift.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\smbPitchShift.vcxproj">
       <Project>{89af16dd-32cc-4a7e-b219-5f117d761f9f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\soundtouch.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\soundtouch.vcxproj">
       <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\UnRAR.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\UnRAR.vcxproj">
       <Project>{95cc809b-03fc-4edb-bb20-fd07a698c05f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\minizip.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\minizip.vcxproj">
       <Project>{63af9025-a6ce-4147-a05d-6e2ccfd3a0d7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\vorbis.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\vorbis.vcxproj">
       <Project>{b544dcb7-16e5-41bc-b51b-7ead8cfdfa05}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\zlib.vcxproj">
+    <ProjectReference Include="..\build\vs2010\ext\zlib.vcxproj">
       <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
     </ProjectReference>
   </ItemGroup>
