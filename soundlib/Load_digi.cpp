@@ -32,7 +32,7 @@ struct DIGIFileHeader
 	uint8be  smpFinetune[31];
 };
 
-STATIC_ASSERT(sizeof(DIGIFileHeader) == 610);
+MPT_BINARY_STRUCT(DIGIFileHeader, 610)
 
 
 static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)

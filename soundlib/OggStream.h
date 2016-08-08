@@ -33,7 +33,9 @@ struct PageHeader
 	uint8le  page_segments;
 };
 
-STATIC_ASSERT(sizeof(PageHeader) == 27);
+} // namespace Ogg
+MPT_BINARY_STRUCT(Ogg::PageHeader, 27)
+namespace Ogg {
 
 
 struct PageInfo

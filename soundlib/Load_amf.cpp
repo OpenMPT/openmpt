@@ -30,7 +30,7 @@ struct AsylumFileHeader
 	uint8 restartPos;
 };
 
-STATIC_ASSERT(sizeof(AsylumFileHeader) == 38);
+MPT_BINARY_STRUCT(AsylumFileHeader, 38)
 
 
 // ASYLUM AMF Sample Header
@@ -62,7 +62,7 @@ struct AsylumSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AsylumSampleHeader) == 37);
+MPT_BINARY_STRUCT(AsylumSampleHeader, 37)
 
 
 // DSMI AMF File Header
@@ -77,7 +77,7 @@ struct AMFFileHeader
 	uint8le  numChannels;
 };
 
-STATIC_ASSERT(sizeof(AMFFileHeader) == 41);
+MPT_BINARY_STRUCT(AMFFileHeader, 41)
 
 
 bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)

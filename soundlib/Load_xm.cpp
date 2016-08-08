@@ -549,7 +549,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read midi config: "MIDI"
 	if(file.ReadMagic("MIDI"))
 	{
-		file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
+		file.ReadStructPartial<MIDIMacroConfigData>(m_MidiCfg, file.ReadUint32LE());
 		m_MidiCfg.Sanitize();
 		m_SongFlags |= SONG_EMBEDMIDICFG;
 		madeWith.set(verConfirmed);

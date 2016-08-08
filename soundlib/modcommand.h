@@ -222,6 +222,4 @@ public:
 	uint8 param;
 };
 
-typedef ModCommand MODCOMMAND_ORIGINAL;
-
 OPENMPT_NAMESPACE_END

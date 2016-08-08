@@ -82,7 +82,7 @@ struct MEDMODULEHEADER
 	uint8be  extra_songs;	// # of songs - 1
 };
 
-STATIC_ASSERT(sizeof(MEDMODULEHEADER) == 52);
+MPT_BINARY_STRUCT(MEDMODULEHEADER, 52)
 
 
 struct MMD0SAMPLE
@@ -94,7 +94,7 @@ struct MMD0SAMPLE
 	int8be   strans;
 };
 
-STATIC_ASSERT(sizeof(MMD0SAMPLE) == 8);
+MPT_BINARY_STRUCT(MMD0SAMPLE, 8)
 
 
 // Sample header is immediately followed by sample data...
@@ -124,7 +124,7 @@ struct MMDSAMPLEHEADER
 	uint8be  SampleData[1];	// Sample Data
 };
 
-STATIC_ASSERT(sizeof(MMDSAMPLEHEADER) == 21);
+MPT_BINARY_STRUCT(MMDSAMPLEHEADER, 21)
 
 
 // MMD0/MMD1 song header
@@ -144,7 +144,7 @@ struct MMD0SONGHEADER
 	uint8be  numsamples;	// # of samples (max=63)
 };
 
-STATIC_ASSERT(sizeof(MMD0SONGHEADER) == 788);
+MPT_BINARY_STRUCT(MMD0SONGHEADER, 788)
 
 
 // MMD2/MMD3 song header
@@ -177,7 +177,7 @@ struct MMD2SONGHEADER
 	uint8be  numsamples;	// # of samples (max 63)
 };
 
-STATIC_ASSERT(sizeof(MMD2SONGHEADER) == 788);
+MPT_BINARY_STRUCT(MMD2SONGHEADER, 788)
 
 
 // For MMD0 the note information is held in 3 bytes, byte0, byte1, byte2.  For reference we
@@ -193,7 +193,7 @@ struct MMD0BLOCK
 	uint8be lines;		// File value is 1 less than actual, so 0 -> 1 line
 };			// uint8_be data[lines+1][tracks][3];
 
-STATIC_ASSERT(sizeof(MMD0BLOCK) == 2);
+MPT_BINARY_STRUCT(MMD0BLOCK, 2)
 
 
 // For MMD1,MMD2,MMD3 the note information is carried in 4 bytes, byte0, byte1,
@@ -210,7 +210,7 @@ struct MMD1BLOCK
 	uint32be info;			// Offset of BlockInfo (if 0, no block_info is present)
 };
 
-STATIC_ASSERT(sizeof(MMD1BLOCK) == 8);
+MPT_BINARY_STRUCT(MMD1BLOCK, 8)
 
 
 struct MMD1BLOCKINFO
@@ -223,7 +223,7 @@ struct MMD1BLOCKINFO
 	uint32be reserved[4];	// future expansion
 };
 
-STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
+MPT_BINARY_STRUCT(MMD1BLOCKINFO, 36)
 
 
 // A set of play sequences is stored as an array of uint32_be files offsets
@@ -237,7 +237,7 @@ struct MMD2PLAYSEQ
 	uint16be seq[512];		// skip if > 0x8000
 };
 
-STATIC_ASSERT(sizeof(MMD2PLAYSEQ) == 1066);
+MPT_BINARY_STRUCT(MMD2PLAYSEQ, 1066)
 
 
 // A command table contains commands that effect a particular play sequence
@@ -251,7 +251,7 @@ struct MMDCOMMAND
 	uint8be extra_bytes[4];	// [extra_count];
 };  // Last entry has offset == 0xFFFF, cmd_number == 0 and 0 extrabytes
 
-STATIC_ASSERT(sizeof(MMDCOMMAND) == 8);
+MPT_BINARY_STRUCT(MMDCOMMAND, 8)
 
 
 struct MMD0EXP
@@ -280,7 +280,7 @@ struct MMD0EXP
 	uint32be tag_end;
 };
 
-STATIC_ASSERT(sizeof(MMD0EXP) == 80);
+MPT_BINARY_STRUCT(MMD0EXP, 80)
 
 
 static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)

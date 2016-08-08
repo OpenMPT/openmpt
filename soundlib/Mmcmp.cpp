@@ -27,7 +27,7 @@ struct MMCMPFILEHEADER
 	uint16le hdrsize;
 };
 
-STATIC_ASSERT(sizeof(MMCMPFILEHEADER) == 10);
+MPT_BINARY_STRUCT(MMCMPFILEHEADER, 10)
 
 struct MMCMPHEADER
 {
@@ -39,7 +39,7 @@ struct MMCMPHEADER
 	uint8le  fmt_comp;
 };
 
-STATIC_ASSERT(sizeof(MMCMPHEADER) == 14);
+MPT_BINARY_STRUCT(MMCMPHEADER, 14)
 
 struct MMCMPBLOCK
 {
@@ -52,7 +52,7 @@ struct MMCMPBLOCK
 	uint16le num_bits;
 };
 
-STATIC_ASSERT(sizeof(MMCMPBLOCK) == 20);
+MPT_BINARY_STRUCT(MMCMPBLOCK, 20)
 
 struct MMCMPSUBBLOCK
 {
@@ -60,7 +60,7 @@ struct MMCMPSUBBLOCK
 	uint32le unpk_size;
 };
 
-STATIC_ASSERT(sizeof(MMCMPSUBBLOCK) == 8);
+MPT_BINARY_STRUCT(MMCMPSUBBLOCK, 8)
 
 
 #define MMCMP_COMP		0x0001
@@ -372,7 +372,7 @@ struct XPKFILEHEADER
 	uint32be Reserved;
 };
 
-STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
+MPT_BINARY_STRUCT(XPKFILEHEADER, 36)
 
 
 struct XPK_error : public std::range_error

@@ -39,7 +39,7 @@ struct XMFileHeader
 	uint16le tempo;				// Default Tempo
 };
 
-STATIC_ASSERT(sizeof(XMFileHeader) == 80);
+MPT_BINARY_STRUCT(XMFileHeader, 80)
 
 
 // XM Instrument Data
@@ -101,7 +101,7 @@ struct XMInstrument
 	std::vector<SAMPLEINDEX> GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const;
 };
 
-STATIC_ASSERT(sizeof(XMInstrument) == 230);
+MPT_BINARY_STRUCT(XMInstrument, 230)
 
 
 // XM Instrument Header
@@ -123,7 +123,7 @@ struct XMInstrumentHeader
 	void ConvertToMPT(ModInstrument &mptIns) const;
 };
 
-STATIC_ASSERT(sizeof(XMInstrumentHeader) == 263);
+MPT_BINARY_STRUCT(XMInstrumentHeader, 263)
 
 
 // XI Instrument Header
@@ -148,7 +148,7 @@ struct XIInstrumentHeader
 	void ConvertToMPT(ModInstrument &mptIns) const;
 };
 
-STATIC_ASSERT(sizeof(XIInstrumentHeader) == 298);
+MPT_BINARY_STRUCT(XIInstrumentHeader, 298)
 
 
 // XM Sample Header
@@ -183,7 +183,7 @@ struct XMSample
 	SampleIO GetSampleFormat() const;
 };
 
-STATIC_ASSERT(sizeof(XMSample) == 40);
+MPT_BINARY_STRUCT(XMSample, 40)
 
 
 OPENMPT_NAMESPACE_END

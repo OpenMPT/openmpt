@@ -66,7 +66,7 @@ struct ITFileHeader
 	uint8le  chnvol[64];		// Initial Channel Volume
 };
 
-STATIC_ASSERT(sizeof(ITFileHeader) == 192);
+MPT_BINARY_STRUCT(ITFileHeader, 192)
 
 
 struct ITEnvelope
@@ -96,7 +96,7 @@ struct ITEnvelope
 	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 maxNodes) const;
 };
 
-STATIC_ASSERT(sizeof(ITEnvelope) == 82);
+MPT_BINARY_STRUCT(ITEnvelope, 82)
 
 
 // Old Impulse Instrument Format (cmwt < 0x200)
@@ -133,7 +133,7 @@ struct ITOldInstrument
 	void ConvertToMPT(ModInstrument &mptIns) const;
 };
 
-STATIC_ASSERT(sizeof(ITOldInstrument) == 554);
+MPT_BINARY_STRUCT(ITOldInstrument, 554)
 
 
 // Impulse Instrument Format
@@ -179,7 +179,7 @@ struct ITInstrument
 	uint32 ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
 };
 
-STATIC_ASSERT(sizeof(ITInstrument) == 554);
+MPT_BINARY_STRUCT(ITInstrument, 554)
 
 
 // MPT IT Instrument Extension
@@ -194,7 +194,7 @@ struct ITInstrumentEx
 	uint32 ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
 };
 
-STATIC_ASSERT(sizeof(ITInstrumentEx) == sizeof(ITInstrument) + 120);
+MPT_BINARY_STRUCT(ITInstrumentEx, sizeof(ITInstrument) + 120)
 
 
 // IT Sample Format
@@ -257,7 +257,7 @@ struct ITSample
 	SampleIO GetSampleFormat(uint16 cwtv = 0x214) const;
 };
 
-STATIC_ASSERT(sizeof(ITSample) == 80);
+MPT_BINARY_STRUCT(ITSample, 80)
 
 
 struct FileHistory;
@@ -276,7 +276,7 @@ struct ITHistoryStruct
 
 };
 
-STATIC_ASSERT(sizeof(ITHistoryStruct) == 8);
+MPT_BINARY_STRUCT(ITHistoryStruct, 8)
 
 
 enum IT_ReaderBitMasks

@@ -32,7 +32,7 @@ struct PSMFileHeader
 	char     fileInfoID[4];	// "FILE"
 };
 
-STATIC_ASSERT(sizeof(PSMFileHeader) == 12);
+MPT_BINARY_STRUCT(PSMFileHeader, 12)
 
 // RIFF-style Chunk
 struct PSMChunk
@@ -68,7 +68,7 @@ struct PSMChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(PSMChunk) == 8);
+MPT_BINARY_STRUCT(PSMChunk, 8)
 
 // Song Information
 struct PSMSongHeader
@@ -79,7 +79,7 @@ struct PSMSongHeader
 
 };
 
-STATIC_ASSERT(sizeof(PSMSongHeader) == 11);
+MPT_BINARY_STRUCT(PSMSongHeader, 11)
 
 // Regular sample header
 struct PSMSampleHeader
@@ -121,7 +121,7 @@ struct PSMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PSMSampleHeader) == 96);
+MPT_BINARY_STRUCT(PSMSampleHeader, 96)
 
 // Sinaria sample header (and possibly other games)
 struct PSMSinariaSampleHeader
@@ -160,7 +160,7 @@ struct PSMSinariaSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PSMSinariaSampleHeader) == 96);
+MPT_BINARY_STRUCT(PSMSinariaSampleHeader, 96)
 
 
 struct PSMSubSong // For internal use (pattern conversion)
@@ -945,7 +945,7 @@ struct PSM16FileHeader
 	char     filler[40];
 };
 
-STATIC_ASSERT(sizeof(PSM16FileHeader) == 146);
+MPT_BINARY_STRUCT(PSM16FileHeader, 146)
 
 struct PSM16SampleHeader
 {
@@ -1025,7 +1025,7 @@ struct PSM16SampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PSM16SampleHeader) == 64);
+MPT_BINARY_STRUCT(PSM16SampleHeader, 64)
 
 struct PSM16PatternHeader
 {
@@ -1034,7 +1034,7 @@ struct PSM16PatternHeader
 	uint8le  numChans;	// 1 ... 32
 };
 
-STATIC_ASSERT(sizeof(PSM16PatternHeader) == 4);
+MPT_BINARY_STRUCT(PSM16PatternHeader, 4)
 
 
 bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)

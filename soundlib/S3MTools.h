@@ -84,7 +84,7 @@ struct S3MFileHeader
 	uint8le  channels[32];		// Channel setup
 };
 
-STATIC_ASSERT(sizeof(S3MFileHeader) == 96);
+MPT_BINARY_STRUCT(S3MFileHeader, 96)
 
 
 // S3M Sample Header
@@ -134,7 +134,7 @@ struct S3MSampleHeader
 	SampleIO GetSampleFormat(bool signedSamples) const;
 };
 
-STATIC_ASSERT(sizeof(S3MSampleHeader) == 80);
+MPT_BINARY_STRUCT(S3MSampleHeader, 80)
 
 
 OPENMPT_NAMESPACE_END

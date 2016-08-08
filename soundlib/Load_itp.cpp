@@ -36,6 +36,30 @@ OPENMPT_NAMESPACE_BEGIN
 // v1.01: Added option to embed instrument headers
 
 
+struct MODCOMMAND_ORIGINAL
+{
+	uint8le note;
+	uint8le instr;
+	uint8le volcmd;
+	uint8le command;
+	uint8le vol;
+	uint8le param;
+	operator ModCommand() const
+	{
+		ModCommand result;
+		result.note = note;
+		result.instr = instr;
+		result.volcmd = volcmd;
+		result.command = command;
+		result.vol = vol;
+		result.param = param;
+		return result;
+	}
+};
+
+MPT_BINARY_STRUCT(MODCOMMAND_ORIGINAL, 6)
+
+
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
@@ -125,7 +149,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// MIDI Macro config
-	file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
+	file.ReadStructPartial<MIDIMacroConfigData>(m_MidiCfg, file.ReadUint32LE());
 	m_MidiCfg.Sanitize();
 
 	// Song Instruments

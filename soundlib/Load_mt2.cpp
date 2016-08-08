@@ -48,7 +48,7 @@ struct MT2FileHeader
 	uint16le numSamples;
 };
 
-STATIC_ASSERT(sizeof(MT2FileHeader) == 126);
+MPT_BINARY_STRUCT(MT2FileHeader, 126)
 
 
 struct MT2DrumsData
@@ -58,7 +58,7 @@ struct MT2DrumsData
 	uint8le  DrumPatternOrder[256];
 };
 
-STATIC_ASSERT(sizeof(MT2DrumsData) == 274);
+MPT_BINARY_STRUCT(MT2DrumsData, 274)
 
 
 struct MT2TrackSettings
@@ -70,7 +70,7 @@ struct MT2TrackSettings
 	uint16le trackEffectParam[64][8];
 };
 
-STATIC_ASSERT(sizeof(MT2TrackSettings) == 1030);
+MPT_BINARY_STRUCT(MT2TrackSettings, 1030)
 
 
 struct MT2Command
@@ -84,7 +84,7 @@ struct MT2Command
 	uint8 fxparam2;
 };
 
-STATIC_ASSERT(sizeof(MT2Command) == 7);
+MPT_BINARY_STRUCT(MT2Command, 7)
 
 
 struct MT2EnvPoint
@@ -93,7 +93,7 @@ struct MT2EnvPoint
 	uint16le y;
 };
 
-STATIC_ASSERT(sizeof(MT2EnvPoint) == 4);
+MPT_BINARY_STRUCT(MT2EnvPoint, 4)
 
 
 struct MT2Instrument
@@ -113,7 +113,7 @@ struct MT2Instrument
 	uint16le nna;
 };
 
-STATIC_ASSERT(sizeof(MT2Instrument) == 106);
+MPT_BINARY_STRUCT(MT2Instrument, 106)
 
 
 struct MT2IEnvelope
@@ -127,7 +127,7 @@ struct MT2IEnvelope
 	MT2EnvPoint points[16];
 };
 
-STATIC_ASSERT(sizeof(MT2IEnvelope) == 72);
+MPT_BINARY_STRUCT(MT2IEnvelope, 72)
 
 
 // Note: The order of these fields differs a bit in MTIOModule_MT2.cpp - maybe just typos, I'm not sure.
@@ -152,7 +152,7 @@ struct MT2InstrSynth
 	uint8le  reserved[16];
 };
 
-STATIC_ASSERT(sizeof(MT2InstrSynth) == 32);
+MPT_BINARY_STRUCT(MT2InstrSynth, 32)
 
 
 struct MT2Sample
@@ -171,7 +171,7 @@ struct MT2Sample
 	int16le  spb;
 };
 
-STATIC_ASSERT(sizeof(MT2Sample) == 26);
+MPT_BINARY_STRUCT(MT2Sample, 26)
 
 
 struct MT2Group
@@ -182,7 +182,7 @@ struct MT2Group
 	uint8le reserved[5];
 };
 
-STATIC_ASSERT(sizeof(MT2Group) == 8);
+MPT_BINARY_STRUCT(MT2Group, 8)
 
 
 struct MT2VST
@@ -199,7 +199,7 @@ struct MT2VST
 	uint32le n;
 };
 
-STATIC_ASSERT(sizeof(MT2VST) == 128);
+MPT_BINARY_STRUCT(MT2VST, 128)
 
 
 static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)

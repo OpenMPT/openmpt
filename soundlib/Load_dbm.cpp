@@ -30,6 +30,8 @@ struct DBMFileHeader
 	char  reserved[2];
 };
 
+MPT_BINARY_STRUCT(DBMFileHeader, 8)
+
 
 // RIFF-style Chunk
 struct DBMChunk
@@ -66,7 +68,7 @@ struct DBMChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(DBMChunk) == 8);
+MPT_BINARY_STRUCT(DBMChunk, 8)
 
 
 struct DBMInfoChunk
@@ -78,7 +80,7 @@ struct DBMInfoChunk
 	uint16be channels;
 };
 
-STATIC_ASSERT(sizeof(DBMInfoChunk) == 10);
+MPT_BINARY_STRUCT(DBMInfoChunk, 10)
 
 
 // Instrument header
@@ -100,7 +102,7 @@ struct DBMInstrument
 	uint16be flags;			// See DBMInstrFlags
 };
 
-STATIC_ASSERT(sizeof(DBMInstrument) == 50);
+MPT_BINARY_STRUCT(DBMInstrument, 50)
 
 
 // Volume or panning envelope
@@ -123,7 +125,7 @@ struct DBMEnvelope
 	uint16be data[2 * 32];
 };
 
-STATIC_ASSERT(sizeof(DBMEnvelope) == 136);
+MPT_BINARY_STRUCT(DBMEnvelope, 136)
 
 
 // Note: Unlike in MOD, 1Fx, 2Fx, 5Fx / 5xF, 6Fx / 6xF and AFx / AxF are fine slides.

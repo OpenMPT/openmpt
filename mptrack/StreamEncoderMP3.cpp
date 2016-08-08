@@ -79,7 +79,7 @@ struct ID3v2Header
 	// Total: 10 bytes
 };
 
-STATIC_ASSERT(sizeof(ID3v2Header) == 10);
+MPT_BINARY_STRUCT(ID3v2Header, 10)
 
 struct ID3v2Frame
 {
@@ -89,7 +89,7 @@ struct ID3v2Frame
 	// Total: 10 bytes
 };
 
-STATIC_ASSERT(sizeof(ID3v2Frame) == 10);
+MPT_BINARY_STRUCT(ID3v2Frame, 10)
 
 
 // charset... choose text ending accordingly.

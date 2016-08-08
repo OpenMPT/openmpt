@@ -30,7 +30,7 @@ struct FARFileHeader
 	uint16le messageLength;
 };
 
-STATIC_ASSERT(sizeof(FARFileHeader) == 98);
+MPT_BINARY_STRUCT(FARFileHeader, 98)
 
 
 struct FAROrderHeader
@@ -42,7 +42,7 @@ struct FAROrderHeader
 	uint16le patternSize[256];
 };
 
-STATIC_ASSERT(sizeof(FAROrderHeader) == 771);
+MPT_BINARY_STRUCT(FAROrderHeader, 771)
 
 
 // FAR Sample header
@@ -99,7 +99,7 @@ struct FARSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(FARSampleHeader) == 48);
+MPT_BINARY_STRUCT(FARSampleHeader, 48)
 
 
 bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)

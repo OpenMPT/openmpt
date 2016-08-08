@@ -35,7 +35,7 @@ struct ChunkHeader
 	int32be fxVersion;		///< fx version
 };
 
-STATIC_ASSERT(sizeof(ChunkHeader) == 24);
+MPT_BINARY_STRUCT(ChunkHeader, 24)
 
 
 VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)

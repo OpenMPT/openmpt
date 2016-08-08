@@ -41,7 +41,7 @@ struct MIDIFILEHEADER
 	uint16be wDivision;	// F0
 };
 
-STATIC_ASSERT(sizeof(MIDIFILEHEADER) == 14);
+MPT_BINARY_STRUCT(MIDIFILEHEADER, 14)
 
 struct MIDITRACKHEADER
 {
@@ -49,7 +49,7 @@ struct MIDITRACKHEADER
 	uint32be len;
 };
 
-STATIC_ASSERT(sizeof(MIDITRACKHEADER) == 8);
+MPT_BINARY_STRUCT(MIDITRACKHEADER, 8)
 
 //////////////////////////////////////////////////////////////////////
 // Midi Loader Internal Structures

@@ -29,7 +29,7 @@ struct UMXFileHeader
 	uint32le importOffset;
 };
 
-STATIC_ASSERT(sizeof(UMXFileHeader) == 36);
+MPT_BINARY_STRUCT(UMXFileHeader, 36)
 
 
 #ifdef MODPLUG_TRACKER

@@ -31,7 +31,7 @@ struct MTMFileHeader
 	uint8le  panPos[32];	// Channel pan positions
 };
 
-STATIC_ASSERT(sizeof(MTMFileHeader) == 66);
+MPT_BINARY_STRUCT(MTMFileHeader, 66)
 
 
 // Sample Header
@@ -72,7 +72,7 @@ struct MTMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(MTMSampleHeader) == 37);
+MPT_BINARY_STRUCT(MTMSampleHeader, 37)
 
 
 bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)

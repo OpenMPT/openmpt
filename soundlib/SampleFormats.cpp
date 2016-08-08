@@ -833,7 +833,7 @@ struct GF1PatchFileHeader
 	char     reserved2[36];
 };
 
-STATIC_ASSERT(sizeof(GF1PatchFileHeader) == 129);
+MPT_BINARY_STRUCT(GF1PatchFileHeader, 129)
 
 
 struct GF1Instrument
@@ -845,7 +845,7 @@ struct GF1Instrument
 	char     reserved[40];
 };
 
-STATIC_ASSERT(sizeof(GF1Instrument) == 63);
+MPT_BINARY_STRUCT(GF1Instrument, 63)
 
 
 struct GF1SampleHeader
@@ -869,7 +869,7 @@ struct GF1SampleHeader
 	char     reserved[36];
 };
 
-STATIC_ASSERT(sizeof(GF1SampleHeader) == 96);
+MPT_BINARY_STRUCT(GF1SampleHeader, 96)
 
 // -- GF1 Envelopes --
 //
@@ -911,7 +911,7 @@ struct GF1Layer
 	char     reserved[40];
 };
 
-STATIC_ASSERT(sizeof(GF1Layer) == 47);
+MPT_BINARY_STRUCT(GF1Layer, 47)
 
 
 static int32 PatchFreqToNote(uint32 nFreq)
@@ -1371,7 +1371,7 @@ struct AIFFHeader
 	char     type[4];	// AIFF or AIFC
 };
 
-STATIC_ASSERT(sizeof(AIFFHeader) == 12);
+MPT_BINARY_STRUCT(AIFFHeader, 12)
 
 
 // General IFF Chunk header
@@ -1403,7 +1403,7 @@ struct AIFFChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(AIFFChunk) == 8);
+MPT_BINARY_STRUCT(AIFFChunk, 8)
 
 
 // "Common" chunk (in AIFC, a compression ID and compression name follows this header, but apart from that it's identical)
@@ -1431,7 +1431,7 @@ struct AIFFCommonChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(AIFFCommonChunk) == 18);
+MPT_BINARY_STRUCT(AIFFCommonChunk, 18)
 
 
 // Sound chunk
@@ -1441,7 +1441,7 @@ struct AIFFSoundChunk
 	uint32be blockSize;
 };
 
-STATIC_ASSERT(sizeof(AIFFSoundChunk) == 8);
+MPT_BINARY_STRUCT(AIFFSoundChunk, 8)
 
 
 // Marker
@@ -1452,7 +1452,7 @@ struct AIFFMarker
 	uint8be  nameLength;	// Not counting eventually existing padding byte in name string
 };
 
-STATIC_ASSERT(sizeof(AIFFMarker) == 7);
+MPT_BINARY_STRUCT(AIFFMarker, 7)
 
 
 // Instrument loop
@@ -1470,7 +1470,7 @@ struct AIFFInstrumentLoop
 	uint16be endLoop;		// Marker index
 };
 
-STATIC_ASSERT(sizeof(AIFFInstrumentLoop) == 6);
+MPT_BINARY_STRUCT(AIFFInstrumentLoop, 6)
 
 
 struct AIFFInstrumentChunk
@@ -1486,7 +1486,7 @@ struct AIFFInstrumentChunk
 	AIFFInstrumentLoop releaseLoop;
 };
 
-STATIC_ASSERT(sizeof(AIFFInstrumentChunk) == 20);
+MPT_BINARY_STRUCT(AIFFInstrumentChunk, 20)
 
 
 bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
@@ -1975,7 +1975,7 @@ struct IFFHeader
 	char     magic[4];	// "8SVX" or "16SV"
 };
 
-STATIC_ASSERT(sizeof(IFFHeader) == 12);
+MPT_BINARY_STRUCT(IFFHeader, 12)
 
 
 // General IFF Chunk header
@@ -2007,7 +2007,7 @@ struct IFFChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(IFFChunk) == 8);
+MPT_BINARY_STRUCT(IFFChunk, 8)
 
 
 struct IFFSampleHeader
@@ -2021,7 +2021,7 @@ struct IFFSampleHeader
 	uint32be volume;
 };
 
-STATIC_ASSERT(sizeof(IFFSampleHeader) == 20);
+MPT_BINARY_STRUCT(IFFSampleHeader, 20)
 
 
 bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
