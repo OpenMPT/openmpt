@@ -169,7 +169,7 @@ public:
 	{
 		typedef typename float_traits<T>::mantissa_uint_type uint_type;
 		const int bits = float_traits<T>::mantissa_bits;
-		return ((b - a) * static_cast<T>(mpt::random<uint_type, bits>(rng)) / static_cast<T>((static_cast<uint_type>(1u) << bits) - 1u)) + a;
+		return ((b - a) * static_cast<T>(mpt::random<uint_type, bits>(rng)) / static_cast<T>((static_cast<uint_type>(1u) << bits))) + a;
 	}
 };
 
