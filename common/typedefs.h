@@ -47,18 +47,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC
-#define PACKED __declspec(align(1))
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#if MPT_COMPILER_GCC && MPT_OS_WINDOWS
-#endif
-#define PACKED __attribute__((packed)) __attribute__((aligned(1)))
-#else
-#define PACKED alignas(1)
-#endif
-
-
-
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
 #define MPT_ALIGNOF(type) __alignof( type )
 #elif MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,5,0)
