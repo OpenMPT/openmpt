@@ -3,7 +3,7 @@
   -- NOTE: Unlike the official libvorbis, we built everything into a single library instead of the vorbis, vorbisenc, vorbisfile split.
   uuid "b544dcb7-16e5-41bc-b51b-7ead8cfdfa05"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   objdir "../../build/obj/vorbis"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
@@ -99,7 +99,7 @@
 -- project "vorbisenc"
 --  uuid "81e695e1-4a3d-42ab-b790-7f4876c79358"
 --  language "C"
---  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+--  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
 --  objdir "../../build/obj/vorbisenc"
 --  dofile "../../build/premake/premake-defaults-LIB.lua"
 --  dofile "../../build/premake/premake-defaults.lua"
@@ -121,7 +121,7 @@
 -- project "vorbisfile"
 --  uuid "a368afd6-cdda-4e65-8829-94f4a237a977"
 --  language "C"
---  location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+--  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
 --  objdir "../../build/obj/vorbisfile"
 --  dofile "../../build/premake/premake-defaults-LIB.lua"
 --  dofile "../../build/premake/premake-defaults.lua"

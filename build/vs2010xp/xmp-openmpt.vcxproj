@@ -126,16 +126,16 @@
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2010xp-ext\zlib.vcxproj">
+    <ProjectReference Include="ext\zlib.vcxproj">
       <Project>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2010xp-ext\vorbis.vcxproj">
+    <ProjectReference Include="ext\vorbis.vcxproj">
       <Project>{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2010xp-ext\ogg.vcxproj">
+    <ProjectReference Include="ext\ogg.vcxproj">
       <Project>{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2010xp-ext\pugixml.vcxproj">
+    <ProjectReference Include="ext\pugixml.vcxproj">
       <Project>{07B89124-7C71-42CC-81AB-62B09BB61F9B}</Project>
     </ProjectReference>
   </ItemGroup>

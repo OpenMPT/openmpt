@@ -1045,59 +1045,59 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
-			RelativePathToProject="..\vs2008-ext\UnRAR.vcproj"
+			RelativePathToProject=".\ext\UnRAR.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-			RelativePathToProject="..\vs2008-ext\zlib.vcproj"
+			RelativePathToProject=".\ext\zlib.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
-			RelativePathToProject="..\vs2008-ext\minizip.vcproj"
+			RelativePathToProject=".\ext\minizip.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
-			RelativePathToProject="..\vs2008-ext\smbPitchShift.vcproj"
+			RelativePathToProject=".\ext\smbPitchShift.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
-			RelativePathToProject="..\vs2008-ext\lhasa.vcproj"
+			RelativePathToProject=".\ext\lhasa.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
-			RelativePathToProject="..\vs2008-ext\flac.vcproj"
+			RelativePathToProject=".\ext\flac.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
-			RelativePathToProject="..\vs2008-ext\ogg.vcproj"
+			RelativePathToProject=".\ext\ogg.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{9A2D9099-E1A2-4287-B845-E3598AD24D70}"
-			RelativePathToProject="..\vs2008-ext\opus.vcproj"
+			RelativePathToProject=".\ext\opus.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{F8517509-9317-4A46-B5ED-06AE5A399E6C}"
-			RelativePathToProject="..\vs2008-ext\opusfile.vcproj"
+			RelativePathToProject=".\ext\opusfile.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{189B867F-FF4B-45A1-B741-A97492EE69AF}"
-			RelativePathToProject="..\vs2008-ext\portaudio.vcproj"
+			RelativePathToProject=".\ext\portaudio.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
-			RelativePathToProject="..\vs2008-ext\portmidi.vcproj"
+			RelativePathToProject=".\ext\portmidi.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{BC116B29-9958-4389-B294-7529BB7C7D37}"
-			RelativePathToProject="..\vs2008-ext\r8brain.vcproj"
+			RelativePathToProject=".\ext\r8brain.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
-			RelativePathToProject="..\vs2008-ext\soundtouch.vcproj"
+			RelativePathToProject=".\ext\soundtouch.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
-			RelativePathToProject="..\vs2008-ext\vorbis.vcproj"
+			RelativePathToProject=".\ext\vorbis.vcproj"
 		/>
 	</References>
 	<Files>

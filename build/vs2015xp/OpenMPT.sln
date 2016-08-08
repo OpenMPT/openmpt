@@ -5,33 +5,33 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMPT", "OpenMPT.vcxproj"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridge", "PluginBridge.vcxproj", "{1A147336-891E-49AC-9EAD-A750599A224C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\vs2015xp-ext\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "ext\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lhasa", "..\vs2015xp-ext\lhasa.vcxproj", "{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lhasa", "ext\lhasa.vcxproj", "{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "..\vs2015xp-ext\minizip.vcxproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "ext\minizip.vcxproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "..\vs2015xp-ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opus", "..\vs2015xp-ext\opus.vcxproj", "{9A2D9099-E1A2-4287-B845-E3598AD24D70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opus", "ext\opus.vcxproj", "{9A2D9099-E1A2-4287-B845-E3598AD24D70}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opusfile", "..\vs2015xp-ext\opusfile.vcxproj", "{F8517509-9317-4A46-B5ED-06AE5A399E6C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opusfile", "ext\opusfile.vcxproj", "{F8517509-9317-4A46-B5ED-06AE5A399E6C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\vs2015xp-ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portmidi", "..\vs2015xp-ext\portmidi.vcxproj", "{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portmidi", "ext\portmidi.vcxproj", "{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "r8brain", "..\vs2015xp-ext\r8brain.vcxproj", "{BC116B29-9958-4389-B294-7529BB7C7D37}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "r8brain", "ext\r8brain.vcxproj", "{BC116B29-9958-4389-B294-7529BB7C7D37}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smbPitchShift", "..\vs2015xp-ext\smbPitchShift.vcxproj", "{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smbPitchShift", "ext\smbPitchShift.vcxproj", "{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soundtouch", "..\vs2015xp-ext\soundtouch.vcxproj", "{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soundtouch", "ext\soundtouch.vcxproj", "{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "..\vs2015xp-ext\UnRAR.vcxproj", "{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "ext\UnRAR.vcxproj", "{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "..\vs2015xp-ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\vs2015xp-ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

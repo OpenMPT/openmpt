@@ -422,7 +422,7 @@ end
 if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
- location ( "../../build/" .. mpt_projectpathname .. "-ext" )
+ location ( "../../build/" .. mpt_projectpathname .. "/ext" )
 if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
 else
