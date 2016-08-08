@@ -44,7 +44,7 @@ const DataSize invalidDatasize = DataSize(-1);
 
 enum 
 {
-	SNT_PROGRESS =		0x80000000, // = 1 << 31
+	SNT_PROGRESS =		0x08000000, // = 1 << 27
 	SNT_FAILURE =		0x40000000, // = 1 << 30
 	SNT_NOTE =			0x20000000, // = 1 << 29
 	SNT_WARNING =		0x10000000, // = 1 << 28
