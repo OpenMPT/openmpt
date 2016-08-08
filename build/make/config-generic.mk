@@ -4,7 +4,7 @@ CXX = c++
 LD  = c++
 AR  = ar
 
-#CPPFLAGS += -DMPT_COMPILER_GENERIC
+CPPFLAGS += -DMPT_COMPILER_GENERIC
 CXXFLAGS += -std=c++11 
 CFLAGS   += -std=c99   
 LDFLAGS  += 
