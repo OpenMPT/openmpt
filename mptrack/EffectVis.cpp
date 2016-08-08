@@ -308,6 +308,9 @@ void CEffectVis::DrawGrid()
 void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 //--------------------------------------------------------------
 {
+	if(nPat == m_nPattern && nRow == m_nOldPlayPos)
+		return;
+
 	int x1;
 	//erase current playpos:
 	if (m_nOldPlayPos>=m_startRow &&  m_nOldPlayPos<=m_endRow)
