@@ -594,7 +594,7 @@ struct LittleEndian_tag
 };
 
 template<typename T, typename Tendian>
-struct PACKED packed
+struct packed
 {
 public:
 	typedef T base_type;
