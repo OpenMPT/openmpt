@@ -48,7 +48,7 @@ struct J2BFileHeader
 	uint32le unpackedLength;	// length of the decompressed module
 };
 
-STATIC_ASSERT(sizeof(J2BFileHeader) == 24);
+MPT_BINARY_STRUCT(J2BFileHeader, 24)
 
 
 // AM(FF) stuff
@@ -87,7 +87,7 @@ struct AMFFRiffChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(AMFFRiffChunk) == 8);
+MPT_BINARY_STRUCT(AMFFRiffChunk, 8)
 
 
 // This header is used for both AM's "INIT" as well as AMFF's "MAIN" chunk
@@ -109,7 +109,7 @@ struct AMFFMainChunk
 	uint8le  globalvolume;
 };
 
-STATIC_ASSERT(sizeof(AMFFMainChunk) == 73);
+MPT_BINARY_STRUCT(AMFFMainChunk, 73)
 
 
 // AMFF instrument envelope point (old format)
@@ -119,7 +119,7 @@ struct AMFFEnvelopePoint
 	uint8le  value;	// 0...64
 };
 
-STATIC_ASSERT(sizeof(AMFFEnvelopePoint) == 3);
+MPT_BINARY_STRUCT(AMFFEnvelopePoint, 3)
 
 
 // AMFF instrument envelope (old format)
@@ -180,7 +180,7 @@ struct AMFFEnvelope
 	}
 };
 
-STATIC_ASSERT(sizeof(AMFFEnvelope) == 65);
+MPT_BINARY_STRUCT(AMFFEnvelope, 65)
 
 
 // AMFF instrument header (old format)
@@ -215,7 +215,7 @@ struct AMFFInstrumentHeader
 
 };
 
-STATIC_ASSERT(sizeof(AMFFInstrumentHeader) == 225);
+MPT_BINARY_STRUCT(AMFFInstrumentHeader, 225)
 
 
 // AMFF sample header (old format)
@@ -289,7 +289,7 @@ struct AMFFSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AMFFSampleHeader) == 64);
+MPT_BINARY_STRUCT(AMFFSampleHeader, 64)
 
 
 // AM instrument envelope point (new format)
@@ -299,7 +299,7 @@ struct AMEnvelopePoint
 	uint16le value;
 };
 
-STATIC_ASSERT(sizeof(AMEnvelopePoint) == 4);
+MPT_BINARY_STRUCT(AMEnvelopePoint, 4)
 
 
 // AM instrument envelope (new format)
@@ -356,7 +356,7 @@ struct AMEnvelope
 	}
 };
 
-STATIC_ASSERT(sizeof(AMEnvelope) == 48);
+MPT_BINARY_STRUCT(AMEnvelope, 48)
 
 
 // AM instrument header (new format)
@@ -401,7 +401,7 @@ struct AMInstrumentHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AMInstrumentHeader) == 326);
+MPT_BINARY_STRUCT(AMInstrumentHeader, 326)
 
 
 // AM sample header (new format)
@@ -462,7 +462,7 @@ struct AMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AMSampleHeader) == 60);
+MPT_BINARY_STRUCT(AMSampleHeader, 60)
 
 
 // Convert RIFF AM(FF) pattern data to MPT pattern data.

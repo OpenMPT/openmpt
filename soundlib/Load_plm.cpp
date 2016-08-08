@@ -32,7 +32,7 @@ struct PLMFileHeader
 	uint16le numOrders;
 };
 
-STATIC_ASSERT(sizeof(PLMFileHeader) == 96);
+MPT_BINARY_STRUCT(PLMFileHeader, 96)
 
 
 struct PLMSampleHeader
@@ -58,7 +58,7 @@ struct PLMSampleHeader
 	uint32le length;
 };
 
-STATIC_ASSERT(sizeof(PLMSampleHeader) == 71);
+MPT_BINARY_STRUCT(PLMSampleHeader, 71)
 
 
 struct PLMPatternHeader
@@ -70,7 +70,7 @@ struct PLMPatternHeader
 	char     name[25];
 };
 
-STATIC_ASSERT(sizeof(PLMPatternHeader) == 32);
+MPT_BINARY_STRUCT(PLMPatternHeader, 32)
 
 
 struct PLMOrderItem
@@ -80,7 +80,7 @@ struct PLMOrderItem
 	uint8le  pattern;
 };
 
-STATIC_ASSERT(sizeof(PLMOrderItem) == 4);
+MPT_BINARY_STRUCT(PLMOrderItem, 4)
 
 
 bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)

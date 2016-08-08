@@ -171,7 +171,7 @@ struct MO3FileHeader
 	uint8le  fixedMacros[128][2];
 };
 
-STATIC_ASSERT(sizeof(MO3FileHeader) == 422);
+MPT_BINARY_STRUCT(MO3FileHeader, 422)
 
 
 struct MO3Envelope
@@ -216,7 +216,7 @@ struct MO3Envelope
 	}
 };
 
-STATIC_ASSERT(sizeof(MO3Envelope) == 106);
+MPT_BINARY_STRUCT(MO3Envelope, 106)
 
 
 struct MO3Instrument
@@ -312,7 +312,7 @@ struct MO3Instrument
 	}
 };
 
-STATIC_ASSERT(sizeof(MO3Instrument) == 826);
+MPT_BINARY_STRUCT(MO3Instrument, 826)
 
 
 struct MO3Sample
@@ -393,7 +393,7 @@ struct MO3Sample
 	}
 };
 
-STATIC_ASSERT(sizeof(MO3Sample) == 41);
+MPT_BINARY_STRUCT(MO3Sample, 41)
 
 
 // We need all this information for Ogg-compressed samples with shared headers:

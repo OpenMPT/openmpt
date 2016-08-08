@@ -30,7 +30,7 @@ struct DSMChunk
 	uint32le size;
 };
 
-STATIC_ASSERT(sizeof(DSMChunk) == 8);
+MPT_BINARY_STRUCT(DSMChunk, 8)
 
 
 struct DSMSongHeader
@@ -51,7 +51,7 @@ struct DSMSongHeader
 	uint8le  orders[128];
 };
 
-STATIC_ASSERT(sizeof(DSMSongHeader) == 192);
+MPT_BINARY_STRUCT(DSMSongHeader, 192)
 
 
 struct DSMSampleHeader
@@ -97,7 +97,7 @@ struct DSMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(DSMSampleHeader) == 64);
+MPT_BINARY_STRUCT(DSMSampleHeader, 64)
 
 
 bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)

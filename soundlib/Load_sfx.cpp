@@ -21,7 +21,7 @@ struct SFXFileHeader
 	uint8be orderList[128];
 };
 
-STATIC_ASSERT(sizeof(SFXFileHeader) == 130);
+MPT_BINARY_STRUCT(SFXFileHeader, 130)
 
 // Sample Header
 struct SFXSampleHeader
@@ -71,7 +71,7 @@ struct SFXSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(SFXSampleHeader) == 30);
+MPT_BINARY_STRUCT(SFXSampleHeader, 30)
 
 
 bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)

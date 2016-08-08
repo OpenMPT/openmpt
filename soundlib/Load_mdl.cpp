@@ -21,7 +21,7 @@ struct MDLFileHeader
 	uint8 version;
 };
 
-STATIC_ASSERT(sizeof(MDLFileHeader) == 5);
+MPT_BINARY_STRUCT(MDLFileHeader, 5)
 
 
 // RIFF-style Chunk
@@ -59,7 +59,7 @@ struct MDLChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(MDLChunk) == 6);
+MPT_BINARY_STRUCT(MDLChunk, 6)
 
 
 struct MDLInfoBlock
@@ -74,7 +74,7 @@ struct MDLInfoBlock
 	uint8le  chnSetup[32];
 };
 
-STATIC_ASSERT(sizeof(MDLInfoBlock) == 91);
+MPT_BINARY_STRUCT(MDLInfoBlock, 91)
 
 
 // Sample header in II block
@@ -95,7 +95,7 @@ struct MDLSampleHeader
 	uint8le  freqEnvFlags;
 };
 
-STATIC_ASSERT(sizeof(MDLSampleHeader) == 14);
+MPT_BINARY_STRUCT(MDLSampleHeader, 14)
 
 
 // Part of the sample header that's common between v0 and v1.
@@ -106,7 +106,7 @@ struct MDLSampleInfoCommon
 	char    filename[8];
 };
 
-STATIC_ASSERT(sizeof(MDLSampleInfoCommon) == 41);
+MPT_BINARY_STRUCT(MDLSampleInfoCommon, 41)
 
 
 struct MDLEnvelope
@@ -143,7 +143,7 @@ struct MDLEnvelope
 	}
 };
 
-STATIC_ASSERT(sizeof(MDLEnvelope) == 33);
+MPT_BINARY_STRUCT(MDLEnvelope, 33)
 
 
 struct MDLPatternHeader
@@ -153,7 +153,7 @@ struct MDLPatternHeader
 	char    name[16];
 };
 
-STATIC_ASSERT(sizeof(MDLPatternHeader) == 18);
+MPT_BINARY_STRUCT(MDLPatternHeader, 18)
 
 
 enum

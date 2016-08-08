@@ -133,7 +133,7 @@ struct EQPresetPacked
 	uint32le Gains[MAX_EQ_BANDS];
 	uint32le Freqs[MAX_EQ_BANDS];
 };
-STATIC_ASSERT(sizeof(EQPresetPacked) == 60);
+MPT_BINARY_STRUCT(EQPresetPacked, 60)
 
 struct EQPreset
 {

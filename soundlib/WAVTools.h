@@ -34,7 +34,7 @@ struct RIFFHeader
 	uint32le type;		// WAVE (in WAV files) or wave (in DLS banks)
 };
 
-STATIC_ASSERT(sizeof(RIFFHeader) == 12);
+MPT_BINARY_STRUCT(RIFFHeader, 12)
 
 
 // General RIFF Chunk header
@@ -87,7 +87,7 @@ struct RIFFChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(RIFFChunk) == 8);
+MPT_BINARY_STRUCT(RIFFChunk, 8)
 
 
 // Format Chunk
@@ -113,7 +113,7 @@ struct WAVFormatChunk
 	uint16le bitsPerSample;		// Bits per sample
 };
 
-STATIC_ASSERT(sizeof(WAVFormatChunk) == 16);
+MPT_BINARY_STRUCT(WAVFormatChunk, 16)
 
 
 // Extension of the WAVFormatChunk structure, used if format == formatExtensible
@@ -126,7 +126,7 @@ struct WAVFormatChunkExtension
 	uint8    guid[14];
 };
 
-STATIC_ASSERT(sizeof(WAVFormatChunkExtension) == 24);
+MPT_BINARY_STRUCT(WAVFormatChunkExtension, 24)
 
 
 // Sample information chunk
@@ -157,7 +157,7 @@ struct WAVSampleInfoChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(WAVSampleInfoChunk) == 36);
+MPT_BINARY_STRUCT(WAVSampleInfoChunk, 36)
 
 
 // Sample loop information chunk (found after WAVSampleInfoChunk in "smpl" chunk)
@@ -185,7 +185,7 @@ struct WAVSampleLoop
 	void ConvertToWAV(SmpLength start, SmpLength end, bool bidi);
 };
 
-STATIC_ASSERT(sizeof(WAVSampleLoop) == 24);
+MPT_BINARY_STRUCT(WAVSampleLoop, 24)
 
 
 // MPT-specific "xtra" chunk
@@ -233,7 +233,7 @@ struct WAVExtraChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(WAVExtraChunk) == 16);
+MPT_BINARY_STRUCT(WAVExtraChunk, 16)
 
 
 // Sample cue point structure for the "cue " chunk
@@ -258,7 +258,7 @@ struct WAVCuePoint
 	}
 };
 
-STATIC_ASSERT(sizeof(WAVCuePoint) == 24);
+MPT_BINARY_STRUCT(WAVCuePoint, 24)
 
 
 //=============

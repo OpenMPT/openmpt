@@ -34,7 +34,7 @@ struct PTMFileHeader
 	uint16le patOffsets[128];	// Pattern offsets (*16)
 };
 
-STATIC_ASSERT(sizeof(PTMFileHeader) == 608);
+MPT_BINARY_STRUCT(PTMFileHeader, 608)
 
 struct PTMSampleHeader
 {
@@ -101,7 +101,7 @@ struct PTMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(PTMSampleHeader) == 80);
+MPT_BINARY_STRUCT(PTMSampleHeader, 80)
 
 
 bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)

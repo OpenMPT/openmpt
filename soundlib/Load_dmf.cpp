@@ -32,7 +32,7 @@ struct DMFFileHeader
 	uint8  creationYear;
 };
 
-STATIC_ASSERT(sizeof(DMFFileHeader) == 66);
+MPT_BINARY_STRUCT(DMFFileHeader, 66)
 
 struct DMFChunk
 {
@@ -65,7 +65,7 @@ struct DMFChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(DMFChunk) == 8);
+MPT_BINARY_STRUCT(DMFChunk, 8)
 
 // Order list
 struct DMFSequence
@@ -75,7 +75,7 @@ struct DMFSequence
 	// order list follows here ...
 };
 
-STATIC_ASSERT(sizeof(DMFSequence) == 4);
+MPT_BINARY_STRUCT(DMFSequence, 4)
 
 // Pattern header (global)
 struct DMFPatterns
@@ -84,7 +84,7 @@ struct DMFPatterns
 	uint8le  numTracks;		// 1..32 channels
 };
 
-STATIC_ASSERT(sizeof(DMFPatterns) == 3);
+MPT_BINARY_STRUCT(DMFPatterns, 3)
 
 // Pattern header (for each pattern)
 struct DMFPatternHeader
@@ -96,7 +96,7 @@ struct DMFPatternHeader
 	// patttern data follows here ...
 };
 
-STATIC_ASSERT(sizeof(DMFPatternHeader) == 8);
+MPT_BINARY_STRUCT(DMFPatternHeader, 8)
 
 // Sample header
 struct DMFSampleHeader
@@ -149,7 +149,7 @@ struct DMFSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(DMFSampleHeader) == 16);
+MPT_BINARY_STRUCT(DMFSampleHeader, 16)
 
 // Sample header tail (between head and tail, there might be the library name of the sample, depending on the DMF version)
 struct DMFSampleHeaderTail
@@ -158,7 +158,7 @@ struct DMFSampleHeaderTail
 	uint32le crc32;
 };
 
-STATIC_ASSERT(sizeof(DMFSampleHeaderTail) == 6);
+MPT_BINARY_STRUCT(DMFSampleHeaderTail, 6)
 
 
 // Pattern translation memory

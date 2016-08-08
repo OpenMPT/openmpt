@@ -785,6 +785,7 @@ public:
 	template <typename T>
 	bool ReadStruct(T &target)
 	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		if(Read(target))
 		{
 			return true;
@@ -800,6 +801,7 @@ public:
 	template <typename T>
 	bool ReadStructPartial(T &target, off_t partialSize = sizeof(T))
 	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		off_t copyBytes = std::min(partialSize, sizeof(T));
 		if(!CanRead(copyBytes))
 		{

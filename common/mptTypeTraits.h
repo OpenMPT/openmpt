@@ -135,6 +135,9 @@ template <> struct is_binary_safe<char>  : public mpt::true_type { };
 template <> struct is_binary_safe<uint8> : public mpt::true_type { };
 template <> struct is_binary_safe<int8>  : public mpt::true_type { };
 
+// Generic Specialization for arrays.
+template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
+
 template <typename T>
 struct GetRawBytesFunctor
 {
@@ -166,6 +169,19 @@ template <typename T> inline mpt::byte * GetRawBytes(T & v)
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
+
+} // namespace mpt
+
+#define MPT_BINARY_STRUCT(type, size) \
+	STATIC_ASSERT(sizeof( type ) == (size) ); \
+	namespace mpt { \
+		template <> struct is_binary_safe< type > : public mpt::true_type { }; \
+	} \
+/**/
+
+
+namespace mpt
+{
 
 
 

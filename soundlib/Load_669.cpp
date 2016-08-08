@@ -27,7 +27,7 @@ struct _669FileHeader
 	uint8 breaks[128];
 };
 
-STATIC_ASSERT(sizeof(_669FileHeader) == 497);
+MPT_BINARY_STRUCT(_669FileHeader, 497)
 
 
 struct _669Sample
@@ -59,7 +59,7 @@ struct _669Sample
 	}
 };
 
-STATIC_ASSERT(sizeof(_669Sample) == 25);
+MPT_BINARY_STRUCT(_669Sample, 25)
 
 
 bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)

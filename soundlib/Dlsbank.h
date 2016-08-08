@@ -43,7 +43,7 @@ typedef struct DLSREGION
 	uint8le  uUnityNote;
 } DLSREGION;
 
-STATIC_ASSERT(sizeof(DLSREGION) == 21);
+MPT_BINARY_STRUCT(DLSREGION, 21)
 
 typedef struct DLSENVELOPE
 {
@@ -55,7 +55,7 @@ typedef struct DLSENVELOPE
 	uint8le nDefPan;			// Default Pan
 } DLSENVELOPE;
 
-STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
+MPT_BINARY_STRUCT(DLSENVELOPE, 8)
 
 // Special Bank bits
 #define F_INSTRUMENT_DRUMS		0x80000000
@@ -70,7 +70,7 @@ typedef struct DLSINSTRUMENT
 	uint16le wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
 
-STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
+MPT_BINARY_STRUCT(DLSINSTRUMENT, 2740)
 
 typedef struct DLSSAMPLEEX
 {
@@ -83,7 +83,7 @@ typedef struct DLSSAMPLEEX
 	int8le   chPitchCorrection;
 } DLSSAMPLEEX;
 
-STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
+MPT_BINARY_STRUCT(DLSSAMPLEEX, 38)
 
 
 #ifdef MODPLUG_TRACKER

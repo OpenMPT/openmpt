@@ -271,7 +271,7 @@ struct AMSFileHeader
 	uint16le extraSize;
 };
 
-STATIC_ASSERT(sizeof(AMSFileHeader) == 11);
+MPT_BINARY_STRUCT(AMSFileHeader, 11)
 
 
 // AMS Sample Header
@@ -329,7 +329,7 @@ struct AMSSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AMSSampleHeader) == 17);
+MPT_BINARY_STRUCT(AMSSampleHeader, 17)
 
 
 bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
@@ -483,7 +483,7 @@ struct AMS2FileHeader
 	// Rest of header differs between format revision 2.01 and 2.02
 };
 
-STATIC_ASSERT(sizeof(AMS2FileHeader) == 7);
+MPT_BINARY_STRUCT(AMS2FileHeader, 7)
 
 
 // AMS2 Instument Envelope
@@ -527,7 +527,7 @@ struct AMS2Envelope
 	}
 };
 
-STATIC_ASSERT(sizeof(AMS2Envelope) == 5);
+MPT_BINARY_STRUCT(AMS2Envelope, 5)
 
 
 // AMS2 Instrument Data
@@ -572,7 +572,7 @@ struct AMS2Instrument
 
 };
 
-STATIC_ASSERT(sizeof(AMS2Instrument) == 5);
+MPT_BINARY_STRUCT(AMS2Instrument, 5)
 
 
 // AMS2 Sample Header
@@ -632,7 +632,7 @@ struct AMS2SampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(AMS2SampleHeader) == 20);
+MPT_BINARY_STRUCT(AMS2SampleHeader, 20)
 
 
 // AMS2 Song Description Header
@@ -645,7 +645,7 @@ struct AMS2Description
 	uint8le  packingMethod;	// RLE
 };
 
-STATIC_ASSERT(sizeof(AMS2Description) == 11);
+MPT_BINARY_STRUCT(AMS2Description, 11)
 
 
 bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)

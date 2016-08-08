@@ -15,32 +15,32 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
+struct GZheader
+{
+	uint8le  magic1;	// 0x1F
+	uint8le  magic2;	// 0x8B
+	uint8le  method;	// 0-7 = reserved, 8 = deflate
+	uint8le  flags;	// See GZ_F* constants
+	uint32le mtime;	// UNIX time
+	uint8le  xflags;	// Available for use by specific compression methods. We ignore this.
+	uint8le  os;		// Which OS was used to compress the file? We also ignore this.
+};
+
+MPT_BINARY_STRUCT(GZheader, 10)
+
+struct GZtrailer
+{
+	uint32le crc32_;	// CRC32 of decompressed data
+	uint32le isize;	// Size of decompressed data
+};
+
+MPT_BINARY_STRUCT(GZtrailer, 8)
+
 //=====================================
 class CGzipArchive : public ArchiveBase
 //=====================================
 {
 protected:
-
-	struct GZheader
-	{
-		uint8le  magic1;	// 0x1F
-		uint8le  magic2;	// 0x8B
-		uint8le  method;	// 0-7 = reserved, 8 = deflate
-		uint8le  flags;	// See GZ_F* constants
-		uint32le mtime;	// UNIX time
-		uint8le  xflags;	// Available for use by specific compression methods. We ignore this.
-		uint8le  os;		// Which OS was used to compress the file? We also ignore this.
-	};
-
-	STATIC_ASSERT(sizeof(GZheader) == 10);
-
-	struct GZtrailer
-	{
-		uint32le crc32_;	// CRC32 of decompressed data
-		uint32le isize;	// Size of decompressed data
-	};
-
-	STATIC_ASSERT(sizeof(GZtrailer) == 8);
 
 	enum MagicBytes
 	{

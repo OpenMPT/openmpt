@@ -57,7 +57,7 @@ struct SNDMIXPLUGININFO
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= uint8(~irBypass); }
 };
 
-STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to files, so the size must be correct!
+MPT_BINARY_STRUCT(SNDMIXPLUGININFO, 128)	// this is directly written to files, so the size must be correct!
 
 
 struct SNDMIXPLUGIN

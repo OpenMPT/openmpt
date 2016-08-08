@@ -204,7 +204,7 @@ struct MODFileHeader
 	uint8be orderList[128];
 };
 
-STATIC_ASSERT(sizeof(MODFileHeader) == 130);
+MPT_BINARY_STRUCT(MODFileHeader, 130)
 
 
 // Sample Header
@@ -315,7 +315,7 @@ struct MODSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
+MPT_BINARY_STRUCT(MODSampleHeader, 30)
 
 struct PT36IffChunk
 {
@@ -332,7 +332,7 @@ struct PT36IffChunk
 	uint32be chunksize;	// chunk size without header
 };
 
-STATIC_ASSERT(sizeof(PT36IffChunk) == 8);
+MPT_BINARY_STRUCT(PT36IffChunk, 8)
 
 struct PT36InfoChunk
 {
@@ -355,7 +355,7 @@ struct PT36InfoChunk
 	uint16be playtimeMsecond;
 };
 
-STATIC_ASSERT(sizeof(PT36InfoChunk) == 64);
+MPT_BINARY_STRUCT(PT36InfoChunk, 64)
 
 
 // Check if header magic equals a given string.

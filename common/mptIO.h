@@ -491,6 +491,7 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 template <typename T, typename Tfile>
 inline bool WriteStruct(Tfile & f, T & v, size_t size = sizeof(T))
 {
+	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	bool result = IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(&v), size);
 	return result;
 }

@@ -157,7 +157,7 @@ typedef struct IFFCHUNK
 	uint32le len;
 } IFFCHUNK, *LPIFFCHUNK;
 
-STATIC_ASSERT(sizeof(IFFCHUNK) == 8);
+MPT_BINARY_STRUCT(IFFCHUNK, 8)
 
 typedef struct RIFFCHUNKID
 {
@@ -166,7 +166,7 @@ typedef struct RIFFCHUNKID
 	uint32le id_DLS;
 } RIFFCHUNKID;
 
-STATIC_ASSERT(sizeof(RIFFCHUNKID) == 12);
+MPT_BINARY_STRUCT(RIFFCHUNKID, 12)
 
 typedef struct LISTCHUNK
 {
@@ -175,7 +175,7 @@ typedef struct LISTCHUNK
 	uint32le listid;
 } LISTCHUNK;
 
-STATIC_ASSERT(sizeof(LISTCHUNK) == 12);
+MPT_BINARY_STRUCT(LISTCHUNK, 12)
 
 typedef struct DLSRGNRANGE
 {
@@ -183,7 +183,7 @@ typedef struct DLSRGNRANGE
 	uint16le usHigh;
 } DLSRGNRANGE;
 
-STATIC_ASSERT(sizeof(DLSRGNRANGE) == 4);
+MPT_BINARY_STRUCT(DLSRGNRANGE, 4)
 
 typedef struct COLHCHUNK
 {
@@ -192,7 +192,7 @@ typedef struct COLHCHUNK
 	uint32le ulInstruments;
 } COLHCHUNK;
 
-STATIC_ASSERT(sizeof(COLHCHUNK) == 12);
+MPT_BINARY_STRUCT(COLHCHUNK, 12)
 
 typedef struct VERSCHUNK
 {
@@ -201,7 +201,7 @@ typedef struct VERSCHUNK
 	uint16le version[4];
 } VERSCHUNK;
 
-STATIC_ASSERT(sizeof(VERSCHUNK) == 16);
+MPT_BINARY_STRUCT(VERSCHUNK, 16)
 
 typedef struct PTBLCHUNK
 {
@@ -212,7 +212,7 @@ typedef struct PTBLCHUNK
 	uint32le ulOffsets[1];
 } PTBLCHUNK;
 
-STATIC_ASSERT(sizeof(PTBLCHUNK) == 20);
+MPT_BINARY_STRUCT(PTBLCHUNK, 20)
 
 typedef struct INSHCHUNK
 {
@@ -223,7 +223,7 @@ typedef struct INSHCHUNK
 	uint32le ulInstrument;
 } INSHCHUNK;
 
-STATIC_ASSERT(sizeof(INSHCHUNK) == 20);
+MPT_BINARY_STRUCT(INSHCHUNK, 20)
 
 typedef struct RGNHCHUNK
 {
@@ -235,7 +235,7 @@ typedef struct RGNHCHUNK
 	uint16le usKeyGroup;
 } RGNHCHUNK;
 
-STATIC_ASSERT(sizeof(RGNHCHUNK) == 20);
+MPT_BINARY_STRUCT(RGNHCHUNK, 20)
 
 typedef struct WLNKCHUNK
 {
@@ -247,7 +247,7 @@ typedef struct WLNKCHUNK
 	uint32le ulTableIndex;
 } WLNKCHUNK;
 
-STATIC_ASSERT(sizeof(WLNKCHUNK) == 20);
+MPT_BINARY_STRUCT(WLNKCHUNK, 20)
 
 typedef struct ART1CHUNK
 {
@@ -257,7 +257,7 @@ typedef struct ART1CHUNK
 	uint32le cConnectionBlocks;
 } ART1CHUNK;
 
-STATIC_ASSERT(sizeof(ART1CHUNK) == 16);
+MPT_BINARY_STRUCT(ART1CHUNK, 16)
 
 typedef struct CONNECTIONBLOCK
 {
@@ -268,7 +268,7 @@ typedef struct CONNECTIONBLOCK
 	int32le  lScale;
 } CONNECTIONBLOCK;
 
-STATIC_ASSERT(sizeof(CONNECTIONBLOCK) == 12);
+MPT_BINARY_STRUCT(CONNECTIONBLOCK, 12)
 
 typedef struct WSMPCHUNK
 {
@@ -282,7 +282,7 @@ typedef struct WSMPCHUNK
 	uint32le cSampleLoops;
 } WSMPCHUNK;
 
-STATIC_ASSERT(sizeof(WSMPCHUNK) == 28);
+MPT_BINARY_STRUCT(WSMPCHUNK, 28)
 
 typedef struct WSMPSAMPLELOOP
 {
@@ -293,7 +293,7 @@ typedef struct WSMPSAMPLELOOP
 
 } WSMPSAMPLELOOP;
 
-STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
+MPT_BINARY_STRUCT(WSMPSAMPLELOOP, 16)
 
 
 /////////////////////////////////////////////////////////////////////
@@ -342,7 +342,7 @@ typedef struct SFPRESETHEADER
 	uint32le dwMorphology;
 } SFPRESETHEADER;
 
-STATIC_ASSERT(sizeof(SFPRESETHEADER) == 38);
+MPT_BINARY_STRUCT(SFPRESETHEADER, 38)
 
 typedef struct SFPRESETBAG
 {
@@ -350,7 +350,7 @@ typedef struct SFPRESETBAG
 	uint16le wModNdx;
 } SFPRESETBAG;
 
-STATIC_ASSERT(sizeof(SFPRESETBAG) == 4);
+MPT_BINARY_STRUCT(SFPRESETBAG, 4)
 
 typedef struct SFGENLIST
 {
@@ -358,7 +358,7 @@ typedef struct SFGENLIST
 	uint16le genAmount;
 } SFGENLIST;
 
-STATIC_ASSERT(sizeof(SFGENLIST) == 4);
+MPT_BINARY_STRUCT(SFGENLIST, 4)
 
 typedef struct SFINST
 {
@@ -366,7 +366,7 @@ typedef struct SFINST
 	uint16le wInstBagNdx;
 } SFINST;
 
-STATIC_ASSERT(sizeof(SFINST) == 22);
+MPT_BINARY_STRUCT(SFINST, 22)
 
 typedef struct SFINSTBAG
 {
@@ -374,7 +374,7 @@ typedef struct SFINSTBAG
 	uint16le wModNdx;
 } SFINSTBAG;
 
-STATIC_ASSERT(sizeof(SFINSTBAG) == 4);
+MPT_BINARY_STRUCT(SFINSTBAG, 4)
 
 typedef struct SFINSTGENLIST
 {
@@ -382,7 +382,7 @@ typedef struct SFINSTGENLIST
 	uint16le genAmount;
 } SFINSTGENLIST;
 
-STATIC_ASSERT(sizeof(SFINSTGENLIST) == 4);
+MPT_BINARY_STRUCT(SFINSTGENLIST, 4)
 
 typedef struct SFSAMPLE
 {
@@ -398,7 +398,7 @@ typedef struct SFSAMPLE
 	uint16le sfSampleType;
 } SFSAMPLE;
 
-STATIC_ASSERT(sizeof(SFSAMPLE) == 46);
+MPT_BINARY_STRUCT(SFSAMPLE, 46)
 
 // End of structures definitions
 /////////////////////////////////////////////////////////////////////

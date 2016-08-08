@@ -23,7 +23,7 @@ struct IMFChannel
 	uint8 status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
 };
 
-STATIC_ASSERT(sizeof(IMFChannel) == 16);
+MPT_BINARY_STRUCT(IMFChannel, 16)
 
 struct IMFFileHeader
 {
@@ -47,7 +47,7 @@ struct IMFFileHeader
 	IMFChannel channels[32];	// Channel settings
 };
 
-STATIC_ASSERT(sizeof(IMFFileHeader) == 576);
+MPT_BINARY_STRUCT(IMFFileHeader, 576)
 
 struct IMFEnvelope
 {
@@ -66,7 +66,7 @@ struct IMFEnvelope
 	uint8 unused[3];
 };
 
-STATIC_ASSERT(sizeof(IMFEnvelope) == 8);
+MPT_BINARY_STRUCT(IMFEnvelope, 8)
 
 struct IMFEnvNode
 {
@@ -74,7 +74,7 @@ struct IMFEnvNode
 	uint16le value;
 };
 
-STATIC_ASSERT(sizeof(IMFEnvNode) == 4);
+MPT_BINARY_STRUCT(IMFEnvNode, 4)
 
 struct IMFInstrument
 {
@@ -144,7 +144,7 @@ struct IMFInstrument
 	}
 };
 
-STATIC_ASSERT(sizeof(IMFInstrument) == 384);
+MPT_BINARY_STRUCT(IMFInstrument, 384)
 
 struct IMFSample
 {
@@ -199,7 +199,7 @@ struct IMFSample
 	}
 };
 
-STATIC_ASSERT(sizeof(IMFSample) == 64);
+MPT_BINARY_STRUCT(IMFSample, 64)
 
 
 static const uint8 imfEffects[] =

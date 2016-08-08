@@ -53,7 +53,7 @@ struct STMSampleHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(STMSampleHeader) == 32);
+MPT_BINARY_STRUCT(STMSampleHeader, 32)
 
 
 // STM file header
@@ -71,7 +71,7 @@ struct STMFileHeader
 	uint8 reserved[13];
 };
 
-STATIC_ASSERT(sizeof(STMFileHeader) == 48);
+MPT_BINARY_STRUCT(STMFileHeader, 48)
 
 
 // Pattern note entry
@@ -83,7 +83,7 @@ struct STMPatternEntry
 	uint8le cmdinf;
 };
 
-STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
+MPT_BINARY_STRUCT(STMPatternEntry, 4)
 
 
 struct STMPatternData
@@ -91,7 +91,7 @@ struct STMPatternData
 	STMPatternEntry entry[64 * 4];
 };
 
-STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
+MPT_BINARY_STRUCT(STMPatternData, 4*64*4)
 
 
 bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)

@@ -33,7 +33,7 @@ struct OktIffChunk
 	uint32be chunksize;	// chunk size without header
 };
 
-STATIC_ASSERT(sizeof(OktIffChunk) == 8);
+MPT_BINARY_STRUCT(OktIffChunk, 8)
 
 struct OktSample
 {
@@ -45,7 +45,7 @@ struct OktSample
 	uint16be type;			// 7-/8-bit sample
 };
 
-STATIC_ASSERT(sizeof(OktSample) == 32);
+MPT_BINARY_STRUCT(OktSample, 32)
 
 
 // Parse the sample header block

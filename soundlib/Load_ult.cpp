@@ -22,7 +22,7 @@ struct UltFileHeader
 	uint8 messageLength;		// Number of Lines
 };
 
-STATIC_ASSERT(sizeof(UltFileHeader) == 48);
+MPT_BINARY_STRUCT(UltFileHeader, 48)
 
 
 struct UltSample
@@ -82,7 +82,7 @@ struct UltSample
 	}
 };
 
-STATIC_ASSERT(sizeof(UltSample) == 66);
+MPT_BINARY_STRUCT(UltSample, 66)
 
 
 /* Unhandled effects:

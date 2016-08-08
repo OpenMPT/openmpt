@@ -59,7 +59,7 @@ struct GDMFileHeader
 	uint16le textGraphicLength;
 };
 
-STATIC_ASSERT(sizeof(GDMFileHeader) == 157);
+MPT_BINARY_STRUCT(GDMFileHeader, 157)
 
 
 // GDM Sample Header
@@ -87,7 +87,7 @@ struct GDMSampleHeader
 	uint8le  panning;		// default pan
 };
 
-STATIC_ASSERT(sizeof(GDMSampleHeader) == 62);
+MPT_BINARY_STRUCT(GDMSampleHeader, 62)
 
 
 bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)

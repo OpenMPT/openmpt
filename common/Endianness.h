@@ -381,14 +381,15 @@ public:
 	}
 };
 
-namespace mpt {
+typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32EmulatedBE;
+typedef IEEE754binary32Emulated<3,2,1,0> IEEE754binary32EmulatedLE;
+typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64EmulatedBE;
+typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64EmulatedLE;
 
-template <> struct is_binary_safe<IEEE754binary32Emulated<0,1,2,3> > : public mpt::true_type { };
-template <> struct is_binary_safe<IEEE754binary32Emulated<3,2,1,0> > : public mpt::true_type { };
-template <> struct is_binary_safe<IEEE754binary64Emulated<0,1,2,3,4,5,6,7> > : public mpt::true_type { };
-template <> struct is_binary_safe<IEEE754binary64Emulated<7,6,5,4,3,2,1,0> > : public mpt::true_type { };
-
-} // namespace mpt
+MPT_BINARY_STRUCT(IEEE754binary32EmulatedBE, 4)
+MPT_BINARY_STRUCT(IEEE754binary32EmulatedLE, 4)
+MPT_BINARY_STRUCT(IEEE754binary64EmulatedBE, 8)
+MPT_BINARY_STRUCT(IEEE754binary64EmulatedLE, 8)
 
 #if MPT_PLATFORM_IEEE_FLOAT
 
@@ -529,31 +530,27 @@ public:
 	}
 };
 
-namespace mpt {
-
-template <> struct is_binary_safe<IEEE754binary32Native> : public mpt::true_type { };
-template <> struct is_binary_safe<IEEE754binary64Native> : public mpt::true_type { };
-
-} // namespace mpt
+MPT_BINARY_STRUCT(IEEE754binary32Native, 4)
+MPT_BINARY_STRUCT(IEEE754binary64Native, 8)
 
 #if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 typedef IEEE754binary32Native                    IEEE754binary32LE;
-typedef IEEE754binary32Emulated<0,1,2,3>         IEEE754binary32BE;
+typedef IEEE754binary32EmulatedBE                IEEE754binary32BE;
 typedef IEEE754binary64Native                    IEEE754binary64LE;
-typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64BE;
+typedef IEEE754binary64EmulatedBE                IEEE754binary64BE;
 #elif defined(MPT_PLATFORM_BIG_ENDIAN)
-typedef IEEE754binary32Emulated<3,2,1,0>         IEEE754binary32LE;
+typedef IEEE754binary32EmulatedLE                IEEE754binary32LE;
 typedef IEEE754binary32Native                    IEEE754binary32BE;
-typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64LE;
+typedef IEEE754binary64EmulatedLE                IEEE754binary64LE;
 typedef IEEE754binary64Native                    IEEE754binary64BE;
 #endif
 
 #else // !MPT_PLATFORM_IEEE_FLOAT
 
-typedef IEEE754binary32Emulated<3,2,1,0> IEEE754binary32LE;
-typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32BE;
-typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64LE;
-typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64BE;
+typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
+typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
+typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
+typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
 
 #endif // MPT_PLATFORM_IEEE_FLOAT
 
@@ -654,6 +651,24 @@ typedef packed<uint64, BigEndian_tag> uint64be;
 typedef packed<uint32, BigEndian_tag> uint32be;
 typedef packed<uint16, BigEndian_tag> uint16be;
 typedef packed<uint8 , BigEndian_tag> uint8be;
+
+MPT_BINARY_STRUCT(int64le, 8)
+MPT_BINARY_STRUCT(int32le, 4)
+MPT_BINARY_STRUCT(int16le, 2)
+MPT_BINARY_STRUCT(int8le , 1)
+MPT_BINARY_STRUCT(uint64le, 8)
+MPT_BINARY_STRUCT(uint32le, 4)
+MPT_BINARY_STRUCT(uint16le, 2)
+MPT_BINARY_STRUCT(uint8le , 1)
+
+MPT_BINARY_STRUCT(int64be, 8)
+MPT_BINARY_STRUCT(int32be, 4)
+MPT_BINARY_STRUCT(int16be, 2)
+MPT_BINARY_STRUCT(int8be , 1)
+MPT_BINARY_STRUCT(uint64be, 8)
+MPT_BINARY_STRUCT(uint32be, 4)
+MPT_BINARY_STRUCT(uint16be, 2)
+MPT_BINARY_STRUCT(uint8be , 1)
 
 
 // Small helper class to support unaligned memory access on all platforms.
