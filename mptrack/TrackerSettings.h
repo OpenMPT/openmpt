@@ -126,7 +126,16 @@ enum
 
 
 // EQ
-struct PACKED EQPreset
+
+struct EQPresetPacked
+{
+	char     szName[12]; // locale encoding
+	uint32le Gains[MAX_EQ_BANDS];
+	uint32le Freqs[MAX_EQ_BANDS];
+};
+STATIC_ASSERT(sizeof(EQPresetPacked) == 60);
+
+struct EQPreset
 {
 	char   szName[12]; // locale encoding
 	uint32 Gains[MAX_EQ_BANDS];
@@ -135,16 +144,23 @@ struct PACKED EQPreset
 
 static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
 
-STATIC_ASSERT(sizeof(EQPreset) == 60);
-
 template<> inline SettingValue ToSettingValue(const EQPreset &val)
 {
-	return SettingValue(EncodeBinarySetting<EQPreset>(val), "EQPreset");
+	EQPresetPacked valpacked;
+	std::memcpy(valpacked.szName, val.szName, CountOf(valpacked.szName));
+	std::copy(val.Gains, val.Gains + MAX_EQ_BANDS, valpacked.Gains);
+	std::copy(val.Freqs, val.Freqs + MAX_EQ_BANDS, valpacked.Freqs);
+	return SettingValue(EncodeBinarySetting<EQPresetPacked>(valpacked), "EQPreset");
 }
 template<> inline EQPreset FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "EQPreset");
-	return DecodeBinarySetting<EQPreset>(val.as<std::vector<char> >());
+	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<char> >());
+	EQPreset valresult;
+	std::memcpy(valresult.szName, valpacked.szName, CountOf(valresult.szName));
+	std::copy(valpacked.Gains, valpacked.Gains + MAX_EQ_BANDS, valresult.Gains);
+	std::copy(valpacked.Freqs, valpacked.Freqs + MAX_EQ_BANDS, valresult.Freqs);
+	return valresult;
 }
 
 
