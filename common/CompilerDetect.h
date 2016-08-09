@@ -168,6 +168,8 @@
 			#define MPT_PLATFORM_LITTLE_ENDIAN
 	#else
 		#error "unknown endianness"
+		// Eventually, we want this error to be removed, as the byte order
+		// is not required to be provided by standard conforming C++ compilers.
 	#endif
 #endif
 
