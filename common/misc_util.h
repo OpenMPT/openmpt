@@ -690,7 +690,7 @@ namespace Util
 	#define MPT_MAX_VALUE_OF_TYPE(integral_type) ( std::numeric_limits<integral_type>::is_signed ? MPT_MAX_SIGNED_VALUE(integral_type) : MPT_MAX_UNSIGNED_VALUE(integral_type) )
 
 	/// Returns value rounded to nearest integer.
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || MPT_OS_ANDROID || MPT_OS_EMSCRIPTEN
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || MPT_OS_ANDROID || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
 	// MSVC before 2013 does not support C99/C++11.
 	// GCC before 4.3.0 does not support C++11.
 	// Android has std::round just missing even though it should be available.
