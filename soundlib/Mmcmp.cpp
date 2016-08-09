@@ -688,7 +688,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	try
 	{
 		unpackedData.resize(header.DstLen);
-		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), mpt::byte_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
 	} catch(MPTMemoryException)
 	{
 		return false;
@@ -834,7 +834,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 		return false;
 	}
 	file.Seek(4);
-	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
+	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
 	return result;
 }
