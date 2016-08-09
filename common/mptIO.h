@@ -191,13 +191,13 @@ inline bool WriteRaw(Tfile & f, const Tbyte * data, std::size_t size)
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
 {
-	return IO::ReadRaw(f, mpt::GetRawBytes(v), sizeof(Tbinary)) == sizeof(Tbinary);
+	return IO::ReadRaw(f, mpt::as_raw_memory(v), sizeof(Tbinary)) == sizeof(Tbinary);
 }
 
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const Tbinary & v)
 {
-	return IO::WriteRaw(f, mpt::GetRawBytes(v), sizeof(Tbinary));
+	return IO::WriteRaw(f, mpt::as_raw_memory(v), sizeof(Tbinary));
 }
 
 template <typename T, typename Tfile>
@@ -489,11 +489,10 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 }
 
 template <typename T, typename Tfile>
-inline bool WriteStruct(Tfile & f, T & v, size_t size = sizeof(T))
+inline bool WriteStruct(Tfile & f, const T & v, size_t size = sizeof(T))
 {
-	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
-	bool result = IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(&v), size);
-	return result;
+	MPT_ASSERT(size <= sizeof(T));
+	return IO::WriteRaw(f, mpt::as_raw_memory(v), size);
 }
 
 } // namespace IO
