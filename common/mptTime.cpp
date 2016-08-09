@@ -104,7 +104,7 @@ Unix::operator time_t () const
 mpt::Date::Unix Unix::FromUTC(tm timeUtc)
 //---------------------------------------
 {
-	#if MPT_COMPILER_MSVC
+	#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 		return mpt::Date::Unix(_mkgmtime(&timeUtc));
 	#else // !MPT_COMPILER_MSVC
 		// There is no portable way in C/C++ to convert between time_t and struct tm in UTC.
