@@ -182,7 +182,7 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 		header.fxVersion = plugin.GetVersion();
 
 		// Write unfinished header... We need to update the size once we're done writing.
-		mpt::IO::WriteStruct(f, header);
+		mpt::IO::Write(f, header);
 
 		uint32 numProgs = std::max(plugin.GetNumPrograms(), int32(1)), curProg = plugin.GetCurrentProgram();
 		mpt::IO::WriteIntBE(f, numProgs);
@@ -220,7 +220,7 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 		header.byteSize = static_cast<int32>(end - 8);
 		memcpy(header.fxMagic, writeChunk ? "FBCh" : "FxBk", 4);
 		mpt::IO::SeekBegin(f);
-		mpt::IO::WriteStruct(f, header);
+		mpt::IO::Write(f, header);
 	}
 
 	return true;
@@ -240,7 +240,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 
 	// Write unfinished header... We need to update the size once we're done writing.
 	mpt::IO::Offset start = mpt::IO::TellWrite(f);
-	mpt::IO::WriteStruct(f, header);
+	mpt::IO::Write(f, header);
 
 	const uint32 numParams = plugin.GetNumParameters();
 	mpt::IO::WriteIntBE(f, numParams);
@@ -276,7 +276,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 	header.byteSize = static_cast<int32>(end - start - 8);
 	memcpy(header.fxMagic, writeChunk ? "FPCh" : "FxCk", 4);
 	mpt::IO::SeekAbsolute(f, start);
-	mpt::IO::WriteStruct(f, header);
+	mpt::IO::Write(f, header);
 	mpt::IO::SeekAbsolute(f, end);
 }
 

@@ -66,7 +66,7 @@ bool UpdatePageCRC(PageInfo &pageInfo, const std::vector<uint8> &pageData);
 template <typename Tfile>
 bool WritePage(Tfile & f, PageInfo &pageInfo, const std::vector<uint8> &pageData)
 {
-	if(!mpt::IO::WriteStruct(f, pageInfo.header))
+	if(!mpt::IO::Write(f, pageInfo.header))
 	{
 		return false;
 	}

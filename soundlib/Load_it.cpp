@@ -1186,7 +1186,7 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
 
 		ITHistoryStruct itHistory;
 		itHistory.ConvertToIT(mptHistory);
-		mpt::IO::WriteStruct(f, itHistory);
+		mpt::IO::Write(f, itHistory);
 	}
 
 	return bytesWritten;
@@ -1350,7 +1350,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Write file header
-	mpt::IO::WriteStruct(f, itHeader);
+	mpt::IO::Write(f, itHeader);
 
 	Order.WriteAsByte(f, itHeader.ordnum);
 	for(uint16 i = 0; i < itHeader.insnum; ++i)
@@ -1372,7 +1372,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing midi cfg
 	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
 	{
-		mpt::IO::WriteStruct(f, static_cast<MIDIMacroConfigData &>(m_MidiCfg));
+		mpt::IO::Write(f, static_cast<MIDIMacroConfigData &>(m_MidiCfg));
 	}
 
 	// Writing pattern names
@@ -1439,7 +1439,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		// Writing instrument
 		inspos[nins - 1] = static_cast<uint32>(dwPos);
 		dwPos += instSize;
-		mpt::IO::WriteStruct(f, iti, instSize);
+		mpt::IO::WritePartial(f, iti, instSize);
 	}
 
 	// Writing sample headers
@@ -1449,7 +1449,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		smppos[smp] = static_cast<uint32>(dwPos);
 		dwPos += sizeof(ITSample);
-		mpt::IO::WriteStruct(f, itss);
+		mpt::IO::Write(f, itss);
 	}
 
 	// Writing Patterns
@@ -1480,7 +1480,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		patinfo[2] = 0;
 		patinfo[3] = 0;
 
-		mpt::IO::WriteStruct(f, patinfo);
+		mpt::IO::Write(f, patinfo);
 		dwPos += 8;
 
 		const CHANNELINDEX maxChannels = std::min(specs.channelsMax, GetNumChannels());
@@ -1637,7 +1637,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 		fseek(f, dwPatPos, SEEK_SET);
 		patinfo[0] = writeSize;
-		mpt::IO::WriteStruct(f, patinfo);
+		mpt::IO::Write(f, patinfo);
 		fseek(f, static_cast<long>(dwPos), SEEK_SET);
 	}
 	// Writing Sample Data
@@ -1667,7 +1667,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		}
 		SmpLength smpLength = itss.length;	// Possibly truncated to 2^32 samples
 		fseek(f, smppos[smp - 1], SEEK_SET);
-		mpt::IO::WriteStruct(f, itss);
+		mpt::IO::Write(f, itss);
 		if(dwPos > uint32_max)
 		{
 			continue;
@@ -1831,7 +1831,7 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 
 				// write plugin size:
 				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
-				mpt::IO::WriteStruct(f, m_MixPlugins[i].Info);
+				mpt::IO::Write(f, m_MixPlugins[i].Info);
 				mpt::IO::WriteIntLE<uint32>(f, m_MixPlugins[i].nPluginDataSize);
 				if(m_MixPlugins[i].pPluginData)
 				{
@@ -2059,7 +2059,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			if (ChnSettings[chn].dwFlags[CHN_SURROUND]) panvol[0] = 100;
 			if (ChnSettings[chn].dwFlags[CHN_MUTE]) panvol[0] |= 0x80;
 			panvol[1] = (uint8)ChnSettings[chn].nVolume;
-			mpt::IO::WriteStruct(f, panvol);
+			mpt::IO::Write(f, panvol);
 		}
 	}
 
