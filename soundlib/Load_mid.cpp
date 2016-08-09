@@ -408,7 +408,7 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 		} else
 		// Melodic Instrument
 		{
-			if (nProgram + 1 == p->nMidiProgram) return i;
+			if (nProgram + 1 == p->nMidiProgram && p->nMidiDrumKey == 0) return i;
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
