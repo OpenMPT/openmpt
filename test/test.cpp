@@ -990,6 +990,9 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(SamplePosition(1, 1) + SamplePosition(2, 2), SamplePosition(3, 3));
 	VERIFY_EQUAL(SamplePosition(1, 0) * 3, SamplePosition(3, 0));
 	VERIFY_EQUAL((SamplePosition(6, 0) / SamplePosition(2, 0)), 3);
+	
+	VERIFY_EQUAL(srlztn::ID::FromInt(static_cast<uint32>(0x87654321u)).AsString(), srlztn::ID("\x21\x43\x65\x87").AsString());
+
 }
 
 
