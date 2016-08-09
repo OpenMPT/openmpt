@@ -1081,7 +1081,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 {
 	uint32 susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 	size_t length = s.size(), pos = strlen(pszEnvHdr);
-	if (length <= pos || mpt::strnicmp(s.c_str(), pszEnvHdr, pos - 2))
+	if(length <= pos || mpt::CompareNoCaseAscii(s.c_str(), pszEnvHdr, pos - 2))
 	{
 		return false;
 	}
