@@ -153,6 +153,21 @@ struct GetRawBytesFunctor
 	}
 };
 
+template <typename T, std::size_t N>
+struct GetRawBytesFunctor<T[N]>
+{
+	inline const mpt::byte * operator () (const T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<const mpt::byte *>(v);
+	}
+	inline mpt::byte * operator () (T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<mpt::byte *>(v);
+	}
+};
+
 // In order to be able to partially specialize it,
 // as_raw_memory is implemented via a class template.
 // Do not overload or specialize as_raw_memory directly.
