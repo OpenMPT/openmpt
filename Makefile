@@ -272,8 +272,8 @@ CXXFLAGS += -g
 CFLAGS   += -g
 endif
 
-CXXFLAGS += -W
-CFLAGS   += -W
+CXXFLAGS += -Wall
+CFLAGS   += -Wall
 
 else
 
