@@ -15,7 +15,43 @@
 #include <intrin.h>
 #endif
 
+
 OPENMPT_NAMESPACE_BEGIN
+
+
+namespace mpt {
+
+struct endian_type { uint16 value; };
+static inline bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
+static inline bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
+
+static const endian_type endian_big    = { 0x1234u };
+static const endian_type endian_little = { 0x3412u };
+
+namespace detail {
+	static inline endian_type endian_probe()
+	{
+		STATIC_ASSERT(sizeof(endian_type) == 2);
+		const mpt::byte probe[2] = { 0x12, 0x34 };
+		endian_type test;
+		std::memcpy(&test, probe, 2);
+		return test;
+	}
+}
+
+static inline endian_type endian()
+{
+	#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		return endian_little;
+	#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+		return endian_big;
+	#else
+		return detail::endian_probe();
+	#endif
+}
+
+} // namespace mpt
+
 
 // Ending swaps:
 // SwapBytesBE(x) and variants may be used either to:

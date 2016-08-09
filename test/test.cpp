@@ -568,6 +568,9 @@ static MPT_NOINLINE void TestMisc()
 //---------------------------------
 {
 
+	VERIFY_EQUAL(mpt::endian(), mpt::detail::endian_probe());
+	VERIFY_EQUAL((mpt::endian() == mpt::endian_big) || (mpt::endian() == mpt::endian_little), true);	
+
 #define SwapBytesReturn(x) SwapBytesLE(SwapBytesBE(x))
 
 	VERIFY_EQUAL(SwapBytesReturn(uint8(0x12)), 0x12);
