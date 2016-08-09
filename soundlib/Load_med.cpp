@@ -672,7 +672,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		uint32 songnamelen = pmex->songnamelen;
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, reinterpret_cast<const char *>(lpStream + songname), songnamelen);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, lpStream + songname, songnamelen);
 		}
 		// Sample Names
 		uint32 smpinfoex = pmex->iinfo;
@@ -687,7 +687,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				const char *psznames = (const char *)(lpStream + iinfoptr);
 				for (uint32 i=0; i<ientries; i++) if (i < m_nSamples)
 				{
-					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], reinterpret_cast<const char *>(psznames + i * ientrysz), ientrysz);
+					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], (psznames + i * ientrysz), ientrysz);
 				}
 			}
 		}
@@ -716,7 +716,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen) && trknamelen < dwMemLength)
 					{
-						mpt::String::Read<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, reinterpret_cast<const char *>(lpStream + trknameofs), trknamelen);
+						mpt::String::Read<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, lpStream + trknameofs, trknamelen);
 					}
 				}
 			}

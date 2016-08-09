@@ -744,7 +744,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							if (!len) break;
 							if ((len < 32) && m_songName.empty())
 							{
-								mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, reinterpret_cast<const char*>(ptrk->ptracks), len);
+								mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, ptrk->ptracks, len);
 							} else
 							if (m_songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
 							{
@@ -766,7 +766,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							if ((len > 1) && (!trk))
 							{
 								std::string s;
-								mpt::String::Read<mpt::String::maybeNullTerminated>(s, reinterpret_cast<const char*>(ptrk->ptracks), len);
+								mpt::String::Read<mpt::String::maybeNullTerminated>(s, ptrk->ptracks, len);
 								if ((!mpt::CompareNoCaseAscii(s.c_str(), "Copyri", 6)) || s.empty()) break;
 								if (i == 0x03)
 								{

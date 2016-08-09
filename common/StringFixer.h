@@ -123,12 +123,12 @@ namespace mpt { namespace String
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
-	template <ReadWriteMode mode>
-	void Read(std::string &dest, const char *srcBuffer, size_t srcSize)
-	//-----------------------------------------------------------------
+	template <ReadWriteMode mode, typename Tbyte>
+	void Read(std::string &dest, const Tbyte *srcBuffer, size_t srcSize)
+	//------------------------------------------------------------------
 	{
 
-		const char *src = srcBuffer;
+		const char *src = mpt::byte_cast<const char*>(srcBuffer);
 
 		dest.clear();
 
@@ -174,9 +174,9 @@ namespace mpt { namespace String
 
 	// Used for reading strings from files.
 	// Preferrably use this version of the function, it is safer.
-	template <ReadWriteMode mode, size_t srcSize>
-	void Read(std::string &dest, const char (&srcBuffer)[srcSize])
-	//------------------------------------------------------------
+	template <ReadWriteMode mode, size_t srcSize, typename Tbyte>
+	void Read(std::string &dest, const Tbyte (&srcBuffer)[srcSize])
+	//-------------------------------------------------------------
 	{
 		STATIC_ASSERT(srcSize > 0);
 		Read<mode>(dest, srcBuffer, srcSize);
@@ -186,14 +186,14 @@ namespace mpt { namespace String
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
-	template <ReadWriteMode mode, size_t destSize>
-	void Read(char (&destBuffer)[destSize], const char *srcBuffer, size_t srcSize)
-	//----------------------------------------------------------------------------
+	template <ReadWriteMode mode, size_t destSize, typename Tbyte>
+	void Read(char (&destBuffer)[destSize], const Tbyte *srcBuffer, size_t srcSize)
+	//-----------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 
 		char *dst = destBuffer;
-		const char *src = srcBuffer;
+		const char *src = mpt::byte_cast<const char*>(srcBuffer);
 
 		if(mode == nullTerminated || mode == spacePaddedNull)
 		{
@@ -238,9 +238,9 @@ namespace mpt { namespace String
 
 	// Used for reading strings from files.
 	// Preferrably use this version of the function, it is safer.
-	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
-	void Read(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//-----------------------------------------------------------------------
+	template <ReadWriteMode mode, size_t destSize, size_t srcSize, typename Tbyte>
+	void Read(char (&destBuffer)[destSize], const Tbyte (&srcBuffer)[srcSize])
+	//------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
