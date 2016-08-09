@@ -149,6 +149,7 @@ template <> struct is_binary_safe<int8>  : public mpt::true_type { };
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
+template <typename T, std::size_t N> struct is_binary_safe<const T[N]> : public is_binary_safe<T> { };
 
 template <typename T>
 struct GetRawBytesFunctor
