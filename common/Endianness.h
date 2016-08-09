@@ -50,6 +50,16 @@ static inline endian_type endian()
 	#endif
 }
 
+static inline bool endian_is_little()
+{
+	return endian() == endian_little;
+}
+
+static inline bool endian_is_big()
+{
+	return endian() == endian_big;
+}
+
 } // namespace mpt
 
 

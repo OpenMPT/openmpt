@@ -65,12 +65,7 @@ public:
 	enum Endianness
 	{
 		littleEndian = 0,
-		bigEndian,
-#ifdef MPT_PLATFORM_LITTLE_ENDIAN
-		nativeEndian = littleEndian,
-#else
-		nativeEndian = bigEndian,
-#endif
+		bigEndian = 1,
 	};
 
 	// Sample encoding
@@ -131,6 +126,22 @@ public:
 	void operator|= (Encoding encoding)
 	{
 		format = (format & ~encodingMask) | (encoding << encodingOffset);
+	}
+
+	static inline Endianness GetNativeEndianness()
+	{
+		const mpt::endian_type endian = mpt::endian();
+		MPT_ASSERT((endian == mpt::endian_little) || (endian == mpt::endian_big));
+		Endianness result = littleEndian;
+		MPT_MAYBE_CONSTANT_IF(endian == mpt::endian_little)
+		{
+			result = littleEndian;
+		}
+		MPT_MAYBE_CONSTANT_IF(endian == mpt::endian_big)
+		{
+			result = bigEndian;
+		}
+		return result;
 	}
 
 	void MayNormalize()
