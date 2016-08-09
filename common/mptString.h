@@ -127,11 +127,6 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 }
 
 
-#ifdef MODPLUG_TRACKER
-int strnicmp(const char *a, const char *b, size_t count);
-#endif // MODPLUG_TRACKER
-
-
 enum Charset {
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	CharsetLocale, // CP_ACP on windows, current C locale otherwise

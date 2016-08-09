@@ -1379,32 +1379,6 @@ static MPT_NOINLINE void TestCharsets()
 #endif
 
 
-
-#if defined(MODPLUG_TRACKER)
-
-	VERIFY_EQUAL(mpt::strnicmp("f", "f", 6) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("f", "F", 6) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("F", "f", 6) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("f", "g", 6) < 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("h", "g", 6) > 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("fgh", "FgH", 6) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("012345678", "012345678", 9) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("", "012345678", 9) < 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "", 6) > 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "F", 6) > 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "Fg", 6) > 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fg", 6) > 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("0123456789", "FgH", 0) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fgh", 1) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fgh", 2) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fgh", 3) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fghi", 3) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FgH", "fghi", 4) < 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FIH", "fghi", 1) == 0, true);
-	VERIFY_EQUAL(mpt::strnicmp("FIH", "fghi", 2) > 0, true);
-
-#endif // MODPLUG_TRACKER
-
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("f", "f", 6) == 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("f", "F", 6) == 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("F", "f", 6) == 0, true);

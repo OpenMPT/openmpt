@@ -26,12 +26,6 @@
 #endif // MODPLUG_TRACKER
 
 #if defined(MODPLUG_TRACKER)
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#include <strings.h> // for strncasecmp
-#endif
-#endif // MODPLUG_TRACKER
-
-#if defined(MODPLUG_TRACKER)
 #include <wctype.h>
 #endif // MODPLUG_TRACKER
 
@@ -293,31 +287,6 @@ ToTcharStr, FromTcharStr.
 
 */
 
-
-
-namespace mpt {
-
-
-#ifdef MODPLUG_TRACKER
-
-// We cannot use the C runtime version in libopenmpt as it depends on the
-// global C locale.
-// We provide a plain ASCII version as mpt::CompareNoCaseAscci().
-
-int strnicmp(const char *a, const char *b, size_t count)
-//------------------------------------------------------
-{
-#if MPT_COMPILER_MSVC
-	return _strnicmp(a, b, count);
-#else
-	return strncasecmp(a, b, count);
-#endif
-}
-
-#endif // MODPLUG_TRACKER
-
-
-} // namespace mpt
 
 
 namespace mpt { namespace String {
