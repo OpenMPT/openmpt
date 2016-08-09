@@ -1002,23 +1002,25 @@ static const char * Charset_wchar_t()
 		if(sizeof(wchar_t) == 2)
 		{
 			// "UTF-16" generates BOM
-			#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+			{
 				return "UTF-16LE";
-			#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+			}
+			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+			{
 				return "UTF-16BE";
-			#else
-				STATIC_ASSERT(false);
-			#endif
+			}
 		} else if(sizeof(wchar_t) == 4)
 		{
 			// "UTF-32" generates BOM
-			#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+			{
 				return "UTF-32LE";
-			#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+			}
+			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+			{
 				return "UTF-32BE";
-			#else
-				STATIC_ASSERT(false);
-			#endif
+			}
 		}
 		return "";
 	#endif // !MPT_ICONV_NO_WCHAR | MPT_ICONV_NO_WCHAR
@@ -1196,10 +1198,19 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 				{
 					outbuf[i] = 0;
 				}
-				#ifdef MPT_PLATFORM_BIG_ENDIAN
+				#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+					outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
+				#elif defined(MPT_PLATFORM_BIG_ENDIAN)
 					outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
 				#else
-					outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
+					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+					{
+						outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
+					}
+					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()))
+					{
+						outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
+					}
 				#endif
 				outbuf += sizeof(wchar_t);
 				outbytesleft -= sizeof(wchar_t);

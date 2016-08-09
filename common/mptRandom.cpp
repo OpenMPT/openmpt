@@ -132,9 +132,10 @@ static T generate_timeseed()
 		#endif // MPT_OS_WINDOWS
 		mpt::byte bytes[sizeof(t)];
 		std::memcpy(bytes, &t, sizeof(t));
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+		{
 			std::reverse(bytes + 0, bytes + CountOf(bytes));
-		#endif
+		}
 		hash(bytes + 0, bytes + CountOf(bytes));
 	}
 
@@ -142,9 +143,10 @@ static T generate_timeseed()
 		std::clock_t c = std::clock();
 		mpt::byte bytes[sizeof(c)];
 		std::memcpy(bytes, &c, sizeof(c));
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+		{
 			std::reverse(bytes + 0, bytes + CountOf(bytes));
-		#endif
+		}
 		hash(bytes + 0, bytes + CountOf(bytes));
 	}
 
