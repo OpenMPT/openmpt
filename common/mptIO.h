@@ -201,6 +201,13 @@ inline bool Write(Tfile & f, const Tbinary & v)
 }
 
 template <typename T, typename Tfile>
+inline bool WritePartial(Tfile & f, const T & v, size_t size = sizeof(T))
+{
+	MPT_ASSERT(size <= sizeof(T));
+	return IO::WriteRaw(f, mpt::as_raw_memory(v), size);
+}
+
+template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
@@ -486,13 +493,6 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 		return false;
 	}
 	return true;
-}
-
-template <typename T, typename Tfile>
-inline bool WriteStruct(Tfile & f, const T & v, size_t size = sizeof(T))
-{
-	MPT_ASSERT(size <= sizeof(T));
-	return IO::WriteRaw(f, mpt::as_raw_memory(v), size);
 }
 
 } // namespace IO
