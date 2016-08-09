@@ -2526,6 +2526,23 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 65535);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0xFFFFFFFFFFFFFFFFull);
 	}
+	{
+		// Verify that writing arrays does not confuse the compiler.
+		// This is noth, compile-time and run-time cheking.
+		// Run-time in case some weird compiler gets confused by our templates
+		// and only writes the first array element.
+		mpt::ostringstream f;
+		uint16be data[2];
+		data[0] = 0x1234;
+		data[1] = 0x5678;
+		mpt::IO::Write(f, data);
+		std::string expected;
+		expected += std::string(1, 0x12);
+		expected += std::string(1, 0x34);
+		expected += std::string(1, 0x56);
+		expected += std::string(1, 0x78);
+		VERIFY_EQUAL(f.str(), expected);
+	}
 }
 
 
