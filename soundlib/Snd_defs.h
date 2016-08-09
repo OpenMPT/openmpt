@@ -475,18 +475,18 @@ struct SamplePosition
 	typedef int64 value_t;
 	typedef uint64 unsigned_value_t;
 protected:
-#ifdef _DEBUG
+#if defined(_DEBUG) && (defined(MPT_PLATFORM_LITTLE_ENDIAN) || defined(MPT_PLATFORM_BIG_ENDIAN))
 	union
 	{
 		value_t v;
 		// The following struct is for debugging only - do not use it directly!
 		// Preferrably, use the Debugger Visualizers available in build/vs/debug/
 		// for even easier debugging.
-#ifdef MPT_PLATFORM_LITTLE_ENDIAN
+#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 		struct { uint32 lo; int32 hi; };
-#else
+#elif defined(MPT_PLATFORM_BIG_ENDIAN)
 		struct { int32 hi; uint32 lo; };
-#endif // MPT_PLATFORM_LITTLE_ENDIAN
+#endif // MPT_PLATFORM_*_ENDIAN
 	};
 #else
 	value_t v;
