@@ -748,37 +748,37 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		PATTERNINDEX actualPattern = pat;
+		ModCommand *rowBase = nullptr;
 
 		if(isFLT8)
 		{
-			if((pat % 2u) == 0)
-			{
-				// Only create "even" patterns for FLT8 files
-				if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat / 2, 64))
-				{
-					file.Skip(readChannels * 64 * 4);
-					continue;
-				}
-			}
+			// FLT8: Only create "even" patterns and either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
 			actualPattern /= 2;
+			if((pat % 2u) == 0 && !Patterns.Insert(actualPattern, 64))
+			{
+				break;
+			}
+			rowBase = Patterns[actualPattern].GetpModCommand(0, (pat % 2u) == 0 ? 0 : 4);
 		} else
 		{
-			if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
+			if(!Patterns.Insert(pat, 64))
 			{
-				file.Skip(readChannels * 64 * 4);
-				continue;
+				break;
 			}
+			rowBase = Patterns[pat].GetpModCommand(0, 0);
+		}
+
+		if(rowBase == nullptr || !(loadFlags & loadPatternData))
+		{
+			break;
 		}
 
 		// For detecting PT1x mode
 		std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
 		std::vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
 
-		for(ROWINDEX row = 0; row < 64; row++)
+		for(ROWINDEX row = 0; row < 64; row++, rowBase += m_nChannels)
 		{
-			// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
-			PatternRow rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
-
 			// If we have more than one Fxx command on this row and one can be interpreted as speed
 			// and the other as tempo, we can be rather sure that it is not a VBlank mod.
 			bool hasSpeedOnRow = false, hasTempoOnRow = false;
@@ -860,6 +860,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading samples
 	if(loadFlags & loadSampleData)
 	{
+		file.Seek(1084 + (readChannels * 64 * 4) * numPatterns);
 		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
 			ModSample &sample = Samples[smp];
@@ -874,13 +875,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					encoding);
 
 				// Fix sample 6 in MOD.shorttune2, which has a replen longer than the sample itself.
-				// ProTracker reads beyond the end of the sample when playing, so we just extend the sample with zeros.
-				// ReadSample will automatically do this for us if the sample chunk itself is too short.
-				FileReader sampleChunk = file.ReadChunk(sampleIO.CalculateEncodedSize(sample.nLength));
+				// ProTracker reads beyond the end of the sample when playing. Normally samples are
+				// adjacent in PT's memory, so we simply read into the next sample in the file.
+				FileReader::off_t nextSample = file.GetPosition() + sampleIO.CalculateEncodedSize(sample.nLength);
 				if(isMdKd)
 					sample.nLength = std::max(sample.nLength, sample.nLoopEnd);
 
-				sampleIO.ReadSample(sample, sampleChunk);
+				sampleIO.ReadSample(sample, file);
+				file.Seek(nextSample);
 			}
 		}
 	}
