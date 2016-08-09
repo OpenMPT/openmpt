@@ -208,12 +208,9 @@ public:
 	static ID FromInt(const T &val)
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-		char bytes[sizeof(T)];
-		std::memcpy(bytes, &val, sizeof(T));
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			std::reverse(bytes, bytes + sizeof(T));
-		#endif
-		return ID(bytes, bytes + sizeof(T));
+		typename mpt::make_le<T>::type valle;
+		valle = val;
+		return ID(std::string(mpt::as_raw_memory(valle), mpt::as_raw_memory(valle) + sizeof(valle)));
 	}
 	bool IsPrintable() const;
 	mpt::ustring AsString() const;

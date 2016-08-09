@@ -720,6 +720,14 @@ MPT_BINARY_STRUCT(uint32be, 4)
 MPT_BINARY_STRUCT(uint16be, 2)
 MPT_BINARY_STRUCT(uint8be , 1)
 
+namespace mpt {
+
+template <typename T> struct make_le { typedef packed<T, LittleEndian_tag> type; };
+template <typename T> struct make_be { typedef packed<T, BigEndian_tag> type; };
+
+} // namespace mpt
+
+
 
 // Small helper class to support unaligned memory access on all platforms.
 // This is only used to make old module loaders work everywhere.
