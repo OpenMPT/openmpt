@@ -914,7 +914,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		}
 	}
 
-	else if((GetBitDepth() == 8 || (GetBitDepth() == 16 && GetEndianness() == nativeEndian)) && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
+	else if((GetBitDepth() == 8 || (GetBitDepth() == 16 && GetEndianness() == GetNativeEndianness())) && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
 	{
 		// Stereo signed interleaved
 		if(f) mpt::IO::WriteRaw(*f, mpt::void_cast<const mpt::byte*>(pSampleVoid), len);
@@ -955,9 +955,10 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		int sinc = sample.GetElementarySampleSize();
 		int s_old = 0;
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
-#ifdef MPT_PLATFORM_LITTLE_ENDIAN
-		if (sample.uFlags[CHN_16BIT]) p++;
-#endif
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+		{
+			if (sample.uFlags[CHN_16BIT]) p++;
+		}
 
 		for (SmpLength j = 0; j < len; j++)
 		{
