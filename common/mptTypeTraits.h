@@ -112,6 +112,18 @@ template <> struct make_unsigned<unsigned long long> { typedef unsigned long lon
 #endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
 
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+
+using std::remove_const;
+
+#else // !MPT_COMPILER_HAS_TYPE_TRAITS
+
+template <typename T> struct remove_const { typedef T type; };
+template <typename T> struct remove_const<const T> { typedef T type; };
+
+#endif // MPT_COMPILER_HAS_TYPE_TRAITS
+
+
 // Tell which types are safe for mpt::byte_cast.
 // signed char is actually not allowed to alias into an object representation,
 // which means that, if the actual type is not itself signed char but char or
@@ -143,12 +155,12 @@ struct GetRawBytesFunctor
 {
 	inline const mpt::byte * operator () (const T & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 		return reinterpret_cast<const mpt::byte *>(&v);
 	}
 	inline mpt::byte * operator () (T & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 		return reinterpret_cast<mpt::byte *>(&v);
 	}
 };
@@ -158,13 +170,23 @@ struct GetRawBytesFunctor<T[N]>
 {
 	inline const mpt::byte * operator () (const T (&v)[N]) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 		return reinterpret_cast<const mpt::byte *>(v);
 	}
 	inline mpt::byte * operator () (T (&v)[N]) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 		return reinterpret_cast<mpt::byte *>(v);
+	}
+};
+
+template <typename T, std::size_t N>
+struct GetRawBytesFunctor<const T[N]>
+{
+	inline const mpt::byte * operator () (const T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		return reinterpret_cast<const mpt::byte *>(v);
 	}
 };
 
@@ -176,12 +198,12 @@ struct GetRawBytesFunctor<T[N]>
 // via on-demand generating a cached serialized representation.
 template <typename T> inline const mpt::byte * as_raw_memory(const T & v)
 {
-	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
 template <typename T> inline mpt::byte * as_raw_memory(T & v)
 {
-	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
 
