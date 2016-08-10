@@ -1,5 +1,5 @@
 /*
- * ModDoc.cpp
+ * Moddoc.cpp
  * ----------
  * Purpose: Module document handling in OpenMPT.
  * Notes  : (currently none)
@@ -18,7 +18,6 @@
 #include "Childfrm.h"
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
-#include "Dlsbank.h"
 #include "mod2wave.h"
 #include "ChannelManagerDlg.h"
 #include "MIDIMacroDialog.h"
@@ -234,134 +233,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 		);
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
-	// Midi Import
-	if (m_SndFile.m_nType == MOD_TYPE_MID)
-	{
-		CDLSBank *pCachedBank = NULL, *pEmbeddedBank = NULL;
-		mpt::PathString szCachedBankFile = MPT_PATHSTRING("");
 
-		if (CDLSBank::IsDLSBank(filename))
-		{
-			pEmbeddedBank = new CDLSBank();
-			pEmbeddedBank->Open(filename);
-		}
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
-		BeginWaitCursor();
-		MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
-		// Scan Instruments
-		for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
-		{
-			mpt::PathString pszMidiMapName;
-			ModInstrument *pIns = m_SndFile.Instruments[nIns];
-			UINT nMidiCode;
-			BOOL bEmbedded = FALSE;
-
-			if (pIns->nMidiChannel == 10)
-				nMidiCode = 0x80 | (pIns->nMidiDrumKey & 0x7F);
-			else
-				nMidiCode = pIns->nMidiProgram & 0x7F;
-			pszMidiMapName = midiLib.MidiMap[nMidiCode];
-			if (pEmbeddedBank)
-			{
-				UINT nDlsIns = 0, nDrumRgn = 0;
-				UINT nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
-				UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
-				if ((pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),
-													(pIns->wMidiBank & 0x3FFF),
-													nProgram, dwKey, &nDlsIns))
-				 || (pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),	0xFFFF,
-													(nMidiCode >= 128) ? 0xFF : nProgram,
-													dwKey, &nDlsIns)))
-				{
-					if (dwKey < 0x80) nDrumRgn = pEmbeddedBank->GetRegionFromKey(nDlsIns, dwKey);
-					if (pEmbeddedBank->ExtractInstrument(m_SndFile, nIns, nDlsIns, nDrumRgn))
-					{
-						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
-						if ((dwKey >= 24) && (dwKey < 100))
-						{
-							mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
-						}
-						bEmbedded = TRUE;
-					}
-					else
-						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
-				}
-			}
-			if((!pszMidiMapName.empty()) && (!bEmbedded))
-			{
-				// Load From DLS Bank
-				if (CDLSBank::IsDLSBank(pszMidiMapName))
-				{
-					CDLSBank *pDLSBank = NULL;
-
-					if ((pCachedBank) && (!mpt::PathString::CompareNoCase(szCachedBankFile, pszMidiMapName)))
-					{
-						pDLSBank = pCachedBank;
-					} else
-					{
-						if (pCachedBank) delete pCachedBank;
-						pCachedBank = new CDLSBank;
-						szCachedBankFile = pszMidiMapName;
-						if (pCachedBank->Open(pszMidiMapName)) pDLSBank = pCachedBank;
-					}
-					if (pDLSBank)
-					{
-						UINT nDlsIns = 0, nDrumRgn = 0;
-						UINT nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
-						UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
-						if ((pDLSBank->FindInstrument(	(nMidiCode >= 128),
-														(pIns->wMidiBank & 0x3FFF),
-														nProgram, dwKey, &nDlsIns))
-						 || (pDLSBank->FindInstrument(	(nMidiCode >= 128), 0xFFFF,
-														(nMidiCode >= 128) ? 0xFF : nProgram,
-														dwKey, &nDlsIns)))
-						{
-							if (dwKey < 0x80) nDrumRgn = pDLSBank->GetRegionFromKey(nDlsIns, dwKey);
-							pDLSBank->ExtractInstrument(m_SndFile, nIns, nDlsIns, nDrumRgn);
-							pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
-							if ((dwKey >= 24) && (dwKey < 24+61))
-							{
-								mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey-24]);
-							}
-						}
-					}
-				} else
-				{
-					// Load from Instrument or Sample file
-					InputFile f;
-
-					if(f.Open(pszMidiMapName))
-					{
-						FileReader file = GetFileReader(f);
-						if(file.IsValid())
-						{
-							m_SndFile.ReadInstrumentFromFile(nIns, file, false);
-							mpt::PathString szName, szExt;
-							pszMidiMapName.SplitPath(nullptr, nullptr, &szName, &szExt);
-							szName += szExt;
-							pIns = m_SndFile.Instruments[nIns];
-							if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName.ToLocale().c_str());
-							if (!pIns->name[0])
-							{
-								if (nMidiCode < 128)
-								{
-									mpt::String::CopyN(pIns->name, szMidiProgramNames[nMidiCode]);
-								} else
-								{
-									UINT nKey = nMidiCode & 0x7F;
-									if (nKey >= 24)
-										mpt::String::CopyN(pIns->name, szMidiPercussionNames[nKey - 24]);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (pCachedBank) delete pCachedBank;
-		if (pEmbeddedBank) delete pEmbeddedBank;
-		EndWaitCursor();
-	}
 	// Convert to MOD/S3M/XM/IT
 	switch(m_SndFile.GetType())
 	{

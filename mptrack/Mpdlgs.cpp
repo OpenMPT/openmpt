@@ -1863,7 +1863,7 @@ void CMidiSetupDlg::OnOK()
 	GetDlgItemText(IDC_EDIT4, cc);
 	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(cc.GetString());
 
-	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(GetDlgItemInt(IDC_EDIT1), uint8(1), uint8(16)));
+	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(GetDlgItemInt(IDC_EDIT1), uint8(2), uint8(16)));
 	TrackerSettings::Instance().midiImportPatternLen = Clamp(GetDlgItemInt(IDC_EDIT2), ROWINDEX(1), MAX_PATTERN_ROWS);
 	if(m_Quantize.GetCurSel() != -1)
 	{
