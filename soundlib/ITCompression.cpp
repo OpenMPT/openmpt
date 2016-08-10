@@ -9,7 +9,7 @@
  */
 
 
-#include <stdafx.h>
+#include "stdafx.h"
 #include <ostream>
 #include "ITCompression.h"
 #include "../common/misc_util.h"
