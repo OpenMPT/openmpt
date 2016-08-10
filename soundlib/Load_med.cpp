@@ -856,7 +856,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			ModCommand *p = Patterns[iBlk];
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 8);
 			uint32 maxlen = tracks*lines*4;
-			if (maxlen + dwPos > dwMemLength - 8) break;
+			if (maxlen + dwPos > dwMemLength - 8 || p == nullptr) break;
 			for (uint32 y=0; y<lines; y++)
 			{
 				for (uint32 x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
