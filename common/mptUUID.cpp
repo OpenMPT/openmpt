@@ -241,10 +241,6 @@ mpt::UUID UUIDFromWin32(::UUID uuid)
 
 UUID::UUID(::UUID uuid)
 {
-	Data1 = 0;
-	Data2 = 0;
-	Data3 = 0;
-	Data4 = 0;
 	*this = UUIDFromWin32(uuid);
 }
 
