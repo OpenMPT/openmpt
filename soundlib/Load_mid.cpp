@@ -2,9 +2,8 @@
  * Load_mid.cpp
  * ------------
  * Purpose: MIDI file loader
- * Notes  : MIDI import is pretty crappy.
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -12,6 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "Dlsbank.h"
+#include "MIDIEvents.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
@@ -20,76 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MODPLUG_TRACKER
 
-#pragma warning(disable:4244)
-//#define MIDI_LOG
-
-#ifdef MIDI_LOG
-//#define MIDI_DETAILED_LOG
-#endif
-
 #define MIDI_DRUMCHANNEL	10
-
-//uint32 gnMidiImportSpeed = 3;
-//uint32 gnMidiPatternLen = 128;
-
-struct MIDIFILEHEADER
-{
-	char     id[4];		// "MThd" = 0x6468544D
-	uint32be len;		// 6
-	uint16be w1;		// 1?
-	uint16be wTrks;		// 2?
-	uint16be wDivision;	// F0
-};
-
-MPT_BINARY_STRUCT(MIDIFILEHEADER, 14)
-
-struct MIDITRACKHEADER
-{
-	char     id[4];	// "MTrk"
-	uint32be len;
-};
-
-MPT_BINARY_STRUCT(MIDITRACKHEADER, 8)
-
-//////////////////////////////////////////////////////////////////////
-// Midi Loader Internal Structures
-
-#define CHNSTATE_NOTEOFFPENDING		0x0001
-
-// MOD Channel State description (current volume, panning, etc...)
-struct MODCHANNELSTATE
-{
-	uint32 flags;	// Channel Flags
-	uint16 idlecount;
-	uint16 pitchsrc, pitchdest;	// Pitch Bend (current position/new position)
-	uint8 parent;	// Midi Channel parent
-	uint8 pan;		// Channel Panning			0-255
-	uint8 note;		// Note On # (0=available)
-};
-
-// MIDI Channel State (Midi Channels 0-15)
-struct MIDICHANNELSTATE
-{
-	uint32 flags;		// Channel Flags
-	uint16 pitchbend;		// Pitch Bend Amount (14-bits unsigned)
-	uint8 note_on[128];	// If note=on -> MOD channel # + 1 (0 if note=off)
-	uint8 program;		// Channel Midi Program
-	uint16 bank;			// 0-16383
-	// -- Controllers --------- function ---------- CC# --- range  --- init (midi) ---
-	uint8 pan;			// Channel Panning			CC10	[0-255]		128 (64)
-	uint8 expression;	// Channel Expression		CC11	0-128		128	(127)
-	uint8 volume;		// Channel Volume			CC7		0-128		80	(100)
-	uint8 modulation;	// Modulation				CC1		0-127		0
-	uint8 pitchbendrange;// Pitch Bend Range								64
-};
-
-struct MIDITRACK
-{
-	const uint8 *ptracks, *ptrmax;
-	uint32 status;
-	int32 nexteventtime;
-};
-
 
 extern const char *szMidiGroupNames[17] =
 {
@@ -329,86 +260,27 @@ extern const char *szMidiPercussionNames[61] =
 };
 
 
-///////////////////////////////////////////////////////////////////////////
-// Helper functions
-
-// Convert a variable-length MIDI integer held in the byte buffer <value> to a normal integer <result>.
-// maxLength bytes are read from the byte buffer at max.
-// Function returns how many bytes have been read.
-template <class TOut>
-static size_t ConvertMIDI2Int(TOut &result, uint8 *value, size_t maxLength)
-//-------------------------------------------------------------------------
-{
-	static_assert(std::numeric_limits<TOut>::is_integer == true, "Output type is a not an integer");
-
-	if(maxLength <= 0)
-	{
-		result = 0;
-		return 0;
-	}
-	size_t bytesUsed = 0;
-	result = 0;
-	uint8 b;
-	do
-	{
-		b = *value;
-		result <<= 7;
-		result |= (b & 0x7F);
-		value++;
-	} while (++bytesUsed < maxLength && (b & 0x80) != 0);
-	return bytesUsed;
-}
-
-// Returns MOD tempo and tick multiplier
-static int ConvertMidiTempo(int tempo_us, int &tickMultiplier, int importSpeed)
-//-----------------------------------------------------------------------------
-{
-	int nBestModTempo = 120;
-	int nBestError = 1000000; // 1s
-	int nBestMultiplier = 1;
-	int nSpeed = importSpeed;
-	for (int nModTempo=110; nModTempo<=240; nModTempo++)
-	{
-		int tick_us = (2500000) / nModTempo;
-		int nFactor = (tick_us+tempo_us/2) / tempo_us;
-		if (!nFactor) nFactor = 1;
-		int nError = tick_us - tempo_us * nFactor;
-		if (nError < 0) nError = -nError;
-		if (nError < nBestError)
-		{
-			nBestError = nError;
-			nBestModTempo = nModTempo;
-			nBestMultiplier = nFactor;
-		}
-		if ((!nError) || ((nError<=1) && (nFactor==64))) break;
-	}
-	tickMultiplier = nBestMultiplier * nSpeed;
-	return nBestModTempo;
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // Maps a midi instrument - returns the instrument number in the file
-uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint32 nNote)
-//---------------------------------------------------------------------------------------
+uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note)
+//---------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns;
-	uint32 nProgram = dwBankProgram & 0x7F;
-	uint32 nBank = dwBankProgram >> 7;
+	program &= 0x7F;
+	bank &= 0x3FFF;;
+	note &= 0x7F;
 
-	nNote &= 0x7F;
-	if (nNote >= NOTE_MAX) return 0;
-	for (uint32 i=1; i<=m_nInstruments; i++) if (Instruments[i])
+	for (uint32 i = 1; i <= m_nInstruments; i++) if (Instruments[i])
 	{
 		ModInstrument *p = Instruments[i];
 		// Drum Kit ?
-		if (nChannel == MIDI_DRUMCHANNEL)
+		if (midiChannel == MIDI_DRUMCHANNEL)
 		{
-			if (nNote == p->nMidiDrumKey) return i;
+			if (note == p->nMidiDrumKey) return i;
 		} else
 		// Melodic Instrument
 		{
-			if (nProgram + 1 == p->nMidiProgram && p->nMidiDrumKey == 0) return i;
+			if (program + 1 == p->nMidiProgram && p->nMidiDrumKey == 0) return i;
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
@@ -421,18 +293,18 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 
 	m_nSamples++;
 	m_nInstruments++;
-	pIns->wMidiBank = nBank;
-	pIns->nMidiProgram = nProgram + 1;
-	pIns->nMidiChannel = nChannel;
-	if (nChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = nNote;
+	pIns->wMidiBank = bank;
+	pIns->nMidiProgram = program + 1;
+	pIns->nMidiChannel = midiChannel;
+	if (midiChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = note;
 	pIns->nFadeOut = 1024;
 	pIns->nNNA = NNA_NOTEOFF;
-	pIns->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
+	pIns->nDCT = (midiChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
 	for (uint32 j=0; j<NOTE_MAX; j++)
 	{
-		int mapnote = j+1;
-		if (nChannel == MIDI_DRUMCHANNEL)
+		int mapnote = j + 1;
+		if (midiChannel == MIDI_DRUMCHANNEL)
 		{
 			mapnote = NOTE_MIDDLEC;
 			/*mapnote = 61 + j - nNote;
@@ -443,7 +315,7 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 		pIns->NoteMap[j] = (uint8)mapnote;
 	}
 	pIns->VolEnv.dwFlags.set(ENV_ENABLED);
-	if (nChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
+	if (midiChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
 	pIns->VolEnv.reserve(4);
 	pIns->VolEnv.push_back(EnvelopeNode(0, ENVELOPE_MAX));
 	pIns->VolEnv.push_back(EnvelopeNode(10, ENVELOPE_MAX));
@@ -454,16 +326,16 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 	Samples[m_nSamples].nPan = 128;
 	Samples[m_nSamples].nVolume = 256;
 	Samples[m_nSamples].nGlobalVol = 64;
-	if (nChannel != MIDI_DRUMCHANNEL)
+	if (midiChannel != MIDI_DRUMCHANNEL)
 	{
 		// GM Midi Name
-		strcpy(pIns->name, szMidiProgramNames[nProgram]);
-		strcpy(m_szNames[m_nSamples], szMidiProgramNames[nProgram]);
+		strcpy(pIns->name, szMidiProgramNames[program]);
+		strcpy(m_szNames[m_nSamples], szMidiProgramNames[program]);
 	} else
 	{
 		strcpy(pIns->name, "Percussions");
-		if ((nNote >= 24) && (nNote <= 84))
-			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[nNote-24]);
+		if ((note >= 24) && (note <= 84))
+			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[note-24]);
 		else
 			strcpy(m_szNames[m_nSamples], "Percussions");
 	}
@@ -471,22 +343,197 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 }
 
 
-/////////////////////////////////////////////////////////////////
-// Loader Status
-#define MIDIGLOBAL_SONGENDED		0x0001
-#define MIDIGLOBAL_FROZEN			0x0002
-#define MIDIGLOBAL_UPDATETEMPO		0x0004
-#define MIDIGLOBAL_UPDATEMASTERVOL	0x0008
-// Midi Globals
-#define MIDIGLOBAL_GMSYSTEMON		0x0100
-#define MIDIGLOBAL_XGSYSTEMON		0x0200
+struct MThd
+{
+	uint32be headerLength;
+	uint16be format;		// 0 = single-track, 1 = multi-track, 2 = multi-song
+	uint16be numTracks;		// Number of track chunks
+	int16be  division;		// Delta timing value: positive = units/beat; negative = smpte compatible units (?)
+};
+
+MPT_BINARY_STRUCT(MThd, 10);
+
+
+typedef uint32 tick_t;
+
+struct TrackState
+{
+	FileReader track;
+	tick_t nextEvent;
+	uint8 command;
+	bool finished;
+
+	TrackState()
+		: nextEvent(0)
+		, command(0)
+		, finished(false)
+	{ }
+};
+
+struct ModChannelState
+{
+	tick_t age;
+	int16 porta;
+	uint8 vol;
+	uint8 pan;
+	uint8 instr;
+	uint8 midiCh;
+	ModCommand::NOTE note;
+
+	ModChannelState()
+		: age(0)
+		, porta(0x2000)
+		, vol(127)
+		, pan(128)
+		, instr(0)
+		, midiCh(0xFF)
+		, note(NOTE_NONE)
+	{ }
+};
+
+struct MidiChannelState
+{
+	uint16 pitchbend;	// 0...16383
+	uint16 bank;		// 0...16383
+	uint8 program;		// 0...127
+	// -- Controllers ------------- function ---------- CC# --- range  ---- init (midi) ---
+	uint8 pan;             // Channel Panning           CC10    [0-255]     128  (64)
+	uint8 expression;      // Channel Expression        CC11    0-128       128  (127)
+	uint8 volume;          // Channel Volume            CC7     0-128       80   (100)
+	uint8 modulation;      // Modulation                CC1     0-127       0
+	uint8 pitchBendRange;  // Pitch Bend Range                              2
+	bool  monoMode;        // Mono/Poly operation       CC126/127           Poly
+	uint8 rpnState;	// Current state of RPN CCs
+
+	CHANNELINDEX noteOn[128];	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
+
+	MidiChannelState()
+		: pitchbend(0x2000)
+		, bank(0)
+		, program(0)
+		, pan(128)
+		, expression(128)
+		, volume(80)
+		, modulation(0)
+		, pitchBendRange(2)
+		, rpnState(0)
+		, monoMode(false)
+	{
+		for(size_t i = 0; i < CountOf(noteOn); i++)
+		{
+			noteOn[i] = CHANNELINDEX_INVALID;
+		}
+	}
+};
+
+
+static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const std::vector<ModChannelState> &channels, bool monoMode, PatternRow patRow)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	size_t anyFreeChannel = CHANNELINDEX_INVALID;
+
+	size_t oldsetMidiCh = CHANNELINDEX_INVALID;
+	tick_t oldestMidiChAge = 0;
+
+	size_t oldestAnyCh = 0;
+	tick_t oldestAnyChAge = 0;
+
+	for(size_t i = 0; i < channels.size(); i++)
+	{
+		// Check if this note is already playing, or find any note of the same MIDI channel in case of mono mode
+		if(channels[i].midiCh == midiCh && (channels[i].note == note || (monoMode && channels[i].note != NOTE_NONE)))
+		{
+			return static_cast<CHANNELINDEX>(i);
+		}
+
+		// If we can't find any free channels, look for the oldest channels
+		if(channels[i].midiCh == midiCh && channels[i].age > oldestMidiChAge)
+		{
+			// Oldest channel matching this MIDI channel
+			oldestMidiChAge = channels[i].age;
+			oldsetMidiCh = i;
+		}
+		if(channels[i].age > oldestAnyChAge)
+		{
+			// Any oldest channel
+			oldestAnyChAge = channels[i].age;
+			oldestAnyCh = i;
+		}
+	}
+
+	for(size_t i = 0; i < channels.size(); i++)
+	{
+		// Try grouping output into four pattern channels per MIDI channel
+		CHANNELINDEX j = static_cast<CHANNELINDEX>((i + midiCh * 4) % channels.size());
+		if(channels[j].note == NOTE_NONE && !patRow[j].IsNote())
+		{
+			// Recycle channel previously used by the same MIDI channel
+			if(channels[j].midiCh == midiCh)
+				return j;
+			if(anyFreeChannel == CHANNELINDEX_INVALID)
+				anyFreeChannel = j;
+		}
+	}
+	if(anyFreeChannel != CHANNELINDEX_INVALID)
+		return static_cast<CHANNELINDEX>(anyFreeChannel);
+	if(oldsetMidiCh != CHANNELINDEX_INVALID)
+		return static_cast<CHANNELINDEX>(oldsetMidiCh);
+	return static_cast<CHANNELINDEX>(oldestAnyCh);
+}
+
+
+static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, PatternRow patRow)
+//----------------------------------------------------------------------------------------------------------------------------------------
+{
+	CHANNELINDEX chn = midiChn.noteOn[note];
+	if(chn == CHANNELINDEX_INVALID)
+		return;
+
+	uint8 midiCh = modChnStatus[chn].midiCh;
+	modChnStatus[chn].note = NOTE_NONE;
+	midiChn.noteOn[note] = CHANNELINDEX_INVALID;
+	ModCommand &m = patRow[chn];
+	if(m.note == NOTE_NONE)
+	{
+		m.note = NOTE_KEYOFF;
+		if(delay != 0)
+		{
+			m.command = CMD_S3MCMDEX;
+			m.param = 0xD0 | delay;
+		}
+	} else if(m.IsNote() && midiCh != (MIDI_DRUMCHANNEL - 1))
+	{
+		if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xD0)
+		{
+			// Already have a note delay
+			m.command = CMD_DELAYCUT;
+			m.param = (m.param << 4) | (delay - (m.param & 0x0F));
+		} else if(m.command == CMD_NONE || m.command == CMD_PANNING8)
+		{
+			m.command = CMD_S3MCMDEX;
+			m.param = 0xC0 | delay;
+		}
+	}
+}
+
+
+static void EnterMIDIVolume(ModCommand &m, ModChannelState &modChn, const MidiChannelState &midiChn)
+//--------------------------------------------------------------------------------------------------
+{
+	m.volcmd = VOLCMD_VOLUME;
+
+	int32 vol = CDLSBank::DLSMidiVolumeToLinear(modChn.vol) >> 8;
+	vol = (vol * midiChn.volume * midiChn.expression) >> 13;
+	Limit(vol, 4, 256);
+	m.vol = static_cast<ModCommand::VOL>(vol / 4);
+}
 
 
 bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
-	
+
 	// Microsoft MIDI files
 	if(file.ReadMagic("RIFF"))
 	{
@@ -500,23 +547,20 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		do
 		{
-			uint32 id = file.ReadUint32LE();
+			char id[4];
+			file.ReadArray(id);
 			uint32 length = file.ReadUint32LE();
-			if(memcmp(&id, "data", 4))
+			if(memcmp(id, "data", 4))
 			{
 				file.Skip(length);
 			} else
 			{
-				file = file.ReadChunk(length);
 				break;
 			}
 		} while(file.BytesLeft());
 	}
 
-	MIDIFILEHEADER pmfh;
-	if(!file.ReadStruct(pmfh)
-		|| memcmp(pmfh.id, "MThd", 4)
-		|| !file.Seek(8 + pmfh.len))
+	if(!file.ReadMagic("MThd"))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -524,705 +568,485 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	const FileReader::off_t dwMemLength = file.BytesLeft();
-	const uint8 *lpStream = file.GetRawData<uint8>();
+	MThd fileHeader;
+	if(!file.ReadStruct(fileHeader)
+		|| !file.Skip(fileHeader.headerLength - 6))
+	{
+		return false;
+	}
 
-	const MIDITRACKHEADER *pmth;
-	MODCHANNELSTATE chnstate[MAX_BASECHANNELS];
-	MIDICHANNELSTATE midichstate[16];
-	std::vector<MIDITRACK> miditracks;
-	FileReader::off_t dwMemPos = 0;
-	uint32 dwGlobalFlags, tracks, tempo;
-	uint32 row, pat, midimastervol;
-	short int division;
-	int midi_clock, nTempoUsec, nPPQN, nTickMultiplier;
+	InitializeGlobals(MOD_TYPE_MID);
+	InitializeChannels();
 
 #ifdef MODPLUG_TRACKER
-	int importSpeed = TrackerSettings::Instance().midiImportSpeed;
-	ROWINDEX importPatternLen = TrackerSettings::Instance().midiImportPatternLen;
+	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 1u, 256u);
+	const ROWINDEX patternLen = Clamp(TrackerSettings::Instance().midiImportPatternLen.Get(), ROWINDEX(1), MAX_PATTERN_ROWS);
+	const uint8 ticksPerRow = Clamp(TrackerSettings::Instance().midiImportTicks.Get(), uint8(1), uint8(16));
 #else
-	int importSpeed = 3;
-	ROWINDEX importPatternLen = 128;
-#endif // MODPLUG_TRACKER
+	const uint32 quantize = 32;
+	const ROWINDEX patternLen = 128;
+	const uint8 ticksPerRow = 16;	// Must be in range 1...16
+#endif
 
-	// Fix import parameters
-	Limit(importSpeed, 2, 6);
-	Limit(importPatternLen, ROWINDEX(1), MAX_PATTERN_ROWS);
-
-	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
-	tracks = pmfh.wTrks;
-	if (memcmp(pmth->id, "MTrk", 4) || (!tracks)) return false;
-	else if(loadFlags == onlyVerifyHeader) return true;
-	miditracks.resize(tracks);
-
-	// Reading File...
-	InitializeGlobals(MOD_TYPE_MID);
-	m_nChannels = 32;
+	m_songArtist = MPT_USTRING("MIDI Conversion");
+	m_nTempoMode = tempoModeModern;
 	m_SongFlags = SONG_LINEARSLIDES;
+	m_nDefaultTempo.Set(120);
+	m_nDefaultSpeed = ticksPerRow;
+	m_nChannels = 64;
+	m_nDefaultRowsPerBeat = quantize / 4;
+	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
+	TEMPO tempo = m_nDefaultTempo;
+	uint16 ppqn = fileHeader.division;
+	if(ppqn < 0)
+	{
+		int frames = -(ppqn >> 8), subFrames = (ppqn & 0xFF);
+		ppqn = static_cast<uint16>(frames * subFrames / 2);
+	}
+	if(!ppqn)
+		ppqn = 96;
+	Order.clear();
 
-	// MIDI->MOD Tempo Conversion
-	division = pmfh.wDivision;
-	if (division < 0)
+	MidiChannelState midiChnStatus[16];
+	const uint16 numTracks = fileHeader.numTracks;
+	std::vector<TrackState> tracks(numTracks);
+	std::vector<ModChannelState> modChnStatus(m_nChannels);
+	std::map<uint8, INSTRUMENTINDEX> modInstrument;
+
+	for(uint16 t = 0; t < numTracks; t++)
 	{
-		int nFrames = -(division>>8);
-		int nSubFrames = (division & 0xff);
-		nPPQN = nFrames * nSubFrames / 2;
-		if (!nPPQN) nPPQN = 1;
-	} else
-	{
-		nPPQN = (division) ? division : 96;
+		if(!file.ReadMagic("MTrk"))
+			return false;
+		tracks[t].track = file.ReadChunk(file.ReadUint32BE());
+		tick_t delta = 0;
+		tracks[t].track.ReadVarInt(delta);
+		tracks[t].nextEvent = delta;
 	}
-	nTempoUsec = 500000 / nPPQN;
-	tempo = ConvertMidiTempo(nTempoUsec, nTickMultiplier, importSpeed);
-	m_nDefaultTempo.Set(tempo);
-	m_nDefaultSpeed = importSpeed;
-	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	midimastervol = m_nDefaultGlobalVolume;
-	
-#ifdef MIDI_LOG
-	Log("%d tracks, tempo = %dus, division = %04X TickFactor=%d\n", tracks, nTempoUsec, ((uint32)division) & 0xFFFF, nTickMultiplier);
-#endif
-	// Initializing 
-	Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
-	MemsetZero(chnstate);
-	MemsetZero(midichstate);
-	// Initializing Patterns
-	Order[0] = 0;
-	// Initializing Channels
-	for (uint32 ics=0; ics<MAX_BASECHANNELS; ics++)
+
+	uint16 finishedTracks = 0;
+	while(finishedTracks < numTracks)
 	{
-		// Channel settings
-		ChnSettings[ics].Reset();
-		// Channels state
-		chnstate[ics].pan = 128;
-		chnstate[ics].pitchsrc = 0x2000;
-		chnstate[ics].pitchdest = 0x2000;
-	}
-	// Initializing Track Pointers
-	for (uint32 itrk=0; itrk<tracks; itrk++)
-	{
-		miditracks[itrk].nexteventtime = -1;
-		miditracks[itrk].status = 0x2F;
-		pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
-		if (dwMemPos + 8 >= dwMemLength) break;
-		uint32 len = pmth->len;
-		if (!memcmp(pmth->id, "MTrk", 4) && (len <= dwMemLength - (dwMemPos + 8)))
+		uint16 t = 0;
+		tick_t tick = Util::MaxValueOfType(tick);
+		for(uint16 track = 0; track < numTracks; track++)
 		{
-#ifdef MIDI_DETAILED_LOG
-			Log(" track%d at offset %d len=%d ", itrk, dwMemPos+8, len);
-#endif
-			// Initializing midi tracks
-			miditracks[itrk].ptracks = lpStream+dwMemPos+8;
-			miditracks[itrk].ptrmax = miditracks[itrk].ptracks + len;
-			miditracks[itrk].ptracks += ConvertMIDI2Int(miditracks[itrk].nexteventtime, (uint8 *)miditracks[itrk].ptracks, len);
-#ifdef MIDI_DETAILED_LOG
-			Log(" init time=%d\n", miditracks[itrk].nexteventtime);
-#endif
-		}
-		dwMemPos += 8 + len;
-	}
-#ifdef MIDI_LOG
-	Log("\n");
-#endif
-	// Initializing midi channels state
-	for (uint32 imidi=0; imidi<16; imidi++)
-	{
-		midichstate[imidi].pan = 128;			// middle
-		midichstate[imidi].expression = 128;	// no attenuation
-		midichstate[imidi].volume = 80;			// GM specs defaults to 100
-		midichstate[imidi].pitchbend = 0x2000;	// Pitch Bend Amount
-		midichstate[imidi].pitchbendrange = 64;	// Pitch Bend Range: +/- 2 semitones
-	}
-	////////////////////////////////////////////////////////////////////////////
-	// Main Midi Sequencer Loop
-	pat = 0;
-	row = 0;
-	midi_clock = 0;
-	dwGlobalFlags = MIDIGLOBAL_UPDATETEMPO | MIDIGLOBAL_FROZEN;
-	do
-	{
-		// Allocate current pattern if not allocated yet
-		if (!Patterns[pat] && !Patterns.Insert(pat, importPatternLen))
-		{
-			break;
-		}
-		dwGlobalFlags |= MIDIGLOBAL_SONGENDED;
-		ModCommand *m = Patterns[pat] + row * m_nChannels;
-		// Parse Tracks
-		for (uint32 trk=0; trk<tracks; trk++) if (miditracks[trk].ptracks)
-		{
-			MIDITRACK *ptrk = &miditracks[trk];
-			dwGlobalFlags &= ~MIDIGLOBAL_SONGENDED;
-			while ((ptrk->ptracks) && (ptrk->nexteventtime >= 0) && (midi_clock+(nTickMultiplier>>2) >= ptrk->nexteventtime))
+			if(!tracks[track].finished && tracks[track].nextEvent < tick)
 			{
-				if (ptrk->ptracks[0] & 0x80) ptrk->status = *(ptrk->ptracks++);
-			#ifdef MIDI_DETAILED_LOG
-				Log("status: %02X\n", ptrk->status);
-			#endif
-				switch(ptrk->status)
+				tick = tracks[track].nextEvent;
+				t = track;
+			}
+		}
+		FileReader &track = tracks[t].track;
+
+		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow / 4u, ppqn), modTicksRounded = ((modTicks + 8u) / ticksPerRow);
+
+		PATTERNINDEX pat = static_cast<PATTERNINDEX>((modTicks / ticksPerRow) / patternLen);
+		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
+		uint8 delay = static_cast<uint8>(modTicks % ticksPerRow);
+
+		PATTERNINDEX patRounded = static_cast<PATTERNINDEX>(modTicksRounded / patternLen);
+		ROWINDEX rowRounded = modTicksRounded % patternLen;
+
+		if(patRounded >= Order.size())
+		{
+			ORDERINDEX curSize = Order.size();
+			Order.resize(patRounded + 1);
+			for(ORDERINDEX ord = curSize;  ord <= patRounded; ord++)
+			{
+				Order[ord] = ord;
+				if(!Patterns.IsValidPat(ord) && !Patterns.Insert(ord, patternLen))
 				{
-				/////////////////////////////////////////////////////////////////////
-				// End Of Track
-				case 0x2F:
-				// End Of Song
-				case 0xFC:
-#ifdef MIDI_LOG
-					Log("track %d: EOT code 0x%02X\n", trk, ptrk->status);
-#endif
-					ptrk->ptracks = NULL;
 					break;
+				}
+			}
+			if(!Patterns.IsValidPat(patRounded))
+				break;
+		}
+		PatternRow patRow = Patterns[pat].GetRow(row);
 
-				/////////////////////////////////////////////////////////////////////
-				// SYSEX messages
-				case 0xF0:
-				case 0xF7:
+		uint8 data1 = track.ReadUint8();
+		if(data1 == 0xFF)
+		{
+			data1 = track.ReadUint8();
+			size_t len = 0;
+			track.ReadVarInt(len);
+			FileReader chunk = track.ReadChunk(len);
+
+			switch(data1)
+			{
+			case 1:	// Text
+				break;
+			case 2:	// Copyright
+				m_songMessage.Read(chunk, len, SongMessage::leAutodetect);
+				break;
+			case 3:	// Track Name
+				{
+					//std::string s;
+					//chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
+					//m_songArtist = mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, s);
+					chunk.ReadString<mpt::String::maybeNullTerminated>(m_songName, len);
+				}
+				break;
+			case 4:	// Instrument
+			case 5:	// Lyric
+				break;
+			case 6:	// Marker
+			case 7:	// Cue point
+				{
+					std::string s;
+					chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
+					Patterns[pat].SetName(s);
+				}
+				break;
+			case 8:	// Patch name
+			case 9:	// Port name
+				break;
+			case 0x2F:
+				Log("Track end");
+				break;
+			case 0x58: // Time Signature
+				{
+					int nn = chunk.ReadUint8();
+					int dd = chunk.ReadUint8();
+					int cc = chunk.ReadUint8();
+					int bb = chunk.ReadUint8();
+					Log("Time sig: %d:%d, metronome:%d, quarter:%d\n",nn,dd,cc,bb);
+				}
+				break;
+			case 0x59: // Key Signature
+				{
+					int sf = chunk.ReadInt8();
+					int mi = chunk.ReadUint8();
+					Log("Key sig: %d %s, %s\n",abs(sf),sf == 0?"c":(sf < 0 ? "flat":"sharp"), mi?"minor":"major");
+				}
+				break;
+			case 0x51: // Tempo
+				{
+					uint32 t = (chunk.ReadUint8() << 16) | (chunk.ReadUint8() << 8) | chunk.ReadUint8();
+					if(t == 0)
+						break;
+					TEMPO newTempo(60000000.0 / t);
+					if(!tick)
 					{
-						LONG len;
-						ptrk->ptracks += ConvertMIDI2Int(len, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
-						if ((len > 1) && (ptrk->ptracks + len <ptrk->ptrmax) && (ptrk->ptracks[len-1] == 0xF7))
+						m_nDefaultTempo = newTempo;
+					}
+					if(newTempo != tempo)
+					{
+						tempo = newTempo;
+						Patterns[patRounded].WriteEffect(EffectWriter(CMD_TEMPO, Util::Round<ModCommand::PARAM>(tempo.ToDouble())).Row(rowRounded));
+					}
+				}
+				break;
+
+			default:
+				printf("meta command %02x %d\n", data1, len);
+				break;
+			}
+		} else
+		{
+			if(data1 & 0x80)
+			{
+				// Command byte (if not present, repeat previous command byte)
+				tracks[t].command = data1;
+				if(data1 < 0xF0)
+					data1 = track.ReadUint8();
+			}
+			uint8 midiCh = tracks[t].command & 0x0F;
+
+			switch(tracks[t].command & 0xF0)
+			{
+			case 0x80: // Note Off
+			case 0x90: // Note On
+				{
+					data1 &= 0x7F;
+					ModCommand::NOTE note = static_cast<ModCommand::NOTE>(Clamp(data1 + NOTE_MIN, NOTE_MIN, NOTE_MAX));
+					uint8 data2 = track.ReadUint8();
+					if(data2 > 0 && (tracks[t].command & 0xF0) == 0x90)
+					{
+						// Note On
+						CHANNELINDEX chn = FindUnusedChannel(midiCh, note, modChnStatus, midiChnStatus[midiCh].monoMode, patRow);
+						if(chn != CHANNELINDEX_INVALID)
 						{
-							uint32 dwSysEx1 = 0, dwSysEx2 = 0;
-							if (len >= 4) dwSysEx1 = (*((uint32 *)(ptrk->ptracks))) & 0x7F7F7F7F;
-							if (len >= 8) dwSysEx2 = (*((uint32 *)(ptrk->ptracks+4))) & 0x7F7F7F7F;
-							// GM System On
-							if ((len == 5) && (dwSysEx1 == 0x01097F7E))
+							modChnStatus[chn].note = note;
+							modChnStatus[chn].midiCh = midiCh;
+							modChnStatus[chn].vol = data2;
+							midiChnStatus[midiCh].noteOn[data1] = chn;
+							int32 pitchOffset = 0;
+							if(midiChnStatus[midiCh].pitchbend != 0x2000)
 							{
-								dwGlobalFlags |= MIDIGLOBAL_GMSYSTEMON;
+								pitchOffset = Util::muldivr(midiChnStatus[midiCh].pitchbend - 0x2000, midiChnStatus[midiCh].pitchBendRange, 0x2000);
+								modChnStatus[chn].porta = static_cast<uint16>(0x2000 + Util::muldivr(pitchOffset, 0x2000, midiChnStatus[midiCh].pitchBendRange));
 							} else
-							// XG System On
-							if ((len == 8) && ((dwSysEx1 & 0xFFFFF0FF) == 0x004c1043) && (dwSysEx2 == 0x77007e00))
 							{
-								dwGlobalFlags |= MIDIGLOBAL_XGSYSTEMON;
-							} else
-							// Midi Master Volume
-							if ((len == 7) && (dwSysEx1 == 0x01047F7F))
-							{
-								midimastervol = CDLSBank::DLSMidiVolumeToLinear(ptrk->ptracks[5] & 0x7F) >> 8;
-								if (midimastervol < 16) midimastervol = 16;
-								dwGlobalFlags |= MIDIGLOBAL_UPDATEMASTERVOL;
+								modChnStatus[chn].porta = 0x2000;
 							}
-#ifdef MIDI_LOG
-							else
+							patRow[chn].note = static_cast<ModCommand::NOTE>(Clamp(note + pitchOffset, NOTE_MIN, NOTE_MAX));
+							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1));
+							EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
+
+							if(delay != 0)
 							{
-								Log("track %d: SYSEX len=%d: F0", trk, len);
-								for (uint32 k=0; k<(uint32)len; k++)
-								{
-									Log(".%02X", ptrk->ptracks[k]);
-									if (k >= 40)
-									{
-										Log("..");
-										break;
-									}
-								}
-								Log("\n");
+								patRow[chn].command = CMD_S3MCMDEX;
+								patRow[chn].param = 0xD0 | delay;
 							}
-#endif
+							if(modChnStatus[chn].pan != midiChnStatus[midiCh].pan && patRow[chn].command == CMD_NONE)
+							{
+								patRow[chn].command = CMD_PANNING8;
+								patRow[chn].param = midiChnStatus[midiCh].pan;
+								modChnStatus[chn].pan = midiChnStatus[midiCh].pan;
+							}
 						}
-#ifdef MIDI_LOG
-						else Log("Invalid SYSEX received!\n");
-#endif
-						ptrk->ptracks += len;
+					} else
+					{
+						// Note Off
+						MIDINoteOff(midiChnStatus[midiCh], modChnStatus, data1, delay, patRow);
+					}
+					//Log("Note on: channel %d, Oct %d Note %s Velocity %d\n",command & 0xf, (data1/12)-1,note[data1%12], data2);
+				}
+				break;
+			case 0xA0: // Note Aftertouch
+				{
+					track.Skip(1);
+					//int data2 = track.ReadUint8();
+					//Log("Aftertouch: channel %d, Oct %d, Note %s Aftertouch %d\n",command & 0xf, (data1/12)-1,note[data1%12], data2);
+				}
+				break;
+			case 0xB0: // Controller
+				{
+					uint8 data2 = track.ReadUint8();
+					switch(data1)
+					{
+					case MIDIEvents::MIDICC_Panposition_Coarse:
+						midiChnStatus[midiCh].pan = data2 * 2u;
+						for(size_t i = 0; i < CountOf(midiChnStatus[midiCh].noteOn); i++)
+						{
+							CHANNELINDEX chn = midiChnStatus[midiCh].noteOn[i];
+							if(chn != CHANNELINDEX_INVALID)
+							{
+								if(Patterns[patRounded].WriteEffect(EffectWriter(CMD_PANNING8, midiChnStatus[midiCh].pan).Channel(chn).Row(rowRounded)))
+								{
+									modChnStatus[chn].pan = midiChnStatus[midiCh].pan;
+								}
+							}
+						}
+						break;
+
+					case MIDIEvents::MIDICC_DataEntry_Coarse:
+						if(midiChnStatus[midiCh].rpnState == 2)
+						{
+							midiChnStatus[midiCh].pitchBendRange = std::max(data2, uint8(1));
+						}
+						break;
+
+					case MIDIEvents::MIDICC_Volume_Coarse:
+						midiChnStatus[midiCh].volume = (uint8)(CDLSBank::DLSMidiVolumeToLinear(data2) >> 9);
+						for(size_t i = 0; i < CountOf(midiChnStatus[midiCh].noteOn); i++)
+						{
+							CHANNELINDEX chn = midiChnStatus[midiCh].noteOn[i];
+							if(chn != CHANNELINDEX_INVALID)
+							{
+								EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
+							}
+						}
+						break;
+
+					case MIDIEvents::MIDICC_Expression_Coarse:
+						midiChnStatus[midiCh].expression = (uint8)(CDLSBank::DLSMidiVolumeToLinear(data2) >> 9);
+						for(size_t i = 0; i < CountOf(midiChnStatus[midiCh].noteOn); i++)
+						{
+							CHANNELINDEX chn = midiChnStatus[midiCh].noteOn[i];
+							if(chn != CHANNELINDEX_INVALID)
+							{
+								EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
+							}
+						}
+						break;
+
+					case MIDIEvents::MIDICC_BankSelect_Coarse:
+						midiChnStatus[midiCh].bank &= 0x7F;
+						midiChnStatus[midiCh].bank |= (data2 << 7);
+						break;
+
+					case MIDIEvents::MIDICC_BankSelect_Fine:
+						midiChnStatus[midiCh].bank &= (0x7F << 7);
+						midiChnStatus[midiCh].bank |= data2;
+						break;
+
+					case MIDIEvents::MIDICC_RegisteredParameter_Fine:
+						if(data2 == 0)
+						{
+							midiChnStatus[midiCh].rpnState = 1;
+						}
+						break;
+					case MIDIEvents::MIDICC_RegisteredParameter_Coarse:
+						if(data2 == 0 && midiChnStatus[midiCh].rpnState == 1)
+						{
+							midiChnStatus[midiCh].rpnState = 2;
+						}
+						break;
+
+					case MIDIEvents::MIDICC_AllControllersOff:
+						midiChnStatus[midiCh].expression = 128;
+						midiChnStatus[midiCh].pitchbend = 0x2000;
+						midiChnStatus[midiCh].pitchBendRange = 2;
+						midiChnStatus[midiCh].rpnState = 0;
+						midiChnStatus[midiCh].modulation = 0;
+						// Should also reset pedals (40h-43h), NRP, RPN, aftertouch
+						break;
+
+						// Bn.78.00: All Sound Off (GS)
+						// Bn.7B.00: All Notes Off (GM)
+					case MIDIEvents::MIDICC_AllSoundOff:
+					case MIDIEvents::MIDICC_AllNotesOff:
+						if(data2 == 0x00)
+						{
+							// All Notes Off
+							for(uint8 note = 0; note < 128; note++)
+							{
+								MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow);
+							}
+						}
+					case MIDIEvents::MIDICC_MonoOperation:
+						midiChnStatus[midiCh].monoMode = true;
+						break;
+					case MIDIEvents::MIDICC_PolyOperation:
+						midiChnStatus[midiCh].monoMode = false;
+						break;
+					}
+
+					if((data1 != MIDIEvents::MIDICC_RegisteredParameter_Fine && data1 != MIDIEvents::MIDICC_RegisteredParameter_Coarse) || data2 != 0)
+					{
+						midiChnStatus[midiCh].rpnState = 0;
+					}
+				}
+				break;
+			case 0xC0: // Program Change
+				midiChnStatus[midiCh].program = data1 & 0x7F;
+				break;
+			case 0xD0: // Channel aftertouch
+				{
+					Log("Channel aftertouch: channel %d, Aftertouch %d\n",midiCh, data1);
+				}
+				break;
+			case 0xE0: // Pitch bend
+				midiChnStatus[midiCh].pitchbend = data1 | (track.ReadUint8() << 7);
+				break;
+			case 0xF0: // General / Immediate
+				switch(midiCh)
+				{
+				case MIDIEvents::sysExStart: // SysEx
+					{
+						uint32 len;
+						track.ReadVarInt(len);
+						FileReader sysex = track.ReadChunk(len);
+						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
+						{
+							uint16 globalVol = sysex.ReadUint8() | (sysex.ReadUint8() << 7);
+							Patterns[patRounded].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(globalVol, 128, 16383))).Row(rowRounded));
+						}
 					}
 					break;
-				
-				//////////////////////////////////////////////////////////////////////
-				// META-events: FF.code.len.data[len]
-				case 0xFF:
-					{
-						uint32 i = *(ptrk->ptracks++);
-						LONG len;
-						ptrk->ptracks += ConvertMIDI2Int(len, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
-						if (ptrk->ptracks+len > ptrk->ptrmax)
-						{
-							// EOF
-							ptrk->ptracks = NULL;
-						} else
-						switch(i)
-						{
-						// FF.01 [text]: Song Information
-						case 0x01:
-							if (!len) break;
-							if ((len < 32) && m_songName.empty())
-							{
-								mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, ptrk->ptracks, len);
-							} else
-							if (m_songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
-							{
-								m_songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
-							}
-							break;
-						// FF.02 [text]: Song Copyright
-						case 0x02:
-							if (!len) break;
-							if (m_songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
-							{
-								m_songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
-							}
-							break;
-						// FF.03: Sequence Name
-						case 0x03:
-						// FF.06: Sequence Text (->Pattern names)
-						case 0x06:
-							if ((len > 1) && (!trk))
-							{
-								std::string s;
-								mpt::String::Read<mpt::String::maybeNullTerminated>(s, ptrk->ptracks, len);
-								if ((!mpt::CompareNoCaseAscii(s.c_str(), "Copyri", 6)) || s.empty()) break;
-								if (i == 0x03)
-								{
-									if(m_songName.empty()) mpt::String::Copy(m_songName, s);
-								} else
-								if (!trk)
-								{
-									Patterns[pat].SetName(s);
-								}
-#ifdef MIDI_LOG
-								Log("Track #%d, META 0x%02X, Pattern %d: ", trk, i, pat);
-								Log("%s\n", (uint32)s);
-#endif
-							}
-							break;
-						// FF.07: Cue Point (marker)
-						// FF.20: Channel Prefix
-						// FF.2F: End of Track
-						case 0x2F:
-							ptrk->status = 0x2F;
-							ptrk->ptracks = NULL;
-							break;
-						// FF.51 [tttttt]: Set Tempo
-						case 0x51:
-							{
-								LONG l = ptrk->ptracks[0];
-								l = (l << 8) | ptrk->ptracks[1];
-								l = (l << 8) | ptrk->ptracks[2];
-								if (l <= 0) break;
-								nTempoUsec = l / nPPQN;
-								if (nTempoUsec < 100) nTempoUsec = 100;
-								tempo = ConvertMidiTempo(nTempoUsec, nTickMultiplier, importSpeed);
-								dwGlobalFlags |= MIDIGLOBAL_UPDATETEMPO;
-#ifdef MIDI_LOG
-								Log("META Tempo: %d usec\n", nTempoUsec);
-#endif
-							}
-							break;
-						// FF.58: Time Signature
-						// FF.7F: Sequencer-Specific
-#ifdef MIDI_LOG
-						default:
-							if ((i != 0x58) && (i != 0x7F))
-								Log("track %d: META %02X len=%d\n", trk, i, len);
-#endif
-						}
-						if (ptrk->ptracks) ptrk->ptracks += len;
-					}
+				case MIDIEvents::sysQuarterFrame:
+					track.Skip(1);
+					break;
+				case MIDIEvents::sysPositionPointer:
+					track.Skip(2);
+					break;
+				case MIDIEvents::sysSongSelect:
+					track.Skip(1);
+					break;
+				case MIDIEvents::sysTuneRequest:
+				case MIDIEvents::sysMIDIClock:
+				case MIDIEvents::sysMIDITick:
+				case MIDIEvents::sysStart:
+				case MIDIEvents::sysContinue:
+				case MIDIEvents::sysStop:
+				case MIDIEvents::sysActiveSense:
+				case MIDIEvents::sysReset:
 					break;
 
-				//////////////////////////////////////////////////////////////////////////
-				// Regular Voice Events
 				default:
-				{
-					uint32 midich = (ptrk->status & 0x0F)+1;
-					uint32 midist = ptrk->status & 0xF0;
-					MIDICHANNELSTATE *pmidich = &midichstate[midich-1];
-					uint32 note, velocity;
-
-					switch(midist)
-					{
-					//////////////////////////////////
-					// Note Off:	80.note.velocity
-					case 0x80:
-					// Note On:		90.note.velocity
-					case 0x90:
-						note = ptrk->ptracks[0] & 0x7F;
-						velocity = (midist == 0x90) ? (ptrk->ptracks[1] & 0x7F) : 0;
-						ptrk->ptracks += 2;
-					#ifdef MIDI_DETAILED_LOG
-						Log("Ch %d: NoteOn(%d,%d)\n", midich, note, velocity);
-					#endif
-						// Note On: 90.note.velocity
-						if (velocity)
-						{
-							// Start counting rows
-							dwGlobalFlags &= ~MIDIGLOBAL_FROZEN;
-							// if the note is already playing, we reuse this channel
-							uint32 nchn = pmidich->note_on[note];
-							if ((nchn) && (chnstate[nchn-1].parent != midich)) nchn = 0;
-							// or else, we look for an available child channel
-							if (!nchn)
-							{
-								for (uint32 i=0; i<m_nChannels; i++) if (chnstate[i].parent == midich)
-								{
-									if ((!chnstate[i].note) && ((!m[i].note) || (m[i].note & 0x80)))
-									{
-										// found an available channel
-										nchn = i+1;
-										break;
-									}
-								}
-							}
-							// still nothing? in this case, we try to allocate a new mod channel
-							if (!nchn)
-							{
-								for (uint32 i=0; i<m_nChannels; i++) if (!chnstate[i].parent)
-								{
-									nchn = i+1;
-									chnstate[i].parent = midich;
-									break;
-								}
-							}
-							// still not? we have to steal a voice from another channel
-#ifdef MIDI_LOG
-							if (!nchn)
-							{
-								Log("Not enough voices!\n");
-							}
-#endif
-							// We found our channel: let's do the note on
-							if (nchn)
-							{
-								pmidich->note_on[note] = nchn;
-								nchn--;
-								chnstate[nchn].pitchsrc = pmidich->pitchbend;
-								chnstate[nchn].pitchdest = pmidich->pitchbend;
-								chnstate[nchn].flags &= ~CHNSTATE_NOTEOFFPENDING;
-								chnstate[nchn].idlecount = 0;
-								chnstate[nchn].note = note+1;
-								int realnote = note;
-								if (midich != 10)
-								{
-									realnote += (((int)pmidich->pitchbend - 0x2000) * pmidich->pitchbendrange) / (0x2000*32);
-									if (realnote < 0) realnote = 0;
-									if (realnote > 119) realnote = 119;
-								}
-								m[nchn].note = realnote+1;
-								m[nchn].instr = MapMidiInstrument(pmidich->program + ((uint32)pmidich->bank << 7), midich, note);
-								m[nchn].volcmd = VOLCMD_VOLUME;
-								LONG vol = CDLSBank::DLSMidiVolumeToLinear(velocity) >> 8;
-								vol = (vol * (LONG)pmidich->volume * (LONG)pmidich->expression) >> 13;
-								if (vol > 256) vol = 256;
-								if (vol < 4) vol = 4;
-								m[nchn].vol = (uint8)(vol>>2);
-								// Channel Panning
-								if ((!m[nchn].command) && (pmidich->pan != chnstate[nchn].pan))
-								{
-									chnstate[nchn].pan = pmidich->pan;
-									m[nchn].param = pmidich->pan;
-									m[nchn].command = CMD_PANNING8;
-								}
-							}
-						} else
-						// Note Off; 90.note.00
-						if (!(dwGlobalFlags & MIDIGLOBAL_FROZEN))
-						{
-							uint32 nchn = pmidich->note_on[note];
-							if (nchn)
-							{
-								nchn--;
-								chnstate[nchn].flags |= CHNSTATE_NOTEOFFPENDING;
-								chnstate[nchn].note = 0;
-								pmidich->note_on[note] = 0;
-							} else
-							{
-								for (uint32 i=0; i<m_nChannels; i++)
-								{
-									if ((chnstate[i].parent == midich) && (chnstate[i].note == note+1))
-									{
-										chnstate[i].note = 0;
-										chnstate[i].flags |= CHNSTATE_NOTEOFFPENDING;
-									}
-								}
-							}
-						}
-						break;
-
-					///////////////////////////////////
-					// A0.xx.yy: Aftertouch
-					case 0xA0:
-						{
-#ifdef MIDI_LOG
-							uint32 a = ptrk->ptracks[0];
-							uint32 b = ptrk->ptracks[1];
-							Log("track %d: %02X %04X\n", trk, midist, a*256+b);
-#endif
-							ptrk->ptracks += 2;
-						}
-						break;
-
-					///////////////////////////////////
-					// B0: Control Change
-					case 0xB0:
-						{
-							uint32 controller = ptrk->ptracks[0];
-							uint32 value = ptrk->ptracks[1] & 0x7F;
-							ptrk->ptracks += 2;
-							switch(controller)
-							{
-							// Bn.00.xx: Bank Select MSB (GS)
-							case 0x00:
-								pmidich->bank &= 0x7F;
-								pmidich->bank |= (value << 7);
-								break;
-							// Bn.01.xx: Modulation Depth
-							case 0x01:
-								pmidich->pitchbendrange = value;
-								break;
-							// Bn.07.xx: Volume
-							case 0x07:
-								pmidich->volume = (uint8)(CDLSBank::DLSMidiVolumeToLinear(value) >> 9);
-								break;
-							// Bn.0B.xx: Expression
-							case 0x0B:
-								pmidich->expression = (uint8)(CDLSBank::DLSMidiVolumeToLinear(value) >> 9);
-								break;
-							// Bn.0A.xx: Pan
-							case 0x0A:
-								pmidich->pan = value * 2;
-								break;
-							// Bn.20.xx: Bank Select LSB (GS)
-							case 0x20:
-								pmidich->bank &= (0x7F << 7);
-								pmidich->bank |= value;
-								break;
-							// Bn.79.00: Reset All Controllers (GM)
-							case 0x79:
-								pmidich->modulation = 0;
-								pmidich->expression = 128;
-								pmidich->pitchbend = 0x2000;
-								pmidich->pitchbendrange = 64;
-								// Should also reset pedals (40h-43h), NRP, RPN, aftertouch
-								break;
-							// Bn.78.00: All Sound Off (GS)
-							// Bn.7B.00: All Notes Off (GM)
-							case 0x78:
-							case 0x7B:
-								if (value == 0x00)
-								{
-									// All Notes Off
-									for (uint32 k=0; k<m_nChannels; k++)
-									{
-										if (chnstate[k].note)
-										{
-											chnstate[k].flags |= CHNSTATE_NOTEOFFPENDING;
-											chnstate[k].note = 0;
-										}
-									}
-								}
-								break;
-							////////////////////////////////////
-							// Controller List
-							//
-							// Bn.02.xx: Breath Control
-							// Bn.04.xx: Foot Pedal
-							// Bn.05.xx: Portamento Time (Glissando Time)
-							// Bn.06.xx: Data Entry MSB
-							// Bn.08.xx: Balance
-							// Bn.10-13.xx: GP Control #1-#4
-							// Bn.20-3F.xx: Data LSB for controllers 0-31
-							// Bn.26.xx: Data Entry LSB
-							// Bn.40.xx: Hold Pedal #1
-							// Bn.41.xx: Portamento (GS)
-							// Bn.42.xx: Sostenuto (GS)
-							// Bn.43.xx: Soft Pedal (GS)
-							// Bn.44.xx: Legato Pedal
-							// Bn.45.xx: Hold Pedal #2
-							// Bn.46.xx: Sound Variation
-							// Bn.47.xx: Sound Timbre
-							// Bn.48.xx: Sound Release Time
-							// Bn.49.xx: Sound Attack Time
-							// Bn.4A.xx: Sound Brightness
-							// Bn.4B-4F.xx: Sound Control #6-#10
-							// Bn.50-53.xx: GP Control #5-#8
-							// Bn.54.xx: Portamento Control (GS)
-							// Bn.5B.xx: Reverb Level (GS)
-							// Bn.5C.xx: Tremolo Depth
-							// Bn.5D.xx: Chorus Level (GS)
-							// Bn.5E.xx: Celeste Depth
-							// Bn.5F.xx: Phaser Depth
-							// Bn.60.xx: Data Increment
-							// Bn.61.xx: Data Decrement
-							// Bn.62.xx: Non-RPN Parameter LSB (GS)
-							// Bn.63.xx: Non-RPN Parameter MSB (GS)
-							// Bn.64.xx: RPN Parameter LSB (GM)
-							// Bn.65.xx: RPN Parameter MSB (GM)
-							// Bn.7A.00: Local On/Off
-							// Bn.7C.00: Omni Mode Off
-							// Bn.7D.00: Omni Mode On
-							// Bn.7E.mm: Mono Mode On
-							// Bn.7F.00: Poly Mode On
-#ifdef MIDI_LOG
-							default:
-								Log("Control Change %02X controller %02X = %02X\n", ptrk->status, controller, value);
-#endif
-							}
-						}
-						break;
-
-					////////////////////////////////
-					// C0.pp: Program Change
-					case 0xC0:
-						{
-							pmidich->program = ptrk->ptracks[0] & 0x7F;
-							ptrk->ptracks++;
-#ifdef MIDI_DETAILED_LOG
-							Log("track %ld, channel %ld: program change %ld\n", trk, midich, pmidich->program);
-#endif
-						}
-						break;
-
-					////////////////////////////////
-					// D0: Channel Aftertouch (Polyphonic Key Pressure)
-					case 0xD0:
-						{
-							ptrk->ptracks++;
-						}
-						break;
-					
-					////////////////////////////////
-					// E0: Pitch Bend
-					case 0xE0:
-						{
-							pmidich->pitchbend = (uint16)(((uint32)ptrk->ptracks[1] << 7) + (ptrk->ptracks[0] & 0x7F));
-							for (uint32 i=0; i<128; i++) if (pmidich->note_on[i])
-							{
-								uint32 nchn = pmidich->note_on[i]-1;
-								if (chnstate[nchn].parent == midich)
-								{
-									chnstate[nchn].pitchdest = pmidich->pitchbend;
-								}
-							}
-#ifdef MIDI_DETAILED_LOG
-							Log("channel %ld: pitch bend = 0x%04X\n", midich, pmidich->pitchbend);
-#endif
-							ptrk->ptracks+=2;
-						}
-						break;
-
-					//////////////////////////////////////
-					// F0 & Unsupported commands: skip it
-					default:
-						ptrk->ptracks++;
-#ifdef MIDI_LOG
-						Log("track %d: unknown status byte: 0x%02X\n", trk, ptrk->status);
-#endif
-					}
-				}} // switch+default
-				// Process to next event
-				if (ptrk->ptracks)
-				{
-					LONG inc;
-					ptrk->ptracks += ConvertMIDI2Int(inc, (uint8 *)ptrk->ptracks, (size_t)(ptrk->ptrmax - ptrk->ptracks));
-					ptrk->nexteventtime += inc;
+					Log("Unknown: command 0x%02x, data 0x%02x\n", tracks[t].command, data1);
+					break;
 				}
-				if (ptrk->ptracks >= ptrk->ptrmax) ptrk->ptracks = NULL;
+				break;
+
+			default:
+				Log("Unknown: command 0x%02x, data 0x%02x\n", tracks[t].command, data1);
+				break;
 			}
-			// End reached?
-			if (ptrk->ptracks >= ptrk->ptrmax) ptrk->ptracks = NULL;
 		}
 
-		////////////////////////////////////////////////////////////////////
-		// Move to next row
-		if (!(dwGlobalFlags & MIDIGLOBAL_FROZEN))
+		// Pitch bend any channels that haven't reached their target yet
+		// TODO: This is currently not called on any rows without events!
+		for(size_t chn = 0; chn < modChnStatus.size(); chn++)
 		{
-			// Check MOD channels status
-			for (uint32 ichn=0; ichn<m_nChannels; ichn++)
-			{
-				// Pending Global Effects ?
-				if (!m[ichn].command)
-				{
-					if ((chnstate[ichn].pitchsrc != chnstate[ichn].pitchdest) && (chnstate[ichn].parent))
-					{
-						int newpitch = chnstate[ichn].pitchdest;
-						int pitchbendrange = midichstate[chnstate[ichn].parent-1].pitchbendrange;
-						// +/- 256 for +/- pitch bend range
-						int slideamount = (newpitch - (int)chnstate[ichn].pitchsrc) / (int)32;
-#ifdef MIDI_DETAILED_LOG
-						Log("chn%2d: portamento: src=%5d dest=%5d ", ichn, chnstate[ichn].pitchsrc, chnstate[ichn].pitchdest);
-						Log("bendamount=%5d range=%d slideamount=%d\n", pitchbendamount, pitchbendrange, slideamount);
-#endif
-						if (slideamount)
-						{
-							const int ppdiv = (16 * 128 * (importSpeed - 1));
-							newpitch = (int)chnstate[ichn].pitchsrc + slideamount;
-							if (slideamount < 0)
-							{
-								int param = (-slideamount * pitchbendrange + ppdiv/2) / ppdiv;
-								if (param >= 0x80) param = 0x80;
-								if (param > 0)
-								{
-									m[ichn].param = (uint8)param;
-									m[ichn].command = CMD_PORTAMENTODOWN;
-								}
-							} else
-							{
-								int param = (slideamount * pitchbendrange + ppdiv/2) / ppdiv;
-								if (param >= 0x80) param = 0x80;
-								if (param > 0)
-								{
-									m[ichn].param = (uint8)param;
-									m[ichn].command = CMD_PORTAMENTOUP;
-								}
-							}
-						}
-						chnstate[ichn].pitchsrc = (uint16)newpitch;
-#ifdef MIDI_DETAILED_LOG
-						Log("  newpitchsrc=%5d newpitchdest=%5d\n", chnstate[ichn].pitchsrc, chnstate[ichn].pitchdest);
-#endif
+			ModChannelState &chnState = modChnStatus[chn];
+			ModCommand &m = patRow[chn];
+			uint8 midiCh = chnState.midiCh;
+			if(chnState.note == NOTE_NONE || midiCh > 0x0F)
+				continue;
 
-					} else
-					if (dwGlobalFlags & MIDIGLOBAL_UPDATETEMPO)
-					{
-						m[ichn].command = CMD_TEMPO;
-						m[ichn].param = (uint8)tempo;
-						dwGlobalFlags &= ~MIDIGLOBAL_UPDATETEMPO;
-					} else
-					if (dwGlobalFlags & MIDIGLOBAL_UPDATEMASTERVOL)
-					{
-						m[ichn].command = CMD_GLOBALVOLUME;
-						m[ichn].param = midimastervol >> 1; // 0-128
-						dwGlobalFlags &= ~MIDIGLOBAL_UPDATEMASTERVOL;
-					}
-				}
-				// Check pending noteoff events for m[ichn]
-				if (!m[ichn].note)
-				{
-					if (chnstate[ichn].flags & CHNSTATE_NOTEOFFPENDING)
-					{
-						chnstate[ichn].flags &= ~CHNSTATE_NOTEOFFPENDING;
-						m[ichn].note = 0xFF;
-					}
-					// Check State of channel
-					chnstate[ichn].idlecount++;
-					if ((chnstate[ichn].note) && (chnstate[ichn].idlecount >= 50))
-					{
-						chnstate[ichn].note = 0;
-						m[ichn].note = 0xFF;	// only if not drum channel ?
-					} else
-					if (chnstate[ichn].idlecount >= 500) // 20secs of inactivity
-					{
-						chnstate[ichn].idlecount = 0;
-						chnstate[ichn].parent = 0;
-					}
-				}
+			int32 diff = Util::muldiv(midiChnStatus[midiCh].pitchbend - chnState.porta, midiChnStatus[midiCh].pitchBendRange * 64, 0x2000);
+			if(diff == 0)
+				continue;
+
+			if(m.command == CMD_PORTAMENTODOWN || m.command == CMD_PORTAMENTOUP)
+			{
+				// First, undo the effect of an existing portamento command
+				int32 porta = 0;
+				if(m.param < 0xE0)
+					porta = m.param * 4 * (ticksPerRow - 1);
+				else if(m.param < 0xF0)
+					porta = (m.param & 0x0F);
+				else
+					porta = (m.param & 0x0F) * 4;
+				if(m.command == CMD_PORTAMENTODOWN)
+					diff += porta;
+				else
+					diff -= porta;
 			}
 
-			if ((++row) >= Patterns[pat].GetNumRows())
+			m.command = static_cast<ModCommand::COMMAND>(diff < 0 ? CMD_PORTAMENTODOWN : CMD_PORTAMENTOUP);
+			int32 absDiff = mpt::abs(diff);
+			int32 realDiff = 0;
+			if(absDiff < 16)
 			{
-				pat++;
-				if (pat >= MAX_PATTERNS-1) break;
-				Order[pat] = pat;
-				Order[pat+1] = Order.GetInvalidPatIndex();
-				row = 0;
+				// Extra-fine slides can do this.
+				m.param = 0xE0 | static_cast<uint8>(absDiff);
+				realDiff = absDiff;
+			} else if(absDiff < 64)
+			{
+				// Fine slides can do this.
+				absDiff /= 4;
+				m.param = 0xF0 | static_cast<uint8>(absDiff);
+				realDiff *= 4;
+			} else
+			{
+				// Need a normal slide.
+				absDiff /= 4 * (ticksPerRow - 1);
+				LimitMax(absDiff, 0xDF);
+				m.param = static_cast<uint8>(absDiff);
+				realDiff = absDiff * 4 * (ticksPerRow - 1);
 			}
+			chnState.porta += static_cast<int16>(Util::muldiv(realDiff * sgn(diff), 0x2000, midiChnStatus[midiCh].pitchBendRange * 64));
 		}
 
-		// Increase midi clock
-		midi_clock += nTickMultiplier;
-	} while (!(dwGlobalFlags & MIDIGLOBAL_SONGENDED));
-#ifdef MIDI_LOG
-	Log("\n------------------ End Of File ---------------------------\n\n");
-#endif
+		tick_t delta = 0;
+		if(track.ReadVarInt(delta) && track.CanRead(1))
+		{
+			tracks[t].nextEvent += delta;
+		} else
+		{
+			finishedTracks++;
+			tracks[t].nextEvent = Util::MaxValueOfType(delta);
+			tracks[t].finished = true;
+		}
+	}
+
 	return true;
 }
+
 
 #else // !MODPLUG_TRACKER
 

@@ -261,8 +261,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, aftertouchBehaviour(conf, "MIDI Settings", "AftertouchBehaviour", atDoNotRecord)
 	, midiVelocityAmp(conf, "MIDI Settings", "MidiVelocityAmp", 100)
 	, midiIgnoreCCs(conf, "MIDI Settings", "IgnoredCCs", std::bitset<128>())
-	, midiImportSpeed(conf, "MIDI Settings", "MidiImportSpeed", 3)
 	, midiImportPatternLen(conf, "MIDI Settings", "MidiImportPatLen", 128)
+	, midiImportQuantize(conf, "MIDI Settings", "MidiImportQuantize", 32)
+	, midiImportTicks(conf, "MIDI Settings", "MidiImportTicks", 6)
 	// Pattern Editor
 	, gbLoopSong(conf, "Pattern Editor", "LoopSong", true)
 	, gnPatternSpacing(conf, "Pattern Editor", "Spacing", 0)
@@ -661,6 +662,14 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		sampleEditorDefaultResampler = SRCMODE_DEFAULT;
 	}
+
+	// Sanitize MIDI import data
+	if(midiImportPatternLen < 1 || midiImportPatternLen > MAX_PATTERN_ROWS)
+		midiImportPatternLen = 128;
+	if(midiImportQuantize < 1 || midiImportQuantize > 256)
+		midiImportQuantize = 16;
+	if(midiImportTicks < 2 || midiImportTicks > 16)
+		midiImportTicks = 16;
 
 	// Last fixup: update config version
 	IniVersion = MptVersion::str;

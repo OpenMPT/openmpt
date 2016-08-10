@@ -1749,6 +1749,7 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN2,		m_SpinPat);
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinAmp);
 	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
+	DDX_Control(pDX, IDC_COMBO3,	m_Quantize);
 	//}}AFX_DATA_MAP
 }
 
@@ -1815,10 +1816,17 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT4, IgnoredCCsToString(TrackerSettings::Instance().midiIgnoreCCs).c_str());
 
 	// Midi Import settings
-	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportSpeed);
+	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportTicks);
 	SetDlgItemInt(IDC_EDIT2, TrackerSettings::Instance().midiImportPatternLen);
-	m_SpinSpd.SetRange(2, 6);
-	m_SpinPat.SetRange(64, 256);
+	for(uint32 i = 2; i < 7; i++)
+	{
+		if((1u << i) == TrackerSettings::Instance().midiImportQuantize)
+		{
+			m_Quantize.SetCurSel(i - 2);
+		}
+	}
+	m_SpinSpd.SetRange(2, 16);
+	m_SpinPat.SetRange(1, MAX_PATTERN_ROWS);
 	return TRUE;
 }
 
@@ -1849,13 +1857,18 @@ void CMidiSetupDlg::OnOK()
 
 	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
 
-	TrackerSettings::Instance().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
-	TrackerSettings::Instance().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
 	TrackerSettings::Instance().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
 
 	CString cc;
 	GetDlgItemText(IDC_EDIT4, cc);
 	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(cc.GetString());
+
+	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(GetDlgItemInt(IDC_EDIT1), uint8(1), uint8(16)));
+	TrackerSettings::Instance().midiImportPatternLen = Clamp(GetDlgItemInt(IDC_EDIT2), ROWINDEX(1), MAX_PATTERN_ROWS);
+	if(m_Quantize.GetCurSel() != -1)
+	{
+		TrackerSettings::Instance().midiImportQuantize = 1 << (m_Quantize.GetCurSel() + 2);
+	}
 
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();

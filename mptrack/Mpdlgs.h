@@ -217,7 +217,7 @@ public:
 
 protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
-	CComboBox m_ATBehaviour;
+	CComboBox m_ATBehaviour, m_Quantize;
 
 public:
 	CMidiSetupDlg(DWORD d, UINT n)
