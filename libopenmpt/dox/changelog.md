@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  Increased accuracy of the sample position and sample rate to drift less when
+    playing very long samples.
+ *  Possible crashes with malformed MED, PSM and Startrekker files.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
