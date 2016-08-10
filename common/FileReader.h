@@ -974,7 +974,11 @@ public:
 	template<size_t N>
 	bool ReadMagic(const char (&magic)[N])
 	{
-		MPT_ASSERT(magic[N - 1] == 0);
+		MPT_ASSERT(magic[N - 1] == '\0');
+		for(std::size_t i = 0; i < N - 1; ++i)
+		{
+			MPT_ASSERT(magic[i] != '\0');
+		}
 		if(CanRead(N - 1))
 		{
 			mpt::byte bytes[N - 1];
