@@ -977,10 +977,10 @@ public:
 		MPT_ASSERT(magic[N - 1] == 0);
 		if(CanRead(N - 1))
 		{
-			mpt::byte data[N - 1];
-			STATIC_ASSERT(sizeof(data) == sizeof(magic) - 1);
-			DataContainer().Read(data, streamPos, N - 1);
-			if(!std::memcmp(data, magic, N - 1))
+			mpt::byte bytes[N - 1];
+			STATIC_ASSERT(sizeof(bytes) == sizeof(magic) - 1);
+			DataContainer().Read(bytes, streamPos, N - 1);
+			if(!std::memcmp(bytes, magic, N - 1))
 			{
 				streamPos += (N - 1);
 				return true;
