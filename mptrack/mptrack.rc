@@ -943,42 +943,44 @@ CAPTION "MIDI"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "MIDI Recording",IDC_STATIC,6,6,276,108
-    LTEXT           "MIDI Input Device:",IDC_STATIC,18,18,67,8
+    LTEXT           "MIDI &Input Device:",IDC_STATIC,18,18,67,8
     COMBOBOX        IDC_COMBO1,18,30,252,74,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Apply Octave Transpose to incoming MIDI Notes",IDC_CHECK4,
+    CONTROL         "&Apply Octave Transpose to incoming MIDI Notes",IDC_CHECK4,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,48,237,12
-    CONTROL         "Respond to Play / Continue / Stop Song messages",IDC_MIDIPLAYCONTROL,
+    CONTROL         "&Respond to Play / Continue / Stop Song messages",IDC_MIDIPLAYCONTROL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,60,237,12
-    CONTROL         "Continue song as soon as MIDI notes are being received",IDC_MIDIPLAYPATTERNONMIDIIN,
+    CONTROL         "&Continue song as soon as MIDI notes are being received",IDC_MIDIPLAYPATTERNONMIDIIN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,73,237,12
-    CONTROL         "Pass MIDI to active instrument plugin",IDC_MIDI_TO_PLUGIN,
+    CONTROL         "&Pass MIDI to active instrument plugin",IDC_MIDI_TO_PLUGIN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,237,12
-    CONTROL         "Enable MIDI recording when launching OpenMPT",IDC_CHECK3,
+    CONTROL         "&Enable MIDI recording when launching OpenMPT",IDC_CHECK3,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,97,240,12
     GROUPBOX        "MIDI Recording - Volume and Controllers",IDC_STATIC,6,120,276,114
-    CONTROL         "Record Note Off",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,138,237,8
-    CONTROL         "Record MIDI Note Velocity, amplify by",IDC_CHECK1,
+    CONTROL         "Record Note &Off",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,138,237,8
+    CONTROL         "Record MIDI Note &Velocity, amplify by",IDC_CHECK1,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,150,144,8
     EDITTEXT        IDC_EDIT3,162,148,42,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN3,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,186,145,11,14
     LTEXT           "%",IDC_STATIC,207,151,48,8
-    CONTROL         "Combine MIDI Volume (CC#07) to Note Velocity",IDC_MIDIVOL_TO_NOTEVOL,
+    CONTROL         "Combine MIDI Vol&ume (CC#07) to Note Velocity",IDC_MIDIVOL_TO_NOTEVOL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,162,258,8
-    CONTROL         "Record Pitch Bend messages as MIDI Macro changes in pattern",IDC_CHECK5,
+    CONTROL         "Recor&d Pitch Bend messages as MIDI Macro changes in pattern",IDC_CHECK5,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,174,258,8
-    CONTROL         "Record MIDI Controller changes as MIDI Macro changes in pattern",IDC_MIDI_MACRO_CONTROL,
+    CONTROL         "Record MIDI Contro&ller changes as MIDI Macro changes in pattern",IDC_MIDI_MACRO_CONTROL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,186,258,8
-    LTEXT           "Ignore CCs (e.g. 1,123,127)",IDC_STATIC,30,200,108,8
+    LTEXT           "I&gnore CCs (e.g. 1,123,127)",IDC_STATIC,30,200,108,8
     EDITTEXT        IDC_EDIT4,138,198,132,12,ES_AUTOHSCROLL
-    LTEXT           "Record Aftertouch Messages",IDC_STATIC,30,216,108,12,SS_CENTERIMAGE
+    LTEXT           "Record A&ftertouch Messages",IDC_STATIC,30,216,108,12,SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO2,138,216,132,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "MIDI File Import",IDC_STATIC,6,240,276,36
-    LTEXT           "Speed:",IDC_STATIC,18,258,24,8
-    EDITTEXT        IDC_EDIT1,48,256,39,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,78,258,11,14
-    LTEXT           "Pattern Size:",IDC_STATIC,102,258,56,8
-    EDITTEXT        IDC_EDIT2,156,256,39,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,180,258,11,14
+    LTEXT           "&Quantize:",IDC_STATIC,12,258,32,8
+    COMBOBOX        IDC_COMBO3,48,256,60,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Tic&ks / Row:",IDC_STATIC,114,258,40,8
+    EDITTEXT        IDC_EDIT1,156,256,30,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,174,258,11,14
+    LTEXT           "Pattern Si&ze:",IDC_STATIC,192,258,48,8
+    EDITTEXT        IDC_EDIT2,240,256,36,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,259,254,11,14
 END
 
 IDD_LOADRAWSAMPLE DIALOGEX 0, 0, 178, 95
@@ -2368,6 +2370,27 @@ END
 IDC_DRAGGING            CURSOR                  "res\\dragging.cur"
 IDC_NODROP              CURSOR                  "res\\nodrop.cur"
 IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_OPTIONS_MIDI DLGINIT
+BEGIN
+    IDC_COMBO3, 0x403, 12, 0
+0x2f31, 0x7434, 0x2068, 0x6f4e, 0x6574, 0x0073, 
+    IDC_COMBO3, 0x403, 12, 0
+0x2f31, 0x7438, 0x2068, 0x6f4e, 0x6574, 0x0073, 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3631, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3233, 0x646e, 0x4e20, 0x746f, 0x7365, "\000" 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3436, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -231,24 +231,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
-	m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 
-	InitializeGlobals();
 	Order.resize(1);
 
-	// Playback
-	m_PlayState.m_nPatternDelay = 0;
-	m_PlayState.m_nFrameDelay = 0;
-	m_PlayState.m_nNextRow = 0;
-	m_PlayState.m_nRow = 0;
-	m_PlayState.m_nPattern = 0;
-	m_PlayState.m_nCurrentOrder = 0;
-	m_PlayState.m_nNextOrder = 0;
-	m_PlayState.m_nNextPatStartRow = 0;
-	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
-
-	m_nMaxOrderPosition = 0;
-	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 #ifndef NO_PLUGINS
@@ -363,6 +348,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		// New song
 		m_dwCreatedWithVersion = MptVersion::num;
+		InitializeGlobals();
 	}
 
 	// Adjust channels
@@ -430,7 +416,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 	m_nInstruments = maxInstr;
 
-	// Set default values
+	// Set default play state values
 	if (!m_nDefaultTempo.GetInt()) m_nDefaultTempo.Set(125);
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
@@ -448,6 +434,13 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
 	m_PlayState.m_nNextRow = 0;
 	m_PlayState.m_nRow = 0;
+	m_PlayState.m_nPatternDelay = 0;
+	m_PlayState.m_nFrameDelay = 0;
+	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
+
+	m_nMaxOrderPosition = 0;
+	MemsetZero(m_PlayState.ChnMix);
 
 	RecalculateSamplesPerTick();
 	visitedSongRows.Initialize(true);
@@ -1113,6 +1106,8 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_PTM:
 	default:
 		return MOD_TYPE_IT;
+	case MOD_TYPE_MID:
+		return MOD_TYPE_MPT;
 	}
 }
 

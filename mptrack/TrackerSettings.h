@@ -674,8 +674,9 @@ public:
 	CachedSetting<uint16> midiVelocityAmp;
 	CachedSetting<std::bitset<128> > midiIgnoreCCs;
 
-	Setting<int32> midiImportSpeed;
-	Setting<int32> midiImportPatternLen;
+	Setting<uint32> midiImportPatternLen;
+	Setting<uint32> midiImportQuantize;
+	Setting<uint8> midiImportTicks;
 
 	// Pattern Editor
 
