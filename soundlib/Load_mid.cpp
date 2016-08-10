@@ -14,6 +14,7 @@
 #include "MIDIEvents.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
+#include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
@@ -355,6 +356,8 @@ MPT_BINARY_STRUCT(MThd, 10);
 
 
 typedef uint32 tick_t;
+static const CHANNELINDEX PATTERN_CHANNELS_PER_MIDI_CHANNEL = 7;
+STATIC_ASSERT(16 * PATTERN_CHANNELS_PER_MIDI_CHANNEL <= MAX_BASECHANNELS);
 
 struct TrackState
 {
@@ -460,11 +463,12 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 			oldestAnyCh = i;
 		}
 	}
-
+	
+	// Try grouping output into X pattern channels per MIDI channel
+	size_t baseOffset = midiCh * PATTERN_CHANNELS_PER_MIDI_CHANNEL;
 	for(size_t i = 0; i < channels.size(); i++)
 	{
-		// Try grouping output into four pattern channels per MIDI channel
-		CHANNELINDEX j = static_cast<CHANNELINDEX>((i + midiCh * 4) % channels.size());
+		CHANNELINDEX j = static_cast<CHANNELINDEX>((i + baseOffset) % channels.size());
 		if(channels[j].note == NOTE_NONE && !patRow[j].IsNote())
 		{
 			// Recycle channel previously used by the same MIDI channel
@@ -593,7 +597,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nDefaultTempo.Set(120);
 	m_nDefaultSpeed = ticksPerRow;
-	m_nChannels = 64;
+	m_nChannels = 16u * PATTERN_CHANNELS_PER_MIDI_CHANNEL;
 	m_nDefaultRowsPerBeat = quantize / 4;
 	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
 	TEMPO tempo = m_nDefaultTempo;
@@ -680,6 +684,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				m_songMessage.Read(chunk, len, SongMessage::leAutodetect);
 				break;
 			case 3:	// Track Name
+				if(!m_songName.empty())
 				{
 					//std::string s;
 					//chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
@@ -702,22 +707,21 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			case 9:	// Port name
 				break;
 			case 0x2F:
-				Log("Track end");
 				break;
 			case 0x58: // Time Signature
 				{
-					int nn = chunk.ReadUint8();
+					/*int nn = chunk.ReadUint8();
 					int dd = chunk.ReadUint8();
 					int cc = chunk.ReadUint8();
 					int bb = chunk.ReadUint8();
-					Log("Time sig: %d:%d, metronome:%d, quarter:%d\n",nn,dd,cc,bb);
+					Log("Time sig: %d:%d, metronome:%d, quarter:%d\n",nn,dd,cc,bb);*/
 				}
 				break;
 			case 0x59: // Key Signature
 				{
-					int sf = chunk.ReadInt8();
+					/*int sf = chunk.ReadInt8();
 					int mi = chunk.ReadUint8();
-					Log("Key sig: %d %s, %s\n",abs(sf),sf == 0?"c":(sf < 0 ? "flat":"sharp"), mi?"minor":"major");
+					Log("Key sig: %d %s, %s\n",abs(sf),sf == 0?"c":(sf < 0 ? "flat":"sharp"), mi?"minor":"major");*/
 				}
 				break;
 			case 0x51: // Tempo
@@ -739,7 +743,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 
 			default:
-				printf("meta command %02x %d\n", data1, len);
 				break;
 			}
 		} else
@@ -801,14 +804,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						// Note Off
 						MIDINoteOff(midiChnStatus[midiCh], modChnStatus, data1, delay, patRow);
 					}
-					//Log("Note on: channel %d, Oct %d Note %s Velocity %d\n",command & 0xf, (data1/12)-1,note[data1%12], data2);
 				}
 				break;
 			case 0xA0: // Note Aftertouch
 				{
 					track.Skip(1);
-					//int data2 = track.ReadUint8();
-					//Log("Aftertouch: channel %d, Oct %d, Note %s Aftertouch %d\n",command & 0xf, (data1/12)-1,note[data1%12], data2);
 				}
 				break;
 			case 0xB0: // Controller
@@ -924,9 +924,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				midiChnStatus[midiCh].program = data1 & 0x7F;
 				break;
 			case 0xD0: // Channel aftertouch
-				{
-					Log("Channel aftertouch: channel %d, Aftertouch %d\n",midiCh, data1);
-				}
 				break;
 			case 0xE0: // Pitch bend
 				midiChnStatus[midiCh].pitchbend = data1 | (track.ReadUint8() << 7);
@@ -966,13 +963,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 
 				default:
-					Log("Unknown: command 0x%02x, data 0x%02x\n", tracks[t].command, data1);
 					break;
 				}
 				break;
 
 			default:
-				Log("Unknown: command 0x%02x, data 0x%02x\n", tracks[t].command, data1);
 				break;
 			}
 		}
@@ -1042,6 +1037,18 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			tracks[t].nextEvent = Util::MaxValueOfType(delta);
 			tracks[t].finished = true;
 		}
+	}
+
+	if(GetpModDoc() != nullptr)
+	{
+		std::vector<CHANNELINDEX> channels;
+		channels.reserve(m_nChannels);
+		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+		{
+			if(modChnStatus[i].midiCh != 0xFF)
+				channels.push_back(i);
+		}
+		GetpModDoc()->ReArrangeChannels(channels);
 	}
 
 	return true;
