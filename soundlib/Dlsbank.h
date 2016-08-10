@@ -29,61 +29,53 @@ OPENMPT_NAMESPACE_BEGIN
 #define DLSREGION_SELFNONEXCLUSIVE	0x80
 #define DLSREGION_SUSTAINLOOP		0x100
 
-typedef struct DLSREGION
+struct DLSREGION
 {
-	uint32le ulLoopStart;
-	uint32le ulLoopEnd;
-	uint16le nWaveLink;
-	uint16le uPercEnv;
-	uint16le usVolume;		// 0..256
-	uint16le fuOptions;	// flags + key group
-	int16le  sFineTune;	// 1..100
-	uint8le  uKeyMin;
-	uint8le  uKeyMax;
-	uint8le  uUnityNote;
-} DLSREGION;
+	uint32 ulLoopStart;
+	uint32 ulLoopEnd;
+	uint16 nWaveLink;
+	uint16 uPercEnv;
+	uint16 usVolume;		// 0..256
+	uint16 fuOptions;	// flags + key group
+	int16  sFineTune;	// 1..100
+	uint8  uKeyMin;
+	uint8  uKeyMax;
+	uint8  uUnityNote;
+};
 
-MPT_BINARY_STRUCT(DLSREGION, 21)
-
-typedef struct DLSENVELOPE
+struct DLSENVELOPE
 {
 	// Volume Envelope
-	uint16le wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16le wVolDecay;		// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16le wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint8le nVolSustainLevel;	// Sustain Level: 0-128, 128=100%	
-	uint8le nDefPan;			// Default Pan
-} DLSENVELOPE;
-
-MPT_BINARY_STRUCT(DLSENVELOPE, 8)
+	uint16 wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolDecay;		// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint8 nVolSustainLevel;	// Sustain Level: 0-128, 128=100%	
+	uint8 nDefPan;			// Default Pan
+};
 
 // Special Bank bits
 #define F_INSTRUMENT_DRUMS		0x80000000
 
-typedef struct DLSINSTRUMENT
+struct DLSINSTRUMENT
 {
-	uint32le ulBank, ulInstrument;
-	uint32le nRegions, nMelodicEnv;
+	uint32 ulBank, ulInstrument;
+	uint32 nRegions, nMelodicEnv;
 	DLSREGION Regions[DLSMAXREGIONS];
 	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
-	uint16le wPresetBagNdx, wPresetBagNum;
-} DLSINSTRUMENT;
+	uint16 wPresetBagNdx, wPresetBagNum;
+};
 
-MPT_BINARY_STRUCT(DLSINSTRUMENT, 2740)
-
-typedef struct DLSSAMPLEEX
+struct DLSSAMPLEEX
 {
-	char      szName[20];
-	uint32le dwLen;
-	uint32le dwStartloop;
-	uint32le dwEndloop;
-	uint32le dwSampleRate;
-	uint8le  byOriginalPitch;
-	int8le   chPitchCorrection;
-} DLSSAMPLEEX;
-
-MPT_BINARY_STRUCT(DLSSAMPLEEX, 38)
+	char   szName[20];
+	uint32 dwLen;
+	uint32 dwStartloop;
+	uint32 dwEndloop;
+	uint32 dwSampleRate;
+	uint8  byOriginalPitch;
+	int8   chPitchCorrection;
+};
 
 
 #ifdef MODPLUG_TRACKER
@@ -93,7 +85,7 @@ MPT_BINARY_STRUCT(DLSSAMPLEEX, 38)
 #define SOUNDBANK_TYPE_DLS		0x01
 #define SOUNDBANK_TYPE_SF2		0x02
 
-typedef struct SOUNDBANKINFO
+struct SOUNDBANKINFO
 {
 	char szBankName[256];
 	char szCopyRight[256];
@@ -101,7 +93,7 @@ typedef struct SOUNDBANKINFO
 	char szEngineer[256];
 	char szSoftware[256];		// ISFT: Software
 	char szDescription[256];	// ISBJ: Subject
-} SOUNDBANKINFO;
+};
 
 
 //============
