@@ -7,10 +7,15 @@
   objdir "../../build/obj/in_openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  includedirs {
+  local extincludedirs = {
    "../..",
    "../../include",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../..",
    "$(IntDir)/svn_version",

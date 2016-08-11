@@ -8,12 +8,17 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-flac"
+  local extincludedirs = {
+		"../../include/ogg/include",
+	}
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
 		"../../include/flac/include",
 		"../../include/flac/src/libFLAC/include",
-	}
-  includedirs {
-		"../../include/ogg/include",
 	}
   characterset "MBCS"
   files {

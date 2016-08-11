@@ -9,10 +9,15 @@ if _ACTION == "vs2010" then
   objdir "../../build/obj/foo_openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  includedirs {
+  local extincludedirs = {
    "../..",
    "../../include/foobar2000sdk",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../..",
    "$(IntDir)/svn_version",

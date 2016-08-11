@@ -7,11 +7,16 @@
   objdir "../../build/obj/openmpt123"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  includedirs {
+  local extincludedirs = {
    "../..",
    "../../include/flac/include",
    "../../include/portaudio/include",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../..",
    "../../openmpt123",

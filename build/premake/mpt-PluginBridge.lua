@@ -7,9 +7,14 @@
   objdir "../../build/obj/PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  includedirs {
+  local extincludedirs = {
    "../include/vstsdk2.4",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../../common",
    "$(IntDir)/svn_version",

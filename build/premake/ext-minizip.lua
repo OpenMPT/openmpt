@@ -8,9 +8,14 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-minizip"
-  includedirs {
+  local extincludedirs = {
 		"../../include/zlib",
 	}
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
 		"../../include/zlib/contrib/minizip"
 	}

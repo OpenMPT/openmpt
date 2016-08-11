@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -114,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -182,7 +182,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -199,7 +199,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -251,7 +251,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -268,7 +268,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -319,7 +319,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -336,7 +336,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -388,7 +388,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -405,7 +405,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -456,7 +456,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
@@ -474,7 +474,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -526,7 +526,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
@@ -544,7 +544,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -595,7 +595,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -612,7 +612,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -675,7 +675,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -692,7 +692,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -754,7 +754,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -771,7 +771,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -836,7 +836,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -853,7 +853,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
-				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include;..\..\..\include\ogg\include"
+				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\flac\include;..\..\..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
