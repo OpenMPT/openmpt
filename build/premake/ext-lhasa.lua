@@ -49,7 +49,8 @@
    "../../include/lhasa/lib/public/lha_reader.h",
    "../../include/lhasa/lib/public/lhasa.h",
   }
-  buildoptions { "/wd4244", "/wd4267" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4244", "/wd4267" }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-lhasa.def" }

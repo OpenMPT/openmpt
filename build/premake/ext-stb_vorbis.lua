@@ -14,4 +14,6 @@
   files {
    "../../include/stb_vorbis/stb_vorbis.c",
   }
-  buildoptions { "/wd4005", "/wd4100", "/wd4244", "/wd4245", "/wd4701" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4005", "/wd4100", "/wd4244", "/wd4245", "/wd4701" }
+  filter {}

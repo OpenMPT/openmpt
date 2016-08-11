@@ -81,7 +81,9 @@
    "../../include/flac/include/FLAC/stream_decoder.h",
    "../../include/flac/include/FLAC/stream_encoder.h",
   }
-  buildoptions { "/wd4244", "/wd4267", "/wd4334" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4244", "/wd4267", "/wd4334" }
+  filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
   filter { "action:vs2008" }

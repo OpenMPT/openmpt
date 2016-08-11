@@ -22,7 +22,8 @@
    "../../include/opusfile/src/*.h",
   }
   links { "ogg", "opus" }
-  buildoptions { "/wd4267" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4267" }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-opusfile.def" }

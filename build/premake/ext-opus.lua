@@ -48,7 +48,9 @@
   }
   defines { "HAVE_CONFIG_H" }
   links { }
-  buildoptions { "/wd4244", "/wd4334" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4244", "/wd4334" }
+  filter {}
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
   filter {}

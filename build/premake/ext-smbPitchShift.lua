@@ -16,7 +16,9 @@
   files {
    "../../include/smbPitchShift/smbPitchShift.h",
   }
-  buildoptions { "/wd4244" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4244" }
+  filter {}
   filter { "kind:SharedLib" }
    defines { "SMBPITCHSHIFT_BUILD_DLL" }
   filter {}
