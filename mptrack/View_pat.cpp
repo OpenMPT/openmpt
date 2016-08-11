@@ -2857,7 +2857,7 @@ void CViewPattern::OnRemoveChannel()
 	{
 		std::vector<bool> keepMask(pModDoc->GetNumChannels(), true);
 		keepMask[nChn] = false;
-		pModDoc->RemoveChannels(keepMask);
+		pModDoc->RemoveChannels(keepMask, true);
 		SetCurrentPattern(m_nPattern); //Updating the screen.
 	}
 }
