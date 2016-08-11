@@ -59,7 +59,7 @@
 #endif
 #endif
 
-#define OPENMPT123_VERSION_STRING "0.2"
+#define OPENMPT123_VERSION_STRING OPENMPT_API_VERSION_STRING
 
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1500) && (_MSC_VER < 1600)
