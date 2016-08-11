@@ -10,6 +10,8 @@
   targetname "openmpt-opus"
   includedirs {
    "../../include/ogg/include",
+	}
+  includedirs {
    "../../include/opus/include",
    "../../include/opus/celt",
    "../../include/opus/silk",
