@@ -8,7 +8,13 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-flac"
-  includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
+  includedirs {
+		"../../include/flac/include",
+		"../../include/flac/src/libFLAC/include",
+	}
+  includedirs {
+		"../../include/ogg/include",
+	}
   characterset "MBCS"
   files {
    "../../include/flac/src/libFLAC/bitmath.c",

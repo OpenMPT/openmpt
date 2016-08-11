@@ -11,6 +11,8 @@
   targetname "openmpt-vorbis"
   includedirs {
    "../../include/ogg/include",
+	}
+  includedirs {
    "../../include/vorbis/include",
    "../../include/vorbis/lib",
   }

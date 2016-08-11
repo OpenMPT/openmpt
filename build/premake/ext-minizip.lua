@@ -8,7 +8,12 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-minizip"
-  includedirs { "../../include/zlib", "../../include/zlib/contrib/minizip" }
+  includedirs {
+		"../../include/zlib",
+	}
+  includedirs {
+		"../../include/zlib/contrib/minizip"
+	}
   characterset "MBCS"
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",

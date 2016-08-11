@@ -11,6 +11,8 @@
   includedirs {
    "../../include/ogg/include",
    "../../include/opus/include",
+	}
+  includedirs {
    "../../include/opusfile/include",
   }
   characterset "MBCS"
