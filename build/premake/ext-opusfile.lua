@@ -8,10 +8,15 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-opusfile"
-  includedirs {
+  local extincludedirs = {
    "../../include/ogg/include",
    "../../include/opus/include",
 	}
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../../include/opusfile/include",
   }

@@ -18,7 +18,7 @@
   filter { "action:vs2012" }
    includedirs { "../../include/msinttypes/inttypes" }
   filter {}
-  includedirs {
+  local extincludedirs = {
    "../../include",
    "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
@@ -31,6 +31,11 @@
    "../../include/vorbis/include",
    "../../include/zlib",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../../common",
    "../../soundlib",

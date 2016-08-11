@@ -8,10 +8,15 @@
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   targetname "libmodplug"
-  includedirs {
+  local extincludedirs = {
    "../..",
    "../../include/modplug/include",
   }
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../..",
    "$(IntDir)/svn_version",

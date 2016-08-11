@@ -9,9 +9,14 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-vorbis"
-  includedirs {
+  local extincludedirs = {
    "../../include/ogg/include",
 	}
+	filter { "action:vs*" }
+		includedirs ( extincludedirs )
+	filter { "not action:vs*" }
+		sysincludedirs ( extincludedirs )
+	filter {}
   includedirs {
    "../../include/vorbis/include",
    "../../include/vorbis/lib",
