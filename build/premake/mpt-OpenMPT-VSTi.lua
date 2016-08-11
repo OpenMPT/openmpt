@@ -7,11 +7,17 @@
   objdir "../../build/obj/OpenMPT-VSTi"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  filter { "action:vs2008" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter { "action:vs2010" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter { "action:vs2012" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter {}
   includedirs {
    "../../common",
    "../../soundlib",
    "../../include",
-   "../../include/msinttypes/inttypes",
    "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
    "../../include/flac/include",

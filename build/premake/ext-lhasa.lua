@@ -8,7 +8,13 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-lhasa"
-  includedirs { "../../include/msinttypes/inttypes" }
+  filter { "action:vs2008" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter { "action:vs2010" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter { "action:vs2012" }
+   includedirs { "../../include/msinttypes/inttypes" }
+  filter {}
   characterset "MBCS"
   files {
    "../../include/lhasa/lib/crc16.c",

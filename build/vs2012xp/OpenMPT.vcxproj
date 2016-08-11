@@ -272,14 +272,14 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -302,14 +302,14 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -332,7 +332,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -346,7 +346,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -371,7 +371,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -384,7 +384,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -409,13 +409,13 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -438,13 +438,13 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -467,7 +467,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -481,7 +481,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -506,7 +506,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -519,7 +519,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -544,13 +544,13 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -573,13 +573,13 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -602,7 +602,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -615,7 +615,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -640,7 +640,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -652,7 +652,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\msinttypes\inttypes;..\..\common;..\..\soundlib;..\..\include;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\flac\include;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include;..\..\include\portaudio\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
