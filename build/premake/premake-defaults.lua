@@ -1,6 +1,12 @@
 
   filter {}
 
+	filter { "not action:vs*", "language:C++" }
+		buildoptions { "-std=c++11" }
+	filter { "not action:vs*", "language:C" }
+		buildoptions { "-std=c99" }
+	filter {}
+
 	filter {}
 		if _OPTIONS["xp"] then
 			if _ACTION == "vs2012" then
