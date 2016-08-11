@@ -259,14 +259,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -291,14 +291,14 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64-Debug\$(TargetFile
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -323,7 +323,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -337,7 +337,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -364,7 +364,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -377,7 +377,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -404,13 +404,13 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32\$(TargetFileName
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -435,13 +435,13 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64-Debug\$(TargetFile
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -466,7 +466,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -480,7 +480,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -507,7 +507,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -520,7 +520,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -547,13 +547,13 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32\$(TargetFileName
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -578,13 +578,13 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64-Debug\$(TargetFile
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -609,7 +609,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -622,7 +622,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -649,7 +649,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -661,7 +661,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

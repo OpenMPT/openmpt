@@ -11,6 +11,9 @@
    "../..",
    "../../include",
    "../../include/pugixml/src",
+  }
+  includedirs {
+   "../..",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

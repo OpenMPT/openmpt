@@ -8,10 +8,12 @@
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
+   "../../include",
+  }
+  includedirs {
    "../..",
    "../../common",
    "../../soundlib",
-   "../../include",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

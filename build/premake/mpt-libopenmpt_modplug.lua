@@ -11,6 +11,9 @@
   includedirs {
    "../..",
    "../../include/modplug/include",
+  }
+  includedirs {
+   "../..",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

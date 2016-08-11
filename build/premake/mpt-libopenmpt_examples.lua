@@ -14,6 +14,9 @@ if _ACTION ~= "vs2008" then
    "../../include/portaudio/bindings/cpp/include",
    "../../include/portaudio/include",
   }
+  includedirs {
+   "../..",
+  }
   files {
    "../../examples/libopenmpt_example_cxx.cpp",
   }
@@ -47,6 +50,9 @@ end
    "../..",
    "../../include/portaudio/include",
   }
+  includedirs {
+   "../..",
+  }
   files {
    "../../examples/libopenmpt_example_c.c",
   }
@@ -77,6 +83,9 @@ end
   includedirs {
    "../..",
    "../../include/portaudio/include",
+  }
+  includedirs {
+   "../..",
   }
   files {
    "../../examples/libopenmpt_example_c_mem.c",
@@ -109,6 +118,9 @@ end
    "../..",
    "../../include/portaudio/include",
   }
+  includedirs {
+   "../..",
+  }
   files {
    "../../examples/libopenmpt_example_c_unsafe.c",
   }
@@ -139,6 +151,9 @@ end
   includedirs {
    "../..",
    "../../include/portaudio/include",
+  }
+  includedirs {
+   "../..",
   }
   files {
    "../../examples/libopenmpt_example_c_probe.c",
