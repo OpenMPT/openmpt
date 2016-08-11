@@ -79,7 +79,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 		if (rem.DoModal() != IDOK) return false;
 
 		// Removing selected channels
-		return RemoveChannels(rem.m_bKeepMask);
+		return RemoveChannels(rem.m_bKeepMask, true);
 	} else
 	{
 		// Increasing number of channels
@@ -104,8 +104,8 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 
 // To remove all channels whose index corresponds to false in the keepMask vector.
 // Return true on success.
-bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask)
-//-------------------------------------------------------------
+bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
+//---------------------------------------------------------------------------
 {
 	CHANNELINDEX nRemainingChannels = 0;
 	//First calculating how many channels are to be left
@@ -115,12 +115,15 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask)
 	}
 	if(nRemainingChannels == GetNumChannels() || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 	{
-		CString str;
-		if(nRemainingChannels == GetNumChannels())
-			str = "No channels chosen to be removed.";
-		else
-			str = "No removal done - channel number is already at minimum.";
-		Reporting::Information(str, "Remove Channels");
+		if(verbose)
+		{
+			CString str;
+			if(nRemainingChannels == GetNumChannels())
+				str = _T("No channels chosen to be removed.");
+			else
+				str = _T("No removal done - channel number is already at minimum.");
+			Reporting::Information(str, _T("Remove Channels"));
+		}
 		return false;
 	}
 
