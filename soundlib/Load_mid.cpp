@@ -585,11 +585,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 
 #ifdef MODPLUG_TRACKER
-	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 1u, 256u);
+	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 4u, 256u);
 	const ROWINDEX patternLen = Clamp(TrackerSettings::Instance().midiImportPatternLen.Get(), ROWINDEX(1), MAX_PATTERN_ROWS);
 	const uint8 ticksPerRow = Clamp(TrackerSettings::Instance().midiImportTicks.Get(), uint8(2), uint8(16));
 #else
-	const uint32 quantize = 32;
+	const uint32 quantize = 32;		// Must be 4 or higher
 	const ROWINDEX patternLen = 128;
 	const uint8 ticksPerRow = 16;	// Must be in range 2...16
 #endif

@@ -666,8 +666,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sanitize MIDI import data
 	if(midiImportPatternLen < 1 || midiImportPatternLen > MAX_PATTERN_ROWS)
 		midiImportPatternLen = 128;
-	if(midiImportQuantize < 1 || midiImportQuantize > 256)
-		midiImportQuantize = 16;
+	if(midiImportQuantize < 4 || midiImportQuantize > 256)
+		midiImportQuantize = 32;
 	if(midiImportTicks < 2 || midiImportTicks > 16)
 		midiImportTicks = 16;
 
