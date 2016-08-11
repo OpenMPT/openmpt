@@ -80,7 +80,9 @@
    "../../include/portaudio/include/pa_win_wmme.h",
    "../../include/portaudio/include/portaudio.h",
   }
-  buildoptions { "/wd4018", "/wd4267" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4018", "/wd4267" }
+  filter {}
   links {
    "ksuser",
    "winmm",

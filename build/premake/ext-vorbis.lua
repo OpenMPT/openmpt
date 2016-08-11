@@ -89,7 +89,9 @@
    "../../include/vorbis/lib/modes/setup_44u.h",
    "../../include/vorbis/lib/modes/setup_X.h",
   }
-  buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+  filter { "action:vs*" }
+    buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+  filter {}
   links { "ogg" }
   filter {}
   filter { "kind:SharedLib" }
@@ -116,8 +118,10 @@
 --   "../../include/vorbis/lib/vorbisenc.c",
 --  }
 --  links { "vorbis" }
---  buildoptions { "/wd4101", "/wd4244", "/wd4267" }
-  
+--  filter { "action:vs*" }
+--    buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+--  filter {}
+
 -- project "vorbisfile"
 --  uuid "a368afd6-cdda-4e65-8829-94f4a237a977"
 --  language "C"
@@ -138,4 +142,6 @@
 --   "../../include/vorbis/lib/vorbisfile.c",
 --  }
 --  links { "ogg", "vorbis" }
---  buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+--  filter { "action:vs*" }
+--    buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+--  filter {}
