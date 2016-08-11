@@ -8,8 +8,10 @@
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
-   "../../common",
    "../include/vstsdk2.4",
+  }
+  includedirs {
+   "../../common",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

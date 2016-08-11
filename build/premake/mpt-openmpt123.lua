@@ -9,9 +9,12 @@
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../..",
-   "../../openmpt123",
    "../../include/flac/include",
    "../../include/portaudio/include",
+  }
+  includedirs {
+   "../..",
+   "../../openmpt123",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

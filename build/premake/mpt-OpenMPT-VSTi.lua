@@ -15,8 +15,6 @@
    includedirs { "../../include/msinttypes/inttypes" }
   filter {}
   includedirs {
-   "../../common",
-   "../../soundlib",
    "../../include",
    "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
@@ -28,6 +26,10 @@
    "../../include/portaudio/include",
    "../../include/vorbis/include",
    "../../include/zlib",
+  }
+  includedirs {
+   "../../common",
+   "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

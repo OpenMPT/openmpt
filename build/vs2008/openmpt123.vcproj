@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -203,7 +203,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -219,7 +219,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -285,7 +285,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -301,7 +301,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -365,7 +365,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -381,7 +381,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -445,7 +445,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -461,7 +461,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -525,7 +525,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -541,7 +541,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -608,7 +608,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -624,7 +624,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\openmpt123;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

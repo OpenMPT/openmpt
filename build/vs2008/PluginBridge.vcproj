@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -127,7 +127,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -143,7 +143,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -209,7 +209,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -225,7 +225,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -294,7 +294,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -310,7 +310,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -377,7 +377,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -393,7 +393,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -459,7 +459,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -475,7 +475,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -541,7 +541,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
@@ -558,7 +558,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -627,7 +627,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
@@ -644,7 +644,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -711,7 +711,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -727,7 +727,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -793,7 +793,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -809,7 +809,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -875,7 +875,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -891,7 +891,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -960,7 +960,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -976,7 +976,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

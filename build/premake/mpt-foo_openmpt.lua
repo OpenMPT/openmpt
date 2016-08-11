@@ -12,6 +12,9 @@ if _ACTION == "vs2010" then
   includedirs {
    "../..",
    "../../include/foobar2000sdk",
+  }
+  includedirs {
+   "../..",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

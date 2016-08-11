@@ -8,13 +8,15 @@
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
-   "../..",
-   "../../common",
-   "../../soundlib",
    "../../include",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
+  }
+  includedirs {
+   "../..",
+   "../../common",
+   "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
