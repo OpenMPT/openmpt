@@ -24,6 +24,11 @@ editor to change the fields. You can find possible values
 for JAVA_INCLUDE_PATH by typing "locate jni.h", and for
 JAVA_JVM_LIBRARY by typing locate libjvm".
 
+Alternatively, try 
+    export JAVA_HOME=/usr/lib/jvm/java-8-oracle/
+before running ccmake ., and note that your JAVA_HOME
+may be different.
+
 You also need JAVA_INCLUDE_PATH2, but this will normally
 be set automatically after you set JAVA_INCLUDE_PATH and
 run "configure" (type "c" to ccmake). Normally,
