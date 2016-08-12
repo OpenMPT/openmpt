@@ -1,6 +1,6 @@
 
 #include <iostream>
-#incluse <string>
+#include <string>
 #include <vector>
 
 #define OPENMPT_NAMESPACE_BEGIN
