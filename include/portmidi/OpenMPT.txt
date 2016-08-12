@@ -1,4 +1,4 @@
-PortMidi, revision 228 from https://sourceforge.net/p/portmedia/code/HEAD/tree/
+PortMidi, revision 230 from https://sourceforge.net/p/portmedia/code/HEAD/tree/
 The following unnecessary folders and files have been removed from SVN:
 pm_cl, pm_csharp, pm_dylib, pm_java, pm_mingw, pm_python, pm_qt, Doxyfile, portmidi.sln, ALL_BUILD.vcproj, ZERO_CHECK.vcproj, portmidi_cdt.zip
 No other changes were made.
