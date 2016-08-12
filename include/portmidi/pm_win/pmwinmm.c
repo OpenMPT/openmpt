@@ -1,8 +1,10 @@
 /* pmwinmm.c -- system specific definitions */
 
+#if 0 // OpenMPT
 #ifdef _MSC_VER
  #pragma warning(disable: 4133) // stop warnings about implicit typecasts
 #endif
+#endif // OpenMPT
 
 #ifndef _WIN32_WINNT
     /* without this define, InitializeCriticalSectionAndSpinCount is 
