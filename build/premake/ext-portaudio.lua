@@ -15,7 +15,13 @@
 
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",
    "PA_WDMKS_NO_KSGUID_LIB",

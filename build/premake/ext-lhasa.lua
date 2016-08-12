@@ -15,7 +15,12 @@
   filter { "action:vs2012" }
    includedirs { "../../include/msinttypes/inttypes" }
   filter {}
-  characterset "MBCS"
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/lhasa/lib/crc16.c",
    "../../include/lhasa/lib/ext_header.c",

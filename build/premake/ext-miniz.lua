@@ -8,7 +8,13 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-miniz"
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/miniz/miniz.c",
   }

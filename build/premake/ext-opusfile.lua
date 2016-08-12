@@ -20,7 +20,13 @@
   includedirs {
    "../../include/opusfile/include",
   }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/opusfile/include/opusfile.h",
   }

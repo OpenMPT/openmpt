@@ -26,7 +26,13 @@
    "../../libopenmpt/libopenmpt_modplug.c",
    "../../libopenmpt/libopenmpt_modplug_cpp.cpp",
   }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   links {
    "libopenmpt"
   }

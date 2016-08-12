@@ -9,7 +9,13 @@
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-ogg"
   includedirs { "../../include/ogg/include" }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/ogg/include/ogg/ogg.h",
    "../../include/ogg/include/ogg/os_types.h",
