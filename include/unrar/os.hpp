@@ -23,7 +23,9 @@
 #ifdef _WIN_ALL
 
 #define STRICT
+#ifndef UNICODE // OPENMPT ADDITION
 #define UNICODE
+#endif // OPENMPT ADDITION
 #undef WINVER
 #undef _WIN32_WINNT
 #define WINVER 0x0501
