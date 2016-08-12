@@ -20,21 +20,21 @@ int main( int argc, char * argv [] ) {
 		if ( arg == "" ) {
 			std::cout << "unknown" << std::endl;
 
-		} else ( arg == "openmpt" ) {
+		} else if ( arg == "openmpt" ) {
 			std::cout << MPT_VERSION_STR << std::endl;
 
 #ifdef OPENMPT_API_VERSION_MAJOR
-		} else ( arg == "libopenmpt-version-major" ) {
+		} else if ( arg == "libopenmpt-version-major" ) {
 			std::cout << OPENMPT_API_VERSION_MAJOR << std::endl;
 #endif
 
 #ifdef OPENMPT_API_VERSION_MINOR
-		} else ( arg == "libopenmpt-version-minor" ) {
+		} else if ( arg == "libopenmpt-version-minor" ) {
 			std::cout << OPENMPT_API_VERSION_MINOR << std::endl;
 #endif
 
 #ifdef OPENMPT_API_VERSION_STRING
-		} else ( arg == "libopenmpt-version-string" ) {
+		} else if ( arg == "libopenmpt-version-string" ) {
 			std::cout << OPENMPT_API_VERSION_STRING << std::endl;
 #endif
 
