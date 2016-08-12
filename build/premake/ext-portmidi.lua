@@ -9,7 +9,13 @@
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-portmidi"
   includedirs { "../../include/portmidi/porttime", "../../include/portmidi/pm_common", "../../include/portmidi/pm_win" }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/portmidi/porttime/porttime.c",
    "../../include/portmidi/porttime/ptwinmm.c",

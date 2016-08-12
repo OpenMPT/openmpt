@@ -19,7 +19,13 @@
   includedirs {
 		"../../include/zlib/contrib/minizip"
 	}
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",
    "../../include/zlib/contrib/minizip/iowin32.c",

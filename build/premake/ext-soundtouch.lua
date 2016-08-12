@@ -13,7 +13,13 @@
    targetname "OpenMPT_SoundTouch_f32"
   filter {}
   includedirs { "../../include/soundtouch/include" }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/soundtouch/include/BPMDetect.h",
    "../../include/soundtouch/include/FIFOSampleBuffer.h",

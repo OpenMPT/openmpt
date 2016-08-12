@@ -9,7 +9,13 @@
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-stb_vorbis"
   includedirs { }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   defines { "STB_VORBIS_NO_PULLDATA_API", "STB_VORBIS_NO_STDIO" }
   files {
    "../../include/stb_vorbis/stb_vorbis.c",

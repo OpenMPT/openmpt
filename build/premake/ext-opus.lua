@@ -25,7 +25,13 @@
    "../../include/opus/win32",
    "../../include/opus",
   }
-  characterset "MBCS"
+	filter {}
+	filter { "action:vs*", "not action:vs2008" }
+		characterset "Unicode"
+		flags { "Unicode" }
+	filter { "action:vs*", "action:vs2008" }
+		characterset "MBCS"
+	filter {}
   files {
    "../../include/opus/include/opus.h",
    "../../include/opus/include/opus_custom.h",
