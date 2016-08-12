@@ -6,16 +6,19 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call build\auto\helper_get_svnversion.cmd
+call build\auto\setup_vs_any.cmd
 
-set MPT_REVISION=%SVNVERSION%
+call build\auto\helper_get_svnversion.cmd
+call build\auto\helper_get_openmpt_version.cmd
+
+set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%-r%SVNVERSION%
 
 
 
 cd bin || goto error
 rmdir /s /q libopenmpt-win
 del /f /q libopenmpt-win.tar
-del /f /q libopenmpt-win-r%MPT_REVISION%.7z
+del /f /q libopenmpt-win-%MPT_REVISION%.7z
 mkdir libopenmpt-win
 cd libopenmpt-win || goto error
 mkdir openmpt123
@@ -58,7 +61,7 @@ copy /y ..\..\bin\x64\openmpt123.exe .\openmpt123\x86_64\ || goto error
 copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-win-r%MPT_REVISION%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-win-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -72,14 +75,14 @@ copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
  foobar2000\foo_openmpt.dll ^
  || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-win.tar libopenmpt-win-r%MPT_REVISION%.7z || goto error
-del /f /q libopenmpt-win-r%MPT_REVISION%.7z
+"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-win.tar libopenmpt-win-%MPT_REVISION%.7z || goto error
+del /f /q libopenmpt-win-%MPT_REVISION%.7z
 cd .. || goto error
 
 cd bin || goto error
 rmdir /s /q libopenmpt-dev-vs2010
 del /f /q libopenmpt-dev-vs2010.tar
-del /f /q libopenmpt-dev-vs2010-r%MPT_REVISION%.7z
+del /f /q libopenmpt-dev-vs2010-%MPT_REVISION%.7z
 mkdir libopenmpt-dev-vs2010
 cd libopenmpt-dev-vs2010 || goto error
 mkdir inc
@@ -131,7 +134,7 @@ copy /y ..\..\bin\x64-Shared\libopenmpt.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-ogg.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-vorbis.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-r%MPT_REVISION%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -152,8 +155,8 @@ copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
  bin\x86_64\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-vs2010.tar libopenmpt-dev-vs2010-r%MPT_REVISION%.7z || goto error
-del /f /q libopenmpt-dev-vs2010-r%MPT_REVISION%.7z
+"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-vs2010.tar libopenmpt-dev-vs2010-%MPT_REVISION%.7z || goto error
+del /f /q libopenmpt-dev-vs2010-%MPT_REVISION%.7z
 cd .. || goto error
 
 
