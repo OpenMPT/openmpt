@@ -38,6 +38,7 @@ public:
 		WinNT4   = 0x0400,
 		Win2000  = 0x0500,
 		WinXP    = 0x0501,
+		WinXP64  = 0x0502,
 		WinVista = 0x0600,
 		Win7     = 0x0601,
 		Win8     = 0x0602,

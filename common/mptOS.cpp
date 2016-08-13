@@ -57,6 +57,8 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 			mpt::Windows::Version::Win7
 		#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
 			mpt::Windows::Version::WinVista
+		#elif NTDDI_VERSION >= 0x05020000 // NTDDI_WS03
+			mpt::Windows::Version::WinXP64
 		#elif NTDDI_VERSION >= NTDDI_WINXP
 			mpt::Windows::Version::WinXP
 		#elif NTDDI_VERSION >= NTDDI_WIN2K
@@ -192,6 +194,7 @@ mpt::ustring Version::VersionToString(uint16 version)
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinVista), MPT_USTRING("Windows Vista")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP64), MPT_USTRING("Windows XP x64 / Windows Server 2003")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP), MPT_USTRING("Windows XP")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win2000), MPT_USTRING("Windows 2000")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinME), MPT_USTRING("Windows ME")));
@@ -241,6 +244,9 @@ mpt::ustring Version::GetName() const
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
 		{
 			name = MPT_USTRING("Windows Vista");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP64))
+		{
+			name = MPT_USTRING("Windows XP x64 / Windows Server 2003");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
 		{
 			name = MPT_USTRING("Windows XP");
