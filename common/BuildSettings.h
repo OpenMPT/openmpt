@@ -22,7 +22,11 @@
 
 #if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)) || MPT_COMPILER_MSVCCLANGC2
 #if defined(MPT_BUILD_TARGET_XP)
+#if defined(_M_X64)
+#define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
+#else // !_M_X64
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
+#endif // _M_X64
 #else
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
 #endif
