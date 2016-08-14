@@ -185,84 +185,84 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Debug\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\Debug\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\Debug\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-Debug\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\Debug\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\Debug\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\Release\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\Release\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\Release\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\Release\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-DebugMDd\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\DebugMDd\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\DebugMDd\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-DebugMDd\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\DebugMDd\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\DebugMDd\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\ReleaseLTCG\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Shared-Debug\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\DebugShared\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\DebugShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-Shared-Debug\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\DebugShared\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\DebugShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32-Shared\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86\ReleaseShared\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86\ReleaseShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64-Shared\</OutDir>
-    <IntDir>..\obj\OpenMPT\x86_64\ReleaseShared\</IntDir>
+    <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\ReleaseShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>

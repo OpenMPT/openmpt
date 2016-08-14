@@ -19,7 +19,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin\Win32-Debug"
-			IntermediateDirectory="..\obj\in_openmpt\x86\Debug"
+			IntermediateDirectory="..\obj\vs2008\in_openmpt\x86\Debug"
 			ConfigurationType="2"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -98,7 +98,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\in_openmpt\x86\Release"
+			IntermediateDirectory="..\obj\vs2008\in_openmpt\x86\Release"
 			ConfigurationType="2"
 			UseOfMFC="1"
 			CharacterSet="1"

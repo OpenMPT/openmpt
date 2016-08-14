@@ -172,78 +172,78 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\lib\x86\Debug\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\Debug\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\Debug\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\lib\x86_64\Debug\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\Debug\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86_64\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\Debug\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\lib\x86\Release\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\Release\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86\Release\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\Release\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\lib\x86_64\Release\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\Release\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86_64\Release\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\Release\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
-    <OutDir>..\..\lib\x86\DebugMDd\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\DebugMDd\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\DebugMDd\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
-    <OutDir>..\..\lib\x86_64\DebugMDd\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\DebugMDd\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86_64\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\DebugMDd\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
-    <OutDir>..\..\lib\x86\ReleaseLTCG\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\ReleaseLTCG\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\ReleaseLTCG\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
-    <OutDir>..\..\lib\x86_64\ReleaseLTCG\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\ReleaseLTCG\</IntDir>
+    <OutDir>..\..\lib\vs2015\x86_64\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\Win32-Shared-Debug\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\DebugShared\</IntDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\DebugShared\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\x64-Shared-Debug\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\DebugShared\</IntDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\Win32-Shared\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86\ReleaseShared\</IntDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\x64-Shared\</OutDir>
-    <IntDir>..\..\obj\portaudio\x86_64\ReleaseShared\</IntDir>
+    <IntDir>..\..\obj\vs2015\portaudio\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-portaudio</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>

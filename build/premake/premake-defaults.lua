@@ -1,7 +1,7 @@
 
   filter {}
 	
-	objdir ( "../../build/obj/" .. mpt_projectname )
+	objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
 
   filter {}
 	filter { "not action:vs*", "language:C++" }
@@ -23,29 +23,29 @@
 		end
 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
-   targetdir "../../build/lib/x86/Debug"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86" }
-   targetdir "../../build/lib/x86/DebugShared"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/DebugShared" )
   filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86" }
-   targetdir "../../build/lib/x86/DebugMDd"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/DebugMDd" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86" }
-   targetdir "../../build/lib/x86/Release"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86" }
-   targetdir "../../build/lib/x86/ReleaseShared"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/ReleaseShared" )
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
-   targetdir "../../build/lib/x86/ReleaseLTCG"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/ReleaseLTCG" )
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/Debug"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/DebugShared"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/DebugShared" )
   filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/DebugMDd"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/DebugMDd" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/Release"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/ReleaseShared"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/ReleaseShared" )
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/ReleaseLTCG"
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/ReleaseLTCG" )
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../bin/Win32-Debug"

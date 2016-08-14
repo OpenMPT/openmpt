@@ -41,14 +41,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Debug\</OutDir>
-    <IntDir>..\obj\in_openmpt\x86\Debug\</IntDir>
+    <IntDir>..\obj\vs2010\in_openmpt\x86\Debug\</IntDir>
     <TargetName>in_openmpt</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
-    <IntDir>..\obj\in_openmpt\x86\Release\</IntDir>
+    <IntDir>..\obj\vs2010\in_openmpt\x86\Release\</IntDir>
     <TargetName>in_openmpt</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
