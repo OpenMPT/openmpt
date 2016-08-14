@@ -68,28 +68,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Debug\</OutDir>
-    <IntDir>..\obj\libopenmpt_test\x86\Debug\</IntDir>
+    <IntDir>..\obj\vs2013\libopenmpt_test\x86\Debug\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-Debug\</OutDir>
-    <IntDir>..\obj\libopenmpt_test\x86_64\Debug\</IntDir>
+    <IntDir>..\obj\vs2013\libopenmpt_test\x86_64\Debug\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
-    <IntDir>..\obj\libopenmpt_test\x86\Release\</IntDir>
+    <IntDir>..\obj\vs2013\libopenmpt_test\x86\Release\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
-    <IntDir>..\obj\libopenmpt_test\x86_64\Release\</IntDir>
+    <IntDir>..\obj\vs2013\libopenmpt_test\x86_64\Release\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>

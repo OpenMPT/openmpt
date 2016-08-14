@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\lib\x86\Debug"
-			IntermediateDirectory="..\..\obj\opusfile\x86\Debug"
+			OutputDirectory="..\..\lib\vs2008\x86\Debug"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -89,8 +89,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\lib\x86_64\Debug"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\Debug"
+			OutputDirectory="..\..\lib\vs2008\x86_64\Debug"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -158,8 +158,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\lib\x86\Release"
-			IntermediateDirectory="..\..\obj\opusfile\x86\Release"
+			OutputDirectory="..\..\lib\vs2008\x86\Release"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -226,8 +226,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\lib\x86_64\Release"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\Release"
+			OutputDirectory="..\..\lib\vs2008\x86_64\Release"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -295,8 +295,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\..\lib\x86\DebugMDd"
-			IntermediateDirectory="..\..\obj\opusfile\x86\DebugMDd"
+			OutputDirectory="..\..\lib\vs2008\x86\DebugMDd"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -363,8 +363,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\..\lib\x86_64\DebugMDd"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\DebugMDd"
+			OutputDirectory="..\..\lib\vs2008\x86_64\DebugMDd"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -432,8 +432,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|Win32"
-			OutputDirectory="..\..\lib\x86\ReleaseLTCG"
-			IntermediateDirectory="..\..\obj\opusfile\x86\ReleaseLTCG"
+			OutputDirectory="..\..\lib\vs2008\x86\ReleaseLTCG"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\ReleaseLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -501,8 +501,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|x64"
-			OutputDirectory="..\..\lib\x86_64\ReleaseLTCG"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\ReleaseLTCG"
+			OutputDirectory="..\..\lib\vs2008\x86_64\ReleaseLTCG"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\ReleaseLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -572,7 +572,7 @@
 		<Configuration
 			Name="DebugShared|Win32"
 			OutputDirectory="..\..\..\bin\Win32-Shared-Debug"
-			IntermediateDirectory="..\..\obj\opusfile\x86\DebugShared"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -652,7 +652,7 @@
 		<Configuration
 			Name="DebugShared|x64"
 			OutputDirectory="..\..\..\bin\x64-Shared-Debug"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\DebugShared"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -733,7 +733,7 @@
 		<Configuration
 			Name="ReleaseShared|Win32"
 			OutputDirectory="..\..\..\bin\Win32-Shared"
-			IntermediateDirectory="..\..\obj\opusfile\x86\ReleaseShared"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -815,7 +815,7 @@
 		<Configuration
 			Name="ReleaseShared|x64"
 			OutputDirectory="..\..\..\bin\x64-Shared"
-			IntermediateDirectory="..\..\obj\opusfile\x86_64\ReleaseShared"
+			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>

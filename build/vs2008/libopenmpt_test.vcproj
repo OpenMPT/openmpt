@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin\Win32-Debug"
-			IntermediateDirectory="..\obj\libopenmpt_test\x86\Debug"
+			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -99,7 +99,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="..\..\bin\x64-Debug"
-			IntermediateDirectory="..\obj\libopenmpt_test\x86_64\Debug"
+			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -177,7 +177,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\libopenmpt_test\x86\Release"
+			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -257,7 +257,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\libopenmpt_test\x86_64\Release"
+			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
