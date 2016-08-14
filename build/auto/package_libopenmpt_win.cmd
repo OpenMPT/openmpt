@@ -81,6 +81,7 @@ copy /y ..\..\bin\release\vs2010-static\x86-32-win7\foo_openmpt.dll .\foobar2000
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-win.tar libopenmpt-win-%MPT_REVISION%.7z || goto error
 del /f /q libopenmpt-win-%MPT_REVISION%.7z
+rmdir /s /q libopenmpt-win
 cd .. || goto error
 
 cd bin || goto error
@@ -161,6 +162,7 @@ copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\openmpt-zlib.dll bin\x86_64\
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-vs2010.tar libopenmpt-dev-vs2010-%MPT_REVISION%.7z || goto error
 del /f /q libopenmpt-dev-vs2010-%MPT_REVISION%.7z
+rmdir /s /q libopenmpt-dev-vs2010
 cd .. || goto error
 
 
