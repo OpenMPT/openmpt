@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  objdir "../../build/obj/OpenMPT"
+  mpt_projectname = "OpenMPT"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
   filter { "configurations:*Shared" }

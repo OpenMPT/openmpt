@@ -3,7 +3,7 @@
   uuid "2512E2CA-578A-4F10-9363-4BFC9A5EF960"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  objdir "../../build/obj/portmidi"
+  mpt_projectname = "portmidi"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"

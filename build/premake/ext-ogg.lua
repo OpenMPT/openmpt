@@ -3,7 +3,7 @@
   uuid "d8d5e11c-f959-49ef-b741-b3f6de52ded8"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  objdir "../../build/obj/ogg"
+  mpt_projectname = "ogg"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"

@@ -3,7 +3,7 @@
   uuid "63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  objdir "../../build/obj/minizip"
+  mpt_projectname = "minizip"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
