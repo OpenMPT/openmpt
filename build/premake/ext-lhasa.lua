@@ -3,7 +3,7 @@
   uuid "6B11F6A8-B131-4D2B-80EF-5731A9016436"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  objdir "../../build/obj/lhasa"
+  mpt_projectname = "lhasa"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"

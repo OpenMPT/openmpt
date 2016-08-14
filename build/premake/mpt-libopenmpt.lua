@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  objdir "../../build/obj/libopenmpt"
+  mpt_projectname = "libopenmpt"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {

@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../pluginBridge/" }
-  objdir "../../build/obj/PluginBridge"
+  mpt_projectname = "PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {

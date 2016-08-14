@@ -6,7 +6,7 @@ if _ACTION == "vs2010" then
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../libopenmpt/" }
-  objdir "../../build/obj/foo_openmpt"
+  mpt_projectname = "foo_openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {

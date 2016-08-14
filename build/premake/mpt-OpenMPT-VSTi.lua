@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  objdir "../../build/obj/OpenMPT-VSTi"
+  mpt_projectname = "OpenMPT-VSTi"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   filter { "action:vs2008" }

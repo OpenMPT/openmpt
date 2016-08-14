@@ -1,6 +1,9 @@
 
   filter {}
+	
+	objdir ( "../../build/obj/" .. mpt_projectname )
 
+  filter {}
 	filter { "not action:vs*", "language:C++" }
 		buildoptions { "-std=c++11" }
 	filter { "not action:vs*", "language:C" }

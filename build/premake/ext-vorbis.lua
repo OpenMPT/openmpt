@@ -4,7 +4,7 @@
   uuid "b544dcb7-16e5-41bc-b51b-7ead8cfdfa05"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  objdir "../../build/obj/vorbis"
+  mpt_projectname = "vorbis"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"

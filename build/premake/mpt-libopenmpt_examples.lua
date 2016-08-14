@@ -6,7 +6,7 @@ if _ACTION ~= "vs2008" then
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  objdir "../../build/obj/libopenmpt_example_cxx"
+  mpt_projectname = "libopenmpt_example_cxx"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
@@ -48,7 +48,7 @@ end
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  objdir "../../build/obj/libopenmpt_example_c"
+  mpt_projectname = "libopenmpt_example_c"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
@@ -87,7 +87,7 @@ end
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  objdir "../../build/obj/libopenmpt_example_c_mem"
+  mpt_projectname = "libopenmpt_example_c_mem"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
@@ -126,7 +126,7 @@ end
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  objdir "../../build/obj/libopenmpt_example_c_unsafe"
+  mpt_projectname = "libopenmpt_example_c_unsafe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
@@ -165,7 +165,7 @@ end
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  objdir "../../build/obj/libopenmpt_example_c_probe"
+  mpt_projectname = "libopenmpt_example_c_probe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
