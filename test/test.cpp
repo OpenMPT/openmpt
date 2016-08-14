@@ -136,7 +136,7 @@ void DoTests()
 			pathprefix = &buf[0];
 		} else if(libopenmpt && IsDebuggerPresent())
 		{
-			pathprefix = L"../../";
+			pathprefix = L"../../../../";
 		}
 
 		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
@@ -2235,26 +2235,21 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 #ifdef MODPLUG_TRACKER
 
-static const char * debugPaths [] = { "mptrack\\Debug\\", "bin\\Win32-Debug\\", "bin\\x64-Debug\\" };
-
-static bool PathEndsIn(const mpt::PathString &path_, const mpt::PathString &match_)
-{
-	std::wstring path = path_.ToWide();
-	std::wstring match = match_.ToWide();
-	return path.rfind(match) == (path.length() - match.length());
-}
-
 static bool ShouldRunTests()
 {
 	mpt::PathString theFile = theApp.GetAppDirPath();
 	// Only run the tests when we're in the project directory structure.
-	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), MPT_USTRING("\\")).size() - 1;
+	for(std::size_t i = 0; i < pathComponents; ++i)
 	{
-		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
-		if(PathEndsIn(theFile, debugPath))
+		if(theFile.IsDirectory() && (theFile + MPT_PATHSTRING("test")).IsDirectory())
 		{
-			return true;
+			if((theFile + MPT_PATHSTRING("test\\test.mptm")).IsFile())
+			{
+				return true;
+			}
 		}
+		theFile += MPT_PATHSTRING("..\\");
 	}
 	return false;
 }
@@ -2262,14 +2257,17 @@ static bool ShouldRunTests()
 static mpt::PathString GetTestFilenameBase()
 {
 	mpt::PathString theFile = theApp.GetAppDirPath();
-	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), MPT_USTRING("\\")).size() - 1;
+	for(std::size_t i = 0; i < pathComponents; ++i)
 	{
-		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
-		if(PathEndsIn(theFile, debugPath))
+		if(theFile.IsDirectory() && (theFile + MPT_PATHSTRING("test")).IsDirectory())
 		{
-			theFile = mpt::PathString::FromWide(theFile.ToWide().substr(0, theFile.ToWide().length() - debugPath.ToWide().length()));
-			break;
+			if((theFile + MPT_PATHSTRING("test\\test.mptm")).IsFile())
+			{
+				break;
+			}
 		}
+		theFile += MPT_PATHSTRING("..\\");
 	}
 	theFile += MPT_PATHSTRING("test/test.");
 	return theFile;

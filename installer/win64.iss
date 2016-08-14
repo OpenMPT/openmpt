@@ -1,4 +1,4 @@
-#define PlatformFolder "x64"
+#define PlatformFolder "release\vs2010-static\x86-64-win7"
 #define PlatformName "64-Bit"
 #define BaseNameAddition "-x64"
 

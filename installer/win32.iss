@@ -1,4 +1,4 @@
-#define PlatformFolder "Win32"
+#define PlatformFolder "release\vs2010-static\x86-32-win7"
 #define PlatformName "32-Bit"
 #define WIN32OLD
 

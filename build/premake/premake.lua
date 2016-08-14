@@ -41,9 +41,15 @@ newoption {
 }
 
 if not _OPTIONS["xp"] then
-	mpt_projectpathname = _ACTION;
+	mpt_projectpathname = _ACTION
+	if _ACTION == "vs2008" then
+		mpt_bindirsuffix = "winxp"
+	else
+		mpt_bindirsuffix = "win7"
+	end
 else
-	mpt_projectpathname = _ACTION .. "xp";
+	mpt_projectpathname = _ACTION .. "xp"
+	mpt_bindirsuffix = "winxp"
 end
 
 function replace_in_file (filename, from, to)

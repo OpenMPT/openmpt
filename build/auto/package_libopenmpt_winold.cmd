@@ -6,6 +6,10 @@ cd ..\..
 
 set MY_DIR=%CD%
 
+set MPT_VSVER=%1
+set MPT_ARCH=%2
+set MPT_BIN_TARGET=%3
+
 call build\auto\setup_vs_any.cmd
 
 call build\auto\helper_get_svnversion.cmd
@@ -52,9 +56,9 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\ || goto error
-copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\openmpt123.exe .\openmpt123\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\xmp-openmpt.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\in_openmpt.dll .\Winamp\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-winold-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

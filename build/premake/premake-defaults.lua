@@ -48,29 +48,29 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/ReleaseLTCG" )
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
-   targetdir "../../bin/Win32-Debug"
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86" }
-   targetdir "../../bin/Win32-Shared-Debug"
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86" }
-   targetdir "../../bin/Win32-DebugMDd"
+		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86" }
-   targetdir "../../bin/Win32"
+		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86" }
-   targetdir "../../bin/Win32-Shared"
+		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
-   targetdir "../../bin/Win32"
+		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
-   targetdir "../../bin/x64-Debug"
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86_64" }
-   targetdir "../../bin/x64-Shared-Debug"
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/x86-64-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-   targetdir "../../bin/x64-DebugMDd"
+		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
-   targetdir "../../bin/x64"
+		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
-   targetdir "../../bin/x64-Shared"
+		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/x86-64-" .. mpt_bindirsuffix )
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
-   targetdir "../../bin/x64"
+		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix )
 
   filter { "action:vs2008" }
    includedirs { "../../include/msinttypes/stdint" }
