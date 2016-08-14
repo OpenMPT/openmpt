@@ -293,7 +293,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt\x86\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -344,7 +344,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\bin\Win32-Shared-Debug\libopenmpt.lib"
+				ImportLibrary="..\..\bin\debug\vs2008-shared\x86-32-winxp\libopenmpt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -371,7 +371,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -423,7 +423,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\bin\x64-Shared-Debug\libopenmpt.lib"
+				ImportLibrary="..\..\bin\debug\vs2008-shared\x86-64-winxp\libopenmpt.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -450,7 +450,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\..\bin\Win32-Shared"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -504,7 +504,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\bin\Win32-Shared\libopenmpt.lib"
+				ImportLibrary="..\..\bin\release\vs2008-shared\x86-32-winxp\libopenmpt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -531,7 +531,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\bin\x64-Shared"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -586,7 +586,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\bin\x64-Shared\libopenmpt.lib"
+				ImportLibrary="..\..\bin\release\vs2008-shared\x86-64-winxp\libopenmpt.lib"
 				TargetMachine="17"
 			/>
 			<Tool

@@ -143,28 +143,28 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Shared-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2013-shared\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_modplug\x86\DebugShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\x64-Shared-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2013-shared\x86-64-winxp\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_modplug\x86_64\DebugShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Shared\</OutDir>
+    <OutDir>..\..\bin\release\vs2013-shared\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_modplug\x86\ReleaseShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\x64-Shared\</OutDir>
+    <OutDir>..\..\bin\release\vs2013-shared\x86-64-winxp\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_modplug\x86_64\ReleaseShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -270,7 +270,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\Win32-Shared-Debug\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2013-shared\x86-32-winxp\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -288,7 +288,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\x64-Shared-Debug\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2013-shared\x86-64-winxp\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -315,7 +315,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\Win32-Shared\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2013-shared\x86-32-winxp\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -341,7 +341,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\x64-Shared\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2013-shared\x86-64-winxp\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

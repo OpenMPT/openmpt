@@ -6,6 +6,10 @@ cd ..\..
 
 set MY_DIR=%CD%
 
+set MPT_VSVER=%1
+set MPT_ARCH=%2
+set MPT_BIN_TARGET=%3
+
 call build\auto\setup_vs_any.cmd
 
 call build\auto\helper_get_svnversion.cmd
@@ -56,11 +60,11 @@ copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
 copy /y ..\..\libopenmpt\doc\foo_openmpt.txt .\foobar2000\ || goto error
-copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\x64\openmpt123.exe .\openmpt123\x86_64\ || goto error
-copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
-copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
+copy /y ..\..\bin\release\vs2010-static\x86-32-win7\openmpt123.exe .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-static\x86-64-win7\openmpt123.exe .\openmpt123\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-static\x86-32-win7\xmp-openmpt.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\vs2010-static\x86-32-win7\in_openmpt.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\vs2010-static\x86-32-win7\foo_openmpt.dll .\foobar2000\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-win-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -124,16 +128,16 @@ copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_config.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_version.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
-copy /y ..\..\bin\Win32-Shared\libopenmpt.lib lib\x86\ || goto error
-copy /y ..\..\bin\Win32-Shared\libopenmpt.dll bin\x86\ || goto error
-copy /y ..\..\bin\Win32-Shared\openmpt-ogg.dll bin\x86\ || goto error
-copy /y ..\..\bin\Win32-Shared\openmpt-vorbis.dll bin\x86\ || goto error
-copy /y ..\..\bin\Win32-Shared\openmpt-zlib.dll bin\x86\ || goto error
-copy /y ..\..\bin\x64-Shared\libopenmpt.lib lib\x86_64\ || goto error
-copy /y ..\..\bin\x64-Shared\libopenmpt.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\x64-Shared\openmpt-ogg.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\x64-Shared\openmpt-vorbis.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-32-win7\libopenmpt.lib lib\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-32-win7\libopenmpt.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-32-win7\openmpt-ogg.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-32-win7\openmpt-vorbis.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-32-win7\openmpt-zlib.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\libopenmpt.lib lib\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\libopenmpt.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\openmpt-ogg.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\openmpt-vorbis.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\release\vs2010-shared\x86-64-win7\openmpt-zlib.dll bin\x86_64\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

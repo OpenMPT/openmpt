@@ -68,10 +68,10 @@ Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: igno
 Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
 #ifdef WIN32OLD
 ; Additional binaries for 32-bit legacy version
-Source: ..\bin\Win32old\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\Win32old\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\Win32old\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\Win32old\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\release\vs2008-static\x86-32-winxp\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\release\vs2008-static\x86-32-winxp\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\release\vs2008-static\x86-32-winxp\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\release\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
 #endif
 #ifndef DOWNLOAD_MO3
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion

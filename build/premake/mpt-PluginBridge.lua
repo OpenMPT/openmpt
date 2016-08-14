@@ -43,25 +43,31 @@
   filter { "architecture:x86_64" }
    targetsuffix "64"
   filter {}
-  filter { "configurations:Release*", "architecture:x86" }
-   postbuildcommands {
-    "if not exist \"$(TargetDir)\\..\\x64\" mkdir \"$(TargetDir)\\..\\x64\"",
-    "copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x64\\$(TargetFileName)\"",
-   }
-  filter { "configurations:Release*", "architecture:x86_64" }
-   postbuildcommands {
-    "if not exist \"$(TargetDir)\\..\\Win32\" mkdir \"$(TargetDir)\\..\\Win32\"",
-    "copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\Win32\\$(TargetFileName)\"",
-   }
-  filter { "configurations:Debug*", "architecture:x86" }
-   postbuildcommands {
-    "if not exist \"$(TargetDir)\\..\\x64-Debug\" mkdir \"$(TargetDir)\\..\\x64-Debug\"",
-    "copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x64-Debug\\$(TargetFileName)\"",
-   }
-  filter { "configurations:Debug*", "architecture:x86_64" }
-   postbuildcommands {
-    "if not exist \"$(TargetDir)\\..\\Win32-Debug\" mkdir \"$(TargetDir)\\..\\Win32-Debug\"",
-    "copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\Win32-Debug\\$(TargetFileName)\"",
-   }
-  filter {}
+
+  filter { "architecture:x86" }
+		if _OPTIONS["xp"] then
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-64-winxp\" mkdir \"$(TargetDir)\\..\\x86-64-winxp\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp\\$(TargetFileName)\"",
+			}
+		else
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-64-win7\" mkdir \"$(TargetDir)\\..\\x86-64-win7\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetFileName)\"",
+			}
+		end
+  filter { "architecture:x86_64" }
+		if _OPTIONS["xp"] then
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
+			}
+		else
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-win7\" mkdir \"$(TargetDir)\\..\\x86-32-win7\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetFileName)\"",
+			}
+		end
+
+	filter {}
 

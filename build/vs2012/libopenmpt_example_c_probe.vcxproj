@@ -118,56 +118,56 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-static\x86-32-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86\Debug\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\x64-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-static\x86-64-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86_64\Debug\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\Win32\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-static\x86-32-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86\Release\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\x64\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-static\x86-64-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86_64\Release\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Shared-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-shared\x86-32-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86\DebugShared\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\x64-Shared-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-shared\x86-64-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86_64\DebugShared\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Shared\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-shared\x86-32-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86\ReleaseShared\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\x64-Shared\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-shared\x86-64-win7\</OutDir>
     <IntDir>..\obj\vs2012\libopenmpt_example_c_probe\x86_64\ReleaseShared\</IntDir>
     <TargetName>libopenmpt_example_c_probe</TargetName>
     <TargetExt>.exe</TargetExt>

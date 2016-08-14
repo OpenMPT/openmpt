@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\Win32-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -98,7 +98,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\x64-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -176,7 +176,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\Win32"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -256,7 +256,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\bin\x64"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -337,7 +337,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86\DebugShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -414,7 +414,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86_64\DebugShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -492,7 +492,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\..\bin\Win32-Shared"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-32-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86\ReleaseShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -572,7 +572,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\bin\x64-Shared"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-winxp"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_example_c_probe\x86_64\ReleaseShared"
 			ConfigurationType="1"
 			CharacterSet="1"

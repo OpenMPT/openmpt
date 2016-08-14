@@ -220,28 +220,28 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\Win32-Shared-Debug\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2012-shared\x86-32-win7\</OutDir>
     <IntDir>..\..\obj\vs2012\ogg\x86\DebugShared\</IntDir>
     <TargetName>openmpt-ogg</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\x64-Shared-Debug\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2012-shared\x86-64-win7\</OutDir>
     <IntDir>..\..\obj\vs2012\ogg\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-ogg</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\Win32-Shared\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2012-shared\x86-32-win7\</OutDir>
     <IntDir>..\..\obj\vs2012\ogg\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-ogg</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\x64-Shared\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2012-shared\x86-64-win7\</OutDir>
     <IntDir>..\..\obj\vs2012\ogg\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-ogg</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -419,7 +419,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\Win32-Shared-Debug\openmpt-ogg.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2012-shared\x86-32-win7\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -436,7 +436,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\x64-Shared-Debug\openmpt-ogg.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2012-shared\x86-64-win7\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -462,7 +462,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\Win32-Shared\openmpt-ogg.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2012-shared\x86-32-win7\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -487,7 +487,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\x64-Shared\openmpt-ogg.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2012-shared\x86-64-win7\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

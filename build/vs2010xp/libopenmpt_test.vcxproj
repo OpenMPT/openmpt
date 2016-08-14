@@ -62,28 +62,28 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\Win32-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2010-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2010xp\libopenmpt_test\x86\Debug\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\x64-Debug\</OutDir>
+    <OutDir>..\..\bin\debug\vs2010-static\x86-64-winxp\</OutDir>
     <IntDir>..\obj\vs2010xp\libopenmpt_test\x86_64\Debug\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\Win32\</OutDir>
+    <OutDir>..\..\bin\release\vs2010-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2010xp\libopenmpt_test\x86\Release\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\x64\</OutDir>
+    <OutDir>..\..\bin\release\vs2010-static\x86-64-winxp\</OutDir>
     <IntDir>..\obj\vs2010xp\libopenmpt_test\x86_64\Release\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>

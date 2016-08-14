@@ -221,28 +221,28 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\Win32-Shared-Debug\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-shared\x86-32-winxp\</OutDir>
     <IntDir>..\..\obj\vs2015xp\vorbis\x86\DebugShared\</IntDir>
     <TargetName>openmpt-vorbis</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\x64-Shared-Debug\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-shared\x86-64-winxp\</OutDir>
     <IntDir>..\..\obj\vs2015xp\vorbis\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-vorbis</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\Win32-Shared\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-shared\x86-32-winxp\</OutDir>
     <IntDir>..\..\obj\vs2015xp\vorbis\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-vorbis</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\x64-Shared\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-shared\x86-64-winxp\</OutDir>
     <IntDir>..\..\obj\vs2015xp\vorbis\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-vorbis</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -427,7 +427,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\Win32-Shared-Debug\openmpt-vorbis.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-shared\x86-32-winxp\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -445,7 +445,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\x64-Shared-Debug\openmpt-vorbis.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-shared\x86-64-winxp\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -471,7 +471,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\Win32-Shared\openmpt-vorbis.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-shared\x86-32-winxp\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -497,7 +497,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\x64-Shared\openmpt-vorbis.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-shared\x86-64-winxp\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
