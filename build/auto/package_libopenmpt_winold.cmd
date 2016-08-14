@@ -72,6 +72,7 @@ copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\in_openmpt.dll .\Winamp\ ||
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-winold.tar libopenmpt-winold-%MPT_REVISION%.7z || goto error
 del /f /q libopenmpt-winold-%MPT_REVISION%.7z
+rmdir /s /q libopenmpt-winold
 cd .. || goto error
 
 

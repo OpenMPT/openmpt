@@ -47,6 +47,7 @@ cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-win64.tar openmpt-win64-%MPT_REVISION%.7z openmpt-win64-%MPT_REVISION%-symbols.7z || goto error
 del /f /q openmpt-win64-%MPT_REVISION%.7z
 del /f /q openmpt-win64-%MPT_REVISION%-symbols.7z
+rmdir /s /q openmpt-win64
 cd .. || goto error
 
 
