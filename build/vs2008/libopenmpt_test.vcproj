@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -98,7 +98,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -176,7 +176,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -256,7 +256,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\libopenmpt_test\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"

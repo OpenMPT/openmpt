@@ -36,20 +36,28 @@ newoption {
 }
 
 newoption {
+	trigger = "w2k",
+	description = "Generate Win2000 targetting projects",
+}
+
+newoption {
 	trigger = "xp",
 	description = "Generate XP targetting projects",
 }
 
-if not _OPTIONS["xp"] then
+if _OPTIONS["w2k"] then
+	mpt_projectpathname = _ACTION .. "w2k"
+	mpt_bindirsuffix = "win2000"
+elseif _OPTIONS["xp"] then
+	mpt_projectpathname = _ACTION .. "xp"
+	mpt_bindirsuffix = "winxp"
+else
 	mpt_projectpathname = _ACTION
 	if _ACTION == "vs2008" then
-		mpt_bindirsuffix = "winxp"
+		mpt_bindirsuffix = "vista"
 	else
 		mpt_bindirsuffix = "win7"
 	end
-else
-	mpt_projectpathname = _ACTION .. "xp"
-	mpt_bindirsuffix = "winxp"
 end
 
 function replace_in_file (filename, from, to)
@@ -156,6 +164,15 @@ newaction {
   postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
+
+  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_test.vcproj")
+  postprocess_vs2008_main("build/vs2008w2k/openmpt123.vcproj")
+  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_probe.vcproj")
+  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c.vcproj")
+  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_mem.vcproj")
+  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_unsafe.vcproj")
+  postprocess_vs2008_nonxcompat("build/vs2008w2k/OpenMPT.vcproj")
+  postprocess_vs2008_nonxcompat("build/vs2008w2k/PluginBridge.vcproj")
 
   postprocess_vs2010_main("build/vs2010xp/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010xp/openmpt123.vcxproj")

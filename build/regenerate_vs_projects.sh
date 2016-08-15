@@ -71,6 +71,17 @@ ${PREMAKE} --group=OpenMPT-VSTi vs2015
 ${PREMAKE} --group=OpenMPT vs2015
 ${PREMAKE} --group=all-externals vs2015
 
+${PREMAKE} --group=libopenmpt_test vs2008 --w2k
+${PREMAKE} --group=in_openmpt vs2008 --w2k
+${PREMAKE} --group=xmp-openmpt vs2008 --w2k
+${PREMAKE} --group=libopenmpt-small vs2008 --w2k
+${PREMAKE} --group=libopenmpt vs2008 --w2k
+${PREMAKE} --group=openmpt123 vs2008 --w2k
+${PREMAKE} --group=PluginBridge vs2008 --w2k
+${PREMAKE} --group=OpenMPT-VSTi vs2008 --w2k
+${PREMAKE} --group=OpenMPT vs2008 --w2k
+${PREMAKE} --group=all-externals vs2008 --w2k
+
 ${PREMAKE} --group=libopenmpt_test vs2010 --xp
 ${PREMAKE} --group=foo_openmpt vs2010 --xp
 ${PREMAKE} --group=in_openmpt vs2010 --xp

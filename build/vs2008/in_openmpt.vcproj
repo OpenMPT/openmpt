@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\in_openmpt\x86\Debug"
 			ConfigurationType="2"
 			UseOfMFC="1"
@@ -70,7 +70,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\bin\debug\vs2008-static\x86-32-winxp\in_openmpt.lib"
+				ImportLibrary="..\..\bin\debug\vs2008-static\x86-32-vista\in_openmpt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -97,7 +97,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\in_openmpt\x86\Release"
 			ConfigurationType="2"
 			UseOfMFC="1"
@@ -152,7 +152,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\bin\release\vs2008-static\x86-32-winxp\in_openmpt.lib"
+				ImportLibrary="..\..\bin\release\vs2008-static\x86-32-vista\in_openmpt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
