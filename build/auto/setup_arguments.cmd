@@ -1,14 +1,16 @@
 @echo off
 
-set %MPT_VS_VER%=%1
-set %MPT_VS_TARGET%=%2
-set %MPT_VS_ARCH%=%3
-set %MPT_VS_CONF%=%4
+set MPT_VS_VER=%1
+set MPT_VS_TARGET=%2
+set MPT_VS_ARCH=%3
+set MPT_VS_CONF=%4
 
 if "%MPT_VS_VER%" == "" goto setupargumentserror
 if "%MPT_VS_TARGET%" == "" goto setupargumentserror
 if "%MPT_VS_ARCH%" == "" goto setupargumentserror
 if "%MPT_VS_CONF%" == "" goto setupargumentserror
+
+pause
 
 goto setupargumentsstart
 
@@ -16,6 +18,7 @@ goto setupargumentsstart
 echo "Usage: foo.cmd vs2010 xp Win32 Release"
 rem vs2010     xp            Win32       Release     x86-32       winxp          release      static
 rem MPT_VS_VER MPT_VS_TARGET MPT_VS_ARCH MPT_VS_CONF MPT_BIN_ARCH MPT_BIN_TARGET MPT_BIN_CONF MPT_BIN_RUNTIME
+pause
 exit 1
 
 :setupargumentsstart
