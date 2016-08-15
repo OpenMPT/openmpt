@@ -1,5 +1,5 @@
 
-if _ACTION == "vs2010" then
+if _ACTION ~= "vs2008" then
 
  project "foo_openmpt"
   uuid "749102d3-b183-420c-a7d7-d8ff343c1a0c"
