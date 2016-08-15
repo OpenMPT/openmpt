@@ -39,6 +39,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2010 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2012 || goto err
+%PREMAKE% --group=foo_openmpt vs2012 || goto err
 %PREMAKE% --group=in_openmpt vs2012 || goto err
 %PREMAKE% --group=xmp-openmpt vs2012 || goto err
 %PREMAKE% --group=libopenmpt-small vs2012 || goto err
@@ -50,6 +51,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2012 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2013 || goto err
+%PREMAKE% --group=foo_openmpt vs2013 || goto err
 %PREMAKE% --group=in_openmpt vs2013 || goto err
 %PREMAKE% --group=xmp-openmpt vs2013 || goto err
 %PREMAKE% --group=libopenmpt-small vs2013 || goto err
@@ -61,6 +63,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2013 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2015 || goto err
+%PREMAKE% --group=foo_openmpt vs2015 || goto err
 %PREMAKE% --group=in_openmpt vs2015 || goto err
 %PREMAKE% --group=xmp-openmpt vs2015 || goto err
 %PREMAKE% --group=libopenmpt-small vs2015 || goto err
@@ -95,6 +98,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2010 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2012 --xp || goto err
+%PREMAKE% --group=foo_openmpt vs2012 --xp || goto err
 %PREMAKE% --group=in_openmpt vs2012 --xp || goto err
 %PREMAKE% --group=xmp-openmpt vs2012 --xp || goto err
 %PREMAKE% --group=libopenmpt-small vs2012 --xp || goto err
@@ -106,6 +110,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2012 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2013 --xp || goto err
+%PREMAKE% --group=foo_openmpt vs2013 --xp || goto err
 %PREMAKE% --group=in_openmpt vs2013 --xp || goto err
 %PREMAKE% --group=xmp-openmpt vs2013 --xp || goto err
 %PREMAKE% --group=libopenmpt-small vs2013 --xp || goto err
@@ -117,6 +122,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=all-externals vs2013 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2015 --xp || goto err
+%PREMAKE% --group=foo_openmpt vs2015 --xp || goto err
 %PREMAKE% --group=in_openmpt vs2015 --xp || goto err
 %PREMAKE% --group=xmp-openmpt vs2015 --xp || goto err
 %PREMAKE% --group=libopenmpt-small vs2015 --xp || goto err
