@@ -32,13 +32,17 @@ mkdir openmpt123\x86
 mkdir openmpt123\x86_64
 mkdir XMPlay
 mkdir Winamp
-mkdir foobar2000
+if not "%MPT_VS_VER%" == "vs2008" (
+	mkdir foobar2000
+)
 rmdir /s /q Licenses
 mkdir Licenses
 rem copy /y ..\..\include\bladeenc\BladeDLL.html                 .\Licenses\License.BladeDLL.html || goto error
 copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
+if not "%MPT_VS_VER%" == "vs2008" (
 copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
+)
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
 rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
@@ -61,12 +65,30 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
+if not "%MPT_VS_VER%" == "vs2008" (
 copy /y ..\..\libopenmpt\doc\foo_openmpt.txt .\foobar2000\ || goto error
+)
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-64-%MPT_BIN_TARGET64%\openmpt123.exe .\openmpt123\x86_64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\in_openmpt.dll .\Winamp\ || goto error
+if not "%MPT_VS_VER%" == "vs2008" (
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_openmpt.dll .\foobar2000\ || goto error
+)
+if "%MPT_VS_VER%" == "vs2008" (
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_PKG_TAG%-%MPT_REVISION%.7z ^
+ LICENSE.txt ^
+ Licenses ^
+ changelog.md ^
+ openmpt123\x86\openmpt123.exe ^
+ openmpt123\x86_64\openmpt123.exe ^
+ XMPlay\xmp-openmpt.txt ^
+ XMPlay\xmp-openmpt.dll ^
+ Winamp\in_openmpt.txt ^
+ Winamp\in_openmpt.dll ^
+ || goto error
+)
+if not "%MPT_VS_VER%" == "vs2008" (
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_PKG_TAG%-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -80,6 +102,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_open
  foobar2000\foo_openmpt.txt ^
  foobar2000\foo_openmpt.dll ^
  || goto error
+)
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-%MPT_PKG_TAG%.tar libopenmpt-%MPT_PKG_TAG%-%MPT_REVISION%.7z || goto error
 del /f /q libopenmpt-%MPT_PKG_TAG%-%MPT_REVISION%.7z
