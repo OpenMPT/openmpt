@@ -6,7 +6,7 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call "build\auto\setup_arguments.cmd"
+call "build\auto\setup_arguments.cmd" %1 %2 %3 %4
 
 call build\auto\setup_vs_any.cmd
 
