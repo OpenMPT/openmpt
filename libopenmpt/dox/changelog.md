@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [**Change**] The output directories of the MSVC build system were changed to
+    'bin/vs2015-shared/x86-64-win7/' (and similar) layout which allows building
+    in the same tree with different compiler versions without overwriting other
+    outputs.
+
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
  *  Possible crashes with malformed MED, PSM and Startrekker files.
