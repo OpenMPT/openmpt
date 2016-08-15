@@ -74,7 +74,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2013-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\debug\vs2013-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_test\x86_64\Debug\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -88,7 +88,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2013-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\release\vs2013-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2013xp\libopenmpt_test\x86_64\Release\</IntDir>
     <TargetName>libopenmpt_test</TargetName>
     <TargetExt>.exe</TargetExt>

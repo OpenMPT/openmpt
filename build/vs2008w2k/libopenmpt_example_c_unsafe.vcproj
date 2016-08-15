@@ -99,7 +99,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\obj\vs2008w2k\libopenmpt_example_c_unsafe\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -259,7 +259,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\obj\vs2008w2k\libopenmpt_example_c_unsafe\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -419,7 +419,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-win2000"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-winxp64"
 			IntermediateDirectory="..\obj\vs2008w2k\libopenmpt_example_c_unsafe\x86_64\DebugShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -579,7 +579,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-win2000"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-winxp64"
 			IntermediateDirectory="..\obj\vs2008w2k\libopenmpt_example_c_unsafe\x86_64\ReleaseShared"
 			ConfigurationType="1"
 			CharacterSet="1"

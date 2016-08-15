@@ -228,7 +228,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2013-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2013-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2013xp\opus\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-opus</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -242,7 +242,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2013-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2013-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2013xp\opus\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-opus</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -444,7 +444,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2013-shared\x86-64-winxp\openmpt-opus.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2013-shared\x86-64-winxp64\openmpt-opus.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -494,7 +494,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2013-shared\x86-64-winxp\openmpt-opus.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2013-shared\x86-64-winxp64\openmpt-opus.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

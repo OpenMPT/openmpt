@@ -227,7 +227,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2012xp\portmidi\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-portmidi</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -241,7 +241,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2012xp\portmidi\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-portmidi</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -437,7 +437,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>..\..\..\bin\debug\vs2012-shared\x86-64-winxp\openmpt-portmidi.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2012-shared\x86-64-winxp64\openmpt-portmidi.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -488,7 +488,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>..\..\..\bin\release\vs2012-shared\x86-64-winxp\openmpt-portmidi.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2012-shared\x86-64-winxp64\openmpt-portmidi.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

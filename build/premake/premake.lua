@@ -48,15 +48,23 @@ newoption {
 if _OPTIONS["w2k"] then
 	mpt_projectpathname = _ACTION .. "w2k"
 	mpt_bindirsuffix = "win2000"
+	mpt_bindirsuffix32 = "win2000"
+	mpt_bindirsuffix64 = "winxp64"
 elseif _OPTIONS["xp"] then
 	mpt_projectpathname = _ACTION .. "xp"
 	mpt_bindirsuffix = "winxp"
+	mpt_bindirsuffix32 = "winxp"
+	mpt_bindirsuffix64 = "winxp64"
 else
 	mpt_projectpathname = _ACTION
 	if _ACTION == "vs2008" then
 		mpt_bindirsuffix = "vista"
+		mpt_bindirsuffix32 = "vista"
+		mpt_bindirsuffix64 = "vista"
 	else
 		mpt_bindirsuffix = "win7"
+		mpt_bindirsuffix32 = "win7"
+		mpt_bindirsuffix64 = "win7"
 	end
 end
 
