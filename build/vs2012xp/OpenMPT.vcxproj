@@ -191,7 +191,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2012-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\Debug\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -205,7 +205,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2012-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\Release\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -219,7 +219,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug-MDd\vs2012-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\debug-MDd\vs2012-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\DebugMDd\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -233,7 +233,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release-LTCG\vs2012-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\release-LTCG\vs2012-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -247,7 +247,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\DebugShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -261,7 +261,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\OpenMPT\x86_64\ReleaseShared\</IntDir>
     <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>

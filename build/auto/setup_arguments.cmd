@@ -40,8 +40,8 @@ if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET32=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET32=vista
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET32=win7
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET64=vista
-if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET64=win7
+if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET64=winxp64
+if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET64=winxp64
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET64=vista
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET64=win7
 

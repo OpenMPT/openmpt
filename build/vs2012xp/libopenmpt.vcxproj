@@ -149,7 +149,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\debug\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\libopenmpt\x86_64\DebugShared\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -163,7 +163,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2012-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\bin\release\vs2012-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2012xp\libopenmpt\x86_64\ReleaseShared\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -290,7 +290,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>..\..\bin\debug\vs2012-shared\x86-64-winxp\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2012-shared\x86-64-winxp64\libopenmpt.lib</ImportLibrary>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
@@ -347,7 +347,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>..\..\bin\release\vs2012-shared\x86-64-winxp\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2012-shared\x86-64-winxp64\libopenmpt.lib</ImportLibrary>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>

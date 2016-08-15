@@ -33,7 +33,7 @@ mkdir openmpt123\x86_64
 mkdir XMPlay
 mkdir Winamp
 if not "%MPT_VS_VER%" == "vs2008" (
-	mkdir foobar2000
+mkdir foobar2000
 )
 rmdir /s /q Licenses
 mkdir Licenses

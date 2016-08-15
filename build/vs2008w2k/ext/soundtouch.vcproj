@@ -98,7 +98,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -149,7 +149,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-64-win2000\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -256,7 +256,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -310,7 +310,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-64-win2000\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -414,7 +414,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\DebugMDd"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -465,7 +465,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-64-win2000\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -573,7 +573,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|x64"
-			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\ReleaseLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -628,7 +628,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-64-win2000\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -732,7 +732,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -783,7 +783,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-win2000\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-winxp64\openmpt-soundtouch.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -890,7 +890,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-win2000"
+			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-winxp64"
 			IntermediateDirectory="..\..\obj\vs2008w2k\soundtouch\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -944,7 +944,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-win2000\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-winxp64\openmpt-soundtouch.lib"
 				TargetMachine="17"
 			/>
 			<Tool

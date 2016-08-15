@@ -167,7 +167,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2010-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2010-static\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\Debug\</IntDir>
     <TargetName>OpenMPT_SoundTouch_f32</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -181,7 +181,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2010-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2010-static\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\Release\</IntDir>
     <TargetName>OpenMPT_SoundTouch_f32</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -195,7 +195,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug-MDd\vs2010-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug-MDd\vs2010-static\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\DebugMDd\</IntDir>
     <TargetName>OpenMPT_SoundTouch_f32</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -209,7 +209,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release-LTCG\vs2010-static\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release-LTCG\vs2010-static\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>OpenMPT_SoundTouch_f32</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -223,7 +223,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2010-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2010-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -237,7 +237,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2010-shared\x86-64-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2010-shared\x86-64-winxp64\</OutDir>
     <IntDir>..\..\obj\vs2010xp\soundtouch\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -271,7 +271,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2010-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2010-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -319,7 +319,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2010-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2010-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
@@ -349,7 +349,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug-MDd\vs2010-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug-MDd\vs2010-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
@@ -397,7 +397,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release-LTCG\vs2010-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release-LTCG\vs2010-static\x86-64-winxp64\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -427,7 +427,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2010-shared\x86-64-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2010-shared\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -473,7 +473,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2010-shared\x86-64-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2010-shared\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
