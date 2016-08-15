@@ -46,7 +46,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -115,7 +115,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -183,7 +183,7 @@
 				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -198,7 +198,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -252,7 +252,7 @@
 				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -320,7 +320,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -335,7 +335,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -389,7 +389,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -404,7 +404,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -458,7 +458,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -473,7 +473,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -528,7 +528,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -543,7 +543,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -571,7 +571,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -596,7 +596,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -611,7 +611,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -624,7 +624,7 @@
 				ModuleDefinitionFile="../../premake/def/ext-opusfile.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-32-winxp\openmpt-opusfile.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-32-vista\openmpt-opusfile.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -651,7 +651,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -677,7 +677,7 @@
 				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -692,7 +692,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -705,7 +705,7 @@
 				ModuleDefinitionFile="../../premake/def/ext-opusfile.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-winxp\openmpt-opusfile.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-vista\openmpt-opusfile.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -732,7 +732,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -757,7 +757,7 @@
 				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -772,7 +772,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -787,7 +787,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-32-winxp\openmpt-opusfile.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-32-vista\openmpt-opusfile.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -814,7 +814,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\opusfile\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -840,7 +840,7 @@
 				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -855,7 +855,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opusfile\include"
 			/>
 			<Tool
@@ -870,7 +870,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-winxp\openmpt-opusfile.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-vista\openmpt-opusfile.lib"
 				TargetMachine="17"
 			/>
 			<Tool

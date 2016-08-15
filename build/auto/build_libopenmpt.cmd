@@ -8,6 +8,7 @@ set MY_DIR=%CD%
 
 set MPT_VSVER=%1
 set MPT_ARCH=%2
+set MPT_TARGET=%3
 
 if "%MPT_VSVER%" == "" goto usage
 if "%MPT_ARCH%" == "" goto usage
@@ -16,7 +17,7 @@ call "build\auto\setup_%MPT_VSVER%.cmd"
 
 
 
-cd "build\%MPT_VSVER%" || goto error
+cd "build\%MPT_VSVER%%MPT_TARGET%" || goto error
 
  devenv libopenmpt.sln /clean "Release|%MPT_ARCH%" || goto error
  devenv openmpt123.sln /clean "Release|%MPT_ARCH%" || goto error

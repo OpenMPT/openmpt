@@ -44,41 +44,50 @@
    targetsuffix "64"
   filter {}
 
-  filter { "architecture:x86", "not action:vs2008" }
-		if _OPTIONS["xp"] then
+	if _OPTIONS["w2k"] then
+		filter { "architecture:x86" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-64-win2000\" mkdir \"$(TargetDir)\\..\\x86-64-win2000\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win2000\\$(TargetFileName)\"",
+			}
+		filter { "architecture:x86_64" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-win2000\" mkdir \"$(TargetDir)\\..\\x86-32-win2000\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win2000\\$(TargetFileName)\"",
+			}
+	elseif _OPTIONS["xp"] then
+		filter { "architecture:x86" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-winxp\" mkdir \"$(TargetDir)\\..\\x86-64-winxp\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp\\$(TargetFileName)\"",
 			}
-		else
+		filter { "architecture:x86_64" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
+			}
+	else
+		filter { "architecture:x86", "action:vs2008" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-64-vista\" mkdir \"$(TargetDir)\\..\\x86-64-vista\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-vista\\$(TargetFileName)\"",
+			}
+		filter { "architecture:x86_64", "action:vs2008" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-vista\" mkdir \"$(TargetDir)\\..\\x86-32-vista\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-vista\\$(TargetFileName)\"",
+			}
+		filter { "architecture:x86", "not action:vs2008" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-win7\" mkdir \"$(TargetDir)\\..\\x86-64-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetFileName)\"",
 			}
-		end
-  filter { "architecture:x86_64", "not action:vs2008" }
-		if _OPTIONS["xp"] then
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
-			}
-		else
+		filter { "architecture:x86_64", "not action:vs2008" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-32-win7\" mkdir \"$(TargetDir)\\..\\x86-32-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetFileName)\"",
 			}
-		end
-
-  filter { "architecture:x86", "action:vs2008" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-winxp\" mkdir \"$(TargetDir)\\..\\x86-64-winxp\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp\\$(TargetFileName)\"",
-			}
-  filter { "architecture:x86_64", "action:vs2008" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
-			}
+	end
 
 	filter {}
 

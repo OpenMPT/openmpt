@@ -29,11 +29,11 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\mptrack.exe .\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\mptrack.pdb .\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.dll .\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\PluginBridge32.exe .\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\PluginBridge64.exe .\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\mptrack.exe .\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\mptrack.pdb .\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\OpenMPT_SoundTouch_f32.dll .\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\PluginBridge32.exe .\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\PluginBridge64.exe .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-win32old-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

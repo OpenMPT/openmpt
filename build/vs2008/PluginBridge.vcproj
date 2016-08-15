@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -97,12 +97,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -179,12 +179,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -263,12 +263,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -348,12 +348,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\..\bin\debug-MDd\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\debug-MDd\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\DebugMDd"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -429,12 +429,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\..\bin\debug-MDd\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\debug-MDd\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\DebugMDd"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -511,12 +511,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|Win32"
-			OutputDirectory="..\..\bin\release-LTCG\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\bin\release-LTCG\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\ReleaseLTCG"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -596,12 +596,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|x64"
-			OutputDirectory="..\..\bin\release-LTCG\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\bin\release-LTCG\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\ReleaseLTCG"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -682,12 +682,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\DebugShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -763,12 +763,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\bin\debug\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\DebugShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -845,12 +845,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\..\bin\release\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86\ReleaseShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -929,12 +929,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-vista&quot; mkdir &quot;$(TargetDir)\..\x86-64-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\bin\release\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\obj\vs2008\PluginBridge\x86_64\ReleaseShared"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -1014,7 +1014,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-winxp&quot; mkdir &quot;$(TargetDir)\..\x86-32-winxp&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-winxp\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-32-vista&quot; mkdir &quot;$(TargetDir)\..\x86-32-vista&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-32-vista\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 	</Configurations>

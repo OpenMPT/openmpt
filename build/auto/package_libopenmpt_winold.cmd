@@ -56,9 +56,9 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\openmpt123.exe .\openmpt123\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\xmp-openmpt.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\vs2008-static\x86-32-winxp\in_openmpt.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\openmpt123.exe .\openmpt123\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\xmp-openmpt.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\vs2008-static\x86-32-win2000\in_openmpt.dll .\Winamp\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-winold-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

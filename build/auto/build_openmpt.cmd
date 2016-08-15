@@ -10,17 +10,19 @@ set MPT_VSVER=%1
 set MPT_ARCH=%2
 set MPT_ARCH2=%3
 set MPT_CONFIG=%4
+set MPT_TARGET=%5
 
 if "%MPT_VSVER%" == "" goto usage
 if "%MPT_ARCH%" == "" goto usage
 if "%MPT_ARCH2%" == "" goto usage
 if "%MPT_CONFIG%" == "" set MPT_CONFIG=Release
+rem if "%MPT_TARGET%" == "" set MPT_TARGET=""
 
 call "build\auto\setup_%MPT_VSVER%.cmd"
 
 
 
-cd "build\%MPT_VSVER%" || goto error
+cd "build\%MPT_VSVER%%MPT_TARGET%" || goto error
 
 devenv OpenMPT.sln /clean "%MPT_CONFIG%|%MPT_ARCH%" || goto error
 devenv PluginBridge.sln /clean "%MPT_CONFIG%|%MPT_ARCH2%" || goto error

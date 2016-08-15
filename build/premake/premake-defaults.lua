@@ -11,7 +11,16 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["xp"] then
+		if _OPTIONS["w2k"] then
+			if _ACTION == "vs2012" then
+				toolset "v110_xp"
+			elseif _ACTION == "vs2013" then
+				toolset "v120_xp"
+			elseif _ACTION == "vs2015" then
+				toolset "v140_xp"
+			end
+			defines { "MPT_BUILD_TARGET_2000" }
+		elseif _OPTIONS["xp"] then
 			if _ACTION == "vs2012" then
 				toolset "v110_xp"
 			elseif _ACTION == "vs2013" then
@@ -119,7 +128,7 @@
 
 	filter {}
 
-	if _OPTIONS["xp"] then
+	if _OPTIONS["w2k"] or _OPTIONS["xp"] then
 
 		-- https://github.com/premake/premake-core/issues/560
 	

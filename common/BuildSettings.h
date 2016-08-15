@@ -20,19 +20,40 @@
 
 #if MPT_OS_WINDOWS
 
-#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)) || MPT_COMPILER_MSVCCLANGC2
-#if defined(MPT_BUILD_TARGET_XP)
+#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+
+#if defined(MPT_BUILD_TARGET_2000)
+
+#if defined(_M_X64)
+#define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
+#else // !_M_X64
+#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#endif // _M_X64
+
+#elif defined(MPT_BUILD_TARGET_XP)
+
 #if defined(_M_X64)
 #define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
 #else // !_M_X64
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif // _M_X64
+
+#else // MPT_BUILD_TARGET
+
+#if MPT_MSVC_BEFORE(2010,0)
+#define _WIN32_WINNT 0x0600 // _WIN32_WINNT_VISTA
 #else
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
 #endif
-#else
-#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
-#endif
+
+#endif // MPT_BUILD_TARGET
+
+#else // MPT_COMPILER
+
+#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
+
+#endif // MPT_COMPILER
+
 #define WINVER       _WIN32_WINNT
 
 #endif // MPT_OS_WINDOWS

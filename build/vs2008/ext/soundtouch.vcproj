@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -71,7 +71,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-32-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -98,7 +98,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -123,7 +123,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -149,7 +149,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-static\x86-64-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -176,7 +176,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -201,7 +201,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -215,7 +215,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -229,7 +229,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-32-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -256,7 +256,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -282,7 +282,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -296,7 +296,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -310,7 +310,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-static\x86-64-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -337,7 +337,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\DebugMDd"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -361,7 +361,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -375,7 +375,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -387,7 +387,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-32-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -414,7 +414,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\debug-MDd\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\DebugMDd"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -439,7 +439,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -453,7 +453,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -465,7 +465,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\debug-MDd\vs2008-static\x86-64-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -492,7 +492,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|Win32"
-			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\ReleaseLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -518,7 +518,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -532,7 +532,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -546,7 +546,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-32-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-32-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -573,7 +573,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseLTCG|x64"
-			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\release-LTCG\vs2008-static\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\ReleaseLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -600,7 +600,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -614,7 +614,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -628,7 +628,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-64-winxp\OpenMPT_SoundTouch_f32.lib"
+				ImportLibrary="..\..\..\bin\release-LTCG\vs2008-static\x86-64-vista\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -655,7 +655,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -679,7 +679,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -693,7 +693,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -705,7 +705,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-32-winxp\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-32-vista\openmpt-soundtouch.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -732,7 +732,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\debug\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -757,7 +757,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -771,7 +771,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -783,7 +783,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-winxp\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\debug\vs2008-shared\x86-64-vista\openmpt-soundtouch.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -810,7 +810,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-32-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-32-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -835,7 +835,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -849,7 +849,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -863,7 +863,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-32-winxp\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-32-vista\openmpt-soundtouch.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -890,7 +890,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-winxp"
+			OutputDirectory="..\..\..\bin\release\vs2008-shared\x86-64-vista"
 			IntermediateDirectory="..\..\obj\vs2008\soundtouch\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -916,7 +916,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -930,7 +930,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0500;DLL_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0600;DLL_EXPORTS"
 				AdditionalIncludeDirectories="..\..\..\include\msinttypes\stdint;..\..\..\include\soundtouch\include"
 			/>
 			<Tool
@@ -944,7 +944,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-winxp\openmpt-soundtouch.lib"
+				ImportLibrary="..\..\..\bin\release\vs2008-shared\x86-64-vista\openmpt-soundtouch.lib"
 				TargetMachine="17"
 			/>
 			<Tool
