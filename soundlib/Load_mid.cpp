@@ -632,6 +632,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	uint16 finishedTracks = 0;
 	PATTERNINDEX lastPat = 0;
 	ROWINDEX lastRow = 0;
+	ROWINDEX restartRow = ROWINDEX_INVALID;
+	bool isEMIDI = false;
+
 	while(finishedTracks < numTracks)
 	{
 		uint16 t = 0;
@@ -711,6 +714,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					std::string s;
 					chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
 					Patterns[pat].SetName(s);
+					if(!mpt::CompareNoCaseAscii(s, "loopStart"))
+					{
+						Order.SetRestartPos(pat);
+						restartRow = row;
+					}
 				}
 				break;
 			case 8:	// Patch name
@@ -896,6 +904,19 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 
+					case 110:
+						isEMIDI = true;
+						break;
+
+					case 111:
+						// Non-standard MIDI loop point. May conflict with Apogee EMIDI CCs (110/111), which is why we also check if CC 110 is ever used.
+						if(data2 == 0)
+						{
+							Order.SetRestartPos(pat);
+							restartRow = row;
+						}
+						break;
+
 					case MIDIEvents::MIDICC_AllControllersOff:
 						midiChnStatus[midiCh].expression = 128;
 						midiChnStatus[midiCh].pitchbend = 0x2000;
@@ -1054,9 +1075,18 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	if(isEMIDI)
+	{
+		Order.SetRestartPos(0);
+	}
+
 	if(Patterns.IsValidPat(lastPat))
 	{
 		Patterns[lastPat].Resize(lastRow + 1);
+		if(restartRow != ROWINDEX_INVALID && !isEMIDI)
+		{
+			Patterns[lastPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, mpt::saturate_cast<ModCommand::PARAM>(restartRow)).Row(lastRow));
+		}
 	}
 
 	if(GetpModDoc() != nullptr)
