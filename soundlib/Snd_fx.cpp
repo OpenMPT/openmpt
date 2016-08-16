@@ -108,7 +108,7 @@ public:
 	}
 
 	// Increment playback position of sample and envelopes on a channel
-	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = 0)
+	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = uint32_max)
 	{
 		ModChannel &chn = state.Chn[channel];
 		uint32 numTicks = chnSettings[channel].ticksToRender;
@@ -178,9 +178,26 @@ public:
 					// We exceeded the sample loop, go back to loop start.
 					if(chn.dwFlags[CHN_PINGPONGLOOP])
 					{
-						// Ping-pong loops are not supported for now.
-						stopNote = true;
-						break;
+						if(chn.position < SamplePosition(chn.nLoopStart, 0))
+						{
+							chn.position = SamplePosition(chn.nLoopStart + chn.nLoopStart, 0) - chn.position;
+							chn.dwFlags.flip(CHN_PINGPONGFLAG);
+							inc.Negate();
+						}
+						SmpLength posInt = chn.position.GetUInt() - chn.nLoopStart;
+						SmpLength pingpongLength = loopLength * 2;
+						if(sndFile.m_playBehaviour[kITPingPongMode]) pingpongLength--;
+						posInt %= pingpongLength;
+						bool forward = (posInt < loopLength);
+						if(forward)
+							chn.position.SetInt(chn.nLoopStart + posInt);
+						else
+							chn.position.SetInt(chn.nLoopEnd - (posInt - loopLength));
+						if(forward == chn.dwFlags[CHN_PINGPONGFLAG])
+						{
+							chn.dwFlags.flip(CHN_PINGPONGFLAG);
+							inc.Negate();
+						}
 					} else
 					{
 						SmpLength posInt = chn.position.GetUInt();
@@ -207,6 +224,7 @@ public:
 		if(stopNote)
 		{
 			chn.Stop();
+			chn.nPortamentoDest = 0;
 		}
 		chnSettings[channel].ticksToRender = 0;
 	}
