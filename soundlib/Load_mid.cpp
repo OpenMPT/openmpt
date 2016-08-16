@@ -217,7 +217,7 @@ extern const char *szMidiPercussionNames[61] =
 	"Hand Clap",
 	"Electric Snare",
 	"Low Floor Tom",
-	"Closed Hi Hat",
+	"Closed Hi-Hat",
 	"High Floor Tom",
 	"Pedal Hi-Hat",
 	"Low Tom",
@@ -270,13 +270,13 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 {
 	ModInstrument *pIns;
 	program &= 0x7F;
-	bank &= 0x3FFF;;
+	bank &= 0x3FFF;
 	note &= 0x7F;
 
 	for (uint32 i = 1; i <= m_nInstruments; i++) if (Instruments[i])
 	{
 		ModInstrument *p = Instruments[i];
-		// Drum Kit ?
+		// Drum Kit?
 		if (midiChannel == MIDI_DRUMCHANNEL)
 		{
 			if (note == p->nMidiDrumKey) return i;
@@ -337,8 +337,8 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	} else
 	{
 		strcpy(pIns->name, "Percussions");
-		if ((note >= 24) && (note <= 84))
-			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[note-24]);
+		if (note >= 24 && note <= 84)
+			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[note - 24]);
 		else
 			strcpy(m_szNames[m_nSamples], "Percussions");
 	}
@@ -351,7 +351,7 @@ struct MThd
 	uint32be headerLength;
 	uint16be format;		// 0 = single-track, 1 = multi-track, 2 = multi-song
 	uint16be numTracks;		// Number of track chunks
-	int16be  division;		// Delta timing value: positive = units/beat; negative = smpte compatible units (?)
+	int16be  division;		// Delta timing value: positive = units/beat; negative = smpte compatible units
 };
 
 MPT_BINARY_STRUCT(MThd, 10);
@@ -359,7 +359,7 @@ MPT_BINARY_STRUCT(MThd, 10);
 
 typedef uint32 tick_t;
 static const CHANNELINDEX PATTERN_CHANNELS_PER_MIDI_CHANNEL = 7;
-STATIC_ASSERT(16 * PATTERN_CHANNELS_PER_MIDI_CHANNEL + 2 <= MAX_BASECHANNELS);
+STATIC_ASSERT(16 * PATTERN_CHANNELS_PER_MIDI_CHANNEL + 2 <= MAX_BASECHANNELS);	// +2 for tempo and global volume channels
 
 struct TrackState
 {
@@ -377,20 +377,18 @@ struct TrackState
 
 struct ModChannelState
 {
-	tick_t age;
-	int32 porta;
-	uint8 vol;
-	uint8 pan;
-	uint8 instr;
-	uint8 midiCh;
-	ModCommand::NOTE note;
+	tick_t age;				// At which MIDI tick the channel was triggered
+	int32 porta;			// Current portamento position in extra-fine slide units (1/64th of a semitone)
+	uint8 vol;				// MIDI note volume (0...127)
+	uint8 pan;				// MIDI channel panning (0...256)
+	uint8 midiCh;			// MIDI channel that was last played on this channel
+	ModCommand::NOTE note;	// MIDI note that was last played on this channel
 
 	ModChannelState()
 		: age(0)
 		, porta(0)
-		, vol(127)
+		, vol(100)
 		, pan(128)
-		, instr(0)
 		, midiCh(0xFF)
 		, note(NOTE_NONE)
 	{ }
@@ -438,10 +436,10 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 	size_t anyFreeChannel = CHANNELINDEX_INVALID;
 
 	size_t oldsetMidiCh = CHANNELINDEX_INVALID;
-	tick_t oldestMidiChAge = 0;
+	tick_t oldestMidiChAge = Util::MaxValueOfType(oldestMidiChAge);
 
 	size_t oldestAnyCh = 0;
-	tick_t oldestAnyChAge = 0;
+	tick_t oldestAnyChAge = Util::MaxValueOfType(oldestAnyChAge);
 
 	for(size_t i = 0; i < channels.size(); i++)
 	{
@@ -452,13 +450,13 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 		}
 
 		// If we can't find any free channels, look for the oldest channels
-		if(channels[i].midiCh == midiCh && channels[i].age > oldestMidiChAge)
+		if(channels[i].midiCh == midiCh && channels[i].age < oldestMidiChAge)
 		{
 			// Oldest channel matching this MIDI channel
 			oldestMidiChAge = channels[i].age;
 			oldsetMidiCh = i;
 		}
-		if(channels[i].age > oldestAnyChAge)
+		if(channels[i].age < oldestAnyChAge)
 		{
 			// Any oldest channel
 			oldestAnyChAge = channels[i].age;
@@ -600,7 +598,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nDefaultTempo.Set(120);
 	m_nDefaultSpeed = ticksPerRow;
-	m_nChannels = 16u * PATTERN_CHANNELS_PER_MIDI_CHANNEL + 2; // +2 for global commands
+	m_nChannels = MAX_BASECHANNELS;
 	m_nDefaultRowsPerBeat = quantize / 4;
 	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
 	TEMPO tempo = m_nDefaultTempo;
@@ -748,7 +746,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					} else if(newTempo != tempo)
 					{
 						patRow[tempoChannel].command = CMD_TEMPO;
-						patRow[tempoChannel].param = Util::Round<ModCommand::PARAM>(newTempo.ToDouble());
+						patRow[tempoChannel].param = std::max(ModCommand::PARAM(32), Util::Round<ModCommand::PARAM>(newTempo.ToDouble()));
 					}
 					tempo = newTempo;
 				}
@@ -782,6 +780,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						CHANNELINDEX chn = FindUnusedChannel(midiCh, note, modChnStatus, midiChnStatus[midiCh].monoMode, patRow);
 						if(chn != CHANNELINDEX_INVALID)
 						{
+							modChnStatus[chn].age = tick;
 							modChnStatus[chn].note = note;
 							modChnStatus[chn].midiCh = midiCh;
 							modChnStatus[chn].vol = data2;
