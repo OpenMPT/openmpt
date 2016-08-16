@@ -350,6 +350,7 @@ namespace MidiExport
 		std::vector<ModInstrument *> m_oldInstruments;
 		std::vector<MidiTrack *> m_tracks;
 		SNDMIXPLUGIN m_oldPlugins[MAX_MIXPLUGINS];
+		SNDMIXPLUGIN tempoTrackPlugin;
 		VSTPluginLib m_plugFactory;
 		CSoundFile &m_sndFile;
 		mpt::ofstream &m_file;
@@ -365,6 +366,7 @@ namespace MidiExport
 		{
 			MemCopy(m_oldPlugins, m_sndFile.m_MixPlugins);
 			MemsetZero(m_sndFile.m_MixPlugins);
+			MemsetZero(tempoTrackPlugin);
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_oldInstruments[i - 1] = m_sndFile.Instruments[i];
@@ -376,7 +378,7 @@ namespace MidiExport
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
-			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &m_oldPlugins[0], nullptr, m_sndFile.m_songName.c_str(), nullptr));
+			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &tempoTrackPlugin, nullptr, m_sndFile.m_songName.c_str(), nullptr));
 			tempoTrack.WriteString(kText, m_sndFile.m_songMessage);
 			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
 			m_tracks.push_back(&tempoTrack);
@@ -385,7 +387,7 @@ namespace MidiExport
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_sndFile.Instruments[i] = nullptr;
-				if(!m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
+				if(instrMap[i].nChannel == MidiNoChannel || !m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
 				{
 					continue;
 				}
@@ -407,8 +409,8 @@ namespace MidiExport
 				{
 					instr.midiPWD = 12;
 				}
-				instr.nMidiChannel = instrMap[i].nChannel ? (instrMap[i].nChannel - 1 + MidiFirstChannel) : MidiMappedChannel;
-				if(instrMap[i].nChannel != 10)
+				instr.nMidiChannel = instrMap[i].nChannel;
+				if(instrMap[i].nChannel != MidiFirstChannel + 9)
 				{
 					// Melodic instrument
 					instr.nMidiProgram = instrMap[i].nProgram + 1;
@@ -431,14 +433,6 @@ namespace MidiExport
 			mpt::IO::WriteIntBE<uint16>(m_file, 1);	// Type 1 MIDI - multiple simultaneous tracks
 			mpt::IO::WriteIntBE<uint16>(m_file, static_cast<uint16>(m_tracks.size()));	// Number of tracks
 			mpt::IO::WriteIntBE<uint16>(m_file, MidiExport::ppq);
-		}
-
-		~Conversion()
-		{
-			for(size_t i = 0; i < m_tracks.size(); i++)
-			{
-				delete m_tracks[i];
-			}
 		}
 
 		void Finalise()
@@ -467,6 +461,10 @@ namespace MidiExport
 			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
 				m_sndFile.m_MixPlugins[i].Destroy();
+			}
+			for(size_t i = 0; i < m_tracks.size(); i++)
+			{
+				delete m_tracks[i];
 			}
 			MemCopy(m_sndFile.m_MixPlugins, m_oldPlugins);
 			
@@ -519,10 +517,10 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 	for (INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 	{
 		ModInstrument *pIns = m_sndFile.Instruments[i];
-		if ((pIns) && (pIns->nMidiChannel <= 16))
+		if(pIns != nullptr)
 		{
 			m_instrMap[i].nChannel = pIns->nMidiChannel;
-			if (m_instrMap[i].nChannel == 10)
+			if(m_instrMap[i].nChannel == MidiFirstChannel + 9)
 			{
 				if ((pIns->nMidiProgram > 20) && (pIns->nMidiProgram < 120))
 					m_instrMap[i].nProgram = pIns->nMidiProgram;
@@ -530,6 +528,8 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 					m_instrMap[i].nProgram = (pIns->NoteMap[60] - NOTE_MIN) & 0x7F;
 			} else
 			{
+				if(!pIns->HasValidMIDIChannel())
+					m_instrMap[i].nChannel = MidiMappedChannel;
 				m_instrMap[i].nProgram = (pIns->nMidiProgram > 0) ? ((pIns->nMidiProgram - 1) & 0x7F) : 0;
 			}
 		}
@@ -571,6 +571,7 @@ BOOL CModToMidi::OnInitDialog()
 		}
 	}
 	// Fill channels box
+	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Don't Export")), 0xFF);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Melodic (any)")), 0);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), 10);
 	for (UINT iCh=1; iCh<=16; iCh++) if (iCh != 10)
@@ -580,7 +581,7 @@ BOOL CModToMidi::OnInitDialog()
 	}
 	m_nCurrInstr = 1;
 	m_bPerc = TRUE;
-	m_CbnChannel.SetCurSel(0);
+	m_CbnChannel.SetCurSel(1);
 	m_CbnInstrument.SetCurSel(0);
 	FillProgramBox(false);
 	m_CbnProgram.SetCurSel(0);
@@ -623,19 +624,28 @@ void CModToMidi::UpdateDialog()
 	m_nCurrInstr = m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel());
 	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
 	{
-		UINT nMidiCh = m_instrMap[m_nCurrInstr].nChannel;
-		if (nMidiCh > 16) nMidiCh = 0;
+		uint8 nMidiCh = m_instrMap[m_nCurrInstr].nChannel;
+		int sel;
+		switch(nMidiCh)
+		{
+		case MidiNoChannel:
+			sel = 0; break;
+		case MidiMappedChannel:
+			sel = 1; break;
+		case MidiFirstChannel + 9:
+			sel = 2; break;
+		default:
+			sel = nMidiCh - MidiFirstChannel + 2;
+			if(nMidiCh < MidiFirstChannel + 9) sel++;
+		}
 		if ((!m_bPerc) && (nMidiCh == 10))
 		{
 			FillProgramBox(true);
-		} else
-		if ((m_bPerc) && (nMidiCh != 10))
+		} else if ((m_bPerc) && (nMidiCh != 10))
 		{
 			FillProgramBox(false);
 		}
-		if (nMidiCh == 10) nMidiCh = 1; else
-		if ((nMidiCh) && (nMidiCh < 10)) nMidiCh++;
-		m_CbnChannel.SetCurSel(nMidiCh);
+		m_CbnChannel.SetCurSel(sel);
 		UINT nMidiProgram = m_instrMap[m_nCurrInstr].nProgram;
 		if (m_bPerc)
 		{
@@ -672,15 +682,12 @@ void CModToMidi::OnChannelChanged()
 //---------------------------------
 {
 	uint8 nMidiCh = static_cast<uint8>(m_CbnChannel.GetItemData(m_CbnChannel.GetCurSel()));
-	if (nMidiCh > 16) return;
-	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
+	if(m_nCurrInstr >= m_instrMap.size())
+		return;
+	m_instrMap[m_nCurrInstr].nChannel = nMidiCh;
+	if((!m_bPerc && nMidiCh == 10) || (m_bPerc && nMidiCh != 10))
 	{
-		m_instrMap[m_nCurrInstr].nChannel = nMidiCh;
-		if (((!m_bPerc) && (nMidiCh == 10))
-		 || ((m_bPerc) && (nMidiCh != 10)))
-		{
-			UpdateDialog();
-		}
+		UpdateDialog();
 	}
 }
 
