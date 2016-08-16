@@ -539,7 +539,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	{
 		for (;;)
 		{
-			fread(&riff, sizeof(RIFFCHUNKID), 1, f);
+			if(!fread(&riff, sizeof(RIFFCHUNKID), 1, f))
+				break;
 			if (riff.id_DLS == IFFID_DLS) break; // found it
 			int len = riff.riff_len;
 			if ((len <= 4) || (fseek(f, len-4, SEEK_CUR) != 0)) break;
@@ -1465,7 +1466,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					length = m_pSamplesEx[nWaveLink].dwLen;
 					try
 					{
-						waveData.resize(length + 8);
+						waveData.assign(length + 8, 0);
 						fread(&waveData[0], 1, length, f);
 					} catch(MPTMemoryException)
 					{
@@ -1482,7 +1483,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					length = chunk.len + 8;
 					try
 					{
-						waveData.resize(chunk.len + 8);
+						waveData.assign(chunk.len + 8, 0);
 						memcpy(&waveData[0], &chunk, 12);
 						fread(&waveData[12], 1, length - 12, f);
 					} catch(MPTMemoryException)
