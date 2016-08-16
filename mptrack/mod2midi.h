@@ -20,7 +20,7 @@ namespace MidiExport
 {
 	struct Mod2MidiInstr
 	{
-		uint8 nChannel;
+		uint8 nChannel; // See enum MidiChannel
 		uint8 nProgram;
 	};
 	typedef std::vector<Mod2MidiInstr> InstrMap;
