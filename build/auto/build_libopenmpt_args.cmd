@@ -22,6 +22,7 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
 
   if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
+ 	  cd ..\.. || goto error
  	  cd include\foobar2000sdk || goto error
  	  svn revert -R --non-interactive . || goto error
     devenv pfc\pfc.vcxproj /Upgrade || goto error
@@ -29,6 +30,7 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
     devenv foobar2000\helpers\foobar2000_sdk_helpers.vcxproj /Upgrade || goto error
     devenv foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj /Upgrade || goto error
  	  cd ..\.. || goto error
+    cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
   )
 
@@ -38,9 +40,11 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
 
   if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
+ 	  cd ..\.. || goto error
     cd include\foobar2000sdk || goto error
     svn revert -R --non-interactive . || goto error
  	  cd ..\.. || goto error
+    cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
   )
 	
@@ -55,6 +59,7 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
 
   if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
+ 	  cd ..\.. || goto error
  	  cd include\foobar2000sdk || goto error
  	  svn revert -R --non-interactive . || goto error
     devenv pfc\pfc.vcxproj /Upgrade || goto error
@@ -62,6 +67,7 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
     devenv foobar2000\helpers\foobar2000_sdk_helpers.vcxproj /Upgrade || goto error
     devenv foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj /Upgrade || goto error
  	  cd ..\.. || goto error
+    cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
   )
 
@@ -71,9 +77,11 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
 
   if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
+ 	  cd ..\.. || goto error
     cd include\foobar2000sdk || goto error
     svn revert -R --non-interactive . || goto error
  	  cd ..\.. || goto error
+    cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
   )
 
