@@ -697,17 +697,19 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			switch(data1)
 			{
 			case 1:	// Text
-				break;
 			case 2:	// Copyright
 				m_songMessage.Read(chunk, len, SongMessage::leAutodetect);
 				break;
 			case 3:	// Track Name
-				if(m_songName.empty())
+				if(len > 0)
 				{
-					//std::string s;
-					//chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
-					//m_songArtist = mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, s);
-					chunk.ReadString<mpt::String::maybeNullTerminated>(m_songName, len);
+					std::string s;
+					chunk.ReadString<mpt::String::maybeNullTerminated>(s, len);
+					if(!m_songMessage.empty())
+						m_songMessage.append(1, SongMessage::InternalLineEnding);
+					m_songMessage += s;
+					if(m_songName.empty())
+						m_songName = s;
 				}
 				break;
 			case 4:	// Instrument
@@ -729,23 +731,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			case 8:	// Patch name
 			case 9:	// Port name
 				break;
-			case 0x2F:
-				break;
-			case 0x58: // Time Signature
-				{
-					/*int nn = chunk.ReadUint8();
-					int dd = chunk.ReadUint8();
-					int cc = chunk.ReadUint8();
-					int bb = chunk.ReadUint8();
-					Log("Time sig: %d:%d, metronome:%d, quarter:%d\n",nn,dd,cc,bb);*/
-				}
-				break;
-			case 0x59: // Key Signature
-				{
-					/*int sf = chunk.ReadInt8();
-					int mi = chunk.ReadUint8();
-					Log("Key sig: %d %s, %s\n",abs(sf),sf == 0?"c":(sf < 0 ? "flat":"sharp"), mi?"minor":"major");*/
-				}
+			case 0x2F:	// End Of Track
 				break;
 			case 0x51: // Tempo
 				{
