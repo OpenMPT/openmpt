@@ -1599,7 +1599,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
 	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
-	if (wsdlg.DoModal() != IDOK) return;
+	{
+		BypassInputHandler bih;
+		if (wsdlg.DoModal() != IDOK) return;
+	}
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
 
@@ -1771,9 +1774,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 
-		CMainFrame::GetInputHandler()->Bypass(true);
+		BypassInputHandler bih;
 		bool cancel = dwcdlg.DoModal() != IDOK;
-		CMainFrame::GetInputHandler()->Bypass(false);
 
 		if(wsdlg.m_Settings.outputToSample)
 		{
@@ -1912,12 +1914,11 @@ void CModDoc::OnFileMidiConvert()
 	if(!dlg.Show()) return;
 
 	CModToMidi mididlg(m_SndFile, pMainFrm);
+	BypassInputHandler bih;
 	if(mididlg.DoModal() == IDOK)
 	{
 		CDoMidiConvert doconv(m_SndFile, dlg.GetFirstFile(), mididlg.m_instrMap);
-		CMainFrame::GetInputHandler()->Bypass(true);
 		doconv.DoModal();
-		CMainFrame::GetInputHandler()->Bypass(false);
 	}
 #else
 	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
