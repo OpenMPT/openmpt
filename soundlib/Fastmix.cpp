@@ -86,7 +86,7 @@ struct MixLoopState
 	}
 
 	// Check how many samples can be rendered without encountering loop or sample end, and also update loop position / direction
-	forceinline uint32 GetSampleCount(ModChannel &chn, uint32 nSamples, bool ITBidiMode) const
+	forceinline uint32 GetSampleCount(ModChannel &chn, uint32 nSamples, bool ITPingPongMode) const
 	{
 		int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
 		SamplePosition nInc = chn.increment;
@@ -147,8 +147,11 @@ struct MixLoopState
 
 					SamplePosition invFract = chn.position.GetInvertedFract();
 					chn.position = SamplePosition(chn.nLength - (chn.position.GetInt() - chn.nLength) - invFract.GetInt(), invFract.GetFract());
-					// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-					if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength)) chn.position.SetInt(chn.nLength - (ITBidiMode ? 2 : 1));
+					if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength))
+					{
+						// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
+						chn.position.SetInt(chn.nLength - std::min<SmpLength>(chn.nLength, ITPingPongMode ? 2 : 1));
+					}
 				} else
 				{
 					if (nInc.IsNegative()) // This is a bug
