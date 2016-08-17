@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
 
 #ifdef MPT_BUILD_FUZZER
-struct CDLSBank { static int32 DLSMidiVolumeToLinear(uint32) { return 256; };
+struct CDLSBank { static int32 DLSMidiVolumeToLinear(uint32) { return 256; } };
 #endif
 
 #define MIDI_DRUMCHANNEL	10
