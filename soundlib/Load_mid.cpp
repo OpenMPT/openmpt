@@ -377,6 +377,8 @@ struct TrackState
 
 struct ModChannelState
 {
+	static const uint8 NOMIDI = 0xFF;	// No MIDI channel assigned.
+
 	tick_t age;				// At which MIDI tick the channel was triggered
 	int32 porta;			// Current portamento position in extra-fine slide units (1/64th of a semitone)
 	uint8 vol;				// MIDI note volume (0...127)
@@ -389,7 +391,7 @@ struct ModChannelState
 		, porta(0)
 		, vol(100)
 		, pan(128)
-		, midiCh(0xFF)
+		, midiCh(NOMIDI)
 		, note(NOTE_NONE)
 	{ }
 };
@@ -433,14 +435,6 @@ struct MidiChannelState
 static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const std::vector<ModChannelState> &channels, bool monoMode, PatternRow patRow)
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	size_t anyFreeChannel = CHANNELINDEX_INVALID;
-
-	size_t oldsetMidiCh = CHANNELINDEX_INVALID;
-	tick_t oldestMidiChAge = Util::MaxValueOfType(oldestMidiChAge);
-
-	size_t oldestAnyCh = 0;
-	tick_t oldestAnyChAge = Util::MaxValueOfType(oldestAnyChAge);
-
 	for(size_t i = 0; i < channels.size(); i++)
 	{
 		// Check if this note is already playing, or find any note of the same MIDI channel in case of mono mode
@@ -448,41 +442,52 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 		{
 			return static_cast<CHANNELINDEX>(i);
 		}
+	}
+	
+	CHANNELINDEX anyUnusedChannel = CHANNELINDEX_INVALID;
+	CHANNELINDEX anyFreeChannel = CHANNELINDEX_INVALID;
+
+	CHANNELINDEX oldsetMidiCh = CHANNELINDEX_INVALID;
+	tick_t oldestMidiChAge = Util::MaxValueOfType(oldestMidiChAge);
+
+	CHANNELINDEX oldestAnyCh = 0;
+	tick_t oldestAnyChAge = Util::MaxValueOfType(oldestAnyChAge);
+
+	for(size_t i = 0; i < channels.size(); i++)
+	{
+		if(channels[i].note == NOTE_NONE && !patRow[i].IsNote())
+		{
+			// Recycle channel previously used by the same MIDI channel
+			if(channels[i].midiCh == midiCh)
+				return static_cast<CHANNELINDEX>(i);
+			// If we cannot find a channel that was already used for the same MIDI channel, try a completely unused channel next
+			else if(channels[i].midiCh == ModChannelState::NOMIDI && anyUnusedChannel == CHANNELINDEX_INVALID)
+				anyUnusedChannel = static_cast<CHANNELINDEX>(i);
+			// And if that fails, try any channel that currently doesn't play a note.
+			if(anyFreeChannel == CHANNELINDEX_INVALID)
+				anyFreeChannel = static_cast<CHANNELINDEX>(i);
+		}
 
 		// If we can't find any free channels, look for the oldest channels
 		if(channels[i].midiCh == midiCh && channels[i].age < oldestMidiChAge)
 		{
 			// Oldest channel matching this MIDI channel
 			oldestMidiChAge = channels[i].age;
-			oldsetMidiCh = i;
-		}
-		if(channels[i].age < oldestAnyChAge)
+			oldsetMidiCh = static_cast<CHANNELINDEX>(i);
+		} else if(channels[i].age < oldestAnyChAge)
 		{
 			// Any oldest channel
 			oldestAnyChAge = channels[i].age;
-			oldestAnyCh = i;
+			oldestAnyCh = static_cast<CHANNELINDEX>(i);
 		}
 	}
-	
-	// Try grouping output into X pattern channels per MIDI channel
-	size_t baseOffset = midiCh * PATTERN_CHANNELS_PER_MIDI_CHANNEL;
-	for(size_t i = 0; i < channels.size(); i++)
-	{
-		CHANNELINDEX j = static_cast<CHANNELINDEX>((i + baseOffset) % channels.size());
-		if(channels[j].note == NOTE_NONE && !patRow[j].IsNote())
-		{
-			// Recycle channel previously used by the same MIDI channel
-			if(channels[j].midiCh == midiCh)
-				return j;
-			if(anyFreeChannel == CHANNELINDEX_INVALID)
-				anyFreeChannel = j;
-		}
-	}
+	if(anyUnusedChannel != CHANNELINDEX_INVALID)
+		return anyUnusedChannel;
 	if(anyFreeChannel != CHANNELINDEX_INVALID)
-		return static_cast<CHANNELINDEX>(anyFreeChannel);
+		return anyFreeChannel;
 	if(oldsetMidiCh != CHANNELINDEX_INVALID)
-		return static_cast<CHANNELINDEX>(oldsetMidiCh);
-	return static_cast<CHANNELINDEX>(oldestAnyCh);
+		return oldsetMidiCh;
+	return oldestAnyCh;
 }
 
 
@@ -649,7 +654,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		FileReader &track = tracks[t].track;
 
-		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow / 4u, ppqn);
+		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow, ppqn * 4u);
 
 		PATTERNINDEX pat = static_cast<PATTERNINDEX>((modTicks / ticksPerRow) / patternLen);
 		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
@@ -1057,7 +1062,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				absDiff /= 4 * (ticksPerRow - 1);
 				LimitMax(absDiff, 0xDF);
 				m.param = static_cast<uint8>(absDiff);
-				MPT_ASSERT(m.param < 30);
 				realDiff = absDiff * 4 * (ticksPerRow - 1);
 			}
 			chnState.porta += realDiff * sgn(diff);
@@ -1095,17 +1099,29 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		channels.reserve(m_nChannels);
 		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 		{
-			if(modChnStatus[i].midiCh != 0xFF || !GetpModDoc()->IsChannelUnused(i))
+			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI || !GetpModDoc()->IsChannelUnused(i))
 			{
 				channels.push_back(i);
-				if(i < tempoChannel)
-					sprintf(ChnSettings[i].szName, "MIDI Ch %u", 1 + (i / PATTERN_CHANNELS_PER_MIDI_CHANNEL));
+				if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
+					sprintf(ChnSettings[i].szName, "MIDI Ch %u", 1 + modChnStatus[i].midiCh);
 				else if(i == tempoChannel)
 					strcpy(ChnSettings[i].szName, "Tempo");
 				else if(i == globalVolChannel)
 					strcpy(ChnSettings[i].szName, "Global Volume");
 			}
 		}
+
+		// Keep MIDI channels in patterns neatly grouped
+		struct MidiChannelSort
+		{
+			std::vector<ModChannelState> &modChnStatus;
+			MidiChannelSort(std::vector<ModChannelState> &modChnStatus) : modChnStatus(modChnStatus) { }
+			bool operator() (CHANNELINDEX c1, CHANNELINDEX c2)
+			{
+				return modChnStatus[c1].midiCh < modChnStatus[c2].midiCh;
+			}
+		};
+		std::stable_sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
 		GetpModDoc()->ReArrangeChannels(channels);
 	}
 
