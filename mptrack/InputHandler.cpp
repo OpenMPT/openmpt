@@ -334,17 +334,14 @@ KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 	{
 		// Key released
 		return kKeyEventUp;
+	} else if (nFlags & REPEATBIT)
+	{
+		// Key repeated
+		return kKeyEventRepeat;
 	} else
 	{
-		if (nFlags & REPEATBIT)
-		{
-			// Key repeated
-			return kKeyEventRepeat;
-		} else
-		{
-			// New key down
-			return kKeyEventDown;
-		}
+		// New key down
+		return kKeyEventDown;
 	}
 }
 
@@ -372,21 +369,21 @@ bool CInputHandler::SelectionPressed()
 bool CInputHandler::ShiftPressed()
 //--------------------------------
 {
-	return (modifierMask & HOTKEYF_SHIFT);
+	return (modifierMask & (HOTKEYF_SHIFT | HOTKEYF_RSHIFT)) != 0;
 }
 
 
 bool CInputHandler::CtrlPressed()
 //-------------------------------
 {
-	return ((modifierMask & HOTKEYF_CONTROL) != 0);
+	return (modifierMask & (HOTKEYF_CONTROL | HOTKEYF_RCONTROL)) != 0;
 }
 
 
 bool CInputHandler::AltPressed()
 //------------------------------
 {
-	return ((modifierMask & HOTKEYF_ALT) != 0);
+	return (modifierMask & (HOTKEYF_ALT | HOTKEYF_RALT)) != 0;
 }
 
 
@@ -614,5 +611,18 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 	return false;
 }
 
+
+BypassInputHandler::BypassInputHandler()
+//--------------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(true);
+}
+
+
+BypassInputHandler::~BypassInputHandler()
+//---------------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(true);
+}
 
 OPENMPT_NAMESPACE_END
