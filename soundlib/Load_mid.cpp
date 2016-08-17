@@ -569,19 +569,17 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		} while(file.BytesLeft());
 	}
 
-	if(!file.ReadMagic("MThd"))
+	MThd fileHeader;
+	if(!file.ReadMagic("MThd")
+		|| !file.ReadStruct(fileHeader)
+		|| fileHeader.numTracks == 0
+		|| fileHeader.headerLength < 6
+		|| !file.Skip(fileHeader.headerLength - 6))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
-	}
-
-	MThd fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| !file.Skip(fileHeader.headerLength - 6))
-	{
-		return false;
 	}
 
 	InitializeGlobals(MOD_TYPE_MID);
@@ -1096,6 +1094,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					strcpy(ChnSettings[i].szName, "Global Volume");
 			}
 		}
+		if(channels.empty())
+			return false;
 
 		// Keep MIDI channels in patterns neatly grouped
 		struct MidiChannelSort

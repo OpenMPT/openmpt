@@ -22,6 +22,8 @@ namespace MidiExport
 	{
 		uint8 nChannel; // See enum MidiChannel
 		uint8 nProgram;
+
+		Mod2MidiInstr() : nChannel(MidiMappedChannel), nProgram(0) { }
 	};
 	typedef std::vector<Mod2MidiInstr> InstrMap;
 }
