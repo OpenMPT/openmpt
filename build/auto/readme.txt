@@ -1,1 +1,1 @@
-Automated build scripts that are used for automated builds and packaging (on windows).
+Automated build scripts that are used for automated builds and packaging.
