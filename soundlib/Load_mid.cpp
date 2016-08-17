@@ -29,7 +29,7 @@ struct CDLSBank { static int32 DLSMidiVolumeToLinear(uint32) { return 256; } };
 
 #define MIDI_DRUMCHANNEL	10
 
-extern const char *szMidiGroupNames[17] =
+const char *szMidiGroupNames[17] =
 {
 	"Piano",
 	"Chromatic Percussion",
@@ -51,7 +51,7 @@ extern const char *szMidiGroupNames[17] =
 };
 
 
-extern const char *szMidiProgramNames[128] =
+const char *szMidiProgramNames[128] =
 {
 	// 1-8: Piano
 	"Acoustic Grand Piano",
@@ -201,7 +201,7 @@ extern const char *szMidiProgramNames[128] =
 
 
 // Notes 25-85
-extern const char *szMidiPercussionNames[61] =
+const char *szMidiPercussionNames[61] =
 {
 	"Seq Click",
 	"Brush Tap",
@@ -400,9 +400,10 @@ struct ModChannelState
 
 struct MidiChannelState
 {
-	uint16 pitchbend;	// 0...16383
-	uint16 bank;		// 0...16383
-	uint8 program;		// 0...127
+	int32  pitchbendMod;	// Pre-computed pitchbend in extra-fine slide units (1/64th of a semitone)
+	int16  pitchbend;		// 0...16383
+	uint16 bank;			// 0...16383
+	uint8  program;			// 0...127
 	// -- Controllers ------------- function ---------- CC# --- range  ---- init (midi) ---
 	uint8 pan;             // Channel Panning           10      [0-255]     128  (64)
 	uint8 expression;      // Channel Expression        11      0-128       128  (127)
@@ -415,7 +416,8 @@ struct MidiChannelState
 	CHANNELINDEX noteOn[128];	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
 
 	MidiChannelState()
-		: pitchbend(0x2000)
+		: pitchbendMod(0)
+		, pitchbend(0x2000)
 		, bank(0)
 		, program(0)
 		, pan(128)
@@ -430,6 +432,13 @@ struct MidiChannelState
 		{
 			noteOn[i] = CHANNELINDEX_INVALID;
 		}
+	}
+
+	void SetPitchbend(uint16 value)
+	{
+		pitchbend = value;
+		// Convert from arbitrary MIDI pitchbend to 64th of semitone
+		pitchbendMod = Util::muldivr(pitchbend - 0x2000, pitchBendRange * 64, 0x2000);
 	}
 };
 
@@ -622,7 +631,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	const uint16 numTracks = fileHeader.numTracks;
 	std::vector<TrackState> tracks(numTracks);
 	std::vector<ModChannelState> modChnStatus(m_nChannels);
-	std::map<uint8, INSTRUMENTINDEX> modInstrument;
 
 	for(uint16 t = 0; t < numTracks; t++)
 	{
@@ -752,6 +760,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 
 			default:
+
 				break;
 			}
 		} else
@@ -787,7 +796,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							int32 pitchOffset = 0;
 							if(midiChnStatus[midiCh].pitchbend != 0x2000)
 							{
-								pitchOffset = Util::muldivr(midiChnStatus[midiCh].pitchbend - 0x2000, midiChnStatus[midiCh].pitchBendRange, 0x2000);
+								pitchOffset = midiChnStatus[midiCh].pitchbendMod / 64;
 								modChnStatus[chn].porta = pitchOffset * 64;
 							} else
 							{
@@ -845,6 +854,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						if(midiChnStatus[midiCh].rpnState == 2)
 						{
 							midiChnStatus[midiCh].pitchBendRange = std::max(data2, uint8(1));
+							midiChnStatus[midiCh].SetPitchbend(midiChnStatus[midiCh].pitchbend);
 						}
 						break;
 
@@ -910,8 +920,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 					case MIDIEvents::MIDICC_AllControllersOff:
 						midiChnStatus[midiCh].expression = 128;
-						midiChnStatus[midiCh].pitchbend = 0x2000;
 						midiChnStatus[midiCh].pitchBendRange = 2;
+						midiChnStatus[midiCh].SetPitchbend(0x2000);
 						midiChnStatus[midiCh].rpnState = 0;
 						midiChnStatus[midiCh].modulation = 0;
 						// Should also reset pedals (40h-43h), NRP, RPN, aftertouch
@@ -949,7 +959,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			case 0xD0: // Channel aftertouch
 				break;
 			case 0xE0: // Pitch bend
-				midiChnStatus[midiCh].pitchbend = data1 | (track.ReadUint8() << 7);
+				midiChnStatus[midiCh].SetPitchbend(data1 | (track.ReadUint8() << 7));
 				break;
 			case 0xF0: // General / Immediate
 				switch(midiCh)
@@ -1012,9 +1022,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			if(chnState.note == NOTE_NONE || m.command == CMD_S3MCMDEX || m.command == CMD_DELAYCUT || midiCh > 0x0F)
 				continue;
 
-			int32 pitchBendRange = midiChnStatus[midiCh].pitchBendRange * 64;
-			// Convert from arbitrary MIDI pitchbend to 64th of semitone
-			int32 diff = Util::muldiv(midiChnStatus[midiCh].pitchbend - 0x2000, pitchBendRange, 0x2000) - chnState.porta;
+			int32 diff = midiChnStatus[midiCh].pitchbendMod - chnState.porta;
 			if(diff == 0)
 				continue;
 
