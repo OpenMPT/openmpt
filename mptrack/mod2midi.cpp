@@ -48,9 +48,9 @@ namespace MidiExport
 
 		std::ostringstream f;
 		double m_tempo;
+		double m_ticks;								// MIDI ticks since previous event
 		CSoundFile::samplecount_t m_samplePos;		// Current sample position
 		CSoundFile::samplecount_t m_prevEventTime;	// Sample position of previous event
-		uint32 m_ticks;			// MIDI ticks since previous event
 		uint32 m_sampleRate;
 		uint32 m_oldSigNumerator;
 		int32 m_oldGlobalVol;
@@ -58,15 +58,16 @@ namespace MidiExport
 		// Calculate how many MIDI ticks have passed since the last written event
 		void UpdateTicksSinceLastEvent()
 		{
-			m_ticks += Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
+			m_ticks += (m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60);
 			m_prevEventTime = m_samplePos;
 		}
 		
 		// Write delta tick count since last event
 		void WriteTicks()
 		{
-			mpt::IO::WriteVarInt(f, m_ticks);
-			m_ticks = 0;
+			uint32 ticks = (m_ticks <= 0) ? 0 : Util::Round<uint32>(m_ticks);
+			mpt::IO::WriteVarInt(f, ticks);
+			m_ticks -= ticks;
 		}
 
 	public:
@@ -79,8 +80,8 @@ namespace MidiExport
 			, m_sndFile(sndFile)
 			, m_tempoTrack(tempoTrack)
 			, m_tempo(0.0)
+			, m_ticks(0.0)
 			, m_samplePos(0), m_prevEventTime(0)
-			, m_ticks(0)
 			, m_sampleRate(sndFile.GetSampleRate())
 			, m_oldSigNumerator(0)
 			, m_oldGlobalVol(-1)
@@ -562,8 +563,7 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= m_sndFile.GetNumSamples(); nSmp++)
 		{
-			if ((m_sndFile.GetSample(nSmp).pSample)
-			 && (m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false)))
+			if (m_sndFile.GetSample(nSmp).pSample != nullptr && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
 			{
 				wsprintf(s, "%02d: %s", nSmp, m_sndFile.m_szNames[nSmp]);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nSmp);
@@ -571,13 +571,13 @@ BOOL CModToMidi::OnInitDialog()
 		}
 	}
 	// Fill channels box
-	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Don't Export")), 0xFF);
-	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Melodic (any)")), 0);
-	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), 10);
+	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Don't Export")), MidiNoChannel);
+	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Melodic (any)")), MidiMappedChannel);
+	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), MidiFirstChannel + 9);
 	for (UINT iCh=1; iCh<=16; iCh++) if (iCh != 10)
 	{
-		wsprintf(s, _T("Melodic %d"), iCh);
-		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), iCh);
+		wsprintf(s, _T("Melodic %u"), iCh);
+		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), MidiFirstChannel - 1 + iCh);
 	}
 	m_nCurrInstr = 1;
 	m_bPerc = TRUE;
@@ -638,10 +638,10 @@ void CModToMidi::UpdateDialog()
 			sel = nMidiCh - MidiFirstChannel + 2;
 			if(nMidiCh < MidiFirstChannel + 9) sel++;
 		}
-		if ((!m_bPerc) && (nMidiCh == 10))
+		if ((!m_bPerc) && (nMidiCh == MidiFirstChannel + 9))
 		{
 			FillProgramBox(true);
-		} else if ((m_bPerc) && (nMidiCh != 10))
+		} else if ((m_bPerc) && (nMidiCh != MidiFirstChannel + 9))
 		{
 			FillProgramBox(false);
 		}
@@ -685,7 +685,7 @@ void CModToMidi::OnChannelChanged()
 	if(m_nCurrInstr >= m_instrMap.size())
 		return;
 	m_instrMap[m_nCurrInstr].nChannel = nMidiCh;
-	if((!m_bPerc && nMidiCh == 10) || (m_bPerc && nMidiCh != 10))
+	if((!m_bPerc && nMidiCh == MidiFirstChannel + 9) || (m_bPerc && nMidiCh != MidiFirstChannel + 9))
 	{
 		UpdateDialog();
 	}
