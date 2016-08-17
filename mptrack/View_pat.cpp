@@ -2662,7 +2662,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 					m[chn].vol = (ModCommand::VOL)vol;
 				}
 			}
-			if((column == PatternCursor::effectColumn || column == PatternCursor::paramColumn) && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
+			if((column == PatternCursor::effectColumn || column == PatternCursor::paramColumn) && (m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn))))
 			{
 				// Increase / decrease effect parameter
 				if(m[chn].IsPcNote())
