@@ -120,7 +120,11 @@ int get_utf8_argv(int *argc, char ***argv)
 	char **utf8argv;
 	int ret, i;
 
+#if 0 // OpenMPT
 	if ((handle = LoadLibrary("msvcrt.dll")) == NULL) return 1;
+#else // OpenMPT
+	if ((handle = LoadLibrary(TEXT("msvcrt.dll"))) == NULL) return 1; // OpenMPT
+#endif // OpenMPT
 	if ((wgetmainargs = (wgetmainargs_t)GetProcAddress(handle, "__wgetmainargs")) == NULL) return 1;
 	i = 0;
 	/* if __wgetmainargs expands wildcards then it also erroneously converts \\?\c:\path\to\file.flac to \\file.flac */
