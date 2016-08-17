@@ -6,8 +6,6 @@
 
 MPT_PREMAKE_VERSION = ""
 
-MPT_WITH_SHARED = true
-
 if _PREMAKE_VERSION == "5.0.0-alpha9" then
  MPT_PREMAKE_VERSION = "5.0"
 else
@@ -323,11 +321,7 @@ if _OPTIONS["group"] == "libopenmpt-small" then
 
 solution "libopenmpt-small"
  location ( "../../build/" .. mpt_projectpathname )
-if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
-else
- configurations { "Debug", "Release" }
-end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
@@ -341,11 +335,7 @@ if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
  location ( "../../build/" .. mpt_projectpathname )
-if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
-else
- configurations { "Debug", "Release" }
-end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -363,11 +353,7 @@ if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
  location ( "../../build/" .. mpt_projectpathname )
-if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
-else
- configurations { "Debug", "Release" }
-end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-openmpt123.lua"
@@ -423,11 +409,7 @@ if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
-if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
-else
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
-end
  platforms { "x86", "x86_64" }
  
  dofile "../../build/premake/mpt-OpenMPT.lua"
@@ -454,11 +436,7 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-if MPT_WITH_SHARED then
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
-else
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
-end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/ext-flac.lua"
