@@ -66,3 +66,20 @@ if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=
 if "%MPT_VS_TARGET%" == "default" set MPT_DIST_VARIANT_SUFFIX=
 
 set MPT_DIST_VARIANT=%MPT_DIST_VARIANT_PREFIX%%MPT_DIST_VARIANT_SUFFIX%
+
+
+rem Environment Variable \ Program Bitness 32bit Native 64bit Native WOW64
+rem PROCESSOR_ARCHITECTURE                 x86          AMD64        x86
+rem PROCESSOR_ARCHITEW6432                 undefined    undefined    AMD64
+
+set MPT_HOST_BITNESS=32
+if "%PROCESSOR_ARCHITECTURE%" == "x86" (
+	if "%PROCESSOR_ARCHITEW6432%" == "AMD64" (
+		set MPT_HOST_BITNESS=64
+	) else (
+		set MPT_HOST_BITNESS=32
+	)
+)
+if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
+	set MPT_HOST_BITNESS=64
+)
