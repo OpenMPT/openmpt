@@ -21,7 +21,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
+
+#ifdef MPT_BUILD_FUZZER
+struct CDLSBank { static int32 DLSMidiVolumeToLinear(uint32) { return 256; };
+#endif
 
 #define MIDI_DRUMCHANNEL	10
 
@@ -358,8 +362,6 @@ MPT_BINARY_STRUCT(MThd, 10);
 
 
 typedef uint32 tick_t;
-static const CHANNELINDEX PATTERN_CHANNELS_PER_MIDI_CHANNEL = 7;
-STATIC_ASSERT(16 * PATTERN_CHANNELS_PER_MIDI_CHANNEL + 2 <= MAX_BASECHANNELS);	// +2 for tempo and global volume channels
 
 struct TrackState
 {
@@ -402,13 +404,13 @@ struct MidiChannelState
 	uint16 bank;		// 0...16383
 	uint8 program;		// 0...127
 	// -- Controllers ------------- function ---------- CC# --- range  ---- init (midi) ---
-	uint8 pan;             // Channel Panning           CC10    [0-255]     128  (64)
-	uint8 expression;      // Channel Expression        CC11    0-128       128  (127)
-	uint8 volume;          // Channel Volume            CC7     0-128       80   (100)
-	uint8 modulation;      // Modulation                CC1     0-127       0
+	uint8 pan;             // Channel Panning           10      [0-255]     128  (64)
+	uint8 expression;      // Channel Expression        11      0-128       128  (127)
+	uint8 volume;          // Channel Volume            7       0-128       80   (100)
+	uint8 modulation;      // Modulation                1       0-127       0
 	uint8 pitchBendRange;  // Pitch Bend Range                              2
-	bool  monoMode;        // Mono/Poly operation       CC126/127           Poly
-	uint8 rpnState;	// Current state of RPN CCs
+	uint8 rpnState;        // Current state of RPN CCs  100/101  n/a
+	bool  monoMode;        // Mono/Poly operation       126/127  n/a        Poly
 
 	CHANNELINDEX noteOn[128];	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
 
@@ -960,8 +962,14 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
 						{
 							uint16 globalVol = sysex.ReadUint8() | (sysex.ReadUint8() << 7);
-							patRow[globalVolChannel].command = CMD_GLOBALVOLUME;
-							patRow[globalVolChannel].param = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(globalVol, 128, 16383));
+							if(tick == 0)
+							{
+								m_nDefaultGlobalVolume = Util::muldivr_unsigned(globalVol, MAX_GLOBAL_VOLUME, 16383);
+							} else
+							{
+								patRow[globalVolChannel].command = CMD_GLOBALVOLUME;
+								patRow[globalVolChannel].param = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(globalVol, 128, 16383));
+							}
 						}
 					}
 					break;
@@ -1077,6 +1085,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
 	{
 		std::vector<CHANNELINDEX> channels;
@@ -1233,12 +1242,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if (pCachedBank) delete pCachedBank;
 	if (pEmbeddedBank) delete pEmbeddedBank;
+#endif // MODPLUG_TRACKER
 
 	return true;
 }
 
 
-#else // !MODPLUG_TRACKER
+#else // !MODPLUG_TRACKER && !MPT_BUILD_FUZZER
 
 bool CSoundFile::ReadMID(FileReader &/*file*/, ModLoadingFlags /*loadFlags*/)
 {
