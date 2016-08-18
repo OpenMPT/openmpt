@@ -1070,7 +1070,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				chnState.porta -= porta;
 
 				if(diff == 0)
+				{
+					m.command = CMD_NONE;
 					continue;
+				}
 			}
 
 			m.command = static_cast<ModCommand::COMMAND>(diff < 0 ? CMD_PORTAMENTODOWN : CMD_PORTAMENTOUP);
