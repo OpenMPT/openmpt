@@ -754,7 +754,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case 0x51: // Tempo
 				{
-					uint32 t = (chunk.ReadUint8() << 16) | (chunk.ReadUint8() << 8) | chunk.ReadUint8();
+					uint8 tempoRaw[3];
+					chunk.ReadArray(tempoRaw);
+					uint32 t = (tempoRaw[0] << 16) | (tempoRaw[1] << 8) | tempoRaw[2];
 					if(t == 0)
 						break;
 					TEMPO newTempo(60000000.0 / t);
@@ -997,7 +999,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						FileReader sysex = track.ReadChunk(len);
 						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
 						{
-							uint16 globalVol = sysex.ReadUint8() | (sysex.ReadUint8() << 7);
+							uint8 volumeRaw[2];
+							sysex.ReadArray(volumeRaw);
+							uint16 globalVol = volumeRaw[0] | (volumeRaw[1] << 7);
 							if(tick == 0)
 							{
 								m_nDefaultGlobalVolume = Util::muldivr_unsigned(globalVol, MAX_GLOBAL_VOLUME, 16383);
