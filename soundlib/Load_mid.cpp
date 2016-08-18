@@ -387,6 +387,7 @@ struct ModChannelState
 	uint8 pan;				// MIDI channel panning (0...256)
 	uint8 midiCh;			// MIDI channel that was last played on this channel
 	ModCommand::NOTE note;	// MIDI note that was last played on this channel
+	bool sustained : 1;		// If true, the note was already released by a note-off event, but sustain pedal CC is still active
 
 	ModChannelState()
 		: age(0)
@@ -395,6 +396,7 @@ struct ModChannelState
 		, pan(128)
 		, midiCh(NOMIDI)
 		, note(NOTE_NONE)
+		, sustained(false)
 	{ }
 };
 
@@ -410,8 +412,9 @@ struct MidiChannelState
 	uint8 volume;          // Channel Volume            7       0-128       80   (100)
 	uint8 modulation;      // Modulation                1       0-127       0
 	uint8 pitchBendRange;  // Pitch Bend Range                              2
-	uint8 rpnState;        // Current state of RPN CCs  100/101  n/a
-	bool  monoMode;        // Mono/Poly operation       126/127  n/a        Poly
+	uint16 rpn;            // Currently selected RPN    100/101  n/a
+	bool  monoMode : 1;    // Mono/Poly operation       126/127  n/a        Poly
+	bool  sustain : 1;     // Sustain pedal             64       on/off     off
 
 	CHANNELINDEX noteOn[128];	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
 
@@ -425,8 +428,9 @@ struct MidiChannelState
 		, volume(80)
 		, modulation(0)
 		, pitchBendRange(2)
-		, rpnState(0)
+		, rpn(0x3FFF)
 		, monoMode(false)
+		, sustain(false)
 	{
 		for(size_t i = 0; i < CountOf(noteOn); i++)
 		{
@@ -438,7 +442,7 @@ struct MidiChannelState
 	{
 		pitchbend = value;
 		// Convert from arbitrary MIDI pitchbend to 64th of semitone
-		pitchbendMod = Util::muldivr(pitchbend - 0x2000, pitchBendRange * 64, 0x2000);
+		pitchbendMod = Util::muldiv(pitchbend - 0x2000, pitchBendRange * 64, 0x2000);
 	}
 };
 
@@ -508,6 +512,13 @@ static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> 
 	CHANNELINDEX chn = midiChn.noteOn[note];
 	if(chn == CHANNELINDEX_INVALID)
 		return;
+
+	if(midiChn.sustain)
+	{
+		// Turn this off later
+		modChnStatus[chn].sustained = true;
+		return;
+	}
 
 	uint8 midiCh = modChnStatus[chn].midiCh;
 	modChnStatus[chn].note = NOTE_NONE;
@@ -792,9 +803,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							modChnStatus[chn].note = note;
 							modChnStatus[chn].midiCh = midiCh;
 							modChnStatus[chn].vol = data2;
+							modChnStatus[chn].sustained = false;
 							midiChnStatus[midiCh].noteOn[data1] = chn;
 							int32 pitchOffset = 0;
-							if(midiChnStatus[midiCh].pitchbend != 0x2000)
+							if(midiChnStatus[midiCh].pitchbendMod != 0)
 							{
 								pitchOffset = midiChnStatus[midiCh].pitchbendMod / 64;
 								modChnStatus[chn].porta = pitchOffset * 64;
@@ -851,7 +863,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					case MIDIEvents::MIDICC_DataEntry_Coarse:
-						if(midiChnStatus[midiCh].rpnState == 2)
+						if(midiChnStatus[midiCh].rpn == 0)
 						{
 							midiChnStatus[midiCh].pitchBendRange = std::max(data2, uint8(1));
 							midiChnStatus[midiCh].SetPitchbend(midiChnStatus[midiCh].pitchbend);
@@ -892,17 +904,33 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						midiChnStatus[midiCh].bank |= data2;
 						break;
 
-					case MIDIEvents::MIDICC_RegisteredParameter_Fine:
-						if(data2 == 0)
+					case MIDIEvents::MIDICC_HoldPedal_OnOff:
+						midiChnStatus[midiCh].sustain = (data2 >= 0x40);
+						if(data2 < 0x40)
 						{
-							midiChnStatus[midiCh].rpnState = 1;
+							// Release notes that are still being held after note-off
+							for(size_t i = 0; i < modChnStatus.size(); i++)
+							{
+								if(modChnStatus[i].midiCh == midiCh && modChnStatus[i].sustained)
+								{
+									MIDINoteOff(midiChnStatus[midiCh], modChnStatus, modChnStatus[i].note - NOTE_MIN, delay, patRow);
+								}
+							}
 						}
 						break;
+
+					case MIDIEvents::MIDICC_NonRegisteredParameter_Fine:
+					case MIDIEvents::MIDICC_NonRegisteredParameter_Coarse:
+						midiChnStatus[midiCh].rpn = 0x3FFF;
+						break;
+
+					case MIDIEvents::MIDICC_RegisteredParameter_Fine:
+						midiChnStatus[midiCh].rpn &= (0x7F << 7);
+						midiChnStatus[midiCh].rpn |= data2;
+						break;
 					case MIDIEvents::MIDICC_RegisteredParameter_Coarse:
-						if(data2 == 0 && midiChnStatus[midiCh].rpnState == 1)
-						{
-							midiChnStatus[midiCh].rpnState = 2;
-						}
+						midiChnStatus[midiCh].rpn &= 0x7F;
+						midiChnStatus[midiCh].rpn |= (data2 << 7);
 						break;
 
 					case 110:
@@ -922,8 +950,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						midiChnStatus[midiCh].expression = 128;
 						midiChnStatus[midiCh].pitchBendRange = 2;
 						midiChnStatus[midiCh].SetPitchbend(0x2000);
-						midiChnStatus[midiCh].rpnState = 0;
+						midiChnStatus[midiCh].rpn = 0x3FFF;
 						midiChnStatus[midiCh].modulation = 0;
+						midiChnStatus[midiCh].monoMode = false;
+						midiChnStatus[midiCh].sustain = false;
 						// Should also reset pedals (40h-43h), NRP, RPN, aftertouch
 						break;
 
@@ -934,6 +964,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						if(data2 == 0x00)
 						{
 							// All Notes Off
+							midiChnStatus[midiCh].sustain = false;
 							for(uint8 note = 0; note < 128; note++)
 							{
 								MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow);
@@ -945,11 +976,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					case MIDIEvents::MIDICC_PolyOperation:
 						midiChnStatus[midiCh].monoMode = false;
 						break;
-					}
-
-					if((data1 != MIDIEvents::MIDICC_RegisteredParameter_Fine && data1 != MIDIEvents::MIDICC_RegisteredParameter_Coarse) || data2 != 0)
-					{
-						midiChnStatus[midiCh].rpnState = 0;
 					}
 				}
 				break;
@@ -1019,7 +1045,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			ModChannelState &chnState = modChnStatus[chn];
 			ModCommand &m = patRow[chn];
 			uint8 midiCh = chnState.midiCh;
-			if(chnState.note == NOTE_NONE || m.command == CMD_S3MCMDEX || m.command == CMD_DELAYCUT || midiCh > 0x0F)
+			if(chnState.note == NOTE_NONE || m.command == CMD_S3MCMDEX || m.command == CMD_DELAYCUT || midiCh == ModChannelState::NOMIDI)
 				continue;
 
 			int32 diff = midiChnStatus[midiCh].pitchbendMod - chnState.porta;
@@ -1036,10 +1062,15 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					porta = (m.param & 0x0F);
 				else
 					porta = (m.param & 0x0F) * 4;
+
 				if(m.command == CMD_PORTAMENTODOWN)
-					diff -= porta;
-				else
-					diff += porta;
+					porta = -porta;
+
+				diff += porta;
+				chnState.porta -= porta;
+
+				if(diff == 0)
+					continue;
 			}
 
 			m.command = static_cast<ModCommand::COMMAND>(diff < 0 ? CMD_PORTAMENTODOWN : CMD_PORTAMENTOUP);
@@ -1053,7 +1084,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(absDiff < 64)
 			{
 				// Fine slides can do this.
-				absDiff /= 4;
+				absDiff = std::min((absDiff + 3) / 4, 0x0F);
 				m.param = 0xF0 | static_cast<uint8>(absDiff);
 				realDiff = absDiff * 4;
 			} else
