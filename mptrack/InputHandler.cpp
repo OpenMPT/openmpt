@@ -622,7 +622,7 @@ BypassInputHandler::BypassInputHandler()
 BypassInputHandler::~BypassInputHandler()
 //---------------------------------------
 {
-	CMainFrame::GetInputHandler()->Bypass(true);
+	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
 OPENMPT_NAMESPACE_END
