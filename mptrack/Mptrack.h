@@ -33,6 +33,9 @@ class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
 class ComponentManagerSettings;
+namespace mpt { namespace Wine {
+class VersionContext;
+} } // namespace mpt::Wine
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -179,6 +182,8 @@ protected:
 	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
 	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
 
+	MPT_SHARED_PTR<mpt::Wine::VersionContext> m_WineVersion;
+
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
 	DebugSettings *m_pDebugSettings;
@@ -294,6 +299,15 @@ public:
 	const mpt::PathString& GetSongSettingsFilename() const
 	{
 		return m_pSongSettingsIniFile->GetFilename();
+	}
+
+	void SetWineVersion(MPT_SHARED_PTR<mpt::Wine::VersionContext> wineVersion)
+	{
+		m_WineVersion = wineVersion;
+	}
+	MPT_SHARED_PTR<mpt::Wine::VersionContext> GetWineVersion() const
+	{
+		return m_WineVersion;
 	}
 
 	/// Returns path to config folder including trailing '\'.
