@@ -11,6 +11,8 @@ is just a high-level summary.
     'bin/vs2015-shared/x86-64-win7/' (and similar) layout which allows building
     in the same tree with different compiler versions without overwriting other
     outputs.
+ *  [**Change**] The emscripten build now exports libopenmpt as 'libopenmpt'
+    instead of the default 'Module'.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
