@@ -386,14 +386,14 @@ MPT_BINARY_STRUCT(SFINSTGENLIST, 4)
 
 typedef struct SFSAMPLE
 {
-	char      achSampleName[20];
+	char     achSampleName[20];
 	uint32le dwStart;
 	uint32le dwEnd;
 	uint32le dwStartloop;
 	uint32le dwEndloop;
 	uint32le dwSampleRate;
 	uint8le  byOriginalPitch;
-	char      chPitchCorrection;
+	char     chPitchCorrection;
 	uint16le wSampleLink;
 	uint16le sfSampleType;
 } SFSAMPLE;
@@ -936,7 +936,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 				if (((p->sfSampleType & 0x7FFF) <= 4) && (p->dwStart < 0x08000000) && (p->dwEnd >= p->dwStart+8))
 				{
 					pDlsSmp->dwLen = (p->dwEnd - p->dwStart) * 2;
-					if ((p->dwEndloop > p->dwStartloop + 7) && (p->dwStartloop > p->dwStart))
+					if ((p->dwEndloop > p->dwStartloop + 7) && (p->dwStartloop >= p->dwStart))
 					{
 						pDlsSmp->dwStartloop = p->dwStartloop - p->dwStart;
 						pDlsSmp->dwEndloop = p->dwEndloop - p->dwStart;
