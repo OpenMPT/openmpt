@@ -7,7 +7,7 @@ AR  = emar
 CPPFLAGS += 
 CXXFLAGS += -std=c++11 -fPIC -O3 -ffast-math 
 CFLAGS   += -std=c99   -fPIC -O3 -ffast-math -fno-strict-aliasing 
-LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1
+LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s EXPORT_NAME="'libopenmpt'"
 LDLIBS   += 
 ARFLAGS  := rcs
 
