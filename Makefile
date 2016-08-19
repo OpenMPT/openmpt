@@ -781,6 +781,7 @@ DIST_OUTPUTS += bin/dist-tar.tar
 DIST_OUTPUTS += bin/dist-zip.tar
 DIST_OUTPUTS += bin/dist-doc.tar
 DIST_OUTPUTS += bin/dist-autotools.tar
+DIST_OUTPUTS += bin/dist-js.tar   
 DIST_OUTPUTS += bin/made.docs
 
 DIST_OUTPUTDIRS += bin/dist
@@ -788,6 +789,7 @@ DIST_OUTPUTDIRS += bin/dist-doc
 DIST_OUTPUTDIRS += bin/dist-tar
 DIST_OUTPUTDIRS += bin/dist-zip
 DIST_OUTPUTDIRS += bin/dist-autotools
+DIST_OUTPUTDIRS += bin/dist-js
 DIST_OUTPUTDIRS += bin/docs
 
 
