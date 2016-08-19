@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -842,6 +842,7 @@
     <ClCompile Include="AppendModule.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Autotune.cpp" />
+    <ClCompile Include="BuildVariants.cpp" />
     <ClCompile Include="CDecimalSupport.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
     <ClCompile Include="Childfrm.cpp" />
@@ -1097,6 +1098,7 @@
     <ClInclude Include="AdvancedConfigDlg.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Autotune.h" />
+    <ClInclude Include="BuildVariants.h" />
     <ClInclude Include="CDecimalSupport.h" />
     <ClInclude Include="Childfrm.h" />
     <ClInclude Include="CImageListEx.h" />

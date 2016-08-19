@@ -649,6 +649,9 @@
     <ClCompile Include="..\soundlib\MixFuncTable.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="BuildVariants.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1274,6 +1277,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\MixFuncTable.h">
       <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildVariants.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
