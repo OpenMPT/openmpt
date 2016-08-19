@@ -760,6 +760,12 @@ MISC_OUTPUTS += bin/libopenmpt_test.js.mem
 MISC_OUTPUTS += bin/made.docs
 MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
 MISC_OUTPUTS += bin/libopenmpt.js.mem
+MISC_OUTPUTS += bin/libopenmpt_example_c.js.mem 
+MISC_OUTPUTS += bin/libopenmpt_example_c_mem.js.mem 
+MISC_OUTPUTS += bin/libopenmpt_example_c_pipe.js.mem
+MISC_OUTPUTS += bin/libopenmpt_example_c_probe.js.mem
+MISC_OUTPUTS += bin/libopenmpt_example_c_stdout.js.mem
+MISC_OUTPUTS += bin/libopenmpt_example_c_unsafe.js.mem
 MISC_OUTPUTS += bin/openmpt.a
 #old
 MISC_OUTPUTS += bin/libopenmpt_example_c_safe$(EXESUFFIX)
@@ -940,6 +946,15 @@ bin/dist-doc.tar: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	cd bin/ && tar cvf dist-doc.tar libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
+.PHONY: dist-js
+dist-js: bin/dist-js.tar
+
+bin/dist-js.tar: bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
+	rm -rf bin/dist-js.tar
+	cd bin/ && cp dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz ./
+	cd bin/ && tar cvf dist-js.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
+
 .PHONY: bin/dist.mk
 bin/dist.mk:
 	rm -rf $@
@@ -1039,6 +1054,19 @@ bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
 	svn export ./ bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ --native-eol CRLF
 	cp bin/svn_version_dist.h bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/common/svn_version_default/svn_version.h
 	cd bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ && zip -r ../OpenMPT-src-$(DIST_OPENMPT_VERSION).zip --compression-method deflate -9 *
+
+.PHONY: bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar
+bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar: bin/libopenmpt.js
+	mkdir -p bin/dist-js
+	rm -rf bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses
+	svn export ./LICENSE                         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/license.txt
+	svn export ./include/miniz/miniz.c           bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.miniz.txt
+	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.stb_vorbis.txt
+	cp bin/libopenmpt.js                         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt.js
+	cp bin/libopenmpt.js.mem                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt.js.mem
+	cd bin/dist-js/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar
 
 bin/libopenmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
