@@ -347,8 +347,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// New song
-		m_dwCreatedWithVersion = MptVersion::num;
 		InitializeGlobals();
+		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
 	// Adjust channels
@@ -421,6 +421,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+	m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
+	m_PlayState.m_nCurrentRowsPerMeasure = m_nDefaultRowsPerMeasure;
 	m_PlayState.m_nGlobalVolume = static_cast<int32>(m_nDefaultGlobalVolume);
 	m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
 	m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
