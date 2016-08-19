@@ -277,7 +277,8 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	bank &= 0x3FFF;
 	note &= 0x7F;
 
-	const bool isDrum = (midiChannel == MIDI_DRUMCHANNEL) || (bank == 0x3F80 && isXG);
+	// In XG mode, extra drums are on banks with MSB 7F
+	const bool isDrum = (midiChannel == MIDI_DRUMCHANNEL) || (bank >= 0x3F80 && isXG);
 
 	for (uint32 i = 1; i <= m_nInstruments; i++) if (Instruments[i])
 	{
@@ -304,16 +305,18 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	m_nInstruments++;
 	pIns->wMidiBank = bank + 1;
 	pIns->nMidiProgram = program + 1;
-	pIns->nMidiChannel = isDrum ? MIDI_DRUMCHANNEL : 0;
-	if (isDrum) pIns->nMidiDrumKey = note;
 	pIns->nFadeOut = 1024;
 	pIns->nNNA = NNA_NOTEOFF;
 	pIns->nDCT = isDrum ? DCT_SAMPLE : DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
-	for (uint32 j=0; j<NOTE_MAX; j++)
+	if(isDrum)
 	{
-		pIns->Keyboard[j] = m_nSamples;
-		pIns->NoteMap[j] = static_cast<uint8>(isDrum ? NOTE_MIDDLEC : (j + 1));
+		pIns->nMidiChannel = MIDI_DRUMCHANNEL;
+		pIns->nMidiDrumKey = note;
+		for(size_t i = 0; i < CountOf(pIns->NoteMap); i++)
+		{
+			pIns->NoteMap[i] = NOTE_MIDDLEC;
+		}
 	}
 	pIns->VolEnv.dwFlags.set(ENV_ENABLED);
 	if (!isDrum) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
@@ -323,22 +326,16 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	pIns->VolEnv.push_back(EnvelopeNode(15, (ENVELOPE_MAX + ENVELOPE_MID) / 2));
 	pIns->VolEnv.push_back(EnvelopeNode(20, ENVELOPE_MIN));
 	pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = 1;
-	// Sample
-	Samples[m_nSamples].nPan = 128;
-	Samples[m_nSamples].nVolume = 256;
-	Samples[m_nSamples].nGlobalVol = 64;
+	// Set GM program / drum name
 	if (!isDrum)
 	{
-		// GM Midi Name
 		strcpy(pIns->name, szMidiProgramNames[program]);
-		strcpy(m_szNames[m_nSamples], szMidiProgramNames[program]);
 	} else
 	{
-		strcpy(pIns->name, "Percussions");
 		if (note >= 24 && note <= 84)
-			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[note - 24]);
+			strcpy(pIns->name, szMidiPercussionNames[note - 24]);
 		else
-			strcpy(m_szNames[m_nSamples], "Percussions");
+			strcpy(pIns->name, "Percussions");
 	}
 	return m_nInstruments;
 }
@@ -613,6 +610,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_songArtist = MPT_USTRING("MIDI Conversion");
 	m_madeWithTracker = "Standard MIDI File";
+	SetMixLevels(mixLevels1_17RC3);
 	m_nTempoMode = tempoModeModern;
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nDefaultTempo.Set(120);
