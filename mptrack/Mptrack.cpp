@@ -29,6 +29,7 @@
 #include "AutoSaver.h"
 #include "FileDialog.h"
 #include "PNG.h"
+#include "BuildVariants.h"
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
 #include "../sounddev/SoundDeviceManager.h"
@@ -897,35 +898,23 @@ void CTrackApp::SetupPaths(bool overridePortable)
 }
 
 
-bool CTrackApp::ProcessorCanRunCurrentBuild()
-//-------------------------------------------
+CString CTrackApp::SuggestModernBuildText()
 {
-	if(GetMinimumSSEVersion() >= 2)
+	CString updateText;
+	const CString url = mpt::ToCString(MptVersion::GetDownloadURL());
+	if(BuildVariants::IsKnownSystem())
 	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE2)) return false;
-	} else if(GetMinimumSSEVersion() >= 1)
-	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_CMOV)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_TSC)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_CPUID)) return false;
+		if(!BuildVariants::CurrentBuildIsModern())
+		{
+			if(BuildVariants::SystemCanRunModernBuilds())
+			{
+				updateText += CString(_T("You are running a '" + mpt::ToCString(BuildVariants::GuessCurrentBuildName()) + "' build of OpenMPT.")) + _T("\r\n");
+				updateText += CString(_T("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.")) + _T("\r\n");
+				updateText += CString(_T("You may want to visit ")) + url + CString(_T(" and upgrade.")) + _T("\r\n");
+			}
+		}
 	}
-	return true;
-}
-
-
-bool CTrackApp::SystemCanRunModernBuilds()
-//----------------------------------------
-{
-	return true
-		&& mpt::Windows::Version::Current().IsNT()
-		&& mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7)
-		&& (GetProcSupport() & PROCSUPPORT_CPUID)
-		&& (GetProcSupport() & PROCSUPPORT_TSC)
-		&& (GetProcSupport() & PROCSUPPORT_CMOV)
-		&& (GetProcSupport() & PROCSUPPORT_SSE)
-		&& (GetProcSupport() & PROCSUPPORT_SSE2)
-		;
+	return updateText;
 }
 
 
@@ -934,54 +923,74 @@ bool CTrackApp::CheckSystemSupport()
 {
 	const mpt::ustring lf = MPT_USTRING("\n");
 	const mpt::ustring url = MptVersion::GetDownloadURL();
-	if(!ProcessorCanRunCurrentBuild())
+	if(!BuildVariants::ProcessorCanRunCurrentBuild())
 	{
-		mpt::ustring text = mpt::ustring()
-			+ MPT_USTRING("This version of OpenMPT requires a CPU with SSE2 instruction set support.") + lf
-			+ MPT_USTRING("Your system may be supported with a special OpenMPT build named 'Win32 for older Windows (Win32old)'.") + lf
-			+ MPT_USTRING("Please visit ") + url + MPT_USTRING(".") + lf
-			+ MPT_USTRING("OpenMPT will exit now.") + lf
-			+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download OpenMPT for older Windows now?") + lf
-			;
-		if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
+		mpt::ustring text = mpt::ustring();
+		text += MPT_USTRING("Your CPU is too old to run this variant of OpenMPT.") + lf;
+		if(BuildVariants::GetRecommendedBuilds().size() > 0)
 		{
-			OpenURL(url);
+			text += MPT_USTRING("The following OpenMPT variants are supported on your system:") + lf;
+			text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf);
+			text += MPT_USTRING("OpenMPT will exit now.") + lf;
+			text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download aq suitable OpenMPT variant now?") + lf;
+			if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
+			{
+				OpenURL(url);
+			}
+			return false;
+		} else if(BuildVariants::IsKnownSystem())
+		{
+			text += MPT_USTRING("There is no OpenMPT variant available for your system.") + lf;
+			text += MPT_USTRING("OpenMPT will exit now.") + lf;
+			Reporting::Error(text, "OpenMPT");
+			return false;
+		} else
+		{
+			text += MPT_USTRING("OpenMPT will exit now.") + lf;
+			Reporting::Error(text, "OpenMPT");
+			return false;
 		}
-		return false;
 	}
-	if(mpt::Windows::IsOriginal())
-	{ // only do windows compatibility checks on non-emulated windows
-		if(MptVersion::IsForOlderWindows())
+	if(BuildVariants::IsKnownSystem())
+	{
+		if(!BuildVariants::CanRunBuild(BuildVariants::GetCurrentBuildVariant()))
 		{
-			if(SystemCanRunModernBuilds())
+			mpt::ustring text = mpt::ustring();
+			text += MPT_USTRING("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
+			if(BuildVariants::GetRecommendedBuilds().size() > 0)
+			{
+				text += MPT_USTRING("The following OpenMPT variants are supported on your system:") + lf;
+				text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf) + lf;
+				text += MPT_USTRING("OpenMPT will exit now.") + lf;
+				text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download aq suitable OpenMPT variant now?") + lf;
+				if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
+				{
+					OpenURL(url);
+				}
+				return true; // may work though
+			} else
+			{
+				text += MPT_USTRING("There is no OpenMPT variant available for your system.") + lf;
+				text += MPT_USTRING("OpenMPT will exit now.") + lf;
+				Reporting::Error(text, "OpenMPT");
+				return true; // may work though
+			}
+		} else if(!BuildVariants::CurrentBuildIsModern())
+		{
+			if(BuildVariants::SystemCanRunModernBuilds())
 			{
 				if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
 				{
-					mpt::ustring text = mpt::ustring()
-						+ MPT_USTRING("You are running a 'Win32old' build of OpenMPT.") + lf
-						+ MPT_USTRING("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.") + lf
-						+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" now to upgrade?") + lf
-						;
+					mpt::ustring text = mpt::ustring();
+					text += MPT_USTRING("You are running an OpenMPT variant which does not support your system in the most optimal way.") + lf;
+					text += MPT_USTRING("The following OpenMPT variants are more suitable for your system:") + lf;
+					text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf) + lf;
+					text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" now to upgrade?") + lf;
 					if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONINFORMATION, CMainFrame::GetMainFrame()) == IDYES)
 					{
 						OpenURL(url);
 					}
 				}
-			}
-		} else
-		{
-			if(!SystemCanRunModernBuilds())
-			{
-				mpt::ustring text = mpt::ustring()
-					+ MPT_USTRING("This version of OpenMPT requires Windows 7 or later.") + lf
-					+ MPT_USTRING("Your system may be supported with a special OpenMPT build named 'Win32 for older Windows (Win32old)'.") + lf
-					+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download OpenMPT for older Windows now?") + lf
-					;
-				if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONWARNING, CMainFrame::GetMainFrame()) == IDYES)
-				{
-					OpenURL(url);
-				}
-				return true; // may work though
 			}
 		}
 	}

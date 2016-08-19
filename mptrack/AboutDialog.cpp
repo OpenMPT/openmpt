@@ -4,6 +4,7 @@
 #include "PNG.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
+#include "BuildVariants.h"
 #include "../common/version.h"
 
 
@@ -262,7 +263,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	mpt::ustring app;
 	app += mpt::format(MPT_USTRING("OpenMPT %1 bit"))(sizeof(void*) * 8)
-		+ (MptVersion::IsForOlderWindows() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
+		+ (!BuildVariants().CurrentBuildIsModern() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
 		+ MPT_USTRING("\n");
 	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
 	app += MPT_USTRING("\n");

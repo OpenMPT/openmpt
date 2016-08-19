@@ -1469,6 +1469,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\BuildVariants.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\BuildVariants.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\CDecimalSupport.cpp"
 				>
 			</File>

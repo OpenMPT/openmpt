@@ -168,6 +168,9 @@
     <ClInclude Include="..\..\mptrack\Autotune.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\BuildVariants.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\CDecimalSupport.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -765,6 +768,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Autotune.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\BuildVariants.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CDecimalSupport.cpp">

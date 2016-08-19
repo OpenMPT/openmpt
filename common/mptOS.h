@@ -50,6 +50,7 @@ public:
 	};
 
 	static mpt::ustring VersionToString(uint16 version);
+	static mpt::ustring VersionToString(Number version);
 
 private:
 
@@ -83,8 +84,8 @@ public:
 
 public:
 
-	static uint16 GetMinimumKernelLevel();
-	static uint16 GetMinimumAPILevel();
+	static mpt::Windows::Version::Number GetMinimumKernelLevel();
+	static mpt::Windows::Version::Number GetMinimumAPILevel();
 
 }; // class Version
 
@@ -130,6 +131,8 @@ public:
 	bool IsBefore(mpt::Wine::Version other) const;
 	bool IsAtLeast(mpt::Wine::Version other) const;
 };
+
+mpt::Wine::Version GetMinimumWineVersion();
 
 class VersionContext
 {

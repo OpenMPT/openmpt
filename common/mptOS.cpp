@@ -220,6 +220,14 @@ mpt::ustring Version::VersionToString(uint16 version)
 }
 
 
+
+mpt::ustring Version::VersionToString(Number version)
+//---------------------------------------------------
+{
+	return VersionToString(static_cast<uint16>(version));
+}
+
+
 mpt::ustring Version::GetName() const
 //-----------------------------------
 {
@@ -306,9 +314,12 @@ mpt::ustring Version::GetNameShort() const
 	{
 		mpt::Wine::VersionContext v;
 		if(v.Version().IsValid())
+		{
 			name = mpt::format(MPT_USTRING("wine-%1"))(v.Version().AsString());
-		else
+		} else
+		{
 			name = MPT_USTRING("wine-unknown");
+		}
 	} else
 	{
 		name = mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::dec(SystemVersion >> 8), mpt::ufmt::HEX0<2>(SystemVersion & 0xFF));
@@ -318,8 +329,8 @@ mpt::ustring Version::GetNameShort() const
 #endif // MODPLUG_TRACKER
 
 
-uint16 Version::GetMinimumKernelLevel()
-//-------------------------------------
+mpt::Windows::Version::Number Version::GetMinimumKernelLevel()
+//------------------------------------------------------------
 {
 	uint16 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
@@ -333,18 +344,18 @@ uint16 Version::GetMinimumKernelLevel()
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win98);
 		#endif
 	#endif
-	return minimumKernelVersion;
+	return static_cast<mpt::Windows::Version::Number>(minimumKernelVersion);
 }
 
 
-uint16 Version::GetMinimumAPILevel()
-//----------------------------------
+mpt::Windows::Version::Number Version::GetMinimumAPILevel()
+//---------------------------------------------------------
 {
 	uint16 minimumApiVersion = 0;
 	#if MPT_OS_WINDOWS && defined(_WIN32_WINNT)
 		minimumApiVersion = std::max<uint16>(minimumApiVersion, _WIN32_WINNT);
 	#endif
-	return minimumApiVersion;
+	return static_cast<mpt::Windows::Version::Number>(minimumApiVersion);
 }
 
 
@@ -554,6 +565,27 @@ bool Version::IsAtLeast(mpt::Wine::Version other) const
 		return false;
 	}
 	return (AsInteger() >= other.AsInteger());
+}
+
+
+mpt::Wine::Version GetMinimumWineVersion()
+//----------------------------------------
+{
+	mpt::Wine::Version minimumWineVersion = mpt::Wine::Version(0,0,0);
+	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
+		#if MPT_MSVC_AT_LEAST(2013, 0) && !defined(MPT_BUILD_TARGET_XP)
+			minimumWineVersion = mpt::Wine::Version(1,8,0);
+		#elif MPT_MSVC_AT_LEAST(2013, 0) && defined(MPT_BUILD_TARGET_XP)
+			minimumWineVersion = mpt::Wine::Version(1,4,0);
+		#elif MPT_MSVC_AT_LEAST(2012, 0)
+			minimumWineVersion = mpt::Wine::Version(1,2,0);
+		#elif MPT_MSVC_AT_LEAST(2010, 0)
+			minimumWineVersion = mpt::Wine::Version(1,0,0);
+		#elif MPT_MSVC_AT_LEAST(2008, 0)
+			minimumWineVersion = mpt::Wine::Version(1,0,0);
+		#endif
+	#endif
+	return minimumWineVersion;
 }
 
 
