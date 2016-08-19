@@ -165,7 +165,7 @@ namespace MidiExport
 				WriteTicks();
 
 				int32 midiVol = Util::muldiv(m_oldGlobalVol, 0x3FFF, MAX_GLOBAL_VOLUME);
-				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, static_cast<uint8>(midiVol & 0x7F), static_cast<uint8>(midiVol >> 7) & 0x7F, 0xF7 };
+				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, static_cast<uint8>(midiVol & 0x7F), static_cast<uint8>((midiVol >> 7) & 0x7F), 0xF7 };
 				mpt::IO::WriteRaw(f, msg, 9);
 			}
 		}
