@@ -269,25 +269,27 @@ const char *szMidiPercussionNames[61] =
 
 ////////////////////////////////////////////////////////////////////////////////
 // Maps a midi instrument - returns the instrument number in the file
-uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note)
-//---------------------------------------------------------------------------------------------
+uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG)
+//--------------------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns;
 	program &= 0x7F;
 	bank &= 0x3FFF;
 	note &= 0x7F;
 
+	const bool isDrum = (midiChannel == MIDI_DRUMCHANNEL) || (bank == 0x3F80 && isXG);
+
 	for (uint32 i = 1; i <= m_nInstruments; i++) if (Instruments[i])
 	{
 		ModInstrument *p = Instruments[i];
 		// Drum Kit?
-		if (midiChannel == MIDI_DRUMCHANNEL)
+		if (isDrum)
 		{
-			if (note == p->nMidiDrumKey) return i;
+			if (note == p->nMidiDrumKey && bank + 1 == p->wMidiBank) return i;
 		} else
 		// Melodic Instrument
 		{
-			if (program + 1 == p->nMidiProgram && p->nMidiDrumKey == 0) return i;
+			if (program + 1 == p->nMidiProgram && bank + 1 == p->wMidiBank && p->nMidiDrumKey == 0) return i;
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
@@ -300,29 +302,21 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 
 	m_nSamples++;
 	m_nInstruments++;
-	pIns->wMidiBank = bank;
+	pIns->wMidiBank = bank + 1;
 	pIns->nMidiProgram = program + 1;
-	pIns->nMidiChannel = midiChannel;
-	if (midiChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = note;
+	pIns->nMidiChannel = isDrum ? MIDI_DRUMCHANNEL : 0;
+	if (isDrum) pIns->nMidiDrumKey = note;
 	pIns->nFadeOut = 1024;
 	pIns->nNNA = NNA_NOTEOFF;
-	pIns->nDCT = (midiChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
+	pIns->nDCT = isDrum ? DCT_SAMPLE : DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
 	for (uint32 j=0; j<NOTE_MAX; j++)
 	{
-		int mapnote = j + 1;
-		if (midiChannel == MIDI_DRUMCHANNEL)
-		{
-			mapnote = NOTE_MIDDLEC;
-			/*mapnote = 61 + j - nNote;
-			if (mapnote < 1) mapnote = 1;
-			if (mapnote > 120) mapnote = 120;*/
-		}
 		pIns->Keyboard[j] = m_nSamples;
-		pIns->NoteMap[j] = (uint8)mapnote;
+		pIns->NoteMap[j] = static_cast<uint8>(isDrum ? NOTE_MIDDLEC : (j + 1));
 	}
 	pIns->VolEnv.dwFlags.set(ENV_ENABLED);
-	if (midiChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
+	if (!isDrum) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
 	pIns->VolEnv.reserve(4);
 	pIns->VolEnv.push_back(EnvelopeNode(0, ENVELOPE_MAX));
 	pIns->VolEnv.push_back(EnvelopeNode(10, ENVELOPE_MAX));
@@ -333,7 +327,7 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	Samples[m_nSamples].nPan = 128;
 	Samples[m_nSamples].nVolume = 256;
 	Samples[m_nSamples].nGlobalVol = 64;
-	if (midiChannel != MIDI_DRUMCHANNEL)
+	if (!isDrum)
 	{
 		// GM Midi Name
 		strcpy(pIns->name, szMidiProgramNames[program]);
@@ -657,6 +651,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX lastPat = 0;
 	ROWINDEX lastRow = 0;
 	ROWINDEX restartRow = ROWINDEX_INVALID;
+	bool isXG = false;
 	bool isEMIDI = false;
 
 	while(finishedTracks < numTracks)
@@ -817,7 +812,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 								modChnStatus[chn].porta = 0;
 							}
 							patRow[chn].note = static_cast<ModCommand::NOTE>(Clamp(note + pitchOffset, NOTE_MIN, NOTE_MAX));
-							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1));
+							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1, isXG));
 							EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
 
 							if(delay != 0)
@@ -999,6 +994,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						FileReader sysex = track.ReadChunk(len);
 						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
 						{
+							// Master volume
 							uint8 volumeRaw[2];
 							sysex.ReadArray(volumeRaw);
 							uint16 globalVol = volumeRaw[0] | (volumeRaw[1] << 7);
@@ -1009,6 +1005,15 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								patRow[globalVolChannel].command = CMD_GLOBALVOLUME;
 								patRow[globalVolChannel].param = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(globalVol, 128, 16383));
+							}
+						} else
+						{
+							// XG System On
+							uint8 xg[7];
+							sysex.ReadArray(xg);
+							if(!memcmp(xg, "\x43\x10\x4C\x00\x00\x7E\x00", 7))
+							{
+								isXG = true;
 							}
 						}
 					}
@@ -1159,10 +1164,12 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			MidiChannelSort(std::vector<ModChannelState> &modChnStatus) : modChnStatus(modChnStatus) { }
 			bool operator() (CHANNELINDEX c1, CHANNELINDEX c2)
 			{
+				if(modChnStatus[c1].midiCh == modChnStatus[c2].midiCh)
+					return c1 < c2;
 				return modChnStatus[c1].midiCh < modChnStatus[c2].midiCh;
 			}
 		};
-		std::stable_sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
+		std::sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
 		GetpModDoc()->ReArrangeChannels(channels);
 	}
 
@@ -1195,7 +1202,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			uint32 nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 			uint32 dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 			if ((pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),
-				(pIns->wMidiBank & 0x3FFF),
+				((pIns->wMidiBank - 1) & 0x3FFF),
 				nProgram, dwKey, &nDlsIns))
 				|| (pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),	0xFFFF,
 				(nMidiCode >= 128) ? 0xFF : nProgram,
@@ -1238,7 +1245,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					uint32 nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 					uint32 dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 					if ((pDLSBank->FindInstrument(	(nMidiCode >= 128),
-						(pIns->wMidiBank & 0x3FFF),
+						((pIns->wMidiBank - 1) & 0x3FFF),
 						nProgram, dwKey, &nDlsIns))
 						|| (pDLSBank->FindInstrument(	(nMidiCode >= 128), 0xFFFF,
 						(nMidiCode >= 128) ? 0xFF : nProgram,
@@ -1285,6 +1292,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
+		GetpModDoc()->m_ShowSavedialog = true;
 	}
 	if (pCachedBank) delete pCachedBank;
 	if (pEmbeddedBank) delete pEmbeddedBank;

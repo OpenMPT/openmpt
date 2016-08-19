@@ -110,8 +110,8 @@ protected:
 	time_t m_creationTime;
 
 	bool bModifiedAutosave; // Modified since last autosave?
-	bool m_ShowSavedialog;
 public:
+	bool m_ShowSavedialog;
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 
 protected:
