@@ -69,7 +69,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
 #else // !MPT_EXTERNAL_SAMPLES && !MPT_BUILD_FUZZER
-	
+
 	enum ITPSongFlags
 	{
 		ITP_EMBEDMIDICFG	= 0x00001,	// Embed macros in file
@@ -174,13 +174,24 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		std::string path;
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
+#ifdef MODPLUG_TRACKER
 		if(version <= 0x00000102)
 		{
 			instrPaths[ins] = mpt::PathString::FromLocaleSilent(path);
 		} else
+#endif // MODPLUG_TRACKER
 		{
 			instrPaths[ins] = mpt::PathString::FromUTF8(path);
 		}
+#ifdef MODPLUG_TRACKER
+		if(!file.GetFileName().empty())
+		{
+			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(file.GetFileName().GetPath());
+		} else if(GetpModDoc() != nullptr)
+		{
+			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+		}
+#endif // MODPLUG_TRACKER
 	}
 
 	// Song Orders
@@ -271,17 +282,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		if(instrPaths[ins].empty())
 			continue;
 
-		if(!file.GetFileName().empty())
-		{
-			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(file.GetFileName().GetPath());
-		}
-#ifdef MODPLUG_TRACKER
-		else if(GetpModDoc() != nullptr)
-		{
-			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
-		}
-#endif // MODPLUG_TRACKER
-
 #ifdef MPT_EXTERNAL_SAMPLES
 		InputFile f(instrPaths[ins]);
 		FileReader instrFile = GetFileReader(f);
@@ -290,7 +290,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
 #else
-		AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."), ins, instrPaths[ins]));
+		AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."), ins, instrPaths[ins].ToUnicode()));
 #endif // MPT_EXTERNAL_SAMPLES
 	}
 
