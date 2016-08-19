@@ -63,12 +63,12 @@ MPT_BINARY_STRUCT(MODCOMMAND_ORIGINAL, 6)
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
-#ifndef MPT_EXTERNAL_SAMPLES
+#if !defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_BUILD_FUZZER)
 	// Doesn't really make sense to support this format when there's no support for external files...
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
-#else // MPT_EXTERNAL_SAMPLES
+#else // !MPT_EXTERNAL_SAMPLES && !MPT_BUILD_FUZZER
 	
 	enum ITPSongFlags
 	{
@@ -282,12 +282,16 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		}
 #endif // MODPLUG_TRACKER
 
+#ifdef MPT_EXTERNAL_SAMPLES
 		InputFile f(instrPaths[ins]);
 		FileReader instrFile = GetFileReader(f);
 		if(!ReadInstrumentFromFile(ins + 1, instrFile, true))
 		{
 			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
+#else
+		AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."), ins, instrPaths[ins]));
+#endif // MPT_EXTERNAL_SAMPLES
 	}
 
 	// Extra info data
