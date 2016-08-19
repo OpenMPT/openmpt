@@ -291,6 +291,37 @@ void InitProcSupport()
 #ifdef MODPLUG_TRACKER
 
 
+uint32 GetMinimumProcSupportFlags()
+{
+	uint32 flags = 0;
+	#ifdef ENABLE_ASM
+		#if MPT_COMPILER_MSVC
+			#if defined(_M_X64)
+				flags |= PROCSUPPORT_AMD64;
+			#elif defined(_M_IX86)
+				#if defined(_M_IX86_FP)
+					#if (_M_IX86_FP >= 2)
+						flags |= PROCSUPPORT_x86_SSE2;
+					#elif (_M_IX86_FP == 1)
+						flags |= PROCSUPPORT_x86_SSE;
+					#endif
+				#else
+					#if MPT_MSVC_AT_LEAST(2012,0)
+						flags |= PROCSUPPORT_i586;
+					#elif MPT_MSVC_AT_LEAST(2010,0)
+						flags |= PROCSUPPORT_i586;
+					#else
+						flags |= PROCSUPPORT_i486;
+					#endif
+				#endif
+			#endif
+		#endif	
+	#endif // ENABLE_ASM
+	return flags;
+}
+
+
+
 int GetMinimumSSEVersion()
 //------------------------
 {

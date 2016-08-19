@@ -342,10 +342,21 @@ std::string GetBuildFeaturesString()
 		#endif
 	#endif
 	#ifdef MODPLUG_TRACKER
-		if(IsForOlderWindows())
-		{
-			retval += " OLDWIN";
-		}
+		#if (MPT_ARCH_BITS == 64)
+			if (true
+				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP64)
+				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP64)
+			) {
+				retval += " WIN64OLD";
+			}
+		#elif (MPT_ARCH_BITS == 32)
+			if (true
+				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP)
+				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP)
+			) {
+				retval += " WIN32OLD";
+			}
+		#endif
 		#ifdef NO_VST
 			retval += " NO_VST";
 		#endif
@@ -420,20 +431,6 @@ static std::string GetRevisionString()
 		result += "p";
 	}
 	return result;
-}
-
-bool IsForOlderWindows()
-{
-	#ifdef MODPLUG_TRACKER
-		return true
-			&& (GetMinimumSSEVersion() <= 0)
-			&& (GetMinimumAVXVersion() <= 0)
-			&& (mpt::Windows::Version::GetMinimumKernelLevel() < mpt::Windows::Version::WinXP)
-			&& (mpt::Windows::Version::GetMinimumAPILevel() < mpt::Windows::Version::WinXP)
-			;
-	#else
-		return false;
-	#endif
 }
 
 mpt::ustring GetDownloadURL()

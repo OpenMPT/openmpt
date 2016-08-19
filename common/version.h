@@ -68,9 +68,6 @@ namespace MptVersion
 	};
 	SourceInfo GetSourceInfo();
 
-	// Returns true if the build will run on ancient Windows versions.
-	bool IsForOlderWindows();
-
 	// Returns either the URL to download release builds or the URL to download test builds, depending on the current build.
 	mpt::ustring GetDownloadURL();
 

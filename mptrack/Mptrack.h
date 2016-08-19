@@ -314,8 +314,7 @@ public:
 	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
 
-	bool ProcessorCanRunCurrentBuild();
-	bool SystemCanRunModernBuilds();
+	CString SuggestModernBuildText();
 	bool CheckSystemSupport();
 
 	// Relative / absolute paths conversion

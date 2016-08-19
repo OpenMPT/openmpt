@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "UpdateCheck.h"
+#include "BuildVariants.h"
 #include "../common/version.h"
 #include "../common/misc_util.h"
 #include "Mptrack.h"
@@ -178,19 +179,8 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	CString updateURL = settings.updateBaseURL;
 	if(updateURL.IsEmpty()) updateURL = defaultUpdateURL;
 	CString versionStr = MptVersion::str;
-#ifdef _WIN64
-	versionStr.Append(_T("-win64"));
-#elif defined(_WIN32)
-	if(MptVersion::IsForOlderWindows())
-	{
-		versionStr.Append(_T("-win32old"));
-	} else
-	{
-		versionStr.Append(_T("-win32"));
-	}
-#else
-#error "Platform-specific identifier missing"
-#endif
+	versionStr.Append(_T("-"));
+	versionStr.Append(mpt::ToCString(BuildVariants().GuessCurrentBuildName()));
 	// Windows Version statistics
 	versionStr.Append(_T("-"));
 	if(TrackerSettings::Instance().UpdateSendGUID)
@@ -521,19 +511,7 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 		updateText += _T("\r\n");
 		if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
 		{
-			const CString url = mpt::ToCString(MptVersion::GetDownloadURL());
-			if(mpt::Windows::IsOriginal())
-			{ // only do compatibility checks on non-emulated windows
-				if(MptVersion::IsForOlderWindows())
-				{
-					if(theApp.SystemCanRunModernBuilds())
-					{
-						updateText += CString(_T("You are running a 'Win32old' build of OpenMPT.")) + _T("\r\n");
-						updateText += CString(_T("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.")) + _T("\r\n");
-						updateText += CString(_T("You may want to visit ")) + url + CString(_T(" and upgrade.")) + _T("\r\n");
-					}
-				}
-			}
+			updateText += theApp.SuggestModernBuildText();
 		}
 		SetDlgItemText(IDC_LASTUPDATE, updateText);
 	}
