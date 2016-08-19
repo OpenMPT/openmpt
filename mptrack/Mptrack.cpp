@@ -932,7 +932,7 @@ bool CTrackApp::CheckSystemSupport()
 			text += MPT_USTRING("The following OpenMPT variants are supported on your system:") + lf;
 			text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf);
 			text += MPT_USTRING("OpenMPT will exit now.") + lf;
-			text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download aq suitable OpenMPT variant now?") + lf;
+			text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download a suitable OpenMPT variant now?") + lf;
 			if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
 			{
 				OpenURL(url);
