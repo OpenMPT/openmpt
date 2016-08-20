@@ -803,7 +803,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							int32 pitchOffset = 0;
 							if(midiChnStatus[midiCh].pitchbendMod != 0)
 							{
-								pitchOffset = midiChnStatus[midiCh].pitchbendMod / 64;
+								pitchOffset = (midiChnStatus[midiCh].pitchbendMod + (midiChnStatus[midiCh].pitchbendMod > 0 ? 32 : -32)) / 64;
 								modChnStatus[chn].porta = pitchOffset * 64;
 							} else
 							{
@@ -813,6 +813,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1, isXG));
 							EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
 
+							if(patRow[chn].command == CMD_PORTAMENTODOWN || patRow[chn].command == CMD_PORTAMENTOUP)
+							{
+								patRow[chn].command = CMD_NONE;
+							}
 							if(delay != 0)
 							{
 								patRow[chn].command = CMD_S3MCMDEX;
