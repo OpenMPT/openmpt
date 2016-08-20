@@ -236,8 +236,6 @@ void CChildFrame::SavePosition(BOOL bForce)
 {
 	if (m_hWnd)
 	{
-		CRect rect;
-
 		m_bMaxWhenClosed = IsZoomed() != FALSE;
 		if (bForce) TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
 		if (!IsIconic())
@@ -245,9 +243,12 @@ void CChildFrame::SavePosition(BOOL bForce)
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
 			if (pWnd)
 			{
+				CRect rect(0, 0, 0, 0);
 				pWnd->GetWindowRect(&rect);
+				if(rect.Width() == 0)
+					return;
 				int l = Util::ScalePixelsInv(rect.Height(), m_hWnd);
-				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
+				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish between the views:
 				if (strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glGeneralWindowHeight = l;
 				else if (strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
