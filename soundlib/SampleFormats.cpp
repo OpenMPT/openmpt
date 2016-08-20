@@ -705,7 +705,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		case 7: bitDepth = SampleIO::_64bit; break;
 		}
 
-		SampleIO sampleIO(
+		sampleIO = SampleIO(
 			bitDepth,
 			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
 			SampleIO::littleEndian,
