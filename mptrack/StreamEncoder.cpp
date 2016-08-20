@@ -98,10 +98,10 @@ void StreamWriterBase::WriteBuffer()
 }
 
 
-void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits_)
-//----------------------------------------------------------------
+void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits)
+//---------------------------------------------------------------
 {
-	traits = traits_;
+	m_Traits = traits;
 }
 
 
