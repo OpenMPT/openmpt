@@ -158,6 +158,27 @@ struct DecodeInt32
 	}
 };
 
+template <uint64 offset, size_t b0, size_t b1, size_t b2, size_t b3, size_t b4, size_t b5, size_t b6, size_t b7>
+struct DecodeInt64
+{
+	typedef mpt::byte input_t;
+	typedef int64 output_t;
+	static const int input_inc = 8;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return (uint64(0)
+			| (static_cast<uint64>(uint8(inBuf[b0])) <<  0)
+			| (static_cast<uint64>(uint8(inBuf[b1])) <<  8)
+			| (static_cast<uint64>(uint8(inBuf[b2])) << 16)
+			| (static_cast<uint64>(uint8(inBuf[b3])) << 24)
+			| (static_cast<uint64>(uint8(inBuf[b4])) << 32)
+			| (static_cast<uint64>(uint8(inBuf[b5])) << 40)
+			| (static_cast<uint64>(uint8(inBuf[b6])) << 48)
+			| (static_cast<uint64>(uint8(inBuf[b7])) << 56)
+			) - offset;
+	}
+};
+
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeFloat32
 {
@@ -296,6 +317,17 @@ struct Convert<int8, int32>
 };
 
 template <>
+struct Convert<int8, int64>
+{
+	typedef int64 input_t;
+	typedef int8 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int8>(val >> 56);
+	}
+};
+
+template <>
 struct Convert<int8, float32>
 {
 	typedef float32 input_t;
@@ -340,6 +372,17 @@ struct Convert<int16, int32>
 	forceinline output_t operator() (input_t val)
 	{
 		return static_cast<int16>(val >> 16);
+	}
+};
+
+template <>
+struct Convert<int16, int64>
+{
+	typedef int64 input_t;
+	typedef int16 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int16>(val >> 48);
 	}
 };
 
@@ -422,6 +465,17 @@ struct Convert<int24, int32>
 };
 
 template <>
+struct Convert<int24, int64>
+{
+	typedef int64 input_t;
+	typedef int24 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int24>(val >> 40);
+	}
+};
+
+template <>
 struct Convert<int32, int8>
 {
 	typedef int8 input_t;
@@ -455,6 +509,17 @@ struct Convert<int32, int24>
 };
 
 template <>
+struct Convert<int32, int64>
+{
+	typedef int64 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int32>(val >> 32);
+	}
+};
+
+template <>
 struct Convert<int32, float32>
 {
 	typedef float32 input_t;
@@ -481,6 +546,80 @@ struct Convert<int32, double>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
 		return mpt::saturate_cast<int32>(static_cast<int64>(val * 2.0 + 1.0) >> 1);
+	}
+};
+
+template <>
+struct Convert<int64, int8>
+{
+	typedef int8 input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int64>(val) << 56;
+	}
+};
+
+template <>
+struct Convert<int64, int16>
+{
+	typedef int16 input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int64>(val) << 48;
+	}
+};
+
+template <>
+struct Convert<int64, int24>
+{
+	typedef int24 input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int64>(val) << 40;
+	}
+};
+
+template <>
+struct Convert<int64, int32>
+{
+	typedef int32 input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<int64>(val) << 32;
+	}
+};
+
+template <>
+struct Convert<int64, float32>
+{
+	typedef float32 input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0f, 1.0f);
+		val *= static_cast<float>(uint64(1)<<63);
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int64>(static_cast<int64>(val * 2.0f + 1.0f) >> 1);
+	}
+};
+
+template <>
+struct Convert<int64, double>
+{
+	typedef double input_t;
+	typedef int64 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= static_cast<double>(uint64(1)<<63);
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int64>(static_cast<int64>(val * 2.0 + 1.0) >> 1);
 	}
 };
 
@@ -518,6 +657,17 @@ struct Convert<float32, int32>
 };
 
 template <>
+struct Convert<float32, int64>
+{
+	typedef int64 input_t;
+	typedef float32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0f / static_cast<float>(static_cast<uint64>(1)<<63));
+	}
+};
+
+template <>
 struct Convert<double, int8>
 {
 	typedef int8 input_t;
@@ -547,6 +697,17 @@ struct Convert<double, int32>
 	forceinline output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<31));
+	}
+};
+
+template <>
+struct Convert<double, int64>
+{
+	typedef int64 input_t;
+	typedef double output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0 / static_cast<double>(static_cast<uint64>(1)<<63));
 	}
 };
 
