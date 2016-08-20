@@ -31,7 +31,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	RIFFHeader fileHeader;
 	isDLS = false;
-	extFormat = 0;
+	subFormat = 0;
 	mayBeCoolEdit16_8 = false;
 	if(!file.ReadStruct(fileHeader)
 		|| (fileHeader.magic != RIFFHeader::idRIFF && fileHeader.magic != RIFFHeader::idLIST)
@@ -88,7 +88,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 		{
 			return;
 		}
-		this->extFormat = extFormat.subFormat;
+		subFormat = extFormat.subFormat;
 	}
 
 	// Read sample data

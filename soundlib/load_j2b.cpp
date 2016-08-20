@@ -653,12 +653,12 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		chunks = chunkFile.ReadChunks<AMFFRiffChunk>(isAM ? 2 : 1);
 
-	FileReader chunk(chunks.GetChunk(mainChunkID));
+	FileReader chunkMain(chunks.GetChunk(mainChunkID));
 	AMFFMainChunk mainChunk;
-	if(!chunk.IsValid() 
-		|| !chunk.ReadStruct(mainChunk)
+	if(!chunkMain.IsValid() 
+		|| !chunkMain.ReadStruct(mainChunk)
 		|| mainChunk.channels < 1
-		|| !chunk.CanRead(mainChunk.channels))
+		|| !chunkMain.CanRead(mainChunk.channels))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -696,7 +696,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ChnSettings[nChn].Reset();
 
-		uint8 pan = chunk.ReadUint8();
+		uint8 pan = chunkMain.ReadUint8();
 		if(isAM)
 		{
 			if(pan > 128)
