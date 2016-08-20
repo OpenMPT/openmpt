@@ -1572,10 +1572,6 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	{
 		sampleIO |= SampleIO::uLaw;
 		sampleIO |= SampleIO::_16bit;
-	} else if(sampleInfo.sampleSize > 32)
-	{
-		// Double-precision floating point is the only 64-bit type supported at the moment.
-		return false;
 	}
 
 	if(mayNormalize)
