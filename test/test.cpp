@@ -771,6 +771,7 @@ static MPT_NOINLINE void TestMisc()
 	}
 
 	// UUID
+	{
 #ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
 	UUID uuid = mpt::UUID::Generate();
@@ -794,6 +795,7 @@ static MPT_NOINLINE void TestMisc()
 	mpt::UUID uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
 	VERIFY_EQUAL(uuid2.ToUString(), MPT_USTRING("00010203-0405-0607-0809-0a0b0c0d0e0f"));
+	}
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
