@@ -105,7 +105,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 				ApplyTransposeKeyboardSetting(*pMainFrm, data);
 				MPT_FALLTHROUGH;
 			default:
-				if(::SendMessage(hWndMidi, WM_MOD_MIDIMSG, data, dwParam2))
+				if(::PostMessage(hWndMidi, WM_MOD_MIDIMSG, data, dwParam2))
 					return;	// Message has been handled
 				break;
 			}
