@@ -19,7 +19,6 @@ OPENMPT_NAMESPACE_END
 OPENMPT_NAMESPACE_BEGIN
 
 #define DLSMAXREGIONS		128
-#define DLSMAXENVELOPES		2048
 
 // Region Flags
 #define DLSREGION_KEYGROUPMASK		0x0F
@@ -106,16 +105,14 @@ protected:
 	uint32 m_nType;
 	uint32 m_dwWavePoolOffset;
 	// DLS Information
-	uint32 m_nInstruments, m_nWaveForms, m_nEnvelopes, m_nSamplesEx, m_nMaxWaveLink;
-	uint32 *m_pWaveForms;
-	DLSINSTRUMENT *m_pInstruments;
-	DLSSAMPLEEX *m_pSamplesEx;
-	DLSENVELOPE m_Envelopes[DLSMAXENVELOPES];
+	uint32 m_nMaxWaveLink;
+	std::vector<uint32> m_WaveForms;
+	std::vector<DLSINSTRUMENT> m_Instruments;
+	std::vector<DLSSAMPLEEX> m_SamplesEx;
+	std::vector<DLSENVELOPE> m_Envelopes;
 
 public:
 	CDLSBank();
-	virtual ~CDLSBank();
-	void Destroy();
 	static bool IsDLSBank(const mpt::PathString &filename);
 	static uint32 MakeMelodicCode(uint32 bank, uint32 instr) { return ((bank << 16) | (instr));}
 	static uint32 MakeDrumCode(uint32 rgn, uint32 instr) { return (0x80000000 | (rgn << 16) | (instr));}
@@ -128,10 +125,10 @@ public:
 	uint32 GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
 
 public:
-	uint32 GetNumInstruments() const { return m_nInstruments; }
-	uint32 GetNumSamples() const { return m_nWaveForms; }
-	DLSINSTRUMENT *GetInstrument(uint32 iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
-	DLSINSTRUMENT *FindInstrument(bool bDrum, uint32 nBank=0xFF, uint32 dwProgram=0xFF, uint32 dwKey=0xFF, uint32 *pInsNo=NULL);
+	uint32 GetNumInstruments() const { return static_cast<uint32>(m_Instruments.size()); }
+	uint32 GetNumSamples() const { return static_cast<uint32>(m_WaveForms.size()); }
+	DLSINSTRUMENT *GetInstrument(uint32 iIns) { return iIns < m_Instruments.size() ? &m_Instruments[iIns] : nullptr; }
+	DLSINSTRUMENT *FindInstrument(bool bDrum, uint32 nBank=0xFF, uint32 dwProgram=0xFF, uint32 dwKey=0xFF, uint32 *pInsNo=nullptr);
 	uint32 GetRegionFromKey(uint32 nIns, uint32 nKey);
 	bool ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &waveData, uint32 &length);
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose=0);
