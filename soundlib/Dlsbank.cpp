@@ -1127,7 +1127,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					pRgn->fuOptions |= (uint8)(value & DLSREGION_KEYGROUPMASK);
 					break;
 				case SF2_GEN_FINETUNE:
-					pRgn->sFineTune = Util::muldiv((int8)value, 128, 100);
+					pRgn->sFineTune = static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
 					break;
 				//default:
 				//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
