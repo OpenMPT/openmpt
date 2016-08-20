@@ -258,16 +258,16 @@ class EncoderFactoryBase
 //======================
 {
 private:
-	Encoder::Traits traits;
+	Encoder::Traits m_Traits;
 protected:
 	EncoderFactoryBase() { }
 	virtual ~EncoderFactoryBase() { }
-	void SetTraits(const Encoder::Traits &traits_);
+	void SetTraits(const Encoder::Traits &traits);
 public:
 	virtual IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const = 0;
 	const Encoder::Traits &GetTraits() const
 	{
-		return traits;
+		return m_Traits;
 	}
 	virtual mpt::ustring DescribeQuality(float quality) const;
 	virtual mpt::ustring DescribeBitrateVBR(int bitrate) const;
