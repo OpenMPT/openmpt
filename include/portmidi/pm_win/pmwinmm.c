@@ -933,11 +933,13 @@ static PmError winmm_write_flush(PmInternal *midi, PmTimestamp timestamp)
                                      sizeof(MIDIHDR));
         }
         midi->fill_base = NULL;
-        m->hdr = NULL;
+//        m->hdr = NULL;	// OPENMPT
         if (m->error) {
             m->hdr->dwFlags = 0; /* release the buffer */
+            m->hdr = NULL;	// OPENMPT
             return pmHostError;
         }
+        m->hdr = NULL;	// OPENMPT
     }
     return pmNoError;
 }
