@@ -551,6 +551,32 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	}
 
 	//////////////////////////////////////////////////////
+	// 64-Bit / Signed / Mono / PCM
+	else if(GetBitDepth() == 64 && GetChannelFormat() == mono && GetEncoding() == signedPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, littleEndian64> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, bigEndian64> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 64-Bit / Signed / Stereo Interleaved / PCM
+	else if(GetBitDepth() == 64 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, littleEndian64> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, bigEndian64> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
 	// 32-Bit / Float / Mono / PCM
 	else if(GetBitDepth() == 32 && GetChannelFormat() == mono && GetEncoding() == floatPCM)
 	{
