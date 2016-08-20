@@ -16,7 +16,7 @@ This is preliminary documentation.
         MPT_WITH_MPG123=1     : Link against libmpg123 compiled externally
         MPT_WITH_OGG=1        : Link against libogg compiled externally
         MPT_WITH_STBVORBIS=1  : Build stb_vorbis into libopenmpt
-        MPT_WITH_UNMO3=1      : Link against Un4senn libunmo3
+        MPT_WITH_UNMO3=1      : Link against Un4seen libunmo3
         MPT_WITH_VORBIS=1     : Link against libvorbis compiled externally
         MPT_WITH_VORBISFILE=1 : Link against libvorbisfile compiled externally
  4. Use ndk-build as usual.
