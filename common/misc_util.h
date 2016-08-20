@@ -690,13 +690,21 @@ namespace Util
 	#define MPT_MAX_VALUE_OF_TYPE(integral_type) ( std::numeric_limits<integral_type>::is_signed ? MPT_MAX_SIGNED_VALUE(integral_type) : MPT_MAX_UNSIGNED_VALUE(integral_type) )
 
 	/// Returns value rounded to nearest integer.
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || MPT_OS_ANDROID || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
 	// MSVC before 2013 does not support C99/C++11.
 	// GCC before 4.3.0 does not support C++11.
-	// Android has std::round just missing even though it should be available.
 	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
 	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
 	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
+#elif MPT_OS_ANDROID && defined(__GLIBCXX__) && !defined(_LIBCPP_VERSION)
+	// NDK 12b gnustl_shared armeabi-v7a only provides round() in ::.
+	// NDK 12b gnustl_shared arm64-v8a has round() in std::.
+	// NDK 12b c++_shared armeabi-v7a has round() in std::.
+	// Just fallback to :: for Android gnustl_shared.
+	// This work-around can be removed once Android switches to LLVM libc++.
+	// Currently (ndk-r12b), libc++ has problems with exceptions.
+	inline double Round(const double& val) { return ::round(val); }
+	inline float Round(const float& val) { return ::roundf(val); }
 #else
 	inline double Round(const double& val) { return std::round(val); }
 	inline float Round(const float& val) { return std::round(val); }
