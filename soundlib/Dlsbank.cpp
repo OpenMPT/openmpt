@@ -1108,7 +1108,6 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					lAttn = -(int)value;
 					break;
 				case SF2_GEN_SAMPLEID:
-					//if (nIns == 9) Log("Region %d/%d: SampleID = %d\n", nRgn, pSmp->nRegions, value);
 					if ((m_pSamplesEx) && ((uint32)value < m_nSamplesEx))
 					{
 						pRgn->nWaveLink = value;
@@ -1126,6 +1125,9 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					break;
 				case SF2_GEN_KEYGROUP:
 					pRgn->fuOptions |= (uint8)(value & DLSREGION_KEYGROUPMASK);
+					break;
+				case SF2_GEN_FINETUNE:
+					pRgn->sFineTune = Util::muldiv((int8)value, 128, 100);
 					break;
 				//default:
 				//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
