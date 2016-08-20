@@ -2,20 +2,115 @@
 LOCAL_PATH := $(call my-dir)
 
 
+ifeq ($(MPT_WITH_UNMO3),1)
+
+ifeq ($(TARGET_ARCH_ABI),armeabi)
+include $(CLEAR_VARS)
+LOCAL_MODULE := unmo3
+LOCAL_SRC_FILES := unmo3lib/android/armeabi/libunmo3.so
+include $(PREBUILT_SHARED_LIBRARY)
+endif
+
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+include $(CLEAR_VARS)
+LOCAL_MODULE := unmo3
+LOCAL_SRC_FILES := unmo3lib/android/armeabi-v7a/libunmo3.so
+include $(PREBUILT_SHARED_LIBRARY)
+endif
+
+ifeq ($(TARGET_ARCH_ABI),x86)
+include $(CLEAR_VARS)
+LOCAL_MODULE := unmo3
+LOCAL_SRC_FILES := unmo3lib/android/x86/libunmo3.so
+include $(PREBUILT_SHARED_LIBRARY)
+endif
+
+endif
+
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := openmpt
 
-LOCAL_CPP_FEATURES += exceptions
-LOCAL_CPP_FEATURES += rtti
+LOCAL_CFLAGS   +=#-std=c99
+LOCAL_CPPFLAGS += -std=c++11 -fexceptions -frtti
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_version
+LOCAL_CPP_FEATURES += exceptions rtti
 
-LOCAL_CFLAGS   :=            -fvisibility=hidden -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
-LOCAL_CPPFLAGS := -std=c++11 -fvisibility=hidden -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
-LOCAL_LDLIBS := -lz
+LOCAL_C_INCLUDES += $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_version
 
-LOCAL_SRC_FILES := \
+LOCAL_CFLAGS   += -fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
+LOCAL_CPPFLAGS +=#-fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
+LOCAL_LDLIBS   += -lz
+
+LOCAL_SRC_FILES := 
+
+ifeq ($(MPT_WITH_MINIMP3),1)
+LOCAL_CFLAGS     += -DMPT_WITH_MINIMP3
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_MINIMP3
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_SRC_FILES  += include/minimp3/minimp3.c
+LOCAL_LDLIBS     += 
+endif
+
+ifeq ($(MPT_WITH_MPG123),1)
+LOCAL_CFLAGS     += -DMPT_WITH_MPG123
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_MPG123
+LOCAL_C_INCLUDES += 
+LOCAL_SRC_FILES  += 
+LOCAL_LDLIBS     += -lmpg123
+endif
+
+ifeq ($(MPT_WITH_OGG),1)
+LOCAL_CFLAGS     += -DMPT_WITH_OGG
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_OGG
+LOCAL_C_INCLUDES += 
+LOCAL_SRC_FILES  += 
+LOCAL_LDLIBS     += -logg
+endif
+
+ifeq ($(MPT_WITH_STBVORBIS),1)
+LOCAL_CFLAGS     += -DMPT_WITH_STBVORBIS
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_STBVORBIS
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_SRC_FILES  += 	include/stb_vorbis/stb_vorbis.c
+LOCAL_LDLIBS     += 
+endif
+
+ifeq ($(MPT_WITH_UNMO3),1)
+LOCAL_CFLAGS     += -DMPT_WITH_UNMO3
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_UNMO3
+LOCAL_C_INCLUDES += 
+LOCAL_SRC_FILES  += 
+LOCAL_LDLIBS     += 
+ifeq ($(TARGET_ARCH_ABI),armeabi)
+LOCAL_SHARED_LIBRARIES := unmo3
+endif
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+LOCAL_SHARED_LIBRARIES := unmo3
+endif
+ifeq ($(TARGET_ARCH_ABI),x86)
+LOCAL_SHARED_LIBRARIES := unmo3
+endif
+endif
+
+ifeq ($(MPT_WITH_VORBIS),1)
+LOCAL_CFLAGS     += -DMPT_WITH_VORBIS
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_VORBIS
+LOCAL_C_INCLUDES += 
+LOCAL_SRC_FILES  += 
+LOCAL_LDLIBS     += -lvorbis
+endif
+
+ifeq ($(MPT_WITH_VORBISFILE),1)
+LOCAL_CFLAGS     += -DMPT_WITH_VORBISFILE
+LOCAL_CPPFLAGS   +=#-DMPT_WITH_VORBISFILE
+LOCAL_C_INCLUDES += 
+LOCAL_SRC_FILES  += 
+LOCAL_LDLIBS     += -lvorbisfile
+endif
+
+LOCAL_SRC_FILES += \
 	common/stdafx.cpp \
 	common/ComponentManager.cpp \
 	common/FileReader.cpp \

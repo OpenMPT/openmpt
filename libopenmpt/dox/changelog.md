@@ -13,6 +13,9 @@ is just a high-level summary.
     outputs.
  *  [**Change**] The emscripten build now exports libopenmpt as 'libopenmpt'
     instead of the default 'Module'.
+ *  [**Change**] Android: The build system changed. The various Android.mk files
+    have been merged into a single one which can be controlled using command
+    line options.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
