@@ -3311,7 +3311,11 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 				{
 					if (nPat != m_nPattern || updateOrderList)
 					{
-						if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
+						if(nPat != m_nPattern)
+							SetCurrentPattern(nPat, nRow);
+						else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
+							InvalidatePattern(true);	// Redraw previous / next pattern
+
 						if (nOrd < pSndFile->Order.size())
 						{
 							m_nOrder = nOrd;
