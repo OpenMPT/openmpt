@@ -947,6 +947,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
 	if(sampleHeader.scale_factor)
 	{
+		sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
 		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (sampleHeader.scale_frequency - 60));
 	}
 	sample.TransposeToFrequency();
@@ -1018,7 +1019,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
 		|| !file.ReadStruct(instrHeader)
-		|| !instrHeader.layers
+		//|| !instrHeader.layers	// DOO.PAT has 0 layers
 		|| !file.ReadStruct(layerHeader)
 		|| !layerHeader.samples)
 	{
