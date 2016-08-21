@@ -525,6 +525,7 @@ static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> 
 		}
 	} else if(m.IsNote() && midiCh != (MIDI_DRUMCHANNEL - 1))
 	{
+		// Only do note cuts for melodic instruments - they sound weird on drums which should fade out naturally.
 		if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xD0)
 		{
 			// Already have a note delay
@@ -646,11 +647,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	uint16 finishedTracks = 0;
-	PATTERNINDEX lastPat = 0;
+	PATTERNINDEX emptyPattern = PATTERNINDEX_INVALID;
+	ORDERINDEX lastOrd = 0;
 	ROWINDEX lastRow = 0;
 	ROWINDEX restartRow = ROWINDEX_INVALID;
 	bool isXG = false;
 	bool isEMIDI = false;
+	bool isType2 = (fileHeader.format == 2);
 
 	while(finishedTracks < numTracks)
 	{
@@ -662,40 +665,49 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				tick = tracks[track].nextEvent;
 				t = track;
+				if(isType2)
+					break;
 			}
 		}
 		FileReader &track = tracks[t].track;
 
 		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow, ppqn * 4u);
 
-		PATTERNINDEX pat = static_cast<PATTERNINDEX>((modTicks / ticksPerRow) / patternLen);
+		ORDERINDEX ord = static_cast<ORDERINDEX>((modTicks / ticksPerRow) / patternLen);
 		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
 		uint8 delay = static_cast<uint8>(modTicks % ticksPerRow);
 
-		if(pat > lastPat)
+		if(ord >= Order.size())
 		{
-			lastPat = pat;
+			if(ord > ORDERINDEX_MAX)
+				break;
+			ORDERINDEX curSize = Order.size();
+			// If we need to extend the order list by more than one pattern, this means that we
+			// will be filling in empty patterns. Just recycle one empty pattern for this job.
+			// We read events in chronological order, so it is never possible for the loader to
+			// "jump back" to one of those empty patterns and write into it.
+			if(ord > curSize && emptyPattern == PATTERNINDEX_INVALID)
+			{
+				if((emptyPattern = Patterns.InsertAny(patternLen)) == PATTERNINDEX_INVALID)
+					break;
+			}
+			Order.resize(ord + 1, emptyPattern);
+
+			if((Order[ord] = Patterns.InsertAny(patternLen)) == PATTERNINDEX_INVALID)
+				break;
+		}
+
+		// Keep track of position of last event for resizing the last pattern
+		if(ord > lastOrd)
+		{
+			lastOrd = ord;
 			lastRow = row;
-		} else if(pat == lastPat)
+		} else if(ord == lastOrd)
 		{
 			lastRow = std::max(lastRow, row);
 		}
 
-		if(pat >= Order.size())
-		{
-			ORDERINDEX curSize = Order.size();
-			Order.resize(pat + 1);
-			for(ORDERINDEX ord = curSize;  ord <= pat; ord++)
-			{
-				Order[ord] = ord;
-				if(!Patterns.IsValidPat(ord) && !Patterns.Insert(ord, patternLen))
-				{
-					break;
-				}
-			}
-			if(!Patterns.IsValidPat(pat))
-				break;
-		}
+		PATTERNINDEX pat = Order[ord];
 		PatternRow patRow = Patterns[pat].GetRow(row);
 
 		uint8 data1 = track.ReadUint8();
@@ -735,7 +747,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					Patterns[pat].SetName(s);
 					if(!mpt::CompareNoCaseAscii(s, "loopStart"))
 					{
-						Order.SetRestartPos(pat);
+						Order.SetRestartPos(ord);
 						restartRow = row;
 					}
 				}
@@ -940,7 +952,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						// Non-standard MIDI loop point. May conflict with Apogee EMIDI CCs (110/111), which is why we also check if CC 110 is ever used.
 						if(data2 == 0)
 						{
-							Order.SetRestartPos(pat);
+							Order.SetRestartPos(ord);
 							restartRow = row;
 						}
 						break;
@@ -1121,6 +1133,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			finishedTracks++;
 			tracks[t].nextEvent = Util::MaxValueOfType(delta);
 			tracks[t].finished = true;
+			// Add another sub-song for type-2 files
+			if(isType2 && finishedTracks < numTracks)
+			{
+				if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
+					break;
+				Order.clear();
+			}
 		}
 	}
 
@@ -1129,6 +1148,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		Order.SetRestartPos(0);
 	}
 
+	PATTERNINDEX lastPat = Order[lastOrd];
 	if(Patterns.IsValidPat(lastPat))
 	{
 		Patterns[lastPat].Resize(lastRow + 1);
@@ -1137,6 +1157,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			Patterns[lastPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, mpt::saturate_cast<ModCommand::PARAM>(restartRow)).Row(lastRow));
 		}
 	}
+	Order.SetSequence(0);
 
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
