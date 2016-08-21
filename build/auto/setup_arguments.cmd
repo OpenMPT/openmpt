@@ -30,10 +30,18 @@ if "%MPT_VS_ARCH%" == "Win32" set MPT_VS_ARCH_OTHER=x64
 if "%MPT_VS_ARCH%" == "x64"   set MPT_VS_ARCH_OTHER=Win32
 
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET=win2000
-if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
-if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
-if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
+if "%MPT_VS_ARCH%" == "Win32" (
+	if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET=win2000
+	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
+	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
+)
+if "%MPT_VS_ARCH%" == "x64" (
+	if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET=winxp64
+	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp64
+	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
+	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
+)
 
 if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET32=win2000
 if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET32=winxp
