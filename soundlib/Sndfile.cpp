@@ -1536,7 +1536,7 @@ void CSoundFile::RecalculateSamplesPerTick()
 		break;
 
 	case tempoModeModern:
-		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw() / (m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat));
+		m_PlayState.m_nSamplesPerTick = static_cast<uint32>((Util::mul32to64_unsigned(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact) * Util::mul32to64_unsigned(m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat)) / m_PlayState.m_nMusicTempo.GetRaw());
 		break;
 
 	case tempoModeAlternative:
@@ -1571,7 +1571,7 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 
 	case tempoModeModern:
 		{
-			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / playState.m_nMusicTempo.ToDouble() / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / playState.m_nMusicTempo.ToDouble() / Util::mul32to64_unsigned(playState.m_nMusicSpeed, playState.m_nCurrentRowsPerBeat));
 			const TempoSwing &swing = (Patterns.IsValidPat(playState.m_nPattern) && Patterns[playState.m_nPattern].HasTempoSwing())
 				? Patterns[playState.m_nPattern].GetTempoSwing()
 				: m_tempoSwing;
