@@ -1194,6 +1194,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		};
 		std::sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
 		GetpModDoc()->ReArrangeChannels(channels);
+		GetpModDoc()->m_ShowSavedialog = true;
 	}
 
 	CDLSBank *pCachedBank = nullptr, *pEmbeddedBank = nullptr;
@@ -1315,7 +1316,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
-		GetpModDoc()->m_ShowSavedialog = true;
 	}
 	if (pCachedBank) delete pCachedBank;
 	if (pEmbeddedBank) delete pEmbeddedBank;
