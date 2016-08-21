@@ -943,14 +943,13 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.nVibSweep = sampleHeader.vibrato_sweep;
 	sample.nVibDepth = sampleHeader.vibrato_depth;
 	sample.nVibRate = sampleHeader.vibrato_rate / 4;
-	sample.FrequencyToTranspose();
-	sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
 	if(sampleHeader.scale_factor)
 	{
+		sample.FrequencyToTranspose();
 		sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
 		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (sampleHeader.scale_frequency - 60));
+		sample.TransposeToFrequency();
 	}
-	sample.TransposeToFrequency();
 
 	SampleIO sampleIO(
 		SampleIO::_8bit,
