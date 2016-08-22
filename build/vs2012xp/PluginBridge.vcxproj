@@ -282,8 +282,8 @@
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -355,8 +355,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -426,8 +426,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
@@ -498,8 +498,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
@@ -569,8 +569,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -640,8 +640,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-winxp" mkdir "$(TargetDir)\..\x86-64-winxp"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)\..\x86-64-winxp64" mkdir "$(TargetDir)\..\x86-64-winxp64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
