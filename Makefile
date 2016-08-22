@@ -66,6 +66,8 @@
 #  NO_VORBIS=1      Avoid using libvorbis, even if found
 #  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
+#  NO_STBVORBIS=1   Do not fallback to stb_vorbis
+#
 #  USE_MINIMP3=1    Use minimp3. You have to copy minimp3 into
 #                   include/minimp3/ yourself.
 #                   Beware that minimp3 is LGPL 2.1 licensed.
@@ -620,19 +622,28 @@ endif
 endif
 
 ifeq ($(NO_OGG),1)
+ifeq ($(NO_STBVORBIS),1)
+else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+endif
 else
 ifeq ($(NO_VORBIS),1)
+ifeq ($(NO_STBVORBIS),1)
+else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+endif
 else
 ifeq ($(NO_VORBISFILE),1)
+ifeq ($(NO_STBVORBIS),1)
+else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+endif
 else
 endif
 endif
