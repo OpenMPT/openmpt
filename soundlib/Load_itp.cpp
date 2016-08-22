@@ -63,12 +63,12 @@ MPT_BINARY_STRUCT(MODCOMMAND_ORIGINAL, 6)
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
-#if !defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_BUILD_FUZZER)
+#if !defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_FUZZ_TRACKER)
 	// Doesn't really make sense to support this format when there's no support for external files...
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
-#else // !MPT_EXTERNAL_SAMPLES && !MPT_BUILD_FUZZER
+#else // !MPT_EXTERNAL_SAMPLES && !MPT_FUZZ_TRACKER
 
 	enum ITPSongFlags
 	{

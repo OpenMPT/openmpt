@@ -536,7 +536,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 	{
 		*dst++ = 0;
 	}
-#endif
+#endif // MPT_BUILD_FUZZER
 	return (dst - initDst) == static_cast<std::ptrdiff_t>(initSize);
 }
 
@@ -892,7 +892,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			return false;
 		}
-#endif // MPT_BUILD_FUZZER
+#endif // !MPT_BUILD_FUZZER
 	}
 
 	std::vector<uint8> musicData(musicSize);

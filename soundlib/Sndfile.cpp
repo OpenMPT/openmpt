@@ -285,11 +285,11 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			 && !ReadPSM16(file, loadFlags)
 			 && !ReadMT2(file, loadFlags)
 			 && !ReadITProject(file, loadFlags)
-#if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
+#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
 			 // this makes little sense for a module player library
 			 && !ReadWav(file, loadFlags)
 			 && !ReadMID(file, loadFlags)
-#endif // MODPLUG_TRACKER || MPT_BUILD_FUZZER
+#endif // MODPLUG_TRACKER || MPT_FUZZ_TRACKER
 			 && !ReadGDM(file, loadFlags)
 			 && !ReadIMF(file, loadFlags)
 			 && !ReadDIGI(file, loadFlags)
