@@ -220,6 +220,9 @@ endif
 ifeq ($(UNAME_S),Linux)
 HOST_FLAVOUR=LINUX
 endif
+ifeq ($(UNAME_S),FreeBSD)
+HOST_FLAVOUR=FREEBSD
+endif
 
 endif
 
@@ -348,6 +351,11 @@ ifeq ($(UNAME_S),Linux)
 CPPFLAGS_DL := -DMPT_WITH_DL
 LDLIBS_DL   := -ldl
 PC_LIBS_DL := -ldl
+endif
+ifeq ($(UNAME_S),FreeBSD)
+CPPFLAGS_DL := -DMPT_WITH_DL
+LDLIBS_DL   := 
+PC_LIBS_DL := 
 endif
 endif
 else
