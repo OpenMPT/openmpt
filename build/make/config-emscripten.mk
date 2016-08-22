@@ -58,3 +58,9 @@ NO_SDL=1
 NO_SDL2=1
 NO_FLAC=1
 NO_SNDFILE=1
+
+# disable stb_vorbis unless we also have minimp3
+ifeq ($(USE_MINIMP3),1)
+else
+NO_STBVORBIS=1
+endif
