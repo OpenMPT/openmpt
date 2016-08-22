@@ -51,7 +51,7 @@ std::vector<BuildVariant> BuildVariants::GetBuildVariants()
 		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), 32, PROCSUPPORT_i586    , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,0,0) };
 		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,4,0) };
 		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), 32, PROCSUPPORT_x86_SSE2, 2, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::Win7   , mpt::Wine::Version(1,4,0) };
-		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::Win7   , mpt::Wine::Version(1,6,0) };
+		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::Win7   , mpt::Wine::Version(1,4,0) };
 		result.push_back(Win32old);
 		result.push_back(Win64old);
 		result.push_back(Win32);
