@@ -562,8 +562,22 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 
-static std::wstring LocaleDecode(const std::string &str, const std::locale & locale, wchar_t replacement = L'\uFFFD')
-//-------------------------------------------------------------------------------------------------------------------
+// Note:
+//
+//  std::codecvt::out in LLVM libc++ does not advance in and out pointers when
+// running into a non-convertible cahracter. This can happen when no locale is
+// set on FreeBSD or MacOSX. This behaviour violates the C++ standard.
+//
+//  We apply the following (albeit costly, even on other platforms) work-around:
+//  If the conversion errors out and does not advance the pointers at all, we
+// retry the conversion with a space character prepended to the string. If it
+// still does error our, we retry the whole conversion character by character.
+//  This is costly even on other platforms in one single case: The first
+// character is an invalid Unicode code point or otherwise not convertible. Any
+// following non-convertible characters are not a problem.
+
+static std::wstring LocaleDecode(const std::string &str, const std::locale & locale, wchar_t replacement = L'\uFFFD', int retry = 0, bool * progress = nullptr)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(str.empty())
 	{
@@ -583,9 +597,29 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 	wchar_t * out_next = nullptr;
 	do
 	{
-		in_next = nullptr;
-		out_next = nullptr;
-		result = facet.in(state, in_begin, in_end, in_next, out_begin, out_end, out_next);
+		if(retry == 2)
+		{
+			for(;;)
+			{
+				in_next = nullptr;
+				out_next = nullptr;
+				result = facet.in(state, in_begin, in_begin + 1, in_next, out_begin, out_end, out_next);
+				if(result == codecvt_type::partial && in_next == in_begin + 1)
+				{
+					in_begin = in_next;
+					out_begin = out_next;
+					continue;
+				} else
+				{
+					break;
+				}
+			}
+		} else
+		{
+			in_next = nullptr;
+			out_next = nullptr;
+			result = facet.in(state, in_begin, in_end, in_next, out_begin, out_end, out_next);
+		}
 		if(result == codecvt_type::partial || (result == codecvt_type::error && out_next == out_end))
 		{
 			out.resize(out.size() * 2);
@@ -593,6 +627,28 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 			out_begin = &(out[0]) + (out_next - out_begin);
 			out_end = &(out[0]) + out.size();
 			continue;
+		}
+		if(retry == 0)
+		{
+			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
+			{
+				bool progress = true;
+				LocaleDecode(std::string(" ") + str, locale, replacement, 1, &progress);
+				if(!progress)
+				{
+					return LocaleDecode(str, locale, replacement, 2);
+				}
+			}
+		} else if(retry == 1)
+		{
+			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
+			{
+				*progress = false;
+			} else
+			{
+				*progress = true;
+			}
+			return std::wstring();
 		}
 		if(result == codecvt_type::error)
 		{
@@ -602,12 +658,12 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 		}
 		in_begin = in_next;
 		out_begin = out_next;
-	} while(result == codecvt_type::error && in_next < in_end && out_next < out_end);
+	} while((result == codecvt_type::error && in_next < in_end && out_next < out_end) || (retry == 2 && in_next < in_end));
 	return std::wstring(&(out[0]), out_next);
 }
 
-static std::string LocaleEncode(const std::wstring &str, const std::locale & locale, char replacement = '?')
-//----------------------------------------------------------------------------------------------------------
+static std::string LocaleEncode(const std::wstring &str, const std::locale & locale, char replacement = '?', int retry = 0, bool * progress = nullptr)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(str.empty())
 	{
@@ -627,9 +683,29 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	char * out_next = nullptr;
 	do
 	{
-		in_next = nullptr;
-		out_next = nullptr;
-		result = facet.out(state, in_begin, in_end, in_next, out_begin, out_end, out_next);
+		if(retry == 2)
+		{
+			for(;;)
+			{
+				in_next = nullptr;
+				out_next = nullptr;
+				result = facet.out(state, in_begin, in_begin + 1, in_next, out_begin, out_end, out_next);
+				if(result == codecvt_type::partial && in_next == in_begin + 1)
+				{
+					in_begin = in_next;
+					out_begin = out_next;
+					continue;
+				} else
+				{
+					break;
+				}
+			}
+		} else
+		{
+			in_next = nullptr;
+			out_next = nullptr;
+			result = facet.out(state, in_begin, in_end, in_next, out_begin, out_end, out_next);
+		}
 		if(result == codecvt_type::partial || (result == codecvt_type::error && out_next == out_end))
 		{
 			out.resize(out.size() * 2);
@@ -637,6 +713,28 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 			out_begin = &(out[0]) + (out_next - out_begin);
 			out_end = &(out[0]) + out.size();
 			continue;
+		}
+		if(retry == 0)
+		{
+			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
+			{
+				bool progress = true;
+				LocaleEncode(std::wstring(L" ") + str, locale, replacement, 1, &progress);
+				if(!progress)
+				{
+					return LocaleEncode(str, locale, replacement, 2);
+				}
+			}
+		} else if(retry == 1)
+		{
+			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
+			{
+				*progress = false;
+			} else
+			{
+				*progress = true;
+			}
+			return std::string();
 		}
 		if(result == codecvt_type::error)
 		{
@@ -646,7 +744,7 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 		}
 		in_begin = in_next;
 		out_begin = out_next;
-	} while(result == codecvt_type::error && in_next < in_end && out_next < out_end);
+	} while((result == codecvt_type::error && in_next < in_end && out_next < out_end) || (retry == 2 && in_next < in_end));
 	return std::string(&(out[0]), out_next);
 }
 
