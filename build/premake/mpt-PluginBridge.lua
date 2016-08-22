@@ -47,8 +47,8 @@
 	if _OPTIONS["w2k"] then
 		filter { "architecture:x86" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-win2000\" mkdir \"$(TargetDir)\\..\\x86-64-win2000\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win2000\\$(TargetFileName)\"",
+				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetFileName)\"",
 			}
 		filter { "architecture:x86_64" }
 			postbuildcommands {
@@ -58,8 +58,8 @@
 	elseif _OPTIONS["xp"] then
 		filter { "architecture:x86" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-winxp\" mkdir \"$(TargetDir)\\..\\x86-64-winxp\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp\\$(TargetFileName)\"",
+				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetFileName)\"",
 			}
 		filter { "architecture:x86_64" }
 			postbuildcommands {

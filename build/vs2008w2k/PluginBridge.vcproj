@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -263,7 +263,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -429,7 +429,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -596,7 +596,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -763,7 +763,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -929,7 +929,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-win2000&quot; mkdir &quot;$(TargetDir)\..\x86-64-win2000&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-win2000\$(TargetFileName)&quot;"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x86-64-winxp64&quot; mkdir &quot;$(TargetDir)\..\x86-64-winxp64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x86-64-winxp64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
