@@ -556,10 +556,12 @@ enum STBVorbisError
 #include <assert.h>
 #include <math.h>
 #if !(defined(__APPLE__) || defined(MACOSX) || defined(macintosh) || defined(Macintosh))
+#if !defined(__FreeBSD__) // OpenMPT
 #include <malloc.h>
 #if defined(__linux__) || defined(__linux) || defined(__EMSCRIPTEN__)
 #include <alloca.h>
 #endif
+#endif // OpenMPT
 #endif
 #else // STB_VORBIS_NO_CRT
 #define NULL 0
