@@ -21,11 +21,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
+#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
 
-#ifdef MPT_BUILD_FUZZER
+#ifdef LIBOPENMPT_BUILD
 struct CDLSBank { static int32 DLSMidiVolumeToLinear(uint32) { return 256; } };
-#endif
+#endif // LIBOPENMPT_BUILD
 
 #define MIDI_DRUMCHANNEL	10
 
@@ -1325,7 +1325,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 }
 
 
-#else // !MODPLUG_TRACKER && !MPT_BUILD_FUZZER
+#else // !MODPLUG_TRACKER && !MPT_FUZZ_TRACKER
 
 bool CSoundFile::ReadMID(FileReader &/*file*/, ModLoadingFlags /*loadFlags*/)
 {

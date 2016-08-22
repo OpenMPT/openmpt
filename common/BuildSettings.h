@@ -445,6 +445,12 @@
 #endif
 #endif
 
+#if defined(MPT_BUILD_FUZZER)
+#ifndef MPT_FUZZ_TRACKER
+#define MPT_FUZZ_TRACKER
+#endif
+#endif
+
 #if !MPT_COMPILER_MSVC && defined(ENABLE_ASM)
 #undef ENABLE_ASM // inline assembly requires MSVC compiler
 #endif

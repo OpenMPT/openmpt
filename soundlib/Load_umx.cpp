@@ -32,9 +32,9 @@ struct UMXFileHeader
 MPT_BINARY_STRUCT(UMXFileHeader, 36)
 
 
-#if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
+#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
 #define MPT_IMPORT_UAX	// Support loading of sound files (load sounds into sample slots)
-#endif // MODPLUG_TRACKER || MPT_BUILD_FUZZER
+#endif // MODPLUG_TRACKER || MPT_FUZZ_TRACKER
 
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.

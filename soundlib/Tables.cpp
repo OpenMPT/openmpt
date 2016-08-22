@@ -945,7 +945,7 @@ void CResampler::InitFloatmixerTables()
 	// when fuzzing OpenMPT for crashes and hangs. This content of the tables is not really
 	// relevant for any kind of possible crashes or hangs.
 	return;
-#endif
+#endif // MPT_BUILD_FUZZER
 #ifndef MPT_INTMIXER
 	// Prepare fast sinc coefficients for floating point mixer
 	for(size_t i = 0; i < CountOf(FastSincTable); i++)
