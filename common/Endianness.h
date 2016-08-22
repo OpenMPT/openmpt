@@ -102,7 +102,7 @@ static forceinline uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
 #endif
 #ifndef MPT_bswap64
 #ifdef bswap64
-static forceinline uint64 mpt_bswap16(uint64 x) { return bswap64(x); }
+static forceinline uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #define MPT_bswap64 mpt::detail::mpt_bswap64
 #endif
 #endif
