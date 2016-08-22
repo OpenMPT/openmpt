@@ -32,9 +32,9 @@ struct UMXFileHeader
 MPT_BINARY_STRUCT(UMXFileHeader, 36)
 
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) || defined(MPT_BUILD_FUZZER)
 #define MPT_IMPORT_UAX	// Support loading of sound files (load sounds into sample slots)
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER || MPT_BUILD_FUZZER
 
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.
@@ -154,6 +154,8 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	UMXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
+		|| fileHeader.exportCount == 0
+		|| fileHeader.importCount == 0
 		|| !file.Seek(fileHeader.nameOffset))
 	{
 		return false;
