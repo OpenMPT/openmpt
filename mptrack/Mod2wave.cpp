@@ -301,8 +301,7 @@ void CWaveConvert::FillFileTypes()
 	int sel = 0;
 	for(std::size_t i = 0; i < m_Settings.EncoderFactories.size(); ++i)
 	{
-		const Encoder::Traits &encTraits = m_Settings.EncoderFactories[i]->GetTraits();
-		int ndx = m_CbnFileType.AddString(mpt::ToCString(encTraits.fileShortDescription));
+		int ndx = m_CbnFileType.AddString(mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileShortDescription));
 		m_CbnFileType.SetItemData(ndx, i);
 		if(m_Settings.EncoderIndex == i)
 		{
@@ -1189,7 +1188,7 @@ void CDoWaveConvert::Run()
 			break;
 		if (!(n % 10))
 		{
-			DWORD l = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
+			DWORD seconds = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
 
 			const DWORD dwCurrentTime = timeGetTime();
 			uint32 timeRemaining = 0; // estimated remainig time
@@ -1199,9 +1198,9 @@ void CDoWaveConvert::Run()
 			}
 
 			if(m_Settings.normalize)
-				_stprintf(s, progressStr, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60u);
+				_stprintf(s, progressStr, seconds / 60, seconds % 60, timeRemaining / 60, timeRemaining % 60u);
 			else
-				_stprintf(s, progressStr, bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
+				_stprintf(s, progressStr, bytesWritten >> 10, seconds / 60, seconds % 60u, timeRemaining / 60, timeRemaining % 60u);
 			SetText(s);
 		}
 		if (static_cast<uint32>(ullSamples >> 14) != pos)
