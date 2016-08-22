@@ -632,9 +632,9 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 		{
 			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
 			{
-				bool progress = true;
-				LocaleDecode(std::string(" ") + str, locale, replacement, 1, &progress);
-				if(!progress)
+				bool made_progress = true;
+				LocaleDecode(std::string(" ") + str, locale, replacement, 1, &made_progress);
+				if(!made_progress)
 				{
 					return LocaleDecode(str, locale, replacement, 2);
 				}
@@ -718,9 +718,9 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 		{
 			if(result == codecvt_type::error && in_next == in_begin && out_next == out_begin)
 			{
-				bool progress = true;
-				LocaleEncode(std::wstring(L" ") + str, locale, replacement, 1, &progress);
-				if(!progress)
+				bool made_progress = true;
+				LocaleEncode(std::wstring(L" ") + str, locale, replacement, 1, &made_progress);
+				if(!made_progress)
 				{
 					return LocaleEncode(str, locale, replacement, 2);
 				}
