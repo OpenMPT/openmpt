@@ -14,6 +14,11 @@ else ifeq ($(HOST_FLAVOUR),LINUX)
 
 include build/make/config-gcc.mk
 
+else ifeq ($(HOST_FLAVOUR),FREEBSD)
+
+include build/make/config-clang.mk
+NO_LTDL?=1
+
 else
 
 include build/make/config-generic.mk
