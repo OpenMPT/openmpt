@@ -43,6 +43,15 @@ newoption {
 	description = "Generate XP targetting projects",
 }
 
+--newoption {
+--	trigger = "layout-custom",
+--	description = "Generate legay OpenmPT project layout",
+--}
+--
+--if _OPTIONS["layout-custom"] then
+--	layout = custom
+--end
+
 if _OPTIONS["w2k"] then
 	mpt_projectpathname = _ACTION .. "w2k"
 	mpt_bindirsuffix = "win2000"
@@ -407,11 +416,35 @@ end
 
 if _OPTIONS["group"] == "OpenMPT" then
 
+layout = "custom"
+solution "OpenMPT-custom"
+ location ( "../../build/" .. mpt_projectpathname )
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ platforms { "x86", "x86_64" }
+
+ dofile "../../build/premake/mpt-OpenMPT.lua"
+ dofile "../../build/premake/mpt-PluginBridge.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-opus.lua"
+ dofile "../../build/premake/ext-opusfile.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portmidi.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
+layout = ""
 solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
  platforms { "x86", "x86_64" }
- 
+
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
  dofile "../../build/premake/ext-flac.lua"
