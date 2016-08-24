@@ -1426,8 +1426,7 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 		if(wParam == TRUE)
 		{
 			// Window is activated - put the plugin window into foreground
-			SetForegroundWindow(that->windowParent);
-			SetForegroundWindow(that->window);
+			SetWindowPos(GetParent(that->windowParent), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_ASYNCWINDOWPOS);
 		}
 		break;
 
