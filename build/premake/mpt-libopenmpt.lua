@@ -13,11 +13,11 @@
    "../../include/vorbis/include",
    "../../include/zlib",
   }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		sysincludedirs ( extincludedirs )
-	filter {}
+  filter { "action:vs*" }
+    includedirs ( extincludedirs )
+  filter { "not action:vs*" }
+    sysincludedirs ( extincludedirs )
+  filter {}
   includedirs {
    "../..",
    "../../common",
@@ -48,6 +48,13 @@
    "../../libopenmpt/libopenmpt_ext.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
+
+  filter { "action:vs*" }
+    files {
+      "../../libopenmpt/libopenmpt_version.rc",
+    }
+  filter {}
+
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD" }

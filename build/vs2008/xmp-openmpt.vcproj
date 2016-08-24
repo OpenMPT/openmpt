@@ -218,6 +218,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\libopenmpt\libopenmpt_version.rc"
+			>
+		</File>
+		<File
 			RelativePath="..\..\libopenmpt\resource.h"
 			>
 		</File>

@@ -902,6 +902,10 @@
 				RelativePath="..\..\libopenmpt\libopenmpt_version.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_version.rc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="soundlib"
