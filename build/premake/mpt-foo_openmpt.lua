@@ -25,6 +25,7 @@ if _ACTION ~= "vs2008" then
   }
   files {
    "../../libopenmpt/foo_openmpt.cpp",
+   "../../libopenmpt/libopenmpt_version.rc",
   }
   characterset "Unicode"
   flags { "Unicode" }

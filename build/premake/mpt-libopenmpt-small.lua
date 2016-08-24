@@ -45,6 +45,13 @@
    "../../libopenmpt/libopenmpt_ext.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
+
+  filter { "action:vs*" }
+    files {
+      "../../libopenmpt/libopenmpt_version.rc",
+    }
+  filter {}
+
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_SMALL" }

@@ -12,11 +12,11 @@
    "../../include",
    "../../include/pugixml/src",
   }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		sysincludedirs ( extincludedirs )
-	filter {}
+  filter { "action:vs*" }
+    includedirs ( extincludedirs )
+  filter { "not action:vs*" }
+    sysincludedirs ( extincludedirs )
+  filter {}
   includedirs {
    "../..",
    "$(IntDir)/svn_version",
@@ -28,6 +28,7 @@
    "../../libopenmpt/libopenmpt_plugin_gui.hpp",
    "../../libopenmpt/libopenmpt_plugin_gui.cpp",
    "../../libopenmpt/libopenmpt_plugin_gui.rc",
+   "../../libopenmpt/libopenmpt_version.rc",
    "../../libopenmpt/resource.h",
   }
   characterset "Unicode"

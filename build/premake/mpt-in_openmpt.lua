@@ -27,6 +27,7 @@
    "../../libopenmpt/libopenmpt_plugin_gui.hpp",
    "../../libopenmpt/libopenmpt_plugin_gui.cpp",
    "../../libopenmpt/libopenmpt_plugin_gui.rc",
+   "../../libopenmpt/libopenmpt_version.rc",
    "../../libopenmpt/resource.h",
   }
   characterset "Unicode"

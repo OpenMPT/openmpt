@@ -178,10 +178,17 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -196,10 +203,17 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -221,12 +235,19 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -247,12 +268,19 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -266,6 +294,10 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -286,6 +318,10 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -313,6 +349,10 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -341,6 +381,10 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -569,6 +613,9 @@
     <ClCompile Include="..\..\soundlib\tuning.cpp" />
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
     <ClCompile Include="..\..\soundlib\tuningbase.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\vorbis.vcxproj">

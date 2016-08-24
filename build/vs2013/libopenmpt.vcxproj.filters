@@ -657,4 +657,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc">
+      <Filter>libopenmpt</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>
