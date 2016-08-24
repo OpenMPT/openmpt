@@ -1,9 +1,22 @@
 
+if layout == "custom" then
+ project "OpenMPT-custom"
+	uuid "6b9af880-af37-4268-bb91-2b982ff6499a"
+else
  project "OpenMPT"
   uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
+end
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
+if layout == "custom" then
+  vpaths {
+		["*"] = "../../",
+		["Sources/*"] = "../../**.cpp",
+		["Headers/*"] = "../../**.h",
+	}
+else
   vpaths { ["*"] = "../../" }
+end
   mpt_projectname = "OpenMPT"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
