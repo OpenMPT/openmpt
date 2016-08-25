@@ -63,13 +63,12 @@ struct MixLoopState
 		// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
 		if(chn.dwFlags[CHN_LOOP] && chn.resamplingMode != SRCMODE_NEAREST)
 		{
-			const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength && chn.pModSample->nLength >= InterpolationMaxLookahead;
 			const bool inSustainLoop = chn.InSustainLoop();
 
 			// Do not enable wraparound magic if we're previewing a custom loop!
 			if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
 			{
-				SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
+				SmpLength lookaheadOffset = 3 * InterpolationMaxLookahead + chn.pModSample->nLength - chn.nLoopEnd;
 				if(inSustainLoop)
 				{
 					lookaheadOffset += 4 * InterpolationMaxLookahead;
