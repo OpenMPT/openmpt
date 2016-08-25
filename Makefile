@@ -990,9 +990,9 @@ bin/svn_version_dist.h:
 	rm -rf $@
 	echo > $@.tmp
 	echo '#pragma once' >> $@.tmp
-	echo '#define OPENMPT_VERSION_SVNURL "$(MPT_SVNURL)"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_URL "$(MPT_SVNURL)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_SVNVERSION "$(MPT_SVNVERSION)"' >> $@.tmp
-	echo '#define OPENMPT_VERSION_SVNDATE "$(MPT_SVNDATE)"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_DATE "$(MPT_SVNDATE)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_IS_PACKAGE 1' >> $@.tmp
 	echo >> $@.tmp
 	mv $@.tmp $@
