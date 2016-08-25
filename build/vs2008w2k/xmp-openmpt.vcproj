@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\&quot;xmp-openmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;xmp-openmpt\&quot;;MPT_BUILD_VER_FILENAME=&quot;xmp-openmpt.dll&quot;;MPT_BUILD_VER_FILEDESC=&quot;xmp-openmpt&quot;;MPT_BUILD_VER_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..\include\pugixml\src;..\..;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\&quot;xmp-openmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;xmp-openmpt\&quot;;MPT_BUILD_VER_FILENAME=&quot;xmp-openmpt.dll&quot;;MPT_BUILD_VER_FILEDESC=&quot;xmp-openmpt&quot;;MPT_BUILD_VER_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..\include\pugixml\src;..\..;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
@@ -215,10 +215,6 @@
 		</File>
 		<File
 			RelativePath="..\..\libopenmpt\libopenmpt_plugin_settings.hpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\libopenmpt\libopenmpt_version.rc"
 			>
 		</File>
 		<File

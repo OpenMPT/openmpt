@@ -46,11 +46,38 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 
-  filter { "action:vs*" }
-    files {
-      "../../libopenmpt/libopenmpt_version.rc",
-    }
-  filter {}
+	filter { "action:vs*", "action:vs2008" }
+		resdefines {
+			"MPT_BUILD_VER_SPECIAL_PREFIX=\\\"+small\\\"",
+		}
+	filter { "action:vs*", "action:not vs2008" }
+		resdefines {
+			"MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\"",
+		}
+	filter { "action:vs*", "action:vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+		resdefines {
+			"MPT_BUILD_VER_FILENAME=\\\"" .. mpt_projectname .. ".dll\\\"",
+			"MPT_BUILD_VER_FILEDESC=\\\"" .. mpt_projectname .. "\\\"",
+		}
+	filter { "action:vs*", "action:not vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+		resdefines {
+			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
+			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
+		}
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
+		resincludedirs {
+			"$(IntDir)/svn_version",
+			"../../build/svn_version",
+			"$(ProjDir)/../build/svn_version",
+		}
+		files {
+			"../../libopenmpt/libopenmpt_version.rc",
+		}
+	filter { "action:vs*", "kind:SharedLib" }
+		resdefines { "MPT_BUILD_VER_DLL" }
+	filter { "action:vs*", "kind:ConsoleApp or WindowedApp" }
+		resdefines { "MPT_BUILD_VER_EXE" }
+	filter {}
 
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
