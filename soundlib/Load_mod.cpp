@@ -674,11 +674,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// (Ultimate) Soundtracker didn't have a restart position, but instead stored a default tempo in this value.
 	// The default value for this is 0x78 (120 BPM). This is probably the reason why some M.K. modules
 	// have this weird restart position. I think I've read somewhere that NoiseTracker actually writes 0x78 there.
-	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15, so handled by ReadM15),
-	// VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
+	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
 	// Files that have an order list longer than 0x78 with restart pos = 0x78: my_shoe_is_barking.mod, papermix.mod
+	// - in both cases it does not appear like the restart position should be used.
 	MPT_ASSERT(fileHeader.restartPos != 0x78 || fileHeader.restartPos + 1u >= realOrders);
-	if(fileHeader.restartPos >= 128 || fileHeader.restartPos + 1u >= realOrders || fileHeader.restartPos == 0x78)
+	if(fileHeader.restartPos > realOrders || (fileHeader.restartPos == 0x78 && m_nChannels == 4))
 	{
 		Order.SetRestartPos(0);
 	}
