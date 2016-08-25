@@ -263,13 +263,10 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 {
 	const int numChannels = smp.GetNumChannels();
 	const int copySamples = numChannels * InterpolationMaxLookahead;
-	// Optimization: Put normal loop wraparound buffer right at the sample end if the normal loop ends there.
-	// Note that we can't do this for sustain loops, as we would get clicks at the sample end after releasing the loop.
-	const bool loopEndsAtSampleEnd = smp.uFlags[CHN_LOOP] && smp.nLoopEnd == smp.nLength && smp.nLength >= InterpolationMaxLookahead;
 	
 	T *sampleData = static_cast<T *>(smp.pSample);
 	T *afterSampleStart = sampleData + smp.nLength * numChannels;
-	T *loopLookAheadStart = afterSampleStart + (loopEndsAtSampleEnd ? -2 * copySamples : copySamples);
+	T *loopLookAheadStart = afterSampleStart + copySamples;
 	T *sustainLookAheadStart = loopLookAheadStart + 4 * copySamples;
 
 	// Hold sample on the same level as the last sampling point at the end to prevent extra pops with interpolation.
