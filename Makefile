@@ -564,8 +564,8 @@ ifeq ($(MPT_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
 ifeq ($(SVN_INFO),0)
 # in svn checkout
-MPT_SVNURL :=  $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )
 MPT_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
+MPT_SVNURL :=  $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )
 MPT_SVNDATE := $(shell svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )
 CPPFLAGS += -D MPT_SVNURL=\"$(MPT_SVNURL)\" -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\" -D MPT_SVNDATE=\"$(MPT_SVNDATE)\"
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
@@ -581,6 +581,12 @@ DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
 endif
 
+ifeq ($(MPT_SVNVERSION),)
+else
+MPT_SVNREVISION := $(shell echo $(MPT_SVNVERSION) | sed 's/M//g' | sed 's/S//g' | sed 's/P//g' | sed -E 's/([0-9]+)-//g' )
+MPT_SVNDIRTY := $(shell echo $(MPT_SVNVERSION) | grep -v 'M\|S\|P' >/dev/null 2>&1 ; echo $$? )
+MPT_SVNMIXED := $(shell echo $(MPT_SVNVERSION) | grep -v '-' >/dev/null 2>&1; echo $$? )
+endif
 
 
 CPPFLAGS += -DLIBOPENMPT_BUILD
@@ -980,8 +986,8 @@ bin/dist-js.tar: bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
 bin/dist.mk:
 	rm -rf $@
 	echo > $@.tmp
-	echo 'MPT_SVNURL=$(MPT_SVNURL)' >> $@.tmp
 	echo 'MPT_SVNVERSION=$(MPT_SVNVERSION)' >> $@.tmp
+	echo 'MPT_SVNURL=$(MPT_SVNURL)' >> $@.tmp
 	echo 'MPT_SVNDATE=$(MPT_SVNDATE)' >> $@.tmp
 	mv $@.tmp $@
 
@@ -990,8 +996,11 @@ bin/svn_version_dist.h:
 	rm -rf $@
 	echo > $@.tmp
 	echo '#pragma once' >> $@.tmp
-	echo '#define OPENMPT_VERSION_URL "$(MPT_SVNURL)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_SVNVERSION "$(MPT_SVNVERSION)"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_REVISION $(MPT_SVNREVISION)' >> $@.tmp
+	echo '#define OPENMPT_VERSION_DIRTY $(MPT_SVNDIRTY)' >> $@.tmp
+	echo '#define OPENMPT_VERSION_MIXEDREVISIONS $(MPT_SVNMIXED)' >> $@.tmp
+	echo '#define OPENMPT_VERSION_URL "$(MPT_SVNURL)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_DATE "$(MPT_SVNDATE)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_IS_PACKAGE 1' >> $@.tmp
 	echo >> $@.tmp
