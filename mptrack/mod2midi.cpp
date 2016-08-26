@@ -74,7 +74,7 @@ namespace MidiExport
 
 		operator ModInstrument& () { return m_instr; }
 
-		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const char *name, const ModInstrument * oldInstr)
+		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const char *name, const ModInstrument *oldInstr)
 			: IMidiPlugin(factory, sndFile, mixStruct)
 			, m_oldInstr(oldInstr)
 			, m_sndFile(sndFile)
@@ -93,7 +93,10 @@ namespace MidiExport
 			if(tempoTrack == nullptr) return;
 
 			m_pMixStruct->pMixPlugin = this;
+		}
 
+		void WritePitchWheelDepth()
+		{
 			// Set up MIDI pitch wheel depth
 			uint8 firstCh = m_instr.nMidiChannel, lastCh = m_instr.nMidiChannel;
 			if(firstCh == MidiMappedChannel || firstCh == MidiNoChannel)
@@ -411,6 +414,7 @@ namespace MidiExport
 					instr.midiPWD = 12;
 				}
 				instr.nMidiChannel = instrMap[i].nChannel ? (instrMap[i].nChannel - 1 + MidiFirstChannel) : MidiMappedChannel;
+				midiInstr.WritePitchWheelDepth();
 				if(instrMap[i].nChannel != 10)
 				{
 					// Melodic instrument

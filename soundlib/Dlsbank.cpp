@@ -950,7 +950,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 				if (((p->sfSampleType & 0x7FFF) <= 4) && (p->dwStart < 0x08000000) && (p->dwEnd >= p->dwStart+8))
 				{
 					pDlsSmp->dwLen = (p->dwEnd - p->dwStart) * 2;
-					if ((p->dwEndloop > p->dwStartloop + 7) && (p->dwStartloop > p->dwStart))
+					if ((p->dwEndloop > p->dwStartloop + 7) && (p->dwStartloop >= p->dwStart))
 					{
 						pDlsSmp->dwStartloop = p->dwStartloop - p->dwStart;
 						pDlsSmp->dwEndloop = p->dwEndloop - p->dwStart;
