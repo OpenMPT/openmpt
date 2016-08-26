@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta20.1
 
+ *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
+    when no locale was active.
+
+ *  'Makefile' has now explicit support for FreeBSD with no special option or
+    configuration required.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
