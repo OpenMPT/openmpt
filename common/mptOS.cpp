@@ -316,9 +316,14 @@ mpt::ustring Version::GetNameShort() const
 		if(v.Version().IsValid())
 		{
 			name = mpt::format(MPT_USTRING("wine-%1"))(v.Version().AsString());
+		} else if(v.RawVersion().length() > 0)
+		{
+			std::string rawVersion = v.RawVersion();
+			std::vector<char> bytes(rawVersion.begin(), rawVersion.end());
+			name = MPT_USTRING("wine-") + Util::BinToHex(bytes);
 		} else
 		{
-			name = MPT_USTRING("wine-unknown");
+			name = MPT_USTRING("wine");
 		}
 	} else
 	{
