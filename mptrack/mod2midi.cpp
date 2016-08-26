@@ -48,9 +48,9 @@ namespace MidiExport
 
 		std::ostringstream f;
 		double m_tempo;
+		double m_ticks;								// MIDI ticks since previous event
 		CSoundFile::samplecount_t m_samplePos;		// Current sample position
 		CSoundFile::samplecount_t m_prevEventTime;	// Sample position of previous event
-		uint32 m_ticks;			// MIDI ticks since previous event
 		uint32 m_sampleRate;
 		uint32 m_oldSigNumerator;
 		int32 m_oldGlobalVol;
@@ -58,15 +58,16 @@ namespace MidiExport
 		// Calculate how many MIDI ticks have passed since the last written event
 		void UpdateTicksSinceLastEvent()
 		{
-			m_ticks += Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
+			m_ticks += (m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60);
 			m_prevEventTime = m_samplePos;
 		}
 		
 		// Write delta tick count since last event
 		void WriteTicks()
 		{
-			mpt::IO::WriteVarInt(f, m_ticks);
-			m_ticks = 0;
+			uint32 ticks = (m_ticks <= 0) ? 0 : Util::Round<uint32>(m_ticks);
+			mpt::IO::WriteVarInt(f, ticks);
+			m_ticks -= ticks;
 		}
 
 	public:
@@ -79,8 +80,8 @@ namespace MidiExport
 			, m_sndFile(sndFile)
 			, m_tempoTrack(tempoTrack)
 			, m_tempo(0.0)
+			, m_ticks(0.0)
 			, m_samplePos(0), m_prevEventTime(0)
-			, m_ticks(0)
 			, m_sampleRate(sndFile.GetSampleRate())
 			, m_oldSigNumerator(0)
 			, m_oldGlobalVol(-1)
@@ -350,6 +351,7 @@ namespace MidiExport
 		std::vector<ModInstrument *> m_oldInstruments;
 		std::vector<MidiTrack *> m_tracks;
 		SNDMIXPLUGIN m_oldPlugins[MAX_MIXPLUGINS];
+		SNDMIXPLUGIN tempoTrackPlugin;
 		VSTPluginLib m_plugFactory;
 		CSoundFile &m_sndFile;
 		mpt::ofstream &m_file;
@@ -365,6 +367,7 @@ namespace MidiExport
 		{
 			MemCopy(m_oldPlugins, m_sndFile.m_MixPlugins);
 			MemsetZero(m_sndFile.m_MixPlugins);
+			MemsetZero(tempoTrackPlugin);
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_oldInstruments[i - 1] = m_sndFile.Instruments[i];
@@ -376,7 +379,7 @@ namespace MidiExport
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
-			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &m_oldPlugins[0], nullptr, m_sndFile.m_songName.c_str(), nullptr));
+			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &tempoTrackPlugin, nullptr, m_sndFile.m_songName.c_str(), nullptr));
 			tempoTrack.WriteString(kText, m_sndFile.m_songMessage);
 			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
 			m_tracks.push_back(&tempoTrack);
@@ -433,14 +436,6 @@ namespace MidiExport
 			mpt::IO::WriteIntBE<uint16>(m_file, MidiExport::ppq);
 		}
 
-		~Conversion()
-		{
-			for(size_t i = 0; i < m_tracks.size(); i++)
-			{
-				delete m_tracks[i];
-			}
-		}
-
 		void Finalise()
 		{
 			for(size_t i = 0; i < m_tracks.size(); i++)
@@ -467,6 +462,10 @@ namespace MidiExport
 			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
 				m_sndFile.m_MixPlugins[i].Destroy();
+			}
+			for(size_t i = 0; i < m_tracks.size(); i++)
+			{
+				delete m_tracks[i];
 			}
 			MemCopy(m_sndFile.m_MixPlugins, m_oldPlugins);
 			
