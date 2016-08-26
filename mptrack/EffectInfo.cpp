@@ -597,6 +597,18 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			_tcscpy(s, _T("continue"));
 		break;
 
+	case CMD_CHANNELVOLUME:
+	case CMD_GLOBALVOLUME:
+		{
+			ModCommand::PARAM minVal = 0, maxVal = 128;
+			GetEffectInfo(ndx, nullptr, false, &minVal, &maxVal);
+			if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) && param > maxVal)
+				_tcscpy(s, _T("undefined"));
+			else
+				wsprintf(s, _T("%u"), std::min<uint32>(param, maxVal));
+		}
+		break;
+
 	case CMD_TREMOR:
 		if(param)
 		{
@@ -611,8 +623,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				if(offtime == 0) offtime = 1;
 			}
 			wsprintf(s, _T("ontime %u, offtime %u"), ontime, offtime);
-		}
-		else
+		} else
 		{
 			_tcscpy(s, _T("continue"));
 		}

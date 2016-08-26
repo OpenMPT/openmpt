@@ -26,16 +26,17 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.05.00 (? September 2016, revision 6993)
+v1.26.05.00 (? September 2016, revision 6996)
 ---------------------------------------------
 Pattern tab
+   [Imp] <js> Show clamped values (or "undefined", depending on the format) for out-of-range channel / global volume parameters in the status bar (http://bugs.openmpt.org/view.php?id=866).
    [Fix] <js> Seeking with sample sync could behave strangely with portamento-ed pingpong-looped samples.
    [Fix] <js> Data Entry also modified the effect column when it was only supposed to affect other columns.
    [Fix] <js> If the same pattern occurred several times in a row, the previous / next patterns were not drawn correctly.
    [Fix] <js> The Parameter Editor window was redrawn more often than necessary (multiple times per row, for every tick - tx mandrasigma).
 
 Pattern tab::Find/Replace
-   [Fix] <js> Repeated searches for extended (Sxy / Exy) commands did not remember the correct pattern commands.
+   [Fix] <js> Repeated searches for extended (Sxy / Exy) commands did not remember the correct pattern commands to search for.
 
 Instrument tab
    [Imp] <js> Improved handling of drum patches in Gravis Patch files.
@@ -51,6 +52,7 @@ VST::Plugin Bridge
    [Fix] <js> Toggling the plugin editor could lead to a crash if the bridged editor took very long to initialize.
 
 Other formats
+   [Fix] <js> MID: Sometimes, melodic channels were imported as drums (http://bugs.openmpt.org/view.php?id=462).
    [Fix] <js> Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker files.
 
 Misc
