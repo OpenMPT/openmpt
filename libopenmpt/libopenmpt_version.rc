@@ -23,6 +23,9 @@
 	#endif
 #endif
 
+#define VER_STRINGIZE_HELPER(x) #x
+#define VER_STRINGIZE(x) VER_STRINGIZE_HELPER(x)
+
 #if defined(OPENMPT_VERSION_DIRTY) && defined(OPENMPT_VERSION_MIXEDREVISIONS) && defined(OPENMPT_VERSION_IS_PACKAGE)
 	#if (OPENMPT_VERSION_DIRTY)
 		#define VER_FILEVERSION_SRC 2
@@ -49,13 +52,13 @@
 	#if (OPENMPT_VERSION_DIRTY)
 		#if (OPENMPT_VERSION_IS_PACKAGE)
 			#if defined(OPENMPT_VERSION_HAVE_REVISION)
-				#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION "modified.pkg"
+				#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION) "modified.pkg"
 			#else
 				#define VER_FILEVERSION2_STR "+modified.pkg"
 			#endif					
 		#else
 			#if defined(OPENMPT_VERSION_HAVE_REVISION)
-				#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION ".modified"
+				#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION) ".modified"
 			#else
 				#define VER_FILEVERSION2_STR "+modified"
 			#endif
@@ -63,33 +66,33 @@
 	#elif (OPENMPT_VERSION_MIXEDREVISIONS)
 		#if (OPENMPT_VERSION_IS_PACKAGE)
 			#if defined(OPENMPT_VERSION_HAVE_REVISION)
-				#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION ".modified.pkg"
+				#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION) ".modified.pkg"
 			#else
 				#define VER_FILEVERSION2_STR "+modified.pkg"
 			#endif					
 		#else
 			#if defined(OPENMPT_VERSION_HAVE_REVISION)
-				#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION ".modified"
+				#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION) ".modified"
 			#else
 				#define VER_FILEVERSION2_STR "+modified"
 			#endif					
 		#endif
 	#elif (OPENMPT_VERSION_IS_PACKAGE)
 		#if defined(OPENMPT_VERSION_HAVE_REVISION)
-			#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION "pkg"
+			#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION) "pkg"
 		#else
 			#define VER_FILEVERSION2_STR "+pkg"
 		#endif					
 	#else
 		#if defined(OPENMPT_VERSION_HAVE_REVISION)
-			#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION
+			#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION)
 		#else
 			#define VER_FILEVERSION2_STR ""
 		#endif					
 	#endif
 #else
 	#if defined(OPENMPT_VERSION_HAVE_REVISION)
-		#define VER_FILEVERSION2_STR "+r" # OPENMPT_VERSION_REVISION
+		#define VER_FILEVERSION2_STR "+r" VER_STRINGIZE(OPENMPT_VERSION_REVISION)
 	#else
 		#define VER_FILEVERSION2_STR ""
 	#endif					
