@@ -292,7 +292,7 @@ static MPT_NOINLINE void TestVersion()
 #ifdef LIBOPENMPT_BUILD
 	mpt::PathString version_mk = GetPathPrefix() + MPT_PATHSTRING("libopenmpt/libopenmpt_version.mk");
 	mpt::ifstream f(version_mk, std::ios::in);
-	VERIFY_EQUAL(static_cast<bool>(f), true);
+	VERIFY_EQUAL(f ? true : false, true);
 	std::map<std::string, std::string> fields;
 	std::string line;
 	while(std::getline(f, line))
