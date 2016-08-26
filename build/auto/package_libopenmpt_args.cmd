@@ -89,7 +89,7 @@ if "%MPT_VS_VER%" == "vs2008" (
  || goto error
 )
 if not "%MPT_VS_VER%" == "vs2008" (
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_PKG_TAG%-%MPT_REVISION%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
