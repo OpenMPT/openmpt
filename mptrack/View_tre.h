@@ -146,8 +146,8 @@ protected:
 		DlsItem(uint32 bank, uint32 itemData) : ModItem(MODITEM_DLSBANK_INSTRUMENT, itemData | ((bank << (DLS_HIBANKSHIFT - 16)) & DLS_HIBANKMASK), (uint16)bank) { }
 
 		uint32 GetBankIndex() const { return val2 | ((val1 & DLS_HIBANKMASK) >> (DLS_HIBANKSHIFT - 16)); }
-		uint8 GetRegion() const { return static_cast<uint8>((val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT); }
-		uint8 GetInstr() const { return static_cast<uint8>((val1 & DLS_INSTRMASK)); }
+		uint32 GetRegion() const { return (val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT; }
+		uint32 GetInstr() const { return (val1 & DLS_INSTRMASK); }
 		bool IsPercussion() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEPERC); }
 		bool IsInstr() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEINST); }
 

@@ -387,9 +387,20 @@ void CFindReplaceTab::UpdateParamList()
 		m_settings.findCommand = cmd;
 
 	// Update Param range
+	const bool isExtended = m_effectInfo.IsExtendedEffect(effectIndex);
 	int sel = -1;
 	int oldcount = m_cbnParam.GetCount();
-	int newcount = m_effectInfo.IsExtendedEffect(effectIndex) ? 16 : 256;
+	int newcount = isExtended ? 16 : 256;
+	if(oldcount)
+		oldcount -= m_isReplaceTab ? 2 : 1;
+
+	if(isExtended && !IsDlgButtonChecked(IDC_CHECK6))
+	{
+		UINT mask = m_effectInfo.GetEffectMaskFromIndex(effectIndex);
+		m_settings.findParamMin = (m_settings.findParamMin & 0x0F) | mask;
+		m_settings.findParamMax = (m_settings.findParamMax & 0x0F) | mask;
+	}
+
 	if(oldcount != newcount)
 	{
 		TCHAR s[16];
