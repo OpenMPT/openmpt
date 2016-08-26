@@ -9,6 +9,9 @@ set -e
 #    checkout. The invests no effort in verifying this precondition.
 #
 
+echo "Gathering version ..."
+. libopenmpt/libopenmpt_version.mk
+
 echo "Cleaning local buid ..."
 make clean
 
@@ -66,6 +69,13 @@ OLDDIR="$(pwd)"
 cd bin/dist-autotools/
 
 echo "Setting version in configure.ac ..."
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_MAJOR!!/${LIBOPENMPT_VERSION_MAJOR}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac             
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_MINOR!!/${LIBOPENMPT_VERSION_MINOR}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac             
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_PATCH!!/${LIBOPENMPT_VERSION_PATCH}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_PREREL!!/${LIBOPENMPT_VERSION_PREREL}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_CURRENT!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_REVISION!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_AGE!!/${LIBOPENMPT_LTVER_AGE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_SVNURL!!/${BUILD_SVNURL}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_SVNVERSION!!/${BUILD_SVNVERSION}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_SVNDATE!!/${BUILD_SVNDATE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac

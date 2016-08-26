@@ -153,7 +153,8 @@ public:
 //! Get the libopenmpt version number
 /*!
   Returns the libopenmpt version number.
-  \return The value represents (major << 24 + minor << 16 + revision).
+  \return The value represents (major << 24 + minor << 16 + patch << 0).
+  \remarks libopenmpt < 0.3.0-pre used the following scheme: (major << 24 + minor << 16 + revision).
 */
 LIBOPENMPT_CXX_API std::uint32_t get_library_version();
 
@@ -186,10 +187,19 @@ LIBOPENMPT_DEPRECATED static const char license          LIBOPENMPT_ATTR_DEPRECA
   \param key Key to query.
          Possible keys are:
           -  "library_version": verbose library version string
+          -  "library_version_major": libopenmpt major version number
+          -  "library_version_minor": libopenmpt minor version number
+          -  "library_version_patch": libopenmpt patch version number
+          -  "library_version_prerel": libopenmpt pre-release version string
+          -  "library_version_is_release": "1" if the version is an officially released version
           -  "library_features": verbose library features string
           -  "core_version": verbose OpenMPT core version string
           -  "source_url": original source code URL
           -  "source_date": original source code date
+          -  "source_revision": original source code revision
+          -  "source_is_modified": "1" if the original source has been modified
+          -  "source_has_mixed_revisions": "1" if the original source has been compiled from different various revision
+          -  "source_is_package": "1" if the original source has been obtained from a source pacakge instead of source code version control
           -  "build": information about the current build (e.g. the build date or compiler used)
           -  "build_compiler": information about the compiler used to build libopenmpt
           -  "credits": all contributors

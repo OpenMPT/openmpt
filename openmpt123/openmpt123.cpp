@@ -372,6 +372,36 @@ static void show_info( std::ostream & log, bool verbose ) {
 	}
 	log << "  libopenmpt source..: " << openmpt::string::get( "source_url" ) << std::endl;
 	log << "  libopenmpt date....: " << openmpt::string::get( "source_date" ) << std::endl;
+	log << "  libopenmpt srcinfo.: ";
+	{
+		std::vector<std::string> fields;
+		if ( openmpt::string::get( "source_is_package" ) == "1" ) {
+			fields.push_back( "package" );
+		}
+		if ( openmpt::string::get( "source_is_release" ) == "1" ) {
+			fields.push_back( "release" );
+		}
+		if ( ( !openmpt::string::get( "source_revision" ).empty() ) && ( openmpt::string::get( "source_revision" ) != "0" ) ) {
+			std::string field = "rev" + openmpt::string::get( "source_revision" );
+			if ( openmpt::string::get( "source_has_mixed_revisions" ) == "1" ) {
+				field += "+mixed";
+			}
+			if ( openmpt::string::get( "source_is_modified" ) == "1" ) {
+				field += "+modified";
+			}
+			fields.push_back( field );
+		}
+		bool first = true;
+		for ( std::vector<std::string>::const_iterator it = fields.begin(); it != fields.end(); ++it ) {
+			if ( first ) {
+				first = false;
+			} else {
+				log << ", ";
+			}
+			log << (*it);
+		}
+	}
+	log << std::endl;
 	log << "  libopenmpt compiler: " << openmpt::string::get( "build_compiler" ) << std::endl;
 	log << "  libopenmpt features: " << openmpt::string::get( "library_features" ) << std::endl;
 #ifdef MPT_WITH_SDL2

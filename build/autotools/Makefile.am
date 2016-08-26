@@ -13,6 +13,7 @@ EXTRA_DIST += libopenmpt/dox/packaging.md
 EXTRA_DIST += libopenmpt/dox/quickstart.md
 EXTRA_DIST += libopenmpt/dox/tests.md
 EXTRA_DIST += libopenmpt/dox/todo.md
+EXTRA_DIST += libopenmpt/libopenmpt_version.mk
 EXTRA_DIST += test/test.xm
 EXTRA_DIST += test/test.s3m
 EXTRA_DIST += test/test.mptm
@@ -88,7 +89,7 @@ nobase_include_HEADERS =
 
 pkgconfig_DATA += libopenmpt/libopenmpt.pc
 lib_LTLIBRARIES += libopenmpt.la
-libopenmpt_la_LDFLAGS = -version-info 0:20:0
+libopenmpt_la_LDFLAGS = -version-info $(LIBOPENMPT_LTVER_CURRENT):$(LIBOPENMPT_LTVER_REVISION):$(LIBOPENMPT_LTVER_AGE)
 nobase_include_HEADERS += libopenmpt/libopenmpt.h libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h libopenmpt/libopenmpt_config.h libopenmpt/libopenmpt_stream_callbacks_fd.h libopenmpt/libopenmpt_stream_callbacks_file.h libopenmpt/libopenmpt_ext.hpp
 libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)

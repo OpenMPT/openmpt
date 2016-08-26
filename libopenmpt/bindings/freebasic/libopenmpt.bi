@@ -82,14 +82,16 @@ Extern "C"
 
 '* API version of this header file
 Const OPENMPT_API_VERSION_MAJOR = 0
-Const OPENMPT_API_VERSION_MINOR = 2
-Const OPENMPT_API_VERSION = (OPENMPT_API_VERSION_MAJOR Shl 24) Or (OPENMPT_API_VERSION_MINOR Shl 16)
-#Define OPENMPT_API_VERSION_STRING (OPENMPT_API_VERSION_MAJOR & "." & OPENMPT_API_VERSION_MINOR)
+Const OPENMPT_API_VERSION_MINOR = 3
+Const OPENMPT_API_VERSION_PATCH = 0
+Const OPENMPT_API_VERSION = (OPENMPT_API_VERSION_MAJOR Shl 24) Or (OPENMPT_API_VERSION_MINOR Shl 16) Or (OPENMPT_API_VERSION_PATCH Shl 0)
+#Define OPENMPT_API_VERSION_STRING (OPENMPT_API_VERSION_MAJOR & "." & OPENMPT_API_VERSION_MINOR & "." & OPENMPT_API_VERSION_PATCH)
 
 /'* \brief Get the libopenmpt version number
 
   Returns the libopenmpt version number.
-  \return The value represents (major Shl 24 + minor << Shr 16 + revision).
+  \return The value represents (major Shl 24 + minor Shl 16 + patch Shl 0).
+  \remarks libopenmpt < 0.3.0-pre used the following scheme: (major Shl 24 + minor Shl 16 + revision).
   \remarks Check the HiWord of the return value against OPENMPT_API_VERSION to ensure that the correct library version is loaded.
 '/
 Declare Function openmpt_get_library_version() As ULong
@@ -127,10 +129,15 @@ Declare Sub openmpt_free_string(ByVal Str As Const ZString Ptr)
   \param key Key to query.
         Possible keys are:
          -  "library_version": verbose library version string
+         -  "library_version_is_release": "1" if the version is an officially released version                              
          -  "library_features": verbose library features string
          -  "core_version": verbose OpenMPT core version string
          -  "source_url": original source code URL
          -  "source_date": original source code date
+         -  "source_revision": original source code revision
+         -  "source_is_modified": "1" if the original source has been modified
+         -  "source_has_mixed_revisions": "1" if the original source has been compiled from different various revision
+         -  "source_is_package": "1" if the original source has been obtained from a source pacakge instead of source code version control
          -  "build": information about the current build (e.g. the build date or compiler used)
          -  "build_compiler": information about the compiler used to build libopenmpt
          -  "credits": all contributors
