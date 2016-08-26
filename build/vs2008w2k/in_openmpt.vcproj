@@ -59,7 +59,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\&quot;in_openmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;in_openmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\&quot;in_openmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;in_openmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

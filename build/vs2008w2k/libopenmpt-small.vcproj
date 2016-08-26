@@ -333,7 +333,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\&quot;+small\&quot;;MPT_BUILD_VER_FILENAME=\&quot;libopenmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;libopenmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -412,7 +412,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\&quot;+small\&quot;;MPT_BUILD_VER_FILENAME=\&quot;libopenmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;libopenmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -491,7 +491,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\&quot;+small\&quot;;MPT_BUILD_VER_FILENAME=\&quot;libopenmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;libopenmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -573,7 +573,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MPT_BUILD_TARGET_2000;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\&quot;+small\&quot;;MPT_BUILD_VER_FILENAME=\&quot;libopenmpt.dll\&quot;;MPT_BUILD_VER_FILEDESC=\&quot;libopenmpt\&quot;;MPT_BUILD_VER_DLL"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

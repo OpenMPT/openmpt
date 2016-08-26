@@ -268,7 +268,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -292,7 +292,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -323,7 +323,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -355,7 +355,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
