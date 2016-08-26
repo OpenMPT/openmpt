@@ -5,8 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### libopenmpt 0.3.0-pre
 
+ *  [**Change**] libopenmpt versioning changed and follows the more conventional
+    major.minor.patch as well as the recommendations of the
+    [SemVer](http://semver.org/) scheme now.
  *  [**Change**] The output directories of the MSVC build system were changed to
     'bin/vs2015-shared/x86-64-win7/' (and similar) layout which allows building
     in the same tree with different compiler versions without overwriting other

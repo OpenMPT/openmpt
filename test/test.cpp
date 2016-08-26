@@ -39,6 +39,9 @@
 #ifndef MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_TRACKER
+#ifdef LIBOPENMPT_BUILD
+#include "../libopenmpt/libopenmpt_version.h"
+#endif // LIBOPENMPT_BUILD
 #ifndef NO_PLUGINS
 #include "../soundlib/plugins/PlugInterface.h"
 #endif
@@ -285,6 +288,42 @@ static MPT_NOINLINE void TestVersion()
 		VERIFY_EQUAL( MptVersion::ToNum(version), MptVersion::num );
 	}
 #endif
+
+#ifdef LIBOPENMPT_BUILD
+	mpt::PathString version_mk = GetPathPrefix() + MPT_PATHSTRING("libopenmpt/libopenmpt_version.mk");
+	mpt::ifstream f(version_mk, std::ios::in);
+	VERIFY_EQUAL(static_cast<bool>(f), true);
+	std::map<std::string, std::string> fields;
+	std::string line;
+	while(std::getline(f, line))
+	{
+		line = mpt::String::Trim(line);
+		if(line.empty())
+		{
+			continue;
+		}
+		std::vector<std::string> line_fields = mpt::String::Split<std::string>(line, std::string("="));
+		VERIFY_EQUAL_NONCONT(line_fields.size(), 2u);
+		line_fields[0] = mpt::String::Trim(line_fields[0]);
+		line_fields[1] = mpt::String::Trim(line_fields[1]);
+		VERIFY_EQUAL_NONCONT(line_fields[0].length() > 0, true);
+		fields[line_fields[0]] = line_fields[1];
+	}
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MAJOR"], mpt::ToString(OPENMPT_API_VERSION_MAJOR));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MINOR"], mpt::ToString(OPENMPT_API_VERSION_MINOR));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PATCH"], mpt::ToString(OPENMPT_API_VERSION_PATCH));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PREREL"], mpt::ToString(OPENMPT_API_VERSION_PREREL));
+	if(std::string(OPENMPT_API_VERSION_PREREL).length() > 0)
+	{
+		VERIFY_EQUAL(std::string(OPENMPT_API_VERSION_PREREL).substr(0, 1), "-");
+	}
+	VERIFY_EQUAL(OPENMPT_API_VERSION_IS_PREREL, (std::string(OPENMPT_API_VERSION_PREREL).length() > 0) ? 1 : 0);
+	
+	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_CURRENT"].length() > 0, true);
+	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_REVISION"].length() > 0, true);
+	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_AGE"].length() > 0, true);
+#endif // LIBOPENMPT_BUILD
+
 }
 
 

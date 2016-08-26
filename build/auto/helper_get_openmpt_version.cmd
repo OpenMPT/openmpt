@@ -16,6 +16,14 @@ build\auto\helper_get_openmpt_version.exe libopenmpt-version-minor > openmpt_ver
 set /p LIBOPENMPT_VERSION_MINOR=<openmpt_version.txt
 del /f openmpt_version.txt
 
+build\auto\helper_get_openmpt_version.exe libopenmpt-version-patch > openmpt_version.txt
+set /p LIBOPENMPT_VERSION_PATCH=<openmpt_version.txt
+del /f openmpt_version.txt
+
+build\auto\helper_get_openmpt_version.exe libopenmpt-version-prerel > openmpt_version.txt
+set /p LIBOPENMPT_VERSION_PREREL=<openmpt_version.txt
+del /f openmpt_version.txt
+
 build\auto\helper_get_openmpt_version.exe libopenmpt-version-string > openmpt_version.txt
 set /p LIBOPENMPT_VERSION_STRING=<openmpt_version.txt
 del /f openmpt_version.txt

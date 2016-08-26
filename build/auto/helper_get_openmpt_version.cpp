@@ -33,6 +33,16 @@ int main( int argc, char * argv [] ) {
 			std::cout << OPENMPT_API_VERSION_MINOR << std::endl;
 #endif
 
+#ifdef OPENMPT_API_VERSION_PATCH
+		} else if ( arg == "libopenmpt-version-patch" ) {
+			std::cout << OPENMPT_API_VERSION_PATCH << std::endl;
+#endif
+
+#ifdef OPENMPT_API_VERSION_PREREL
+		} else if ( arg == "libopenmpt-version-prerel" ) {
+			std::cout << OPENMPT_API_VERSION_PREREL << std::endl;
+#endif
+
 #ifdef OPENMPT_API_VERSION_STRING
 		} else if ( arg == "libopenmpt-version-string" ) {
 			std::cout << OPENMPT_API_VERSION_STRING << std::endl;

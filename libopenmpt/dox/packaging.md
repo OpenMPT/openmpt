@@ -8,6 +8,11 @@ Packaging
 
 ### Packaging recommendations for distribution package maintainers
 
+ *  libopenmpt uses SemVer versioning. See [semver.org](http://semver.org/).
+    This versioning scheme is incompatible with Debian/Ubuntu package versions,
+    however it can easily be processed to be compatible by replacing '-'
+    (hyphen) with '~' (tilde). It is recommended that you use this exact
+    transformation if required.
  *  Use the autotools source package.
  *  Use the default set of dependencies required by the autotools package.
  *  Run the test suite in your build process.

@@ -95,8 +95,7 @@ namespace openmpt {
 namespace version {
 
 std::uint32_t get_library_version() {
-	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
-	return OPENMPT_API_VERSION | ( sourceInfo.Revision & 0xffff );
+	return OPENMPT_API_VERSION;
 }
 
 std::uint32_t get_core_version() {
@@ -106,30 +105,29 @@ std::uint32_t get_core_version() {
 static std::string get_library_version_string() {
 	std::string str;
 	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
-	std::uint32_t version = get_library_version();
-	if ( ( version & 0xffff ) == 0 ) {
-		str += mpt::ToString((version>>24) & 0xff);
-		str += ".";
-		str += mpt::ToString((version>>16) & 0xff);
-	} else {
-		str += mpt::ToString((version>>24) & 0xff);
-		str += ".";
-		str += mpt::ToString((version>>16) & 0xff);
-		str += ".";
-		str += mpt::ToString((version>>0) & 0xffff);
+	str += mpt::ToString(OPENMPT_API_VERSION_MAJOR);
+	str += ".";
+	str += mpt::ToString(OPENMPT_API_VERSION_MINOR);
+	str += ".";
+	str += mpt::ToString(OPENMPT_API_VERSION_PATCH);
+	if ( std::string(OPENMPT_API_VERSION_PREREL).length() > 0 ) {
+		str += OPENMPT_API_VERSION_PREREL;
+	}
+	std::vector<std::string> fields;
+	if ( sourceInfo.Revision ) {
+		fields.push_back( "r" + mpt::ToString( sourceInfo.Revision ) );
 	}
 	if ( sourceInfo.IsDirty ) {
-		str += ".2-modified";
-		if ( sourceInfo.IsPackage ) {
-			str += "-pkg";
-		}
+		fields.push_back( "modified" );
 	} else if ( sourceInfo.HasMixedRevisions ) {
-		str += ".1-modified";
-		if ( sourceInfo.IsPackage ) {
-			str += "-pkg";
-		}
-	} else if ( sourceInfo.IsPackage ) {
-		str += ".0-pkg";
+		fields.push_back( "mixed" );
+	}
+	if ( sourceInfo.IsPackage ) {
+		fields.push_back( "pkg" );
+	}
+	if ( !fields.empty() ) {
+		str += "+";
+		str += mpt::String::Combine( fields, std::string(".") );
 	}
 	return str;
 }
@@ -148,6 +146,11 @@ static std::string get_source_url_string() {
 
 static std::string get_source_date_string() {
 	return MptVersion::GetSourceInfo().Date;
+}
+
+static std::string get_source_revision_string() {
+	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
+	return sourceInfo.Revision ? mpt::ToString(sourceInfo.Revision) : std::string();
 }
 
 static std::string get_build_string() {
@@ -187,6 +190,16 @@ std::string get_string( const std::string & key ) {
 		return std::string();
 	} else if ( key == "library_version" ) {
 		return get_library_version_string();
+	} else if ( key == "library_version_major" ) {
+		return mpt::ToString(OPENMPT_API_VERSION_MAJOR);
+	} else if ( key == "library_version_minor" ) {
+		return mpt::ToString(OPENMPT_API_VERSION_MINOR);
+	} else if ( key == "library_version_patch" ) {
+		return mpt::ToString(OPENMPT_API_VERSION_PATCH);
+	} else if ( key == "library_version_prerel" ) {
+		return mpt::ToString(OPENMPT_API_VERSION_PREREL);
+	} else if ( key == "library_version_is_release" ) {
+		return ( std::string(OPENMPT_API_VERSION_PREREL).length() == 0 ) ? "1" : "0";
 	} else if ( key == "library_features" ) {
 		return get_library_features_string();
 	} else if ( key == "core_version" ) {
@@ -195,6 +208,14 @@ std::string get_string( const std::string & key ) {
 		return get_source_url_string();
 	} else if ( key == "source_date" ) {
 		return get_source_date_string();
+	} else if ( key == "source_revision" ) {
+		return get_source_revision_string();
+	} else if ( key == "source_is_modified" ) {
+		return MptVersion::GetSourceInfo().IsDirty ? "1" : "0";
+	} else if ( key == "source_has_mixed_revision" ) {
+		return MptVersion::GetSourceInfo().HasMixedRevisions ? "1" : "0";
+	} else if ( key == "source_is_package" ) {
+		return MptVersion::GetSourceInfo().IsPackage ? "1" : "0";
 	} else if ( key == "build" ) {
 		return get_build_string();
 	} else if ( key == "build_compiler" ) {

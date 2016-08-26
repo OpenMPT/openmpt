@@ -183,10 +183,10 @@ MANDIR ?= $(PREFIX)/share/man
 
 # version
 
-LIBOPENMPT_VERSION_MAJOR=0
-LIBOPENMPT_VERSION_MINOR=2
+include libopenmpt/libopenmpt_version.mk 
 
-LIBOPENMPT_SONAME=libopenmpt$(SOSUFFIX).0
+LIBOPENMPT_SO_VERSION=$(LIBOPENMPT_LTVER_CURRENT)
+LIBOPENMPT_SONAME=libopenmpt$(SOSUFFIX).$(LIBOPENMPT_SO_VERSION)
 
 
 # host setup
@@ -569,16 +569,16 @@ MPT_SVNURL :=  $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed '
 MPT_SVNDATE := $(shell svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )
 CPPFLAGS += -D MPT_SVNURL=\"$(MPT_SVNURL)\" -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\" -D MPT_SVNDATE=\"$(MPT_SVNDATE)\"
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
-DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+r$(MPT_SVNVERSION)
 else
 # not in svn checkout
 DIST_OPENMPT_VERSION:=rUNKNOWN
-DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+rUNKNOWN
 endif
 else
 # in dist package
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
-DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+r$(MPT_SVNVERSION)
 endif
 
 ifeq ($(MPT_SVNVERSION),)
@@ -958,20 +958,20 @@ bin/dist-tar.tar: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
 .PHONY: dist-zip
 dist-zip: bin/dist-zip.tar
 
-bin/dist-zip.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+bin/dist-zip.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
 	rm -rf bin/dist-zip.tar
-	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip ./
-	cd bin/ && tar cvf dist-zip.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip ./
+	cd bin/ && tar cvf dist-zip.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
 
 .PHONY: dist-doc
 dist-doc: bin/dist-doc.tar
 
-bin/dist-doc.tar: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist-doc.tar: bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
 	rm -rf bin/dist-doc.tar
-	cd bin/ && cp dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist-doc.tar libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
-	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	cd bin/ && cp dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz ./
+	cd bin/ && tar cvf dist-doc.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
 
 .PHONY: dist-js
 dist-js: bin/dist-js.tar
@@ -1006,13 +1006,13 @@ bin/svn_version_dist.h:
 	echo >> $@.tmp
 	mv $@.tmp $@
 
-.PHONY: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
+.PHONY: bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar
+bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar: docs
 	mkdir -p bin/dist-doc
-	rm -rf bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
-	cp -Rv bin/docs/html bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
-	cd bin/dist-doc/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
+	rm -rf bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc
+	mkdir -p bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc
+	cp -Rv bin/docs/html bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc/docs
+	cd bin/dist-doc/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc > libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar
 
 .PHONY: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
 bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
@@ -1041,8 +1041,8 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
 	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
 
-.PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
-bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/svn_version_dist.h
+.PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
+bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
 	rm -rf bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
@@ -1075,7 +1075,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/
 	svn export ./include/msinttypes    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/msinttypes    --native-eol CRLF
 	cp bin/dist.mk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
-	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip --compression-method deflate -9 *
+	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip --compression-method deflate -9 *
 
 .PHONY: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
 bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
