@@ -230,7 +230,7 @@ public:
 				if(pingpong)
 				{
 					readIncrement = -1;
-					if(ITPingPongMode)
+					if(ITPingPongMode && readPosition > 0)
 					{
 						readPosition--;
 					}

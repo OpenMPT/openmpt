@@ -108,7 +108,7 @@ public:
 	}
 
 	// Increment playback position of sample and envelopes on a channel
-	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = 0)
+	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = uint32_max)
 	{
 		ModChannel &chn = state.Chn[channel];
 		uint32 numTicks = chnSettings[channel].ticksToRender;
@@ -207,6 +207,7 @@ public:
 		if(stopNote)
 		{
 			chn.Stop();
+			chn.nPortamentoDest = 0;
 		}
 		chnSettings[channel].ticksToRender = 0;
 	}

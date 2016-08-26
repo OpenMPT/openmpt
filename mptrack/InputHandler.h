@@ -64,4 +64,13 @@ public:
 	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };
 
+
+// RAII object for temporarily bypassing the input handler
+class BypassInputHandler
+{
+public:
+	BypassInputHandler();
+	~BypassInputHandler();
+};
+
 OPENMPT_NAMESPACE_END

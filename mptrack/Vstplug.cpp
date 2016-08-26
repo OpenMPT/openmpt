@@ -1180,7 +1180,6 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 			//ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_Factory.szLibraryName);
 		}
 	}
-	Limit(fResult, 0.0f, 1.0f);
 	return fResult;
 }
 
@@ -1192,8 +1191,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 	{
 		if(nIndex < m_Effect.numParams && m_Effect.setParameter)
 		{
-			if ((fValue >= 0.0f) && (fValue <= 1.0f))
-				m_Effect.setParameter(&m_Effect, nIndex, fValue);
+			m_Effect.setParameter(&m_Effect, nIndex, fValue);
 		}
 		ResetSilence();
 	} __except(EXCEPTION_EXECUTE_HANDLER)
