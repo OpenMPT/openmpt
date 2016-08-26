@@ -26,6 +26,45 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.05.00 (? September 2016, revision 6993)
+---------------------------------------------
+Pattern tab
+   [Fix] <js> Seeking with sample sync could behave strangely with portamento-ed pingpong-looped samples.
+   [Fix] <js> Data Entry also modified the effect column when it was only supposed to affect other columns.
+   [Fix] <js> If the same pattern occurred several times in a row, the previous / next patterns were not drawn correctly.
+   [Fix] <js> The Parameter Editor window was redrawn more often than necessary (multiple times per row, for every tick - tx mandrasigma).
+
+Pattern tab::Find/Replace
+   [Fix] <js> Repeated searches for extended (Sxy / Exy) commands did not remember the correct pattern commands.
+
+Instrument tab
+   [Imp] <js> Improved handling of drum patches in Gravis Patch files.
+
+Mod Conversion
+   [Fix] <js> Correctly translate Lxy / Kxy with fine slide parameter when converting from S3M / IT / MPTM to MOD / XM.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> Genny Beta uses parameters outside the nominal 0...1 range, which broke when loading and saving modules using this plugin.
+
+VST::Plugin Bridge
+   [Fix] <js> Some mouse actions did not work in bridged editors on some systems, in particular with Windows 10 Anniversary Update (http://forum.openmpt.org/index.php?topic=5703.0).
+   [Fix] <js> Toggling the plugin editor could lead to a crash if the bridged editor took very long to initialize.
+
+Other formats
+   [Fix] <js> Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker files.
+
+Misc
+   [Fix] <js> MIDI Export: Timing precision was drifting badly, leading to notes not being properly aligned to the PPQN.
+   [Fix] <js> MIDI Export: Since OpenMPT 1.26.01.00, exporting a file with a plugin in the first slot would lead to a crash when closing the file later.
+   [Fix] <js> MIDI Export: Pitch bend depth was not always exported correctly.
+   [Fix] <js> SF2: Region fine-tune was not imported at all. Soundfonts should now hopefully be finally in tune!
+   [Fix] <js> SF2: Some sample loops were not imported correctly.
+   [Fix] <js> It may have been possible that auto save also triggered on unsaved files right after they were loaded.
+
+Bundled plugins
+   [Fix] <js> Possible crash in the MIDI Input / Output plugin when a MIDI message could not be sent.
+
+
 v1.26.04.00 (7 August 2016, revision 6772)
 ------------------------------------------
 Pattern tab

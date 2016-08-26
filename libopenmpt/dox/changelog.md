@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
+ *  [**Bug**] Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker 
+    files.
 
  *  'Makefile' has now explicit support for FreeBSD with no special option or
     configuration required.
