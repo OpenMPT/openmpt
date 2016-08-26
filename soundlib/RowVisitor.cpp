@@ -201,8 +201,11 @@ void RowVisitor::AddVisitedRow(ORDERINDEX order, ROWINDEX row)
 	{
 		// We're in a new pattern! Forget about which rows we previously visited...
 		visitOrder.clear();
-		visitOrder.reserve(GetVisitedRowsVectorSize(Order->At(order)));
 		currentOrder = order;
+	}
+	if(visitOrder.empty())
+	{
+		visitOrder.reserve(GetVisitedRowsVectorSize(Order->At(order)));
 	}
 	// And now add the played row to our memory.
 	visitOrder.push_back(row);
