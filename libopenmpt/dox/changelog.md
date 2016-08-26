@@ -20,6 +20,9 @@ is just a high-level summary.
     have been merged into a single one which can be controlled using command
     line options.
 
+ *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
+    when no locale was active.
+
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
  *  Possible crashes with malformed MED, PSM and Startrekker files.
