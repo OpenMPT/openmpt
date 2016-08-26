@@ -571,6 +571,14 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 void IMixPlugin::ToggleEditor()
 //-----------------------------
 {
+	// We only really need this mutex for bridged plugins, as we may be processing window messages (in the same thread) while the editor opens.
+	// The user could press the toggle button while the editor is loading and thus close the editor while still being initialized.
+	// Note that this does not protect against closing the module while the editor is still loading.
+	static bool initializing = false;
+	if(initializing)
+		return;
+	initializing = true;
+
 	if (m_pEditor)
 	{
 		CloseEditor();
@@ -581,6 +589,7 @@ void IMixPlugin::ToggleEditor()
 		if (m_pEditor)
 			m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
 	}
+	initializing = false;
 }
 
 
