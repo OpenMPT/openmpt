@@ -65,8 +65,7 @@ void RowVisitor::Initialize(bool reset, SEQUENCEINDEX sequence)
 void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 //-----------------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
-	if(order >= endOrder || row >= GetVisitedRowsVectorSize(Order->At(order)))
+	if(order >= Order->GetLength() || row >= GetVisitedRowsVectorSize(Order->At(order)))
 	{
 		return;
 	}
@@ -75,6 +74,11 @@ void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 	if(order >= visitedRows.size() || row >= visitedRows[order].size())
 	{
 		Initialize(false);
+		// If it's still past the end of the vector, this means that order >= Order->GetLengthTailTrimmed(), i.e. we are trying to play an empty order.
+		if(order >= visitedRows.size())
+		{
+			return;
+		}
 	}
 
 	visitedRows[order][row] = visited;
@@ -91,8 +95,7 @@ void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 bool RowVisitor::IsVisited(ORDERINDEX order, ROWINDEX row, bool autoSet)
 //----------------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
-	if(order >= endOrder)
+	if(order >= Order->GetLength())
 	{
 		return false;
 	}
