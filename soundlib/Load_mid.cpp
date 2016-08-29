@@ -411,7 +411,7 @@ struct MidiChannelState
 
 	MidiChannelState()
 		: pitchbendMod(0)
-		, pitchbend(0x2000)
+		, pitchbend(MIDIEvents::pitchBendCentre)
 		, bank(0)
 		, program(0)
 		, pan(128)
@@ -433,7 +433,7 @@ struct MidiChannelState
 	{
 		pitchbend = value;
 		// Convert from arbitrary MIDI pitchbend to 64th of semitone
-		pitchbendMod = Util::muldiv(pitchbend - 0x2000, pitchBendRange * 64, 0x2000);
+		pitchbendMod = Util::muldiv(pitchbend - MIDIEvents::pitchBendCentre, pitchBendRange * 64, MIDIEvents::pitchBendCentre);
 	}
 };
 
@@ -778,7 +778,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 
 			default:
-
 				break;
 			}
 		} else
@@ -960,7 +959,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					case MIDIEvents::MIDICC_AllControllersOff:
 						midiChnStatus[midiCh].expression = 128;
 						midiChnStatus[midiCh].pitchBendRange = 2;
-						midiChnStatus[midiCh].SetPitchbend(0x2000);
+						midiChnStatus[midiCh].SetPitchbend(MIDIEvents::pitchBendCentre);
 						midiChnStatus[midiCh].rpn = 0x3FFF;
 						midiChnStatus[midiCh].modulation = 0;
 						midiChnStatus[midiCh].monoMode = false;
@@ -972,15 +971,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						// Bn.7B.00: All Notes Off (GM)
 					case MIDIEvents::MIDICC_AllSoundOff:
 					case MIDIEvents::MIDICC_AllNotesOff:
-						if(data2 == 0x00)
+						// All Notes Off
+						midiChnStatus[midiCh].sustain = false;
+						for(uint8 note = 0; note < 128; note++)
 						{
-							// All Notes Off
-							midiChnStatus[midiCh].sustain = false;
-							for(uint8 note = 0; note < 128; note++)
-							{
-								MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow);
-							}
+							MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow);
 						}
+						break;
 					case MIDIEvents::MIDICC_MonoOperation:
 						midiChnStatus[midiCh].monoMode = true;
 						break;
@@ -1159,27 +1156,27 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	Order.SetSequence(0);
 
+	std::vector<CHANNELINDEX> channels;
+	channels.reserve(m_nChannels);
+	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+	{
+		if(modChnStatus[i].midiCh != ModChannelState::NOMIDI || !GetpModDoc()->IsChannelUnused(i))
+		{
+			channels.push_back(i);
+			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
+				sprintf(ChnSettings[i].szName, "MIDI Ch %u", 1 + modChnStatus[i].midiCh);
+			else if(i == tempoChannel)
+				strcpy(ChnSettings[i].szName, "Tempo");
+			else if(i == globalVolChannel)
+				strcpy(ChnSettings[i].szName, "Global Volume");
+		}
+	}
+	if(channels.empty())
+		return false;
+
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
 	{
-		std::vector<CHANNELINDEX> channels;
-		channels.reserve(m_nChannels);
-		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
-		{
-			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI || !GetpModDoc()->IsChannelUnused(i))
-			{
-				channels.push_back(i);
-				if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
-					sprintf(ChnSettings[i].szName, "MIDI Ch %u", 1 + modChnStatus[i].midiCh);
-				else if(i == tempoChannel)
-					strcpy(ChnSettings[i].szName, "Tempo");
-				else if(i == globalVolChannel)
-					strcpy(ChnSettings[i].szName, "Global Volume");
-			}
-		}
-		if(channels.empty())
-			return false;
-
 		// Keep MIDI channels in patterns neatly grouped
 		struct MidiChannelSort
 		{
@@ -1193,7 +1190,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		};
 		std::sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
-		GetpModDoc()->ReArrangeChannels(channels);
+		GetpModDoc()->ReArrangeChannels(channels, false);
 		GetpModDoc()->m_ShowSavedialog = true;
 	}
 
@@ -1251,7 +1248,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			// Load From DLS Bank
 			if (CDLSBank::IsDLSBank(pszMidiMapName))
 			{
-				CDLSBank *pDLSBank = NULL;
+				CDLSBank *pDLSBank = nullptr;
 
 				if ((pCachedBank) && (!mpt::PathString::CompareNoCase(szCachedBankFile, pszMidiMapName)))
 				{
@@ -1295,9 +1292,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					if(file.IsValid())
 					{
 						ReadInstrumentFromFile(nIns, file, false);
-						mpt::PathString szName, szExt;
-						pszMidiMapName.SplitPath(nullptr, nullptr, &szName, &szExt);
-						szName += szExt;
+						mpt::PathString szName = pszMidiMapName.GetFullFileName();
 						pIns = Instruments[nIns];
 						if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName.ToLocale().c_str());
 						if (!pIns->name[0])
