@@ -981,7 +981,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		int sinc = sample.GetElementarySampleSize();
 		int s_old = 0;
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
 		{
 			if (sample.uFlags[CHN_16BIT]) p++;
 		}
