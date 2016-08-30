@@ -19,6 +19,9 @@ is just a high-level summary.
  *  [**Change**] Android: The build system changed. The various Android.mk files
     have been merged into a single one which can be controlled using command
     line options.
+ *  [**Change**] The `Makefile` build system now passes `std=c++11` to the
+    compiler by default. Older compilers may still work if you pass
+    `STDCXX=c++0x` to the `make` invocation.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.

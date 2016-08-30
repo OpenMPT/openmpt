@@ -5,7 +5,7 @@ LD  = clang++
 AR  = ar 
 
 CPPFLAGS +=
-CXXFLAGS += -std=c++0x -fPIC 
+CXXFLAGS += -std=c++11 -fPIC 
 CFLAGS   += -std=c99   -fPIC
 LDFLAGS  += 
 LDLIBS   += -lm
