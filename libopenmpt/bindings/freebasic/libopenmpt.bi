@@ -177,6 +177,7 @@ Const OPENMPT_STREAM_SEEK_END = 2
   \param bytes Number of bytes to read.
   \return Number of bytes actually read and written to dst.
   \retval 0 End of stream or error.
+  \remarks Short reads are allowed as long as they return at least 1 byte if EOF is not reached.
 '/
 Type openmpt_stream_read_func As Function(ByVal stream As Any Ptr, ByVal dst As Any Ptr, ByVal bytes As UInteger) As UInteger
 
@@ -189,6 +190,7 @@ Type openmpt_stream_read_func As Function(ByVal stream As Any Ptr, ByVal dst As 
   \return Returns 0 on success.
   \retval 0 Success.
   \retval -1 Failure. Position does not get updated.
+  \remarks libopenmpt will not try to seek beyond the file size, thus it is not important whether you allow for virtual positioning after the file end, or return an error in that case. The position equal to the file size needs to be seekable to.
 '/
 Type openmpt_stream_seek_func As Function(ByVal stream As Any Ptr, ByVal offset As LongInt, ByVal whence As Long) As Long
 
