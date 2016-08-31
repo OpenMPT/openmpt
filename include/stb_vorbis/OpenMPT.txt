@@ -1,11 +1,10 @@
 This folder contains the stb_vorbis library from
 https://github.com/nothings/stb/blob/master/stb_vorbis.c
-(commit 4c519106a7c3862524100f907736c1c74412725d)
+(commit e713a69f1ea6ee1e0d55725ed0731520045a5993)
 
 Modifications:
  * Use of alloca has been replaced with malloc, as alloca is not in C99 and fails
    to compile.
- * Compilation on FreeBSD has been fixed by not including <malloc.h>.
  * Macro redefinition of STB_VORBIS_NO_STDIO has been fixed.
 Modifications are always additions and have been marked with // OpenMPT.
 
