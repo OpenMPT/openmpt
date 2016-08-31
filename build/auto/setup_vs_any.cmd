@@ -37,13 +37,4 @@ if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
  goto vsdone
 )
 
-if exist "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
- call %~dp0\setup_vs2008.cmd
- goto vsdone
-)
-if exist "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
- call %~dp0\setup_vs2008.cmd
- goto vsdone
-)
-
 :vsdone

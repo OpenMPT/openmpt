@@ -15,17 +15,6 @@ PREMAKE=include/premake/bin/release/premake5
 
 echo dofile \"build/premake/premake.lua\" > premake5.lua
 
-${PREMAKE} --group=libopenmpt_test vs2008
-${PREMAKE} --group=in_openmpt vs2008
-${PREMAKE} --group=xmp-openmpt vs2008
-${PREMAKE} --group=libopenmpt-small vs2008
-${PREMAKE} --group=libopenmpt vs2008
-${PREMAKE} --group=openmpt123 vs2008
-${PREMAKE} --group=PluginBridge vs2008
-${PREMAKE} --group=OpenMPT-VSTi vs2008
-${PREMAKE} --group=OpenMPT vs2008
-${PREMAKE} --group=all-externals vs2008
-
 ${PREMAKE} --group=libopenmpt_test vs2010
 ${PREMAKE} --group=foo_openmpt vs2010
 ${PREMAKE} --group=in_openmpt vs2010
@@ -73,17 +62,6 @@ ${PREMAKE} --group=PluginBridge vs2015
 ${PREMAKE} --group=OpenMPT-VSTi vs2015
 ${PREMAKE} --group=OpenMPT vs2015
 ${PREMAKE} --group=all-externals vs2015
-
-${PREMAKE} --group=libopenmpt_test vs2008 --w2k
-${PREMAKE} --group=in_openmpt vs2008 --w2k
-${PREMAKE} --group=xmp-openmpt vs2008 --w2k
-${PREMAKE} --group=libopenmpt-small vs2008 --w2k
-${PREMAKE} --group=libopenmpt vs2008 --w2k
-${PREMAKE} --group=openmpt123 vs2008 --w2k
-${PREMAKE} --group=PluginBridge vs2008 --w2k
-${PREMAKE} --group=OpenMPT-VSTi vs2008 --w2k
-${PREMAKE} --group=OpenMPT vs2008 --w2k
-${PREMAKE} --group=all-externals vs2008 --w2k
 
 ${PREMAKE} --group=libopenmpt_test vs2010 --xp
 ${PREMAKE} --group=foo_openmpt vs2010 --xp

@@ -44,18 +44,7 @@
    targetsuffix "64"
   filter {}
 
-	if _OPTIONS["w2k"] then
-		filter { "architecture:x86" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetFileName)\"",
-			}
-		filter { "architecture:x86_64" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-win2000\" mkdir \"$(TargetDir)\\..\\x86-32-win2000\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win2000\\$(TargetFileName)\"",
-			}
-	elseif _OPTIONS["xp"] then
+	if _OPTIONS["xp"] then
 		filter { "architecture:x86" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
@@ -67,22 +56,12 @@
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
 			}
 	else
-		filter { "architecture:x86", "action:vs2008" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-vista\" mkdir \"$(TargetDir)\\..\\x86-64-vista\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-vista\\$(TargetFileName)\"",
-			}
-		filter { "architecture:x86_64", "action:vs2008" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-vista\" mkdir \"$(TargetDir)\\..\\x86-32-vista\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-vista\\$(TargetFileName)\"",
-			}
-		filter { "architecture:x86", "not action:vs2008" }
+		filter { "architecture:x86" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-win7\" mkdir \"$(TargetDir)\\..\\x86-64-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetFileName)\"",
 			}
-		filter { "architecture:x86_64", "not action:vs2008" }
+		filter { "architecture:x86_64" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-32-win7\" mkdir \"$(TargetDir)\\..\\x86-32-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetFileName)\"",

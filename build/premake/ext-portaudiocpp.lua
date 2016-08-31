@@ -10,11 +10,9 @@
   targetname "openmpt-portaudiocpp"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
 	filter {}
-	filter { "action:vs*", "not action:vs2008" }
+	filter { "action:vs*" }
 		characterset "Unicode"
 		flags { "Unicode" }
-	filter { "action:vs*", "action:vs2008" }
-		characterset "MBCS"
 	filter {}
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",

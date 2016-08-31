@@ -34,11 +34,6 @@ newoption {
 }
 
 newoption {
-	trigger = "w2k",
-	description = "Generate Win2000 targetting projects",
-}
-
-newoption {
 	trigger = "xp",
 	description = "Generate XP targetting projects",
 }
@@ -52,27 +47,16 @@ newoption {
 --	layout = custom
 --end
 
-if _OPTIONS["w2k"] then
-	mpt_projectpathname = _ACTION .. "w2k"
-	mpt_bindirsuffix = "win2000"
-	mpt_bindirsuffix32 = "win2000"
-	mpt_bindirsuffix64 = "winxp64"
-elseif _OPTIONS["xp"] then
+if _OPTIONS["xp"] then
 	mpt_projectpathname = _ACTION .. "xp"
 	mpt_bindirsuffix = "winxp"
 	mpt_bindirsuffix32 = "winxp"
 	mpt_bindirsuffix64 = "winxp64"
 else
 	mpt_projectpathname = _ACTION
-	if _ACTION == "vs2008" then
-		mpt_bindirsuffix = "vista"
-		mpt_bindirsuffix32 = "vista"
-		mpt_bindirsuffix64 = "vista"
-	else
-		mpt_bindirsuffix = "win7"
-		mpt_bindirsuffix32 = "win7"
-		mpt_bindirsuffix64 = "win7"
-	end
+	mpt_bindirsuffix = "win7"
+	mpt_bindirsuffix32 = "win7"
+	mpt_bindirsuffix64 = "win7"
 end
 
 function replace_in_file (filename, from, to)
@@ -97,15 +81,6 @@ function replace_in_file (filename, from, to)
 end
 
 -- related to issue https://github.com/premake/premake-core/issues/68
-function postprocess_vs2008_main (filename)
-	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\r\n", "")
-end
-
-function postprocess_vs2008_nonxcompat (filename)
-	replace_in_file(filename, "\t\t\t<Tool\r\n\t\t\t\tName=\"VCLinkerTool\"\r\n", "\t\t\t<Tool\r\n\t\t\t\tName=\"VCLinkerTool\"\r\n\t\t\t\t\DataExecutionPrevention=\"1\"\r\n")
-end
-
--- related to issue https://github.com/premake/premake-core/issues/68
 function postprocess_vs2010_main (filename)
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 end
@@ -122,15 +97,6 @@ newaction {
  trigger     = "postprocess",
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
-
-  postprocess_vs2008_main("build/vs2008/libopenmpt_test.vcproj")
-  postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
-  postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_probe.vcproj")
-  postprocess_vs2008_main("build/vs2008/libopenmpt_example_c.vcproj")
-  postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_mem.vcproj")
-  postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_unsafe.vcproj")
-  postprocess_vs2008_nonxcompat("build/vs2008/OpenMPT.vcproj")
-  postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
 
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
@@ -179,15 +145,6 @@ newaction {
   postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
-
-  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_test.vcproj")
-  postprocess_vs2008_main("build/vs2008w2k/openmpt123.vcproj")
-  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_probe.vcproj")
-  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c.vcproj")
-  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_mem.vcproj")
-  postprocess_vs2008_main("build/vs2008w2k/libopenmpt_example_c_unsafe.vcproj")
-  postprocess_vs2008_nonxcompat("build/vs2008w2k/OpenMPT.vcproj")
-  postprocess_vs2008_nonxcompat("build/vs2008w2k/PluginBridge.vcproj")
 
   postprocess_vs2010_main("build/vs2010xp/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010xp/openmpt123.vcxproj")

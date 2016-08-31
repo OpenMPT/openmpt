@@ -21,11 +21,9 @@
 		"../../include/flac/src/libFLAC/include",
 	}
 	filter {}
-	filter { "action:vs*", "not action:vs2008" }
+	filter { "action:vs*" }
 		characterset "Unicode"
 		flags { "Unicode" }
-	filter { "action:vs*", "action:vs2008" }
-		characterset "MBCS"
 	filter {}
   files {
    "../../include/flac/src/libFLAC/bitmath.c",
@@ -103,10 +101,7 @@
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
-  filter { "action:vs2008" }
-   defines { "VERSION=\\\"1.3.1\\\"" }
-  filter { "action:not vs2008" }
-   defines { "VERSION=\"1.3.1\"" }
+  defines { "VERSION=\"1.3.1\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }

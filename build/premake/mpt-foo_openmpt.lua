@@ -1,6 +1,4 @@
 
-if _ACTION ~= "vs2008" then
-
  project "foo_openmpt"
   uuid "749102d3-b183-420c-a7d7-d8ff343c1a0c"
   language "C++"
@@ -27,12 +25,7 @@ if _ACTION ~= "vs2008" then
    "../../libopenmpt/foo_openmpt.cpp",
   }
 
-	filter { "action:vs*", "action:vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
-		resdefines {
-			"MPT_BUILD_VER_FILENAME=\\\"" .. mpt_projectname .. ".dll\\\"",
-			"MPT_BUILD_VER_FILEDESC=\\\"" .. mpt_projectname .. "\\\"",
-		}
-	filter { "action:vs*", "action:not vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
 			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
@@ -56,7 +49,6 @@ if _ACTION ~= "vs2008" then
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg" }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
-  filter { "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -94,5 +86,3 @@ if _ACTION ~= "vs2008" then
   uuid "71AD2674-065B-48F5-B8B0-E1F9D3892081"
   kind "StaticLib"
   language "C++"
-
-end

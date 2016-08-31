@@ -29,12 +29,7 @@
   }
   defines { }
 	
-	filter { "action:vs*", "action:vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
-		resdefines {
-			"MPT_BUILD_VER_FILENAME=\\\"" .. mpt_projectname .. ".exe\\\"",
-			"MPT_BUILD_VER_FILEDESC=\\\"" .. mpt_projectname .. "\\\"",
-		}
-	filter { "action:vs*", "action:not vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".exe\"",
 			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
@@ -71,7 +66,7 @@
     "winmm",
     "zlib",
    }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
    links { "delayimp" }
    linkoptions {
     "/DELAYLOAD:mf.dll",

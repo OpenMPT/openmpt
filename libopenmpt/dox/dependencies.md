@@ -9,7 +9,7 @@ Dependencies
 ### libopenmpt
 
  *  Supported compilers for building libopenmpt:
-     *  **Microsoft Visual Studio 2008** or higher
+     *  **Microsoft Visual Studio 2010** or higher
      *  **GCC 4.3** or higher (4.1 to 4.2 are partially supported)
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher
@@ -44,7 +44,7 @@ Dependencies
 ### openmpt123
 
  *  Supported compilers for building openmpt:
-     *  **Microsoft Visual Studio 2008** or higher
+     *  **Microsoft Visual Studio 2010** or higher
      *  **GCC 4.3** or higher (4.1 to 4.2 are partially supported)
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher

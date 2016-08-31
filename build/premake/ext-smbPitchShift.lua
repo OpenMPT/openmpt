@@ -10,11 +10,9 @@
   targetname "openmpt-smbpitchshift"
   includedirs { }
 	filter {}
-	filter { "action:vs*", "not action:vs2008" }
+	filter { "action:vs*" }
 		characterset "Unicode"
 		flags { "Unicode" }
-	filter { "action:vs*", "action:vs2008" }
-		characterset "MBCS"
 	filter {}
   files {
    "../../include/smbPitchShift/smbPitchShift.cpp",

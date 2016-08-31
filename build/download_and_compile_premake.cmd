@@ -82,21 +82,6 @@ if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
  goto premakedone
 )
 
-if exist "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
- call build\auto\setup_vs2008.cmd || goto error
- cd include\premake\build\vs2008 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
- cd ..\..\..\.. || goto error
- goto premakedone
-)
-if exist "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
- call build\auto\setup_vs2008.cmd || goto error
- cd include\premake\build\vs2008 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
- cd ..\..\..\.. || goto error
- goto premakedone
-)
-
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake\build\vs2013 || goto error

@@ -11,16 +11,7 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["w2k"] then
-			if _ACTION == "vs2012" then
-				toolset "v110_xp"
-			elseif _ACTION == "vs2013" then
-				toolset "v120_xp"
-			elseif _ACTION == "vs2015" then
-				toolset "v140_xp"
-			end
-			defines { "MPT_BUILD_TARGET_2000" }
-		elseif _OPTIONS["xp"] then
+		if _OPTIONS["xp"] then
 			if _ACTION == "vs2012" then
 				toolset "v110_xp"
 			elseif _ACTION == "vs2013" then
@@ -81,9 +72,6 @@
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
 		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
 
-  filter { "action:vs2008" }
-   includedirs { "../../include/msinttypes/stdint" }
-
   filter { "configurations:Debug" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
@@ -128,7 +116,7 @@
 
 	filter {}
 
-	if _OPTIONS["w2k"] or _OPTIONS["xp"] then
+	if _OPTIONS["xp"] then
 
 		-- https://github.com/premake/premake-core/issues/560
 	
@@ -167,13 +155,13 @@
 
 		filter {}
 
-		filter { "configurations:Release", "not action:vs2008" }
+		filter { "configurations:Release" }
 			vectorextensions "SSE2"
 
-		filter { "configurations:ReleaseShared", "not action:vs2008" }
+		filter { "configurations:ReleaseShared" }
 		 vectorextensions "SSE2"
 
-		filter { "configurations:ReleaseLTCG", "not action:vs2008" }
+		filter { "configurations:ReleaseLTCG" }
 		 vectorextensions "SSE2"
 
 		filter {}

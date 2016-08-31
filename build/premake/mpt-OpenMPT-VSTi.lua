@@ -7,8 +7,6 @@
   mpt_projectname = "OpenMPT-VSTi"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  filter { "action:vs2008" }
-   includedirs { "../../include/msinttypes/inttypes" }
   filter { "action:vs2010" }
    includedirs { "../../include/msinttypes/inttypes" }
   filter { "action:vs2012" }
@@ -105,7 +103,6 @@
    }
    targetname "mptrack"
   filter {}
-  filter { "not action:vs2008" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
