@@ -185,10 +185,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
         which will try to guess the compiler based on your operating system.
 
-        GCC versions 4.1 and 4.2 are partially supported, run:
-
-            make CONFIG=gcc ANCIENT=1
-
      -  emscripten (on Unix-like systems):
 
         libopenmpt has been tested and verified to work with emscripten 1.21 or

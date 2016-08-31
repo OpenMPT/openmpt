@@ -23,6 +23,8 @@ is just a high-level summary.
     compiler by default. Older compilers may still work if you pass
     `STDCXX=c++0x` to the `make` invocation.
 
+ *  [**Regression**] Support for GCC 4.1 and GCC 4.2, as well as the `Makefile`
+    option `ANCIENT=1`, is gone.
  *  [**Regression**] Visual Studio 2008 support has been removed.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways

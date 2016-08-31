@@ -47,7 +47,6 @@
 #  OPTIMIZE_SIZE=0  Build size-optimized binaries
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
-#  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3.0)
 #  STRICT=0         Treat warnings as errors.
 #  CHECKED=0        Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
@@ -148,7 +147,6 @@ OPTIMIZE=1
 OPTIMIZE_SIZE=0
 TEST=1
 ONLY_TEST=0
-ANCIENT=0
 SOSUFFIX=.so
 OPENMPT123=1
 STRICT=0
@@ -329,11 +327,8 @@ endif
 
 ifeq ($(HOST),unix)
 
-ifeq ($(ANCIENT),1)
-else
 ifeq ($(shell help2man --version > /dev/null 2>&1 && echo yes ),yes)
 MPT_WITH_HELP2MAN := 1
-endif
 endif
 
 ifeq ($(shell doxygen --version > /dev/null 2>&1 && echo yes ),yes)

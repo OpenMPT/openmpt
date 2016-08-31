@@ -4,10 +4,6 @@ CXX = g++
 LD  = g++
 AR  = ar
 
-ifeq ($(ANCIENT),1)
-STDCXX?=gnu++98
-endif
-
 ifneq ($(STDCXX),)
 
 CPPFLAGS += 
