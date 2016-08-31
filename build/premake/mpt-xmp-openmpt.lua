@@ -31,17 +31,12 @@
    "../../libopenmpt/resource.h",
   }
 
-	filter { "action:vs*", "action:vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
-		resdefines {
-			"MPT_BUILD_VER_FILENAME=\\\"" .. mpt_projectname .. ".dll\\\"",
-			"MPT_BUILD_VER_FILEDESC=\\\"" .. mpt_projectname .. "\\\"",
-		}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
 			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
 		}
-	filter { "action:vs*", "action:not vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {
 			"$(IntDir)/svn_version",
 			"../../build/svn_version",
@@ -59,7 +54,6 @@
   characterset "Unicode"
   flags { "MFC", "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "pugixml" }
-  filter { "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",

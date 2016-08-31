@@ -22,15 +22,7 @@
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 
-#if defined(MPT_BUILD_TARGET_2000)
-
-#if defined(_M_X64)
-#define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
-#else // !_M_X64
-#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
-#endif // _M_X64
-
-#elif defined(MPT_BUILD_TARGET_XP)
+#if defined(MPT_BUILD_TARGET_XP)
 
 #if defined(_M_X64)
 #define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
@@ -432,7 +424,7 @@
 
 // fixing stuff up
 
-#if defined(MPT_BUILD_TARGET_2000) || defined(MPT_BUILD_TARGET_XP)
+#if defined(MPT_BUILD_TARGET_XP)
 // Also support Wine 1.6 in addition to Windows XP
 #ifndef MPT_QUIRK_NO_CPP_THREAD
 #define MPT_QUIRK_NO_CPP_THREAD

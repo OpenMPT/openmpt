@@ -20,11 +20,9 @@
 		"../../include/zlib/contrib/minizip"
 	}
 	filter {}
-	filter { "action:vs*", "not action:vs2008" }
+	filter { "action:vs*" }
 		characterset "Unicode"
 		flags { "Unicode" }
-	filter { "action:vs*", "action:vs2008" }
-		characterset "MBCS"
 	filter {}
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",

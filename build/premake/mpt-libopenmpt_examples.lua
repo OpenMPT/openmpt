@@ -1,6 +1,4 @@
 
-if _ACTION ~= "vs2008" then
-
  project "libopenmpt_example_cxx"
   uuid "ce5b5a74-cdb1-4654-b928-f91725fb57c9"
   language "C++"
@@ -28,7 +26,7 @@ if _ACTION ~= "vs2008" then
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "portaudiocpp", "ksuser", "winmm" }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -40,8 +38,6 @@ if _ACTION ~= "vs2008" then
   filter { "configurations:*Shared" }
    defines { "LIBOPENMPT_USE_DLL" }
   filter {}
-
-end
 
  project "libopenmpt_example_c"
   uuid "3f39804d-01c0-479c-ab8b-025683529c57"
@@ -69,7 +65,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -108,7 +104,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -147,7 +143,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -186,7 +182,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg" }
-  filter { "not configurations:*Shared", "not action:vs2008" }
+  filter { "not configurations:*Shared" }
   links { "delayimp" }
   linkoptions {
   }

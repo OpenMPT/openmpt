@@ -20,7 +20,6 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
   devenv in_openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
   devenv xmp-openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
  	  cd ..\.. || goto error
  	  cd include\foobar2000sdk || goto error
@@ -32,13 +31,10 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
  	  cd ..\.. || goto error
     cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
-  )
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    devenv foo_openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
   )
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
  	  cd ..\.. || goto error
     cd include\foobar2000sdk || goto error
@@ -46,7 +42,6 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
  	  cd ..\.. || goto error
     cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
-  )
 	
  )
  devenv libopenmpt.sln /clean "ReleaseShared|%MPT_VS_ARCH%" || goto error
@@ -57,7 +52,6 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
   devenv in_openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
   devenv xmp-openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
  	  cd ..\.. || goto error
  	  cd include\foobar2000sdk || goto error
@@ -69,13 +63,9 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
  	  cd ..\.. || goto error
     cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
-  )
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    devenv foo_openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
-  )
 
-  if not "%MPT_VS_VER%" == "vs2008" (
    if not "%MPT_VS_VER%" == "vs2010" (
  	  cd ..\.. || goto error
     cd include\foobar2000sdk || goto error
@@ -83,7 +73,6 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
  	  cd ..\.. || goto error
     cd "build\%MPT_VS_WITHTARGET%" || goto error
    )
-  )
 
  )
  devenv libopenmpt.sln /build "ReleaseShared|%MPT_VS_ARCH%" || goto error

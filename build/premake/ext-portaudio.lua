@@ -9,18 +9,16 @@
 
 --  dofile "../../build/premake/premake-defaults-winver.lua"
   filter {}
-  filter { "not action:vs2008" }
+  filter { "action:vs*" }
    defines { "_WIN32_WINNT=0x0601" }
   filter {}
 
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
 	filter {}
-	filter { "action:vs*", "not action:vs2008" }
+	filter { "action:vs*" }
 		characterset "Unicode"
 		flags { "Unicode" }
-	filter { "action:vs*", "action:vs2008" }
-		characterset "MBCS"
 	filter {}
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",

@@ -14,16 +14,6 @@ How to compile
 
  -  Supported Visual Studio versions:
 
-     -  Visual Studio 2008 Service Pack 1 Standard/Professional/Team Edition
-        (Express Edition is not supported as it does not include MFC).
-
-        You need the DirectX SDK 2010-June to enable DirectSound output. If you
-        don't want this, comment out `#define MPT_WITH_DSOUND` in the file
-        `common/BuildSettings.h`.
-
-        To compile the project, open `build/vs2008/OpenMPT.sln` and hit the
-        compile button.
-
      -  Visual Studio 2010 Service Pack 1 Professional/Premium/Ultimate (Express
         version is not supported as it does not include MFC).
 

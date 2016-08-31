@@ -49,12 +49,7 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 
-	filter { "action:vs*", "action:vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
-		resdefines {
-			"MPT_BUILD_VER_FILENAME=\\\"" .. mpt_projectname .. ".dll\\\"",
-			"MPT_BUILD_VER_FILEDESC=\\\"" .. mpt_projectname .. "\\\"",
-		}
-	filter { "action:vs*", "action:not vs2008", "kind:SharedLib or ConsoleApp or WindowedApp" }
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
 			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
@@ -79,7 +74,7 @@
   defines { "LIBOPENMPT_BUILD" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
-  filter { "kind:SharedLib", "not action:vs2008" }
+  filter { "kind:SharedLib" }
    links { "delayimp" }
    linkoptions {
     "/DELAYLOAD:mf.dll",

@@ -15,17 +15,6 @@ if exist "include\premake\bin\release\premake5.exe" set PREMAKE=include\premake\
 
 echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 
-%PREMAKE% --group=libopenmpt_test vs2008 || goto err
-%PREMAKE% --group=in_openmpt vs2008 || goto err
-%PREMAKE% --group=xmp-openmpt vs2008 || goto err
-%PREMAKE% --group=libopenmpt-small vs2008 || goto err
-%PREMAKE% --group=libopenmpt vs2008 || goto err
-%PREMAKE% --group=openmpt123 vs2008 || goto err
-%PREMAKE% --group=PluginBridge vs2008 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2008 || goto err
-%PREMAKE% --group=OpenMPT vs2008 || goto err
-%PREMAKE% --group=all-externals vs2008 || goto err
-
 %PREMAKE% --group=libopenmpt_test vs2010 || goto err
 %PREMAKE% --group=foo_openmpt vs2010 || goto err
 %PREMAKE% --group=in_openmpt vs2010 || goto err
@@ -73,17 +62,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=OpenMPT-VSTi vs2015 || goto err
 %PREMAKE% --group=OpenMPT vs2015 || goto err
 %PREMAKE% --group=all-externals vs2015 || goto err
-
-%PREMAKE% --group=libopenmpt_test vs2008 --w2k || goto err
-%PREMAKE% --group=in_openmpt vs2008 --w2k || goto err
-%PREMAKE% --group=xmp-openmpt vs2008 --w2k || goto err
-%PREMAKE% --group=libopenmpt-small vs2008 --w2k || goto err
-%PREMAKE% --group=libopenmpt vs2008 --w2k || goto err
-%PREMAKE% --group=openmpt123 vs2008 --w2k || goto err
-%PREMAKE% --group=PluginBridge vs2008 --w2k || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2008 --w2k || goto err
-%PREMAKE% --group=OpenMPT vs2008 --w2k || goto err
-%PREMAKE% --group=all-externals vs2008 --w2k || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2010 --xp || goto err
 %PREMAKE% --group=foo_openmpt vs2010 --xp || goto err
