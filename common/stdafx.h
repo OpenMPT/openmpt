@@ -60,6 +60,7 @@ struct IUnknown;
 #include "../common/typedefs.h"
 // <memory>
 // <new>
+// <climits>
 // <cstdint>
 // <stdint.h>
 

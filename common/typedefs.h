@@ -426,7 +426,9 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 OPENMPT_NAMESPACE_END
+#include <climits>
 #include <cstdint>
+#include <stdint.h>
 OPENMPT_NAMESPACE_BEGIN
 
 typedef std::int8_t   int8;
@@ -437,10 +439,6 @@ typedef std::uint8_t  uint8;
 typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
-
-OPENMPT_NAMESPACE_END
-#include <stdint.h>
-OPENMPT_NAMESPACE_BEGIN
 
 const int8 int8_min     = INT8_MIN;
 const int16 int16_min   = INT16_MIN;
@@ -498,6 +496,8 @@ STATIC_ASSERT(sizeof(float64) == 8);
 
 
 namespace mpt {
+
+STATIC_ASSERT(CHAR_BIT == 8);
 
 STATIC_ASSERT(sizeof(char) == 1);
 
