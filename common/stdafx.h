@@ -110,7 +110,7 @@ struct IUnknown;
 // nonetheless. Pre-include the affected headers here as a future-proof
 // safe-guard and let their own include guards handle the further including by
 // VST SDK.
-#if !((MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)))
+#if !(MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
 #include <cstdint>
 #endif
 #include <stdint.h>

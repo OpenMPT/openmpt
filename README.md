@@ -151,7 +151,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  mingw-w64:
 
-        The required version should be at least 4.3. Only 4.6 and up are
+        The required version should be at least 4.4. Only 4.6 and up are
         tested.
 
             make CONFIG=mingw64-win32    # for win32
@@ -162,7 +162,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
         The minimum required compiler versions are:
 
-         -  gcc 4.3
+         -  gcc 4.4
 
          -  clang 3.0
 

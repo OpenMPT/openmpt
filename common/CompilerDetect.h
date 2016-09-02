@@ -54,8 +54,8 @@
 #define MPT_GCC_AT_LEAST(major,minor,patch)          (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_GCC_BEFORE(4,3,0)
-#error "GCC version 4.3 required"
+#if MPT_GCC_BEFORE(4,4,0)
+#error "GCC version 4.4 required"
 #endif
 
 #elif defined(_MSC_VER)
@@ -229,12 +229,8 @@
 #elif MPT_COMPILER_GCC
 	#if MPT_GCC_AT_LEAST(4,9,0)
 		#define MPT_CXX_VERSION MPT_CXX_11_FULL
-	#elif MPT_GCC_AT_LEAST(4,3,0)
-		#define MPT_CXX_VERSION MPT_CXX_11_PARTIAL
-	#elif MPT_GCC_AT_LEAST(4,1,0)
-		#define MPT_CXX_VERSION MPT_CXX_03_TR1
 	#else
-		#define MPT_CXX_VERSION MPT_CXX_98
+		#define MPT_CXX_VERSION MPT_CXX_11_PARTIAL
 	#endif
 #elif MPT_COMPILER_MSVC
 	#if MPT_MSVC_AT_LEAST(2010,0)
@@ -283,9 +279,7 @@
 #define MPT_COMPILER_HAS_VARIADIC_MACROS 1
 #endif
 #elif MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(3,0,0)
 #define MPT_COMPILER_HAS_VARIADIC_MACROS 1
-#endif
 #endif
 
 #ifndef MPT_COMPILER_HAS_VARIADIC_MACROS

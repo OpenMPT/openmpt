@@ -495,7 +495,7 @@ inline Tdst saturate_cast(float src)
 } // namespace mpt
 
 
-#if MPT_MSVC_BEFORE(2010,0) || MPT_GCC_BEFORE(4,4,0)
+#if MPT_MSVC_BEFORE(2010,0)
 // Compiler too old.
 #ifndef MPT_MINMAX_MACROS
 #define MPT_MINMAX_MACROS
@@ -690,9 +690,8 @@ namespace Util
 	#define MPT_MAX_VALUE_OF_TYPE(integral_type) ( std::numeric_limits<integral_type>::is_signed ? MPT_MAX_SIGNED_VALUE(integral_type) : MPT_MAX_UNSIGNED_VALUE(integral_type) )
 
 	/// Returns value rounded to nearest integer.
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
 	// MSVC before 2013 does not support C99/C++11.
-	// GCC before 4.3.0 does not support C++11.
 	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
 	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
 	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}

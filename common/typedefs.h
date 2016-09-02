@@ -121,13 +121,7 @@ OPENMPT_NAMESPACE_END
 #include <memory>
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)
-OPENMPT_NAMESPACE_END
-#include <tr1/memory>
-OPENMPT_NAMESPACE_BEGIN
-#endif
-
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
 
 #define MPT_SHARED_PTR std::tr1::shared_ptr
 #define MPT_CONST_POINTER_CAST std::tr1::const_pointer_cast
@@ -278,7 +272,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
   _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
   if(x) \
 /**/
-#elif MPT_GCC_AT_LEAST(4,4,0)
+#else
 // GCC 4.4 does not like _Pragma diagnostic inside functions.
 // As GCC 4.4 is one of our major compilers, we do not want a noisy build.
 // Thus, just disable this warning globally. (not required for now)
@@ -441,12 +435,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 // Compile time assert.
-#if (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
-	#define MPT_SA_CONCAT(x, y) x ## y
-	#define MPT_SA_HELPER(x) MPT_SA_CONCAT(OPENMPT_STATIC_ASSERT_, x)
-	#define OPENMPT_STATIC_ASSERT MPT_SA_HELPER(__LINE__)
-	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
-#elif (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
 	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
@@ -463,7 +452,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
 
 OPENMPT_NAMESPACE_END
 #include "stdint.h"
