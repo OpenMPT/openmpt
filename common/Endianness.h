@@ -76,10 +76,8 @@ static inline bool endian_is_big()
 #if MPT_GCC_AT_LEAST(4,8,0)
 #define MPT_bswap16 __builtin_bswap16
 #endif
-#if MPT_GCC_AT_LEAST(4,3,0)
 #define MPT_bswap32 __builtin_bswap32
 #define MPT_bswap64 __builtin_bswap64
-#endif
 #elif MPT_COMPILER_MSVC
 #define MPT_bswap16 _byteswap_ushort
 #define MPT_bswap32 _byteswap_ulong

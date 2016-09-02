@@ -13,7 +13,7 @@
 
 #if defined(MPT_ENABLE_ATOMIC)
 
-#if !(MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0))
+#if !(MPT_MSVC_BEFORE(2012,0) || MPT_CLANG_BEFORE(3,1,0))
 #include <atomic>
 #endif // MPT_COMPILER
 
@@ -30,7 +30,7 @@ namespace mpt
 {
 
 
-#if MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0)
+#if MPT_CLANG_BEFORE(3,1,0)
 
 template < typename T >
 class atomic_impl {
@@ -356,7 +356,7 @@ public:
 
 #endif // MPT_COMPILER
 
-#if MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0)
+#if MPT_CLANG_BEFORE(3,1,0)
 typedef mpt::atomic_impl<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl<int32> atomic_int32_t;
 #if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)

@@ -7,7 +7,7 @@ Quick Start {#quickstart}
 
  1. Grab a `libopenmpt-autotools.VERSION.tar.gz` tarball.
  2. Get dependencies:
-     -  **gcc >= 4.3** or **clang >= 3.0**
+     -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config >= 0.24**
      -  **zlib**
      -  **libltdl**
@@ -43,7 +43,7 @@ Quick Start {#quickstart}
 
  1. Get dependencies:
      -  **GNU make**
-     -  **gcc >= 4.3** or **clang >= 3.0**
+     -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config**
  2. *Optional*:
      -  **zlib**
