@@ -175,39 +175,6 @@
 
 
 
-// Guess the supported C++ standard version
-
-// This is only a rough estimate to facilitate conditional compilation
-
-#define MPT_CXX_98         199711L // STD
-#define MPT_CXX_03_TR1     200301L // custom
-#define MPT_CXX_11_PARTIAL 201100L // custom
-#define MPT_CXX_11_FULL    201103L // STD
-#define MPT_CXX_14_PARTIAL 201400L // custom
-#define MPT_CXX_14_FULL    201402L // STD
-
-#if MPT_COMPILER_GENERIC
-	#define MPT_CXX_VERSION __cplusplus
-#elif MPT_COMPILER_MSVCCLANGC2
-	#define MPT_CXX_VERSION MPT_CXX_14_PARTIAL
-#elif MPT_COMPILER_CLANG
-	#if MPT_CLANG_AT_LEAST(3,5,0)
-		#define MPT_CXX_VERSION MPT_CXX_11_FULL
-	#else
-		#define MPT_CXX_VERSION MPT_CXX_11_PARTIAL
-	#endif
-#elif MPT_COMPILER_GCC
-	#if MPT_GCC_AT_LEAST(4,9,0)
-		#define MPT_CXX_VERSION MPT_CXX_11_FULL
-	#else
-		#define MPT_CXX_VERSION MPT_CXX_11_PARTIAL
-	#endif
-#elif MPT_COMPILER_MSVC
-	#define MPT_CXX_VERSION MPT_CXX_11_PARTIAL
-#endif // MPT_COMPILER
-
-
-
 // specific C++ features
 
 
