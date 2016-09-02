@@ -560,9 +560,7 @@ public:
 
 	// unicode
 	BasicAnyString(const mpt::ustring &str) : mpt::ustring(str) { }
-#if MPT_COMPILER_HAS_RVALUE_REF
 	BasicAnyString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
-#endif
 #if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
 	BasicAnyString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
 #endif
@@ -580,9 +578,7 @@ public:
 
 	// fallback for custom string types
 	template <typename Tstring> BasicAnyString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#if MPT_COMPILER_HAS_RVALUE_REF
 	template <typename Tstring> BasicAnyString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
-#endif
 
 };
 
@@ -594,9 +590,7 @@ public:
 
 	// unicode
 	AnyUnicodeString(const mpt::ustring &str) : mpt::ustring(str) { }
-#if MPT_COMPILER_HAS_RVALUE_REF
 	AnyUnicodeString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
-#endif
 #if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
 	AnyUnicodeString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
 #endif
@@ -614,9 +608,7 @@ public:
 
 	// fallback for custom string types
 	template <typename Tstring> AnyUnicodeString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#if MPT_COMPILER_HAS_RVALUE_REF
 	template <typename Tstring> AnyUnicodeString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
-#endif
 
 };
 
