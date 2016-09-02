@@ -197,11 +197,7 @@ private:
 	void write_frames( std::vector<Tsample*> buffers, std::size_t frames ) {
 		while ( frames > 0 ) {
 			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-			check_portaudio_error( Pa_WriteStream( stream, &buffers[0], chunk_frames ) );
-#else
 			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
-#endif
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
 				buffers[channel] += chunk_frames;
 			}
@@ -217,11 +213,7 @@ public:
 					sampleBufFloat.push_back( buffers[channel][frame] );
 				}
 			}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-			write_frames( &sampleBufFloat[0], frames );
-#else
 			write_frames( sampleBufFloat.data(), frames );
-#endif
 		} else {
 			write_frames( buffers, frames );
 		}
@@ -234,11 +226,7 @@ public:
 					sampleBufInt.push_back( buffers[channel][frame] );
 				}
 			}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-			write_frames( &sampleBufInt[0], frames );
-#else
 			write_frames( sampleBufInt.data(), frames );
-#endif
 		} else {
 			write_frames( buffers, frames );
 		}

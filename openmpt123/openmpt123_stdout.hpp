@@ -31,11 +31,7 @@ public:
 				interleaved_float_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		std::cout.write( reinterpret_cast<const char *>( &interleaved_float_buffer[0] ), interleaved_float_buffer.size() * sizeof( float ) );
-#else
 		std::cout.write( reinterpret_cast<const char *>( interleaved_float_buffer.data() ), interleaved_float_buffer.size() * sizeof( float ) );
-#endif
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		interleaved_int_buffer.clear();
@@ -44,11 +40,7 @@ public:
 				interleaved_int_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		std::cout.write( reinterpret_cast<const char *>( &interleaved_int_buffer[0] ), interleaved_int_buffer.size() * sizeof( std::int16_t ) );
-#else
 		std::cout.write( reinterpret_cast<const char *>( interleaved_int_buffer.data() ), interleaved_int_buffer.size() * sizeof( std::int16_t ) );
-#endif
 	}
 };
 

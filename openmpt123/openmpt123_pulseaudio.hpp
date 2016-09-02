@@ -124,11 +124,7 @@ public:
 				sampleBufFloat.push_back( buffers[channel][frame] );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		write_frames( &sampleBufFloat[0], frames );
-#else
 		write_frames( sampleBufFloat.data(), frames );
-#endif
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		sampleBufInt.clear();
@@ -137,11 +133,7 @@ public:
 				sampleBufInt.push_back( buffers[channel][frame] );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		write_frames( &sampleBufInt[0], frames );
-#else
 		write_frames( sampleBufInt.data(), frames );
-#endif
 	}
 	bool unpause() {
 		return true;

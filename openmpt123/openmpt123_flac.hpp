@@ -111,11 +111,7 @@ public:
 				interleaved_buffer.push_back( out );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		FLAC__stream_encoder_process_interleaved( encoder, &interleaved_buffer[0], static_cast<unsigned int>( frames ) );
-#else
 		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), static_cast<unsigned int>( frames ) );
-#endif
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
@@ -128,11 +124,7 @@ public:
 				interleaved_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-		FLAC__stream_encoder_process_interleaved( encoder, &interleaved_buffer[0], static_cast<unsigned int>( frames ) );
-#else
 		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), static_cast<unsigned int>( frames ) );
-#endif
 	}
 };
 

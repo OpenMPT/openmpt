@@ -14,11 +14,6 @@
 #include "libopenmpt.hpp"
 
 #include <iosfwd>
-#ifdef LIBOPENMPT_ANCIENT_COMPILER
-#if defined(__GNUC__)
-#include <tr1/memory>
-#endif
-#endif
 #include <memory>
 
 #if defined(_MSC_VER)
@@ -80,29 +75,13 @@ protected:
 	}; // struct subsong_data
 	typedef std::vector<subsong_data> subsongs_type;
 	static const std::int32_t all_subsongs = -1;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<log_interface> m_Log;
-#else
 	std::shared_ptr<log_interface> m_Log;
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<log_forwarder> m_LogForwarder;
-#else
 	std::unique_ptr<log_forwarder> m_LogForwarder;
-#endif
 	std::int32_t m_current_subsong;
 	double m_currentPositionSeconds;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<OpenMPT::CSoundFile> m_sndFile;
-#else
 	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
-#endif
 	bool m_loaded;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<OpenMPT::Dither> m_Dither;
-#else
 	std::unique_ptr<OpenMPT::Dither> m_Dither;
-#endif
 	subsongs_type m_subsongs;
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
@@ -130,59 +109,19 @@ protected:
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	static double could_open_propability( const OpenMPT::FileReader & file, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log );
-#else
 	static double could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log );
-#endif
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	static double could_open_propability( callback_stream_wrapper stream, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log );
-#else
 	static double could_open_propability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	static double could_open_propability( std::istream & stream, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log );
-#else
 	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( callback_stream_wrapper stream, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( std::istream & stream, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( const std::vector<std::uint8_t> & data, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( const std::vector<char> & data, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( const std::uint8_t * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( const char * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	module_impl( const void * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls );
-#else
 	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-#endif
 	~module_impl();
 public:
 	void select_subsong( std::int32_t subsong );

@@ -76,11 +76,7 @@ public:
 		for ( std::size_t i = 0; i < num_chunks; ++i ) {
 			wavebuffers[i].resize( bytes_per_chunk );
 			waveheaders[i] = WAVEHDR();
-#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
-			waveheaders[i].lpData = &wavebuffers[i][0];
-#else
 			waveheaders[i].lpData = wavebuffers[i].data();
-#endif
 			waveheaders[i].dwBufferLength = static_cast<DWORD>( wavebuffers[i].size() );
 			waveheaders[i].dwFlags = 0;
 			waveOutPrepareHeader( waveout, &waveheaders[i], sizeof( WAVEHDR ) );

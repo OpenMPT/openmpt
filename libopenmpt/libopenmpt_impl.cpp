@@ -260,17 +260,9 @@ void std_ostream_log::log( const std::string & message ) const {
 
 class log_forwarder : public ILog {
 private:
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<log_interface> destination;
-#else
 	std::shared_ptr<log_interface> destination;
-#endif
 public:
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	log_forwarder( LIBOPENMPT_SHARED_PTR<log_interface> dest ) : destination(dest) {
-#else
 	log_forwarder( std::shared_ptr<log_interface> dest ) : destination(dest) {
-#endif
 		return;
 	}
 	virtual ~log_forwarder() {
@@ -417,22 +409,10 @@ bool module_impl::has_subsongs_inited() const {
 	return !m_subsongs.empty();
 }
 void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	m_sndFile = LIBOPENMPT_SHARED_PTR<CSoundFile>(new CSoundFile());
-#else
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
-#endif
 	m_loaded = false;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	m_Dither = LIBOPENMPT_SHARED_PTR<Dither>(new Dither(mpt::global_prng()));
-#else
 	m_Dither = std::unique_ptr<Dither>(new Dither(mpt::global_prng()));
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	m_LogForwarder = LIBOPENMPT_SHARED_PTR<log_forwarder>(new log_forwarder(m_Log));
-#else
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
-#endif
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
@@ -566,21 +546,9 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), tolower );
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log ) {
-#else
 double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<CSoundFile> sndFile( new CSoundFile() );
-#else
 	std::unique_ptr<CSoundFile> sndFile( new CSoundFile() );
-#endif
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<log_forwarder> logForwarder( new log_forwarder( log ) );
-#else
 	std::unique_ptr<log_forwarder> logForwarder( new log_forwarder( log ) );
-#endif
 	sndFile->SetCustomLog( logForwarder.get() );
 
 	try {
@@ -612,11 +580,7 @@ double module_impl::could_open_propability( const OpenMPT::FileReader & file, do
 	}
 
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-double module_impl::could_open_propability( callback_stream_wrapper stream, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log ) {
-#else
 double module_impl::could_open_propability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log ) {
-#endif
 	CallbackStream fstream;
 	fstream.stream = stream.stream;
 	fstream.read = stream.read;
@@ -624,19 +588,11 @@ double module_impl::could_open_propability( callback_stream_wrapper stream, doub
 	fstream.tell = stream.tell;
 	return could_open_propability( FileReader( fstream ), effort, log );
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-double module_impl::could_open_propability( std::istream & stream, double effort, LIBOPENMPT_SHARED_PTR<log_interface> log ) {
-#else
 double module_impl::could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
-#endif
 	return could_open_propability( FileReader( &stream ), effort, log );
 }
 
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( callback_stream_wrapper stream, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	CallbackStream fstream;
 	fstream.stream = stream.stream;
@@ -646,56 +602,32 @@ module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_in
 	load( FileReader( fstream ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( std::istream & stream, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( const std::vector<std::uint8_t> & data, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( const std::vector<char> & data, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( const std::uint8_t * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( const char * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data, size ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-module_impl::module_impl( const void * data, std::size_t size, LIBOPENMPT_SHARED_PTR<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#else
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
-#endif
 	ctor( ctls );
 	load( FileReader( mpt::as_span( mpt::void_cast< const mpt::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();
@@ -849,11 +781,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<subsongs_type> subsongs_temp = has_subsongs_inited() ? LIBOPENMPT_SHARED_PTR<subsongs_type>() : LIBOPENMPT_SHARED_PTR<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#else
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( m_current_subsong == all_subsongs ) {
 		// Play all subsongs consecutively.
@@ -866,11 +794,7 @@ double module_impl::get_duration_seconds() const {
 	return subsongs[m_current_subsong].duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<subsongs_type> subsongs_temp = has_subsongs_inited() ? LIBOPENMPT_SHARED_PTR<subsongs_type>() : LIBOPENMPT_SHARED_PTR<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#else
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( subsong != all_subsongs && ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) ) {
 		throw openmpt::exception("invalid subsong");
@@ -894,11 +818,7 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<subsongs_type> subsongs_temp = has_subsongs_inited() ? LIBOPENMPT_SHARED_PTR<subsongs_type>() : LIBOPENMPT_SHARED_PTR<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#else
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	const subsong_data * subsong = 0;
 	double base_seconds = 0.0;
@@ -1089,11 +1009,7 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 }
 
 std::int32_t module_impl::get_num_subsongs() const {
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<subsongs_type> subsongs_temp = has_subsongs_inited() ? LIBOPENMPT_SHARED_PTR<subsongs_type>() : LIBOPENMPT_SHARED_PTR<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#else
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	return static_cast<std::int32_t>( subsongs.size() );
 }
@@ -1115,11 +1031,7 @@ std::int32_t module_impl::get_num_samples() const {
 
 std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	LIBOPENMPT_SHARED_PTR<subsongs_type> subsongs_temp = has_subsongs_inited() ? LIBOPENMPT_SHARED_PTR<subsongs_type>() : LIBOPENMPT_SHARED_PTR<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#else
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
-#endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
