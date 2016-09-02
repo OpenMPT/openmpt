@@ -345,8 +345,6 @@ mpt::Windows::Version::Number Version::GetMinimumKernelLevel()
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinXP);
 		#elif MPT_MSVC_AT_LEAST(2010, 0)
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
-		#elif MPT_MSVC_AT_LEAST(2008, 0)
-			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win98);
 		#endif
 	#endif
 	return static_cast<mpt::Windows::Version::Number>(minimumKernelVersion);
@@ -585,8 +583,6 @@ mpt::Wine::Version GetMinimumWineVersion()
 		#elif MPT_MSVC_AT_LEAST(2012, 0)
 			minimumWineVersion = mpt::Wine::Version(1,2,0);
 		#elif MPT_MSVC_AT_LEAST(2010, 0)
-			minimumWineVersion = mpt::Wine::Version(1,0,0);
-		#elif MPT_MSVC_AT_LEAST(2008, 0)
 			minimumWineVersion = mpt::Wine::Version(1,0,0);
 		#endif
 	#endif

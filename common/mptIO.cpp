@@ -132,22 +132,10 @@ bool IsValid(std::istream & f) { return !f.fail(); }
 bool IsValid(std::iostream & f) { return !f.fail(); }
 IO::Offset TellRead(std::istream & f)
 {
-	#if MPT_MSVC_BEFORE(2010, 0)
-		if(StreamIsStringStreamAndValidAndEmpty(f))
-		{
-			return 0;
-		}
-	#endif
 	return f.tellg();
 }
 IO::Offset TellWrite(std::ostream & f)
 {
-	#if MPT_MSVC_BEFORE(2010, 0)
-		if(StreamIsStringStreamAndValidAndEmpty(f))
-		{
-			return 0;
-		}
-	#endif
 	return f.tellp();
 }
 bool SeekBegin(std::ostream & f)
