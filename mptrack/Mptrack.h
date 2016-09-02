@@ -133,17 +133,10 @@ public:
 	CDocument* OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune = false);
 
 	// inherited members, overload them all
-	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE)
-		{
-			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), TRUE, makeVisible);
-		}
-	#else
-		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
-		{
-			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
-		}
-	#endif
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
+	{
+		return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
+	}
 };
 
 
@@ -207,20 +200,6 @@ protected:
 public:
 	CTrackApp();
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
-	{
-		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString(), bAddToMRU);
-	}
-	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
-	{
-		CDocument* pDoc = CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
-		if (pDoc && bAddToMRU != TRUE)
-			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU
-							  // (if the new item got added, it might have already dropped the last item out)
-		return pDoc;
-	}
-#else
 	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
 		return CWinApp::OpenDocumentFile(lpszFileName, bAddToMRU);
@@ -229,7 +208,6 @@ public:
 	{
 		return CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), bAddToMRU);
 	}
-#endif
 
 	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
 	void AddToRecentFileList(const mpt::PathString path);

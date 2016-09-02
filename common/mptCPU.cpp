@@ -79,22 +79,12 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 //---------------------------------------------------------------
 {
 	cpuid_result result;
-	#if MPT_MSVC_AT_LEAST(2010,0)
-		int CPUInfo[4];
-		__cpuidex(CPUInfo, function_a, function_c);
-		result.a = CPUInfo[0];
-		result.b = CPUInfo[1];
-		result.c = CPUInfo[2];
-		result.d = CPUInfo[3];
-	#else
-		// just do not test modern cpuid features with older compiler
-		MPT_UNREFERENCED_PARAMETER(function_a);
-		MPT_UNREFERENCED_PARAMETER(function_c);
-		result.a = 0;
-		result.b = 0;
-		result.c = 0;
-		result.d = 0;
-	#endif
+	int CPUInfo[4];
+	__cpuidex(CPUInfo, function_a, function_c);
+	result.a = CPUInfo[0];
+	result.b = CPUInfo[1];
+	result.c = CPUInfo[2];
+	result.d = CPUInfo[3];
 	return result;
 }
 
@@ -306,13 +296,7 @@ uint32 GetMinimumProcSupportFlags()
 						flags |= PROCSUPPORT_x86_SSE;
 					#endif
 				#else
-					#if MPT_MSVC_AT_LEAST(2012,0)
-						flags |= PROCSUPPORT_i586;
-					#elif MPT_MSVC_AT_LEAST(2010,0)
-						flags |= PROCSUPPORT_i586;
-					#else
-						flags |= PROCSUPPORT_i486;
-					#endif
+					flags |= PROCSUPPORT_i586;
 				#endif
 			#endif
 		#endif	

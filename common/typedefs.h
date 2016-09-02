@@ -22,13 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC
-
-#if MPT_MSVC_BEFORE(2010,0)
-#define nullptr 0
-#endif
-
-#elif MPT_COMPILER_GCC
+#if MPT_COMPILER_GCC
 
 #if MPT_GCC_BEFORE(4,6,0)
 #define nullptr 0
@@ -121,22 +115,6 @@ OPENMPT_NAMESPACE_END
 #include <memory>
 OPENMPT_NAMESPACE_BEGIN
 
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
-
-#define MPT_SHARED_PTR std::tr1::shared_ptr
-#define MPT_CONST_POINTER_CAST std::tr1::const_pointer_cast
-#define MPT_STATIC_POINTER_CAST std::tr1::static_pointer_cast
-#define MPT_DYNAMIC_POINTER_CAST std::tr1::dynamic_pointer_cast
-namespace mpt {
-template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return MPT_SHARED_PTR<T>(new T()); }
-template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return MPT_SHARED_PTR<T>(new T(x1)); }
-template <typename T, typename T1, typename T2> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2) { return MPT_SHARED_PTR<T>(new T(x1, x2)); }
-template <typename T, typename T1, typename T2, typename T3> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3) { return MPT_SHARED_PTR<T>(new T(x1, x2, x3)); }
-template <typename T, typename T1, typename T2, typename T3, typename T4> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return MPT_SHARED_PTR<T>(new T(x1, x2, x3, x4)); }
-} // namespace mpt
-
-#else
-
 #define MPT_SHARED_PTR std::shared_ptr
 #define MPT_CONST_POINTER_CAST std::const_pointer_cast
 #define MPT_STATIC_POINTER_CAST std::static_pointer_cast
@@ -148,8 +126,6 @@ template <typename T, typename T1, typename T2> inline MPT_SHARED_PTR<T> make_sh
 template <typename T, typename T1, typename T2, typename T3> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3) { return std::make_shared<T>(x1, x2, x3); }
 template <typename T, typename T1, typename T2, typename T3, typename T4> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return std::make_shared<T>(x1, x2, x3, x4); }
 } // namespace mpt
-
-#endif
 
 // We cannot provide unique_ptr as it does require move semantics.
 // However, we can provide a simple scoped_ptr which is also very useful.
@@ -435,9 +411,6 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 // Compile time assert.
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
-	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
-#endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 
 
@@ -452,23 +425,6 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
-
-OPENMPT_NAMESPACE_END
-#include "stdint.h"
-OPENMPT_NAMESPACE_BEGIN
-
-typedef int8_t   int8;
-typedef int16_t  int16;
-typedef int32_t  int32;
-typedef int64_t  int64;
-typedef uint8_t  uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-
-#else
-
 OPENMPT_NAMESPACE_END
 #include <cstdint>
 OPENMPT_NAMESPACE_BEGIN
@@ -481,8 +437,6 @@ typedef std::uint8_t  uint8;
 typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
-
-#endif
 
 OPENMPT_NAMESPACE_END
 #include <stdint.h>

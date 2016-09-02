@@ -64,15 +64,7 @@ bool SetFilesystemCompression(const mpt::PathString &filename);
 namespace mpt
 {
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-
-// VS2008 converts char filenames with CRT mbcs string conversion functions to wchar_t filenames.
-// This is totally wrong for Win32 GUI applications because the C locale does not necessarily match the current windows ANSI codepage (CP_ACP).
-// Work around this insanity by using our own string conversions for the std::fstream filenames.
-
-#define MPT_FSTREAM_DO_CONVERSIONS
-
-#elif MPT_COMPILER_GCC
+#if MPT_COMPILER_GCC
 
 #if MPT_OS_WINDOWS
 // GCC C++ library has no wchar_t overloads

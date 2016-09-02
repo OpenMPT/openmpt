@@ -32,11 +32,7 @@
 
 #else // MPT_BUILD_TARGET
 
-#if MPT_MSVC_BEFORE(2010,0)
-#define _WIN32_WINNT 0x0600 // _WIN32_WINNT_VISTA
-#else
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
-#endif
 
 #endif // MPT_BUILD_TARGET
 
@@ -498,10 +494,6 @@
 
 #if !MPT_OS_WINDOWS && defined(MPT_WITH_MEDIAFOUNDATION)
 #undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows
-#endif
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && defined(MPT_WITH_MEDIAFOUNDATION)
-#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
 #endif
 
 #if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_TEMPFILE)

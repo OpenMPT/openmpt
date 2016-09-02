@@ -148,11 +148,7 @@ inline long abs(long x)
 inline long long abs(long long x)
 //-------------------------------
 {
-	#if MPT_MSVC_BEFORE(2010,0)
-		return (x >= 0) ? x : -x;
-	#else
-		return std::abs(x);
-	#endif
+	return std::abs(x);
 }
 inline float abs(float x)
 //-----------------------
@@ -494,13 +490,6 @@ inline Tdst saturate_cast(float src)
 
 } // namespace mpt
 
-
-#if MPT_MSVC_BEFORE(2010,0)
-// Compiler too old.
-#ifndef MPT_MINMAX_MACROS
-#define MPT_MINMAX_MACROS
-#endif
-#endif
 
 #if defined(MODPLUG_TRACKER)
 // Tracker code requires MIN/MAX to work in constexpr contexts.

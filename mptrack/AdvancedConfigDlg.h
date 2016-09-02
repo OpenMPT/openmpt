@@ -15,11 +15,7 @@
 #include "CListCtrl.h"
 #if MPT_USTRING_MODE_WIDE
 #include <unordered_map>
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-#define MPT_UNORDERED_MAP std::tr1::unordered_map
-#else
 #define MPT_UNORDERED_MAP std::unordered_map
-#endif
 #else
 #include <map>
 #endif

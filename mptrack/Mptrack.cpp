@@ -105,11 +105,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 		theApp.RemoveMruItem(filename);
 	}
 
-	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), makeVisible);
-	#else
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
-	#endif
+	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
 	if(pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
