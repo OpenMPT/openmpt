@@ -33,4 +33,4 @@
 #endif
 
 
-#endif // LIBOPENMPT_INTERNAL_H
+#endif /* LIBOPENMPT_INTERNAL_H */
