@@ -167,7 +167,7 @@ enum
 };
 
 
-static const uint8 MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE };
+static const uint8 MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_SINE };
 
 static const ModCommand::COMMAND MDLEffTrans[] =
 {
