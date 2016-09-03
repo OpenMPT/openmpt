@@ -196,7 +196,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 
 				CHANNELINDEX chn = (flag & 0x0F);
-				ModCommand dummy;
+				ModCommand dummy = ModCommand();
 				ModCommand &m = (chn < GetNumChannels() ? rowBase[chn] : dummy);
 
 				if(flag & 0x80)

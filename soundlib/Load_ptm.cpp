@@ -190,7 +190,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 			}
 			CHANNELINDEX chn = (b & 0x1F);
-			ModCommand dummy;
+			ModCommand dummy = ModCommand();
 			ModCommand &m = chn < GetNumChannels() ? rowBase[chn] : dummy;
 
 			if(b & 0x20)
