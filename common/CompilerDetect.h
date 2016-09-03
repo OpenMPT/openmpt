@@ -89,7 +89,7 @@
 
 #else
 
-#error "Your compiler is unknown to openmpt and thus not supported. You might want to edit CompilerDetect.h und typedefs.h."
+#define MPT_COMPILER_GENERIC                         1
 
 #endif
 
@@ -166,17 +166,18 @@
 		|| defined(__x86_64) || defined(__x86_64__) \
 		|| defined(_M_X64) || defined(__bfin__)
 			#define MPT_PLATFORM_LITTLE_ENDIAN
-	#else
-		#error "unknown endianness"
-		// Eventually, we want this error to be removed, as the byte order
-		// is not required to be provided by standard conforming C++ compilers.
 	#endif
+#endif
+
+#if defined(MPT_PLATFORM_BIG_ENDIAN) || defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#define MPT_PLATFORM_ENDIAN_KNOWN 1
+#else
+#define MPT_PLATFORM_ENDIAN_KNOWN 0
 #endif
 
 
 
 // specific C++ features
-
 
 #if MPT_COMPILER_GENERIC || MPT_COMPILER_MSVC || MPT_CLANG_AT_LEAST(3,0,0) || MPT_GCC_AT_LEAST(4,5,0) || MPT_COMPILER_MSVCCLANGC2
 #define MPT_COMPILER_HAS_TYPE_TRAITS 1
@@ -185,6 +186,7 @@
 #ifndef MPT_COMPILER_HAS_TYPE_TRAITS
 #define MPT_COMPILER_HAS_TYPE_TRAITS 0
 #endif
+
 
 
 #if MPT_COMPILER_GCC || MPT_COMPILER_MSVC

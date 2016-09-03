@@ -214,11 +214,18 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
      -  American Fuzzy Lop:
 
         To compile libopenmpt with fuzzing instrumentation for afl-fuzz, run:
-
+        
             make CONFIG=afl
         
         For more detailed instructions, read contrib/fuzzing/readme.md
 
+     -  other compilers:
+
+        To compiler libopenmpt with other C++11 compliant compilers, run:
+        
+            make CONFIG=generic
+        
+    
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.
     `make DYNLINK=0` or similar. Cross compiling or different compiler would

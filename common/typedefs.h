@@ -16,12 +16,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// Platform has native IEEE floating point representation.
-// (Currently always assumed)
-#define MPT_PLATFORM_IEEE_FLOAT 1
-
-
-
 #if MPT_COMPILER_GCC
 
 #if MPT_GCC_BEFORE(4,6,0)
