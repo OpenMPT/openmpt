@@ -680,7 +680,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 	if(writeSamples != 0)
 	{
-		fwrite(&sampleOffsets[0], 2, writeSamples, f);
+		fwrite(sampleOffsets.data(), 2, writeSamples, f);
 	}
 
 	size_t patternPointerOffset = ftell(f);
@@ -690,7 +690,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// Need to calculate the real offsets later.
 	if(writePatterns != 0)
 	{
-		fwrite(&patternOffsets[0], 2, writePatterns, f);
+		fwrite(patternOffsets.data(), 2, writePatterns, f);
 	}
 
 	// Write channel panning
@@ -849,7 +849,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			buffer.insert(buffer.end(), 16 - (buffer.size() % 16u), 0);
 		}
 
-		fwrite(&buffer[0], buffer.size(), 1, f);
+		fwrite(buffer.data(), buffer.size(), 1, f);
 	}
 
 	size_t sampleDataOffset = ftell(f);
@@ -910,14 +910,14 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	if(writePatterns != 0)
 	{
 		fseek(f, patternPointerOffset, SEEK_SET);
-		fwrite(&patternOffsets[0], 2, writePatterns, f);
+		fwrite(patternOffsets.data(), 2, writePatterns, f);
 	}
 
 	// And we can finally write the sample headers.
 	if(writeSamples != 0)
 	{
 		fseek(f, sampleHeaderOffset, SEEK_SET);
-		fwrite(&sampleHeader[0], sizeof(sampleHeader[0]), writeSamples, f);
+		fwrite(sampleHeader.data(), sizeof(sampleHeader[0]), writeSamples, f);
 	}
 
 	fclose(f);

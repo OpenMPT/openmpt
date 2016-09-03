@@ -163,7 +163,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT1, m_groupSize);
 	OnToggleGroup();
 
-	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&m_controls[0]->valueSlider));
+	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&(m_controls[0]->valueSlider)));
 	rect.MoveToY(m.paddingTop + containerRect.bottom + m.paddingY);
 	{
 		CRect buttonRect;
@@ -227,7 +227,7 @@ void CTempoSwingDlg::OnReset()
 	{
 		m_controls[i]->valueSlider.SetPos(0);
 	}
-	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&m_controls[0]->valueSlider));
+	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&(m_controls[0]->valueSlider)));
 }
 
 

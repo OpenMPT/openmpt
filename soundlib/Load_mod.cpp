@@ -1679,7 +1679,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		{
 			// Invent empty pattern
 			events.assign(writeChannels * 64 * 4, 0);
-			fwrite(&events[0], events.size(), 1, f);
+			fwrite(events.data(), events.size(), 1, f);
 			continue;
 		}
 
@@ -1689,7 +1689,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 			{
 				// Invent empty row
 				events.assign(writeChannels * 4, 0);
-				fwrite(&events[0], events.size(), 1, f);
+				fwrite(events.data(), events.size(), 1, f);
 				continue;
 			}
 			PatternRow rowBase = Patterns[pat].GetRow(row);
@@ -1723,7 +1723,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 				events[eventByte++] = ((instr & 0x0F) << 4) | (command & 0x0F);
 				events[eventByte++] = param;
 			}
-			fwrite(&events[0], eventByte, 1, f);
+			fwrite(events.data(), eventByte, 1, f);
 		}
 	}
 

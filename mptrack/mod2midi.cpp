@@ -450,7 +450,7 @@ namespace MidiExport
 				{
 					mpt::IO::WriteRaw(m_file, "MTrk", 4);
 					mpt::IO::WriteIntBE<uint32>(m_file, data.size());
-					mpt::IO::WriteRaw(m_file, &data[0], data.size());
+					mpt::IO::WriteRaw(m_file, data.data(), data.size());
 				}
 			}
 

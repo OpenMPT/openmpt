@@ -1770,7 +1770,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 					while(remain > 0)
 					{
 						uint32 procIn = std::min<uint32>(remain, bufferSize);
-						SmpLength procCount = resampler.process(&convBuffer[0], procIn, outBuffer);
+						SmpLength procCount = resampler.process(convBuffer.data(), procIn, outBuffer);
 						MPT_ASSERT(procCount <= outLatency);
 						LimitMax(procCount, outLatency);
 						outLatency -= procCount;
@@ -1789,10 +1789,10 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 						switch(sample.GetElementarySampleSize())
 						{
 						case 1:
-							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(convBuffer.data(), smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 							break;
 						case 2:
-							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(convBuffer.data(), smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 							break;
 						}
 						readOffset += smpCount * numChannels;
@@ -1803,7 +1803,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 						for(SmpLength i = 0; i < smpCount; i++) convBuffer[i] = lastVal;
 					}
 
-					SmpLength procCount = resampler.process(&convBuffer[0], smpCount, outBuffer);
+					SmpLength procCount = resampler.process(convBuffer.data(), smpCount, outBuffer);
 					const SmpLength procLatency = std::min(outLatency, procCount);
 					procCount = std::min(procCount- procLatency, writeCount);
 

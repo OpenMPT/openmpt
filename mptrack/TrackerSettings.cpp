@@ -626,11 +626,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Effects
 #ifndef NO_EQ
-	FixupEQ(&m_EqSettings);
-	FixupEQ(&m_EqUserPresets[0]);
-	FixupEQ(&m_EqUserPresets[1]);
-	FixupEQ(&m_EqUserPresets[2]);
-	FixupEQ(&m_EqUserPresets[3]);
+	FixupEQ(m_EqSettings);
+	FixupEQ(m_EqUserPresets[0]);
+	FixupEQ(m_EqUserPresets[1]);
+	FixupEQ(m_EqUserPresets[2]);
+	FixupEQ(m_EqUserPresets[3]);
 #endif // !NO_EQ
 
 	// Zxx Macros
@@ -958,17 +958,17 @@ void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
 }
 
 
-void TrackerSettings::FixupEQ(EQPreset *pEqSettings)
-//--------------------------------------------------
+void TrackerSettings::FixupEQ(EQPreset &eqSettings)
+//-------------------------------------------------
 {
 	for(UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
-		if(pEqSettings->Gains[i] > 32)
-			pEqSettings->Gains[i] = 16;
-		if((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000))
-			pEqSettings->Freqs[i] = FlatEQPreset.Freqs[i];
+		if(eqSettings.Gains[i] > 32)
+			eqSettings.Gains[i] = 16;
+		if((eqSettings.Freqs[i] < 100) || (eqSettings.Freqs[i] > 10000))
+			eqSettings.Freqs[i] = FlatEQPreset.Freqs[i];
 	}
-	mpt::String::SetNullTerminator(pEqSettings->szName);
+	mpt::String::SetNullTerminator(eqSettings.szName);
 }
 
 

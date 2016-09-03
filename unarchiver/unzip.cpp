@@ -134,10 +134,10 @@ CZipArchive::CZipArchive(FileReader &file)
 					info.size_comment++;
 				}
 				std::vector<char> commentData(info.size_comment);
-				if(unzGetGlobalComment(zipFile, &commentData[0], info.size_comment) >= 0)
+				if(unzGetGlobalComment(zipFile, commentData.data(), info.size_comment) >= 0)
 				{
 					commentData[info.size_comment - 1] = '\0';
-					comment = mpt::ToUnicode(mpt::IsUTF8(&commentData[0]) ? mpt::CharsetUTF8 : mpt::CharsetCP437, &commentData[0]);
+					comment = mpt::ToUnicode(mpt::IsUTF8(commentData.data()) ? mpt::CharsetUTF8 : mpt::CharsetCP437, commentData.data());
 				}
 			}
 		}
@@ -207,7 +207,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 			unzCloseCurrentFile(zipFile);
 			return false;
 		}
-		unzReadCurrentFile(zipFile, &data[0], info.uncompressed_size);
+		unzReadCurrentFile(zipFile, data.data(), info.uncompressed_size);
 		unzCloseCurrentFile(zipFile);
 
 		return true;
@@ -307,7 +307,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 	{
 		return false;
 	}
-	if(!mz_zip_reader_extract_to_mem(zip, bestFile, &data[0], static_cast<std::size_t>(stat.m_uncomp_size), 0))
+	if(!mz_zip_reader_extract_to_mem(zip, bestFile, data.data(), static_cast<std::size_t>(stat.m_uncomp_size), 0))
 	{
 		return false;
 	}

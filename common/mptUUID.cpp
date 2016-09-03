@@ -60,7 +60,7 @@ CLSID StringToCLSID(const std::wstring &str)
 {
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	if(::CLSIDFromString(&tmp[0], &clsid) != S_OK)
+	if(::CLSIDFromString(tmp.data(), &clsid) != S_OK)
 	{
 		return CLSID();
 	}
@@ -72,7 +72,7 @@ bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
 //-------------------------------------------------------------
 {
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return (::CLSIDFromString(&tmp[0], &clsid) == S_OK);
+	return (::CLSIDFromString(tmp.data(), &clsid) == S_OK);
 }
 
 
@@ -81,7 +81,7 @@ bool IsCLSID(const std::wstring &str)
 {
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return (::CLSIDFromString(&tmp[0], &clsid) == S_OK);
+	return (::CLSIDFromString(tmp.data(), &clsid) == S_OK);
 }
 
 
@@ -106,7 +106,7 @@ IID StringToIID(const std::wstring &str)
 {
 	IID iid = IID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	::IIDFromString(&tmp[0], &iid);
+	::IIDFromString(tmp.data(), &iid);
 	return iid;
 }
 
@@ -115,8 +115,8 @@ std::wstring GUIDToString(GUID guid)
 //----------------------------------
 {
 	std::vector<OLECHAR> tmp(256);
-	::StringFromGUID2(guid, &tmp[0], static_cast<int>(tmp.size()));
-	return &tmp[0];
+	::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size()));
+	return tmp.data();
 }
 
 

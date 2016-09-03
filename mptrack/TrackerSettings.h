@@ -816,7 +816,7 @@ protected:
 
 	static std::vector<uint32> GetDefaultSampleRates();
 
-	void FixupEQ(EQPreset *pEqSettings);
+	void FixupEQ(EQPreset &eqSettings);
 
 	void LoadChords(MPTChords &chords);
 	void SaveChords(MPTChords &chords);

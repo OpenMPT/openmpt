@@ -897,7 +897,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::vector<uint8> musicData(musicSize);
 
-	if(!UnpackMO3Data(file, &musicData[0], musicSize))
+	if(!UnpackMO3Data(file, musicData.data(), musicSize))
 	{
 		return false;
 	}

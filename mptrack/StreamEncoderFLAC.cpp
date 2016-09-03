@@ -241,7 +241,7 @@ public:
 		while(frameCount > 0)
 		{
 			unsigned int frameCountChunk = mpt::saturate_cast<unsigned int>(frameCount);
-			FLAC__stream_encoder_process_interleaved(encoder, &sampleBuf[0], frameCountChunk);
+			FLAC__stream_encoder_process_interleaved(encoder, sampleBuf.data(), frameCountChunk);
 			frameCount -= frameCountChunk;
 		}
 	}

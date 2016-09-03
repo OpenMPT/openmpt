@@ -139,10 +139,10 @@ private:
 	{
 		ASSERT(inited);
 		buf.resize(og.header_len);
-		std::memcpy(&buf[0], og.header, og.header_len);
+		std::memcpy(buf.data(), og.header, og.header_len);
 		WriteBuffer();
 		buf.resize(og.body_len);
-		std::memcpy(&buf[0], og.body, og.body_len);
+		std::memcpy(buf.data(), og.body, og.body_len);
 		WriteBuffer();
 	}
 	void AddCommentField(const std::string &field, const mpt::ustring &data)

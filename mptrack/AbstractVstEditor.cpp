@@ -178,10 +178,10 @@ void CAbstractVstEditor::OnDropFiles(HDROP hDropInfo)
 	for(UINT f = 0; f < nFiles; f++)
 	{
 		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
-		std::wstring fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
+		std::vector<WCHAR> fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size + 1))
 		{
-			m_VstPlugin.LoadProgram(mpt::PathString::FromNative(fileName));
+			m_VstPlugin.LoadProgram(mpt::PathString::FromNative(fileName.data()));
 		}
 	}
 	::DragFinish(hDropInfo);
@@ -224,7 +224,7 @@ void CAbstractVstEditor::OnCopyParameters()
 			LPSTR p = (LPSTR)GlobalLock(hCpy);
 			if(p)
 			{
-				memcpy(p, &data[0], data.length());
+				memcpy(p, data.data(), data.length());
 			}
 			GlobalUnlock(hCpy);
 			SetClipboardData(m_clipboardFormat, (HANDLE) hCpy);

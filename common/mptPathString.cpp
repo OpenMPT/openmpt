@@ -243,11 +243,11 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 		return path;
 	}
 	std::vector<WCHAR> fullPathName(size, L'\0');
-	if(GetFullPathNameW(path.AsNative().c_str(), size, &fullPathName[0], nullptr) == 0)
+	if(GetFullPathNameW(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0)
 	{
 		return path;
 	}
-	return mpt::PathString::FromNative(&fullPathName[0]);
+	return mpt::PathString::FromNative(fullPathName.data());
 }
 
 #ifdef MODPLUG_TRACKER
@@ -317,9 +317,9 @@ mpt::PathString GetTempDirectory()
 	if(size)
 	{
 		std::vector<WCHAR> tempPath(size + 1);
-		if(GetTempPathW(size + 1, &tempPath[0]))
+		if(GetTempPathW(size + 1, tempPath.data()))
 		{
-			return mpt::PathString::FromNative(&tempPath[0]);
+			return mpt::PathString::FromNative(tempPath.data());
 		}
 	}
 	// use app directory as fallback

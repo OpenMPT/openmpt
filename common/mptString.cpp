@@ -1166,8 +1166,8 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 			return Tdststring();
 		}
 		std::vector<CHAR> encoded_string(required_size);
-		WideCharToMultiByte(codepage, 0, src.c_str(), -1, &encoded_string[0], required_size, nullptr, nullptr);
-		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
+		WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
+		return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToStringTranslit(charset), Charset_wchar_t());
@@ -1181,9 +1181,9 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		}
 		std::vector<wchar_t> wide_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> encoded_string(wide_string.size() * 8); // large enough
-		char * inbuf = reinterpret_cast<char*>(&wide_string[0]);
+		char * inbuf = reinterpret_cast<char*>(wide_string.data());
 		size_t inbytesleft = wide_string.size() * sizeof(wchar_t);
-		char * outbuf = &encoded_string[0];
+		char * outbuf = encoded_string.data();
 		size_t outbytesleft = encoded_string.size();
 		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
@@ -1204,7 +1204,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		}
 		iconv_close(conv);
 		conv = iconv_t();
-		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
+		return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
 	#else
 		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
@@ -1273,8 +1273,8 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 			return std::wstring();
 		}
 		std::vector<WCHAR> decoded_string(required_size);
-		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, &decoded_string[0], required_size);
-		return &decoded_string[0];
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
+		return decoded_string.data();
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(Charset_wchar_t(), CharsetToString(charset));
@@ -1284,9 +1284,9 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		}
 		std::vector<char> encoded_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
 		std::vector<wchar_t> wide_string(encoded_string.size() * 8); // large enough
-		char * inbuf = &encoded_string[0];
+		char * inbuf = encoded_string.data();
 		size_t inbytesleft = encoded_string.size();
-		char * outbuf = reinterpret_cast<char*>(&wide_string[0]);
+		char * outbuf = reinterpret_cast<char*>(wide_string.data());
 		size_t outbytesleft = wide_string.size() * sizeof(wchar_t);
 		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
@@ -1324,7 +1324,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		}
 		iconv_close(conv);
 		conv = iconv_t();
-		return &wide_string[0];
+		return wide_string.data();
 	#else
 		return DecodeImplFallback<Tsrcstring>(charset, src);
 	#endif
@@ -1384,9 +1384,9 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 		}
 		std::vector<char> src_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
 		std::vector<char> dst_string(src_string.size() * 8); // large enough
-		char * inbuf = &src_string[0];
+		char * inbuf = src_string.data();
 		size_t inbytesleft = src_string.size();
-		char * outbuf = &dst_string[0];
+		char * outbuf = dst_string.data();
 		size_t outbytesleft = dst_string.size();
 		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
@@ -1407,7 +1407,7 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 		}
 		iconv_close(conv);
 		conv = iconv_t();
-		return reinterpret_cast<const typename Tdststring::value_type*>(&dst_string[0]);
+		return reinterpret_cast<const typename Tdststring::value_type*>(dst_string.data());
 	#else
 		return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
 	#endif

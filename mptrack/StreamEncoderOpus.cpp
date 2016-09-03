@@ -128,7 +128,7 @@ private:
 				opus_comments_buf.push_back((*it)[i]);
 			}
 		}
-		op.packet = &opus_comments_buf[0];
+		op.packet = opus_comments_buf.data();
 		op.bytes = mpt::saturate_cast<long>(opus_comments_buf.size());
 		op.b_o_s = 0;
 		op.e_o_s = 0;
@@ -158,7 +158,7 @@ private:
 			ASSERT(inited && started);
 
 			std::vector<float> extraBuf(opus_extrasamples * opus_channels);
-			WriteInterleaved(opus_extrasamples, &extraBuf[0]);
+			WriteInterleaved(opus_extrasamples, extraBuf.data());
 
 			int cur_frame_size = 960 * opus_samplerate / 48000;
 			int last_frame_size = (static_cast<int>(opus_sampleBuf.size()) / opus_channels) * opus_samplerate / 48000;
@@ -176,14 +176,14 @@ private:
 			opus_sampleBuf.clear();
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
+			opus_frameData.resize(opus_multistream_encode_float(st, opus_frameBuf.data(), cur_frame_size, opus_frameData.data(), static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += last_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
 			op.e_o_s = 1;
 			op.granulepos = enc_granulepos;
 			op.packetno = packetno;
-			op.packet = &opus_frameData[0];
+			op.packet = opus_frameData.data();
 			op.bytes = static_cast<long>(opus_frameData.size());
 			ogg_stream_packetin(&os, &op);
 
@@ -208,10 +208,10 @@ private:
 	{
 		ASSERT(inited);
 		buf.resize(og.header_len);
-		std::memcpy(&buf[0], og.header, og.header_len);
+		std::memcpy(buf.data(), og.header, og.header_len);
 		WriteBuffer();
 		buf.resize(og.body_len);
-		std::memcpy(&buf[0], og.body, og.body_len);
+		std::memcpy(buf.data(), og.body, og.body_len);
 		WriteBuffer();
 	}
 	void AddCommentField(const std::string &field, const mpt::ustring &data)
@@ -412,14 +412,14 @@ public:
 			}
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
+			opus_frameData.resize(opus_multistream_encode_float(st, opus_frameBuf.data(), cur_frame_size, opus_frameData.data(), static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += cur_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
 			op.e_o_s = 0;
 			op.granulepos = enc_granulepos;
 			op.packetno = packetno;
-			op.packet = &opus_frameData[0];
+			op.packet = opus_frameData.data();
 			op.bytes = static_cast<long>(opus_frameData.size());
 			ogg_stream_packetin(&os, &op);
 

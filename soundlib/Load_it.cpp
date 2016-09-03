@@ -1691,7 +1691,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
 			{
 				dwPos += intBytes + strSize;
-				mpt::IO::WriteRaw(f, &filenameU8[0], strSize);
+				mpt::IO::WriteRaw(f, filenameU8.data(), strSize);
 			}
 #endif // MPT_EXTERNAL_SAMPLES
 		}
@@ -2125,7 +2125,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		std::string data = oStrm.str();
 		uint16 length = mpt::saturate_cast<uint16>(data.size());
 		WRITEMODULARHEADER(MAGIC4LE('S','W','N','G'), length);
-		mpt::IO::WriteRaw(f, &data[0], length);
+		mpt::IO::WriteRaw(f, data.data(), length);
 	}
 
 	// Playback compatibility flags

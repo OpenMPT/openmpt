@@ -1949,7 +1949,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
 			{
 				filePos += intBytes + strSize;
-				mpt::IO::WriteRaw(f, &filenameU8[0], strSize);
+				mpt::IO::WriteRaw(f, filenameU8.data(), strSize);
 			}
 #endif // MPT_EXTERNAL_SAMPLES
 		}
@@ -3677,10 +3677,10 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 		std::vector<WCHAR> wcharVal(256);
 		for(;;)
 		{
-			HRESULT hrToString = PropVariantToString(propVal, &wcharVal[0], wcharVal.size());
+			HRESULT hrToString = PropVariantToString(propVal, wcharVal.data(), wcharVal.size());
 			if(hrToString == S_OK)
 			{
-				stringVal = &wcharVal[0];
+				stringVal = wcharVal.data();
 				break;
 			} else if(hrToString == ERROR_INSUFFICIENT_BUFFER)
 			{
@@ -3993,24 +3993,24 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	{
 		if(numChannels == 2)
 		{
-			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(Samples[sample], &rawData[0], rawData.size());
+			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(Samples[sample], rawData.data(), rawData.size());
 		} else
 		{
-			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(Samples[sample], &rawData[0], rawData.size());
+			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(Samples[sample], rawData.data(), rawData.size());
 		}
 	} else if(bitsPerSample == 32)
 	{
 		if(numChannels == 2)
 		{
-			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(Samples[sample], &rawData[0], rawData.size());
+			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(Samples[sample], rawData.data(), rawData.size());
 		} else
 		{
-			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(Samples[sample], &rawData[0], rawData.size());
+			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(Samples[sample], rawData.data(), rawData.size());
 		}
 	} else
 	{
 		// just copy
-		std::copy(&rawData[0], &rawData[0] + rawData.size(), mpt::void_cast<char*>(Samples[sample].pSample));
+		std::copy(rawData.data(), rawData.data() + rawData.size(), mpt::void_cast<char*>(Samples[sample].pSample));
 	}
 
 	result = true;

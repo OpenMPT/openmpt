@@ -602,7 +602,7 @@ bool CASIODevice::InternalOpen()
 		MPT_ASSERT_ALWAYS(g_CallbacksInstance == nullptr);
 		g_CallbacksInstance = this;
 		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels, m_nAsioBufferLen));
-		asioCall(createBuffers(&m_BufferInfo[0], m_Settings.GetTotalChannels(), m_nAsioBufferLen, &m_Callbacks));
+		asioCall(createBuffers(m_BufferInfo.data(), m_Settings.GetTotalChannels(), m_nAsioBufferLen, &m_Callbacks));
 		m_BuffersCreated = true;
 
 		m_ChannelInfo.resize(m_Settings.GetTotalChannels());
@@ -1146,7 +1146,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			float *const dstFloat = &m_SampleInputBufferFloat[0];
+			float *const dstFloat = m_SampleInputBufferFloat.data();
 			if(!src)
 			{
 				// Skip if we did get no buffer for this channel,
@@ -1170,7 +1170,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			int16 *const dstInt16 = &m_SampleInputBufferInt16[0];
+			int16 *const dstInt16 = m_SampleInputBufferInt16.data();
 			if(!src)
 			{
 				// Skip if we did get no buffer for this channel,
@@ -1190,7 +1190,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			int24 *const dstInt24 = &m_SampleInputBufferInt24[0];
+			int24 *const dstInt24 = m_SampleInputBufferInt24.data();
 			if(!src)
 			{
 				// Skip if we did get no buffer for this channel,
@@ -1210,7 +1210,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			int32 *const dstInt32 = &m_SampleInputBufferInt32[0];
+			int32 *const dstInt32 = m_SampleInputBufferInt32.data();
 			if(!src)
 			{
 				// Skip if we did get no buffer for this channel,
@@ -1269,16 +1269,16 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 	{
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			std::memset(&m_SampleBufferFloat[0], 0, countChunk * outputChannels * sizeof(float));
+			std::memset(m_SampleBufferFloat.data(), 0, countChunk * outputChannels * sizeof(float));
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			std::memset(&m_SampleBufferInt16[0], 0, countChunk * outputChannels * sizeof(int16));
+			std::memset(m_SampleBufferInt16.data(), 0, countChunk * outputChannels * sizeof(int16));
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			std::memset(&m_SampleBufferInt24[0], 0, countChunk * outputChannels * sizeof(int24));
+			std::memset(m_SampleBufferInt24.data(), 0, countChunk * outputChannels * sizeof(int24));
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			std::memset(&m_SampleBufferInt32[0], 0, countChunk * outputChannels * sizeof(int32));
+			std::memset(m_SampleBufferInt32.data(), 0, countChunk * outputChannels * sizeof(int32));
 		} else
 		{
 			MPT_ASSERT_NOTREACHED();
@@ -1288,16 +1288,16 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		SourceLockedAudioPreRead(countChunk, m_nAsioBufferLen);
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			SourceLockedAudioRead(&m_SampleBufferFloat[0], (m_SampleInputBufferFloat.size() > 0) ? &m_SampleInputBufferFloat[0] : nullptr, countChunk);
+			SourceLockedAudioRead(m_SampleBufferFloat.data(), (m_SampleInputBufferFloat.size() > 0) ? m_SampleInputBufferFloat.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			SourceLockedAudioRead(&m_SampleBufferInt16[0], (m_SampleInputBufferInt16.size() > 0) ? &m_SampleInputBufferInt16[0] : nullptr, countChunk);
+			SourceLockedAudioRead(m_SampleBufferInt16.data(), (m_SampleInputBufferInt16.size() > 0) ? m_SampleInputBufferInt16.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			SourceLockedAudioRead(&m_SampleBufferInt24[0], (m_SampleInputBufferInt24.size() > 0) ? &m_SampleInputBufferInt24[0] : nullptr, countChunk);
+			SourceLockedAudioRead(m_SampleBufferInt24.data(), (m_SampleInputBufferInt24.size() > 0) ? m_SampleInputBufferInt24.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			SourceLockedAudioRead(&m_SampleBufferInt32[0], (m_SampleInputBufferInt32.size() > 0) ? &m_SampleInputBufferInt32[0] : nullptr, countChunk);
+			SourceLockedAudioRead(m_SampleBufferInt32.data(), (m_SampleInputBufferInt32.size() > 0) ? m_SampleInputBufferInt32.data() : nullptr, countChunk);
 		} else
 		{
 			MPT_ASSERT_NOTREACHED();
@@ -1314,7 +1314,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			const float *const srcFloat = &m_SampleBufferFloat[0];
+			const float *const srcFloat = m_SampleBufferFloat.data();
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTFloat32MSB:
@@ -1331,7 +1331,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			const int16 *const srcInt16 = &m_SampleBufferInt16[0];
+			const int16 *const srcInt16 = m_SampleBufferInt16.data();
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt16MSB:
@@ -1344,7 +1344,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			const int24 *const srcInt24 = &m_SampleBufferInt24[0];
+			const int24 *const srcInt24 = m_SampleBufferInt24.data();
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt24MSB:
@@ -1357,7 +1357,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			const int32 *const srcInt32 = &m_SampleBufferInt32[0];
+			const int32 *const srcInt32 = m_SampleBufferInt32.data();
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt16MSB:
