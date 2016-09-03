@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "mptString.h"
 
+#include "Endianness.h"
+
 #if defined(MPT_CHARSET_CODECVTUTF8)
 #include <codecvt>
 #endif
@@ -1305,7 +1307,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 					{
 						outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
 					}
-					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()))
+					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
 					{
 						outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
 					}
