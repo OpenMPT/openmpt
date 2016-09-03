@@ -16,21 +16,20 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+// nullptr for ancient gcc
 #if MPT_COMPILER_GCC
-
 #if MPT_GCC_BEFORE(4,6,0)
 #define nullptr 0
 #endif
-
 #endif
 
 
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
 #if MPT_COMPILER_MSVC
-	#define CountOf(x) _countof(x)
+#define MPT_ARRAYCOUNT(x) _countof(x)
 #else
-	#define CountOf(x) (sizeof((x))/sizeof((x)[0]))
+#define MPT_ARRAYCOUNT(x) (sizeof((x))/sizeof((x)[0]))
 #endif
 
 
@@ -47,13 +46,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
-#define forceinline __forceinline
-#define MPT_NOINLINE __declspec(noinline)
+#define MPT_FORCEINLINE __forceinline
+#define MPT_NOINLINE    __declspec(noinline)
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#define forceinline __attribute__((always_inline)) inline
-#define MPT_NOINLINE __attribute__((noinline))
+#define MPT_FORCEINLINE __attribute__((always_inline)) inline
+#define MPT_NOINLINE    __attribute__((noinline))
 #else
-#define forceinline inline
+#define MPT_FORCEINLINE inline
 #define MPT_NOINLINE
 #endif
 
@@ -112,6 +111,7 @@ OPENMPT_NAMESPACE_BEGIN
 #else
 #define MPT_SHARED_PTR_NULL(T) nullptr
 #endif
+
 
 
 // We provide a simple scoped_ptr which can also be useful in addition to
@@ -397,8 +397,10 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 #endif // MPT_ASSERT_HANDLER_NEEDED
 
 
+
 // Compile time assert.
-#define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+#define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+
 
 
 // Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
@@ -469,27 +471,27 @@ struct int24
 		#endif
 	}
 };
-STATIC_ASSERT(sizeof(int24) == 3);
+MPT_STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_min (0-0x00800000)
 #define int24_max (0+0x007fffff)
 
 
 typedef float float32;
-STATIC_ASSERT(sizeof(float32) == 4);
+MPT_STATIC_ASSERT(sizeof(float32) == 4);
 
 typedef double float64;
-STATIC_ASSERT(sizeof(float64) == 8);
+MPT_STATIC_ASSERT(sizeof(float64) == 8);
 
 
 
 namespace mpt {
 
-STATIC_ASSERT(CHAR_BIT == 8);
+MPT_STATIC_ASSERT(CHAR_BIT == 8);
 
-STATIC_ASSERT(sizeof(char) == 1);
+MPT_STATIC_ASSERT(sizeof(char) == 1);
 
 typedef unsigned char byte;
-STATIC_ASSERT(sizeof(mpt::byte) == 1);
+MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
 
 } // namespace mpt
 
@@ -528,7 +530,7 @@ STATIC_ASSERT(sizeof(mpt::byte) == 1);
 #if !defined(MPT_ARCH_BITS)
 #include <cstdint>
 #include <stdint.h>
-STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 #if defined(UINTPTR_MAX)
 	#if (UINTPTR_MAX == 0xffffffffffffffffull)
 		#define MPT_ARCH_BITS 64
@@ -580,6 +582,13 @@ STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 #ifndef MPT_MSVC_WORKAROUND_LNK4221
 #define MPT_MSVC_WORKAROUND_LNK4221(x)
 #endif
+
+
+
+// legacy
+#define CountOf(x) MPT_ARRAYCOUNT(x)
+#define forceinline MPT_FORCEINLINE
+#define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
 
 
 
