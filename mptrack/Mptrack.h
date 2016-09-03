@@ -175,7 +175,7 @@ protected:
 	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
 	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
 
-	MPT_SHARED_PTR<mpt::Wine::VersionContext> m_WineVersion;
+	std::shared_ptr<mpt::Wine::VersionContext> m_WineVersion;
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
@@ -279,11 +279,11 @@ public:
 		return m_pSongSettingsIniFile->GetFilename();
 	}
 
-	void SetWineVersion(MPT_SHARED_PTR<mpt::Wine::VersionContext> wineVersion)
+	void SetWineVersion(std::shared_ptr<mpt::Wine::VersionContext> wineVersion)
 	{
 		m_WineVersion = wineVersion;
 	}
-	MPT_SHARED_PTR<mpt::Wine::VersionContext> GetWineVersion() const
+	std::shared_ptr<mpt::Wine::VersionContext> GetWineVersion() const
 	{
 		return m_WineVersion;
 	}

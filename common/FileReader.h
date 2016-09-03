@@ -49,7 +49,7 @@ private:
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 	const IFileDataContainer & DataContainer() const { return *data; }
 	IFileDataContainer & DataContainer() { return *data; }
-	MPT_SHARED_PTR<IFileDataContainer> data;
+	std::shared_ptr<IFileDataContainer> data;
 #else
 	const FileDataContainerMemory & DataContainer() const { return data; }
 	FileDataContainerMemory & DataContainer() { return data; }
@@ -70,19 +70,19 @@ public:
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 
 	// Initialize invalid file reader object.
-	FileReader() : data(mpt::make_shared<FileDataContainerDummy>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader() : data(std::make_shared<FileDataContainerDummy>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(mpt::span<const mpt::byte> bytedata) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(mpt::span<const mpt::byte> bytedata) : data(std::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #ifdef MODPLUG_TRACKER
-	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const char *chardata, off_t length) : data(std::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const uint8 *uint8data, off_t length) : data(std::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #endif // MODPLUG_TRACKER
 #if defined(MPT_ENABLE_FILEIO)
-	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0), fileName(filename) { }
+	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(std::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0), fileName(filename) { }
 #ifdef MODPLUG_TRACKER
-	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0), fileName(filename) { }
+	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(std::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(std::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0), fileName(filename) { }
 #endif // MODPLUG_TRACKER
 #endif // MPT_ENABLE_FILEIO
 
@@ -92,10 +92,10 @@ public:
 		: data(
 #if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
 #endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
 			)
 		, streamPos(0)
 		MPT_FILEREADER_INIT_FILENAME
@@ -107,10 +107,10 @@ public:
 		: data(
 #if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
 #endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
 			)
 		, streamPos(0)
 		, fileName(filename)
@@ -126,10 +126,10 @@ public:
 		: data(
 #if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStreamSeekable>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
 #endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
 			)
 		, streamPos(0)
 		MPT_FILEREADER_INIT_FILENAME
@@ -141,10 +141,10 @@ public:
 		: data(
 #if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStreamSeekable>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
 #endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
-					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
 			)
 		, streamPos(0)
 		, fileName(filename)
@@ -154,7 +154,7 @@ public:
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object window.
-	FileReader(MPT_SHARED_PTR<IFileDataContainer> other) : data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(std::shared_ptr<IFileDataContainer> other) : data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : data(other.data), streamPos(other.streamPos)
@@ -322,7 +322,7 @@ protected:
 			return FileReader();
 		}
 		#if defined(MPT_FILEREADER_STD_ISTREAM)
-			return FileReader(MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerWindow>(data, position, std::min(length, DataContainer().GetLength() - position))));
+			return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
 			return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
 		#endif

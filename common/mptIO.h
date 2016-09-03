@@ -568,11 +568,11 @@ public:
 class FileDataContainerWindow : public IFileDataContainer
 {
 private:
-	MPT_SHARED_PTR<IFileDataContainer> data;
+	std::shared_ptr<IFileDataContainer> data;
 	const off_t dataOffset;
 	const off_t dataLength;
 public:
-	FileDataContainerWindow(MPT_SHARED_PTR<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
+	FileDataContainerWindow(std::shared_ptr<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
 	virtual ~FileDataContainerWindow() { }
 
 	bool IsValid() const

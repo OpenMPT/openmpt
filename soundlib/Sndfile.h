@@ -487,7 +487,7 @@ public:
 public:
 #ifdef LIBOPENMPT_BUILD
 #ifndef NO_PLUGINS
-	MPT_SHARED_PTR<CVstPluginManager> m_PluginManager;
+	std::shared_ptr<CVstPluginManager> m_PluginManager;
 #endif
 #endif
 

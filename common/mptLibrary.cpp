@@ -475,7 +475,7 @@ Library::Library()
 Library::Library(const mpt::LibraryPath &path)
 //--------------------------------------------
 {
-	m_Handle = mpt::make_shared<LibraryHandle>(path);
+	m_Handle = std::make_shared<LibraryHandle>(path);
 }
 
 

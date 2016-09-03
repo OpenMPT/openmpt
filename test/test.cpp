@@ -2376,7 +2376,7 @@ static mpt::PathString GetTempFilenameBase()
 	return MPT_PATHSTRING("./test.");
 }
 
-typedef MPT_SHARED_PTR<CSoundFile> TSoundFileContainer;
+typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
 
 static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 {
@@ -2387,7 +2387,7 @@ static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filen
 {
 	mpt::ifstream stream(filename, std::ios::binary);
 	FileReader file(&stream);
-	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
+	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
 	return pSndFile;
 }
@@ -2762,7 +2762,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 //------------------------------------------------
 {
 	FileReader file;
-	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
+	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
 	sndFile.m_nType = MOD_TYPE_MPT;
 	sndFile.Patterns.DestroyPatterns();
