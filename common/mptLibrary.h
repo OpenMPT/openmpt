@@ -90,7 +90,7 @@ public:
 class Library
 {
 protected:
-	MPT_SHARED_PTR<LibraryHandle> m_Handle;
+	std::shared_ptr<LibraryHandle> m_Handle;
 public:
 	Library();
 	Library(const mpt::LibraryPath &path);

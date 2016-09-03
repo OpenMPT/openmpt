@@ -125,7 +125,7 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 #else
 	if(!sndFile.m_PluginManager)
 	{
-		sndFile.m_PluginManager = mpt::make_shared<CVstPluginManager>();
+		sndFile.m_PluginManager = std::make_shared<CVstPluginManager>();
 	}
 	return sndFile.m_PluginManager->CreateMixPlugin(mixPlugin, sndFile);
 #endif // MODPLUG_TRACKER

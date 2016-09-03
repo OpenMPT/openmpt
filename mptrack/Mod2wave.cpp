@@ -923,7 +923,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	{
 		const Encoder::Traits &encTraits = EncoderFactories[i]->GetTraits();
 		EncoderSettings.push_back(
-			MPT_SHARED_PTR<Encoder::Settings>(
+			std::shared_ptr<Encoder::Settings>(
 				new Encoder::Settings(
 					conf,
 					encTraits.encoderSettingsName,

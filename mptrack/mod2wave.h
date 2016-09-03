@@ -40,7 +40,7 @@ struct StoredTags
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
-	std::vector<MPT_SHARED_PTR<Encoder::Settings> > EncoderSettings;
+	std::vector<std::shared_ptr<Encoder::Settings> > EncoderSettings;
 
 	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;

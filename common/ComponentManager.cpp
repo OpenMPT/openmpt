@@ -219,7 +219,7 @@ void ComponentFactoryBase::PreConstruct() const
 }
 
 
-void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component) const
+void ComponentFactoryBase::Initialize(ComponentManager &componentManager, std::shared_ptr<IComponent> component) const
 //-------------------------------------------------------------------------------------------------------------------
 {
 	if(componentManager.IsComponentBlocked(GetSettingsKey()))
@@ -266,7 +266,7 @@ bool ComponentListPush(ComponentListEntry *entry)
 }
 
 
-static MPT_SHARED_PTR<ComponentManager> g_ComponentManager;
+static std::shared_ptr<ComponentManager> g_ComponentManager;
 
 
 void ComponentManager::Init(const IComponentManagerSettings &settings)
@@ -274,7 +274,7 @@ void ComponentManager::Init(const IComponentManagerSettings &settings)
 {
 	MPT_LOG(LogInformation, "Components", MPT_USTRING("Init"));
 	// cannot use make_shared because the constructor is private
-	g_ComponentManager = MPT_SHARED_PTR<ComponentManager>(new ComponentManager(settings));
+	g_ComponentManager = std::shared_ptr<ComponentManager>(new ComponentManager(settings));
 }
 
 
@@ -282,11 +282,11 @@ void ComponentManager::Release()
 //------------------------------
 {
 	MPT_LOG(LogInformation, "Components", MPT_USTRING("Release"));
-	g_ComponentManager = MPT_SHARED_PTR<ComponentManager>();
+	g_ComponentManager = MPT_SHARED_PTR_NULL(ComponentManager);
 }
 
 
-MPT_SHARED_PTR<ComponentManager> ComponentManager::Instance()
+std::shared_ptr<ComponentManager> ComponentManager::Instance()
 //-----------------------------------------------------------
 {
 	return g_ComponentManager;
@@ -315,7 +315,7 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 	RegisteredComponent registeredComponent;
 	registeredComponent.settingsKey = componentFactory.GetSettingsKey();
 	registeredComponent.factoryMethod = componentFactory.GetStaticConstructor();
-	registeredComponent.instance = MPT_SHARED_PTR<IComponent>();
+	registeredComponent.instance = MPT_SHARED_PTR_NULL(IComponent);
 	m_Components.insert(std::make_pair(componentFactory.GetID(), registeredComponent));
 }
 
@@ -335,7 +335,7 @@ void ComponentManager::Startup()
 	{
 		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
 		{
-			(*it).second.instance = MPT_SHARED_PTR<IComponent>();
+			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
 		}
 	}
 }
@@ -348,7 +348,7 @@ bool ComponentManager::IsComponentBlocked(const std::string &settingsKey) const
 }
 
 
-void ComponentManager::InitializeComponent(MPT_SHARED_PTR<IComponent> component) const
+void ComponentManager::InitializeComponent(std::shared_ptr<IComponent> component) const
 //------------------------------------------------------------------------------------
 {
 	if(!component)
@@ -363,10 +363,10 @@ void ComponentManager::InitializeComponent(MPT_SHARED_PTR<IComponent> component)
 }
 
 
-MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
+std::shared_ptr<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
 //--------------------------------------------------------------------------------------------------
 {
-	MPT_SHARED_PTR<IComponent> component = MPT_SHARED_PTR<IComponent>();
+	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
 	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
@@ -390,16 +390,16 @@ MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactor
 }
 
 
-MPT_SHARED_PTR<IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
+std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
 //-----------------------------------------------------------------------------------------------------
 {
-	MPT_SHARED_PTR<IComponent> component = MPT_SHARED_PTR<IComponent>();
+	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
 	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
 		if((*it).second.instance)
 		{ // loaded
-			(*it).second.instance = MPT_SHARED_PTR<IComponent>();
+			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
 		}
 		// not loaded
 		component = (*it).second.factoryMethod(*this);
@@ -446,7 +446,7 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 		result.state = ComponentStateBlocked;
 		return result;
 	}
-	MPT_SHARED_PTR<IComponent> component = ((*it).second.instance) ? it->second.instance : MPT_SHARED_PTR<IComponent>();
+	std::shared_ptr<IComponent> component = ((*it).second.instance) ? it->second.instance : MPT_SHARED_PTR_NULL(IComponent);
 	if(!component)
 	{
 		result.state = ComponentStateUnintialized;

@@ -1058,7 +1058,7 @@ BOOL CTrackApp::InitInstance()
 
 	if(mpt::Windows::IsWine())
 	{
-		SetWineVersion(mpt::make_shared<mpt::Wine::VersionContext>());
+		SetWineVersion(std::make_shared<mpt::Wine::VersionContext>());
 	}
 
 	// Set up paths to store configuration in
@@ -1296,7 +1296,7 @@ int CTrackApp::ExitInstance()
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
 
-	SetWineVersion(MPT_SHARED_PTR<mpt::Wine::VersionContext>());
+	SetWineVersion(MPT_SHARED_PTR_NULL(mpt::Wine::VersionContext));
 
 	m_PRNG.reset();
 	mpt::set_global_prng(nullptr);

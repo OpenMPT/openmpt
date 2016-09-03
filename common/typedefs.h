@@ -102,27 +102,20 @@ typedef std::bad_alloc & MPTMemoryException;
 
 
 
-// For mpt::make_shared<T>, we sacrifice perfect forwarding in order to keep things simple here.
-// Templated for up to 4 parameters. Add more when required.
-
 OPENMPT_NAMESPACE_END
 #include <memory>
+#include <utility>
 OPENMPT_NAMESPACE_BEGIN
 
-#define MPT_SHARED_PTR std::shared_ptr
-#define MPT_CONST_POINTER_CAST std::const_pointer_cast
-#define MPT_STATIC_POINTER_CAST std::static_pointer_cast
-#define MPT_DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
-namespace mpt {
-template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return std::make_shared<T>(); }
-template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return std::make_shared<T>(x1); }
-template <typename T, typename T1, typename T2> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2) { return std::make_shared<T>(x1, x2); }
-template <typename T, typename T1, typename T2, typename T3> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3) { return std::make_shared<T>(x1, x2, x3); }
-template <typename T, typename T1, typename T2, typename T3, typename T4> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return std::make_shared<T>(x1, x2, x3, x4); }
-} // namespace mpt
+#if MPT_GCC_BEFORE(4,6,0)
+#define MPT_SHARED_PTR_NULL(T) std::shared_ptr<T>()
+#else
+#define MPT_SHARED_PTR_NULL(T) nullptr
+#endif
 
-// We cannot provide unique_ptr as it does require move semantics.
-// However, we can provide a simple scoped_ptr which is also very useful.
+
+// We provide a simple scoped_ptr which can also be useful in addition to
+// std::unique_ptr.
 namespace mpt {
 template<typename T> class scoped_ptr
 {
