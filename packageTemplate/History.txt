@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.05.00 (? September 2016, revision 6996)
+v1.26.05.00 (3 September 2016, revision 7024)
 ---------------------------------------------
 Pattern tab
    [Imp] <js> Show clamped values (or "undefined", depending on the format) for out-of-range channel / global volume parameters in the status bar (http://bugs.openmpt.org/view.php?id=866).
@@ -36,23 +36,26 @@ Pattern tab
    [Fix] <js> The Parameter Editor window was redrawn more often than necessary (multiple times per row, for every tick - tx mandrasigma).
 
 Pattern tab::Find/Replace
-   [Fix] <js> Repeated searches for extended (Sxy / Exy) commands did not remember the correct pattern commands to search for.
+   [Fix] <js> Repeated searches for extended commands (Sxy / Exy) did not remember the correct pattern commands to search for.
 
 Instrument tab
    [Imp] <js> Improved handling of drum patches in Gravis Patch files.
+
+Tree view
+   [Fix] <js> Some soundfont items were not previewed correctly.
 
 Mod Conversion
    [Fix] <js> Correctly translate Lxy / Kxy with fine slide parameter when converting from S3M / IT / MPTM to MOD / XM.
 
 VST::Specific Plugin Fixes
-   [Fix] <js> Genny Beta uses parameters outside the nominal 0...1 range, which broke when loading and saving modules using this plugin.
+   [Fix] <js> Genny Beta uses parameter values outside the nominal 0...1 range, which broke when loading and saving modules using this plugin. The affected parameters can still not be automated properly, though (the same issue exists in other hosts).
 
 VST::Plugin Bridge
    [Fix] <js> Some mouse actions did not work in bridged editors on some systems, in particular with Windows 10 Anniversary Update (http://forum.openmpt.org/index.php?topic=5703.0).
    [Fix] <js> Toggling the plugin editor could lead to a crash if the bridged editor took very long to initialize.
 
 Other formats
-   [Fix] <js> MID: Sometimes, melodic channels were imported as drums (http://bugs.openmpt.org/view.php?id=462).
+   [Fix] <js> MIDI Import: A channel 10 drum program change could cause melodic channels using the same program number to turn into drums (http://bugs.openmpt.org/view.php?id=462).
    [Fix] <js> Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker files.
 
 Misc
@@ -79,7 +82,7 @@ Sample tab
    [New] <js> Can now mix-paste from clipboard.
    [New] <js> Can now Paste (Insert) instead of just Paste (Replace) as well.
    [New] <js> Can now import Sun Audio (AU / SND) samples.
-   [New] <js> Can now import 64-bit float, a-law and u-law WAV and AIFF samples.
+   [New] <js> Can now import 64-bit float, µ-law and A-law WAV and AIFF samples.
    [Imp] <js> Remember previously used resampler across sessions (http://bugs.openmpt.org/view.php?id=830).
    [Imp] <js> If there is no loop yet, allow setting the loop start via context menu sample end becomes loop end).
    [Fix] <js> Cue points were not written correctly to FLAC files.
@@ -448,7 +451,7 @@ Instrument tab
    [Imp] <js> When trying to load a module into an instrument slot, open it directly in the tree view for importing instruments.
    [Imp] <js> Forward / backward mouse buttons can be used to switch to next / previous instrument.
    [Fix] <js> Previewing several notes at once was broken for XM modules.
-   [Fix] <js> Bogus shortcuts were added for some envelope editor shortcuts.
+   [Fix] <js> Bogus keys were added for some envelope editor shortcuts.
 
 VST / DMO Plugins
    [New] <js> Allow the user to enter plugin-specific tags in the plugin selection dialog. The name filter now searches for both plugin names and tags (patch partially provided by arseniiv, http://bugs.openmpt.org/view.php?id=541).
