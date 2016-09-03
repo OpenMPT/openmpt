@@ -328,7 +328,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 		{
 			if (pmsh->flags & MMD_FLAG_8CHANNEL)
 			{
-				param = (param > 10) ? 99 : bpmvals[param-1];
+				param = (param >= 10) ? 99 : bpmvals[param-1];
 			} else
 			// F.01 - F.0A: Set Speed
 			if (param <= 0x0A)
