@@ -295,9 +295,9 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 //--------------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
-	if(!ReadPATInstrument(nInstr, file)
+	if(!ReadITIInstrument(nInstr, file)
 		&& !ReadXIInstrument(nInstr, file)
-		&& !ReadITIInstrument(nInstr, file)
+		&& !ReadPATInstrument(nInstr, file)
 		// Generic read
 		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize))
 	{
@@ -704,21 +704,15 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		case 7: bitDepth = SampleIO::_64bit; break;
 		}
 
-		sampleIO = SampleIO(
-			bitDepth,
-			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
-			SampleIO::littleEndian,
-			(wavFile.GetBitsPerSample() > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
+		sampleIO |= bitDepth;
+		if(wavFile.GetBitsPerSample() <= 8)
+			sampleIO |= SampleIO::unsignedPCM;
 
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
-		{
 			sampleIO |= SampleIO::floatPCM;
-		}
 
 		if(mayNormalize)
-		{
 			sampleIO.MayNormalize();
-		}
 
 		sampleIO.ReadSample(sample, sampleChunk);
 	}
@@ -1330,11 +1324,21 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 		m_nSamples = nSample;
 	}
 
-	// Read first sample header
+	uint16 numSamples = fileHeader.numSamples;
+	FileReader::off_t samplePos = sizeof(XIInstrumentHeader) + numSamples * sizeof(XMSample);
+	// Preferrably read the middle-C sample
+	auto sample = fileHeader.instrument.sampleMap[48];
+	if(sample >= fileHeader.numSamples)
+		sample = 0;
 	XMSample sampleHeader;
+	while(sample--)
+	{
+		file.ReadStruct(sampleHeader);
+		samplePos += sampleHeader.length;
+	}
 	file.ReadStruct(sampleHeader);
 	// Gotta skip 'em all!
-	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
+	file.Seek(samplePos);
 
 	DestroySampleThreadsafe(nSample);
 
@@ -1798,6 +1802,13 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 	ModInstrument dummy;
 	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
+	// Preferrably read the middle-C sample
+	auto sample = dummy.Keyboard[NOTE_MIDDLEC - NOTE_MIN];
+	if(sample > 0 && sample <= instrumentHeader.nos)
+		sample--;
+	else
+		sample = 0;
+	file.Seek(file.GetPosition() + sample * sizeof(ITSample));
 	return ReadITSSample(nSample, file, false);
 }
 
