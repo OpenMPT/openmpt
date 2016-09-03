@@ -236,7 +236,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			return true;
 		file.Rewind();
 		decrypted.resize(file.GetLength());
-		file.ReadRaw(&decrypted[0], decrypted.size());
+		file.ReadRaw(decrypted.data(), decrypted.size());
 		uint8 i = 0;
 		for(std::vector<mpt::byte>::iterator c = decrypted.begin(); c != decrypted.end(); c++)
 		{

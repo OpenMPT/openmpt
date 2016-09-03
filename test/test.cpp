@@ -134,9 +134,9 @@ void DoTests()
 
 		// set path prefix for test files (if provided)
 		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
-		if(GetEnvironmentVariableW(L"srcdir", &buf[0], static_cast<DWORD>(buf.size())) > 0)
+		if(GetEnvironmentVariableW(L"srcdir", buf.data(), static_cast<DWORD>(buf.size())) > 0)
 		{
-			pathprefix = &buf[0];
+			pathprefix = buf.data();
 		} else if(libopenmpt && IsDebuggerPresent())
 		{
 			pathprefix = L"../../../../";
@@ -2571,7 +2571,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
-	smp.pSample = const_cast<int8 *>(&sampleData[0]);
+	smp.pSample = const_cast<int8 *>(sampleData.data());
 	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
 
 	std::string data;
@@ -2586,10 +2586,10 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 		FileReader file(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
-		smp.pSample = &sampleDataNew[0];
+		smp.pSample = sampleDataNew.data();
 
 		ITDecompression decompression(file, smp, it215);
-		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
+		VERIFY_EQUAL_NONCONT(memcmp(sampleData.data(), sampleDataNew.data(), sampleData.size()), 0);
 	}
 }
 

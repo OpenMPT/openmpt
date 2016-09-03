@@ -130,7 +130,7 @@ mpt::ustring ID::AsString() const
 	}
 	uint64le val;
 	val.set(0);
-	std::memcpy(&val, &m_ID[0], m_ID.length());
+	std::memcpy(&val, m_ID.data(), m_ID.length());
 	return mpt::ToUString(val);
 }
 

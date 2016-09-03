@@ -2027,10 +2027,10 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 	for(UINT f = 0; f < nFiles; f++)
 	{
 		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
-		std::wstring fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
+		std::vector<WCHAR> fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size + 1))
 		{
-			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 			if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, file))
 			{
 				SetModified(InstrumentHint(m_nInstrument).Envelope(), true);

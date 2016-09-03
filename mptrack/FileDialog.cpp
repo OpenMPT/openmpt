@@ -32,7 +32,7 @@ bool FileDialog::Show(const CWnd *parent)
 
 	// Prepare filename buffer.
 	std::vector<WCHAR> filenameBuffer(uint16_max, 0);
-	wcscpy(&filenameBuffer[0], defaultFilename.c_str());
+	wcscpy(filenameBuffer.data(), defaultFilename.c_str());
 
 	preview = preview && TrackerSettings::Instance().previewInFileDialogs;
 	const std::wstring workingDirectoryNative = workingDirectory.AsNative();
@@ -47,7 +47,7 @@ bool FileDialog::Show(const CWnd *parent)
 	ofn.lpstrCustomFilter = NULL;
 	ofn.nMaxCustFilter = 0;
 	ofn.nFilterIndex = filterIndex != nullptr ? *filterIndex : 0;
-	ofn.lpstrFile = &filenameBuffer[0];
+	ofn.lpstrFile = filenameBuffer.data();
 	ofn.nMaxFile = filenameBuffer.size();
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;

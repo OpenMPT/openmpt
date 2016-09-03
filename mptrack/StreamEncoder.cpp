@@ -93,7 +93,7 @@ void StreamWriterBase::WriteBuffer()
 	{
 		return;
 	}
-	f.write(&buf[0], buf.size());
+	f.write(buf.data(), buf.size());
 	buf.resize(0);
 }
 

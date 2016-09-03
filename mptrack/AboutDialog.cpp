@@ -29,8 +29,8 @@ CRippleBitmap::CRippleBitmap()
 	bitmapTarget = new PNG::Bitmap(bitmapSrc->width, bitmapSrc->height);
 	offset1.assign(bitmapSrc->GetNumPixels(), 0);
 	offset2.assign(bitmapSrc->GetNumPixels(), 0);
-	frontBuf = &offset2[0];
-	backBuf = &offset1[0];
+	frontBuf = offset2.data();
+	backBuf = offset1.data();
 	activity = true;
 	lastFrame = 0;
 	frame = false;

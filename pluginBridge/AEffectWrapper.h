@@ -153,7 +153,7 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 	}
 
 	// Write pointers
-	VstEvents *events = reinterpret_cast<VstEvents *>(&data[0]);
+	VstEvents *events = reinterpret_cast<VstEvents *>(data.data());
 	events->numEvents = numEvents;
 	offset = &data[headerSize];
 	for(int32_t i = 0; i < numEvents; i++)

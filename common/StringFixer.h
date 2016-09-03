@@ -299,7 +299,7 @@ namespace mpt { namespace String
 	//------------------------------------------------------------------------------------
 	{
 		MPT_ASSERT(destBuffer.size() > 0);
-		Write<mode>(&destBuffer[0], destBuffer.size(), srcBuffer, srcSize);
+		Write<mode>(destBuffer.data(), destBuffer.size(), srcBuffer, srcSize);
 	}
 
 	// Copy a string from srcBuffer to destBuffer using a given write mode.

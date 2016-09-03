@@ -2636,10 +2636,10 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 	for(UINT f = 0; f < nFiles; f++)
 	{
 		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
-		std::wstring fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
+		std::vector<WCHAR> fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size + 1))
 		{
-			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more sample slots

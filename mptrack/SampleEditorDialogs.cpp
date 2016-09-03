@@ -95,7 +95,7 @@ BOOL CAmpDlg::OnInitDialog()
 			bits[x + val * cx] = col;
 		}
 		CBitmap bitmap;
-		bitmap.CreateBitmap(cx, cy, 1, 32, &bits[0]);
+		bitmap.CreateBitmap(cx, cy, 1, 32, bits.data());
 		m_list.Add(&bitmap, RGB(255, 0, 255));
 		bitmap.DeleteObject();
 	}

@@ -85,7 +85,7 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 			else
 				Compress<IT8BitParams>(sample.pSample8 + chn, offset, remain);
 
-			if(file) mpt::IO::WriteRaw(*file, &packedData[0], packedLength);
+			if(file) mpt::IO::WriteRaw(*file, packedData, packedLength);
 			packedTotalLength += packedLength;
 
 			offset += baseLength;

@@ -392,7 +392,7 @@ public:
 		: FILE_output_streambuf(f)
 		, buf((bufSize > 0) ? bufSize : 1)
 	{
-		setp(&buf[0], &buf[0] + buf.size());
+		setp(buf.data(), buf.data() + buf.size());
 	}
 	~FILE_output_buffered_streambuf()
 	{

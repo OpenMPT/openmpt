@@ -3142,7 +3142,7 @@ void CModDoc::DeserializeViews()
 	}
 	std::vector<char> bytes = Util::HexToBin(s);
 
-	FileReader file(&bytes[0], bytes.size());
+	FileReader file(bytes.data(), bytes.size());
 
 	CRect mdiRect;
 	::GetWindowRect(CMainFrame::GetMainFrame()->m_hWndMDIClient, &mdiRect);

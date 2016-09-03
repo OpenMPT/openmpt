@@ -808,10 +808,10 @@ public:
 		if(lame.lame_get_num_channels(gfp) == 1)
 		{
 			// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-			buf.resize(lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count, (unsigned char*)&buf[0], buf.size()));
+			buf.resize(lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count, (unsigned char*)buf.data(), buf.size()));
 		} else
 		{
-			buf.resize(lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count, (unsigned char*)&buf[0], buf.size()));
+			buf.resize(lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count, (unsigned char*)buf.data(), buf.size()));
 		}
 		WriteBuffer();
 	}
@@ -827,7 +827,7 @@ public:
 			gfp_inited = true;
 		}
 		buf.resize(7200);
-		buf.resize(lame.lame_encode_flush(gfp, (unsigned char*)&buf[0], buf.size()));
+		buf.resize(lame.lame_encode_flush(gfp, (unsigned char*)buf.data(), buf.size()));
 		WriteBuffer();
 		ReplayGain replayGain;
 		if(StreamEncoderSettings::Instance().MP3LameCalculatePeakSample)
@@ -864,7 +864,7 @@ public:
 			std::streampos endPos = f.tellp();
 			f.seekp(fStart + id3v2Size);
 			buf.resize(lame.lame_get_lametag_frame(gfp, nullptr, 0));
-			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)&buf[0], buf.size()));
+			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)buf.data(), buf.size()));
 			WriteBuffer();
 			f.seekp(endPos);
 		}
@@ -1105,7 +1105,7 @@ public:
 			}
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), &samples[0], (PBYTE)&buf[0], &size);
+			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), samples.data(), (PBYTE)buf.data(), &size);
 			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
@@ -1124,7 +1124,7 @@ public:
 			blade_sampleBuf.clear();
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), &samples[0], (PBYTE)&buf[0], &size);
+			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), samples.data(), (PBYTE)buf.data(), &size);
 			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
@@ -1132,7 +1132,7 @@ public:
 		{
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
-			blade.beDeinitStream(bestream, (PBYTE)&buf[0], &size);
+			blade.beDeinitStream(bestream, (PBYTE)buf.data(), &size);
 			buf.resize(size);
 			WriteBuffer();
 		}
@@ -1369,7 +1369,7 @@ private:
 					formats_driverids.push_back(driver);
 					{
 						std::vector<char> wfex(sizeof(WAVEFORMATEX) + pafd->pwfx->cbSize);
-						std::memcpy(&wfex[0], pafd->pwfx, wfex.size());
+						std::memcpy(wfex.data(), pafd->pwfx, wfex.size());
 						formats_waveformats.push_back(wfex);
 					}
 
@@ -1573,9 +1573,9 @@ public:
 
 		MemsetZero(acmHeader);
 		acmHeader.cbStruct = sizeof(acmHeader);
-		acmHeader.pbSrc = &acmSrcBuf[0];
+		acmHeader.pbSrc = acmSrcBuf.data();
 		acmHeader.cbSrcLength = acmBufSize;
-		acmHeader.pbDst = &acmDstBuf[0];
+		acmHeader.pbDst = acmDstBuf.data();
 		acmHeader.cbDstLength = acmDstBufSize;
 		if(acmStreamPrepareHeader(acmStream, &acmHeader, 0) != MMSYSERR_NOERROR)
 		{
@@ -1620,7 +1620,7 @@ public:
 				samples.push_back(acm_sampleBuf.front());
 				acm_sampleBuf.pop_front();
 			}
-			std::memcpy(&acmSrcBuf[0], &samples[0], acmSrcBuf.size());
+			std::memcpy(acmSrcBuf.data(), samples.data(), acmSrcBuf.size());
 			acmHeader.cbSrcLength = static_cast<DWORD>(acmSrcBuf.size());
 			acmHeader.cbSrcLengthUsed = 0;
 			acmHeader.cbDstLength = static_cast<DWORD>(acmDstBuf.size());
@@ -1629,13 +1629,13 @@ public:
 			if(acmHeader.cbDstLengthUsed)
 			{
 				buf.resize(acmHeader.cbDstLengthUsed);
-				std::memcpy(&buf[0], &acmDstBuf[0], acmHeader.cbDstLengthUsed);
+				std::memcpy(buf.data(), acmDstBuf.data(), acmHeader.cbDstLengthUsed);
 				WriteBuffer();
 			}
 			if(acmHeader.cbSrcLengthUsed < acmSrcBuf.size())
 			{
 				samples.resize((acmSrcBuf.size() - acmHeader.cbSrcLengthUsed) / sizeof(int16));
-				std::memcpy(&samples[0], &acmSrcBuf[acmHeader.cbSrcLengthUsed], acmSrcBuf.size() - acmHeader.cbSrcLengthUsed);
+				std::memcpy(samples.data(), &acmSrcBuf[acmHeader.cbSrcLengthUsed], acmSrcBuf.size() - acmHeader.cbSrcLengthUsed);
 				while(samples.size() > 0)
 				{
 					acm_sampleBuf.push_front(samples.back());
@@ -1658,7 +1658,7 @@ public:
 				samples.push_back(acm_sampleBuf.front());
 				acm_sampleBuf.pop_front();
 			}
-			std::memcpy(&acmSrcBuf[0], &samples[0], samples.size() * sizeof(int16));
+			std::memcpy(acmSrcBuf.data(), samples.data(), samples.size() * sizeof(int16));
 		}
 		acmHeader.cbSrcLength = static_cast<DWORD>(samples.size() * sizeof(int16));
 		acmHeader.cbSrcLengthUsed = 0;
@@ -1668,7 +1668,7 @@ public:
 		if(acmHeader.cbDstLengthUsed)
 		{
 			buf.resize(acmHeader.cbDstLengthUsed);
-			std::memcpy(&buf[0], &acmDstBuf[0], acmHeader.cbDstLengthUsed);
+			std::memcpy(buf.data(), acmDstBuf.data(), acmHeader.cbDstLengthUsed);
 			WriteBuffer();
 		}
 		// acmStreamUnprepareHeader demands original buffer sizes to be specified
@@ -1689,7 +1689,7 @@ public:
 			// codecs at least not messing with cbDstLengthUsed in
 			// acmStreamUnprepareHeader.
 			buf.resize(acmHeader.cbDstLengthUsed);
-			std::memcpy(&buf[0], &acmDstBuf[0], acmHeader.cbDstLengthUsed);
+			std::memcpy(buf.data(), acmDstBuf.data(), acmHeader.cbDstLengthUsed);
 			WriteBuffer();
 		}
 		MemsetZero(acmHeader);

@@ -1399,7 +1399,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					try
 					{
 						waveData.assign(length + 8, 0);
-						fread(&waveData[0], 1, length, f);
+						fread(waveData.data(), 1, length, f);
 					} catch(MPTMemoryException)
 					{
 					}
@@ -1416,7 +1416,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					try
 					{
 						waveData.assign(chunk.len + 8, 0);
-						memcpy(&waveData[0], &chunk, 12);
+						memcpy(waveData.data(), &chunk, 12);
 						fread(&waveData[12], 1, length - 12, f);
 					} catch(MPTMemoryException)
 					{
@@ -1470,7 +1470,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			else if(pDlsIns->szName[0])
 				mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
 
-			FileReader chunk(&pWaveForm[0], dwLen);
+			FileReader chunk(pWaveForm.data(), dwLen);
 			SampleIO(
 				SampleIO::_16bit,
 				SampleIO::mono,
@@ -1481,7 +1481,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		bWaveForm = sample.pSample != nullptr;
 	} else
 	{
-		FileReader file(&pWaveForm[0], dwLen);
+		FileReader file(pWaveForm.data(), dwLen);
 		bWaveForm = sndFile.ReadWAVSample(nSample, file, false, &wsmpChunk);
 		if(pDlsIns->szName[0])
 			mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
@@ -1739,7 +1739,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 					if(ExtractWaveForm(nIns, nRgn, pWaveForm, dwLen) && dwLen >= sample.GetSampleSizeInBytes() / 2)
 					{
 						SmpLength len = sample.nLength;
-						const int16 *src = reinterpret_cast<int16 *>(&pWaveForm[0]);
+						const int16 *src = reinterpret_cast<int16 *>(pWaveForm.data());
 						int16 *dst = sample.pSample16 + ((pan1 == 0) ? 0 : 1);
 						while(len--)
 						{

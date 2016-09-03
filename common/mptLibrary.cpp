@@ -56,11 +56,11 @@ mpt::PathString GetAppPath()
 {
 #if defined(MODPLUG_TRACKER)
 	std::vector<WCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileNameW(0, &exeFileName[0], mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
+	while(GetModuleFileNameW(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
 	{
 		exeFileName.resize(exeFileName.size() * 2);
 	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(&exeFileName[0]).GetPath());
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
 #else
 	return mpt::PathString(); // dummy
 #endif
@@ -71,11 +71,11 @@ mpt::PathString GetSystemPath()
 {
 	DWORD size = GetSystemDirectoryW(nullptr, 0);
 	std::vector<WCHAR> path(size + 1);
-	if(!GetSystemDirectoryW(&path[0], size + 1))
+	if(!GetSystemDirectoryW(path.data(), size + 1))
 	{
 		return mpt::PathString();
 	}
-	return mpt::PathString::FromNative(&path[0]) + MPT_PATHSTRING("\\");
+	return mpt::PathString::FromNative(path.data()) + MPT_PATHSTRING("\\");
 }
 
 

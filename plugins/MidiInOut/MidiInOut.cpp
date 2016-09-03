@@ -275,7 +275,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 			if(buffer.message & 0x80808080)
 			{
 				// End of message found!
-				ReceiveSysex(&bufferedMessage[0], bufferedMessage.size() * sizeof(bufferedMessage[0]));
+				ReceiveSysex(bufferedMessage.data(), bufferedMessage.size() * sizeof(bufferedMessage[0]));
 				bufferedMessage.clear();
 			}
 			continue;

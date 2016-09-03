@@ -62,7 +62,7 @@ public:
 			mixBuffer.assign(totalBufferSize, 0);
 
 			// Align buffer start.
-			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(&mixBuffer[0]) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
+			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(mixBuffer.data()) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
 		} catch(MPTMemoryException)
 		{
 			inputs.clear();
@@ -118,8 +118,8 @@ public:
 	buffer_t *GetOutputBuffer(uint32 index) const { return GetBuffer(inputs.size() + index); }
 
 	// Return pointer array to all input or output buffers
-	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : &inputs[0]; }
-	buffer_t **GetOutputBufferArray() { return outputs.empty() ? nullptr : &outputs[0]; }
+	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputs.data(); }
+	buffer_t **GetOutputBufferArray() { return outputs.empty() ? nullptr : outputs.data(); }
 
 	bool Ok() const { return alignedBuffer != nullptr; }
 };

@@ -284,7 +284,7 @@ template<typename T>
 std::vector<char> EncodeBinarySetting(const T &val)
 {
 	std::vector<char> result(sizeof(T));
-	std::memcpy(&result[0], &val, sizeof(T));
+	std::memcpy(result.data(), &val, sizeof(T));
 	return result;
 }
 template<typename T>
@@ -293,7 +293,7 @@ T DecodeBinarySetting(const std::vector<char> &val)
 	T result = T();
 	if(val.size() >= sizeof(T))
 	{
-		std::memcpy(&result, &val[0], sizeof(T));
+		std::memcpy(&result, val.data(), sizeof(T));
 	}
 	return result;
 }

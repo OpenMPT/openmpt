@@ -210,14 +210,14 @@ void CModTree::Init()
 		if(size)
 		{
 			curDir.resize(size + 1);
-			GetCurrentDirectoryW(size + 1, &curDir[0]);
+			GetCurrentDirectoryW(size + 1, curDir.data());
 		}
 		const mpt::PathString dirs[] =
 		{
 			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
 			TrackerSettings::Instance().PathInstruments.GetDefaultDir(),
 			TrackerSettings::Instance().PathSongs.GetDefaultDir(),
-			mpt::PathString::FromNative(&curDir[0])
+			mpt::PathString::FromNative(curDir.data())
 		};
 		for(int i = 0; i < CountOf(dirs); i++)
 		{
@@ -3949,10 +3949,10 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 	for(UINT f = 0; f < nFiles; f++)
 	{
 		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
-		std::wstring fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
+		std::vector<WCHAR> fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size + 1))
 		{
-			mpt::PathString file(mpt::PathString::FromNative(fileName));
+			mpt::PathString file(mpt::PathString::FromNative(fileName.data()));
 			if(IsSampleBrowser())
 			{
 				// Set sample browser location to this directory or file

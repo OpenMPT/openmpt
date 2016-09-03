@@ -925,7 +925,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	// Header is valid, now unpack the RIFF AM file using inflate
 	uLongf destSize = fileHeader.unpackedLength;
 	std::vector<Bytef> amFileData(destSize);
-	int retVal = uncompress(&amFileData[0], &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
+	int retVal = uncompress(amFileData.data(), &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
 
 	bool result = false;
 

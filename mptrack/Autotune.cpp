@@ -259,7 +259,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		ASSERT(threadHandles[p] != INVALID_HANDLE_VALUE);
 	}
 
-	WaitForMultipleObjects(numProcs, &threadHandles[0], TRUE, INFINITE);
+	WaitForMultipleObjects(numProcs, threadHandles.data(), TRUE, INFINITE);
 
 	// Histogram for all notes.
 	std::vector<uint64> autocorrHistogram(HISTORY_BINS, 0);

@@ -942,7 +942,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		patHead[7] = static_cast<uint8>(len & 0xFF);
 		patHead[8] = static_cast<uint8>(len >> 8);
 		fwrite(patHead, 1, 9, f);
-		if(len) fwrite(&s[0], len, 1, f);
+		if(len) fwrite(s.data(), len, 1, f);
 	}
 
 #undef ASSERT_CAN_WRITE

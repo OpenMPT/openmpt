@@ -74,7 +74,7 @@ bool WritePage(Tfile & f, PageInfo &pageInfo, const std::vector<uint8> &pageData
 	{
 		return false;
 	}
-	if(!mpt::IO::WriteRaw(f, &pageData[0], pageData.size()))
+	if(!mpt::IO::WriteRaw(f, pageData.data(), pageData.size()))
 	{
 		return false;
 	}

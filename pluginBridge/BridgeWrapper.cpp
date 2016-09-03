@@ -56,11 +56,11 @@ bool ComponentPluginBridge::DoInitialize()
 		return false;
 	}
 	std::vector<WCHAR> exePath(MAX_PATH);
-	while(GetModuleFileNameW(0, &exePath[0], exePath.size()) >= exePath.size())
+	while(GetModuleFileNameW(0, exePath.data(), exePath.size()) >= exePath.size())
 	{
 		exePath.resize(exePath.size() * 2);
 	}
-	uint64 mptVersion = BridgeWrapper::GetFileVersion(&exePath[0]);
+	uint64 mptVersion = BridgeWrapper::GetFileVersion(exePath.data());
 	uint64 bridgeVersion = BridgeWrapper::GetFileVersion(exeName.AsNative().c_str());
 	if(bridgeVersion != mptVersion)
 	{
@@ -464,7 +464,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 	case audioMasterProcessEvents:
 		// VstEvents* in [ptr]
 		TranslateBridgeToVSTEvents(extraData, ptr);
-		ptr = &extraData[0];
+		ptr = extraData.data();
 		break;
 
 	case audioMasterVendorSpecific:
@@ -651,7 +651,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 				index = kVendorOpenMPT;
 				value = kUpdateEventMemName;
 			}
-			memcpy(that->eventMem.view, &events[0], events.size());
+			memcpy(that->eventMem.view, events.data(), events.size());
 		}
 		if(opcode != effVendorSpecific)
 		{
@@ -801,7 +801,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	uint32 extraSize = static_cast<uint32>(dispatchData.size() - sizeof(DispatchMsg));
 	
 	// Create message header
-	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
+	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(dispatchData.data());
 	msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
 
 	const bool useAuxMem = dispatchData.size() > sizeof(BridgeMessage);

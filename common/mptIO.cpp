@@ -361,7 +361,7 @@ void FileDataContainerSeekable::CacheStream() const
 		return;
 	}
 	cache.resize(streamLength);
-	InternalRead(&cache[0], 0, streamLength);
+	InternalRead(cache.data(), 0, streamLength);
 	cached = true;
 }
 
@@ -378,7 +378,7 @@ bool FileDataContainerSeekable::HasPinnedView() const
 const mpt::byte *FileDataContainerSeekable::GetRawData() const
 {
 	CacheStream();
-	return &cache[0];
+	return cache.data();
 }
 
 IFileDataContainer::off_t FileDataContainerSeekable::GetLength() const
@@ -559,7 +559,7 @@ bool FileDataContainerUnseekable::HasPinnedView() const
 const mpt::byte *FileDataContainerUnseekable::GetRawData() const
 {
 	CacheStream();
-	return &cache[0];
+	return cache.data();
 }
 
 IFileDataContainer::off_t FileDataContainerUnseekable::GetLength() const
