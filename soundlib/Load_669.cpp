@@ -100,7 +100,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES);
 #endif // MODPLUG_TRACKER
 
-	if(!memcmp(fileHeader.magic, "if", 4))
+	if(!memcmp(fileHeader.magic, "if", 2))
 		m_madeWithTracker = "Composer 669";
 	else
 		m_madeWithTracker = "UNIS 669";
