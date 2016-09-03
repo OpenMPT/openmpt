@@ -14,6 +14,7 @@ Dependencies
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher
      *  **emscripten 1.21** or higher
+     *  any **C++11 compliant** compiler
  *  Required compilers to use libopenmpt:
      *  Any **C89** / **C99** / **C11** compatible compiler should work with
         the C API as long as a **C99** compatible **stdint.h** is available.
@@ -48,7 +49,7 @@ Dependencies
      *  **GCC 4.4** or higher
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher
-     *  any **C++11 compliant** compiler should also work
+     *  any **C++11 compliant** compiler
  *  Live sound output requires one of:
      *  **PulseAudio**
      *  **SDL 2**

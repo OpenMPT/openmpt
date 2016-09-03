@@ -475,7 +475,7 @@ struct SamplePosition
 	typedef int64 value_t;
 	typedef uint64 unsigned_value_t;
 protected:
-#if defined(_DEBUG) && (defined(MPT_PLATFORM_LITTLE_ENDIAN) || defined(MPT_PLATFORM_BIG_ENDIAN))
+#if defined(_DEBUG) && MPT_PLATFORM_ENDIAN_KNOWN
 	union
 	{
 		value_t v;
