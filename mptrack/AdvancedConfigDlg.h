@@ -15,7 +15,6 @@
 #include "CListCtrl.h"
 #if MPT_USTRING_MODE_WIDE
 #include <unordered_map>
-#define MPT_UNORDERED_MAP std::unordered_map
 #else
 #include <map>
 #endif
@@ -29,7 +28,7 @@ class COptionsAdvanced: public CPropertyPage
 protected:
 	CListCtrlEx m_List;
 #if MPT_USTRING_MODE_WIDE
-	typedef MPT_UNORDERED_MAP<mpt::ustring, int> GroupMap;
+	typedef std::unordered_map<mpt::ustring, int> GroupMap;
 #else
 	typedef std::map<mpt::ustring, int> GroupMap;
 #endif
