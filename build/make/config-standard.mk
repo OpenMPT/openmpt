@@ -1,7 +1,7 @@
 
-CC  = cc 
-CXX = c++
-LD  = c++
+CC  ?= cc 
+CXX ?= c++
+LD  ?= c++
 AR  = ar
 
 CPPFLAGS += -DMPT_COMPILER_GENERIC
@@ -16,3 +16,4 @@ SHARED_LIB=0
 DYNLINK=0
 
 EXESUFFIX=
+
