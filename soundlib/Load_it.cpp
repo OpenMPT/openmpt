@@ -88,9 +88,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		//T1 1 T2 2 1 1 1 2 2 2
 
 		//Creating the tuning address <-> tuning id number map.
-		typedef std::map<CTuning*, uint16> TNTS_MAP;
-		typedef TNTS_MAP::iterator TNTS_MAP_ITER;
-		TNTS_MAP tNameToShort_Map;
+		std::map<CTuning*, uint16> tNameToShort_Map;
 
 		unsigned short figMap = 0;
 		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++)
@@ -100,7 +98,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 			{
 				pTuning = sf.Instruments[i]->pTuning;
 			}
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(pTuning);
+			auto iter = tNameToShort_Map.find(pTuning);
 			if(iter != tNameToShort_Map.end())
 				continue; //Tuning already mapped.
 
@@ -112,7 +110,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		//the addresses.
 		const uint16 tuningMapSize = static_cast<uint16>(tNameToShort_Map.size());
 		mpt::IO::WriteIntLE<uint16>(oStrm, tuningMapSize);
-		for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
+		for(auto iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 		{
 			if(iter->first)
 				mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter->first->GetName());
@@ -130,7 +128,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 			{
 				pTuning = sf.Instruments[i]->pTuning;
 			}
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(pTuning);
+			auto iter = tNameToShort_Map.find(pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
 			{
 				sf.AddToLog("Error: 210807_1");
@@ -175,9 +173,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0)
 //-------------------------------------------------------------------------------
 {
-	typedef std::map<uint16, std::string> MAP;
-	typedef MAP::iterator MAP_ITER;
-	MAP shortToTNameMap;
+	std::map<uint16, std::string> shortToTNameMap;
 	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
 
 	//Read & set tunings for instruments
@@ -186,7 +182,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 	{
 		uint16 ui = 0;
 		mpt::IO::ReadIntLE<uint16>(iStrm, ui);
-		MAP_ITER iter = shortToTNameMap.find(ui);
+		auto iter = shortToTNameMap.find(ui);
 		if(csf.Instruments[i] && iter != shortToTNameMap.end())
 		{
 			const std::string str = iter->second;

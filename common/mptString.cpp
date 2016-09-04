@@ -849,7 +849,7 @@ static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uF
 	std::size_t charsleft = 0;
 	uint32 ucs4 = 0;
 
-	for ( std::string::const_iterator i = in.begin(); i != in.end(); ++i ) {
+	for ( auto i = in.cbegin(); i != in.cend(); ++i ) {
 
 		uint8 c = *i;
 

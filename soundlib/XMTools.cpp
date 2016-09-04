@@ -67,12 +67,12 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 	ConvertEnvelopeToXM(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, EnvTypePan);
 
 	// Create sample assignment table
-	std::vector<SAMPLEINDEX> sampleList = GetSampleList(mptIns, compatibilityExport);
+	auto sampleList = GetSampleList(mptIns, compatibilityExport);
 	for(size_t i = 0; i < CountOf(sampleMap); i++)
 	{
 		if(mptIns.Keyboard[i + 12] > 0)
 		{
-			std::vector<SAMPLEINDEX>::iterator sample = std::find(sampleList.begin(), sampleList.end(), mptIns.Keyboard[i + 12]);
+			auto sample = std::find(sampleList.begin(), sampleList.end(), mptIns.Keyboard[i + 12]);
 			if(sample != sampleList.end())
 			{
 				// Yep, we want to export this sample.

@@ -488,7 +488,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				{
 					// Plugin not found - add to list
 					bool found = false;
-					for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+					for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
 					{
 						if((**i).dwPluginId2 == m_MixPlugins[plug].Info.dwPluginId2
 							&& (**i).dwPluginId1 == m_MixPlugins[plug].Info.dwPluginId1)
@@ -528,7 +528,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
 			std::string url = "http://resources.openmpt.org/plugins/search.php?p=";
-			for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+			for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
 			{
 				url += mpt::fmt::HEX0<8>((**i).dwPluginId2.get());
 				url += (**i).szLibraryName;
@@ -1825,7 +1825,7 @@ void CSoundFile::PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 s
 	const std::set<SAMPLEINDEX> referencedSamples = Instruments[ins]->GetSamples();
 
 	// Propagate changes to all samples that belong to this instrument.
-	for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+	for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 	{
 		if(*sample <= m_nSamples)
 		{

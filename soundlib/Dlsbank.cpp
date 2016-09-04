@@ -794,7 +794,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 			Log("phdr: %d instruments\n", m_Instruments.size());
 		#endif
 			SFPRESETHEADER *psfh = (SFPRESETHEADER *)(pchunk+1);
-			for (std::vector<DLSINSTRUMENT>::iterator pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++, psfh++)
+			for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++, psfh++)
 			{
 				mpt::String::Copy(pDlsIns->szName, psfh->achPresetName);
 				pDlsIns->szName[20] = 0;
@@ -927,7 +927,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 		return false;
 
 	SF2LOADERINFO *psf2 = (SF2LOADERINFO *)pvsf2info;
-	for (std::vector<DLSINSTRUMENT>::iterator pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
+	for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
 	{
 		DLSENVELOPE dlsEnv;
 		uint32 nInstrNdx = 0;

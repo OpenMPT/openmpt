@@ -405,7 +405,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadVector(textIn, packedLength);
 		textOut.reserve(packedLength);
 
-		for(std::vector<uint8>::iterator c = textIn.begin(); c != textIn.end(); c++)
+		for(auto c = textIn.begin(); c != textIn.end(); c++)
 		{
 			if(*c & 0x80)
 			{
@@ -746,15 +746,15 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		instrHeader.ApplyFlags(instrument->PitchEnv, AMS2Instrument::vibEnvShift);
 
 		// Scale envelopes to correct range
-		for(InstrumentEnvelope::iterator it = instrument->VolEnv.begin(); it != instrument->VolEnv.end(); it++)
+		for(auto it = instrument->VolEnv.begin(); it != instrument->VolEnv.end(); it++)
 		{
 			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((it->value * ENVELOPE_MAX + 64u) / 127u));
 		}
-		for(InstrumentEnvelope::iterator it = instrument->PanEnv.begin(); it != instrument->PanEnv.end(); it++)
+		for(auto it = instrument->PanEnv.begin(); it != instrument->PanEnv.end(); it++)
 		{
 			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((it->value * ENVELOPE_MAX + 128u) / 255u));
 		}
-		for(InstrumentEnvelope::iterator it = instrument->PitchEnv.begin(); it != instrument->PitchEnv.end(); it++)
+		for(auto it = instrument->PitchEnv.begin(); it != instrument->PitchEnv.end(); it++)
 		{
 #ifdef MODPLUG_TRACKER
 			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(it->value - 128), vibAmp, 255)));

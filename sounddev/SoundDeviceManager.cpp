@@ -47,9 +47,9 @@ template <typename Tdevice>
 void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 //----------------------------------------------------------
 {
-	const std::vector<SoundDevice::Info> infos = Tdevice::EnumerateDevices(sysInfo);
+	const auto infos = Tdevice::EnumerateDevices(sysInfo);
 	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	for(std::vector<SoundDevice::Info>::const_iterator it = infos.begin(); it != infos.end(); ++it)
+	for(auto it = infos.cbegin(); it != infos.cend(); ++it)
 	{
 		SoundDevice::Identifier identifier = it->GetIdentifier();
 		if(!identifier.empty())
@@ -163,7 +163,7 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 
-	for(std::vector<SoundDevice::Info>::iterator it = m_SoundDevices.begin(); it != m_SoundDevices.end(); ++it)
+	for(auto it = m_SoundDevices.begin(); it != m_SoundDevices.end(); ++it)
 	{
 		(*it).extraData[MPT_USTRING("priority")] = mpt::ufmt::dec(typePriorities[(*it).type]); 
 	}
@@ -176,7 +176,7 @@ void Manager::ReEnumerate()
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  InternalID: %1"))(m_SoundDevices[i].internalID));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  API Name  : %1"))(m_SoundDevices[i].apiName));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Name      : %1"))(m_SoundDevices[i].name));
-		for(std::map<mpt::ustring, mpt::ustring>::const_iterator extraIt = m_SoundDevices[i].extraData.begin(); extraIt != m_SoundDevices[i].extraData.end(); ++extraIt)
+		for(auto extraIt = m_SoundDevices[i].extraData.cbegin(); extraIt != m_SoundDevices[i].extraData.cend(); ++extraIt)
 		{
 			Log(LogDebug, mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extraIt->first, extraIt->second));
 		}
@@ -223,7 +223,7 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 	{
 		return SoundDevice::Info();
 	}
-	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+	for(auto it = begin(); it != end(); ++it)
 	{
 		if(it->GetIdentifier() == identifier)
 		{
@@ -244,7 +244,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 	}
 	if(!identifier.empty())
 	{ // valid identifier
-		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+		for(auto it = begin(); it != end(); ++it)
 		{
 			if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->GetIdentifier()))
 			{ // exact match
@@ -261,7 +261,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 		}
 		if(preferSameType)
 		{ // find first avilable device of given type
-			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+			for(auto it = begin(); it != end(); ++it)
 			{
 				if((it->type == type) && !IsDeviceUnavailable(it->GetIdentifier()))
 				{
@@ -270,7 +270,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 			}
 		}
 	}
-	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+	for(auto it = begin(); it != end(); ++it)
 	{ // find first available device
 		if(!IsDeviceUnavailable(it->GetIdentifier()))
 		{
@@ -453,7 +453,7 @@ SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Leg
 	}
 	std::size_t index = static_cast<uint8>(id & SoundDevice::Legacy::MaskIndex);
 	std::size_t seenDevicesOfDesiredType = 0;
-	for(std::vector<SoundDevice::Info>::const_iterator it = manager.begin(); it != manager.end(); ++it)
+	for(auto it = manager.begin(); it != manager.end(); ++it)
 	{
 		if(it->type == type)
 		{

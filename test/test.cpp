@@ -3066,7 +3066,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 
 	for(int i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
-		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
+		auto iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
 	}
 
@@ -3090,7 +3090,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	for(int i = 0; i < 3; i++)
 	{
 		bool bPatternDataMatch = true;
-		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
+		auto iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++)
 		{
 			if(pat[i][j] != *iter)

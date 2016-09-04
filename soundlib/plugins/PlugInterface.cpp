@@ -450,7 +450,7 @@ size_t IMixPlugin::GetInputPlugList(std::vector<IMixPlugin *> &list)
 		{
 			candidatePlug->GetOutputPlugList(candidatePlugOutputs);
 
-			for(std::vector<IMixPlugin *>::iterator iter = candidatePlugOutputs.begin(); iter != candidatePlugOutputs.end(); iter++)
+			for(auto iter = candidatePlugOutputs.begin(); iter != candidatePlugOutputs.end(); iter++)
 			{
 				if(*iter == this)
 				{

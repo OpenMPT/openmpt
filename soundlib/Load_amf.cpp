@@ -498,7 +498,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 	uint16 trackCount = 0;
-	for(std::vector<uint16>::const_iterator i = trackMap.begin(); i != trackMap.end(); i++)
+	for(auto i = trackMap.cbegin(); i != trackMap.cend(); i++)
 	{
 		trackCount = std::max(trackCount, *i);
 	}
@@ -528,9 +528,9 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		// First, try compacting the sample indices so that the loop won't have 2^32 iterations in the worst case.
 		std::vector<uint32> samplePosCompact = samplePos;
 		std::sort(samplePosCompact.begin(), samplePosCompact.end());
-		std::vector<uint32>::const_iterator end = std::unique(samplePosCompact.begin(), samplePosCompact.end());
+		auto end = std::unique(samplePosCompact.begin(), samplePosCompact.end());
 
-		for(std::vector<uint32>::const_iterator pos = samplePosCompact.begin(); pos != end && file.CanRead(1); pos++)
+		for(auto pos = samplePosCompact.begin(); pos != end && file.CanRead(1); pos++)
 		{
 			for(SAMPLEINDEX smp = 0; smp < GetNumSamples() && file.CanRead(1); smp++)
 			{
