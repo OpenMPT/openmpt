@@ -31,7 +31,7 @@
 namespace openmpt {
 
 static const char * strdup( const char * src ) {
-	char * dst = (char*)std::malloc( std::strlen( src ) + 1 );
+	char * dst = (char*)std::calloc( std::strlen( src ) + 1, sizeof( char ) );
 	if ( !dst ) {
 		return NULL;
 	}
@@ -228,7 +228,7 @@ double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks
 
 openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	try {
-		openmpt_module * mod = (openmpt_module*)std::malloc( sizeof( openmpt_module ) );
+		openmpt_module * mod = (openmpt_module*)std::calloc( 1, sizeof( openmpt_module ) );
 		if ( !mod ) {
 			throw std::bad_alloc();
 		}
@@ -264,7 +264,7 @@ openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callback
 
 openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	try {
-		openmpt_module * mod = (openmpt_module*)std::malloc( sizeof( openmpt_module ) );
+		openmpt_module * mod = (openmpt_module*)std::calloc( 1, sizeof( openmpt_module ) );
 		if ( !mod ) {
 			throw std::bad_alloc();
 		}
