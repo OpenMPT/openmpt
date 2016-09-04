@@ -23,7 +23,7 @@ class CRarArchive
 
 protected:
 
-	mpt::scoped_ptr<OnDiskFileWrapper> diskFile;
+	std::unique_ptr<OnDiskFileWrapper> diskFile;
 	bool captureCurrentFile;
 
 public:

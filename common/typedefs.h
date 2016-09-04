@@ -114,95 +114,21 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// We provide a simple scoped_ptr which can also be useful in addition to
-// std::unique_ptr.
+// std::make_unique is C++14
 namespace mpt {
-template<typename T> class scoped_ptr
+#if MPT_GCC_BEFORE(4,4,0) || MPT_MSVC_BEFORE(2013,0)
+template <typename T> inline std::unique_ptr<T> make_unique() { return std::unique_ptr<T>(new T()); }
+template <typename T, typename T1> inline std::unique_ptr<T> make_unique(T1 && x1) { return std::unique_ptr<T>(new T(std::forward<T1>(x1))); }
+template <typename T, typename T1, typename T2> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2))); }
+template <typename T, typename T1, typename T2, typename T3> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2, T3 && x3) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2), std::forward<T3>(x3))); }
+template <typename T, typename T1, typename T2, typename T3, typename T4> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2, T3 && x3, T4 && x4) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2), std::forward<T3>(x3), std::forward<T4>(x4))); }
+#else
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
 {
-private:
-	// Copying is not supported.
-	MPT_DEPRECATED scoped_ptr(const scoped_ptr & other) : m_p(other.m_p) {} // = delete
-	// Copying is not supported.
-	MPT_DEPRECATED scoped_ptr & operator=(const scoped_ptr & other) { m_p = other.m_p; return *this; } // = delete
-public:
-	typedef T element_type;
-	class initializer_impl
-	{
-		friend class scoped_ptr<element_type>;
-	private:
-		element_type * m_p;
-	private:
-		inline initializer_impl(const initializer_impl & other) : m_p(other.m_p) {}
-		inline initializer_impl & operator=(const initializer_impl & other) { m_p = other.m_p; return *this; }
-	public:
-		explicit initializer_impl(T * p) : m_p(p) {}
-	public:
-		template <typename Tobj> static inline typename mpt::scoped_ptr<T>::initializer_impl make() { return mpt::scoped_ptr<T>::initializer_impl(new Tobj()); }
-		template <typename Tobj, typename T1> static inline typename mpt::scoped_ptr<T>::initializer_impl make(const T1 &x1) { return mpt::scoped_ptr<T>::initializer_impl(new Tobj(x1)); }
-		template <typename Tobj, typename T1, typename T2> static inline typename mpt::scoped_ptr<T>::initializer_impl make(const T1 &x1, const T2 &x2) { return mpt::scoped_ptr<T>::initializer_impl(new Tobj(x1, x2)); }
-		template <typename Tobj, typename T1, typename T2, typename T3> static inline typename mpt::scoped_ptr<T>::initializer_impl make(const T1 &x1, const T2 &x2, const T3 &x3) { return mpt::scoped_ptr<T>::initializer_impl(new Tobj(x1, x2, x3)); }
-		template <typename Tobj, typename T1, typename T2, typename T3, typename T4> static inline typename mpt::scoped_ptr<T>::initializer_impl make(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return mpt::scoped_ptr<T>::initializer_impl(new Tobj(x1, x2, x3, x4)); }
-	};
-	class initializer_impl_result
-	{
-		friend class scoped_ptr<element_type>;
-	private:
-		element_type * m_p;
-	public:
-		inline initializer_impl_result(const initializer_impl_result & other) : m_p(other.m_p) {}
-	private:
-		MPT_DEPRECATED initializer_impl_result & operator=(const initializer_impl_result & other ) { m_p = other.m_p; return *this; } // = delete
-	public:
-		inline initializer_impl_result(const initializer_impl & other) : m_p(other.m_p) {}
-		inline initializer_impl_result & operator=(const initializer_impl & other) { m_p = other.m_p; return *this; }
-	public:
-		explicit initializer_impl_result(T * p) : m_p(p) {}
-	};
-	class initializer
-	{
-		friend class scoped_ptr<element_type>;
-	private:
-		element_type * m_p;
-	private:
-		MPT_DEPRECATED initializer(const initializer & /* other */ ) {} // = delete
-		MPT_DEPRECATED initializer & operator=(const initializer & /* other */ ) {return *this;} // = delete
-	public:
-		inline initializer(const initializer_impl_result & other) : m_p(other.m_p) {}
-		inline initializer & operator=(const initializer_impl_result & other) { m_p = other.m_p; return *this; }
-	public:
-		explicit initializer(T * p) : m_p(p) {}
-	};
-private:
-	element_type * m_p;
-public:
-	// Creates a scoped_ptr without any owned object.
-	scoped_ptr() : m_p(nullptr) {}
-	// Creates a scoped_ptr and assumes ownership of p (if p != nulltr).
-	explicit scoped_ptr(T * p) : m_p(p) {}
-	// Deletes the currently owned object (if any).
-	~scoped_ptr() { if(m_p) { delete m_p; m_p = nullptr; } }
-	// Deletes the currently owned object (if any), and assumes ownership of the passed object p (if any).
-	void reset(T * p = nullptr) { if(m_p) { delete m_p; m_p = nullptr; } m_p = p; }
-	// Returns a reference to the owned object. Behaviour is undefined if there is no owned object.
-	T & operator*() const { return *m_p; }
-	// Returns a pointer to the owned object, or nullptr if there is not any owned object. Ownership is not transferred.
-	T * operator->() const { return m_p; }
-	// Returns a pointer to the owned object, or nullptr if there is not any owned object. Ownership is not transferred.
-	T * get() const { return m_p; }
-	// Give away ownership of the owned object.
-	T * release() { T * ret = m_p; m_p = nullptr; return ret; }
-	// Creates a scoped_ptr and assumes ownership of the passed object init (if any).
-	scoped_ptr (const initializer & init) : m_p(init.m_p) {}
-	// Deletes the currently owned object (if any), and assumes ownership of the passed object init (if any).
-	scoped_ptr & operator=(const initializer & init) { if(m_p) { delete m_p; m_p = nullptr; } m_p = init.m_p; return *this; }
-	// Returns true iff the scoped_ptr currently owns an object (i.e. same as (bool)p).
-	operator bool() const { return m_p ? true : false; }
-};
-template <typename T> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped() { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(); }
-template <typename T, typename T1> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1); }
-template <typename T, typename T1, typename T2> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2); }
-template <typename T, typename T1, typename T2, typename T3> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2, x3); }
-template <typename T, typename T1, typename T2, typename T3, typename T4> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2, x3, x4); }
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+#endif
 } // namespace mpt
 
 
