@@ -394,6 +394,11 @@ void CFindReplaceTab::UpdateParamList()
 	if(oldcount)
 		oldcount -= m_isReplaceTab ? 2 : 1;
 
+	auto findParamMin = m_settings.findParamMin;
+	if(isExtended)
+	{
+		findParamMin &= 0x0F;
+	}
 	if(isExtended && !IsDlgButtonChecked(IDC_CHECK6))
 	{
 		UINT mask = m_effectInfo.GetEffectMaskFromIndex(effectIndex);
@@ -408,7 +413,7 @@ void CFindReplaceTab::UpdateParamList()
 		if(oldcount)
 			newpos = m_cbnParam.GetItemData(m_cbnParam.GetCurSel());
 		else
-			newpos = (m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin);
+			newpos = (m_isReplaceTab ? m_settings.replaceParam : findParamMin);
 		Limit(newpos, 0, newcount - 1);
 		m_cbnParam.SetRedraw(FALSE);
 		m_cbnParam.ResetContent();
