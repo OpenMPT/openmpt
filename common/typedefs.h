@@ -116,7 +116,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // std::make_unique is C++14
 namespace mpt {
-#if MPT_GCC_BEFORE(4,4,0) || MPT_MSVC_BEFORE(2013,0)
+#if MPT_MSVC_BEFORE(2013,0)
 template <typename T> inline std::unique_ptr<T> make_unique() { return std::unique_ptr<T>(new T()); }
 template <typename T, typename T1> inline std::unique_ptr<T> make_unique(T1 && x1) { return std::unique_ptr<T>(new T(std::forward<T1>(x1))); }
 template <typename T, typename T1, typename T2> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2))); }
