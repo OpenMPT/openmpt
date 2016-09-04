@@ -171,9 +171,9 @@ protected:
 
 	DWORD m_GuiThreadId;
 
-	mpt::scoped_ptr<mpt::random_device> m_RD;
-	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
-	mpt::scoped_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
+	std::unique_ptr<mpt::random_device> m_RD;
+	std::unique_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
+	std::unique_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
 
 	std::shared_ptr<mpt::Wine::VersionContext> m_WineVersion;
 
