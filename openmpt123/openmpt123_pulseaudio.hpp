@@ -102,7 +102,7 @@ public:
 		if ( stream ) {
 			error = 0;
 			if ( pa_simple_drain( stream, &error ) < 0 ) {
-				throw pulseaudio_exception( error );
+				// throw pulseaudio_exception( error );
 			}
 			pa_simple_free( stream );
 			stream = NULL;

@@ -475,7 +475,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < fileHeader.numOrds; i++)
+		for(size_t i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -808,7 +808,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(numSamples == 0
 			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))	// v2.01+: 120 Notes
-			|| (fileHeader.versionLow == 0 && !file.ReadArray(reinterpret_cast<uint8 (&) [96]>(sampleAssignment[12]))))	// v2.0: 96 Notes
+			|| (fileHeader.versionLow == 0 && !file.ReadRaw(sampleAssignment + 12, 96)))	// v2.0: 96 Notes
 		{
 			continue;
 		}
@@ -936,7 +936,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < fileHeader.numOrds; i++)
+		for(size_t i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -1024,16 +1024,12 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
 //------------------------------------------------------------------------------------------------------------------------
 {
-	int8 *tempBuf = new (std::nothrow) int8[destSize];
-	if(tempBuf == nullptr)
-	{
-		return;
-	}
+	std::vector<int8> tempBuf(destSize, 0);
 
 	// Unpack Loop
 	{
 		const int8 *in = source;
-		int8 *out = tempBuf;
+		int8 *out = tempBuf.data();
 
 		size_t i = sourceSize, j = destSize;
 		while(i != 0 && j != 0)
@@ -1067,7 +1063,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 
 	// Bit Unpack Loop
 	{
-		int8 *out = tempBuf;
+		int8 *out = tempBuf.data();
 		uint16 bitcount = 0x80;
 		size_t k = 0;
 		uint8 *dst = static_cast<uint8 *>(dest);
@@ -1106,8 +1102,6 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 			*(out++) = old;
 		}
 	}
-
-	delete[] tempBuf;
 }
 
 
