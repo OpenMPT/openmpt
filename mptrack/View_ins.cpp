@@ -358,7 +358,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 	{
 		// Move all points after modified point as well.
 		tickDiff = envelope->at(nPoint).tick - tickDiff;
-		for(InstrumentEnvelope::iterator it = envelope->begin() + nPoint + 1; it != envelope->end(); it++)
+		for(auto it = envelope->begin() + nPoint + 1; it != envelope->end(); it++)
 		{
 			it->tick = (uint16)(std::max(0, (int)it->tick + tickDiff));
 		}

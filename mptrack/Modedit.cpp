@@ -1068,7 +1068,7 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 	s = pszEnvHdr;
 	s.AppendFormat(pszEnvFmt, env.size(), env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
 		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
-	for(InstrumentEnvelope::const_iterator i = env.begin(); i != env.end(); i++)
+	for(auto i = env.cbegin(); i != env.cend(); i++)
 	{
 		s.AppendFormat("%d,%d\r\n", i->tick, i->value);
 	}
@@ -1115,7 +1115,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	env.dwFlags.set(ENV_ENABLED, nPoints > 0);
 
 	int oldn = 0;
-	for(InstrumentEnvelope::iterator i = env.begin(); i != env.end(); i++)
+	for(auto i = env.begin(); i != env.end(); i++)
 	{
 		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
 		if (pos >= length) break;

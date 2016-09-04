@@ -94,8 +94,8 @@ std::vector<BuildVariant> BuildVariants::GetRecommendedWin32Build()
 	std::vector<BuildVariant> result;
 	if(IsKnownSystem())
 	{
-		std::vector<BuildVariant> builds = GetBuildVariants();
-		for(std::vector<BuildVariant>::const_iterator it = builds.begin(); it != builds.end(); ++it)
+		auto builds = GetBuildVariants();
+		for(auto it = builds.cbegin(); it != builds.cend(); ++it)
 		{
 			if(!((*it).Bitness == 32))
 			{
@@ -117,8 +117,8 @@ std::vector<BuildVariant> BuildVariants::GetRecommendedWin64Build()
 	std::vector<BuildVariant> result;
 	if(IsKnownSystem())
 	{
-		std::vector<BuildVariant> builds = GetBuildVariants();
-		for(std::vector<BuildVariant>::const_iterator it = builds.begin(); it != builds.end(); ++it)
+		auto builds = GetBuildVariants();
+		for(auto it = builds.cbegin(); it != builds.cend(); ++it)
 		{
 			if(!((*it).Bitness == 64))
 			{

@@ -1882,7 +1882,7 @@ bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
 {
 	for (CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes; cmd=(CommandID)(cmd + 1))		//for all notes
 	{
-		for(std::vector<KeyCombination>::iterator kc = commands[cmd].kcList.begin(); kc != commands[cmd].kcList.end(); kc++)
+		for(auto kc = commands[cmd].kcList.begin(); kc != commands[cmd].kcList.end(); kc++)
 		{
 			if(repeat)
 				kc->EventType(kc->EventType() | kKeyEventRepeat);

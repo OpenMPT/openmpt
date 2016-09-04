@@ -342,7 +342,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				// Create sub menu with a list of all samples that are referenced by this instrument.
 				const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 
-				for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+				for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 				{
 					if(*sample <= sndFile.GetNumSamples())
 					{
@@ -1990,7 +1990,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 
 			const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 
-			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+			for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 			{
 				if(*sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).uFlags[CHN_PANNING])
 				{
@@ -2259,7 +2259,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 						// If we just dialled up an instrument plugin, zap the sample assignments.
 						const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 						bool hasSamples = false;
-						for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+						for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 						{
 							if(*sample > 0 && *sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).pSample != nullptr)
 							{

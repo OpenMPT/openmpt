@@ -2255,7 +2255,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 	
 	//for all channels where type is selected
-	for(std::vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(auto iter = validChans.begin(); iter != validChans.end(); iter++)
 	{
 		CHANNELINDEX nchn = *iter;
 		
@@ -6274,7 +6274,7 @@ bool CViewPattern::IsInterpolationPossible(PatternCursor::Columns colType) const
 
 	ROWINDEX startRow = m_Selection.GetStartRow();
 	ROWINDEX endRow   = m_Selection.GetEndRow();
-	for(std::vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(auto iter = validChans.begin(); iter != validChans.end(); iter++)
 	{
 		if(IsInterpolationPossible(startRow, endRow, *iter, colType))
 		{

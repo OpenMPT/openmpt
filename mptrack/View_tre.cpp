@@ -162,8 +162,7 @@ CModTree::CModTree(CModTree *pDataTree) :
 CModTree::~CModTree()
 //-------------------
 {
-	std::vector<ModTreeDocInfo *>::iterator iter;
-	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		delete (*iter);
 	}
@@ -446,8 +445,7 @@ void CModTree::AddDocument(CModDoc &modDoc)
 //-----------------------------------------
 {
 	// Check if document is already in the list
-	std::vector<ModTreeDocInfo *>::iterator iter;
-	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if(&(*iter)->modDoc == &modDoc)
 		{
@@ -475,8 +473,7 @@ void CModTree::AddDocument(CModDoc &modDoc)
 void CModTree::RemoveDocument(CModDoc &modDoc)
 //--------------------------------------------
 {
-	std::vector<ModTreeDocInfo *>::iterator iter;
-	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if(&(*iter)->modDoc == &modDoc)
 		{
@@ -516,8 +513,7 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 //------------------------------------------------------------------
 {
-	std::vector<ModTreeDocInfo *>::iterator iter;
-	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if(&(*iter)->modDoc == &modDoc)
 		{
@@ -2482,8 +2478,7 @@ void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 {
 	if (pHint != this)
 	{
-		std::vector<ModTreeDocInfo *>::iterator iter;
-		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+		for (auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 		{
 			if (&(*iter)->modDoc == pModDoc || !pModDoc)
 			{
@@ -3084,8 +3079,7 @@ void CModTree::OnRefreshTree()
 //----------------------------
 {
 	BeginWaitCursor();
-	std::vector<ModTreeDocInfo *>::iterator iter;
-	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for (auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		UpdateView((**iter), UpdateHint().ModType());
 	}

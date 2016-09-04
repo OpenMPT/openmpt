@@ -51,7 +51,7 @@ public:
 
 	void RemoveValue_1(const T1& a)
 	{
-		typename std::vector<T1>::iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		auto iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			m_T2.erase(m_T2.begin() + (iter-m_T1.begin()));
@@ -61,7 +61,7 @@ public:
 
 	void RemoveValue_2(const T2& b)
 	{
-		typename std::vector<T2>::iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		auto iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			m_T1.erase(m_T1.begin() + (iter-m_T2.begin()));
@@ -71,7 +71,7 @@ public:
 
 	T2 GetMapping_12(const T1& a) const
 	{
-		typename std::vector<T1>::const_iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		auto iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			return m_T2[iter-m_T1.begin()];
@@ -82,7 +82,7 @@ public:
 
 	T1 GetMapping_21(const T2& b) const
 	{
-		typename std::vector<T2>::const_iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		auto iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			return m_T1[iter-m_T2.begin()];

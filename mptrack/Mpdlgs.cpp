@@ -335,9 +335,9 @@ void COptionsSoundcard::UpdateEverything()
 
 		UINT iItem = 0;
 
-		for(std::vector<SoundDevice::Info>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
+		for(auto it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
 		{
-			std::map<mpt::ustring, mpt::ustring> extraData = it->extraData;
+			auto extraData = it->extraData;
 			int priority = ConvertStrTo<int>(extraData[MPT_USTRING("priority")]);
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)

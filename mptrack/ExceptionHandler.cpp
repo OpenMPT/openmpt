@@ -158,7 +158,7 @@ int DebugReporter::RescueFiles()
 {
 	int numFiles = 0;
 	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	for(auto doc = documents.begin(); doc != documents.end(); doc++)
 	{
 		CModDoc *pModDoc = *doc;
 		if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
@@ -239,7 +239,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		if(&theApp.GetSettings())
 		{
 			SettingsContainer & settings = theApp.GetSettings();
-			for(SettingsContainer::SettingsMap::const_iterator it = settings.begin(); it != settings.end(); ++it)
+			for(auto it = settings.begin(); it != settings.end(); ++it)
 			{
 				f
 					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).first.FormatAsString() + MPT_USTRING(" = ") + (*it).second.GetRefValue().FormatValueAsString())
@@ -265,7 +265,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			if(&theApp.GetSettings())
 			{
 				SettingsContainer & settings = theApp.GetSettings();
-				for(SettingsContainer::SettingsMap::const_iterator it = settings.begin(); it != settings.end(); ++it)
+				for(auto it = settings.cbegin(); it != settings.cend(); ++it)
 				{
 					f.WriteSetting((*it).first, (*it).second.GetRefValue());
 				}

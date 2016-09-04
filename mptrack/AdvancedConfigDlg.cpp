@@ -147,7 +147,7 @@ void COptionsAdvanced::ReInit()
 #endif
 
 	int i = 0;
-	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
+	for(auto it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
 	{
 		// In MPT_USTRING_MODE_WIDE mode,
 		// this loop is heavily optimized to avoid as much string copies as possible
@@ -189,7 +189,7 @@ void COptionsAdvanced::ReInit()
 		if(m_listGrouped)
 		{
 
-			GroupMap::const_iterator gi = m_groups.find(section);
+			auto gi = m_groups.find(section);
 			if(gi == m_groups.end())
 			{
 				LVGROUP group;

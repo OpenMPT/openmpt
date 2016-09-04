@@ -134,9 +134,8 @@ public:
 			fileWAV->Write(numPoints);
 
 			// Write all cue points
-			std::vector<uint64>::const_iterator iter;
 			uint32 index = 0;
-			for(iter = cues.begin(); iter != cues.end(); iter++)
+			for(auto iter = cues.cbegin(); iter != cues.cend(); iter++)
 			{
 				WAVCuePoint cuePoint;
 				cuePoint.id = index++;

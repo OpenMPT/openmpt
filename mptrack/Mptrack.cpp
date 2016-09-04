@@ -286,7 +286,7 @@ void CTrackApp::OnFileCloseAll()
 	}
 
 	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	for(auto doc = documents.begin(); doc != documents.end(); doc++)
 	{
 		(*doc)->SafeFileClose();
 	}
@@ -695,7 +695,7 @@ void CTrackApp::RemoveMruItem(const size_t item)
 void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 //--------------------------------------------------------
 {
-	for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+	for(auto i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
 	{
 		if(!mpt::PathString::CompareNoCase(*i, path))
 		{
@@ -1456,7 +1456,7 @@ void CTrackApp::OnFileOpen()
 {
 	FileDialog::PathList files;
 	OpenModulesDialog(files);
-	for(FileDialog::PathList::const_iterator file = files.begin(); file != files.end(); file++)
+	for(auto file = files.cbegin(); file != files.cend(); file++)
 	{
 		OpenDocumentFile(*file);
 	}
@@ -1961,7 +1961,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	bool dialogShown = false;
 
 	// Read tags for built-in plugins
-	for(CVstPluginManager::iterator plug = m_pPluginManager->begin(); plug != m_pPluginManager->end(); plug++)
+	for(auto plug = m_pPluginManager->begin(); plug != m_pPluginManager->end(); plug++)
 	{
 		char tmp[32];
 		sprintf(tmp, "Plugin%08X%08X.Tags", (**plug).pluginId1, (**plug).pluginId2);
@@ -2032,7 +2032,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 #ifndef NO_PLUGINS
 
 	size_t plug = 0;
-	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
+	for(auto pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
 		if(!(**pPlug).isBuiltIn)
 		{
