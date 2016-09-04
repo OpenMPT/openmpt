@@ -2415,7 +2415,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 
 
 template<int channels>
-forceinline void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuffer, int32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
+MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuffer, int32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
 {
 	const bool isStereo = (channels >= 2);
 	const bool hasRear = (channels >= 4);

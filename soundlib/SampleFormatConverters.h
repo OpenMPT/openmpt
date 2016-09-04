@@ -48,7 +48,7 @@ struct DecodeInt7
 	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return Clamp(static_cast<int8>(*inBuf), static_cast<int8>(-64), static_cast<int8>(63)) * 2;
 	}
@@ -59,7 +59,7 @@ struct DecodeInt8
 	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return static_cast<int8>(*inBuf);
 	}
@@ -70,7 +70,7 @@ struct DecodeUint8
 	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return static_cast<int8>(int(static_cast<uint8>(*inBuf)) - 128);
 	}
@@ -83,7 +83,7 @@ struct DecodeInt8Delta
 	static const int input_inc = 1;
 	uint8 delta;
 	DecodeInt8Delta() : delta(0) { }
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		delta += static_cast<uint8>(*inBuf);
 		return static_cast<int8>(delta);
@@ -96,7 +96,7 @@ struct DecodeInt16
 	typedef mpt::byte input_t;
 	typedef int16 output_t;
 	static const int input_inc = 2;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return (static_cast<uint8>(inBuf[loByteIndex]) | (static_cast<uint8>(inBuf[hiByteIndex]) << 8)) - offset;
 	}
@@ -110,7 +110,7 @@ struct DecodeInt16Delta
 	static const int input_inc = 2;
 	uint16 delta;
 	DecodeInt16Delta() : delta(0) { }
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		delta += static_cast<uint8>(inBuf[loByteIndex]) | (static_cast<uint8>(inBuf[hiByteIndex]) << 8);
 		return static_cast<int16>(delta);
@@ -124,7 +124,7 @@ struct DecodeInt16Delta8
 	static const int input_inc = 2;
 	uint16 delta;
 	DecodeInt16Delta8() : delta(0) { }
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		delta += static_cast<uint8>(inBuf[0]);
 		int16 result = delta & 0xFF;
@@ -140,7 +140,7 @@ struct DecodeInt24
 	typedef mpt::byte input_t;
 	typedef int32 output_t;
 	static const int input_inc = 3;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return ((static_cast<uint8>(inBuf[loByteIndex]) << 8) | (static_cast<uint8>(inBuf[midByteIndex]) << 16) | (static_cast<uint8>(inBuf[hiByteIndex]) << 24)) - offset;
 	}
@@ -152,7 +152,7 @@ struct DecodeInt32
 	typedef mpt::byte input_t;
 	typedef int32 output_t;
 	static const int input_inc = 4;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return (static_cast<uint8>(inBuf[loLoByteIndex]) | (static_cast<uint8>(inBuf[loHiByteIndex]) << 8) | (static_cast<uint8>(inBuf[hiLoByteIndex]) << 16) | (static_cast<uint8>(inBuf[hiHiByteIndex]) << 24)) - offset;
 	}
@@ -164,7 +164,7 @@ struct DecodeInt64
 	typedef mpt::byte input_t;
 	typedef int64 output_t;
 	static const int input_inc = 8;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return (uint64(0)
 			| (static_cast<uint64>(uint8(inBuf[b0])) <<  0)
@@ -185,7 +185,7 @@ struct DecodeFloat32
 	typedef mpt::byte input_t;
 	typedef float32 output_t;
 	static const int input_inc = 4;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
 	}
@@ -198,11 +198,11 @@ struct DecodeScaledFloat32
 	typedef float32 output_t;
 	static const int input_inc = 4;
 	float factor;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return factor * IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
 	}
-	forceinline DecodeScaledFloat32(float scaleFactor)
+	MPT_FORCEINLINE DecodeScaledFloat32(float scaleFactor)
 		: factor(scaleFactor)
 	{
 		return;
@@ -215,7 +215,7 @@ struct DecodeFloat64
 	typedef mpt::byte input_t;
 	typedef float64 output_t;
 	static const int input_inc = 8;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return IEEE754binary64LE(uint8(inBuf[b0]), uint8(inBuf[b1]), uint8(inBuf[b2]), uint8(inBuf[b3]), uint8(inBuf[b4]), uint8(inBuf[b5]), uint8(inBuf[b6]), uint8(inBuf[b7]));
 	}
@@ -227,7 +227,7 @@ struct DecodeIdentity
 	typedef Tsample input_t;
 	typedef Tsample output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return *inBuf;
 	}
@@ -241,7 +241,7 @@ struct ConvertShift
 {
 	typedef Tsrc input_t;
 	typedef Tdst output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return mpt::saturate_cast<output_t>(val >> shift);
 	}
@@ -255,7 +255,7 @@ struct ConvertShiftUp
 {
 	typedef Tsrc input_t;
 	typedef Tdst output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return mpt::saturate_cast<output_t>(val << shift);
 	}
@@ -277,7 +277,7 @@ struct Convert<Tid, Tid>
 {
 	typedef Tid input_t;
 	typedef Tid output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val;
 	}
@@ -288,7 +288,7 @@ struct Convert<int8, int16>
 {
 	typedef int16 input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int8>(val >> 8);
 	}
@@ -299,7 +299,7 @@ struct Convert<int8, int24>
 {
 	typedef int24 input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int8>(val >> 16);
 	}
@@ -310,7 +310,7 @@ struct Convert<int8, int32>
 {
 	typedef int32 input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int8>(val >> 24);
 	}
@@ -321,7 +321,7 @@ struct Convert<int8, int64>
 {
 	typedef int64 input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int8>(val >> 56);
 	}
@@ -332,7 +332,7 @@ struct Convert<int8, float32>
 {
 	typedef float32 input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 128.0f;
@@ -347,7 +347,7 @@ struct Convert<int16, int8>
 {
 	typedef int8 input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int16>(val << 8);
 	}
@@ -358,7 +358,7 @@ struct Convert<int16, int24>
 {
 	typedef int24 input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int16>(val >> 8);
 	}
@@ -369,7 +369,7 @@ struct Convert<int16, int32>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int16>(val >> 16);
 	}
@@ -380,7 +380,7 @@ struct Convert<int16, int64>
 {
 	typedef int64 input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int16>(val >> 48);
 	}
@@ -391,7 +391,7 @@ struct Convert<int16, float32>
 {
 	typedef float32 input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 32768.0f;
@@ -406,7 +406,7 @@ struct Convert<int8, double>
 {
 	typedef double input_t;
 	typedef int8 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 128.0;
@@ -421,7 +421,7 @@ struct Convert<int16, double>
 {
 	typedef double input_t;
 	typedef int16 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 32768.0;
@@ -436,7 +436,7 @@ struct Convert<int24, int8>
 {
 	typedef int8 input_t;
 	typedef int24 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int24>(val << 16);
 	}
@@ -447,7 +447,7 @@ struct Convert<int24, int16>
 {
 	typedef int16 input_t;
 	typedef int24 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int24>(val << 8);
 	}
@@ -458,7 +458,7 @@ struct Convert<int24, int32>
 {
 	typedef int32 input_t;
 	typedef int24 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int24>(val >> 8);
 	}
@@ -469,7 +469,7 @@ struct Convert<int24, int64>
 {
 	typedef int64 input_t;
 	typedef int24 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int24>(val >> 40);
 	}
@@ -480,7 +480,7 @@ struct Convert<int32, int8>
 {
 	typedef int8 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int32>(val << 24);
 	}
@@ -491,7 +491,7 @@ struct Convert<int32, int16>
 {
 	typedef int16 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int32>(val << 16);
 	}
@@ -502,7 +502,7 @@ struct Convert<int32, int24>
 {
 	typedef int24 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int32>(val << 8);
 	}
@@ -513,7 +513,7 @@ struct Convert<int32, int64>
 {
 	typedef int64 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int32>(val >> 32);
 	}
@@ -524,7 +524,7 @@ struct Convert<int32, float32>
 {
 	typedef float32 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
@@ -539,7 +539,7 @@ struct Convert<int32, double>
 {
 	typedef double input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 2147483648.0;
@@ -554,7 +554,7 @@ struct Convert<int64, int8>
 {
 	typedef int8 input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int64>(val) << 56;
 	}
@@ -565,7 +565,7 @@ struct Convert<int64, int16>
 {
 	typedef int16 input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int64>(val) << 48;
 	}
@@ -576,7 +576,7 @@ struct Convert<int64, int24>
 {
 	typedef int24 input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int64>(val) << 40;
 	}
@@ -587,7 +587,7 @@ struct Convert<int64, int32>
 {
 	typedef int32 input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int64>(val) << 32;
 	}
@@ -598,7 +598,7 @@ struct Convert<int64, float32>
 {
 	typedef float32 input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1)<<63);
@@ -613,7 +613,7 @@ struct Convert<int64, double>
 {
 	typedef double input_t;
 	typedef int64 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		Limit(val, -1.0, 1.0);
 		val *= static_cast<double>(uint64(1)<<63);
@@ -628,7 +628,7 @@ struct Convert<float32, int8>
 {
 	typedef int8 input_t;
 	typedef float32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>(static_cast<unsigned int>(1)<<7));
 	}
@@ -639,7 +639,7 @@ struct Convert<float32, int16>
 {
 	typedef int16 input_t;
 	typedef float32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>(static_cast<unsigned int>(1)<<15));
 	}
@@ -650,7 +650,7 @@ struct Convert<float32, int32>
 {
 	typedef int32 input_t;
 	typedef float32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>(static_cast<unsigned int>(1)<<31));
 	}
@@ -661,7 +661,7 @@ struct Convert<float32, int64>
 {
 	typedef int64 input_t;
 	typedef float32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>(static_cast<uint64>(1)<<63));
 	}
@@ -672,7 +672,7 @@ struct Convert<double, int8>
 {
 	typedef int8 input_t;
 	typedef double output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<7));
 	}
@@ -683,7 +683,7 @@ struct Convert<double, int16>
 {
 	typedef int16 input_t;
 	typedef double output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<15));
 	}
@@ -694,7 +694,7 @@ struct Convert<double, int32>
 {
 	typedef int32 input_t;
 	typedef double output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<31));
 	}
@@ -705,7 +705,7 @@ struct Convert<double, int64>
 {
 	typedef int64 input_t;
 	typedef double output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<uint64>(1)<<63));
 	}
@@ -716,7 +716,7 @@ struct Convert<double, float>
 {
 	typedef float input_t;
 	typedef double output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val;
 	}
@@ -727,7 +727,7 @@ struct Convert<float, double>
 {
 	typedef double input_t;
 	typedef float output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<float>(val);
 	}
@@ -743,7 +743,7 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits, clipOutput>
 	typedef int32 input_t;
 	typedef uint8 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -760,7 +760,7 @@ struct ConvertFixedPoint<int8, int32, fractionalBits, clipOutput>
 	typedef int32 input_t;
 	typedef int8 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -777,7 +777,7 @@ struct ConvertFixedPoint<int16, int32, fractionalBits, clipOutput>
 	typedef int32 input_t;
 	typedef int16 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -794,7 +794,7 @@ struct ConvertFixedPoint<int24, int32, fractionalBits, clipOutput>
 	typedef int32 input_t;
 	typedef int24 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -810,7 +810,7 @@ struct ConvertFixedPoint<int32, int32, fractionalBits, clipOutput>
 {
 	typedef int32 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return static_cast<int32>(Clamp(val, static_cast<int>(-((1<<fractionalBits)-1)), static_cast<int>(1<<fractionalBits)-1)) << (sizeof(input_t)*8-1-fractionalBits);
@@ -823,12 +823,12 @@ struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
 	typedef int32 input_t;
 	typedef float32 output_t;
 	const float factor;
-	forceinline ConvertFixedPoint()
+	MPT_FORCEINLINE ConvertFixedPoint()
 		: factor( 1.0f / static_cast<float>(1 << fractionalBits) )
 	{
 		return;
 	}
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		MPT_CONSTANT_IF(clipOutput)
@@ -854,7 +854,7 @@ struct ConvertToFixedPoint<int32, uint8, fractionalBits>
 	typedef uint8 input_t;
 	typedef int32 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -868,7 +868,7 @@ struct ConvertToFixedPoint<int32, int16, fractionalBits>
 	typedef int16 input_t;
 	typedef int32 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -882,7 +882,7 @@ struct ConvertToFixedPoint<int32, int24, fractionalBits>
 	typedef int24 input_t;
 	typedef int32 output_t;
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
@@ -895,7 +895,7 @@ struct ConvertToFixedPoint<int32, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int32 output_t;
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		return static_cast<output_t>(val) >> (sizeof(input_t)*8-1-fractionalBits);
@@ -908,12 +908,12 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	typedef float32 input_t;
 	typedef int32 output_t;
 	const float factor;
-	forceinline ConvertToFixedPoint()
+	MPT_FORCEINLINE ConvertToFixedPoint()
 		: factor( static_cast<float>(1 << fractionalBits) )
 	{
 		return;
 	}
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return mpt::saturate_cast<output_t>(std::floor(val * factor + 0.5f));
@@ -932,11 +932,11 @@ struct ConversionChain
 	static const int input_inc = Func1::input_inc;
 	Func1 func1;
 	Func2 func2;
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return func2(func1(inBuf));
 	}
-	forceinline ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+	MPT_FORCEINLINE ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
 		, func2(f2)
 	{
@@ -957,8 +957,8 @@ struct Normalize<int32>
 	typedef int32 output_t;
 	typedef uint32 peak_t;
 	uint32 maxVal;
-	forceinline Normalize() : maxVal(0) { }
-	forceinline void FindMax(input_t val)
+	MPT_FORCEINLINE Normalize() : maxVal(0) { }
+	MPT_FORCEINLINE void FindMax(input_t val)
 	{
 		if(val < 0)
 		{
@@ -974,15 +974,15 @@ struct Normalize<int32>
 			maxVal = static_cast<uint32>(val);
 		}
 	}
-	forceinline bool IsSilent() const
+	MPT_FORCEINLINE bool IsSilent() const
 	{
 		return maxVal == 0;
 	}
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return Util::muldivrfloor(val, static_cast<uint32>(1) << 31, maxVal);
 	}
-	forceinline peak_t GetSrcPeak() const
+	MPT_FORCEINLINE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -996,8 +996,8 @@ struct Normalize<float32>
 	typedef float32 peak_t;
 	float maxVal;
 	float maxValInv;
-	forceinline Normalize() : maxVal(0.0f), maxValInv(1.0f) { }
-	forceinline void FindMax(input_t val)
+	MPT_FORCEINLINE Normalize() : maxVal(0.0f), maxValInv(1.0f) { }
+	MPT_FORCEINLINE void FindMax(input_t val)
 	{
 		float absval = std::fabs(val);
 		if(absval > maxVal)
@@ -1005,7 +1005,7 @@ struct Normalize<float32>
 			maxVal = absval;
 		}
 	}
-	forceinline bool IsSilent()
+	MPT_FORCEINLINE bool IsSilent()
 	{
 		if(maxVal == 0.0f)
 		{
@@ -1017,11 +1017,11 @@ struct Normalize<float32>
 			return false;
 		}
 	}
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * maxValInv;
 	}
-	forceinline peak_t GetSrcPeak() const
+	MPT_FORCEINLINE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -1035,8 +1035,8 @@ struct Normalize<float64>
 	typedef float64 peak_t;
 	double maxVal;
 	double maxValInv;
-	forceinline Normalize() : maxVal(0.0), maxValInv(1.0) { }
-	forceinline void FindMax(input_t val)
+	MPT_FORCEINLINE Normalize() : maxVal(0.0), maxValInv(1.0) { }
+	MPT_FORCEINLINE void FindMax(input_t val)
 	{
 		double absval = std::fabs(val);
 		if(absval > maxVal)
@@ -1044,7 +1044,7 @@ struct Normalize<float64>
 			maxVal = absval;
 		}
 	}
-	forceinline bool IsSilent()
+	MPT_FORCEINLINE bool IsSilent()
 	{
 		if(maxVal == 0.0)
 		{
@@ -1056,11 +1056,11 @@ struct Normalize<float64>
 			return false;
 		}
 	}
-	forceinline output_t operator() (input_t val)
+	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * maxValInv;
 	}
-	forceinline peak_t GetSrcPeak() const
+	MPT_FORCEINLINE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -1082,23 +1082,23 @@ struct NormalizationChain
 	Func1 func1;
 	Normalize<normalize_t> normalize;
 	Func2 func2;
-	forceinline void FindMax(const input_t *inBuf)
+	MPT_FORCEINLINE void FindMax(const input_t *inBuf)
 	{
 		normalize.FindMax(func1(inBuf));
 	}
-	forceinline bool IsSilent()
+	MPT_FORCEINLINE bool IsSilent()
 	{
 		return normalize.IsSilent();
 	}
-	forceinline output_t operator() (const input_t *inBuf)
+	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
 		return func2(normalize(func1(inBuf)));
 	}
-	forceinline peak_t GetSrcPeak() const
+	MPT_FORCEINLINE peak_t GetSrcPeak() const
 	{
 		return normalize.GetSrcPeak();
 	}
-	forceinline NormalizationChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+	MPT_FORCEINLINE NormalizationChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
 		, func2(f2)
 	{

@@ -587,7 +587,6 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 // legacy
 #define CountOf(x) MPT_ARRAYCOUNT(x)
-#define forceinline MPT_FORCEINLINE
 #define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
 
 

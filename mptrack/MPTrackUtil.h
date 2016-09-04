@@ -24,7 +24,7 @@ CString GetErrorMessage(DWORD nErrorCode);
 namespace Util
 {
 	// Get horizontal DPI resolution
-	forceinline int GetDPIx(HWND hwnd)
+	MPT_FORCEINLINE int GetDPIx(HWND hwnd)
 	{
 		HDC dc = ::GetDC(hwnd);
 		int dpi = ::GetDeviceCaps(dc, LOGPIXELSX);
@@ -33,7 +33,7 @@ namespace Util
 	}
 
 	// Get vertical DPI resolution
-	forceinline int GetDPIy(HWND hwnd)
+	MPT_FORCEINLINE int GetDPIy(HWND hwnd)
 	{
 		HDC dc = ::GetDC(hwnd);
 		int dpi = ::GetDeviceCaps(dc, LOGPIXELSY);
@@ -42,13 +42,13 @@ namespace Util
 	}
 
 	// Applies DPI scaling factor to some given size
-	forceinline int ScalePixels(int pixels, HWND hwnd)
+	MPT_FORCEINLINE int ScalePixels(int pixels, HWND hwnd)
 	{
 		return MulDiv(pixels, GetDPIx(hwnd), 96);
 	}
 
 	// Removes DPI scaling factor from some given size
-	forceinline int ScalePixelsInv(int pixels, HWND hwnd)
+	MPT_FORCEINLINE int ScalePixelsInv(int pixels, HWND hwnd)
 	{
 		return MulDiv(pixels, 96, GetDPIx(hwnd));
 	}

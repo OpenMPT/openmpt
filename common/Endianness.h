@@ -55,14 +55,14 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
 struct endian_type { uint16 value; };
-static forceinline bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
-static forceinline bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
+static MPT_FORCEINLINE bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
+static MPT_FORCEINLINE bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
 
 static const endian_type endian_big    = { 0x1234u };
 static const endian_type endian_little = { 0x3412u };
 
 namespace detail {
-	static forceinline endian_type endian_probe()
+	static MPT_FORCEINLINE endian_type endian_probe()
 	{
 		STATIC_ASSERT(sizeof(endian_type) == 2);
 		const mpt::byte probe[2] = { 0x12, 0x34 };
@@ -72,7 +72,7 @@ namespace detail {
 	}
 }
 
-static forceinline endian_type endian()
+static MPT_FORCEINLINE endian_type endian()
 {
 	#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 		return endian_little;
@@ -83,12 +83,12 @@ static forceinline endian_type endian()
 	#endif
 }
 
-static forceinline bool endian_is_little()
+static MPT_FORCEINLINE bool endian_is_little()
 {
 	return endian() == endian_little;
 }
 
-static forceinline bool endian_is_big()
+static MPT_FORCEINLINE bool endian_is_big()
 {
 	return endian() == endian_big;
 }
@@ -149,19 +149,19 @@ namespace mpt { namespace detail {
 // catch system macros
 #ifndef MPT_bswap16
 #ifdef bswap16
-static forceinline uint16 mpt_bswap16(uint16 x) { return bswap16(x); }
+static MPT_FORCEINLINE uint16 mpt_bswap16(uint16 x) { return bswap16(x); }
 #define MPT_bswap16 mpt::detail::mpt_bswap16
 #endif
 #endif
 #ifndef MPT_bswap32
 #ifdef bswap32
-static forceinline uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
+static MPT_FORCEINLINE uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
 #define MPT_bswap32 mpt::detail::mpt_bswap32
 #endif
 #endif
 #ifndef MPT_bswap64
 #ifdef bswap64
-static forceinline uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
+static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #define MPT_bswap64 mpt::detail::mpt_bswap64
 #endif
 #endif
@@ -228,7 +228,7 @@ static forceinline uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #else // !MPT_PLATFORM_ENDIAN_KNOWN
 
 template <typename T, typename Tendian, std::size_t size>
-static forceinline std::array<mpt::byte, size> EndianEncode(T val)
+static MPT_FORCEINLINE std::array<mpt::byte, size> EndianEncode(T val)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
@@ -255,7 +255,7 @@ static forceinline std::array<mpt::byte, size> EndianEncode(T val)
 }
 
 template <typename T, typename Tendian, std::size_t size>
-static forceinline T EndianDecode(std::array<mpt::byte, size> data)
+static MPT_FORCEINLINE T EndianDecode(std::array<mpt::byte, size> data)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
@@ -283,7 +283,7 @@ static forceinline T EndianDecode(std::array<mpt::byte, size> data)
 }
 
 template <typename Tendian, typename T>
-static forceinline T MPT_bswap_impl(T val)
+static MPT_FORCEINLINE T MPT_bswap_impl(T val)
 {
 	typedef typename mpt::make_unsigned<T>::type Tu;
 	std::array<mpt::byte, sizeof(T)> data = EndianEncode<Tu, Tendian, sizeof(T)>(val);
@@ -300,39 +300,39 @@ static forceinline T MPT_bswap_impl(T val)
 
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 
-static forceinline uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
-static forceinline uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
-static forceinline uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
-static forceinline uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
-static forceinline uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
-static forceinline uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
-static forceinline int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
-static forceinline int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
-static forceinline int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
-static forceinline int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
-static forceinline int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
-static forceinline int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
+static MPT_FORCEINLINE uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
+static MPT_FORCEINLINE uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
+static MPT_FORCEINLINE uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
+static MPT_FORCEINLINE uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
+static MPT_FORCEINLINE uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
+static MPT_FORCEINLINE uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
+static MPT_FORCEINLINE int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
+static MPT_FORCEINLINE int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
+static MPT_FORCEINLINE int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
+static MPT_FORCEINLINE int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
+static MPT_FORCEINLINE int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
+static MPT_FORCEINLINE int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
 // endian-converting and casting back to int.
 // Thus these overloads.
-static forceinline uint8  SwapBytesLE(uint8  value) { return value; }
-static forceinline int8   SwapBytesLE(int8   value) { return value; }
-static forceinline char   SwapBytesLE(char   value) { return value; }
-static forceinline uint8  SwapBytesBE(uint8  value) { return value; }
-static forceinline int8   SwapBytesBE(int8   value) { return value; }
-static forceinline char   SwapBytesBE(char   value) { return value; }
+static MPT_FORCEINLINE uint8  SwapBytesLE(uint8  value) { return value; }
+static MPT_FORCEINLINE int8   SwapBytesLE(int8   value) { return value; }
+static MPT_FORCEINLINE char   SwapBytesLE(char   value) { return value; }
+static MPT_FORCEINLINE uint8  SwapBytesBE(uint8  value) { return value; }
+static MPT_FORCEINLINE int8   SwapBytesBE(int8   value) { return value; }
+static MPT_FORCEINLINE char   SwapBytesBE(char   value) { return value; }
 
-static forceinline uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
-static forceinline uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
-static forceinline uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
-static forceinline int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
-static forceinline int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
-static forceinline int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
-static forceinline uint8  SwapBytes(uint8  value) { return value; }
-static forceinline int8   SwapBytes(int8   value) { return value; }
-static forceinline char   SwapBytes(char   value) { return value; }
+static MPT_FORCEINLINE uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
+static MPT_FORCEINLINE uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
+static MPT_FORCEINLINE uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
+static MPT_FORCEINLINE int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
+static MPT_FORCEINLINE int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
+static MPT_FORCEINLINE int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
+static MPT_FORCEINLINE uint8  SwapBytes(uint8  value) { return value; }
+static MPT_FORCEINLINE int8   SwapBytes(int8   value) { return value; }
+static MPT_FORCEINLINE char   SwapBytes(char   value) { return value; }
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
@@ -346,7 +346,7 @@ static forceinline char   SwapBytes(char   value) { return value; }
 
 
 // 1.0f --> 0x3f800000u
-static forceinline uint32 EncodeIEEE754binary32(float32 f)
+static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
 	STATIC_ASSERT(sizeof(uint32) == sizeof(float32));
@@ -388,7 +388,7 @@ static forceinline uint32 EncodeIEEE754binary32(float32 f)
 	}
 #endif
 }
-static forceinline uint64 EncodeIEEE754binary64(float64 f)
+static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
 	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
@@ -432,7 +432,7 @@ static forceinline uint64 EncodeIEEE754binary64(float64 f)
 }
 
 // 0x3f800000u --> 1.0f
-static forceinline float32 DecodeIEEE754binary32(uint32 i)
+static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
 	STATIC_ASSERT(sizeof(uint32) == sizeof(float32));
@@ -468,7 +468,7 @@ static forceinline float32 DecodeIEEE754binary32(uint32 i)
 	}
 #endif
 }
-static forceinline float64 DecodeIEEE754binary64(uint64 i)
+static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
 	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
@@ -514,30 +514,30 @@ private:
 	typedef IEEE754binary32Emulated<hihi,hilo,lohi,lolo> self_t;
 	mpt::byte bytes[4];
 public:
-	forceinline mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
 		return bytes[i];
 	}
-	forceinline IEEE754binary32Emulated() { }
-	forceinline explicit IEEE754binary32Emulated(float32 f)
+	MPT_FORCEINLINE IEEE754binary32Emulated() { }
+	MPT_FORCEINLINE explicit IEEE754binary32Emulated(float32 f)
 	{
 		SetInt32(EncodeIEEE754binary32(f));
 	}
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
-	forceinline explicit IEEE754binary32Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
+	MPT_FORCEINLINE explicit IEEE754binary32Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
 	{
 		bytes[0] = b0;
 		bytes[1] = b1;
 		bytes[2] = b2;
 		bytes[3] = b3;
 	}
-	forceinline operator float32 () const
+	MPT_FORCEINLINE operator float32 () const
 	{
 		return DecodeIEEE754binary32(GetInt32());
 	}
-	forceinline self_t & SetInt32(uint32 i)
+	MPT_FORCEINLINE self_t & SetInt32(uint32 i)
 	{
 		bytes[hihi] = static_cast<mpt::byte>(i >> 24);
 		bytes[hilo] = static_cast<mpt::byte>(i >> 16);
@@ -545,7 +545,7 @@ public:
 		bytes[lolo] = static_cast<mpt::byte>(i >>  0);
 		return *this;
 	}
-	forceinline uint32 GetInt32() const
+	MPT_FORCEINLINE uint32 GetInt32() const
 	{
 		return 0u
 			| (static_cast<uint32>(bytes[hihi]) << 24)
@@ -554,7 +554,7 @@ public:
 			| (static_cast<uint32>(bytes[lolo]) <<  0)
 			;
 	}
-	forceinline bool operator == (const self_t &cmp) const
+	MPT_FORCEINLINE bool operator == (const self_t &cmp) const
 	{
 		return true
 			&& bytes[0] == cmp.bytes[0]
@@ -563,7 +563,7 @@ public:
 			&& bytes[3] == cmp.bytes[3]
 			;
 	}
-	forceinline bool operator != (const self_t &cmp) const
+	MPT_FORCEINLINE bool operator != (const self_t &cmp) const
 	{
 		return !(*this == cmp);
 	}
@@ -575,16 +575,16 @@ private:
 	typedef IEEE754binary64Emulated<hihihi,hihilo,hilohi,hilolo,lohihi,lohilo,lolohi,lololo> self_t;
 	mpt::byte bytes[8];
 public:
-	forceinline mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
 		return bytes[i];
 	}
-	forceinline IEEE754binary64Emulated() { }
-	forceinline explicit IEEE754binary64Emulated(float64 f)
+	MPT_FORCEINLINE IEEE754binary64Emulated() { }
+	MPT_FORCEINLINE explicit IEEE754binary64Emulated(float64 f)
 	{
 		SetInt64(EncodeIEEE754binary64(f));
 	}
-	forceinline explicit IEEE754binary64Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
+	MPT_FORCEINLINE explicit IEEE754binary64Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
 	{
 		bytes[0] = b0;
 		bytes[1] = b1;
@@ -595,11 +595,11 @@ public:
 		bytes[6] = b6;
 		bytes[7] = b7;
 	}
-	forceinline operator float64 () const
+	MPT_FORCEINLINE operator float64 () const
 	{
 		return DecodeIEEE754binary64(GetInt64());
 	}
-	forceinline self_t & SetInt64(uint64 i)
+	MPT_FORCEINLINE self_t & SetInt64(uint64 i)
 	{
 		bytes[hihihi] = static_cast<mpt::byte>(i >> 56);
 		bytes[hihilo] = static_cast<mpt::byte>(i >> 48);
@@ -611,7 +611,7 @@ public:
 		bytes[lololo] = static_cast<mpt::byte>(i >>  0);
 		return *this;
 	}
-	forceinline uint64 GetInt64() const
+	MPT_FORCEINLINE uint64 GetInt64() const
 	{
 		return 0u
 			| (static_cast<uint64>(bytes[hihihi]) << 56)
@@ -624,7 +624,7 @@ public:
 			| (static_cast<uint64>(bytes[lololo]) <<  0)
 			;
 	}
-	forceinline bool operator == (const self_t &cmp) const
+	MPT_FORCEINLINE bool operator == (const self_t &cmp) const
 	{
 		return true
 			&& bytes[0] == cmp.bytes[0]
@@ -637,7 +637,7 @@ public:
 			&& bytes[7] == cmp.bytes[7]
 			;
 	}
-	forceinline bool operator != (const self_t &cmp) const
+	MPT_FORCEINLINE bool operator != (const self_t &cmp) const
 	{
 		return !(*this == cmp);
 	}
@@ -660,7 +660,7 @@ struct IEEE754binary32Native
 private:
 	float32 value;
 public:
-	forceinline mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			return static_cast<mpt::byte>(EncodeIEEE754binary32(value) >> (i*8));
@@ -670,15 +670,15 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	forceinline IEEE754binary32Native() { }
-	forceinline explicit IEEE754binary32Native(float32 f)
+	MPT_FORCEINLINE IEEE754binary32Native() { }
+	MPT_FORCEINLINE explicit IEEE754binary32Native(float32 f)
 	{
 		value = f;
 	}
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
-	forceinline explicit IEEE754binary32Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
+	MPT_FORCEINLINE explicit IEEE754binary32Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
 	{
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			value = DecodeIEEE754binary32(0u
@@ -698,24 +698,24 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	forceinline operator float32 () const
+	MPT_FORCEINLINE operator float32 () const
 	{
 		return value;
 	}
-	forceinline IEEE754binary32Native & SetInt32(uint32 i)
+	MPT_FORCEINLINE IEEE754binary32Native & SetInt32(uint32 i)
 	{
 		value = DecodeIEEE754binary32(i);
 		return *this;
 	}
-	forceinline uint32 GetInt32() const
+	MPT_FORCEINLINE uint32 GetInt32() const
 	{
 		return EncodeIEEE754binary32(value);
 	}
-	forceinline bool operator == (const IEEE754binary32Native &cmp) const
+	MPT_FORCEINLINE bool operator == (const IEEE754binary32Native &cmp) const
 	{
 		return value == cmp.value;
 	}
-	forceinline bool operator != (const IEEE754binary32Native &cmp) const
+	MPT_FORCEINLINE bool operator != (const IEEE754binary32Native &cmp) const
 	{
 		return value != cmp.value;
 	}
@@ -726,7 +726,7 @@ struct IEEE754binary64Native
 private:
 	float64 value;
 public:
-	forceinline mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			return static_cast<mpt::byte>(EncodeIEEE754binary64(value) >> (i*8));
@@ -736,12 +736,12 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	forceinline IEEE754binary64Native() { }
-	forceinline explicit IEEE754binary64Native(float64 f)
+	MPT_FORCEINLINE IEEE754binary64Native() { }
+	MPT_FORCEINLINE explicit IEEE754binary64Native(float64 f)
 	{
 		value = f;
 	}
-	forceinline explicit IEEE754binary64Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
+	MPT_FORCEINLINE explicit IEEE754binary64Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
 	{
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			value = DecodeIEEE754binary64(0ull
@@ -769,24 +769,24 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	forceinline operator float64 () const
+	MPT_FORCEINLINE operator float64 () const
 	{
 		return value;
 	}
-	forceinline IEEE754binary64Native & SetInt64(uint64 i)
+	MPT_FORCEINLINE IEEE754binary64Native & SetInt64(uint64 i)
 	{
 		value = DecodeIEEE754binary64(i);
 		return *this;
 	}
-	forceinline uint64 GetInt64() const
+	MPT_FORCEINLINE uint64 GetInt64() const
 	{
 		return EncodeIEEE754binary64(value);
 	}
-	forceinline bool operator == (const IEEE754binary64Native &cmp) const
+	MPT_FORCEINLINE bool operator == (const IEEE754binary64Native &cmp) const
 	{
 		return value == cmp.value;
 	}
-	forceinline bool operator != (const IEEE754binary64Native &cmp) const
+	MPT_FORCEINLINE bool operator != (const IEEE754binary64Native &cmp) const
 	{
 		return value != cmp.value;
 	}
@@ -857,7 +857,7 @@ private:
 	std::array<mpt::byte, sizeof(base_type)> data;
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 public:
-	forceinline void set(base_type val)
+	MPT_FORCEINLINE void set(base_type val)
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_PLATFORM_ENDIAN_KNOWN
@@ -871,7 +871,7 @@ public:
 			data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}
-	forceinline base_type get() const
+	MPT_FORCEINLINE base_type get() const
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_PLATFORM_ENDIAN_KNOWN
@@ -887,8 +887,8 @@ public:
 			return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}
-	forceinline packed & operator = (const base_type & val) { set(val); return *this; }
-	forceinline operator base_type () const { return get(); }
+	MPT_FORCEINLINE packed & operator = (const base_type & val) { set(val); return *this; }
+	MPT_FORCEINLINE operator base_type () const { return get(); }
 public:
 	packed & operator &= (base_type val) { set(get() & val); return *this; }
 	packed & operator |= (base_type val) { set(get() | val); return *this; }

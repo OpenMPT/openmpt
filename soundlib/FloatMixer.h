@@ -22,7 +22,7 @@ struct IntToFloatTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 	static_assert(std::numeric_limits<input_t>::is_integer, "Input must be integer");
 	static_assert(!std::numeric_limits<output_t>::is_integer, "Output must be floating point");
 
-	static forceinline output_t Convert(const input_t x)
+	static MPT_FORCEINLINE output_t Convert(const input_t x)
 	{
 		return static_cast<output_t>(x) * (static_cast<output_t>(1.0f) / static_cast<output_t>(int2float));
 	}
@@ -40,11 +40,11 @@ typedef IntToFloatTraits<2, 2, mixsample_t, int16, -int16_min> Int16SToFloatS;
 template<class Traits>
 struct LinearInterpolation
 {
-	forceinline void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
 
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 		const Traits::output_t fract = CResampler::LinearTablef[posLo >> 8];
@@ -63,10 +63,10 @@ struct LinearInterpolation
 template<class Traits>
 struct FastSincInterpolation
 {
-	forceinline void Start(const ModChannel &, const CResampler &) { }
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 		const Traits::output_t *lut = CResampler::FastSincTablef + ((posLo >> 6) & 0x3FC);
@@ -88,15 +88,15 @@ struct PolyphaseInterpolation
 {
 	const typename Traits::output_t *sinc;
 
-	forceinline void Start(const ModChannel &chn, const CResampler &resampler)
+	MPT_FORCEINLINE void Start(const ModChannel &chn, const CResampler &resampler)
 	{
 		sinc = (((chn.increment > SamplePosition(0x130000000ll)) || (chn.increment < -SamplePosition(-0x130000000ll))) ?
 			(((chn.increment > SamplePosition(0x180000000ll)) || (chn.increment < SamplePosition(-0x180000000ll))) ? resampler.gDownsample2x : resampler.gDownsample13x) : resampler.gKaiserSinc);
 	}
 
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 		const Traits::output_t *lut = sinc + ((posLo >> (16 - SINC_PHASES_BITS)) & SINC_MASK) * SINC_WIDTH;
@@ -122,14 +122,14 @@ struct FIRFilterInterpolation
 {
 	const typename Traits::output_t *WFIRlut;
 
-	forceinline void Start(const ModChannel &, const CResampler &resampler)
+	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &resampler)
 	{
 		WFIRlut = resampler.m_WindowedFIR.lut;
 	}
 
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 		const Traits::output_t * const lut = WFIRlut + (((posLo + WFIR_FRACHALVE) >> WFIR_FRACSHIFT) & WFIR_FRACMASK);
@@ -158,13 +158,13 @@ struct NoRamp
 {
 	typename Traits::output_t lVol, rVol;
 
-	forceinline void Start(const ModChannel &chn)
+	MPT_FORCEINLINE void Start(const ModChannel &chn)
 	{
 		lVol = static_cast<Traits::output_t>(chn.leftVol) * (1.0f / 4096.0f);
 		rVol = static_cast<Traits::output_t>(chn.rightVol) * (1.0f / 4096.0f);
 	}
 
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 };
 
 
@@ -172,13 +172,13 @@ struct Ramp
 {
 	int32 lRamp, rRamp;
 
-	forceinline void Start(const ModChannel &chn)
+	MPT_FORCEINLINE void Start(const ModChannel &chn)
 	{
 		lRamp = chn.rampLeftVol;
 		rRamp = chn.rampRightVol;
 	}
 
-	forceinline void End(ModChannel &chn)
+	MPT_FORCEINLINE void End(ModChannel &chn)
 	{
 		chn.rampLeftVol = lRamp; chn.leftVol = lRamp >> VOLUMERAMPPRECISION;
 		chn.rampRightVol = rRamp; chn.rightVol = rRamp >> VOLUMERAMPPRECISION;
@@ -190,7 +190,7 @@ struct Ramp
 template<class Traits>
 struct MixMonoFastNoRamp : public NoRamp<Traits>
 {
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
 	{
 		Traits::output_t vol = outSample[0] * lVol;
 		for(int i = 0; i < Traits::numChannelsOut; i++)
@@ -204,7 +204,7 @@ struct MixMonoFastNoRamp : public NoRamp<Traits>
 template<class Traits>
 struct MixMonoNoRamp : public NoRamp<Traits>
 {
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
 	{
 		outBuffer[0] += outSample[0] * lVol;
 		outBuffer[1] += outSample[0] * rVol;
@@ -215,7 +215,7 @@ struct MixMonoNoRamp : public NoRamp<Traits>
 template<class Traits>
 struct MixMonoRamp : public Ramp
 {
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
 	{
 		// TODO volume is not float, can we optimize this?
 		lRamp += chn.leftRamp;
@@ -229,7 +229,7 @@ struct MixMonoRamp : public Ramp
 template<class Traits>
 struct MixStereoNoRamp : public NoRamp<Traits>
 {
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
 	{
 		outBuffer[0] += outSample[0] * lVol;
 		outBuffer[1] += outSample[1] * rVol;
@@ -240,7 +240,7 @@ struct MixStereoNoRamp : public NoRamp<Traits>
 template<class Traits>
 struct MixStereoRamp : public Ramp
 {
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
 	{
 		// TODO volume is not float, can we optimize this?
 		lRamp += chn.leftRamp;
@@ -258,10 +258,10 @@ struct MixStereoRamp : public Ramp
 template<class Traits>
 struct NoFilter
 {
-	forceinline void Start(const ModChannel &) { }
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void Start(const ModChannel &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (const typename Traits::outbuf_t &, const ModChannel &) { }
+	MPT_FORCEINLINE void operator() (const typename Traits::outbuf_t &, const ModChannel &) { }
 };
 
 
@@ -272,7 +272,7 @@ struct ResonantFilter
 	// Filter history
 	typename Traits::output_t fy[Traits::numChannelsIn][2];
 
-	forceinline void Start(const ModChannel &chn)
+	MPT_FORCEINLINE void Start(const ModChannel &chn)
 	{
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
@@ -281,7 +281,7 @@ struct ResonantFilter
 		}
 	}
 
-	forceinline void End(ModChannel &chn)
+	MPT_FORCEINLINE void End(ModChannel &chn)
 	{
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
@@ -293,7 +293,7 @@ struct ResonantFilter
 	// Filter values are clipped to double the input range
 #define ClipFilter(x) Clamp(x, static_cast<Traits::output_t>(-2.0f), static_cast<Traits::output_t>(2.0f))
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const ModChannel &chn)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const ModChannel &chn)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 

@@ -494,7 +494,7 @@ protected:
 
 public:
 	static const uint32 fractMax = 0xFFFFFFFFu;
-	static forceinline uint32 GetFractMax() { return fractMax; }
+	static MPT_FORCEINLINE uint32 GetFractMax() { return fractMax; }
 
 	SamplePosition() : v(0) { }
 	explicit SamplePosition(value_t v) : v(v) { }
@@ -503,43 +503,43 @@ public:
 
 #if 1
 	// Set integer and fractional part
-	forceinline SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
+	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
 	// Set integer part, keep fractional part
-	forceinline SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
+	MPT_FORCEINLINE SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
 	// Get integer part (as sample length / position)
-	forceinline SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_FORCEINLINE SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get integer part
-	forceinline int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_FORCEINLINE int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get fractional part
-	forceinline uint32 GetFract() const { return static_cast<uint32>(v); }
+	MPT_FORCEINLINE uint32 GetFract() const { return static_cast<uint32>(v); }
 #else
 	// Set integer and fractional part
-	forceinline SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { hi = intPart; lo = fractPart; return *this; }
+	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { hi = intPart; lo = fractPart; return *this; }
 	// Set integer part, keep fractional part
-	forceinline SamplePosition &SetInt(int32 intPart) { hi = intPart; return *this; }
+	MPT_FORCEINLINE SamplePosition &SetInt(int32 intPart) { hi = intPart; return *this; }
 	// Get integer part (as sample length / position)
-	forceinline SmpLength GetUInt() const { return static_cast<SmpLength>(hi); }
+	MPT_FORCEINLINE SmpLength GetUInt() const { return static_cast<SmpLength>(hi); }
 	// Get integer part
-	forceinline int32 GetInt() const { return hi; }
+	MPT_FORCEINLINE int32 GetInt() const { return hi; }
 	// Get fractional part
-	forceinline uint32 GetFract() const { return lo; }
+	MPT_FORCEINLINE uint32 GetFract() const { return lo; }
 #endif
 	// Get the inverted fractional part
-	forceinline SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
+	MPT_FORCEINLINE SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
 	// Get the raw fixed-point value
-	forceinline int64 GetRaw() const { return v; }
+	MPT_FORCEINLINE int64 GetRaw() const { return v; }
 	// Negate the current value
-	forceinline SamplePosition &Negate() { v = -v; return *this; }
+	MPT_FORCEINLINE SamplePosition &Negate() { v = -v; return *this; }
 	// Multiply and divide by given integer scalars
-	forceinline SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
+	MPT_FORCEINLINE SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
 	// Check if value is 1.0
-	forceinline bool IsUnity() const { return v == 0x100000000ll; }
+	MPT_FORCEINLINE bool IsUnity() const { return v == 0x100000000ll; }
 	// Check if value is 0
-	forceinline bool IsZero() const { return v == 0; }
+	MPT_FORCEINLINE bool IsZero() const { return v == 0; }
 	// Check if value is > 0
-	forceinline bool IsPositive() const { return v > 0; }
+	MPT_FORCEINLINE bool IsPositive() const { return v > 0; }
 	// Check if value is < 0
-	forceinline bool IsNegative() const { return v < 0; }
+	MPT_FORCEINLINE bool IsNegative() const { return v < 0; }
 
 	// Addition / subtraction of another fixed-point number
 	SamplePosition operator+ (const SamplePosition &other) const { return SamplePosition(v + other.v); }
