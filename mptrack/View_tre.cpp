@@ -3529,16 +3529,17 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 	nFiles = DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
 	if (nFiles)
 	{
-		WCHAR fileName[_MAX_PATH];
-		if(DragQueryFileW(hDropInfo, 0, fileName, _MAX_PATH))
+		UINT size = ::DragQueryFileW(hDropInfo, 0, nullptr, 0) + 1;
+		std::vector<WCHAR> fileName(size, L'\0');
+		if(DragQueryFileW(hDropInfo, 0, fileName.data(), size))
 		{
 			switch(m_itemDrag.type)
 			{
 			case MODITEM_MIDIINSTRUMENT:
-				bOk = SetMidiInstrument(m_itemDrag.val1, mpt::PathString::FromNative(fileName));
+				bOk = SetMidiInstrument(m_itemDrag.val1, mpt::PathString::FromNative(fileName.data()));
 				break;
 			case MODITEM_MIDIPERCUSSION:
-				bOk = SetMidiPercussion(m_itemDrag.val1, mpt::PathString::FromNative(fileName));
+				bOk = SetMidiPercussion(m_itemDrag.val1, mpt::PathString::FromNative(fileName.data()));
 				break;
 			}
 		}
@@ -3942,9 +3943,9 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
+		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0) + 1;
 		std::vector<WCHAR> fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size + 1))
+		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
 		{
 			mpt::PathString file(mpt::PathString::FromNative(fileName.data()));
 			if(IsSampleBrowser())
