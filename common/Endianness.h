@@ -55,14 +55,14 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
 struct endian_type { uint16 value; };
-static inline bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
-static inline bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
+static forceinline bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
+static forceinline bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
 
 static const endian_type endian_big    = { 0x1234u };
 static const endian_type endian_little = { 0x3412u };
 
 namespace detail {
-	static inline endian_type endian_probe()
+	static forceinline endian_type endian_probe()
 	{
 		STATIC_ASSERT(sizeof(endian_type) == 2);
 		const mpt::byte probe[2] = { 0x12, 0x34 };
@@ -72,7 +72,7 @@ namespace detail {
 	}
 }
 
-static inline endian_type endian()
+static forceinline endian_type endian()
 {
 	#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 		return endian_little;
@@ -83,12 +83,12 @@ static inline endian_type endian()
 	#endif
 }
 
-static inline bool endian_is_little()
+static forceinline bool endian_is_little()
 {
 	return endian() == endian_little;
 }
 
-static inline bool endian_is_big()
+static forceinline bool endian_is_big()
 {
 	return endian() == endian_big;
 }
@@ -300,39 +300,39 @@ static forceinline T MPT_bswap_impl(T val)
 
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 
-inline uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
-inline uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
-inline uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
-inline uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
-inline uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
-inline uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
-inline int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
-inline int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
-inline int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
-inline int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
-inline int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
-inline int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
+static forceinline uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
+static forceinline uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
+static forceinline uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
+static forceinline uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
+static forceinline uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
+static forceinline uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
+static forceinline int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
+static forceinline int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
+static forceinline int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
+static forceinline int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
+static forceinline int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
+static forceinline int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
 // endian-converting and casting back to int.
 // Thus these overloads.
-inline uint8  SwapBytesLE(uint8  value) { return value; }
-inline int8   SwapBytesLE(int8   value) { return value; }
-inline char   SwapBytesLE(char   value) { return value; }
-inline uint8  SwapBytesBE(uint8  value) { return value; }
-inline int8   SwapBytesBE(int8   value) { return value; }
-inline char   SwapBytesBE(char   value) { return value; }
+static forceinline uint8  SwapBytesLE(uint8  value) { return value; }
+static forceinline int8   SwapBytesLE(int8   value) { return value; }
+static forceinline char   SwapBytesLE(char   value) { return value; }
+static forceinline uint8  SwapBytesBE(uint8  value) { return value; }
+static forceinline int8   SwapBytesBE(int8   value) { return value; }
+static forceinline char   SwapBytesBE(char   value) { return value; }
 
-inline uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
-inline uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
-inline uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
-inline int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
-inline int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
-inline int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
-inline uint8  SwapBytes(uint8  value) { return value; }
-inline int8   SwapBytes(int8   value) { return value; }
-inline char   SwapBytes(char   value) { return value; }
+static forceinline uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
+static forceinline uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
+static forceinline uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
+static forceinline int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
+static forceinline int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
+static forceinline int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
+static forceinline uint8  SwapBytes(uint8  value) { return value; }
+static forceinline int8   SwapBytes(int8   value) { return value; }
+static forceinline char   SwapBytes(char   value) { return value; }
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
