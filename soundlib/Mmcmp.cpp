@@ -192,6 +192,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			for (uint32 i=0; i<blk.sub_blk; i++)
 			{
+				if(!psubblk) return false;
 				if(!MMCMP_IsDstBlockValid(unpackedData, *psubblk)) return false;
 #ifdef MMCMP_LOG
 				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
