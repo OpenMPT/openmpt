@@ -468,7 +468,7 @@ Version::Version(const mpt::ustring &rawVersion)
 		return;
 	}
 	std::vector<uint8> version = mpt::String::Split<uint8>(rawVersion, MPT_USTRING("."));
-	if(version.size() < 3)
+	if(version.size() < 2)
 	{
 		return;
 	}
@@ -485,7 +485,7 @@ Version::Version(const mpt::ustring &rawVersion)
 	valid = true;
 	vmajor = version[0];
 	vminor = version[1];
-	vupdate = version[2];
+	vupdate = (version.size() >= 3) ? version[2] : 0;
 }
 
 
