@@ -877,7 +877,7 @@ void CTuningDialog::OnEnKillfocusEditNotename()
 bool CTuningDialog::GetModifiedStatus(const CTuningCollection* const pTc) const
 //-----------------------------------------------------------------------------
 {
-	MODIFIED_MAP::const_iterator iter = m_ModifiedTCs.find(pTc);
+	auto iter = m_ModifiedTCs.find(pTc);
 	if(iter != m_ModifiedTCs.end())
 		return (*iter).second;
 	else
@@ -1049,7 +1049,7 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 bool CTuningDialog::IsDeletable(const CTuningCollection* const pTC) const
 //--------------------------------------------------------------------------------
 {
-	std::vector<CTuningCollection*>::const_iterator iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
+	auto iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
 	if(iter != m_DeletableTuningCollections.end())
 		return true;
 	else
@@ -1284,7 +1284,7 @@ void CTuningDialog::OnCopyTuning()
 	m_CommandItemDest = s_notFoundItemTuning;
 
 	CTuning* pT = m_CommandItemSrc.GetT();
-	if(pT == NULL)
+	if(pT == nullptr)
 	{
 		return;
 	}
@@ -1304,13 +1304,13 @@ void CTuningDialog::OnRemoveTuningCollection()
 		return;
 	}
 
-	TUNINGVECTOR::iterator iter = find(m_TuningCollections.begin(), m_TuningCollections.end(), m_pActiveTuningCollection);
+	auto iter = find(m_TuningCollections.begin(), m_TuningCollections.end(), m_pActiveTuningCollection);
 	if(iter == m_TuningCollections.end())
 	{
 		ASSERT(false);
 		return;
 	}
-	TUNINGVECTOR::iterator DTCiter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), *iter);
+	auto DTCiter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), *iter);
 	CTuningCollection* deletableTC = m_pActiveTuningCollection;
 	//Note: Order matters in the following lines.
 	m_DeletableTuningCollections.erase(DTCiter);

@@ -264,7 +264,7 @@ void CWaveConvert::FillTags()
 		m_EditGenre.Clear();
 		m_CbnGenre.ResetContent();
 		m_CbnGenre.AddString(_T(""));
-		for(std::vector<mpt::ustring>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
+		for(auto genre = encTraits->genres.cbegin(); genre != encTraits->genres.cend(); ++genre)
 		{
 			m_CbnGenre.AddString(mpt::ToCString(*genre));
 		}
@@ -320,7 +320,7 @@ void CWaveConvert::FillSamplerates()
 	int sel = -1;
 	if(TrackerSettings::Instance().ExportDefaultToSoundcardSamplerate)
 	{
-		for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
+		for(auto it = encTraits->samplerates.cbegin(); it != encTraits->samplerates.cend(); ++it)
 		{
 			uint32 samplerate = *it;
 			if(samplerate == TrackerSettings::Instance().MixerSamplerate)
@@ -329,7 +329,7 @@ void CWaveConvert::FillSamplerates()
 			}
 		}
 	}
-	for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
+	for(auto it = encTraits->samplerates.cbegin(); it != encTraits->samplerates.cend(); ++it)
 	{
 		uint32 samplerate = *it;
 		int ndx = m_CbnSampleRate.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Hz"), samplerate)));
@@ -1309,9 +1309,9 @@ void CDoWaveConvert::Run()
 	{
 		if(encSettings.Cues)
 		{
-			std::vector<PatternCuePoint>::const_iterator iter;
 			std::vector<uint64> cues;
-			for(iter = m_SndFile.m_PatternCuePoints.begin(); iter != m_SndFile.m_PatternCuePoints.end(); iter++)
+			cues.reserve(m_SndFile.m_PatternCuePoints.size());
+			for(auto iter = m_SndFile.m_PatternCuePoints.cbegin(); iter != m_SndFile.m_PatternCuePoints.cend(); iter++)
 			{
 				cues.push_back(static_cast<uint32>(iter->offset));
 			}

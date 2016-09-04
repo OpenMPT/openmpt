@@ -774,7 +774,7 @@ mpt::ustring CModDoc::GetLogString() const
 //---------------------------------------
 {
 	mpt::ustring ret;
-	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
+	for(auto i = m_Log.cbegin(); i != m_Log.cend(); ++i)
 	{
 		ret += (*i).message;
 		ret += MPT_USTRING("\r\n");
@@ -788,7 +788,7 @@ LogLevel CModDoc::GetMaxLogLevel() const
 {
 	LogLevel retval = LogInformation;
 	// find the most severe loglevel
-	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
+	for(auto i = m_Log.cbegin(); i != m_Log.cend(); ++i)
 	{
 		retval = std::min(retval, i->level);
 	}

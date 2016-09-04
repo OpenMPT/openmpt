@@ -26,7 +26,7 @@ public:
 
 	bool separatorAt(int c) const
 	{
-		for(std::vector<int>::const_iterator i = separators.begin(); i != separators.end(); i++)
+		for(auto i = separators.cbegin(); i != separators.cend(); i++)
 		{
 			if (*i == c)
 				return true;

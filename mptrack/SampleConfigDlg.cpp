@@ -95,7 +95,7 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != BST_UNCHECKED;
 
 	std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
-	for(std::vector<CModDoc *>::iterator i = docs.begin(); i != docs.end(); i++)
+	for(auto i = docs.begin(); i != docs.end(); i++)
 	{
 		(**i).GetSampleUndo().RestrictBufferSize();
 	}

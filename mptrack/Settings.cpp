@@ -138,7 +138,7 @@ SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const Setti
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	SettingsMap::iterator entry = map.find(path);
+	auto entry = map.find(path);
 	if(entry == map.end())
 	{
 		entry = map.insert(map.begin(), std::make_pair(path, SettingState(def).assign(BackendsReadSetting(path, def), false)));
@@ -150,7 +150,7 @@ bool SettingsContainer::IsDefaultSetting(const SettingPath &path) const
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	SettingsMap::iterator entry = map.find(path);
+	auto entry = map.find(path);
 	if(entry == map.end())
 	{
 		return true;
@@ -162,7 +162,7 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	SettingsMap::iterator entry = map.find(path);
+	auto entry = map.find(path);
 	if(entry == map.end())
 	{
 		map[path] = val;
@@ -203,12 +203,12 @@ void SettingsContainer::RemoveSetting(const SettingPath &path)
 
 void SettingsContainer::NotifyListeners(const SettingPath &path)
 {
-	const SettingsListenerMap::iterator entry = mapListeners.find(path);
+	const auto entry = mapListeners.find(path);
 	if(entry != mapListeners.end())
 	{
-		const std::set<ISettingChanged*>::const_iterator beg = entry->second.begin();
-		const std::set<ISettingChanged*>::const_iterator end = entry->second.end();
-		for(std::set<ISettingChanged*>::const_iterator it = beg; it != end; ++it)
+		const auto beg = entry->second.begin();
+		const auto end = entry->second.end();
+		for(auto it = beg; it != end; ++it)
 		{
 			(*it)->SettingChanged(path);
 		}
@@ -219,7 +219,7 @@ void SettingsContainer::WriteSettings()
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	for(SettingsMap::iterator i = map.begin(); i != map.end(); ++i)
+	for(auto i = map.begin(); i != map.end(); ++i)
 	{
 		if(i->second.IsDirty())
 		{

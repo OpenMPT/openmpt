@@ -334,13 +334,13 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 	bool foundCurrentPlug = false;
 
 	const bool nameFilterActive = !m_nameFilter.empty();
-	std::vector<mpt::ustring> currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, MPT_USTRING(" "));
+	auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, MPT_USTRING(" "));
 
 	if(pManager)
 	{
 		bool first = true;
 
-		for(CVstPluginManager::const_iterator p = pManager->begin(); p != pManager->end(); p++)
+		for(auto p = pManager->begin(); p != pManager->end(); p++)
 		{
 			ASSERT(*p);
 			const VSTPluginLib &plug = **p;
@@ -360,7 +360,7 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 				if(!matches)
 				{
 					mpt::ustring tags = mpt::ToLowerCase(plug.tags);
-					for(std::vector<mpt::ustring>::const_iterator it = currentTags.begin(); it != currentTags.end(); it++)
+					for(auto it = currentTags.cbegin(); it != currentTags.cend(); it++)
 					{
 						if(!it->empty() && tags.find(*it, 0) != tags.npos)
 						{
@@ -679,7 +679,7 @@ void CSelectPluginDlg::OnScanFolder()
 
 	// If any of the plugins was missing anywhere, try loading it
 	const CVstPluginManager *pManager = theApp.GetPluginManager();
-	for(CVstPluginManager::const_iterator p = pManager->begin(); p != pManager->end(); p++)
+	for(auto p = pManager->begin(); p != pManager->end(); p++)
 	{
 		ReloadMissingPlugins(*p);
 	}
@@ -750,7 +750,7 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 //------------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	std::vector<CModDoc *> docs(theApp.GetOpenDocuments());
+	auto docs = theApp.GetOpenDocuments();
 	for(size_t i = 0; i < docs.size(); i++)
 	{
 		CModDoc &doc = *docs[i];

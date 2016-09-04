@@ -1462,7 +1462,7 @@ public:
 			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
 		}
 		traits.encoderSettingsName = MPT_USTRING("MP3ACM");
-		for(std::set<mpt::ustring>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
+		for(auto i = drivers.cbegin(); i != drivers.cend(); ++i)
 		{
 			traits.description += (*i);
 		}

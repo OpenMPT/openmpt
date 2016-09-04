@@ -86,8 +86,8 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 		theApp.BeginWaitCursor(); //display hour glass
 
-		std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
-		for(std::vector<CModDoc *>::iterator doc = docs.begin(); doc != docs.end(); doc++)
+		auto docs = theApp.GetOpenDocuments();
+		for(auto doc = docs.begin(); doc != docs.end(); doc++)
 		{
 			CModDoc &modDoc = **doc;
 			if(modDoc.ModifiedSinceLastAutosave())

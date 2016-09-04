@@ -3493,12 +3493,12 @@ void CCtrlSamples::PropagateAutoVibratoChanges()
 	{
 		if(m_sndFile.IsSampleReferencedByInstrument(m_nSample, i))
 		{
-			const std::set<SAMPLEINDEX> referencedSamples = m_sndFile.Instruments[i]->GetSamples();
+			const auto referencedSamples = m_sndFile.Instruments[i]->GetSamples();
 
 			// Propagate changes to all samples that belong to this instrument.
 			const ModSample &it = m_sndFile.GetSample(m_nSample);
 			m_sndFile.PropagateXMAutoVibrato(i, it.nVibType, it.nVibSweep, it.nVibDepth, it.nVibRate);
-			for(std::set<SAMPLEINDEX>::const_iterator it = referencedSamples.begin(); it != referencedSamples.end(); it++)
+			for(auto it = referencedSamples.cbegin(); it != referencedSamples.cend(); it++)
 			{
 				m_modDoc.UpdateAllViews(nullptr, SampleHint(*it).Info(), this);
 			}

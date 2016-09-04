@@ -91,11 +91,11 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 		// To avoid this problem, copy over the elements we are interested in before sending commands.
 		std::vector<CommandID> commands;
 		commands.reserve(std::distance(cmd.first, cmd.second));
-		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
+		for(auto i = cmd.first; i != cmd.second; i++)
 		{
 			commands.push_back(i->second);
 		}
-		for(std::vector<CommandID>::const_iterator i = commands.begin(); i != commands.end(); i++)
+		for(auto i = commands.cbegin(); i != commands.cend(); i++)
 		{
 			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, *i, wParam))
 			{
@@ -222,7 +222,7 @@ void CInputHandler::SetupSpecialKeyInterception()
 //-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
-	for(KeyMap::const_iterator i = keyMap.begin(); i != keyMap.end(); i++)
+	for(auto i = keyMap.cbegin(); i != keyMap.cend(); i++)
 	{
 		ASSERT(i->second != kcNull);
 		if(i->first.Modifier() == HOTKEYF_EXT) m_bInterceptWindowsKeys = true;

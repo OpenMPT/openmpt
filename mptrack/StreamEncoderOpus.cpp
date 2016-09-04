@@ -120,7 +120,7 @@ private:
 			PushUint32LE(opus_comments_buf, 0);
 		}
 		PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(opus_comments.size()));
-		for(std::vector<std::string>::const_iterator it = opus_comments.begin(); it != opus_comments.end(); ++it)
+		for(auto it = opus_comments.cbegin(); it != opus_comments.cend(); ++it)
 		{
 			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(it->length()));
 			for(std::size_t i = 0; i < it->length(); ++i)

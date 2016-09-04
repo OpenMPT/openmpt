@@ -352,10 +352,10 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					case INSLIST_SAMPLES:
 						if (pIns)
 						{
-							const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
+							const auto referencedSamples = pIns->GetSamples();
 
 							bool first = true;
-							for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+							for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 							{
 								if(!first) strcat(s, ",");
 								first = false;

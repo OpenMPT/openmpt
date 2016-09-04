@@ -688,7 +688,7 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 		// get the old default device
 		SetSoundDeviceIdentifier(SoundDevice::Legacy::FindDeviceInfo(manager, m_SoundDeviceID_DEPRECATED).GetIdentifier());
 		// apply old global sound device settings to each found device
-		for(std::vector<SoundDevice::Info>::const_iterator it = manager.begin(); it != manager.end(); ++it)
+		for(auto it = manager.begin(); it != manager.end(); ++it)
 		{
 			SetSoundDeviceSettings(it->GetIdentifier(), GetSoundDeviceSettingsDefaults());
 		}
