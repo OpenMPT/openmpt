@@ -376,6 +376,7 @@ struct int24
 {
 	uint8 bytes[3];
 	int24() { bytes[0] = bytes[1] = bytes[2] = 0; }
+#if MPT_PLATFORM_ENDIAN_KNOWN
 	explicit int24(int other)
 	{
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
@@ -396,6 +397,10 @@ struct int24
 			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
 		#endif
 	}
+#else
+	explicit int24(int other);
+	operator int() const;
+#endif
 };
 MPT_STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_min (0-0x00800000)
