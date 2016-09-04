@@ -5,6 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta20.2
+
+ *  [**Bug**] Possible crashes with malformed AMS files.
+ *  [**Bug**] Possible crashes with MDL and MED files.
+
 ### libopenmpt 0.2-beta20.1
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
