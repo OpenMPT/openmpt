@@ -29,7 +29,7 @@ struct MixerTraits
 	typedef in input_t;								// Input buffer sample type
 	typedef out outbuf_t[channelsOut];				// Output buffer sampling point type
 	// To perform sample conversion, add a function with the following signature to your derived classes:
-	// static forceinline output_t Convert(const input_t x)
+	// static MPT_FORCEINLINE output_t Convert(const input_t x)
 };
 
 
@@ -39,10 +39,10 @@ struct MixerTraits
 template<class Traits>
 struct NoInterpolation
 {
-	forceinline void Start(const ModChannel &, const CResampler &) { }
-	forceinline void End(const ModChannel &) { }
+	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE void End(const ModChannel &) { }
 
-	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
 

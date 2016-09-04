@@ -520,13 +520,13 @@ inline Tdst saturate_cast(float src)
 namespace mpt { namespace Legacy {
 
 template <typename Ta, typename Tb>
-forceinline auto MAX(const Ta &a, const Tb &b) -> decltype((a>b)?a:b)
+MPT_FORCEINLINE auto MAX(const Ta &a, const Tb &b) -> decltype((a>b)?a:b)
 {
 	return (a > b) ? a : b;
 }
 
 template <typename Ta, typename Tb>
-forceinline auto MIN(const Ta &a, const Tb &b) -> decltype((a<b)?a:b)
+MPT_FORCEINLINE auto MIN(const Ta &a, const Tb &b) -> decltype((a<b)?a:b)
 {
 	return (a < b) ? a : b;
 }
@@ -735,7 +735,7 @@ namespace Util {
 
 	// Multiply two 32-bit integers, receive 64-bit result.
 	// MSVC generates unnecessarily complicated code for the unoptimized variant using _allmul.
-	forceinline int64 mul32to64(int32 a, int32 b)
+	MPT_FORCEINLINE int64 mul32to64(int32 a, int32 b)
 	{
 #if MPT_COMPILER_MSVC
 		return __emul(a, b);
@@ -744,7 +744,7 @@ namespace Util {
 #endif
 	}
 
-	forceinline uint64 mul32to64_unsigned(uint32 a, uint32 b)
+	MPT_FORCEINLINE uint64 mul32to64_unsigned(uint32 a, uint32 b)
 	{
 #if MPT_COMPILER_MSVC
 		return __emulu(a, b);
@@ -753,27 +753,27 @@ namespace Util {
 #endif
 	}
 
-	forceinline int32 muldiv(int32 a, int32 b, int32 c)
+	MPT_FORCEINLINE int32 muldiv(int32 a, int32 b, int32 c)
 	{
 		return static_cast<int32>( mul32to64( a, b ) / c );
 	}
 
-	forceinline int32 muldivr(int32 a, int32 b, int32 c)
+	MPT_FORCEINLINE int32 muldivr(int32 a, int32 b, int32 c)
 	{
 		return static_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
-	forceinline uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_FORCEINLINE uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return static_cast<uint32>( mul32to64_unsigned( a, b ) / c );
 	}
-	forceinline uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_FORCEINLINE uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return static_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2 ) ) / c );
 	}
 
-	forceinline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
+	MPT_FORCEINLINE int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
 		a += c / 2;

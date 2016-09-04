@@ -121,7 +121,7 @@ extern bool ConsoleEnabled;
 void SetFacilities(const std::string &solo, const std::string &blocked);
 bool IsFacilityActive(const char *facility);
 #else
-static forceinline bool IsFacilityActive(const char * /*facility*/ ) { return true; }
+static MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { return true; }
 #endif
 
 
@@ -133,14 +133,14 @@ struct Context
 	const char * const file;
 	const int line;
 	const char * const function;
-	forceinline Context(const char *file, int line, const char *function)
+	MPT_FORCEINLINE Context(const char *file, int line, const char *function)
 		: file(file)
 		, line(line)
 		, function(function)
 	{
 		return;
 	}
-	forceinline Context(const Context &c)
+	MPT_FORCEINLINE Context(const Context &c)
 		: file(c.file)
 		, line(c.line)
 		, function(c.function)
@@ -162,7 +162,7 @@ public:
 	void SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text);
 public:
 	// facility:ASCII, text:ASCII (only string literals)
-	template <std::size_t size> forceinline void SendLogMessage(const Context &context, LogLevel level, const char *facility, const char (&text)[size])
+	template <std::size_t size> MPT_FORCEINLINE void SendLogMessage(const Context &context, LogLevel level, const char *facility, const char (&text)[size])
 	{
 		SendLogMessage(context, level, facility, mpt::ToUnicode(mpt::CharsetASCII, text));
 	}

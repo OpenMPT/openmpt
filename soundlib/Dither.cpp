@@ -95,7 +95,7 @@ noiseloop:
 #endif // ENABLE_X86
 
 
-static forceinline int32 dither_rand(uint32 &a, uint32 &b)
+static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
 //--------------------------------------------------------
 {
 	a = (a << 1) | (a >> 31);
