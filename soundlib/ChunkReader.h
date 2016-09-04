@@ -60,7 +60,7 @@ public:
 		// Check if the list contains a given chunk.
 		bool ChunkExists(typename T::id_type id) const
 		{
-			for(auto iter = cbegin(); iter != cend(); iter++)
+			for(auto iter = this->cbegin(); iter != this->cend(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
@@ -73,7 +73,7 @@ public:
 		// Retrieve the first chunk with a given ID.
 		FileReader GetChunk(typename T::id_type id) const
 		{
-			for(auto iter = cbegin(); iter != cend(); iter++)
+			for(auto iter = this->cbegin(); iter != this->cend(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
@@ -87,7 +87,7 @@ public:
 		std::vector<FileReader> GetAllChunks(typename T::id_type id) const
 		{
 			std::vector<FileReader> result;
-			for(auto iter = cbegin(); iter != cend(); iter++)
+			for(auto iter = this->cbegin(); iter != this->cend(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
