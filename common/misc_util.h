@@ -655,6 +655,97 @@ int sgn(T value)
 }
 
 
+
+// mpt::rshift_signed
+// mpt::lshift_signed
+// Shift a signed integer value in a well-defined manner.
+// Does the same thing as MSVC would do. This is verified by the test suite.
+
+namespace mpt
+{
+
+template <typename T>
+MPT_FORCEINLINE auto rshift_signed_standard(T x, int y) -> decltype(x >> y)
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	typedef decltype(x >> y) result_type;
+	typedef typename std::make_unsigned<result_type>::type unsigned_result_type;
+	const unsigned_result_type roffset = static_cast<unsigned_result_type>(1) << ((sizeof(result_type) * 8) - 1);
+	result_type rx = x;
+	unsigned_result_type urx = static_cast<unsigned_result_type>(rx);
+	urx += roffset;
+	urx >>= y;
+	urx -= roffset >> y;
+	return static_cast<result_type>(urx);
+}
+
+template <typename T>
+MPT_FORCEINLINE auto lshift_signed_standard(T x, int y) -> decltype(x << y)
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	typedef decltype(x << y) result_type;
+	typedef typename std::make_unsigned<result_type>::type unsigned_result_type;
+	const unsigned_result_type roffset = static_cast<unsigned_result_type>(1) << ((sizeof(result_type) * 8) - 1);
+	result_type rx = x;
+	unsigned_result_type urx = static_cast<unsigned_result_type>(rx);
+	urx += roffset;
+	urx <<= y;
+	urx -= roffset << y;
+	return static_cast<result_type>(urx);
+}
+
+#if MPT_COMPILER_SHIFT_SIGNED
+
+template <typename T>
+MPT_FORCEINLINE auto rshift_signed_undefined(T x, int y) -> decltype(x >> y)
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	return x >> y;
+}
+
+template <typename T>
+MPT_FORCEINLINE auto lshift_signed_undefined(T x, int y) -> decltype(x << y)
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	return x << y;
+}
+
+template <typename T>
+MPT_FORCEINLINE auto rshift_signed(T x, int y) -> decltype(x >> y)
+{
+	return mpt::rshift_signed_undefined(x, y);
+}
+
+template <typename T>
+MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
+{
+	return mpt::lshift_signed_undefined(x, y);
+}
+
+#else
+
+template <typename T>
+MPT_FORCEINLINE auto rshift_signed(T x, int y) -> decltype(x >> y)
+{
+	return mpt::rshift_signed_standard(x, y);
+}
+
+template <typename T>
+MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
+{
+	return mpt::lshift_signed_standard(x, y);
+}
+
+#endif
+
+} // namespace mpt
+
+
+
 namespace Util
 {
 

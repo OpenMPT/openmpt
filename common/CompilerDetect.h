@@ -189,6 +189,17 @@
 
 
 
+#if MPT_COMPILER_MSVC
+// Compiler has multiplication/division semantics when shifting signed integers.
+#define MPT_COMPILER_SHIFT_SIGNED 1
+#endif
+
+#ifndef MPT_COMPILER_SHIFT_SIGNED
+#define MPT_COMPILER_SHIFT_SIGNED 0
+#endif
+
+
+
 #if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
 // Compiler supports type-punning through unions. This is not stricly standard-conforming.
 // For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
