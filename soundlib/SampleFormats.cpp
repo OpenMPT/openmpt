@@ -393,7 +393,7 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX kee
 
 	// Check which samples are used by the instrument we are going to nuke.
 	std::set<SAMPLEINDEX> referencedSamples = Instruments[nInstr]->GetSamples();
-	for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+	for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
 	{
 		if((*sample) <= GetNumSamples())
 		{
@@ -456,7 +456,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		const SAMPLEINDEX sourceIndex = pIns->Keyboard[i];
 		if(sourceIndex > 0 && sourceIndex <= srcSong.GetNumSamples())
 		{
-			const std::vector<SAMPLEINDEX>::const_iterator entry = std::find(sourceSample.begin(), sourceSample.end(), sourceIndex);
+			const auto entry = std::find(sourceSample.cbegin(), sourceSample.cend(), sourceIndex);
 			if(entry == sourceSample.end())
 			{
 				// Didn't consider this sample yet, so add it to our map.
@@ -1626,7 +1626,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		}
 
 		// Read markers
-		for(std::vector<AIFFMarker>::iterator iter = markers.begin(); iter != markers.end(); iter++)
+		for(auto iter = markers.begin(); iter != markers.end(); iter++)
 		{
 			if(iter->id == instrHeader.sustainLoop.beginLoop)
 			{
@@ -1923,7 +1923,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 
 	// Writing sample headers + data
 	std::vector<SampleIO> sampleFlags;
-	for(std::vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
+	for(auto iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
 		ITSample itss;
 		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress, allowExternal);
@@ -3855,7 +3855,7 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 	RegCloseKey(hkHandlers);
 	hkHandlers = NULL;
 
-	for(std::map<std::wstring, FileType>::const_iterator it = guidMap.begin(); it != guidMap.end(); ++it)
+	for(auto it = guidMap.cbegin(); it != guidMap.cend(); ++it)
 	{
 		result.push_back(it->second);
 	}

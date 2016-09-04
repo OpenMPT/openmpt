@@ -392,7 +392,7 @@ public:
 	FileType() { }
 	FileType(const std::vector<FileType> &group)
 	{
-		for(std::vector<FileType>::const_iterator it = group.begin(); it != group.end(); ++it)
+		for(auto it = group.cbegin(); it != group.cend(); ++it)
 		{
 			m_MimeTypes.insert(m_MimeTypes.end(), it->m_MimeTypes.begin(), it->m_MimeTypes.end());
 			m_Extensions.insert(m_Extensions.end(), it->m_Extensions.begin(), it->m_Extensions.end());

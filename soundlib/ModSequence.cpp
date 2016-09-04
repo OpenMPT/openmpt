@@ -614,7 +614,7 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 	bool result = false;
 	std::vector<GetLengthType> length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
 	ModSequence &order = GetSequence(seq);
-	for(std::vector<GetLengthType>::const_iterator it = length.begin(); it != length.end(); it++)
+	for(auto it = length.cbegin(); it != length.cend(); it++)
 	{
 		if(it->endOrder != ORDERINDEX_INVALID && it->endRow != ROWINDEX_INVALID)
 		{
@@ -838,8 +838,8 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 {
 	const uint16 size = seq.GetLength();
 	mpt::IO::WriteIntLE<uint16>(oStrm, size);
-	const ModSequenceSet::const_iterator endIter = seq.end();
-	for(ModSequenceSet::const_iterator citer = seq.begin(); citer != endIter; citer++)
+	const auto endIter = seq.end();
+	for(auto citer = seq.begin(); citer != endIter; citer++)
 	{
 		const uint16 temp = static_cast<uint16>(*citer);
 		mpt::IO::WriteIntLE<uint16>(oStrm, temp);

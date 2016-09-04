@@ -434,7 +434,7 @@ void SanitizeFilename(mpt::PathString &filename)
 //----------------------------------------------
 {
 	mpt::RawPathString tmp = filename.AsNative();
-	for(mpt::RawPathString::iterator it = tmp.begin(); it != tmp.end(); ++it)
+	for(auto it = tmp.begin(); it != tmp.end(); ++it)
 	{
 		*it = SanitizeFilenameChar(*it);
 	}
@@ -509,12 +509,12 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	{
 		filter += mpt::PathString::FromUnicode(GetShortName());
 	}
-	const std::vector<mpt::PathString> extensions = GetExtensions();
+	const auto extensions = GetExtensions();
 	if(format[FileTypeFormatShowExtensions])
 	{
 		filter += MPT_PATHSTRING(" (");
 		bool first = true;
-		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
 		{
 			if(first)
 			{
@@ -531,7 +531,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	filter += MPT_PATHSTRING("|");
 	{
 		bool first = true;
-		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
 		{
 			if(first)
 			{
@@ -556,7 +556,7 @@ mpt::PathString FileType::AsFilterOnlyString() const
 	const std::vector<mpt::PathString> extensions = GetExtensions();
 	{
 		bool first = true;
-		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
 		{
 			if(first)
 			{
@@ -584,7 +584,7 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 //----------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(std::vector<FileType>::const_iterator it = fileTypes.begin(); it != fileTypes.end(); ++it)
+	for(auto it = fileTypes.cbegin(); it != fileTypes.cend(); ++it)
 	{
 		filter += it->AsFilterString(format);
 	}
@@ -604,7 +604,7 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 //-----------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(std::vector<FileType>::const_iterator it = fileTypes.begin(); it != fileTypes.end(); ++it)
+	for(auto it = fileTypes.cbegin(); it != fileTypes.cend(); ++it)
 	{
 		filter += it->AsFilterOnlyString();
 	}

@@ -238,7 +238,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		decrypted.resize(file.GetLength());
 		file.ReadRaw(decrypted.data(), decrypted.size());
 		uint8 i = 0;
-		for(std::vector<mpt::byte>::iterator c = decrypted.begin(); c != decrypted.end(); c++)
+		for(auto c = decrypted.begin(); c != decrypted.end(); c++)
 		{
 			*c -= ++i;
 		}
@@ -282,8 +282,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	bool sinariaFormat = false; // The game "Sinaria" uses a slightly modified PSM structure - in some ways it's more like PSM16 (e.g. effects).
 
 	// "SONG" - Subsong information (channel count etc)
-	std::vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
-	for(std::vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
+	auto songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
+	for(auto subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
 	{
 		ChunkReader chunk(*subsongIter);
 		PSMSongHeader songHeader;
@@ -311,7 +311,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Read "Sub chunks"
 		ChunkReader::ChunkList<PSMChunk> subChunks = chunk.ReadChunks<PSMChunk>(1);
-		for(ChunkReader::ChunkList<PSMChunk>::iterator subChunkIter = subChunks.begin(); subChunkIter != subChunks.end(); subChunkIter++)
+		for(auto subChunkIter = subChunks.begin(); subChunkIter != subChunks.end(); subChunkIter++)
 		{
 			FileReader subChunk(subChunkIter->GetData());
 			PSMChunk subChunkHead = subChunkIter->GetHeader();
@@ -536,8 +536,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// DSMP - Samples
 	if(loadFlags & loadSampleData)
 	{
-		std::vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
-		for(std::vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
+		auto sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
+		for(auto sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
 		{
 			FileReader &chunk(*sampleIter);
 			SAMPLEINDEX smp;
@@ -608,8 +608,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "PBOD" - Pattern data of a single pattern
 	// Now that we know the number of channels, we can go through all the patterns.
-	std::vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
-	for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+	auto pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
+	for(auto patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 	{
 		FileReader &chunk(*patternIter);
 		if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice

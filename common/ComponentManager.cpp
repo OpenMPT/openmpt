@@ -163,7 +163,7 @@ bool ComponentLibrary::HasBindFailed() const
 mpt::Library ComponentLibrary::GetLibrary(const std::string &libName) const
 //-------------------------------------------------------------------------
 {
-	TLibraryMap::const_iterator it = m_Libraries.find(libName);
+	const auto it = m_Libraries.find(libName);
 	if(it == m_Libraries.end())
 	{
 		return mpt::Library();
@@ -326,14 +326,14 @@ void ComponentManager::Startup()
 	MPT_LOG(LogDebug, "Components", MPT_USTRING("Startup"));
 	if(m_Settings.LoadOnStartup())
 	{
-		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
 		{
 			(*it).second.instance = (*it).second.factoryMethod(*this);
 		}
 	}
 	if(!m_Settings.KeepLoaded())
 	{
-		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
 		{
 			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
 		}
@@ -367,7 +367,7 @@ std::shared_ptr<IComponent> ComponentManager::GetComponent(const IComponentFacto
 //--------------------------------------------------------------------------------------------------
 {
 	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
-	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
+	auto it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
 		if((*it).second.instance)
@@ -394,7 +394,7 @@ std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFa
 //-----------------------------------------------------------------------------------------------------
 {
 	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
-	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
+	auto it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
 		if((*it).second.instance)
@@ -419,7 +419,7 @@ std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFa
 std::vector<std::string> ComponentManager::GetRegisteredComponents() const
 {
 	std::vector<std::string> result;
-	for(TComponentMap::const_iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+	for(auto it = m_Components.cbegin(); it != m_Components.cend(); ++it)
 	{
 		result.push_back((*it).first);
 	}
@@ -434,7 +434,7 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 	result.state = ComponentStateUnregistered;
 	result.settingsKey = "";
 	result.type = ComponentTypeUnknown;
-	TComponentMap::const_iterator it = m_Components.find(name);
+	const auto it = m_Components.find(name);
 	if(it == m_Components.end())
 	{
 		result.state = ComponentStateUnregistered;
