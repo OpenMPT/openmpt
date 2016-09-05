@@ -1605,10 +1605,11 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			// First, find all used patterns in all sequences.
 			for(SEQUENCEINDEX seq = 0; seq < sndFile.Order.GetNumSequences(); seq++)
 			{
-				const ORDERINDEX ordLength = sndFile.Order.GetSequence(seq).GetLength();
+				const auto sequence = sndFile.Order.GetSequence(seq);
+				const ORDERINDEX ordLength = sequence.GetLengthTailTrimmed();
 				for(ORDERINDEX ord = 0; ord < ordLength; ord++)
 				{
-					if(sndFile.Order.GetSequence(seq)[ord] == modItemID)
+					if(sequence[ord] == modItemID)
 					{
 						isUsed = true;
 						break;
@@ -1756,18 +1757,6 @@ void CModTree::EmptyInstrumentLibrary()
 }
 
 
-struct find_str
-{
-	find_str(const char *str): s1(str) { }
-
-	bool operator() (const char *s2) const
-	{
-		return !strcmp(s1, s2);
-	}
-
-	const char *s1;
-};
-
 bool CModTree::IsMediaFoundationExtension(const std::string &ext) const
 //---------------------------------------------------------------------
 {
@@ -1912,7 +1901,8 @@ void CModTree::FillInstrumentLibrary()
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_INSTRUMENTS);
 						}
-					} else if(std::find_if(modExts.begin(), modExts.end(), find_str(s)) != modExts.end())
+					} else if(std::find_if(modExts.begin(), modExts.end(),
+						[&s] (const char *str) -> bool { return !strcmp(s, str); }) != modExts.end())
 					{
 						// Songs
 						if (showDirs)
