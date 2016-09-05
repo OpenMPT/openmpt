@@ -25,25 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-//  CountOf macro computes the number of elements in a statically-allocated array.
-#if MPT_COMPILER_MSVC
-#define MPT_ARRAYCOUNT(x) _countof(x)
-#else
-#define MPT_ARRAYCOUNT(x) (sizeof((x))/sizeof((x)[0]))
-#endif
-
-
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
-#define MPT_ALIGNOF(type) __alignof( type )
-#elif MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,5,0)
-#define MPT_ALIGNOF(type) __alignof__( type )
-#else
-#define MPT_ALIGNOF(type) alignof( type )
-#endif
-
-
-
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline
@@ -54,6 +35,35 @@ OPENMPT_NAMESPACE_BEGIN
 #else
 #define MPT_FORCEINLINE inline
 #define MPT_NOINLINE
+#endif
+
+
+
+// constexpr
+#if MPT_GCC_BEFORE(4,6,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
+#define MPT_CONSTEXPR11 MPT_FORCEINLINE
+#else
+#define MPT_CONSTEXPR11 constexpr
+#endif
+
+
+
+// MPT_ARRAY_COUNT macro computes the number of elements in a statically-allocated array.
+#if MPT_COMPILER_MSVC
+#include <cstdlib>
+#define MPT_ARRAY_COUNT(x) _countof(x)
+#else
+#define MPT_ARRAY_COUNT(x) (sizeof((x))/sizeof((x)[0]))
+#endif
+
+
+
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
+#define MPT_ALIGNOF(type) __alignof( type )
+#elif MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,5,0)
+#define MPT_ALIGNOF(type) __alignof__( type )
+#else
+#define MPT_ALIGNOF(type) alignof( type )
 #endif
 
 
@@ -517,7 +527,7 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 
 // legacy
-#define CountOf(x) MPT_ARRAYCOUNT(x)
+#define CountOf(x) MPT_ARRAY_COUNT(x)
 #define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
 
 
