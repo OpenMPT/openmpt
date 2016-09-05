@@ -68,6 +68,8 @@ public:
 // RAII object for temporarily bypassing the input handler
 class BypassInputHandler
 {
+private:
+	bool bypassed;
 public:
 	BypassInputHandler();
 	~BypassInputHandler();

@@ -614,15 +614,24 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 
 BypassInputHandler::BypassInputHandler()
 //--------------------------------------
+	: bypassed(false)
 {
-	CMainFrame::GetInputHandler()->Bypass(true);
+	if(CMainFrame::GetInputHandler())
+	{
+		bypassed = true;
+		CMainFrame::GetInputHandler()->Bypass(true);
+	}
 }
 
 
 BypassInputHandler::~BypassInputHandler()
 //---------------------------------------
 {
-	CMainFrame::GetInputHandler()->Bypass(false);
+	if(bypassed)
+	{
+		CMainFrame::GetInputHandler()->Bypass(false);
+		bypassed = false;
+	}
 }
 
 OPENMPT_NAMESPACE_END
