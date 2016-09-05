@@ -1160,7 +1160,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	channels.reserve(m_nChannels);
 	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 	{
-		if(modChnStatus[i].midiCh != ModChannelState::NOMIDI || !GetpModDoc()->IsChannelUnused(i))
+		if(modChnStatus[i].midiCh != ModChannelState::NOMIDI
+#ifdef MODPLUG_TRACKER
+			|| !GetpModDoc()->IsChannelUnused(i)
+#endif // MODPLUG_TRACKER
+			)
 		{
 			channels.push_back(i);
 			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
@@ -1178,18 +1182,12 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	if(GetpModDoc() != nullptr)
 	{
 		// Keep MIDI channels in patterns neatly grouped
-		struct MidiChannelSort
+		std::sort(channels.begin(), channels.end(), [&modChnStatus] (CHANNELINDEX c1, CHANNELINDEX c2) -> bool
 		{
-			std::vector<ModChannelState> &modChnStatus;
-			MidiChannelSort(std::vector<ModChannelState> &modChnStatus) : modChnStatus(modChnStatus) { }
-			bool operator() (CHANNELINDEX c1, CHANNELINDEX c2)
-			{
-				if(modChnStatus[c1].midiCh == modChnStatus[c2].midiCh)
-					return c1 < c2;
-				return modChnStatus[c1].midiCh < modChnStatus[c2].midiCh;
-			}
-		};
-		std::sort(channels.begin(), channels.end(), MidiChannelSort(modChnStatus));
+			if(modChnStatus[c1].midiCh == modChnStatus[c2].midiCh)
+				return c1 < c2;
+			return modChnStatus[c1].midiCh < modChnStatus[c2].midiCh;
+		});
 		GetpModDoc()->ReArrangeChannels(channels, false);
 		GetpModDoc()->m_ShowSavedialog = true;
 	}
