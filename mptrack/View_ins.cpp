@@ -1068,14 +1068,8 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr) return 0;
 
-			struct TickComperator
-			{
-				bool operator() (const EnvelopeNode &l, const EnvelopeNode &r) const
-				{
-					return l.tick < r.tick;
-				}
-			};
-			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<uint16>(nTick), 0), TickComperator()))
+			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<uint16>(nTick), 0),
+				[] (const EnvelopeNode &l, const EnvelopeNode &r) -> bool { return l.tick < r.tick; }))
 			{
 				// Don't want to insert a node at the same position as another node.
 				return 0;
