@@ -50,7 +50,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 // MPT_ARRAY_COUNT macro computes the number of elements in a statically-allocated array.
 #if MPT_COMPILER_MSVC
+OPENMPT_NAMESPACE_END
 #include <cstdlib>
+OPENMPT_NAMESPACE_BEGIN
 #define MPT_ARRAY_COUNT(x) _countof(x)
 #else
 #define MPT_ARRAY_COUNT(x) (sizeof((x))/sizeof((x)[0]))
