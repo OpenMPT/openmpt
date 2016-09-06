@@ -848,7 +848,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
 		m_SongFlags.set(SONG_AMIGALIMITS);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
-		if(maxPanning < 0x20)
+		// Don't enable these hacks for ScreamTracker modules (restart position = 0x7F), to fix e.g. sample 10 in BASIC001.MOD (SHA1: 11298a5620e677beaa50bd4ed00c3710b75c81af)
+		if(maxPanning < 0x20 && fileHeader.restartPos != 0x7F)
 		{
 			m_SongFlags.set(SONG_PT_MODE);
 			m_playBehaviour.set(kMODSampleSwap);
