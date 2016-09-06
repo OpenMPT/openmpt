@@ -98,11 +98,11 @@ rmdir /s /q libopenmpt-%MPT_PKG_TAG%
 cd .. || goto error
 
 cd bin || goto error
-rmdir /s /q libopenmpt-dev-%MPT_VS_VER%
-del /f /q libopenmpt-dev-%MPT_VS_VER%.tar
+rmdir /s /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%
+del /f /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar
 del /f /q libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z
-mkdir libopenmpt-dev-%MPT_VS_VER%
-cd libopenmpt-dev-%MPT_VS_VER% || goto error
+mkdir libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%
+cd libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER% || goto error
 mkdir inc
 mkdir inc\libopenmpt
 mkdir lib
@@ -173,9 +173,9 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-
  bin\x86_64\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-%MPT_VS_VER%.tar libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z || goto error
+"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z || goto error
 del /f /q libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z
-rmdir /s /q libopenmpt-dev-%MPT_VS_VER%
+rmdir /s /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%
 cd .. || goto error
 
 
