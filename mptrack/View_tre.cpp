@@ -329,7 +329,21 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				return TRUE;
 			}
 		}
+	} else if(pMsg->message == WM_CHAR)
+	{
+		ModItem item = GetModItem(GetSelectedItem());
+		switch(item.type)
+		{
+		case MODITEM_MIDIINSTRUMENT:
+		case MODITEM_MIDIPERCUSSION:
+		case MODITEM_INSLIB_SAMPLE:
+		case MODITEM_INSLIB_INSTRUMENT:
+		case MODITEM_DLSBANK_INSTRUMENT:
+			// Avoid cycling through tree-view elements on key hold
+			return true;
+		}
 	}
+
 	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
