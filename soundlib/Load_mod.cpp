@@ -536,7 +536,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
 		m_nChannels = 4;
-		m_madeWithTracker = "Generic MOD (ProTracker compatible)";
+		m_madeWithTracker = "Generic ProTracker or compatible";
 	} else if(IsMagic(magic, "M&K!")
 		|| IsMagic(magic, "FEST")	// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "N.T."))
@@ -570,13 +570,13 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// xCHN - Many trackers
 		m_nChannels = magic[0] - '0';
-		m_madeWithTracker = "Generic MOD";
+		m_madeWithTracker = "Generic MOD-compatible Tracker";
 	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1]>='0' && magic[1] <= '9'
 		&& (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
 		m_nChannels = (magic[0] - '0') * 10 + magic[1] - '0';
-		m_madeWithTracker = "Generic MOD";
+		m_madeWithTracker = "Generic MOD-compatible Tracker";
 	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker

@@ -270,6 +270,10 @@ std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
 {
 	std::set<std::string> retvals;
 	std::string retval;
+	if(modtype == MOD_TYPE_MOD)
+	{ // special case MOD
+		return "Generic Amiga / PC MOD file";
+	}
 	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
 	{
 		if(modFormatInfo[i].format & modtype)
