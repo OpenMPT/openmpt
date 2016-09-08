@@ -84,14 +84,14 @@ struct CModSpecifications
 
 namespace ModSpecs
 {
-	extern const CModSpecifications mptm;
-	extern const CModSpecifications mod;
-	extern const CModSpecifications s3m;
-	extern const CModSpecifications s3mEx;
-	extern const CModSpecifications xm;
-	extern const CModSpecifications xmEx;
-	extern const CModSpecifications it;
-	extern const CModSpecifications itEx;
+	extern const CModSpecifications & mptm;
+	extern const CModSpecifications & mod;
+	extern const CModSpecifications & s3m;
+	extern const CModSpecifications & s3mEx;
+	extern const CModSpecifications & xm;
+	extern const CModSpecifications & xmEx;
+	extern const CModSpecifications & it;
+	extern const CModSpecifications & itEx;
 	extern const CModSpecifications *Collection[8];
 }
 
