@@ -24,7 +24,7 @@ namespace ModSpecs
 #define SongFlag FlagSet<SongFlags>::store_type
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications mptm =
+MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 {
 	/*
 	TODO: Proper, less arbitrarily chosen values here.
@@ -78,7 +78,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm =
 
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications mod =
+MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 {
 	MOD_TYPE_MOD,								// Internal MODTYPE value
 	"mod",										// File extension
@@ -125,7 +125,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod =
 };
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications xm =
+MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -172,7 +172,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm =
 };
 
 // XM with MPT extensions
-MPT_CONSTEXPR11_VAR CModSpecifications xmEx =
+MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -218,7 +218,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx =
 	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications s3m =
+MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -265,7 +265,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m =
 };
 
 // S3M with MPT extensions
-MPT_CONSTEXPR11_VAR CModSpecifications s3mEx =
+MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -311,7 +311,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx =
 	" vp?????????????",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications it =
+MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension
@@ -357,7 +357,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications it =
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications itEx =
+MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension
@@ -403,7 +403,16 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx =
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
-const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
+const CModSpecifications *Collection[8] = { &mptm_, &mod_, &s3m_, &s3mEx_, &xm_, &xmEx_, &it_, &itEx_ };
+
+const CModSpecifications & mptm = mptm_;
+const CModSpecifications & mod = mod_;
+const CModSpecifications & s3m = s3m_;
+const CModSpecifications & s3mEx = s3mEx_;
+const CModSpecifications & xm = xm_;
+const CModSpecifications & xmEx = xmEx_;
+const CModSpecifications & it = it_;
+const CModSpecifications & itEx = itEx_;
 
 } // namespace ModSpecs
 
