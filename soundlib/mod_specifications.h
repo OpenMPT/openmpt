@@ -78,9 +78,9 @@ struct CModSpecifications
 	uint8 hasFractionalTempo : 1;		// Are fractional tempos allowed?
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
-	TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
-	TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
-	FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
+	MPT_CONSTEXPR11_FUN TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
+	MPT_CONSTEXPR11_FUN TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
+	MPT_CONSTEXPR11_FUN FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
 };
 
 
