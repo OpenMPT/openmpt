@@ -24,7 +24,7 @@ namespace ModSpecs
 #define SongFlag FlagSet<SongFlags>::store_type
 
 
-const CModSpecifications mptm =
+MPT_CONSTEXPR11_VAR CModSpecifications mptm =
 {
 	/*
 	TODO: Proper, less arbitrarily chosen values here.
@@ -78,7 +78,7 @@ const CModSpecifications mptm =
 
 
 
-const CModSpecifications mod =
+MPT_CONSTEXPR11_VAR CModSpecifications mod =
 {
 	MOD_TYPE_MOD,								// Internal MODTYPE value
 	"mod",										// File extension
@@ -125,7 +125,7 @@ const CModSpecifications mod =
 };
 
 
-const CModSpecifications xm =
+MPT_CONSTEXPR11_VAR CModSpecifications xm =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -172,7 +172,7 @@ const CModSpecifications xm =
 };
 
 // XM with MPT extensions
-const CModSpecifications xmEx =
+MPT_CONSTEXPR11_VAR CModSpecifications xmEx =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -218,7 +218,7 @@ const CModSpecifications xmEx =
 	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
-const CModSpecifications s3m =
+MPT_CONSTEXPR11_VAR CModSpecifications s3m =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -265,7 +265,7 @@ const CModSpecifications s3m =
 };
 
 // S3M with MPT extensions
-const CModSpecifications s3mEx =
+MPT_CONSTEXPR11_VAR CModSpecifications s3mEx =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -311,7 +311,7 @@ const CModSpecifications s3mEx =
 	" vp?????????????",							// Supported Volume Column commands
 };
 
-const CModSpecifications it =
+MPT_CONSTEXPR11_VAR CModSpecifications it =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension
@@ -357,7 +357,7 @@ const CModSpecifications it =
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
-const CModSpecifications itEx =
+MPT_CONSTEXPR11_VAR CModSpecifications itEx =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension
