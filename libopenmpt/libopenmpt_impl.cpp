@@ -63,6 +63,18 @@ static int Warning_libopenmpt_built_in_non_thread_safe_mode_because_mutexes_are_
 #endif
 #endif // MPT_MUTEX_NONE
 
+#if (!MPT_COMPILER_HAS_CONSTEXPR11)
+#if MPT_COMPILER_MSVC
+#pragma message("Warning: libopenmpt is built with a compiler not supporting constexpr. Referring to libopenmpt from global initializers will result in undefined behaviour.")
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#warning "Warning: libopenmpt is built with a compiler not supporting constexpr. Referring to libopenmpt from global initializers will result in undefined behaviour.")
+#else
+// There is no portable way to display a warning.
+// Try to provoke a warning with an unused variable.
+static int Warning_libopenmpt_is_built_with_a_compiler_not_supporting_constexpr_Referring_to_libopenmpt_from_global_initializers_will_result_in_undefined_behaviour;
+#endif
+#endif // MPT_MUTEX_NONE
+
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
 MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)

@@ -189,6 +189,17 @@
 
 
 
+// C++11 constexpr
+#if MPT_GCC_BEFORE(4,6,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
+#define MPT_COMPILER_HAS_CONSTEXPR11 0
+#endif
+
+#ifndef MPT_COMPILER_HAS_CONSTEXPR11
+#define MPT_COMPILER_HAS_CONSTEXPR11 1
+#endif
+
+
+
 #if MPT_COMPILER_MSVC
 // Compiler has multiplication/division semantics when shifting signed integers.
 #define MPT_COMPILER_SHIFT_SIGNED 1
