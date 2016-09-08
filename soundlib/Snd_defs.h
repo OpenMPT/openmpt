@@ -575,41 +575,41 @@ struct FPInt
 {
 protected:
 	T v;
-	FPInt(T rawValue) : v(rawValue) { }
+	MPT_CONSTEXPR11_FUN FPInt(T rawValue) : v(rawValue) { }
 
 public:
 	static const size_t fractFact = FFact;
 
-	FPInt() : v(0) { }
-	FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
-	FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
-	explicit FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
-	explicit FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
+	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }
+	MPT_CONSTEXPR11_FUN FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
+	MPT_CONSTEXPR11_FUN FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
+	explicit MPT_CONSTEXPR11_FUN FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
+	explicit MPT_CONSTEXPR11_FUN FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
 
 	// Set integer and fractional part
-	FPInt<fractFact, T> &Set(T intPart, T fractPart = 0) { v = (intPart * fractFact) + (fractPart % fractFact); return *this; }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> &Set(T intPart, T fractPart = 0) { v = (intPart * fractFact) + (fractPart % fractFact); return *this; }
 	// Set raw internal representation directly
-	FPInt<fractFact, T> &SetRaw(T value) { v = value; return *this; }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> &SetRaw(T value) { v = value; return *this; }
 	// Retrieve the integer part of the stored value
-	T GetInt() const { return v / fractFact; }
+	MPT_CONSTEXPR11_FUN T GetInt() const { return v / fractFact; }
 	// Retrieve the fractional part of the stored value
-	T GetFract() const { return v % fractFact; }
+	MPT_CONSTEXPR11_FUN T GetFract() const { return v % fractFact; }
 	// Retrieve the raw internal representation of the stored value
-	T GetRaw() const { return v; }
+	MPT_CONSTEXPR11_FUN T GetRaw() const { return v; }
 	// Formats the stored value as a floating-point value
-	double ToDouble() const { return v / double(fractFact); }
+	MPT_CONSTEXPR11_FUN double ToDouble() const { return v / double(fractFact); }
 
-	FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v + other.v); }
-	FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v - other.v); }
-	void operator+= (const FPInt<fractFact, T> &other) { v += other.v; }
-	void operator-= (const FPInt<fractFact, T> &other) { v -= other.v; }
+	MPT_CONSTEXPR11_FUN FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v + other.v); }
+	MPT_CONSTEXPR11_FUN FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v - other.v); }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator+= (const FPInt<fractFact, T> &other) { v += other.v; return *this; }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator-= (const FPInt<fractFact, T> &other) { v -= other.v; return *this; }
 
-	bool operator== (const FPInt<fractFact, T> &other) const { return v == other.v; }
-	bool operator!= (const FPInt<fractFact, T> &other) const { return v != other.v; }
-	bool operator<= (const FPInt<fractFact, T> &other) const { return v <= other.v; }
-	bool operator>= (const FPInt<fractFact, T> &other) const { return v >= other.v; }
-	bool operator< (const FPInt<fractFact, T> &other) const { return v < other.v; }
-	bool operator> (const FPInt<fractFact, T> &other) const { return v > other.v; }
+	MPT_CONSTEXPR11_FUN bool operator== (const FPInt<fractFact, T> &other) const { return v == other.v; }
+	MPT_CONSTEXPR11_FUN bool operator!= (const FPInt<fractFact, T> &other) const { return v != other.v; }
+	MPT_CONSTEXPR11_FUN bool operator<= (const FPInt<fractFact, T> &other) const { return v <= other.v; }
+	MPT_CONSTEXPR11_FUN bool operator>= (const FPInt<fractFact, T> &other) const { return v >= other.v; }
+	MPT_CONSTEXPR11_FUN bool operator< (const FPInt<fractFact, T> &other) const { return v < other.v; }
+	MPT_CONSTEXPR11_FUN bool operator> (const FPInt<fractFact, T> &other) const { return v > other.v; }
 };
 
 typedef FPInt<10000, uint32_t> TEMPO;
