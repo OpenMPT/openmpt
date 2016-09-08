@@ -227,8 +227,8 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		else
 			m_SpinSpeed.SetRange32(specs.speedMin, specs.speedMax);
 		
-		tempoMin = specs.tempoMin;
-		tempoMax = specs.tempoMax;
+		tempoMin = specs.GetTempoMin();
+		tempoMax = specs.GetTempoMax();
 		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
 		// Changing the upper tempo limit in the mod specs would break them, so do it here instead.
 		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= TEMPO(255, 0))
@@ -334,7 +334,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		if (pSlider == &m_SliderTempo)
 		{
 			const TEMPO tempo = tempoMax - TEMPO(m_SliderTempo.GetPos(), 0);
-			if ((tempo >= m_sndFile.GetModSpecifications().tempoMin) && (tempo <= m_sndFile.GetModSpecifications().tempoMax) && (tempo != m_sndFile.m_nDefaultTempo))
+			if ((tempo >= m_sndFile.GetModSpecifications().GetTempoMin()) && (tempo <= m_sndFile.GetModSpecifications().GetTempoMax()) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();

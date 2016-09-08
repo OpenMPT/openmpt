@@ -44,8 +44,8 @@ struct CModSpecifications
 	SEQUENCEINDEX sequencesMax;
 	CHANNELINDEX channelsMin;			// Minimum number of editable channels in pattern.
 	CHANNELINDEX channelsMax;			// Maximum number of editable channels in pattern.
-	TEMPO tempoMin;
-	TEMPO tempoMax;
+	uint32 tempoMinInt;
+	uint32 tempoMaxInt;
 	uint32 speedMin;					// Minimum ticks per frame
 	uint32 speedMax;					// Maximum ticks per frame
 	ROWINDEX patternRowsMin;
@@ -78,6 +78,8 @@ struct CModSpecifications
 	uint8 hasFractionalTempo : 1;		// Are fractional tempos allowed?
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
+	TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
+	TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
 	FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
 };
 

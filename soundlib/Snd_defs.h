@@ -514,6 +514,6 @@ public:
 	bool operator> (const FPInt<fractFact, T> &other) const { return v > other.v; }
 };
 
-typedef FPInt<10000, uint32_t> TEMPO;
+typedef FPInt<10000, uint32> TEMPO;
 
 OPENMPT_NAMESPACE_END

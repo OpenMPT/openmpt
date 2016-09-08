@@ -340,7 +340,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 
 	CModDoc &modDoc = *(sndFile.GetpModDoc());
 
-	const uint32 tempoMin = sndFile.GetModSpecifications().tempoMin.GetInt();
+	const uint32 tempoMin = sndFile.GetModSpecifications().GetTempoMin().GetInt();
 
 	bool success = false;
 	bool prepareUndo = true;	// prepare pattern for undo next time

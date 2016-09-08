@@ -40,8 +40,8 @@ const CModSpecifications mptm =
 	MAX_SEQUENCES,								// Sequences max
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
@@ -89,8 +89,8 @@ const CModSpecifications mod =
 	1,											// Only one order list
 	1,											// Channel min
 	99,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	32,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	64,											// Min pattern rows
@@ -136,8 +136,8 @@ const CModSpecifications xm =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
@@ -183,8 +183,8 @@ const CModSpecifications xmEx =
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
@@ -229,8 +229,8 @@ const CModSpecifications s3m =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(33, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	33,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	64,											// Min pattern rows
@@ -276,8 +276,8 @@ const CModSpecifications s3mEx =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(33, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	33,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	64,											// Min pattern rows
@@ -322,8 +322,8 @@ const CModSpecifications it =
 	1,											// Only one order list
 	1,											// Channel min
 	64,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	32,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
@@ -368,8 +368,8 @@ const CModSpecifications itEx =
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
