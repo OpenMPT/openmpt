@@ -40,12 +40,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // constexpr
-#if MPT_GCC_BEFORE(4,6,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
-#define MPT_CONSTEXPR11_FUN MPT_FORCEINLINE
-#define MPT_CONSTEXPR11_VAR const
-#else
+#if MPT_COMPILER_HAS_CONSTEXPR11
 #define MPT_CONSTEXPR11_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR11_VAR constexpr
+#else
+#define MPT_CONSTEXPR11_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR11_VAR const
 #endif
 // no support for c++14 yet, however when making types constexpr, there are a
 //  couple of situations where it's only possible in c++14
