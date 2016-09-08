@@ -44,8 +44,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	MAX_SEQUENCES,								// Sequences max
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
@@ -105,8 +105,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 	1,											// Only one order list
 	1,											// Channel min
 	99,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	32,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	64,											// Min pattern rows
@@ -164,8 +164,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
@@ -223,8 +223,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
@@ -281,8 +281,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(33, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	33,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	64,											// Min pattern rows
@@ -340,8 +340,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	TEMPO(33, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	33,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	64,											// Min pattern rows
@@ -398,8 +398,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	1,											// Only one order list
 	1,											// Channel min
 	64,											// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(255, 0),								// Max tempo
+	32,											// Min tempo
+	255,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
@@ -456,8 +456,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	TEMPO(32, 0),								// Min tempo
-	TEMPO(512, 0),								// Max tempo
+	32,											// Min tempo
+	512,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows

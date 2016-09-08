@@ -2324,7 +2324,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 	}
 
 	// Validate read values.
-	Limit(m_nDefaultTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+	Limit(m_nDefaultTempo, GetModSpecifications().GetTempoMin(), GetModSpecifications().GetTempoMax());
 	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat) m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
 	if(m_nTempoMode >= tempoModeMax) m_nTempoMode = tempoModeClassic;
 	if(m_nMixLevels >= mixLevelsMax) m_nMixLevels = mixLevelsOriginal;

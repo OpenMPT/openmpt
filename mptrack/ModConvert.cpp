@@ -558,7 +558,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	ChangeFileExtension(nNewType);
 
 	// Check mod specifications
-	Limit(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
+	Limit(m_SndFile.m_nDefaultTempo, specs.GetTempoMin(), specs.GetTempoMax());
 	Limit(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++) if(m_SndFile.Instruments[i] != nullptr)

@@ -1627,7 +1627,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			// Pitch/Tempo lock
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				wsprintf(pszText, _T("Tempo range: %u - %u"), specs.tempoMin.GetInt(), specs.tempoMax.GetInt());
+				wsprintf(pszText, _T("Tempo range: %u - %u"), specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
 				return TRUE;
 			}
 
@@ -2871,7 +2871,7 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 	if(IsLocked() || !m_nInstrument || !m_sndFile.Instruments[m_nInstrument]) return;
 
 	TEMPO ptlTempo = m_EditPitchTempoLock.GetTempoValue();
-	Limit(ptlTempo, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
+	Limit(ptlTempo, m_sndFile.GetModSpecifications().GetTempoMin(), m_sndFile.GetModSpecifications().GetTempoMax());
 
 	m_sndFile.Instruments[m_nInstrument]->pitchToTempoLock = ptlTempo;
 	m_modDoc.SetModified();	// Only update other views after killing focus
@@ -2888,13 +2888,13 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 	bool changed = false;
 	const CModSpecifications& specs = m_sndFile.GetModSpecifications();
 
-	if(ptlTempo < specs.tempoMin)
+	if(ptlTempo < specs.GetTempoMin())
 	{
-		ptlTempo = specs.tempoMin;
+		ptlTempo = specs.GetTempoMin();
 		changed = true;
-	} else if(ptlTempo > specs.tempoMax)
+	} else if(ptlTempo > specs.GetTempoMax())
 	{
-		ptlTempo = specs.tempoMax;
+		ptlTempo = specs.GetTempoMax();
 		changed = true;
 	}
 	if(changed)
