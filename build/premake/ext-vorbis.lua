@@ -101,7 +101,7 @@
    "../../include/vorbis/lib/modes/setup_X.h",
   }
   filter { "action:vs*" }
-    buildoptions { "/wd4101", "/wd4244", "/wd4267" }
+    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305" }
   filter {}
   links { "ogg" }
   filter {}
