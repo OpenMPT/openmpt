@@ -190,7 +190,7 @@
 
 
 // C++11 constexpr
-#if MPT_GCC_BEFORE(4,7,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
+#if MPT_GCC_BEFORE(4,7,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_COMPILER_MSVC
 // constexpr is broken in GCC 4.6
 #define MPT_COMPILER_HAS_CONSTEXPR11 0
 #endif
