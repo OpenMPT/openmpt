@@ -555,7 +555,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					newTempo = TEMPO(n, 0);
 				}
 				newTempo += nCurrentTempo;
-				pSndFile->SetTempo(Clamp(newTempo, specs.tempoMin, specs.tempoMax), true);
+				pSndFile->SetTempo(Clamp(newTempo, specs.GetTempoMin(), specs.GetTempoMax()), true);
 				m_SpinTempo.SetPos(0);
 			}
 			if ((n = sgn(m_SpinSpeed.GetPos32())) != 0)

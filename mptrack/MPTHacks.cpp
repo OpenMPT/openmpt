@@ -371,12 +371,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for invalid default tempo
-	if(m_SndFile.m_nDefaultTempo > originalSpecs->tempoMax || m_SndFile.m_nDefaultTempo < originalSpecs->tempoMin)
+	if(m_SndFile.m_nDefaultTempo > originalSpecs->GetTempoMax() || m_SndFile.m_nDefaultTempo < originalSpecs->GetTempoMin())
 	{
-		AddToLog(mpt::String::Print("Found incompatible default tempo (must be between %1 and %2)", originalSpecs->tempoMin.GetInt(), originalSpecs->tempoMax.GetInt()));
+		AddToLog(mpt::String::Print("Found incompatible default tempo (must be between %1 and %2)", originalSpecs->GetTempoMin().GetInt(), originalSpecs->GetTempoMax().GetInt()));
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->tempoMin, originalSpecs->tempoMax);
+			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->GetTempoMin(), originalSpecs->GetTempoMax());
 	}
 
 	// Check for invalid default speed
