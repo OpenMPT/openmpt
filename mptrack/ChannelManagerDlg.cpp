@@ -652,8 +652,6 @@ void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || show == false) return;
 
-	CriticalSection cs;
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
@@ -684,7 +682,6 @@ void CChannelManagerDlg::OnPaint()
 	{
 		// Window height is not sufficient => resize window
 		::EndPaint(m_hWnd,&pDC);
-		cs.Leave();
 		CWnd::SetWindowPos(NULL, 0, 0, btn.Width(), btn.Height() + (buttonHeight - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
 		return;
 	}
@@ -693,25 +690,31 @@ void CChannelManagerDlg::OnPaint()
 
 	if(currentTab == 3 && moveRect && bkgnd)
 	{
-
+		// Only draw channels to be moved around
 		HDC bdc = ::CreateCompatibleDC(pDC.hdc);
-		::SelectObject(bdc,bkgnd);
-		::BitBlt(pDC.hdc,client.left,client.top,client.Width(),client.Height(),bdc,0,0,SRCCOPY);
-		::SelectObject(bdc,(HBITMAP)NULL);
-		::DeleteDC(bdc);
+		::SelectObject(bdc, bkgnd);
+		::BitBlt(pDC.hdc, client.left, client.top, client.Width(), client.Height(), bdc, 0, 0, SRCCOPY);
+
+		BLENDFUNCTION ftn;
+		ftn.BlendOp = AC_SRC_OVER;
+		ftn.BlendFlags = 0;
+		ftn.SourceConstantAlpha = 192;
+		ftn.AlphaFormat = 0;
 
 		for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 		{
 			CHANNELINDEX nThisChn = pattern[nChn];
-			if(select[nThisChn]){
+			if(select[nThisChn])
+			{
 				btn = move[nThisChn];
-				btn.left += mx - omx + 2;
-				btn.right += mx - omx + 1;
-				btn.top += my - omy + 2;
-				btn.bottom += my - omy + 1;
-				FrameRect(pDC.hdc,&btn,CMainFrame::brushBlack);
+				btn.DeflateRect(3, 3, 0, 0);
+
+				AlphaBlend(pDC.hdc, btn.left + mx - omx, btn.top + my - omy, btn.Width(), btn.Height(), bdc,
+					btn.left - client.left, btn.top - client.top, btn.Width(), btn.Height(), ftn);
 			}
 		}
+		::SelectObject(bdc, (HBITMAP)NULL);
+		::DeleteDC(bdc);
 
 		::EndPaint(m_hWnd,&pDC);
 		return;
@@ -758,6 +761,7 @@ void CChannelManagerDlg::OnPaint()
 
 		btn.DeflateRect(borderX, borderY, borderX, borderY);
 
+		// Draw red/green markers
 		switch(currentTab)
 		{
 			case 0:
@@ -782,7 +786,7 @@ void CChannelManagerDlg::OnPaint()
 				else FillRect(pDC.hdc,&btn,green);
 				break;
 		}
-
+		// Draw border around marker
 		FrameRect(pDC.hdc,&btn,CMainFrame::brushBlack);
 
 		c++;
@@ -1118,7 +1122,8 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 						invalidate = client = m_drawableArea;
 						HDC dc = ::GetDC(m_hWnd);
 						if(!bkgnd) bkgnd = ::CreateCompatibleBitmap(dc,client.Width(),client.Height());
-						if(!moveRect && bkgnd){
+						if(!moveRect && bkgnd)
+						{
 							HDC bdc = ::CreateCompatibleDC(dc);
 							::SelectObject(bdc,bkgnd);
 							::BitBlt(bdc,0,0,client.Width(),client.Height(), dc,client.left,client.top,SRCCOPY);
