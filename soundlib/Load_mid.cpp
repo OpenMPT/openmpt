@@ -403,6 +403,7 @@ struct MidiChannelState
 	uint8 volume;          // Channel Volume            7       0-128       80   (100)
 	uint8 modulation;      // Modulation                1       0-127       0
 	uint8 pitchBendRange;  // Pitch Bend Range                              2
+	int8  transpose;       // Channel transpose                             0
 	uint16 rpn;            // Currently selected RPN    100/101  n/a
 	bool  monoMode : 1;    // Mono/Poly operation       126/127  n/a        Poly
 	bool  sustain : 1;     // Sustain pedal             64       on/off     off
@@ -419,6 +420,7 @@ struct MidiChannelState
 		, volume(80)
 		, modulation(0)
 		, pitchBendRange(2)
+		, transpose(0)
 		, rpn(0x3FFF)
 		, monoMode(false)
 		, sustain(false)
@@ -434,6 +436,45 @@ struct MidiChannelState
 		pitchbend = value;
 		// Convert from arbitrary MIDI pitchbend to 64th of semitone
 		pitchbendMod = Util::muldiv(pitchbend - MIDIEvents::pitchBendCentre, pitchBendRange * 64, MIDIEvents::pitchBendCentre);
+	}
+
+	void ResetAllControllers()
+	{
+		expression = 128;
+		pitchBendRange = 2;
+		SetPitchbend(MIDIEvents::pitchBendCentre);
+		transpose = 0;
+		rpn = 0x3FFF;
+		modulation = 0;
+		monoMode = false;
+		sustain = false;
+		// Should also reset pedals (40h-43h), portamento, aftertouch
+	}
+
+	void SetRPN(uint8 value)
+	{
+		switch(rpn)
+		{
+		case 0:	// Pitch Bend Range
+			pitchBendRange = std::max(value, uint8(1));
+			SetPitchbend(pitchbend);
+			break;
+		case 2:	// Coarse Tune
+			transpose = static_cast<int8>(value) - 64;
+			break;
+		}
+	}
+
+	uint8 GetRPN() const
+	{
+		switch(rpn)
+		{
+		case 0:	// Pitch Bend Range
+			return pitchBendRange;
+		case 2:	// Coarse Tune
+			return transpose;
+		}
+		return 0;
 	}
 };
 
@@ -651,6 +692,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	ORDERINDEX lastOrd = 0;
 	ROWINDEX lastRow = 0;
 	ROWINDEX restartRow = ROWINDEX_INVALID;
+	int8 masterTranspose = 0;
 	bool isXG = false;
 	bool isEMIDI = false;
 	bool isType2 = (fileHeader.format == 2);
@@ -820,7 +862,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								modChnStatus[chn].porta = 0;
 							}
-							patRow[chn].note = static_cast<ModCommand::NOTE>(Clamp(note + pitchOffset, NOTE_MIN, NOTE_MAX));
+							patRow[chn].note = static_cast<ModCommand::NOTE>(Clamp(note + pitchOffset + midiChnStatus[midiCh].transpose + masterTranspose, NOTE_MIN, NOTE_MAX));
 							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1, isXG));
 							EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
 
@@ -873,11 +915,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					case MIDIEvents::MIDICC_DataEntry_Coarse:
-						if(midiChnStatus[midiCh].rpn == 0)
-						{
-							midiChnStatus[midiCh].pitchBendRange = std::max(data2, uint8(1));
-							midiChnStatus[midiCh].SetPitchbend(midiChnStatus[midiCh].pitchbend);
-						}
+						midiChnStatus[midiCh].SetRPN(data2);
 						break;
 
 					case MIDIEvents::MIDICC_Volume_Coarse:
@@ -929,6 +967,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 
+					case MIDIEvents::MIDICC_DataButtonincrement:
+					case MIDIEvents::MIDICC_DataButtondecrement:
+						midiChnStatus[midiCh].SetRPN(midiChnStatus[midiCh].GetRPN() + (data1 == MIDIEvents::MIDICC_DataButtonincrement) ? 1 : -1);
+						break;
+
 					case MIDIEvents::MIDICC_NonRegisteredParameter_Fine:
 					case MIDIEvents::MIDICC_NonRegisteredParameter_Coarse:
 						midiChnStatus[midiCh].rpn = 0x3FFF;
@@ -957,14 +1000,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					case MIDIEvents::MIDICC_AllControllersOff:
-						midiChnStatus[midiCh].expression = 128;
-						midiChnStatus[midiCh].pitchBendRange = 2;
-						midiChnStatus[midiCh].SetPitchbend(MIDIEvents::pitchBendCentre);
-						midiChnStatus[midiCh].rpn = 0x3FFF;
-						midiChnStatus[midiCh].modulation = 0;
-						midiChnStatus[midiCh].monoMode = false;
-						midiChnStatus[midiCh].sustain = false;
-						// Should also reset pedals (40h-43h), NRP, RPN, aftertouch
+						midiChnStatus[midiCh].ResetAllControllers();
 						break;
 
 						// Bn.78.00: All Sound Off (GS)
@@ -1025,6 +1061,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							if(!memcmp(xg, "\x43\x10\x4C\x00\x00\x7E\x00", 7))
 							{
 								isXG = true;
+							} else if(!memcmp(xg, "\x43\x10\x4C\x00\x00\x06", 6))
+							{
+								masterTranspose = static_cast<int8>(xg[6]) - 64;
 							}
 						}
 					}
@@ -1192,13 +1231,28 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		GetpModDoc()->m_ShowSavedialog = true;
 	}
 
-	CDLSBank *pCachedBank = nullptr, *pEmbeddedBank = nullptr;
-	mpt::PathString szCachedBankFile;
+	std::shared_ptr<CDLSBank> pCachedBank, pEmbeddedBank;
+	mpt::PathString cachedBankFile;
 
 	if(CDLSBank::IsDLSBank(file.GetFileName()))
 	{
-		pEmbeddedBank = new CDLSBank();
+		// Soundfont embedded in MIDI file
+		pEmbeddedBank = std::make_shared<CDLSBank>();
 		pEmbeddedBank->Open(file.GetFileName());
+	} else
+	{
+		// Soundfont with same name as MIDI file
+		mpt::PathString exts[] = { MPT_PATHSTRING(".sf2"), MPT_PATHSTRING(".sbk"), MPT_PATHSTRING(".dls") };
+		for(size_t i = 0; i < CountOf(exts); i++)
+		{
+			mpt::PathString filename = file.GetFileName().ReplaceExt(exts[i]);
+			if(filename.IsFile())
+			{
+				pEmbeddedBank = std::make_shared<CDLSBank>();
+				if(pEmbeddedBank->Open(filename))
+					break;
+			}
+		}
 	}
 	ChangeModTypeTo(MOD_TYPE_MPT);
 	MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
@@ -1246,16 +1300,15 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			// Load From DLS Bank
 			if (CDLSBank::IsDLSBank(pszMidiMapName))
 			{
-				CDLSBank *pDLSBank = nullptr;
+				std::shared_ptr<CDLSBank> pDLSBank = nullptr;
 
-				if ((pCachedBank) && (!mpt::PathString::CompareNoCase(szCachedBankFile, pszMidiMapName)))
+				if ((pCachedBank) && (!mpt::PathString::CompareNoCase(cachedBankFile, pszMidiMapName)))
 				{
 					pDLSBank = pCachedBank;
 				} else
 				{
-					if (pCachedBank) delete pCachedBank;
-					pCachedBank = new CDLSBank;
-					szCachedBankFile = pszMidiMapName;
+					pCachedBank = std::make_shared<CDLSBank>();
+					cachedBankFile = pszMidiMapName;
 					if (pCachedBank->Open(pszMidiMapName)) pDLSBank = pCachedBank;
 				}
 				if (pDLSBank)
@@ -1310,8 +1363,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-	if (pCachedBank) delete pCachedBank;
-	if (pEmbeddedBank) delete pEmbeddedBank;
 #endif // MODPLUG_TRACKER
 
 	return true;
