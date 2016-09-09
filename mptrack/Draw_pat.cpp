@@ -623,8 +623,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 	}
 	if (ypaint < rcClient.bottom)
 	{
-		rc.SetRect(0, ypaint, rcClient.right+1, rcClient.bottom+1);
-		DrawButtonRect(hdc, &rc, "");
+		int width = Util::ScalePixels(1, m_hWnd);
+		rc.SetRect(0, ypaint, rcClient.right + 1, rcClient.bottom + 1);
+		if(width == 1)
+			DrawButtonRect(hdc, &rc, "");
+		else
+			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);	// Prevent lower edge from being drawn
 	}
 	// Drawing pattern selection
 	if(m_Status[psDragnDropping])
@@ -642,6 +646,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 		rect.right = m_szHeader.cx;
 		DrawButtonRect(hdc, &rect, s, FALSE,
 			((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PATTERNHEADER)) ? TRUE : FALSE);
+
+		const int dropWidth = Util::ScalePixels(2, m_hWnd);
 
 		// Drawing Channel Headers
 		while (xpaint < rcClient.right)
@@ -666,13 +672,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
 					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
 				{
-					RECT r;
+					CRect r;
 					r.top = rect.top;
 					r.bottom = rect.bottom;
 					// Drop position depends on whether hovered channel is left or right of dragged item.
-					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - 2;
-					r.right = r.left + 2;
-					::FillRect(hdc, &r, CMainFrame::brushText);
+					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
+					r.right = r.left + dropWidth;
+					::FillRect(hdc, r, CMainFrame::brushText);
 				}
 
 				rect.bottom = rect.top + colHeight;

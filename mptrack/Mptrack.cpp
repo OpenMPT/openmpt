@@ -1696,26 +1696,33 @@ MODPLUGDIB *LoadDib(LPCTSTR lpszName)
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
 //-------------------------------------------------------------------------------------------------------
 {
-	RECT rect;
-	HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
-	::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
-	::LineTo(hdc, lpRect->left, lpRect->top);
-	::LineTo(hdc, lpRect->right-1, lpRect->top);
-	SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
-	::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-	::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-	rect.left = lpRect->left + 1;
-	rect.top = lpRect->top + 1;
-	rect.right = lpRect->right - 1;
-	rect.bottom = lpRect->bottom - 1;
-	::FillRect(hdc, &rect, CMainFrame::brushGray);
-	SelectPen(hdc, oldpen);
+	CRect rect = *lpRect;
+
+	int width = Util::ScalePixels(1, WindowFromDC(hdc));
+	rect.DeflateRect(width, width);
+	if(width != 1)
+	{
+		// Draw "real" buttons in Hi-DPI mode
+		DrawFrameControl(hdc, lpRect, DFC_BUTTON, bPushed ? (DFCS_PUSHED | DFCS_BUTTONPUSH) : DFCS_BUTTONPUSH);
+	} else
+	{
+		HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
+		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
+		::LineTo(hdc, lpRect->left, lpRect->top);
+		::LineTo(hdc, lpRect->right-1, lpRect->top);
+		SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
+		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
+		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
+		::FillRect(hdc, rect, CMainFrame::brushGray);
+		SelectPen(hdc, oldpen);
+	}
+	
 	if ((lpszText) && (lpszText[0]))
 	{
 		if (bPushed)
 		{
-			rect.top++;
-			rect.left++;
+			rect.top += width;
+			rect.left += width;
 		}
 		::SetTextColor(hdc, GetSysColor((bDisabled) ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
 		::SetBkMode(hdc, TRANSPARENT);
@@ -2095,7 +2102,7 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 {
 	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
-		if(reinterpret_cast<int>(ShellExecuteW(
+		if(reinterpret_cast<INT_PTR>(ShellExecuteW(
 			theApp.m_pMainWnd->m_hWnd,
 			L"open",
 			lpszURL.AsNative().c_str(),
