@@ -1008,6 +1008,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 			// Region Default Values
 			int32 lAttn = lAttenuation;
 			pRgn->uUnityNote = 0xFF;	// 0xFF means undefined -> use sample
+			pRgn->sFineTune = 0;
 			// Load Generators
 			SFINSTBAG *pbag = psf2->pInstBags + ibagcnt;
 			for (uint32 igenndx=pbag[0].wGenNdx; igenndx<pbag[1].wGenNdx; igenndx++)
@@ -1070,8 +1071,11 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				case SF2_GEN_KEYGROUP:
 					pRgn->fuOptions |= (uint8)(value & DLSREGION_KEYGROUPMASK);
 					break;
+				case SF2_GEN_COARSETUNE:
+					pRgn->sFineTune += static_cast<int16>(value) * 128;
+					break;
 				case SF2_GEN_FINETUNE:
-					pRgn->sFineTune = static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
+					pRgn->sFineTune += static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
 					break;
 				//default:
 				//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
@@ -1355,38 +1359,36 @@ uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey)
 bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &waveData, uint32 &length)
 //----------------------------------------------------------------------------------------------------
 {
-	DLSINSTRUMENT *pDlsIns;
-	uint32 dwOffset;
-	uint32 nWaveLink;
-	FILE *f;
+	waveData.clear();
+	length = 0;
 
-	if (nIns >= m_Instruments.size() || !m_dwWavePoolOffset || m_WaveForms.empty())
+	if (nIns >= m_Instruments.size() || !m_dwWavePoolOffset)
 	{
 	#ifdef DLSBANK_LOG
-		Log("ExtractWaveForm(%d) failed: m_Instruments.size()=%d m_dwWavePoolOffset=%d m_WaveForms=0x%08X\n", nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms);
+		Log("ExtractWaveForm(%d) failed: m_Instruments.size()=%d m_dwWavePoolOffset=%d m_WaveForms.size()=%d\n", nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms.size());
 	#endif
 		return false;
 	}
-	waveData.clear();
-	length = 0;
-	pDlsIns = &m_Instruments[nIns];
-	if (nRgn >= pDlsIns->nRegions)
+	DLSINSTRUMENT &dlsIns = m_Instruments[nIns];
+	if (nRgn >= dlsIns.nRegions)
 	{
 	#ifdef DLSBANK_LOG
 		Log("invalid waveform region: nIns=%d nRgn=%d pSmp->nRegions=%d\n", nIns, nRgn, pSmp->nRegions);
 	#endif
 		return false;
 	}
-	nWaveLink = pDlsIns->Regions[nRgn].nWaveLink;
-	if (nWaveLink >= m_WaveForms.size())
+	uint32 nWaveLink = dlsIns.Regions[nRgn].nWaveLink;
+	if(nWaveLink >= m_WaveForms.size())
 	{
 	#ifdef DLSBANK_LOG
 		Log("Invalid wavelink id: nWaveLink=%d nWaveForms=%d\n", nWaveLink, m_WaveForms.size());
 	#endif
 		return false;
 	}
-	dwOffset = m_WaveForms[nWaveLink] + m_dwWavePoolOffset;
-	if((f = mpt_fopen(m_szFileName, "rb")) == NULL) return false;
+
+	uint32 dwOffset = m_WaveForms[nWaveLink] + m_dwWavePoolOffset;
+	FILE *f = mpt_fopen(m_szFileName, "rb");
+	if(f == nullptr) return false;
 	if (fseek(f, dwOffset, SEEK_SET) == 0)
 	{
 		if (m_nType & SOUNDBANK_TYPE_SF2)
