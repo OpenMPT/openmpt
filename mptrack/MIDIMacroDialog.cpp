@@ -36,8 +36,8 @@ BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_CBN_SELCHANGE(IDC_MACROCC,	OnCCChanged)
 	ON_EN_CHANGE(IDC_EDIT1,			OnSFxEditChanged)
 	ON_EN_CHANGE(IDC_EDIT2,			OnZxxEditChanged)
-	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + NUM_MACROS - 1, OnViewAllParams) //rewbs.patPlugName
-	ON_COMMAND_RANGE(ID_PLUGSELECT + NUM_MACROS, ID_PLUGSELECT + NUM_MACROS + NUM_MACROS - 1, OnSetSFx) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + NUM_MACROS - 1, OnViewAllParams)
+	ON_COMMAND_RANGE(ID_PLUGSELECT + NUM_MACROS, ID_PLUGSELECT + NUM_MACROS + NUM_MACROS - 1, OnSetSFx)
 END_MESSAGE_MAP()
 
 
@@ -45,7 +45,6 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSFx);
 	DDX_Control(pDX, IDC_COMBO2,	m_CbnSFxPreset);
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnZxxPreset);
@@ -55,7 +54,6 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MACROPLUG, m_CbnMacroPlug);
 	DDX_Control(pDX, IDC_MACROPARAM, m_CbnMacroParam);
 	DDX_Control(pDX, IDC_MACROCC,   m_CbnMacroCC);
-	//}}AFX_DATA_MAP
 }
 
 
@@ -107,8 +105,10 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	UpdateDialog();
 
-	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
-		height=18, widthMacro=30, widthVal=90, widthType=135, widthBtn=70;
+#define ScalePixels(x) Util::ScalePixels(x, m_hWnd)
+	int offsetx = ScalePixels(108), offsety = ScalePixels(30), separatorx = ScalePixels(4), separatory = ScalePixels(2);
+	int height = ScalePixels(18), widthMacro = ScalePixels(30), widthVal = ScalePixels(90), widthType = ScalePixels(135), widthBtn = ScalePixels(70);
+#undef ScalePixels
 
 	for(UINT m = 0; m < NUM_MACROS; m++)
 	{
