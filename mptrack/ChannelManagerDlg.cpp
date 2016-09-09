@@ -560,49 +560,29 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 	InvalidateRect(NULL, FALSE);
 }
 
-void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bActivate, BOOL bEnable, DWORD dwFlags, HBRUSH /*markBrush*/)
+
+void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags)
 {
-	RECT rect;
-	rect = (*lpRect);
-	::FillRect(hdc,&rect,bActivate ? CMainFrame::brushWindow : (bEnable ? CMainFrame::brushGray : CMainFrame::brushHighLight));
+	CRect rect = (*lpRect);
 
-	if(bEnable){
-		HGDIOBJ oldpen = ::SelectObject(hdc, CMainFrame::penLightGray);
-		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
-		::LineTo(hdc, lpRect->left, lpRect->top);
-		::LineTo(hdc, lpRect->right-1, lpRect->top);
-
-		::MoveToEx(hdc, lpRect->left+1, lpRect->bottom-1, NULL);
-		::LineTo(hdc, lpRect->left+1, lpRect->top+1);
-		::LineTo(hdc, lpRect->right-1, lpRect->top+1);
-
-		::SelectObject(hdc, CMainFrame::penBlack);
-		::MoveToEx(hdc, lpRect->right-1, lpRect->top, NULL);
-		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-
-		::SelectObject(hdc, CMainFrame::penDarkGray);
-		::MoveToEx(hdc, lpRect->right-2, lpRect->top+1, NULL);
-		::LineTo(hdc, lpRect->right-2, lpRect->bottom-2);
-		::LineTo(hdc, lpRect->left+1, lpRect->bottom-2);
-
-		::SelectObject(hdc, oldpen);
-	}
-	else ::FrameRect(hdc,&rect,CMainFrame::brushBlack);
-
-	if ((lpszText) && (lpszText[0]))
+	DrawEdge(hdc, rect, enable ? EDGE_RAISED : EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
+	if(activate)
 	{
-		rect.left += 13;
-		rect.right -= 5;
-
-		::SetBkMode(hdc, TRANSPARENT);
-		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-
-		::SetTextColor(hdc, GetSysColor(bEnable || !bActivate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
-		::SelectObject(hdc, oldfont);
+		::FillRect(hdc, rect, CMainFrame::brushWindow);
 	}
+
+
+	rect.left += Util::ScalePixels(13, m_hWnd);
+	rect.right -= Util::ScalePixels(5, m_hWnd);
+
+	::SetBkMode(hdc, TRANSPARENT);
+	HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
+
+	::SetTextColor(hdc, GetSysColor(enable || activate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
+	::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
+	::SelectObject(hdc, oldfont);
 }
+
 
 void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 {
@@ -772,7 +752,7 @@ void CChannelManagerDlg::OnPaint()
 		btn.bottom = btn.top + chnSizeY - borderY;
 
 		ok = intersection.IntersectRect(&pDC.rcPaint, &client);
-		if(ok) DrawChannelButton(pDC.hdc, &btn, s, select[nThisChn], removed[nThisChn] ? FALSE : TRUE, DT_RIGHT | DT_VCENTER, NULL);
+		if(ok) DrawChannelButton(pDC.hdc, &btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
 
 		btn.right = btn.left + chnSizeX / 7;
 
@@ -803,13 +783,6 @@ void CChannelManagerDlg::OnPaint()
 				break;
 		}
 
-		if(!removed[nThisChn])
-		{
-			HGDIOBJ oldpen = ::SelectObject(pDC.hdc, CMainFrame::penLightGray);
-			::MoveToEx(pDC.hdc, btn.right, btn.top-2, NULL);
-			::LineTo(pDC.hdc, btn.right, btn.bottom+1);
-			::SelectObject(pDC.hdc, oldpen);
-		}
 		FrameRect(pDC.hdc,&btn,CMainFrame::brushBlack);
 
 		c++;
@@ -1015,6 +988,7 @@ void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 	if(!ButtonHit(point,NULL,NULL)) ResetState(true,  false, false, false);
 
 	leftButton = true;
+	m_buttonAction = kUndetermined;
 	MouseEvent(nFlags,point,CM_BT_LEFT);
 	omx = point.x;
 	omy = point.y;
@@ -1037,6 +1011,7 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 	if(!m_hWnd || show == false) return;
 
 	rightButton = true;
+	m_buttonAction = kUndetermined;
 	if(moveRect)
 	{
 		ResetState(true, true, false, false, false);
@@ -1083,7 +1058,9 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 				case 0:
 					if(button == CM_BT_LEFT)
 					{
-						if(!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n))
+						if(m_buttonAction == kUndetermined)
+							m_buttonAction = (!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n)) ? kAction1 : kAction2;
+						if(m_buttonAction == kAction1)
 						{
 							pModDoc->MuteChannel(n, false);
 							pModDoc->SoloChannel(n, true);
@@ -1094,7 +1071,9 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					} else
 					{
 						if(pModDoc->IsChannelSolo(n)) pModDoc->SoloChannel(n, false);
-						pModDoc->MuteChannel(n,!pModDoc->IsChannelMuted(n));
+						if(m_buttonAction == kUndetermined)
+							m_buttonAction = pModDoc->IsChannelMuted(n) ? kAction1 : kAction2;
+						pModDoc->MuteChannel(n, m_buttonAction == kAction2);
 					}
 					pModDoc->SetModified();
 					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
@@ -1102,15 +1081,17 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 				case 1:
 					BYTE rec;
 					rec = pModDoc->IsChannelRecord(n);
-					if(!rec || rec != (button == CM_BT_LEFT ? 1 : 2))
+					if(m_buttonAction == kUndetermined)
+						m_buttonAction = (!rec || rec != (button == CM_BT_LEFT ? 1 : 2)) ? kAction1 : kAction2;
+
+					pModDoc->Record1Channel(n, false);
+					pModDoc->Record2Channel(n, false);
+					if(m_buttonAction == kAction1)
 					{
 						if(button == CM_BT_LEFT) pModDoc->Record1Channel(n);
 						else pModDoc->Record2Channel(n);
-					} else
-					{
-						pModDoc->Record1Channel(n, false);
-						pModDoc->Record2Channel(n, false);
 					}
+					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
 					break;
 				case 2:
 					if(button == CM_BT_LEFT) pModDoc->NoFxChannel(n, false);
@@ -1126,8 +1107,10 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					}
 					if(button == CM_BT_RIGHT)
 					{
-						select[n] = false;
-						removed[n] = !removed[n];
+						if(m_buttonAction == kUndetermined)
+							m_buttonAction = removed[n] ? kAction1 : kAction2;
+							select[n] = false;
+						removed[n] = (m_buttonAction == kAction2);
 					}
 
 					if(select[n] || button == 0)
