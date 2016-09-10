@@ -33,32 +33,42 @@ private:
 
 protected:
 
+	enum ButtonAction
+	{
+		kUndetermined,
+		kAction1,
+		kAction2,
+	};
+
 	CChannelManagerDlg(void);
 	~CChannelManagerDlg(void);
 
 	CHANNELINDEX memory[4][MAX_BASECHANNELS];
 	CHANNELINDEX pattern[MAX_BASECHANNELS];
-	bool removed[MAX_BASECHANNELS];
-	bool select[MAX_BASECHANNELS];
-	bool state[MAX_BASECHANNELS];
+	std::bitset<MAX_BASECHANNELS> removed;
+	std::bitset<MAX_BASECHANNELS> select;
+	std::bitset<MAX_BASECHANNELS> state;
 	CRect move[MAX_BASECHANNELS];
 	CRect m_drawableArea;
-	void * parentCtrl;
-	bool mouseTracking;
+	void *parentCtrl;
 	CHANNELINDEX nChannelsOld;
-	bool rightButton;
-	bool leftButton;
 	int currentTab;
-	bool moveRect;
 	HBITMAP bkgnd;
-	int omx,omy;
-	bool show;
-	int mx,my;
+	int omx, omy;
+	int mx, my;
 	int buttonHeight;
+	ButtonAction m_buttonAction;
+	bool rightButton : 1;
+	bool leftButton : 1;
+	bool mouseTracking : 1;
+	bool moveRect : 1;
+	bool show : 1;
 
 	bool ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate);
 	void MouseEvent(UINT nFlags,CPoint point, BYTE button);
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
+
+	void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags);
 
 	//{{AFX_VIRTUAL(CChannelManagerDlg)
 	BOOL OnInitDialog();

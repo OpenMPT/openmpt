@@ -1078,6 +1078,7 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 			// Region Default Values
 			LONG lAttn = lAttenuation;
 			pRgn->uUnityNote = 0xFF;	// 0xFF means undefined -> use sample
+			pRgn->sFineTune = 0;
 			// Load Generators
 			SFINSTBAG *pbag = psf2->pInstBags + ibagcnt;
 			for (uint32 igenndx=pbag[0].wGenNdx; igenndx<pbag[1].wGenNdx; igenndx++)
@@ -1140,8 +1141,11 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				case SF2_GEN_KEYGROUP:
 					pRgn->fuOptions |= (uint8)(value & DLSREGION_KEYGROUPMASK);
 					break;
+				case SF2_GEN_COARSETUNE:
+					pRgn->sFineTune += static_cast<int16>(value) * 128;
+					break;
 				case SF2_GEN_FINETUNE:
-					pRgn->sFineTune = static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
+					pRgn->sFineTune += static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
 					break;
 				//default:
 				//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);

@@ -17,6 +17,8 @@ is just a high-level summary.
  *  [**Bug**] Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker 
     files.
 
+ *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
+    created with ScreamTracker 3.
  *  'Makefile' has now explicit support for FreeBSD with no special option or
     configuration required.
 
