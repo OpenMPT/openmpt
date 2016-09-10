@@ -85,7 +85,7 @@
    "../../include/portaudio/include/portaudio.h",
   }
   filter { "action:vs*" }
-    buildoptions { "/wd4018", "/wd4267" }
+    buildoptions { "/wd4018", "/wd4267", "/wd4312" }
   filter {}
   links {
    "ksuser",
