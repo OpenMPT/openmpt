@@ -34,9 +34,9 @@ struct DLSREGION
 	uint32 ulLoopEnd;
 	uint16 nWaveLink;
 	uint16 uPercEnv;
-	uint16 usVolume;		// 0..256
+	uint16 usVolume;	// 0..256
 	uint16 fuOptions;	// flags + key group
-	int16  sFineTune;	// 1..100
+	int16  sFineTune;	// +128 = +1 semitone
 	uint8  uKeyMin;
 	uint8  uKeyMax;
 	uint8  uUnityNote;
