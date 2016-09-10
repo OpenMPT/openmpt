@@ -256,7 +256,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -273,7 +273,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -296,7 +296,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -321,7 +321,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -339,7 +339,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\src\common;..\..\..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -355,7 +355,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\src\common;..\..\..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -378,7 +378,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -403,7 +403,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -421,7 +421,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\src\common;..\..\..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -440,7 +440,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\portaudio\include;..\..\..\include\portaudio\src\common;..\..\..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -465,7 +465,7 @@
       <StringPooling>true</StringPooling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -492,7 +492,7 @@
       <StringPooling>true</StringPooling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4267 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
