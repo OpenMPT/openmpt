@@ -313,20 +313,26 @@ MPT_BINARY_STRUCT(WSMPSAMPLELOOP, 16)
 ///////////////////////////////////////////
 // SF2 Generators IDs
 
-#define SF2_GEN_MODENVTOFILTERFC		11
-#define SF2_GEN_PAN						17
-#define SF2_GEN_DECAYMODENV				28
-#define SF2_GEN_DECAYVOLENV				36
-#define SF2_GEN_RELEASEVOLENV			38
-#define SF2_GEN_INSTRUMENT				41
-#define SF2_GEN_KEYRANGE				43
-#define SF2_GEN_ATTENUATION				48
-#define SF2_GEN_COARSETUNE				51
-#define SF2_GEN_FINETUNE				52
-#define SF2_GEN_SAMPLEID				53
-#define SF2_GEN_SAMPLEMODES				54
-#define SF2_GEN_KEYGROUP				57
-#define SF2_GEN_UNITYNOTE				58
+enum SF2Generators
+{
+	SF2_GEN_MODENVTOFILTERFC	= 11,
+	SF2_GEN_PAN					= 17,
+	SF2_GEN_DECAYMODENV			= 28,
+	SF2_GEN_ATTACKVOLENV		= 34,
+	SF2_GEN_HOLDVOLENV			= 34,
+	SF2_GEN_DECAYVOLENV			= 36,
+	SF2_GEN_SUSTAINVOLENV		= 37,
+	SF2_GEN_RELEASEVOLENV		= 38,
+	SF2_GEN_INSTRUMENT			= 41,
+	SF2_GEN_KEYRANGE			= 43,
+	SF2_GEN_ATTENUATION			= 48,
+	SF2_GEN_COARSETUNE			= 51,
+	SF2_GEN_FINETUNE			= 52,
+	SF2_GEN_SAMPLEID			= 53,
+	SF2_GEN_SAMPLEMODES			= 54,
+	SF2_GEN_KEYGROUP			= 57,
+	SF2_GEN_UNITYNOTE			= 58,
+};
 
 /////////////////////////////////////////////////////////////////////
 // SF2 Structures Definitions
@@ -919,6 +925,14 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 }
 
 
+static int16 SF2TimeToDLS(int16 amount)
+//-------------------------------------
+{
+	int32 time = CDLSBank::DLS32BitTimeCentsToMilliseconds(static_cast<int32>(amount) << 16);
+	return static_cast<int16>(Clamp(time, 20, 20000) / 20);
+}
+
+
 // Convert all instruments to the DLS format
 bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 //---------------------------------------------
@@ -951,21 +965,14 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 				SFGENLIST *pgen = psf2->pPresetGens + ipgenndx;
 				switch(pgen->sfGenOper)
 				{
+				case SF2_GEN_ATTACKVOLENV:
+					dlsEnv.wVolAttack = SF2TimeToDLS(pgen->genAmount);
+					break;
 				case SF2_GEN_DECAYVOLENV:
-					{
-						int32 decaytime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
-						if (decaytime > 20000) decaytime = 20000;
-						if (decaytime >= 20) dlsEnv.wVolDecay = (uint16)(decaytime / 20);
-						//Log("  vol decay time set to %d\n", decaytime);
-					}
+					dlsEnv.wVolDecay = SF2TimeToDLS(pgen->genAmount);
 					break;
 				case SF2_GEN_RELEASEVOLENV:
-					{
-						int32 releasetime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
-						if (releasetime > 20000) releasetime = 20000;
-						if (releasetime >= 20) dlsEnv.wVolRelease = (uint16)(releasetime / 20);
-						//Log("  vol release time set to %d\n", releasetime);
-					}
+					dlsEnv.wVolRelease = SF2TimeToDLS(pgen->genAmount);
 					break;
 				case SF2_GEN_INSTRUMENT:
 					nInstrNdx = pgen->genAmount + 1;
@@ -1023,22 +1030,21 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 					pRgn->uKeyMax = (uint8)(value >> 8);
 					if (pRgn->uKeyMin > pRgn->uKeyMax)
 					{
-						uint8 b = pRgn->uKeyMax;
-						pRgn->uKeyMax = pRgn->uKeyMin;
-						pRgn->uKeyMin = b;
+						std::swap(pRgn->uKeyMin, pRgn->uKeyMax);
 					}
 					//if (nIns == 9) Log("  keyrange: %d-%d\n", pRgn->uKeyMin, pRgn->uKeyMax);
 					break;
 				case SF2_GEN_UNITYNOTE:
 					if (value < 128) pRgn->uUnityNote = (uint8)value;
 					break;
+				case SF2_GEN_ATTACKVOLENV:
+					pDlsEnv->wVolAttack = SF2TimeToDLS(pgen->genAmount);
+					break;
+				case SF2_GEN_DECAYVOLENV:
+					pDlsEnv->wVolDecay = SF2TimeToDLS(pgen->genAmount);
+					break;
 				case SF2_GEN_RELEASEVOLENV:
-					{
-						int32 releasetime = DLS32BitTimeCentsToMilliseconds(((int32)(short int)pgen->genAmount)<<16);
-						if (releasetime > 20000) releasetime = 20000;
-						if (releasetime >= 20) pDlsEnv->wVolRelease = (uint16)(releasetime / 20);
-						//Log("  vol release time set to %d\n", releasetime);
-					}
+					pDlsEnv->wVolRelease = SF2TimeToDLS(pgen->genAmount);
 					break;
 				case SF2_GEN_PAN:
 					{
