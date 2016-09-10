@@ -123,9 +123,9 @@ struct PACKED PSMSampleHeader
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
+		mptSmp.Initialize();
 		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
 
-		mptSmp.nGlobalVol = 64;
 		mptSmp.nC5Speed = c5Freq;
 		mptSmp.nLength = sampleLength;
 		mptSmp.nLoopStart = loopStart;
@@ -133,7 +133,6 @@ struct PACKED PSMSampleHeader
 		// Sample 8 in the medieval table music of Extreme Pinball and CONVERT.EXE v1.36 suggest that we should do so.
 		// But for other tunes it's not correct, e.g. the OMF 2097 music!
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nPan = 128;
 		mptSmp.nVolume = (defaultVolume + 1) * 2;
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
@@ -175,14 +174,13 @@ struct PACKED PSMSinariaSampleHeader
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
+		mptSmp.Initialize();
 		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
 
-		mptSmp.nGlobalVol = 64;
 		mptSmp.nC5Speed = c5Freq;
 		mptSmp.nLength = sampleLength;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nPan = 128;
 		mptSmp.nVolume = (defaultVolume + 1) * 2;
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
@@ -1061,7 +1059,6 @@ struct PACKED PSM16SampleHeader
 		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, ((finetune ^ 0x08) - 0x78) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
 
 		mptSmp.nVolume = volume << 2;
-		mptSmp.nGlobalVol = 256;
 
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)

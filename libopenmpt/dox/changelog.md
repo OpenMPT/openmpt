@@ -10,7 +10,7 @@ is just a high-level summary.
  *  [**Bug**] Possible crashes with malformed AMS files.
  *  [**Bug**] Possible crashes with MDL and MED files.
 
-### libopenmpt 0.2-beta20.1
+### libopenmpt 0.2-beta20.1 (2016-09-03)
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.

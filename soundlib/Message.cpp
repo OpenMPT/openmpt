@@ -181,9 +181,8 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 	}
 
 	const size_t len = length();
-	comments.resize(len);
+	comments.reserve(len);
 
-	size_t writePos = 0;
 	for(size_t i = 0; i < len; i++)
 	{
 		if(at(i) == InternalLineEnding)
@@ -191,20 +190,22 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 			switch(lineEnding)
 			{
 			case leCR:
-			default:
-				comments.at(writePos++) = '\r';
+				comments.push_back('\r');
 				break;
 			case leCRLF:
-				comments.at(writePos++) = '\r';
-				MPT_FALLTHROUGH;
+				comments.push_back('\r');
+				comments.push_back('\n');
+				break;
 			case leLF:
-				comments.at(writePos++) = '\n';
+				comments.push_back('\n');
+				break;
+			default:
+				comments.push_back('\r');
 				break;
 			}
 		} else
 		{
-			char c = at(i);
-			comments.at(writePos++) = c;
+			comments.push_back(at(i));
 		}
 	}
 	return comments;
