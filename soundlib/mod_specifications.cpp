@@ -32,7 +32,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
 	MOD_TYPE_MPT,								// Internal MODTYPE value
-	{'m','p','t','m','\0'},
+	"mptm",										// File extension
 	NOTE_MIN,									// Minimum note index
 	NOTE_MAX,									// Maximum note index
 	4000,										// Pattern max.
@@ -71,8 +71,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	true,										// Has artist name
 	true,										// Has default resampling
 	true,										// Fixed point tempo
-	{' ','J','F','E','G','H','L','K','R','X','O','D','B','?','C','Q','A','T','I','?','S','M','N','V','W','?','U','Y','?','P','?','Z','\\',':','#','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','c','d','a','b','u','h','l','r','g','f','e','?','o','\0'},							// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??????",	// Supported Effects
+	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 };
 
 
@@ -81,7 +81,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 {
 	MOD_TYPE_MOD,								// Internal MODTYPE value
-	{'m','o','d','\0'},										// File extension
+	"mod",										// File extension
 	37,											// Minimum note index
 	108,										// Maximum note index
 	128,										// Pattern max.
@@ -120,15 +120,15 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','0','1','2','3','4','5','6','7','8','9','A','B','C','D','?','F','F','?','E','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','?','?','?','?','?','?','?','?','?','?','?','?','?','?','?','\0'},							// Supported Volume Column commands
+	" 0123456789ABCD?FF?E?????????????????????",	// Supported Effects
+	" ???????????????",							// Supported Volume Column commands
 };
 
 
 MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
-	{'x','m','\0'},										// File extension
+	"xm",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
 	256,										// Pattern max.
@@ -167,15 +167,15 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','0','1','2','3','4','5','6','7','8','9','A','B','C','D','R','F','F','T','E','?','?','?','G','H','K','?','?','X','P','L','?','?','?','?','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','c','d','a','b','u','h','l','r','g','?','?','?','?','\0'},							// Supported Volume Column commands
+	" 0123456789ABCDRFFTE???GHK??XPL??????????",	// Supported Effects
+	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
 // XM with MPT extensions
 MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
-	{'x','m','\0'},										// File extension
+	"xm",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
 	256,										// Pattern max.
@@ -214,14 +214,14 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','0','1','2','3','4','5','6','7','8','9','A','B','C','D','R','F','F','T','E','?','?','?','G','H','K','?','Y','X','P','L','Z','\\','?','#','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','c','d','a','b','u','h','l','r','g','f','e','?','?','\0'},							// Supported Volume Column commands
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#??????",	// Supported Effects
+	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
 MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
-	{'s','3','m','\0'},										// File extension
+	"s3m",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
 	100,										// Pattern max.
@@ -260,15 +260,15 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','J','F','E','G','H','L','K','R','X','O','D','B','?','C','Q','A','T','I','?','S','M','N','V','W','?','U','?','?','?','?','?','?','?','?','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','?','?','?','?','?','?','?','?','?','?','?','?','?','\0'},							// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?U??????????????",	// Supported Effects
+	" vp?????????????",							// Supported Volume Column commands
 };
 
 // S3M with MPT extensions
 MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
-	{'s','3','m','\0'},										// File extension
+	"s3m",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
 	100,										// Pattern max.
@@ -307,14 +307,14 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','J','F','E','G','H','L','K','R','X','O','D','B','?','C','Q','A','T','I','?','S','M','N','V','W','?','U','Y','?','P','?','Z','?','?','?','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','?','?','?','?','?','?','?','?','?','?','?','?','?','\0'},							// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
+	" vp?????????????",							// Supported Volume Column commands
 };
 
 MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
-	{'i','t','\0'},										// File extension
+	"it",										// File extension
 	1,											// Minimum note index
 	120,										// Maximum note index
 	200,										// Pattern max.
@@ -353,14 +353,14 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','J','F','E','G','H','L','K','R','X','O','D','B','?','C','Q','A','T','I','?','S','M','N','V','W','?','U','Y','?','P','?','Z','?','?','?','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','c','d','a','b','?','h','?','?','g','f','e','?','?','\0'},							// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
+	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
 MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
-	{'i','t','\0'},										// File extension
+	"it",										// File extension
 	1,											// Minimum note index
 	120,										// Maximum note index
 	240,										// Pattern max.
@@ -399,8 +399,8 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	{' ','J','F','E','G','H','L','K','R','X','O','D','B','?','C','Q','A','T','I','?','S','M','N','V','W','?','U','Y','?','P','?','Z','\\','?','#','?','?','?','?','?','?','\0'},	// Supported Effects
-	{' ','v','p','c','d','a','b','?','h','?','?','g','f','e','?','?','\0'},							// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#??????",	// Supported Effects
+	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications *Collection[8] = { &mptm_, &mod_, &s3m_, &s3mEx_, &xm_, &xmEx_, &it_, &itEx_ };
