@@ -21,7 +21,6 @@ public:
 	static CChannelManagerDlg * sharedInstance(BOOL autoCreate = TRUE);
 	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = NULL;}
 	void SetDocument(void * parent);
-	BOOL IsOwner(void * ctrl);
 	BOOL IsDisplayed(void);
 	void Update(void);
 	BOOL Show(void);
@@ -60,7 +59,6 @@ protected:
 	ButtonAction m_buttonAction;
 	bool rightButton : 1;
 	bool leftButton : 1;
-	bool mouseTracking : 1;
 	bool moveRect : 1;
 	bool show : 1;
 
@@ -93,8 +91,6 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags,CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags,CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags,CPoint point);
-	afx_msg LRESULT OnMouseLeave(WPARAM wparam, LPARAM lparam);
-	afx_msg LRESULT OnMouseHover(WPARAM wparam, LPARAM lparam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP();
 public:

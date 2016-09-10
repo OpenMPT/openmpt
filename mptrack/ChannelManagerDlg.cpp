@@ -37,8 +37,6 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_CLOSE()
 	//{{AFX_MSG_MAP(CRemoveChannelsDlg)
-	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
-	ON_MESSAGE(WM_MOUSEHOVER, OnMouseHover)
 	ON_COMMAND(IDC_BUTTON1,	OnApply)
 	ON_COMMAND(IDC_BUTTON2,	OnClose)
 	ON_COMMAND(IDC_BUTTON3,	OnSelectAll)
@@ -53,15 +51,15 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_RBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
-CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = NULL;
+CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance(BOOL autoCreate)
 {
-	if(CChannelManagerDlg::sharedInstance_ == NULL && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
+	if(CChannelManagerDlg::sharedInstance_ == nullptr && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
 	return CChannelManagerDlg::sharedInstance_;
 }
 
-void CChannelManagerDlg::SetDocument(void * parent)
+void CChannelManagerDlg::SetDocument(void *parent)
 {
 	if(parent && parentCtrl != parent)
 	{
@@ -69,11 +67,6 @@ void CChannelManagerDlg::SetDocument(void * parent)
 		nChannelsOld = 0;
 		InvalidateRect(NULL, FALSE);
 	}
-}
-
-BOOL CChannelManagerDlg::IsOwner(void * ctrl)
-{
-	return ctrl == parentCtrl;
 }
 
 BOOL CChannelManagerDlg::IsDisplayed(void)
@@ -115,17 +108,15 @@ BOOL CChannelManagerDlg::Hide(void)
 
 
 CChannelManagerDlg::CChannelManagerDlg(void)
+	: parentCtrl(nullptr)
+	, leftButton(false)
+	, rightButton(false)
+	, moveRect(false)
+	, nChannelsOld(0)
+	, bkgnd(nullptr)
+	, show(false)
 {
-	mouseTracking = false;
-	rightButton = false;
-	leftButton = false;
-	parentCtrl = NULL;
-	moveRect = false;
-	nChannelsOld = 0;
-	bkgnd = NULL;
-	show = false;
-
-	Create(IDD_CHANNELMANAGER, NULL);
+	Create(IDD_CHANNELMANAGER, nullptr);
 	ShowWindow(SW_HIDE);
 }
 
@@ -179,7 +170,9 @@ void CChannelManagerDlg::OnApply()
 
 	if(!pModDoc) return;
 
-	CHANNELINDEX nChannels, newpat[MAX_BASECHANNELS], newMemory[4][MAX_BASECHANNELS];
+	CHANNELINDEX nChannels, newMemory[4][MAX_BASECHANNELS];
+	std::vector<CHANNELINDEX> newChnOrder;
+	newChnOrder.reserve(pModDoc->GetNumChannels());
 
 	// Count new number of channels , copy pattern pointers & manager internal store memory
 	nChannels = 0;
@@ -190,20 +183,19 @@ void CChannelManagerDlg::OnApply()
 			newMemory[0][nChannels] = memory[0][nChannels];
 			newMemory[1][nChannels] = memory[1][nChannels];
 			newMemory[2][nChannels] = memory[2][nChannels];
-			newpat[nChannels++] = pattern[nChn];
+			newChnOrder.push_back(pattern[nChn]);
+			nChannels++;
 		}
 	}
 
 	BeginWaitCursor();
 
 	//Creating new order-vector for ReArrangeChannels.
-	std::vector<CHANNELINDEX> newChnOrder(newpat, newpat + nChannels);
 	CriticalSection cs;
 	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
 		cs.Leave();
 		EndWaitCursor();
-		Reporting::Error("Rearranging channels failed");
 
 		ResetState(true, true, true, true, true);
 
@@ -214,11 +206,12 @@ void CChannelManagerDlg::OnApply()
 	// Update manager internal store memory
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
-		if(nChn != newpat[nChn])
+		CHANNELINDEX newChn = newChnOrder[nChn];
+		if(nChn != newChn)
 		{
-			memory[0][nChn] = newMemory[0][newpat[nChn]];
-			memory[1][nChn] = newMemory[1][newpat[nChn]];
-			memory[2][nChn] = newMemory[2][newpat[nChn]];
+			memory[0][nChn] = newMemory[0][newChn];
+			memory[1][nChn] = newMemory[1][newChn];
+			memory[2][nChn] = newMemory[2][newChn];
 		}
 		memory[3][nChn] = nChn;
 	}
@@ -241,7 +234,7 @@ void CChannelManagerDlg::OnClose()
 {
 	if(bkgnd) DeleteObject((HBITMAP)bkgnd);
 	ResetState(true, true, true, true, true);
-	bkgnd = NULL;
+	bkgnd = nullptr;
 	show = false;
 
 	CDialog::OnCancel();
@@ -250,7 +243,7 @@ void CChannelManagerDlg::OnClose()
 void CChannelManagerDlg::OnSelectAll()
 {
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
 	if(pModDoc)
 		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
@@ -262,7 +255,7 @@ void CChannelManagerDlg::OnSelectAll()
 void CChannelManagerDlg::OnInvert()
 {
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
 	if(pModDoc)
 		for(CHANNELINDEX nChn = 0 ; nChn < pModDoc->GetNumChannels() ; nChn++)
@@ -272,8 +265,6 @@ void CChannelManagerDlg::OnInvert()
 
 void CChannelManagerDlg::OnAction1()
 {
-	CriticalSection cs;
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
@@ -347,14 +338,12 @@ void CChannelManagerDlg::OnAction1()
 		ResetState();
 
 		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
-		InvalidateRect(NULL,FALSE);
+		InvalidateRect(NULL, FALSE);
 	}
 }
 
 void CChannelManagerDlg::OnAction2()
 {
-	CriticalSection cs;
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
@@ -423,7 +412,7 @@ void CChannelManagerDlg::OnAction2()
 		if(currentTab != 3) ResetState();
 
 		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
-		InvalidateRect(NULL,FALSE);
+		InvalidateRect(NULL, FALSE);
 	}
 }
 
@@ -477,8 +466,6 @@ void CChannelManagerDlg::OnRestore(void)
 		return;
 	}
 
-	CriticalSection cs;
-
 	switch(currentTab)
 	{
 		case 0:
@@ -513,7 +500,7 @@ void CChannelManagerDlg::OnRestore(void)
 	if(currentTab != 3) ResetState();
 
 	pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
-	InvalidateRect(NULL,FALSE);
+	InvalidateRect(NULL, FALSE);
 }
 
 void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
@@ -865,43 +852,14 @@ void CChannelManagerDlg::ResetState(bool bSelection, bool bMove, bool bButton, b
 		rightButton = false;
 	}
 	if(move) moveRect = false;
-	if(bInternal) mouseTracking = false;
 
 	if(bOrder) nChannelsOld = 0;
 }
 
-LRESULT CChannelManagerDlg::OnMouseLeave(WPARAM /*wparam*/, LPARAM /*lparam*/)
-{
-	if(!m_hWnd || show == false) return 0;
-
-	mouseTracking = false;
-	ResetState(false, true, false, true);
-
-	return 0;
-}
-
-LRESULT CChannelManagerDlg::OnMouseHover(WPARAM /*wparam*/, LPARAM /*lparam*/)
-{
-	if(!m_hWnd || show == false) return 0;
-
-	mouseTracking = false;
-
-	return 0;
-}
 
 void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
-
-	if(!mouseTracking)
-	{
-		TRACKMOUSEEVENT tme;
-		tme.cbSize = sizeof(tme);
-		tme.hwndTrack = m_hWnd;
-		tme.dwFlags = TME_LEAVE|TME_HOVER;
-		tme.dwHoverTime = 1;
-		mouseTracking = _TrackMouseEvent(&tme) != FALSE; 
-	}
 
 	if(!leftButton && !rightButton)
 	{
@@ -909,17 +867,16 @@ void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 		my = point.y;
 		return;
 	}
-	MouseEvent(nFlags,point,moveRect ? 0 : (leftButton ? CM_BT_LEFT : CM_BT_RIGHT));
+	MouseEvent(nFlags, point, moveRect ? 0 : (leftButton ? CM_BT_LEFT : CM_BT_RIGHT));
 }
 
 void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 {
+	ReleaseCapture();
 	if(!m_hWnd || show == false) return;
 
-	CriticalSection cs;
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
 	if(moveRect && pModDoc)
 	{
@@ -931,7 +888,8 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			if(k == CHANNELINDEX_INVALID && select[pattern[nChn]]) k = nChn;
 
-		if(hit && k != CHANNELINDEX_INVALID){
+		if(hit && k != CHANNELINDEX_INVALID)
+		{
 			i = 0;
 			k = 0;
 			while(i < n)
@@ -970,11 +928,14 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 				pattern[nChn] = newpat[nChn];
 				select[nChn] = false;
 			}
+		} else
+		{
+			ResetState(true, false, false, false, false);
 		}
 
 		moveRect = false;
 		nChannelsOld = 0;
-		InvalidateRect(NULL,FALSE);
+		InvalidateRect(NULL, FALSE);
 	}
 
 	leftButton = false;
@@ -988,6 +949,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
+	SetCapture();
 
 	if(!ButtonHit(point,NULL,NULL)) ResetState(true,  false, false, false);
 
@@ -1000,6 +962,7 @@ void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 
 void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 {
+	ReleaseCapture();
 	if(!m_hWnd || show == false) return;
 
 	ResetState(false, false, true, false);
@@ -1013,6 +976,7 @@ void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
+	SetCapture();
 
 	rightButton = true;
 	m_buttonAction = kUndetermined;
@@ -1040,7 +1004,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 	my = point.y;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
 	if(!pModDoc) return;
 
