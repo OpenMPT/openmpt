@@ -27,16 +27,12 @@ is just a high-level summary.
     `Makefile` option `ANCIENT=1`, is gone.
  *  [**Regression**] Visual Studio 2008 support has been removed.
 
- *  Increased accuracy of the sample position and sample rate to drift less when
-    playing very long samples.
-
-### libopenmpt 0.2-beta20.1 (2016-09-03)
-
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
- *  [**Bug**] Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker 
-    files.
 
+ *  Increased accuracy of the sample position and sample rate to drift less when
+    playing very long samples.
+ *  Possible crashes with malformed MED, PSM and Startrekker files.
  *  'Makefile' has now explicit support for FreeBSD with no special option or
     configuration required.
 
