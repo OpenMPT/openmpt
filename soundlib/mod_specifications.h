@@ -36,7 +36,7 @@ struct CModSpecifications
 
 	// NOTE: If changing order, update all initializations in .cpp file.
 	MODTYPE internalType;				// Internal MODTYPE value
-	char fileExtension[6];				// File extension without dot.
+	const char *fileExtension;			// File extension without dot.
 	ModCommand::NOTE noteMin;			// Minimum note index (index starts from 1)
 	ModCommand::NOTE noteMax;			// Maximum note index (index starts from 1)
 	PATTERNINDEX patternsMax;
@@ -76,8 +76,8 @@ struct CModSpecifications
 	uint8 hasArtistName : 1;			// Can artist name be stored in file?
 	uint8 hasDefaultResampling : 1;		// Can default resampling be saved? (if not, it can still be modified in the GUI but won't set the module as modified)
 	uint8 hasFractionalTempo : 1;		// Are fractional tempos allowed?
-	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
-	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
+	const char *commands;				// An array holding all commands this format supports; commands that are not supported are marked with "?"
+	const char *volcommands;			// Ditto, but for volume column
 	MPT_CONSTEXPR11_FUN TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
 	MPT_CONSTEXPR11_FUN TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
 	MPT_CONSTEXPR11_FUN FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
