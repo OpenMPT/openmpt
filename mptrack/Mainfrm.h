@@ -190,7 +190,7 @@ template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
 template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
-	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<char> >());
+	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<mpt::byte> >());
 }
 
 

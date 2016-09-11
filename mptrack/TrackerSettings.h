@@ -155,7 +155,7 @@ template<> inline SettingValue ToSettingValue(const EQPreset &val)
 template<> inline EQPreset FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "EQPreset");
-	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<char> >());
+	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<mpt::byte> >());
 	EQPreset valresult;
 	std::memcpy(valresult.szName, valpacked.szName, CountOf(valresult.szName));
 	std::copy(valpacked.Gains, valpacked.Gains + MAX_EQ_BANDS, valresult.Gains);

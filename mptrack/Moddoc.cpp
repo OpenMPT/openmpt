@@ -3112,9 +3112,8 @@ void CModDoc::SerializeViews() const
 
 	SettingsContainer &settings = theApp.GetSongSettings();
 	const std::string s = f.str();
-	const std::vector<char> data(s.begin(), s.end());
 	settings.Write("WindowSettings", pathName.GetFullFileName().ToWide(), pathName);
-	settings.Write("WindowSettings", pathName.ToWide(), Util::BinToHex(data));
+	settings.Write("WindowSettings", pathName.ToWide(), Util::BinToHex(mpt::as_span(s)));
 }
 
 
@@ -3140,9 +3139,9 @@ void CModDoc::DeserializeViews()
 			if(s.size() < 2) return;
 		}
 	}
-	std::vector<char> bytes = Util::HexToBin(s);
+	std::vector<mpt::byte> bytes = Util::HexToBin(s);
 
-	FileReader file(bytes.data(), bytes.size());
+	FileReader file(mpt::as_span(bytes));
 
 	CRect mdiRect;
 	::GetWindowRect(CMainFrame::GetMainFrame()->m_hWndMDIClient, &mdiRect);

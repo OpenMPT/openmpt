@@ -45,7 +45,7 @@ private:
 	int32 valueInt;
 	double valueFloat;
 	mpt::ustring valueString;
-	std::vector<char> valueBinary;
+	std::vector<mpt::byte> valueBinary;
 	SettingType type;
 	std::string typeTag;
 	void Init()
@@ -149,7 +149,7 @@ public:
 		valueString = val;
 	}
 #endif
-	SettingValue(const std::vector<char> &val)
+	SettingValue(const std::vector<mpt::byte> &val)
 	{
 		Init();
 		type = SettingTypeBinary;
@@ -213,7 +213,7 @@ public:
 		valueString = val;
 	}
 #endif
-	SettingValue(const std::vector<char> &val, const std::string &typeTag_)
+	SettingValue(const std::vector<mpt::byte> &val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeBinary;
@@ -269,7 +269,7 @@ public:
 		return valueString;
 	}
 #endif
-	operator std::vector<char> () const
+	operator std::vector<mpt::byte> () const
 	{
 		MPT_ASSERT(type == SettingTypeBinary);
 		return valueBinary;
@@ -281,14 +281,14 @@ public:
 
 
 template<typename T>
-std::vector<char> EncodeBinarySetting(const T &val)
+std::vector<mpt::byte> EncodeBinarySetting(const T &val)
 {
-	std::vector<char> result(sizeof(T));
+	std::vector<mpt::byte> result(sizeof(T));
 	std::memcpy(result.data(), &val, sizeof(T));
 	return result;
 }
 template<typename T>
-T DecodeBinarySetting(const std::vector<char> &val)
+T DecodeBinarySetting(const std::vector<mpt::byte> &val)
 {
 	T result = T();
 	if(val.size() >= sizeof(T))
@@ -838,12 +838,12 @@ class IniFileSettingsBackend : public ISettingsBackend
 private:
 	const mpt::PathString filename;
 private:
-	std::vector<char> ReadSettingRaw(const SettingPath &path, const std::vector<char> &def) const;
+	std::vector<mpt::byte> ReadSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &def) const;
 	std::wstring ReadSettingRaw(const SettingPath &path, const std::wstring &def) const;
 	double ReadSettingRaw(const SettingPath &path, double def) const;
 	int32 ReadSettingRaw(const SettingPath &path, int32 def) const;
 	bool ReadSettingRaw(const SettingPath &path, bool def) const;
-	void WriteSettingRaw(const SettingPath &path, const std::vector<char> &val);
+	void WriteSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &val);
 	void WriteSettingRaw(const SettingPath &path, const std::wstring &val);
 	void WriteSettingRaw(const SettingPath &path, double val);
 	void WriteSettingRaw(const SettingPath &path, int32 val);

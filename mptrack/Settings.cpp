@@ -79,7 +79,7 @@ mpt::ustring SettingValue::FormatValueAsString() const
 			return valueString;
 			break;
 		case SettingTypeBinary:
-			return Util::BinToHex(valueBinary);
+			return Util::BinToHex(mpt::as_span(valueBinary));
 			break;
 		case SettingTypeNone:
 		default:
@@ -300,9 +300,9 @@ SettingsContainer::SettingsContainer(ISettingsBackend *backend)
 
 
 
-std::vector<char> IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<char> &def) const
+std::vector<mpt::byte> IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &def) const
 {
-	std::vector<char> result = def;
+	std::vector<mpt::byte> result = def;
 	if(!Util::TypeCanHoldValue<UINT>(result.size()))
 	{
 		return result;
@@ -350,7 +350,7 @@ bool IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, bool def) c
 }
 
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<char> &val)
+void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &val)
 {
 	MPT_ASSERT(Util::TypeCanHoldValue<UINT>(val.size()));
 	::WritePrivateProfileStructW(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)val.data(), static_cast<UINT>(val.size()), filename.AsNative().c_str());
@@ -467,7 +467,7 @@ SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const 
 	case SettingTypeInt: return SettingValue(ReadSettingRaw(path, def.as<int32>()), def.GetTypeTag()); break;
 	case SettingTypeFloat: return SettingValue(ReadSettingRaw(path, def.as<double>()), def.GetTypeTag()); break;
 	case SettingTypeString: return SettingValue(ReadSettingRaw(path, def.as<std::wstring>()), def.GetTypeTag()); break;
-	case SettingTypeBinary: return SettingValue(ReadSettingRaw(path, def.as<std::vector<char> >()), def.GetTypeTag()); break;
+	case SettingTypeBinary: return SettingValue(ReadSettingRaw(path, def.as<std::vector<mpt::byte> >()), def.GetTypeTag()); break;
 	default: return SettingValue(); break;
 	}
 }
@@ -481,7 +481,7 @@ void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const Setting
 	case SettingTypeInt: WriteSettingRaw(path, val.as<int32>()); break;
 	case SettingTypeFloat: WriteSettingRaw(path, val.as<double>()); break;
 	case SettingTypeString: WriteSettingRaw(path, val.as<std::wstring>()); break;
-	case SettingTypeBinary: WriteSettingRaw(path, val.as<std::vector<char> >()); break;
+	case SettingTypeBinary: WriteSettingRaw(path, val.as<std::vector<mpt::byte> >()); break;
 	default: break;
 	}
 }
