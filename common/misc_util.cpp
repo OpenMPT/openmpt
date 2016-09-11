@@ -75,7 +75,7 @@ static inline bool DecodeByte(uint8 &byte, MPT_UCHAR_TYPE c1, MPT_UCHAR_TYPE c2)
 	return true;
 }
 
-mpt::ustring BinToHex(const std::vector<char> &src)
+mpt::ustring BinToHex(mpt::span<const mpt::byte> src)
 {
 	mpt::ustring result;
 	for(std::size_t i = 0; i < src.size(); ++i)
@@ -87,9 +87,9 @@ mpt::ustring BinToHex(const std::vector<char> &src)
 	return result;
 }
 
-std::vector<char> HexToBin(const mpt::ustring &src)
+std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
 {
-	std::vector<char> result;
+	std::vector<mpt::byte> result;
 	for(std::size_t i = 0; (i + 1) < src.size(); i += 2)
 	{
 		uint8 byte = 0;
