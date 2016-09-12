@@ -226,6 +226,37 @@ public:
 		threadHandle = nullptr;
 	}
 
+	void swap(thread & other) MPT_NOEXCEPT
+	{
+		using std::swap;
+		swap(threadHandle, other.threadHandle);
+		swap(startupDoneEvent, other.startupDoneEvent);
+		swap(functionMode, other.functionMode);
+	}
+
+	friend void swap(thread & a, thread & b) MPT_NOEXCEPT
+	{
+		a.swap(b);
+	}
+
+	thread(thread && other) MPT_NOEXCEPT
+		: threadHandle(nullptr)
+		, startupDoneEvent(nullptr)
+		, functionMode(FunctionModeNone)
+	{
+		swap(other);
+	}
+
+	thread & operator=(thread && other) MPT_NOEXCEPT
+	{
+		if(joinable())
+		{
+			std::terminate();
+		}
+		swap(other);
+		return *this;
+	}
+
 	thread()
 		: threadHandle(nullptr)
 		, startupDoneEvent(nullptr)
