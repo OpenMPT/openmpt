@@ -370,6 +370,9 @@ LDFLAGS_ZLIB  := $(shell pkg-config --libs-only-L   zlib ) $(shell pkg-config --
 LDLIBS_ZLIB   := $(shell pkg-config --libs-only-l   zlib )
 PC_REQUIRES_ZLIB := zlib
 else
+ifeq ($(FORCE_DEPS),1)
+$(error zlib not found)
+endif
 NO_ZLIB:=1
 endif
 endif
@@ -383,6 +386,9 @@ LDFLAGS_MPG123  := $(shell pkg-config --libs-only-L   libmpg123 ) $(shell pkg-co
 LDLIBS_MPG123   := $(shell pkg-config --libs-only-l   libmpg123 )
 PC_REQUIRES_MPG123 := libmpg123
 else
+ifeq ($(FORCE_DEPS),1)
+$(error mpg123 not found)
+endif
 NO_MPG123:=1
 endif
 endif
@@ -396,6 +402,9 @@ LDFLAGS_OGG  := $(shell pkg-config --libs-only-L   ogg ) $(shell pkg-config --li
 LDLIBS_OGG   := $(shell pkg-config --libs-only-l   ogg )
 PC_REQUIRES_OGG := ogg
 else
+ifeq ($(FORCE_DEPS),1)
+$(error ogg not found)
+endif
 NO_OGG:=1
 endif
 endif
@@ -409,6 +418,9 @@ LDFLAGS_VORBIS  := $(shell pkg-config --libs-only-L   vorbis ) $(shell pkg-confi
 LDLIBS_VORBIS   := $(shell pkg-config --libs-only-l   vorbis )
 PC_REQUIRES_VORBIS := vorbis
 else
+ifeq ($(FORCE_DEPS),1)
+$(error vorbis not found)
+endif
 NO_VORBIS:=1
 endif
 endif
@@ -422,6 +434,9 @@ LDFLAGS_VORBISFILE  := $(shell pkg-config --libs-only-L   vorbisfile ) $(shell p
 LDLIBS_VORBISFILE   := $(shell pkg-config --libs-only-l   vorbisfile )
 PC_REQUIRES_VORBISFILE := vorbisfile
 else
+ifeq ($(FORCE_DEPS),1)
+$(error vorbisfile not found)
+endif
 NO_VORBISFILE:=1
 endif
 endif
@@ -435,6 +450,9 @@ LDFLAGS_SDL  := $(shell pkg-config --libs-only-L   sdl2 ) $(shell pkg-config --l
 LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl2 )
 NO_SDL:=1
 else
+ifeq ($(FORCE_DEPS),1)
+$(error sdl2 not found)
+endif
 NO_SDL2:=1
 endif
 endif
@@ -447,6 +465,9 @@ CPPFLAGS_SDL := $(shell pkg-config --cflags-only-I sdl ) -DMPT_WITH_SDL
 LDFLAGS_SDL  := $(shell pkg-config --libs-only-L   sdl ) $(shell pkg-config --libs-only-other sdl )
 LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error sdl not found)
+endif
 NO_SDL:=1
 endif
 endif
@@ -459,6 +480,9 @@ CPPFLAGS_PORTAUDIO := $(shell pkg-config --cflags-only-I portaudio-2.0 ) -DMPT_W
 LDFLAGS_PORTAUDIO  := $(shell pkg-config --libs-only-L   portaudio-2.0 ) $(shell pkg-config --libs-only-other portaudio-2.0 )
 LDLIBS_PORTAUDIO   := $(shell pkg-config --libs-only-l   portaudio-2.0 )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error portaudio not found)
+endif
 NO_PORTAUDIO:=1
 endif
 endif
@@ -471,6 +495,9 @@ CPPFLAGS_PORTAUDIOCPP := $(shell pkg-config --cflags-only-I portaudiocpp ) -DMPT
 LDFLAGS_PORTAUDIOCPP  := $(shell pkg-config --libs-only-L   portaudiocpp ) $(shell pkg-config --libs-only-other portaudiocpp )
 LDLIBS_PORTAUDIOCPP   := $(shell pkg-config --libs-only-l   portaudiocpp )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error portaudiocpp not found)
+endif
 NO_PORTAUDIOCPP:=1
 endif
 endif
@@ -483,6 +510,9 @@ CPPFLAGS_PULSEAUDIO := $(shell pkg-config --cflags-only-I libpulse libpulse-simp
 LDFLAGS_PULSEAUDIO  := $(shell pkg-config --libs-only-L   libpulse libpulse-simple ) $(shell pkg-config --libs-only-other libpulse libpulse-simple )
 LDLIBS_PULSEAUDIO   := $(shell pkg-config --libs-only-l   libpulse libpulse-simple )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error pulseaudio not found)
+endif
 NO_PULSEAUDIO:=1
 endif
 endif
@@ -495,6 +525,9 @@ CPPFLAGS_FLAC := $(shell pkg-config --cflags-only-I 'flac >= 1.3.0' ) -DMPT_WITH
 LDFLAGS_FLAC  := $(shell pkg-config --libs-only-L   'flac >= 1.3.0' ) $(shell pkg-config --libs-only-other 'flac >= 1.3.0' )
 LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   'flac >= 1.3.0' )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error flac not found)
+endif
 NO_FLAC:=1
 endif
 endif
@@ -507,6 +540,9 @@ CPPFLAGS_SNDFILE := $(shell pkg-config --cflags-only-I   sndfile ) -DMPT_WITH_SN
 LDFLAGS_SNDFILE  := $(shell pkg-config --libs-only-L     sndfile ) $(shell pkg-config --libs-only-other sndfile )
 LDLIBS_SNDFILE   := $(shell pkg-config --libs-only-l     sndfile )
 else
+ifeq ($(FORCE_DEPS),1)
+$(error sndfile not found)
+endif
 NO_SNDFILE:=1
 endif
 endif
