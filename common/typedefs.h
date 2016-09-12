@@ -54,6 +54,15 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+// noexcept
+#if MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(4,6,0)
+#define MPT_NOEXCEPT throw()
+#else
+#define MPT_NOEXCEPT noexept
+#endif
+
+
+
 // MPT_ARRAY_COUNT macro computes the number of elements in a statically-allocated array.
 #if MPT_COMPILER_MSVC
 OPENMPT_NAMESPACE_END
