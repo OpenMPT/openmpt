@@ -58,7 +58,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(4,6,0)
 #define MPT_NOEXCEPT throw()
 #else
-#define MPT_NOEXCEPT noexept
+#define MPT_NOEXCEPT noexcept
 #endif
 
 
