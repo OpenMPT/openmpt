@@ -1015,7 +1015,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, LPSTR s) const
 				param = sndFile.GetSample(smp).cues[m.vol - 1];
 			else
 				param = m.vol << 11;
-			sprintf(s, "Cue %u: %u", m.vol, param);
+			sprintf(s, "Cue %u: %llu", m.vol, static_cast<unsigned long long>(param));
 		} else
 		{
 			strcpy(s, "continue");
