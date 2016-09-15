@@ -998,28 +998,16 @@ BOOL CTrackApp::InitInstance()
 //----------------------------
 {
 
+	// We probably should call the base class version here,
+	// but we historically did not do that.
+	//if(!CWinApp::InitInstance())
+	//{
+	//	return FALSE;
+	//}
+
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
-	
-	m_GuiThreadId = GetCurrentThreadId();
-
-	// create the tracker-global random device
-	m_RD = mpt::make_unique<mpt::random_device>();
-	// make the device available to non-tracker-only code
-	mpt::set_global_random_device(m_RD.get());
-	// create and seed the traker-global best PRNG with the random device
-	m_BestPRNG = mpt::make_unique<mpt::thread_safe_prng<mpt::best_prng> >(mpt::make_prng<mpt::best_prng>(RandomDevice()));
-	// make the best PRNG available to non-tracker-only code
-	mpt::set_global_prng(m_BestPRNG.get());
-	// create and seed the traker-global PRNG with the random device
-	m_PRNG = mpt::make_unique<mpt::thread_safe_prng<mpt::prng> >(mpt::make_prng<mpt::prng>(RandomDevice()));
-	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
-	mpt::rng::crand::reseed(RandomDevice());
-
-	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
-
-	ExceptionHandler::Register();
 
 	// Initialize OLE MFC support
 	BOOL oleinit = AfxOleInit();
@@ -1040,6 +1028,25 @@ BOOL CTrackApp::InitInstance()
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
+
+	m_GuiThreadId = GetCurrentThreadId();
+
+	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
+
+	ExceptionHandler::Register();
+
+	// create the tracker-global random device
+	m_RD = mpt::make_unique<mpt::random_device>();
+	// make the device available to non-tracker-only code
+	mpt::set_global_random_device(m_RD.get());
+	// create and seed the traker-global best PRNG with the random device
+	m_BestPRNG = mpt::make_unique<mpt::thread_safe_prng<mpt::best_prng> >(mpt::make_prng<mpt::best_prng>(RandomDevice()));
+	// make the best PRNG available to non-tracker-only code
+	mpt::set_global_prng(m_BestPRNG.get());
+	// create and seed the traker-global PRNG with the random device
+	m_PRNG = mpt::make_unique<mpt::thread_safe_prng<mpt::prng> >(mpt::make_prng<mpt::prng>(RandomDevice()));
+	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
+	mpt::rng::crand::reseed(RandomDevice());
 
 	if(cmdInfo.m_bNoWine)
 	{
