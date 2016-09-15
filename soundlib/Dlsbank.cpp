@@ -45,11 +45,22 @@ OPENMPT_NAMESPACE_BEGIN
 #define CONN_SRC_EG2               0x0005
 #define CONN_SRC_PITCHWHEEL        0x0006
 
+#define CONN_SRC_POLYPRESSURE      0x0007
+#define CONN_SRC_CHANNELPRESSURE   0x0008
+#define CONN_SRC_VIBRATO           0x0009
+
 // Midi Controllers 0-127
 #define CONN_SRC_CC1               0x0081
 #define CONN_SRC_CC7               0x0087
 #define CONN_SRC_CC10              0x008a
 #define CONN_SRC_CC11              0x008b
+
+#define CONN_SRC_CC91              0x00db
+#define CONN_SRC_CC93              0x00dd
+
+#define CONN_SRC_RPN0              0x0100
+#define CONN_SRC_RPN1              0x0101
+#define CONN_SRC_RPN2              0x0102
 
 // Generic Destinations
 #define CONN_DST_NONE              0x0000
@@ -62,6 +73,8 @@ OPENMPT_NAMESPACE_BEGIN
 #define CONN_DST_LFO_FREQUENCY     0x0104
 #define CONN_DST_LFO_STARTDELAY    0x0105
 
+#define CONN_DST_KEYNUMBER         0x0005
+
 // EG1 Destinations
 #define CONN_DST_EG1_ATTACKTIME    0x0206
 #define CONN_DST_EG1_DECAYTIME     0x0207
@@ -69,12 +82,19 @@ OPENMPT_NAMESPACE_BEGIN
 #define CONN_DST_EG1_RELEASETIME   0x0209
 #define CONN_DST_EG1_SUSTAINLEVEL  0x020a
 
+#define CONN_DST_EG1_DELAYTIME     0x020b
+#define CONN_DST_EG1_HOLDTIME      0x020c
+#define CONN_DST_EG1_SHUTDOWNTIME  0x020d
+
 // EG2 Destinations
 #define CONN_DST_EG2_ATTACKTIME    0x030a
 #define CONN_DST_EG2_DECAYTIME     0x030b
 #define CONN_DST_EG2_RESERVED      0x030c
 #define CONN_DST_EG2_RELEASETIME   0x030d
 #define CONN_DST_EG2_SUSTAINLEVEL  0x030e
+
+#define CONN_DST_EG2_DELAYTIME     0x030f
+#define CONN_DST_EG2_HOLDTIME      0x0310
 
 #define CONN_TRN_NONE              0x0000
 #define CONN_TRN_CONCAVE           0x0001
@@ -98,6 +118,9 @@ OPENMPT_NAMESPACE_BEGIN
 #define ART_VOL_EG_DECAYTIME	MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_DECAYTIME)
 #define ART_VOL_EG_SUSTAINLEVEL	MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_SUSTAINLEVEL)
 #define ART_VOL_EG_RELEASETIME	MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_RELEASETIME)
+#define ART_VOL_EG_DELAYTIME	MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_DELAYTIME)
+#define ART_VOL_EG_HOLDTIME		MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_HOLDTIME)
+#define ART_VOL_EG_SHUTDOWNTIME	MAKE_ART(CONN_SRC_NONE,	CONN_SRC_NONE,	CONN_DST_EG1_SHUTDOWNTIME)
 #define ART_VOL_EG_VELTOATTACK	MAKE_ART(CONN_SRC_KEYONVELOCITY,	CONN_SRC_NONE,	CONN_DST_EG1_ATTACKTIME)
 #define ART_VOL_EG_KEYTODECAY	MAKE_ART(CONN_SRC_KEYNUMBER,		CONN_SRC_NONE,	CONN_DST_EG1_DECAYTIME)
 
@@ -147,6 +170,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define IFFID_rgnh		0x686E6772
 #define IFFID_wlnk		0x6B6E6C77
 #define IFFID_art1		0x31747261
+#define IFFID_art2		0x32747261
 
 //////////////////////////////////////////////////////////
 // DLS Structures definitions
@@ -337,60 +361,60 @@ enum SF2Generators
 /////////////////////////////////////////////////////////////////////
 // SF2 Structures Definitions
 
-typedef struct SFPRESETHEADER
+struct SFPRESETHEADER
 {
-	char      achPresetName[20];
+	char     achPresetName[20];
 	uint16le wPreset;
 	uint16le wBank;
 	uint16le wPresetBagNdx;
 	uint32le dwLibrary;
 	uint32le dwGenre;
 	uint32le dwMorphology;
-} SFPRESETHEADER;
+};
 
 MPT_BINARY_STRUCT(SFPRESETHEADER, 38)
 
-typedef struct SFPRESETBAG
+struct SFPRESETBAG
 {
 	uint16le wGenNdx;
 	uint16le wModNdx;
-} SFPRESETBAG;
+};
 
 MPT_BINARY_STRUCT(SFPRESETBAG, 4)
 
-typedef struct SFGENLIST
+struct SFGENLIST
 {
 	uint16le sfGenOper;
 	uint16le genAmount;
-} SFGENLIST;
+};
 
 MPT_BINARY_STRUCT(SFGENLIST, 4)
 
-typedef struct SFINST
+struct SFINST
 {
 	char      achInstName[20];
 	uint16le wInstBagNdx;
-} SFINST;
+};
 
 MPT_BINARY_STRUCT(SFINST, 22)
 
-typedef struct SFINSTBAG
+struct SFINSTBAG
 {
 	uint16le wGenNdx;
 	uint16le wModNdx;
-} SFINSTBAG;
+};
 
 MPT_BINARY_STRUCT(SFINSTBAG, 4)
 
-typedef struct SFINSTGENLIST
+struct SFINSTGENLIST
 {
 	uint16le sfGenOper;
 	uint16le genAmount;
-} SFINSTGENLIST;
+};
 
 MPT_BINARY_STRUCT(SFINSTGENLIST, 4)
 
-typedef struct SFSAMPLE
+struct SFSAMPLE
 {
 	char     achSampleName[20];
 	uint32le dwStart;
@@ -402,7 +426,7 @@ typedef struct SFSAMPLE
 	char     chPitchCorrection;
 	uint16le wSampleLink;
 	uint16le sfSampleType;
-} SFSAMPLE;
+};
 
 MPT_BINARY_STRUCT(SFSAMPLE, 46)
 
@@ -500,6 +524,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 				fread(&riff, sizeof(RIFFCHUNKID), 1, f);
 				break;
 			}
+			if((len % 2u) != 0)
+				len++;
 			if (fseek(f, len-4, SEEK_CUR) != 0) break;
 		} while (fread(&riff, sizeof(RIFFCHUNKID), 1, f) != 0);
 	} else
@@ -511,6 +537,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 				break;
 			if (riff.id_DLS == IFFID_DLS) break; // found it
 			int len = riff.riff_len;
+			if((len % 2u) != 0)
+				len++;
 			if ((len <= 4) || (fseek(f, len-4, SEEK_CUR) != 0)) break;
 		}
 	}
@@ -668,6 +696,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 			break;
 
 		case IFFID_art1:
+		case IFFID_art2:
 			{
 				ART1CHUNK *p = (ART1CHUNK *)pchunk;
 				if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -1145,7 +1174,10 @@ bool CDLSBank::Open(FileReader file)
 		{
 			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
 			if ((priff->id_RIFF == IFFID_RIFF) && (priff->id_DLS == IFFID_DLS)) break;
-			dwMemPos += priff->riff_len + 8;
+			uint32 len = priff->riff_len;
+			if((len % 2u) != 0)
+				len++;
+			dwMemPos += len + 8;
 		}
 	}
 
@@ -1156,6 +1188,8 @@ bool CDLSBank::Open(FileReader file)
 			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
 			uint32 len = priff->riff_len;
 			len = SwapBytesBE(len);
+			if((len % 2u) != 0)
+				len++;
 			if ((len <= 4) || ((uint32)len >= dwMemLength - dwMemPos)) break;
 			if (priff->id_DLS == IFFID_XDLS)
 			{
