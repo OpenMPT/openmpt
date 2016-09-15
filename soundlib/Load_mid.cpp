@@ -269,8 +269,8 @@ const char *szMidiPercussionNames[61] =
 
 ////////////////////////////////////////////////////////////////////////////////
 // Maps a midi instrument - returns the instrument number in the file
-uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG)
-//--------------------------------------------------------------------------------------------------------
+uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns)
+//----------------------------------------------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns;
 	program &= 0x7F;
@@ -278,7 +278,7 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	note &= 0x7F;
 
 	// In XG mode, extra drums are on banks with MSB 7F
-	const bool isDrum = (midiChannel == MIDI_DRUMCHANNEL) || (bank >= 0x3F80 && isXG);
+	const bool isDrum = drumChns[midiChannel - 1] || (bank >= 0x3F80 && isXG);
 
 	for (uint32 i = 1; i <= m_nInstruments; i++) if (Instruments[i])
 	{
@@ -401,10 +401,9 @@ struct MidiChannelState
 	uint8 pan;             // Channel Panning           10      [0-255]     128  (64)
 	uint8 expression;      // Channel Expression        11      0-128       128  (127)
 	uint8 volume;          // Channel Volume            7       0-128       80   (100)
-	uint8 modulation;      // Modulation                1       0-127       0
+	uint16 rpn;            // Currently selected RPN    100/101  n/a
 	uint8 pitchBendRange;  // Pitch Bend Range                              2
 	int8  transpose;       // Channel transpose                             0
-	uint16 rpn;            // Currently selected RPN    100/101  n/a
 	bool  monoMode : 1;    // Mono/Poly operation       126/127  n/a        Poly
 	bool  sustain : 1;     // Sustain pedal             64       on/off     off
 
@@ -418,10 +417,9 @@ struct MidiChannelState
 		, pan(128)
 		, expression(128)
 		, volume(80)
-		, modulation(0)
+		, rpn(0x3FFF)
 		, pitchBendRange(2)
 		, transpose(0)
-		, rpn(0x3FFF)
 		, monoMode(false)
 		, sustain(false)
 	{
@@ -445,10 +443,9 @@ struct MidiChannelState
 		SetPitchbend(MIDIEvents::pitchBendCentre);
 		transpose = 0;
 		rpn = 0x3FFF;
-		modulation = 0;
 		monoMode = false;
 		sustain = false;
-		// Should also reset pedals (40h-43h), portamento, aftertouch
+		// Should also reset modulation, pedals (40h-43h), aftertouch
 	}
 
 	void SetRPN(uint8 value)
@@ -660,11 +657,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = MAX_BASECHANNELS;
 	m_nDefaultRowsPerBeat = quantize / 4;
 	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
+	m_nSamplePreAmp = m_nVSTiVolume = 32;
 	TEMPO tempo = m_nDefaultTempo;
 	uint16 ppqn = fileHeader.division;
-	if(ppqn < 0)
+	if(ppqn & 0x8000)
 	{
-		int frames = -(ppqn >> 8), subFrames = (ppqn & 0xFF);
+		// SMPTE compatible units (approximation)
+		int frames = 256 - (ppqn >> 8), subFrames = (ppqn & 0xFF);
 		ppqn = static_cast<uint16>(frames * subFrames / 2);
 	}
 	if(!ppqn)
@@ -676,6 +675,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	const uint16 numTracks = fileHeader.numTracks;
 	std::vector<TrackState> tracks(numTracks);
 	std::vector<ModChannelState> modChnStatus(m_nChannels);
+	std::bitset<16> drumChns;
+	drumChns.set(MIDI_DRUMCHANNEL - 1);
 
 	for(uint16 t = 0; t < numTracks; t++)
 	{
@@ -863,7 +864,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 								modChnStatus[chn].porta = 0;
 							}
 							patRow[chn].note = static_cast<ModCommand::NOTE>(Clamp(note + pitchOffset + midiChnStatus[midiCh].transpose + masterTranspose, NOTE_MIN, NOTE_MAX));
-							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1, isXG));
+							patRow[chn].instr = mpt::saturate_cast<ModCommand::INSTR>(MapMidiInstrument(midiChnStatus[midiCh].program, midiChnStatus[midiCh].bank, midiCh + 1, data1, isXG, drumChns));
 							EnterMIDIVolume(patRow[chn], modChnStatus[chn], midiChnStatus[midiCh]);
 
 							if(patRow[chn].command == CMD_PORTAMENTODOWN || patRow[chn].command == CMD_PORTAMENTOUP)
@@ -1039,6 +1040,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						uint32 len;
 						track.ReadVarInt(len);
 						FileReader sysex = track.ReadChunk(len);
+
 						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
 						{
 							// Master volume
@@ -1055,15 +1057,25 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							}
 						} else
 						{
-							// XG System On
 							uint8 xg[7];
 							sysex.ReadArray(xg);
 							if(!memcmp(xg, "\x43\x10\x4C\x00\x00\x7E\x00", 7))
 							{
+								// XG System On
 								isXG = true;
 							} else if(!memcmp(xg, "\x43\x10\x4C\x00\x00\x06", 6))
 							{
+								// XG Master Transpose
 								masterTranspose = static_cast<int8>(xg[6]) - 64;
+							} else if(!memcmp(xg, "\x41\x10\x42\x12\x40", 5) && (xg[5] & 0xF0) == 0x10 && xg[6] == 0x15)
+							{
+								// GS Drum Kit
+								uint8 chn = xg[5] & 0x0F;
+								if(chn == 0)
+									chn = 9;
+								else if(chn < 10)
+									chn--;
+								drumChns.set(chn, xg[6] != 0);
 							}
 						}
 					}
