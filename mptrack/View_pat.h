@@ -157,7 +157,7 @@ protected:
 	DWORD m_nDragItem;	// Currently dragged item
 	DWORD m_nDropItem;	// Currently hovered item during dragondrop
 	RECT m_rcDragItem, m_rcDropItem;
-	bool m_bInItemRect;
+	bool m_bInItemRect : 1;
 
 	UINT m_nFoundInstrument;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
@@ -421,6 +421,7 @@ protected:
 	afx_msg void OnShowTimeAtRow();
 	afx_msg void OnTogglePCNotePluginEditor();
 	afx_msg void OnSetQuantize();
+	afx_msg void OnLockPatternRows();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -442,7 +443,7 @@ private:
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
-	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn, CModDoc *pModDoc) const;
+	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn) const;
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
 	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;

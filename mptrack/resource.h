@@ -1266,6 +1266,7 @@
 #define ID_MRU_LIST_LAST                44642
 #define ID_FILE_APPENDMODULE            44643
 #define ID_SAMPLE_16BITCONVERT          44644
+#define ID_LOCK_PATTERN_ROWS            44645
 
 // Next default values for new objects
 // 
@@ -1273,7 +1274,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        541
-#define _APS_NEXT_COMMAND_VALUE         44645
+#define _APS_NEXT_COMMAND_VALUE         44646
 #define _APS_NEXT_CONTROL_VALUE         2495
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

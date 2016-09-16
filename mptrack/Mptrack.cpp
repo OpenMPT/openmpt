@@ -1852,14 +1852,14 @@ void CFastBitmap::SetBlendColor(COLORREF cr)
 	UINT r = GetRValue(cr);
 	UINT g = GetGValue(cr);
 	UINT b = GetBValue(cr);
-	for (UINT i=0; i<0x80; i++)
+	for (UINT i=0; i<BLEND_OFFSET; i++)
 	{
 		UINT m = (m_Dib.bmiColors[i].rgbRed >> 2)
 				+ (m_Dib.bmiColors[i].rgbGreen >> 1)
 				+ (m_Dib.bmiColors[i].rgbBlue >> 2);
-		m_Dib.bmiColors[i|0x80].rgbRed = static_cast<BYTE>((m + r)>>1);
-		m_Dib.bmiColors[i|0x80].rgbGreen = static_cast<BYTE>((m + g)>>1);
-		m_Dib.bmiColors[i|0x80].rgbBlue = static_cast<BYTE>((m + b)>>1);
+		m_Dib.bmiColors[i|BLEND_OFFSET].rgbRed = static_cast<BYTE>((m + r)>>1);
+		m_Dib.bmiColors[i|BLEND_OFFSET].rgbGreen = static_cast<BYTE>((m + g)>>1);
+		m_Dib.bmiColors[i|BLEND_OFFSET].rgbBlue = static_cast<BYTE>((m + b)>>1);
 	}
 }
 

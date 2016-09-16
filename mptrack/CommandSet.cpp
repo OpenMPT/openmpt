@@ -542,8 +542,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleSignUnsign, 1785, _T("Signed / Unsigned Conversion"));
 	DefineKeyCommand(kcChannelReset, 1786, _T("Reset Channel"));
 	DefineKeyCommand(kcToggleOverflowPaste, 1787, _T("Toggle overflow paste"));
-	DefineKeyCommand(kcNotePC, 1788, _T("Parameter control(MPTm only)"));
-	DefineKeyCommand(kcNotePCS, 1789, _T("Parameter control(smooth)(MPTm only)"));
+	DefineKeyCommand(kcNotePC, 1788, _T("Parameter Control"));
+	DefineKeyCommand(kcNotePCS, 1789, _T("Parameter Control (smooth)"));
 	DefineKeyCommand(kcSampleRemoveDCOffset, 1790, _T("Remove DC Offset"));
 	DefineKeyCommand(kcNoteFade, 1791, _T("Note Fade"));
 	DefineKeyCommand(kcNoteFadeOld, 1792, _T("Note Fade"), kcHidden);	// Legacy
@@ -700,6 +700,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleCenterSampleStart, 1962, _T("Zoom into sample start"));
 	DefineKeyCommand(kcSampleCenterSampleEnd, 1963, _T("Zoom into sample end"));
 	DefineKeyCommand(kcSampleTrimToLoopEnd, 1964, _T("Trim to loop end"));
+	DefineKeyCommand(kcLockPlaybackToRows, 1965, _T("Lock Playback to Rows"));
 
 	// Add new key commands here.
 
