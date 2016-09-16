@@ -259,7 +259,7 @@
 	//#elif TARGET_OS_MAC
 	//#else
 	//#endif
-#elif defined(ANDROID)
+#elif defined(__ANDROID__) || defined(ANDROID)
 	#define MPT_OS_ANDROID 1
 #elif defined(__linux__)
 	#define MPT_OS_LINUX 1
