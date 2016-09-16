@@ -563,10 +563,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 				ypaint += (nSkip - n) * m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
-				m_Dib.SetBlendMode(0x80);
+				m_Dib.SetBlendMode(true);
 				DrawPatternData(hdc, nPrevPat, false, false,
 						nPrevRows - n, nPrevRows, xofs, rcClient, &ypaint);
-				m_Dib.SetBlendMode(0);
+				m_Dib.SetBlendMode(false);
 			} else
 			{
 				ypaint += nSkip * m_szCell.cy;
@@ -607,10 +607,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 				ROWINDEX nNextRows = sndFile.Patterns[nNextPat].GetNumRows();
 				ROWINDEX n = std::min(static_cast<ROWINDEX>(nVisRows), nNextRows);
 
-				m_Dib.SetBlendMode(0x80);
+				m_Dib.SetBlendMode(true);
 				DrawPatternData(hdc, nNextPat, false, false,
 						0, n, xofs, rcClient, &ypaint);
-				m_Dib.SetBlendMode(0);
+				m_Dib.SetBlendMode(false);
 			}
 		}
 	}
@@ -777,7 +777,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
 	int row_col, row_bkcol;
-	UINT bSpeedUp, nColumnWidth;
+	UINT nColumnWidth;
 	
 	CHANNELINDEX ncols = sndFile.GetNumChannels();
 	nColumnWidth = m_szCell.cx;
@@ -827,7 +827,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			goto SkipRow;
 		}
 		rect.right = rect.left + m_szHeader.cx;
-		DrawButtonRect(hdc, &rect, s, !selEnable);
+		bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
+		DrawButtonRect(hdc, &rect, s, !selEnable || rowDisabled);
 		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
@@ -861,6 +862,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				row_bkcol = MODCOLOR_BACKHILIGHT;
 			}
 		}
+		bool blendModeChanged = false;
 		if (selEnable)
 		{
 			if ((row == m_nPlayRow) && (nPattern == m_nPlayPat))
@@ -881,6 +883,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					row_bkcol = MODCOLOR_BACKPLAYCURSOR;
 				}
 			}
+			blendModeChanged = (rowDisabled != m_Dib.GetBlendMode());
+			m_Dib.SetBlendMode(rowDisabled);
 		}
 		// Eliminate non-visible column
 		xpaint = m_szHeader.cx;
@@ -892,7 +896,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			xpaint += nColumnWidth;
 		}
 		// Optimization: same row color ?
-		bSpeedUp = (oldrowcolor == (UINT)((row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0))) ? TRUE : FALSE;
+		bool useSpeedUpMask = (oldrowcolor == (UINT)((row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0))) && !blendModeChanged;
 		xbmp = nbmp = 0;
 		do
 		{
@@ -904,7 +908,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
-			if ((bSpeedUp) && (selectedCols[col] & COLUMN_BITS_SKIP) && (pPattern) && (row))
+			if (useSpeedUpMask && (selectedCols[col] & COLUMN_BITS_SKIP) && (pPattern) && (row))
 			{
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);

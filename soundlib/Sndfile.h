@@ -370,6 +370,8 @@ public:
 	TempoMode m_nTempoMode;
 
 #ifdef MODPLUG_TRACKER
+	// Lock playback between two rows. Lock is active if lock start != ROWINDEX_INVALID).
+	ROWINDEX m_lockRowStart, m_lockRowEnd;
 	// Lock playback between two orders. Lock is active if lock start != ORDERINDEX_INVALID).
 	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
 #endif // MODPLUG_TRACKER

@@ -266,6 +266,7 @@ enum CommandID
 	kcChangeLoopStatus,
 	kcShowEditMenu,
 	kcTimeAtRow,
+	kcLockPlaybackToRows,
 	kcQuantizeSettings,
 	kcToggleOverflowPaste,
 	kcToggleNoteOffRecordPC,

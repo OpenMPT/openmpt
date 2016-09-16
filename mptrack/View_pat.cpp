@@ -118,6 +118,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
 	ON_COMMAND(ID_PATTERN_EDIT_PCNOTE_PLUGIN,	OnTogglePCNotePluginEditor)
 	ON_COMMAND(ID_SETQUANTIZE,					OnSetQuantize)
+	ON_COMMAND(ID_LOCK_PATTERN_ROWS,			OnLockPatternRows)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_COMMAND_RANGE(ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue, OnSelectPCNoteParam)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
@@ -692,13 +693,13 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			}
 			//HACK: fold kCtxViewPatternsFX and kCtxViewPatternsFXparam so that all commands of 1 are active in the other
 			else {
-				if (ctx==kCtxViewPatternsFX)
+				if (ctx == kCtxViewPatternsFX)
 				{
 					if (ih->KeyEvent(kCtxViewPatternsFXparam, nChar, nRepCnt, nFlags, kT) != kcNull)
 					{
 						return true; // Mapped to a command, no need to pass message on.
 					}
-				} else if (ctx==kCtxViewPatternsFXparam)
+				} else if (ctx == kCtxViewPatternsFXparam)
 				{
 					if (ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull)
 					{
@@ -1461,7 +1462,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			{
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-				BuildRecordCtxMenu(hMenu, ih, nChn, pModDoc);
+				BuildRecordCtxMenu(hMenu, ih, nChn);
 				BuildChannelControlCtxMenu(hMenu, ih);
 			}
 		}
@@ -4179,6 +4180,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcToggleNoteOffRecordMIDI: TrackerSettings::Instance().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 		case kcQuantizeSettings: OnSetQuantize(); return wParam;
+		case kcLockPlaybackToRows: OnLockPatternRows(); return wParam;
 		case kcFindInstrument: FindInstrument(); return wParam;
 		case kcChannelSettings:
 			{
@@ -4437,7 +4439,7 @@ void CViewPattern::SetSpacing(int n)
 }
 
 
-// Enter an effect letter in the pattenr
+// Enter an effect letter in the pattern
 void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 //----------------------------------------------------------
 {
@@ -5297,7 +5299,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			// data to the pattern and then remove it again - but often, it is actually removed before the row is parsed by the soundlib.
 			// just play the newly inserted notes...
 
-			ModCommand &firstNote = rowBase[chn];
+			const ModCommand &firstNote = rowBase[chn];
 			ModCommand::INSTR nPlayIns = 0;
 			if(firstNote.instr)
 			{
@@ -5306,7 +5308,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			} else if(!firstNote.instr)
 			{
 				// ...or one that can be found on a previous row of this pattern.
-				ModCommand *search = &firstNote;
+				const ModCommand *search = &firstNote;
 				ROWINDEX srow = GetCurrentRow();
 				while(srow-- > 0)
 				{
@@ -5529,6 +5531,22 @@ void CViewPattern::OnSetQuantize()
 	{
 		TrackerSettings::Instance().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultAsInt);
 	}
+}
+
+
+void CViewPattern::OnLockPatternRows()
+//------------------------------------
+{
+	CSoundFile &sndFile = *GetSoundFile();
+	if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
+	{
+		sndFile.m_lockRowStart = m_Selection.GetStartRow();
+		sndFile.m_lockRowEnd = m_Selection.GetEndRow();
+	} else
+	{
+		sndFile.m_lockRowStart = sndFile.m_lockRowEnd = ROWINDEX_INVALID;
+	}
+	InvalidatePattern(true);
 }
 
 
@@ -5882,11 +5900,12 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 	return true;
 }
 
-bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn, CModDoc* pModDoc) const
-//--------------------------------------------------------------------------------------------------------------
+bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn) const
+//--------------------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, "R&ecord select\t" + ih->GetKeyTextFromCommand(kcChannelRecordSelect));
-	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, "S&plit Record select\t" + ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect));
+	const CModDoc *pModDoc = GetDocument();
+	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, _T("R&ecord select\t") + ih->GetKeyTextFromCommand(kcChannelRecordSelect));
+	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, _T("S&plit Record select\t") + ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect));
 	return true;
 }
 
@@ -5895,17 +5914,37 @@ bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELIND
 bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //----------------------------------------------------------------------------
 {
-	const CString label = (m_Selection.GetStartRow() != m_Selection.GetEndRow() ? "Rows" : "Row");
+	const CString label = (m_Selection.GetStartRow() != m_Selection.GetEndRow() ? _T("Rows") : _T("Row"));
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, "&Insert " + label + "\t" + ih->GetKeyTextFromCommand(kcInsertRow));
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, "&Delete " + label + "\t" + ih->GetKeyTextFromCommand(kcDeleteRows) );
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, _T("&Insert ") + label + _T("\t") + ih->GetKeyTextFromCommand(kcInsertRow));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, _T("&Delete ") + label + _T("\t") + ih->GetKeyTextFromCommand(kcDeleteRows) );
 	return true;
 }
 
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-----------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, "Show row play time\t" + ih->GetKeyTextFromCommand(kcTimeAtRow));
+	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, _T("Show row play time\t") + ih->GetKeyTextFromCommand(kcTimeAtRow));
+
+	const CSoundFile &sndFile = *GetSoundFile();
+	CString lockStr;
+	bool lockActive = (sndFile.m_lockRowStart != ROWINDEX_INVALID);
+	if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
+	{
+		lockStr = _T("&Lock playback to selection");
+		if(lockActive)
+		{
+			lockStr.AppendFormat(_T(" (current: %u-%u)"), sndFile.m_lockRowStart, sndFile.m_lockRowEnd);
+		}
+	} else if(lockActive)
+	{
+		lockStr = _T("Reset playback &lock");
+	} else
+	{
+		return true;
+	}
+	lockStr += "\t" + ih->GetKeyTextFromCommand(kcLockPlaybackToRows);
+	AppendMenu(hMenu, MF_STRING | (lockActive ? MF_CHECKED : 0), ID_LOCK_PATTERN_ROWS, lockStr);
 	return true;
 }
 

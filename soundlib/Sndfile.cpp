@@ -114,6 +114,7 @@ CSoundFile::CSoundFile() :
 	m_bIsRendering = false;
 
 #ifdef MODPLUG_TRACKER
+	m_lockRowStart = m_lockRowEnd = ROWINDEX_INVALID;
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
 	m_pModDoc = nullptr;
 	m_bChannelMuteTogglePending.reset();

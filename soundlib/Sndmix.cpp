@@ -393,6 +393,11 @@ bool CSoundFile::ProcessRow()
 		m_PlayState.m_nCurrentOrder = m_PlayState.m_nNextOrder;
 
 #ifdef MODPLUG_TRACKER
+		// "Lock row" editing feature
+		if(m_lockRowStart != ROWINDEX_INVALID && (m_PlayState.m_nRow < m_lockRowStart || m_PlayState.m_nRow > m_lockRowEnd) && !IsRenderingToDisc())
+		{
+			m_PlayState.m_nRow = m_lockRowStart;
+		}
 		// "Lock order" editing feature
 		if(Order.IsPositionLocked(m_PlayState.m_nCurrentOrder) && !IsRenderingToDisc())
 		{

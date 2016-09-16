@@ -353,19 +353,21 @@ class CFastBitmap
 //===============
 {
 protected:
+	static const uint8 BLEND_OFFSET = 0x80;
+
 	struct MODPLUGFASTDIB
 	{
 		BITMAPINFOHEADER bmiHeader;
 		RGBQUAD bmiColors[256];
-		std::vector<uint8_t> DibBits;
+		std::vector<uint8> DibBits;
 	};
 
 	MODPLUGFASTDIB m_Dib;
 	UINT m_nTextColor, m_nBkColor;
 	MODPLUGDIB *m_pTextDib;
-	uint8_t m_nBlendOffset;
-	uint8_t m_n4BitPalette[16];
-	uint8_t m_nXShiftFactor;
+	uint8 m_nBlendOffset;
+	uint8 m_n4BitPalette[16];
+	uint8 m_nXShiftFactor;
 
 public:
 	CFastBitmap() {}
@@ -379,7 +381,8 @@ public:
 	void SetColor(UINT nIndex, COLORREF cr);
 	void SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr);
 	void TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODPLUGDIB *lpdib = nullptr);
-	void SetBlendMode(BYTE nBlendOfs) { m_nBlendOffset = nBlendOfs; }
+	void SetBlendMode(bool enable) { m_nBlendOffset = enable ? BLEND_OFFSET : 0; }
+	bool GetBlendMode() const { return m_nBlendOffset != 0; }
 	void SetBlendColor(COLORREF cr);
 	void SetSize(int x, int y);
 	int GetWidth() const { return m_Dib.bmiHeader.biWidth; }
