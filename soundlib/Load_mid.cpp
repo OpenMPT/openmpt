@@ -646,6 +646,12 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	const ROWINDEX patternLen = 128;
 	const uint8 ticksPerRow = 16;	// Must be in range 2...16
 #endif
+#ifdef MPT_FUZZ_TRACKER
+	// Avoid generating test cases that take overly long to evaluate
+	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = 64;
+#else
+	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = ORDERINDEX_MAX;
+#endif
 
 	m_songArtist = MPT_USTRING("MIDI Conversion");
 	m_madeWithTracker = "Standard MIDI File";
@@ -722,7 +728,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(ord >= Order.size())
 		{
-			if(ord > ORDERINDEX_MAX)
+			if(ord > MPT_MIDI_IMPORT_MAX_ORDERS)
 				break;
 			ORDERINDEX curSize = Order.size();
 			// If we need to extend the order list by more than one pattern, this means that we
