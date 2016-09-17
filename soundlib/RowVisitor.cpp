@@ -41,6 +41,16 @@ void RowVisitor::Initialize(bool reset, SEQUENCEINDEX sequence)
 	if(reset)
 	{
 		visitOrder.clear();
+		// Pre-allocate maximum amount of memory most likely needed for keeping track of visited rows in a pattern
+		if(visitOrder.capacity() < MAX_PATTERN_ROWS)
+		{
+			ROWINDEX maxRows = 0;
+			for(PATTERNINDEX pat = 0; pat < sndFile.Patterns.Size(); pat++)
+			{
+				maxRows = std::max(maxRows, sndFile.Patterns[pat].GetNumRows());
+			}
+			visitOrder.reserve(maxRows);
+		}
 	}
 
 	for(ORDERINDEX order = 0; order < endOrder; order++)
