@@ -314,6 +314,12 @@ CXXFLAGS += -g -fno-omit-frame-pointer
 CFLAGS   += -g -fno-omit-frame-pointer
 endif
 
+ifeq ($(FUZZ),1)
+CPPFLAGS +=
+CXXFLAGS += -fno-omit-frame-pointer
+CFLAGS   += -fno-omit-frame-pointer
+endif
+
 CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CXXFLAGS_WARNINGS)
 CFLAGS   += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CFLAGS_WARNINGS)
 
