@@ -29,6 +29,8 @@ is just a high-level summary.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
+ *  [**Bug**] The C API could crash instead of failing gracefully in
+    out-of-memory situations.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
