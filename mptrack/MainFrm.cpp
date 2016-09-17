@@ -1941,9 +1941,7 @@ void CMainFrame::OnViewOptions()
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice());
 	PathConfigDlg pathsdlg;
 	CUpdateSetupDlg updatedlg;
-#if defined(MPT_SETTINGS_CACHE)
 	COptionsAdvanced advanced;
-#endif // MPT_SETTINGS_CACHE
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&mixerdlg);
@@ -1957,9 +1955,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&mididlg);
 	dlg.AddPage(&pathsdlg);
 	dlg.AddPage(&updatedlg);
-#if defined(MPT_SETTINGS_CACHE)
 	dlg.AddPage(&advanced);
-#endif // MPT_SETTINGS_CACHE
 	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();

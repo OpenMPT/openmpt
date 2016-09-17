@@ -10,8 +10,6 @@
 
 #pragma once
 
-#if defined(MPT_SETTINGS_CACHE)
-
 #include "CListCtrl.h"
 #if MPT_USTRING_MODE_WIDE
 #include <unordered_map>
@@ -56,5 +54,3 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // MPT_SETTINGS_CACHE
