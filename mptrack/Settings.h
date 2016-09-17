@@ -13,6 +13,7 @@
 
 
 #include "../common/misc_util.h"
+#include "../common/mptMutex.h"
 
 #include <map>
 #include <set>
@@ -691,6 +692,7 @@ class CachedSetting
 	: public ISettingChanged
 {
 private:
+	mutable mpt::mutex valueMutex;
 	T value;
 	SettingsContainer &conf;
 	const SettingPath path;
@@ -708,7 +710,10 @@ public:
 		, conf(conf_)
 		, path(section, key)
 	{
-		value = conf.Read(path, def);
+		{
+			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			value = conf.Read(path, def);
+		}
 		conf.Register(this, path);
 	}
 	CachedSetting(SettingsContainer &conf_, const SettingPath &path_, const T&def)
@@ -716,7 +721,10 @@ public:
 		, conf(conf_)
 		, path(path_)
 	{
-		value = conf.Read(path, def);
+		{
+			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			value = conf.Read(path, def);
+		}
 		conf.Register(this, path);
 	}
 	~CachedSetting()
@@ -729,16 +737,21 @@ public:
 	}
 	CachedSetting & operator = (const T &val)
 	{
-		value = val;
+		{
+			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			value = val;
+		}
 		conf.Write(path, val);
 		return *this;
 	}
-	operator const T & () const
+	operator T () const
 	{
+		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
 		return value;
 	}
-	const T & Get() const
+	const T Get() const
 	{
+		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
 		return value;
 	}
 	bool IsDefault() const
@@ -747,7 +760,10 @@ public:
 	}
 	CachedSetting & Update()
 	{
-		value = conf.Read<T>(path);
+		{
+			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			value = conf.Read<T>(path);
+		}
 		return *this;
 	}
 	void SettingChanged(const SettingPath &changedPath)
