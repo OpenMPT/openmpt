@@ -86,14 +86,16 @@ struct DLSSAMPLEEX
 
 struct SOUNDBANKINFO
 {
-	char szBankName[256];
-	char szCopyRight[256];
-	char szComments[512];
-	char szEngineer[256];
-	char szSoftware[256];		// ISFT: Software
-	char szDescription[256];	// ISBJ: Subject
+	std::string szBankName,
+		szCopyRight,
+		szComments,
+		szEngineer,
+		szSoftware,		// ISFT: Software
+		szDescription;	// ISBJ: Subject
 };
 
+struct IFFCHUNK;
+struct SF2LOADERINFO;
 
 //============
 class CDLSBank
@@ -122,7 +124,7 @@ public:
 	bool Open(FileReader file);
 	mpt::PathString GetFileName() const { return m_szFileName; }
 	uint32 GetBankType() const { return m_nType; }
-	uint32 GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
+	const SOUNDBANKINFO &GetBankInfo() const { return m_BankInfo; }
 
 public:
 	uint32 GetNumInstruments() const { return static_cast<uint32>(m_Instruments.size()); }
@@ -138,9 +140,9 @@ public:
 
 // Internal Loader Functions
 protected:
-	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, uint32 dwMaxLen);
-	bool UpdateSF2PresetData(void *psf2info, void *pchunk, uint32 dwMaxLen);
-	bool ConvertSF2ToDLS(void *psf2info);
+	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK *pchunk, uint32 dwMaxLen);
+	bool UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &header, FileReader &chunk);
+	bool ConvertSF2ToDLS(SF2LOADERINFO &sf2info);
 
 public:
 	// DLS Unit conversion

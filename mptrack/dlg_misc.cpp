@@ -771,32 +771,28 @@ void CRemoveChannelsDlg::OnChannelChanged()
 ////////////////////////////////////////////////////////////////////////////////
 // Sound Bank Information
 
-CSoundBankProperties::CSoundBankProperties(CDLSBank &bank, CWnd *parent) : CDialog(IDD_SOUNDBANK_INFO, parent)
-//------------------------------------------------------------------------------------------------------------
+CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, CWnd *parent) : CDialog(IDD_SOUNDBANK_INFO, parent)
+//------------------------------------------------------------------------------------------------------------------
 {
-	SOUNDBANKINFO bi;
 	
-	m_szInfo[0] = 0;
-
 	fileName = bank.GetFileName();
 
-	UINT nType = bank.GetBankInfo(&bi);
-	wsprintf(&m_szInfo[strlen(m_szInfo)], "Type:\t%s\r\n", (nType & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
-	if (bi.szBankName[0])
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "Name:\t\"%s\"\r\n", bi.szBankName);
-	if (bi.szDescription[0])
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "\t\"%s\"\r\n", bi.szDescription);
-	if (bi.szCopyRight[0])
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "Copyright:\t\"%s\"\r\n", bi.szCopyRight);
-	if (bi.szEngineer[0])
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "Author:\t\"%s\"\r\n", bi.szEngineer);
-	if (bi.szSoftware[0])
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "Software:\t\"%s\"\r\n", bi.szSoftware);
-	// Last lines: comments
-	if (bi.szComments[0])
+	const SOUNDBANKINFO &bi = bank.GetBankInfo();
+	m_szInfo.reserve(128 + bi.szBankName.size() + bi.szDescription.size() + bi.szCopyRight.size() + bi.szEngineer.size() + bi.szSoftware.size() + bi.szComments.size());
+	m_szInfo = "Type:\t" + std::string((bank.GetBankType() & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
+	if (bi.szBankName.size())
+		m_szInfo += "\r\nName:\t" + bi.szBankName;
+	if (bi.szDescription.size())
+		m_szInfo += "\r\n\t" + bi.szDescription;
+	if (bi.szCopyRight.size())
+		m_szInfo += "\r\nCopyright:\t" + bi.szCopyRight;
+	if (bi.szEngineer.size())
+		m_szInfo += "\r\nAuthor:\t" + bi.szEngineer;
+	if (bi.szSoftware.size())
+		m_szInfo += "\r\nSoftware:\t" + bi.szSoftware;
+	if (bi.szComments.size())
 	{
-		strncat(m_szInfo, "\r\nComments:\r\n", strlen(m_szInfo) - CountOf(m_szInfo) - 1);
-		strncat(m_szInfo, bi.szComments, strlen(m_szInfo) - CountOf(m_szInfo) - 1);
+		m_szInfo += "\r\n\r\nComments:\r\n" + bi.szComments;
 	}
 }
 
@@ -805,7 +801,7 @@ BOOL CSoundBankProperties::OnInitDialog()
 //---------------------------------------
 {
 	CDialog::OnInitDialog();
-	SetDlgItemText(IDC_EDIT1, m_szInfo);
+	SetDlgItemTextA(IDC_EDIT1, m_szInfo.c_str());
 	SetWindowTextW(m_hWnd, (fileName.AsNative() + L" - Sound Bank Information").c_str());
 	return TRUE;
 }

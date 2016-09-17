@@ -175,81 +175,69 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////
 // DLS Structures definitions
 
-typedef struct IFFCHUNK
+struct IFFCHUNK
 {
 	uint32le id;
 	uint32le len;
-} IFFCHUNK, *LPIFFCHUNK;
+};
 
 MPT_BINARY_STRUCT(IFFCHUNK, 8)
 
-typedef struct RIFFCHUNKID
+struct RIFFCHUNKID
 {
 	uint32le id_RIFF;
 	uint32le riff_len;
 	uint32le id_DLS;
-} RIFFCHUNKID;
+};
 
 MPT_BINARY_STRUCT(RIFFCHUNKID, 12)
 
-typedef struct LISTCHUNK
+struct LISTCHUNK
 {
 	uint32le id;
 	uint32le len;
 	uint32le listid;
-} LISTCHUNK;
+};
 
 MPT_BINARY_STRUCT(LISTCHUNK, 12)
 
-typedef struct DLSRGNRANGE
+struct DLSRGNRANGE
 {
 	uint16le usLow;
 	uint16le usHigh;
-} DLSRGNRANGE;
+};
 
 MPT_BINARY_STRUCT(DLSRGNRANGE, 4)
 
-typedef struct COLHCHUNK
-{
-	uint32le id;
-	uint32le len;
-	uint32le ulInstruments;
-} COLHCHUNK;
-
-MPT_BINARY_STRUCT(COLHCHUNK, 12)
-
-typedef struct VERSCHUNK
+struct VERSCHUNK
 {
 	uint32le id;
 	uint32le len;
 	uint16le version[4];
-} VERSCHUNK;
+};
 
 MPT_BINARY_STRUCT(VERSCHUNK, 16)
 
-typedef struct PTBLCHUNK
+struct PTBLCHUNK
 {
-	uint32le id;
-	uint32le len;
 	uint32le cbSize;
 	uint32le cCues;
-	uint32le ulOffsets[1];
-} PTBLCHUNK;
+};
 
-MPT_BINARY_STRUCT(PTBLCHUNK, 20)
+MPT_BINARY_STRUCT(PTBLCHUNK, 8)
 
-typedef struct INSHCHUNK
+struct INSHCHUNK
 {
 	uint32le id;
 	uint32le len;
 	uint32le cRegions;
 	uint32le ulBank;
 	uint32le ulInstrument;
-} INSHCHUNK;
+};
 
 MPT_BINARY_STRUCT(INSHCHUNK, 20)
 
-typedef struct RGNHCHUNK
+struct RGNHCHUNK
 {
 	uint32le id;
 	uint32le len;
@@ -257,11 +245,11 @@ typedef struct RGNHCHUNK
 	DLSRGNRANGE RangeVelocity;
 	uint16le fusOptions;
 	uint16le usKeyGroup;
-} RGNHCHUNK;
+};
 
 MPT_BINARY_STRUCT(RGNHCHUNK, 20)
 
-typedef struct WLNKCHUNK
+struct WLNKCHUNK
 {
 	uint32le id;
 	uint32le len;
@@ -269,32 +257,32 @@ typedef struct WLNKCHUNK
 	uint16le usPhaseGroup;
 	uint32le ulChannel;
 	uint32le ulTableIndex;
-} WLNKCHUNK;
+};
 
 MPT_BINARY_STRUCT(WLNKCHUNK, 20)
 
-typedef struct ART1CHUNK
+struct ART1CHUNK
 {
 	uint32le id;
 	uint32le len;
 	uint32le cbSize;
 	uint32le cConnectionBlocks;
-} ART1CHUNK;
+};
 
 MPT_BINARY_STRUCT(ART1CHUNK, 16)
 
-typedef struct CONNECTIONBLOCK
+struct CONNECTIONBLOCK
 {
 	uint16le usSource;
 	uint16le usControl;
 	uint16le usDestination;
 	uint16le usTransform;
 	int32le  lScale;
-} CONNECTIONBLOCK;
+};
 
 MPT_BINARY_STRUCT(CONNECTIONBLOCK, 12)
 
-typedef struct WSMPCHUNK
+struct WSMPCHUNK
 {
 	uint32le id;
 	uint32le len;
@@ -304,18 +292,18 @@ typedef struct WSMPCHUNK
 	int32le  lAttenuation;
 	uint32le fulOptions;
 	uint32le cSampleLoops;
-} WSMPCHUNK;
+};
 
 MPT_BINARY_STRUCT(WSMPCHUNK, 28)
 
-typedef struct WSMPSAMPLELOOP
+struct WSMPSAMPLELOOP
 {
 	uint32le cbSize;
 	uint32le ulLoopType;
 	uint32le ulLoopStart;
 	uint32le ulLoopLength;
 
-} WSMPSAMPLELOOP;
+};
 
 MPT_BINARY_STRUCT(WSMPSAMPLELOOP, 16)
 
@@ -434,19 +422,19 @@ MPT_BINARY_STRUCT(SFSAMPLE, 46)
 /////////////////////////////////////////////////////////////////////
 
 
-typedef struct SF2LOADERINFO
+struct SF2LOADERINFO
 {
 	uint32 nPresetBags;
-	SFPRESETBAG *pPresetBags;
+	const SFPRESETBAG *pPresetBags;
 	uint32 nPresetGens;
-	SFGENLIST *pPresetGens;
+	const SFGENLIST *pPresetGens;
 	uint32 nInsts;
-	SFINST *pInsts;
+	const SFINST *pInsts;
 	uint32 nInstBags;
-	SFINSTBAG *pInstBags;
+	const SFINSTBAG *pInstBags;
 	uint32 nInstGens;
-	SFINSTGENLIST *pInstGens;
-} SF2LOADERINFO;
+	const SFINSTGENLIST *pInstGens;
+};
 
 
 /////////////////////////////////////////////////////////////////////
@@ -498,7 +486,6 @@ CDLSBank::CDLSBank()
 {
 	m_nMaxWaveLink = 0;
 	m_nType = SOUNDBANK_TYPE_INVALID;
-	MemsetZero(m_BankInfo);
 }
 
 
@@ -514,6 +501,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	// Check for embedded DLS sections
 	if (riff.id_RIFF == IFFID_FORM)
 	{
+		// Miles Sound System
 		do
 		{
 			uint32 len = riff.riff_len;
@@ -535,7 +523,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 		{
 			if(!fread(&riff, sizeof(RIFFCHUNKID), 1, f))
 				break;
-			if (riff.id_DLS == IFFID_DLS) break; // found it
+			if (riff.id_DLS == IFFID_DLS)
+				break; // found it
 			int len = riff.riff_len;
 			if((len % 2u) != 0)
 				len++;
@@ -544,8 +533,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	}
 	fclose(f);
 	return ((riff.id_RIFF == IFFID_RIFF)
-		 && ((riff.id_DLS == IFFID_DLS) || (riff.id_DLS == IFFID_MLS) || (riff.id_DLS == IFFID_sfbk))
-		 && (riff.riff_len >= 256));
+		&& ((riff.id_DLS == IFFID_DLS) || (riff.id_DLS == IFFID_MLS) || (riff.id_DLS == IFFID_sfbk))
+		&& (riff.riff_len >= 256));
 }
 
 
@@ -600,10 +589,9 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(bool bDrum, uint32 nBank, uint32 dwProgr
 ///////////////////////////////////////////////////////////////
 // Update DLS instrument definition from an IFF chunk
 
-bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk, uint32 dwMaxLen)
-//-----------------------------------------------------------------------------------------------
+bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK *pchunk, uint32 dwMaxLen)
+//--------------------------------------------------------------------------------------------------------
 {
-	IFFCHUNK *pchunk = (IFFCHUNK *)pvchunk;
 	if ((!pchunk->len) || (pchunk->len+8 > dwMaxLen)) return false;
 	if (pchunk->id == IFFID_LIST)
 	{
@@ -611,10 +599,10 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 		uint32 dwPos = 12;
 		while (dwPos < plist->len)
 		{
-			LPIFFCHUNK p = (LPIFFCHUNK)(((uint8 *)plist) + dwPos);
+			const IFFCHUNK *p = (const IFFCHUNK *)(((uint8 *)plist) + dwPos);
 			if (!(p->id & 0xFF))
 			{
-				p = (LPIFFCHUNK)( ((uint8 *)p)+1  );
+				p = (const IFFCHUNK *)( ((uint8 *)p)+1  );
 				dwPos++;
 			}
 			if (dwPos + p->len + 8 <= plist->len + 12)
@@ -797,7 +785,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 				char sid[5];
 				memcpy(sid, &pchunk->id, 4);
 				sid[4] = 0;
-				Log("    \"%s\": %d bytes\n", (uint32)sid, pchunk->len);
+				Log("    \"%s\": %d bytes\n", (uint32)sid, pchunk->len.get());
 			}
 	#endif
 		}
@@ -808,18 +796,16 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 ///////////////////////////////////////////////////////////////
 // Converts SF2 chunks to DLS
 
-bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
-//-----------------------------------------------------------------------------
+bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &header, FileReader &chunk)
+//---------------------------------------------------------------------------------------------------
 {
-	SF2LOADERINFO *psf2 = (SF2LOADERINFO *)pvsf2;
-	IFFCHUNK *pchunk = (IFFCHUNK *)pvchunk;
-	if ((!pchunk->len) || (pchunk->len+8 > dwMaxLen)) return false;
-	switch(pchunk->id)
+	if (!chunk.IsValid()) return false;
+	switch(header.id)
 	{
 	case IFFID_phdr:
 		if (m_Instruments.empty())
 		{
-			uint32 numIns = pchunk->len / sizeof(SFPRESETHEADER);
+			uint32 numIns = chunk.GetLength() / sizeof(SFPRESETHEADER);
 			if(numIns <= 1)
 				break;
 			numIns--; // Disgard EOP
@@ -828,16 +814,18 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 		#ifdef DLSBANK_LOG
 			Log("phdr: %d instruments\n", m_Instruments.size());
 		#endif
-			SFPRESETHEADER *psfh = (SFPRESETHEADER *)(pchunk+1);
-			for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++, psfh++)
+			SFPRESETHEADER psfh;
+			chunk.ReadStruct(psfh);
+			for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
 			{
-				mpt::String::Copy(pDlsIns->szName, psfh->achPresetName);
+				mpt::String::Copy(pDlsIns->szName, psfh.achPresetName);
 				pDlsIns->szName[20] = 0;
-				pDlsIns->ulInstrument = psfh->wPreset & 0x7F;
-				pDlsIns->ulBank = (psfh->wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh->wBank << 8);
-				pDlsIns->wPresetBagNdx = psfh->wPresetBagNdx;
+				pDlsIns->ulInstrument = psfh.wPreset & 0x7F;
+				pDlsIns->ulBank = (psfh.wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh.wBank << 8);
+				pDlsIns->wPresetBagNdx = psfh.wPresetBagNdx;
 				pDlsIns->wPresetBagNum = 1;
-				if (psfh[1].wPresetBagNdx > pDlsIns->wPresetBagNdx) pDlsIns->wPresetBagNum = (uint16)(psfh[1].wPresetBagNdx - pDlsIns->wPresetBagNdx);
+				chunk.ReadStruct(psfh);
+				if (psfh.wPresetBagNdx > pDlsIns->wPresetBagNdx) pDlsIns->wPresetBagNum = (uint16)(psfh.wPresetBagNdx - pDlsIns->wPresetBagNdx);
 			}
 		}
 		break;
@@ -845,11 +833,11 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	case IFFID_pbag:
 		if (!m_Instruments.empty())
 		{
-			uint32 nBags = pchunk->len / sizeof(SFPRESETBAG);
+			uint32 nBags = chunk.GetLength() / sizeof(SFPRESETBAG);
 			if (nBags)
 			{
-				psf2->nPresetBags = nBags;
-				psf2->pPresetBags = (SFPRESETBAG *)(pchunk+1);
+				sf2info.nPresetBags = nBags;
+				sf2info.pPresetBags = reinterpret_cast<const SFPRESETBAG *>(chunk.GetRawData());
 			}
 		}
 	#ifdef DLSINSTR_LOG
@@ -860,11 +848,11 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	case IFFID_pgen:
 		if (!m_Instruments.empty())
 		{
-			uint32 nGens = pchunk->len / sizeof(SFGENLIST);
+			uint32 nGens = chunk.GetLength() / sizeof(SFGENLIST);
 			if (nGens)
 			{
-				psf2->nPresetGens = nGens;
-				psf2->pPresetGens = (SFGENLIST *)(pchunk+1);
+				sf2info.nPresetGens = nGens;
+				sf2info.pPresetGens = reinterpret_cast<const SFGENLIST *>(chunk.GetRawData());
 			}
 		}
 	#ifdef DLSINSTR_LOG
@@ -875,20 +863,20 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	case IFFID_inst:
 		if (!m_Instruments.empty())
 		{
-			uint32 nIns = pchunk->len / sizeof(SFINST);
-			psf2->nInsts = nIns;
-			psf2->pInsts = (SFINST *)(pchunk+1);
+			uint32 nIns = chunk.GetLength() / sizeof(SFINST);
+			sf2info.nInsts = nIns;
+			sf2info.pInsts = reinterpret_cast<const SFINST *>(chunk.GetRawData());
 		}
 		break;
 
 	case IFFID_ibag:
 		if (!m_Instruments.empty())
 		{
-			uint32 nBags = pchunk->len / sizeof(SFINSTBAG);
+			uint32 nBags = chunk.GetLength() / sizeof(SFINSTBAG);
 			if (nBags)
 			{
-				psf2->nInstBags = nBags;
-				psf2->pInstBags = (SFINSTBAG *)(pchunk+1);
+				sf2info.nInstBags = nBags;
+				sf2info.pInstBags = reinterpret_cast<const SFINSTBAG *>(chunk.GetRawData());
 			}
 		}
 		break;
@@ -896,11 +884,11 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	case IFFID_igen:
 		if (!m_Instruments.empty())
 		{
-			uint32 nGens = pchunk->len / sizeof(SFINSTGENLIST);
+			uint32 nGens = chunk.GetLength() / sizeof(SFINSTGENLIST);
 			if (nGens)
 			{
-				psf2->nInstGens = nGens;
-				psf2->pInstGens = (SFINSTGENLIST *)(pchunk+1);
+				sf2info.nInstGens = nGens;
+				sf2info.pInstGens = reinterpret_cast<const SFINSTGENLIST *>(chunk.GetRawData());
 			}
 		}
 		break;
@@ -908,7 +896,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	case IFFID_shdr:
 		if (m_SamplesEx.empty())
 		{
-			uint32 numSmp = pchunk->len / sizeof(SFSAMPLE);
+			uint32 numSmp = chunk.GetLength() / sizeof(SFSAMPLE);
 			if (numSmp < 1) break;
 			m_SamplesEx.resize(numSmp);
 			m_WaveForms.resize(numSmp);
@@ -916,25 +904,26 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 		Log("shdr: %d samples\n", m_SamplesEx.size());
 	#endif
 
-			const SFSAMPLE *p = reinterpret_cast<const SFSAMPLE *>(pchunk + 1);
-			for (uint32 i = 0; i < numSmp; i++, p++)
+			for (uint32 i = 0; i < numSmp; i++)
 			{
+				SFSAMPLE p;
+				chunk.ReadStruct(p);
 				DLSSAMPLEEX &dlsSmp = m_SamplesEx[i];
-				mpt::String::Copy(dlsSmp.szName, p->achSampleName);
+				mpt::String::Copy(dlsSmp.szName, p.achSampleName);
 				dlsSmp.dwLen = 0;
-				dlsSmp.dwSampleRate = p->dwSampleRate;
-				dlsSmp.byOriginalPitch = p->byOriginalPitch;
-				dlsSmp.chPitchCorrection = p->chPitchCorrection;
-				if (((p->sfSampleType & 0x7FFF) <= 4) && (p->dwStart < 0x08000000) && (p->dwEnd >= p->dwStart+8))
+				dlsSmp.dwSampleRate = p.dwSampleRate;
+				dlsSmp.byOriginalPitch = p.byOriginalPitch;
+				dlsSmp.chPitchCorrection = p.chPitchCorrection;
+				if (((p.sfSampleType & 0x7FFF) <= 4) && (p.dwStart < 0x08000000) && (p.dwEnd >= p.dwStart+8))
 				{
-					dlsSmp.dwLen = (p->dwEnd - p->dwStart) * 2;
-					if ((p->dwEndloop > p->dwStartloop + 7) && (p->dwStartloop >= p->dwStart))
+					dlsSmp.dwLen = (p.dwEnd - p.dwStart) * 2;
+					if ((p.dwEndloop > p.dwStartloop + 7) && (p.dwStartloop >= p.dwStart))
 					{
-						dlsSmp.dwStartloop = p->dwStartloop - p->dwStart;
-						dlsSmp.dwEndloop = p->dwEndloop - p->dwStart;
+						dlsSmp.dwStartloop = p.dwStartloop - p.dwStart;
+						dlsSmp.dwEndloop = p.dwEndloop - p.dwStart;
 					}
-					m_WaveForms[i] = p->dwStart * 2;
-					//Log("  offset[%d]=%d len=%d\n", i, p->dwStart*2, psmp->dwLen);
+					m_WaveForms[i] = p.dwStart * 2;
+					//Log("  offset[%d]=%d len=%d\n", i, p.dwStart*2, psmp->dwLen);
 				}
 			}
 		}
@@ -944,9 +933,9 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 	default:
 		{
 			char sdbg[5];
-			memcpy(sdbg, &pchunk->id, 4);
+			memcpy(sdbg, &header.id, 4);
 			sdbg[4] = 0;
-			Log("Unsupported SF2 chunk: %s (%d bytes)\n", sdbg, pchunk->len);
+			Log("Unsupported SF2 chunk: %s (%d bytes)\n", sdbg, header.len.get());
 		}
 	#endif
 	}
@@ -963,13 +952,12 @@ static int16 SF2TimeToDLS(int16 amount)
 
 
 // Convert all instruments to the DLS format
-bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
-//---------------------------------------------
+bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
+//----------------------------------------------------
 {
 	if (m_Instruments.empty() || m_SamplesEx.empty())
 		return false;
 
-	SF2LOADERINFO *psf2 = (SF2LOADERINFO *)pvsf2info;
 	for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
 	{
 		DLSENVELOPE dlsEnv;
@@ -985,13 +973,13 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 		for (uint32 ipbagcnt=0; ipbagcnt<(uint32)pDlsIns->wPresetBagNum; ipbagcnt++)
 		{
 			uint32 ipbagndx = pDlsIns->wPresetBagNdx + ipbagcnt;
-			if ((ipbagndx+1 >= psf2->nPresetBags) || (!psf2->pPresetBags)) break;
+			if ((ipbagndx+1 >= sf2info.nPresetBags) || (!sf2info.pPresetBags)) break;
 			// Load generators for each preset bag
-			SFPRESETBAG *pbag = psf2->pPresetBags + ipbagndx;
+			const SFPRESETBAG *pbag = sf2info.pPresetBags + ipbagndx;
 			for (uint32 ipgenndx=pbag[0].wGenNdx; ipgenndx<pbag[1].wGenNdx; ipgenndx++)
 			{
-				if ((!psf2->pPresetGens) || (ipgenndx+1 >= psf2->nPresetGens)) break;
-				SFGENLIST *pgen = psf2->pPresetGens + ipgenndx;
+				if ((!sf2info.pPresetGens) || (ipgenndx+1 >= sf2info.nPresetGens)) break;
+				const SFGENLIST *pgen = sf2info.pPresetGens + ipgenndx;
 				switch(pgen->sfGenOper)
 				{
 				case SF2_GEN_ATTACKVOLENV:
@@ -1025,16 +1013,16 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 			pDlsIns->nMelodicEnv = m_Envelopes.size();
 		}
 		// Load Instrument Bags
-		if ((!nInstrNdx) || (nInstrNdx >= psf2->nInsts) || (!psf2->pInsts)) continue;
+		if ((!nInstrNdx) || (nInstrNdx >= sf2info.nInsts) || (!sf2info.pInsts)) continue;
 		nInstrNdx--;
-		pDlsIns->nRegions = psf2->pInsts[nInstrNdx+1].wInstBagNdx - psf2->pInsts[nInstrNdx].wInstBagNdx;
+		pDlsIns->nRegions = sf2info.pInsts[nInstrNdx+1].wInstBagNdx - sf2info.pInsts[nInstrNdx].wInstBagNdx;
 		//Log("\nIns %3d, %2d regions:\n", nIns, pSmp->nRegions);
 		if (pDlsIns->nRegions > DLSMAXREGIONS) pDlsIns->nRegions = DLSMAXREGIONS;
 		DLSREGION *pRgn = pDlsIns->Regions;
 		for (uint32 nRgn=0; nRgn<pDlsIns->nRegions; nRgn++, pRgn++)
 		{
-			uint32 ibagcnt = psf2->pInsts[nInstrNdx].wInstBagNdx + nRgn;
-			if ((ibagcnt >= psf2->nInstBags) || (!psf2->pInstBags)) break;
+			uint32 ibagcnt = sf2info.pInsts[nInstrNdx].wInstBagNdx + nRgn;
+			if ((ibagcnt >= sf2info.nInstBags) || (!sf2info.pInstBags)) break;
 			// Create a new envelope for drums
 			DLSENVELOPE *pDlsEnv = &dlsEnv;
 			if (!(pDlsIns->ulBank & F_INSTRUMENT_DRUMS) && pDlsIns->nMelodicEnv > 0 && pDlsIns->nMelodicEnv <= m_Envelopes.size())
@@ -1046,11 +1034,11 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 			pRgn->uUnityNote = 0xFF;	// 0xFF means undefined -> use sample
 			pRgn->sFineTune = 0;
 			// Load Generators
-			SFINSTBAG *pbag = psf2->pInstBags + ibagcnt;
+			const SFINSTBAG *pbag = sf2info.pInstBags + ibagcnt;
 			for (uint32 igenndx=pbag[0].wGenNdx; igenndx<pbag[1].wGenNdx; igenndx++)
 			{
-				if ((igenndx >= psf2->nInstGens) || (!psf2->pInstGens)) break;
-				SFINSTGENLIST *pgen = psf2->pInstGens + igenndx;
+				if ((igenndx >= sf2info.nInstGens) || (!sf2info.pInstGens)) break;
+				const SFINSTGENLIST *pgen = sf2info.pInstGens + igenndx;
 				uint16 value = pgen->genAmount;
 				switch(pgen->sfGenOper)
 				{
@@ -1145,64 +1133,60 @@ bool CDLSBank::Open(FileReader file)
 //----------------------------------
 {
 	SF2LOADERINFO sf2info;
-	const uint8 *lpMemFile;	// Pointer to memory-mapped file
-	RIFFCHUNKID *priff;
-	uint32 dwMemPos, dwMemLength;
 	uint32 nInsDef;
 
+	if(!file.GetFileName().empty())
+		m_szFileName = file.GetFileName();
+
 	file.Rewind();
-	m_szFileName = file.GetFileName();
-	lpMemFile = file.GetRawData<uint8>();
-	dwMemLength = file.GetLength();
-	if (!lpMemFile || dwMemLength < 256)
+	const uint8 *lpMemFile = file.GetRawData<uint8>();
+	uint32 dwMemLength = file.GetLength();
+	uint32 dwMemPos = 0;
+	if(!file.CanRead(256))
 	{
 		return false;
 	}
 
-#ifdef DLSBANK_LOG
-	Log("\nOpening DLS bank: %s\n", m_szFileName);
-#endif
-
-	priff = (RIFFCHUNKID *)lpMemFile;
-	dwMemPos = 0;
-
+	RIFFCHUNKID riff;
+	file.ReadStruct(riff);
 	// Check DLS sections embedded in RMI midi files
-	if ((priff->id_RIFF == IFFID_RIFF) && (priff->id_DLS == IFFID_RMID))
+	if(riff.id_RIFF == IFFID_RIFF && riff.id_DLS == IFFID_RMID)
 	{
-		dwMemPos = 12;
-		while (dwMemPos + 12 <= dwMemLength)
+		while(file.ReadStruct(riff))
 		{
-			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
-			if ((priff->id_RIFF == IFFID_RIFF) && (priff->id_DLS == IFFID_DLS)) break;
-			uint32 len = priff->riff_len;
+			if(riff.id_RIFF == IFFID_RIFF && riff.id_DLS == IFFID_DLS)
+			{
+				file.SkipBack(sizeof(riff));
+				break;
+			}
+			uint32 len = riff.riff_len;
 			if((len % 2u) != 0)
 				len++;
-			dwMemPos += len + 8;
+			file.SkipBack(4);
+			file.Skip(len);
 		}
 	}
 
-	// Check XDLS sections embedded in big endian IFF files
-	if (priff->id_RIFF == IFFID_FORM)
+	// Check XDLS sections embedded in big endian IFF files (Miles Sound System)
+	if (riff.id_RIFF == IFFID_FORM)
 	{
-		do {
-			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
-			uint32 len = priff->riff_len;
-			len = SwapBytesBE(len);
-			if((len % 2u) != 0)
-				len++;
-			if ((len <= 4) || ((uint32)len >= dwMemLength - dwMemPos)) break;
-			if (priff->id_DLS == IFFID_XDLS)
+		do
+		{
+			if(riff.id_DLS == IFFID_XDLS)
 			{
-				dwMemPos += 12;
-				priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
+				file.ReadStruct(riff);
 				break;
 			}
-			dwMemPos += len + 8;
-		} while (dwMemPos + 24 < dwMemLength);
+			uint32 len = SwapBytesBE(riff.riff_len);
+			if((len % 2u) != 0)
+				len++;
+			file.SkipBack(4);
+			file.Skip(len);
+		} while(file.ReadStruct(riff));
 	}
-	if ((priff->id_RIFF != IFFID_RIFF)
-	 || ((priff->id_DLS != IFFID_DLS) && (priff->id_DLS != IFFID_MLS) && (priff->id_DLS != IFFID_sfbk))
-	 || (dwMemPos + priff->riff_len > dwMemLength-8))
+	if (riff.id_RIFF != IFFID_RIFF
+		|| (riff.id_DLS != IFFID_DLS && riff.id_DLS != IFFID_MLS && riff.id_DLS != IFFID_sfbk)
+		|| !file.CanRead(riff.riff_len - 4))
 	{
 	#ifdef DLSBANK_LOG
 		Log("Invalid DLS bank!\n");
@@ -1210,29 +1194,35 @@ bool CDLSBank::Open(FileReader file)
 		return false;
 	}
 	MemsetZero(sf2info);
-	m_nType = (priff->id_DLS == IFFID_sfbk) ? SOUNDBANK_TYPE_SF2 : SOUNDBANK_TYPE_DLS;
+	m_nType = (riff.id_DLS == IFFID_sfbk) ? SOUNDBANK_TYPE_SF2 : SOUNDBANK_TYPE_DLS;
 	m_dwWavePoolOffset = 0;
 	m_Instruments.clear();
 	m_WaveForms.clear();
 	m_Envelopes.clear();
 	nInsDef = 0;
-	if (dwMemLength > 8 + priff->riff_len + dwMemPos) dwMemLength = 8 + priff->riff_len + dwMemPos;
-	dwMemPos += sizeof(RIFFCHUNKID);
-	while (dwMemPos + sizeof(IFFCHUNK) < dwMemLength)
+	if (dwMemLength > 8 + riff.riff_len + dwMemPos) dwMemLength = 8 + riff.riff_len + dwMemPos;
+	while(file.CanRead(sizeof(IFFCHUNK)))
 	{
-		IFFCHUNK *pchunk = (IFFCHUNK *)(lpMemFile + dwMemPos);
+		IFFCHUNK chunkHeader;
+		file.ReadStruct(chunkHeader);
+		dwMemPos = file.GetPosition();
+		FileReader chunk = file.ReadChunk(chunkHeader.len);
+		if(chunkHeader.len % 2u)
+			file.Skip(1);
 
-		if (dwMemPos + 8 + pchunk->len > dwMemLength) break;
-		switch(pchunk->id)
+		if(!chunk.LengthIsAtLeast(chunkHeader.len))
+			break;
+
+		switch(chunkHeader.id)
 		{
 		// DLS 1.0: Instruments Collection Header
 		case IFFID_colh:
 		#ifdef DLSBANK_LOG
-			Log("colh (%d bytes)\n", pchunk->len);
+			Log("colh (%d bytes)\n", chunkHeader.len);
 		#endif
 			if (m_Instruments.empty())
 			{
-				m_Instruments.resize(((COLHCHUNK *)pchunk)->ulInstruments);
+				m_Instruments.resize(chunk.ReadUint32LE());
 			#ifdef DLSBANK_LOG
 				Log("  %d instruments\n", m_Instruments.size());
 			#endif
@@ -1242,16 +1232,18 @@ bool CDLSBank::Open(FileReader file)
 		// DLS 1.0: Instruments Pointers Table
 		case IFFID_ptbl:
 		#ifdef DLSBANK_LOG
-			Log("ptbl (%d bytes)\n", pchunk->len);
+			Log("ptbl (%d bytes)\n", chunkHeader.len);
 		#endif
 			if (m_WaveForms.empty())
 			{
-				uint32 cues = ((PTBLCHUNK *)pchunk)->cCues;
+				PTBLCHUNK ptbl;
+				chunk.ReadStruct(ptbl);
+				uint32 cues = ptbl.cCues;
 				m_WaveForms.reserve(cues);
-				FileReader waveForms(mpt::as_span((lpMemFile + dwMemPos + 8 + ((PTBLCHUNK *)pchunk)->cbSize), cues * sizeof(uint32)));
+				chunk.Skip(ptbl.cbSize - 8);
 				for(uint32 i = 0; i < cues; i++)
 				{
-					m_WaveForms.push_back(waveForms.ReadUint32LE());
+					m_WaveForms.push_back(chunk.ReadUint32LE());
 				}
 			#ifdef DLSBANK_LOG
 				Log("  %d waveforms\n", m_WaveForms.size());
@@ -1265,69 +1257,70 @@ bool CDLSBank::Open(FileReader file)
 			Log("LIST\n");
 		#endif
 			{
-				LISTCHUNK *plist = (LISTCHUNK *)pchunk;
-				uint32 dwPos = dwMemPos + sizeof(LISTCHUNK);
-				uint32 dwMaxPos = dwMemPos + 8 + plist->len;
-				if (dwMaxPos > dwMemLength) dwMaxPos = dwMemLength;
-				if (((plist->listid == IFFID_wvpl) && (m_nType & SOUNDBANK_TYPE_DLS))
-				 || ((plist->listid == IFFID_sdta) && (m_nType & SOUNDBANK_TYPE_SF2)))
+				uint32 listid = chunk.ReadUint32LE();
+				if (((listid == IFFID_wvpl) && (m_nType & SOUNDBANK_TYPE_DLS))
+				 || ((listid == IFFID_sdta) && (m_nType & SOUNDBANK_TYPE_SF2)))
 				{
-					m_dwWavePoolOffset = dwPos;
+					m_dwWavePoolOffset = dwMemPos + 4;
 				#ifdef DLSBANK_LOG
 					Log("Wave Pool offset: %d\n", m_dwWavePoolOffset);
 				#endif
 					break;
 				}
-				while (dwPos + 12 < dwMaxPos)
+
+				while (chunk.CanRead(12))
 				{
-					if (!(lpMemFile[dwPos])) dwPos++;
-					LISTCHUNK *psublist = (LISTCHUNK *)(lpMemFile+dwPos);
-					if (dwPos + psublist->len + 8 > dwMemLength) break;
+					IFFCHUNK listHeader;
+					const void *subData = chunk.GetRawData();
+					chunk.ReadStruct(listHeader);
+
+					if(!chunk.CanRead(listHeader.len))
+						break;
+
+					FileReader listChunk = chunk.ReadChunk(listHeader.len);
+					if(listHeader.len % 2u)
+						chunk.Skip(1);
 					// DLS Instrument Headers
-					if ((psublist->id == IFFID_LIST) && (m_nType & SOUNDBANK_TYPE_DLS))
+					if (listHeader.id == IFFID_LIST && (m_nType & SOUNDBANK_TYPE_DLS))
 					{
-						if ((psublist->listid == IFFID_ins) && (nInsDef < m_Instruments.size()))
+						uint32 subID = listChunk.ReadUint32LE();
+						if ((subID == IFFID_ins) && (nInsDef < m_Instruments.size()))
 						{
 							DLSINSTRUMENT *pDlsIns = &m_Instruments[nInsDef];
 							//Log("Instrument %d:\n", nInsDef);
-							UpdateInstrumentDefinition(pDlsIns, (IFFCHUNK *)psublist, psublist->len + 8);
+							UpdateInstrumentDefinition(pDlsIns, static_cast<const IFFCHUNK *>(subData), listHeader.len + 8);
 							nInsDef++;
 						}
 					} else
 					// DLS/SF2 Bank Information
-					if ((plist->listid == IFFID_INFO) && (psublist->len))
+					if (listid == IFFID_INFO && listHeader.len)
 					{
-						uint32 len = (psublist->len < 255) ? psublist->len : 255;
-						const char *pszInfo = (const char *)(lpMemFile+dwPos+8);
-						switch(psublist->id)
+						switch(listHeader.id)
 						{
 						case IFFID_INAM:
-							lstrcpynA(m_BankInfo.szBankName, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szBankName, listChunk.BytesLeft());
 							break;
 						case IFFID_IENG:
-							lstrcpynA(m_BankInfo.szEngineer, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szEngineer, listChunk.BytesLeft());
 							break;
 						case IFFID_ICOP:
-							lstrcpynA(m_BankInfo.szCopyRight, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szCopyRight, listChunk.BytesLeft());
 							break;
 						case IFFID_ICMT:
-							len = psublist->len;
-							if (len > sizeof(m_BankInfo.szComments)-1) len = sizeof(m_BankInfo.szComments)-1;
-							lstrcpynA(m_BankInfo.szComments, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szComments, listChunk.BytesLeft());
 							break;
 						case IFFID_ISFT:
-							lstrcpynA(m_BankInfo.szSoftware, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szSoftware, listChunk.BytesLeft());
 							break;
 						case IFFID_ISBJ:
-							lstrcpynA(m_BankInfo.szDescription, pszInfo, len);
+							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szDescription, listChunk.BytesLeft());
 							break;
 						}
 					} else
-					if ((plist->listid == IFFID_pdta) && (m_nType & SOUNDBANK_TYPE_SF2))
+					if ((listid == IFFID_pdta) && (m_nType & SOUNDBANK_TYPE_SF2))
 					{
-						UpdateSF2PresetData(&sf2info, (IFFCHUNK *)psublist, psublist->len + 8);
+						UpdateSF2PresetData(sf2info, listHeader, listChunk);
 					}
-					dwPos += 8 + psublist->len;
 				}
 			}
 			break;
@@ -1336,14 +1329,13 @@ bool CDLSBank::Open(FileReader file)
 		default:
 			{
 				char sdbg[5];
-				memcpy(sdbg, &pchunk->id, 4);
+				memcpy(sdbg, &chunkHeader.id, 4);
 				sdbg[4] = 0;
-				Log("Unsupported chunk: %s (%d bytes)\n", sdbg, pchunk->len);
+				Log("Unsupported chunk: %s (%d bytes)\n", sdbg, chunkHeader.len);
 			}
 			break;
 		#endif
 		}
-		dwMemPos += 8 + pchunk->len;
 	}
 	// Build the ptbl is not present in file
 	if ((m_WaveForms.empty()) && (m_dwWavePoolOffset) && (m_nType & SOUNDBANK_TYPE_DLS) && (m_nMaxWaveLink > 0))
@@ -1367,7 +1359,7 @@ bool CDLSBank::Open(FileReader file)
 	// Convert the SF2 data to DLS
 	if ((m_nType & SOUNDBANK_TYPE_SF2) && !m_SamplesEx.empty() && !m_Instruments.empty())
 	{
-		ConvertSF2ToDLS(&sf2info);
+		ConvertSF2ToDLS(sf2info);
 	}
 #ifdef DLSBANK_LOG
 	Log("DLS bank closed\n");
