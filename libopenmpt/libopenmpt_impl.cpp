@@ -423,10 +423,10 @@ bool module_impl::has_subsongs_inited() const {
 	return !m_subsongs.empty();
 }
 void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
-	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
+	m_sndFile = mpt::make_unique<CSoundFile>();
 	m_loaded = false;
-	m_Dither = std::unique_ptr<Dither>(new Dither(mpt::global_prng()));
-	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
+	m_Dither = mpt::make_unique<Dither>(mpt::global_prng());
+	m_LogForwarder = mpt::make_unique<log_forwarder>(m_Log);
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
@@ -561,8 +561,8 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
 double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
-	std::unique_ptr<CSoundFile> sndFile( new CSoundFile() );
-	std::unique_ptr<log_forwarder> logForwarder( new log_forwarder( log ) );
+	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
+	std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( log );
 	sndFile->SetCustomLog( logForwarder.get() );
 
 	try {
@@ -795,7 +795,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( m_current_subsong == all_subsongs ) {
 		// Play all subsongs consecutively.
@@ -808,7 +808,7 @@ double module_impl::get_duration_seconds() const {
 	return subsongs[m_current_subsong].duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( subsong != all_subsongs && ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) ) {
 		throw openmpt::exception("invalid subsong");
@@ -832,7 +832,7 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	const subsong_data * subsong = 0;
 	double base_seconds = 0.0;
@@ -1023,7 +1023,7 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 }
 
 std::int32_t module_impl::get_num_subsongs() const {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	return static_cast<std::int32_t>( subsongs.size() );
 }
@@ -1045,7 +1045,7 @@ std::int32_t module_impl::get_num_samples() const {
 
 std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
