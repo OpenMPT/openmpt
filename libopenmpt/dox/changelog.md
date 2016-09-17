@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta20.2
 
+ *  [**Bug**] The C API could crash instead of failing gracefully in
+    out-of-memory situations.
  *  [**Bug**] Possible crashes with malformed AMS files.
  *  [**Bug**] Possible crashes with MDL and MED files.
 

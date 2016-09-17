@@ -96,13 +96,18 @@ struct openmpt_module {
 namespace openmpt {
 
 static void do_report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const user = 0, openmpt::module_impl * const impl = 0 ) {
-	const std::string message = format_exception( function );
-	if ( impl ) {
-		impl->PushToCSoundFileLog( message );
-	} else if ( logfunc ) {
-		logfunc( message.c_str(), user );
-	} else {
-		openmpt_log_func_default( message.c_str(), NULL );
+	try {
+		const std::string message = format_exception( function );
+		if ( impl ) {
+			impl->PushToCSoundFileLog( message );
+		} else if ( logfunc ) {
+			logfunc( message.c_str(), user );
+		} else {
+			openmpt_log_func_default( message.c_str(), NULL );
+		}
+	} catch ( ... ) {
+		fprintf( stderr, "openmpt: %s:%i: UNKNOWN INTERNAL ERROR in error handling: function='%s', logfunc=%p, user=%p, impl=%p\n", __FILE__, static_cast<int>( __LINE__ ), function ? function : "", logfunc, user, impl );
+		fflush( stderr );
 	}
 }
 
