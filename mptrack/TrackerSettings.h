@@ -597,6 +597,7 @@ public:
 
 	Setting<uint32> gnMsgBoxVisiblityFlags;
 	Setting<uint32> GUIUpdateInterval;
+	CachedSetting<uint32> FSUpdateInterval;
 	CachedSetting<uint32> VuMeterUpdateInterval;
 	CachedSetting<float> VuMeterDecaySpeedDecibelPerSecond;
 

@@ -159,9 +159,11 @@ protected:
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	HWND m_hDropWnd;
-	volatile HANDLE m_hWatchDir;
+	mpt::mutex m_WatchDirMutex;
+	HANDLE m_hSwitchWatchDir;
+	mpt::PathString m_WatchDir;
 	HANDLE m_hWatchDirKillThread;
-	mpt::UnmanagedThread watchDirThread;
+	mpt::thread m_WatchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;

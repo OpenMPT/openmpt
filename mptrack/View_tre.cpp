@@ -140,7 +140,7 @@ END_MESSAGE_MAP()
 CModTree::CModTree(CModTree *pDataTree) :
 	m_pDataTree(pDataTree),
 	m_hDropWnd(nullptr),
-	m_hWatchDir(INVALID_HANDLE_VALUE),
+	m_WatchDir(),
 	m_dwStatus(0),
 	m_nDocNdx(0), m_nDragDocNdx(0),
 	m_hItemDrag(nullptr), m_hItemDrop(nullptr),
@@ -152,7 +152,8 @@ CModTree::CModTree(CModTree *pDataTree) :
 	{
 		// Set up instrument library monitoring thread
 		m_hWatchDirKillThread = CreateEvent(NULL, FALSE, FALSE, NULL);
-		watchDirThread = mpt::UnmanagedThreadMember<CModTree, &CModTree::MonitorInstrumentLibrary>(this);
+		m_hSwitchWatchDir = CreateEvent(NULL,  FALSE, FALSE, NULL);
+		m_WatchDirThread = mpt::thread([&](){MonitorInstrumentLibrary();});
 	}
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
@@ -174,8 +175,9 @@ CModTree::~CModTree()
 	if(m_pDataTree != nullptr)
 	{
 		SetEvent(m_hWatchDirKillThread);
-		WaitForSingleObject(watchDirThread, INFINITE);
-		CloseHandle(watchDirThread);
+		m_WatchDirThread.join();
+		CloseHandle(m_hSwitchWatchDir);
+		CloseHandle(m_hWatchDirKillThread);
 	}
 }
 
@@ -1979,9 +1981,13 @@ void CModTree::FillInstrumentLibrary()
 	SortChildrenCB(&tvs);
 	SetRedraw(TRUE);
 
-	if(m_hWatchDir == INVALID_HANDLE_VALUE)
 	{
-		m_hWatchDir = FindFirstChangeNotificationW(m_InstrLibPath.AsNative().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME);
+		MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+		if(m_InstrLibPath != m_WatchDir)
+		{
+			m_WatchDir = m_InstrLibPath;
+			SetEvent(m_hSwitchWatchDir);
+		}
 	}
 }
 
@@ -1992,18 +1998,69 @@ void CModTree::MonitorInstrumentLibrary()
 {
 	mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLowest);
 	DWORD result;
+	mpt::PathString lastWatchDir;
+	HANDLE hWatchDir = INVALID_HANDLE_VALUE;
+	DWORD lastRefresh = GetTickCount();
+	DWORD timeout = INFINITE;
+	DWORD interval = TrackerSettings::Instance().GUIUpdateInterval;
 	do
 	{
-		Sleep(500);
-		const HANDLE waitHandles[] = { m_hWatchDirKillThread, m_hWatchDir };
-		result = WaitForMultipleObjects(m_hWatchDir != INVALID_HANDLE_VALUE ? 2 : 1, waitHandles, FALSE, 1000);
-		if(result == WAIT_OBJECT_0 + 1 && m_hWatchDir == waitHandles[1])
 		{
-			FindNextChangeNotification(m_hWatchDir);
+			MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+			if(m_WatchDir != lastWatchDir)
+			{
+				if(hWatchDir != INVALID_HANDLE_VALUE)
+				{
+					FindCloseChangeNotification(hWatchDir);
+					hWatchDir = INVALID_HANDLE_VALUE;
+					lastWatchDir = mpt::PathString();
+				}
+				if(!m_WatchDir.empty())
+				{
+					hWatchDir = FindFirstChangeNotificationW(m_WatchDir.AsNative().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME);
+					lastWatchDir = m_WatchDir;
+				}
+			}
+		}
+		const HANDLE waitHandles[3] = { m_hWatchDirKillThread, m_hSwitchWatchDir, hWatchDir };
+		result = WaitForMultipleObjects(hWatchDir != INVALID_HANDLE_VALUE ? 3 : 2, waitHandles, FALSE, timeout);
+		DWORD now = GetTickCount();
+		if(result == WAIT_TIMEOUT)
+		{
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
+			lastRefresh = now;
+			timeout = INFINITE;
+		} else if(result == WAIT_OBJECT_0 + 1)
+		{
+			// nothing
+			// will switch to new dir in next loop iteration
+		} else if(result == WAIT_OBJECT_0 + 2)
+		{
+			FindNextChangeNotification(hWatchDir);
+			timeout = 0; // update timeout later	
+		}
+		if(timeout != INFINITE)
+		{
+			// Update timeout. Can happen either because we just got a change event,
+			// or because we got a directory switch event and still have a change
+			// notification pending.
+			if(now - lastRefresh >= interval)
+			{
+				PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
+				lastRefresh = now;
+				timeout = INFINITE;
+			} else
+			{
+				timeout = lastRefresh + interval - now;
+			}
 		}
 	} while(result != WAIT_OBJECT_0);
-	CloseHandle(m_hWatchDirKillThread);
+	if(hWatchDir != INVALID_HANDLE_VALUE)
+	{
+		FindCloseChangeNotification(hWatchDir);
+		hWatchDir = INVALID_HANDLE_VALUE;
+		lastWatchDir = mpt::PathString();
+	}
 }
 
 
@@ -2130,9 +2187,8 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 	if(ok)
 	{
-		HANDLE watchDir = m_hWatchDir;
-		m_hWatchDir = INVALID_HANDLE_VALUE;
-		FindCloseChangeNotification(watchDir);
+		MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+		m_WatchDir = mpt::PathString();
 	} else
 	{
 		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
