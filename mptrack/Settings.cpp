@@ -116,9 +116,6 @@ void SettingValue::SetFromString(const AnyStringLocale &newVal)
 
 
 
-#if defined(MPT_SETTINGS_CACHE)
-
-
 SettingValue SettingsContainer::BackendsReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	return backend->ReadSetting(path, def);
@@ -259,35 +256,6 @@ SettingsContainer::~SettingsContainer()
 {
 	WriteSettings();
 }
-
-#else // !MPT_SETTINGS_CACHE
-
-SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def) const
-{
-	return backend->ReadSetting(path, def);
-}
-
-void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val)
-{
-	backend->WriteSetting(path, val);
-}
-
-void SettingsContainer::RemoveSetting(const SettingPath &path)
-{
-	backend->RemoveSetting(path);
-}
-
-void SettingsContainer::Flush()
-{
-	return;
-}
-
-SettingsContainer::~SettingsContainer()
-{
-	return;
-}
-
-#endif // MPT_SETTINGS_CACHE
 
 
 SettingsContainer::SettingsContainer(ISettingsBackend *backend)

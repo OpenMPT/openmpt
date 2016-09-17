@@ -14,8 +14,6 @@
 #include "Settings.h"
 #include "dlg_misc.h"
 
-#if defined(MPT_SETTINGS_CACHE)
-
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
@@ -302,12 +300,8 @@ void COptionsAdvanced::OnSaveNow()
 //--------------------------------
 {
 	TrackerSettings::Instance().SaveSettings();
-	#if defined(MPT_SETTINGS_CACHE)
-		theApp.GetSettings().WriteSettings();
-	#endif // MPT_SETTINGS_CACHE
+	theApp.GetSettings().WriteSettings();
 }
 
 
 OPENMPT_NAMESPACE_END
-
-#endif // MPT_SETTINGS_CACHE

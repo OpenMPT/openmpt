@@ -21,10 +21,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define MPT_SETTINGS_CACHE
-#define MPT_SETTINGS_CACHE_STORE_DEFAULTS
-
-
 enum SettingType
 {
 	SettingTypeNone,
@@ -344,18 +340,13 @@ template<> inline SettingValue ToSettingValue(const LONG &val) { return SettingV
 template<> inline LONG FromSettingValue(const SettingValue &val) { return LONG(val.as<int32>()); }
 
 
-#if defined(MPT_SETTINGS_CACHE)
-
-
 // An instance of SetttingState represents the cached on-disk state of a certain SettingPath.
 // The mapping is stored externally in SettingsContainer::map.
 class SettingState
 {
 private:
 	SettingValue value;
-#if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
 	const SettingValue defaultValue;
-#endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 	bool dirty;
 public:
 	SettingState()
@@ -364,18 +355,14 @@ public:
 	}
 	SettingState(const SettingValue &def)
 		: value(def)
-#if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
 		, defaultValue(def)
-#endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 		, dirty(false)
 	{
 		return;
 	}
 	SettingState & assign(const SettingValue &other, bool setDirty = true)
 	{
-#if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
 		MPT_ASSERT(defaultValue.GetType() == SettingTypeNone || (defaultValue.GetType() == other.GetType() && defaultValue.GetTypeTag() == other.GetTypeTag()));
-#endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 		if(setDirty)
 		{
 			if(value != other)
@@ -394,7 +381,7 @@ public:
 		assign(val);
 		return *this;
 	}
-#if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
+
 	SettingValue GetDefault() const
 	{
 		return defaultValue;
@@ -407,7 +394,7 @@ public:
 	{
 		return value == defaultValue;
 	}
-#endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
+
 	bool IsDirty() const
 	{
 		return dirty;
@@ -429,9 +416,6 @@ public:
 		return value;
 	}
 };
-
-
-#endif // MPT_SETTINGS_CACHE
 
 
 // SettingPath represents the path in a config backend to a certain setting.
@@ -517,17 +501,13 @@ enum SettingFlushMode
 class SettingsContainer
 {
 
-	#if defined(MPT_SETTINGS_CACHE)
-
-		public:
-			typedef std::map<SettingPath,SettingState> SettingsMap;
-			typedef std::map<SettingPath,std::set<ISettingChanged*> > SettingsListenerMap;
-			void WriteSettings();
-		private:
-			mutable SettingsMap map;
-			mutable SettingsListenerMap mapListeners;
-
-	#endif // MPT_SETTINGS_CACHE
+public:
+	typedef std::map<SettingPath,SettingState> SettingsMap;
+	typedef std::map<SettingPath,std::set<ISettingChanged*> > SettingsListenerMap;
+	void WriteSettings();
+private:
+	mutable SettingsMap map;
+	mutable SettingsListenerMap mapListeners;
 
 private:
 	ISettingsBackend *backend;
@@ -596,24 +576,19 @@ public:
 	void Flush();
 	~SettingsContainer();
 
-	#if defined(MPT_SETTINGS_CACHE)
+public:
 
-		public:
+	void Register(ISettingChanged *listener, const SettingPath &path);
+	void UnRegister(ISettingChanged *listener, const SettingPath &path);
 
-			void Register(ISettingChanged *listener, const SettingPath &path);
-			void UnRegister(ISettingChanged *listener, const SettingPath &path);
-
-			SettingsMap::const_iterator begin() const { return map.begin(); }
-			SettingsMap::const_iterator end() const { return map.end(); }
-			SettingsMap::size_type size() const { return map.size(); }
-			bool empty() const { return map.empty(); }
-			const SettingsMap &GetMap() const { return map; }
-
-	#endif // MPT_SETTINGS_CACHE
+	SettingsMap::const_iterator begin() const { return map.begin(); }
+	SettingsMap::const_iterator end() const { return map.end(); }
+	SettingsMap::size_type size() const { return map.size(); }
+	bool empty() const { return map.empty(); }
+	const SettingsMap &GetMap() const { return map; }
 
 };
 
-#if defined(MPT_SETTINGS_CACHE)
 
 // Setting<T> and CachedSetting<T> are references to a SettingPath below a SettingConainer (both provided to the constructor).
 // They should mostly behave like normal non-reference variables of type T. I.e., they can be assigned to and read from.
@@ -765,73 +740,6 @@ public:
 	template<typename Trhs> CachedSetting & operator ^= (const Trhs &rhs) { T tmp = *this; tmp ^= rhs; *this = tmp; return *this; }
 };
 
-#else // !MPT_SETTINGS_CACHE
-
-template <typename T>
-class Setting
-{
-private:
-	T value;
-	SettingsContainer &conf;
-	const SettingPath path;
-public:
-	Setting(const Setting &other)
-		: value(other.value)
-		, conf(other.conf)
-		, path(other.path)
-	{
-		return;
-	}
-public:
-	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
-		: value(def)
-		, conf(conf_)
-		, path(section, key)
-	{
-		value = conf.Read(path, def);
-	}
-	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def)
-		: value(def)
-		, conf(conf_)
-		, path(path_)
-	{
-		value = conf.Read(path, def);
-	}
-	~Setting()
-	{
-		conf.Write(path, val);
-	}
-	SettingPath GetPath() const
-	{
-		return path;
-	}
-	Setting & operator = (const T &val)
-	{
-		value = val;
-		return *this;
-	}
-	operator const T & () const
-	{
-		return value;
-	}
-	const T & Get() const
-	{
-		return value;
-	}
-	template<typename Trhs> Setting & operator += (const Trhs &rhs) { T tmp = *this; tmp += rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator -= (const Trhs &rhs) { T tmp = *this; tmp -= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator *= (const Trhs &rhs) { T tmp = *this; tmp *= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator /= (const Trhs &rhs) { T tmp = *this; tmp /= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator %= (const Trhs &rhs) { T tmp = *this; tmp %= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator |= (const Trhs &rhs) { T tmp = *this; tmp |= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator &= (const Trhs &rhs) { T tmp = *this; tmp &= rhs; *this = tmp; return *this; }
-	template<typename Trhs> Setting & operator ^= (const Trhs &rhs) { T tmp = *this; tmp ^= rhs; *this = tmp; return *this; }
-};
-
-#define CachedSetting Setting
-
-#endif // MPT_SETTINGS_CACHE
-
 
 class IniFileSettingsBackend : public ISettingsBackend
 {
@@ -876,8 +784,6 @@ public:
 };
 
 
-#if defined(MPT_SETTINGS_CACHE)
-
 class SettingChangedNotifyGuard
 {
 private:
@@ -913,8 +819,6 @@ public:
 		}
 	}
 };
-
-#endif // MPT_SETTINGS_CACHE
 
 
 OPENMPT_NAMESPACE_END
