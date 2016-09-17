@@ -147,11 +147,11 @@ class CSoundBankProperties: public CDialog
 //========================================
 {
 protected:
-	CHAR m_szInfo[4096];
+	std::string m_szInfo;
 	mpt::PathString fileName;
 
 public:
-	CSoundBankProperties(CDLSBank &bank, CWnd *parent = nullptr);
+	CSoundBankProperties(const CDLSBank &bank, CWnd *parent = nullptr);
 	virtual BOOL OnInitDialog();
 };
 
