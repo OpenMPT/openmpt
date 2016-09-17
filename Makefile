@@ -71,14 +71,19 @@
 #                   include/minimp3/ yourself.
 #                   Beware that minimp3 is LGPL 2.1 licensed.
 #
-# Build flags for openmpt123 (provide on each `make` invocation)
-#
+# Build flags for libopenmpt examples and openmpt123
+#  (provide on each `make` invocation)
 #  (defaults are 0):
+#
+#  NO_PORTAUDIO=1      Avoid using PortAudio, even if found
+#  NO_PORTAUDIOCPP=1   Avoid using PortAudio C++, even if found
+#
+# Build flags for openmpt123 (provide on each `make` invocation)
+#  (defaults are 0):
+#
 #  NO_PULSEAUDIO=1     Avoid using PulseAudio, even if found
 #  NO_SDL=1            Avoid using SDL, even if found
 #  NO_SDL2=1           Avoid using SDL2, even if found
-#  NO_PORTAUDIO=1      Avoid using PortAudio, even if found
-#  NO_PORTAUDIOCPP=1   Avoid using PortAudio C++, even if found
 #  NO_FLAC=1           Avoid using FLAC, even if found
 #  NO_SNDFILE=1        Avoid using libsndfile, even if found
 #
