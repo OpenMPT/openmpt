@@ -955,6 +955,10 @@ bool CModCleanupDlg::ResetVariables()
 bool CModCleanupDlg::RemoveUnusedChannels()
 //-----------------------------------------
 {
+	// Avoid M.K. modules to become xCHN modules if some channels are unused.
+	if(modDoc.GetModType() == MOD_TYPE_MOD && modDoc.GetNumChannels() == 4)
+		return false;
+
 	std::vector<bool> usedChannels;
 	modDoc.CheckUsedChannels(usedChannels, modDoc.GetNumChannels() - modDoc.GetrSoundFile().GetModSpecifications().channelsMin);
 	return modDoc.RemoveChannels(usedChannels);
@@ -968,7 +972,8 @@ bool CModCleanupDlg::RemoveAllPatterns()
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	if(sndFile.Patterns.Size() == 0) return false;
-	sndFile.Patterns.ResizeArray(0);
+	modDoc.GetPatternUndo().ClearUndo();
+	sndFile.Patterns.Init();
 	sndFile.SetCurrentOrder(0);
 	return true;
 }
@@ -984,7 +989,7 @@ bool CModCleanupDlg::RemoveAllOrders()
 	{
 		sndFile.Order.RemoveSequence(1);
 	}
-	sndFile.Order.Init();
+	sndFile.Order.resize(1);
 	sndFile.Order[0] = 0;
 	sndFile.SetCurrentOrder(0);
 	return true;
