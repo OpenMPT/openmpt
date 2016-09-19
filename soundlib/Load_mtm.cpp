@@ -82,10 +82,10 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	MTMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.id, "MTM", 3)
+		|| fileHeader.version >= 0x20
 		|| fileHeader.lastOrder > 127
 		|| fileHeader.numChannels > 32
 		|| fileHeader.numChannels == 0
-		|| fileHeader.lastPattern >= MAX_PATTERNS
 		|| !file.CanRead(sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize))
 	{
 		return false;

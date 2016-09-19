@@ -394,7 +394,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = file.ReadUint8() + 1;
 	PATTERNINDEX numPats = file.ReadUint8() + 1;
 
-	if(GetNumChannels() > MAX_BASECHANNELS || numPats > MAX_PATTERNS)
+	if(GetNumChannels() > MAX_BASECHANNELS)
 		return false;
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
