@@ -433,7 +433,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	const PATTERNINDEX readPatterns = std::min<PATTERNINDEX>(fileHeader.patNum, MAX_PATTERNS);
+	// Order list cannot contain pattern indices > 255, so do not even try to load higher patterns
+	const PATTERNINDEX readPatterns = std::min<PATTERNINDEX>(fileHeader.patNum, uint8_max);
 	Patterns.ResizeArray(readPatterns);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{

@@ -49,15 +49,15 @@ MPT_BINARY_STRUCT(OktSample, 32)
 
 
 // Parse the sample header block
-static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile *pSndFile)
-//------------------------------------------------------------------------------------------------
+static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------------------
 {
-	pSndFile->m_nSamples = MIN((SAMPLEINDEX)(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1);	// typically 36
-	sample7bit.resize(pSndFile->GetNumSamples());
+	sndFile.m_nSamples = std::min<SAMPLEINDEX>(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1u);
+	sample7bit.resize(sndFile.GetNumSamples());
 
-	for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 	{
-		ModSample &mptSmp = pSndFile->GetSample(nSmp);
+		ModSample &mptSmp = sndFile.GetSample(smp);
 		OktSample oktSmp;
 		chunk.ReadStruct(oktSmp);
 
@@ -68,7 +68,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 		oktSmp.type = oktSmp.type;
 
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(pSndFile->m_szNames[nSmp], oktSmp.name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(sndFile.m_szNames[smp], oktSmp.name);
 
 		mptSmp.nC5Speed = 8287;
 		mptSmp.nGlobalVol = 64;
@@ -84,7 +84,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 			else
 				mptSmp.nSustainStart = mptSmp.nSustainEnd = 0;
 		}
-		sample7bit[nSmp - 1] = (oktSmp.type == 0 || oktSmp.type == 2);
+		sample7bit[smp - 1] = (oktSmp.type == 0 || oktSmp.type == 2);
 	}
 }
 
@@ -250,7 +250,6 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 
 			default:
 				m->command = m->param = 0;
-				//MPT_ASSERT_NOTREACHED();
 				break;
 			}
 		}
@@ -271,7 +270,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	std::vector<FileReader> patternChunks;
 	std::vector<FileReader> sampleChunks;
 	std::vector<bool> sample7bit;	// 7-/8-bit sample
-	ORDERINDEX nOrders = 0;
+	ORDERINDEX numOrders = 0;
 
 	InitializeGlobals(MOD_TYPE_OKT);
 
@@ -293,22 +292,22 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 		switch(iffHead.signature)
 		{
 		case OktIffChunk::idCMOD:
-			// read that weird channel setup table
+			// Read that weird channel setup table
 			if(m_nChannels > 0 || chunk.GetLength() < 8)
 			{
 				break;
 			}
 
-			for(CHANNELINDEX nChn = 0; nChn < 4; nChn++)
+			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				uint8 ch1 = chunk.ReadUint8(), ch2 = chunk.ReadUint8();
 				if(ch1 || ch2)
 				{
 					ChnSettings[m_nChannels].Reset();
-					ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+					ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 				}
 				ChnSettings[m_nChannels].Reset();
-				ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+				ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 			}
 
 			if(loadFlags == onlyVerifyHeader)
@@ -318,16 +317,16 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case OktIffChunk::idSAMP:
-			// convert sample headers
+			// Convert sample headers
 			if(m_nSamples > 0)
 			{
 				break;
 			}
-			ReadOKTSamples(chunk, sample7bit, this);
+			ReadOKTSamples(chunk, sample7bit, *this);
 			break;
 
 		case OktIffChunk::idSPEE:
-			// read default speed
+			// Read default speed
 			if(chunk.GetLength() >= 2)
 			{
 				m_nDefaultSpeed = Clamp(chunk.ReadUint16BE(), uint16(1), uint16(255));
@@ -335,32 +334,32 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case OktIffChunk::idSLEN:
-			// number of patterns, we don't need this.
+			// Number of patterns, we don't need this.
 			break;
 
 		case OktIffChunk::idPLEN:
-			// read number of valid orders
+			// Read number of valid orders
 			if(chunk.GetLength() >= 2)
 			{
-				nOrders = chunk.ReadUint16BE();
+				numOrders = chunk.ReadUint16BE();
 			}
 			break;
 
 		case OktIffChunk::idPATT:
-			// read the orderlist
+			// Read the orderlist
 			Order.ReadAsByte(chunk, chunk.GetLength(), ORDERINDEX_MAX, 0xFF, 0xFE);
 			break;
 
 		case OktIffChunk::idPBOD:
-			// don't read patterns for now, as the number of channels might be unknown at this point.
-			if(patternChunks.size() < MAX_PATTERNS)
+			// Don't read patterns for now, as the number of channels might be unknown at this point.
+			if(patternChunks.size() < 256)
 			{
 				patternChunks.push_back(chunk);
 			}
 			break;
 
 		case OktIffChunk::idSBOD:
-			// sample data - same as with patterns, as we need to know the sample format / length
+			// Sample data - same as with patterns, as we need to know the sample format / length
 			if(sampleChunks.size() < MAX_SAMPLES - 1 && chunk.GetLength() > 0)
 			{
 				sampleChunks.push_back(chunk);
@@ -380,46 +379,43 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 0x358 * 4;
 
 	// Fix orderlist
-	for(ORDERINDEX nOrd = nOrders; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
-	{
-		Order[nOrd] = Order.GetInvalidPatIndex();
-	}
+	Order.resize(numOrders);
 
 	// Read patterns
 	if(loadFlags & loadPatternData)
 	{
 		Patterns.ResizeArray(static_cast<PATTERNINDEX>(patternChunks.size()));
-		for(PATTERNINDEX nPat = 0; nPat < patternChunks.size(); nPat++)
+		for(PATTERNINDEX pat = 0; pat < patternChunks.size(); pat++)
 		{
-			if(patternChunks[nPat].GetLength() > 0)
-				ReadOKTPattern(patternChunks[nPat], nPat, *this);
+			if(patternChunks[pat].GetLength() > 0)
+				ReadOKTPattern(patternChunks[pat], pat, *this);
 			else
-				Patterns.Insert(nPat, 64);	// invent empty pattern
+				Patterns.Insert(pat, 64);	// Invent empty pattern
 		}
 	}
 
 	// Read samples
-	size_t nFileSmp = 0;
-	for(SAMPLEINDEX nSmp = 1; nSmp < m_nSamples; nSmp++)
+	size_t fileSmp = 0;
+	for(SAMPLEINDEX smp = 1; smp < m_nSamples; smp++)
 	{
-		if(nFileSmp >= sampleChunks.size() || !(loadFlags & loadSampleData))
+		if(fileSmp >= sampleChunks.size() || !(loadFlags & loadSampleData))
 			break;
 
-		ModSample &mptSample = Samples[nSmp];
+		ModSample &mptSample = Samples[smp];
 		if(mptSample.nLength == 0)
 			continue;
 
-		// weird stuff?
-		mptSample.nLength = MIN(mptSample.nLength, sampleChunks[nFileSmp].GetLength());
+		// Weird stuff?
+		LimitMax(mptSample.nLength, sampleChunks[fileSmp].GetLength());
 
 		SampleIO(
 			SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::bigEndian,
-			sample7bit[nSmp - 1] ? SampleIO::PCM7to8 : SampleIO::signedPCM)
-			.ReadSample(mptSample, sampleChunks[nFileSmp]);
+			sample7bit[smp - 1] ? SampleIO::PCM7to8 : SampleIO::signedPCM)
+			.ReadSample(mptSample, sampleChunks[fileSmp]);
 
-		nFileSmp++;
+		fileSmp++;
 	}
 
 	return true;
