@@ -2002,7 +2002,7 @@ void CModTree::MonitorInstrumentLibrary()
 	HANDLE hWatchDir = INVALID_HANDLE_VALUE;
 	DWORD lastRefresh = GetTickCount();
 	DWORD timeout = INFINITE;
-	DWORD interval = TrackerSettings::Instance().GUIUpdateInterval;
+	DWORD interval = TrackerSettings::Instance().FSUpdateInterval;
 	do
 	{
 		{
