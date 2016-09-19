@@ -136,6 +136,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading Patterns
+	Patterns.ResizeArray(fileHeader.patterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))

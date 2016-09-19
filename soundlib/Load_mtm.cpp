@@ -124,6 +124,8 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	const ROWINDEX rowsPerPat = fileHeader.beatsPerTrack ? std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS) : 64;
 	FileReader tracks = file.ReadChunk(192 * fileHeader.numTracks);
 
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.lastPattern + 1);
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, rowsPerPat))

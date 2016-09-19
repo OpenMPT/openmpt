@@ -172,6 +172,8 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	uint8 slideRate[4] = {0};
 
 	// Reading patterns
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(numPatterns);
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))

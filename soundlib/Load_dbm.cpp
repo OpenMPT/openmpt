@@ -419,6 +419,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader patternNameChunk = chunks.GetChunk(DBMChunk::idPNAM);
 		patternNameChunk.Skip(1);	// Encoding, should be UTF-8 or ASCII
 
+		Patterns.ResizeArray(infoData.patterns);
 		for(PATTERNINDEX pat = 0; pat < infoData.patterns; pat++)
 		{
 			uint16 numRows = patternChunk.ReadUint16BE();

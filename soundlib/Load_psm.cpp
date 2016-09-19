@@ -607,6 +607,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// "PBOD" - Pattern data of a single pattern
 	// Now that we know the number of channels, we can go through all the patterns.
 	auto pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
+	Patterns.ResizeArray(static_cast<PATTERNINDEX>(pattChunks.size()));
 	for(auto patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 	{
 		FileReader &chunk(*patternIter);
@@ -1126,6 +1127,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if(fileHeader.patOffset > 4 && file.Seek(fileHeader.patOffset - 4) && file.ReadMagic("PPAT"))
 	{
+		Patterns.ResizeArray(fileHeader.numPatterns);
 		for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 		{
 			PSM16PatternHeader patternHeader;

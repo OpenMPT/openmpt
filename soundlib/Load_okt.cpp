@@ -388,6 +388,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	// Read patterns
 	if(loadFlags & loadPatternData)
 	{
+		Patterns.ResizeArray(static_cast<PATTERNINDEX>(patternChunks.size()));
 		for(PATTERNINDEX nPat = 0; nPat < patternChunks.size(); nPat++)
 		{
 			if(patternChunks[nPat].GetLength() > 0)

@@ -961,6 +961,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		// Now go through the order list and load them.
 		DMFPatternSettings settings(GetNumChannels());
 
+		Patterns.ResizeArray(Order.GetLength());
 		for(ORDERINDEX ord = 0; ord < Order.GetLength(); ord++)
 		{
 			// Create one pattern for each order item, as the same pattern can be played with different settings
