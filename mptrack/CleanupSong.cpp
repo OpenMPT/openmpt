@@ -968,8 +968,7 @@ bool CModCleanupDlg::RemoveAllPatterns()
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	if(sndFile.Patterns.Size() == 0) return false;
-	sndFile.Patterns.Init();
-	sndFile.Patterns.Insert(0, 64);
+	sndFile.Patterns.ResizeArray(0);
 	sndFile.SetCurrentOrder(0);
 	return true;
 }

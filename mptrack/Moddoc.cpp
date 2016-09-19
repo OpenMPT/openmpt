@@ -603,7 +603,7 @@ BOOL CModDoc::InitializeMod()
 		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
 			m_SndFile.Order[0] = 0;
 
-		if (!m_SndFile.Patterns[0])
+		if (!m_SndFile.Patterns.IsValidPat(0))
 		{
 			m_SndFile.Patterns.Insert(0, 64);
 		}

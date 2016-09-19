@@ -72,7 +72,6 @@ PATTERNINDEX CPatternContainer::InsertAny(const ROWINDEX rows, bool respectQtyLi
 	if(!Insert(i, rows))
 		return PATTERNINDEX_INVALID;
 	else return i;
-
 }
 
 
@@ -124,10 +123,12 @@ void CPatternContainer::ResizeArray(const PATTERNINDEX newSize)
 //-------------------------------------------------------------
 {
 	if(Size() <= newSize)
-		m_Patterns.resize(newSize, MODPATTERN(*this));
-	else
 	{
-		for(PATTERNINDEX i = Size(); i > newSize; i--) Remove(i-1);
+		m_Patterns.resize(newSize, MODPATTERN(*this));
+	} else
+	{
+		for(PATTERNINDEX i = Size(); i > newSize; i--)
+			Remove(i - 1);
 		m_Patterns.resize(newSize, MODPATTERN(*this));
 	}
 }
@@ -137,10 +138,8 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 //-----------------------------------------------------------------
 {
 	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
-	if(specs.patternsMax < Size())
-		ResizeArray(MAX(MAX_PATTERNS, specs.patternsMax));
-	else if(Size() < MAX_PATTERNS)
-		ResizeArray(MAX_PATTERNS);
+	//if(specs.patternsMax < Size())
+	//	ResizeArray(specs.patternsMax);
 
 	// remove pattern time signatures
 	if(!specs.hasPatternSignatures)
@@ -151,18 +150,6 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 			m_Patterns[nPat].RemoveTempoSwing();
 		}
 	}
-}
-
-
-void CPatternContainer::Init()
-//----------------------------
-{
-	for(PATTERNINDEX i = 0; i < Size(); i++)
-	{
-		Remove(i);
-	}
-
-	ResizeArray(MAX_PATTERNS);
 }
 
 
