@@ -922,6 +922,11 @@ bool CModCleanupDlg::ResetVariables()
 	sndFile.m_nVSTiVolume = 48;
 	sndFile.Order.SetRestartPos(0);
 
+	if(sndFile.Order.size() == 0)
+	{
+		sndFile.Order.Append(sndFile.Patterns.InsertAny(64);
+	}
+
 	// Reset instruments (if there are any)
 	for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++) if(sndFile.Instruments[i])
 	{
@@ -989,8 +994,7 @@ bool CModCleanupDlg::RemoveAllOrders()
 	{
 		sndFile.Order.RemoveSequence(1);
 	}
-	sndFile.Order.resize(1);
-	sndFile.Order[0] = 0;
+	sndFile.Order.clear();
 	sndFile.SetCurrentOrder(0);
 	return true;
 }
