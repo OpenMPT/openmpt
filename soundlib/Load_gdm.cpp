@@ -256,7 +256,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read patterns
-	Patterns.ResizeArray(MAX(MAX_PATTERNS, fileHeader.lastPattern + 1));
+	Patterns.ResizeArray(fileHeader.lastPattern + 1);
 
 	const CModSpecifications &modSpecs = GetModSpecifications(GetBestSaveFormat());
 

@@ -23,25 +23,12 @@ typedef CPattern MODPATTERN;
 class CPatternContainer
 //=====================
 {
-//BEGIN: TYPEDEFS
 public:
-	typedef std::vector<MODPATTERN> PATTERNVECTOR;
-//END: TYPEDEFS
+	MODPATTERN& operator[](const int pat) { return m_Patterns[pat]; }
+	const MODPATTERN& operator[](const int pat) const { return m_Patterns[pat]; }
 
-
-//BEGIN: OPERATORS
 public:
-	//To mimic old pattern == ModCommand* behavior.
-	MODPATTERN& operator[](const int pat) {return m_Patterns[pat];}
-	const MODPATTERN& operator[](const int pat) const {return m_Patterns[pat];}
-//END: OPERATORS
-
-//BEGIN: INTERFACE METHODS
-public:
-	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(MAX_PATTERNS, MODPATTERN(*this));}
-
-	// Clears existing patterns and resizes array to default size.
-	void Init();
+	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) { }
 
 	// Empty and initialize all patterns.
 	void ClearPatterns();
@@ -69,18 +56,18 @@ public:
 	template <class Func>
 	Func ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func);
 	template <class Func>
-	Func ForEachModCommand(Func func) {return ForEachModCommand(0, Size() - 1, func);}
+	Func ForEachModCommand(Func func) { return ForEachModCommand(0, Size() - 1, func); }
 
-	PATTERNINDEX Size() const {return static_cast<PATTERNINDEX>(m_Patterns.size());}
+	PATTERNINDEX Size() const { return static_cast<PATTERNINDEX>(m_Patterns.size()); }
 
-	CSoundFile& GetSoundFile() {return m_rSndFile;}
-	const CSoundFile& GetSoundFile() const {return m_rSndFile;}
+	CSoundFile& GetSoundFile() { return m_rSndFile; }
+	const CSoundFile& GetSoundFile() const { return m_rSndFile; }
 
 	// Return true if pattern can be accessed with operator[](iPat), false otherwise.
-	bool IsValidIndex(const PATTERNINDEX iPat) const {return (iPat < Size());}
+	bool IsValidIndex(const PATTERNINDEX iPat) const { return (iPat < Size()); }
 
 	// Return true if IsValidIndex() is true and the corresponding pattern has allocated modcommand array, false otherwise.
-	bool IsValidPat(const PATTERNINDEX iPat) const {return IsValidIndex(iPat) && (*this)[iPat];}
+	bool IsValidPat(const PATTERNINDEX iPat) const { return IsValidIndex(iPat) && (*this)[iPat]; }
 
 	// Returns true if the pattern is empty, i.e. there are no notes/effects in this pattern
 	bool IsPatternEmpty(const PATTERNINDEX nPat) const;
@@ -95,15 +82,10 @@ public:
 	// Returns index of highest pattern with pattern named + 1.
 	PATTERNINDEX GetNumNamedPatterns() const;
 
-//END: INTERFACE METHODS
 
-
-//BEGIN: DATA MEMBERS
 private:
-	PATTERNVECTOR m_Patterns;
+	std::vector<MODPATTERN> m_Patterns;
 	CSoundFile &m_rSndFile;
-//END: DATA MEMBERS
-
 };
 
 

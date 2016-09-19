@@ -5892,8 +5892,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
 			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 
-	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
-	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On Transition: Unmute All\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
+	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On Transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, "&Reset Channel\t" + ih->GetKeyTextFromCommand(kcChannelReset));
 	
@@ -5924,21 +5924,21 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-----------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, _T("Show row play time\t") + ih->GetKeyTextFromCommand(kcTimeAtRow));
+	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, _T("Show Row Play Time\t") + ih->GetKeyTextFromCommand(kcTimeAtRow));
 
 	const CSoundFile &sndFile = *GetSoundFile();
 	CString lockStr;
 	bool lockActive = (sndFile.m_lockRowStart != ROWINDEX_INVALID);
 	if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
 	{
-		lockStr = _T("&Lock playback to selection");
+		lockStr = _T("&Lock Playback to Selection");
 		if(lockActive)
 		{
-			lockStr.AppendFormat(_T(" (current: %u-%u)"), sndFile.m_lockRowStart, sndFile.m_lockRowEnd);
+			lockStr.AppendFormat(_T(" (Current: %u-%u)"), sndFile.m_lockRowStart, sndFile.m_lockRowEnd);
 		}
 	} else if(lockActive)
 	{
-		lockStr = _T("Reset playback &lock");
+		lockStr = _T("Reset Playback &Lock");
 	} else
 	{
 		return true;
@@ -6028,7 +6028,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_REDO, "&Redo\t" + ih->GetKeyTextFromCommand(kcEditRedo));
 	}
 
-	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, "Clear selection\t" + ih->GetKeyTextFromCommand(kcSampleDelete));
+	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, "Clear Selection\t" + ih->GetKeyTextFromCommand(kcSampleDelete));
 
 	return true;
 }

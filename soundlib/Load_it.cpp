@@ -153,7 +153,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 	if(numTuning > maxNum)
 		return true;
 
-	for(size_t i = 0; i<numTuning; i++)
+	for(size_t i = 0; i < numTuning; i++)
 	{
 		std::string temp;
 		uint16 ui = 0;
@@ -176,7 +176,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 	std::map<uint16, std::string> shortToTNameMap;
 	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
 
-	//Read & set tunings for instruments
+	// Read & set tunings for instruments
 	std::vector<std::string> notFoundTunings;
 	for(INSTRUMENTINDEX i = 1; i<=csf.GetNumInstruments(); i++)
 	{
@@ -213,16 +213,15 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 			if(csf.Instruments[i]->pTuning)
 				continue;
 
-			//Checking if not found tuning already noticed.
+			// Checking if not found tuning already noticed.
 			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
-				std::string erm = std::string("Tuning ") + str + std::string(" used by the module was not found.");
-				csf.AddToLog(erm);
+				csf.AddToLog("Tuning " + str + " used by the module was not found.");
 #ifdef MODPLUG_TRACKER
 				if(csf.GetpModDoc() != nullptr)
 				{
-					csf.GetpModDoc()->SetModified(); //The tuning is changed so the modified flag is set.
+					csf.GetpModDoc()->SetModified(); // The tuning is changed so the modified flag is set.
 				}
 #endif // MODPLUG_TRACKER
 
@@ -826,7 +825,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	LoadExtendedSongProperties(file, &interpretModPlugMade);
 
 	// Reading Patterns
-	Patterns.ResizeArray(std::max(MAX_PATTERNS, numPats));
+	Patterns.ResizeArray(numPats);
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
@@ -2229,6 +2228,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4LE('D','T','F','R'): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
 			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
+				// FIXME: If there are only PC events on the last few channels in an MPTM MO3, they won't be imported!
 			case MAGIC4BE('C','.','.','.'): if(GetType() != MOD_TYPE_XM && m_ContainerType != MOD_CONTAINERTYPE_MO3) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = Clamp(chn, m_nChannels, MAX_BASECHANNELS); } break;
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
