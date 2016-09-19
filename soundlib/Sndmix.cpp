@@ -1595,6 +1595,9 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
 		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !alternativeTuning)
 		{
+			if(!pSmp->nVibRate)
+				return;
+
 			// Schism's autovibrato code
 
 			/*
