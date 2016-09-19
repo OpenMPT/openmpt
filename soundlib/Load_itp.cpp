@@ -211,6 +211,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(numPats);
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		const ROWINDEX numRows = file.ReadUint32LE();

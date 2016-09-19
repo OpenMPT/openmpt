@@ -386,6 +386,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read pattern names
+	Patterns.ResizeArray(fileHeader.numPats);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
 		char name[11];
@@ -855,6 +856,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Patterns
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.numPats);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
 		uint32 patLength = file.ReadUint32LE();

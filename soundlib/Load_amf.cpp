@@ -123,6 +123,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	file.Skip((64 - fileHeader.numSamples) * sizeof(AsylumSampleHeader));
 
 	// Read Patterns
+	Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
@@ -549,6 +550,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Create the patterns from the list of tracks
+	Patterns.ResizeArray(fileHeader.numOrders);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numOrders; pat++)
 	{
 		uint16 patLength = pat < patternLength.size() ? patternLength[pat] : 64;

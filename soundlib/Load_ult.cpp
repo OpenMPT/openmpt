@@ -406,6 +406,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 			ChnSettings[chn].nPan = (chn & 1) ? 192 : 64;
 	}
 
+	Patterns.ResizeArray(numPats);
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(!Patterns.Insert(pat, 64))

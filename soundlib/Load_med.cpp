@@ -517,7 +517,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	const MMD0SONGHEADER *pmsh;
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;
-	uint32 dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
+	uint32 dwBlockArr, dwSmplArr, dwExpData;
 	const_unaligned_ptr_be<uint32> pdwTable;
 	int8 version = pmmh.id[3];
 	uint32 deftempo;
@@ -540,7 +540,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	pmsh = (const MMD0SONGHEADER *)(lpStream + dwSong);
 	pmsh2 = (const MMD2SONGHEADER *)pmsh;
 
-	wNumBlocks = pmsh->numblocks;
+	uint16 wNumBlocks = pmsh->numblocks;
 	m_nChannels = 4;
 	m_nSamples = pmsh->numsamples;
 	if (m_nSamples > 63) m_nSamples = 63;
@@ -773,9 +773,10 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
-	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks) || (4*wNumBlocks > dwMemLength)) return true;
+	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4u*wNumBlocks) || (4u*wNumBlocks > dwMemLength)) return true;
 	pdwTable = const_unaligned_ptr_be<uint32>(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
+	Patterns.ResizeArray(wNumBlocks);
 	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
 	{
 		uint32 dwPos = pdwTable[iBlk];

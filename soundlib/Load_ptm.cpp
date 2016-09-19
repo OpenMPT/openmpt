@@ -168,6 +168,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		if(!Patterns.Insert(pat, 64)

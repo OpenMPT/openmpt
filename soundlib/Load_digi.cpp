@@ -127,6 +127,9 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 30);
 	}
 
+
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.lastPatIndex + 1);
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPatIndex; pat++)
 	{
 		FileReader patternChunk;

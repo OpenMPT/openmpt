@@ -434,6 +434,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	const PATTERNINDEX readPatterns = std::min<PATTERNINDEX>(fileHeader.patNum, MAX_PATTERNS);
+	Patterns.ResizeArray(readPatterns);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{
 		// A zero parapointer indicates an empty pattern.

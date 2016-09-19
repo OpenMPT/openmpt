@@ -1113,6 +1113,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		noteOffset = 13 + NOTE_MIN;
 	else if(m_nType != MOD_TYPE_IT)
 		noteOffset = 12 + NOTE_MIN;
+
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		const ROWINDEX numRows = patLengthChunk.ReadUint16LE();

@@ -748,6 +748,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	bool hasTempoCommands = false, definitelyCIA = false;	// for detecting VBlank MODs
 
 	// Reading patterns
+	Patterns.ResizeArray(numPatterns);
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		PATTERNINDEX actualPattern = pat;
@@ -1175,6 +1176,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(patOffset);
 
 	// Reading patterns
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(numPatterns);
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
@@ -1393,6 +1396,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading patterns
 	Order.resize(numOrders);
 	uint8 speed[2] = { 0, 0 }, speedPos = 0;
+	Patterns.ResizeArray(numOrders);
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
 	{
 		Order[pat] = pat;

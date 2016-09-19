@@ -682,6 +682,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		chunk.Seek(1);
 
+		Patterns.ResizeArray(numPats);
 		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 		{
 			CHANNELINDEX numChans = 32;

@@ -432,6 +432,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	Order.ReadAsByte(file, 256, fileHeader.ordNum, uint16_max, 0xFF);
 
 	// Read patterns
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.patNum);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patNum; pat++)
 	{
 		const uint16 length = file.ReadUint16LE(), numRows = file.ReadUint16LE();

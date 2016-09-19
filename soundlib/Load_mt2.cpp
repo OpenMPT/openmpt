@@ -447,6 +447,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	bool hasLegacyTempo = false;
 
 	// Read patterns
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		ROWINDEX numRows = file.ReadUint16LE();

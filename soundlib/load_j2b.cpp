@@ -725,6 +725,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		PATTERNINDEX maxPattern = 0;
 		auto pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
+		Patterns.ResizeArray(static_cast<PATTERNINDEX>(pattChunks.size()));
 		for(auto patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 		{
 			FileReader chunk(*patternIter);

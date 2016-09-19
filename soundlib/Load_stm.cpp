@@ -161,6 +161,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		STMPatternData patternData;
