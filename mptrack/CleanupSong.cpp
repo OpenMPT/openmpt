@@ -973,7 +973,7 @@ bool CModCleanupDlg::RemoveAllPatterns()
 
 	if(sndFile.Patterns.Size() == 0) return false;
 	modDoc.GetPatternUndo().ClearUndo();
-	sndFile.Patterns.Init();
+	sndFile.Patterns.ResizeArray(0);
 	sndFile.SetCurrentOrder(0);
 	return true;
 }
