@@ -601,6 +601,7 @@ LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS
 
 
 -include build/dist.mk
+DIST_LIBOPENMPT_VERSION_PURE:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)
 CPPFLAGS += -Ibuild/svn_version
 ifeq ($(MPT_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
@@ -1282,3 +1283,11 @@ clean-dist:
 	$(INFO) clean-dist ...
 	$(SILENT)$(RM) $(call FIXPATH,$(DIST_OUTPUTS))
 	$(SILENT)$(RMTREE) $(call FIXPATH,$(DIST_OUTPUTDIRS))
+
+.PHONY: distversion
+distversion:
+	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION)"
+
+.PHONY: distversion-pure
+distversion-pure:
+	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION_PURE)"
