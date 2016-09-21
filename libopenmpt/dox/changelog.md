@@ -38,7 +38,7 @@ is just a high-level summary.
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
  *  Possible crashes with malformed MED, PSM and Startrekker files.
- *  'Makefile' has now explicit support for FreeBSD with no special option or
+ *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
