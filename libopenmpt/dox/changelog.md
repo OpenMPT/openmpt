@@ -11,6 +11,9 @@ is just a high-level summary.
     out-of-memory situations.
  *  [**Bug**] Possible crashes with malformed AMS files.
  *  [**Bug**] Possible crashes with MDL and MED files.
+ *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
+    `libopenmpt_stream_callbacks_file.h` were missing in Windows development
+    packages.
 
 ### libopenmpt 0.2-beta20.1 (2016-09-03)
 
