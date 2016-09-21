@@ -31,6 +31,9 @@ is just a high-level summary.
     when no locale was active.
  *  [**Bug**] The C API could crash instead of failing gracefully in
     out-of-memory situations.
+ *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
+    `libopenmpt_stream_callbacks_file.h` were missing in Windows development
+    packages.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
