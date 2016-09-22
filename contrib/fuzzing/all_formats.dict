@@ -2,10 +2,7 @@
 669="JN"
 
 amf="ASYLUM Music Format V1.0\x00"
-amf="AMF\x08"
 amf="AMF\x0A"
-amf="AMF\x0C"
-amf="AMF\x0E"
 
 ams="Extreme"
 ams="AMShdr\x1A\x02\x02"
@@ -107,13 +104,9 @@ mdl="II"
 #mdl="IS"
 #mdl="SA"
 
-med="MMD0"
 med="MMD1"
-med="MMD2"
-med="MMD3"
 
 mo3="MO3\x05"
-mo3="MO3\x01"
 
 # A couple of magic bytes are commented out because they do not modify the loader's behaviour, apart from setting a "made with" string.
 mod="M.K."
@@ -205,14 +198,13 @@ stm="!SCREAM!\x1A\x02"
 stm="BMOD2STM\x1A\x02"
 
 ult="MAS_UTrack_V004"
-ult="MAS_UTrack_V001"
 
 umx="\xC1\x83\x2A\x9E"
 umx="music"
 umx="sound"
 
 xm="Extended Module: "
-xm="OpenMPT 1."
+xm="OpenMPT "
 xm="FastTracker v 2.00  "
 xm="MilkyTracker        "
 xm="text"
