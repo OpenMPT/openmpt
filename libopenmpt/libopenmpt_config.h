@@ -22,6 +22,32 @@
 #define LIBOPENMPT_CXX_API
 #undef LIBOPENMPT_CXX_API
 
+/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_fd.h exists.
+ * \since 0.3
+ * \remarks
+ *   Use the following to check for availability:
+ *   \code
+ *   #include <libopenmpt/libopenmpt.h>
+ *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FD) || ((OPENMPT_API_VERSION_MAJOR == 0) && ((OPENMPT_API_VERSION_MINOR == 2) || (OPENMPT_API_VERSION_MINOR == 1)))
+ *   #include <libopenmpt/libopenmpt_stream_callbacks_fd.h>
+ *   #endif
+ *   \endcode
+ */
+#define LIBOPENMPT_STREAM_CALLBACKS_FD
+
+/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file.h exists.
+ * \since 0.3
+ * \remarks
+ *   Use the following to check for availability:
+ *   \code
+ *   #include <libopenmpt/libopenmpt.h>
+ *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE) || ((OPENMPT_API_VERSION_MAJOR == 0) && ((OPENMPT_API_VERSION_MINOR == 2) || (OPENMPT_API_VERSION_MINOR == 1))
+ *   #include <libopenmpt/libopenmpt_stream_callbacks_file.h>
+ *   #endif
+ *   \endcode
+ */
+#define LIBOPENMPT_STREAM_CALLBACKS_FILE
+
 #if defined(__DOXYGEN__)
 
 #define LIBOPENMPT_API_HELPER_EXPORT
