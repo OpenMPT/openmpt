@@ -16,17 +16,24 @@ Contents:
 * `fuzz-settings.sh`: Set up your preferences and afl settings here before the
   first run.
 * `fuzz.c`: A tiny C program that is used by the fuzzer to test libopenmpt.
+* `get-afl.sh`: A simple script to obtain the latest version of the fuzzer.
 
 Prerequisites
 =============
-* afl from http://lcamtuf.coredump.cx/afl/
-* Clang. afl also works with gcc, but our makefile has been set up to make use
-  of afl's faster LLVM mode.
+* afl from http://lcamtuf.coredump.cx/afl/ - the makefile expects this to be
+  installed in `contrib/fuzzing/afl`, as it is automatically done by the
+  `get-afl.sh` install script.
+* Clang with LLVM dev headers (llvm-config needs to be installed).
+  afl also works with gcc, but our makefile has been set up to make use of afl's
+  faster LLVM mode.
 
 How to use
 ==========
-* Extract afl to ~/afl
-* Use `make` to build afl-fuzz, `cd llvm_mode`, `make` to build afl-clang-fast.
+* Run `get-afl.sh`, or manually extract afl to `contrib/fuzzing/build.sh`, use
+  `make` to build afl-fuzz, `cd llvm_mode`, `make` to build afl-clang-fast.
+  If building with either option fails because `llvm-config` cannot be found,
+  try prepending `LLVM_CONFIG=/usr/bin/llvm-config-3.8` or similar, and read the
+  afl manual.
 * Build libopenmpt with the `build.sh` script in this directory.
 * Set up `fuzz-settings.sh` to your taste. Most importantly, you will have to
   specify the input directory for first use.

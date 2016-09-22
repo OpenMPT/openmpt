@@ -1,7 +1,7 @@
 
-CC  = ~/afl/afl-clang-fast
-CXX = ~/afl/afl-clang-fast++
-LD  = ~/afl/afl-clang-fast++
+CC  = contrib/fuzzing/afl/afl-clang-fast
+CXX = contrib/fuzzing/afl/afl-clang-fast++
+LD  = contrib/fuzzing/afl/afl-clang-fast++
 AR  = ar 
 
 CPPFLAGS +=
