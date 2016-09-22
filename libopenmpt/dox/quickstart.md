@@ -5,7 +5,7 @@ Quick Start {#quickstart}
 
 ### Autotools-based
 
- 1. Grab a `libopenmpt-autotools.VERSION.tar.gz` tarball.
+ 1. Grab a `libopenmpt-VERSION.autotools.tar.gz` tarball.
  2. Get dependencies:
      -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config >= 0.24**
