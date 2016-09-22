@@ -39,16 +39,13 @@ protected:
 
 public:
 
-	RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence = SEQUENCEINDEX_INVALID) : sndFile(sf), currentOrder(0)
-	{
-		Initialize(true, sequence);
-	};
+	RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence = SEQUENCEINDEX_INVALID);
 
 	RowVisitor(const RowVisitor &other) : sndFile(other.sndFile), Order(other.Order), visitedRows(other.visitedRows), visitOrder(other.visitOrder), currentOrder(other.currentOrder) { };
 
 	// Resize / Clear the row vector.
 	// If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
-	void Initialize(bool reset, SEQUENCEINDEX sequence = SEQUENCEINDEX_INVALID);
+	void Initialize(bool reset);
 
 	// Mark a row as visited.
 	void Visit(ORDERINDEX order, ROWINDEX row)

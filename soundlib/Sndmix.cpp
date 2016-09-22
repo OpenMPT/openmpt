@@ -517,7 +517,8 @@ bool CSoundFile::ProcessRow()
 		}
 
 		// Weird stuff?
-		if (!Patterns.IsValidPat(m_PlayState.m_nPattern)) return false;
+		if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
+			return false;
 		// Did we jump to an invalid row?
 		if (m_PlayState.m_nRow >= Patterns[m_PlayState.m_nPattern].GetNumRows()) m_PlayState.m_nRow = 0;
 
@@ -587,6 +588,8 @@ bool CSoundFile::ProcessRow()
 					if(Order.size() > m_PlayState.m_nCurrentOrder)
 						m_PlayState.m_nPattern = Order[m_PlayState.m_nCurrentOrder];
 					visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
+					if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
+						return false;
 				} else
 				{
 					visitedSongRows.Initialize(true);

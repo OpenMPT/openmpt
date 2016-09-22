@@ -26,16 +26,24 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Resize / Clear the row vector.
-// If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
-void RowVisitor::Initialize(bool reset, SEQUENCEINDEX sequence)
-//-------------------------------------------------------------
+RowVisitor::RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence)
+	: sndFile(sf)
+	, currentOrder(0)
 {
 	if(sequence < sndFile.Order.GetNumSequences())
 		Order = &sndFile.Order.GetSequence(sequence);
 	else
 		Order = &sndFile.Order;
+	Initialize(true);
+}
 
+
+
+// Resize / Clear the row vector.
+// If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
+void RowVisitor::Initialize(bool reset)
+//-------------------------------------
+{
 	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
 	visitedRows.resize(endOrder);
 	if(reset)
