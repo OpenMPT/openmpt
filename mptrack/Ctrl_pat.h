@@ -117,6 +117,9 @@ public:
 	//}}AFX_VIRTUAL
 
 protected:
+	void SetScrollPos(int pos);
+	int GetScrollPos(bool getTrackPos = false);
+
 	//{{AFX_MSG(COrderList)
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }

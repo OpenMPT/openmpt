@@ -94,11 +94,38 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 END_MESSAGE_MAP()
 
 
+void COrderList::SetScrollPos(int pos)
+//------------------------------------
+{
+	// Work around 16-bit limitations of WM_HSCROLL
+	SCROLLINFO si;
+	MemsetZero(si);
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_TRACKPOS;
+	GetScrollInfo(SB_HORZ, &si);
+	si.nPos = pos;
+	SetScrollInfo(SB_HORZ, &si);
+}
+
+
+int COrderList::GetScrollPos(bool getTrackPos)
+//--------------------------------------------
+{
+	// Work around 16-bit limitations of WM_HSCROLL
+	SCROLLINFO si;
+	MemsetZero(si);
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_TRACKPOS;
+	GetScrollInfo(SB_HORZ, &si);
+	return getTrackPos ? si.nTrackPos : si.nPos;
+}
+
+
 bool COrderList::IsOrderInMargins(int order, int startOrder)
 //----------------------------------------------------------
 {
 	const ORDERINDEX nMargins = GetMargins();
-	return ((startOrder != 0 && order - startOrder < nMargins) || 
+	return ((startOrder != 0 && order - startOrder < nMargins) ||
 		order - startOrder >= GetLength() - nMargins);
 }
 
@@ -151,13 +178,13 @@ ORDERINDEX COrderList::GetOrderFromPoint(const CRect& rect, const CPoint& pt) co
 BOOL COrderList::Init(const CRect &rect, HFONT hFont)
 //---------------------------------------------------
 {
-	CreateEx(WS_EX_STATICEDGE, NULL, "", WS_CHILD|WS_VISIBLE, rect, &m_pParent, IDC_ORDERLIST);
+	CreateEx(WS_EX_STATICEDGE, NULL, _T(""), WS_CHILD|WS_VISIBLE, rect, &m_pParent, IDC_ORDERLIST);
 	m_hFont = hFont;
 	colorText = GetSysColor(COLOR_WINDOWTEXT);
 	colorInvalid = GetSysColor(COLOR_GRAYTEXT);
 	colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	SendMessage(WM_SETFONT, (WPARAM)m_hFont);
-	SetScrollPos(SB_HORZ, 0);
+	SetScrollPos(0);
 	EnableScrollBarCtrl(SB_HORZ, TRUE);
 	SetCurSel(0);
 	return TRUE;
@@ -202,7 +229,7 @@ int COrderList::GetFontWidth()
 	{
 		CClientDC dc(this);
 		HGDIOBJ oldfont = ::SelectObject(dc.m_hDC, m_hFont);
-		CSize sz = dc.GetTextExtent("000+", 4);
+		CSize sz = dc.GetTextExtent(_T("000+"), 4);
 		if (oldfont) ::SelectObject(dc.m_hDC, oldfont);
 		return sz.cx;
 	}
@@ -297,7 +324,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			// Must move first shown sequence item to left in order to show
 			// the new active order.
 			m_nXScroll = static_cast<ORDERINDEX>(std::max(0, static_cast<int>(nOrder - nMargins)));
-			SetScrollPos(SB_HORZ, m_nXScroll);
+			SetScrollPos(m_nXScroll);
 			InvalidateRect(NULL, FALSE);
 		} else
 		{
@@ -308,7 +335,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				// Must move first shown sequence item to right in order to show
 				// the new active order.
 				m_nXScroll = nOrder - (maxsel - nMargins);
-				SetScrollPos(SB_HORZ, m_nXScroll);
+				SetScrollPos(m_nXScroll);
 				InvalidateRect(NULL, FALSE);
 			}
 		}
@@ -654,7 +681,7 @@ void COrderList::OnPaint()
 	// First time ?
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{
-		CSize sz = dc.GetTextExtent("000+", 4);
+		CSize sz = dc.GetTextExtent(_T("000+"), 4);
 		m_cxFont = sz.cx;
 		m_cyFont = sz.cy;
 	}
@@ -1063,14 +1090,13 @@ void COrderList::OnMButtonDown(UINT nFlags, CPoint pt)
 }
 
 
-void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *)
-//---------------------------------------------------------------
+void COrderList::OnHScroll(UINT nSBCode, UINT /*nPos*/, CScrollBar *)
+//-------------------------------------------------------------------
 {
 	UINT nNewPos = m_nXScroll;
 	UINT smin, smax;
 	
 	GetScrollRange(SB_HORZ, (LPINT)&smin, (LPINT)&smax);
-	ASSERT(smin >= 0);	// This should never be negative. Otherwise, nPos may be negative too, which we don't account for, because it shouldn't happen... :)
 	m_bScrolling = true;
 	switch(nSBCode)
 	{
@@ -1079,7 +1105,7 @@ void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *)
 	case SB_PAGELEFT:		if (nNewPos > 4) nNewPos -= 4; else nNewPos = 0; break;
 	case SB_PAGERIGHT:		if (nNewPos + 4 < smax) nNewPos += 4; else nNewPos = smax; break;
 	case SB_THUMBPOSITION:
-	case SB_THUMBTRACK:		nNewPos = nPos; break;
+	case SB_THUMBTRACK:		nNewPos = GetScrollPos(true); break;
 	case SB_LEFT:			nNewPos = 0; break;
 	case SB_RIGHT:			nNewPos = smax; break;
 	case SB_ENDSCROLL:		m_bScrolling = false; break;
@@ -1088,7 +1114,7 @@ void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *)
 	if (nNewPos != m_nXScroll)
 	{
 		m_nXScroll = static_cast<ORDERINDEX>(nNewPos);
-		SetScrollPos(SB_HORZ, m_nXScroll);
+		SetScrollPos(m_nXScroll);
 		InvalidateRect(NULL, FALSE);
 	}
 }
@@ -1103,12 +1129,12 @@ void COrderList::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 	UpdateScrollInfo();
 	GetScrollRange(SB_HORZ, &smin, &smax);
-	nPos = GetScrollPos(SB_HORZ);
+	nPos = GetScrollPos();
 	if (nPos > smax) nPos = smax;
 	if (m_nXScroll != nPos)
 	{
 		m_nXScroll = static_cast<ORDERINDEX>(nPos);
-		SetScrollPos(SB_HORZ, m_nXScroll);
+		SetScrollPos(m_nXScroll);
 		InvalidateRect(NULL, FALSE);
 	}
 }
