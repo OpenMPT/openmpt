@@ -67,5 +67,6 @@ Quick Start {#quickstart}
         make check
         sudo make install         # installs into /usr/local by default
         sudo make install-doc     # installs into /usr/local by default
+        sudo ldconfig             # required on some systems (i.e. Linux)
         openmpt123 $SOMEMODULE
 

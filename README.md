@@ -240,6 +240,13 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         make PREFIX=/yourprefix install
         make PREFIX=/yourprefix install-doc
 
+    Some systems (i.e. Linux) require running
+
+        sudo ldconfig
+
+    in order for the system linker to be able to pick up newly installed
+    libraries.
+
     `PREFIX` defaults to `/usr/local`. A `DESTDIR=` parameter is also
     supported.
 
