@@ -341,7 +341,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadMagic("Extreme")
 		|| !file.ReadStruct(fileHeader)
 		|| !file.Skip(fileHeader.extraSize)
-		|| !file.CanRead(fileHeader.numSamps * sizeof(AMSSampleHeader))
+		|| !file.CanRead(3u + fileHeader.numSamps * (1u + sizeof(AMSSampleHeader)) + fileHeader.numOrds * 2u + fileHeader.numPats * 4u)
 		|| fileHeader.versionHigh != 0x01)
 	{
 		return false;
@@ -400,10 +400,11 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read packed song message
 	const uint16 packedLength = file.ReadUint16LE();
-	if(packedLength)
+	if(packedLength && file.CanRead(packedLength))
 	{
-		std::vector<uint8> textIn, textOut;
+		std::vector<uint8> textIn;
 		file.ReadVector(textIn, packedLength);
+		std::string textOut;
 		textOut.reserve(packedLength);
 
 		for(auto c = textIn.begin(); c != textIn.end(); c++)
@@ -417,11 +418,10 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		std::string str(textOut.begin(), textOut.end());
-		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
+		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, textOut);
 
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 76, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(textOut.c_str()), textOut.length(), 76, 0);
 	}
 
 	// Read Order List
@@ -664,7 +664,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(!file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_songName)
 		|| !file.ReadStruct(fileHeader)
-		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
+		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2
+		|| !file.CanRead(36u + sizeof(AMS2Description) + fileHeader.numIns * 2u + fileHeader.numOrds * 2u + fileHeader.numPats * 4u))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -815,33 +816,31 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	if(descriptionHeader.packedLen)
+	if(descriptionHeader.packedLen > sizeof(descriptionHeader) && file.CanRead(descriptionHeader.packedLen - sizeof(descriptionHeader)))
 	{
 		const size_t textLength = descriptionHeader.packedLen - sizeof(descriptionHeader);
-		std::vector<uint8> textIn, textOut(descriptionHeader.unpackedLen);
+		std::vector<uint8> textIn;
 		file.ReadVector(textIn, textLength);
+		std::string textOut;
+		textOut.reserve(descriptionHeader.unpackedLen);
 
-		size_t readLen = 0, writeLen = 0;
-		while(readLen < textLength && writeLen < descriptionHeader.unpackedLen)
+		size_t readLen = 0;
+		while(readLen < textLength)
 		{
 			uint8 c = textIn[readLen++];
 			if(c == 0xFF && textLength - readLen >= 2)
 			{
 				c = textIn[readLen++];
 				uint32 count = textIn[readLen++];
-				for(size_t i = std::min<size_t>(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
-				{
-					textOut[writeLen++] = c;
-				}
+				textOut.insert(textOut.end(), count, c);
 			} else
 			{
-				textOut[writeLen++] = c;
+				textOut.push_back(c);
 			}
 		}
-		std::string str(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen);
-		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
+		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, textOut);
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 74, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(textOut.c_str()), textOut.length(), 74, 0);
 	}
 
 	// Read Order List
