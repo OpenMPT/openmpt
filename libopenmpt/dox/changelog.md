@@ -9,15 +9,15 @@ is just a high-level summary.
 
  *  [**Bug**] The C API could crash instead of failing gracefully in
     out-of-memory situations.
- *  [**Bug**] Possible crashes with malformed AMS files.
- *  [**Bug**] Possible crashes with MDL and MED files.
+ *  [**Bug**] Possible crashes with malformed AMS, MDL and MED files.
+ *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
 
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
- *  Possible hangs with malformed DBM, MPTM and PSM files.
- *  Crashes with malformed files in various formats.
+ *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
+    created with ScreamTracker 3.
 
 ### libopenmpt 0.2-beta20.1 (2016-09-03)
 
@@ -26,8 +26,6 @@ is just a high-level summary.
  *  [**Bug**] Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker 
     files.
 
- *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
-    created with ScreamTracker 3.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
 
