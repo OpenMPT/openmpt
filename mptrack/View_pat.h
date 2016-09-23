@@ -516,6 +516,9 @@ private:
 	void PendingSoloChn(CHANNELINDEX nChn);
 	void PendingUnmuteAllChn();
 
+	template<typename Func>
+	void ApplyToSelection(Func func);
+
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
