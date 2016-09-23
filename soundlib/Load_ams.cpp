@@ -712,7 +712,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		if(instrument == nullptr
 			|| !file.ReadSizedString<uint8le, mpt::String::spacePadded>(instrument->name))
 		{
-			return false;
+			break;
 		}
 
 		uint8 numSamples = file.ReadUint8();
