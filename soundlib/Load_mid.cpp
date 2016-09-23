@@ -762,6 +762,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 data1 = track.ReadUint8();
 		if(data1 == 0xFF)
 		{
+			// Meta events
 			data1 = track.ReadUint8();
 			size_t len = 0;
 			track.ReadVarInt(len);
@@ -805,6 +806,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			case 9:	// Port name
 				break;
 			case 0x2F:	// End Of Track
+				tracks[t].finished = true;
 				break;
 			case 0x51: // Tempo
 				{
@@ -976,7 +978,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 					case MIDIEvents::MIDICC_DataButtonincrement:
 					case MIDIEvents::MIDICC_DataButtondecrement:
-						midiChnStatus[midiCh].SetRPN(midiChnStatus[midiCh].GetRPN() + (data1 == MIDIEvents::MIDICC_DataButtonincrement) ? 1 : -1);
+						midiChnStatus[midiCh].SetRPN(midiChnStatus[midiCh].GetRPN() + ((data1 == MIDIEvents::MIDICC_DataButtonincrement) ? 1 : -1));
 						break;
 
 					case MIDIEvents::MIDICC_NonRegisteredParameter_Fine:
@@ -1042,10 +1044,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				switch(midiCh)
 				{
 				case MIDIEvents::sysExStart: // SysEx
+				case MIDIEvents::sysExEnd: // SysEx (continued)
 					{
 						uint32 len;
 						track.ReadVarInt(len);
 						FileReader sysex = track.ReadChunk(len);
+						if(midiCh == MIDIEvents::sysExEnd)
+							break;
 
 						if(sysex.ReadMagic("\x7F\x7F\x04\x01"))
 						{
