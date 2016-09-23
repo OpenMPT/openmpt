@@ -955,6 +955,10 @@ bool CModCleanupDlg::ResetVariables()
 bool CModCleanupDlg::RemoveUnusedChannels()
 //-----------------------------------------
 {
+	// Avoid M.K. modules to become xCHN modules if some channels are unused.
+	if(modDoc.GetModType() == MOD_TYPE_MOD && modDoc.GetNumChannels() == 4)
+		return false;
+
 	std::vector<bool> usedChannels;
 	modDoc.CheckUsedChannels(usedChannels, modDoc.GetNumChannels() - modDoc.GetrSoundFile().GetModSpecifications().channelsMin);
 	return modDoc.RemoveChannels(usedChannels);

@@ -15,6 +15,10 @@ is just a high-level summary.
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
 
+ *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
+ *  Possible hangs with malformed DBM, MPTM and PSM files.
+ *  Crashes with malformed files in various formats.
+
 ### libopenmpt 0.2-beta20.1 (2016-09-03)
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways

@@ -334,7 +334,7 @@ BOOL CSampleXFadeDlg::OnInitDialog()
 	const bool hasBothLoops = hasNormal && hasSustain;
 	m_RadioNormalLoop.EnableWindow(hasBothLoops);
 	m_RadioSustainLoop.EnableWindow(hasBothLoops);
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_useSustainLoop && hasSustain) ? IDC_RADIO2 : IDC_RADIO1);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, ((m_useSustainLoop && hasSustain) || !hasNormal) ? IDC_RADIO2 : IDC_RADIO1);
 
 	m_SliderLength.SetRange(0, 100000);
 	m_SliderLength.SetPos(m_fadeLength);

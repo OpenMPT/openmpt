@@ -348,6 +348,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 			}
 		}
+		if(memory.state.m_nNextOrder == ORDERINDEX_INVALID)
+		{
+			// GetFirstUnvisitedRow failed, so there is nothing more to play
+			break;
+		}
+
 		// Skip non-existing patterns
 		if((memory.state.m_nPattern >= Patterns.Size()) || (!Patterns[memory.state.m_nPattern]))
 		{

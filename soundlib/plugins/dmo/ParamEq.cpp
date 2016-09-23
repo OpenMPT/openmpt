@@ -45,24 +45,32 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-----------------------------------------------------------------
 {
-	if(m_param[kEqGain] == 1.0f || !m_mixBuffer.Ok())
+	if(!m_mixBuffer.Ok())
 		return;
+
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
-	for(uint32 i = numFrames; i != 0; i--)
+	if(m_param[kEqGain] == 0.5f)
 	{
-		for(uint8 channel = 0; channel < 2; channel++)
+		memcpy(out[0], in[0], numFrames * sizeof(float));
+		memcpy(out[1], in[1], numFrames * sizeof(float));
+	} else
+	{
+		for(uint32 i = numFrames; i != 0; i--)
 		{
-			float x = *(in[channel])++;
-			float y = b0DIVa0 * x + b1DIVa0 * x1[channel] + b2DIVa0 * x2[channel] - a1DIVa0 * y1[channel] - a2DIVa0 * y2[channel];
+			for(uint8 channel = 0; channel < 2; channel++)
+			{
+				float x = *(in[channel])++;
+				float y = b0DIVa0 * x + b1DIVa0 * x1[channel] + b2DIVa0 * x2[channel] - a1DIVa0 * y1[channel] - a2DIVa0 * y2[channel];
 
-			x2[channel] = x1[channel];
-			x1[channel] = x;
-			y2[channel] = y1[channel];
-			y1[channel] = y;
+				x2[channel] = x1[channel];
+				x1[channel] = x;
+				y2[channel] = y1[channel];
+				y1[channel] = y;
 
-			*(out[channel])++ = y;
+				*(out[channel])++ = y;
+			}
 		}
 	}
 

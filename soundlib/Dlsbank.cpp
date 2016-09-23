@@ -152,6 +152,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define IFFID_rgnh		0x686E6772
 #define IFFID_wlnk		0x6B6E6C77
 #define IFFID_art1		0x31747261
+#define IFFID_art2		0x32747261
 
 //////////////////////////////////////////////////////////
 // DLS Structures definitions
@@ -546,6 +547,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 				fread(&riff, sizeof(RIFFCHUNKID), 1, f);
 				break;
 			}
+			if((len % 2u) != 0)
+				len++;
 			if (fseek(f, len-4, SEEK_CUR) != 0) break;
 		} while (fread(&riff, sizeof(RIFFCHUNKID), 1, f) != 0);
 	} else
@@ -557,6 +560,8 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 				break;
 			if (riff.id_DLS == IFFID_DLS) break; // found it
 			int len = riff.riff_len;
+			if((len % 2u) != 0)
+				len++;
 			if ((len <= 4) || (fseek(f, len-4, SEEK_CUR) != 0)) break;
 		}
 	}
@@ -714,6 +719,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 			break;
 
 		case IFFID_art1:
+		case IFFID_art2:
 			if (m_nEnvelopes < DLSMAXENVELOPES)
 			{
 				ART1CHUNK *p = (ART1CHUNK *)pchunk;
@@ -1209,7 +1215,10 @@ bool CDLSBank::Open(FileReader file)
 		{
 			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
 			if ((priff->id_RIFF == IFFID_RIFF) && (priff->id_DLS == IFFID_DLS)) break;
-			dwMemPos += priff->riff_len + 8;
+			uint32 len = priff->riff_len;
+			if((len % 2u) != 0)
+				len++;
+			dwMemPos += len + 8;
 		}
 	}
 
@@ -1219,6 +1228,8 @@ bool CDLSBank::Open(FileReader file)
 		do {
 			priff = (RIFFCHUNKID *)(lpMemFile + dwMemPos);
 			int len = BigEndian(priff->riff_len);
+			if((len % 2u) != 0)
+				len++;
 			if ((len <= 4) || ((uint32)len >= dwMemLength - dwMemPos)) break;
 			if (priff->id_DLS == IFFID_XDLS)
 			{

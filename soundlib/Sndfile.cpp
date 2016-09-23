@@ -88,6 +88,7 @@ CSoundFile::CSoundFile() :
 	Order(*this),
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
+	m_pModDoc(nullptr),
 #endif
 	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
 	visitedSongRows(*this),
@@ -115,7 +116,6 @@ CSoundFile::CSoundFile() :
 
 #ifdef MODPLUG_TRACKER
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
-	m_pModDoc = nullptr;
 	m_bChannelMuteTogglePending.reset();
 
 	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
@@ -176,6 +176,13 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	MODTYPE bestType = GetBestSaveFormat();
 	m_playBehaviour = GetDefaultPlaybackBehaviour(bestType);
 	SetModSpecsPointer(m_pModSpecs, bestType);
+
+	// Delete instruments in case some previously called loader already created them.
+	for(INSTRUMENTINDEX i = 1; i <= m_nInstruments; i++)
+	{
+		delete Instruments[i];
+		Instruments[i] = nullptr;
+	}
 
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = 0;
@@ -532,7 +539,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
-			std::string url = "http://resources.openmpt.org/plugins/search.php?p=";
+			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
 				url += mpt::fmt::HEX0<8>(LittleEndian((**i).dwPluginId2));
