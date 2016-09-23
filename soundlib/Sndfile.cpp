@@ -88,6 +88,7 @@ CSoundFile::CSoundFile() :
 	Order(*this),
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
+	m_pModDoc(nullptr),
 #endif
 	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
 	visitedSongRows(*this),
@@ -116,7 +117,6 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_lockRowStart = m_lockRowEnd = ROWINDEX_INVALID;
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
-	m_pModDoc = nullptr;
 	m_bChannelMuteTogglePending.reset();
 
 	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
@@ -177,6 +177,13 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	MODTYPE bestType = GetBestSaveFormat();
 	m_playBehaviour = GetDefaultPlaybackBehaviour(bestType);
 	SetModSpecsPointer(m_pModSpecs, bestType);
+
+	// Delete instruments in case some previously called loader already created them.
+	for(INSTRUMENTINDEX i = 1; i <= m_nInstruments; i++)
+	{
+		delete Instruments[i];
+		Instruments[i] = nullptr;
+	}
 
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = 0;
@@ -528,7 +535,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
-			std::string url = "http://resources.openmpt.org/plugins/search.php?p=";
+			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
 			for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
 			{
 				url += mpt::fmt::HEX0<8>((**i).dwPluginId2.get());
@@ -550,10 +557,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 
 	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
-	const ORDERINDEX CacheSize = ModSequenceSet::s_nCacheSize; // workaround reference to static const member problem
-	const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
-	if (Order.GetLength() < nMinLength)
-		Order.resize(nMinLength);
 
 	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.
 	if(m_dwLastSavedWithVersion)
