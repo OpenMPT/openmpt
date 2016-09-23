@@ -1016,87 +1016,81 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 
 	PrepareUndo(m_Selection, "Clear Selection");
 
-	const ROWINDEX endRow = m_Selection.GetEndRow();
-	for(ROWINDEX row = m_Selection.GetStartRow(); row <= endRow; row++)
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX row, CHANNELINDEX chn)
 	{
-		for(CHANNELINDEX chn = m_Selection.GetStartChannel(); chn <= m_Selection.GetEndChannel(); chn++)
+		for(int i = PatternCursor::firstColumn; i <= PatternCursor::lastColumn; i++)
 		{
-			for(int i = PatternCursor::firstColumn; i <= PatternCursor::lastColumn; i++)
+			PatternCursor cell(row, chn, static_cast<PatternCursor::Columns>(i));
+			if(!m_Selection.ContainsHorizontal(cell))
 			{
-				PatternCursor cell(row, chn, static_cast<PatternCursor::Columns>(i));
-				if(!m_Selection.ContainsHorizontal(cell))
+				// We might have to skip the first / last few entries.
+				continue;
+			}
+
+			switch(i)
+			{
+			case PatternCursor::noteColumn:		// Clear note
+				if(rm.note)
 				{
-					// We might have to skip the first / last few entries.
-					continue;
+					if(m.IsPcNote())
+					{  // Clear whole cell if clearing PC note
+						m.Clear();
+					}
+					else
+					{
+						m.note = NOTE_NONE;
+						if (ITStyle) m.instr = 0;
+					}
 				}
+				break;
 
-				ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
-
-				switch(i)
+			case PatternCursor::instrColumn:	// Clear instrument
+				if(rm.instrument)
 				{
-				case PatternCursor::noteColumn:		// Clear note
-					if(rm.note)
-					{
-						if(m->IsPcNote())
-						{  // Clear whole cell if clearing PC note
-							m->Clear();
-						}
-						else
-						{
-							m->note = NOTE_NONE;
-							if (ITStyle) m->instr = 0;
-						}
-					}
-					break;
-
-				case PatternCursor::instrColumn:	// Clear instrument
-					if(rm.instrument)
-					{
-						m->instr = 0;
-					}
-					break;
-
-				case PatternCursor::volumeColumn:	// Clear volume
-					if(rm.volume)
-					{
-						m->volcmd = VOLCMD_NONE;
-						m->vol = 0;
-					}
-					break;
-
-				case PatternCursor::effectColumn:	// Clear Command
-					if(rm.command)
-					{
-						m->command = CMD_NONE;
-						if(m->IsPcNote())
-						{
-							m->SetValueEffectCol(0);
-						}
-					}
-					break;
-
-				case PatternCursor::paramColumn:	// Clear Command Param
-					if(rm.parameter)
-					{
-						m->param = 0;
-						if(m->IsPcNote())
-						{
-							m->SetValueEffectCol(0);
-
-							if(cell.CompareColumn(m_Selection.GetUpperLeft()) == 0)
-							{
-								// If this is the first selected column, update effect column char as well
-								PatternCursor upper(m_Selection.GetUpperLeft());
-								upper.Move(0, 0, -1);
-								m_Selection = PatternRect(upper, m_Selection.GetLowerRight());
-							}
-						}
-					}
-					break;
+					m.instr = 0;
 				}
+				break;
+
+			case PatternCursor::volumeColumn:	// Clear volume
+				if(rm.volume)
+				{
+					m.volcmd = VOLCMD_NONE;
+					m.vol = 0;
+				}
+				break;
+
+			case PatternCursor::effectColumn:	// Clear Command
+				if(rm.command)
+				{
+					m.command = CMD_NONE;
+					if(m.IsPcNote())
+					{
+						m.SetValueEffectCol(0);
+					}
+				}
+				break;
+
+			case PatternCursor::paramColumn:	// Clear Command Param
+				if(rm.parameter)
+				{
+					m.param = 0;
+					if(m.IsPcNote())
+					{
+						m.SetValueEffectCol(0);
+
+						if(cell.CompareColumn(m_Selection.GetUpperLeft()) == 0)
+						{
+							// If this is the first selected column, update effect column char as well
+							PatternCursor upper(m_Selection.GetUpperLeft());
+							upper.Move(0, 0, -1);
+							m_Selection = PatternRect(upper, m_Selection.GetLowerRight());
+						}
+					}
+				}
+				break;
 			}
 		}
-	}
+	});
 
 	// Expand invalidation to the whole column. Needed for:
 	// - Last column is the effect character (parameter needs to be invalidated, too
@@ -2522,9 +2516,6 @@ bool CViewPattern::TransposeSelection(int transp)
 
 	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 
-	const ROWINDEX startRow = m_Selection.GetStartRow(), endRow = m_Selection.GetEndRow();
-	const CHANNELINDEX startChan = m_Selection.GetStartChannel() + (m_Selection.GetStartColumn() > PatternCursor::noteColumn ? 1 : 0), endChan = m_Selection.GetEndChannel();
-
 	// Don't allow notes outside our supported note range.
 	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
 	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
@@ -2532,33 +2523,32 @@ bool CViewPattern::TransposeSelection(int transp)
 	PrepareUndo(m_Selection, "Transpose");
 
 	std::vector<int> lastGroupSize(pSndFile->GetNumChannels(), 12);
-	for(ROWINDEX row = startRow; row <= endRow; row++)
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX chn)
 	{
-		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
-		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
+		if(chn == m_Selection.GetStartChannel() && m_Selection.GetStartColumn() > PatternCursor::noteColumn)
+			return;
+
+		if (m.IsNote())
 		{
-			if (m[chn].IsNote())
+			if(m.instr > 0 && m.instr <= pSndFile->GetNumInstruments())
 			{
-				if(m[chn].instr > 0 && m[chn].instr <= pSndFile->GetNumInstruments())
+				const ModInstrument *pIns = pSndFile->Instruments[m.instr];
+				if(pIns != nullptr && pIns->pTuning != nullptr)
 				{
-					const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
-					if(pIns != nullptr && pIns->pTuning != nullptr)
-					{
-						lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
-					}
+					lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
 				}
-				int transpose = transp;
-				if(transpose == 12000 || transpose == -12000)
-				{
-					// Transpose one octave
-					transpose = lastGroupSize[chn] * sgn(transpose);
-				}
-				int note = m[chn].note + transpose;
-				Limit(note, noteMin, noteMax);
-				m[chn].note = static_cast<ModCommand::NOTE>(note);
 			}
+			int transpose = transp;
+			if(transpose == 12000 || transpose == -12000)
+			{
+				// Transpose one octave
+				transpose = lastGroupSize[chn] * sgn(transpose);
+			}
+			int note = m.note + transpose;
+			Limit(note, noteMin, noteMax);
+			m.note = static_cast<ModCommand::NOTE>(note);
 		}
-	}
+	});
 	SetModified(false);
 	InvalidateSelection();
 	return true;
@@ -2576,8 +2566,6 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 
-	const ROWINDEX startRow = m_Selection.GetStartRow(), endRow = m_Selection.GetEndRow();
-	const CHANNELINDEX startChan = m_Selection.GetStartChannel(), endChan = m_Selection.GetEndChannel();
 	const PatternCursor::Columns column = m_Selection.GetStartColumn();
 
 	// Don't allow notes outside our supported note range.
@@ -2591,97 +2579,94 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	// Notes per octave for non-TET12 tunings and coarse note steps
 	std::vector<int> lastGroupSize(pSndFile->GetNumChannels(), 12);
-	for(ROWINDEX row = startRow; row <= endRow; row++)
+
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX chn)
 	{
-		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
-		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
+		if(column == PatternCursor::noteColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
 		{
-			if(column == PatternCursor::noteColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
+			// Increase / decrease note
+			if(m.IsNote())
 			{
-				// Increase / decrease note
-				if(m[chn].IsNote())
+				if(m.instr > 0 && m.instr <= pSndFile->GetNumInstruments())
 				{
-					if(m[chn].instr > 0 && m[chn].instr <= pSndFile->GetNumInstruments())
+					lastGroupSize[chn] = 12;
+					const ModInstrument *pIns = pSndFile->Instruments[m.instr];
+					if(pIns != nullptr && pIns->pTuning != nullptr)
 					{
-						lastGroupSize[chn] = 12;
-						const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
-						if(pIns != nullptr && pIns->pTuning != nullptr)
-						{
-							lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
-						}
-					}
-					int note = m[chn].note + offset * (coarse ? lastGroupSize[chn] : 1);
-					Limit(note, noteMin, noteMax);
-					m[chn].note = (ModCommand::NOTE)note;
-				} else if(m[chn].IsSpecialNote())
-				{
-					ModCommand::NOTE note = m[chn].note;
-					do
-					{
-						note = static_cast<ModCommand::NOTE>(note + offset);
-						if(!ModCommand::IsSpecialNote(note))
-						{
-							break;
-						}
-					} while(!pSndFile->GetModSpecifications().HasNote(note));
-					if(ModCommand::IsSpecialNote(note))
-					{
-						if(m[chn].IsPcNote() != ModCommand::IsPcNote(note))
-						{
-							m[chn].Clear();
-						}
-						m[chn].note = (ModCommand::NOTE)note;
+						lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
 					}
 				}
-			}
-			if(column == PatternCursor::instrColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)) && m[chn].instr != 0)
+				int note = m.note + offset * (coarse ? lastGroupSize[chn] : 1);
+				Limit(note, noteMin, noteMax);
+				m.note = (ModCommand::NOTE)note;
+			} else if(m.IsSpecialNote())
 			{
-				// Increase / decrease instrument
-				int instr = m[chn].instr + offset * (coarse ? 10 : 1);
-				Limit(instr, 1, m[chn].IsInstrPlug() ? MAX_MIXPLUGINS : instrMax);
-				m[chn].instr = (ModCommand::INSTR)instr;
-			}
-			if(column == PatternCursor::volumeColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
-			{
-				// Increase / decrease volume parameter
-				if(m[chn].IsPcNote())
+				ModCommand::NOTE note = m.note;
+				do
 				{
-					int val = m[chn].GetValueVolCol() + offset * (coarse ? 10 : 1);
-					Limit(val, 0, int(ModCommand::maxColumnValue));
-					m[chn].SetValueVolCol(static_cast<uint16>(val));
-				} else
-				{
-					int vol = m[chn].vol + offset * (coarse ? 10 : 1);
-					if(m[chn].volcmd == VOLCMD_NONE && m[chn].IsNote() && m[chn].instr)
+					note = static_cast<ModCommand::NOTE>(note + offset);
+					if(!ModCommand::IsSpecialNote(note))
 					{
-						m[chn].volcmd = VOLCMD_VOLUME;
-						vol = GetDefaultVolume(m[chn]);
+						break;
 					}
-					ModCommand::VOL minValue = 0, maxValue = 64;
-					effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m[chn].volcmd), nullptr, &minValue, &maxValue);
-					Limit(vol, (int)minValue, (int)maxValue);
-					m[chn].vol = (ModCommand::VOL)vol;
-				}
-			}
-			if((column == PatternCursor::effectColumn || column == PatternCursor::paramColumn) && (m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn))))
-			{
-				// Increase / decrease effect parameter
-				if(m[chn].IsPcNote())
+				} while(!pSndFile->GetModSpecifications().HasNote(note));
+				if(ModCommand::IsSpecialNote(note))
 				{
-					int val = m[chn].GetValueEffectCol() + offset * (coarse ? 10 : 1);
-					Limit(val, 0, int(ModCommand::maxColumnValue));
-					m[chn].SetValueEffectCol(static_cast<uint16>(val));
-				} else
-				{
-					int param = m[chn].param + offset * (coarse ? 16 : 1);
-					ModCommand::PARAM minValue = 0, maxValue = 0xFF;
-					effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m[chn].command, m[chn].param), nullptr, false, &minValue, &maxValue);
-					Limit(param, (int)minValue, (int)maxValue);
-					m[chn].param = (ModCommand::PARAM)param;
+					if(m.IsPcNote() != ModCommand::IsPcNote(note))
+					{
+						m.Clear();
+					}
+					m.note = (ModCommand::NOTE)note;
 				}
 			}
 		}
-	}
+		if(column == PatternCursor::instrColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)) && m.instr != 0)
+		{
+			// Increase / decrease instrument
+			int instr = m.instr + offset * (coarse ? 10 : 1);
+			Limit(instr, 1, m.IsInstrPlug() ? MAX_MIXPLUGINS : instrMax);
+			m.instr = (ModCommand::INSTR)instr;
+		}
+		if(column == PatternCursor::volumeColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
+		{
+			// Increase / decrease volume parameter
+			if(m.IsPcNote())
+			{
+				int val = m.GetValueVolCol() + offset * (coarse ? 10 : 1);
+				Limit(val, 0, int(ModCommand::maxColumnValue));
+				m.SetValueVolCol(static_cast<uint16>(val));
+			} else
+			{
+				int vol = m.vol + offset * (coarse ? 10 : 1);
+				if(m.volcmd == VOLCMD_NONE && m.IsNote() && m.instr)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					vol = GetDefaultVolume(m);
+				}
+				ModCommand::VOL minValue = 0, maxValue = 64;
+				effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m.volcmd), nullptr, &minValue, &maxValue);
+				Limit(vol, (int)minValue, (int)maxValue);
+				m.vol = (ModCommand::VOL)vol;
+			}
+		}
+		if((column == PatternCursor::effectColumn || column == PatternCursor::paramColumn) && (m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn))))
+		{
+			// Increase / decrease effect parameter
+			if(m.IsPcNote())
+			{
+				int val = m.GetValueEffectCol() + offset * (coarse ? 10 : 1);
+				Limit(val, 0, int(ModCommand::maxColumnValue));
+				m.SetValueEffectCol(static_cast<uint16>(val));
+			} else
+			{
+				int param = m.param + offset * (coarse ? 16 : 1);
+				ModCommand::PARAM minValue = 0, maxValue = 0xFF;
+				effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m.command, m.param), nullptr, false, &minValue, &maxValue);
+				Limit(param, (int)minValue, (int)maxValue);
+				m.param = (ModCommand::PARAM)param;
+			}
+		}
+	});
 
 	SetModified(false);
 	InvalidatePattern();
@@ -5732,19 +5717,14 @@ void CViewPattern::OnSelectPCNoteParam(UINT nID)
 
 	uint16 paramNdx = static_cast<uint16>(nID - ID_CHANGE_PCNOTE_PARAM);
 	bool modified = false;
-	CHANNELINDEX startChn = m_Selection.GetStartChannel(), endChn = m_Selection.GetEndChannel();
-	for(ROWINDEX nRow = m_Selection.GetStartRow(); nRow <= m_Selection.GetEndRow(); nRow++)
+	ApplyToSelection([paramNdx, &modified] (ModCommand &m, ROWINDEX, CHANNELINDEX)
 	{
-		ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, startChn);
-		for(CHANNELINDEX nChn = startChn; nChn <= endChn; nChn++, p++)
+		if(m.IsPcNote() && (m.GetValueVolCol() != paramNdx))
 		{
-			if(p && p->IsPcNote() && (p->GetValueVolCol() != paramNdx))
-			{
-				modified = true;
-				p->SetValueVolCol(paramNdx);
-			}
+			m.SetValueVolCol(paramNdx);
+			modified = true;
 		}
-	}
+	});
 	if(modified)
 	{
 		SetModified();
@@ -6615,32 +6595,21 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 		return;
 	}
 
-	bool modified = false;
-
 	BeginWaitCursor();
 	PrepareUndo(m_Selection, "Set Instrument");
 
-	//rewbs: re-written to work regardless of selection
-	ROWINDEX startRow  = m_Selection.GetStartRow();
-	ROWINDEX endRow    = m_Selection.GetEndRow();
-	CHANNELINDEX startChan = m_Selection.GetStartChannel();
-	CHANNELINDEX endChan   = m_Selection.GetEndChannel();
-
-	for(ROWINDEX r = startRow; r <= endRow; r++)
+	bool modified = false;
+	ApplyToSelection([nIns, &modified] (ModCommand &m, ROWINDEX, CHANNELINDEX)
 	{
-		ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, startChan);
-		for(CHANNELINDEX c = startChan; c <= endChan; c++, p++)
+		// If a note or an instr is present on the row, do the change, if required.
+		// Do not set instr if note and instr are both blank,
+		// but set instr if note is a PC note and instr is blank.
+		if((m.IsNote() || m.IsPcNote() || m.instr) && (m.instr != nIns))
 		{
-			// If a note or an instr is present on the row, do the change, if required.
-			// Do not set instr if note and instr are both blank,
-			// but set instr if note is a PC note and instr is blank.
-			if((p->IsNote() || p->IsPcNote() || p->instr) && (p->instr != nIns))
-			{
-				p->instr = static_cast<ModCommand::INSTR>(nIns);
-				modified = true;
-			}
+			m.instr = static_cast<ModCommand::INSTR>(nIns);
+			modified = true;
 		}
-	}
+	});
 
 	if(modified)
 	{
@@ -6786,5 +6755,26 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	return result;
 }
 
+
+template<typename Func>
+void CViewPattern::ApplyToSelection(Func func)
+//--------------------------------------------
+{
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+		return;
+	auto pattern = sndFile->Patterns[m_nPattern];
+	m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
+	const CHANNELINDEX startChn = m_Selection.GetStartChannel(), endChn = m_Selection.GetEndChannel();
+	const ROWINDEX endRow = m_Selection.GetEndRow();
+	for(ROWINDEX row = m_Selection.GetStartRow(); row <= endRow; row++)
+	{
+		ModCommand *m = pattern.GetpModCommand(row, startChn);
+		for(CHANNELINDEX chn = startChn; chn <= endChn; chn++, m++)
+		{
+			func(*m, row, chn);
+		}
+	}
+}
 
 OPENMPT_NAMESPACE_END
