@@ -100,7 +100,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	float fb1 = -e / (1.0f + d + e);
 
 #if defined(MPT_INTMIXER)
-#define FILTER_CONVERT(x) static_cast<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
+#define FILTER_CONVERT(x) Util::Round<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
 #else
 #define FILTER_CONVERT(x) (x)
 #endif
@@ -123,6 +123,8 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 		pChn->nFilter_B0 = FILTER_CONVERT(fb0);
 		pChn->nFilter_B1 = FILTER_CONVERT(fb1);
 #ifdef MPT_INTMIXER
+		if(pChn->nFilter_A0 == 0)
+			pChn->nFilter_A0 = 1;	// Prevent silence at low filter cutoff and very high sampling rate
 		pChn->nFilter_HP = 0;
 #else
 		pChn->nFilter_HP = 0;
