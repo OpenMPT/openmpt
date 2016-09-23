@@ -90,7 +90,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_TOP_PICKS,		OnInternetLink)
-	ON_CBN_SELCHANGE(IDC_COMBO_BASEOCTAVE,	OnOctaveChanged)
 	ON_UPDATE_COMMAND_UI(ID_MIDI_RECORD,	OnUpdateMidiRecord)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	OnUpdateTime)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
@@ -2183,15 +2182,15 @@ CView *CMainFrame::GetActiveView()
 void CMainFrame::SwitchToActiveView()
 //-----------------------------------
 {
-	CMDIChildWnd *pMDIActive = MDIGetActive();
-	if (pMDIActive)
+	CWnd *wnd = GetActiveView();
+	if (wnd)
 	{
-		CView *pView = pMDIActive->GetActiveView();
-		if (pView)
+		// Hack: If the upper view is active, we only get the "container" (the dialog view with the tabs), not the view itself.
+		if(!strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CModControlView"))
 		{
-			pMDIActive->SetActiveView(pView);
-			pView->SetFocus();
+			wnd = static_cast<CModControlView *>(wnd)->GetCurrentControlDlg();
 		}
+		wnd->SetFocus();
 	}
 }
 
@@ -2361,10 +2360,6 @@ void CMainFrame::OnPrevOctave()
 {
 	UINT n = GetBaseOctave();
 	if (n > MIN_BASEOCTAVE) m_wndToolBar.SetBaseOctave(n-1);
-// -> CODE#0009
-// -> DESC="instrument editor note play & octave change"
-//	SwitchToActiveView();
-// -! BEHAVIOUR_CHANGE#0009
 }
 
 
@@ -2373,17 +2368,6 @@ void CMainFrame::OnNextOctave()
 {
 	UINT n = GetBaseOctave();
 	if (n < MAX_BASEOCTAVE) m_wndToolBar.SetBaseOctave(n+1);
-// -> CODE#0009
-// -> DESC="instrument editor note play & octave change"
-//	SwitchToActiveView();
-// -! BEHAVIOUR_CHANGE#0009
-}
-
-
-void CMainFrame::OnOctaveChanged()
-//--------------------------------
-{
-	SwitchToActiveView();
 }
 
 
@@ -2506,6 +2490,13 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 					StopPreview();
 				break;
 			}
+
+		case kcSwitchToInstrLibrary:
+			if(m_bModTreeHasFocus)
+				SwitchToActiveView();
+			else
+				m_wndTree.SetFocus();
+			break;
 
 		//if handled neither by MainFrame nor by ModDoc...
 		default:

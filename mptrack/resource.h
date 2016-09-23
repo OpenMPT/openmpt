@@ -571,7 +571,6 @@
 #define IDC_TABCTRL1                    1951
 #define IDC_SCROLLBAR1                  1998
 #define IDC_QUESTION1                   1999
-#define IDC_COMBO_BASEOCTAVE            2001
 #define IDC_COMBO_INSTRUMENT            2002
 #define IDC_EDIT_COMMENTS               2004
 #define IDC_EDIT_SONGTITLE              2005

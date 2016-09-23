@@ -17,8 +17,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct CModSpecifications;
 
-#define KEYMAP_VERSION 1	// Version of the .mkb format
-
 #define HOTKEYF_MIDI 0x10		// modifier mask for MIDI CCs
 #define HOTKEYF_RSHIFT 0x20		// modifier mask for right Shift key
 #define HOTKEYF_RCONTROL 0x40	// modifier mask for right Ctrl key
@@ -141,6 +139,7 @@ enum CommandID
 	kcShowMacroConfig,
 	kcViewMIDImapping,
 	kcViewEditHistory,
+	kcSwitchToInstrLibrary,
 	kcHelp,
 	kcEndView=kcHelp,
 

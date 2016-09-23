@@ -509,7 +509,6 @@ protected:
 	afx_msg void OnMidiRecord();
 	afx_msg void OnPrevOctave();
 	afx_msg void OnNextOctave();
-	afx_msg void OnOctaveChanged();
 	afx_msg void OnPanic();
 	afx_msg void OnReportBug();
 	afx_msg BOOL OnInternetLink(UINT nID);

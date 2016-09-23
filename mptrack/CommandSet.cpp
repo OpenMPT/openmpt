@@ -23,6 +23,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
+
 
 #define ENABLE_LOGGING 0
 
@@ -446,7 +448,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcEditSelectAll, 1364, _T("Select All"));
 	DefineKeyCommand(kcEditFind, 1365, _T("Find / Replace"));
 	DefineKeyCommand(kcEditFindNext, 1366, _T("Find Next"));
-	DefineKeyCommand(kcViewMain, 1367, _T("Toggle Main View"));
+	DefineKeyCommand(kcViewMain, 1367, _T("Toggle Main Toolbar"));
 	DefineKeyCommand(kcViewTree, 1368, _T("Toggle Tree View"));
 	DefineKeyCommand(kcViewOptions, 1369, _T("View Options"));
 	DefineKeyCommand(kcHelp, 1370, _T("Help"));
@@ -701,6 +703,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleCenterSampleEnd, 1963, _T("Zoom into sample end"));
 	DefineKeyCommand(kcSampleTrimToLoopEnd, 1964, _T("Trim to loop end"));
 	DefineKeyCommand(kcLockPlaybackToRows, 1965, _T("Lock Playback to Rows"));
+	DefineKeyCommand(kcSwitchToInstrLibrary, 1966, _T("Switch To Instrument Library"));
 
 	// Add new key commands here.
 
@@ -839,6 +842,7 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 //-----------------------------------------------------------
 {
+
 	//find kc in commands[cmd].kcList
 	std::vector<KeyCombination>::const_iterator index;
 	for(index = commands[cmd].kcList.begin(); index != commands[cmd].kcList.end(); index++)
@@ -1525,56 +1529,57 @@ void CCommandSet::Copy(const CCommandSet *source)
 
 bool CCommandSet::SaveFile(const mpt::PathString &filename)
 //---------------------------------------------------------
-{ //TODO: Make C++
+{
 
 /* Layout:
-----( Context1 Text (id) )----
+//----( Context1 Text (id) )----
 ctx:UID:Description:Modifier:Key:EventMask
 ctx:UID:Description:Modifier:Key:EventMask
 ...
-----( Context2 Text (id) )----
+//----( Context2 Text (id) )----
 ...
 */
 
-	FILE *outStream;
-	KeyCombination kc;
-
-	if((outStream = mpt_fopen(filename, "w")) == NULL)
+	mpt::ofstream f(filename);
+	if(!f)
 	{
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);
 		return false;
 	}
-	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n");
-	fprintf(outStream, "//-Format is:                                                          -\n");
-	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n");
-	fprintf(outStream, "//----------------------------------------------------------------------\n");
-	fprintf(outStream, "version:%u\n", KEYMAP_VERSION);
+	f << "//----------------- OpenMPT key binding definition file  ---------------\n";
+	f << "//- Format is:                                                         -\n";
+	f << "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n";
+	f << "//----------------------------------------------------------------------\n";
+	f << "version:" << KEYMAP_VERSION << "\n";
 
 	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
-		fprintf(outStream, "\n//----( %s (%d) )------------\n", KeyCombination::GetContextText((InputTargetContext)ctx), ctx);
+		f << "\n//----( " << KeyCombination::GetContextText((InputTargetContext)ctx) << " (" << ctx << ") )------------\n";
 
 		for (int cmd=0; cmd<kcNumCommands; cmd++)
 		{
 			for (int k=0; k<GetKeyListSize((CommandID)cmd); k++)
 			{
-				kc = GetKey((CommandID)cmd, k);
+				KeyCombination kc = GetKey((CommandID)cmd, k);
 
 				if (kc.Context() != ctx)
 					continue;		//sort by context
 
 				if (!commands[cmd].isHidden)
 				{
-					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n",
-							ctx, commands[cmd].UID,	kc.Modifier(), kc.KeyCode(), kc.EventType().GetRaw(),
-							GetCommandText((CommandID)cmd).GetString(), kc.GetKeyText().GetString(), kc.GetKeyEventText().GetString());
+					f << ctx << ":"
+						<< commands[cmd].UID << ":"
+						<< kc.Modifier() << ":"
+						<< kc.KeyCode() << ":"
+						<< (int)kc.EventType().GetRaw() << "\t\t//"
+						<< mpt::ToCharset(mpt::CharsetUTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
+						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyText()).c_str() << " ("
+						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyEventText()).c_str() << ")\n";
 				}
 
 			}
 		}
 	}
-
-	fclose(outStream);
 
 	return true;
 }
