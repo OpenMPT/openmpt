@@ -5731,20 +5731,21 @@ void CViewPattern::OnSelectPCNoteParam(UINT nID)
 	}
 
 	uint16 paramNdx = static_cast<uint16>(nID - ID_CHANGE_PCNOTE_PARAM);
-	bool bModified = false;
+	bool modified = false;
+	CHANNELINDEX startChn = m_Selection.GetStartChannel(), endChn = m_Selection.GetEndChannel();
 	for(ROWINDEX nRow = m_Selection.GetStartRow(); nRow <= m_Selection.GetEndRow(); nRow++)
 	{
-		ModCommand *p = pSndFile->Patterns[m_nPattern].GetRow(nRow);
-		for(CHANNELINDEX nChn = m_Selection.GetStartChannel(); nChn <= m_Selection.GetEndChannel(); nChn++, p++)
+		ModCommand *p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, startChn);
+		for(CHANNELINDEX nChn = startChn; nChn <= endChn; nChn++, p++)
 		{
 			if(p && p->IsPcNote() && (p->GetValueVolCol() != paramNdx))
 			{
-				bModified = true;
+				modified = true;
 				p->SetValueVolCol(paramNdx);
 			}
 		}
 	}
-	if(bModified)
+	if(modified)
 	{
 		SetModified();
 		InvalidatePattern();
