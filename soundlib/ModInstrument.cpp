@@ -126,12 +126,12 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 		}
 	}
 	STATIC_ASSERT(MAX_ENVPOINTS <= 255);
-	LimitMax(nLoopEnd, static_cast<uint8>(size()));
+	LimitMax(nLoopEnd, static_cast<decltype(nLoopEnd)>(size() - 1));
 	LimitMax(nLoopStart, nLoopEnd);
-	LimitMax(nSustainEnd, static_cast<uint8>(size()));
+	LimitMax(nSustainEnd, static_cast<decltype(nSustainEnd)>(size() - 1));
 	LimitMax(nSustainStart, nSustainEnd);
 	if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
-		LimitMax(nReleaseNode, static_cast<uint8>(size()));
+		LimitMax(nReleaseNode, static_cast<decltype(nReleaseNode)>(size() - 1));
 }
 
 
