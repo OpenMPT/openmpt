@@ -184,8 +184,9 @@ struct MixLoopState
 			SamplePosition incSamples = nInc * (nSamples - 1);
 			int32 nPosDest = (nPos + incSamples).GetInt();
 
-			const int32 nPosInt = nPos.GetInt();
-			if(nPosInt < nLoopStart || nPosInt >= nLoopStart + InterpolationMaxLookahead)
+			const SmpLength nPosInt = nPos.GetUInt();
+			const bool isAtLoopStart = (nPosInt >= chn.nLoopStart && nPosInt < chn.nLoopStart + InterpolationMaxLookahead);
+			if(!isAtLoopStart)
 			{
 				chn.dwFlags.reset(CHN_WRAPPED_LOOP);
 			}
@@ -220,7 +221,7 @@ struct MixLoopState
 #endif
 					chn.pCurrentSample = lookaheadPointer;
 					checkDest = false;
-				} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && nPosInt < nLoopStart + InterpolationMaxLookahead)
+				} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
 				{
 					// We just restarted the loop, so interpolate correctly after wrapping around
 					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
