@@ -99,15 +99,12 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2008 to 2015 in the
+     -  You will find solutions for Visual Studio 2010 to 2015 in the
         corresponding `build/vsVERSION/` folder.
+        Projects that target Windows versions before Windows 7 are available in
+        `build/vsVERSIONxp/`
         Most projects are supported with any of the mentioned Visual Studio
         verions, with the following exceptions:
-
-         -  libopenmpt_example_cxx: Requires VS2010 because it makes use of
-            C++11 features that VS2008 does not support..
-
-         -  foo_openmpt: Requires VS2010 because the foobar2000 SDK uses VS2010.
 
          -  in_openmpt: Requires Visual Studio with MFC.
 
