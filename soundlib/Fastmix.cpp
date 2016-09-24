@@ -93,7 +93,6 @@ struct MixLoopState
 		if ((nSamples <= 0) || nInc.IsZero() || (!chn.nLength)) return 0;
 
 		// Part 1: Making sure the play position is valid, and if necessary, invert the play direction in case we reached a loop boundary of a ping-pong loop.
-		bool loopRestart = false;
 		chn.pCurrentSample = samplePointer;
 
 		// Under zero ?
@@ -162,7 +161,7 @@ struct MixLoopState
 					chn.position += SamplePosition(nLoopStart - chn.nLength, 0);
 					MPT_ASSERT(chn.position.GetInt() >= nLoopStart);
 					// Interpolate correctly after wrapping around
-					loopRestart = true;
+					chn.dwFlags.set(CHN_WRAPPED_LOOP);
 				}
 			}
 
@@ -185,11 +184,17 @@ struct MixLoopState
 			SamplePosition incSamples = nInc * (nSamples - 1);
 			int32 nPosDest = (nPos + incSamples).GetInt();
 
+			const SmpLength nPosInt = nPos.GetUInt();
+			if(nPosInt < nLoopStart || nPosInt >= nLoopStart + InterpolationMaxLookahead)
+			{
+				chn.dwFlags.reset(CHN_WRAPPED_LOOP);
+			}
+
 			// Loop wrap-around magic.
 			bool checkDest = true;
 			if(lookaheadPointer != nullptr)
 			{
-				if(nPos.GetUInt() >= lookaheadStart)
+				if(nPosInt >= lookaheadStart)
 				{
 #if 0
 					const uint32 oldCount = nSmpCount;
@@ -215,16 +220,16 @@ struct MixLoopState
 #endif
 					chn.pCurrentSample = lookaheadPointer;
 					checkDest = false;
+				} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && nPosInt < nLoopStart + InterpolationMaxLookahead)
+				{
+					// We just restarted the loop, so interpolate correctly after wrapping around
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
+					chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
+					checkDest = false;
 				} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
 				{
 					// We shouldn't read that far if we're not using the pre-computed wrap-around buffer.
 					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(lookaheadStart, 0), nInv);
-					checkDest = false;
-				} else if(loopRestart && nPos.GetUInt() < nLoopStart + InterpolationMaxLookahead)
-				{
-					// We just restarted the loop, so interpolate correctly after wrapping around
-					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
-					chn.pCurrentSample = lookaheadPointer + (chn.nLength - nLoopStart) * chn.pModSample->GetBytesPerSample();
 					checkDest = false;
 				}
 			}

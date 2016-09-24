@@ -132,7 +132,7 @@ enum ChannelFlags
 	CHN_KEYOFF			= 0x200,		// exit sustain
 	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
 	CHN_SURROUND		= 0x800,		// use surround channel
-	// UNUSED			= 0x1000,
+	CHN_WRAPPED_LOOP	= 0x1000,		// loop just wrapped around to loop start (required for correct interpolation around loop points)
 	// UNUSED			= 0x2000,
 	CHN_FILTER			= 0x4000,		// Apply resonant filter on sample
 	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
