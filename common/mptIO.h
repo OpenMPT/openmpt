@@ -520,7 +520,7 @@ public:
 
 	virtual bool CanRead(off_t pos, off_t length) const
 	{
-		return pos + length <= GetLength();
+		return length <= GetLength() - pos;
 	}
 
 	virtual off_t GetReadableLength(off_t pos, off_t length) const
@@ -598,7 +598,7 @@ public:
 		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
 	}
 	bool CanRead(off_t pos, off_t length) const {
-		return (pos + length <= dataLength);
+		return (length <= dataLength - pos);
 	}
 	off_t GetReadableLength(off_t pos, off_t length) const
 	{
@@ -836,7 +836,7 @@ public:
 
 	bool CanRead(off_t pos, off_t length) const
 	{
-		return pos + length <= streamLength;
+		return pos < streamLength && length <= streamLength - pos;
 	}
 
 	off_t GetReadableLength(off_t pos, off_t length) const
