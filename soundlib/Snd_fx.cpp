@@ -1166,8 +1166,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
 //----------------------------------------------------------------------------------------------------------------
 {
-	if(instr >= MAX_INSTRUMENTS) return;
-	const ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
+	if(instr > GetNumInstruments()) return;
+	const ModInstrument *pIns = Instruments[instr];
 	const ModSample *pSmp = &Samples[instr];
 	ModCommand::NOTE note = pChn->nNewNote;
 
@@ -1943,7 +1943,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		pChn->rightVol = pChn->leftVol = 0;
 		return nnaChn;
 	}
-	if(instr >= MAX_INSTRUMENTS) instr = 0;
+	if(instr > GetNumInstruments()) instr = 0;
 	const ModSample *pSample = pChn->pModSample;
 	// If no instrument is given, assume previous instrument to still be valid.
 	// Test case: DNA-NoInstr.it
@@ -2531,7 +2531,7 @@ bool CSoundFile::ProcessEffects()
 					if(GetNumInstruments())
 					{
 						// Instrument mode
-						if(instr < MAX_INSTRUMENTS && pChn->pModInstrument != Instruments[instr])
+						if(instr <= GetNumInstruments() && pChn->pModInstrument != Instruments[instr])
 							note = pChn->nNote;
 					} else
 					{
@@ -2553,7 +2553,7 @@ bool CSoundFile::ProcessEffects()
 				if (!keepInstr) instr = 0;
 			}
 			// Invalid Instrument ?
-			if (instr >= MAX_INSTRUMENTS) instr = 0;
+			if (instr > GetNumInstruments()) instr = 0;
 
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL)
