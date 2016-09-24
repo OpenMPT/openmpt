@@ -1138,6 +1138,10 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnNextInstrument();
 		break;
 
+	case CTRLMSG_INS_OPENFILE_NEW:
+		if(!InsertInstrument(false))
+			break;
+		MPT_FALLTHROUGH;
 	case CTRLMSG_INS_OPENFILE:
 		if (lParam) return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
@@ -1769,24 +1773,25 @@ void CCtrlInstruments::OnInstrumentNew()
 //--------------------------------------
 {
 	InsertInstrument(m_sndFile.GetNumInstruments() > 0 && CMainFrame::GetInputHandler()->ShiftPressed());
+	SwitchToView();
 }
 
 
-void CCtrlInstruments::InsertInstrument(bool duplicate)
+bool CCtrlInstruments::InsertInstrument(bool duplicate)
 //-----------------------------------------------------
 {
 	const bool hasInstruments = m_sndFile.GetNumInstruments() > 0;
 
 	INSTRUMENTINDEX ins = m_modDoc.InsertInstrument(SAMPLEINDEX_INVALID, (duplicate && hasInstruments) ? m_nInstrument : INSTRUMENTINDEX_INVALID);
+	if (ins == INSTRUMENTINDEX_INVALID)
+		return false;
+
 	if (!hasInstruments) m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Names().ModType());
 
-	if (ins != INSTRUMENTINDEX_INVALID)
-	{
-		SetCurrentInstrument(ins);
-		m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
-	}
+	SetCurrentInstrument(ins);
+	m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
 	m_parent.InstrumentChanged(m_nInstrument);
-	SwitchToView();
+	return true;
 }
 
 

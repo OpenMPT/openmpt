@@ -290,10 +290,10 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 								const char *className = view->GetRuntimeClass()->m_lpszClassName;
 								if(!strcmp("CViewSample", className))
 								{
-									view->SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file);
+									view->SendCtrlMessage(CMainFrame::GetInputHandler()->ShiftPressed() ? CTRLMSG_SMP_OPENFILE_NEW : CTRLMSG_SMP_OPENFILE, (LPARAM)&file);
 								} else if(!strcmp("CViewInstrument", className))
 								{
-									view->SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file);
+									view->SendCtrlMessage(CMainFrame::GetInputHandler()->ShiftPressed() ? CTRLMSG_INS_OPENFILE_NEW : CTRLMSG_INS_OPENFILE, (LPARAM)&file);
 								}
 							}
 						} else
@@ -1722,7 +1722,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	FileDialog dlg = OpenFileDialog()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.mss;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Wave Files (*.wav)|*.wav|"
@@ -1743,7 +1743,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	#endif
 			"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
 			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
-			"DLS Sound Banks (*.dls)|*.dls|"
+			"DLS Sound Banks (*.dls;*.mss)|*.dls;*.mss|"
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return FALSE;
 
@@ -1911,6 +1911,7 @@ void CModTree::FillInstrumentLibrary()
 						|| (!strcmp(s, "sf2"))
 						|| (!strcmp(s, "sbk"))
 						|| (!strcmp(s, "dls"))
+						|| (!strcmp(s, "mss"))
 						|| (!strcmp(s, "pat")) )
 					{
 						if (showInstrs)
