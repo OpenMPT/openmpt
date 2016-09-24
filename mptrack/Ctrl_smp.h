@@ -76,7 +76,7 @@ public:
 	~CCtrlSamples();
 
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
-	void InsertSample(bool duplicate, int8 *confirm = nullptr);
+	bool InsertSample(bool duplicate, int8 *confirm = nullptr);
 	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize

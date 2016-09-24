@@ -444,6 +444,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnNextInstrument();
 		break;
 
+	case CTRLMSG_SMP_OPENFILE_NEW:
+		if(!InsertSample(false))
+			break;
+		MPT_FALLTHROUGH;
 	case CTRLMSG_SMP_OPENFILE:
 		if (lParam) return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
@@ -1048,10 +1052,11 @@ void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
 	InsertSample(CMainFrame::GetInputHandler()->ShiftPressed());
+	SwitchToView();
 }
 
 
-void CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
+bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 //------------------------------------------------------------
 {
 	SAMPLEINDEX smp = m_modDoc.InsertSample(true);
@@ -1087,7 +1092,7 @@ void CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 			}
 		}
 	}
-	SwitchToView();
+	return (smp != SAMPLEINDEX_INVALID);
 }
 
 

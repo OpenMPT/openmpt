@@ -128,7 +128,7 @@ public:
 public:
 	void SetModified(InstrumentHint hint, bool updateAll);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
-	void InsertInstrument(bool duplicate);
+	bool InsertInstrument(bool duplicate);
 	bool OpenInstrument(const mpt::PathString &fileName);
 	bool OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
