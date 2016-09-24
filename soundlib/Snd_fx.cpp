@@ -1166,8 +1166,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
 //----------------------------------------------------------------------------------------------------------------
 {
-	if(instr > GetNumInstruments()) return;
-	const ModInstrument *pIns = Instruments[instr];
+	const ModInstrument *pIns = instr <= GetNumInstruments() ? Instruments[instr] : nullptr;
 	const ModSample *pSmp = &Samples[instr];
 	ModCommand::NOTE note = pChn->nNewNote;
 
