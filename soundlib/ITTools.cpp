@@ -13,6 +13,7 @@
 #include "ITTools.h"
 #include "Tables.h"
 #include "../common/StringFixer.h"
+#include "../common/version.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -172,7 +173,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 	// Header
 	memcpy(id, "IMPI", 4);
-	trkvers = 0x0214;
+	trkvers = 0x5000 | static_cast<uint16>(MptVersion::num >> 16);
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
 	mpt::String::Write<mpt::String::nullTerminated>(name, mptIns.name);
@@ -201,8 +202,19 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	ifr = mptIns.GetResonance() | (mptIns.IsResonanceEnabled() ? ITInstrument::enableResonance : 0x00);
 
 	// MIDI Setup
-	mbank = mptIns.wMidiBank;
-	mpr = mptIns.nMidiProgram;
+	if(mptIns.nMidiProgram > 0)
+		mpr = mptIns.nMidiProgram - 1u;
+	else
+		mpr = 0xFF;
+	if(mptIns.wMidiBank > 0)
+	{
+		mbank[0] = static_cast<uint8>((mptIns.wMidiBank - 1) & 0x7F);
+		mbank[1] = static_cast<uint8>((mptIns.wMidiBank - 1) >> 7);
+	} else
+	{
+		mbank[0] = 0xFF;
+		mbank[1] = 0xFF;
+	}
 	if(mptIns.nMidiChannel != MidiNoChannel || mptIns.nMixPlug == 0 || mptIns.nMixPlug > 127 || compatExport)
 	{
 		// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
@@ -284,9 +296,37 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.SetResonance(ifr & 0x7F, (ifr & ITInstrument::enableResonance) != 0);
 
 	// MIDI Setup
-	if(mpr <= 128)
+
+	// MPT used to have a slightly different encoding of MIDI program and banks which we are trying to fix here.
+	// Impulse Tracker / Schism Tracker will set trkvers to 0 in IT files,
+	// and we won't care about correctly importing MIDI programs and banks in ITI files.
+	// Chibi Tracker sets trkvers to 0x214, but always writes mpr=mbank=0.
+	// BeRoTracker sets trkvers to 0x214, but only writes mpr correctly.
+	//        <= MPT 1.07          <= MPT 1.16       OpenMPT 1.17-?      <= OpenMPT 1.26     definitely not MPT
+	if((trkvers == 0x0202 || trkvers == 0x0211 || trkvers == 0x0220 || trkvers == 0x0214) && mpr != 0xFF)
 	{
-		mptIns.nMidiProgram = mpr;
+		if(mpr <= 128)
+		{
+			mptIns.nMidiProgram = mpr;
+		}
+		uint16 bank = mbank[0] | (mbank[1] << 8);
+		// These versions also ignored the high bank nibble (was only handled correctly in OpenMPT instrument extensions)
+		if(bank <= 128)
+		{
+			mptIns.wMidiBank = bank;
+		}
+	} else
+	{
+		if(mpr < 128)
+		{
+			mptIns.nMidiProgram = mpr + 1;
+		}
+		uint16 bank = 0;
+		if(mbank[0] < 128)
+			bank = mbank[0] + 1;
+		if(mbank[1] < 128)
+			bank += (mbank[1] << 7);
+		mptIns.wMidiBank = bank;
 	}
 	mptIns.nMidiChannel = mch;
 	if(mptIns.nMidiChannel >= 128)
@@ -294,10 +334,6 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		// Handle old format where MIDI channel and Plugin index are stored in the same variable
 		mptIns.nMixPlug = mptIns.nMidiChannel - 128;
 		mptIns.nMidiChannel = 0;
-	}
-	if(mbank <= 128)
-	{
-		mptIns.wMidiBank = mbank;
 	}
 
 	// Envelope point count. Limited to 25 in IT format.
