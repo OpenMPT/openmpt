@@ -184,7 +184,7 @@ struct MixLoopState
 			SamplePosition incSamples = nInc * (nSamples - 1);
 			int32 nPosDest = (nPos + incSamples).GetInt();
 
-			const SmpLength nPosInt = nPos.GetUInt();
+			const int32 nPosInt = nPos.GetInt();
 			if(nPosInt < nLoopStart || nPosInt >= nLoopStart + InterpolationMaxLookahead)
 			{
 				chn.dwFlags.reset(CHN_WRAPPED_LOOP);
@@ -194,7 +194,7 @@ struct MixLoopState
 			bool checkDest = true;
 			if(lookaheadPointer != nullptr)
 			{
-				if(nPosInt >= lookaheadStart)
+				if(nPos.GetUInt() >= lookaheadStart)
 				{
 #if 0
 					const uint32 oldCount = nSmpCount;
