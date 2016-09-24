@@ -518,17 +518,22 @@ void FileDataContainerUnseekable::CacheStream() const
 	streamFullyCached = true;
 }
 
-void FileDataContainerUnseekable::CacheStreamUpTo(std::streampos pos) const
+void FileDataContainerUnseekable::CacheStreamUpTo(off_t pos, off_t length) const
 {
 	if(streamFullyCached)
 	{
 		return;
 	}
-	if(pos <= std::streampos(cachesize))
+	if(length > std::numeric_limits<off_t>::max() - pos)
+	{
+		length = std::numeric_limits<off_t>::max() - pos;
+	}
+	std::size_t target = mpt::saturate_cast<std::size_t>(pos + length);
+	if(target <= cachesize)
 	{
 		return;
 	}
-	std::size_t alignedpos = Util::AlignUp<std::size_t>(static_cast<std::size_t>(pos), QUANTUM_SIZE);
+	std::size_t alignedpos = Util::AlignUp<std::size_t>(target, QUANTUM_SIZE);
 	std::size_t needcount = alignedpos - cachesize;
 	EnsureCacheBuffer(needcount);
 	std::size_t readcount = InternalRead(&cache[cachesize], alignedpos - cachesize);
@@ -570,7 +575,7 @@ IFileDataContainer::off_t FileDataContainerUnseekable::GetLength() const
 
 IFileDataContainer::off_t FileDataContainerUnseekable::Read(mpt::byte *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
-	CacheStreamUpTo(pos + count);
+	CacheStreamUpTo(pos, count);
 	if(pos >= IFileDataContainer::off_t(cachesize))
 	{
 		return 0;
@@ -582,13 +587,21 @@ IFileDataContainer::off_t FileDataContainerUnseekable::Read(mpt::byte *dst, IFil
 
 bool FileDataContainerUnseekable::CanRead(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
-	CacheStreamUpTo(pos + length);
-	return pos + length <= IFileDataContainer::off_t(cachesize);
+	CacheStreamUpTo(pos, length);
+	if((pos == IFileDataContainer::off_t(cachesize)) && (length == 0))
+	{
+		return true;
+	}
+	if(pos >= IFileDataContainer::off_t(cachesize))
+	{
+		return false;
+	}
+	return length <= IFileDataContainer::off_t(cachesize) - pos;
 }
 
 IFileDataContainer::off_t FileDataContainerUnseekable::GetReadableLength(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
-	CacheStreamUpTo(pos + length);
+	CacheStreamUpTo(pos, length);
 	if(pos >= cachesize)
 	{
 		return 0;
