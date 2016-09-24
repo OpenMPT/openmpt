@@ -522,16 +522,26 @@ public:
 
 	virtual bool CanRead(off_t pos, off_t length) const
 	{
-		return pos + length <= GetLength();
+		off_t dataLength = GetLength();
+		if((pos == dataLength) && (length == 0))
+		{
+			return true;
+		}
+		if(pos >= dataLength)
+		{
+			return false;
+		}
+		return length <= dataLength - pos;
 	}
 
 	virtual off_t GetReadableLength(off_t pos, off_t length) const
 	{
-		if(pos >= GetLength())
+		off_t dataLength = GetLength();
+		if(pos >= dataLength)
 		{
 			return 0;
 		}
-		return std::min<off_t>(length, GetLength() - pos);
+		return std::min<off_t>(length, dataLength - pos);
 	}
 };
 
@@ -600,7 +610,15 @@ public:
 		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
 	}
 	bool CanRead(off_t pos, off_t length) const {
-		return (pos + length <= dataLength);
+		if((pos == dataLength) && (length == 0))
+		{
+			return true;
+		}
+		if(pos >= dataLength)
+		{
+			return false;
+		}
+		return (length <= dataLength - pos);
 	}
 	off_t GetReadableLength(off_t pos, off_t length) const
 	{
@@ -687,7 +705,7 @@ private:
 
 	void EnsureCacheBuffer(std::size_t requiredbuffersize) const;
 	void CacheStream() const;
-	void CacheStreamUpTo(std::streampos pos) const;
+	void CacheStreamUpTo(off_t pos, off_t length) const;
 
 private:
 
@@ -838,7 +856,15 @@ public:
 
 	bool CanRead(off_t pos, off_t length) const
 	{
-		return pos + length <= streamLength;
+		if((pos == streamLength) && (length == 0))
+		{
+			return true;
+		}
+		if(pos >= streamLength)
+		{
+			return false;
+		}
+		return (length <= streamLength - pos);
 	}
 
 	off_t GetReadableLength(off_t pos, off_t length) const
