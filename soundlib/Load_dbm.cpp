@@ -243,7 +243,8 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 		chunk.ReadStruct(dbmEnv);
 
 		ModInstrument *mptIns;
-		if(dbmEnv.instrument && dbmEnv.instrument < MAX_INSTRUMENTS && (mptIns = sndFile.Instruments[dbmEnv.instrument]) != nullptr)
+		uint16 dbmIns = dbmEnv.instrument;
+		if(dbmIns > 0 && dbmIns <= sndFile.GetNumInstruments() && (mptIns = sndFile.Instruments[dbmIns]) != nullptr)
 		{
 			InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType);
 
@@ -297,9 +298,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	ChunkReader::ChunkList<DBMChunk> chunks = chunkFile.ReadChunks<DBMChunk>(1);
 
 	// Globals
-	FileReader infoChunk = chunks.GetChunk(DBMChunk::idINFO);
 	DBMInfoChunk infoData;
-	if(!infoChunk.ReadStruct(infoData))
+	if(!chunks.GetChunk(DBMChunk::idINFO).ReadStruct(infoData))
 	{
 		return false;
 	}
@@ -321,7 +321,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader songChunk = chunks.GetChunk(DBMChunk::idSONG);
 	Order.clear();
 	uint16 numSongs = infoData.songs;
-	for(uint16 i = 0; i < numSongs; i++)
+	for(uint16 i = 0; i < numSongs && songChunk.CanRead(46); i++)
 	{
 		char name[44];
 		songChunk.ReadString<mpt::String::maybeNullTerminated>(name, 44);
@@ -342,7 +342,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 		uint16 numOrders = songChunk.ReadUint16BE();
 		const ORDERINDEX startIndex = Order.GetLength();
-		if(startIndex < ORDERINDEX_MAX && songChunk.CanRead(2))
+		if(startIndex < ORDERINDEX_MAX && songChunk.CanRead(numOrders * 2u))
 		{
 			LimitMax(numOrders, static_cast<ORDERINDEX>(ORDERINDEX_MAX - startIndex - 1));
 			Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
@@ -394,18 +394,18 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 				if(instrHeader.flags & DBMInstrument::smpPingPongLoop) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
 			}
 		}
-	}
 
-	// Read envelopes
-	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idVENV), ENV_VOLUME, *this, false);
-	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idPENV), ENV_PANNING, *this, fileHeader.trkVerHi > 2);
+		// Read envelopes
+		ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idVENV), ENV_VOLUME, *this, false);
+		ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idPENV), ENV_PANNING, *this, fileHeader.trkVerHi > 2);
 
-	// Note-Off cuts samples if there's no envelope.
-	for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-	{
-		if(Instruments[i] != nullptr && !Instruments[i]->VolEnv.dwFlags[ENV_ENABLED])
+		// Note-Off cuts samples if there's no envelope.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			Instruments[i]->nFadeOut = 32767;
+			if(Instruments[i] != nullptr && !Instruments[i]->VolEnv.dwFlags[ENV_ENABLED])
+			{
+				Instruments[i]->nFadeOut = 32767;
+			}
 		}
 	}
 
