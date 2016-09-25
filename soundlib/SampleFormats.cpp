@@ -1910,7 +1910,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 
 	// Create sample assignment table
 	std::vector<SAMPLEINDEX> smptable;
-	std::vector<SAMPLEINDEX> smpmap(GetNumSamples(), 0);
+	std::vector<uint8> smpmap(GetNumSamples(), 0);
 	for(size_t i = 0; i < NOTE_MAX; i++)
 	{
 		const SAMPLEINDEX smp = pIns->Keyboard[i];
@@ -1920,14 +1920,15 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 			{
 				// We haven't considered this sample yet.
 				smptable.push_back(smp);
-				smpmap[smp - 1] = static_cast<SAMPLEINDEX>(smptable.size());
+				smpmap[smp - 1] = static_cast<uint8>(smptable.size());
 			}
-			iti.keyboard[i * 2 + 1] = static_cast<uint8>(smpmap[smp - 1]);
+			iti.keyboard[i * 2 + 1] = smpmap[smp - 1];
 		} else
 		{
 			iti.keyboard[i * 2 + 1] = 0;
 		}
 	}
+	iti.nos = static_cast<uint8>(smptable.size());
 	smpmap.clear();
 
 	uint32 filePos = instSize;
