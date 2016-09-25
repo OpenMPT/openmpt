@@ -197,7 +197,6 @@ void ITInstrument::ConvertEndianness()
 {
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
-	SwapBytesLE(mbank);
 }
 
 
