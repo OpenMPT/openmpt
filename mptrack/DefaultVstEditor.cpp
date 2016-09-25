@@ -234,8 +234,9 @@ void CDefaultVstEditor::CreateControls()
 		{
 			controls.push_back(new ParamControlSet(this, rect, i, m));
 			rect.OffsetRect(0, m.totalHeight + m.spacing);
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		}
 	}
 

@@ -343,8 +343,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				m_songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
 			}
 #endif
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 #ifdef MODPLUG_TRACKER
 			return false;
 #else

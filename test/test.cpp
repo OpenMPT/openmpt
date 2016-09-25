@@ -259,8 +259,9 @@ static MPT_NOINLINE void TestVersion()
 		try
 		{
 			pVersionInfo = new char[dwVerInfoSize];
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			throw std::runtime_error("Could not allocate memory for pVersionInfo");
 		}
 

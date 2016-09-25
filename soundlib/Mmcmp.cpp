@@ -690,8 +690,9 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	{
 		unpackedData.resize(header.DstLen);
 		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), mpt::byte_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		return false;
 	} catch(const XPK_error &)
 	{
@@ -830,8 +831,9 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	try
 	{
 		unpackedData.resize(dstLen);
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		return false;
 	}
 	file.Seek(4);

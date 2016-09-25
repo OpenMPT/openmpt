@@ -3464,8 +3464,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 			try
 			{
 				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
-			} catch(MPTMemoryException)
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 				break;
 			}
 		}

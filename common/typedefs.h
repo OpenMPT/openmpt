@@ -116,18 +116,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// Exception type that is used to catch "operator new" exceptions.
-#if defined(_MFC_VER)
-typedef CMemoryException * MPTMemoryException;
-#else
-OPENMPT_NAMESPACE_END
-#include <new>
-OPENMPT_NAMESPACE_BEGIN
-typedef std::bad_alloc & MPTMemoryException;
-#endif
-
-
-
 OPENMPT_NAMESPACE_END
 #include <memory>
 #include <utility>
@@ -233,6 +221,30 @@ std::unique_ptr<T> make_unique(Args&&... args)
 #ifndef MPT_WHILE_0
 #define MPT_WHILE_0 while(0)
 #endif
+
+
+
+// Exception handling helpers, because MFC requires explicit deletion of the exception object,
+// Thus, always call exactly one of MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() or MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e).
+
+#if defined(_MFC_VER)
+
+#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()   MPT_DO { AfxThrowMemoryException(); } MPT_WHILE_0
+#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)  catch ( CMemoryException * e )
+#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() MPT_DO { throw; } MPT_WHILE_0
+#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { if(e) { e->Delete(); e = nullptr; } } MPT_WHILE_0
+
+#else // !_MFC_VER
+
+OPENMPT_NAMESPACE_END
+#include <new>
+OPENMPT_NAMESPACE_BEGIN
+#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()   MPT_DO { throw std::bad_alloc(); } MPT_WHILE_0
+#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)  catch ( const std::bad_alloc & e )
+#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() MPT_DO { throw; } MPT_WHILE_0
+#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { } MPT_WHILE_0
+
+#endif // _MFC_VER
 
 
 

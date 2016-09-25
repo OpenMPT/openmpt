@@ -147,8 +147,9 @@ void Compressor::Resume()
 	try
 	{
 		m_buffer.assign(m_bufSize * 2, 0.0f);
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		m_bufSize = 0;
 	}
 

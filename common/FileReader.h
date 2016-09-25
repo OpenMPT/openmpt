@@ -872,8 +872,9 @@ public:
 			{
 				dest += c;
 			}
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		}
 		return dest.length() != 0;
 	}
@@ -951,8 +952,9 @@ public:
 		try
 		{
 			destVector.resize(destSize);
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			return false;
 		}
 		if(CanRead(readSize))

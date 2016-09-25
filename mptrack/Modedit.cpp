@@ -1102,8 +1102,9 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	try
 	{
 		env.resize(nPoints);
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		return false;
 	}
 	env.nSustainStart = susBegin;

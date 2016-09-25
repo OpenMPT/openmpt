@@ -103,8 +103,9 @@ bool COrderList::EnsureEditable(ORDERINDEX ord)
 		try
 		{
 			order.resize(ord + 1);
-		} catch(MPTMemoryException)
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			return false;
 		}
 	}
