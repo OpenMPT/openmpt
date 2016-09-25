@@ -545,8 +545,9 @@ void CModDoc::OnAppendModule()
 	try
 	{
 		source = new CSoundFile;
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		AddToLog("Out of memory.");
 		return;
 	}

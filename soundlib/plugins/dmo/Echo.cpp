@@ -125,8 +125,9 @@ void Echo::Resume()
 	try
 	{
 		m_delayLine.assign(m_bufferSize * 2, 0);
-	} catch(MPTMemoryException)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		m_bufferSize = 0;
 	}
 	m_writePos = 0;

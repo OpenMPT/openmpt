@@ -148,8 +148,9 @@ namespace mpt { namespace String
 			try
 			{
 				dest.assign(src, std::find(src, src + srcSize, '\0'));
-			} catch(MPTMemoryException)
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			}
 
 		} else if(mode == spacePadded || mode == spacePaddedNull)
@@ -165,8 +166,9 @@ namespace mpt { namespace String
 
 				// Trim trailing spaces.
 				dest = mpt::String::RTrim(dest);
-			} catch(MPTMemoryException)
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			}
 
 		}
