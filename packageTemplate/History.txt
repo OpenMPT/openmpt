@@ -38,8 +38,14 @@ Sample tab
    [Fix] <js> Crossfading did not work if a sample only had a sustain loop.
    [Fix] <js> Adding silence at the beginning of the sample only updated the normal loop points, but not the sustain loop points.
 
+Instrument tab
+   [Fix] <js> Allow ITI files saved with old Schism Tracker versions to be loaded.
+
 Tree view
    [Fix] <js> Do not cycle through tree items when keeping keys pressed while a playable item is focussed (http://bugs.openmpt.org/view.php?id=872).
+
+IT
+   [Fix] <js> Correctly write MIDI program and bank instrument properties in a way that is also correctly read by other IT-compatible applications.
 
 MOD
    [Fix] <js> MOD: Avoid enabling some ProTracker quirks for files most likely created with ScreamTracker 3 (fixes BASIC001.MOD, tx Borg-).

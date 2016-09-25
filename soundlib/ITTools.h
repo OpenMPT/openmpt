@@ -161,7 +161,7 @@ struct PACKED ITInstrument
 	uint8  nna;				// New Note Action
 	uint8  dct;				// Duplicate Note Check Type
 	uint8  dca;				// Duplicate Note Check Action
-	uint16 fadeout;			// Instrument Fadeout (0...128)
+	uint16 fadeout;		// Instrument Fadeout (0...256, although values up to 1024 would be sensible. Up to IT2.07, the limit was 0...128)
 	int8   pps;				// Pitch/Pan Separatation
 	uint8  ppc;				// Pitch/Pan Centre
 	uint8  gbv;				// Global Volume
@@ -176,7 +176,7 @@ struct PACKED ITInstrument
 	uint8  ifr;				// Filter Resonance
 	uint8  mch;				// MIDI Channel
 	uint8  mpr;				// MIDI Program
-	uint16 mbank;			// MIDI Bank
+	uint8  mbank[2];		// MIDI Bank
 	uint8  keyboard[240];	// Sample / Transpose map
 	ITEnvelope volenv;		// Volume Envelope
 	ITEnvelope panenv;		// Pan Envelope

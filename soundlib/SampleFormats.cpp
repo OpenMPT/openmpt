@@ -1895,14 +1895,22 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
-		|| memcmp(instrumentHeader.id, "IMPI", 4)
-		|| instrumentHeader.nos == 0)
+		|| memcmp(instrumentHeader.id, "IMPI", 4))
 	{
 		return false;
 	}
 	file.Rewind();
 	ModInstrument dummy;
 	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
+	SAMPLEINDEX nsamples = instrumentHeader.nos;
+	// Old SchismTracker versions set nos=0
+	for(size_t i = 0; i < CountOf(dummy.Keyboard); i++)
+	{
+		nsamples = std::max(nsamples, dummy.Keyboard[i]);
+	}
+	if(!nsamples)
+		return false;
+
 	// Preferrably read the middle-C sample
 	SAMPLEINDEX sample = dummy.Keyboard[NOTE_MIDDLEC - NOTE_MIN];
 	if(sample > 0 && sample <= instrumentHeader.nos)
@@ -1918,7 +1926,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 //--------------------------------------------------------------------------
 {
 	ITInstrument instrumentHeader;
-	SAMPLEINDEX smp = 0, nsamples;
+	SAMPLEINDEX smp = 0;
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
@@ -1939,7 +1947,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	Instruments[nInstr] = pIns;
 	file.Rewind();
 	ITInstrToMPT(file, *pIns, instrumentHeader.trkvers);
-	nsamples = instrumentHeader.nos;
+	SAMPLEINDEX nsamples = instrumentHeader.nos;
+	// Old SchismTracker versions set nos=0
+	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
+	{
+		nsamples = std::max(nsamples, pIns->Keyboard[i]);
+	}
 
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
@@ -1954,7 +1967,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(smp == SAMPLEINDEX_INVALID) break;
 		samplemap[i] = smp;
 		const FileReader::off_t offset = file.GetPosition();
-		ReadITSSample(smp, file, false);
+		if(!ReadITSSample(smp, file, false))
+			smp--;
 		extraOffset = std::max(extraOffset, file.GetPosition());
 		file.Seek(offset + sizeof(ITSample));
 	}
