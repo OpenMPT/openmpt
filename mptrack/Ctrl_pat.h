@@ -120,6 +120,9 @@ protected:
 	void SetScrollPos(int pos);
 	int GetScrollPos(bool getTrackPos = false);
 
+	// Resizes the order list if the specified order is past the order list length
+	bool EnsureEditable(ORDERINDEX ord);
+
 	//{{AFX_MSG(COrderList)
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
