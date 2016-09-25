@@ -94,6 +94,24 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 END_MESSAGE_MAP()
 
 
+bool COrderList::EnsureEditable(ORDERINDEX ord)
+//---------------------------------------------
+{
+	auto &order = m_pModDoc.GetrSoundFile().Order;
+	if(ord >= order.GetLength())
+	{
+		try
+		{
+			order.resize(ord + 1);
+		} catch(MPTMemoryException)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
 void COrderList::SetScrollPos(int pos)
 //------------------------------------
 {
@@ -297,8 +315,10 @@ OrdSelection COrderList::GetCurSel(bool bIgnoreSelection) const
 		else
 			result.lastOrd = m_nScrollPos2nd;
 	}
-	LimitMax(result.firstOrd, m_pModDoc.GetrSoundFile().Order.GetLastIndex());
-	LimitMax(result.lastOrd, m_pModDoc.GetrSoundFile().Order.GetLastIndex());
+	auto &sndFile = m_pModDoc.GetrSoundFile();
+	ORDERINDEX lastIndex = std::min(sndFile.Order.GetLength(), sndFile.GetModSpecifications().ordersMax) - 1u;
+	LimitMax(result.firstOrd, lastIndex);
+	LimitMax(result.lastOrd, lastIndex);
 	return result;
 }
 
@@ -310,11 +330,15 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
 	ORDERINDEX &nOrder = bShiftClick ? m_nScrollPos2nd : m_nScrollPos;
 
-	if ((sel < 0) || (sel >= sndFile.Order.GetLength()) || (!m_pParent) || (!pMainFrm)) return false;
+	ORDERINDEX lastIndex = std::max(sndFile.Order.GetLength(), sndFile.GetModSpecifications().ordersMax) - 1u;
+
+	if ((sel < 0) || (sel > lastIndex) || (!m_pParent) || (!pMainFrm)) return false;
 	if (!bIgnoreCurSel && sel == nOrder && (sel == sndFile.m_PlayState.m_nCurrentOrder || !setPlayPos)) return true;
 	const ORDERINDEX nShownLength = GetLength();
 	InvalidateSelection();
 	nOrder = sel;
+	if(!EnsureEditable(nOrder))
+		return false;
 
 	if (!m_bScrolling)
 	{
@@ -386,8 +410,8 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 }
 
 
-UINT COrderList::GetCurrentPattern() const
-//----------------------------------------
+PATTERNINDEX COrderList::GetCurrentPattern() const
+//------------------------------------------------
 {
 	if(m_nScrollPos < m_pModDoc.GetrSoundFile().Order.GetLength())
 	{
@@ -530,6 +554,9 @@ void COrderList::EnterPatternNum(int enterNum)
 //--------------------------------------------
 {
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
+
+	if(!EnsureEditable(m_nScrollPos))
+		return;
 
 	PATTERNINDEX nCurNdx = (m_nScrollPos < sndFile.Order.GetLength()) ? sndFile.Order[m_nScrollPos] : sndFile.Order.GetInvalidPatIndex();
 	PATTERNINDEX nMaxNdx = 0;
@@ -931,7 +958,7 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 		{
 			CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
 			n = GetOrderFromPoint(rect, pt);
-			if (n >= sndFile.Order.GetLength() || n >= sndFile.GetModSpecifications().ordersMax) n = ORDERINDEX_INVALID;
+			if (n >= sndFile.Order.GetLength() && n >= sndFile.GetModSpecifications().ordersMax) n = ORDERINDEX_INVALID;
 		}
 		if (n != m_nDropPos)
 		{
@@ -985,6 +1012,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	// Check if at least one pattern in the current selection exists
 	bool patExists = false;
 	OrdSelection selection = GetCurSel(false);
+	LimitMax(selection.lastOrd, sndFile.Order.GetLastIndex());
 	for(ORDERINDEX ord = selection.firstOrd; ord <= selection.lastOrd && !patExists; ord++)
 	{
 		patExists = sndFile.Order.IsValidPat(ord);
@@ -1072,12 +1100,15 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 void COrderList::OnLButtonDblClk(UINT, CPoint)
 //--------------------------------------------
 {
+	auto &sndFile = m_pModDoc.GetrSoundFile();
 	m_nScrollPos2nd = ORDERINDEX_INVALID;
 	SetFocus();
-	PATTERNINDEX pat = m_pModDoc.GetrSoundFile().Order[m_nScrollPos];
-	if(m_pModDoc.GetrSoundFile().Patterns.IsValidPat(pat))
+	if(!EnsureEditable(m_nScrollPos))
+		return;
+	PATTERNINDEX pat = sndFile.Order[m_nScrollPos];
+	if(sndFile.Patterns.IsValidPat(pat))
 		m_pParent.SetCurrentPattern(pat);
-	else if(pat != m_pModDoc.GetrSoundFile().Order.GetIgnoreIndex())
+	else if(pat != sndFile.Order.GetIgnoreIndex())
 		OnCreateNewPattern();
 }
 
@@ -1207,6 +1238,8 @@ void COrderList::OnInsertSeparatorPattern()
 	const OrdSelection selection = GetCurSel(true);
 	ORDERINDEX insertPos = selection.firstOrd;
 		
+	if(!EnsureEditable(insertPos))
+		return;
 	if(sndFile.Order[insertPos] != sndFile.Order.GetInvalidPatIndex())
 	{
 		// If we're not inserting on a stop (---) index, we move on by one position.

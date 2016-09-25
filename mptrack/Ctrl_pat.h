@@ -55,7 +55,7 @@ public:
 public:
 	BOOL Init(const CRect&, HFONT hFont);
 	void InvalidateSelection() const;
-	UINT GetCurrentPattern() const;
+	PATTERNINDEX GetCurrentPattern() const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)
 	{

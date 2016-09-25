@@ -258,11 +258,10 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
 	// Limit number of orders to be inserted.
 	LimitMax(nCount, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - nPos));
-	// Calculate new length.
-	const ORDERINDEX nNewLength = std::min<ORDERINDEX>(nLengthTt + nCount, m_sndFile.GetModSpecifications().ordersMax);
-	// Resize if needed.
-	if (nNewLength > GetLength())
-		resize(nNewLength);
+	// Calculate new length and resize if needed.
+	const ORDERINDEX newLength = std::min<ORDERINDEX>(std::max(nPos, nLengthTt) + nCount, m_sndFile.GetModSpecifications().ordersMax);
+	if (newLength > GetLength())
+		resize(newLength);
 	// Calculate how many orders would need to be moved(nNeededSpace) and how many can actually
 	// be moved(nFreeSpace).
 	const ORDERINDEX nNeededSpace = nLengthTt - nPos;
@@ -358,7 +357,7 @@ ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, 
 		{
 			candidateOrder = (startFromOrder - p + maxOrder) % maxOrder;	// wrap around 0 and MAX_ORDERS
 		}
-		if ((*this)[candidateOrder] == nPat)
+		if (At(candidateOrder) == nPat)
 		{
 			foundAtOrder = candidateOrder;
 			break;
@@ -820,9 +819,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 		seq.m_sndFile.AddToLog(mpt::String::Print(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
-	seq.resize(MAX(size, MAX_ORDERS));
-	if(size == 0)
-		{ seq.Init(); return; }
+	seq.resize(size);
 
 	for(size_t i = 0; i < size; i++)
 	{

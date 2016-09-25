@@ -957,13 +957,15 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy, SEQUENCEINDEX nSourceSeq, SEQUENCEINDEX nDestSeq)
 //---------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if (MAX(nSourceNdx, nDestNdx) >= m_SndFile.Order.size()) return false;
 	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
 
 	if(nSourceSeq == SEQUENCEINDEX_INVALID) nSourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 	if(nDestSeq == SEQUENCEINDEX_INVALID) nDestSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	if (MAX(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
-	PATTERNINDEX nSourcePat = m_SndFile.Order.GetSequence(nSourceSeq)[nSourceNdx];
+	if (std::max(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
+	auto &sourceSeq = m_SndFile.Order.GetSequence(nSourceSeq);
+	PATTERNINDEX nSourcePat = sourceSeq.GetInvalidPatIndex();
+	if(nSourceNdx < sourceSeq.GetLength())
+		nSourcePat = sourceSeq[nSourceNdx];
 
 	// save current working sequence
 	SEQUENCEINDEX nWorkingSeq = m_SndFile.Order.GetCurrentSequenceIndex();
