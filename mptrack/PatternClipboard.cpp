@@ -830,7 +830,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			{
 				curRow = 0;
 				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder == 0 || nextOrder >= sndFile.Order.size()) return success;
+				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size()) return success;
 				pattern = sndFile.Order[nextOrder];
 				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
 				patData = sndFile.Patterns[pattern];
