@@ -313,7 +313,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		memory.state.m_nCurrentOrder = memory.state.m_nNextOrder;
 
 		if(memory.state.m_nCurrentOrder >= orderList.size())
+		{
+			memory.state.m_nCurrentOrder = orderList.GetRestartPos();
 			break;
+		}
 
 		// Check if pattern is valid
 		memory.state.m_nPattern = orderList[memory.state.m_nCurrentOrder];
