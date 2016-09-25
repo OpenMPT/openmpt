@@ -74,6 +74,8 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 		// Update loop points if necessary.
 		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
 		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+		if(smp.nSustainStart >= nStartFrom) smp.nSustainStart += nSilenceLength;
+		if(smp.nSustainEnd >= nStartFrom) smp.nSustainEnd += nSilenceLength;
 		for(std::size_t i = 0; i < CountOf(smp.cues); i++)
 		{
 			if(smp.cues[i] >= nStartFrom) smp.cues[i] += nSilenceLength;
