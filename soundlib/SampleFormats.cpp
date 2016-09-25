@@ -1899,12 +1899,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const
 //----------------------------------------------------------------------------------------------------------------------------------
 {
-	ITInstrumentEx iti;
+	ITInstrument iti;
 	ModInstrument *pIns = Instruments[nInstr];
 	FILE *f;
 
 	if((!pIns) || filename.empty()) return false;
-	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
+	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
 	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
 
@@ -1922,10 +1922,10 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 				smptable.push_back(smp);
 				smpmap[smp - 1] = static_cast<SAMPLEINDEX>(smptable.size());
 			}
-			iti.iti.keyboard[i * 2 + 1] = static_cast<uint8>(smpmap[smp - 1]);
+			iti.keyboard[i * 2 + 1] = static_cast<uint8>(smpmap[smp - 1]);
 		} else
 		{
-			iti.iti.keyboard[i * 2 + 1] = 0;
+			iti.keyboard[i * 2 + 1] = 0;
 		}
 	}
 	smpmap.clear();
