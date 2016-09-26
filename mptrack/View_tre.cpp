@@ -295,6 +295,8 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 								{
 									view->SendCtrlMessage(CMainFrame::GetInputHandler()->ShiftPressed() ? CTRLMSG_INS_OPENFILE_NEW : CTRLMSG_INS_OPENFILE, (LPARAM)&file);
 								}
+								// In case a message box like "create instrument for sample?" showed up
+								SetFocus();
 							}
 						} else
 						{
