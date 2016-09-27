@@ -45,6 +45,9 @@ int main( int argc, char * argv[] ) {
 			break;
 		}
 	}
+	/* fuzz string-related stuff */
+	openmpt_free_string ( openmpt_module_get_metadata( mod, "date" ) );
+	openmpt_free_string ( openmpt_module_get_metadata( mod, "message" ) );
 	openmpt_module_destroy( mod );
 	return 0;
 }
