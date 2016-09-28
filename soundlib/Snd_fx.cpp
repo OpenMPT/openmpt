@@ -2554,9 +2554,6 @@ bool CSoundFile::ProcessEffects()
 				}
 				if (!keepInstr) instr = 0;
 			}
-			// Invalid Instrument ?
-			if (GetNumInstruments() > 0 && instr > GetNumInstruments())
-				instr = 0;
 
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL)
