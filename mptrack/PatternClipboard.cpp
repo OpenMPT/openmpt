@@ -541,7 +541,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				} else if(data.Mid(pos, 6) == "Name: ")
 				{
 					pos += 6;
-					sndFile.Patterns[pattern].SetName(data.Mid(pos, eol - pos - 2).TrimRight());
+					CString name = data.Mid(pos, eol - pos - 2).TrimRight();
+					sndFile.Patterns[pattern].SetName(name, name.GetLength());
 				} else if(data.Mid(pos, 11) == "Signature: ")
 				{
 					pos += 11;
@@ -682,8 +683,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						if(m.IsPcNote())
 						{
 							m.SetValueVolCol(ConvertStrTo<uint16>(data.Mid(pos + 5, 3)));
-						}
-						else
+						} else
 						{
 							m.volcmd = VOLCMD_NONE;
 							for(ModCommand::VOLCMD i = 1; i < MAX_VOLCMDS; i++)
@@ -712,6 +712,13 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						firstCol = std::min(firstCol, PatternCursor::paramColumn);
 						lastCol = std::max(lastCol, PatternCursor::paramColumn);
 						m.SetValueEffectCol(ConvertStrTo<uint16>(data.Mid(pos + 8, 3)));
+					} else
+					{
+						// No value provided in clipboard
+						if(m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI && m.param < 128)
+							m.SetValueEffectCol(static_cast<uint16>(Util::muldivr(m.param, ModCommand::maxColumnValue, 127)));
+						else
+							m.SetValueEffectCol(0);
 					}
 				} else
 				{
@@ -801,12 +808,19 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					}
 				}
 
-				// convert some commands, if necessary. With mix paste convert only
+				// Convert some commands, if necessary. With mix paste convert only
 				// if the original modcommand was empty as otherwise the unchanged parts
 				// of the old modcommand would falsely be interpreted being of type
 				// origFormat and ConvertCommand could change them.
 				if(pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty()))
 					m.Convert(pasteFormat, sndFile.GetType(), sndFile);
+
+				// Sanitize PC events
+				if(m.IsPcNote())
+				{
+					m.SetValueEffectCol(std::min<decltype(m.GetValueEffectCol())>(m.GetValueEffectCol(), ModCommand::maxColumnValue));
+					m.SetValueVolCol(std::min<decltype(m.GetValueEffectCol())>(m.GetValueVolCol(), ModCommand::maxColumnValue));
+				}
 
 				// Adjust pattern selection
 				if(col == startChan) startPoint.SetColumn(startChan, firstCol);
