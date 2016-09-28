@@ -436,7 +436,7 @@ is just a high-level summary.
  *  Support building on Android NDK.
  *  Avoid clicks in sample loops when using interpolation.
  *  IT filters are now done in integer instead of floating point. This improves
-    performances, especially on architectures with no or a slow FPU.
+    performance, especially on architectures with no or a slow FPU.
  *  MOD pattern break handling fixes.
  *  Various XM playback improvements.
  *  Improved and switchable dithering when using 16bit integer API.
