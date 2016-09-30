@@ -77,10 +77,13 @@ mpt::ustring FileHistory::AsISO8601() const
 
 #ifdef MODPLUG_TRACKER
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(nullptr);
-const char (*CSoundFile::m_NoteNames)[4] = NoteNamesFlat;
+const NoteName *CSoundFile::m_NoteNames = NoteNamesFlat;
 #endif
 
 CSoundFile::CSoundFile() :
+#ifndef MODPLUG_TRACKER
+	m_NoteNames(NoteNamesSharp),
+#endif
 	m_pTuningsTuneSpecific(nullptr),
 	m_pModSpecs(&ModSpecs::itEx),
 	m_nType(MOD_TYPE_NONE),
@@ -1396,27 +1399,27 @@ std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMEN
 }
 
 
-std::string CSoundFile::GetNoteName(const ModCommand::NOTE note)
-//--------------------------------------------------------------
+std::string CSoundFile::GetNoteName(const ModCommand::NOTE note) const
+//--------------------------------------------------------------------
+{
+	return GetNoteName(note, m_NoteNames);
+}
+
+
+std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const char (*noteNames)[4])
+//------------------------------------------------------------------------------------------
 {
 	if(ModCommand::IsSpecialNote(note))
 	{
 		const char specialNoteNames[][4] = { "PCs",  "PC ", "~~~", "^^^", "===" };
 		STATIC_ASSERT(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
-
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))
 	{
-		char name[4];
-#ifdef MODPLUG_TRACKER
-#define NOTENAMES m_NoteNames
-#else
-#define NOTENAMES NoteNamesSharp
-#endif // MODPLUG_TRACKER
-		MemCopy<char[4]>(name, NOTENAMES[(note - NOTE_MIN) % 12]);	// e.g. "C#"
-		name[2] = '0' + (note - NOTE_MIN) / 12;	// e.g. 5
-		return name; //NoteNamesSharp[(note - NOTE_MIN) % 12] + std::string(1, '0' + (note - NOTE_MIN) / 12);
-#undef NOTENAMES
+		return std::string()
+			.append(noteNames[(note - NOTE_MIN) % 12])
+			.append(1, '0' + (note - NOTE_MIN) / 12)
+			;	// e.g. "C#" + "5"
 	} else if(note == NOTE_NONE)
 	{
 		return "...";
@@ -1426,11 +1429,19 @@ std::string CSoundFile::GetNoteName(const ModCommand::NOTE note)
 
 
 #ifdef MODPLUG_TRACKER
+
 void CSoundFile::SetDefaultNoteNames()
 //------------------------------------
 {
 	m_NoteNames = TrackerSettings::Instance().accidentalFlats ? NoteNamesFlat : NoteNamesSharp;
 }
+
+const NoteName *CSoundFile::GetDefaultNoteNames()
+//-----------------------------------------------
+{
+	return m_NoteNames;
+}
+
 #endif // MODPLUG_TRACKER
 
 

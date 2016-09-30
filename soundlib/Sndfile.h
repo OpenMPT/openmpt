@@ -260,6 +260,9 @@ public:
 };
 
 
+typedef char NoteName[4];
+
+
 //==============
 class CSoundFile
 //==============
@@ -291,10 +294,14 @@ public:
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	std::string GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const;
-	static std::string GetNoteName(const ModCommand::NOTE note);
+	std::string GetNoteName(const ModCommand::NOTE note) const;
+	static std::string GetNoteName(const ModCommand::NOTE note, const NoteName *noteNames);
 #ifdef MODPLUG_TRACKER
-	static const char (*m_NoteNames)[4];
+	static const NoteName *m_NoteNames;
 	static void SetDefaultNoteNames();
+	static const NoteName *GetDefaultNoteNames();
+#else
+	const NoteName *m_NoteNames;
 #endif
 
 private:
