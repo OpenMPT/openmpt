@@ -234,7 +234,7 @@ static MPT_FORCEINLINE std::array<mpt::byte, size> EndianEncode(T val)
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
 	typedef T base_type;
-	typedef typename mpt::make_unsigned<base_type>::type unsigned_base_type;
+	typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
 	typedef Tendian endian_type;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
 	std::array<mpt::byte, size> data;
@@ -261,7 +261,7 @@ static MPT_FORCEINLINE T EndianDecode(std::array<mpt::byte, size> data)
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
 	typedef T base_type;
-	typedef typename mpt::make_unsigned<base_type>::type unsigned_base_type;
+	typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
 	typedef Tendian endian_type;
 	base_type val = base_type();
 	unsigned_base_type uval = unsigned_base_type();
@@ -285,7 +285,7 @@ static MPT_FORCEINLINE T EndianDecode(std::array<mpt::byte, size> data)
 template <typename Tendian, typename T>
 static MPT_FORCEINLINE T MPT_bswap_impl(T val)
 {
-	typedef typename mpt::make_unsigned<T>::type Tu;
+	typedef typename std::make_unsigned<T>::type Tu;
 	std::array<mpt::byte, sizeof(T)> data = EndianEncode<Tu, Tendian, sizeof(T)>(val);
 	std::memcpy(&val, data.data(), sizeof(T));
 	return val;
@@ -797,8 +797,8 @@ STATIC_ASSERT(sizeof(IEEE754binary64Native) == 8);
 
 #if MPT_PLATFORM_IEEE_FLOAT
 namespace mpt {
-template <> struct is_binary_safe< IEEE754binary32Native > : public mpt::true_type { };
-template <> struct is_binary_safe< IEEE754binary64Native > : public mpt::true_type { };
+template <> struct is_binary_safe< IEEE754binary32Native > : public std::true_type { };
+template <> struct is_binary_safe< IEEE754binary64Native > : public std::true_type { };
 }
 #endif // MPT_PLATFORM_IEEE_FLOAT
 
@@ -867,7 +867,7 @@ public:
 			}
 			std::memcpy(data, &val, sizeof(val));
 		#else // !MPT_PLATFORM_ENDIAN_KNOWN
-			typedef typename mpt::make_unsigned<base_type>::type unsigned_base_type;
+			typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
 			data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}
@@ -883,7 +883,7 @@ public:
 			}
 			return val;
 		#else // !MPT_PLATFORM_ENDIAN_KNOWN
-			typedef typename mpt::make_unsigned<base_type>::type unsigned_base_type;
+			typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
 			return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}

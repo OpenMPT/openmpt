@@ -83,7 +83,7 @@ template <typename T>
 static inline bool is_mask(T x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	typedef typename mpt::make_unsigned<T>::type unsigned_T;
+	typedef typename std::make_unsigned<T>::type unsigned_T;
 	unsigned_T ux = static_cast<unsigned_T>(x);
 	unsigned_T mask = 0;
 	for(std::size_t bits = 0; bits <= (sizeof(unsigned_T) * 8); ++bits)

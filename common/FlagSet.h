@@ -22,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 template <typename Tenum>
 struct enum_traits
 {
-	typedef typename mpt::make_unsigned<Tenum>::type store_type;
+	typedef typename std::make_unsigned<Tenum>::type store_type;
 };
 
 
