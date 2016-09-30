@@ -935,10 +935,19 @@ namespace Util {
 		}
 	}
 
+} // namespace Util
+
+
+namespace mpt
+{
+
 	// Greatest Common Divisor. Always returns non-negative number.
-	template <class T>
-	T gcd(T a, T b)
+	// compatible with C++17 std::gcd
+	template <typename A, typename B>
+	inline typename std::common_type<A, B>::type gcd(A a_, B b_)
 	{
+		typename std::common_type<A, B>::type a = a_;
+		typename std::common_type<A, B>::type b = b_;
 		if(a < 0)
 			a = -a;
 		if(b < 0)
@@ -955,17 +964,26 @@ namespace Util {
 	}
 
 	// Least Common Multiple. Always returns non-negative number.
-	template <class T>
-	int lcm(T a, T b)
+	// compatible with C++17 std::lcm
+	template <typename A, typename B>
+	inline typename std::common_type<A, B>::type lcm(A a_, B b_)
 	{
+		typename std::common_type<A, B>::type a = a_;
+		typename std::common_type<A, B>::type b = b_;
 		if(a < 0)
 			a = -a;
 		if(b < 0)
 			b = -b;
 		if((a | b) == 0)
 			return 0;
-		return a / gcd<T>(a, b) * b;
+		return a / mpt::gcd(a, b) * b;
 	}
+
+} // namespace mpt
+
+
+namespace Util
+{
 
 	template<typename T, std::size_t n>
 	class fixed_size_queue
