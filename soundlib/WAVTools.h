@@ -12,6 +12,7 @@
 
 #include "ChunkReader.h"
 #include "Loaders.h"
+#include "../common/mptUUID.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -122,8 +123,7 @@ struct WAVFormatChunkExtension
 	uint16le size;
 	uint16le validBitsPerSample;
 	uint32le channelMask;
-	uint16le subFormat;
-	uint8    guid[14];
+	GUIDms   subFormat;
 };
 
 MPT_BINARY_STRUCT(WAVFormatChunkExtension, 24)

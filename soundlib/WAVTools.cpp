@@ -88,7 +88,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 		{
 			return;
 		}
-		subFormat = extFormat.subFormat;
+		subFormat = static_cast<uint16>(mpt::UUID(extFormat.subFormat).GetData1());
 	}
 
 	// Read sample data
@@ -448,10 +448,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 			extFormat.channelMask = 0;
 			break;
 		}
-		extFormat.subFormat = static_cast<uint16>(encoding);
-		const uint8 guid[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 };
-		MemCopy<uint8[14]>(extFormat.guid, guid);
-
+		extFormat.subFormat = mpt::UUID(static_cast<uint16>(encoding), 0x0000, 0x0010, 0x800000AA00389B71ull);
 		Write(extFormat);
 	}
 }
