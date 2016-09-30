@@ -65,7 +65,7 @@ struct IUnknown;
 // <stdint.h>
 
 #include "../common/mptTypeTraits.h"
-// <type_traits> // if available
+// <type_traits>
 
 #include "../common/mptString.h"
 // <algorithm>

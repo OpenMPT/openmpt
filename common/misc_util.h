@@ -174,11 +174,9 @@ template <class T>
 inline void MemsetZero(T &a)
 //--------------------------
 {
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
 	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
-#endif
 #endif
 	std::memset(&a, 0, sizeof(T));
 }
@@ -189,11 +187,9 @@ template <class T>
 inline T &MemCopy(T &destination, const T &source)
 //------------------------------------------------
 {
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
 	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
-#endif
 #endif
 	return *static_cast<T *>(std::memcpy(&destination, &source, sizeof(T)));
 }
@@ -303,10 +299,8 @@ struct byte_cast_impl
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		// not checking is_byte_castable here because we are actually
 		// doing a static_cast and converting the value
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
-#endif
 		return static_cast<Tdst>(src);
 	}
 };
@@ -319,10 +313,8 @@ struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
-#endif
 		return mpt::as_span(mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.begin()), mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.end()));
 	}
 };
@@ -335,10 +327,8 @@ struct byte_cast_impl<Tdst*, Tsrc*>
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
-#endif
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -353,9 +343,7 @@ struct void_cast_impl<Tdst*, void*>
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
-#endif
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -366,9 +354,7 @@ struct void_cast_impl<Tdst*, const void*>
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
-#endif
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -379,9 +365,7 @@ struct void_cast_impl<void*, Tsrc*>
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
-#endif
 		return reinterpret_cast<void*>(src);
 	}
 };
@@ -392,9 +376,7 @@ struct void_cast_impl<const void*, Tsrc*>
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
-#endif
 		return reinterpret_cast<const void*>(src);
 	}
 };
