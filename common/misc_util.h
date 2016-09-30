@@ -184,15 +184,15 @@ inline void MemsetZero(T &a)
 
 // Copy given object to other location.
 template <class T>
-inline T &MemCopy(T &destination, const T &source)
-//------------------------------------------------
+void MemCopy(T &destination, const T &source)
+//-------------------------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
 	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C+11, but not supported on most compilers we care about
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #endif
-	return *static_cast<T *>(std::memcpy(&destination, &source, sizeof(T)));
+	std::memcpy(&destination, &source, sizeof(T));
 }
 
 
