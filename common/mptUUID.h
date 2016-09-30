@@ -65,6 +65,16 @@ bool IsValid(UUID uuid);
 
 #endif // MPT_OS_WINDOWS
 
+// Microsoft on-disk layout
+struct GUIDms
+{
+	uint32le Data1;
+	uint16le Data2;
+	uint16le Data3;
+	uint64be Data4; // yes, big endian here
+};
+STATIC_ASSERT(sizeof(GUIDms) == 16);
+
 namespace mpt {
 
 struct UUID
@@ -99,6 +109,8 @@ public:
 public:
 	UUID();
 	explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4);
+	explicit UUID(GUIDms guid);
+	operator GUIDms () const;
 	friend bool operator==(const mpt::UUID & a, const mpt::UUID & b);
 	friend bool operator!=(const mpt::UUID & a, const mpt::UUID & b);
 public:
