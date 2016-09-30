@@ -86,15 +86,15 @@ namespace Test {
 
 // We do not generally have type_traits from C++03-TR1
 // and std::numeric_limits does not provide a is_integer which is useable as template argument.
-template <typename T> struct is_integer : public mpt::false_type { };
-template <> struct is_integer<signed short>     : public mpt::true_type { };
-template <> struct is_integer<signed int>       : public mpt::true_type { };
-template <> struct is_integer<signed long>      : public mpt::true_type { };
-template <> struct is_integer<signed long long> : public mpt::true_type { };
-template <> struct is_integer<unsigned short>     : public mpt::true_type { };
-template <> struct is_integer<unsigned int>       : public mpt::true_type { };
-template <> struct is_integer<unsigned long>      : public mpt::true_type { };
-template <> struct is_integer<unsigned long long> : public mpt::true_type { };
+template <typename T> struct is_integer : public std::false_type { };
+template <> struct is_integer<signed short>     : public std::true_type { };
+template <> struct is_integer<signed int>       : public std::true_type { };
+template <> struct is_integer<signed long>      : public std::true_type { };
+template <> struct is_integer<signed long long> : public std::true_type { };
+template <> struct is_integer<unsigned short>     : public std::true_type { };
+template <> struct is_integer<unsigned int>       : public std::true_type { };
+template <> struct is_integer<unsigned long>      : public std::true_type { };
+template <> struct is_integer<unsigned long long> : public std::true_type { };
 
 class Testcase
 {
@@ -127,25 +127,25 @@ public:
 private:
 
 	template <typename Tx, typename Ty>
-	inline bool IsEqual(const Tx &x, const Ty &y, mpt::false_type, mpt::false_type)
+	inline bool IsEqual(const Tx &x, const Ty &y, std::false_type, std::false_type)
 	{
 		return (x == y);
 	}
 
 	template <typename Tx, typename Ty>
-	inline bool IsEqual(const Tx &x, const Ty &y, mpt::false_type, mpt::true_type)
+	inline bool IsEqual(const Tx &x, const Ty &y, std::false_type, std::true_type)
 	{
 		return (x == y);
 	}
 
 	template <typename Tx, typename Ty>
-	inline bool IsEqual(const Tx &x, const Ty &y, mpt::true_type, mpt::false_type)
+	inline bool IsEqual(const Tx &x, const Ty &y, std::true_type, std::false_type)
 	{
 		return (x == y);
 	}
 
 	template <typename Tx, typename Ty>
-	inline bool IsEqual(const Tx &x, const Ty &y, mpt::true_type /* is_integer */, mpt::true_type /* is_integer */ )
+	inline bool IsEqual(const Tx &x, const Ty &y, std::true_type /* is_integer */, std::true_type /* is_integer */ )
 	{
 		// Avoid signed-unsigned-comparison warnings and test equivalence in case of either type conversion direction.
 		return ((x == static_cast<Tx>(y)) && (static_cast<Ty>(x) == y));

@@ -22,10 +22,6 @@ namespace mpt {
 
 
 
-typedef std::true_type true_type;
-typedef std::false_type false_type;
-
-
 template <std::size_t size> struct int_of_size { };
 template <> struct int_of_size<1> { typedef int8  type; };
 template <> struct int_of_size<2> { typedef int16 type; };
@@ -47,35 +43,28 @@ template <> struct uint_of_size<7> { typedef uint64 type; };
 template <> struct uint_of_size<8> { typedef uint64 type; };
 
 
-using std::make_signed;
-using std::make_unsigned;
-
-
-using std::remove_const;
-
-
 // Tell which types are safe for mpt::byte_cast.
 // signed char is actually not allowed to alias into an object representation,
 // which means that, if the actual type is not itself signed char but char or
 // unsigned char instead, dereferencing the signed char pointer is undefined
 // behaviour.
-template <typename T> struct is_byte_castable : public mpt::false_type { };
-template <> struct is_byte_castable<char>                : public mpt::true_type { };
-template <> struct is_byte_castable<unsigned char>       : public mpt::true_type { };
-template <> struct is_byte_castable<const char>          : public mpt::true_type { };
-template <> struct is_byte_castable<const unsigned char> : public mpt::true_type { };
+template <typename T> struct is_byte_castable : public std::false_type { };
+template <> struct is_byte_castable<char>                : public std::true_type { };
+template <> struct is_byte_castable<unsigned char>       : public std::true_type { };
+template <> struct is_byte_castable<const char>          : public std::true_type { };
+template <> struct is_byte_castable<const unsigned char> : public std::true_type { };
 
 
 // Tell which types are safe to binary write into files.
 // By default, no types are safe.
 // When a safe type gets defined,
 // also specialize this template so that IO functions will work.
-template <typename T> struct is_binary_safe : public mpt::false_type { }; 
+template <typename T> struct is_binary_safe : public std::false_type { }; 
 
 // Specialization for byte types.
-template <> struct is_binary_safe<char>  : public mpt::true_type { };
-template <> struct is_binary_safe<uint8> : public mpt::true_type { };
-template <> struct is_binary_safe<int8>  : public mpt::true_type { };
+template <> struct is_binary_safe<char>  : public std::true_type { };
+template <> struct is_binary_safe<uint8> : public std::true_type { };
+template <> struct is_binary_safe<int8>  : public std::true_type { };
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
@@ -86,12 +75,12 @@ struct GetRawBytesFunctor
 {
 	inline const mpt::byte * operator () (const T & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return reinterpret_cast<const mpt::byte *>(&v);
 	}
 	inline mpt::byte * operator () (T & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return reinterpret_cast<mpt::byte *>(&v);
 	}
 };
@@ -101,12 +90,12 @@ struct GetRawBytesFunctor<T[N]>
 {
 	inline const mpt::byte * operator () (const T (&v)[N]) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return reinterpret_cast<const mpt::byte *>(v);
 	}
 	inline mpt::byte * operator () (T (&v)[N]) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return reinterpret_cast<mpt::byte *>(v);
 	}
 };
@@ -116,7 +105,7 @@ struct GetRawBytesFunctor<const T[N]>
 {
 	inline const mpt::byte * operator () (const T (&v)[N]) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return reinterpret_cast<const mpt::byte *>(v);
 	}
 };
@@ -129,12 +118,12 @@ struct GetRawBytesFunctor<const T[N]>
 // via on-demand generating a cached serialized representation.
 template <typename T> inline const mpt::byte * as_raw_memory(const T & v)
 {
-	STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+	STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
 template <typename T> inline mpt::byte * as_raw_memory(T & v)
 {
-	STATIC_ASSERT(mpt::is_binary_safe<typename mpt::remove_const<T>::type>::value);
+	STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
 
@@ -144,7 +133,7 @@ template <typename T> inline mpt::byte * as_raw_memory(T & v)
 	STATIC_ASSERT(sizeof( type ) == (size) ); \
 	STATIC_ASSERT(MPT_ALIGNOF( type ) == 1); \
 	namespace mpt { \
-		template <> struct is_binary_safe< type > : public mpt::true_type { }; \
+		template <> struct is_binary_safe< type > : public std::true_type { }; \
 	} \
 /**/
 
