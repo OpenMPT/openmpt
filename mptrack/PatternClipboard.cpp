@@ -213,7 +213,7 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 					data.Append(note);
 				} else
 				{
-					data.Append(CSoundFile::GetNoteName(m->note).c_str());
+					data.Append(sndFile.GetNoteName(m->note).c_str());
 				}
 			} else
 			{
