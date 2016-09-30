@@ -176,7 +176,7 @@ inline void MemsetZero(T &a)
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
-	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
+	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
 #endif
 	std::memset(&a, 0, sizeof(T));
 }
@@ -189,7 +189,8 @@ inline T &MemCopy(T &destination, const T &source)
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
-	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
+	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C+11, but not supported on most compilers we care about
+	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #endif
 	return *static_cast<T *>(std::memcpy(&destination, &source, sizeof(T)));
 }
