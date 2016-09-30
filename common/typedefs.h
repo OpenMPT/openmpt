@@ -224,6 +224,16 @@ std::unique_ptr<T> make_unique(Args&&... args)
 
 
 
+#if MPT_COMPILER_MSVC && defined(UNREFERENCED_PARAMETER)
+#define MPT_UNREFERENCED_PARAMETER(x) UNREFERENCED_PARAMETER(x)
+#else
+#define MPT_UNREFERENCED_PARAMETER(x) (void)(x)
+#endif
+
+#define MPT_UNUSED_VARIABLE(x) MPT_UNREFERENCED_PARAMETER(x)
+
+
+
 // Exception handling helpers, because MFC requires explicit deletion of the exception object,
 // Thus, always call exactly one of MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() or MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e).
 
@@ -242,7 +252,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()   MPT_DO { throw std::bad_alloc(); } MPT_WHILE_0
 #define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)  catch ( const std::bad_alloc & e )
 #define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() MPT_DO { throw; } MPT_WHILE_0
-#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { } MPT_WHILE_0
+#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { MPT_UNUSED_VARIABLE(e); } MPT_WHILE_0
 
 #endif // _MFC_VER
 
@@ -521,16 +531,6 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 #else
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
 #endif
-
-
-
-#if MPT_COMPILER_MSVC && defined(UNREFERENCED_PARAMETER)
-#define MPT_UNREFERENCED_PARAMETER(x) UNREFERENCED_PARAMETER(x)
-#else
-#define MPT_UNREFERENCED_PARAMETER(x) (void)(x)
-#endif
-
-#define MPT_UNUSED_VARIABLE(x) MPT_UNREFERENCED_PARAMETER(x)
 
 
 
