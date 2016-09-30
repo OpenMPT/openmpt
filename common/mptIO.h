@@ -211,7 +211,7 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
-	#if MPT_COMPILER_HAS_TYPE_TRAITS
+	#if !MPT_GCC_BEFORE(4,5,0)
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	mpt::byte bytes[sizeof(T)];
