@@ -19,9 +19,7 @@
 template<typename T>
 static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
 {
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't push pointers to data vectors.");
-#endif // MPT_COMPILER_HAS_TYPE_TRAITS
 	const char *objC = reinterpret_cast<const char *>(&obj);
 	data.insert(data.end(), objC, objC + writeSize);
 }

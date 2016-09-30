@@ -101,13 +101,11 @@ public:
 	template <typename Tfunc>
 	bool Bind(Tfunc * & f, const std::string &symbol) const
 	{
-		#if MPT_COMPILER_HAS_TYPE_TRAITS
-			#if ((MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2013,0)) || !MPT_COMPILER_MSVC) && !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
-				// MSVC std::is_function is always false for non __cdecl functions.
-				// See https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug .
-				// MinGW64 has the same problem.
-				STATIC_ASSERT(std::is_function<Tfunc>::value);
-			#endif
+		#if ((MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2013,0)) || !MPT_COMPILER_MSVC) && !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
+			// MSVC std::is_function is always false for non __cdecl functions.
+			// See https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug .
+			// MinGW64 has the same problem.
+			STATIC_ASSERT(std::is_function<Tfunc>::value);
 		#endif
 		const FuncPtr addr = GetProcAddress(symbol);
 		f = reinterpret_cast<Tfunc*>(addr);

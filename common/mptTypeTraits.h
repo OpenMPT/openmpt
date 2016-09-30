@@ -10,9 +10,7 @@
 
 #pragma once
 
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 #include <type_traits>
-#endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
 
 
@@ -24,30 +22,8 @@ namespace mpt {
 
 
 
-#if MPT_COMPILER_HAS_TYPE_TRAITS
-
 typedef std::true_type true_type;
 typedef std::false_type false_type;
-
-#else // !MPT_COMPILER_HAS_TYPE_TRAITS
-
-struct true_type {
-	typedef true_type type;
-	typedef bool value_type;
-	static const value_type value = true;
-	operator value_type () const { return value; }
-	value_type operator () () const { return value; }
-};
-
-struct false_type {
-	typedef true_type type;
-	typedef bool value_type;
-	static const value_type value = false;
-	operator value_type () const { return value; }
-	value_type operator () () const { return value; }
-};
-
-#endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
 
 template <std::size_t size> struct int_of_size { };
@@ -71,57 +47,11 @@ template <> struct uint_of_size<7> { typedef uint64 type; };
 template <> struct uint_of_size<8> { typedef uint64 type; };
 
 
-#if MPT_COMPILER_HAS_TYPE_TRAITS
-
 using std::make_signed;
 using std::make_unsigned;
 
-#else // !MPT_COMPILER_HAS_TYPE_TRAITS
-
-// Simplified version of C++11 std::make_signed and std::make_unsigned:
-//  - we do not require a C++11 <type_traits> header
-//  - no support fr CV-qualifiers
-//  - does not fail for non-integral types
-
-template <typename T> struct make_signed { typedef typename mpt::int_of_size<sizeof(T)>::type type; };
-template <> struct make_signed<char> { typedef signed char type; };
-template <> struct make_signed<signed char> { typedef signed char type; };
-template <> struct make_signed<unsigned char> { typedef signed char type; };
-template <> struct make_signed<signed short> { typedef signed short type; };
-template <> struct make_signed<unsigned short> { typedef signed short type; };
-template <> struct make_signed<signed int> { typedef signed int type; };
-template <> struct make_signed<unsigned int> { typedef signed int type; };
-template <> struct make_signed<signed long> { typedef signed long type; };
-template <> struct make_signed<unsigned long> { typedef signed long type; };
-template <> struct make_signed<signed long long> { typedef signed long long type; };
-template <> struct make_signed<unsigned long long> { typedef signed long long type; };
-
-template <typename T> struct make_unsigned { typedef typename mpt::uint_of_size<sizeof(T)>::type type; };
-template <> struct make_unsigned<char> { typedef unsigned char type; };
-template <> struct make_unsigned<signed char> { typedef unsigned char type; };
-template <> struct make_unsigned<unsigned char> { typedef unsigned char type; };
-template <> struct make_unsigned<signed short> { typedef unsigned short type; };
-template <> struct make_unsigned<unsigned short> { typedef unsigned short type; };
-template <> struct make_unsigned<signed int> { typedef unsigned int type; };
-template <> struct make_unsigned<unsigned int> { typedef unsigned int type; };
-template <> struct make_unsigned<signed long> { typedef unsigned long type; };
-template <> struct make_unsigned<unsigned long> { typedef unsigned long type; };
-template <> struct make_unsigned<signed long long> { typedef unsigned long long type; };
-template <> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
-
-#endif // MPT_COMPILER_HAS_TYPE_TRAITS
-
-
-#if MPT_COMPILER_HAS_TYPE_TRAITS
 
 using std::remove_const;
-
-#else // !MPT_COMPILER_HAS_TYPE_TRAITS
-
-template <typename T> struct remove_const { typedef T type; };
-template <typename T> struct remove_const<const T> { typedef T type; };
-
-#endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
 
 // Tell which types are safe for mpt::byte_cast.
@@ -217,14 +147,6 @@ template <typename T> inline mpt::byte * as_raw_memory(T & v)
 		template <> struct is_binary_safe< type > : public mpt::true_type { }; \
 	} \
 /**/
-
-
-namespace mpt
-{
-
-
-
-} // namespace mpt
 
 
 

@@ -179,9 +179,6 @@
 
 // specific C++ features
 
-#define MPT_COMPILER_HAS_TYPE_TRAITS 1
-
-
 
 // C++11 constexpr
 #if MPT_GCC_BEFORE(4,8,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
