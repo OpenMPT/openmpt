@@ -133,7 +133,7 @@ template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
 //-------------------------------------------------------
 {
-	#if MPT_COMPILER_HAS_TYPE_TRAITS
+	#if !MPT_GCC_BEFORE(4,5,0)
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	Binarywrite(oStrm, data);
@@ -174,7 +174,7 @@ template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 //----------------------------------------------------------------------
 {
-	#if MPT_COMPILER_HAS_TYPE_TRAITS
+	#if !MPT_GCC_BEFORE(4,5,0)
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	if (nSize == sizeof(T) || nSize == invalidDatasize)

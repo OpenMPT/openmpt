@@ -176,7 +176,7 @@ inline void MemsetZero(T &a)
 {
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
-#if !MPT_CLANG_BEFORE(3,2,0)
+#if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
 	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
 #endif
 #endif
@@ -191,7 +191,7 @@ inline T &MemCopy(T &destination, const T &source)
 {
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
-#if !MPT_CLANG_BEFORE(3,2,0)
+#if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
 	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
 #endif
 #endif
