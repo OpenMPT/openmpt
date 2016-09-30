@@ -1040,7 +1040,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					const double start = memory.chnSettings[nChn].patLoop;
 					if(!startTimes[start]) startTimes[start] = 1;
-					startTimes[start] = Util::lcm<int>(startTimes[start], 1 + (param & 0x0F));
+					startTimes[start] = mpt::lcm(startTimes[start], 1 + (param & 0x0F));
 				}
 			}
 			for(auto i = startTimes.begin(); i != startTimes.end(); i++)
