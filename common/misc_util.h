@@ -182,6 +182,7 @@ inline void MemsetZero(T &a)
 }
 
 
+#ifdef MODPLUG_TRACKER
 // Copy given object to other location.
 template <class T>
 void MemCopy(T &destination, const T &source)
@@ -194,6 +195,7 @@ void MemCopy(T &destination, const T &source)
 #endif
 	std::memcpy(&destination, &source, sizeof(T));
 }
+#endif // MODPLUG_TRACKER
 
 
 namespace mpt {
