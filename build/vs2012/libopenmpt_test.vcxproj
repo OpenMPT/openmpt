@@ -234,6 +234,7 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_impl.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_internal.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />

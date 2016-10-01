@@ -138,6 +138,9 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_internal.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>

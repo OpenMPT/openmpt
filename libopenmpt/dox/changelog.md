@@ -37,6 +37,10 @@ is just a high-level summary.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
+ *  Added `libopenmpt_stream_callbacks_buffer.h` which adds
+    `openmpt_stream_callbacks` support for in-memory buffers, possibly even only
+    using a truncated prefix view into a bigger file which is useful for
+    probing.
  *  Possible crashes with malformed MED, PSM and Startrekker files.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.

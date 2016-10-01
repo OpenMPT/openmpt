@@ -22,6 +22,9 @@
 #define LIBOPENMPT_CXX_API
 #undef LIBOPENMPT_CXX_API
 
+/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_buffer.h exists. */
+#define LIBOPENMPT_STREAM_CALLBACKS_BUFFER
+
 /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_fd.h exists.
  * \since 0.3
  * \remarks
