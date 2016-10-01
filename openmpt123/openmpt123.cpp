@@ -446,7 +446,9 @@ static void show_info( std::ostream & log, bool verbose ) {
 }
 
 static void show_man_version( textout & log ) {
-	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", " << "Copyright (c) 2013-2016 OpenMPT developers <https://lib.openmpt.org/>" << std::endl;
+	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << std::endl;
+	log << std::endl;
+	log << "Copyright (c) 2013-2016 OpenMPT developers <https://lib.openmpt.org/>" << std::endl;
 }
 
 static void show_short_version( textout & log ) {
@@ -502,6 +504,9 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		if ( man_version ) {
 			log << "openmpt123 plays module music files." << std::endl;
 			log << std::endl;
+		}
+		if ( man_version ) {
+			log << "Options:" << std::endl;
 		}
 		log << " -h, --help                 Show help" << std::endl;
 		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << std::endl;

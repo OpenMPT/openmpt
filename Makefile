@@ -1157,9 +1157,9 @@ bin/libopenmpt_modplug$(SOSUFFIX): $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPE
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/openmpt123.1: bin/openmpt123$(EXESUFFIX)
+bin/openmpt123.1: bin/openmpt123$(EXESUFFIX) openmpt123/openmpt123.h2m
 	$(INFO) [HELP2MAN] $@
-	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help $< > $@
+	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help --include=openmpt123/openmpt123.h2m $< > $@
 
 openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(INFO) [CXX] $<
