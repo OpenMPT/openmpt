@@ -18,6 +18,7 @@ is just a high-level summary.
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
     created with ScreamTracker 3.
+ *  openmpt123: Improved section layout in man page.
 
 ### libopenmpt 0.2-beta20.1 (2016-09-03)
 
