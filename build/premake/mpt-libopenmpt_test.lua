@@ -42,6 +42,7 @@
    "../../libopenmpt/libopenmpt_ext.hpp",
    "../../libopenmpt/libopenmpt_impl.hpp",
    "../../libopenmpt/libopenmpt_internal.h",
+   "../../libopenmpt/libopenmpt_stream_callbacks_buffer.h",
    "../../libopenmpt/libopenmpt_stream_callbacks_fd.h",
    "../../libopenmpt/libopenmpt_stream_callbacks_file.h",
    "../../libopenmpt/libopenmpt_version.h",

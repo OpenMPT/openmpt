@@ -20,9 +20,9 @@
 #define LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS 1
 #define LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX    2
 
-#define LIBOPENMPT_EXAMPLE_PROBE_STYLE  LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS
+#define LIBOPENMPT_EXAMPLE_PROBE_STYLE  LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX
 
-#define LIBOPENMPT_EXAMPLE_PROBE_RESULT LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY
+#define LIBOPENMPT_EXAMPLE_PROBE_RESULT LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT
 
 /* Use something between 1024 and 65536. 4096 is a sane default. */
 #define LIBOPENMPT_EXAMPLE_PROBE_PREFIX_BYTES (4096)
@@ -34,121 +34,26 @@
 #include <string.h>
 
 #include <libopenmpt/libopenmpt.h>
+
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 #include <libopenmpt/libopenmpt_stream_callbacks_file.h>
 #endif
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
 
-typedef struct libopenmpt_example_stream_prefix_probe {
-	const void * prefix_data;
-	int64_t prefix_size;
-	int64_t file_size;
-	int64_t file_pos;
-	int overflow;
-} libopenmpt_example_stream_prefix_probe;
-
-static size_t libopenmpt_example_stream_read_func_prefix_probe( void * stream, void * dst, size_t bytes ) {
-	libopenmpt_example_stream_prefix_probe * s = (libopenmpt_example_stream_prefix_probe*)stream;
-	int64_t offset = bytes;
-	int64_t begpos = s->file_pos;
-	int64_t endpos = s->file_pos;
-	size_t valid_bytes = 0;
-	endpos = (uint64_t)endpos + (uint64_t)offset;
-	if ( ( offset > 0 ) && !( (uint64_t)endpos > (uint64_t)begpos ) ) {
-		/* integer wrapped */
-		return 0;
-	}
-	if ( bytes == 0 ) {
-		return 0;
-	}
-	if ( begpos >= s->file_size ) {
-		return 0;
-	}
-	if ( endpos > s->file_size ) {
-		/* clip to eof */
-		bytes = bytes - (size_t)( endpos - s->file_size );
-		endpos = endpos - ( endpos - s->file_size );
-	}
-	memset( dst, 0, bytes );
-	if ( begpos >= s->prefix_size ) {
-		s->overflow = 1;
-		valid_bytes = 0;
-	} else if ( endpos > s->prefix_size ) {
-		s->overflow = 1;
-		valid_bytes = bytes - (size_t)( endpos - s->prefix_size );
-	} else {
-		valid_bytes = bytes;
-	}
-	memcpy( dst, (const char*)s->prefix_data + s->file_pos, valid_bytes );
-	s->file_pos = s->file_pos + bytes;
-	return bytes;
-}
-
-static int libopenmpt_example_stream_seek_func_prefix_probe( void * stream, int64_t offset, int whence ) {
-	libopenmpt_example_stream_prefix_probe * s = (libopenmpt_example_stream_prefix_probe*)stream;
-	int result = -1;
-	switch ( whence ) {
-		case OPENMPT_STREAM_SEEK_SET:
-			if ( offset < 0 ) {
-				return -1;
-			}
-			if ( offset > s->file_size ) {
-				return -1;
-			}
-			s->file_pos = offset;
-			result = 0;
-			break;
-		case OPENMPT_STREAM_SEEK_CUR:
-			do {
-				int64_t oldpos = s->file_pos;
-				int64_t pos = s->file_pos;
-				pos = (uint64_t)pos + (uint64_t)offset;
-				if ( ( offset > 0 ) && !( (uint64_t)pos > (uint64_t)oldpos ) ) {
-					/* integer wrapped */
-					return -1;
-				}
-				if ( ( offset < 0 ) && !( (uint64_t)pos < (uint64_t)oldpos ) ) {
-					/* integer wrapped */
-					return -1;
-				}
-				s->file_pos = pos;
-			} while(0);
-			result = 0;
-			break;
-		case OPENMPT_STREAM_SEEK_END:
-			if ( offset > 0 ) {
-				return -1;
-			}
-			do {
-				int64_t oldpos = s->file_pos;
-				int64_t pos = s->file_pos;
-				pos = s->file_size;
-				pos = (uint64_t)pos + (uint64_t)offset;
-				if ( ( offset < 0 ) && !( (uint64_t)pos < (uint64_t)oldpos ) ) {
-					/* integer wrapped */
-					return -1;
-				}
-				s->file_pos = pos;
-			} while(0);
-			result = 0;
-			break;
-	}
-	return result;
-}
-
-static int64_t libopenmpt_example_stream_tell_func_prefix_probe( void * stream ) {
-	libopenmpt_example_stream_prefix_probe * s = (libopenmpt_example_stream_prefix_probe*)stream;
-	return s->file_pos;
-}
+#if defined( LIBOPENMPT_STREAM_CALLBACKS_BUFFER )
+#include <libopenmpt/libopenmpt_stream_callbacks_buffer.h>
+#else
+#error "libopenmpt too old."
+#endif
 
 static double libopenmpt_example_could_open_probability_prefix( const void * prefix_data, size_t prefix_size_, int64_t file_size, double effort, openmpt_log_func logfunc, void * user ) {
 	double ret = 0.0;
 	int64_t prefix_size = prefix_size_;
 	openmpt_stream_callbacks openmpt_stream_callbacks_prefix_probe;
-	libopenmpt_example_stream_prefix_probe stream;
+	openmpt_stream_buffer stream;
 	memset( &openmpt_stream_callbacks_prefix_probe, 0, sizeof( openmpt_stream_callbacks ) );
-	memset( &stream, 0, sizeof( libopenmpt_example_stream_prefix_probe ) );
+	memset( &stream, 0, sizeof( openmpt_stream_buffer ) );
 	if ( !prefix_data ) {
 		return 0.0;
 	}
@@ -161,16 +66,10 @@ static double libopenmpt_example_could_open_probability_prefix( const void * pre
 	if ( prefix_size > file_size ) {
 		prefix_size = file_size;
 	}
-	openmpt_stream_callbacks_prefix_probe.read = &libopenmpt_example_stream_read_func_prefix_probe;
-	openmpt_stream_callbacks_prefix_probe.seek = &libopenmpt_example_stream_seek_func_prefix_probe;
-	openmpt_stream_callbacks_prefix_probe.tell = &libopenmpt_example_stream_tell_func_prefix_probe;
-	stream.prefix_data = prefix_data;
-	stream.prefix_size = prefix_size;
-	stream.file_size = file_size;
-	stream.file_pos = 0;
-	stream.overflow = 0;
+	openmpt_stream_callbacks_prefix_probe = openmpt_stream_get_buffer_callbacks();
+	openmpt_stream_buffer_init_prefix_only( &stream, prefix_data, prefix_size, file_size );
 	ret = openmpt_could_open_propability( openmpt_stream_callbacks_prefix_probe, &stream, effort, logfunc, user );
-	if ( stream.overflow ) {
+	if ( openmpt_stream_buffer_overflowed( &stream ) ) {
 		ret = 0.5;
 	}
 	return ret;
@@ -456,3 +355,4 @@ cleanup:
 
 	return result;
 }
+
