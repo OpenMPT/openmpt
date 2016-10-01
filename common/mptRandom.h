@@ -12,16 +12,8 @@
 
 #include "mptMutex.h"
 
-#if MPT_COMPILER_GENERIC || MPT_COMPILER_MSVC || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,5,0)) || (MPT_COMPILER_CLANG && MPT_CLANG_AT_LEAST(3,0,0)) || MPT_COMPILER_MSVCCLANGC2
-#define MPT_STD_RANDOM 1
-#else // MPT_COMPILER
-#define MPT_STD_RANDOM 0
-#endif // MPT_COMPILER
-
 #include <limits>
-#if MPT_STD_RANDOM
 #include <random>
-#endif // MPT_STD_RANDOM
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -282,9 +274,6 @@ public:
 #endif // MODPLUG_TRACKER
 
 
-#if MPT_STD_RANDOM
-
-
 //  C++11 std::random_device may be implemented as a deterministic PRNG.
 //  There is no way to seed this PRNG and it is allowed to be seeded with the
 // same value on each program invocation. This makes std::random_device
@@ -338,6 +327,21 @@ public:
 // C++11 random does not provide any sane way to determine the amount of entropy
 // required to seed a particular engine. VERY STUPID.
 // List the ones we are likely to use.
+
+#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+
+template <> struct engine_traits<std::mt19937> {
+	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
+	typedef std::mt19937 rng_type;
+	typedef rng_type::result_type result_type;
+	static inline int result_bits() { return rng_type::word_size; }
+	template<typename Trd> static inline rng_type make(Trd & rd)
+	{
+		return rng_type(rd);
+	}
+};
+
+#else
 
 template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
@@ -417,8 +421,7 @@ template <> struct engine_traits<std::ranlux48> {
 	}
 };
 
-
-#endif // MPT_STD_RANDOM
+#endif
 
 
 class prng_random_device_seeder
@@ -492,8 +495,6 @@ typedef mpt::rng::lcg_musl best_prng;
 
 #else // !MPT_BUILD_FUZZER
 
-#if MPT_STD_RANDOM
-
 // mpt::random_device always generates 32 bits of entropy
 typedef mpt::sane_random_device random_device;
 
@@ -501,19 +502,11 @@ typedef mpt::sane_random_device random_device;
 // output domain which we rely upon.
 typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
 typedef std::mt19937       main_prng;
+#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+typedef std::mt19937       best_prng;
+#else
 typedef std::ranlux48      best_prng;
-
-#else // !MPT_STD_RANDOM
-
-// easy to implement fallbacks, only used on very old compilers
-
-typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
-
-typedef mpt::rng::lcg_msvc fast_prng;
-typedef mpt::rng::lcg_c99  main_prng;
-typedef mpt::rng::lcg_musl best_prng;
-
-#endif // MPT_STD_RANDOM
+#endif
 
 #endif // MPT_BUILD_FUZZER
 

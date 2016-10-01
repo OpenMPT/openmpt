@@ -180,6 +180,13 @@
 // specific C++ features
 
 
+
+#if MPT_GCC_BEFORE(4,5,0)
+#define MPT_COMPILER_QUIRK_RANDOM_TR1
+#endif
+
+
+
 // C++11 constexpr
 #if MPT_GCC_BEFORE(4,8,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
 // GCC 4.6 rejects valid code
