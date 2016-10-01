@@ -191,18 +191,21 @@ crand::result_type crand::operator()()
 
 #endif // MODPLUG_TRACKER
 
-#if MPT_STD_RANDOM
-
 sane_random_device::sane_random_device()
 	: rd_reliable(rd.entropy() > 0.0)
 {
 	if(!rd_reliable)
 	{
+#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+		uint32 seed_val = mpt::generate_timeseed<uint32>();
+		unsigned int seed = seed_val;
+#else
 		uint64 seed_val = mpt::generate_timeseed<uint64>();
 		unsigned int seeds[2];
 		seeds[0] = static_cast<uint32>(seed_val >> 32);
 		seeds[1] = static_cast<uint32>(seed_val >>  0);
 		std::seed_seq seed(seeds + 0, seeds + 2);
+#endif
 		rd_fallback = mpt::make_unique<std::mt19937>(seed);
 	}
 }
@@ -213,6 +216,15 @@ sane_random_device::sane_random_device(const std::string & token)
 {
 	if(!rd_reliable)
 	{
+#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+		uint32 seed_val = mpt::generate_timeseed<uint32>();
+		mpt::default_hash<uint32>::type hash;
+		for(std::size_t i = 0; i < token.length(); ++i)
+		{
+			hash(static_cast<unsigned char>(token[i]));
+		}
+		unsigned int seed = seed_val ^ hash.result();
+#else
 		uint64 seed_val = mpt::generate_timeseed<uint64>();
 		std::vector<unsigned int> seeds;
 		seeds.push_back(static_cast<uint32>(seed_val >> 32));
@@ -222,6 +234,7 @@ sane_random_device::sane_random_device(const std::string & token)
 			seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
 		}
 		std::seed_seq seed(seeds.begin(), seeds.end());
+#endif
 		rd_fallback = mpt::make_unique<std::mt19937>(seed);
 	}
 }
@@ -288,8 +301,6 @@ sane_random_device::result_type sane_random_device::operator()()
 	}
 	return result;
 }
-
-#endif // MPT_STD_RANDOM
 
 prng_random_device_seeder::prng_random_device_seeder()
 {
