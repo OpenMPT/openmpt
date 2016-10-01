@@ -4,10 +4,12 @@ set -e
 
 MODE="${1}"
 
-if [ $(svn status | wc -l) -ne 0 ]; then
-	echo "error: Working copy not clean"
-	exit 1
-fi
+function checkclean {
+	if [ $(svn status | wc -l) -ne 0 ]; then
+		echo "error: Working copy not clean"
+		exit 1
+	fi
+}
 
 DATE=$(date --iso)
 
@@ -48,6 +50,7 @@ function writeall {
 case $MODE in
 
 	release)
+		checkclean
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_PREREL.*/#define OPENMPT_API_VERSION_PREREL ""/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_IS_PREREL.*/#define OPENMPT_API_VERSION_IS_PREREL 0/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.mk | sed -e 's/LIBOPENMPT_VERSION_PREREL=.*/LIBOPENMPT_VERSION_PREREL=/' > libopenmpt/libopenmpt_version.mk.tmp && mv libopenmpt/libopenmpt_version.mk.tmp libopenmpt/libopenmpt_version.mk
@@ -59,6 +62,7 @@ case $MODE in
 		;;
 
 	bumpmajor)
+		checkclean
 		LIBOPENMPT_VERSION_MAJOR=$(($LIBOPENMPT_VERSION_MAJOR + 1))
 		LIBOPENMPT_VERSION_MINOR=0
 		LIBOPENMPT_VERSION_PATCH=0
@@ -69,6 +73,7 @@ case $MODE in
 		addchangelog
 		;;
 	bumpminor)
+		checkclean
 		LIBOPENMPT_VERSION_MINOR=$(($LIBOPENMPT_VERSION_MINOR + 1))
 		LIBOPENMPT_VERSION_PATCH=0
 		LIBOPENMPT_VERSION_PRERELVER=0
@@ -78,6 +83,7 @@ case $MODE in
 		addchangelog
 		;;
 	bumppatch)
+		checkclean
 		LIBOPENMPT_VERSION_PATCH=$(($LIBOPENMPT_VERSION_PATCH + 1))
 		LIBOPENMPT_VERSION_PRERELVER=0
 		LIBOPENMPT_VERSION_PREREL=-pre.0
@@ -93,6 +99,7 @@ case $MODE in
 		;;
 
 	breakltabi)
+		checkclean
 		LIBOPENMPT_LTVER_CURRENT=$(($LIBOPENMPT_LTVER_CURRENT + 1))
 		LIBOPENMPT_LTVER_REVISION=0
 		LIBOPENMPT_LTVER_AGE=0
