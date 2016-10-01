@@ -40,6 +40,7 @@ is just a high-level summary.
  *  Possible crashes with malformed MED, PSM and Startrekker files.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
+ *  openmpt123: Improved section layout in man page.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
