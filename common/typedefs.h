@@ -123,8 +123,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_GCC_BEFORE(4,6,0)
 #define MPT_SHARED_PTR_NULL(T) std::shared_ptr<T>()
+#define MPT_WEAK_PTR_NULL(T) std::weak_ptr<T>()
 #else
 #define MPT_SHARED_PTR_NULL(T) nullptr
+#define MPT_WEAK_PTR_NULL(T) nullptr
 #endif
 
 
