@@ -126,7 +126,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_WEAK_PTR_NULL(T) std::weak_ptr<T>()
 #else
 #define MPT_SHARED_PTR_NULL(T) nullptr
-#define MPT_WEAK_PTR_NULL(T) nullptr
+#define MPT_WEAK_PTR_NULL(T) std::weak_ptr<T>()
 #endif
 
 
