@@ -11,7 +11,11 @@
 
 #include <vector> // some C++ header in order to have the C++ standard library version information available
 
-#if MPT_OS_EMSCRIPTEN
+#if !MPT_PLATFORM_MULTITHREADED
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_OS_EMSCRIPTEN
 #define MPT_MUTEX_STD     0
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
