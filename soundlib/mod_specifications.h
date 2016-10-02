@@ -55,6 +55,7 @@ struct CModSpecifications
 	uint16 sampleFilenameLengthMax;		// Ditto
 	uint16 instrNameLengthMax;			// Ditto
 	uint16 instrFilenameLengthMax;		// Ditto
+	uint16 commentLineLengthMax;		// not including line break, 0 for unlimited
 	SAMPLEINDEX samplesMax;				// Max number of samples == Highest possible sample index
 	INSTRUMENTINDEX instrumentsMax;		// Max number of instruments == Highest possible instrument index
 	MixLevels defaultMixLevels;			// Default mix levels that are used when creating a new file in this format

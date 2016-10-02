@@ -19,6 +19,7 @@ class CCtrlComments: public CModControlDlg
 {
 protected:
 	int charWidth;
+	bool m_Reformatting;
 	UINT m_nLockCount;
 
 public:
@@ -41,6 +42,7 @@ public:
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlComments)
+	afx_msg void OnCommentsUpdated();
 	afx_msg void OnCommentsChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

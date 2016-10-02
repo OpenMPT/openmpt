@@ -20,11 +20,20 @@
 #include "../soundlib/mod_specifications.h"
 
 
+//#define MPT_COMMENTS_LONG_LINES_WRAP
+//#define MPT_COMMENTS_LONG_LINES_TRUNCATE
+
+
+#define MPT_COMMENTS_MARGIN 4
+
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
+	ON_EN_UPDATE(IDC_EDIT_COMMENTS,		OnCommentsUpdated)
 	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		OnCommentsChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -43,6 +52,7 @@ CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModC
 //---------------------------------------------------------------------------------------------------------
 {
 	m_nLockCount = 0;
+	m_Reformatting = false;
 	charWidth = 0;
 }
 
@@ -75,10 +85,11 @@ BOOL CCtrlComments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	// Initialize comments
-	UINT margin = Util::ScalePixels(4, m_EditComments.m_hWnd);
-	m_EditComments.SetMargins(margin, 0);
+	UINT margin = Util::ScalePixels(MPT_COMMENTS_MARGIN, m_EditComments.m_hWnd);
+	m_EditComments.SetMargins(margin, margin);
 	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
+	m_EditComments.FmtLines(FALSE);
 	m_bInitialized = TRUE;
 	return FALSE;
 }
@@ -100,9 +111,16 @@ void CCtrlComments::RecalcLayout()
 	rect.right = rcClient.right - rect.left;
 	if ((rect.right > rect.left) && (rect.bottom > rect.top))
 	{
-		int cxmax = 80 * charWidth;
 		int cx = rect.Width(), cy = rect.Height();
-		if (cx > cxmax && cxmax != 0) cx = cxmax;
+		if(m_sndFile.GetModSpecifications().commentLineLengthMax != 0)
+		{
+			int cxmax = Util::ScalePixels(GetSystemMetrics(SM_CXBORDER) + MPT_COMMENTS_MARGIN + m_sndFile.GetModSpecifications().commentLineLengthMax * charWidth + MPT_COMMENTS_MARGIN + GetSystemMetrics(SM_CXVSCROLL) + GetSystemMetrics(SM_CXBORDER) - 1, m_EditComments.m_hWnd);
+			if (cx > cxmax && cxmax != 0) cx = cxmax;
+			//SetWindowLong(m_EditComments.m_hWnd, GWL_STYLE, GetWindowLong(m_EditComments.m_hWnd, GWL_STYLE) & ~WS_HSCROLL);
+		} else
+		{
+			//SetWindowLong(m_EditComments.m_hWnd, GWL_STYLE, GetWindowLong(m_EditComments.m_hWnd, GWL_STYLE) | WS_HSCROLL);
+		}
 		if ((cx != cx0) || (cy != cy0)) m_EditComments.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 	}
 }
@@ -120,52 +138,47 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	FontSetting font = TrackerSettings::Instance().commentsFont;
 	// Point size to pixels
 	int32_t fontSize = -MulDiv(font.size, m_nDPIy, 720);
-	charWidth = (-fontSize + 1) / 2;
 	if(previousFont != font)
 	{
 		previousFont = font;
-		CMainFrame::GetCommentsFont() = ::CreateFont(fontSize, charWidth, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
+		CMainFrame::GetCommentsFont() = ::CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
 			font.flags[FontSetting::Italic] ? TRUE :FALSE, FALSE, FALSE,
-			DEFAULT_CHARSET, OUT_RASTER_PRECIS,
+			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
 			CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			FIXED_PITCH | FF_MODERN, font.name.c_str());
 	}
 	m_EditComments.SendMessage(WM_SETFONT, (WPARAM)CMainFrame::GetCommentsFont());
+	CDC * pDC = m_EditComments.GetDC();
+	pDC->SelectObject(CMainFrame::GetCommentsFont());
+	TEXTMETRIC tm;
+	pDC->GetTextMetrics(&tm);
+	charWidth = tm.tmAveCharWidth;
+	m_EditComments.ReleaseDC(pDC);
+
 	RecalcLayout();
 
 	m_EditComments.SetRedraw(FALSE);
-	m_EditComments.SetSel(0, -1, TRUE);
-	m_EditComments.ReplaceSel(_T(""));
-	if(!m_sndFile.m_songMessage.empty())
+
+	std::string text = m_sndFile.m_songMessage.GetFormatted(SongMessage::leCRLF);
+	for(std::size_t i = 0; i < text.length(); ++i)
 	{
-		TCHAR s[256], c;
-		const char *p = m_sndFile.m_songMessage.c_str();
-		UINT ln = 0;
-		while ((c = *p++) != NULL)
+		// replace control characters
+		char c = text[i];
+		if(c > '\0' && c < ' ' && c != '\r' && c != '\n')
 		{
-			if ((ln >= LINE_LENGTH-1) || (!*p))
-			{
-				if (((uint32)c) > _T(' ')) s[ln++] = c;
-				c = SongMessage::InternalLineEnding;
-			}
-			if (c == SongMessage::InternalLineEnding)
-			{
-				s[ln] = 0x0D;
-				s[ln+1] = 0x0A;
-				s[ln+2] = 0;
-				m_EditComments.SetSel(65000, 65000, TRUE);
-				m_EditComments.ReplaceSel(s);
-				ln = 0;
-			} else
-			{
-				if (((uint32)c) < _T(' ')) c = _T(' ');
-				s[ln++] = c;
-			}
+			c = ' ';
 		}
-		m_EditComments.SetSel(0, 0);
-		m_EditComments.SetModify(FALSE);
+		text[i] = c;
 	}
-	if (commentHint.GetType() & HINT_MODTYPE)
+	CString new_text = text.c_str();
+	CString old_text;
+	m_EditComments.GetWindowText(old_text);
+	if(new_text != old_text)
+	{
+		m_EditComments.SetWindowText(new_text);
+	}
+
+	if(commentHint.GetType() & HINT_MODTYPE)
 	{
 		m_EditComments.SetReadOnly(!m_sndFile.GetModSpecifications().hasComments);
 	}
@@ -175,56 +188,146 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 }
 
 
+void CCtrlComments::OnCommentsUpdated()
+//-------------------------------------
+{
+
+#if defined(MPT_COMMENTS_LONG_LINES_TRUNCATE) || defined(MPT_COMMENTS_LONG_LINES_WRAP)
+
+	if(m_Reformatting)
+	{
+		return;
+	}
+
+	if(!m_sndFile.GetModSpecifications().hasComments)
+	{
+		return;
+	}
+	if(m_sndFile.GetModSpecifications().commentLineLengthMax == 0)
+	{
+		return;
+	}
+
+	m_Reformatting = true;
+	const std::size_t maxline = m_sndFile.GetModSpecifications().commentLineLengthMax;
+	int beg = 0;
+	int end = 0;
+	m_EditComments.GetSel(beg, end);
+	CString text;
+	m_EditComments.GetWindowText(text);
+	std::string lines_new;
+	lines_new.reserve(text.GetLength());
+	bool modified = false;
+	std::size_t pos = 0;
+
+#if defined(MPT_COMMENTS_LONG_LINES_WRAP)
+
+	std::string lines = text.GetString();
+	std::size_t line_length = 0;
+	for(std::size_t i = 0; i < lines.length(); ++i)
+	{
+		if(lines[i] == '\r')
+		{
+			// nothing
+		} else if (lines[i] == '\n')
+		{
+			line_length = 0;
+		} else
+		{
+			line_length += 1;
+		}
+		if(line_length > maxline)
+		{
+			modified = true;
+			lines_new.push_back('\r');
+			lines_new.push_back('\n');
+			if(beg >= 0)
+			{
+				if(beg >= pos)
+				{
+					beg += 2;
+				}
+			}
+			if(end >= 0)
+			{
+				if(end >= pos)
+				{
+					end += 2;
+				}
+			}
+			pos += 2;
+			line_length = 1;
+		}
+		lines_new.push_back(lines[i]);
+		pos++;
+	}
+
+#elif defined(MPT_COMMENTS_LONG_LINES_TRUNCATE)
+
+	std::vector<std::string> lines = mpt::String::Split<std::string>(std::string(text.GetString()), std::string("\r\n"));
+	for(std::size_t i = 0; i < lines.size(); ++i)
+	{
+		if(i > 0)
+		{
+			pos += 2;
+		}
+		if(lines[i].length() > maxline)
+		{
+			modified = true;
+			pos += maxline;
+			for(std::size_t n = 0; n < lines[i].length() - maxline; ++n)
+			{
+				if(beg >= 0)
+				{
+					if(beg > pos)
+					{
+						beg--;
+					}
+				}
+				if(end >= 0)
+				{
+					if(end > pos)
+					{
+						end--;
+					}
+				}
+			}
+			lines[i] = lines[i].substr(0, maxline);
+		} else
+		{
+			pos += lines[i].length();
+		}
+	}
+	lines_new = mpt::String::Combine(lines, std::string("\r\n"));
+
+#endif
+
+	if(modified)
+	{
+		text = lines_new.c_str();
+		m_EditComments.SetWindowText(text);
+		m_EditComments.SetSel(beg, end);
+	}
+	m_Reformatting = false;
+
+#endif
+
+}
+
+
 void CCtrlComments::OnCommentsChanged()
 //-------------------------------------
 {
-	if ((m_nLockCount)
-		|| !m_sndFile.GetModSpecifications().hasComments) return;
+	if(m_nLockCount)
+		return;
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
-
-	TCHAR s[LINE_LENGTH + 2];
-
-	// Updating comments
+	CString text;
+	m_EditComments.GetWindowText(text);
+	m_EditComments.SetModify(FALSE);
+	if(m_sndFile.m_songMessage.SetFormatted(text.GetString(), SongMessage::leCRLF))
 	{
-		UINT n = m_EditComments.GetLineCount();
-		TCHAR *p = new (std::nothrow) TCHAR[n * LINE_LENGTH + 1];
-		if (!p)
-		{
-			return;
-		}
-		p[0] = 0;
-
-		for (UINT i=0; i<n; i++)
-		{
-			int ln = m_EditComments.GetLine(i, s, LINE_LENGTH);
-			if (ln < 0) ln = 0;
-			if (ln > LINE_LENGTH - 1) ln = LINE_LENGTH - 1;
-			s[ln] = 0;
-			while ((ln > 0) && (((uint32)s[ln-1]) <= _T(' '))) s[--ln] = 0;
-			if (i+1 < n)
-			{
-				size_t l = _tcslen(s);
-				s[l++] = SongMessage::InternalLineEnding;
-				s[l] = _T('\0');
-			}
-			_tcscat(p, s);
-		}
-		size_t len = _tcslen(p);
-		while ((len > 0) && ((p[len-1] == ' ') || (p[len - 1] == SongMessage::InternalLineEnding)))
-		{
-			len--;
-			p[len] = 0;
-		}
-
-		m_EditComments.SetModify(FALSE);
-		if(p != m_sndFile.m_songMessage)
-		{
-			m_sndFile.m_songMessage.assign(p);
-			m_modDoc.SetModified();
-			m_modDoc.UpdateAllViews(nullptr, CommentHint(), this);
-		}
-
-		delete[] p;
+		m_modDoc.SetModified();
+		m_modDoc.UpdateAllViews(nullptr, CommentHint(), this);
 	}
 }
 

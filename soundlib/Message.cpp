@@ -212,4 +212,31 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 }
 
 
+bool SongMessage::SetFormatted(std::string message, LineEnding lineEnding)
+{
+	MPT_ASSERT(lineEnding == leLF || lineEnding == leCR || lineEnding == leCRLF);
+	switch (lineEnding)
+	{
+	case leLF:
+		message = mpt::String::Replace(message, "\n", std::string(1, InternalLineEnding));
+		break;
+	case leCR:
+		message = mpt::String::Replace(message, "\r", std::string(1, InternalLineEnding));
+		break;
+	case leCRLF:
+		message = mpt::String::Replace(message, "\r\n", std::string(1, InternalLineEnding));
+		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
+		break;
+	}
+	if(message == *this)
+	{
+		return false;
+	}
+	assign(message);
+	return true;
+}
+
+
 OPENMPT_NAMESPACE_END

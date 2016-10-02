@@ -51,6 +51,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	12,											// Max sample filename length
 	25,											// Max instrument name length
 	12,											// Max instrument filename length
+	0,											// Max comment line length
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	mixLevels1_17RC3,							// defaultMixLevels
@@ -100,6 +101,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 	0,											// Max sample filename length
 	0,											// Max instrument name length
 	0,											// Max instrument filename length
+	0,											// Max comment line length
 	31,											// SamplesMax
 	0,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
@@ -147,6 +149,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 	0,											// Max sample filename length
 	22,											// Max instrument name length
 	0,											// Max instrument filename length
+	0,											// Max comment line length
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
 	mixLevelsCompatibleFT2,						// defaultMixLevels
@@ -194,6 +197,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	0,											// Max sample filename length
 	22,											// Max instrument name length
 	0,											// Max instrument filename length
+	0,											// Max comment line length
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
 	mixLevelsCompatibleFT2,						// defaultMixLevels
@@ -240,6 +244,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 	12,											// Max sample filename length
 	0,											// Max instrument name length
 	0,											// Max instrument filename length
+	0,											// Max comment line length
 	99,											// SamplesMax
 	0,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
@@ -287,6 +292,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 	12,											// Max sample filename length
 	0,											// Max instrument name length
 	0,											// Max instrument filename length
+	0,											// Max comment line length
 	99,											// SamplesMax
 	0,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
@@ -333,6 +339,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	12,											// Max sample filename length
 	25,											// Max instrument name length
 	12,											// Max instrument filename length
+	75,											// Max comment line length
 	99,											// SamplesMax
 	99,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
@@ -379,6 +386,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 	12,											// Max sample filename length
 	25,											// Max instrument name length
 	12,											// Max instrument filename length
+	75,											// Max comment line length
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels

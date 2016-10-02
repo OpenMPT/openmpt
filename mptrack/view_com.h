@@ -15,11 +15,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum
-{ 
-	LINE_LENGTH = 128,	//was 81. must be larger than visible comment area.
-};
-
 //========================================
 class CViewComments: public CModScrollView
 //========================================
