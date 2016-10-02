@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include "../common/misc_util.h"
+#include "../common/mptMutex.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -353,6 +354,7 @@ private:
 		std::string settingsKey;
 		ComponentFactoryMethod factoryMethod;
 		std::shared_ptr<IComponent> instance;
+		std::weak_ptr<IComponent> weakInstance;
 	};
 	typedef std::map<std::string, RegisteredComponent> TComponentMap;
 	const IComponentManagerSettings &m_Settings;
@@ -417,12 +419,16 @@ std::shared_ptr<type> ReloadComponent()
 template <typename type>
 std::shared_ptr<type> GetComponent()
 {
-	std::shared_ptr<type> component = std::make_shared<type>();
+	static std::weak_ptr<type> cache;
+	static mpt::mutex m;
+	MPT_LOCK_GUARD<mpt::mutex> l(m);
+	std::shared_ptr<type> component = cache.lock();
 	if(!component)
 	{
-		return component;
+		component = std::make_shared<type>();
+		component->Initialize();
+		cache = component;
 	}
-	component->Initialize();
 	return component;
 }
 

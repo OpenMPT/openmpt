@@ -316,6 +316,7 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 	registeredComponent.settingsKey = componentFactory.GetSettingsKey();
 	registeredComponent.factoryMethod = componentFactory.GetStaticConstructor();
 	registeredComponent.instance = MPT_SHARED_PTR_NULL(IComponent);
+	registeredComponent.weakInstance = MPT_WEAK_PTR_NULL(IComponent);
 	m_Components.insert(std::make_pair(componentFactory.GetID(), registeredComponent));
 }
 
@@ -329,6 +330,7 @@ void ComponentManager::Startup()
 		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
 		{
 			(*it).second.instance = (*it).second.factoryMethod(*this);
+			(*it).second.weakInstance = (*it).second.instance;
 		}
 	}
 	if(!m_Settings.KeepLoaded())
@@ -375,11 +377,16 @@ std::shared_ptr<IComponent> ComponentManager::GetComponent(const IComponentFacto
 			component = (*it).second.instance;
 		} else
 		{ // not loaded
-			component = (*it).second.factoryMethod(*this);
+			component = (*it).second.weakInstance.lock();
+			if(!component)
+			{
+				component = (*it).second.factoryMethod(*this);
+			}
 			if(m_Settings.KeepLoaded())
 			{ // keep the component loaded
 				(*it).second.instance = component;
 			}
+			(*it).second.weakInstance = component;
 		}
 	} else
 	{ // unregistered component
@@ -400,6 +407,7 @@ std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFa
 		if((*it).second.instance)
 		{ // loaded
 			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
+			(*it).second.weakInstance = MPT_WEAK_PTR_NULL(IComponent);
 		}
 		// not loaded
 		component = (*it).second.factoryMethod(*this);
@@ -407,6 +415,7 @@ std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFa
 		{ // keep the component loaded
 			(*it).second.instance = component;
 		}
+		(*it).second.weakInstance = component;
 	} else
 	{ // unregistered component
 		component = componentFactory.Construct(*this);
@@ -446,7 +455,11 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 		result.state = ComponentStateBlocked;
 		return result;
 	}
-	std::shared_ptr<IComponent> component = ((*it).second.instance) ? it->second.instance : MPT_SHARED_PTR_NULL(IComponent);
+	std::shared_ptr<IComponent> component = it->second.instance;
+	if(!component)
+	{
+		component = it->second.weakInstance.lock();
+	}
 	if(!component)
 	{
 		result.state = ComponentStateUnintialized;
