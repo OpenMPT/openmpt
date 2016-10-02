@@ -177,6 +177,14 @@
 
 
 
+// This should really be based on __STDCPP_THREADS__, but that is not defined by
+// GCC or clang. Stupid.
+// Just assume multithreaded and disable for platforms we know are
+// singlethreaded later on.
+#define MPT_PLATFORM_MULTITHREADED 1
+
+
+
 // specific C++ features
 
 
@@ -311,4 +319,11 @@
 
 #ifndef MPT_OS_EMSCRIPTEN_ANCIENT
 #define MPT_OS_EMSCRIPTEN_ANCIENT 0
+#endif
+
+
+
+#if MPT_OS_EMSCRIPTEN
+#undef MPT_PLATFORM_MULTITHREADED
+#define MPT_PLATFORM_MULTITHREADED 0
 #endif

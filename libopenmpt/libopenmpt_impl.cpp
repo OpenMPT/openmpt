@@ -51,7 +51,7 @@ OPENMPT_NAMESPACE_BEGIN
 #endif // !NO_DMO
 #endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 
-#if MPT_MUTEX_NONE && !MPT_OS_EMSCRIPTEN
+#if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
 #if MPT_COMPILER_MSVC
 #pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
