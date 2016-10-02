@@ -33,6 +33,18 @@ namespace SC { // SC = _S_ample_C_onversion
 
 
 
+#if MPT_COMPILER_MSVC
+#if defined(_M_IX86) && !(defined(_M_X64)) && (_M_IX86_FP < 2)
+#define MPT_SC_AVOID_FLOOR 1
+#else
+#define MPT_SC_AVOID_FLOOR 0
+#endif
+#else
+#define MPT_SC_AVOID_FLOOR 0
+#endif
+
+
+
 #if MPT_COMPILER_SHIFT_SIGNED
 
 #define MPT_SC_RSHIFT_SIGNED(val, shift) ((val) >> (shift))
@@ -379,9 +391,12 @@ struct Convert<int8, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 128.0f;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5f)));
 		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0f + 1.0f), 1));
+#else
+		return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5f)));
+#endif
 	}
 };
 
@@ -438,9 +453,12 @@ struct Convert<int16, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 32768.0f;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
 		return mpt::saturate_cast<int16>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0f + 1.0f), 1));
+#else
+		return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
+#endif
 	}
 };
 
@@ -453,9 +471,12 @@ struct Convert<int8, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 128.0;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
 		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
+#else
+		return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5)));
+#endif
 	}
 };
 
@@ -468,9 +489,12 @@ struct Convert<int16, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 32768.0;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
 		return mpt::saturate_cast<int16>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
+#else
+		return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
+#endif
 	}
 };
 
@@ -571,9 +595,12 @@ struct Convert<int32, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
 		return mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0f + 1.0f), 1));
+#else
+		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
+#endif
 	}
 };
 
@@ -586,9 +613,12 @@ struct Convert<int32, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 2147483648.0;
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
 		return mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0 + 1.0), 1));
+#else
+		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
+#endif
 	}
 };
 
@@ -645,9 +675,12 @@ struct Convert<int64, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1)<<63);
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
 		return mpt::saturate_cast<int64>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0f + 1.0f), 1));
+#else
+		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
+#endif
 	}
 };
 
@@ -660,9 +693,12 @@ struct Convert<int64, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= static_cast<double>(uint64(1)<<63);
+#if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
 		return mpt::saturate_cast<int64>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0 + 1.0), 1));
+#else
+		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
+#endif
 	}
 };
 
