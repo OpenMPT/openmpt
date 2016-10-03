@@ -44,13 +44,43 @@ std::wstring CLSIDToString(CLSID clsid)
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
-	::StringFromCLSID(clsid, &tmp);
-	if(tmp)
+	switch(::StringFromCLSID(clsid, &tmp))
+	{
+	case S_OK:
+		break;
+	case E_OUTOFMEMORY:
+		if(tmp)
+		{
+			::CoTaskMemFree(tmp);
+			tmp = nullptr;
+		}
+		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		break;
+	default:
+		if(tmp)
+		{
+			::CoTaskMemFree(tmp);
+			tmp = nullptr;
+		}
+		throw std::runtime_error("StringFromCLSID() failed.");
+		break;
+	}
+	if(!tmp)
+	{
+		throw std::runtime_error("StringFromCLSID() failed.");
+	}
+	try
 	{
 		str = tmp;
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
+		MPT_UNUSED_VARIABLE(e);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
 	}
+	::CoTaskMemFree(tmp);
+	tmp = nullptr;
 	return str;
 }
 
@@ -60,9 +90,28 @@ CLSID StringToCLSID(const std::wstring &str)
 {
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	if(::CLSIDFromString(tmp.data(), &clsid) != S_OK)
+	switch(::CLSIDFromString(tmp.data(), &clsid))
 	{
-		return CLSID();
+	case NOERROR:
+		// nothing
+		break;
+	case E_INVALIDARG:
+		clsid = CLSID();
+		break;
+	case CO_E_CLASSSTRING:
+		clsid = CLSID();
+		break;
+	case REGDB_E_CLASSNOTREG:
+		clsid = CLSID();
+		break;
+	case REGDB_E_READREGDB:
+		clsid = CLSID();
+		throw std::runtime_error("CLSIDFromString() failed: REGDB_E_READREGDB.");
+		break;
+	default:
+		clsid = CLSID();
+		throw std::runtime_error("CLSIDFromString() failed.");
+		break;
 	}
 	return clsid;
 }
@@ -71,17 +120,64 @@ CLSID StringToCLSID(const std::wstring &str)
 bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
 //-------------------------------------------------------------
 {
+	bool result = false;
+	clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return (::CLSIDFromString(tmp.data(), &clsid) == S_OK);
+	switch(::CLSIDFromString(tmp.data(), &clsid))
+	{
+	case NOERROR:
+		result = true;
+		break;
+	case E_INVALIDARG:
+		result = false;
+		break;
+	case CO_E_CLASSSTRING:
+		result = false;
+		break;
+	case REGDB_E_CLASSNOTREG:
+		result = false;
+		break;
+	case REGDB_E_READREGDB:
+		throw std::runtime_error("CLSIDFromString() failed: REGDB_E_READREGDB.");
+		break;
+	default:
+		throw std::runtime_error("CLSIDFromString() failed.");
+		break;
+	}
+	return result;
 }
 
 
 bool IsCLSID(const std::wstring &str)
 //-----------------------------------
 {
+	bool result = false;
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return (::CLSIDFromString(tmp.data(), &clsid) == S_OK);
+	switch(::CLSIDFromString(tmp.data(), &clsid))
+	{
+	case NOERROR:
+		result = true;
+		break;
+	case E_INVALIDARG:
+		result = false;
+		break;
+	case CO_E_CLASSSTRING:
+		result = false;
+		break;
+	case REGDB_E_CLASSNOTREG:
+		result = false;
+		break;
+	case REGDB_E_READREGDB:
+		result = false;
+		throw std::runtime_error("CLSIDFromString() failed: REGDB_E_READREGDB.");
+		break;
+	default:
+		result = false;
+		throw std::runtime_error("CLSIDFromString() failed.");
+		break;
+	}
+	return result;
 }
 
 
@@ -90,12 +186,40 @@ std::wstring IIDToString(IID iid)
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
-	::StringFromIID(iid, &tmp);
-	if(tmp)
+	switch(::StringFromIID(iid, &tmp))
+	{
+	case S_OK:
+		break;
+	case E_OUTOFMEMORY:
+		if(tmp)
+		{
+			::CoTaskMemFree(tmp);
+			tmp = nullptr;
+		}
+		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		break;
+	default:
+		if(tmp)
+		{
+			::CoTaskMemFree(tmp);
+			tmp = nullptr;
+		}
+		throw std::runtime_error("StringFromIID() failed.");
+		break;
+	}
+	if(!tmp)
+	{
+		throw std::runtime_error("StringFromIID() failed.");
+	}
+	try
 	{
 		str = tmp;
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
+		MPT_UNUSED_VARIABLE(e);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
 	}
 	return str;
 }
@@ -106,7 +230,23 @@ IID StringToIID(const std::wstring &str)
 {
 	IID iid = IID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	::IIDFromString(tmp.data(), &iid);
+	switch(::IIDFromString(tmp.data(), &iid))
+	{
+	case S_OK:
+		// nothing
+		break;
+	case E_OUTOFMEMORY:
+		iid = IID();
+		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		break;
+	case E_INVALIDARG:
+		iid = IID();
+		break;
+	default:
+		iid = IID();
+		throw std::runtime_error("IIDFromString() failed.");
+		break;
+	}
 	return iid;
 }
 
@@ -115,7 +255,10 @@ std::wstring GUIDToString(GUID guid)
 //----------------------------------
 {
 	std::vector<OLECHAR> tmp(256);
-	::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size()));
+	if(::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size())) <= 0)
+	{
+		throw std::runtime_error("StringFromGUID2() failed.");
+	}
 	return tmp.data();
 }
 
@@ -131,9 +274,14 @@ GUID CreateGUID()
 //---------------
 {
 	GUID guid = GUID();
-	if(::CoCreateGuid(&guid) != S_OK)
+	switch(::CoCreateGuid(&guid))
 	{
-		return GUID();
+	case S_OK:
+		// nothing
+		break;
+	default:
+		guid = GUID();
+		throw std::runtime_error("CoCreateGuid() failed.");
 	}
 	return guid;
 }
@@ -145,9 +293,17 @@ UUID StringToUUID(const mpt::ustring &str)
 	UUID uuid = UUID();
 	std::wstring wstr = mpt::ToWide(str);
 	std::vector<wchar_t> tmp(wstr.c_str(), wstr.c_str() + wstr.length() + 1);
-	if(::UuidFromStringW((RPC_WSTR)(&(tmp[0])), &uuid) != RPC_S_OK)
+	switch(::UuidFromStringW((RPC_WSTR)(&(tmp[0])), &uuid))
 	{
-		return UUID();
+	case RPC_S_OK:
+		// nothing
+		break;
+	case RPC_S_INVALID_STRING_UUID:
+		uuid = UUID();
+		break;
+	default:
+		throw std::runtime_error("UuidFromStringW() failed.");
+		break;
 	}
 	return uuid;
 }
@@ -158,12 +314,38 @@ mpt::ustring UUIDToString(UUID uuid)
 {
 	std::wstring wstr;
 	RPC_WSTR tmp = nullptr;
-	if(::UuidToStringW(&uuid, &tmp) != RPC_S_OK)
+	switch(::UuidToStringW(&uuid, &tmp))
 	{
-		return mpt::ustring();
+	case RPC_S_OK:
+		// nothing
+		break;
+	case RPC_S_OUT_OF_MEMORY:
+		if(tmp)
+		{
+			::RpcStringFreeW(&tmp);
+			tmp = nullptr;
+		}
+		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		break;
+	default:
+		throw std::runtime_error("UuidToStringW() failed.");
+		break;
 	}
-	wstr = (wchar_t*)tmp;
-	::RpcStringFreeW(&tmp);
+	try
+	{
+		std::size_t len = 0;
+		for(len = 0; tmp[len] != 0; ++len)
+		{
+			// nothing
+		}
+		wstr = std::wstring(tmp, tmp + len);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		::RpcStringFreeW(&tmp);
+		tmp = nullptr;
+		MPT_UNUSED_VARIABLE(e);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
+	}
 	return mpt::ToUnicode(wstr);
 }
 
