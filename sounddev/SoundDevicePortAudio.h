@@ -107,7 +107,6 @@ public:
 	ComponentPortAudio();
 	virtual ~ComponentPortAudio();
 	virtual bool DoInitialize();
-	bool ReInit();
 };
 
 

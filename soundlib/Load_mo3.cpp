@@ -83,7 +83,7 @@ public:
 	int32 (UNMO3_API * UNMO3_Decode_New)(const void **data, uint32 *len, uint32 flags);
 	// Free the data returned by UNMO3_Decode
 	void (UNMO3_API * UNMO3_Free)(const void *data);
-	int32 UNMO3_Decode(const void **data, uint32 *len, uint32 flags)
+	int32 UNMO3_Decode(const void **data, uint32 *len, uint32 flags) const
 	{
 		return (UNMO3_Decode_New ? UNMO3_Decode_New(data, len, flags) : UNMO3_Decode_Old(data, len));
 	}

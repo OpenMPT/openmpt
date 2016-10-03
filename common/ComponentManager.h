@@ -68,7 +68,7 @@ public:
 	virtual mpt::ustring GetVersion() const = 0;
 
 	virtual void Initialize() = 0;  // try to load the component
-	
+
 };
 
 
@@ -365,8 +365,8 @@ private:
 public:
 	void Register(const IComponentFactory &componentFactory);
 	void Startup();
-	std::shared_ptr<IComponent> GetComponent(const IComponentFactory &componentFactory);
-	std::shared_ptr<IComponent> ReloadComponent(const IComponentFactory &componentFactory);
+	std::shared_ptr<const IComponent> GetComponent(const IComponentFactory &componentFactory);
+	std::shared_ptr<const IComponent> ReloadComponent(const IComponentFactory &componentFactory);
 	std::vector<std::string> GetRegisteredComponents() const;
 	ComponentInfo GetComponentInfo(std::string name) const;
 };
@@ -395,16 +395,16 @@ bool ComponentListPush(ComponentListEntry *entry);
 
 
 template <typename type>
-std::shared_ptr<type> GetComponent()
+std::shared_ptr<const type> GetComponent()
 {
-	return std::dynamic_pointer_cast<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>()));
+	return std::dynamic_pointer_cast<const type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>()));
 }
 
 
 template <typename type>
-std::shared_ptr<type> ReloadComponent()
+std::shared_ptr<const type> ReloadComponent()
 {
-	return std::dynamic_pointer_cast<type>(ComponentManager::Instance()->ReloadComponent(ComponentFactory<type>()));
+	return std::dynamic_pointer_cast<const type>(ComponentManager::Instance()->ReloadComponent(ComponentFactory<type>()));
 }
 
 
@@ -417,7 +417,7 @@ std::shared_ptr<type> ReloadComponent()
 
 
 template <typename type>
-std::shared_ptr<type> GetComponent()
+std::shared_ptr<const type> GetComponent()
 {
 	static std::weak_ptr<type> cache;
 	static mpt::mutex m;
@@ -442,7 +442,7 @@ template <typename T>
 class ComponentHandle
 {
 private:
-	std::shared_ptr<T> component;
+	std::shared_ptr<const T> component;
 public:
 	ComponentHandle()
 		: component(GetComponent<T>())
@@ -457,18 +457,25 @@ public:
 	{
 		return component && component->IsAvailable();
 	}
-	T *get() const
+	const T *get() const
 	{
 		return component.get();
 	}
-	T &operator*() const
+	const T &operator*() const
 	{
 		return *component;
 	}
-	T *operator->() const
+	const T *operator->() const
 	{
 		return &*component;
 	}
+#if MPT_COMPONENT_MANAGER
+	void Reload()
+	{
+		component = MPT_SHARED_PTR_NULL(T);
+		component = ReloadComponent<T>();
+	}
+#endif
 };
 
 

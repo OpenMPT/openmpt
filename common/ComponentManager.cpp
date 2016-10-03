@@ -365,8 +365,8 @@ void ComponentManager::InitializeComponent(std::shared_ptr<IComponent> component
 }
 
 
-std::shared_ptr<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
-//--------------------------------------------------------------------------------------------------
+std::shared_ptr<const IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
+//---------------------------------------------------------------------------------------------------------
 {
 	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
 	auto it = m_Components.find(componentFactory.GetID());
@@ -397,8 +397,8 @@ std::shared_ptr<IComponent> ComponentManager::GetComponent(const IComponentFacto
 }
 
 
-std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
-//-----------------------------------------------------------------------------------------------------
+std::shared_ptr<const IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
+//------------------------------------------------------------------------------------------------------------
 {
 	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
 	auto it = m_Components.find(componentFactory.GetID());
@@ -407,6 +407,10 @@ std::shared_ptr<IComponent> ComponentManager::ReloadComponent(const IComponentFa
 		if((*it).second.instance)
 		{ // loaded
 			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
+			if(!(*it).second.weakInstance.expired())
+			{
+				throw std::runtime_error("Component not completely unloaded. Cannot reload.");
+			}
 			(*it).second.weakInstance = MPT_WEAK_PTR_NULL(IComponent);
 		}
 		// not loaded

@@ -79,10 +79,7 @@ void Manager::ReEnumerate()
 	m_DeviceDynamicCaps.clear();
 
 #ifdef MPT_WITH_PORTAUDIO
-	if(IsComponentAvailable(m_PortAudio))
-	{
-		m_PortAudio->ReInit();
-	}
+	m_PortAudio.Reload();
 #endif // MPT_WITH_PORTAUDIO
 
 #if MPT_OS_WINDOWS
