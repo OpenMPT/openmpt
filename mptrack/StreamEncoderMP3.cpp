@@ -571,7 +571,7 @@ public:
 			traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
 		}
 	}
-	Encoder::Traits BuildTraits(bool compatible)
+	Encoder::Traits BuildTraits(bool compatible) const
 	{
 		Encoder::Traits traits;
 		if(!IsAvailable())
@@ -619,7 +619,7 @@ MPT_REGISTERED_COMPONENT(ComponentLame, "LibMP3Lame")
 class MP3LameStreamWriter : public StreamWriterBase
 {
 private:
-	ComponentLame &lame;
+	const ComponentLame &lame;
 	bool compatible;
 	Encoder::Mode Mode;
 	bool gfp_inited;
@@ -635,7 +635,7 @@ private:
 	std::streamoff id3v2Size;
 	FileTags Tags;
 public:
-	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream, bool compatible)
+	MP3LameStreamWriter(const ComponentLame &lame_, std::ostream &stream, bool compatible)
 		: StreamWriterBase(stream)
 		, lame(lame_)
 		, compatible(compatible)
@@ -965,7 +965,7 @@ private:
 
 public:
 
-	Encoder::Traits BuildTraits()
+	Encoder::Traits BuildTraits() const
 	{
 		Encoder::Traits traits;
 		if(!IsAvailable())
@@ -1006,7 +1006,7 @@ MPT_REGISTERED_COMPONENT(ComponentBlade, "BladeEnc")
 class MP3BladeStreamWriter : public StreamWriterBase
 {
 private:
-	ComponentBlade &blade;
+	const ComponentBlade &blade;
 	DWORD blade_inputsamples;
 	DWORD blade_outputbytes;
 	SC::Convert<int16,float> sampleConv[2];
@@ -1016,7 +1016,7 @@ private:
 
 	std::vector<SHORT> samples;
 public:
-	MP3BladeStreamWriter(ComponentBlade &blade_, std::ostream &stream)
+	MP3BladeStreamWriter(const ComponentBlade &blade_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, blade(blade_)
 	{
@@ -1443,7 +1443,7 @@ private:
 
 public:
 
-	Encoder::Traits BuildTraits()
+	Encoder::Traits BuildTraits() const
 	{
 		Encoder::Traits traits;
 		if(!IsAvailable())
@@ -1491,7 +1491,7 @@ MPT_REGISTERED_COMPONENT(ComponentAcmMP3, "ACM_MP3")
 class MP3AcmStreamWriter : public StreamWriterBase
 {
 private:
-	ComponentAcmMP3 &acm;
+	const ComponentAcmMP3 &acm;
 	static const size_t acmBufSize = 1024;
 	int acmChannels;
 	SC::Convert<int16,float> sampleConv[2];
@@ -1504,7 +1504,7 @@ private:
 
 	std::vector<int16> samples;
 public:
-	MP3AcmStreamWriter(ComponentAcmMP3 &acm_, std::ostream &stream)
+	MP3AcmStreamWriter(const ComponentAcmMP3 &acm_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, acm(acm_)
 	{

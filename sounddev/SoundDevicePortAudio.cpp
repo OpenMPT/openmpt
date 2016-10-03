@@ -650,17 +650,6 @@ ComponentPortAudio::~ComponentPortAudio()
 }
 
 
-bool ComponentPortAudio::ReInit()
-{
-	if(!IsAvailable())
-	{
-		return false;
-	}
-	Pa_Terminate();
-	return DoInitialize();
-}
-
-
 #endif // MPT_WITH_PORTAUDIO
 
 
