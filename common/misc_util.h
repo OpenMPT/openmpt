@@ -190,7 +190,7 @@ void MemCopy(T &destination, const T &source)
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
-	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C+11, but not supported on most compilers we care about
+	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #endif
 	std::memcpy(&destination, &source, sizeof(T));
@@ -586,6 +586,26 @@ inline T ExponentialGrow(const T &x)
 }
 									
 } //namespace Util
+
+
+namespace mpt
+{
+
+// C++17 clamp
+
+template<typename T, typename Compare>
+MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi, Compare comp)
+{
+	return comp(v, lo) ? lo : comp(hi, v) ? hi : v;
+}
+
+template<typename T>
+MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
+{
+	return clamp(v, lo, hi, std::less<T>());
+}
+
+} // namespace mpt
 
 
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
