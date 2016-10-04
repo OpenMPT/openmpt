@@ -43,7 +43,7 @@ protected:
 	IDirectSound *m_piDS;
 	IDirectSoundBuffer *m_pPrimary;
 	IDirectSoundBuffer *m_pMixBuffer;
-	DWORD m_nDSoundBufferSize;
+	uint32 m_nDSoundBufferSize;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos;
 

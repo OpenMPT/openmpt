@@ -171,9 +171,9 @@ bool CWaveDevice::InternalOpen()
 	}
 	m_nWaveBufferSize = Util::Round<int32>(m_Settings.UpdateInterval * pwfx->nAvgBytesPerSec);
 	m_nWaveBufferSize = Util::AlignUp<uint32>(m_nWaveBufferSize, pwfx->nBlockAlign);
-	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, static_cast<uint32>(WAVEOUT_MINBUFFERFRAMECOUNT * pwfx->nBlockAlign), static_cast<uint32>(Util::AlignDown<uint32>(WAVEOUT_MAXBUFFERSIZE, pwfx->nBlockAlign)));
+	m_nWaveBufferSize = mpt::clamp(m_nWaveBufferSize, static_cast<uint32>(WAVEOUT_MINBUFFERFRAMECOUNT * pwfx->nBlockAlign), static_cast<uint32>(Util::AlignDown<uint32>(WAVEOUT_MAXBUFFERSIZE, pwfx->nBlockAlign)));
 	std::size_t numBuffers = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec / m_nWaveBufferSize);
-	numBuffers = Clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
+	numBuffers = mpt::clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
 	m_WaveBuffers.resize(numBuffers);
 	m_WaveBuffersData.resize(numBuffers);

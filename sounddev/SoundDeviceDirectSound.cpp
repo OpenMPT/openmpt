@@ -266,7 +266,7 @@ bool CDSoundDevice::InternalOpen()
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
 	m_nDSoundBufferSize = Util::AlignUp<uint32>(m_nDSoundBufferSize, bytesPerFrame);
-	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, Util::AlignUp<uint32>(DSBSIZE_MIN, bytesPerFrame), Util::AlignDown<uint32>(DSBSIZE_MAX, bytesPerFrame));
+	m_nDSoundBufferSize = mpt::clamp(m_nDSoundBufferSize, Util::AlignUp<uint32>(DSBSIZE_MIN, bytesPerFrame), Util::AlignDown<uint32>(DSBSIZE_MAX, bytesPerFrame));
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
@@ -415,7 +415,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			return;
 		}
 
-		DWORD dwBytes = m_nDSoundBufferSize/2;
+		uint32 dwBytes = m_nDSoundBufferSize/2;
 		if(!m_bMixRunning)
 		{
 			// startup
@@ -427,7 +427,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
 			dwLatency = (dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
 			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
-			dwBytes = Clamp(dwBytes, DWORD(0), m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
+			dwBytes = mpt::clamp(dwBytes, uint32(0), m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
 		}
 		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame; // truncate to full frame
 		if(dwBytes < bytesPerFrame)

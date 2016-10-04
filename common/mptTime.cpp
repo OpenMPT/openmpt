@@ -212,7 +212,7 @@ void MultimediaClock::SetPeriod(uint32 ms)
 	{
 		return;
 	}
-	ms = Clamp<uint32>(ms, caps.wPeriodMin, caps.wPeriodMax);
+	ms = mpt::clamp<uint32>(ms, caps.wPeriodMin, caps.wPeriodMax);
 	if(timeBeginPeriod(ms) != MMSYSERR_NOERROR)
 	{
 		return;

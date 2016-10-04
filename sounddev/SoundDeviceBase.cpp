@@ -82,8 +82,8 @@ bool Base::Open(const SoundDevice::Settings &settings)
 	m_Settings = settings;
 	if(m_Settings.Latency == 0.0) m_Settings.Latency = m_Caps.DefaultSettings.Latency;
 	if(m_Settings.UpdateInterval == 0.0) m_Settings.UpdateInterval = m_Caps.DefaultSettings.UpdateInterval;
-	m_Settings.Latency = Clamp(m_Settings.Latency, m_Caps.LatencyMin, m_Caps.LatencyMax);
-	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_Caps.UpdateIntervalMin, m_Caps.UpdateIntervalMax);
+	m_Settings.Latency = mpt::clamp(m_Settings.Latency, m_Caps.LatencyMin, m_Caps.LatencyMax);
+	m_Settings.UpdateInterval = mpt::clamp(m_Settings.UpdateInterval, m_Caps.UpdateIntervalMin, m_Caps.UpdateIntervalMax);
 	m_Flags = SoundDevice::Flags();
 	m_DeviceUnavailableOnOpen = false;
 	m_RequestFlags.store(0);

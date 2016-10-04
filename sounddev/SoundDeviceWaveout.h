@@ -47,7 +47,7 @@ protected:
 	HANDLE m_ThreadWakeupEvent;
 	bool m_Failed;
 	HWAVEOUT m_hWaveOut;
-	ULONG m_nWaveBufferSize;
+	uint32 m_nWaveBufferSize;
 	bool m_JustStarted;
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;

@@ -34,7 +34,7 @@ static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 	// _WIN32_WINNT macro uses BCD for the minor byte (see Windows 98 / ME).
 	// We use what _WIN32_WINNT does.
 	uint32 result = 0;
-	minor = Clamp(minor, 0u, 99u);
+	minor = mpt::clamp<uint32>(minor, 0, 99);
 	result |= major;
 	result <<= 8;
 	result |= minor/10*0x10 + minor%10;
