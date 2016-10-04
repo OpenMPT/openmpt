@@ -1106,31 +1106,29 @@ BOOL CTrackApp::InitInstance()
 	bool setDPI = false;
 	// For Windows 8.1 and newer
 	{
-		HMODULE shcore = LoadLibraryW(L"SHCore.dll");
-		if(shcore != nullptr)
+		mpt::Library shcore(mpt::LibraryPath::System(MPT_PATHSTRING("SHCore")));
+		if(shcore.IsValid())
 		{
 			typedef HRESULT (WINAPI * PSETPROCESSDPIAWARENESS)(int);
-			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = (PSETPROCESSDPIAWARENESS)GetProcAddress(shcore, "SetProcessDpiAwareness");
-			if(SetProcessDPIAwareness != nullptr)
+			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = nullptr;
+			if(shcore.Bind(SetProcessDPIAwareness, "SetProcessDpiAwareness"))
 			{
 				setDPI = (SetProcessDPIAwareness(TrackerSettings::Instance().highResUI ? 2 : 0) == S_OK);
 			}
-			FreeLibrary(shcore);
 		}
 	}
 	// For Vista and newer
 	if(!setDPI && TrackerSettings::Instance().highResUI)
 	{
-		HMODULE user32 = LoadLibraryW(L"user32.dll");
-		if(user32 != nullptr)
+		mpt::Library user32(mpt::LibraryPath::System(MPT_PATHSTRING("user32")));
+		if(user32.IsValid())
 		{
 			typedef BOOL (WINAPI * PSETPROCESSDPIAWARE)();
-			PSETPROCESSDPIAWARE SetProcessDPIAware = (PSETPROCESSDPIAWARE)GetProcAddress(user32, "SetProcessDPIAware");
-			if(SetProcessDPIAware != nullptr)
+			PSETPROCESSDPIAWARE SetProcessDPIAware = nullptr;
+			if(user32.Bind(SetProcessDPIAware, "SetProcessDPIAware"))
 			{
 				SetProcessDPIAware();
 			}
-			FreeLibrary(user32);
 		}
 	}
 
