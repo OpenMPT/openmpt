@@ -62,12 +62,12 @@ std::wstring CLSIDToString(CLSID clsid)
 			::CoTaskMemFree(tmp);
 			tmp = nullptr;
 		}
-		throw std::runtime_error("StringFromCLSID() failed.");
+		throw std::logic_error("StringFromCLSID() failed.");
 		break;
 	}
 	if(!tmp)
 	{
-		throw std::runtime_error("StringFromCLSID() failed.");
+		throw std::logic_error("StringFromCLSID() failed.");
 	}
 	try
 	{
@@ -110,7 +110,7 @@ CLSID StringToCLSID(const std::wstring &str)
 		break;
 	default:
 		clsid = CLSID();
-		throw std::runtime_error("CLSIDFromString() failed.");
+		throw std::logic_error("CLSIDFromString() failed.");
 		break;
 	}
 	return clsid;
@@ -141,7 +141,7 @@ bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
 		throw std::runtime_error("CLSIDFromString() failed: REGDB_E_READREGDB.");
 		break;
 	default:
-		throw std::runtime_error("CLSIDFromString() failed.");
+		throw std::logic_error("CLSIDFromString() failed.");
 		break;
 	}
 	return result;
@@ -174,7 +174,7 @@ bool IsCLSID(const std::wstring &str)
 		break;
 	default:
 		result = false;
-		throw std::runtime_error("CLSIDFromString() failed.");
+		throw std::logic_error("CLSIDFromString() failed.");
 		break;
 	}
 	return result;
@@ -204,12 +204,12 @@ std::wstring IIDToString(IID iid)
 			::CoTaskMemFree(tmp);
 			tmp = nullptr;
 		}
-		throw std::runtime_error("StringFromIID() failed.");
+		throw std::logic_error("StringFromIID() failed.");
 		break;
 	}
 	if(!tmp)
 	{
-		throw std::runtime_error("StringFromIID() failed.");
+		throw std::logic_error("StringFromIID() failed.");
 	}
 	try
 	{
@@ -244,7 +244,7 @@ IID StringToIID(const std::wstring &str)
 		break;
 	default:
 		iid = IID();
-		throw std::runtime_error("IIDFromString() failed.");
+		throw std::logic_error("IIDFromString() failed.");
 		break;
 	}
 	return iid;
@@ -257,7 +257,7 @@ std::wstring GUIDToString(GUID guid)
 	std::vector<OLECHAR> tmp(256);
 	if(::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size())) <= 0)
 	{
-		throw std::runtime_error("StringFromGUID2() failed.");
+		throw std::logic_error("StringFromGUID2() failed.");
 	}
 	return tmp.data();
 }
@@ -302,7 +302,7 @@ UUID StringToUUID(const mpt::ustring &str)
 		uuid = UUID();
 		break;
 	default:
-		throw std::runtime_error("UuidFromStringW() failed.");
+		throw std::logic_error("UuidFromStringW() failed.");
 		break;
 	}
 	return uuid;
@@ -328,7 +328,7 @@ mpt::ustring UUIDToString(UUID uuid)
 		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
 		break;
 	default:
-		throw std::runtime_error("UuidToStringW() failed.");
+		throw std::logic_error("UuidToStringW() failed.");
 		break;
 	}
 	try
