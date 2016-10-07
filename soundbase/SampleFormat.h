@@ -24,11 +24,11 @@ enum SampleFormatEnum
 };
 
 template<typename Tsample> struct SampleFormatTraits;
-template<> struct SampleFormatTraits<uint8>     { static const SampleFormatEnum sampleFormat = SampleFormatUnsigned8; };
-template<> struct SampleFormatTraits<int16>     { static const SampleFormatEnum sampleFormat = SampleFormatInt16;     };
-template<> struct SampleFormatTraits<int24>     { static const SampleFormatEnum sampleFormat = SampleFormatInt24;     };
-template<> struct SampleFormatTraits<int32>     { static const SampleFormatEnum sampleFormat = SampleFormatInt32;     };
-template<> struct SampleFormatTraits<float>     { static const SampleFormatEnum sampleFormat = SampleFormatFloat32;   };
+template<> struct SampleFormatTraits<uint8>     { static MPT_CONSTEXPR11_VAR SampleFormatEnum sampleFormat = SampleFormatUnsigned8; };
+template<> struct SampleFormatTraits<int16>     { static MPT_CONSTEXPR11_VAR SampleFormatEnum sampleFormat = SampleFormatInt16;     };
+template<> struct SampleFormatTraits<int24>     { static MPT_CONSTEXPR11_VAR SampleFormatEnum sampleFormat = SampleFormatInt24;     };
+template<> struct SampleFormatTraits<int32>     { static MPT_CONSTEXPR11_VAR SampleFormatEnum sampleFormat = SampleFormatInt32;     };
+template<> struct SampleFormatTraits<float>     { static MPT_CONSTEXPR11_VAR SampleFormatEnum sampleFormat = SampleFormatFloat32;   };
 
 template<SampleFormatEnum sampleFormat> struct SampleFormatToType;
 template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8     type; };
@@ -41,69 +41,52 @@ template<> struct SampleFormatToType<SampleFormatFloat32>   { typedef float     
 struct SampleFormat
 {
 	SampleFormatEnum value;
-	SampleFormat(SampleFormatEnum v = SampleFormatInvalid) : value(v) { }
-	bool operator == (SampleFormat other) const { return value == other.value; }
-	bool operator != (SampleFormat other) const { return value != other.value; }
-	bool operator == (SampleFormatEnum other) const { return value == other; }
-	bool operator != (SampleFormatEnum other) const { return value != other; }
-	operator SampleFormatEnum () const
+	MPT_CONSTEXPR11_FUN SampleFormat(SampleFormatEnum v = SampleFormatInvalid) : value(v) { }
+	MPT_CONSTEXPR11_FUN bool operator == (SampleFormat other) const { return value == other.value; }
+	MPT_CONSTEXPR11_FUN bool operator != (SampleFormat other) const { return value != other.value; }
+	MPT_CONSTEXPR11_FUN bool operator == (SampleFormatEnum other) const { return value == other; }
+	MPT_CONSTEXPR11_FUN bool operator != (SampleFormatEnum other) const { return value != other; }
+	MPT_CONSTEXPR11_FUN operator SampleFormatEnum () const
 	{
 		return value;
 	}
-	bool IsValid() const
+	MPT_CONSTEXPR11_FUN bool IsValid() const
 	{
 		return value != SampleFormatInvalid;
 	}
-	bool IsUnsigned() const
+	MPT_CONSTEXPR11_FUN bool IsUnsigned() const
 	{
-		if(!IsValid()) return false;
-		return value == SampleFormatUnsigned8;
+		return IsValid() && (value == SampleFormatUnsigned8);
 	}
-	bool IsFloat() const
+	MPT_CONSTEXPR11_FUN bool IsFloat() const
 	{
-		if(!IsValid()) return false;
-		return value == SampleFormatFloat32;
+		return IsValid() && (value == SampleFormatFloat32);
 	}
-	bool IsInt() const
+	MPT_CONSTEXPR11_FUN bool IsInt() const
 	{
-		if(!IsValid()) return false;
-		return value != SampleFormatFloat32;
+		return IsValid() && (value != SampleFormatFloat32);
 	}
-	uint8 GetBitsPerSample() const
+	MPT_CONSTEXPR11_FUN uint8 GetBitsPerSample() const
 	{
-		if(!IsValid()) return 0;
-		switch(value)
-		{
-		case SampleFormatUnsigned8:
-			return 8;
-			break;
-		case SampleFormatInt16:
-			return 16;
-			break;
-		case SampleFormatInt24:
-			return 24;
-			break;
-		case SampleFormatInt32:
-			return 32;
-			break;
-		case SampleFormatFloat32:
-			return 32;
-			break;
-		default:
-			return 0;
-			break;
-		}
+		return
+			!IsValid() ? 0 :
+			(value == SampleFormatUnsigned8) ?  8 :
+			(value == SampleFormatInt16)     ? 16 :
+			(value == SampleFormatInt24)     ? 24 :
+			(value == SampleFormatInt32)     ? 32 :
+			(value == SampleFormatFloat32)   ? 32 :
+			0;
 	}
 
 	// backward compatibility, conversion to/from integers
-	operator int () const { return value; }
-	SampleFormat(int v) : value(SampleFormatEnum(v)) { }
-	operator long () const { return value; }
-	SampleFormat(long v) : value(SampleFormatEnum(v)) { }
-	operator unsigned int () const { return value; }
-	SampleFormat(unsigned int v) : value(SampleFormatEnum(v)) { }
-	operator unsigned long () const { return value; }
-	SampleFormat(unsigned long v) : value(SampleFormatEnum(v)) { }
+	MPT_CONSTEXPR11_FUN operator int () const { return value; }
+	MPT_CONSTEXPR11_FUN SampleFormat(int v) : value(SampleFormatEnum(v)) { }
+	MPT_CONSTEXPR11_FUN operator long () const { return value; }
+	MPT_CONSTEXPR11_FUN SampleFormat(long v) : value(SampleFormatEnum(v)) { }
+	MPT_CONSTEXPR11_FUN operator unsigned int () const { return value; }
+	MPT_CONSTEXPR11_FUN SampleFormat(unsigned int v) : value(SampleFormatEnum(v)) { }
+	MPT_CONSTEXPR11_FUN operator unsigned long () const { return value; }
+	MPT_CONSTEXPR11_FUN SampleFormat(unsigned long v) : value(SampleFormatEnum(v)) { }
 };
 
 
