@@ -804,9 +804,6 @@
     <ClInclude Include="..\soundlib\RowVisitor.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\SampleFormatConverters.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\SampleIO.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
@@ -1018,9 +1015,6 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\MixerLoops.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\SampleFormat.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\sounddev\SoundDeviceASIO.h">
@@ -1280,6 +1274,18 @@
     </ClInclude>
     <ClInclude Include="BuildVariants.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundbase\SampleFormat.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundbase\SampleFormatConverters.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundbase\SampleFormatCopy.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\ModSampleCopy.h">
+      <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

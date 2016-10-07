@@ -30,7 +30,9 @@
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
+#include "../soundlib/ModSampleCopy.h"
 #include "../common/ComponentManager.h"
 #ifdef MPT_ENABLE_MP3_SAMPLES
 #include "MPEGFrame.h"

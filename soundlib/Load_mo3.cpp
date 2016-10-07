@@ -33,12 +33,14 @@
 
 #if defined(MPT_WITH_VORBISFILE)
 #include <vorbis/vorbisfile.h>
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 #endif
 
 #ifdef MPT_WITH_STBVORBIS
 #include <stb_vorbis/stb_vorbis.c>
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 #endif // MPT_WITH_STBVORBIS
 
 #endif // MPT_ENABLE_MO3_BUILTIN

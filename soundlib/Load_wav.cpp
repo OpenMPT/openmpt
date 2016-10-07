@@ -12,7 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "WAVTools.h"
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

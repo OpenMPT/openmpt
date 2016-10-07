@@ -12,7 +12,8 @@
 #include "modsmp_ctrl.h"
 #include "AudioCriticalSection.h"
 #include "Sndfile.h"
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 
 #define new DEBUG_NEW
 

@@ -13,7 +13,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "SampleIO.h"
-#include "SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
+#include "ModSampleCopy.h"
 #include "ITCompression.h"
 #include "../common/mptIO.h"
 #ifndef MODPLUG_NO_FILESAVE

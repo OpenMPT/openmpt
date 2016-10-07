@@ -7,6 +7,9 @@
     <Filter Include="libopenmpt">
       <UniqueIdentifier>{FFE9848F-EBA1-C6DC-54A9-9F38408061CD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="soundbase">
+      <UniqueIdentifier>{69D0CCEC-D53A-8163-1E79-32098A225FB8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="soundlib">
       <UniqueIdentifier>{050BB116-F1D7-0B22-1AF1-F9C9061D41B0}</UniqueIdentifier>
     </Filter>
@@ -153,6 +156,15 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormat.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatConverters.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\AudioCriticalSection.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -219,6 +231,9 @@
     <ClInclude Include="..\..\soundlib\ModSample.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModSampleCopy.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\ModSequence.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -232,12 +247,6 @@
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\S3MTools.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\SampleFormat.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\SampleFormatConverters.h">
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\SampleIO.h">

@@ -42,6 +42,8 @@
   files {
    "../../common/*.cpp",
    "../../common/*.h",
+   "../../soundbase/*.cpp",
+   "../../soundbase/*.h",
    "../../soundlib/*.cpp",
    "../../soundlib/*.h",
    "../../soundlib/plugins/*.cpp",

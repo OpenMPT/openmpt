@@ -19,7 +19,7 @@
 
 #include "../soundlib/Sndfile.h"
 
-#include "../soundlib/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 

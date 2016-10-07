@@ -13,9 +13,9 @@
 
 #include "../common/Logging.h"
 #include "../common/version.h"
+#include "../soundbase/SampleFormat.h"
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
-#include "../soundlib/SampleFormat.h"
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
