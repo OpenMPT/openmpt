@@ -12,8 +12,8 @@
 
 #include "Settings.h"
 
+#include "../soundbase/SampleFormat.h"
 #include "../soundlib/Tagging.h"
-#include "../soundlib/SampleFormat.h"
 
 #include <iosfwd>
 #include <string>

@@ -18,7 +18,8 @@
 #include "../common/misc_util.h"
 #include "../common/mptUUID.h"
 #include "../common/StringFixer.h"
-#include "../soundlib/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 
 #include <algorithm>
 

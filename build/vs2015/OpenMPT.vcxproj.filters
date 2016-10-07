@@ -28,6 +28,9 @@
     <Filter Include="plugins\MidiInOut">
       <UniqueIdentifier>{E80B1C8D-5422-1A23-9D99-A54409EFEAAA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="soundbase">
+      <UniqueIdentifier>{69D0CCEC-D53A-8163-1E79-32098A225FB8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="sounddev">
       <UniqueIdentifier>{8DE8B016-79B5-0B22-A2CE-F9C98EFA40B0}</UniqueIdentifier>
     </Filter>
@@ -441,6 +444,15 @@
     <ClInclude Include="..\..\plugins\MidiInOut\MidiInOutEditor.h">
       <Filter>plugins\MidiInOut</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormat.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatConverters.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDevice.h">
       <Filter>sounddev</Filter>
     </ClInclude>
@@ -543,6 +555,9 @@
     <ClInclude Include="..\..\soundlib\ModSample.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\ModSampleCopy.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\ModSequence.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -556,12 +571,6 @@
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\S3MTools.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\SampleFormat.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\SampleFormatConverters.h">
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\SampleIO.h">

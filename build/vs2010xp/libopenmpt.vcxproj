@@ -405,6 +405,9 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
+    <ClInclude Include="..\..\soundbase\SampleFormat.h" />
+    <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
+    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
     <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
@@ -427,13 +430,12 @@
     <ClInclude Include="..\..\soundlib\ModChannel.h" />
     <ClInclude Include="..\..\soundlib\ModInstrument.h" />
     <ClInclude Include="..\..\soundlib\ModSample.h" />
+    <ClInclude Include="..\..\soundlib\ModSampleCopy.h" />
     <ClInclude Include="..\..\soundlib\ModSequence.h" />
     <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
-    <ClInclude Include="..\..\soundlib\SampleFormat.h" />
-    <ClInclude Include="..\..\soundlib\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundlib\SampleIO.h" />
     <ClInclude Include="..\..\soundlib\Snd_defs.h" />
     <ClInclude Include="..\..\soundlib\Sndfile.h" />

@@ -25,7 +25,8 @@
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
 #include "../common/FileReader.h"
-#include "../soundlib/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/mod_specifications.h"
 
 

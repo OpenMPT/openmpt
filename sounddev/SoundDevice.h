@@ -14,7 +14,7 @@
 #include "../common/FlagSet.h"
 #include "../common/mptOS.h"
 #include "../common/mptThread.h"
-#include "../soundlib/SampleFormat.h"
+#include "../soundbase/SampleFormat.h"
 
 #include <map>
 #include <vector>

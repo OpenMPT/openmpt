@@ -18,6 +18,7 @@
 #include "WAVTools.h"
 #include "../common/mptString.h"
 #include "../common/version.h"
+#include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/MixerLoops.h"
 #include "../soundlib/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
