@@ -39,7 +39,7 @@ static T log2(T x)
 }
 
 
-static inline int lower_bound_entropy_bits(unsigned int x)
+static MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
 {
 	// easy to compile-time evaluate even for stupid compilers
 	return
