@@ -117,14 +117,8 @@ inline T random(Trng & rng)
 	{
 		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
-#endif
-			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
@@ -142,16 +136,10 @@ inline T random(Trng & rng)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		if(rng_bits < (sizeof(T) * 8))
+		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
-#endif
-			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
@@ -177,14 +165,8 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	{
 		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
-#endif
-			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
