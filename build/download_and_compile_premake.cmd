@@ -59,7 +59,7 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha9/premake-5.0.0-alpha9-src.zip" "premake-5.0-alpha9-src.zip" "premake-5.0.0-alpha9" "-" || goto error
+call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-src.zip" "premake-5.0-alpha10-src.zip" "premake-5.0.0-alpha10" "-" || goto error
 
 rem Premake does not ship VS2015 projects yet.
 rem VS2015 comes with incomplete toolsets for earlier VS versions,

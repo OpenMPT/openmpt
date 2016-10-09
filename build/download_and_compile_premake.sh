@@ -43,7 +43,7 @@ if [ ! -d "build/externals" ]; then
  mkdir build/externals
 fi
 
-download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha9/premake-5.0.0-alpha9-src.zip" "premake-5.0-alpha9-src.zip" "premake-5.0.0-alpha9"
+download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-src.zip" "premake-5.0-alpha10-src.zip" "premake-5.0.0-alpha10"
 
 cd include/premake
 

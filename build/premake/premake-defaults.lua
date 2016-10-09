@@ -119,6 +119,7 @@
 	if _OPTIONS["xp"] then
 
 		-- https://github.com/premake/premake-core/issues/560
+		-- https://github.com/premake/premake-core/issues/592
 	
 		filter {}
 
