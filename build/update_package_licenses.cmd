@@ -18,7 +18,8 @@ rem copy /y ..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License
 rem copy /y ..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 copy /y ..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
 rem copy /y ..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
-copy /y ..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
+rem copy /y ..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
+copy /y ..\include\msinttypes\inttypes\inttypes.h         .\Licenses\License.msinttypes.txt || goto error
 copy /y ..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 copy /y ..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
 copy /y ..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
