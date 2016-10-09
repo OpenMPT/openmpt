@@ -15,6 +15,10 @@
 #include <limits>
 #include <random>
 
+#ifdef MODPLUG_TRACKER
+#include <cstdlib>
+#endif // MODPLUG_TRACKER
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -42,10 +46,55 @@ static const uint32 FUZZER_RNG_SEED = 3141592653u; // pi
 #endif // MPT_BUILD_FUZZER
 
 
+namespace detail
+{
+
+MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
+{
+	// easy to compile-time evaluate even for stupid compilers
+	return
+		x >= 0xffffffffu ? 32 :
+		x >= 0x7fffffffu ? 31 :
+		x >= 0x3fffffffu ? 30 :
+		x >= 0x1fffffffu ? 29 :
+		x >= 0x0fffffffu ? 28 :
+		x >= 0x07ffffffu ? 27 :
+		x >= 0x03ffffffu ? 26 :
+		x >= 0x01ffffffu ? 25 :
+		x >= 0x00ffffffu ? 24 :
+		x >= 0x007fffffu ? 23 :
+		x >= 0x003fffffu ? 22 :
+		x >= 0x001fffffu ? 21 :
+		x >= 0x000fffffu ? 20 :
+		x >= 0x0007ffffu ? 19 :
+		x >= 0x0003ffffu ? 18 :
+		x >= 0x0001ffffu ? 17 :
+		x >= 0x0000ffffu ? 16 :
+		x >= 0x00007fffu ? 15 :
+		x >= 0x00003fffu ? 14 :
+		x >= 0x00001fffu ? 13 :
+		x >= 0x00000fffu ? 12 :
+		x >= 0x000007ffu ? 11 :
+		x >= 0x000003ffu ? 10 :
+		x >= 0x000001ffu ?  9 :
+		x >= 0x000000ffu ?  8 :
+		x >= 0x0000007fu ?  7 :
+		x >= 0x0000003fu ?  6 :
+		x >= 0x0000001fu ?  5 :
+		x >= 0x0000000fu ?  4 :
+		x >= 0x00000007u ?  3 :
+		x >= 0x00000003u ?  2 :
+		x >= 0x00000001u ?  1 :
+		0;
+}
+
+}
+
+
 template <typename Trng> struct engine_traits
 {
 	typedef typename Trng::result_type result_type;
-	static inline int result_bits()
+	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
 		return Trng::result_bits();
 	}
@@ -68,7 +117,14 @@ inline T random(Trng & rng)
 	{
 		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
+#endif
 			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
@@ -88,7 +144,14 @@ inline T random(Trng & rng)
 	{
 		if(rng_bits < (sizeof(T) * 8))
 		{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
+#endif
 			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
@@ -112,9 +175,16 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		if(rng_bits < (sizeof(T) * 8))
+		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4293) // '<<': shift count negative or too big, undefined behavior
+#endif
 			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		} else
 		{
 			result = static_cast<unsigned_T>(rng());
@@ -205,16 +275,16 @@ public:
 		operator()(); // we return results from the current state and update state after returning. results in better pipelining.
 	}
 public:
-	static inline result_type min()
+	static MPT_CONSTEXPR11_FUN result_type min()
 	{
 		return static_cast<result_type>(0);
 	}
-	static inline result_type max()
+	static MPT_CONSTEXPR11_FUN result_type max()
 	{
 		STATIC_ASSERT(((result_mask >> result_shift) << result_shift) == result_mask);
 		return static_cast<result_type>(result_mask >> result_shift);
 	}
-	static inline int result_bits()
+	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
 		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits_) - 1) == (result_mask >> result_shift));
 		return result_bits_;
@@ -263,9 +333,18 @@ public:
 	crand() { }
 	explicit crand(const std::string &) { }
 public:
-	static result_type min();
-	static result_type max();
-	static int result_bits();
+	static MPT_CONSTEXPR11_FUN result_type min()
+	{
+		return 0;
+	}
+	static MPT_CONSTEXPR11_FUN result_type max()
+	{
+		return RAND_MAX;
+	}
+	static MPT_CONSTEXPR11_FUN int result_bits()
+	{
+		return detail::lower_bound_entropy_bits(RAND_MAX);
+	}
 	result_type operator()();
 };
 
@@ -292,9 +371,18 @@ public:
 public:
 	sane_random_device();
 	sane_random_device(const std::string & token);
-	static result_type min();
-	static result_type max();
-	static int result_bits();
+	static MPT_CONSTEXPR11_FUN result_type min()
+	{
+		return std::numeric_limits<result_type>::min();
+	}
+	static MPT_CONSTEXPR11_FUN result_type max()
+	{
+		return std::numeric_limits<result_type>::max();
+	}
+	static MPT_CONSTEXPR11_FUN int result_bits()
+	{
+		return sizeof(result_type) * 8;
+	}
 	result_type operator()();
 };
 
@@ -334,7 +422,7 @@ template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
 	typedef std::mt19937 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return rng_type::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		return rng_type(rd);
@@ -347,7 +435,7 @@ template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
 	typedef std::mt19937 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return rng_type::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -360,7 +448,7 @@ template <> struct engine_traits<std::mt19937_64> {
 	static const std::size_t seed_bits = sizeof(std::mt19937_64::result_type) * 8 * std::mt19937_64::state_size;
 	typedef std::mt19937_64 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return rng_type::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -373,7 +461,7 @@ template <> struct engine_traits<std::ranlux24_base> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24_base rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return rng_type::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -386,7 +474,7 @@ template <> struct engine_traits<std::ranlux48_base> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48_base rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return rng_type::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -399,7 +487,7 @@ template <> struct engine_traits<std::ranlux24> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return std::ranlux24_base::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux24_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -412,7 +500,7 @@ template <> struct engine_traits<std::ranlux48> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int result_bits() { return std::ranlux48_base::word_size; }
+	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux48_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -462,15 +550,15 @@ public:
 	{
 		return;
 	}
-	static result_type min()
+	static MPT_CONSTEXPR11_FUN result_type min()
 	{
 		return std::numeric_limits<unsigned int>::min();
 	}
-	static result_type max()
+	static MPT_CONSTEXPR11_FUN result_type max()
 	{
 		return std::numeric_limits<unsigned int>::max();
 	}
-	static int result_bits()
+	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
 		return sizeof(unsigned int) * 8;
 	}
@@ -543,15 +631,15 @@ public:
 		return;
 	}
 public:
-	static typename engine_traits<Trng>::result_type min()
+	static MPT_CONSTEXPR11_FUN typename engine_traits<Trng>::result_type min()
 	{
 		return Trng::min();
 	}
-	static typename engine_traits<Trng>::result_type max()
+	static MPT_CONSTEXPR11_FUN typename engine_traits<Trng>::result_type max()
 	{
 		return Trng::max();
 	}
-	static int result_bits()
+	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
 		return engine_traits<Trng>::result_bits();
 	}
