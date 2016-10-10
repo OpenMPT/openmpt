@@ -52,7 +52,7 @@
 	filter {}
 
   characterset "Unicode"
-  flags { "MFC", "Unicode" }
+  flags { "MFC" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "pugixml" }
   links { "delayimp" }
   linkoptions {

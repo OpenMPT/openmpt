@@ -74,7 +74,7 @@
 	filter {}
 
   characterset "Unicode"
-  flags { "Unicode", "ExtraWarnings" }
+  flags { "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_SMALL" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
