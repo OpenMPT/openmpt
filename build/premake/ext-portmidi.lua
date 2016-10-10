@@ -12,7 +12,6 @@
 	filter {}
 	filter { "action:vs*" }
 --		characterset "Unicode"
---		flags { "Unicode" }
 		characterset "MBCS"
 	filter {}
   files {

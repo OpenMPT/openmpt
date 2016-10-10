@@ -22,7 +22,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",

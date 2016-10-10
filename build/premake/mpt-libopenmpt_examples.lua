@@ -24,7 +24,6 @@
    "../../examples/libopenmpt_example_cxx.cpp",
   }
   characterset "Unicode"
-  flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
   links { "delayimp" }
@@ -63,7 +62,6 @@
    "../../examples/libopenmpt_example_c.c",
   }
   characterset "Unicode"
-  flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
   links { "delayimp" }
@@ -102,7 +100,6 @@
    "../../examples/libopenmpt_example_c_mem.c",
   }
   characterset "Unicode"
-  flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
   links { "delayimp" }
@@ -141,7 +138,6 @@
    "../../examples/libopenmpt_example_c_unsafe.c",
   }
   characterset "Unicode"
-  flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
   links { "delayimp" }
@@ -180,7 +176,6 @@
    "../../examples/libopenmpt_example_c_probe.c",
   }
   characterset "Unicode"
-  flags { "Unicode" }
   links { "libopenmpt", "zlib", "vorbis", "ogg" }
   filter { "not configurations:*Shared" }
   links { "delayimp" }

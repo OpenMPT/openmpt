@@ -50,7 +50,6 @@
 	filter {}
 	
   characterset "Unicode"
-  flags { "Unicode" }
   links {
    "libopenmpt",
    "flac",

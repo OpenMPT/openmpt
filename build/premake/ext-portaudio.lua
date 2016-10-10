@@ -18,7 +18,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",

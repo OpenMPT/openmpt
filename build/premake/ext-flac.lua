@@ -23,7 +23,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/flac/src/libFLAC/bitmath.c",
