@@ -313,6 +313,7 @@ enum CommandID
 	kcPatternOpenRandomizer,
 	kcPatternGoto,
 	kcPatternSetInstrument,
+	kcPatternSetInstrumentNotEmpty,
 	kcPatternGrowSelection,
 	kcPatternShrinkSelection,
 	//	kcClearSelection,

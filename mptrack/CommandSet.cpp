@@ -704,6 +704,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleTrimToLoopEnd, 1964, _T("Trim to loop end"));
 	DefineKeyCommand(kcLockPlaybackToRows, 1965, _T("Lock Playback to Rows"));
 	DefineKeyCommand(kcSwitchToInstrLibrary, 1966, _T("Switch To Instrument Library"));
+	DefineKeyCommand(kcPatternSetInstrumentNotEmpty, 1967, _T("Apply current instrument to existing only"));
 
 	// Add new key commands here.
 

@@ -308,7 +308,7 @@ public:
 	void SetSpacing(int n);
 	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
 	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
-	void SetSelectionInstrument(const INSTRUMENTINDEX nIns);
+	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 
 	void FindInstrument();
 
