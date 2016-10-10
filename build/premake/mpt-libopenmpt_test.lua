@@ -55,7 +55,7 @@
    "../../libopenmpt/libopenmpt_test.cpp",
   }
   characterset "Unicode"
-  flags { "Unicode", "ExtraWarnings" }
+  flags { "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
   links {
    "ogg",

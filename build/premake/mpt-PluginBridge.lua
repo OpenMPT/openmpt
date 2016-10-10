@@ -36,7 +36,7 @@
   defines { "MODPLUG_TRACKER" }
   largeaddressaware ( true )
   characterset "Unicode"
-  flags { "Unicode", "WinMain", "ExtraWarnings" }
+  flags { "WinMain", "ExtraWarnings" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
    targetsuffix "32"
