@@ -12,7 +12,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   defines { "STB_VORBIS_NO_PULLDATA_API", "STB_VORBIS_NO_STDIO" }
   files {

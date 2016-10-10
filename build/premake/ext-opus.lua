@@ -28,7 +28,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/opus/include/opus.h",

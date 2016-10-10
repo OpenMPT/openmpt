@@ -24,7 +24,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/vorbis/include/vorbis/codec.h",

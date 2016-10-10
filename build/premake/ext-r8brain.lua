@@ -12,7 +12,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/r8brain/r8bbase.cpp",

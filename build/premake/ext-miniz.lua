@@ -11,7 +11,6 @@
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/miniz/miniz.c",

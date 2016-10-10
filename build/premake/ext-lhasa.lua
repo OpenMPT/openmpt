@@ -15,7 +15,6 @@
   filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
-		flags { "Unicode" }
 	filter {}
   files {
    "../../include/lhasa/lib/crc16.c",
