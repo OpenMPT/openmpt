@@ -54,6 +54,7 @@ cd include/premake
 #bin/release/premake5 test
 
 cd build/gmake.unix
+# https://github.com/premake/premake-core/issues/594
 cat Premake5.make | sed 's/\-lm\ \-ldl\ \-lrt/\-lm\ \-ldl\ \-lrt\ \-lssl\ \-lcrypto/g' > Premake5.make2
 mv Premake5.make2 Premake5.make
 make
