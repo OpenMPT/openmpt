@@ -50,10 +50,10 @@ Playback
    [Fix] <js> Even when disabling "loop song", songs with 256 order items or more still looped (http://bugs.openmpt.org/view.php?id=878).
 
 IT
-   [Fix] <js> Correctly write MIDI program and bank instrument properties in a way that is also correctly read by other IT-compatible applications.
+   [Fix] <js> Correctly write MIDI program and bank instrument properties in a way that is also read by other IT-compatible applications.
 
 MOD
-   [Fix] <js> MOD: Avoid enabling some ProTracker quirks for files most likely created with ScreamTracker 3 (fixes BASIC001.MOD, tx Borg-).
+   [Fix] <js> Avoid enabling some ProTracker quirks for files most likely created with ScreamTracker 3 (fixes BASIC001.MOD, tx Borg-).
 
 Other formats
    [Fix] <js> Crashes with malformed files in various formats.
