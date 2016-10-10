@@ -2807,7 +2807,7 @@ void CViewPattern::OnDropSelection()
 void CViewPattern::OnSetSelInstrument()
 //-------------------------------------
 {
-	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()));
+	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), true);
 }
 
 
@@ -3981,7 +3981,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcDataEntryDownCoarse:			DataEntry(false, true); return wParam;
 		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
-		case kcPatternSetInstrument:		OnSetSelInstrument(); return wParam;
+		case kcPatternSetInstrumentNotEmpty:
+		case kcPatternSetInstrument:		SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), wParam == kcPatternSetInstrument); return wParam;
 		case kcPatternInterpolateNote:		OnInterpolateNote(); return wParam;
 		case kcPatternInterpolateInstr:		OnInterpolateInstr(); return wParam;
 		case kcPatternInterpolateVol:		OnInterpolateVolume(); return wParam;
@@ -5702,7 +5703,7 @@ void CViewPattern::TogglePluginEditor(int chan)
 void CViewPattern::OnSelectInstrument(UINT nID)
 //---------------------------------------------
 {
-	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(nID - ID_CHANGE_INSTRUMENT));
+	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(nID - ID_CHANGE_INSTRUMENT), true);
 }
 
 
@@ -6586,8 +6587,8 @@ ROWINDEX CViewPattern::GetRowsPerMeasure() const
 
 
 // Set instrument 
-void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
-//-------------------------------------------------------------------
+void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument)
+//---------------------------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
@@ -6599,14 +6600,15 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 	PrepareUndo(m_Selection, "Set Instrument");
 
 	bool modified = false;
-	ApplyToSelection([nIns, &modified] (ModCommand &m, ROWINDEX, CHANNELINDEX)
+	ApplyToSelection([instr, setEmptyInstrument, &modified] (ModCommand &m, ROWINDEX, CHANNELINDEX)
 	{
 		// If a note or an instr is present on the row, do the change, if required.
 		// Do not set instr if note and instr are both blank,
 		// but set instr if note is a PC note and instr is blank.
-		if((m.IsNote() || m.IsPcNote() || m.instr) && (m.instr != nIns))
+		if(((setEmptyInstrument && (m.IsNote() || m.IsPcNote())) || m.instr != 0)
+			&& (m.instr != instr))
 		{
-			m.instr = static_cast<ModCommand::INSTR>(nIns);
+			m.instr = static_cast<ModCommand::INSTR>(instr);
 			modified = true;
 		}
 	});
@@ -6763,7 +6765,7 @@ void CViewPattern::ApplyToSelection(Func func)
 	CSoundFile *sndFile = GetSoundFile();
 	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
 		return;
-	auto pattern = sndFile->Patterns[m_nPattern];
+	auto &pattern = sndFile->Patterns[m_nPattern];
 	m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
 	const CHANNELINDEX startChn = m_Selection.GetStartChannel(), endChn = m_Selection.GetEndChannel();
 	const ROWINDEX endRow = m_Selection.GetEndRow();
