@@ -827,8 +827,6 @@ void CCtrlPatterns::OnPatternDuplicate()
 		} else
 		{
 			// Invalid pattern, or it has been duplicated before (multiselect)
-			for (int j = m_sndFile.Order.size() - 1; j > selection.firstOrd + i + insertCount + 1; j--) m_sndFile.Order[j] = m_sndFile.Order[j - 1];
-
 			PATTERNINDEX newPat;
 			if(curPat < m_sndFile.Patterns.Size() && patReplaceIndex[curPat] != PATTERNINDEX_INVALID)
 			{
@@ -839,10 +837,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 				newPat = m_sndFile.Order[selection.firstOrd + i];
 			}
 
-			if (selection.firstOrd + i + insertCount + 1 < m_sndFile.Order.GetLength())
-			{
-				m_sndFile.Order[selection.firstOrd + i + insertCount + 1] = newPat;
-			}
+			m_sndFile.Order.Insert(selection.firstOrd + i + insertCount, 1, newPat);
 
 			success = true;
 		}
