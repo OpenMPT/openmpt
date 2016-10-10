@@ -362,24 +362,36 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	bool interpretModPlugMade = false;
 
 	// OpenMPT crap at the end of file
-	file.Seek(file.GetLength() - 4);
-	size_t mptStartPos = file.ReadUint32LE();
-	if(mptStartPos >= file.GetLength() || mptStartPos < 0x100)
-	{
-		mptStartPos = file.GetLength();
-	}
+	size_t mptStartPos = 0;
 
 	if(!memcmp(fileHeader.id, "tpm.", 4))
 	{
-		// Legacy MPTM files (old 1.17.02.xx releases)
+		// Legacy MPTM files (old 1.17.02.4x releases)
 		SetType(MOD_TYPE_MPT);
+		file.Seek(file.GetLength() - 4);
+		mptStartPos = file.ReadUint32LE();
 	} else
 	{
-		if(mptStartPos <= file.GetLength() - 3 && fileHeader.cwtv > 0x888 && fileHeader.cwtv <= 0xFFF)
+		if(fileHeader.cwtv > 0x888 && fileHeader.cwtv <= 0xFFF)
 		{
-			file.Seek(mptStartPos);
-			if(file.ReadMagic("228"))
-				SetType(MOD_TYPE_MPT);
+			file.Seek(file.GetLength() - 4);
+			mptStartPos = file.ReadUint32LE();
+			if(mptStartPos >= 0x100 && mptStartPos < file.GetLength())
+			{
+				if(file.Seek(mptStartPos) && file.ReadMagic("228"))
+				{
+					SetType(MOD_TYPE_MPT);
+
+					if(fileHeader.cwtv >= verMptFileVerLoadLimit)
+					{
+						AddToLog(str_LoadingIncompatibleVersion);
+						return false;
+					} else if(fileHeader.cwtv > verMptFileVer)
+					{
+						AddToLog(str_LoadingMoreRecentVersion);
+					}
+				}
+			}
 		}
 
 		if(GetType() == MOD_TYPE_IT)
@@ -420,21 +432,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
 			}
-		} else // case: type == MOD_TYPE_MPT
-		{
-			if (fileHeader.cwtv >= verMptFileVerLoadLimit)
-			{
-				AddToLog(str_LoadingIncompatibleVersion);
-				return false;
-			}
-			else if (fileHeader.cwtv > verMptFileVer)
-			{
-				AddToLog(str_LoadingMoreRecentVersion);
-			}
 		}
 	}
-
-	if(GetType() == MOD_TYPE_IT) mptStartPos = file.GetLength();
 
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & ITFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_ITOLDEFFECTS, (fileHeader.flags & ITFileHeader::itOldEffects) != 0);
@@ -1212,11 +1211,12 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		if(!Order.NeedsExtraDatafield()) itHeader.ordnum = Order.size();
-		else itHeader.ordnum = std::min(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
-
-		//Crop unused orders from the end.
-		while(itHeader.ordnum > 1 && Order[itHeader.ordnum - 1] == Order.GetInvalidPatIndex()) itHeader.ordnum--;
+		itHeader.ordnum = Order.GetLengthTailTrimmed();
+		if(Order.NeedsExtraDatafield() && itHeader.ordnum > 256)
+		{
+			// If there are more order items, write them elsewhere.
+			itHeader.ordnum = 256;
+		}
 	} else
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
