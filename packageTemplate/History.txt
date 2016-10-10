@@ -26,13 +26,14 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.06.00 (? ??? 2016, revision 7196)
+v1.26.06.00 (? ??? 2016, revision 7242)
 ---------------------------------------
 Pattern tab::Find/Replace
    [Fix] <js> Searching for a specific Sxy / Exy parameter didn't bring up the correct parameter when repeatedly opening the Find/Replace dialog.
    [Fix] <js> Using overflow paste on the last possible order item overflowed into the beginning of the current pattern.
    [Fix] <js> "Change plugin parameter" only worked if the selection started in the first channel (http://forum.openmpt.org/index.php?topic=5729.0).
    [Fix] <js> Pasting partial PC events could result in invalid parameter numbers or values in patterns.
+   [Fix] <js> Duplicating several identical order list items could fail under some circumstances.
 
 Sample tab
    [Imp] <js> When reading ITI / XI instruments as samples, prefer reading the sample at middle-C rather than the first sample in the file.
