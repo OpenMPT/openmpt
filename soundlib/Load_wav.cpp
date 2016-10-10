@@ -73,7 +73,8 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Setting up module length
 	// Calculate sample length in ticks at tempo 125
-	const uint32 sampleTicks = mpt::saturate_cast<uint32>(((sampleLength * 50) / wavFile.GetSampleRate()) + 1);
+	const uint32 sampleRate = std::max(uint32(1), wavFile.GetSampleRate());
+	const uint32 sampleTicks = mpt::saturate_cast<uint32>(((sampleLength * 50) / sampleRate) + 1);
 	uint32 ticksPerRow = std::max((sampleTicks + 63u) / 63u, 1u);
 
 	Order.clear();
@@ -153,7 +154,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(wavFile.GetBitsPerSample() > 8)
 		{
-			sample.uFlags |= CHN_16BIT;
+			sample.uFlags.set(CHN_16BIT);
 		}
 
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
