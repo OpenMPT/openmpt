@@ -848,12 +848,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
 		m_SongFlags.set(SONG_AMIGALIMITS);
+		// Need this for professionaltracker.mod by h0ffman (SHA1: 9a7c52cbad73ed2a198ee3fa18d3704ea9f546ff)
+		m_SongFlags.set(SONG_PT_MODE);
+		m_playBehaviour.set(kMODSampleSwap);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
 		// Don't enable these hacks for ScreamTracker modules (restart position = 0x7F), to fix e.g. sample 10 in BASIC001.MOD (SHA1: 11298a5620e677beaa50bd4ed00c3710b75c81af)
+		// Note: restart position = 0x7F can also be found in ProTracker modules, e.g. professionaltracker.mod by h0ffman
 		if(maxPanning < 0x20 && fileHeader.restartPos != 0x7F)
 		{
-			m_SongFlags.set(SONG_PT_MODE);
-			m_playBehaviour.set(kMODSampleSwap);
 			m_playBehaviour.set(kMODOneShotLoops);
 			if(maxPanning > 0) m_playBehaviour.set(kMODIgnorePanning);
 		}
@@ -1737,7 +1739,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	{
 		if(Patterns.IsValidPat(pat))
 		{
-			AddToLog("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the .mod format.");
+			AddToLog("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the MOD format.");
 			break;
 		}
 	}
