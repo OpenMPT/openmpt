@@ -780,11 +780,12 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 		if(vol > 0 || m_playBehaviour[kITVibratoTremoloPanbrello])
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-			const int tremattn = ((GetType() & MOD_TYPE_XM) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
+			const uint8 tremattn = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
-			if(GetType() == MOD_TYPE_DMF) delta -= 127;
-			vol += (delta * (int)pChn->nTremoloDepth) >> tremattn;
+			if(GetType() == MOD_TYPE_DMF)
+				delta -= 127;
+			vol += (delta * pChn->nTremoloDepth) / (1u << tremattn);
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
@@ -1845,7 +1846,7 @@ SamplePosition CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, 
 	}
 
 	// Avoid increment to overflow and become negative with unrealisticly high frequencies.
-	LimitMax(freq, uint32(0x7FFFFFFF));
+	LimitMax(freq, uint32(int32_max));
 	return SamplePosition::Ratio(freq, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
