@@ -1028,7 +1028,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 	// Unpack Loop
 	{
 		const int8 *in = source;
-		int8 *out = tempBuf.data();
+		int8 *out = &tempBuf[0];
 
 		size_t i = sourceSize, j = destSize;
 		while(i != 0 && j != 0)
@@ -1062,7 +1062,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 
 	// Bit Unpack Loop
 	{
-		int8 *out = tempBuf.data();
+		int8 *out = &tempBuf[0];
 		uint16 bitcount = 0x80;
 		size_t k = 0;
 		uint8 *dst = static_cast<uint8 *>(dest);
