@@ -495,7 +495,6 @@ bool CSoundFile::ProcessRow()
 						visitedSongRows.Initialize(true);
 						return false;
 					}
-
 				} else
 				{
 					m_PlayState.m_nCurrentOrder++;
@@ -1845,6 +1844,8 @@ SamplePosition CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, 
 		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), pIns->pitchToTempoLock.GetRaw());
 	}
 
+	// Avoid increment to overflow and become negative with unrealisticly high frequencies.
+	LimitMax(freq, uint32(0x7FFFFFFF));
 	return SamplePosition::Ratio(freq, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
