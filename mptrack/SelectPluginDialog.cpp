@@ -110,7 +110,12 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		CSize(MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpiY, 96))
 	);
 	::MapWindowPoints(GetParent()->m_hWnd, HWND_DESKTOP, (CPoint *)&rect, 2);
-	MoveWindow(rect);
+	WINDOWPLACEMENT wnd;
+	wnd.length = sizeof(wnd);
+	GetWindowPlacement(&wnd);
+	wnd.showCmd = SW_SHOW;
+	wnd.rcNormalPosition = rect;
+	SetWindowPlacement(&wnd);
 
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
@@ -241,8 +246,10 @@ VSTPluginLib* CSelectPluginDlg::GetSelectedPlugin()
 void CSelectPluginDlg::SaveWindowPos() const
 //------------------------------------------
 {
-	CRect rect;
-	GetWindowRect(&rect);
+	WINDOWPLACEMENT wnd;
+	wnd.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(&wnd);
+	CRect rect = wnd.rcNormalPosition;
 	::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (CPoint *)&rect, 2);
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);

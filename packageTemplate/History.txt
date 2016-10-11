@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.06.00 (? ??? 2016, revision 7245)
+v1.26.06.00 (? ??? 2016, revision 7248)
 ---------------------------------------
 Pattern tab
    [Fix] <js> Using overflow paste on the last possible order item overflowed into the beginning of the current pattern.
@@ -72,6 +72,7 @@ Misc
    [Fix] <js> DLS: Embedded soundfonts could not be read in some cases.
    [Fix] <js> SF2: Region coarse-tune was not imported at all.
    [Fix] <js> MIDI Macro dialog is now DPI-aware.
+   [Fix] <js> The Plugin Manager window could be placed off-screen, effectively locking the entire GUI (http://forum.openmpt.org/index.php?topic=5738.0).
 
 
 v1.26.05.00 (3 September 2016, revision 7025)
