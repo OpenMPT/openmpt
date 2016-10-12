@@ -142,14 +142,17 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 
 	// When song first loads, initialise patternViewState to point to start of song.
 	CView *pView = GetActiveView();
-	CModDoc *pModDoc = NULL;
+	CModDoc *pModDoc = nullptr;
 	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
 	if ((m_hWndCtrl) && (pModDoc))
 	{
 		if (m_bInitialActivation && m_ViewPatterns.nPattern==0)
 		{
-			m_ViewPatterns.nPattern=pModDoc->GetSoundFile()->Order[0];
-			m_ViewPatterns.nOrder=0; //just in case (should already be 0)
+			if(pModDoc->GetSoundFile()->Order.GetLength() > 0)
+				m_ViewPatterns.nPattern = pModDoc->GetSoundFile()->Order[0];
+			else
+				m_ViewPatterns.nPattern = 0;
+			m_ViewPatterns.nOrder = 0; //just in case (should already be 0)
 			m_ViewPatterns.cursor.SetRow(0);   //just in case
 			m_bInitialActivation=false;
 		}
