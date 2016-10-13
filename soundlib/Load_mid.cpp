@@ -1224,7 +1224,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(modChnStatus[i].midiCh != ModChannelState::NOMIDI
 #ifdef MODPLUG_TRACKER
-			|| !GetpModDoc()->IsChannelUnused(i)
+			|| (GetpModDoc() != nullptr && !GetpModDoc()->IsChannelUnused(i))
 #endif // MODPLUG_TRACKER
 			)
 		{
