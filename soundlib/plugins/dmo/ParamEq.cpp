@@ -10,14 +10,14 @@
 
 #include "stdafx.h"
 
-#if !defined(NO_PLUGINS) && defined(NO_DMO)
+#ifndef NO_PLUGINS
 #include "../../Sndfile.h"
 #include "ParamEq.h"
-#endif // !NO_PLUGINS && NO_DMO
+#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if !defined(NO_PLUGINS) && defined(NO_DMO)
+#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -196,6 +196,6 @@ void ParamEq::RecalculateEqParams()
 #else
 MPT_MSVC_WORKAROUND_LNK4221(ParamEq)
 
-#endif // !NO_PLUGINS && NO_DMO
+#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

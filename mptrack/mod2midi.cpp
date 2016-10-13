@@ -329,8 +329,6 @@ namespace MidiExport
 		virtual bool ShouldProcessSilence() { return true; }
 #ifdef MODPLUG_TRACKER
 		virtual CString GetDefaultEffectName() { return CString(); }
-		virtual void CacheProgramNames(int32, int32) { }
-		virtual void CacheParameterNames(int32, int32) { }
 		virtual CString GetParamName(PlugParamIndex) { return CString(); }
 		virtual CString GetParamLabel(PlugParamIndex) { return CString(); }
 		virtual CString GetParamDisplay(PlugParamIndex) { return CString(); }
@@ -338,14 +336,9 @@ namespace MidiExport
 		virtual void SetCurrentProgramName(const CString &) { }
 		virtual CString GetProgramName(int32) { return CString(); }
 		virtual bool HasEditor() const { return false; }
-		virtual void BeginSetProgram(int32) { }
-		virtual void EndSetProgram() { }
 #endif // MODPLUG_TRACKER
 		virtual int GetNumInputChannels() const { return 0; }
 		virtual int GetNumOutputChannels() const { return 0; }
-		virtual bool ProgramsAreChunks() const { return false; }
-		virtual size_t GetChunk(char *(&), bool) { return 0; }
-		virtual void SetChunk(size_t, char *, bool) { }
 	};
 
 

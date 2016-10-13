@@ -153,6 +153,64 @@ CVstPluginManager::CVstPluginManager()
 	// Hard-coded "plugins"
 	VSTPluginLib *plug;
 
+	if(pluginList.empty())
+	{
+		// DirectX Media Objects Emulation
+		plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, true, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEF011F79;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, true, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEF114C90;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, true, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEF3E932C;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::Gargle::Create, true, MPT_PATHSTRING("{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}"), MPT_PATHSTRING("Gargle"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xDAFD8210;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::ParamEq::Create, true, MPT_PATHSTRING("{120CED89-3BF4-4173-A132-3CB406CF3231}"), MPT_PATHSTRING("ParamEq"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0x120CED89;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::WavesReverb::Create, true, MPT_PATHSTRING("{87FC0268-9A55-4360-95AA-004A1D9DE26C}"), MPT_PATHSTRING("WavesReverb"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0x87FC0268;
+			plug->category = VSTPluginLib::catDMO;
+		}
+	}
+
 	// DigiBooster Pro Echo DSP
 	plug = new (std::nothrow) VSTPluginLib(DigiBoosterEcho::Create, true, mpt::PathString(), MPT_PATHSTRING("DigiBooster Pro Echo"));
 	if(plug != nullptr)
@@ -174,63 +232,6 @@ CVstPluginManager::CVstPluginManager()
 		plug->isInstrument = true;
 	}
 #endif // MODPLUG_TRACKER
-
-#ifdef NO_DMO
-	// DirectX Media Objects Emulation
-	plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, true, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0xEF011F79;
-		plug->category = VSTPluginLib::catDMO;
-	}
-
-	plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, true, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0xEF114C90;
-		plug->category = VSTPluginLib::catDMO;
-	}
-
-	plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, true, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0xEF3E932C;
-		plug->category = VSTPluginLib::catDMO;
-	}
-
-	plug = new (std::nothrow) VSTPluginLib(DMO::Gargle::Create, true, MPT_PATHSTRING("{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}"), MPT_PATHSTRING("Gargle"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0xDAFD8210;
-		plug->category = VSTPluginLib::catDMO;
-	}
-
-	plug = new (std::nothrow) VSTPluginLib(DMO::ParamEq::Create, true, MPT_PATHSTRING("{120CED89-3BF4-4173-A132-3CB406CF3231}"), MPT_PATHSTRING("ParamEq"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0x120CED89;
-		plug->category = VSTPluginLib::catDMO;
-	}
-
-	plug = new (std::nothrow) VSTPluginLib(DMO::WavesReverb::Create, true, MPT_PATHSTRING("{87FC0268-9A55-4360-95AA-004A1D9DE26C}"), MPT_PATHSTRING("WavesReverb"));
-	if(plug != nullptr)
-	{
-		pluginList.push_back(plug);
-		plug->pluginId1 = kDmoMagic;
-		plug->pluginId2 = 0x87FC0268;
-		plug->category = VSTPluginLib::catDMO;
-	}
-#endif // NO_DMO
 }
 
 

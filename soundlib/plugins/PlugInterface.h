@@ -138,14 +138,17 @@ public:
 	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const;
 	// Render silence and return the highest resulting output level
 	virtual float RenderSilence(uint32 numSamples);
-	virtual bool MidiSend(uint32 midiCode) = 0;
-	virtual bool MidiSysexSend(const void *message, uint32 length) = 0;
-	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
-	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
-	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
-	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
-	virtual void HardAllNotesOff() = 0;
-	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
+
+	// MIDI event handling
+	virtual bool MidiSend(uint32 /*midiCode*/) { return true; }
+	virtual bool MidiSysexSend(const void * /*message*/, uint32 /*length*/) { return true; }
+	virtual void MidiCC(uint8 /*nMidiCh*/, MIDIEvents::MidiCC /*nController*/, uint8 /*nParam*/, CHANNELINDEX /*trackChannel*/) { }
+	virtual void MidiPitchBend(uint8 /*nMidiCh*/, int32 /*increment*/, int8 /*pwd*/) { }
+	virtual void MidiVibrato(uint8 /*nMidiCh*/, int32 /*depth*/, int8 /*pwd*/) { }
+	virtual void MidiCommand(uint8 /*nMidiCh*/, uint8 /*nMidiProg*/, uint16 /*wMidiBank*/, uint16 /*note*/, uint16 /*vol*/, CHANNELINDEX /*trackChannel*/) { }
+	virtual void HardAllNotesOff() { }
+	virtual bool IsNotePlaying(uint32 /*note*/, uint32 /*midiChn*/, uint32 /*trackerChn*/) { return false; }
+
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void NotifySongPlaying(bool playing) { m_isSongPlaying = playing; }
@@ -156,7 +159,7 @@ public:
 	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)
 	virtual void PositionChanged() = 0;
 	virtual void Bypass(bool = true);
-	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
+	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); }
 	virtual bool IsInstrument() const = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
 	// If false is returned, mixing this plugin can be skipped if its input are currently completely silent.
@@ -175,8 +178,8 @@ public:
 	virtual CString GetDefaultEffectName() = 0;
 
 	// Cache a range of names, in case one-by-one retrieval would be slow (e.g. when using plugin bridge)
-	virtual void CacheProgramNames(int32 firstProg, int32 lastProg) = 0;
-	virtual void CacheParameterNames(int32 firstParam, int32 lastParam) = 0;
+	virtual void CacheProgramNames(int32 /*firstProg*/, int32 /*lastProg*/) { }
+	virtual void CacheParameterNames(int32 /*firstParam*/, int32 /*lastParam*/) { }
 
 	virtual CString GetParamName(PlugParamIndex param) = 0;
 	virtual CString GetParamLabel(PlugParamIndex param) = 0;
@@ -203,15 +206,15 @@ public:
 	void AutomateParameter(PlugParamIndex param);
 #endif
 
-	virtual void BeginSetProgram(int32 program = -1) = 0;
-	virtual void EndSetProgram() = 0;
+	virtual void BeginSetProgram(int32 /*program*/ = -1) { }
+	virtual void EndSetProgram() { }
 
 	virtual int GetNumInputChannels() const = 0;
 	virtual int GetNumOutputChannels() const = 0;
 
-	virtual bool ProgramsAreChunks() const = 0;
-	virtual size_t GetChunk(char *(&chunk), bool isBank) = 0;
-	virtual void SetChunk(size_t size, char *chunk, bool isBank) = 0;
+	virtual bool ProgramsAreChunks() const { return false; }
+	virtual size_t GetChunk(char *(&/*chunk*/), bool /*isBank*/) { return 0; }
+	virtual void SetChunk(size_t /*size*/, char * /*chunk*/, bool /*isBank*/) { }
 };
 
 
