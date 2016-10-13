@@ -1289,17 +1289,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		pChn->nNNA = pIns->nNNA;
 
 	// Update volume
-	if (pIns)
-	{
-		pChn->nInsVol = pIns->nGlobalVol;
-		if(pSmp != nullptr)
-		{
-			pChn->nInsVol = (pSmp->nGlobalVol * pChn->nInsVol) >> 6;
-		}
-	} else if (pSmp != nullptr)
-	{
-		pChn->nInsVol = pSmp->nGlobalVol;
-	}
+	pChn->UpdateInstrumentVolume(pSmp, pIns);
 
 	// Update panning
 	// FT2 compatibility: Only reset panning on instrument numbers, not notes (bUpdVol condition)
