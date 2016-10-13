@@ -181,6 +181,8 @@ struct ModChannel
 	// Check if currently processed loop is a sustain loop. pModSample is not checked for validity!
 	bool InSustainLoop() const { return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP]; }
 
+	void UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins);
+
 	ModChannel()
 	{
 		memset(this, 0, sizeof(*this));

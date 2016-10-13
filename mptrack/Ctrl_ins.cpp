@@ -1972,7 +1972,16 @@ void CCtrlInstruments::OnGlobalVolChanged()
 		Limit(nVol, 0, 64);
 		if (nVol != (int)pIns->nGlobalVol)
 		{
+			// Live-adjust volume
 			pIns->nGlobalVol = nVol;
+			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+			{
+				auto &chn = m_sndFile.m_PlayState.Chn[i];
+				if(chn.pModInstrument == pIns)
+				{
+					chn.UpdateInstrumentVolume(chn.pModSample, pIns);
+				}
+			}
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}

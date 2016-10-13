@@ -553,11 +553,7 @@ float RemoveDCOffset(ModSample &smp,
 		{
 			if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
 			{
-				sndFile.m_PlayState.Chn[i].nInsVol = smp.nGlobalVol;
-				if(sndFile.m_PlayState.Chn[i].pModInstrument)
-				{
-					sndFile.m_PlayState.Chn[i].nInsVol = (smp.nGlobalVol * sndFile.m_PlayState.Chn[i].pModInstrument->nGlobalVol) >> 6;
-				}
+				sndFile.m_PlayState.Chn[i].UpdateInstrumentVolume(&smp, sndFile.m_PlayState.Chn[i].pModInstrument);
 			}
 		}
 	}

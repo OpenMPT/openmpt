@@ -106,4 +106,15 @@ void ModChannel::Stop()
 }
 
 
+void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins)
+//-------------------------------------------------------------------------------------
+{
+	nInsVol = 64;
+	if(smp != nullptr)
+		nInsVol = smp->nGlobalVol;
+	if(ins != nullptr)
+		nInsVol = (nInsVol * ins->nGlobalVol) / 64;
+}
+
+
 OPENMPT_NAMESPACE_END

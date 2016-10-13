@@ -2342,7 +2342,7 @@ public:
 				// TRICK : output buffer offset management
 				// as the pitch-shifter adds  some blank signal in head of output  buffer (matching FFT
 				// length - in short it needs a certain amount of data before being able to output some
-				// meaningfull  processed samples) , in order  to avoid this behaviour , we will ignore
+				// meaningful  processed samples) , in order  to avoid this behaviour , we will ignore
 				// the  first FFT_length  samples and process  the same  amount of extra  blank samples
 				// (all 0.0f) at the end of the buffer (those extra samples will benefit from  internal
 				// FFT data  computed during the previous  steps resulting in a  correct and consistent
@@ -2663,9 +2663,19 @@ void CCtrlSamples::OnGlobalVolChanged()
 	if (IsLocked()) return;
 	int nVol = GetDlgItemInt(IDC_EDIT8);
 	Limit(nVol, 0, 64);
-	if (nVol != m_sndFile.GetSample(m_nSample).nGlobalVol)
+	auto &sample = m_sndFile.GetSample(m_nSample);
+	if (nVol != sample.nGlobalVol)
 	{
-		m_sndFile.GetSample(m_nSample).nGlobalVol = (uint16)nVol;
+		// Live-adjust volume
+		sample.nGlobalVol = (uint16)nVol;
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		{
+			auto &chn = m_sndFile.m_PlayState.Chn[i];
+			if(chn.pModSample == &sample)
+			{
+				chn.UpdateInstrumentVolume(chn.pModSample, chn.pModInstrument);
+			}
+		}
 		SetModified(SampleHint().Info(), false, false);
 	}
 }
