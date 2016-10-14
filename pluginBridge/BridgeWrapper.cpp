@@ -821,7 +821,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	try
 	{
-		if(!SendToBridge(*msg) && opcode != effClose)
+		if(!that->SendToBridge(*msg) && opcode != effClose)
 		{
 			return 0;
 		}
