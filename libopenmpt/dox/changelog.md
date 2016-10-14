@@ -14,10 +14,16 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
+ *  [**Bug**] Possible crashes with malformed IT, AMS, MDL, MED, MPTM, PSM and
+    Startrekker files.
+ *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
+ *  [**Bug**] Plugins did not work correctly when changing the sample rate
+    between two render calls.
 
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
     created with ScreamTracker 3.
+ *  Tremolo effect only had half the intended strength in MOD files.
  *  openmpt123: Improved section layout in man page.
 
 ### libopenmpt 0.2-beta20.1 (2016-09-03)

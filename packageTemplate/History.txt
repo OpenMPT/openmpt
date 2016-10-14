@@ -26,8 +26,8 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.06.00 (? ??? 2016, revision 7248)
----------------------------------------
+v1.26.06.00 (16 October 2016, revision 7252)
+--------------------------------------------
 Pattern tab
    [Fix] <js> Using overflow paste on the last possible order item overflowed into the beginning of the current pattern.
    [Fix] <js> "Change plugin parameter" only worked if the selection started in the first channel (http://forum.openmpt.org/index.php?topic=5729.0).
@@ -57,6 +57,7 @@ IT
 
 MOD
    [Fix] <js> Avoid enabling some ProTracker quirks for files most likely created with ScreamTracker 3 (fixes BASIC001.MOD, tx Borg-).
+   [Fix] <js> Tremolo effect only had half the intended strength.
 
 Other formats
    [Fix] <js> Crashes with malformed files in various formats.
