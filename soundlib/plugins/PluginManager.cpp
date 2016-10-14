@@ -83,8 +83,7 @@ uint8 VSTPluginLib::GetDllBits(bool fromCache) const
 
 
 // PluginCache format:
-// LibraryName = <ID1><ID2><CRC32> (hex-encoded)
-// <ID1><ID2><CRC32> = FullDllPath
+// FullDllPath = <ID1><ID2><CRC32> (hex-encoded)
 // <ID1><ID2><CRC32>.Flags = Plugin Flags (see VSTPluginLib::DecodeCacheFlags).
 // <ID1><ID2><CRC32>.Vendor = Plugin Vendor String.
 
@@ -94,8 +93,8 @@ void VSTPluginLib::WriteToCache() const
 {
 	SettingsContainer &cacheFile = theApp.GetPluginCache();
 
-	const std::string libName = libraryName.ToUTF8();
-	const uint32 crc = mpt::crc32(libName);
+	const std::string crcName = dllPath.ToUTF8();
+	const uint32 crc = mpt::crc32(crcName);
 	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(SwapBytesLE(pluginId1)) + mpt::ufmt::HEX0<8>(SwapBytesLE(pluginId2)) + mpt::ufmt::HEX0<8>(SwapBytesLE(crc));
 
 	mpt::PathString writePath = dllPath;
@@ -104,8 +103,7 @@ void VSTPluginLib::WriteToCache() const
 		writePath = theApp.AbsolutePathToRelative(writePath);
 	}
 
-	cacheFile.Write<mpt::ustring>(cacheSection, libraryName.ToUnicode(), IDs);
-	cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
+	cacheFile.Write<mpt::ustring>(cacheSection, writePath.ToUnicode(), IDs);
 	cacheFile.Write<CString>(cacheSection, IDs + MPT_USTRING(".Vendor"), vendor);
 	cacheFile.Write<int32>(cacheSection, IDs + MPT_USTRING(".Flags"), EncodeCacheFlags());
 }
@@ -368,52 +366,52 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	if(fromCache)
 	{
 		SettingsContainer & cacheFile = theApp.GetPluginCache();
-		const mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, fileName.ToUnicode(), MPT_USTRING(""));
+		// First try finding the full path
+		mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, dllPath.ToUnicode(), MPT_USTRING(""));
+		if(IDs.length() < 16)
+		{
+			// If that didn't work out, find relative path
+			mpt::PathString relPath = theApp.AbsolutePathToRelative(dllPath);
+			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode(), MPT_USTRING(""));
+		}
 
 		if(IDs.length() >= 16)
 		{
-			// Get path from cache file
-			mpt::PathString realPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
-			realPath = theApp.RelativePathToAbsolute(realPath);
-
-			if(!realPath.empty() && !dllPath.CompareNoCase(realPath, dllPath))
+			VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, false, dllPath, fileName, tags);
+			if(plug == nullptr)
 			{
-				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, false, dllPath, fileName, tags);
-				if(plug == nullptr)
-				{
-					return nullptr;
-				}
-				pluginList.push_back(plug);
-
-				// Extract plugin IDs
-				for (int i = 0; i < 16; i++)
-				{
-					int32 n = IDs[i] - '0';
-					if (n > 9) n = IDs[i] + 10 - 'A';
-					n &= 0x0f;
-					if (i < 8)
-					{
-						plug->pluginId1 = (plug->pluginId1 << 4) | n;
-					} else
-					{
-						plug->pluginId2 = (plug->pluginId2 << 4) | n;
-					}
-				}
-
-				const mpt::ustring flagKey = IDs + MPT_USTRING(".Flags");
-				plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
-				plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + MPT_USTRING(".Vendor"), CString());
-
-#ifdef VST_LOG
-				Log("Plugin \"%s\" found in PluginCache\n", plug->libraryName.ToLocale().c_str());
-#endif // VST_LOG
-				return plug;
-			} else
-			{
-#ifdef VST_LOG
-				Log("Plugin \"%s\" mismatch in PluginCache: \"%s\" [%s]=\"%s\"\n", s, dllPath, (LPCTSTR)IDs, (LPCTSTR)strFullPath);
-#endif // VST_LOG
+				return nullptr;
 			}
+			pluginList.push_back(plug);
+
+			// Extract plugin IDs
+			for (int i = 0; i < 16; i++)
+			{
+				int32 n = IDs[i] - '0';
+				if (n > 9) n = IDs[i] + 10 - 'A';
+				n &= 0x0f;
+				if (i < 8)
+				{
+					plug->pluginId1 = (plug->pluginId1 << 4) | n;
+				} else
+				{
+					plug->pluginId2 = (plug->pluginId2 << 4) | n;
+				}
+			}
+
+			const mpt::ustring flagKey = IDs + MPT_USTRING(".Flags");
+			plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
+			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + MPT_USTRING(".Vendor"), CString());
+
+#ifdef VST_LOG
+			Log("Plugin \"%s\" found in PluginCache\n", plug->libraryName.ToLocale().c_str());
+#endif // VST_LOG
+			return plug;
+		} else
+		{
+#ifdef VST_LOG
+			Log("Plugin \"%s\" mismatch in PluginCache: \"%s\" [%s]=\"%s\"\n", s, dllPath, (LPCTSTR)IDs, (LPCTSTR)strFullPath);
+#endif // VST_LOG
 		}
 	}
 
