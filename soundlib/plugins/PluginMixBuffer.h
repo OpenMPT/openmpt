@@ -29,8 +29,8 @@ protected:
 
 	// Align buffer to 16 bytes
 	static_assert(sizeof(buffer_t) < 16, "Check buffer alignment code");
-	static const size_t bufferAlignmentInBytes = (16 - 1);
-	static const size_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
+	static const uintptr_t bufferAlignmentInBytes = (16 - 1);
+	static const uintptr_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
 
 	// Return pointer to an aligned buffer
 	buffer_t *GetBuffer(uint32 index) const
@@ -62,7 +62,7 @@ public:
 			mixBuffer.assign(totalBufferSize, 0);
 
 			// Align buffer start.
-			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(mixBuffer.data()) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
+			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<uintptr_t>(mixBuffer.data()) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
 			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);

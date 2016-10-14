@@ -2,7 +2,7 @@
  * PluginEventQueue.h
  * ------------------
  * Purpose: Alternative, easy to use implementation of the VST event queue mechanism.
- * Notes  : Modelled after an idea from http://www.kvraudio.com/forum/viewtopic.php?p=3043807#3043807
+ * Notes  : Modelled after an idea from http://www.kvraudio.com/forum/viewtopic.php?p=3043807#p3043807
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -41,18 +41,19 @@ protected:
 
 	// Although originally all event types were apparently supposed to be of the same size, this is not the case on 64-Bit systems.
 	// VstMidiSysexEvent contains 3 pointers, so the struct size differs between 32-Bit and 64-Bit systems.
-	typedef VstMidiSysexEvent BiggestVstEvent;
-	static_assert(sizeof(BiggestVstEvent) >= sizeof(VstEvent)
-		&& sizeof(BiggestVstEvent) >= sizeof(VstMidiEvent)
-		&& sizeof(BiggestVstEvent) >= sizeof(VstMidiSysexEvent),
-		"Check typedef above, BiggestVstEvent must be the biggest VstEvent struct.");
+	union Event
+	{
+		VstEvent event;
+		VstMidiEvent midi;
+		VstMidiSysexEvent sysex;
+	};
 
 	// The first three member variables of this class mustn't be changed, to be compatible with the original VSTEvents struct.
 	VstInt32 numEvents;		///< number of Events in array
 	VstIntPtr reserved;		///< zero (Reserved for future use)
 	VstEvent *events[N];	///< event pointer array
 	// Here we store our events.
-	std::deque<BiggestVstEvent> eventQueue;
+	std::deque<Event> eventQueue;
 	// Since plugins can also add events to the queue (even from a different thread than the processing thread),
 	// we need to ensure that reading and writing is never done in parallel.
 	mpt::mutex criticalSection;
@@ -83,32 +84,29 @@ public:
 	// Set insertFront to true to prioritise this event (i.e. add it at the front of the queue instead of the back)
 	bool Enqueue(const VstEvent *event, bool insertFront = false)
 	{
-		ASSERT(event->type != kVstSysExType || event->byteSize == sizeof(VstMidiSysexEvent));
-		ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
+		MPT_ASSERT(event->type != kVstSysExType || event->byteSize == sizeof(VstMidiSysexEvent));
+		MPT_ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
 
-		BiggestVstEvent copyEvent;
+		Event copyEvent;
 		memcpy(&copyEvent, event, std::min(size_t(event->byteSize), sizeof(copyEvent)));
 
-		if(copyEvent.type == kVstSysExType)
+		if(event->type == kVstSysExType)
 		{
 			// SysEx messages need to be copied, as the space used for the dump might be freed in the meantime.
-			VstMidiSysexEvent *e = reinterpret_cast<VstMidiSysexEvent *>(&copyEvent);
-			e->sysexDump = new (std::nothrow) char[e->dumpBytes];
-			if(e->sysexDump == nullptr)
+			VstMidiSysexEvent &e = copyEvent.sysex;
+			e.sysexDump = new (std::nothrow) char[e.dumpBytes];
+			if(e.sysexDump == nullptr)
 			{
 				return false;
 			}
-			memcpy(e->sysexDump, reinterpret_cast<const VstMidiSysexEvent *>(event)->sysexDump, e->dumpBytes);
+			memcpy(e.sysexDump, reinterpret_cast<const VstMidiSysexEvent *>(event)->sysexDump, e.dumpBytes);
 		}
 
 		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
 		if(insertFront)
-		{
 			eventQueue.push_front(copyEvent);
-		} else
-		{
+		else
 			eventQueue.push_back(copyEvent);
-		}
 		return true;
 	}
 
@@ -116,10 +114,10 @@ public:
 	VstInt32 Finalise()
 	{
 		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
-		numEvents = std::min<VstInt32>(eventQueue.size(), N);
+		numEvents = static_cast<VstInt32>(std::min(eventQueue.size(), N));
 		for(VstInt32 i = 0; i < numEvents; i++)
 		{
-			events[i] = reinterpret_cast<VstEvent *>(&eventQueue[i]);
+			events[i] = &eventQueue[i].event;
 		}
 		return numEvents;
 	}
@@ -131,11 +129,11 @@ public:
 		if(numEvents)
 		{
 			// Release temporarily allocated buffer for SysEx messages
-			for(VstInt32 i = 0; i < numEvents; i++)
+			for(std::deque<Event>::iterator e = eventQueue.begin(); e != eventQueue.begin() + numEvents; e++)
 			{
-				if(events[i]->type == kVstSysExType)
+				if(e->event.type == kVstSysExType)
 				{
-					delete[] reinterpret_cast<VstMidiSysexEvent *>(events[i])->sysexDump;
+					delete[] e->sysex.sysexDump;
 				}
 			}
 			eventQueue.erase(eventQueue.begin(), eventQueue.begin() + numEvents);
