@@ -2019,7 +2019,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			{
 				GetSettings().Remove("VST Plugins", "FailedPlugin");
 				const std::wstring text = L"The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToWide() + L"\n\nDo you still want to load it?";
-				if(Reporting::Confirm(text, false, true) == cnfNo)
+				if(Reporting::Confirm(text, false, true, &pluginScanDlg) == cnfNo)
 				{
 					continue;
 				}
