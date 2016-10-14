@@ -1995,6 +1995,26 @@ BOOL CTrackApp::InitializeDXPlugins()
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
 
+			if(!dialogShown && GetTickCount() >= scanStart + 2000)
+			{
+				// If this is taking too long, show the user what they're waiting for.
+				dialogShown = true;
+				pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
+				pluginScanDlg.ShowWindow(SW_SHOW);
+				pluginScanDlg.CenterWindow(gpSplashScreen);
+			} else if(dialogShown)
+			{
+				CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+				std::wstring scanStr = mpt::String::Print(L"Scanning Plugin %1 / %2...\n%3", plug + 1, numPlugins + 1, plugPath);
+				SetWindowTextW(text->m_hWnd, scanStr.c_str());
+				MSG msg;
+				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
+			}
+
 			if(plugPath == failedPlugin)
 			{
 				GetSettings().Remove("VST Plugins", "FailedPlugin");
@@ -2012,26 +2032,6 @@ BOOL CTrackApp::InitializeDXPlugins()
 			{
 				// This appears to be an old version of our MIDI I/O plugin, which is not built right into the main executable.
 				m_pPluginManager->RemovePlugin(lib);
-			}
-		}
-
-		if(!dialogShown && GetTickCount() >= scanStart + 2000)
-		{
-			// If this is taking too long, show the user what they're waiting for.
-			dialogShown = true;
-			pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
-			pluginScanDlg.ShowWindow(SW_SHOW);
-			pluginScanDlg.CenterWindow(gpSplashScreen);
-		} else if(dialogShown)
-		{
-			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-			std::wstring scanStr = mpt::String::Print(L"Scanning Plugin %1 / %2...\n%3", plug, numPlugins, plugPath);
-			SetWindowTextW(text->m_hWnd, scanStr.c_str());
-			MSG msg;
-			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
 			}
 		}
 	}
