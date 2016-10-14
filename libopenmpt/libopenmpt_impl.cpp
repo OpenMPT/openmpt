@@ -385,10 +385,9 @@ std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const
 	return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->GetCharset(), encoded );
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
-	if (
-		static_cast<std::int32_t>( m_sndFile->m_MixerSettings.gdwMixingFreq ) != samplerate ||
-		static_cast<int>( m_sndFile->m_MixerSettings.gnChannels ) != channels
-		) {
+	bool samplerate_changed = static_cast<std::int32_t>( m_sndFile->m_MixerSettings.gdwMixingFreq ) != samplerate;
+	bool channels_changed = static_cast<int>( m_sndFile->m_MixerSettings.gnChannels ) != channels;
+	if ( samplerate_changed || channels_changed ) {
 		MixerSettings mixersettings = m_sndFile->m_MixerSettings;
 		std::int32_t volrampin_us = mixersettings.GetVolumeRampUpMicroseconds();
 		std::int32_t volrampout_us = mixersettings.GetVolumeRampDownMicroseconds();
@@ -397,6 +396,10 @@ void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) 
 		mixersettings.SetVolumeRampUpMicroseconds( volrampin_us );
 		mixersettings.SetVolumeRampDownMicroseconds( volrampout_us );
 		m_sndFile->SetMixerSettings( mixersettings );
+	}
+	if ( samplerate_changed ) {
+		m_sndFile->SuspendPlugins();
+		m_sndFile->ResumePlugins();
 	}
 }
 void module_impl::apply_libopenmpt_defaults() {
