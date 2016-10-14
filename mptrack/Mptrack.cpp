@@ -1963,10 +1963,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 {
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
-	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
+	const size_t numPlugins = GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
 	std::wstring nonFoundPlugs;
-	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
+	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
 	CDialog pluginScanDlg;
 	DWORD scanStart = GetTickCount();
@@ -1977,19 +1977,27 @@ BOOL CTrackApp::InitializeDXPlugins()
 	{
 		char tmp[32];
 		sprintf(tmp, "Plugin%08X%08X.Tags", (**plug).pluginId1, (**plug).pluginId2);
-		(**plug).tags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+		(**plug).tags = GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+	}
+
+	// Restructured plugin cache
+	if(TrackerSettings::Instance().PreviousSettingsVersion < MAKE_VERSION_NUMERIC(1,27,00,15))
+	{
+		DeleteFileW(m_szPluginCacheFileName.AsNative().c_str());
+		GetPluginCache().ForgetAll();
 	}
 
 	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), MPT_PATHSTRING(""));
+		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), MPT_PATHSTRING(""));
 		if(!plugPath.empty())
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
 
 			if(plugPath == failedPlugin)
 			{
+				GetSettings().Remove("VST Plugins", "FailedPlugin");
 				const std::wstring text = L"The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToWide() + L"\n\nDo you still want to load it?";
 				if(Reporting::Confirm(text, false, true) == cnfNo)
 				{
@@ -1997,7 +2005,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 				}
 			}
 
-			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", mpt::format("Plugin%1.Tags")(plug), mpt::ustring());
+			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>("VST Plugins", mpt::format("Plugin%1.Tags")(plug), mpt::ustring());
 
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
