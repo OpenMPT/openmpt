@@ -819,13 +819,20 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		memcpy(&dispatchData[sizeof(DispatchMsg)], auxMem->name, sizeof(auxMem->name));
 	}
 
-	//std::cout << "about to dispatch " << opcode << " to host...";
-	//std::flush(std::cout);
-	if(!that->SendToBridge(*msg) && opcode != effClose)
+	try
 	{
-		return 0;
+		if(!SendToBridge(*msg) && opcode != effClose)
+		{
+			return 0;
+		}
+	} catch(...)
+	{
+		if(opcode != effClose)
+		{
+			throw;
+		}
 	}
-	//std::cout << "done." << std::endl;
+
 	const DispatchMsg *resultMsg = &msg->dispatch;
 
 	const char *extraData = useAuxMem ? static_cast<const char *>(auxMem->memory.view) : reinterpret_cast<const char *>(resultMsg + 1);
