@@ -34,14 +34,21 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
+ *  [**Bug**] Possible crashes with malformed IT, AMS, MDL, MED, MPTM, PSM and
+    Startrekker files.
+ *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
+ *  [**Bug**] Plugins did not work correctly when changing the sample rate
+    between two render calls.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
+ *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Added `libopenmpt_stream_callbacks_buffer.h` which adds
     `openmpt_stream_callbacks` support for in-memory buffers, possibly even only
     using a truncated prefix view into a bigger file which is useful for
     probing.
- *  Possible crashes with malformed MED, PSM and Startrekker files.
+ *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
+    created with ScreamTracker 3.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
  *  openmpt123: Improved section layout in man page.
@@ -453,7 +460,7 @@ is just a high-level summary.
  *  Support building on Android NDK.
  *  Avoid clicks in sample loops when using interpolation.
  *  IT filters are now done in integer instead of floating point. This improves
-    performances, especially on architectures with no or a slow FPU.
+    performance, especially on architectures with no or a slow FPU.
  *  MOD pattern break handling fixes.
  *  Various XM playback improvements.
  *  Improved and switchable dithering when using 16bit integer API.
