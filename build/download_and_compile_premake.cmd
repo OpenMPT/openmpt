@@ -65,30 +65,18 @@ rem https://github.com/premake/premake-core/issues/593
 powershell -Command "(Get-Content include/premake/src/host/http.c -Raw).replace(\"`t`tlua_pushnil(L);`n`t`tchar errorBuf[1024];`n\", \"`t`tchar errorBuf[1024];`n`t`tlua_pushnil(L);`n\") | Set-Content include/premake/src/host/http.c -Force" || goto error
 
 rem Premake does not ship VS2015 projects yet.
-rem VS2015 comes with incomplete toolsets for earlier VS versions,
-rem which confuses our detection logic.
-rem Just stick with VS2010 as default for now.
 rem See https://github.com/premake/premake-core/pull/562 .
 rem See https://github.com/premake/premake-core/issues/596 .
-
-if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
- call build\auto\setup_vs2010.cmd || goto error
- cd include\premake\build\vs2010 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
- cd ..\..\..\.. || goto error
- goto premakedone
-)
-if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
- call build\auto\setup_vs2010.cmd || goto error
- cd include\premake\build\vs2010 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
- cd ..\..\..\.. || goto error
- goto premakedone
-)
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake\build\vs2013 || goto error
+ rem devenv curl-lib.vcxproj /Upgrade || goto error
+ rem devenv lua-lib.vcxproj  /Upgrade || goto error
+ rem devenv zip-lib.vcxproj  /Upgrade || goto error
+ rem devenv zlib-lib.vcxproj /Upgrade || goto error
+ rem devenv Premake5.vcxproj /Upgrade || goto error
+ devenv Premake5.sln /Upgrade || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
@@ -96,6 +84,12 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" 
 if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake\build\vs2013 || goto error
+ rem devenv curl-lib.vcxproj /Upgrade || goto error
+ rem devenv lua-lib.vcxproj  /Upgrade || goto error
+ rem devenv zip-lib.vcxproj  /Upgrade || goto error
+ rem devenv zlib-lib.vcxproj /Upgrade || goto error
+ rem devenv Premake5.vcxproj /Upgrade || goto error
+ devenv Premake5.sln /Upgrade || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
@@ -126,6 +120,21 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" 
 if exist "C:\Program Files\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2012.cmd || goto error
  cd include\premake\build\vs2012 || goto error
+ devenv Premake5.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2010.cmd || goto error
+ cd include\premake\build\vs2010 || goto error
+ devenv Premake5.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2010.cmd || goto error
+ cd include\premake\build\vs2010 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
