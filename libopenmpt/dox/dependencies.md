@@ -15,6 +15,30 @@ Dependencies
      *  **MinGW-W64 4.6** or higher
      *  **emscripten 1.21** or higher
      *  any **C++11 compliant** compiler
+        
+        libopenmpt makes the following assumptions about the C++ implementation
+        used for building:
+         *  `CHAR_BIT == 8` (enforced by static_assert)
+         *  `sizeof(char) == 1` (enforced by static_assert)
+         *  existence of `std::uintptr_t` (enforced by static_assert)
+         *  `sizeof(float) == 4` (enforced by static_assert)
+         *  `sizeof(double) == 8` (enforced by static_assert)
+         *  if `__BYTE_ORDER__` is provided by the compiler and
+            `__STDC_IEC_559__ == 1`, the endianness of integers is the same as
+            the endianness of floats (implicitly assumed)
+         *  `wchar_t` encoding is either UTF-16 or UTF-32 (implicitly assumed)
+         *  representation of basic source character set is ASCII (implicitly
+            assumed)
+         *  representation of basic source character set is identical in char
+            and `wchar_t` (implicitly assumed)
+        
+        libopenmpt does not rely on any specific implementation defined or
+        undefined behaviour (if it does, that's a bug in libopenmpt). In
+        particular:
+         *  `char` can be `signed` or `unsigned`
+         *  shifting signed values is implementation defined
+         *  `float` and `double` can be non-IEEE754
+
  *  Required compilers to use libopenmpt:
      *  Any **C89** / **C99** / **C11** compatible compiler should work with
         the C API as long as a **C99** compatible **stdint.h** is available.
