@@ -465,6 +465,8 @@ typedef double float64;
 MPT_STATIC_ASSERT(sizeof(float64) == 8);
 
 
+MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+
 
 namespace mpt {
 
