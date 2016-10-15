@@ -171,7 +171,7 @@ void ParamEq::RecalculateEqParams()
 //---------------------------------
 {
 	const float freq = std::min(FreqInHertz() / m_SndFile.GetSampleRate(), 0.5f);
-	const float a = std::pow(10, GainInDecibel() / 40.0f);
+	const float a = std::pow(10.0f, GainInDecibel() / 40.0f);
 	const float w0 = 2.0f * float(M_PI) * freq;
 	const float sinW0 = std::sin(w0);
 	const float cosW0 = std::cos(w0);
