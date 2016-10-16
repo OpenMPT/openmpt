@@ -129,6 +129,14 @@ inline void Binarywrite(std::ostream& oStrm, const float& data)
 	mpt::IO::Write(oStrm, tmp);
 }
 
+template<>
+inline void Binarywrite(std::ostream& oStrm, const double& data)
+//--------------------------------------------------------------
+{
+	IEEE754binary64LE tmp = IEEE754binary64LE(data);
+	mpt::IO::Write(oStrm, tmp);
+}
+
 template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
 //-------------------------------------------------------
@@ -161,12 +169,47 @@ inline void Binaryread(std::istream& iStrm, float& data)
 	data = tmp;
 }
 
+template<>
+inline void Binaryread(std::istream& iStrm, double& data)
+//-------------------------------------------------------
+{
+	IEEE754binary64LE tmp = IEEE754binary64LE(0.0);
+	mpt::IO::Read(iStrm, tmp);
+	data = tmp;
+}
+
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 //---------------------------------------------------------------------------
 {
 	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
+}
+
+template <>
+inline void Binaryread<float>(std::istream& iStrm, float& data, const Offtype bytecount)
+//--------------------------------------------------------------------------------------
+{
+	typedef IEEE754binary32LE T;
+	mpt::byte bytes[sizeof(T)];
+	std::memset(bytes, 0, sizeof(T));
+	mpt::IO::ReadRaw(iStrm, bytes, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
+	// There is not much we can sanely do for truncated floats,
+	// thus we ignore what we just read and return 0.
+	data = 0.0f;
+}
+
+template <>
+inline void Binaryread<double>(std::istream& iStrm, double& data, const Offtype bytecount)
+//----------------------------------------------------------------------------------------
+{
+	typedef IEEE754binary64LE T;
+	mpt::byte bytes[sizeof(T)];
+	std::memset(bytes, 0, sizeof(T));
+	mpt::IO::ReadRaw(iStrm, bytes, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
+	// There is not much we can sanely do for truncated floats,
+	// thus we ignore what we just read and return 0.
+	data = 0.0;
 }
 
 

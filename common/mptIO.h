@@ -204,9 +204,7 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
-	#if MPT_COMPILER_HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	mpt::byte bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
