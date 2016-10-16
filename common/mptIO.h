@@ -211,11 +211,7 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
-	#if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
-		MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-		//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
-		MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
-	#endif
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	mpt::byte bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
