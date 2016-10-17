@@ -129,7 +129,7 @@ template <typename T> inline mpt::byte * as_raw_memory(T & v)
 
 } // namespace mpt
 
-#if MPT_CLANG_BEFORE(3,2,0) || MPT_GCC_BEFORE(4,5,0)
+#if MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(4,5,0) || MPT_CLANG_BEFORE(3,2,0)
 
 #define MPT_BINARY_STRUCT(type, size) \
 	MPT_STATIC_ASSERT(sizeof( type ) == (size) ); \
