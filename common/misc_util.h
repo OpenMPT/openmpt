@@ -175,10 +175,14 @@ inline void MemsetZero(T &a)
 //--------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
-#if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
+#if MPT_GCC_BEFORE(4,5,0) || MPT_CLANG_BEFORE(3,2,0)
+	// nothing
+#elif MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0)
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
+#else // default
+	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
+	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
 #endif
 	std::memset(&a, 0, sizeof(T));
 }
@@ -191,9 +195,12 @@ void MemCopy(T &destination, const T &source)
 //-------------------------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
-#if !MPT_CLANG_BEFORE(3,2,0) && !MPT_GCC_BEFORE(4,5,0)
-	//MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
+#if MPT_GCC_BEFORE(4,5,0) || MPT_CLANG_BEFORE(3,2,0)
+	// nothing
+#elif MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0)
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
+#else // default
+	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
 #endif
 	std::memcpy(&destination, &source, sizeof(T));
 }
