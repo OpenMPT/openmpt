@@ -177,7 +177,7 @@ inline void MemsetZero(T &a)
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if MPT_GCC_BEFORE(4,5,0) || MPT_CLANG_BEFORE(3,2,0)
 	// nothing
-#elif MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
+#elif MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
@@ -197,7 +197,7 @@ void MemCopy(T &destination, const T &source)
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if MPT_GCC_BEFORE(4,5,0) || MPT_CLANG_BEFORE(3,2,0)
 	// nothing
-#elif MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
+#elif MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
