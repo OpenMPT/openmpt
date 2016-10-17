@@ -14,7 +14,8 @@ Dependencies
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher
      *  **emscripten 1.21** or higher
-     *  any **C++11 compliant** compiler
+     *  any other **C++11 compliant** compiler (full standard compliant mode is
+        known to work with GCC >= 5.1 and Clang >= 3.5)
         
         libopenmpt makes the following assumptions about the C++ implementation
         used for building:
