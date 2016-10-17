@@ -129,14 +129,28 @@ template <typename T> inline mpt::byte * as_raw_memory(T & v)
 
 } // namespace mpt
 
+#if MPT_CLANG_BEFORE(3,2,0) || MPT_GCC_BEFORE(4,5,0)
+
 #define MPT_BINARY_STRUCT(type, size) \
-	STATIC_ASSERT(sizeof( type ) == (size) ); \
-	STATIC_ASSERT(MPT_ALIGNOF( type ) == 1); \
+	MPT_STATIC_ASSERT(sizeof( type ) == (size) ); \
+	MPT_STATIC_ASSERT(MPT_ALIGNOF( type ) == 1); \
 	namespace mpt { \
 		template <> struct is_binary_safe< type > : public std::true_type { }; \
 	} \
 /**/
 
+#else // MPT_COMPILER
+
+#define MPT_BINARY_STRUCT(type, size) \
+	MPT_STATIC_ASSERT(sizeof( type ) == (size) ); \
+	MPT_STATIC_ASSERT(MPT_ALIGNOF( type ) == 1); \
+	MPT_STATIC_ASSERT(std::is_standard_layout< type >::value); \
+	namespace mpt { \
+		template <> struct is_binary_safe< type > : public std::true_type { }; \
+	} \
+/**/
+
+#endif // MPT_COMPILER
 
 
 OPENMPT_NAMESPACE_END
