@@ -321,8 +321,8 @@ typedef struct openmpt_module_initial_ctl {
  *
  * \param stream_callbacks Input stream callback operations.
  * \param stream Input stream to load the module from.
- * \param logfunc Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
- * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc) 
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
+ * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
@@ -335,8 +335,8 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks 
  *
  * \param filedata Data to load the module from.
  * \param filesize Amount of data available.
- * \param logfunc Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
- * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc) 
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
+ * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
