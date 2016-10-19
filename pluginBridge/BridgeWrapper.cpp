@@ -535,11 +535,16 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
-	if(that == nullptr)
+	if(that != nullptr)
 	{
-		return 0;
+		return that->DispatchToPlugin(opcode, index, value, ptr, opt);
 	}
+	return 0;
+}
 
+
+VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+{
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
 	int64 ptrOut = 0;
 	bool copyPtrBack = false, ptrIsSize = true;
@@ -550,14 +555,14 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effGetParamLabel:
 	case effGetParamDisplay:
 	case effGetParamName:
-		if(index >= that->cachedParamInfoStart && index < that->cachedParamInfoStart + mpt::saturate_cast<int32>(that->cachedParamInfo.size()))
+		if(index >= cachedParamInfoStart && index < cachedParamInfoStart + mpt::saturate_cast<int32>(cachedParamInfo.size()))
 		{
 			if(opcode == effGetParamLabel)
-				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].label);
+				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].label);
 			else if(opcode == effGetParamDisplay)
-				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].display);
+				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].display);
 			else if(opcode == effGetParamName)
-				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].name);
+				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].name);
 			return 1;
 		}
 		MPT_FALLTHROUGH;
@@ -570,12 +575,12 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effGetProductString:
 	case effShellGetNextPlugin:
 		// Name in [ptr]
-		if(opcode == effGetProgramNameIndexed && !that->cachedProgNames.empty())
+		if(opcode == effGetProgramNameIndexed && !cachedProgNames.empty())
 		{
 			// First check if we have cached this program name
-			if(index >= that->cachedProgNameStart && index < that->cachedProgNameStart + mpt::saturate_cast<int32>(that->cachedProgNames.size() / kCachedProgramNameLength))
+			if(index >= cachedProgNameStart && index < cachedProgNameStart + mpt::saturate_cast<int32>(cachedProgNames.size() / kCachedProgramNameLength))
 			{
-				strcpy(ptr, &that->cachedProgNames[(index - that->cachedProgNameStart) * kCachedProgramNameLength]);
+				strcpy(ptr, &cachedProgNames[(index - cachedProgNameStart) * kCachedProgramNameLength]);
 				return 1;
 			}
 		}
@@ -584,7 +589,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		break;
 
 	case effSetProgramName:
-		that->cachedProgNames.clear();
+		cachedProgNames.clear();
 		MPT_FALLTHROUGH;
 	case effCanDo:
 		// char* in [ptr]
@@ -606,8 +611,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
 		ptrOut = reinterpret_cast<int64>(ptr);
 		ptrIsSize = false;
-		that->cachedProgNames.clear();
-		that->cachedParamInfo.clear();
+		cachedProgNames.clear();
+		cachedParamInfo.clear();
 		break;
 
 	case effEditIdle:
@@ -628,8 +633,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// void* in [ptr] for chunk data
 		ptrOut = value;
 		dispatchData.insert(dispatchData.end(), ptrC, ptrC + value);
-		that->cachedProgNames.clear();
-		that->cachedParamInfo.clear();
+		cachedProgNames.clear();
+		cachedParamInfo.clear();
 		break;
 
 	case effProcessEvents:
@@ -637,21 +642,21 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// We process in a separate memory segment to save a bridge communication message.
 		{
 			std::vector<char> events;
-			TranslateVSTEventsToBridge(events, static_cast<VstEvents *>(ptr), that->otherPtrSize);
-			if(that->eventMem.Size() < events.size())
+			TranslateVSTEventsToBridge(events, static_cast<VstEvents *>(ptr), otherPtrSize);
+			if(eventMem.Size() < events.size())
 			{
 				// Resize memory
 				static uint32 chunkId = 0;
 				const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-events-" + mpt::ToWString(chunkId++);
 				ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 				PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
-				that->eventMem.Create(mapName.c_str(), static_cast<uint32>(events.size() + 1024));
+				eventMem.Create(mapName.c_str(), static_cast<uint32>(events.size() + 1024));
 
 				opcode = effVendorSpecific;
 				index = kVendorOpenMPT;
 				value = kUpdateEventMemName;
 			}
-			memcpy(that->eventMem.view, events.data(), events.size());
+			memcpy(eventMem.view, events.data(), events.size());
 		}
 		if(opcode != effVendorSpecific)
 		{
@@ -701,19 +706,19 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			switch(value)
 			{
 			case kGetWrapperPointer:
-				return ToVstPtr<BridgeWrapper>(that);
+				return ToVstPtr<BridgeWrapper>(this);
 
 			case kCloseOldProcessingMemory:
 				{
-					VstIntPtr result = that->oldProcessMem.Good();
-					that->oldProcessMem.Close();
+					VstIntPtr result = oldProcessMem.Good();
+					oldProcessMem.Close();
 					return result;
 				}
 
 			case kCacheProgramNames:
 				{
 					int32 *prog = static_cast<int32 *>(ptr);
-					that->cachedProgNameStart = prog[0];
+					cachedProgNameStart = prog[0];
 					ptrOut = std::max<int64>(sizeof(int32) * 2, (prog[1] - prog[0]) * kCachedProgramNameLength);
 					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 				}
@@ -722,7 +727,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			case kCacheParameterInfo:
 				{
 					int32 *param = static_cast<int32 *>(ptr);
-					that->cachedParamInfoStart = param[0];
+					cachedParamInfoStart = param[0];
 					ptrOut = std::max<int64>(sizeof(int32) * 2, (param[1] - param[0]) * sizeof(ParameterInfo));
 					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 				}
@@ -732,9 +737,9 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effGetParameterProperties:
 		// VstParameterProperties* in [ptr]
-		if(index >= that->cachedParamInfoStart && index < that->cachedParamInfoStart + mpt::saturate_cast<int32>(that->cachedParamInfo.size()))
+		if(index >= cachedParamInfoStart && index < cachedParamInfoStart + mpt::saturate_cast<int32>(cachedParamInfo.size()))
 		{
-			*static_cast<VstParameterProperties *>(ptr) = that->cachedParamInfo[index - that->cachedParamInfoStart].props;
+			*static_cast<VstParameterProperties *>(ptr) = cachedParamInfo[index - cachedParamInfoStart].props;
 			return 1;
 		}
 		ptrOut = sizeof(VstParameterProperties);
@@ -761,17 +766,17 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		break;
 
 	case effBeginSetProgram:
-		that->isSettingProgram = true;
+		isSettingProgram = true;
 		break;
 
 	case effEndSetProgram:
-		that->isSettingProgram = false;
-		if(that->sharedMem->automationQueue.pendingEvents)
+		isSettingProgram = false;
+		if(sharedMem->automationQueue.pendingEvents)
 		{
-			that->SendAutomationQueue();
+			SendAutomationQueue();
 		}
-		that->cachedProgNames.clear();
-		that->cachedParamInfo.clear();
+		cachedProgNames.clear();
+		cachedParamInfo.clear();
 		break;
 
 	case effGetSpeakerArrangement:
@@ -784,8 +789,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effBeginLoadProgram:
 		// VstPatchChunkInfo* in [ptr]
 		ptrOut = sizeof(VstPatchChunkInfo);
-		that->cachedProgNames.clear();
-		that->cachedParamInfo.clear();
+		cachedProgNames.clear();
+		cachedParamInfo.clear();
 		break;
 
 	default:
@@ -809,7 +814,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	if(useAuxMem)
 	{
 		// Extra data doesn't fit in message - use secondary memory
-		auxMem = that->GetAuxMemory(dispatchData.size());
+		auxMem = GetAuxMemory(dispatchData.size());
 		if(auxMem == nullptr)
 			return 0;
 
@@ -821,16 +826,19 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	try
 	{
-		if(!that->SendToBridge(*msg) && opcode != effClose)
+		if(!SendToBridge(*msg) && opcode != effClose)
 		{
 			return 0;
 		}
 	} catch(...)
 	{
+		// Don't do anything for now.
+#if 0
 		if(opcode != effClose)
 		{
 			throw;
 		}
+#endif
 	}
 
 	const DispatchMsg *resultMsg = &msg->dispatch;
@@ -840,8 +848,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	switch(opcode)
 	{
 	case effClose:
-		effect->object = nullptr;
-		delete that;
+		sharedMem->effect.object = nullptr;
+		delete this;
 		return 0;
 
 	case effGetProgramName:
@@ -861,17 +869,17 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effEditGetRect:
 		// ERect** in [ptr]
-		that->editRect = *reinterpret_cast<const ERect *>(extraData);
-		*static_cast<const ERect **>(ptr) = &that->editRect;
+		editRect = *reinterpret_cast<const ERect *>(extraData);
+		*static_cast<const ERect **>(ptr) = &editRect;
 		break;
 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
 		{
 			const wchar_t *str = reinterpret_cast<const wchar_t *>(extraData);
-			if(that->getChunkMem.Open(str))
+			if(getChunkMem.Open(str))
 			{
-				*static_cast<void **>(ptr) = that->getChunkMem.view;
+				*static_cast<void **>(ptr) = getChunkMem.view;
 			} else
 			{
 				return 0;
@@ -887,14 +895,14 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			case kCacheProgramNames:
 				if(resultMsg->result == 1)
 				{
-					that->cachedProgNames.assign(extraData, extraData + ptrOut);
+					cachedProgNames.assign(extraData, extraData + ptrOut);
 				}
 				break;
 			case kCacheParameterInfo:
 				if(resultMsg->result == 1)
 				{
 					const ParameterInfo *params = reinterpret_cast<const ParameterInfo *>(extraData);
-					that->cachedParamInfo.assign(params, params + ptrOut / sizeof(ParameterInfo));
+					cachedParamInfo.assign(params, params + ptrOut / sizeof(ParameterInfo));
 				}
 				break;
 			}
@@ -903,10 +911,10 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effGetSpeakerArrangement:
 		// VstSpeakerArrangement* in [value] and [ptr]
-		that->speakers[0] = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
-		that->speakers[1] = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
-		*static_cast<VstSpeakerArrangement *>(ptr) = that->speakers[0];
-		*FromVstPtr<VstSpeakerArrangement>(value) = that->speakers[1];
+		speakers[0] = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
+		speakers[1] = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
+		*static_cast<VstSpeakerArrangement *>(ptr) = speakers[0];
+		*FromVstPtr<VstSpeakerArrangement>(value) = speakers[1];
 		break;
 
 	default:
@@ -991,41 +999,53 @@ void BridgeWrapper::SendAutomationQueue()
 void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, float parameter)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
-	const CVstPlugin *plug = FromVstPtr<CVstPlugin>(effect->resvd1);
 	if(that)
 	{
-		AutomationQueue &autoQueue = that->sharedMem->automationQueue;
-		if(that->isSettingProgram || (plug && plug->IsResumed()))
+		try
 		{
-			// Queue up messages while rendering to reduce latency introduced by every single bridge call
-			uint32 i;
-			while((i = InterlockedExchangeAdd(&autoQueue.pendingEvents, 1)) >= CountOf(autoQueue.params))
-			{
-				// Queue full!
-				if(i == CountOf(autoQueue.params))
-				{
-					// We're the first to notice that it's full
-					that->SendAutomationQueue();
-				} else
-				{
-					// Wait until queue is emptied by someone else (this branch is very unlikely to happen)
-					WaitForSingleObject(that->sigAutomation, INFINITE);
-				}
-			}
+			that->SetParameter(index, parameter);
+		} catch(...)
+		{
+			// Be quiet about exceptions here
+		}
+	}
+}
 
-			autoQueue.params[i].index = index;
-			autoQueue.params[i].value = parameter;
-			return;
-		} else if(autoQueue.pendingEvents)
+
+void BridgeWrapper::SetParameter(VstInt32 index, float parameter)
+{
+	const CVstPlugin *plug = FromVstPtr<CVstPlugin>(sharedMem->effect.resvd1);
+	AutomationQueue &autoQueue = sharedMem->automationQueue;
+	if(isSettingProgram || (plug && plug->IsResumed()))
+	{
+		// Queue up messages while rendering to reduce latency introduced by every single bridge call
+		uint32 i;
+		while((i = InterlockedExchangeAdd(&autoQueue.pendingEvents, 1)) >= CountOf(autoQueue.params))
 		{
-			// Actually, this should never happen as pending events are cleared before processing and at the end of a set program event.
-			that->SendAutomationQueue();
+			// Queue full!
+			if(i == CountOf(autoQueue.params))
+			{
+				// We're the first to notice that it's full
+				SendAutomationQueue();
+			} else
+			{
+				// Wait until queue is emptied by someone else (this branch is very unlikely to happen)
+				WaitForSingleObject(sigAutomation, INFINITE);
+			}
 		}
 
-		BridgeMessage msg;
-		msg.SetParameter(index, parameter);
-		that->SendToBridge(msg);
+		autoQueue.params[i].index = index;
+		autoQueue.params[i].value = parameter;
+		return;
+	} else if(autoQueue.pendingEvents)
+	{
+		// Actually, this should never happen as pending events are cleared before processing and at the end of a set program event.
+		SendAutomationQueue();
 	}
+
+	BridgeMessage msg;
+	msg.SetParameter(index, parameter);
+	SendToBridge(msg);
 }
 
 
@@ -1034,12 +1054,25 @@ float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, VstInt32 index)
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
 	{
-		BridgeMessage msg;
-		msg.GetParameter(index);
-		if(that->SendToBridge(msg))
+		try
 		{
-			return msg.parameter.value;
+			return that->GetParameter(index);
+		} catch(...)
+		{
+			// Be quiet about exceptions here
 		}
+	}
+	return 0.0f;
+}
+
+
+float BridgeWrapper::GetParameter(VstInt32 index)
+{
+	BridgeMessage msg;
+	msg.GetParameter(index);
+	if(SendToBridge(msg))
+	{
+		return msg.parameter.value;
 	}
 	return 0.0f;
 }
