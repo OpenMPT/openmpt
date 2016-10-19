@@ -139,8 +139,11 @@ protected:
 	AuxMem *GetAuxMemory(uint32 size);
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	VstIntPtr DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);
+	void SetParameter(VstInt32 index, float parameter);
 	static float VSTCALLBACK GetParameter(AEffect *effect, VstInt32 index);
+	float GetParameter(VstInt32 index);
 	static void VSTCALLBACK Process(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames);
 	static void VSTCALLBACK ProcessReplacing(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames);
 	static void VSTCALLBACK ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, VstInt32 sampleFrames);
