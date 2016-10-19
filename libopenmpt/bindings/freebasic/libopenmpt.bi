@@ -274,7 +274,7 @@ End Type
 
   \param stream_callbacks Input stream callback operations.
   \param stream Input stream to load the module from.
-  \param logfunc Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
+  \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
   \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
   \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
   \return A pointer to the constructed openmpt_module, or NULL on failure.
@@ -287,7 +287,7 @@ Declare Function openmpt_module_create(ByVal stream_callbacks As openmpt_stream_
 
   \param filedata Data to load the module from.
   \param filesize Amount of data available.
-  \param logfunc Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
+  \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
   \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
   \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
   \return A pointer to the constructed openmpt_module, or NULL on failure.
