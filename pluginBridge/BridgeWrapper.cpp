@@ -599,7 +599,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 
 	case effIdle:
 		// The plugin bridge will generate these messages by itself
-		break;
+		return 0;
 
 	case effEditGetRect:
 		// ERect** in [ptr]
