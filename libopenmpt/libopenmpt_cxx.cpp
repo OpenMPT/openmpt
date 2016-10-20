@@ -76,8 +76,11 @@ bool is_extension_supported( const std::string & extension ) {
 	return openmpt::module_impl::is_extension_supported( extension );
 }
 
+double could_open_probability( std::istream & stream, double effort, std::ostream & log ) {
+	return openmpt::module_impl::could_open_probability( stream, effort, std::make_shared<std_ostream_log>( log ) );
+}
 double could_open_propability( std::istream & stream, double effort, std::ostream & log ) {
-	return openmpt::module_impl::could_open_propability( stream, effort, std::make_shared<std_ostream_log>( log ) );
+	return openmpt::module_impl::could_open_probability( stream, effort, std::make_shared<std_ostream_log>( log ) );
 }
 
 module::module( const module & ) {

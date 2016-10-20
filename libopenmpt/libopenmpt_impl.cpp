@@ -563,7 +563,7 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), tolower );
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
-double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
+double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
 	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
 	std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( log );
 	sndFile->SetCustomLog( logForwarder.get() );
@@ -597,16 +597,16 @@ double module_impl::could_open_propability( const OpenMPT::FileReader & file, do
 	}
 
 }
-double module_impl::could_open_propability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log ) {
+double module_impl::could_open_probability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log ) {
 	CallbackStream fstream;
 	fstream.stream = stream.stream;
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	return could_open_propability( FileReader( fstream ), effort, log );
+	return could_open_probability( FileReader( fstream ), effort, log );
 }
-double module_impl::could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
-	return could_open_propability( FileReader( &stream ), effort, log );
+double module_impl::could_open_probability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
+	return could_open_probability( FileReader( &stream ), effort, log );
 }
 
 module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
