@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.0-pre
 
+ *  [**New**] New API `openmpt::module::get_selected_subsong()` (C++) and
+    `openmpt_module_get_selected_subsong()` (C).
+ *  [**New**] New API `openmpt::could_open_probability()` (C++) and
+    `openmpt_could_open_probability()` (C). This fixes a spelling error in the
+    old 0.2 API.
+
  *  [**Change**] libopenmpt versioning changed and follows the more conventional
     major.minor.patch as well as the recommendations of the
     [SemVer](http://semver.org/) scheme now.
