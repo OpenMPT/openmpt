@@ -410,6 +410,7 @@ public:
 	/*!
 	  \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
 	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong, openmpt::module::get_subsong_names
+	  \since 0.3.0
 	*/
 	std::int32_t get_selected_subsong() const;
 	//! Set Repeat Count
