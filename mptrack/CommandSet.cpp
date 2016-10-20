@@ -1670,9 +1670,11 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 				kc.EventType((KeyEventType)atoi(token));
 			}
 
-			if(fillExistingSet && cmd >= kcVPStartNotes && cmd <= kcVPEndNotes && pTempCS->GetKeyListSize(cmd) != 0)
+			//if(fillExistingSet && ((cmd >= kcVPStartNotes && cmd <= kcVPEndNotes) || pTempCS->GetKeyListSize(cmd) != 0))
+			if(fillExistingSet && pTempCS->GetKeyListSize(cmd) != 0)
 			{
-				// Don't fill in default note keys, as this will probably create awkward keymaps when loading
+				// Do not map shortcuts that already have custom keys assigned.
+				// In particular with default note keys, this can create awkward keymaps when loading
 				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
 				continue;
 			}
@@ -1705,7 +1707,6 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 			}
 		}
 	}
-	//if(fileVersion < KEYMAP_VERSION) pTempCS->UpgradeKeymap(fileVersion);
 
 	if(!fillExistingSet)
 	{
