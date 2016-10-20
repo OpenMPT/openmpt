@@ -595,6 +595,7 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 	PLUGINDEX nRemoved = 0;
 	const PLUGINDEX maxPlug = static_cast<PLUGINDEX>(MIN(MAX_MIXPLUGINS, keepMask.size()));
 
+	CriticalSection cs;
 	for(PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
 		SNDMIXPLUGIN &plug = m_SndFile.m_MixPlugins[nPlug];
