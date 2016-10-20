@@ -4921,6 +4921,19 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		{
 			// We're overwriting a normal cell with a PC note.
 			newcmd = m_PCNoteEditMemory;
+			if((pTarget->command == CMD_MIDI || pTarget->command == CMD_SMOOTHMIDI) && pTarget->param < 0x80)
+			{
+				newcmd.SetValueEffectCol(static_cast<uint16>(Util::muldiv(pTarget->param, ModCommand::maxColumnValue, 0x7F)));
+				if(!newcmd.instr)
+					newcmd.instr = sndFile.ChnSettings[nChn].nMixPlugin;
+				auto activeMacro = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
+				if(!newcmd.GetValueVolCol() && sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
+				{
+					PlugParamIndex plugParam = sndFile.m_MidiCfg.MacroToPlugParam(sndFile.m_PlayState.Chn[nChn].nActiveMacro);
+					if(plugParam < ModCommand::maxColumnValue)
+						newcmd.SetValueVolCol(static_cast<uint16>(plugParam));
+				}
+			}
 		} else if(recordEnabled)
 		{
 			// Pick up current entry to update PC note edit memory.
@@ -6586,7 +6599,7 @@ ROWINDEX CViewPattern::GetRowsPerMeasure() const
 }
 
 
-// Set instrument 
+// Set instrument
 void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument)
 //---------------------------------------------------------------------------------------------
 {
