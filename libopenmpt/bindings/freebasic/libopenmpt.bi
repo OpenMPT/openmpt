@@ -357,10 +357,18 @@ Const OPENMPT_MODULE_COMMAND_PARAMETER = 5
   \param module The module handle to work on.
   \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
   \return 1 on success, 0 on failure.
-  \sa openmpt_module_get_num_subsongs, openmpt_module_get_subsong_names
+  \sa openmpt_module_get_num_subsongs, openmpt_module_get_selected_subsong, openmpt_module_get_subsong_names
   \remarks Whether subsong -1 (all subsongs consecutively), subsong 0 or some other subsong is selected by default, is an implementation detail and subject to change. If you do not want to care about subsongs, it is recommended to just not call openmpt_module_select_subsong() at all.
 '/
 Declare Function openmpt_module_select_subsong(ByVal module As openmpt_module Ptr, ByVal subsong As Long) As Long
+
+/'* \brief Get currently selected sub-song from a multi-song module
+
+  \param mod The module handle to work on.
+  \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
+  \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_names
+'/
+Declare Function openmpt_module_get_selected_subsong(ByVal module As openmpt_module Ptr) As Long;
 
 /'* \brief Set Repeat Count
 
@@ -731,7 +739,7 @@ Declare Function openmpt_module_get_current_channel_vu_rear_right(ByVal module A
 
   \param module The module handle to work on.
   \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
-  \sa openmpt_module_get_subsong_names, openmpt_module_select_subsong
+  \sa openmpt_module_get_subsong_names, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
 '/
 Declare Function openmpt_module_get_num_subsongs(ByVal module As openmpt_module Ptr) As Long
 
@@ -776,7 +784,7 @@ Declare Function openmpt_module_get_num_samples(ByVal module As openmpt_module P
   \param module The module handle to work on.
   \param index The sub-song whose name should be retrieved
   \return The sub-song name.
-  \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong
+  \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
   \remarks Use openmpt_module_get_subsong_name to automatically handle the lifetime of the returned pointer.
 '/
 Declare Function openmpt_module_get_subsong_name_ Alias "openmpt_module_get_subsong_name" (ByVal module As openmpt_module Ptr, ByVal index As Long) As Const ZString Ptr

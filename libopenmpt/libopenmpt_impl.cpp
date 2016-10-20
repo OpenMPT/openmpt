@@ -825,6 +825,9 @@ void module_impl::select_subsong( std::int32_t subsong ) {
 	set_position_order_row( subsongs[subsong].start_order, subsongs[subsong].start_row );
 	m_currentPositionSeconds = 0.0;
 }
+std::int32_t module_impl::get_selected_subsong() const {
+	return m_current_subsong;
+}
 void module_impl::set_repeat_count( std::int32_t repeat_count ) {
 	m_sndFile->SetRepeatCount( repeat_count );
 }
@@ -1318,7 +1321,7 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 	} else if ( ctl == "seek.sync_samples" ) {
 		return mpt::ToString( m_ctl_seek_sync_samples );
 	} else if ( ctl == "subsong" ) {
-		return mpt::ToString( m_current_subsong );
+		return mpt::ToString( get_selected_subsong() );
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return "1.0";

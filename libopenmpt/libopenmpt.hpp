@@ -402,10 +402,16 @@ public:
 	/*!
 	  \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if sub-song is not in range [-1,openmpt::module::get_num_subsongs()[
-	  \sa openmpt::module::get_num_subsongs, openmpt::module::get_subsong_names
+	  \sa openmpt::module::get_num_subsongs, openmpt::module::get_selected_subsong, openmpt::module::get_subsong_names
 	  \remarks Whether subsong -1 (all subsongs consecutively), subsong 0 or some other subsong is selected by default, is an implementation detail and subject to change. If you do not want to care about subsongs, it is recommended to just not call openmpt::module::select_subsong() at all.
 	*/
 	void select_subsong( std::int32_t subsong );
+	//! Get currently selected sub-song from a multi-song module
+	/*!
+	  \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
+	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong, openmpt::module::get_subsong_names
+	*/
+	std::int32_t get_selected_subsong() const;
 	//! Set Repeat Count
 	/*!
 	  \param repeat_count Repeat Count
@@ -712,7 +718,7 @@ public:
 	//! Get the number of sub-songs
 	/*!
 	  \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
-	  \sa openmpt::module::get_subsong_names, openmpt::module::select_subsong
+	  \sa openmpt::module::get_subsong_names, openmpt::module::select_subsong, openmpt::module::get_selected_subsong
 	*/
 	std::int32_t get_num_subsongs() const;
 	//! Get the number of pattern channels
@@ -745,7 +751,7 @@ public:
 	//! Get a list of sub-song names
 	/*!
 	  \return All sub-song names.
-	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong
+	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong, openmpt::module::get_selected_subsong
 	*/
 	std::vector<std::string> get_subsong_names() const;
 	//! Get a list of channel names

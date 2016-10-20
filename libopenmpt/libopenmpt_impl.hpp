@@ -125,6 +125,7 @@ public:
 	~module_impl();
 public:
 	void select_subsong( std::int32_t subsong );
+	std::int32_t get_selected_subsong() const;
 	void set_repeat_count( std::int32_t repeat_count );
 	std::int32_t get_repeat_count() const;
 	double get_duration_seconds() const;

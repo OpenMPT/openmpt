@@ -136,6 +136,9 @@ module::~module() {
 void module::select_subsong( std::int32_t subsong ) {
 	impl->select_subsong( subsong );
 }
+std::int32_t module::get_selected_subsong() const {
+	return impl->get_selected_subsong();
+}
 
 void module::set_repeat_count( std::int32_t repeat_count ) {
 	impl->set_repeat_count( repeat_count );
