@@ -1710,7 +1710,10 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	ModSample &mptSample = Samples[nSample];
 	DestroySampleThreadsafe(nSample);
 	mptSample.Initialize();
-	mptSample.nLength = (std::min<FileReader::off_t>(file.BytesLeft(), dataSize) * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
+	SmpLength length = mpt::saturate_cast<SmpLength>(file.BytesLeft());
+	if(dataSize != 0xFFFFFFFF)
+		LimitMax(length, dataSize);
+	mptSample.nLength = (length * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
 	mptSample.nC5Speed = sampleRate;
 	strcpy(m_szNames[nSample], "");
 
