@@ -712,7 +712,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						firstCol = std::min(firstCol, PatternCursor::paramColumn);
 						lastCol = std::max(lastCol, PatternCursor::paramColumn);
 						m.SetValueEffectCol(ConvertStrTo<uint16>(data.Mid(pos + 8, 3)));
-					} else
+					} else if(!origModCmd.IsPcNote())
 					{
 						// No value provided in clipboard
 						if(m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI && m.param < 128)
