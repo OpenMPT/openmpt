@@ -109,12 +109,12 @@ protected:
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
-	static double could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log );
+	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log );
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
-	static double could_open_propability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log );
-	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
+	static double could_open_probability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log );
+	static double could_open_probability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
 	module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );

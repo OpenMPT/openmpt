@@ -221,10 +221,19 @@ void openmpt_log_func_silent( const char * /*message*/, void * /*user*/ ) {
 	return;
 }
 
+double openmpt_could_open_probability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user ) {
+	try {
+		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
+		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, logfunc, user );
+	}
+	return 0.0;
+}
 double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user ) {
 	try {
 		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-		return openmpt::module_impl::could_open_propability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
+		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
 	} catch ( ... ) {
 		openmpt::report_exception( __FUNCTION__, logfunc, user );
 	}
