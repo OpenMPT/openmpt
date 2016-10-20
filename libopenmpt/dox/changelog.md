@@ -9,16 +9,14 @@ is just a high-level summary.
 
  *  [**Bug**] The C API could crash instead of failing gracefully in
     out-of-memory situations.
- *  [**Bug**] Possible crashes with malformed AMS, MDL and MED files.
- *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
+ *  [**Bug**] Plugins did not work correctly when changing the sample rate
+    between two render calls.
  *  [**Bug**] Possible crashes with malformed IT, AMS, MDL, MED, MPTM, PSM and
     Startrekker files.
  *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
- *  [**Bug**] Plugins did not work correctly when changing the sample rate
-    between two render calls.
 
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
