@@ -245,7 +245,7 @@ LIBOPENMPT_CXX_API double could_open_probability( std::istream & stream, double 
 /*!
   \deprecated Please use openmpt::module::could_open_probability().
 */
-LIBOPENMPT_CXX_API LIBOPENMPT_DEPRECATED double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog ) LIBOPENMPT_ATTR_DEPRECATED;
+LIBOPENMPT_CXX_API LIBOPENMPT_DEPRECATED LIBOPENMPT_ATTR_DEPRECATED double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
 class module_impl;
 
