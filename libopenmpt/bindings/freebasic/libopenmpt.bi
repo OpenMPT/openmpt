@@ -374,7 +374,7 @@ Declare Function openmpt_module_select_subsong(ByVal module As openmpt_module Pt
   \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_names
   \since 0.3.0
 '/
-Declare Function openmpt_module_get_selected_subsong(ByVal module As openmpt_module Ptr) As Long;
+Declare Function openmpt_module_get_selected_subsong(ByVal module As openmpt_module Ptr) As Long
 
 /'* \brief Set Repeat Count
 
