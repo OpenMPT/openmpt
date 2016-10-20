@@ -367,6 +367,7 @@ Declare Function openmpt_module_select_subsong(ByVal module As openmpt_module Pt
   \param mod The module handle to work on.
   \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
   \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_names
+  \since 0.3.0
 '/
 Declare Function openmpt_module_get_selected_subsong(ByVal module As openmpt_module Ptr) As Long;
 
