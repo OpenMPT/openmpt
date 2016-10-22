@@ -394,7 +394,7 @@ void CFindReplaceTab::UpdateParamList()
 	if(oldcount)
 		oldcount -= m_isReplaceTab ? 2 : 1;
 
-	auto findParamMin = m_settings.findParamMin;
+	int findParamMin = m_settings.findParamMin;
 	if(isExtended)
 	{
 		findParamMin &= 0x0F;
