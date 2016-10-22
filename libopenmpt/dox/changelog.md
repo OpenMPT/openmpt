@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta20.2
+### libopenmpt 0.2-beta20.2 (2016-10-22)
 
  *  [**Bug**] The C API could crash instead of failing gracefully in
     out-of-memory situations.
