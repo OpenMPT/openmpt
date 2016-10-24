@@ -147,6 +147,33 @@ void CPattern::Deallocate()
 
 #ifdef MODPLUG_TRACKER
 
+bool CPattern::operator== (const CPattern &other) const
+//-----------------------------------------------------
+{
+	if(GetNumRows() != other.GetNumRows()
+		|| GetNumChannels() != other.GetNumChannels()
+		|| GetOverrideSignature() != other.GetOverrideSignature()
+		|| GetRowsPerBeat() != other.GetRowsPerBeat()
+		|| GetRowsPerMeasure() != other.GetRowsPerMeasure())
+		return false;
+	if(m_ModCommands == nullptr || other.m_ModCommands == nullptr)
+		return m_ModCommands == other.m_ModCommands;
+
+	auto i = GetNumRows() * GetNumChannels();
+	auto m1 = m_ModCommands, m2 = other.m_ModCommands;
+	while(i--)
+	{
+		if(*m1 != *m2)
+		{
+			return false;
+		}
+		m1++;
+		m2++;
+	}
+	return true;
+}
+
+
 bool CPattern::Expand()
 //---------------------
 {

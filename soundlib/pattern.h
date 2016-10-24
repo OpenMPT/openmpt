@@ -46,6 +46,8 @@ public:
 		m_PatternName = pat.m_PatternName;
 		return *this;
 	}
+
+	bool operator== (const CPattern &other) const;
 //END: OPERATORS
 
 //BEGIN: INTERFACE METHODS
