@@ -1074,6 +1074,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			const UINT maxMod = TrackerSettings::Instance().MiscDistinguishModifiers ? MaxMod : (MaxMod & ~(HOTKEYF_RSHIFT | HOTKEYF_RCONTROL | HOTKEYF_RALT));
 			for(UINT i = 0; i <= maxMod; i++)
 			{
+				// Avoid Windows key, so that it won't detected as being actively used
+				if(i & HOTKEYF_EXT)
+					continue;
 				newKcDeSel.Modifier(i);
 				//newKcDeSel.mod&=~CodeToModifier(inKc.code);		//<-- Need to get rid of right modifier!!
 
