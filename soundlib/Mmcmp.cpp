@@ -177,7 +177,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			if(!file.ReadStruct(subblks[i])) return false;
 		}
-		MMCMPSUBBLOCK *psubblk = blk.sub_blk > 0 ? &(subblks[0]) : nullptr;
+		const MMCMPSUBBLOCK *psubblk = blk.sub_blk > 0 ? subblks.data() : nullptr;
 
 		if(blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK) >= file.GetLength()) return false;
 		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
@@ -452,8 +452,8 @@ static uint8 XPK_ReadTable(int32 index)
 	return xpk_table[index];
 }
 
-static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, uint8 *dst_, int32 len)
-//--------------------------------------------------------------------------------
+static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, std::vector<char> &unpackedData, int32 len)
+//----------------------------------------------------------------------------------------------------
 {
 	if(len <= 0) return false;
 	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
@@ -465,10 +465,12 @@ static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, uint8 *dst_, int32 le
 	std::size_t phist = 0;
 	std::size_t dstmax = len;
 
+	unpackedData.resize(len);
+
 	XPK_BufferBounds bufs;
 	bufs.pSrcBeg = src_;
 	bufs.SrcSize = srcLen;
-	bufs.pDstBeg = dst_;
+	bufs.pDstBeg = mpt::byte_cast<uint8 *>(unpackedData.data());
 	bufs.DstSize = len;
 
 	src = 0;
@@ -582,7 +584,8 @@ static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, uint8 *dst_, int32 le
 			d2 -= d6;
 		}
 	}
-	return true;
+	unpackedData.resize(bufs.DstSize - len);
+	return !unpackedData.empty();
 
 l75a:
 	d0 += 1;
@@ -688,8 +691,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	bool result = false;
 	try
 	{
-		unpackedData.resize(header.DstLen);
-		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), mpt::byte_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), unpackedData, header.DstLen);
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -837,9 +839,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 		return false;
 	}
 	file.Seek(4);
-	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(&(unpackedData[0])), dstLen);
-
-	return result;
+	return PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(unpackedData.data()), dstLen);
 }
 
 
