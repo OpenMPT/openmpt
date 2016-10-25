@@ -707,8 +707,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExport)
 //--------------------------------------------------------------------------------
 {
-	FILE *f;
-	if(filename.empty() || (f = mpt_fopen(filename, "wb")) == nullptr)
+	if(filename.empty())
+	{
+		return false;
+	}
+	FILE *f = mpt_fopen(filename, "wb");
+	if(!f)
 	{
 		return false;
 	}
