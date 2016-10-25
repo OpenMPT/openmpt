@@ -1230,7 +1230,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinMidiPR.EnableWindow(bITandXM);
 		m_SpinMidiBK.EnableWindow(bITandXM);
 
-		const bool extendedFadeoutRange = (m_sndFile.GetType() & MOD_TYPE_XM);
+		const bool extendedFadeoutRange = !(m_sndFile.GetType() & MOD_TYPE_IT);
 		m_SpinFadeOut.EnableWindow(bITandXM);
 		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
 		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);
