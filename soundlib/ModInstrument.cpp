@@ -226,8 +226,8 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	PanEnv.Convert(fromType, toType);
 	PitchEnv.Convert(fromType, toType);
 
-	// Limit fadeout length for IT / MPT
-	if(toType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+	// Limit fadeout length for IT
+	if(toType & MOD_TYPE_IT)
 	{
 		LimitMax(nFadeOut, 8192u);
 	}
