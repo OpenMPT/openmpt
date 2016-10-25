@@ -2630,7 +2630,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		chunk.header.id = RIFFChunk::idsmpl;
 		chunk.header.length = sizeof(WAVSampleInfoChunk);
 
-		chunk.info.ConvertToWAV(sample.GetSampleRate(GetType()));
+		chunk.info.ConvertToWAV(sample.GetSampleRate(GetType()), sample.rootNote);
 
 		if(sample.uFlags[CHN_SUSTAINLOOP])
 		{

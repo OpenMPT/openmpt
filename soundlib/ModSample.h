@@ -37,7 +37,9 @@ struct ModSample
 	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	uint8  nVibDepth;						// Auto vibrato depth
 	uint8  nVibRate;						// Auto vibrato rate (speed)
-	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, the current structure size is 64 Bytes - would adding the sample name here slow down the mixer (cache misses)?
+	uint8  rootNote;						// For multisample import
+
+	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring.
 	char filename [MAX_SAMPLEFILENAME];
 	SmpLength cues[9];
 
