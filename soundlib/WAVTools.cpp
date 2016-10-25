@@ -182,6 +182,12 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		{
 			loopData.ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);
 		}
+		//sample.nC5Speed = Util::Round<decltype(sample.nC5Speed)>(sample.nC5Speed * std::pow(2.0, (60 - sampleInfo.baseNote) / 12.0));
+		sample.rootNote = static_cast<uint8>(sampleInfo.baseNote);
+		if(sample.rootNote < 128)
+			sample.rootNote += NOTE_MIN;
+		else
+			sample.rootNote = 0;
 		sample.SanitizeLoops();
 	}
 
@@ -517,7 +523,7 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 		sampleRate = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
 	}
 
-	info.ConvertToWAV(sampleRate);
+	info.ConvertToWAV(sampleRate, sample.rootNote);
 
 	// Set up loops
 	WAVSampleLoop loops[2];

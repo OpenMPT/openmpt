@@ -143,12 +143,15 @@ struct WAVSampleInfoChunk
 	uint32le samplerData;
 
 	// Set up information
-	void ConvertToWAV(uint32 freq)
+	void ConvertToWAV(uint32 freq, uint8 rootNote)
 	{
 		manufacturer = 0;
 		product = 0;
 		samplePeriod = 1000000000 / freq;
-		baseNote = NOTE_MIDDLEC - NOTE_MIN;
+		if(rootNote != 0)
+			baseNote = rootNote - NOTE_MIN;
+		else
+			baseNote = NOTE_MIDDLEC - NOTE_MIN;
 		pitchFraction = 0;
 		SMPTEFormat = 0;
 		SMPTEOffset = 0;
@@ -271,9 +274,9 @@ protected:
 	ChunkReader::ChunkList<RIFFChunk> infoChunk;
 
 	FileReader::off_t sampleLength;
-	bool isDLS;
 	WAVFormatChunk formatInfo;
 	uint16 subFormat;
+	bool isDLS;
 	bool mayBeCoolEdit16_8;
 
 public:

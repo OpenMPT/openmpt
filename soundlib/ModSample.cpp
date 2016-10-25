@@ -125,6 +125,7 @@ void ModSample::Initialize(MODTYPE type)
 	nVibSweep = 0;
 	nVibDepth = 0;
 	nVibRate = 0;
+	rootNote = 0;
 	filename[0] = '\0';
 
 	// Default cues compatible with old-style volume column offset
@@ -338,7 +339,7 @@ void ModSample::FrequencyToTranspose()
 		transpose++;
 		finetune -= 128;
 	}
-	Limit(transpose, -127, 127);
+	Limit(transpose, -127, 128);
 	RelativeTone = static_cast<int8>(transpose);
 	nFineTune = static_cast<int8>(finetune);
 }
