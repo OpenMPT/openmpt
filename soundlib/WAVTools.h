@@ -44,15 +44,16 @@ struct RIFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idfmt_	= MAGIC4LE('f','m','t',' '),	// "fmt "
-		iddata	= MAGIC4LE('d','a','t','a'),	// "data"
-		idpcm_	= MAGIC4LE('p','c','m',' '),	// "pcm " (IMA ADPCM samples)
-		idfact	= MAGIC4LE('f','a','c','t'),	// "fact" (compressed samples)
-		idsmpl	= MAGIC4LE('s','m','p','l'),	// "smpl"
-		idLIST	= MAGIC4LE('L','I','S','T'),	// "LIST"
-		idxtra	= MAGIC4LE('x','t','r','a'),	// "xtra"
-		idcue_	= MAGIC4LE('c','u','e',' '),	// "cue "
-		idwsmp	= MAGIC4LE('w','s','m','p'),	// "wsmp" (DLS bank samples)
+		idfmt_	= MAGIC4LE('f','m','t',' '),	// Sample format information
+		iddata	= MAGIC4LE('d','a','t','a'),	// Sample data
+		idpcm_	= MAGIC4LE('p','c','m',' '),	// IMA ADPCM samples
+		idfact	= MAGIC4LE('f','a','c','t'),	// Compressed samples
+		idsmpl	= MAGIC4LE('s','m','p','l'),	// Sampler and loop information
+		idinst	= MAGIC4LE('i','n','s','t'),	// Instrument information
+		idLIST	= MAGIC4LE('L','I','S','T'),	// List of chunks
+		idxtra	= MAGIC4LE('x','t','r','a'),	// OpenMPT extra infomration
+		idcue_	= MAGIC4LE('c','u','e',' '),	// Cue points
+		idwsmp	= MAGIC4LE('w','s','m','p'),	// DLS bank samples
 		id____	= 0x00000000,	// Found when loading buggy MPT samples
 
 		// Identifiers in "LIST" chunk
@@ -191,6 +192,21 @@ struct WAVSampleLoop
 MPT_BINARY_STRUCT(WAVSampleLoop, 24)
 
 
+// Instrument information chunk
+struct WAVInstrumentChunk
+{
+	uint8 unshiftedNote;	// Root key of sample, 0...127
+	int8  finetune;			// Finetune of root key in cents
+	int8  gain;				// in dB
+	uint8 lowNote;			// Note range, 0...127
+	uint8 highNote;
+	uint8 lowVelocity;		// Velocity range, 0...127
+	uint8 highVelocity;
+};
+
+MPT_BINARY_STRUCT(WAVInstrumentChunk, 7)
+
+
 // MPT-specific "xtra" chunk
 struct WAVExtraChunk
 {
@@ -270,7 +286,7 @@ class WAVReader
 {
 protected:
 	ChunkReader file;
-	FileReader sampleData, smplChunk, xtraChunk, wsmpChunk, cueChunk;
+	FileReader sampleData, smplChunk, instChunk, xtraChunk, wsmpChunk, cueChunk;
 	ChunkReader::ChunkList<RIFFChunk> infoChunk;
 
 	FileReader::off_t sampleLength;
