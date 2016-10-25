@@ -14,7 +14,7 @@
 #include "tuningcollection.h"
 #include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
+#include "../mptrack/Moddoc.h"
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
@@ -1296,6 +1296,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		itHeader.chnpan[ich] = (uint8)(ChnSettings[ich].nPan >> 2);
 		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
 		itHeader.chnvol[ich] = (uint8)(ChnSettings[ich].nVolume);
+#ifdef MODPLUG_TRACKER
+		if(TrackerSettings::Instance().MiscSaveChannelMuteStatus)
+#endif
 		if (ChnSettings[ich].dwFlags[CHN_MUTE]) itHeader.chnpan[ich] |= 0x80;
 	}
 
@@ -1639,7 +1642,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	for(SAMPLEINDEX smp = 1; smp <= itHeader.smpnum; smp++)
 	{
 #ifdef MODPLUG_TRACKER
-		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
+		uint32 type = GetType() == MOD_TYPE_IT ? 1 : 4;
 		if(compatibilityExport) type = 2;
 		bool compress = ((((Samples[smp].GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono) & type) != 0);
 #else
