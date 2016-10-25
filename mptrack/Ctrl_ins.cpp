@@ -1211,11 +1211,11 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if (hintType[HINT_MODTYPE])
 	{
-		const CModSpecifications *specs = &m_sndFile.GetModSpecifications();
+		auto &specs = m_sndFile.GetModSpecifications();
 
 		// Limit text fields
-		m_EditName.SetLimitText(specs->instrNameLengthMax);
-		m_EditFileName.SetLimitText(specs->instrFilenameLengthMax);
+		m_EditName.SetLimitText(specs.instrNameLengthMax);
+		m_EditFileName.SetLimitText(specs.instrFilenameLengthMax);
 
 		const BOOL bITandMPT = ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
 		const BOOL bITandXM = ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
@@ -1223,8 +1223,6 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), bMPTOnly || (pIns && pIns->nVolRampUp));
-		m_SliderAttack.EnableWindow(bMPTOnly || (pIns && pIns->nVolRampUp));	// For legacy modules, keep the attack setting enabled. Otherwise, only allow it in MPTM files.
 		m_EditName.EnableWindow(bITandXM);
 		m_EditFileName.EnableWindow(bITandMPT);
 		m_CbnMidiCh.EnableWindow(bITandXM);
@@ -1256,7 +1254,6 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinPWD.EnableWindow(bITandXM);
 
 		m_NoteMap.EnableWindow(bITandXM);
-		m_CbnResampling.EnableWindow(bITandXM);
 
 		m_ComboNNA.EnableWindow(bITandMPT);
 		m_SliderVolSwing.EnableWindow(bITandMPT);
@@ -1299,10 +1296,13 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinInstrument.SetRange(1, m_sndFile.m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_sndFile.m_nInstruments) ? TRUE : FALSE);
 
-		// Backwards compatibility with IT modules that use now deprecated hack features.
-		m_SliderCutSwing.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0)) ? TRUE : FALSE);
-		m_SliderResSwing.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0)) ? TRUE : FALSE);
-		m_CbnFilterMode.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED)) ? TRUE : FALSE);
+		// Backwards compatibility with legacy IT/XM modules that use now deprecated hack features.
+		m_SliderCutSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0));
+		m_SliderResSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0));
+		m_CbnFilterMode.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED));
+		m_CbnResampling.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResampling != SRCMODE_DEFAULT));
+		m_SliderAttack.EnableWindow  (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
 
 		if (pIns)
 		{
