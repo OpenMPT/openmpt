@@ -130,8 +130,9 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 //---------------------------------------------------------------------------
 {
-	// Read sample loop points
+	// Read sample loop points and other sampler information
 	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
+	instChunk = chunks.GetChunk(RIFFChunk::idinst);
 
 	// Read sample cues
 	cueChunk = chunks.GetChunk(RIFFChunk::idcue_);
@@ -187,8 +188,22 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		if(sample.rootNote < 128)
 			sample.rootNote += NOTE_MIN;
 		else
-			sample.rootNote = 0;
+			sample.rootNote = NOTE_NONE;
 		sample.SanitizeLoops();
+	}
+
+	if(sample.rootNote == NOTE_NONE && instChunk.LengthIsAtLeast(sizeof(WAVInstrumentChunk)))
+	{
+		WAVInstrumentChunk inst;
+		instChunk.Rewind();
+		if(instChunk.ReadStruct(inst))
+		{
+			sample.rootNote = inst.unshiftedNote;
+			if(sample.rootNote < 128)
+				sample.rootNote += NOTE_MIN;
+			else
+				sample.rootNote = NOTE_NONE;
+		}
 	}
 
 	// Read cue points
