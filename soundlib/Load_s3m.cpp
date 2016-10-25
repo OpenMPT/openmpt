@@ -13,7 +13,10 @@
 #include "S3MTools.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
-#endif
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/TrackerSettings.h"
+#endif // MODPLUG_TRACKER
+#endif // MODPLUG_NO_FILESAVE
 #include "../common/version.h"
 
 
@@ -646,6 +649,9 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			{
 				ch += 8 - midCh;
 			}
+#ifdef MODPLUG_TRACKER
+			if(TrackerSettings::Instance().MiscSaveChannelMuteStatus)
+#endif
 			if(ChnSettings[chn].dwFlags[CHN_MUTE])
 			{
 				ch |= 0x80;
