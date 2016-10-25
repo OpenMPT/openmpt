@@ -242,10 +242,10 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 		DBMEnvelope dbmEnv;
 		chunk.ReadStruct(dbmEnv);
 
-		ModInstrument *mptIns;
 		uint16 dbmIns = dbmEnv.instrument;
-		if(dbmIns > 0 && dbmIns <= sndFile.GetNumInstruments() && (mptIns = sndFile.Instruments[dbmIns]) != nullptr)
+		if(dbmIns > 0 && dbmIns <= sndFile.GetNumInstruments() && (sndFile.Instruments[dbmIns] != nullptr))
 		{
+			ModInstrument *mptIns = sndFile.Instruments[dbmIns];
 			InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType);
 
 			if(dbmEnv.numSegments)
