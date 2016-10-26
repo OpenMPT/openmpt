@@ -100,6 +100,9 @@ struct ModSample
 	static int FrequencyToTranspose(uint32 freq);
 	void FrequencyToTranspose();
 
+	// Transpose the sample by amount specified in octaves (i.e. amount=1 transposes one octave up)
+	void Transpose(double amount);
+
 	// Check if the sample's cue points are the default cue point set.
 	bool HasCustomCuePoints() const;
 };

@@ -3236,10 +3236,9 @@ NoSample:
 	{
 		if (m_sndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			uint32 d = sample.nC5Speed;
-			if (d < 1) d = 8363;
-			d = Util::Round<uint32>(d * std::pow(2.0, (pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0));
-			sample.nC5Speed = Clamp(d, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
+			if (sample.nC5Speed < 1) sample.nC5Speed = 8363;
+			sample.Transpose((pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);
+			Limit(sample.nC5Speed, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
 			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);

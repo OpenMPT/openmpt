@@ -65,7 +65,7 @@ struct UltSample
 		mptSmp.nC5Speed = speed;
 		if(finetune)
 		{
-			mptSmp.nC5Speed = Util::Round<uint32>(mptSmp.nC5Speed * pow(2.0, finetune / (12.0 * 32768.0)));
+			mptSmp.Transpose(finetune / (12.0 * 32768.0));
 		}
 
 		if(flags & ULT_LOOP)

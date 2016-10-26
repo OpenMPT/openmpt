@@ -982,15 +982,16 @@ struct PSM16SampleHeader
 		mptSmp.nLoopEnd = loopEnd;
 		// It seems like that finetune and transpose are added to the already given c2freq... That's a double WTF!
 		// Why on earth would you want to use both systems at the same time?
-		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, ((finetune ^ 0x08) - 0x78) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
+		mptSmp.nC5Speed = c2freq;
+		mptSmp.Transpose(((finetune ^ 0x08) - 0x78) / (12.0 * 16.0));
 
-		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
+		mptSmp.nVolume = std::min<uint8>(volume, 64u) * 4u;
 
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
 		{
 			mptSmp.uFlags.set(CHN_16BIT);
-			mptSmp.nLength /= 2;
+			mptSmp.nLength /= 2u;
 		}
 		if(flags & PSM16SampleHeader::smpPingPong)
 		{
