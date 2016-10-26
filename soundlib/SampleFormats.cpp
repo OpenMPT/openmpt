@@ -300,6 +300,7 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 	if(!ReadITIInstrument(nInstr, file)
 		&& !ReadXIInstrument(nInstr, file)
 		&& !ReadPATInstrument(nInstr, file)
+		&& !ReadSFZInstrument(nInstr, file)
 		// Generic read
 		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize))
 	{
@@ -1089,6 +1090,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 	}
 
+	pIns->Sanitize(MOD_TYPE_IT);
 	pIns->Convert(MOD_TYPE_IT, GetType());
 	return true;
 }
@@ -1362,6 +1364,351 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	Samples[nSample].PrecomputeLoops(*this, false);
 
 	return true;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// SFZ Instrument
+
+struct SFZRegion
+{
+	std::string filename;
+	SmpLength loopStart, loopEnd, length, offset;
+	ChannelFlags loopType;
+	int32 cutoff;			// in Hz
+	int16 volume;			// -144dB...+6dB
+	int16 pitchBend;		// -9600...9600 cents
+	float pitchLfoFade;		// 0...100 seconds
+	int16 pitchLfoDepth;	// -1200...12000
+	uint8 pitchLfoFreq;		// 0...20 Hz
+	int8 panning;			// -100...+100
+	int8 transpose;
+	int8 finetune;
+	uint8 keyLo, keyHi, keyRoot;
+	uint8 resonance;		// 0...40dB
+	uint8 filterType;
+	bool useSampleKeyRoot;
+
+	SFZRegion()
+		: loopStart(0), loopEnd(0), length(MAX_SAMPLE_LENGTH), offset(0)
+		, loopType(ChannelFlags(0))
+		, cutoff(0)
+		, volume(0)
+		, pitchBend(200)
+		, pitchLfoFade(0)
+		, pitchLfoDepth(0)
+		, pitchLfoFreq(0)
+		, panning(-128)
+		, transpose(0)
+		, finetune(0)
+		, keyLo(0), keyHi(127), keyRoot(60)
+		, resonance(0)
+		, filterType(FLTMODE_UNCHANGED)
+		, useSampleKeyRoot(false)
+	{
+	}
+
+	template<typename T, typename Tc>
+	void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
+	{
+		value = Clamp(ConvertStrTo<T>(valueStr), static_cast<T>(valueMin), static_cast<T>(valueMax));
+	}
+
+	void Parse(const std::string &key, const std::string &value)
+	{
+		if(key == "sample")
+			filename = value;
+		else if(key == "lokey")
+			Read(value, keyLo, 0u, 127u);
+		else if(key == "hikey")
+			Read(value, keyHi, 0u, 127u);
+		else if(key == "pitch_keycenter")
+		{
+			Read(value, keyRoot, 0u, 127u);
+			useSampleKeyRoot = (value == "sample");
+		}
+		else if(key == "key")
+		{
+			keyLo = keyHi = keyRoot = ConvertStrTo<uint8>(value);
+			useSampleKeyRoot = false;
+		}
+		else if(key == "bend_up")
+			Read(value, pitchBend, -9600, 9600);
+		else if(key == "pitchlfo_fade")
+			Read(value, pitchLfoFade, 0.0f, 100.0f);
+		else if(key == "pitchlfo_depth")
+			Read(value, pitchLfoDepth, -12000, 12000);
+		else if(key == "pitchlfo_freq")
+			Read(value, pitchLfoFreq, 0, 20);
+		else if(key == "volume")
+			Read(value, volume, -144, 6);
+		else if(key == "pan")
+			Read(value, panning, -100, 100);
+		else if(key == "transpose")
+			Read(value, transpose, -127, 127);
+		else if(key == "tune")
+			Read(value, finetune, -100, 100);
+		else if(key == "end")
+			Read(value, length, SmpLength(0), MAX_SAMPLE_LENGTH);
+		else if(key == "offset")
+			Read(value, offset, SmpLength(0), MAX_SAMPLE_LENGTH);
+		else if(key == "loop_start" || key == "loopstart")
+			Read(value, loopStart, SmpLength(0), MAX_SAMPLE_LENGTH);
+		else if(key == "loop_end" || key == "loopend")
+			Read(value, loopEnd, SmpLength(0), MAX_SAMPLE_LENGTH);
+		else if(key == "loop_mode" || key == "loopmode")
+		{
+			if(value == "loop_continuous" || value == "one_shot")
+				loopType = CHN_LOOP;
+			else if(value == "loop_sustain")
+				loopType = CHN_SUSTAINLOOP;
+			else if(value == "no_loop")
+				loopType = ChannelFlags(0);
+		}
+		else if(key == "cutoff")
+			Read(value, cutoff, 0, 96000);
+		else if(key == "resonance")
+			Read(value, resonance, 0u, 40u);
+		else if(key == "fil_type" || key == "filtype")
+		{
+			if(value == "lpf_1p" || value == "lpf_2p")
+				filterType = FLTMODE_LOWPASS;
+			else if(value == "hpf_1p" || value == "hpf_2p")
+				filterType = FLTMODE_HIGHPASS;
+			// Alternatives: bpf_1p, bpf_2p
+		}
+		// pitchlfo_fade,pitchlfo_freq,pitchlfo_depth
+	}
+};
+
+bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
+//--------------------------------------------------------------------------
+{
+#ifdef MPT_EXTERNAL_SAMPLES
+	file.Rewind();
+	std::string s;
+
+	std::string defaultPath;
+	enum { kNone, kGroup, kRegion, kControl } section = kNone;
+	std::vector<SFZRegion> regions;
+	SFZRegion group;
+
+	while(file.ReadLine(s, 1024))
+	{
+		// First, terminate line at the start of a comment block
+		auto commentPos = s.find("//");
+		if(commentPos != std::string::npos)
+		{
+			s.resize(commentPos);
+		}
+
+		// Now, read the tokens.
+		// This format is so funky that no general tokenizer approach seems to work here...
+		// Consider this jolly good example found at https://stackoverflow.com/questions/5923895/tokenizing-a-custom-text-file-format-file-using-c-sharp
+		// <region>sample=piano C3.wav key=48 ampeg_release=0.7 // a comment here
+		// <region>key = 49 sample = piano Db3.wav
+		// <region>
+		// group=1
+		// key = 48
+		//     sample = piano D3.ogg
+
+		while(!s.empty())
+		{
+			s.erase(0, s.find_first_not_of(" \t"));
+			if(s.empty())
+			{
+				break;
+			}
+			std::string::size_type charsRead = 0;
+
+			if(s.substr(0, 1) == "<" && (charsRead = s.find('>')) != std::string::npos)
+			{
+				std::string sec = s.substr(1, charsRead - 1);
+				if(sec == "group")
+				{
+					section = kGroup;
+					// Reset group parameters
+					group = SFZRegion();
+				} else if(sec == "region")
+				{
+					section = kRegion;
+					regions.push_back(group);
+				} else if(sec == "control")
+				{
+					section = kControl;
+				}
+				charsRead++;
+			} else if(section == kNone)
+			{
+				return false;
+			} else
+			{
+				// Read key=value pair
+				auto keyEnd = s.find_first_of(" =");
+				auto valueStart = s.find_first_not_of(" =", keyEnd);
+				std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
+				if(key == "sample")
+				{
+					// Sample name may contain spaces...
+					charsRead = s.find_first_of("=\t<", valueStart);
+					if(charsRead != std::string::npos && s[charsRead] == '=')
+					{
+						while(charsRead > valueStart && s[charsRead] != ' ')
+						{
+							charsRead--;
+						}
+					}
+				} else
+				{
+					charsRead = s.find_first_of(" \t<", valueStart);
+				}
+				std::string value = s.substr(valueStart, charsRead - valueStart);
+
+				switch(section)
+				{
+				case kGroup:
+				case kRegion:
+					{
+						SFZRegion &region = (section == kGroup) ? group : regions.back();
+						region.Parse(key, value);
+						if(key == "sample")
+						{
+							region.filename.insert(0, defaultPath);
+						}
+					}
+					break;
+				case kControl:
+					if(key == "default_path")
+						defaultPath = value;
+					// octave_offset=1 pitch down one octave
+					// note_offset=1 pitrch down one semiteone
+					break;
+				}
+			}
+
+			// Remove the token(s) we just read
+			s.erase(0, charsRead);
+		}
+	}
+
+	if(regions.empty())
+	{
+		return false;
+	}
+
+
+	ModInstrument *pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
+	{
+		return false;
+	}
+
+	DestroyInstrument(nInstr, deleteAssociatedSamples);
+	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
+	Instruments[nInstr] = pIns;
+
+	ScopedLogCapturer log(*GetpModDoc());
+
+	SAMPLEINDEX prevSmp = 0;
+	for(auto region = regions.begin(); region != regions.end(); region++)
+	{
+		uint8 keyLo = region->keyLo, keyHi = region->keyHi;
+		if(keyLo > keyHi)
+			continue;
+		Clamp<uint8, uint8>(keyLo, 0, NOTE_MAX - NOTE_MIN);
+		Clamp<uint8, uint8>(keyHi, 0, NOTE_MAX - NOTE_MIN);
+		SAMPLEINDEX smp = GetNextFreeSample(nInstr, prevSmp + 1);
+		if(smp == SAMPLEINDEX_INVALID)
+			break;
+		prevSmp = smp;
+
+		ModSample &sample = Samples[smp];
+		mpt::PathString filename = mpt::PathString::FromUTF8(region->filename);
+		if(!filename.empty())
+		{
+			if(region->filename.find(':') == std::string::npos)
+			{
+				filename = file.GetFileName().GetPath() + filename;
+			}
+			SetSamplePath(smp, filename);
+			InputFile f(filename);
+			FileReader file = GetFileReader(f);
+			if(!ReadSampleFromFile(smp, file, false))
+			{
+				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
+			}
+		} else
+		{
+			sample.uFlags.reset(SMP_KEEPONDISK);
+		}
+
+		if(region->useSampleKeyRoot)
+		{
+			if(sample.rootNote != NOTE_NONE)
+				region->keyRoot = sample.rootNote - NOTE_MIN;
+			else
+				region->keyRoot = 60;
+		}
+
+		int8 transp = NOTE_MIN + region->transpose + (60 - region->keyRoot);
+		for(uint8 i = keyLo; i <= keyHi; i++)
+		{
+			pIns->Keyboard[i] = smp;
+			pIns->NoteMap[i] = i + transp;
+		}
+
+		pIns->nFilterMode = region->filterType;
+		if(region->cutoff != 0)
+			pIns->SetCutoff(FrequencyToCutOff(region->cutoff), true);
+		if(region->resonance != 0)
+			pIns->SetResonance(mpt::saturate_cast<uint8>(Util::muldivr(region->resonance, 128, 24)), true);
+		pIns->midiPWD = static_cast<int8>(region->pitchBend / 100);
+
+		sample.rootNote = region->keyRoot + NOTE_MIN;
+		sample.nGlobalVol = Util::Round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region->volume / 20.0));
+		if(region->panning != -128)
+		{
+			sample.nPan = static_cast<decltype(sample.nPan)>(Util::muldivr_unsigned(region->panning + 100, 256, 200));
+			sample.uFlags.set(CHN_PANNING);
+		}
+		sample.Transpose(region->finetune / 1200.0);
+
+		if(region->pitchLfoDepth && region->pitchLfoFreq)
+		{
+			sample.nVibSweep = 255;
+			if(region->pitchLfoFade > 0)
+				sample.nVibSweep = Util::Round<uint8>(255 / region->pitchLfoFade);
+			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region->pitchLfoDepth, 32, 100));
+			sample.nVibRate = region->pitchLfoFreq * 4;
+		}
+		
+		sample.uFlags.set(region->loopType);
+		if(region->loopType == CHN_SUSTAINLOOP)
+		{
+			sample.nSustainStart = region->loopStart;
+			sample.nSustainEnd = region->loopEnd;
+		} else
+		{
+			sample.nLoopStart = region->loopStart;
+			sample.nLoopEnd = region->loopEnd;
+		}
+		if(region->offset && region->offset < sample.nLength)
+		{
+			auto offset = region->offset * sample.GetBytesPerSample();
+			memmove(sample.pSample8, sample.pSample8 + offset, sample.nLength * sample.GetBytesPerSample() - offset);
+		}
+		LimitMax(sample.nLength, region->length);
+
+		sample.SanitizeLoops();
+		sample.Convert(MOD_TYPE_IT, GetType());
+	}
+
+	pIns->Sanitize(MOD_TYPE_IT);
+	pIns->Convert(MOD_TYPE_IT, GetType());
+	return true;
+#else
+	return false;
+#endif // MPT_EXTERNAL_SAMPLES
 }
 
 

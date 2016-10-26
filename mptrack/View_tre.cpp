@@ -1724,7 +1724,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	FileDialog dlg = OpenFileDialog()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.mss;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+			"All Instruments and Banks|*.xi;*.pat;*.iti;*.sfz;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.mss;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Wave Files (*.wav)|*.wav|"
@@ -1744,6 +1744,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
 	#endif
 			"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
+			"SFZ Instruments (*.sfz)|*.sfz|"
 			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 			"DLS Sound Banks (*.dls;*.mss)|*.dls;*.mss|"
 			"All Files (*.*)|*.*||");
@@ -1910,6 +1911,7 @@ void CModTree::FillInstrumentLibrary()
 					// Instruments
 					if ((!strcmp(s, "xi"))
 						|| (!strcmp(s, "iti"))
+						|| (!strcmp(s, "sfz"))
 						|| (!strcmp(s, "sf2"))
 						|| (!strcmp(s, "sbk"))
 						|| (!strcmp(s, "dls"))

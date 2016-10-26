@@ -1708,7 +1708,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			return TRUE;
 
 		case IDC_SLIDER4:
-			wsprintf(pszText, _T("%u"), pIns->GetResonance());
+			wsprintf(pszText, _T("%u (%u dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
 			return TRUE;
 
 		case IDC_SLIDER6:
@@ -1805,10 +1805,11 @@ void CCtrlInstruments::OnInstrumentOpen()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff;*.au;*.snd;*.sf2;*.sbk;*.dls;*.oga;*.ogg;*.opus" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+			"All Instruments|*.xi;*.pat;*.iti;*.sfz;*.flac;*.wav;*.aif;*.aiff;*.au;*.snd;*.sf2;*.sbk;*.dls;*.oga;*.ogg;*.opus" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"SFZ Instruments (*.sfz)|*.sfz|"
 			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 			"DLS Sound Banks (*.dls)|*.dls|"
 			"All Files (*.*)|*.*||")
