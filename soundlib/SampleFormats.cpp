@@ -1370,6 +1370,26 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 /////////////////////////////////////////////////////////////////////////////////////////
 // SFZ Instrument
 
+struct SFZGlobals
+{
+	std::string defaultPath;
+	int8 octaveOffset, noteOffset;
+
+	SFZGlobals()
+		: octaveOffset(0), noteOffset(0)
+	{ }
+
+	void Parse(const std::string &key, const std::string &value)
+	{
+		if(key == "default_path")
+			defaultPath = value;
+		else if(key == "octave_offset")
+			octaveOffset = ConvertStrTo<int8>(value);
+		else if(key == "note_offset")
+			noteOffset = ConvertStrTo<int8>(value);
+	}
+};
+
 struct SFZRegion
 {
 	std::string filename;
@@ -1405,8 +1425,7 @@ struct SFZRegion
 		, resonance(0)
 		, filterType(FLTMODE_UNCHANGED)
 		, useSampleKeyRoot(false)
-	{
-	}
+	{ }
 
 	template<typename T, typename Tc>
 	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
@@ -1414,22 +1433,69 @@ struct SFZRegion
 		value = Clamp(ConvertStrTo<T>(valueStr), static_cast<T>(valueMin), static_cast<T>(valueMax));
 	}
 
-	void Parse(const std::string &key, const std::string &value)
+	static uint8 ReadKey(const std::string &value, const SFZGlobals &globals)
+	{
+		if(value.empty())
+			return 0;
+
+		int key = 0;
+		if(value[0] >= '0' && value[0] <= '9')
+		{
+			// MIDI key
+			key = ConvertStrTo<uint8>(value);
+		} else if(value.length() < 2)
+		{
+			return 0;
+		} else
+		{
+			// Scientific pitch
+			switch(::tolower(value[0]))
+			{
+			case 'c': key = 0; break;
+			case 'd': key = 2; break;
+			case 'e': key = 4; break;
+			case 'f': key = 5; break;
+			case 'g': key = 7; break;
+			case 'a': key = 9; break;
+			case 'b': key = 11; break;
+			default:  return 0;
+			}
+			uint8 octaveOffset = 1;
+			if(value[1] == '#')
+			{
+				key++;
+				octaveOffset = 2;
+			} else if(value[1] == 'b' || value[1] == 'B')
+			{
+				key--;
+				octaveOffset = 2;
+			}
+			if(octaveOffset >= value.length())
+				return 0;
+
+			int8 octave = ConvertStrTo<int8>(value.data() + octaveOffset);
+			key += (octave + 1) * 12;
+		}
+		key += globals.octaveOffset * 12 + globals.noteOffset;
+		return static_cast<uint8>(Clamp(key, 0, 127));
+}
+
+	void Parse(const std::string &key, const std::string &value, const SFZGlobals &globals)
 	{
 		if(key == "sample")
-			filename = value;
+			filename = globals.defaultPath + value;
 		else if(key == "lokey")
-			Read(value, keyLo, 0u, 127u);
+			keyLo = ReadKey(value, globals);
 		else if(key == "hikey")
-			Read(value, keyHi, 0u, 127u);
+			keyHi = ReadKey(value, globals);
 		else if(key == "pitch_keycenter")
 		{
-			Read(value, keyRoot, 0u, 127u);
+			keyRoot = ReadKey(value, globals);
 			useSampleKeyRoot = (value == "sample");
 		}
 		else if(key == "key")
 		{
-			keyLo = keyHi = keyRoot = ConvertStrTo<uint8>(value);
+			keyLo = keyHi = keyRoot = ReadKey(value, globals);
 			useSampleKeyRoot = false;
 		}
 		else if(key == "bend_up" || key == "bendup")
@@ -1485,13 +1551,13 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 {
 #ifdef MPT_EXTERNAL_SAMPLES
 	file.Rewind();
-	std::string s;
 
-	std::string defaultPath;
 	enum { kNone, kGroup, kRegion, kControl, kUnknown } section = kNone;
-	std::vector<SFZRegion> regions;
+	SFZGlobals globals;
 	SFZRegion group;
+	std::vector<SFZRegion> regions;
 
+	std::string s;
 	while(file.ReadLine(s, 1024))
 	{
 		// First, terminate line at the start of a comment block
@@ -1541,7 +1607,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			} else if(section == kNone)
 			{
 				return false;
-			} else
+			} else if(s.find('=') != std::string::npos)
 			{
 				// Read key=value pair
 				auto keyEnd = s.find_first_of(" =");
@@ -1567,23 +1633,19 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				switch(section)
 				{
 				case kGroup:
+					group.Parse(key, value, globals);
+					break;
 				case kRegion:
-					{
-						SFZRegion &region = (section == kGroup) ? group : regions.back();
-						region.Parse(key, value);
-						if(key == "sample")
-						{
-							region.filename.insert(0, defaultPath);
-						}
-					}
+					regions.back().Parse(key, value, globals);
 					break;
 				case kControl:
-					if(key == "default_path")
-						defaultPath = value;
-					// octave_offset=1 pitch down one octave
-					// note_offset=1 pitrch down one semiteone
+					globals.Parse(key, value);
 					break;
 				}
+			} else
+			{
+				MPT_ASSERT(false);
+				return false;
 			}
 
 			// Remove the token(s) we just read
@@ -1604,10 +1666,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	}
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
-	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
+	if(nInstr > m_nInstruments) m_nInstruments = nInstr;
 	Instruments[nInstr] = pIns;
-
-	ScopedLogCapturer log(*GetpModDoc());
 
 	SAMPLEINDEX prevSmp = 0;
 	for(auto region = regions.begin(); region != regions.end(); region++)
@@ -1636,11 +1696,15 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			if(!ReadSampleFromFile(smp, file, false))
 			{
 				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
+				prevSmp--;
+				continue;
 			}
-		} else
-		{
-			sample.uFlags.reset(SMP_KEEPONDISK);
+			if(!m_szNames[smp][0])
+			{
+				mpt::String::Copy(m_szNames[smp], filename.GetFullFileName().ToLocale());
+			}
 		}
+		sample.uFlags.set(SMP_KEEPONDISK, sample.pSample != nullptr);
 
 		if(region->useSampleKeyRoot)
 		{
@@ -1685,7 +1749,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		sample.uFlags.set(region->loopType);
 		if(region->loopEnd > region->loopStart)
 		{
-			// Loop may also be defined in file, in which case loopStart=loopEnd=0.
+			// Loop may also be defined in file, in which case loopStart and loopEnd are unset.
 			if(region->loopType == CHN_SUSTAINLOOP)
 			{
 				sample.nSustainStart = region->loopStart;
