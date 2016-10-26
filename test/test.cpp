@@ -480,7 +480,6 @@ static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
 static MPT_NOINLINE void TestStringFormatting()
 //---------------------------------------------
 {
-
 	VERIFY_EQUAL(mpt::ToString(1.5f), "1.5");
 	VERIFY_EQUAL(mpt::ToString(true), "1");
 	VERIFY_EQUAL(mpt::ToString(false), "0");
@@ -2430,6 +2429,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDIEvents::MIDICC_ModulationWheel_Coarse);
 #endif
 
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(0)), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(80)), 80);
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(127)), 127);
 }
 
 
@@ -2830,7 +2832,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	}
 	{
 		// Verify that writing arrays does not confuse the compiler.
-		// This is noth, compile-time and run-time cheking.
+		// This is both, compile-time and run-time cheking.
 		// Run-time in case some weird compiler gets confused by our templates
 		// and only writes the first array element.
 		mpt::ostringstream f;
@@ -2943,8 +2945,7 @@ static MPT_NOINLINE void TestTunings()
 {
 
 	// check that the generated builtin tunings match the old resource data
-
-	CSoundFile *emptyFile = new CSoundFile();
+	std::shared_ptr<CSoundFile> emptyFile = std::make_shared<CSoundFile>();
 	emptyFile->Create(FileReader(), CSoundFile::loadCompleteModule);
 
 	static const size_t built_inTunings_tc_size = 244;
@@ -2999,7 +3000,6 @@ static MPT_NOINLINE void TestTunings()
 	delete oldBuiltin;
 
 	emptyFile->Destroy();
-	delete emptyFile;
 }
 
 

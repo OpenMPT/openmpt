@@ -22,6 +22,20 @@ OPENMPT_NAMESPACE_BEGIN
 // EMU10K1 docs: cutoff = reg[0-127]*62+100
 
 
+uint8 CSoundFile::FrequencyToCutOff(double frequency) const
+//---------------------------------------------------------
+{
+	// IT Cutoff is computed as cutoff = 110 * 2 ^ (0.25 + x/y), where x is the cutoff and y defines the filter range.
+	// Reversed, this gives us x = (log2(cutoff / 110) - 0.25) * y.
+	// <==========> Rewrite as x = (log2(cutoff) - log2(110) - 0.25) * y.
+	// <==========> Rewrite as x = (ln(cutoff) - ln(110) - 0.25*ln(2)) * y/ln(2).
+	//                                           <4.8737671609324025>
+	double cutoff = (std::log(frequency) - 4.8737671609324025) * (m_SongFlags[SONG_EXFILTERRANGE] ? (20.0 / M_LN2) : (24.0 / M_LN2));
+	Limit(cutoff, 0.0f, 127.0f);
+	return Util::Round<uint8>(cutoff);
+}
+
+
 uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
 //--------------------------------------------------------------------------
 {

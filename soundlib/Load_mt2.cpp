@@ -930,12 +930,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			MT2InstrSynth synthData;
 			instrChunk.ReadStruct(synthData);
 
-			// Translate frequency back to extended IT cutoff factor
-			float cutoff = 28.8539f * std::log(0.00764451f * synthData.cutoff);
-			Limit(cutoff, 0.0f, 127.0f);
 			if(flags & 2)
 			{
-				mptIns->SetCutoff(Util::Round<uint8>(cutoff), true);
+				mptIns->SetCutoff(FrequencyToCutOff(synthData.cutoff), true);
 				mptIns->SetResonance(synthData.resonance, true);
 			}
 			mptIns->nFilterMode = synthData.effectID == 1 ? FLTMODE_HIGHPASS : FLTMODE_LOWPASS;
@@ -1091,7 +1088,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX i = 0; i < m_nSamples; i++)
 	{
 		ModSample &mptSmp = Samples[i + 1];
-		const uint32 freq = Util::Round<uint32>(mptSmp.nC5Speed * std::pow(2.0, -(mptSmp.RelativeTone - 49 - (mptSmp.nFineTune / 128.0)) / 12.0));
+		mptSmp.Transpose(-(mptSmp.RelativeTone - 49 - (mptSmp.nFineTune / 128.0)) / 12.0);
+		mptSmp.nFineTune = 0;
+		mptSmp.RelativeTone = 0;
 
 		if(!mptSmp.uFlags[SMP_KEEPONDISK])
 		{
@@ -1123,9 +1122,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(GetCharsetLocaleOrModule(), filename)));
 #endif // MPT_EXTERNAL_SAMPLES
 		}
-		mptSmp.nC5Speed = freq;
-		mptSmp.nFineTune = 0;
-		mptSmp.RelativeTone = 0;
 	}
 
 	return true;
