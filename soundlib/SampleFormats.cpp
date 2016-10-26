@@ -1409,7 +1409,7 @@ struct SFZRegion
 	}
 
 	template<typename T, typename Tc>
-	void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
+	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
 	{
 		value = Clamp(ConvertStrTo<T>(valueStr), static_cast<T>(valueMin), static_cast<T>(valueMax));
 	}
@@ -1432,7 +1432,7 @@ struct SFZRegion
 			keyLo = keyHi = keyRoot = ConvertStrTo<uint8>(value);
 			useSampleKeyRoot = false;
 		}
-		else if(key == "bend_up")
+		else if(key == "bend_up" || key == "bendup")
 			Read(value, pitchBend, -9600, 9600);
 		else if(key == "pitchlfo_fade")
 			Read(value, pitchLfoFade, 0.0f, 100.0f);
@@ -1477,7 +1477,6 @@ struct SFZRegion
 				filterType = FLTMODE_HIGHPASS;
 			// Alternatives: bpf_1p, bpf_2p
 		}
-		// pitchlfo_fade,pitchlfo_freq,pitchlfo_depth
 	}
 };
 
@@ -1489,7 +1488,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	std::string s;
 
 	std::string defaultPath;
-	enum { kNone, kGroup, kRegion, kControl } section = kNone;
+	enum { kNone, kGroup, kRegion, kControl, kUnknown } section = kNone;
 	std::vector<SFZRegion> regions;
 	SFZRegion group;
 
@@ -1524,6 +1523,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			if(s.substr(0, 1) == "<" && (charsRead = s.find('>')) != std::string::npos)
 			{
 				std::string sec = s.substr(1, charsRead - 1);
+				section = kUnknown;
 				if(sec == "group")
 				{
 					section = kGroup;
@@ -1711,6 +1711,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	pIns->Convert(MOD_TYPE_IT, GetType());
 	return true;
 #else
+	MPT_UNREFERENCED_PARAMETER(nInstr);
+	MPT_UNREFERENCED_PARAMETER(file);
 	return false;
 #endif // MPT_EXTERNAL_SAMPLES
 }
