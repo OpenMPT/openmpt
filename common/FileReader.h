@@ -879,6 +879,32 @@ public:
 		return dest.length() != 0;
 	}
 
+	// Read a string up to the next line terminator into a std::string
+	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	{
+		dest.clear();
+		if(!CanRead(1))
+			return false;
+		try
+		{
+			char c = '\0';
+			while(Read(c) && c != '\r' && c != '\n' && dest.length() < maxLength)
+			{
+				dest += c;
+			}
+			// Handle CRLF line ending
+			if(c == '\r')
+			{
+				if(Read(c) && c != '\n')
+					SkipBack(1);
+			}
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		}
+		return true;
+	}
+
 	// Read an array of byte-sized values.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
