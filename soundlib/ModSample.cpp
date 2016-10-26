@@ -345,6 +345,14 @@ void ModSample::FrequencyToTranspose()
 }
 
 
+// Transpose the sample by amount specified in octaves (i.e. amount=1 transposes one octave up)
+void ModSample::Transpose(double amount)
+//--------------------------------------
+{
+	nC5Speed = Util::Round<uint32>(nC5Speed * std::pow(2.0, amount));
+}
+
+
 // Check if the sample's cue points are the default cue point set.
 bool ModSample::HasCustomCuePoints() const
 //----------------------------------------

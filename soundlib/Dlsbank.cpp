@@ -380,7 +380,7 @@ MPT_BINARY_STRUCT(SFGENLIST, 4)
 
 struct SFINST
 {
-	char      achInstName[20];
+	char     achInstName[20];
 	uint16le wInstBagNdx;
 };
 
@@ -411,7 +411,7 @@ struct SFSAMPLE
 	uint32le dwEndloop;
 	uint32le dwSampleRate;
 	uint8le  byOriginalPitch;
-	char     chPitchCorrection;
+	int8le   chPitchCorrection;
 	uint16le wSampleLink;
 	uint16le sfSampleType;
 };
@@ -808,7 +808,8 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 			uint32 numIns = chunk.GetLength() / sizeof(SFPRESETHEADER);
 			if(numIns <= 1)
 				break;
-			numIns--; // Disgard EOP
+			// The terminal sfPresetHeader record should never be accessed, and exists only to provide a terminal wPresetBagNdx with which to determine the number of zones in the last preset.
+			numIns--;
 			m_Instruments.resize(numIns);
 
 		#ifdef DLSBANK_LOG
@@ -819,7 +820,6 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 			for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
 			{
 				mpt::String::Copy(pDlsIns->szName, psfh.achPresetName);
-				pDlsIns->szName[20] = 0;
 				pDlsIns->ulInstrument = psfh.wPreset & 0x7F;
 				pDlsIns->ulBank = (psfh.wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh.wBank << 8);
 				pDlsIns->wPresetBagNdx = psfh.wPresetBagNdx;
@@ -913,7 +913,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 				dlsSmp.dwLen = 0;
 				dlsSmp.dwSampleRate = p.dwSampleRate;
 				dlsSmp.byOriginalPitch = p.byOriginalPitch;
-				dlsSmp.chPitchCorrection = p.chPitchCorrection;
+				dlsSmp.chPitchCorrection = static_cast<int8>(Util::muldivr(p.chPitchCorrection, 128, 100));
 				if (((p.sfSampleType & 0x7FFF) <= 4) && (p.dwStart < 0x08000000) && (p.dwEnd >= p.dwStart+8))
 				{
 					dlsSmp.dwLen = (p.dwEnd - p.dwStart) * 2;
@@ -1583,7 +1583,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
 			int steps = (60 + transpose - usUnityNote) * 128 + sFineTune;
-			sample.nC5Speed = Util::Round<uint32>(std::pow(2.0, steps * (1.0 / (12.0 * 128.0))) * sample.nC5Speed);
+			sample.Transpose(steps * (1.0 / (12.0 * 128.0)));
 
 			Limit(lVolume, 16, 256);
 			sample.nGlobalVol = (uint8)(lVolume / 4);	// 0-64
