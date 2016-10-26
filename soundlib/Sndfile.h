@@ -864,9 +864,16 @@ protected:
 	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
 
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
+
 	// Low-Level effect processing
 	void DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const;
 	void UpdateTimeSignature();
+
+public:
+	// Convert frequency to IT cutoff (0...127)
+	uint8 FrequencyToCutOff(double frequency) const;
+	// Convert IT cutoff (0...127 + modifier) to frequency
+	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
 
 public:
 	uint32 GetNumTicksOnCurrentRow() const
@@ -927,6 +934,7 @@ public:
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
+	bool ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const;
@@ -953,7 +961,6 @@ public:
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // NO_PLUGINS
 
-	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
 	void ProcessGlobalVolume(long countChunk);
 	void ProcessStereoSeparation(long countChunk);
 
@@ -975,7 +982,7 @@ public:
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //-----------------------------------------------------------------------
 {
-	if(instr > 0 && instr < MAX_INSTRUMENTS && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
+	if(instr > 0 && instr <= GetNumInstruments() && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
 		return m_MixPlugins[Instruments[instr]->nMixPlug - 1].pMixPlugin;
 	else
 		return nullptr;
