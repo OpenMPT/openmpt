@@ -1506,6 +1506,7 @@ bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			m_modDoc.SetModified();
 		}
 		if (!m_nInstrument) m_nInstrument = 1;
+		ScopedLogCapturer log(m_modDoc, "Instrument Import", this);
 		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
 			ok = true;
