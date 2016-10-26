@@ -49,8 +49,8 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			if(at(nLoopEnd).tick - 1 > at(nLoopEnd - 1).tick)
 			{
 				// Insert an interpolated point just before the loop point.
-				uint16 tick = at(nLoopEnd).tick - 1;
-				uint8 interpolatedValue = static_cast<uint8>(GetValueFromPosition(tick, 64));
+				EnvelopeNode::tick_t tick = at(nLoopEnd).tick - 1u;
+				auto interpolatedValue = static_cast<EnvelopeNode::value_t>(GetValueFromPosition(tick, 64));
 				insert(begin() + nLoopEnd, EnvelopeNode(tick, interpolatedValue));
 			} else
 			{
@@ -125,7 +125,6 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 			LimitMax(it->value, maxValue);
 		}
 	}
-	STATIC_ASSERT(MAX_ENVPOINTS <= 255);
 	LimitMax(nLoopEnd, static_cast<decltype(nLoopEnd)>(size() - 1));
 	LimitMax(nLoopStart, nLoopEnd);
 	LimitMax(nSustainEnd, static_cast<decltype(nSustainEnd)>(size() - 1));

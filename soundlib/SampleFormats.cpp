@@ -1424,12 +1424,12 @@ struct SFZEnvelope
 			depth = v;
 	}
 
-	static uint16 ToTicks(float duration, float tickDuration)
+	static EnvelopeNode::tick_t ToTicks(float duration, float tickDuration)
 	{
-		return std::max(uint16(1), Util::Round<uint16>(duration / tickDuration));
+		return std::max(EnvelopeNode::tick_t(1), Util::Round<EnvelopeNode::tick_t>(duration / tickDuration));
 	}
 
-	uint8 ToValue(float value, EnvelopeType envType) const
+	EnvelopeNode::value_t ToValue(float value, EnvelopeType envType) const
 	{
 		value *= (ENVELOPE_MAX / 100.0f);
 		if(envType == ENV_PITCH)
@@ -1438,7 +1438,7 @@ struct SFZEnvelope
 			value += ENVELOPE_MID;
 		}
 		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
-		return Util::Round<uint8>(value);
+		return Util::Round<EnvelopeNode::value_t>(value);
 	}
 
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType) const
@@ -1448,6 +1448,11 @@ struct SFZEnvelope
 		if(tickDuration <= 0)
 			return;
 		env.clear();
+		if(envType != ENV_VOLUME && attack == 0 && delay == 0 && hold == 0 && decay == 0 && sustainLevel == 100 && release == 0 && depth == 0)
+		{
+			env.dwFlags.reset(ENV_SUSTAIN | ENV_ENABLED);
+			return;
+		}
 		if(attack > 0 || delay > 0)
 		{
 			env.push_back(EnvelopeNode(0, ToValue(startLevel, envType)));
@@ -1461,9 +1466,9 @@ struct SFZEnvelope
 				env.push_back(EnvelopeNode(0, ToValue(100, envType)));
 			env.push_back(EnvelopeNode(env.back().tick + ToTicks(hold, tickDuration), env.back().value));
 		}
-		auto sustain = ToValue(sustainLevel, envType);
 		if(env.empty())
-			env.push_back(EnvelopeNode(0, sustain));
+			env.push_back(EnvelopeNode(0, ToValue(100, envType)));
+		auto sustain = ToValue(sustainLevel, envType);
 		if(env.back().value != sustain)
 			env.push_back(EnvelopeNode(env.back().tick + ToTicks(decay, tickDuration), sustain));
 		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
@@ -1641,7 +1646,7 @@ struct SFZRegion
 				filterType = FLTMODE_LOWPASS;
 			else if(value == "hpf_1p" || value == "hpf_2p")
 				filterType = FLTMODE_HIGHPASS;
-			// Alternatives: bpf_1p, bpf_2p
+			// Alternatives: bpf_2p, brf_2p
 		}
 		else if(key.substr(0, 6) == "ampeg_")
 			ampEnv.Parse(key, value);
@@ -1662,6 +1667,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	SFZControl control;
 	SFZRegion group, globals;
 	std::vector<SFZRegion> regions;
+	std::map<std::string, std::string> macros;
 
 	std::string s;
 	while(file.ReadLine(s, 1024))
@@ -1682,10 +1688,25 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		// group=1
 		// key = 48
 		//     sample = piano D3.ogg
+		// The original sfz specification claims that spaces around = are not allowed, but a quick look into the real world tells us otherwise.
 
 		while(!s.empty())
 		{
 			s.erase(0, s.find_first_not_of(" \t"));
+			
+			// Replace macros
+			for(auto m = macros.cbegin(); m != macros.cend(); m++)
+			{
+				const auto &oldStr = m->first;
+				const auto &newStr = m->second;
+				std::string::size_type pos = 0;
+				while((pos = s.find(oldStr, pos)) != std::string::npos)
+				{
+					s.replace(pos, oldStr.length(), newStr);
+					pos += newStr.length();
+				}
+			}
+
 			if(s.empty())
 			{
 				break;
@@ -1694,6 +1715,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 			if(s.substr(0, 1) == "<" && (charsRead = s.find('>')) != std::string::npos)
 			{
+				// Section header
 				std::string sec = s.substr(1, charsRead - 1);
 				section = kUnknown;
 				if(sec == "group")
@@ -1714,8 +1736,21 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					section = kControl;
 				}
 				charsRead++;
+			} else if(s.substr(0, 8) == "#define " || s.substr(0, 8) == "#define\t")
+			{
+				// Macro definition
+				auto keyStart = s.find_first_not_of(" \t", 8);
+				auto keyEnd = s.find_first_of(" \t", keyStart);
+				auto valueStart = s.find_first_not_of(" \t", keyEnd);
+				std::string key = s.substr(keyStart, keyEnd - keyStart);
+				if(valueStart != std::string::npos && key.length() > 1 && key[0] == '$')
+				{
+					charsRead = s.find_first_of(" \t", valueStart);
+					macros[key] = s.substr(valueStart, charsRead - valueStart);
+				}
 			} else if(section == kNone)
 			{
+				// Garbage before any section, probably not an sfz file
 				return false;
 			} else if(s.find('=') != std::string::npos)
 			{
@@ -1758,6 +1793,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				}
 			} else
 			{
+				// Garbage, probably not an sfz file
 				MPT_ASSERT(false);
 				return false;
 			}
@@ -1885,7 +1921,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				sample.nLoopStart = region->loopStart;
 				sample.nLoopEnd = region->loopEnd + 1;
 			}
-		} else if(sample.nLoopEnd < sample.nLoopStart && region->loopMode)
+		} else if(sample.nLoopEnd <= sample.nLoopStart && region->loopMode)
 		{
 			sample.nLoopEnd = sample.nLength;
 		}
@@ -1901,7 +1937,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		LimitMax(sample.nLength, region->end);
 
 		sample.PrecomputeLoops(*this, false);
-		sample.Convert(MOD_TYPE_IT, GetType());
+		sample.Convert(MOD_TYPE_MPT, GetType());
 	}
 
 	pIns->Sanitize(MOD_TYPE_IT);

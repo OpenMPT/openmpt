@@ -21,11 +21,16 @@ OPENMPT_NAMESPACE_BEGIN
 // Instrument Nodes
 struct EnvelopeNode
 {
-	uint16 tick;	// Envelope node position (x axis)
-	uint8 value;	// Envelope node value (y axis)
+	typedef uint16 tick_t;
+	typedef uint8 value_t;
+
+	tick_t tick;	// Envelope node position (x axis)
+	value_t value;	// Envelope node value (y axis)
 
 	EnvelopeNode() : tick(0), value(0) { }
-	EnvelopeNode(uint16 tick, uint8 value) : tick(tick), value(value) { }
+	EnvelopeNode(tick_t tick, value_t value) : tick(tick), value(value) { }
+
+	bool operator== (const EnvelopeNode &other) const { return tick == other.tick && value == other.value; }
 };
 
 // Instrument Envelopes
