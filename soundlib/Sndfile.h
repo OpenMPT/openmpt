@@ -444,8 +444,8 @@ public:
 		uint32 m_nTickCount;
 	protected:
 		uint32 m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
-		uint32 m_nSamplesPerTick;
 	public:
+		uint32 m_nSamplesPerTick;
 		ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
 		uint32 m_nMusicSpeed;	// Current speed
 		TEMPO m_nMusicTempo;	// Current tempo
@@ -646,44 +646,44 @@ public:
 	bool InitChannel(CHANNELINDEX nChn);
 
 	// Module Loaders
-	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMod(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadM15(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadICE(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadPT36(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMed(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadIT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadITProject(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool Read669(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadUlt(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadWav(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadDSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMDL(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadOKT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadPTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadGDM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadICE(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadIMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadIT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadITProject(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadM15(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMDL(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMed(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMID(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMO3(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMod(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMT2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadOKT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPLM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPSM16(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadUMX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMO3(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadGDM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadIMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadPLM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMID(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPT36(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSFX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadUlt(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadUMX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadWav(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static mpt::Charset GetCharsetFromModType(MODTYPE modtype);

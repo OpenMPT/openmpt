@@ -1370,12 +1370,12 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 /////////////////////////////////////////////////////////////////////////////////////////
 // SFZ Instrument
 
-struct SFZGlobals
+struct SFZControl
 {
 	std::string defaultPath;
 	int8 octaveOffset, noteOffset;
 
-	SFZGlobals()
+	SFZControl()
 		: octaveOffset(0), noteOffset(0)
 	{ }
 
@@ -1390,12 +1390,96 @@ struct SFZGlobals
 	}
 };
 
+struct SFZEnvelope
+{
+	float startLevel, delay, attack, hold, decay, sustainLevel, release, depth;
+	SFZEnvelope()
+		: startLevel(0), delay(0), attack(0), hold(0), decay(0), sustainLevel(100), release(0), depth(0)
+	{ }
+
+	void Parse(std::string key, const std::string &value)
+	{
+		key.erase(0, key.find('_') + 1);
+		float v = ConvertStrTo<float>(value);
+		if(key != "depth")
+			Limit(v, 0.0f, 100.0f);
+		else
+			Limit(v, -12000.0f, 12000.0f);
+
+		if(key == "start")
+			startLevel = v;
+		else if(key == "delay")
+			delay = v;
+		else if(key == "attack")
+			attack = v;
+		else if(key == "hold")
+			hold = v;
+		else if(key == "decay")
+			decay = v;
+		else if(key == "sustain")
+			sustainLevel = v;
+		else if(key == "release")
+			release = v;
+		else if(key == "depth")
+			depth = v;
+	}
+
+	static uint16 ToTicks(float duration, float tickDuration)
+	{
+		return std::max(uint16(1), Util::Round<uint16>(duration / tickDuration));
+	}
+
+	uint8 ToValue(float value, EnvelopeType envType) const
+	{
+		value *= (ENVELOPE_MAX / 100.0f);
+		if(envType == ENV_PITCH)
+		{
+			value *= depth / 3200.0f;
+			value += ENVELOPE_MID;
+		}
+		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
+		return Util::Round<uint8>(value);
+	}
+
+	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType) const
+	{
+		auto &env = ins->GetEnvelope(envType);
+		float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
+		if(tickDuration <= 0)
+			return;
+		env.clear();
+		if(attack > 0 || delay > 0)
+		{
+			env.push_back(EnvelopeNode(0, ToValue(startLevel, envType)));
+			if(delay > 0)
+				env.push_back(EnvelopeNode(ToTicks(delay, tickDuration), env.back().value));
+			env.push_back(EnvelopeNode(env.back().tick + ToTicks(attack, tickDuration), ToValue(100, envType)));
+		}
+		if(hold > 0)
+		{
+			if(env.empty())
+				env.push_back(EnvelopeNode(0, ToValue(100, envType)));
+			env.push_back(EnvelopeNode(env.back().tick + ToTicks(hold, tickDuration), env.back().value));
+		}
+		auto sustain = ToValue(sustainLevel, envType);
+		if(env.empty())
+			env.push_back(EnvelopeNode(0, sustain));
+		if(env.back().value != sustain)
+			env.push_back(EnvelopeNode(env.back().tick + ToTicks(decay, tickDuration), sustain));
+		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
+		env.push_back(EnvelopeNode(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType)));
+		env.dwFlags.set(ENV_SUSTAIN | ENV_ENABLED);
+	}
+};
+
 struct SFZRegion
 {
 	std::string filename;
-	SmpLength loopStart, loopEnd, length, offset;
-	ChannelFlags loopType;
+	SFZEnvelope ampEnv, pitchEnv, filterEnv;
+	SmpLength loopStart, loopEnd, end, offset;
+	FlagSet<ChannelFlags> loopMode, loopType;
 	int32 cutoff;			// in Hz
+	int32 filterRandom;		// 0...9600 cents
 	int16 volume;			// -144dB...+6dB
 	int16 pitchBend;		// -9600...9600 cents
 	float pitchLfoFade;		// 0...100 seconds
@@ -1407,12 +1491,15 @@ struct SFZRegion
 	uint8 keyLo, keyHi, keyRoot;
 	uint8 resonance;		// 0...40dB
 	uint8 filterType;
+	uint8 polyphony;
 	bool useSampleKeyRoot;
 
 	SFZRegion()
-		: loopStart(0), loopEnd(0), length(MAX_SAMPLE_LENGTH), offset(0)
+		: loopStart(0), loopEnd(0), end(MAX_SAMPLE_LENGTH), offset(0)
+		, loopMode(ChannelFlags(0))
 		, loopType(ChannelFlags(0))
 		, cutoff(0)
+		, filterRandom(0)
 		, volume(0)
 		, pitchBend(200)
 		, pitchLfoFade(0)
@@ -1424,6 +1511,7 @@ struct SFZRegion
 		, keyLo(0), keyHi(127), keyRoot(60)
 		, resonance(0)
 		, filterType(FLTMODE_UNCHANGED)
+		, polyphony(255)
 		, useSampleKeyRoot(false)
 	{ }
 
@@ -1433,7 +1521,7 @@ struct SFZRegion
 		value = Clamp(ConvertStrTo<T>(valueStr), static_cast<T>(valueMin), static_cast<T>(valueMax));
 	}
 
-	static uint8 ReadKey(const std::string &value, const SFZGlobals &globals)
+	static uint8 ReadKey(const std::string &value, const SFZControl &control)
 	{
 		if(value.empty())
 			return 0;
@@ -1449,17 +1537,16 @@ struct SFZRegion
 		} else
 		{
 			// Scientific pitch
-			switch(::tolower(value[0]))
-			{
-			case 'c': key = 0; break;
-			case 'd': key = 2; break;
-			case 'e': key = 4; break;
-			case 'f': key = 5; break;
-			case 'g': key = 7; break;
-			case 'a': key = 9; break;
-			case 'b': key = 11; break;
-			default:  return 0;
-			}
+			static const int8 keys[] = { 9, 11, 0, 2, 4, 5, 7 };
+			STATIC_ASSERT(CountOf(keys) == 'g' - 'a' + 1);
+			auto keyC = value[0];
+			if(keyC >= 'A' && keyC <= 'G')
+				key = keys[keyC - 'A'];
+			if(keyC >= 'a' && keyC <= 'g')
+				key = keys[keyC - 'a'];
+			else
+				return 0;
+
 			uint8 octaveOffset = 1;
 			if(value[1] == '#')
 			{
@@ -1476,26 +1563,26 @@ struct SFZRegion
 			int8 octave = ConvertStrTo<int8>(value.data() + octaveOffset);
 			key += (octave + 1) * 12;
 		}
-		key += globals.octaveOffset * 12 + globals.noteOffset;
+		key += control.octaveOffset * 12 + control.noteOffset;
 		return static_cast<uint8>(Clamp(key, 0, 127));
 }
 
-	void Parse(const std::string &key, const std::string &value, const SFZGlobals &globals)
+	void Parse(const std::string &key, const std::string &value, const SFZControl &control)
 	{
 		if(key == "sample")
-			filename = globals.defaultPath + value;
+			filename = control.defaultPath + value;
 		else if(key == "lokey")
-			keyLo = ReadKey(value, globals);
+			keyLo = ReadKey(value, control);
 		else if(key == "hikey")
-			keyHi = ReadKey(value, globals);
+			keyHi = ReadKey(value, control);
 		else if(key == "pitch_keycenter")
 		{
-			keyRoot = ReadKey(value, globals);
+			keyRoot = ReadKey(value, control);
 			useSampleKeyRoot = (value == "sample");
 		}
 		else if(key == "key")
 		{
-			keyLo = keyHi = keyRoot = ReadKey(value, globals);
+			keyLo = keyHi = keyRoot = ReadKey(value, control);
 			useSampleKeyRoot = false;
 		}
 		else if(key == "bend_up" || key == "bendup")
@@ -1515,7 +1602,7 @@ struct SFZRegion
 		else if(key == "tune")
 			Read(value, finetune, -100, 100);
 		else if(key == "end")
-			Read(value, length, SmpLength(0), MAX_SAMPLE_LENGTH);
+			Read(value, end, SmpLength(0), MAX_SAMPLE_LENGTH);
 		else if(key == "offset")
 			Read(value, offset, SmpLength(0), MAX_SAMPLE_LENGTH);
 		else if(key == "loop_start" || key == "loopstart")
@@ -1525,16 +1612,29 @@ struct SFZRegion
 		else if(key == "loop_mode" || key == "loopmode")
 		{
 			if(value == "loop_continuous" || value == "one_shot")
-				loopType = CHN_LOOP;
+				loopMode = CHN_LOOP;
 			else if(value == "loop_sustain")
-				loopType = CHN_SUSTAINLOOP;
+				loopMode = CHN_SUSTAINLOOP;
 			else if(value == "no_loop")
+				loopMode = ChannelFlags(0);
+		}
+		else if(key == "loop_type" || key == "looptype")
+		{
+			if(value == "forward")
 				loopType = ChannelFlags(0);
+			else if(value == "backward")
+				loopType = CHN_REVERSE;
+			else if(value == "alternate")
+				loopType = CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN;
 		}
 		else if(key == "cutoff")
 			Read(value, cutoff, 0, 96000);
+		else if(key == "fil_random")
+			Read(value, filterRandom, 0, 9600);
 		else if(key == "resonance")
 			Read(value, resonance, 0u, 40u);
+		else if(key == "polyphony")
+			Read(value, polyphony, 0u, 255u);
 		else if(key == "fil_type" || key == "filtype")
 		{
 			if(value == "lpf_1p" || value == "lpf_2p")
@@ -1543,6 +1643,12 @@ struct SFZRegion
 				filterType = FLTMODE_HIGHPASS;
 			// Alternatives: bpf_1p, bpf_2p
 		}
+		else if(key.substr(0, 6) == "ampeg_")
+			ampEnv.Parse(key, value);
+		else if(key.substr(0, 6) == "fileg_")
+			filterEnv.Parse(key, value);
+		else if(key.substr(0, 8) == "pitcheg_")
+			pitchEnv.Parse(key, value);
 	}
 };
 
@@ -1552,9 +1658,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 #ifdef MPT_EXTERNAL_SAMPLES
 	file.Rewind();
 
-	enum { kNone, kGroup, kRegion, kControl, kUnknown } section = kNone;
-	SFZGlobals globals;
-	SFZRegion group;
+	enum { kNone, kGroup, kRegion, kGlobal, kControl, kUnknown } section = kNone;
+	SFZControl control;
+	SFZRegion group, globals;
 	std::vector<SFZRegion> regions;
 
 	std::string s;
@@ -1594,11 +1700,15 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				{
 					section = kGroup;
 					// Reset group parameters
-					group = SFZRegion();
+					group = globals;
 				} else if(sec == "region")
 				{
 					section = kRegion;
 					regions.push_back(group);
+				} else if(sec == "global")
+				{
+					section = kGlobal;
+					globals = SFZRegion();
 				} else if(sec == "control")
 				{
 					section = kControl;
@@ -1633,13 +1743,17 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				switch(section)
 				{
 				case kGroup:
-					group.Parse(key, value, globals);
+					group.Parse(key, value, control);
 					break;
 				case kRegion:
-					regions.back().Parse(key, value, globals);
+					regions.back().Parse(key, value, control);
+					break;
+				case kGlobal:
+					globals.Parse(key, value, control);
+					group.Parse(key, value, control);
 					break;
 				case kControl:
-					globals.Parse(key, value);
+					control.Parse(key, value);
 					break;
 				}
 			} else
@@ -1726,7 +1840,18 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			pIns->SetCutoff(FrequencyToCutOff(region->cutoff), true);
 		if(region->resonance != 0)
 			pIns->SetResonance(mpt::saturate_cast<uint8>(Util::muldivr(region->resonance, 128, 24)), true);
+		pIns->nCutSwing = mpt::saturate_cast<uint8>(Util::muldivr(region->filterRandom, m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24, 1200));
 		pIns->midiPWD = static_cast<int8>(region->pitchBend / 100);
+
+		pIns->nNNA = NNA_NOTEOFF;
+		if(region->polyphony == 1)
+		{
+			pIns->nDNA = NNA_NOTECUT;
+			pIns->nDCT = DCT_SAMPLE;
+		}
+		region->ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
+		region->pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
+		//region->filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
 
 		sample.rootNote = region->keyRoot + NOTE_MIN;
 		sample.nGlobalVol = Util::Round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region->volume / 20.0));
@@ -1746,26 +1871,34 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.nVibRate = region->pitchLfoFreq * 4;
 		}
 		
+		sample.uFlags.set(region->loopMode);
 		sample.uFlags.set(region->loopType);
 		if(region->loopEnd > region->loopStart)
 		{
 			// Loop may also be defined in file, in which case loopStart and loopEnd are unset.
-			if(region->loopType == CHN_SUSTAINLOOP)
+			if(region->loopMode == CHN_SUSTAINLOOP)
 			{
 				sample.nSustainStart = region->loopStart;
 				sample.nSustainEnd = region->loopEnd + 1;
-			} else if(region->loopType == CHN_LOOP)
+			} else if(region->loopMode == CHN_LOOP)
 			{
 				sample.nLoopStart = region->loopStart;
 				sample.nLoopEnd = region->loopEnd + 1;
 			}
+		} else if(sample.nLoopEnd < sample.nLoopStart && region->loopMode)
+		{
+			sample.nLoopEnd = sample.nLength;
 		}
 		if(region->offset && region->offset < sample.nLength)
 		{
 			auto offset = region->offset * sample.GetBytesPerSample();
 			memmove(sample.pSample8, sample.pSample8 + offset, sample.nLength * sample.GetBytesPerSample() - offset);
+			if(region->end > region->offset)
+				region->end -= region->offset;
+			sample.nLoopStart -= region->offset;
+			sample.nLoopEnd -= region->offset;
 		}
-		LimitMax(sample.nLength, region->length);
+		LimitMax(sample.nLength, region->end);
 
 		sample.PrecomputeLoops(*this, false);
 		sample.Convert(MOD_TYPE_IT, GetType());
