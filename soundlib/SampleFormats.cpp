@@ -1683,14 +1683,18 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		
 		sample.uFlags.set(region->loopType);
-		if(region->loopType == CHN_SUSTAINLOOP)
+		if(region->loopEnd > region->loopStart)
 		{
-			sample.nSustainStart = region->loopStart;
-			sample.nSustainEnd = region->loopEnd;
-		} else
-		{
-			sample.nLoopStart = region->loopStart;
-			sample.nLoopEnd = region->loopEnd;
+			// Loop may also be defined in file, in which case loopStart=loopEnd=0.
+			if(region->loopType == CHN_SUSTAINLOOP)
+			{
+				sample.nSustainStart = region->loopStart;
+				sample.nSustainEnd = region->loopEnd + 1;
+			} else if(region->loopType == CHN_LOOP)
+			{
+				sample.nLoopStart = region->loopStart;
+				sample.nLoopEnd = region->loopEnd + 1;
+			}
 		}
 		if(region->offset && region->offset < sample.nLength)
 		{
@@ -1699,7 +1703,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		LimitMax(sample.nLength, region->length);
 
-		sample.SanitizeLoops();
+		sample.PrecomputeLoops(*this, false);
 		sample.Convert(MOD_TYPE_IT, GetType());
 	}
 
