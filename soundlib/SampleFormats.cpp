@@ -30,6 +30,7 @@
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#include "modsmp_ctrl.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/ModSampleCopy.h"
@@ -1401,10 +1402,12 @@ struct SFZEnvelope
 	{
 		key.erase(0, key.find('_') + 1);
 		float v = ConvertStrTo<float>(value);
-		if(key != "depth")
-			Limit(v, 0.0f, 100.0f);
-		else
+		if(key == "depth")
 			Limit(v, -12000.0f, 12000.0f);
+		else if(key == "start" || key == "sustain")
+			Limit(v, -100.0f, 100.0f);
+		else
+			Limit(v, 0.0f, 100.0f);
 
 		if(key == "start")
 			startLevel = v;
@@ -1497,7 +1500,8 @@ struct SFZRegion
 	uint8 resonance;		// 0...40dB
 	uint8 filterType;
 	uint8 polyphony;
-	bool useSampleKeyRoot;
+	bool useSampleKeyRoot : 1;
+	bool invertPhase : 1;
 
 	SFZRegion()
 		: loopStart(0), loopEnd(0), end(MAX_SAMPLE_LENGTH), offset(0)
@@ -1518,6 +1522,7 @@ struct SFZRegion
 		, filterType(FLTMODE_UNCHANGED)
 		, polyphony(255)
 		, useSampleKeyRoot(false)
+		, invertPhase(false)
 	{ }
 
 	template<typename T, typename Tc>
@@ -1640,11 +1645,13 @@ struct SFZRegion
 			Read(value, resonance, 0u, 40u);
 		else if(key == "polyphony")
 			Read(value, polyphony, 0u, 255u);
+		else if(key == "phase")
+			invertPhase = (value == "invert");
 		else if(key == "fil_type" || key == "filtype")
 		{
-			if(value == "lpf_1p" || value == "lpf_2p")
+			if(value == "lpf_1p" || value == "lpf_2p" || value == "lpf_4p" || value == "lpf_6p")
 				filterType = FLTMODE_LOWPASS;
-			else if(value == "hpf_1p" || value == "hpf_2p")
+			else if(value == "hpf_1p" || value == "hpf_2p" || value == "hpf_4p" || value == "hpf_6p")
 				filterType = FLTMODE_HIGHPASS;
 			// Alternatives: bpf_2p, brf_2p
 		}
@@ -1663,9 +1670,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 #ifdef MPT_EXTERNAL_SAMPLES
 	file.Rewind();
 
-	enum { kNone, kGroup, kRegion, kGlobal, kControl, kUnknown } section = kNone;
+	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kUnknown } section = kNone;
 	SFZControl control;
-	SFZRegion group, globals;
+	SFZRegion group, master, globals;
 	std::vector<SFZRegion> regions;
 	std::map<std::string, std::string> macros;
 
@@ -1718,19 +1725,25 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				// Section header
 				std::string sec = s.substr(1, charsRead - 1);
 				section = kUnknown;
-				if(sec == "group")
+				if(sec == "global")
+				{
+					section = kGlobal;
+					// Reset global parameters
+					globals = SFZRegion();
+				} else if(sec == "master")
+				{
+					section = kMaster;
+					// Reset master parameters
+					master = globals;
+				} else if(sec == "group")
 				{
 					section = kGroup;
 					// Reset group parameters
-					group = globals;
+					group = master;
 				} else if(sec == "region")
 				{
 					section = kRegion;
 					regions.push_back(group);
-				} else if(sec == "global")
-				{
-					section = kGlobal;
-					globals = SFZRegion();
 				} else if(sec == "control")
 				{
 					section = kControl;
@@ -1777,15 +1790,17 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 				switch(section)
 				{
+				case kGlobal:
+					globals.Parse(key, value, control);
+					MPT_FALLTHROUGH;
+				case kMaster:
+					master.Parse(key, value, control);
+					MPT_FALLTHROUGH;
 				case kGroup:
 					group.Parse(key, value, control);
 					break;
 				case kRegion:
 					regions.back().Parse(key, value, control);
-					break;
-				case kGlobal:
-					globals.Parse(key, value, control);
-					group.Parse(key, value, control);
 					break;
 				case kControl:
 					control.Parse(key, value);
@@ -1933,15 +1948,22 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				region->end -= region->offset;
 			sample.nLoopStart -= region->offset;
 			sample.nLoopEnd -= region->offset;
+			sample.uFlags.set(SMP_MODIFIED);
 		}
 		LimitMax(sample.nLength, region->end);
+
+		if(region->invertPhase)
+		{
+			ctrlSmp::InvertSample(sample, 0, sample.nLength, *this);
+			sample.uFlags.set(SMP_MODIFIED);
+		}
 
 		sample.PrecomputeLoops(*this, false);
 		sample.Convert(MOD_TYPE_MPT, GetType());
 	}
 
-	pIns->Sanitize(MOD_TYPE_IT);
-	pIns->Convert(MOD_TYPE_IT, GetType());
+	pIns->Sanitize(MOD_TYPE_MPT);
+	pIns->Convert(MOD_TYPE_MPT, GetType());
 	return true;
 #else
 	MPT_UNREFERENCED_PARAMETER(nInstr);
