@@ -928,6 +928,7 @@ public:
 #endif
 	static bool CanReadMP3();
 	static bool CanReadVorbis();
+	static bool CanReadMediaFoundation();
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);

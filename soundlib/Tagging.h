@@ -40,4 +40,7 @@ struct FileTags
 };
 
 
+mpt::ustring GetSampleNameFromTags(const FileTags &tags);
+
+
 OPENMPT_NAMESPACE_END
