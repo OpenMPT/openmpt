@@ -212,6 +212,11 @@ LOCAL_SRC_FILES += \
 	soundlib/RowVisitor.cpp \
 	soundlib/S3MTools.cpp \
 	soundlib/SampleFormats.cpp \
+	soundlib/SampleFormatFLAC.cpp \
+	soundlib/SampleFormatMediaFoundation.cpp \
+	soundlib/SampleFormatMP3.cpp \
+	soundlib/SampleFormatOpus.cpp \
+	soundlib/SampleFormatVorbis.cpp \
 	soundlib/SampleIO.cpp \
 	soundlib/Sndfile.cpp \
 	soundlib/Snd_flt.cpp \

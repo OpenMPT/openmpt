@@ -557,6 +557,11 @@
     <ClCompile Include="..\..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormats.cpp" />
     <ClCompile Include="..\..\soundlib\SampleIO.cpp" />
     <ClCompile Include="..\..\soundlib\Snd_flt.cpp" />

@@ -22,4 +22,19 @@ FileTags::FileTags()
 }
 
 
+mpt::ustring GetSampleNameFromTags(const FileTags &tags)
+//------------------------------------------------------
+{
+	mpt::ustring result;
+	if(tags.artist.empty())
+	{
+		result = tags.title;
+	} else
+	{
+		result = mpt::String::Print(MPT_USTRING("%1 (by %2)"), tags.title, tags.artist);
+	}
+	return result;
+}
+
+
 OPENMPT_NAMESPACE_END
