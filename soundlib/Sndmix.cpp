@@ -2127,11 +2127,6 @@ bool CSoundFile::ReadNote()
 				ninc.Set(0, 1);
 			}
 			pChn->increment = ninc;
-		} else
-		{
-			// Avoid nasty noises...
-			// This could have been != 0 if a plugin was assigned to the channel, for macro purposes.
-			pChn->nRealVolume = 0;
 		}
 
 		// Increment envelope positions
@@ -2152,7 +2147,7 @@ bool CSoundFile::ReadNote()
 		//if (((pChn->nInc >> 16) + 1) >= (int32)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
 		pChn->newLeftVol = pChn->newRightVol = 0;
 		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->pSample && pChn->nLength && !pChn->increment.IsZero()) ? pChn->pModSample->pSample : nullptr;
-		if (pChn->pCurrentSample)
+		if (pChn->pCurrentSample || pChn->HasMIDIOutput())
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
 			uint32 vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
@@ -2165,7 +2160,15 @@ bool CSoundFile::ReadNote()
 			if (pChn->nRightVU > 127) pChn->nRightVU = (uint8)vur;
 			vur >>= 1;
 			if (pChn->nRightVU < vur) pChn->nRightVU = (uint8)vur;
+		} else
+		{
+			// Note change but no sample
+			if (pChn->nLeftVU > 128) pChn->nLeftVU = 0;
+			if (pChn->nRightVU > 128) pChn->nRightVU = 0;
+		}
 
+		if (pChn->pCurrentSample)
+		{
 #ifdef MODPLUG_TRACKER
 			const uint32 kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (uint32)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
 #else
@@ -2268,10 +2271,6 @@ bool CSoundFile::ReadNote()
 			m_PlayState.ChnMix[m_nMixChannels++] = nChn;
 		} else
 		{
-			// Note change but no sample
-			if (pChn->nLeftVU > 128) pChn->nLeftVU = 0;
-			if (pChn->nRightVU > 128) pChn->nRightVU = 0;
-
 			pChn->rightVol = pChn->leftVol = 0;
 			pChn->nLength = 0;
 		}
