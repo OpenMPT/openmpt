@@ -669,7 +669,7 @@ void CEditCommand::OnNoteChanged()
 		} else if(m->IsPcNote())
 		{
 			// Update parameter list
-			InitEffect();
+			InitPlugParam();
 		}
 	}
 }
