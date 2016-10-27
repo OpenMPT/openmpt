@@ -1475,8 +1475,12 @@ struct SFZEnvelope
 		if(env.back().value != sustain)
 			env.push_back(EnvelopeNode(env.back().tick + ToTicks(decay, tickDuration), sustain));
 		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
-		env.push_back(EnvelopeNode(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType)));
-		env.dwFlags.set(ENV_SUSTAIN | ENV_ENABLED);
+		if(sustainLevel != 0)
+		{
+			env.push_back(EnvelopeNode(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType)));
+			env.dwFlags.set(ENV_SUSTAIN);
+		}
+		env.dwFlags.set(ENV_ENABLED);
 	}
 };
 
@@ -1771,7 +1775,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				auto keyEnd = s.find_first_of(" =");
 				auto valueStart = s.find_first_not_of(" =", keyEnd);
 				std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
-				if(key == "sample")
+				if(key == "sample" || key == "default_path")
 				{
 					// Sample name may contain spaces...
 					charsRead = s.find_first_of("=\t<", valueStart);
