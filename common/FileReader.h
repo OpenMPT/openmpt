@@ -865,12 +865,23 @@ public:
 	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
 		dest.clear();
+		if(!CanRead(1))
+			return false;
 		try
 		{
-			char c = '\0';
-			while(Read(c) && c != '\0' && dest.length() < maxLength)
+			char buffer[64];
+			off_t avail = 0;
+			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
 			{
-				dest += c;
+				auto end = std::find(buffer, buffer + avail, '\0');
+				dest.insert(dest.end(), buffer, end);
+				streamPos += (end - buffer);
+				if(end < buffer + avail)
+				{
+					// Found null char
+					streamPos++;
+					break;
+				}
 			}
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
@@ -882,21 +893,32 @@ public:
 	// Read a string up to the next line terminator into a std::string
 	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
+		struct FindLineEnd { bool operator() (char c) const { return c == '\r' || c == '\n'; } };
+
 		dest.clear();
 		if(!CanRead(1))
 			return false;
 		try
 		{
-			char c = '\0';
-			while(Read(c) && c != '\r' && c != '\n' && dest.length() < maxLength)
+			char buffer[64], c = '\0';
+			off_t avail = 0;
+			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
 			{
-				dest += c;
-			}
-			// Handle CRLF line ending
-			if(c == '\r')
-			{
-				if(Read(c) && c != '\n')
-					SkipBack(1);
+				auto end = std::find_if(buffer, buffer + avail, FindLineEnd());
+				dest.insert(dest.end(), buffer, end);
+				streamPos += (end - buffer);
+				if(end < buffer + avail)
+				{
+					// Found line ending
+					streamPos++;
+					// Handle CRLF line ending
+					if(*end == '\r')
+					{
+						if(Read(c) && c != '\n')
+							SkipBack(1);
+					}
+					break;
+				}
 			}
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
