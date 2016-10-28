@@ -1308,7 +1308,11 @@ struct SFZRegion
 	template<typename T, typename Tc>
 	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
 	{
-		value = Clamp(ConvertStrTo<T>(valueStr), static_cast<T>(valueMin), static_cast<T>(valueMax));
+		double valueF = ConvertStrTo<double>(valueStr);
+		if(std::numeric_limits<T>::is_integer)
+			valueF = Util::Round(valueF);
+		Limit(valueF, static_cast<double>(valueMin), static_cast<double>(valueMax));
+		value = static_cast<T>(valueF);
 	}
 
 	static uint8 ReadKey(const std::string &value, const SFZControl &control)
@@ -1350,7 +1354,7 @@ struct SFZRegion
 			if(octaveOffset >= value.length())
 				return 0;
 
-			int8 octave = ConvertStrTo<int8>(value.data() + octaveOffset);
+			int8 octave = ConvertStrTo<int8>(value.c_str() + octaveOffset);
 			key += (octave + 1) * 12;
 		}
 		key += control.octaveOffset * 12 + control.noteOffset;
@@ -1548,8 +1552,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			} else if(s.find('=') != std::string::npos)
 			{
 				// Read key=value pair
-				auto keyEnd = s.find_first_of(" =");
-				auto valueStart = s.find_first_not_of(" =", keyEnd);
+				auto keyEnd = s.find_first_of(" \t=");
+				auto valueStart = s.find_first_not_of(" \t=", keyEnd);
 				std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
 				if(key == "sample" || key == "default_path")
 				{
@@ -1646,7 +1650,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			if(!m_szNames[smp][0])
 			{
-				mpt::String::Copy(m_szNames[smp], filename.GetFullFileName().ToLocale());
+				mpt::String::Copy(m_szNames[smp], filename.GetFileName().ToLocale());
 			}
 		}
 		sample.uFlags.set(SMP_KEEPONDISK, sample.pSample != nullptr);
