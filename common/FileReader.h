@@ -890,11 +890,12 @@ public:
 		return dest.length() != 0;
 	}
 
+private:
+	static bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
+public:
 	// Read a string up to the next line terminator into a std::string
 	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
-		struct FindLineEnd { bool operator() (char c) const { return c == '\r' || c == '\n'; } };
-
 		dest.clear();
 		if(!CanRead(1))
 			return false;
@@ -904,7 +905,7 @@ public:
 			off_t avail = 0;
 			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
 			{
-				auto end = std::find_if<char *>(buffer, buffer + avail, FindLineEnd());
+				auto end = std::find_if(buffer, buffer + avail, IsLineEnding);
 				dest.insert(dest.end(), buffer, end);
 				streamPos += (end - buffer);
 				if(end < buffer + avail)
