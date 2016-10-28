@@ -904,7 +904,7 @@ public:
 			off_t avail = 0;
 			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
 			{
-				auto end = std::find_if(buffer, buffer + avail, FindLineEnd());
+				auto end = std::find_if<char *>(buffer, buffer + avail, FindLineEnd());
 				dest.insert(dest.end(), buffer, end);
 				streamPos += (end - buffer);
 				if(end < buffer + avail)
