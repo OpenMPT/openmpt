@@ -4915,7 +4915,8 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 //-------------------------------------------------------------------------
 {
 #ifndef NO_PLUGINS
-	const ModInstrument *pIns = m_PlayState.Chn[chn].pModInstrument;
+	auto &channel = m_PlayState.Chn[chn];
+	const ModInstrument *pIns = channel.pModInstrument;
 	// instro sends to a midi chan
 	if (pIns && pIns->HasValidMIDIChannel())
 	{
@@ -4926,6 +4927,7 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 			if (pPlug != nullptr)
 			{
 				pPlug->MidiCommand(GetBestMidiChannel(chn), pIns->nMidiProgram, pIns->wMidiBank, note, volume, chn);
+				channel.nLeftVU = channel.nRightVU = 0xFF;
 			}
 		}
 	}

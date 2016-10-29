@@ -260,7 +260,7 @@ public:
 	static HBRUSH brushGray, brushBlack, brushWhite, brushText, brushHighLight, brushHighLightRed, brushWindow, brushYellow;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
-	static MODPLUGDIB *bmpNotes, *bmpVUMeters;
+	static MODPLUGDIB *bmpNotes, *bmpVUMeters, *bmpPluginVUMeters;
 	static COLORREF gcolrefVuMeter[NUM_VUMETER_PENS * 2];	// General tab VU meters
 
 public:
