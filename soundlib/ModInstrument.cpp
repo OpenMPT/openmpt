@@ -225,6 +225,22 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	PanEnv.Convert(fromType, toType);
 	PitchEnv.Convert(fromType, toType);
 
+	if(fromType == MOD_TYPE_XM && (toType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	{
+		if(!VolEnv.dwFlags[ENV_ENABLED])
+		{
+			// Note-Off with no envelope cuts the note immediately in XM
+			VolEnv.resize(2);
+			VolEnv[0].tick = 0;
+			VolEnv[0].value =  ENVELOPE_MAX;
+			VolEnv[1].tick = 1;
+			VolEnv[1].value =  ENVELOPE_MIN;
+			VolEnv.dwFlags.set(ENV_ENABLED | ENV_SUSTAIN);
+			VolEnv.dwFlags.reset(ENV_LOOP);
+			VolEnv.nSustainStart = VolEnv.nSustainEnd = 0;
+		}
+	}
+
 	// Limit fadeout length for IT
 	if(toType & MOD_TYPE_IT)
 	{
