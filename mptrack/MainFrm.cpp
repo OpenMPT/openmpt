@@ -162,6 +162,7 @@ HCURSOR CMainFrame::curNoDrop2 = NULL;
 HCURSOR CMainFrame::curVSplit = NULL;
 MODPLUGDIB *CMainFrame::bmpNotes = nullptr;
 MODPLUGDIB *CMainFrame::bmpVUMeters = nullptr;
+MODPLUGDIB *CMainFrame::bmpPluginVUMeters = nullptr;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
@@ -324,6 +325,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// bitmaps
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
+	bmpPluginVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
 	if (!m_wndToolBar.Create(this)) return -1;
@@ -386,6 +388,11 @@ BOOL CMainFrame::DestroyWindow()
 	{
 		delete bmpVUMeters;
 		bmpVUMeters = nullptr;
+	}
+	if (bmpPluginVUMeters)
+	{
+		delete bmpPluginVUMeters;
+		bmpPluginVUMeters = nullptr;
 	}
 
 	PatternFont::DeleteFontData();
@@ -1140,17 +1147,22 @@ void CMainFrame::UpdateColors()
 //-----------------------------
 {
 	COLORREF (&colors)[MAX_MODCOLORS] = TrackerSettings::Instance().rgbCustomColors;
-	if (bmpVUMeters)
+	struct { MODPLUGDIB *bitmap; uint32 lo, med, hi; } meters[] =
 	{
-		bmpVUMeters->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
-		bmpVUMeters->bmiColors[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
-		bmpVUMeters->bmiColors[15] = rgb2quad(GetSysColor(COLOR_BTNHIGHLIGHT));
-		bmpVUMeters->bmiColors[10] = rgb2quad(colors[MODCOLOR_VUMETER_LO]);
-		bmpVUMeters->bmiColors[11] = rgb2quad(colors[MODCOLOR_VUMETER_MED]);
-		bmpVUMeters->bmiColors[9] = rgb2quad(colors[MODCOLOR_VUMETER_HI]);
-		bmpVUMeters->bmiColors[2] = rgb2quad((colors[MODCOLOR_VUMETER_LO] >> 1) & 0x7F7F7F);
-		bmpVUMeters->bmiColors[3] = rgb2quad((colors[MODCOLOR_VUMETER_MED] >> 1) & 0x7F7F7F);
-		bmpVUMeters->bmiColors[1] = rgb2quad((colors[MODCOLOR_VUMETER_HI] >> 1) & 0x7F7F7F);
+		{ bmpVUMeters, MODCOLOR_VUMETER_LO, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_HI },
+		{ bmpPluginVUMeters, MODCOLOR_VUMETER_LO_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_HI_VST },
+	};
+	for(size_t i = 0; i < CountOf(meters); i++) if(meters[i].bitmap != nullptr)
+	{
+		meters[i].bitmap->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
+		meters[i].bitmap->bmiColors[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
+		meters[i].bitmap->bmiColors[15] = rgb2quad(GetSysColor(COLOR_BTNHIGHLIGHT));
+		meters[i].bitmap->bmiColors[10] = rgb2quad(colors[meters[i].lo]);
+		meters[i].bitmap->bmiColors[11] = rgb2quad(colors[meters[i].med]);
+		meters[i].bitmap->bmiColors[9] = rgb2quad(colors[meters[i].hi]);
+		meters[i].bitmap->bmiColors[2] = rgb2quad((colors[meters[i].lo] >> 1) & 0x7F7F7F);
+		meters[i].bitmap->bmiColors[3] = rgb2quad((colors[meters[i].med] >> 1) & 0x7F7F7F);
+		meters[i].bitmap->bmiColors[1] = rgb2quad((colors[meters[i].hi] >> 1) & 0x7F7F7F);
 	}
 	if (penSample) DeleteObject(penSample);
 	penSample = ::CreatePen(PS_SOLID, 0, colors[MODCOLOR_SAMPLE]);

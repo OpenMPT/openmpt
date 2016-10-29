@@ -25,7 +25,6 @@
 #include "../common/StringFixer.h"
 #include "EffectInfo.h"
 #include "PatternFont.h"
-#include <string>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1139,25 +1138,27 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 		if (vul > 8) vul = 8;
 		if (vur > 8) vur = 8;
 		x += (m_szCell.cx / 2);
+		auto &channel = GetSoundFile()->m_PlayState.Chn[nChn];
+		auto bmp = (channel.pCurrentSample != nullptr || !channel.HasMIDIOutput()) ? CMainFrame::bmpVUMeters : CMainFrame::bmpPluginVUMeters;
 		if (m_nDetailLevel <= PatternCursor::instrColumn)
 		{
 			DibBlt(hdc, x-VUMETERS_LOWIDTH-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2, vul * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2, vul * VUMETERS_BMPHEIGHT, bmp);
 			DibBlt(hdc, x-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2+VUMETERS_LOWIDTH, vur * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2+VUMETERS_LOWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
 		} else
 		if (m_nDetailLevel <= PatternCursor::volumeColumn)
 		{
 			DibBlt(hdc, x - VUMETERS_MEDWIDTH-1, y, VUMETERS_MEDWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2, vul * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				VUMETERS_BMPWIDTH*2, vul * VUMETERS_BMPHEIGHT, bmp);
 			DibBlt(hdc, x, y, VUMETERS_MEDWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH, vur * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
 		} else
 		{
 			DibBlt(hdc, x - VUMETERS_BMPWIDTH - 1, y, VUMETERS_BMPWIDTH, VUMETERS_BMPHEIGHT,
-				0, vul * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				0, vul * VUMETERS_BMPHEIGHT, bmp);
 			DibBlt(hdc, x + 1, y, VUMETERS_BMPWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH, vur * VUMETERS_BMPHEIGHT, CMainFrame::bmpVUMeters);
+				VUMETERS_BMPWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
 		}
 		OldVUMeters[nChn] = ChnVUMeters[nChn];
 	}
@@ -1307,7 +1308,7 @@ void CViewPattern::UpdateScrollSize()
 		sizePage.cy = sizeLine.cy * 8;
 		GetClientRect(&rect);
 		m_nMidRow = 0;
-		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
+		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy * 2);
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue
@@ -1731,10 +1732,10 @@ void CViewPattern::UpdateXInfoText()
 			pSndFile->m_PlayState.Chn[nChn].nGlobalVol,
 			pSndFile->m_PlayState.Chn[nChn].nActiveMacro,
 			pSndFile->m_PlayState.Chn[nChn].nCutOff,
-			(pSndFile->m_PlayState.Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
+			(pSndFile->m_PlayState.Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? _T("-Hi") : _T(""),
 			pSndFile->m_PlayState.Chn[nChn].nResonance,
 			pSndFile->m_PlayState.Chn[nChn].nPan,
-			pSndFile->m_PlayState.Chn[nChn].dwFlags[CHN_SURROUND] ? "-S" : "");
+			pSndFile->m_PlayState.Chn[nChn].dwFlags[CHN_SURROUND] ? _T("-S") : _T(""));
 
 		pMainFrm->SetXInfoText(xtraInfo);
 	}

@@ -26,18 +26,19 @@ static const struct ColorDescriptions
 	const char *descText1, *descText2, *descText3;
 } colorDefs[] =
 {
-	{"Pattern Editor",	0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
-	{"Active Row",		0,	MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, "Background:", "Foreground:", NULL},
-	{"Pattern Selection",0,	MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0, "Background:", "Foreground:", NULL},
-	{"Play Cursor",		0,	MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, "Background:", "Foreground:", NULL},
-	{"Note Highlight",	0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
-	{"Effect Highlight",0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
-	{"Invalid Commands",0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
-	{"Channel Separator",0,	MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, "Highlight:", "Face:", "Shadow:"},
-	{"Next/Prev Pattern",0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend Colour:", NULL, NULL},
-	{"Sample Editor",	1,	MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, "Sample Data:", "Background:", "Selection:"},
-	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, "Envelopes:", "Background:", NULL},
-	{"VU-Meters",		0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"}
+	{"Pattern Editor",		0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
+	{"Active Row",			0,	MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, "Background:", "Foreground:", nullptr },
+	{"Pattern Selection",	0,	MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0, "Background:", "Foreground:", nullptr },
+	{"Play Cursor",			0,	MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, "Background:", "Foreground:", nullptr },
+	{"Note Highlight",		0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
+	{"Effect Highlight",	0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
+	{"Invalid Commands",	0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
+	{"Channel Separator",	0,	MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, "Highlight:", "Face:", "Shadow:"},
+	{"Next/Prev Pattern",	0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend Colour:", NULL, NULL},
+	{"Sample Editor",		1,	MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, "Sample Data:", "Background:", "Selection:"},
+	{"Instrument Editor",	2,	MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, "Envelopes:", "Background:", nullptr },
+	{"VU-Meters",			0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"},
+	{"VU-Meters (Plugins)",	0,	MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST, "Hi:", "Med:", "Lo:"}
 };
 
 #define PREVIEWBMP_WIDTH	88
@@ -478,11 +479,11 @@ void COptionsColors::OnSettingsChanged()
 void COptionsColors::OnUpdateDialog()
 //-----------------------------------
 {
-	const ColorDescriptions *p = &colorDefs[m_nColorItem];
-	if (p->descText1) m_TxtColor1.SetWindowText(p->descText1);
-	if (p->descText2)
+	const ColorDescriptions &cd = colorDefs[m_nColorItem];
+	if (cd.descText1) m_TxtColor1.SetWindowText(cd.descText1);
+	if (cd.descText2)
 	{
-		m_TxtColor2.SetWindowText(p->descText2);
+		m_TxtColor2.SetWindowText(cd.descText2);
 		m_TxtColor2.ShowWindow(SW_SHOW);
 		m_BtnColor2.ShowWindow(SW_SHOW);
 		m_BtnColor2.InvalidateRect(NULL, FALSE);
@@ -491,9 +492,9 @@ void COptionsColors::OnUpdateDialog()
 		m_TxtColor2.ShowWindow(SW_HIDE);
 		m_BtnColor2.ShowWindow(SW_HIDE);
 	}
-	if (p->descText3)
+	if (cd.descText3)
 	{
-		m_TxtColor3.SetWindowText(p->descText3);
+		m_TxtColor3.SetWindowText(cd.descText3);
 		m_TxtColor3.ShowWindow(SW_SHOW);
 		m_BtnColor3.ShowWindow(SW_SHOW);
 		m_BtnColor3.InvalidateRect(NULL, FALSE);
@@ -549,6 +550,9 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x2E, 0x2E, 0x5C);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x40, 0x80);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x99, 0x99, 0xCC);
@@ -585,6 +589,9 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x23, 0x38, 0x23);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x68, 0x40);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x94, 0xBC, 0x94);
@@ -620,6 +627,9 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xAC, 0xA8, 0xA1);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD6, 0xD0, 0xC6);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);
@@ -644,7 +654,7 @@ void COptionsColors::OnLoadColorScheme()
 	OnPresetMPT();
 	{
 		IniFileSettingsContainer file(dlg.GetFirstFile());
-		for(int i = 0; i < MAX_MODCOLORS; i++)
+		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
 			wsprintf(sKeyName, _T("Color%02u"), i);
@@ -665,7 +675,7 @@ void COptionsColors::OnSaveColorScheme()
 
 	{
 		IniFileSettingsContainer file(dlg.GetFirstFile());
-		for(int i = 0; i < MAX_MODCOLORS; i++)
+		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
 			wsprintf(sKeyName, _T("Color%02u"), i);
