@@ -2,9 +2,8 @@
  * SampleFormats.cpp
  * -----------------
  * Purpose: Code for loading various more or less common sample and instrument formats.
- * Notes  : Needs a lot of rewriting.
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -1504,7 +1503,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			std::string::size_type charsRead = 0;
 
-			if(s.substr(0, 1) == "<" && (charsRead = s.find('>')) != std::string::npos)
+			if(s[0] == '<' && (charsRead = s.find('>')) != std::string::npos)
 			{
 				// Section header
 				std::string sec = s.substr(1, charsRead - 1);
@@ -1561,10 +1560,12 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					charsRead = s.find_first_of("=\t<", valueStart);
 					if(charsRead != std::string::npos && s[charsRead] == '=')
 					{
-						while(charsRead > valueStart && s[charsRead] != ' ')
-						{
+						// Backtrack to end of key
+						while(charsRead > valueStart && (s[charsRead] == ' ')
 							charsRead--;
-						}
+						// Backtrack to start of key
+						while(charsRead > valueStart && s[charsRead] != ' ')
+							charsRead--;
 					}
 				} else
 				{
@@ -1723,6 +1724,15 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		} else if(sample.nLoopEnd <= sample.nLoopStart && region->loopMode)
 		{
 			sample.nLoopEnd = sample.nLength;
+		}
+		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region->loopMode == CHN_SUSTAINLOOP)
+		{
+			// Turn normal loop (impored from sample) into sustain loop
+			std::swap(sample.nSustainStart, sample.nLoopStart);
+			std::swap(sample.nSustainEnd, sample.nLoopEnd);
+			sample.uFlags.set(CHN_SUSTAINLOOP);
+			sample.uFlags.set(CHN_PINGPONGSUSTAIN, sample.uFlags[CHN_PINGPONGLOOP]);
+			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
 		if(region->offset && region->offset < sample.nLength)
 		{
