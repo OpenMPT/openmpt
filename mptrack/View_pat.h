@@ -142,7 +142,7 @@ protected:
 	uint32 m_nPlayTick, m_nTicksOnRow;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
 	ORDERINDEX m_nOrder;
-	int32 m_nTransposeAmount;
+	static int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
 	PatternCursor::Columns m_nDetailLevel;	// Visible Columns
