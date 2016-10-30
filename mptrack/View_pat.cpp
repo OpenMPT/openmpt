@@ -38,6 +38,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Static initializers
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
+int32 CViewPattern::m_nTransposeAmount = 1;
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -144,7 +145,6 @@ CViewPattern::CViewPattern()
 	m_pEffectVis = nullptr; //rewbs.fxvis
 	m_bLastNoteEntryBlocked = false;
 
-	m_nTransposeAmount = 1;
 	m_nPattern = 0;
 	m_nOrder = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;
@@ -4921,9 +4921,9 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		{
 			// We're overwriting a normal cell with a PC note.
 			newcmd = m_PCNoteEditMemory;
-			if((pTarget->command == CMD_MIDI || pTarget->command == CMD_SMOOTHMIDI) && pTarget->param < 0x80)
+			if((pTarget->command == CMD_MIDI || pTarget->command == CMD_SMOOTHMIDI) && pTarget->param < 128)
 			{
-				newcmd.SetValueEffectCol(static_cast<uint16>(Util::muldiv(pTarget->param, ModCommand::maxColumnValue, 0x7F)));
+				newcmd.SetValueEffectCol(static_cast<decltype(newcmd.GetValueEffectCol())>(Util::muldivr(pTarget->param, ModCommand::maxColumnValue, 127)));
 				if(!newcmd.instr)
 					newcmd.instr = sndFile.ChnSettings[nChn].nMixPlugin;
 				auto activeMacro = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
@@ -4931,7 +4931,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 				{
 					PlugParamIndex plugParam = sndFile.m_MidiCfg.MacroToPlugParam(sndFile.m_PlayState.Chn[nChn].nActiveMacro);
 					if(plugParam < ModCommand::maxColumnValue)
-						newcmd.SetValueVolCol(static_cast<uint16>(plugParam));
+						newcmd.SetValueVolCol(static_cast<decltype(newcmd.GetValueVolCol())>(plugParam));
 				}
 			}
 		} else if(recordEnabled)
