@@ -219,6 +219,8 @@ public:
 	bool UpdateChannelMuteStatus(CHANNELINDEX nChn);
 	bool MuteSample(SAMPLEINDEX nSample, bool bMute);
 	bool MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute);
+	// Returns true if toggling the mute status of a channel should set the document as modified given the current module format and settings.
+	bool MuteToggleModifiesDocument() const;
 
 	bool SoloChannel(CHANNELINDEX nChn, bool bSolo);
 	bool IsChannelSolo(CHANNELINDEX nChn) const;
