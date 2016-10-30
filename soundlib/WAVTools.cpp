@@ -524,7 +524,7 @@ void WAVWriter::WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext)
 void WAVWriter::WriteLoopInformation(const ModSample &sample)
 //-----------------------------------------------------------
 {
-	if(!sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP])
+	if(!sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP] && !ModCommand::IsNote(sample.rootNote))
 	{
 		return;
 	}

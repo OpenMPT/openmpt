@@ -542,9 +542,9 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 		FLAC__metadata_object_application_set_data(metadata[1], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 	}
-	if(metadata[numBlocks] && sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP])
+	if(metadata[numBlocks] && (sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP] || ModCommand::IsNote(sample.rootNote)))
 	{
-		// Store loop points
+		// Store loop points / root note information
 		memcpy(metadata[numBlocks]->data.application.id, "riff", 4);
 
 		struct

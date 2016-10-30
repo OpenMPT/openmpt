@@ -1664,12 +1664,15 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				region->keyRoot = 60;
 		}
 
-		int8 transp = NOTE_MIN + region->transpose + (60 - region->keyRoot);
+		int8 transp = region->transpose + (60 - region->keyRoot);
 		for(uint8 i = keyLo; i <= keyHi; i++)
 		{
 			pIns->Keyboard[i] = smp;
-			pIns->NoteMap[i] = i + transp;
+			if(GetType() != MOD_TYPE_XM)
+				pIns->NoteMap[i] = NOTE_MIN + i + transp;
 		}
+		if(GetType() == MOD_TYPE_XM)
+			sample.Transpose(transp / 12.0);
 
 		pIns->nFilterMode = region->filterType;
 		if(region->cutoff != 0)
@@ -1727,7 +1730,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region->loopMode == CHN_SUSTAINLOOP)
 		{
-			// Turn normal loop (impored from sample) into sustain loop
+			// Turn normal loop (imported from sample) into sustain loop
 			std::swap(sample.nSustainStart, sample.nLoopStart);
 			std::swap(sample.nSustainEnd, sample.nLoopEnd);
 			sample.uFlags.set(CHN_SUSTAINLOOP);
