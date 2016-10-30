@@ -550,7 +550,7 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
 	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x2E, 0x2E, 0x5C);
@@ -589,7 +589,7 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
 	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x23, 0x38, 0x23);
@@ -627,7 +627,7 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x00, 0x80, 0xC8);
+	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
 	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xAC, 0xA8, 0xA1);

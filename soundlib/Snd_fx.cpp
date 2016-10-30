@@ -4927,7 +4927,8 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 			if (pPlug != nullptr)
 			{
 				pPlug->MidiCommand(GetBestMidiChannel(chn), pIns->nMidiProgram, pIns->wMidiBank, note, volume, chn);
-				channel.nLeftVU = channel.nRightVU = 0xFF;
+				if(note < NOTE_MIN_SPECIAL)
+					channel.nLeftVU = channel.nRightVU = 0xFF;
 			}
 		}
 	}
