@@ -541,10 +541,10 @@ void CModDoc::OnAppendModule()
 	CTrackApp::OpenModulesDialog(files);
 
 	ScopedLogCapturer logcapture(*this, "Append Failures");
-	CSoundFile *source;
+	std::unique_ptr<CSoundFile> source;
 	try
 	{
-		source = new CSoundFile;
+		source = mpt::make_unique<CSoundFile>();
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -565,7 +565,6 @@ void CModDoc::OnAppendModule()
 			AddToLog("Unable to open source file!");
 		}
 	}
-	delete source;
 	UpdateAllViews(nullptr, SequenceHint().Data().ModType());
 }
 
@@ -987,7 +986,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.dwFlags = (sample.uFlags & (CHN_SAMPLEFLAGS & ~CHN_MUTE));
 			chn.nPan = 128;
 			if (sample.uFlags[CHN_PANNING]) chn.nPan = sample.nPan;
-			chn.nInsVol = sample.nGlobalVol;
+			chn.UpdateInstrumentVolume(&sample, nullptr);
 		}
 		chn.nFadeOutVol = 0x10000;
 
@@ -1173,6 +1172,13 @@ bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 }
 
 
+bool CModDoc::MuteToggleModifiesDocument() const
+//----------------------------------------------
+{
+	return (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) && TrackerSettings::Instance().MiscSaveChannelMuteStatus;
+}
+
+
 bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 //-------------------------------------------------------
 {
@@ -1185,13 +1191,9 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_MUTE, doMute);
 
 	const bool success = UpdateChannelMuteStatus(nChn);
-	if(success)
+	if(success && MuteToggleModifiesDocument())
 	{
-		//Mark IT/MPTM/S3M as modified
-		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M))
-		{
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
-		}
+		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
 	return success;
@@ -1262,7 +1264,7 @@ bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
 //------------------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return false;
-	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) SetModified();
+	if (MuteToggleModifiesDocument()) SetModified();
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_SOLO, bSolo);
 	return true;
 }
