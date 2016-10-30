@@ -1561,7 +1561,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					if(charsRead != std::string::npos && s[charsRead] == '=')
 					{
 						// Backtrack to end of key
-						while(charsRead > valueStart && (s[charsRead] == ' ')
+						while(charsRead > valueStart && s[charsRead] == ' ')
 							charsRead--;
 						// Backtrack to start of key
 						while(charsRead > valueStart && s[charsRead] != ' ')
