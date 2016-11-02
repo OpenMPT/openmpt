@@ -269,7 +269,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Pattern Editor
 	, gbLoopSong(conf, "Pattern Editor", "LoopSong", true)
 	, gnPatternSpacing(conf, "Pattern Editor", "Spacing", 0)
-	, gbPatternVUMeters(conf, "Pattern Editor", "VU-Meters", false)
+	, gbPatternVUMeters(conf, "Pattern Editor", "VU-Meters", true)
 	, gbPatternPluginNames(conf, "Pattern Editor", "Plugin-Names", true)
 	, gbPatternRecord(conf, "Pattern Editor", "Record", true)
 	, patternNoEditPopup(conf, "Pattern Editor", "NoEditPopup", false)
