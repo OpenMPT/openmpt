@@ -1294,6 +1294,15 @@ static MPT_NOINLINE void TestMisc()
 		for(int32 finetune = -128; finetune < 128; finetune += 64, freqIndex++)
 			VERIFY_EQUAL_EPS(transposeToFrequency[freqIndex], static_cast<int32>(ModSample::TransposeToFrequency(transpose, finetune)), 1);
 
+	{
+		ModSample smp;
+		smp.nC5Speed = 9999;
+		smp.Transpose(1.5);
+		VERIFY_EQUAL_EPS(28281, static_cast<int32>(smp.nC5Speed), 1);
+		smp.Transpose(-1.3);
+		VERIFY_EQUAL_EPS(11486, static_cast<int32>(smp.nC5Speed), 1);
+	}
+
 	// Check SamplePosition fixed-point type
 	VERIFY_EQUAL(SamplePosition(1).GetRaw(), 1);
 	VERIFY_EQUAL(SamplePosition(2).Set(1), SamplePosition(1, 0));
@@ -2713,6 +2722,12 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		return;
 	}
+
+#ifdef MODPLUG_TRACKER
+	bool saveMutedChannels = TrackerSettings::Instance().MiscSaveChannelMuteStatus;
+	TrackerSettings::Instance().MiscSaveChannelMuteStatus = true;
+#endif
+
 	mpt::PathString filenameBaseSrc = GetTestFilenameBase();
 	mpt::PathString filenameBase = GetTempFilenameBase();
 
@@ -2847,6 +2862,10 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		expected += std::string(1, 0x78);
 		VERIFY_EQUAL(f.str(), expected);
 	}
+
+#ifdef MODPLUG_TRACKER
+	TrackerSettings::Instance().MiscSaveChannelMuteStatus = saveMutedChannels;
+#endif
 }
 
 
