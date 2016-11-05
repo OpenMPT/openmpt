@@ -3307,18 +3307,9 @@ bool CSoundFile::ProcessEffects()
 					m_PlayState.Chn[i].nPatternLoopCount = 0;
 				}
 			}
-			if(GetType() == MOD_TYPE_S3M)
-			{
-				// Reset pattern loop start
-				// Test case: LoopReset.s3m
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-				{
-					m_PlayState.Chn[i].nPatternLoop = 0;
-				}
-			}
+
 			m_PlayState.m_nNextOrder = nPosJump;
 			m_PlayState.m_nNextRow = nBreakRow;
-			m_PlayState.m_bPatternTransitionOccurred = true;
 		}
 
 	}
