@@ -456,22 +456,24 @@ bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
 }
 
 
-template<class T, class SIZETYPE>
-bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
-//-----------------------------------------------------------------------------------------------------------------------------------
+template<class T, class SIZETYPE, class Tdst>
+static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
+//---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!inStrm.good()) return true;
 
-	SIZETYPE size;
-	inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
+	SIZETYPE size = 0;
+	mpt::IO::ReadIntLE<SIZETYPE>(inStrm, size);
 
 	if(size > maxSize)
 		return true;
 
 	v.resize(size);
-	for(size_t i = 0; i<size; i++)
+	for(std::size_t i = 0; i<size; i++)
 	{
-		inStrm.read(reinterpret_cast<char*>(&v[i]), sizeof(T));
+		T tmp = T();
+		mpt::IO::Read(inStrm, tmp);
+		v[i] = tmp;
 	}
 	if(inStrm.good())
 		return false;
@@ -486,15 +488,13 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	if(!inStrm.good())
 		return 0;
 
-	char begin[8];
-	char end[8];
-	int16 version;
-
-	const long startPos = inStrm.tellg();
+	const std::streamoff startPos = inStrm.tellg();
 
 	//First checking is there expected begin sequence.
-	inStrm.read(reinterpret_cast<char*>(&begin), sizeof(begin));
-	if(memcmp(begin, "CTRTI_B.", 8))
+	char begin[8];
+	MemsetZero(begin);
+	inStrm.read(begin, sizeof(begin));
+	if(std::memcmp(begin, "CTRTI_B.", 8))
 	{
 		//Returning stream position if beginmarker was not found.
 		inStrm.seekg(startPos);
@@ -502,7 +502,8 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	}
 
 	//Version
-	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
+	int16 version = 0;
+	mpt::IO::ReadIntLE<int16>(inStrm, version);
 	if(version != 3)
 		return 0;
 
@@ -516,31 +517,34 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	}
 
 	//Ratiotable
-	if(VectorFromBinaryStream<RATIOTYPE, uint16>(inStrm, pT->m_RatioTable))
+	if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTable))
 	{
 		delete pT;
 		return 0;
 	}
 
 	//Fineratios
-	if(VectorFromBinaryStream<RATIOTYPE, uint16>(inStrm, pT->m_RatioTableFine))
+	if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTableFine))
 	{
 		delete pT;
 		return 0;
 	}
-	else
-		pT->m_FineStepCount = pT->m_RatioTableFine.size();
+	pT->m_FineStepCount = pT->m_RatioTableFine.size();
 
 	//m_StepMin
-	inStrm.read(reinterpret_cast<char*>(&pT->m_StepMin), sizeof(pT->m_StepMin));
-	if (pT->m_StepMin < -200 || pT->m_StepMin > 200)
+	int16 stepmin = 0;
+	mpt::IO::ReadIntLE<int16>(inStrm, stepmin);
+	pT->m_StepMin = stepmin;
+	if(pT->m_StepMin < -200 || pT->m_StepMin > 200)
 	{
 		delete pT;
 		return nullptr;
 	}
 
 	//m_GroupSize
-	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupSize), sizeof(pT->m_GroupSize));
+	int16 groupsize = 0;
+	mpt::IO::ReadIntLE<int16>(inStrm, groupsize);
+	pT->m_GroupSize = groupsize;
 	if(pT->m_GroupSize < 0)
 	{
 		delete pT;
@@ -548,7 +552,9 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	}
 
 	//m_GroupRatio
-	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupRatio), sizeof(pT->m_GroupRatio));
+	IEEE754binary32LE groupratio = IEEE754binary32LE(0.0f);
+	mpt::IO::Read(inStrm, groupratio);
+	pT->m_GroupRatio = groupratio;
 	if(pT->m_GroupRatio < 0)
 	{
 		delete pT;
@@ -557,13 +563,14 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 
 	if(pT->GetFineStepCount() > 0) pT->ProSetFineStepCount(pT->GetFineStepCount() - 1);
 
+	char end[8];
+	MemsetZero(end);
 	inStrm.read(reinterpret_cast<char*>(&end), sizeof(end));
-	if(memcmp(end, "CTRTI_E.", 8))
+	if(std::memcmp(end, "CTRTI_E.", 8))
 	{
 		delete pT;
 		return 0;
 	}
-
 
 	return pT;
 }
