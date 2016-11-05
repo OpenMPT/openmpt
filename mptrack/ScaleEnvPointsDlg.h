@@ -33,6 +33,8 @@ public:
 		, m_nCenter(nCenter)
 	{ }
 
+	void Apply();
+
 protected:
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();

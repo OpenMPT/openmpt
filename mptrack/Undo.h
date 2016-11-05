@@ -102,7 +102,6 @@ public:
 };
 
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 // Sample Undo
 
@@ -176,6 +175,64 @@ public:
 		ClearUndo();
 	};
 
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Instrument Undo
+
+
+//===================
+class CInstrumentUndo
+//===================
+{
+protected:
+
+	struct UndoInfo
+	{
+		ModInstrument instr;
+		const char *description;
+		EnvelopeType editedEnvelope;
+	};
+
+	typedef std::vector<std::vector<UndoInfo> > undobuf_t;
+	undobuf_t UndoBuffer;
+	undobuf_t RedoBuffer;
+
+	CModDoc &modDoc;
+
+	// Instrument undo helper functions
+	void ClearUndo(undobuf_t &buffer, const INSTRUMENTINDEX ins);
+	void DeleteStep(undobuf_t &buffer, const INSTRUMENTINDEX ins, const size_t step);
+	bool InstrumentBufferExists(const undobuf_t &buffer, const INSTRUMENTINDEX ins) const;
+	void RearrangeInstruments(undobuf_t &buffer, const std::vector<INSTRUMENTINDEX> &newIndex);
+	void RearrangeSamples(undobuf_t &buffer, const INSTRUMENTINDEX ins, std::vector<SAMPLEINDEX> &newIndex);
+
+	bool PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins, const char *description, EnvelopeType envType);
+	bool Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const INSTRUMENTINDEX ins);
+
+public:
+
+	// Instrument undo functions
+	void ClearUndo();
+	void ClearUndo(const INSTRUMENTINDEX ins) { ClearUndo(UndoBuffer, ins); ClearUndo(RedoBuffer, ins); }
+	bool PrepareUndo(const INSTRUMENTINDEX ins, const char *description, EnvelopeType envType = ENV_MAXTYPES);
+	bool Undo(const INSTRUMENTINDEX ins);
+	bool Redo(const INSTRUMENTINDEX ins);
+	bool CanUndo(const INSTRUMENTINDEX ins) const { return InstrumentBufferExists(UndoBuffer, ins) && !UndoBuffer[ins - 1].empty(); }
+	bool CanRedo(const INSTRUMENTINDEX ins) const { return InstrumentBufferExists(RedoBuffer, ins) && !RedoBuffer[ins - 1].empty(); }
+	void RemoveLastUndoStep(const INSTRUMENTINDEX ins);
+	const char *GetUndoName(const INSTRUMENTINDEX ins) const;
+	const char *GetRedoName(const INSTRUMENTINDEX ins) const;
+	void RearrangeInstruments(const std::vector<INSTRUMENTINDEX> &newIndex) { RearrangeInstruments(UndoBuffer, newIndex); RearrangeInstruments(RedoBuffer, newIndex); }
+	void RearrangeSamples(const INSTRUMENTINDEX ins, std::vector<SAMPLEINDEX> &newIndex) { RearrangeSamples(UndoBuffer, ins, newIndex); RearrangeSamples(RedoBuffer, ins, newIndex); }
+
+	CInstrumentUndo(CModDoc &parent) : modDoc(parent) { }
+
+	~CInstrumentUndo()
+	{
+		ClearUndo();
+	};
 };
 
 
