@@ -432,12 +432,12 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 //----------------------------------------------------
 {
 	char begin[8];
-	int16 version;
-
+	MemsetZero(begin);
 	inStrm.read(begin, sizeof(begin));
-	if(memcmp(begin, "CT<sfs>B", 8)) return SERIALIZATION_FAILURE;
+	if(std::memcmp(begin, "CT<sfs>B", 8)) return SERIALIZATION_FAILURE;
 
-	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
+	int16 version = 0;
+	mpt::IO::ReadIntLE<int16>(inStrm, version);
 	if(version != 4) return SERIALIZATION_FAILURE;
 
 	//Tuning name
@@ -446,22 +446,22 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 
 	//Const mask
 	int16 em = 0;
-	inStrm.read(reinterpret_cast<char*>(&em), sizeof(em));
+	mpt::IO::ReadIntLE<int16>(inStrm, em);
 	m_EditMask = em;
 
 	//Tuning type
 	int16 tt = 0;
-	inStrm.read(reinterpret_cast<char*>(&tt), sizeof(tt));
+	mpt::IO::ReadIntLE<int16>(inStrm, tt);
 	m_TuningType = tt;
 
 	//Notemap
-	UNOTEINDEXTYPE size;
-	inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
-	for(size_t i = 0; i<size; i++)
+	uint16 size = 0;
+	mpt::IO::ReadIntLE<uint16>(inStrm, size);
+	for(UNOTEINDEXTYPE i = 0; i<size; i++)
 	{
-		NOTEINDEXTYPE n;
 		std::string str;
-		inStrm.read(reinterpret_cast<char*>(&n), sizeof(n));
+		int16 n = 0;
+		mpt::IO::ReadIntLE<int16>(inStrm, n);
 		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, str))
 			return SERIALIZATION_FAILURE;
 		m_NoteNameMap[n] = str;
@@ -469,8 +469,9 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 
 	//End marker
 	char end[8];
+	MemsetZero(end);
 	inStrm.read(end, sizeof(end));
-	if(memcmp(end, "CT<sfs>E", 8)) return SERIALIZATION_FAILURE;
+	if(std::memcmp(end, "CT<sfs>E", 8)) return SERIALIZATION_FAILURE;
 
 	return SERIALIZATION_SUCCESS;
 }
