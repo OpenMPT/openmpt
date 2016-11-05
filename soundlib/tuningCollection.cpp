@@ -206,16 +206,16 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 	//s_SerializationBeginMarker = 0x54435348;  //ascii of TCSH
 	//s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
 
-	int32 beginMarker, endMarker, version;
-
 	loadingSuccessful = false;
 
 	//1. begin marker:
-	inStrm.read(reinterpret_cast<char*>(&beginMarker), sizeof(beginMarker));
+	int32 beginMarker = 0;
+	mpt::IO::ReadIntLE<int32>(inStrm, beginMarker);
 	if(beginMarker != 0x54435348) return true;
 
 	//2. version
-	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
+	int32 version = 0;
+	mpt::IO::ReadIntLE<int32>(inStrm, version);
 	if(version > 2 || version < 1)
 		return false;
 
@@ -233,14 +233,14 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 
 	//4. Editmask
 	int16 em = 0;
-	inStrm.read(reinterpret_cast<char*>(&em), sizeof(em));
+	mpt::IO::ReadIntLE<int16>(inStrm, em);
 	//Not assigning the value yet, for if it sets some property const,
 	//further loading might fail.
 
     //5. Tunings
 	{
-		size_t s = 0;
-		inStrm.read(reinterpret_cast<char*>(&s), sizeof(s));
+		uint32 s = 0;
+		mpt::IO::ReadIntLE<uint32>(inStrm, s);
 		if(s > 50) return false;
 		for(size_t i = 0; i<s; i++)
 		{
@@ -250,7 +250,8 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 	}
 
 	//6. End marker
-	inStrm.read(reinterpret_cast<char*>(&endMarker), sizeof(endMarker));
+	int32 endMarker = 0;
+	mpt::IO::ReadIntLE<int32>(inStrm, endMarker);
 	if(endMarker != 0x54435346) return false;
 
 	m_EditMask = em;
