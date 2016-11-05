@@ -338,6 +338,7 @@ struct AMEnvelope
 			switch(envType)
 			{
 			case ENV_VOLUME:	// 0....32767
+			default:
 				mptEnv[i].value = (uint8)((val + 1) >> 9);
 				break;
 			case ENV_PITCH:		// -4096....4096
