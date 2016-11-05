@@ -480,6 +480,95 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 }
 
 
+CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
+//----------------------------------------------------------
+{
+	if(!inStrm.good())
+		return 0;
+
+	char begin[8];
+	char end[8];
+	int16 version;
+
+	const long startPos = inStrm.tellg();
+
+	//First checking is there expected begin sequence.
+	inStrm.read(reinterpret_cast<char*>(&begin), sizeof(begin));
+	if(memcmp(begin, "CTRTI_B.", 8))
+	{
+		//Returning stream position if beginmarker was not found.
+		inStrm.seekg(startPos);
+		return 0;
+	}
+
+	//Version
+	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
+	if(version != 3)
+		return 0;
+
+	CTuningRTI* pT = new CTuningRTI;
+
+	//Baseclass deserialization
+	if(pT->CTuning::DeserializeOLD(inStrm) == SERIALIZATION_FAILURE)
+	{
+		delete pT;
+		return 0;
+	}
+
+	//Ratiotable
+	if(VectorFromBinaryStream<RATIOTYPE, uint16>(inStrm, pT->m_RatioTable))
+	{
+		delete pT;
+		return 0;
+	}
+
+	//Fineratios
+	if(VectorFromBinaryStream<RATIOTYPE, uint16>(inStrm, pT->m_RatioTableFine))
+	{
+		delete pT;
+		return 0;
+	}
+	else
+		pT->m_FineStepCount = pT->m_RatioTableFine.size();
+
+	//m_StepMin
+	inStrm.read(reinterpret_cast<char*>(&pT->m_StepMin), sizeof(pT->m_StepMin));
+	if (pT->m_StepMin < -200 || pT->m_StepMin > 200)
+	{
+		delete pT;
+		return nullptr;
+	}
+
+	//m_GroupSize
+	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupSize), sizeof(pT->m_GroupSize));
+	if(pT->m_GroupSize < 0)
+	{
+		delete pT;
+		return 0;
+	}
+
+	//m_GroupRatio
+	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupRatio), sizeof(pT->m_GroupRatio));
+	if(pT->m_GroupRatio < 0)
+	{
+		delete pT;
+		return 0;
+	}
+
+	if(pT->GetFineStepCount() > 0) pT->ProSetFineStepCount(pT->GetFineStepCount() - 1);
+
+	inStrm.read(reinterpret_cast<char*>(&end), sizeof(end));
+	if(memcmp(end, "CTRTI_E.", 8))
+	{
+		delete pT;
+		return 0;
+	}
+
+
+	return pT;
+}
+
+
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //-----------------------------------------------------------------------------------
 {

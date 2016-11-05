@@ -62,7 +62,7 @@ public:
 	static uint32 GetVersion() {return s_SerializationVersion;}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuningRTI* DeserializeOLD(std::istream&) {return 0;}
+	static CTuningRTI* DeserializeOLD(std::istream&);
 
 	SERIALIZATION_RETURN_TYPE Serialize(std::ostream& out) const;
 
