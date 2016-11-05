@@ -340,6 +340,12 @@ BOOL CCtrlComments::PreTranslateMessage(MSG *pMsg)
 		// Ctrl-A is not handled by multiline edit boxes
 		if(::GetFocus() == m_EditComments.m_hWnd)
 			m_EditComments.SetSel(0, -1);
+	} else if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && CMainFrame::GetMainFrame()->GetInputHandler()->GetModifierMask() == 0)
+	{
+		CString tabs(_T(' '), 4 - (m_EditComments.LineIndex() % 4));
+		m_EditComments.ReplaceSel(tabs, TRUE);
+		m_EditComments.SetSel(-1, -1, TRUE);
+		return TRUE;
 	}
 	return CModControlDlg::PreTranslateMessage(pMsg);
 }
