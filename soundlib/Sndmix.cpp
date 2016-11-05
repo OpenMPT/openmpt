@@ -384,6 +384,21 @@ bool CSoundFile::ProcessRow()
 		// Test case: DelayBreak.mod (based on condom_corruption by Travolta)
 		const bool ignoreRow = m_PlayState.m_nPatternDelay != 0 && m_SongFlags[SONG_BREAKTOROW] && GetType() == MOD_TYPE_MOD;
 
+		// Done with the last row of the pattern or jumping somewhere else
+		if(m_PlayState.m_nNextRow == 0 || m_SongFlags[SONG_BREAKTOROW])
+		{
+			m_PlayState.m_bPatternTransitionOccurred = true;
+			if(GetType() == MOD_TYPE_S3M)
+			{
+				// Reset pattern loop start
+				// Test case: LoopReset.s3m
+				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+				{
+					m_PlayState.Chn[i].nPatternLoop = 0;
+				}
+			}
+		}
+
 		HandlePatternTransitionEvents();
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
@@ -602,7 +617,6 @@ bool CSoundFile::ProcessRow()
 		if (m_PlayState.m_nNextRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
 		{
 			if (!m_SongFlags[SONG_PATTERNLOOP]) m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder + 1;
-			m_PlayState.m_bPatternTransitionOccurred = true;
 			m_PlayState.m_nNextRow = 0;
 
 			// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
@@ -611,15 +625,6 @@ bool CSoundFile::ProcessRow()
 			{
 				m_PlayState.m_nNextRow = m_PlayState.m_nNextPatStartRow;
 				m_PlayState.m_nNextPatStartRow = 0;
-			}
-			if(GetType() == MOD_TYPE_S3M)
-			{
-				// Reset pattern loop start
-				// Test case: LoopReset.s3m
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-				{
-					m_PlayState.Chn[i].nPatternLoop = 0;
-				}
 			}
 		}
 		// Reset channel values
