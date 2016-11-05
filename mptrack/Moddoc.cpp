@@ -146,6 +146,7 @@ CModDoc::CModDoc()
 	, m_notifyItem(0)
 	, m_PatternUndo(*this)
 	, m_SampleUndo(*this)
+	, m_InstrumentUndo(*this)
 	, bModifiedAutosave(false)
 //---------------------------------------
 {

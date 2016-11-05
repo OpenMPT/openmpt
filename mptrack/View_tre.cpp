@@ -1659,6 +1659,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		wsprintf(s, _T("Remove instrument %u?"), modItemID);
 		if(Reporting::Confirm(s, false, true) == cnfYes)
 		{
+			modDoc->GetInstrumentUndo().PrepareUndo((INSTRUMENTINDEX)modItemID, "Delete");
 			const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
 			if(modDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
 			{

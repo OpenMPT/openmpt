@@ -397,15 +397,13 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			{
 				continue;
 			}
+			GetInstrumentUndo().RearrangeSamples(i, newIndex);
 			for(size_t note = 0; note < CountOf(ins->Keyboard); note++)
 			{
-				if(ins->Keyboard[note] > 0 && ins->Keyboard[note] <= oldNumSamples)
-				{
+				if(ins->Keyboard[note] < newIndex.size())
 					ins->Keyboard[note] = newIndex[ins->Keyboard[note]];
-				} else
-				{
+				else
 					ins->Keyboard[note] = 0;
-				}
 			}
 		}
 	} else
@@ -487,6 +485,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 	}
 
 	PrepareUndoForAllPatterns(false, "Rearrange Instrumens");
+	GetInstrumentUndo().RearrangeInstruments(newIndex);
 
 	std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 	for(size_t i = 0; i < newIndex.size(); i++)
@@ -542,6 +541,7 @@ bool CModDoc::ConvertInstrumentsToSamples()
 //-----------------------------------------
 {
 	if (!m_SndFile.GetNumInstruments()) return false;
+	GetInstrumentUndo().ClearUndo();
 	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
 	return true;
 }

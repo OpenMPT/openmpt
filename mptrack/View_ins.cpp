@@ -61,7 +61,7 @@ static const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_INSTRUMENT_SAMPLEMAP,
 		ID_SEPARATOR,
-	ID_ENVELOPE_VIEWGRID,			//rewbs.envRowGrid
+	ID_ENVELOPE_VIEWGRID,
 		ID_SEPARATOR,
 	ID_ENVELOPE_ZOOM_IN,
 	ID_ENVELOPE_ZOOM_OUT,
@@ -109,7 +109,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_PANNING,			OnEnvPanChanged)
 	ON_COMMAND(ID_ENVELOPE_PITCH,			OnEnvPitchChanged)
 	ON_COMMAND(ID_ENVELOPE_FILTER,			OnEnvFilterChanged)
-	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid) //rewbs.envRowGrid
+	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid)
 	ON_COMMAND(ID_ENVELOPE_ZOOM_IN,			OnEnvZoomIn)
 	ON_COMMAND(ID_ENVELOPE_ZOOM_OUT,		OnEnvZoomOut)
 	ON_COMMAND(ID_ENVELOPE_LOAD,			OnEnvLoad)
@@ -119,12 +119,19 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVSEL_PITCH,				OnSelectPitchEnv)
 	ON_COMMAND(ID_EDIT_COPY,				OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,				OnEditPaste)
+	ON_COMMAND(ID_EDIT_UNDO,				OnEditUndo)
+	ON_COMMAND(ID_EDIT_REDO,				OnEditRedo)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,		OnEditSampleMap)
-	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, OnEnvToggleReleasNode)
+	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, OnEnvelopeScalePoints)
+
+	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
+
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		OnUpdateUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		OnUpdateRedo)
+
 	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, OnEnvelopeScalepoints)
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
@@ -201,6 +208,13 @@ LRESULT CViewInstrument::OnDPIChanged(WPARAM wParam, LPARAM lParam)
 	LRESULT res = CModScrollView::OnDPIChanged(wParam, lParam);
 	m_envPointSize = Util::ScalePixels(4, m_hWnd);
 	return res;
+}
+
+
+void CViewInstrument::PrepareUndo(const char *description)
+//--------------------------------------------------------
+{
+	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, description, m_nEnv);
 }
 
 
@@ -338,7 +352,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 			if(nTick > maxtick) nTick = maxtick;
 			if(nTick != envelope->at(nPoint).tick)
 			{
-				envelope->at(nPoint).tick = (uint16)nTick;
+				envelope->at(nPoint).tick = static_cast<EnvelopeNode::tick_t>(nTick);
 				ok = true;
 			}
 		}
@@ -348,7 +362,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 			Limit(nValue, 0, maxVal);
 			if(nValue != envelope->at(nPoint).value)
 			{
-				envelope->at(nPoint).value = (uint8)nValue;
+				envelope->at(nPoint).value = static_cast<EnvelopeNode::value_t>(nValue);
 				ok = true;
 			}
 		}
@@ -360,7 +374,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 		tickDiff = envelope->at(nPoint).tick - tickDiff;
 		for(auto it = envelope->begin() + nPoint + 1; it != envelope->end(); it++)
 		{
-			it->tick = (uint16)(std::max(0, (int)it->tick + tickDiff));
+			it->tick = static_cast<EnvelopeNode::tick_t>(std::max(0, (int)it->tick + tickDiff));
 		}
 	}
 
@@ -579,20 +593,21 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 }
 
 // Enable or disable a flag of the current envelope
-bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
-//---------------------------------------------------------------------
+bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable)
+//---------------------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr || envelope->empty()) return false;
 
 	bool modified = envelope->dwFlags[flag] != enable;
+	PrepareUndo("Toggle Envelope Flag");
 	envelope->dwFlags.set(flag, enable);
 	return modified;
 }
 
 
-bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, EnvelopeNode::value_t defaultValue, EnvelopeFlags extraFlags)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	InstrumentEnvelope &env = ins.GetEnvelope(envelope);
 
@@ -686,10 +701,10 @@ int CViewInstrument::ScreenToTick(int x) const
 int CViewInstrument::ScreenToValue(int y) const
 //---------------------------------------------
 {
-	if (m_rcClient.bottom < 2) return 0;
-	int n = 64 - ((y * 64 + 1) / (m_rcClient.bottom - 1));
-	if (n < 0) return 0;
-	if (n > 64) return 64;
+	if (m_rcClient.bottom < 2) return ENVELOPE_MIN;
+	int n = ENVELOPE_MAX - Util::muldivr(y, ENVELOPE_MAX, m_rcClient.bottom - 1);
+	if (n < ENVELOPE_MIN) return ENVELOPE_MIN;
+	if (n > ENVELOPE_MAX) return ENVELOPE_MAX;
 	return n;
 }
 
@@ -1025,6 +1040,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr || envelope->empty()) return false;
 
+			PrepareUndo("Remove Envelope Point");
 			envelope->erase(envelope->begin() + nPoint);
 			if (nPoint >= envelope->size()) nPoint = envelope->size() - 1;
 			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
@@ -1068,7 +1084,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr) return 0;
 
-			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<uint16>(nTick), 0),
+			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<EnvelopeNode::tick_t>(nTick), 0),
 				[] (const EnvelopeNode &l, const EnvelopeNode &r) -> bool { return l.tick < r.tick; }))
 			{
 				// Don't want to insert a node at the same position as another node.
@@ -1095,6 +1111,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 
 			if (envelope->size() < sndFile.GetModSpecifications().envelopePointsMax)
 			{
+				PrepareUndo("Insert Envelope Point");
 				if (envelope->empty())
 				{
 					envelope->push_back(EnvelopeNode(0, defaultValue));
@@ -1102,7 +1119,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				}
 				uint32 i = 0;
 				for (i = 0; i < envelope->size(); i++) if (nTick <= envelope->at(i).tick) break;
-				envelope->insert(envelope->begin() + i, EnvelopeNode(mpt::saturate_cast<uint16>(nTick), static_cast<uint8>(nValue)));
+				envelope->insert(envelope->begin() + i, EnvelopeNode(mpt::saturate_cast<EnvelopeNode::tick_t>(nTick), static_cast<EnvelopeNode::value_t>(nValue)));
 				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
 				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
 				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
@@ -1405,12 +1422,8 @@ void CViewInstrument::OnNcLButtonDblClk(UINT uFlags, CPoint point)
 }
 
 
-#if _MFC_VER > 0x0710
 LRESULT CViewInstrument::OnNcHitTest(CPoint point)
-#else
-UINT CViewInstrument::OnNcHitTest(CPoint point)
-#endif
-//---------------------------------------------
+//------------------------------------------------
 {
 	CRect rect;
 	GetWindowRect(&rect);
@@ -1446,6 +1459,11 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 
 	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
+		if(!m_mouseMoveModified)
+		{
+			PrepareUndo("Move Envelope Point");
+			m_mouseMoveModified = true;
+		}
 		bool bChanged = false;
 		if (pt.x >= m_rcClient.right - 2) nTick++;
 		if (IsDragItemEnvPoint())
@@ -1487,11 +1505,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 				UpdateScrollSize();
 				OnScrollBy(CSize((int)m_fZoom + pt.x - m_rcClient.right, 0), TRUE);
 			}
-			CModDoc *pModDoc = GetDocument();
-			if(pModDoc)
-			{
-				SetModified(InstrumentHint().Envelope(), true);
-			}
+			SetModified(InstrumentHint().Envelope(), true);
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
 	} else
@@ -1610,6 +1624,7 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 //--------------------------------------------------
 {
+	m_mouseMoveModified = false;
 	if (!(m_dwStatus & INSSTATUS_DRAGGING))
 	{
 		CRect rect;
@@ -1698,6 +1713,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 void CViewInstrument::OnLButtonUp(UINT, CPoint)
 //---------------------------------------------
 {
+	m_mouseMoveModified = false;
 	if (m_dwStatus & INSSTATUS_SPLITCURSOR)
 	{
 		m_dwStatus &= ~INSSTATUS_SPLITCURSOR;
@@ -1808,6 +1824,7 @@ void CViewInstrument::OnEnvLoopChanged()
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	PrepareUndo("Toggle Envelope Loop");
 	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
 		InstrumentEnvelope *pEnv = GetEnvelopePtr();
@@ -1815,7 +1832,7 @@ void CViewInstrument::OnEnvLoopChanged()
 		{
 			// Enabled loop => set loop points if no loop has been specified yet.
 			pEnv->nLoopStart = 0;
-			pEnv->nLoopEnd = mpt::saturate_cast<uint8>(pEnv->size() - 1);
+			pEnv->nLoopEnd = mpt::saturate_cast<decltype(pEnv->nLoopEnd)>(pEnv->size() - 1);
 		}
 		SetModified(InstrumentHint().Envelope(), true);
 	}
@@ -1826,13 +1843,14 @@ void CViewInstrument::OnEnvSustainChanged()
 //-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	PrepareUndo("Toggle Envelope Sustain");
 	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
 		InstrumentEnvelope *pEnv = GetEnvelopePtr();
 		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
 		{
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
-			pEnv->nSustainStart = pEnv->nSustainEnd = mpt::saturate_cast<uint8>(m_nDragItem - 1);
+			pEnv->nSustainStart = pEnv->nSustainEnd = mpt::saturate_cast<decltype(pEnv->nSustainEnd)>(m_nDragItem - 1);
 		}
 		SetModified(InstrumentHint().Envelope(), true);
 	}
@@ -1843,6 +1861,7 @@ void CViewInstrument::OnEnvCarryChanged()
 //---------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	PrepareUndo("Toggle Envelope Carry");
 	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
@@ -1852,9 +1871,13 @@ void CViewInstrument::OnEnvCarryChanged()
 void CViewInstrument::OnEnvToggleReleasNode()
 //-------------------------------------------
 {
-	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
+	if(IsDragItemEnvPoint())
 	{
-		SetModified(InstrumentHint().Envelope(), true);
+		PrepareUndo("Toggle Envelope Release Node");
+		if(EnvToggleReleaseNode(m_nDragItem - 1))
+		{
+			SetModified(InstrumentHint().Envelope(), true);
+		}
 	}
 }
 
@@ -1862,6 +1885,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 void CViewInstrument::OnEnvVolChanged()
 //-------------------------------------
 {
+	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Volume Envelope", ENV_VOLUME);
 	if (EnvSetVolEnv(!EnvGetVolEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
@@ -1872,6 +1896,7 @@ void CViewInstrument::OnEnvVolChanged()
 void CViewInstrument::OnEnvPanChanged()
 //-------------------------------------
 {
+	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Panning Envelope", ENV_PANNING);
 	if (EnvSetPanEnv(!EnvGetPanEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
@@ -1882,6 +1907,7 @@ void CViewInstrument::OnEnvPanChanged()
 void CViewInstrument::OnEnvPitchChanged()
 //---------------------------------------
 {
+	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Pitch Envelope", ENV_PITCH);
 	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
@@ -1892,13 +1918,14 @@ void CViewInstrument::OnEnvPitchChanged()
 void CViewInstrument::OnEnvFilterChanged()
 //----------------------------------------
 {
+	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Filter Envelope", ENV_PITCH);
 	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
-//rewbs.envRowGrid
+
 void CViewInstrument::OnEnvToggleGrid()
 //-------------------------------------
 {
@@ -1910,7 +1937,7 @@ void CViewInstrument::OnEnvToggleGrid()
 		pModDoc->UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Envelope());
 
 }
-//end rewbs.envRowGrid
+
 
 void CViewInstrument::OnEnvRemovePoint()
 //--------------------------------------
@@ -1920,6 +1947,7 @@ void CViewInstrument::OnEnvRemovePoint()
 		EnvRemovePoint(m_nDragItem - 1);
 	}
 }
+
 
 void CViewInstrument::OnEnvInsertPoint()
 //--------------------------------------
@@ -1946,9 +1974,13 @@ void CViewInstrument::OnEditPaste()
 //---------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	PrepareUndo("Paste Envelope");
 	if (pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
 	{
 		SetModified(InstrumentHint().Envelope(), true);
+	} else
+	{
+		pModDoc->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 	}
 }
 
@@ -2025,13 +2057,18 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
+			PrepareUndo("Replace Envelope");
 			if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, file))
 			{
 				SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
-			} else if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
+			} else
 			{
-				// Insert more instrument slots
-				SendCtrlMessage(IDC_INSTRUMENT_NEW);
+				GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
+				if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
+				{
+					// Insert more instrument slots
+					SendCtrlMessage(IDC_INSTRUMENT_NEW);
+				}
 			}
 		}
 	}
@@ -2043,8 +2080,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 //----------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL bCanDrop = FALSE;
-	BOOL bUpdate;
+	bool bCanDrop = false;
 
 	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
@@ -2080,7 +2116,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	}
 	if ((!m_nInstrument) || (m_nInstrument > sndFile.GetNumInstruments())) return FALSE;
 	// Do the drop
-	bUpdate = FALSE;
+	bool bUpdate = false;
 	BeginWaitCursor();
 	switch(lpDropInfo->dwDropType)
 	{
@@ -2114,13 +2150,14 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
 					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
-				bCanDrop = FALSE;
+				bCanDrop = false;
 				if (pDlsIns)
 				{
 					CriticalSection cs;
+					pModDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
 					bCanDrop = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
 				}
-				bUpdate = TRUE;
+				bUpdate = true;
 				break;
 			}
 		}
@@ -2147,8 +2184,9 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 
 			CriticalSection cs;
 
+			pModDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
 			bCanDrop = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
-			bUpdate = TRUE;
+			bUpdate = true;
 		}
 		break;
 	}
@@ -2235,6 +2273,8 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
+		case kcEditUndo:		OnEditUndo(); return wParam;
+		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 		case kcInstrumentLoad:	SendCtrlMessage(IDC_INSTRUMENT_OPEN); return wParam;
@@ -2246,7 +2286,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentEnvelopeSave:					OnEnvSave(); return wParam;
 		case kcInstrumentEnvelopeZoomIn:				OnEnvZoomIn(); return wParam;
 		case kcInstrumentEnvelopeZoomOut:				OnEnvZoomOut(); return wParam;
-		case kcInstrumentEnvelopeScale:					OnEnvelopeScalepoints(); return wParam;
+		case kcInstrumentEnvelopeScale:					OnEnvelopeScalePoints(); return wParam;
 		case kcInstrumentEnvelopeSelectLoopStart:		EnvKbdSelectPoint(ENV_DRAGLOOPSTART); return wParam;
 		case kcInstrumentEnvelopeSelectLoopEnd:			EnvKbdSelectPoint(ENV_DRAGLOOPEND); return wParam;
 		case kcInstrumentEnvelopeSelectSustainStart:	EnvKbdSelectPoint(ENV_DRAGSUSTAINSTART); return wParam;
@@ -2286,7 +2326,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 }
 
 
-void CViewInstrument::OnEnvelopeScalepoints()
+void CViewInstrument::OnEnvelopeScalePoints()
 //-------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -2304,6 +2344,8 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		CScaleEnvPointsDlg dlg(this, *GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal() == IDOK)
 		{
+			PrepareUndo("Scale Envelope");
+			dlg.Apply();
 			SetModified(InstrumentHint().Envelope(), true);
 		}
 	}
@@ -2368,6 +2410,7 @@ void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
 	const MODTYPE modType = GetDocument()->GetModType();
 
 	// Move loop points?
+	PrepareUndo("Move Envelope Point");
 	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
 	{
 		if(pEnv->nSustainStart <= 0) return;
@@ -2391,9 +2434,15 @@ void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
 	{
 		// Move envelope node
 		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
+		{
+			GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 			return;
+		}
 		if(!EnvSetValue(m_nDragItem - 1, pEnv->at(m_nDragItem - 1).tick - stepsize))
+		{
+			GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 			return;
+		}
 	}
 	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
@@ -2408,6 +2457,7 @@ void CViewInstrument::EnvKbdMovePointRight(int stepsize)
 	const MODTYPE modType = GetDocument()->GetModType();
 
 	// Move loop points?
+	PrepareUndo("Move Envelope Point");
 	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
 	{
 		if(pEnv->nSustainStart >= pEnv->size() - 1) return;
@@ -2431,9 +2481,15 @@ void CViewInstrument::EnvKbdMovePointRight(int stepsize)
 	{
 		// Move envelope node
 		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
+		{
+			GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 			return;
+		}
 		if(!EnvSetValue(m_nDragItem - 1, pEnv->at(m_nDragItem - 1).tick + stepsize))
+		{
+			GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 			return;
+		}
 	}
 	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
@@ -2446,10 +2502,14 @@ void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	int val = pEnv->at(m_nDragItem - 1).value + stepsize;
+	PrepareUndo("Move Envelope Point");
 	if(EnvSetValue(m_nDragItem - 1, int32_min, val, false))
 	{
 		UpdateIndicator();
 		SetModified(InstrumentHint().Envelope(), true);
+	} else
+	{
+		GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 	}
 }
 
@@ -2460,8 +2520,8 @@ void CViewInstrument::EnvKbdInsertPoint()
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
 	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->size();
-	uint16 newTick = 10;
-	uint8 newVal = m_nEnv == ENV_VOLUME ? ENVELOPE_MAX : ENVELOPE_MID;
+	EnvelopeNode::tick_t newTick = 10;
+	EnvelopeNode::value_t newVal = m_nEnv == ENV_VOLUME ? ENVELOPE_MAX : ENVELOPE_MID;
 	if(m_nDragItem < pEnv->size() && (pEnv->at(m_nDragItem).tick - pEnv->at(m_nDragItem - 1).tick > 1))
 	{
 		// If some other point than the last is selected: interpolate between this and next point (if there's room between them)
@@ -2474,7 +2534,7 @@ void CViewInstrument::EnvKbdInsertPoint()
 		newVal = pEnv->back().value;
 	}
 
-	UINT newPoint = EnvInsertPoint(newTick, newVal);
+	auto newPoint = EnvInsertPoint(newTick, newVal);
 	if(newPoint > 0) m_nDragItem = newPoint;
 	UpdateIndicator();
 }
@@ -2496,6 +2556,7 @@ void CViewInstrument::EnvKbdSetLoopStart()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	PrepareUndo("Set Envelope Loop Start");
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
 	EnvSetLoopStart(m_nDragItem - 1);
@@ -2508,6 +2569,7 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	PrepareUndo("Set Envelope Loop End");
 	if(!EnvGetLoop())
 	{
 		EnvSetLoop(true);
@@ -2523,6 +2585,7 @@ void CViewInstrument::EnvKbdSetSustainStart()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	PrepareUndo("Set Envelope Sustain Start");
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
 	EnvSetSustainStart(m_nDragItem - 1);
@@ -2535,6 +2598,7 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	PrepareUndo("Set Envelope Sustain End");
 	if(!EnvGetSustain())
 	{
 		EnvSetSustain(true);
@@ -2550,10 +2614,14 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	PrepareUndo("Toggle Release Node");
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
 		UpdateIndicator();
 		SetModified(InstrumentHint().Envelope(), true);
+	} else
+	{
+		GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 	}
 }
 
@@ -2642,9 +2710,13 @@ void CViewInstrument::OnEnvLoad()
 	if(!dlg.Show(this)) return;
 	TrackerSettings::Instance().PathInstruments.SetWorkingDir(dlg.GetWorkingDirectory());
 
+	PrepareUndo("Replace Envelope");
 	if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{
 		SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
+	} else
+	{
+		GetDocument()->GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
 	}
 }
 
@@ -2669,6 +2741,56 @@ void CViewInstrument::OnEnvSave()
 	if(!GetDocument()->SaveEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{
 		Reporting::Error(L"Unable to save file " + dlg.GetFirstFile().ToWide(), L"OpenMPT", this);
+	}
+}
+
+
+void CViewInstrument::OnUpdateUndo(CCmdUI *pCmdUI)
+//------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanUndo(m_nInstrument));
+		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetInstrumentUndo().GetUndoName(m_nInstrument))
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+	}
+}
+
+
+void CViewInstrument::OnUpdateRedo(CCmdUI *pCmdUI)
+//------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanRedo(m_nInstrument));
+		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetInstrumentUndo().GetRedoName(m_nInstrument))
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
+	}
+}
+
+
+void CViewInstrument::OnEditUndo()
+//--------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	if(pModDoc->GetInstrumentUndo().Undo(m_nInstrument))
+	{
+		SetModified(InstrumentHint().Info().Envelope().Names(), true);
+	}
+}
+
+
+void CViewInstrument::OnEditRedo()
+//--------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	if(pModDoc->GetInstrumentUndo().Redo(m_nInstrument))
+	{
+		SetModified(InstrumentHint().Info().Envelope().Names(), true);
 	}
 }
 

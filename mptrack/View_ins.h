@@ -61,6 +61,7 @@ protected:
 
 	bool m_bGrid : 1;
 	bool m_bGridForceRedraw : 1;
+	bool m_mouseMoveModified : 1;
 
 	std::bitset<128> m_baPlayingNote;
 	uint32 m_dwNotifyPos[MAX_CHANNELS];
@@ -70,6 +71,8 @@ public:
 	DECLARE_SERIAL(CViewInstrument)
 
 protected:
+	void PrepareUndo(const char *description);
+
 	////////////////////////
 	// Envelope get stuff
 
@@ -101,10 +104,10 @@ protected:
 	// Envelope set stuff
 
 	// Flags
-	bool EnvSetFlag(EnvelopeFlags flag, bool enable) const;
-	bool EnvSetLoop(bool enable) const {return EnvSetFlag(ENV_LOOP, enable);};
-	bool EnvSetSustain(bool enable) const {return EnvSetFlag(ENV_SUSTAIN, enable);};
-	bool EnvSetCarry(bool enable) const {return EnvSetFlag(ENV_CARRY, enable);};
+	bool EnvSetFlag(EnvelopeFlags flag, bool enable);
+	bool EnvSetLoop(bool enable) {return EnvSetFlag(ENV_LOOP, enable);};
+	bool EnvSetSustain(bool enable) {return EnvSetFlag(ENV_SUSTAIN, enable);};
+	bool EnvSetCarry(bool enable) {return EnvSetFlag(ENV_CARRY, enable);};
 
 	// Misc.
 	bool EnvSetValue(int nPoint, int32 nTick = int32_min, int32 nValue = int32_min, bool moveTail = false);
@@ -118,7 +121,7 @@ protected:
 	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
-	bool EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
+	bool EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, EnvelopeNode::value_t defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);
@@ -184,11 +187,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
-#if _MFC_VER > 0x0710
 	afx_msg LRESULT OnNcHitTest(CPoint point);
-#else
-	afx_msg UINT OnNcHitTest(CPoint point);
-#endif 
 	afx_msg void OnNcPaint();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();
@@ -222,13 +221,17 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditSampleMap();
-	afx_msg void OnEnvelopeScalepoints();
+	afx_msg void OnEnvelopeScalePoints();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
-	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
+	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
+	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

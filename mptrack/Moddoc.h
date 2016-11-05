@@ -106,6 +106,7 @@ protected:
 
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
+	CInstrumentUndo m_InstrumentUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	time_t m_creationTime;
 
@@ -174,6 +175,7 @@ public:
 	void PrepareUndoForAllPatterns(bool storeChannelInfo = false, const char *description = "");
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
+	CInstrumentUndo &GetInstrumentUndo() { return m_InstrumentUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
 	time_t GetCreationTime() const { return m_creationTime; }

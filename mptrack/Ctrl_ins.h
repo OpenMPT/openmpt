@@ -36,6 +36,7 @@ protected:
 
 private:
 	void MapTranspose(int nAmount);
+	void PrepareUndo(const char *description);
 
 public:
 	CNoteMapWnd(CCtrlInstruments &parent, CModDoc &document) : m_pParent(parent), m_modDoc(document)
@@ -92,6 +93,8 @@ protected:
 class CCtrlInstruments: public CModControlDlg
 //===========================================
 {
+	friend class PrepareInstrUndo;
+
 protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
@@ -109,7 +112,9 @@ protected:
 	CComboBox m_ComboTuning;
 
 	INSTRUMENTINDEX m_nInstrument;
-	bool openendPluginListWithMouse;
+	bool m_openendPluginListWithMouse : 1;
+	bool m_startedHScroll : 1;
+	bool m_startedEdit : 1;
 
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
@@ -149,7 +154,10 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 protected:
+	void PrepareUndo(const char *description);
+
 	//{{AFX_MSG(CCtrlInstruments)
+	afx_msg void OnEditFocus();
 	afx_msg void OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB);
 	afx_msg void OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB);
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
@@ -182,7 +190,7 @@ protected:
 	afx_msg void OnPluginVelocityHandlingChanged();
 	afx_msg void OnPluginVolumeHandlingChanged();
 	afx_msg void OnPitchWheelDepthChanged();
-	afx_msg void OnOpenPluginList() { openendPluginListWithMouse = true; }
+	afx_msg void OnOpenPluginList() { m_openendPluginListWithMouse = true; }
 	afx_msg void OnAttackChanged();
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
@@ -190,10 +198,10 @@ protected:
 	afx_msg void TogglePluginEditor();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnCbnSelchangeCombotuning();
-	afx_msg void OnEnChangeEditPitchtempolock();
+	afx_msg void OnEnChangeEditPitchTempoLock();
 	afx_msg void OnBnClickedCheckPitchtempolock();
-	afx_msg void OnEnKillfocusEditPitchtempolock();
-	afx_msg void OnEnKillfocusEditFadeOut();
+	afx_msg void OnEnKillFocusEditPitchTempoLock();
+	afx_msg void OnEnKillFocusEditFadeOut();
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

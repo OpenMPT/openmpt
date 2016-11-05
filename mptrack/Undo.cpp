@@ -634,14 +634,14 @@ size_t CSampleUndo::GetBufferCapacity(const undobuf_t &buffer) const
 //------------------------------------------------------------------
 {
 	size_t sum = 0;
-	for(size_t smp = 0; smp < buffer.size(); smp++)
+	for(auto smp = buffer.begin(); smp != buffer.end(); smp++)
 	{
-		for(size_t nStep = 0; nStep < buffer[smp].size(); nStep++)
+		for(size_t nStep = 0; nStep < smp->size(); nStep++)
 		{
-			if(buffer[smp][nStep].samplePtr != nullptr)
+			auto &step = smp->at(nStep);
+			if(step.samplePtr != nullptr)
 			{
-				sum += (buffer[smp][nStep].changeEnd - buffer[smp][nStep].changeStart)
-					* buffer[smp][nStep].OldSample.GetBytesPerSample();
+				sum += (step.changeEnd - step.changeStart) * step.OldSample.GetBytesPerSample();
 			}
 		}
 	}
@@ -679,6 +679,233 @@ const char *CSampleUndo::GetRedoName(const SAMPLEINDEX smp) const
 		return "";
 	}
 	return RedoBuffer[smp - 1].back().description;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Instrument Undo Functions
+
+
+// Remove all undo steps for all instruments.
+void CInstrumentUndo::ClearUndo()
+//-------------------------------
+{
+	UndoBuffer.clear();
+	RedoBuffer.clear();
+}
+
+
+// Remove all undo steps of a given instrument.
+void CInstrumentUndo::ClearUndo(undobuf_t &buffer, const INSTRUMENTINDEX ins)
+//---------------------------------------------------------------------------
+{
+	if(!InstrumentBufferExists(buffer, ins)) return;
+	buffer[ins - 1].clear();
+}
+
+
+// Create undo point for given Instrument.
+// The main program has to tell what kind of changes are going to be made to the Instrument.
+// That way, a lot of RAM can be saved, because some actions don't even require an undo Instrument buffer.
+bool CInstrumentUndo::PrepareUndo(const INSTRUMENTINDEX ins, const char *description, EnvelopeType envType)
+//---------------------------------------------------------------------------------------------------------
+{
+	if(PrepareBuffer(UndoBuffer, ins, description, envType))
+	{
+		ClearUndo(RedoBuffer, ins);
+		return true;
+	}
+	return false;
+}
+
+
+bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins, const char *description, EnvelopeType envType)
+//------------------------------------------------------------------------------------------------------------------------------
+{
+	if(ins == 0 || ins >= MAX_INSTRUMENTS || modDoc.GetrSoundFile().Instruments[ins] == nullptr) return false;
+	if(ins > buffer.size())
+	{
+		buffer.resize(ins);
+	}
+
+	// Remove undo steps if there are too many.
+	if(buffer[ins - 1].size() >= MAX_UNDO_LEVEL)
+	{
+		buffer.erase(buffer.begin(), buffer.begin() + (buffer[ins - 1].size() - MAX_UNDO_LEVEL + 1));
+	}
+	
+	// Create new undo slot
+	UndoInfo undo;
+
+	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	undo.description = description;
+	undo.editedEnvelope = envType;
+	if(envType < ENV_MAXTYPES)
+	{
+		undo.instr.GetEnvelope(envType) = sndFile.Instruments[ins]->GetEnvelope(envType);
+	} else
+	{
+		undo.instr = *sndFile.Instruments[ins];
+	}
+	buffer[ins - 1].push_back(undo);
+
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
+
+	return true;
+}
+
+
+// Restore undo point for given Instrument
+bool CInstrumentUndo::Undo(const INSTRUMENTINDEX ins)
+//---------------------------------------------------
+{
+	return Undo(UndoBuffer, RedoBuffer, ins);
+}
+
+
+// Restore redo point for given Instrument
+bool CInstrumentUndo::Redo(const INSTRUMENTINDEX ins)
+//---------------------------------------------------
+{
+	return Undo(RedoBuffer, UndoBuffer, ins);
+}
+
+
+// Restore undo/redo point for given Instrument
+bool CInstrumentUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const INSTRUMENTINDEX ins)
+//-----------------------------------------------------------------------------------------
+{
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	if(sndFile.Instruments[ins] == nullptr || !InstrumentBufferExists(fromBuf, ins) || fromBuf[ins - 1].empty()) return false;
+
+	// Select most recent undo slot
+	const UndoInfo &undo = fromBuf[ins - 1].back();
+
+	PrepareBuffer(toBuf, ins, undo.description, undo.editedEnvelope);
+
+	// When turning an undo point into a redo point (and vice versa), some action types need to be adjusted.
+	ModInstrument *instr = sndFile.Instruments[ins];
+	if(undo.editedEnvelope < ENV_MAXTYPES)
+	{
+		instr->GetEnvelope(undo.editedEnvelope) = undo.instr.GetEnvelope(undo.editedEnvelope);
+	} else
+	{
+		*instr = undo.instr;
+	}
+
+	DeleteStep(fromBuf, ins, fromBuf[ins - 1].size() - 1);
+
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
+	modDoc.SetModified();
+
+	return true;
+}
+
+
+// Delete a given undo / redo step of a Instrument.
+void CInstrumentUndo::DeleteStep(undobuf_t &buffer, const INSTRUMENTINDEX ins, const size_t step)
+//---------------------------------------------------------------------------------------
+{
+	if(!InstrumentBufferExists(buffer, ins) || step >= buffer[ins - 1].size()) return;
+	buffer[ins - 1].erase(buffer[ins - 1].begin() + step);
+}
+
+
+// Public helper function to remove the most recent undo point.
+void CInstrumentUndo::RemoveLastUndoStep(const INSTRUMENTINDEX ins)
+//---------------------------------------------------------
+{
+	if(!CanUndo(ins)) return;
+	DeleteStep(UndoBuffer, ins, UndoBuffer[ins - 1].size() - 1);
+}
+
+
+// Update undo buffer when using rearrange instruments functionality.
+// newIndex contains one new index for each old index. newIndex[1] represents the first instrument.
+void CInstrumentUndo::RearrangeInstruments(undobuf_t &buffer, const std::vector<INSTRUMENTINDEX> &newIndex)
+//---------------------------------------------------------------------------------------------------------
+{
+	undobuf_t newBuf(modDoc.GetNumInstruments());
+
+	const INSTRUMENTINDEX newSize = static_cast<INSTRUMENTINDEX>(newIndex.size());
+	const INSTRUMENTINDEX oldSize = static_cast<INSTRUMENTINDEX>(buffer.size());
+	for(INSTRUMENTINDEX ins = 1; ins <= oldSize; ins++)
+	{
+		MPT_ASSERT(ins >= newSize || newIndex[ins] <= modDoc.GetNumInstruments());
+		if(ins < newSize && newIndex[ins] > 0 && newIndex[ins] <= modDoc.GetNumInstruments())
+		{
+			newBuf[newIndex[ins] - 1] = buffer[ins - 1];
+		} else
+		{
+			ClearUndo(ins);
+		}
+	}
+#ifdef _DEBUG
+	for(size_t i = 0; i < oldSize; i++)
+	{
+		if(i + 1 < newIndex.size() && newIndex[i + 1] != 0)
+			MPT_ASSERT(newBuf[newIndex[i + 1] - 1].size() == buffer[i].size());
+		else
+			MPT_ASSERT(buffer[i].empty());
+	}
+#endif
+	buffer = newBuf;
+}
+
+
+// Update undo buffer when using rearrange samples functionality.
+// newIndex contains one new index for each old index. newIndex[1] represents the first sample.
+void CInstrumentUndo::RearrangeSamples(undobuf_t &buffer, const INSTRUMENTINDEX ins, std::vector<SAMPLEINDEX> &newIndex)
+//----------------------------------------------------------------------------------------------------------------------
+{
+	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	if(sndFile.Instruments[ins] == nullptr || !InstrumentBufferExists(buffer, ins) || buffer[ins - 1].empty()) return;
+
+	for(auto i = buffer[ins - 1].begin(); i != buffer[ins - 1].end(); i++) if(i->editedEnvelope >= ENV_MAXTYPES)
+	{
+		auto &keyboard = i->instr.Keyboard;
+		for(size_t note = 0; note < CountOf(keyboard); note++)
+		{
+			if(keyboard[note] < newIndex.size())
+				keyboard[note] = newIndex[keyboard[note]];
+			else
+				keyboard[note] = 0;
+		}
+	}
+}
+
+
+// Ensure that the undo buffer is big enough for a given Instrument number
+bool CInstrumentUndo::InstrumentBufferExists(const undobuf_t &buffer, const INSTRUMENTINDEX ins) const
+//----------------------------------------------------------------------------------------------------
+{
+	if(ins == 0 || ins >= MAX_INSTRUMENTS) return false;
+	if(ins <= buffer.size()) return true;
+	return false;
+}
+
+
+// Get name of next undo item
+const char *CInstrumentUndo::GetUndoName(const INSTRUMENTINDEX ins) const
+//-----------------------------------------------------------------------
+{
+	if(!CanUndo(ins))
+	{
+		return "";
+	}
+	return UndoBuffer[ins - 1].back().description;
+}
+
+
+// Get name of next redo item
+const char *CInstrumentUndo::GetRedoName(const INSTRUMENTINDEX ins) const
+//-----------------------------------------------------------------------
+{
+	if(!CanRedo(ins))
+	{
+		return "";
+	}
+	return RedoBuffer[ins - 1].back().description;
 }
 
 

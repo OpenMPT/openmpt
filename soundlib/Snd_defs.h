@@ -196,6 +196,8 @@ enum EnvelopeType
 	ENV_VOLUME = 0,
 	ENV_PANNING,
 	ENV_PITCH,
+
+	ENV_MAXTYPES
 };
 
 // Filter Modes
