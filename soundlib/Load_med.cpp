@@ -283,11 +283,11 @@ struct MMD0EXP
 MPT_BINARY_STRUCT(MMD0EXP, 80)
 
 
+static const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
+
 static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 //---------------------------------------------------------------
 {
-	const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
-
 	ModCommand::COMMAND command = p->command;
 	uint32 param = p->param;
 	switch(command)
@@ -559,7 +559,10 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	#endif
 	} else
 	{
-		deftempo = Util::muldiv(deftempo, 5*715909, 2*474326);
+		if((pmsh->flags & MMD_FLAG_8CHANNEL) && deftempo > 0 && deftempo <= 10)
+			deftempo = bpmvals[deftempo-1];
+		else
+			deftempo = Util::muldiv(deftempo, 5 * 715909, 2 * 474326);
 	#ifdef MED_LOG
 		Log("oldtempo: %3d bpm (bpm=%3d)\n", deftempo, pmsh->deftempo);
 	#endif
@@ -702,7 +705,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				uint32 trktagofs = ptrktags[i];
 				if (trktagofs && (trktagofs <= dwMemLength - 8) )
 				{
-					while (trktagofs+8 < dwMemLength)
+					while (trktagofs < dwMemLength - 8)
 					{
 						uint32 ntag = *const_unaligned_ptr_be<uint32>(lpStream + trktagofs);
 						if (ntag == MMDTAG_END) break;
