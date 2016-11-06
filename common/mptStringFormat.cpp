@@ -76,6 +76,52 @@ std::string ToString(const float & x) { return ToStringHelper(x); }
 std::string ToString(const double & x) { return ToStringHelper(x); }
 std::string ToString(const long double & x) { return ToStringHelper(x); }
 
+mpt::ustring ToUString(const std::string & x) { return mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, x); }
+mpt::ustring ToUString(const char * const & x) { return mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, x); }
+mpt::ustring ToUString(const char & x) { return mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, std::string(1, x)); }
+#if MPT_WSTRING_FORMAT
+#if MPT_USTRING_MODE_UTF8
+mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
+#endif
+mpt::ustring ToUString(const wchar_t * const & x) { return mpt::ToUnicode(x); }
+mpt::ustring ToUString(const wchar_t & x) { return mpt::ToUnicode(std::wstring(1, x)); }
+#endif
+#if defined(_MFC_VER)
+mpt::ustring ToUString(const CString & x)  { return mpt::ToUnicode(x); }
+#endif
+#if MPT_USTRING_MODE_WIDE
+mpt::ustring ToUString(const bool & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const signed char & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const unsigned char & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const signed short & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const unsigned short & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const signed int & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const unsigned int & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const signed long & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const unsigned long & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const signed long long & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const unsigned long long & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const float & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const double & x) { return ToWStringHelper(x); }
+mpt::ustring ToUString(const long double & x) { return ToWStringHelper(x); }
+#endif
+#if MPT_USTRING_MODE_UTF8
+mpt::ustring ToUString(const bool & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const signed char & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const unsigned char & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const signed short & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const unsigned short & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const signed int & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const unsigned int & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const signed long & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const unsigned long & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const signed long long & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const unsigned long long & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const float & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const double & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+mpt::ustring ToUString(const long double & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToStringHelper(x)); }
+#endif
+
 #if MPT_WSTRING_FORMAT
 std::wstring ToWString(const std::string & x) { return mpt::ToWide(mpt::CharsetLocaleOrUTF8, x); }
 std::wstring ToWString(const char * const & x) { return mpt::ToWide(mpt::CharsetLocaleOrUTF8, x); }

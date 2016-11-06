@@ -98,6 +98,35 @@ std::string ToString(const float & x);
 std::string ToString(const double & x);
 std::string ToString(const long double & x);
 
+static inline mpt::ustring ToUString(const mpt::ustring & x) { return x; }
+MPT_DEPRECATED mpt::ustring ToUString(const std::string & x); // Unknown encoding.
+MPT_DEPRECATED mpt::ustring ToUString(const char * const & x); // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
+MPT_DEPRECATED mpt::ustring ToUString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+#if MPT_WSTRING_FORMAT
+#if MPT_USTRING_MODE_UTF8
+mpt::ustring ToUString(const std::wstring & x);
+#endif
+mpt::ustring ToUString(const wchar_t * const & x);
+MPT_DEPRECATED mpt::ustring ToUString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#endif
+#if defined(_MFC_VER)
+mpt::ustring ToUString(const CString & x);
+#endif
+mpt::ustring ToUString(const bool & x);
+mpt::ustring ToUString(const signed char & x);
+mpt::ustring ToUString(const unsigned char & x);
+mpt::ustring ToUString(const signed short & x);
+mpt::ustring ToUString(const unsigned short & x);
+mpt::ustring ToUString(const signed int & x);
+mpt::ustring ToUString(const unsigned int & x);
+mpt::ustring ToUString(const signed long & x);
+mpt::ustring ToUString(const unsigned long & x);
+mpt::ustring ToUString(const signed long long & x);
+mpt::ustring ToUString(const unsigned long long & x);
+mpt::ustring ToUString(const float & x);
+mpt::ustring ToUString(const double & x);
+mpt::ustring ToUString(const long double & x);
+
 #if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::wstring ToWString(const std::string & x); // Unknown encoding.
 MPT_DEPRECATED std::wstring ToWString(const char * const & x); // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
@@ -125,28 +154,6 @@ std::wstring ToWString(const unsigned long long & x);
 std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
-#endif
-
-#if MPT_USTRING_MODE_UTF8
-template<typename T>
-mpt::ustring ToUString(const T & x)
-{
-	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
-}
-template<>
-inline mpt::ustring ToUString<mpt::ustring>(const mpt::ustring & x)
-{
-	return x;
-}
-#if MPT_WSTRING_FORMAT
-static inline mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
-#endif
-#else
-template<typename T>
-mpt::ustring ToUString(const T & x)
-{
-	return ToWString(x);
-}
 #endif
 
 template <typename Tstring> struct ToStringTFunctor {};
