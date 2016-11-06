@@ -602,6 +602,41 @@ bool operator!=(const mpt::UUID & a, const mpt::UUID & b)
 	return (a.Data1 != b.Data1) || (a.Data2 != b.Data2) || (a.Data3 != b.Data3) || (a.Data4 != b.Data4);
 }
 
+UUID UUID::FromString(const std::string &str)
+{
+	std::vector<std::string> segments = mpt::String::Split<std::string>(str, std::string("-"));
+	if(segments.size() != 5)
+	{
+		return UUID();
+	}
+	if(segments[0].length() != 8)
+	{
+		return UUID();
+	}
+	if(segments[1].length() != 4)
+	{
+		return UUID();
+	}
+	if(segments[2].length() != 4)
+	{
+		return UUID();
+	}
+	if(segments[3].length() != 4)
+	{
+		return UUID();
+	}
+	if(segments[4].length() != 12)
+	{
+		return UUID();
+	}
+	UUID result;
+	result.Data1 = mpt::String::Parse::Hex<uint32>(segments[0]);
+	result.Data2 = mpt::String::Parse::Hex<uint16>(segments[1]);
+	result.Data3 = mpt::String::Parse::Hex<uint16>(segments[2]);
+	result.Data4 = mpt::String::Parse::Hex<uint64>(segments[3] + segments[4]);
+	return result;
+}
+
 UUID UUID::FromString(const mpt::ustring &str)
 {
 	std::vector<mpt::ustring> segments = mpt::String::Split<mpt::ustring>(str, MPT_USTRING("-"));
@@ -635,6 +670,22 @@ UUID UUID::FromString(const mpt::ustring &str)
 	result.Data3 = mpt::String::Parse::Hex<uint16>(segments[2]);
 	result.Data4 = mpt::String::Parse::Hex<uint64>(segments[3] + segments[4]);
 	return result;
+}
+
+std::string UUID::ToString() const
+{
+	return std::string()
+		+ mpt::fmt::hex0<8>(GetData1())
+		+ std::string("-")
+		+ mpt::fmt::hex0<4>(GetData2())
+		+ std::string("-")
+		+ mpt::fmt::hex0<4>(GetData3())
+		+ std::string("-")
+		+ mpt::fmt::hex0<4>(static_cast<uint16>(GetData4() >> 48))
+		+ std::string("-")
+		+ mpt::fmt::hex0<4>(static_cast<uint16>(GetData4() >> 32))
+		+ mpt::fmt::hex0<8>(static_cast<uint32>(GetData4() >>  0))
+		;
 }
 
 mpt::ustring UUID::ToUString() const

@@ -124,7 +124,9 @@ public:
 public:
 	// General UUID<->string conversion.
 	// The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
+	static UUID FromString(const std::string &str);
 	static UUID FromString(const mpt::ustring &str);
+	std::string ToString() const;
 	mpt::ustring ToUString() const;
 };
 
