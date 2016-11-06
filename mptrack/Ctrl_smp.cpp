@@ -558,7 +558,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 		case IDC_SPIN5:
 		case IDC_COMBO_BASENOTE:
 			// Transpose + Finetune to Frequency
-			if ((m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (m_nSample))
+			if ((m_sndFile.UseFinetuneAndTranspose()) && (m_nSample))
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
 				uint32 freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
@@ -596,15 +596,16 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 	const SAMPLEINDEX updateSmp = sampleHint.GetSample();
 	if(updateSmp != m_nSample && updateSmp != 0 && !hintType[HINT_MODTYPE]) return;
 
+	const CModSpecifications &specs = m_sndFile.GetModSpecifications();
+	
 	LockControls();
 	// Updating Ranges
 	if (hintType[HINT_MODTYPE])
 	{
-		const CModSpecifications *specs = &m_sndFile.GetModSpecifications();
 
 		// Limit text fields
-		m_EditName.SetLimitText(specs->sampleNameLengthMax);
-		m_EditFileName.SetLimitText(specs->sampleFilenameLengthMax);
+		m_EditName.SetLimitText(specs.sampleNameLengthMax);
+		m_EditFileName.SetLimitText(specs.sampleFilenameLengthMax);
 
 		// Loop Type
 		m_ComboLoopType.ResetContent();
@@ -711,7 +712,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
 		mpt::String::Copy(s, sample.filename);
-		if (m_sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) s[0] = 0;
+		if (specs.sampleFilenameLengthMax == 0) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
 		SetDlgItemInt(IDC_EDIT7, sample.nVolume >> 2);
@@ -1271,7 +1272,7 @@ void CCtrlSamples::OnSampleSave()
 		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
 
 		fileName += MPT_PATHSTRING(" - %sample_number% - ");
-		if(m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD))
+		if(m_sndFile.GetModSpecifications().sampleFilenameLengthMax == 0)
 			fileName += MPT_PATHSTRING("%sample_name%");
 		else
 			fileName += MPT_PATHSTRING("%sample_filename%");
@@ -1882,10 +1883,6 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 		else if(sample.nSustainEnd > selection.nStart) sample.nSustainEnd = selection.nStart + Util::muldivr_unsigned(sample.nSustainEnd - selection.nStart, newRate, oldRate);
 		if(sample.nSustainEnd > newTotalLength) sample.nSustainEnd = newTotalLength;
 
-		ctrlSmp::ReplaceSample(sample, newSample, newTotalLength, m_sndFile);
-		// Update loop wrap-around buffer
-		sample.PrecomputeLoops(m_sndFile);
-
 		if(!selection.selectionActive)
 		{
 			if(m_sndFile.GetType() != MOD_TYPE_MOD)
@@ -1897,6 +1894,11 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 		{
 			SetSelectionPoints(selection.nStart, newSelEnd);
 		}
+
+		ctrlSmp::ReplaceSample(sample, newSample, newTotalLength, m_sndFile);
+		// Update loop wrap-around buffer
+		sample.PrecomputeLoops(m_sndFile);
+
 		SetModified(SampleHint().Info().Data(), true, true);
 	}
 
@@ -2736,7 +2738,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		finetuneBoxActive = true;
 	}
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if (m_sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
+	if (!m_sndFile.UseFinetuneAndTranspose())
 	{
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
 		{
@@ -3234,7 +3236,7 @@ NoSample:
 	// FineTune / C-5 Speed
 	if ((pos = m_SpinFineTune.GetPos32()) != 0)
 	{
-		if (m_sndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (!m_sndFile.UseFinetuneAndTranspose())
 		{
 			if (sample.nC5Speed < 1) sample.nC5Speed = 8363;
 			sample.Transpose((pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);

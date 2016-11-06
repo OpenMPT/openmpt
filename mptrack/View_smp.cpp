@@ -415,13 +415,9 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
 
-				uint32 lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
-				if(pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
-				{
-					lSampleRate = ModSample::TransposeToFrequency(pSndFile->GetSample(m_nSample).RelativeTone, pSndFile->GetSample(m_nSample).nFineTune);
-				}
-				if (!lSampleRate) lSampleRate = 8363;
-				uint64 msec = (uint64(selLength) * 1000) / lSampleRate;
+				auto sampleRate = pSndFile->GetSample(m_nSample).GetSampleRate(pSndFile->GetType());
+				if (!sampleRate) sampleRate = 8363;
+				uint64 msec = (uint64(selLength) * 1000) / sampleRate;
 				if(msec < 1000)
 					s += mpt::String::Print("%1ms)", msec);
 				else

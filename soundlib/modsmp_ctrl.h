@@ -111,7 +111,7 @@ namespace ctrlChn
 {
 
 // Replaces sample from sound channels by given sample.
-void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
+void ReplaceSample( CSoundFile &sndFile,
 					const ModSample &sample,
 					const void * const pNewSample,
 					const SmpLength nNewLength,

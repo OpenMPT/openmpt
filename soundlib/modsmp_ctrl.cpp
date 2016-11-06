@@ -36,7 +36,7 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile.m_PlayState.Chn, smp, pNewSample, nNewLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile, smp, pNewSample, nNewLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
 	ModSample::FreeSample(pOldSmp);
@@ -922,34 +922,44 @@ bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
 namespace ctrlChn
 {
 
-void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
+void ReplaceSample( CSoundFile &sndFile,
 					const ModSample &sample,
 					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,
 					FlagSet<ChannelFlags> resetFlags)
 {
-	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	const bool periodIsFreq = sndFile.PeriodsAreFrequencies();
+	auto begin = sndFile.m_PlayState.Chn, end = sndFile.m_PlayState.Chn + CountOf(sndFile.m_PlayState.Chn);
+	for (auto chn = begin; chn != end; chn++)
 	{
-		if (Chn[i].pModSample == &sample)
+		if (chn->pModSample == &sample)
 		{
-			if (Chn[i].pCurrentSample != nullptr)
-				Chn[i].pCurrentSample = pNewSample;
-			if (Chn[i].position.GetUInt() > nNewLength)
-				Chn[i].position.Set(0);
-			if (Chn[i].nLength > 0)
-				LimitMax(Chn[i].nLength, nNewLength);
-			if(Chn[i].InSustainLoop())
+			if (chn->pCurrentSample != nullptr)
+				chn->pCurrentSample = pNewSample;
+			if (chn->position.GetUInt() > nNewLength)
+				chn->position.Set(0);
+			if (chn->nLength > 0)
+				LimitMax(chn->nLength, nNewLength);
+			if(chn->InSustainLoop())
 			{
-				Chn[i].nLoopStart = sample.nSustainStart;
-				Chn[i].nLoopEnd = sample.nSustainEnd;
+				chn->nLoopStart = sample.nSustainStart;
+				chn->nLoopEnd = sample.nSustainEnd;
 			} else
 			{
-				Chn[i].nLoopStart = sample.nLoopStart;
-				Chn[i].nLoopEnd = sample.nLoopEnd;
+				chn->nLoopStart = sample.nLoopStart;
+				chn->nLoopEnd = sample.nLoopEnd;
 			}
-			Chn[i].dwFlags.set(setFlags);
-			Chn[i].dwFlags.reset(resetFlags);
+			chn->dwFlags.set(setFlags);
+			chn->dwFlags.reset(resetFlags);
+			if(chn->nC5Speed && sample.nC5Speed && !sndFile.UseFinetuneAndTranspose())
+			{
+				if(periodIsFreq)
+					chn->nPeriod = Util::muldivr_unsigned(chn->nPeriod, sample.nC5Speed, chn->nC5Speed);
+				else
+					chn->nPeriod = Util::muldivr_unsigned(chn->nPeriod, chn->nC5Speed, sample.nC5Speed);
+			}
+			chn->nC5Speed = sample.nC5Speed;
 		}
 	}
 }
