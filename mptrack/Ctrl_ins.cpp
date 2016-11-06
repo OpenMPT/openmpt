@@ -131,7 +131,7 @@ void CNoteMapWnd::PrepareUndo(const char *description)
 }
 
 
-BOOL CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
+void CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 //----------------------------------------------------------
 {
 	if (nIns != m_nInstrument)
@@ -144,38 +144,32 @@ BOOL CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 		{
 			ModInstrument *instrument = sndFile.AllocateInstrument(m_nInstrument);
 			if(instrument == nullptr)
-			{
-				return FALSE;
-			}
+				return;
 			m_modDoc.InitializeInstrument(instrument);
 		}
 
 		InvalidateRect(NULL, FALSE);
 	}
-	return TRUE;
 }
 
 
-BOOL CNoteMapWnd::SetCurrentNote(UINT nNote)
+void CNoteMapWnd::SetCurrentNote(UINT nNote)
 //------------------------------------------
 {
-	if (nNote == m_nNote) return TRUE;
-	if (!ModCommand::IsNote(nNote + 1)) return FALSE;
-	m_nNote = nNote;
-	InvalidateRect(NULL, FALSE);
-	return TRUE;
+	if(nNote != m_nNote && ModCommand::IsNote(static_cast<ModCommand::NOTE>(nNote + NOTE_MIN)))
+	{
+		m_nNote = nNote;
+		InvalidateRect(NULL, FALSE);
+	}
 }
 
 
 void CNoteMapWnd::OnPaint()
 //-------------------------
 {
-	HGDIOBJ oldfont = NULL;
-	CRect rcClient;
 	CPaintDC dc(this);
-	HDC hdc;
-	CSoundFile &sndFile = m_modDoc.GetrSoundFile();
 
+	CRect rcClient;
 	GetClientRect(&rcClient);
 	if (!m_hFont)
 	{
@@ -183,84 +177,87 @@ void CNoteMapWnd::OnPaint()
 		colorText = GetSysColor(COLOR_WINDOWTEXT);
 		colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	}
-	hdc = dc.m_hDC;
-	oldfont = ::SelectObject(hdc, m_hFont);
+	HDC hdc = dc.m_hDC;
+	HGDIOBJ oldfont = ::SelectObject(hdc, m_hFont);
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{
 		CSize sz;
-		sz = dc.GetTextExtent("C#0.", 4);
+		sz = dc.GetTextExtent(_T("C#0."), 4);
 		m_cyFont = sz.cy + 2;
 		m_cxFont = rcClient.right / 3;
 	}
 	dc.IntersectClipRect(&rcClient);
+
+	const CSoundFile &sndFile = m_modDoc.GetrSoundFile();
 	if (m_cxFont > 0 && m_cyFont > 0)
 	{
 		bool bFocus = (::GetFocus() == m_hWnd);
-		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-		CHAR s[64];
+		const ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		CRect rect;
 
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
 		int nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
+		std::string s;
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
-			bool bHighLight;
-
 			// Note
-			s[0] = 0;
-
-			std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument);
-			temp.resize(4);
-			if ((nPos >= 0) && (nPos < NOTE_MAX)) wsprintf(s, "%s", temp.c_str());
+			bool isValidPos = (nPos >= 0) && (nPos < NOTE_MAX - NOTE_MIN + 1);
+			if (isValidPos)
+			{
+				s = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument);
+				s.resize(4);
+			} else
+			{
+				s.clear();
+			}
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
+			DrawButtonRect(hdc, &rect, s.c_str(), FALSE, FALSE);
 			// Mapped Note
-			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (!m_bIns)*/);
+			bool highlight = ((bFocus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
-			strcpy(s, "...");
-			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos] != NOTE_NONE))
+			s = "...";
+			if (pIns != nullptr && isValidPos && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
 				ModCommand::NOTE n = pIns->NoteMap[nPos];
 				if(ModCommand::IsNote(n))
 				{
-					std::string temp = sndFile.GetNoteName(n, m_nInstrument);
-					temp.resize(4);
-					wsprintf(s, "%s", temp.c_str());
+					s = sndFile.GetNoteName(n, m_nInstrument);
+					s.resize(4);
 				} else
 				{
-					strcpy(s, "???");
+					s = "???";
 				}
 			}
-			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(hdc, &rect, highlight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (!m_bIns))
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
 			}
-			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.SetTextColor(highlight ? colorTextSel : colorText);
+			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			// Sample
-			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
+			highlight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
 			rect.left = rcClient.left + m_cxFont*2+3;
 			rect.right = rcClient.right;
-			strcpy(s, " ..");
+			s = " ..";
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->Keyboard[nPos]))
 			{
-				wsprintf(s, "%3d", pIns->Keyboard[nPos]);
+				s = mpt::format("%1")(mpt::fmt::dec<3>(pIns->Keyboard[nPos]));
 			}
-			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(hdc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (m_bIns))
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
 			}
-			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.SetTextColor((highlight) ? colorTextSel : colorText);
+			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
 		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
@@ -279,7 +276,8 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = (CWnd*)this;
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = this;
+	m_undo = true;
 }
 
 
@@ -404,6 +402,7 @@ void CNoteMapWnd::OnMapCopyNote()
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
+		m_undo = true;
 		bool bModified = false;
 		auto n = pIns->NoteMap[m_nNote];
 		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != n)
@@ -429,6 +428,7 @@ void CNoteMapWnd::OnMapCopySample()
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
+		m_undo = true;
 		bool bModified = false;
 		auto n = pIns->Keyboard[m_nNote];
 		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != n)
@@ -455,6 +455,7 @@ void CNoteMapWnd::OnMapReset()
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
+		m_undo = true;
 		bool bModified = false;
 		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
@@ -480,6 +481,7 @@ void CNoteMapWnd::OnMapRemove()
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
+		m_undo = true;
 		bool bModified = false;
 		for (size_t i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != 0)
 		{
@@ -525,6 +527,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 		nAmount = pIns->pTuning->GetGroupSize() * sgn(nAmount);
 	}
 
+	m_undo = true;
 	if (pIns)
 	{
 		bool bModified = false;
@@ -565,6 +568,7 @@ void CNoteMapWnd::OnEditSample(UINT nID)
 void CNoteMapWnd::OnEditSampleMap()
 //---------------------------------
 {
+	m_undo = true;
 	m_pParent.PostMessage(WM_COMMAND, ID_INSTRUMENT_SAMPLEMAP);
 }
 
@@ -572,6 +576,7 @@ void CNoteMapWnd::OnEditSampleMap()
 void CNoteMapWnd::OnInstrumentDuplicate()
 //---------------------------------------
 {
+	m_undo = true;
 	m_pParent.PostMessage(WM_COMMAND, ID_INSTRUMENT_DUPLICATE);
 }
 
@@ -683,6 +688,11 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 			if (n != pIns->Keyboard[m_nNote])
 			{
+				if(m_undo)
+				{
+					PrepareUndo("Enter Instrument");
+					m_undo = false;
+				}
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
@@ -715,6 +725,12 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 			if (n != pIns->NoteMap[m_nNote])
 			{
+				if(m_undo)
+				{
+					PrepareUndo("Enter Note");
+					m_undo = false;
+				}
+
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
@@ -785,6 +801,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	}
 	if (bRedraw)
 	{
+		m_undo = true;
 		InvalidateRect(NULL, FALSE);
 	}
 
@@ -2586,7 +2603,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 						PrepareUndo("Set Volume Random Variation");
 						m_startedHScroll = true;
 					}
-					pIns->nVolSwing = (uint8)n;
+					pIns->nVolSwing = static_cast<uint8>(n);
 					SetModified(InstrumentHint().Info(), false);
 				}
 			}
@@ -2601,7 +2618,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 						PrepareUndo("Set Panning Random Variation");
 						m_startedHScroll = true;
 					}
-					pIns->nPanSwing = (uint8)n;
+					pIns->nPanSwing = static_cast<uint8>(n);
 					SetModified(InstrumentHint().Info(), false);
 				}
 			}
@@ -2616,7 +2633,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 						PrepareUndo("Set Cutoff Random Variation");
 						m_startedHScroll = true;
 					}
-					pIns->nCutSwing = (uint8)n;
+					pIns->nCutSwing = static_cast<uint8>(n);
 					SetModified(InstrumentHint().Info(), false);
 				}
 			}
@@ -2631,7 +2648,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 						PrepareUndo("Set Resonance Random Variation");
 						m_startedHScroll = true;
 					}
-					pIns->nResSwing = (uint8)n;
+					pIns->nResSwing = static_cast<uint8>(n);
 					SetModified(InstrumentHint().Info(), false);
 				}
 			}
