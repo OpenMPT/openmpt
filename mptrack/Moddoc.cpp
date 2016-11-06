@@ -347,20 +347,20 @@ BOOL CModDoc::SaveModified()
 bool CModDoc::SaveAllSamples()
 //----------------------------
 {
-	std::wstring prompt = L"The following external samples have been modified:\n";
+	mpt::ustring prompt = MPT_USTRING("The following external samples have been modified:\n");
 	bool modified = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
 		if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 		{
 			modified = true;
-			prompt += mpt::wfmt::dec0<2>(i) + L": " + m_SndFile.GetSamplePath(i).ToWide() + L"\n";
+			prompt += mpt::ufmt::dec0<2>(i) + MPT_USTRING(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + MPT_USTRING("\n");
 		}
 	}
 
 	ConfirmAnswer ans = cnfYes;
 	bool success = true;
-	if(modified && (ans = Reporting::Confirm(prompt + L"Do you want to save them?", L"External Samples", true)) == cnfYes)
+	if(modified && (ans = Reporting::Confirm(prompt + MPT_USTRING("Do you want to save them?"), MPT_USTRING("External Samples"), true)) == cnfYes)
 	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
@@ -2980,7 +2980,7 @@ void CModDoc::OnSaveTemplateModule()
 	mpt::PathString sName;
 	for(size_t i = 0; i < 1000; ++i)
 	{
-		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromWide(mpt::ToWString(i));
+		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromUnicode(mpt::ToUString(i));
 		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
 		if (!(templateFolder + sName).FileOrDirectoryExists())
 			break;

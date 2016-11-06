@@ -171,7 +171,7 @@ int DebugReporter::RescueFiles()
 
 			mpt::PathString filename;
 			filename += crashDirectory.path;
-			filename += mpt::PathString::FromWide(mpt::ToWString(++numFiles));
+			filename += mpt::PathString::FromUnicode(mpt::ToUString(++numFiles));
 			filename += MPT_PATHSTRING("_");
 			filename += mpt::PathString::FromCStringSilent(pModDoc->GetTitle()).SanitizeComponent();
 			filename += MPT_PATHSTRING(".");
