@@ -147,46 +147,61 @@ sane_random_device::sane_random_device()
 {
 	if(!rd_reliable)
 	{
-#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-		uint32 seed_val = mpt::generate_timeseed<uint32>();
-		unsigned int seed = seed_val;
-#else
-		uint64 seed_val = mpt::generate_timeseed<uint64>();
-		unsigned int seeds[2];
-		seeds[0] = static_cast<uint32>(seed_val >> 32);
-		seeds[1] = static_cast<uint32>(seed_val >>  0);
-		std::seed_seq seed(seeds + 0, seeds + 2);
-#endif
-		rd_fallback = mpt::make_unique<std::mt19937>(seed);
+		init_fallback();
 	}
 }
 
-sane_random_device::sane_random_device(const std::string & token)
-	: rd(token)
+sane_random_device::sane_random_device(const std::string & token_)
+	: token(token_)
+	, rd(token)
 	, rd_reliable(rd.entropy() > 0.0)
 {
 	if(!rd_reliable)
 	{
-#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-		uint32 seed_val = mpt::generate_timeseed<uint32>();
-		mpt::default_hash<uint32>::type hash;
-		for(std::size_t i = 0; i < token.length(); ++i)
+		init_fallback();
+	}
+}
+
+void sane_random_device::init_fallback()
+{
+	if(!rd_fallback)
+	{
+		if(token.length() > 0)
 		{
-			hash(static_cast<unsigned char>(token[i]));
-		}
-		unsigned int seed = seed_val ^ hash.result();
-#else
-		uint64 seed_val = mpt::generate_timeseed<uint64>();
-		std::vector<unsigned int> seeds;
-		seeds.push_back(static_cast<uint32>(seed_val >> 32));
-		seeds.push_back(static_cast<uint32>(seed_val >>  0));
-		for(std::size_t i = 0; i < token.length(); ++i)
+			#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+				uint32 seed_val = mpt::generate_timeseed<uint32>();
+				mpt::default_hash<uint32>::type hash;
+				for(std::size_t i = 0; i < token.length(); ++i)
+				{
+					hash(static_cast<unsigned char>(token[i]));
+				}
+				unsigned int seed = seed_val ^ hash.result();
+			#else
+				uint64 seed_val = mpt::generate_timeseed<uint64>();
+				std::vector<unsigned int> seeds;
+				seeds.push_back(static_cast<uint32>(seed_val >> 32));
+				seeds.push_back(static_cast<uint32>(seed_val >>  0));
+				for(std::size_t i = 0; i < token.length(); ++i)
+				{
+					seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
+				}
+				std::seed_seq seed(seeds.begin(), seeds.end());
+			#endif
+			rd_fallback = mpt::make_unique<std::mt19937>(seed);
+		} else
 		{
-			seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
+			#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
+				uint32 seed_val = mpt::generate_timeseed<uint32>();
+				unsigned int seed = seed_val;
+			#else
+				uint64 seed_val = mpt::generate_timeseed<uint64>();
+				unsigned int seeds[2];
+				seeds[0] = static_cast<uint32>(seed_val >> 32);
+				seeds[1] = static_cast<uint32>(seed_val >>  0);
+				std::seed_seq seed(seeds + 0, seeds + 2);
+			#endif
+			rd_fallback = mpt::make_unique<std::mt19937>(seed);
 		}
-		std::seed_seq seed(seeds.begin(), seeds.end());
-#endif
-		rd_fallback = mpt::make_unique<std::mt19937>(seed);
 	}
 }
 
@@ -194,37 +209,44 @@ sane_random_device::result_type sane_random_device::operator()()
 {
 	MPT_LOCK_GUARD<mpt::mutex> l(m);
 	result_type result = 0;
-	if(rd.min() != 0 || !mpt::is_mask(rd.max()))
-	{ // insane std::random_device
-		//  This implementation is not exactly uniformly distributed but good enough
-		// for OpenMPT.
-		double rd_min = static_cast<double>(rd.min());
-		double rd_max = static_cast<double>(rd.max());
-		double rd_range = rd_max - rd_min;
-		double rd_size = rd_range + 1.0;
-		double rd_entropy = mpt::log2(rd_size);
-		int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
-		double tmp = 0.0;
-		for(int i = 0; i < iterations; ++i)
-		{
-			tmp = (tmp * rd_size) + (static_cast<double>(rd()) - rd_min);
-		}
-		double result_01 = std::floor(tmp / std::pow(rd_size, iterations));
-		result = static_cast<result_type>(std::floor(result_01 * (static_cast<double>(max() - min()) + 1.0))) + min();
-	} else
-	{ // sane std::random_device
-		result = 0;
-		std::size_t rd_bits = mpt::lower_bound_entropy_bits(rd.max());
-		for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
-		{
-			if(rd_bits < (sizeof(result_type) * 8))
+	try
+	{
+		if(rd.min() != 0 || !mpt::is_mask(rd.max()))
+		{ // insane std::random_device
+			//  This implementation is not exactly uniformly distributed but good enough
+			// for OpenMPT.
+			double rd_min = static_cast<double>(rd.min());
+			double rd_max = static_cast<double>(rd.max());
+			double rd_range = rd_max - rd_min;
+			double rd_size = rd_range + 1.0;
+			double rd_entropy = mpt::log2(rd_size);
+			int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
+			double tmp = 0.0;
+			for(int i = 0; i < iterations; ++i)
 			{
-				result = (result << rd_bits) | static_cast<result_type>(rd());
-			} else
+				tmp = (tmp * rd_size) + (static_cast<double>(rd()) - rd_min);
+			}
+			double result_01 = std::floor(tmp / std::pow(rd_size, iterations));
+			result = static_cast<result_type>(std::floor(result_01 * (static_cast<double>(max() - min()) + 1.0))) + min();
+		} else
+		{ // sane std::random_device
+			result = 0;
+			std::size_t rd_bits = mpt::lower_bound_entropy_bits(rd.max());
+			for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
 			{
-				result = result | static_cast<result_type>(rd());
+				if(rd_bits < (sizeof(result_type) * 8))
+				{
+					result = (result << rd_bits) | static_cast<result_type>(rd());
+				} else
+				{
+					result = result | static_cast<result_type>(rd());
+				}
 			}
 		}
+	} catch(const std::exception &)
+	{
+		rd_reliable = false;
+		init_fallback();
 	}
 	if(!rd_reliable)
 	{ // std::random_device is unreliable
