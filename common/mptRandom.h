@@ -345,11 +345,14 @@ class sane_random_device
 {
 private:
 	mpt::mutex m;
+	std::string token;
 	std::random_device rd;
 	bool rd_reliable;
 	std::unique_ptr<std::mt19937> rd_fallback;
 public:
 	typedef unsigned int result_type;
+private:
+	void init_fallback();
 public:
 	sane_random_device();
 	sane_random_device(const std::string & token);
