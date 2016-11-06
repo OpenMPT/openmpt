@@ -141,7 +141,7 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 //-------------------------------------------------------
 {
 	uint32 rate;
-	if(type & (MOD_TYPE_MOD | MOD_TYPE_XM))
+	if(CSoundFile::UseFinetuneAndTranspose(type))
 		rate = TransposeToFrequency(RelativeTone, nFineTune);
 	else
 		rate = nC5Speed;

@@ -610,7 +610,7 @@ public:
 #endif // MODPLUG_TRACKER
 
 	double GetCurrentBPM() const;
-	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
+	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	CHANNELINDEX GetMixStat() const { return m_nMixStat; }
 	void ResetMixStat() { m_nMixStat = 0; }
 	void ResetPlayPos();
@@ -874,6 +874,22 @@ public:
 	uint8 FrequencyToCutOff(double frequency) const;
 	// Convert IT cutoff (0...127 + modifier) to frequency
 	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
+
+	// Returns true if periods are actually plain frequency values in Hz.
+	bool PeriodsAreFrequencies() const
+	{
+		return m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode] && GetType() != MOD_TYPE_XM;
+	}
+	
+	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.
+	static bool UseFinetuneAndTranspose(MODTYPE type)
+	{
+		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_XM));
+	}
+	bool UseFinetuneAndTranspose() const
+	{
+		return UseFinetuneAndTranspose(GetType());
+	}
 
 public:
 	uint32 GetNumTicksOnCurrentRow() const

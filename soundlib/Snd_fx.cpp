@@ -5454,7 +5454,7 @@ uint32 CSoundFile::GetNoteFromPeriod(uint32 period, int32 nFineTune, uint32 nC5S
 	}
 	// This essentially implements std::lower_bound, with the difference that we don't need an iterable container.
 	uint32 minNote = NOTE_MIN, maxNote = NOTE_MAX, count = maxNote - minNote + 1;
-	const bool periodIsFreq = m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode] && GetType() != MOD_TYPE_XM;
+	const bool periodIsFreq = PeriodsAreFrequencies();
 	while(count > 0)
 	{
 		const uint32 step = count / 2, midNote = minNote + step;
@@ -5477,9 +5477,13 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 {
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	note -= NOTE_MIN;
-	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669|MOD_TYPE_PLM|MOD_TYPE_DSM
-				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF|MOD_TYPE_UAX))
+	if (!UseFinetuneAndTranspose())
 	{
+		if(GetType() == MOD_TYPE_MDL)
+		{
+			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
+			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
+		}
 		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
 		{
 			// In IT linear slide mode, directly use frequency in Hertz rather than periods.
@@ -5496,10 +5500,6 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
-	} else if (GetType() == MOD_TYPE_MDL)
-	{
-		// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
-		return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
 	} else if (GetType() == MOD_TYPE_XM)
 	{
 		if (note < 12) note = 12;
@@ -5556,10 +5556,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 //------------------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_MTM | MOD_TYPE_AMF0 | MOD_TYPE_SFX))
-	{
-		return ((3546895L * 4) << FREQ_FRACBITS) / period;
-	} else if (GetType() == MOD_TYPE_XM)
+	if (GetType() == MOD_TYPE_XM)
 	{
 		if(m_playBehaviour[kFT2Periods])
 		{
@@ -5590,6 +5587,9 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			if(!period) period = 1;
 			return ((8363 * 1712L) << FREQ_FRACBITS) / period;
 		}
+	} else if (UseFinetuneAndTranspose())
+	{
+		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if(GetType() == MOD_TYPE_669)
 	{
 		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
