@@ -81,8 +81,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		ITP_ITPEMBEDIH		= 0x40000,	// Embed instrument headers in project file
 	};
 
-	uint32 version;
-	FileReader::off_t size;
+	uint32 version, size;
 
 	file.Rewind();
 
@@ -156,6 +155,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = static_cast<INSTRUMENTINDEX>(file.ReadUint32LE());
 	if(m_nInstruments >= MAX_INSTRUMENTS)
 	{
+		m_nInstruments = 0;
 		return false;
 	}
 
@@ -240,7 +240,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 			ModCommand *target = Patterns[pat].GetpModCommand(0, 0);
 			while(numCommands-- != 0)
 			{
-				STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
 				MODCOMMAND_ORIGINAL data;
 				patternChunk.ReadStruct(data);
 				if(data.command >= MAX_EFFECTS) data.command = CMD_NONE;
