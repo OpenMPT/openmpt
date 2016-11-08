@@ -1238,10 +1238,9 @@ bool CDLSBank::Open(FileReader file)
 			{
 				PTBLCHUNK ptbl;
 				chunk.ReadStruct(ptbl);
-				uint32 cues = ptbl.cCues;
-				m_WaveForms.reserve(cues);
 				chunk.Skip(ptbl.cbSize - 8);
-				LimitMax(cues, chunk.BytesLeft() / sizeof(uint32));
+				uint32 cues = std::min(ptbl.cCues.get(), mpt::saturate_cast<uint32>(chunk.BytesLeft() / sizeof(uint32)));
+				m_WaveForms.reserve(cues);
 				for(uint32 i = 0; i < cues; i++)
 				{
 					m_WaveForms.push_back(chunk.ReadUint32LE());
