@@ -230,7 +230,7 @@ void CViewInstrument::SetModified(InstrumentHint hint, bool updateAll)
 
 
 BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	Notification::Type type;
@@ -491,8 +491,8 @@ bool CViewInstrument::EnvSetLoopStart(int nPoint)
 
 	if (nPoint != envelope->nLoopStart)
 	{
-		envelope->nLoopStart = (BYTE)nPoint;
-		if (envelope->nLoopEnd < nPoint) envelope->nLoopEnd = (BYTE)nPoint;
+		envelope->nLoopStart = static_cast<decltype(envelope->nLoopStart)>(nPoint);
+		if (envelope->nLoopEnd < nPoint) envelope->nLoopEnd = static_cast<decltype(envelope->nLoopEnd)>(nPoint);
 		return true;
 	} else
 	{
@@ -510,8 +510,8 @@ bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 
 	if (nPoint != envelope->nLoopEnd)
 	{
-		envelope->nLoopEnd = (BYTE)nPoint;
-		if (envelope->nLoopStart > nPoint) envelope->nLoopStart = (BYTE)nPoint;
+		envelope->nLoopEnd = static_cast<decltype(envelope->nLoopEnd)>(nPoint);
+		if (envelope->nLoopStart > nPoint) envelope->nLoopStart = static_cast<decltype(envelope->nLoopStart)>(nPoint);
 		return true;
 	} else
 	{
@@ -532,8 +532,8 @@ bool CViewInstrument::EnvSetSustainStart(int nPoint)
 
 	if (nPoint != envelope->nSustainStart)
 	{
-		envelope->nSustainStart = (BYTE)nPoint;
-		if ((envelope->nSustainEnd < nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainEnd = (BYTE)nPoint;
+		envelope->nSustainStart = static_cast<decltype(envelope->nSustainStart)>(nPoint);
+		if ((envelope->nSustainEnd < nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainEnd = static_cast<decltype(envelope->nSustainEnd)>(nPoint);
 		return true;
 	} else
 	{
@@ -554,8 +554,8 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 
 	if (nPoint != envelope->nSustainEnd)
 	{
-		envelope->nSustainEnd = (BYTE)nPoint;
-		if ((envelope->nSustainStart > nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainStart = (BYTE)nPoint;
+		envelope->nSustainEnd = static_cast<decltype(envelope->nSustainEnd)>(nPoint);
+		if ((envelope->nSustainStart > nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainStart = static_cast<decltype(envelope->nSustainStart)>(nPoint);
 		return true;
 	} else
 	{
@@ -587,7 +587,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 		envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	} else
 	{
-		envelope->nReleaseNode = static_cast<BYTE>(nPoint);
+		envelope->nReleaseNode = static_cast<decltype(envelope->nReleaseNode)>(nPoint);
 	}
 	return true;
 }
@@ -2193,6 +2193,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	if (bUpdate)
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
+		GetDocument()->UpdateAllViews(nullptr, SampleHint().Info().Names().Data(), this);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
