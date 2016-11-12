@@ -3305,18 +3305,9 @@ bool CSoundFile::ProcessEffects()
 					m_PlayState.Chn[i].nPatternLoopCount = 0;
 				}
 			}
-			if(GetType() == MOD_TYPE_S3M)
-			{
-				// Reset pattern loop start
-				// Test case: LoopReset.s3m
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-				{
-					m_PlayState.Chn[i].nPatternLoop = 0;
-				}
-			}
+
 			m_PlayState.m_nNextOrder = nPosJump;
 			m_PlayState.m_nNextRow = nBreakRow;
-			m_PlayState.m_bPatternTransitionOccurred = true;
 		}
 
 	}
@@ -5564,7 +5555,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 //------------------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_MTM | MOD_TYPE_AMF0 | MOD_TYPE_SFX))
+	if (GetType() & (MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_MTM | MOD_TYPE_AMF0 | MOD_TYPE_OKT | MOD_TYPE_SFX))
 	{
 		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if (GetType() == MOD_TYPE_XM)

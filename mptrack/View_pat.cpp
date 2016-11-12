@@ -38,6 +38,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Static initializers
 ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
+int32 CViewPattern::m_nTransposeAmount = 1;
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -143,7 +144,6 @@ CViewPattern::CViewPattern()
 	m_pEffectVis = nullptr; //rewbs.fxvis
 	m_bLastNoteEntryBlocked = false;
 
-	m_nTransposeAmount = 1;
 	m_nPattern = 0;
 	m_nOrder = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;

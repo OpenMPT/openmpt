@@ -356,29 +356,13 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 	{
 		if(!sndFile.Patterns.IsValidPat(pat1))
 			continue;
-		const CPattern pattern1 = sndFile.Patterns[pat1];
+		const CPattern &pattern1 = sndFile.Patterns[pat1];
 		for(PATTERNINDEX pat2 = pat1 + 1; pat2 < numPatterns; pat2++)
 		{
 			if(!sndFile.Patterns.IsValidPat(pat2) || patternMapping[pat2] != PATTERNINDEX_INVALID)
 				continue;
-			const CPattern pattern2 = sndFile.Patterns[pat2];
-			if(pattern1.GetNumRows() != pattern2.GetNumRows() || pattern1.GetNumChannels() != pattern2.GetNumChannels())
-				continue;
-
-			size_t i = pattern1.GetNumRows() * pattern1.GetNumChannels();
-			const ModCommand *m1 = pattern1, *m2 = pattern2;
-			bool identical = true;
-			while(i--)
-			{
-				if(*m1 != *m2)
-				{
-					identical = false;
-					break;
-				}
-				m1++;
-				m2++;
-			}
-			if(identical)
+			const CPattern &pattern2 = sndFile.Patterns[pat2];
+			if(pattern1 == pattern2)
 			{
 				modDoc.GetPatternUndo().PrepareUndo(pat2, 0, 0, pattern2.GetNumChannels(), pattern2.GetNumRows(), "Remove Duplicate Patterns", foundDupes != 0, false);
 				sndFile.Patterns.Remove(pat2);

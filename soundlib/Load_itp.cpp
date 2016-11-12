@@ -57,8 +57,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		ITP_ITPEMBEDIH		= 0x40000,	// Embed instrument headers in project file
 	};
 
-	uint32 version;
-	FileReader::off_t size;
+	uint32 version, size;
 
 	file.Rewind();
 
@@ -132,6 +131,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = static_cast<INSTRUMENTINDEX>(file.ReadUint32LE());
 	if(m_nInstruments >= MAX_INSTRUMENTS)
 	{
+		m_nInstruments = 0;
 		return false;
 	}
 

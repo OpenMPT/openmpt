@@ -26,6 +26,39 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.07.00 (? November 2016, revision 7357)
+--------------------------------------------
+Pattern tab
+   [Mod] <js> Remember channel transpose amount also after closing the tab.
+   [Fix] <js> Note Properties: Changing the plugin of a PC event didn't update the parameter list (tx isdera).
+   [Fix] <js> Pattern transitions were executed too early if a pattern loop ended on the last row of a pattern.
+
+Instrument tab
+   [Imp] <js> Allow a maximum fadeout value of 32767 in MPTM, like in XM.
+
+Tree view
+   [Fix] <js> Excessive performance drop when modifying a sample or instrument in a module containing hundreds of samples or instruments.
+
+Mod Conversion
+   [Imp] <js> Converting an XM instrument with no volume envelope to IT / MPTM now creates an envelope which instantly cuts the sample on key-off.
+
+Playback
+   [Fix] <js> Tremolo on quiet notes was broken in OpenMPT 1.26.06.00 (http://bugs.openmpt.org/view.php?id=888). 
+
+S3M
+   [Fix] <js> Pattern loops ending on the last row of a pattern were not executed properly (http://bugs.openmpt.org/view.php?id=887).
+
+Other formats
+   [Fix] <js> MED: Default 8-channel mode tempo should now be imported correctly.
+   [Fix] <js> Possible crashes with malformed ITP files.
+
+Module cleanup
+   [Fix] <js> Remove Duplicates: Patterns with identical contents but different time signatures were merged.
+
+Misc
+   [Fix] <js> Windows key and other special keys were always intercepted since OpenMPT 1.26.01.00 (http://bugs.openmpt.org/view.php?id=886).
+
+
 v1.26.06.00 (22 October 2016, revision 7297)
 --------------------------------------------
 Pattern tab

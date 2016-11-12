@@ -1118,7 +1118,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	{
 		const SAMPLEINDEX nSmp = sampleHint.GetSample();
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
-		if (sampleHint.GetType()[HINT_SMPNAMES] && (nSmp) && (nSmp < MAX_SAMPLES))
+		if (sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA] && (nSmp) && (nSmp < MAX_SAMPLES))
 		{
 			smin = smax = nSmp;
 		}
@@ -1179,7 +1179,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	{
 		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
 		const INSTRUMENTINDEX nIns = instrHint.GetInstrument();
-		if (instrHint.GetType()[HINT_INSNAMES] && (nIns) && (nIns < MAX_INSTRUMENTS))
+		if (instrHint.GetType()[HINT_INSNAMES | HINT_INSTRUMENT] && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
 			smin = smax = nIns;
 		}
