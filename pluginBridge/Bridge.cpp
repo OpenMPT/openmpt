@@ -537,7 +537,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effMainsChanged:
 		// [value]: 0 means "turn off", 1 means "turn on"
 		SetThreadPriority(otherThread, msg->value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
-		sharedMem->tailSize = Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f);
+		sharedMem->tailSize = static_cast<int32>(Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f));
 		break;
 
 	case effEditGetRect:
@@ -838,7 +838,7 @@ void PluginBridge::RenderThread()
 			InterlockedExchange(&isProcessing, 1);
 			AutomateParameters();
 
-			sharedMem->tailSize = Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f);
+			sharedMem->tailSize = static_cast<int32>(Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f));
 
 			// Prepare VstEvents.
 			if(eventMem.Good())
