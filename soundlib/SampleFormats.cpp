@@ -1501,6 +1501,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			{
 				break;
 			}
+
 			std::string::size_type charsRead = 0;
 
 			if(s[0] == '<' && (charsRead = s.find('>')) != std::string::npos)
@@ -1615,6 +1616,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		return false;
 	}
 
+	RecalculateSamplesPerTick();
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
 	if(nInstr > m_nInstruments) m_nInstruments = nInstr;
 	Instruments[nInstr] = pIns;
