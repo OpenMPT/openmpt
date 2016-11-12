@@ -627,6 +627,7 @@ bool CSoundFile::ProcessRow()
 				m_PlayState.m_nNextPatStartRow = 0;
 			}
 		}
+
 		// Reset channel values
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
 		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
@@ -785,12 +786,12 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 		if(vol > 0 || m_playBehaviour[kITVibratoTremoloPanbrello])
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-			const uint8 tremattn = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
+			const uint8 attenuation = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
 			if(GetType() == MOD_TYPE_DMF)
 				delta -= 127;
-			vol += (delta * pChn->nTremoloDepth) / (1u << tremattn);
+			vol += (delta * pChn->nTremoloDepth) / (1 << attenuation);
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
@@ -969,7 +970,7 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 			int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
 			envval = envValueAtReleaseJump + relativeVolumeChange;
 		}
-		vol = (vol * Clamp(envval, 0, 512)) >> 8;
+		vol = (vol * Clamp(envval, 0, 512)) / 256;
 	}
 
 }
@@ -1213,9 +1214,9 @@ void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol) const
 		uint32 fadeout = pIns->nFadeOut;
 		if (fadeout)
 		{
-			pChn->nFadeOutVol -= fadeout << 1;
+			pChn->nFadeOutVol -= fadeout * 2;
 			if (pChn->nFadeOutVol <= 0) pChn->nFadeOutVol = 0;
-			vol = (vol * pChn->nFadeOutVol) >> 16;
+			vol = (vol * pChn->nFadeOutVol) / 65536;
 		} else if (!pChn->nFadeOutVol)
 		{
 			vol = 0;
@@ -1277,7 +1278,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 	}
 	if(pdelta)
 	{
-		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
+		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) / 8;
 		pdelta += pChn->nRealPan;
 		pChn->nRealPan = Clamp(pdelta, 0, 256);
 	}
@@ -1515,7 +1516,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 					vdepth += 2;
 			}
 
-			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
+			vdelta = (vdelta * (int)chn.nVibratoDepth) / (1 << vdepth);
 #ifndef NO_PLUGINS
 			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
 #endif // NO_PLUGINS
@@ -1526,11 +1527,11 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				if (l < 0)
 				{
 					l = -l;
-					vdelta = Util::muldiv(period, GetLinearSlideUpTable(this, l >> 2), 65536) - period;
+					vdelta = Util::muldiv(period, GetLinearSlideUpTable(this, l / 4u), 65536) - period;
 					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideUpTable(this, l & 0x03), 65536) - period;
 				} else
 				{
-					vdelta = Util::muldiv(period, GetLinearSlideDownTable(this, l >> 2), 65536) - period;
+					vdelta = Util::muldiv(period, GetLinearSlideDownTable(this, l / 4u), 65536) - period;
 					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideDownTable(this, l & 0x03), 65536) - period;
 				}
 			}
@@ -1652,14 +1653,14 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			period *= 256;
 			if(vdelta < 0)
 			{
-				vdelta = Util::muldiv(period, downTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, downTable[l / 4u], 0x10000) - period;
 				if (l & 0x03)
 				{
 					vdelta += Util::muldiv(period, fineDownTable[l & 0x03], 0x10000) - period;
 				}
 			} else
 			{
-				vdelta = Util::muldiv(period, upTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, upTable[l / 4u], 0x10000) - period;
 				if (l & 0x03)
 				{
 					vdelta += Util::muldiv(period, fineUpTable[l & 0x03], 0x10000) - period;
@@ -1697,10 +1698,10 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				pChn->nAutoVibPos++;
 				break;
 			case VIB_RAMP_DOWN:
-				vdelta = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
+				vdelta = ((0x40 - (pChn->nAutoVibPos / 2u)) & 0x7F) - 0x40;
 				break;
 			case VIB_RAMP_UP:
-				vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
+				vdelta = ((0x40 + (pChn->nAutoVibPos / 2u)) & 0x7F) - 0x40;
 				break;
 			case VIB_SQUARE:
 				vdelta = (pChn->nAutoVibPos & 128) ? +64 : -64;
@@ -1793,8 +1794,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 			rampLength = 1;
 		}
 
-		int32 leftDelta = ((pChn->newLeftVol - pChn->leftVol) * (1<<VOLUMERAMPPRECISION));
-		int32 rightDelta = ((pChn->newRightVol - pChn->rightVol) * (1<<VOLUMERAMPPRECISION));
+		int32 leftDelta = ((pChn->newLeftVol - pChn->leftVol) * (1 << VOLUMERAMPPRECISION));
+		int32 rightDelta = ((pChn->newRightVol - pChn->rightVol) * (1 << VOLUMERAMPPRECISION));
 		if(!enableCustomRamp)
 		{
 			// Extra-smooth ramping, unless we're forced to use the default values
@@ -1807,8 +1808,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 
 		pChn->leftRamp = leftDelta / rampLength;
 		pChn->rightRamp = rightDelta / rampLength;
-		pChn->leftVol = pChn->newLeftVol - ((pChn->leftRamp * rampLength) >> VOLUMERAMPPRECISION);
-		pChn->rightVol = pChn->newRightVol - ((pChn->rightRamp * rampLength) >> VOLUMERAMPPRECISION);
+		pChn->leftVol = pChn->newLeftVol - ((pChn->leftRamp * rampLength) / (1 << VOLUMERAMPPRECISION));
+		pChn->rightVol = pChn->newRightVol - ((pChn->rightRamp * rampLength) / (1 << VOLUMERAMPPRECISION));
 
 		if (pChn->leftRamp|pChn->rightRamp)
 		{
@@ -1825,8 +1826,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 		pChn->leftVol = pChn->newLeftVol;
 		pChn->rightVol = pChn->newRightVol;
 	}
-	pChn->rampLeftVol = pChn->leftVol * (1<<VOLUMERAMPPRECISION);
-	pChn->rampRightVol = pChn->rightVol * (1<<VOLUMERAMPPRECISION);
+	pChn->rampLeftVol = pChn->leftVol * (1 << VOLUMERAMPPRECISION);
+	pChn->rampRightVol = pChn->rightVol * (1 << VOLUMERAMPPRECISION);
 }
 
 
@@ -1896,7 +1897,7 @@ bool CSoundFile::ReadNote()
 				//Attenuate global pre-amp depending on num channels
 				realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32 + 4)) / 16;
 			}
-			mastervol = (realmastervol * (m_nSamplePreAmp)) >> 6;
+			mastervol = (realmastervol * (m_nSamplePreAmp)) / 64;
 		} else
 		{
 			//Preferred option: don't use global pre-amp at all.
@@ -1907,9 +1908,9 @@ bool CSoundFile::ReadNote()
 		{
 			uint32 attenuation =
 #ifndef NO_AGC
-				(m_MixerSettings.DSPMask & SNDDSP_AGC) ? PreAmpAGCTable[nchn32 >> 1] :
+				(m_MixerSettings.DSPMask & SNDDSP_AGC) ? PreAmpAGCTable[nchn32 / 2u] :
 #endif
-				PreAmpTable[nchn32 >> 1];
+				PreAmpTable[nchn32 / 2u];
 			if(attenuation < 1) attenuation = 1;
 			nMasterVol = (mastervol << 7) / attenuation;
 		} else
@@ -2155,15 +2156,15 @@ bool CSoundFile::ReadNote()
 		if (pChn->pCurrentSample || pChn->HasMIDIOutput())
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
-			uint32 vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
+			uint32 vul = (pChn->nRealVolume * pChn->nRealPan) / (1 << 14);
 			if (vul > 127) vul = 127;
 			if (pChn->nLeftVU > 127) pChn->nLeftVU = (uint8)vul;
-			vul >>= 1;
+			vul /= 2;
 			if (pChn->nLeftVU < vul) pChn->nLeftVU = (uint8)vul;
-			uint32 vur = (pChn->nRealVolume * (256-pChn->nRealPan)) >> 14;
+			uint32 vur = (pChn->nRealVolume * (256-pChn->nRealPan)) / (1 << 14);
 			if (vur > 127) vur = 127;
 			if (pChn->nRightVU > 127) pChn->nRightVU = (uint8)vur;
-			vur >>= 1;
+			vur /= 2;
 			if (pChn->nRightVU < vur) pChn->nRightVU = (uint8)vur;
 		} else
 		{
@@ -2189,11 +2190,11 @@ bool CSoundFile::ReadNote()
 				int32 realvol;
 				if (m_PlayConfig.getUseGlobalPreAmp())
 				{
-					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;
+					realvol = (pChn->nRealVolume * kChnMasterVol) / 128;
 				} else
 				{
 					// Extra attenuation required here if we're bypassing pre-amp.
-					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
+					realvol = (pChn->nRealVolume * kChnMasterVol) / 256;
 				}
 
 				const ForcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
@@ -2201,12 +2202,12 @@ bool CSoundFile::ReadNote()
 				{
 					if (pan < 128)
 					{
-						pChn->newLeftVol = (realvol * 128) >> 8;
-						pChn->newRightVol = (realvol * pan) >> 8;
+						pChn->newLeftVol = (realvol * 128) / 256;
+						pChn->newRightVol = (realvol * pan) / 256;
 					} else
 					{
-						pChn->newLeftVol = (realvol * (256 - pan)) >> 8;
-						pChn->newRightVol = (realvol * 128) >> 8;
+						pChn->newLeftVol = (realvol * (256 - pan)) / 256;
+						pChn->newRightVol = (realvol * 128) / 256;
 					}
 				} else if(panningMode == forceFT2Panning)
 				{
@@ -2217,17 +2218,17 @@ bool CSoundFile::ReadNote()
 					LimitMax(pan, 255);
 					const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
 					const int panR = XMPanningTable[pan];
-					pChn->newLeftVol = (realvol * panL) >> 16;
-					pChn->newRightVol = (realvol * panR) >> 16;
+					pChn->newLeftVol = (realvol * panL) / 65536;
+					pChn->newRightVol = (realvol * panR) / 65536;
 				} else
 				{
-					pChn->newLeftVol = (realvol * (256 - pan)) >> 8;
-					pChn->newRightVol = (realvol * pan) >> 8;
+					pChn->newLeftVol = (realvol * (256 - pan)) / 256;
+					pChn->newRightVol = (realvol * pan) / 256;
 				}
 
 			} else
 			{
-				pChn->newLeftVol = (pChn->nRealVolume * kChnMasterVol) >> 8;
+				pChn->newLeftVol = (pChn->nRealVolume * kChnMasterVol) / 256;
 				pChn->newRightVol = pChn->newLeftVol;
 			}
 			// Clipping volumes
@@ -2260,8 +2261,8 @@ bool CSoundFile::ReadNote()
 				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
 			}*/
 			const int extraAttenuation = m_PlayConfig.getExtraSampleAttenuation();
-			pChn->newLeftVol >>= extraAttenuation;
-			pChn->newRightVol >>= extraAttenuation;
+			pChn->newLeftVol /= (1 << extraAttenuation);
+			pChn->newRightVol /= (1 << extraAttenuation);
 
 			// Dolby Pro-Logic Surround
 			if(pChn->dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) pChn->newRightVol = - pChn->newRightVol;
