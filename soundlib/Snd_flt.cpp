@@ -85,6 +85,8 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 
 	pChn->dwFlags.set(CHN_FILTER);
 
+	// 2 * damping factor
+	const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
 	if(m_playBehaviour[kITFilterBehaviour] && !m_SongFlags[SONG_EXFILTERRANGE])
 	{
 		const float freqParameterMultiplier = 128.0f / (24.0f * 256.0f);
@@ -94,12 +96,11 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 		LimitMax(frequency, (float)(m_MixerSettings.gdwMixingFreq / 2));
 		const float r = (float)m_MixerSettings.gdwMixingFreq / (2.0f * (float)M_PI * frequency);
 
-		d = ITResonanceTable[resonance] * r + ITResonanceTable[resonance] - 1.0f;
+		d = dmpfac * r + dmpfac - 1.0f;
 		e = r * r;
 	} else
 	{
 		float fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-		const float dmpfac = pow(10.0f, -((24.0f / 128.0f) * (float)resonance) / 20.0f);
 
 		fc *= (float)(2.0f * (float)M_PI / (float)m_MixerSettings.gdwMixingFreq);
 
