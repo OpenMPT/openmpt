@@ -297,7 +297,7 @@ struct DispatchMsg : public MsgHeader
 	int32 index;
 	int64 value;
 	int64 ptr;	// Usually, this will be the size of whatever ptr points to. In that case, the data itself is stored after this struct.
-	float   opt;
+	float opt;
 	int32 result;
 };
 
@@ -428,6 +428,7 @@ struct SharedMemLayout
 	MsgQueue toBridge;
 	AutomationQueue automationQueue;
 	VstTimeInfo timeInfo;
+	int32 tailSize;
 };
 static_assert(sizeof(AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
 

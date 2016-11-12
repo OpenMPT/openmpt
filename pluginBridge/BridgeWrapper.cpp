@@ -735,6 +735,9 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		}
 		break;
 
+	case effGetTailSize:
+		return sharedMem->tailSize;
+
 	case effGetParameterProperties:
 		// VstParameterProperties* in [ptr]
 		if(index >= cachedParamInfoStart && index < cachedParamInfoStart + mpt::saturate_cast<int32>(cachedParamInfo.size()))
@@ -1135,7 +1138,21 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 
 	sigProcess.Send();
 	const HANDLE objects[] = { sigProcess.ack, otherProcess };
-	WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+	DWORD result;
+	do
+	{
+		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 100);
+		if(result == WAIT_TIMEOUT)
+		{
+			// In case we called Process() from the GUI thread (panic button or song restart)
+			MSG msg;
+			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
+		}
+	} while (result == WAIT_TIMEOUT);
 
 	for(VstInt32 i = 0; i < numOutputs; i++)
 	{

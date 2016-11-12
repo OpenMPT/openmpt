@@ -9,7 +9,7 @@
 
 
 // TODO
-// Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
+// Translate VstIntPtr size in remaining structs: VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all these are currently not supported by OpenMPT, so not urgent at all)
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // Kirnu and Combo F GUI deadlocks during playback
@@ -31,11 +31,10 @@
 #include <algorithm>
 
 
-//#include <cassert>
 #ifdef _DEBUG
 #include <intrin.h>
 #undef assert
-#define assert(x) while(!(x)) { ::MessageBoxA(NULL, #x, "Debug Assertion Failed", MB_ICONERROR);  __debugbreak(); break; }
+#define assert(x) MPT_MAYBE_CONSTANT_IF(!(x)) { if(IsDebuggerPresent()) __debugbreak(); ::MessageBoxA(NULL, #x, "Debug Assertion Failed", MB_ICONERROR); }
 #else
 #define assert(x)
 #endif
@@ -107,7 +106,7 @@ Event PluginBridge::sigQuit;
 bool PluginBridge::fullMemDump = false;
 
 // This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
-// It always points to the last intialized PluginBridge object.
+// It always points to the last initialized PluginBridge object.
 PluginBridge *PluginBridge::latestInstance = nullptr;
 WNDCLASSEX PluginBridge::windowClass;
 #define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
@@ -538,6 +537,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effMainsChanged:
 		// [value]: 0 means "turn off", 1 means "turn on"
 		SetThreadPriority(otherThread, msg->value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
+		sharedMem->tailSize = Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f);
 		break;
 
 	case effEditGetRect:
@@ -837,6 +837,8 @@ void PluginBridge::RenderThread()
 			ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
 			InterlockedExchange(&isProcessing, 1);
 			AutomateParameters();
+
+			sharedMem->tailSize = Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f);
 
 			// Prepare VstEvents.
 			if(eventMem.Good())
@@ -1313,7 +1315,6 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
-
 					// Provide some memory for the return path.
 					fileSel->sizeReturnPath = lstrlenA(ofn.lpstrFile) + 1;
 					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
