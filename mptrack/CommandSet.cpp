@@ -1574,7 +1574,12 @@ ctx:UID:Description:Modifier:Key:EventMask
 					f << ctx << ":"
 						<< commands[cmd].UID << ":"
 						<< kc.Modifier() << ":"
-						<< kc.KeyCode() << ":"
+						<< kc.KeyCode();
+					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
+					{
+						f << "/" << MapVirtualKey(kc.KeyCode(), MAPVK_VK_TO_VSC);
+					}
+					f << ":"
 						<< (int)kc.EventType().GetRaw() << "\t\t//"
 						<< mpt::ToCharset(mpt::CharsetUTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
 						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyText()).c_str() << " ("
@@ -1595,10 +1600,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	KeyCombination kc;
 	CommandID cmd = kcNumCommands;
 	char s[1024];
-	CString curLine, token;
-	int commentStart;
-	int l=0;
-	int fileVersion = 0;
+	std::string curLine;
+	std::vector<std::string> tokens;
+	int l = 0;
 	oldSpecs = nullptr;	// After clearing the key set, need to fix effect letters
 
 	const bool fillExistingSet = commandSet != nullptr;
@@ -1606,74 +1610,63 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	// If commandSet is valid, add new commands to it (this is used for adding the default shortcuts to existing keymaps)
 	CCommandSet *pTempCS = fillExistingSet ? commandSet : new CCommandSet();
 
-	int errorCount=0;
-	CString errText = "";
+	CString errText;
+	int errorCount = 0;
 
-	while(iStrm.getline(s, CountOf(s)))
+	while(iStrm.getline(s, MPT_ARRAY_COUNT(s)))
 	{
 		curLine = s;
 		l++;
 
-		//Cut everything after a //
-		commentStart = curLine.Find("//");
-		if (commentStart>=0)
-			curLine = curLine.Left(commentStart);
-		curLine.Trim();	//remove whitespace
+		// Cut everything after a //, trim whitespace
+		auto pos = curLine.find("//");
+		if(pos != std::string::npos) curLine.resize(pos);
+		pos = curLine.find_first_not_of(" \n\r\t");
+		if(pos != std::string::npos) curLine.erase(0, pos);
+		pos = curLine.find_last_not_of(" \n\r\t");
+		if(pos != std::string::npos) curLine.resize(pos + 1);
 
-		if (!curLine.IsEmpty() && curLine.Compare("\n") !=0)
+		if (curLine.empty())
+			continue;
+
+		tokens = mpt::String::Split<std::string>(curLine, ":");
+		if(tokens.size() == 2 && !mpt::CompareNoCaseAscii(tokens[0], "version"))
 		{
-			int spos = 0;
-
-			// Format: ctx:UID:Description:Modifier:Key:EventMask
-
-			//context
-			token=curLine.Tokenize(":",spos);
-			kc.Context((InputTargetContext) atoi(token));
-
-			// this line indicates the version of this keymap file instead. (e.g. "version:1")
-			if((token.Trim().CompareNoCase("version") == 0) && (spos != -1))
+			// This line indicates the version of this keymap file instead. (e.g. "version:1")
+			int fileVersion = ConvertStrTo<int>(tokens[1]);
+			if(fileVersion > KEYMAP_VERSION)
 			{
-				fileVersion = atoi(curLine.Mid(spos));
-				if(fileVersion > KEYMAP_VERSION)
-				{
-					CString err;
-					err.Format("File version is %d, but your version of OpenMPT only supports loading files up to version %d.", fileVersion, KEYMAP_VERSION);
-					errText += err + "\n";
-					Log(err);
-				}
-				spos = -1;
-				continue;
+				errText.AppendFormat(_T("File version is %d, but your version of OpenMPT only supports loading files up to version %d.\n"), fileVersion, KEYMAP_VERSION);
 			}
+			continue;
+		}
 
-			//UID
-			if (spos != -1)
+		// Format: ctx:UID:Description:Modifier:Key:EventMask
+		if(tokens.size() >= 5)
+		{
+			kc.Context(static_cast<InputTargetContext>(ConvertStrTo<int>(tokens[0])));
+			cmd = static_cast<CommandID>(FindCmd(ConvertStrTo<int>(tokens[1])));
+
+			// Modifier
+			kc.Modifier(ConvertStrTo<UINT>(tokens[2]));
+
+			// Virtual Key code / Scan code
+			UINT vk = 0;
+			auto scPos = tokens[3].find('/');
+			if(scPos != std::string::npos)
 			{
-				token=curLine.Tokenize(":",spos);
-				cmd= (CommandID)FindCmd(atoi(token));
+				// Scan code present
+				vk = MapVirtualKey(ConvertStrTo<UINT>(tokens[3].substr(scPos + 1)), MAPVK_VSC_TO_VK);
 			}
-
-			//modifier
-			if (spos != -1)
+			if(vk == 0)
 			{
-				token=curLine.Tokenize(":",spos);
-				kc.Modifier(atoi(token));
+				vk = ConvertStrTo<UINT>(tokens[3]);
 			}
+			kc.KeyCode(vk);
 
-			//scancode
-			if (spos != -1)
-			{
-				token=curLine.Tokenize(":",spos);
-				kc.KeyCode(atoi(token));
-			}
+			// Event
+			kc.EventType(static_cast<KeyEventType>(ConvertStrTo<int>(tokens[4])));
 
-			//event
-			if (spos != -1)
-			{
-				token=curLine.Tokenize(":",spos);
-				kc.EventType((KeyEventType)atoi(token));
-			}
-
-			//if(fillExistingSet && ((cmd >= kcVPStartNotes && cmd <= kcVPEndNotes) || pTempCS->GetKeyListSize(cmd) != 0))
 			if(fillExistingSet && pTempCS->GetKeyListSize(cmd) != 0)
 			{
 				// Do not map shortcuts that already have custom keys assigned.
@@ -1681,33 +1674,28 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
 				continue;
 			}
+		}
 
-			//Error checking (TODO):
-			if (cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || spos == -1)
+		// Error checking (TODO):
+		if (cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
+		{
+			errorCount++;
+			if (errorCount < 10)
 			{
-				errorCount++;
-				CString err;
-				if (errorCount < 10)
+				if(tokens.size() < 4)
 				{
-					if(spos == -1)
-					{
-						err.Format("Line %d was not understood.", l);
-					} else
-					{
-						err.Format("Line %d contained an unknown command.", l);
-					}
-					errText += err + "\n";
-					Log(err);
-				} else if (errorCount == 10)
+					errText.AppendFormat(_T("Line %d was not understood.\n"), l);
+				} else
 				{
-					err = "Too many errors detected, not reporting any more.";
-					errText += err + "\n";
-					Log(err);
+					errText.AppendFormat(_T("Line %d contained an unknown command.\n"), l);
 				}
-			} else
+			} else if (errorCount == 10)
 			{
-				pTempCS->Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
+				errText += _T("Too many errors detected, not reporting any more.\n");
 			}
+		} else
+		{
+			pTempCS->Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
 		}
 	}
 
