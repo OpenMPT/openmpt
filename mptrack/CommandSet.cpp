@@ -1556,6 +1556,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 	f << "//----------------------------------------------------------------------\n";
 	f << "version:" << KEYMAP_VERSION << "\n";
 
+	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
+	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+
 	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
 		f << "\n//----( " << KeyCombination::GetContextText((InputTargetContext)ctx) << " (" << ctx << ") )------------\n";
@@ -1577,7 +1580,12 @@ ctx:UID:Description:Modifier:Key:EventMask
 						<< kc.KeyCode();
 					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
 					{
-						f << "/" << MapVirtualKey(kc.KeyCode(), MAPVK_VK_TO_VSC);
+						UINT sc = 0;
+						for(auto i = layouts.begin(); i != layouts.end() && sc == 0; i++)
+						{
+							sc = MapVirtualKeyEx(kc.KeyCode(), MAPVK_VK_TO_VSC, *i);
+						}
+						f << "/" << sc;
 					}
 					f << ":"
 						<< (int)kc.EventType().GetRaw() << "\t\t//"
@@ -1612,6 +1620,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 
 	CString errText;
 	int errorCount = 0;
+
+	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
+	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
 	while(iStrm.getline(s, MPT_ARRAY_COUNT(s)))
 	{
@@ -1656,7 +1667,10 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 			if(scPos != std::string::npos)
 			{
 				// Scan code present
-				vk = MapVirtualKey(ConvertStrTo<UINT>(tokens[3].substr(scPos + 1)), MAPVK_VSC_TO_VK);
+				for(auto i = layouts.begin(); i != layouts.end() && vk == 0; i++)
+				{
+					vk = MapVirtualKeyEx(ConvertStrTo<UINT>(tokens[3].substr(scPos + 1)), MAPVK_VSC_TO_VK, *i);
+				}
 			}
 			if(vk == 0)
 			{
@@ -1928,10 +1942,15 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 
 		if(effect != '?')
 		{
-			SHORT codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(0));
 			// Hack for situations where a non-latin keyboard layout without A...Z key code mapping may the current layout (e.g. Russian),
 			// but a latin layout (e.g. EN-US) is installed as well.
-			if(codeNmod == -1) codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(1));
+			std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
+			GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+			SHORT codeNmod = -1;
+			for(auto i = layouts.begin(); i != layouts.end() && codeNmod == -1; i++)
+			{
+				codeNmod = VkKeyScanEx(effect, *i);
+			}
 			if(codeNmod != -1)
 			{
 				kc.KeyCode(LOBYTE(codeNmod));
