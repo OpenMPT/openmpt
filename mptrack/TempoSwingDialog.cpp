@@ -205,9 +205,18 @@ void CTempoSwingDlg::OnOK()
 {
 	CDialog::OnOK();
 	// If this is the default setup, just clear the vector.
-	if(static_cast<size_t>(std::count(m_tempoSwing.begin(), m_tempoSwing.end(), TempoSwing::Unity)) == m_tempoSwing.size())
+	if(m_pattern == PATTERNINDEX_INVALID)
 	{
-		m_tempoSwing.clear();
+		if(static_cast<size_t>(std::count(m_tempoSwing.begin(), m_tempoSwing.end(), TempoSwing::Unity)) == m_tempoSwing.size())
+		{
+			m_tempoSwing.clear();
+		}
+	} else
+	{
+		if(m_tempoSwing == m_sndFile.m_tempoSwing)
+		{
+			m_tempoSwing.clear();
+		}
 	}
 	OnClose();
 }
