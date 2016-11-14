@@ -69,6 +69,9 @@ public:
 	int GetFontWidth();
 	void QueuePattern(CPoint pt);
 
+	// Check if this module is currently playing
+	bool IsPlaying() const;
+
 	ORDERINDEX GetOrderFromPoint(const CRect& rect, const CPoint& pt) const;
 
 	// Get the currently selected pattern(s).
