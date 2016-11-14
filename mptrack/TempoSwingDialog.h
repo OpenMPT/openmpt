@@ -38,8 +38,11 @@ protected:
 	{
 		CStatic rowLabel, valueLabel;
 		CSliderCtrl valueSlider;
+
+		void SetValue(TempoSwing::value_type v);
+		TempoSwing::value_type GetValue() const;
 	};
-	std::vector<RowCtls *> m_controls;
+	std::vector<std::shared_ptr<RowCtls>> m_controls;
 
 	CButton m_checkGroup;
 	CScrollBar m_scrollBar;
@@ -64,6 +67,7 @@ protected:
 	virtual void OnCancel();
 	void OnClose();
 	afx_msg void OnReset();
+	afx_msg void OnUseGlobal();
 	afx_msg void OnToggleGroup();
 	afx_msg void OnGroupChanged();
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);

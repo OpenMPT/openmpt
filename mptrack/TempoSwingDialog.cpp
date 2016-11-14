@@ -15,10 +15,26 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+void CTempoSwingDlg::RowCtls::SetValue(TempoSwing::value_type v)
+//--------------------------------------------------------------
+{
+	int32 val = Util::muldivr(static_cast<int32>(v) - TempoSwing::Unity, CTempoSwingDlg::SliderUnity, TempoSwing::Unity);
+	valueSlider.SetPos(val);
+}
+
+
+TempoSwing::value_type CTempoSwingDlg::RowCtls::GetValue() const
+//--------------------------------------------------------------
+{
+	return Util::muldivr(valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
+}
+
+
 BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
 	//{{AFX_MSG_MAP(CTempoSwingDlg)
 	ON_WM_VSCROLL()
 	ON_COMMAND(IDC_BUTTON1,	OnReset)
+	ON_COMMAND(IDC_BUTTON2,	OnUseGlobal)
 	ON_COMMAND(IDC_CHECK1,	OnToggleGroup)
 	ON_EN_CHANGE(IDC_EDIT1, OnGroupChanged)
 	//}}AFX_MSG_MAP
@@ -134,13 +150,15 @@ BOOL CTempoSwingDlg::OnInitDialog()
 
 	rect.DeflateRect(m.paddingX, 0/* m.paddingTop*/, m.paddingX + m.scrollbarWidth, 0);
 
+	GetDlgItem(IDC_BUTTON2)->ShowWindow((m_pattern != PATTERNINDEX_INVALID) ? SW_SHOW : SW_HIDE);
+
 	m_controls.resize(m_tempoSwing.size());
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
-		RowCtls *r = m_controls[i] = new RowCtls;
+		auto r = m_controls[i] = std::make_shared<RowCtls>();
 		// Row label
 		TCHAR s[16];
-		wsprintf(s, "Row %u:", i + 1);
+		wsprintf(s, _T("Row %u:"), i + 1);
 		r->rowLabel.Create(s, WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, rect.right, rect.top + m.rowHeight), &m_container);
 		r->rowLabel.SetFont(GetFont());
 
@@ -154,8 +172,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		r->valueSlider.SetRange(-SliderResolution / 2, SliderResolution / 2);
 		r->valueSlider.SetTicFreq(SliderResolution / 8);
 		r->valueSlider.SetPageSize(SliderResolution / 8);
-		int32 val = Util::muldivr(static_cast<int32>(m_tempoSwing[i]) - TempoSwing::Unity, SliderUnity, TempoSwing::Unity);
-		r->valueSlider.SetPos(val);
+		r->SetValue(m_tempoSwing[i]);
 		rect.MoveToY(rect.top + m.rowHeight);
 	}
 
@@ -171,6 +188,8 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		GetDlgItem(IDOK)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
 		GetDlgItem(IDCANCEL)->GetWindowRect(buttonRect);
 		GetDlgItem(IDCANCEL)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+		GetDlgItem(IDC_BUTTON2)->GetWindowRect(buttonRect);
+		GetDlgItem(IDC_BUTTON2)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
 	}
 
 	windowRect.bottom += displayHeight + m.paddingTop + m.footerHeight;
@@ -205,10 +224,6 @@ void CTempoSwingDlg::OnCancel()
 void CTempoSwingDlg::OnClose()
 //----------------------------
 {
-	for(size_t i = 0; i < m_controls.size(); i++)
-	{
-		delete m_controls[i];
-	}
 	// Restore original swing properties after preview
 	if(m_pattern == PATTERNINDEX_INVALID)
 	{
@@ -226,6 +241,22 @@ void CTempoSwingDlg::OnReset()
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
 		m_controls[i]->valueSlider.SetPos(0);
+	}
+	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&(m_controls[0]->valueSlider)));
+}
+
+
+void CTempoSwingDlg::OnUseGlobal()
+//--------------------------------
+{
+	if(m_sndFile.m_tempoSwing.empty())
+	{
+		OnReset();
+		return;
+	}
+	for(size_t i = 0; i < m_tempoSwing.size(); i++)
+	{
+		m_controls[i]->SetValue(m_sndFile.m_tempoSwing[i % m_sndFile.m_tempoSwing.size()]);
 	}
 	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&(m_controls[0]->valueSlider)));
 }
@@ -359,7 +390,7 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 
 	for(size_t i = 0; i < m_parent.m_controls.size(); i++)
 	{
-		m_parent.m_tempoSwing[i] = Util::muldivr(m_parent.m_controls[i]->valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
+		m_parent.m_tempoSwing[i] = m_parent.m_controls[i]->GetValue();
 	}
 	m_parent.m_tempoSwing.Normalize();
 	// Apply preview
