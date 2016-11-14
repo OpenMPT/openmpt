@@ -1709,9 +1709,14 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_INSLIB_SONG:
-		{
-			theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
-		}
+		theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
+		break;
+	case MODITEM_HDR_INSTRUMENTLIB:
+		CTrackApp::OpenDirectory(m_InstrLibPath);
+		break;
+	case MODITEM_INSLIB_FOLDER:
+		// Open path in Explorer
+		CTrackApp::OpenDirectory(InsLibGetFullPath(hItem));
 		break;
 	}
 	return TRUE;
@@ -2861,9 +2866,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				bSep = TRUE;
 				break;
 
+			case MODITEM_HDR_INSTRUMENTLIB:
+				if(!IsSampleBrowser())
+					break;
+				MPT_FALLTHROUGH;
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer..."));
 				break;
 
 			case MODITEM_INSLIB_SONG:
@@ -2899,14 +2909,6 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_DLSBANK_INSTRUMENT:
 				nDefault = ID_MODTREE_PLAY;
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, _T("&Play Instrument"));
-				break;
-
-			case MODITEM_HDR_INSTRUMENTLIB:
-				if(IsSampleBrowser())
-				{
-					nDefault = ID_MODTREE_EXECUTE;
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_EXECUTE, _T("&Browse..."));
-				}
 				break;
 			}
 			if (nDefault) SetMenuDefaultItem(hMenu, nDefault, FALSE);
