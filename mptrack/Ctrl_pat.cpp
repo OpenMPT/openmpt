@@ -383,7 +383,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_NOTIFYCURRENTORDER:
-		if(m_OrderList.GetCurSel(false).GetSelCount() > 1)
+		if(m_OrderList.GetCurSel(false).GetSelCount() > 1 || m_OrderList.m_bDragging)
 		{
 			// Only update play cursor in case there's a selection
 			m_OrderList.Invalidate(FALSE);
