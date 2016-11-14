@@ -418,6 +418,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,132,120,50,14
     PUSHBUTTON      "&Cancel",IDCANCEL,186,120,50,14
+    PUSHBUTTON      "Use &Global Settings",IDC_BUTTON2,6,120,72,14
     LTEXT           "Configure how much each row contributes to a beat:",IDC_STATIC,6,9,174,8
     PUSHBUTTON      "&Reset",IDC_BUTTON1,186,6,50,14
     CONTROL         "&Edit group:",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,24,54,12
