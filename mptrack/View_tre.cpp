@@ -332,6 +332,11 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
 				return TRUE;
 			}
+			break;
+
+		case VK_INSERT:
+			InsertOrDupItem(!CMainFrame::GetInputHandler()->ShiftPressed());
+			return TRUE;
 		}
 	} else if(pMsg->message == WM_CHAR)
 	{
@@ -966,12 +971,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 
 		// go through all sequences
+		CString seqName;
 		for(SEQUENCEINDEX nSeq = nSeqMin; nSeq <= nSeqMax; nSeq++)
 		{
 			if(sndFile.Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
-				CString seqName;
 				if(sndFile.Order.GetSequence(nSeq).GetName().empty())
 					seqName.Format(_T("Sequence %u"), nSeq);
 				else
