@@ -2483,9 +2483,16 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	SEQUENCEINDEX nNewSeq = sndFile.Order.GetCurrentSequenceIndex();
 	if (nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
 	{
+		// Remove bold state from old item
+		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
+			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], 0, TVIS_BOLD);
+
 		pInfo->nOrdSel = nNewOrd;
 		pInfo->nSeqSel = nNewSeq;
-		UpdateView(*pInfo, SequenceHint().Data());
+		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
+			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], TVIS_BOLD, TVIS_BOLD);
+		else
+			UpdateView(*pInfo, SequenceHint().Data());
 	}
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
@@ -2873,7 +2880,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
-				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer..."));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 				break;
 
 			case MODITEM_INSLIB_SONG:
