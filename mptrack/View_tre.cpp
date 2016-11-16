@@ -329,6 +329,11 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
 				return TRUE;
 			}
+			break;
+
+		case VK_INSERT:
+			InsertOrDupItem(!CMainFrame::GetInputHandler()->ShiftPressed());
+			return TRUE;
 		}
 	} else if(pMsg->message == WM_CHAR)
 	{
@@ -966,12 +971,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 
 		// go through all sequences
+		CString seqName;
 		for(SEQUENCEINDEX nSeq = nSeqMin; nSeq <= nSeqMax; nSeq++)
 		{
 			if(sndFile.Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
-				CString seqName;
 				if(sndFile.Order.GetSequence(nSeq).GetName().empty())
 					seqName.Format(_T("Sequence %u"), nSeq);
 				else
@@ -1707,9 +1712,14 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_INSLIB_SONG:
-		{
-			theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
-		}
+		theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
+		break;
+	case MODITEM_HDR_INSTRUMENTLIB:
+		CTrackApp::OpenDirectory(m_InstrLibPath);
+		break;
+	case MODITEM_INSLIB_FOLDER:
+		// Open path in Explorer
+		CTrackApp::OpenDirectory(InsLibGetFullPath(hItem));
 		break;
 	}
 	return TRUE;
@@ -2430,9 +2440,16 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	SEQUENCEINDEX nNewSeq = sndFile.Order.GetCurrentSequenceIndex();
 	if (nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
 	{
+		// Remove bold state from old item
+		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
+			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], 0, TVIS_BOLD);
+
 		pInfo->nOrdSel = nNewOrd;
 		pInfo->nSeqSel = nNewSeq;
-		UpdateView(*pInfo, SequenceHint().Data());
+		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
+			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], TVIS_BOLD, TVIS_BOLD);
+		else
+			UpdateView(*pInfo, SequenceHint().Data());
 	}
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
@@ -2814,9 +2831,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				bSep = TRUE;
 				break;
 
+			case MODITEM_HDR_INSTRUMENTLIB:
+				if(!IsSampleBrowser())
+					break;
+				MPT_FALLTHROUGH;
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 				break;
 
 			case MODITEM_INSLIB_SONG:
@@ -2852,14 +2874,6 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_DLSBANK_INSTRUMENT:
 				nDefault = ID_MODTREE_PLAY;
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, _T("&Play Instrument"));
-				break;
-
-			case MODITEM_HDR_INSTRUMENTLIB:
-				if(IsSampleBrowser())
-				{
-					nDefault = ID_MODTREE_EXECUTE;
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_EXECUTE, _T("&Browse..."));
-				}
 				break;
 			}
 			if (nDefault) SetMenuDefaultItem(hMenu, nDefault, FALSE);

@@ -56,6 +56,7 @@ PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from, bool respectQtyLimi
 		newPat.m_RowsPerBeat = oldPat.m_RowsPerBeat;
 		newPat.m_RowsPerMeasure = oldPat.m_RowsPerMeasure;
 		newPat.m_PatternName = oldPat.m_PatternName;
+		newPat.m_tempoSwing = oldPat.m_tempoSwing;
 	}
 	return newPatIndex;
 }

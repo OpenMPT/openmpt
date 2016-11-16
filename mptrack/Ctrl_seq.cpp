@@ -126,6 +126,13 @@ void COrderList::EnsureVisible(ORDERINDEX order)
 }
 
 
+bool COrderList::IsPlaying() const
+//--------------------------------
+{
+	return (CMainFrame::GetMainFrame()->GetModPlaying() == &m_pModDoc);
+}
+
+
 COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document) : m_pParent(parent), m_pModDoc(document)
 //-------------------------------------------------------------------------------------------------------
 {
@@ -321,7 +328,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 		{
 			CriticalSection cs;
 
-			bool isPlaying = (pMainFrm->GetModPlaying() == &m_pModDoc);
+			bool isPlaying = IsPlaying();
 			bool changedPos = false;
 
 			if(isPlaying && sndFile.m_SongFlags[SONG_PATTERNLOOP])
@@ -406,6 +413,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	if (wParam == kcNull)
 		return 0;
 
+	bool isPlaying = IsPlaying();
 	switch(wParam)
 	{
 	case kcEditCopy:
@@ -418,15 +426,15 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	// Orderlist navigation
 	case kcOrderlistNavigateLeftSelect:
 	case kcOrderlistNavigateLeft:
-		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLeftSelect); SetCurSel(m_nScrollPos - 1); return wParam;
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLeftSelect); SetCurSel(m_nScrollPos - 1, wParam == kcOrderlistNavigateLeft || !isPlaying); return wParam;
 	case kcOrderlistNavigateRightSelect:
 	case kcOrderlistNavigateRight:
-		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateRightSelect); SetCurSel(m_nScrollPos + 1); return wParam;
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateRightSelect); SetCurSel(m_nScrollPos + 1, wParam == kcOrderlistNavigateRight || !isPlaying); return wParam;
 	case kcOrderlistNavigateFirstSelect:
 	case kcOrderlistNavigateFirst:
-		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateFirstSelect); SetCurSel(0); return wParam;
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateFirstSelect); SetCurSel(0, wParam == kcOrderlistNavigateFirst || !isPlaying); return wParam;
 	case kcEditSelectAll:
-		SetCurSel(0);
+		SetCurSel(0, !isPlaying);
 		MPT_FALLTHROUGH;
 	case kcOrderlistNavigateLastSelect:
 	case kcOrderlistNavigateLast:
@@ -434,7 +442,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLastSelect || wParam == kcEditSelectAll);
 			ORDERINDEX nLast = m_pModDoc.GetrSoundFile().Order.GetLengthTailTrimmed();
 			if(nLast > 0) nLast--;
-			SetCurSel(nLast);
+			SetCurSel(nLast, wParam == kcOrderlistNavigateLast || !isPlaying);
 		}
 		return wParam;
 
