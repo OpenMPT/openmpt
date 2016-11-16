@@ -2807,7 +2807,7 @@ void CViewPattern::OnDropSelection()
 void CViewPattern::OnSetSelInstrument()
 //-------------------------------------
 {
-	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), true);
+	SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), false);
 }
 
 
@@ -6174,8 +6174,9 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			{
 				AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
 			}
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, _T("&Remove instrument"));
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), _T("&Set to current instrument"));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, _T("&Remove Instrument"));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), _T("&Current Instrument"));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, _T("Current Instrument (&only change existing)"));
 		}
 		return BuildTogglePlugEditorCtxMenu(hMenu, ih);
 	}
