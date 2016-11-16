@@ -24,13 +24,13 @@ class PatternClipboardElement
 {
 public:
 	
-	CStringA content;
-	CStringA description;
+	std::string content;
+	CString description;
 
 public:
 
 	PatternClipboardElement() { };
-	PatternClipboardElement(const CStringA &data, const CStringA &desc) : content(data), description(desc) { };
+	PatternClipboardElement(const std::string &data, const CString &desc) : content(data), description(desc) { };
 };
 
 
@@ -91,18 +91,18 @@ protected:
 
 	PatternClipboard() : activeClipboard(0) { SetClipboardSize(1); };
 
-	static CStringA GetFileExtension(const char *ext, bool addPadding);
+	static std::string GetFileExtension(const char *ext, bool addPadding);
 
 	// Create the clipboard text for a pattern selection
-	static CStringA CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
+	static std::string CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
 	// Parse clipboard string and perform the pasting operation.
-	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CStringA &data, ORDERINDEX curOrder, PatternRect &pasteRect);
+	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect);
 
 	// System-specific clipboard functions
 	static bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };
-	static bool ToSystemClipboard(const CStringA &data);
-	static bool FromSystemClipboard(CStringA &data);
+	static bool ToSystemClipboard(const std::string &data);
+	static bool FromSystemClipboard(std::string &data);
 };
 
 

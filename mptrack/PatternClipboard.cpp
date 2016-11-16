@@ -39,18 +39,18 @@ OPENMPT_NAMESPACE_BEGIN
 
 PatternClipboard PatternClipboard::instance;
 
-CStringA PatternClipboard::GetFileExtension(const char *ext, bool addPadding)
-//---------------------------------------------------------------------------
+std::string PatternClipboard::GetFileExtension(const char *ext, bool addPadding)
+//------------------------------------------------------------------------------
 {
-	CStringA format(ext);
-	if(format.GetLength() > 3)
+	std::string format(ext);
+	if(format.size() > 3)
 	{
-		format.Truncate(3);
+		format.resize(3);
 	}
-	format.MakeUpper();
+	format = mpt::ToUpperCaseAscii(format);
 	if(addPadding)
 	{
-		format = CStringA(" ", 3 - format.GetLength()) + format;
+		format.insert(0, 3 - format.size(), ' ');
 	}
 	return format;
 }
@@ -64,8 +64,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	LimitMax(last, sndFile.Order.GetLength());
 
 	// Set up clipboard header.
-	CStringA data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\nOrders: ";
-	CStringA patternData;
+	std::string data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\nOrders: ";
+	std::string patternData;
 
 	// Pattern => Order list assignment
 	std::vector<PATTERNINDEX> patList(sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
@@ -77,15 +77,14 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 		PATTERNINDEX pattern = sndFile.Order[ord];
 
 		if(ord != first)
-		{
-			data.AppendChar(',');
-		}
+			data += ',';
+		
 		if(pattern == sndFile.Order.GetInvalidPatIndex())
 		{
-			data.AppendChar('-');
+			data += '-';
 		} else if(pattern == sndFile.Order.GetIgnoreIndex())
 		{
-			data.AppendChar('+');
+			data += '+';
 		} else if(sndFile.Patterns.IsValidPat(pattern))
 		{
 			if(onlyOrders)
@@ -97,15 +96,15 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 				patList[pattern] = insertedPats++;
 
 				const CPattern &pat = sndFile.Patterns[pattern];
-				patternData.AppendFormat("Rows: %u\r\n", pat.GetNumRows());
-				CStringA name = pat.GetName().c_str();
-				if(!name.IsEmpty())
+				patternData += mpt::format("Rows: %1\r\n")(pat.GetNumRows());
+				std::string name = pat.GetName();
+				if(!name.empty())
 				{
-					patternData.Append("Name: " + name + "\r\n");
+					patternData += "Name: " + name + "\r\n";
 				}
 				if(pat.GetOverrideSignature())
 				{
-					patternData.AppendFormat("Signature: %u/%u\r\n", pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
+					patternData += mpt::format("Signature: %1/%2\r\n")(pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
 				}
 				if(pat.HasTempoSwing())
 				{
@@ -113,26 +112,26 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 					const TempoSwing &swing = pat.GetTempoSwing();
 					for(size_t i = 0; i < swing.size(); i++)
 					{
-						patternData.AppendFormat(i == 0 ? "%u" : ",%u", swing[i]);
+						patternData += mpt::format(i == 0 ? "%1" : ",%1")(swing[i]);
 					}
 					patternData += "\r\n";
 				}
-				patternData.Append(CreateClipboardString(sndFile, pattern, PatternRect(PatternCursor(), PatternCursor(sndFile.Patterns[pattern].GetNumRows() - 1, sndFile.GetNumChannels() - 1, PatternCursor::lastColumn))));
+				patternData += CreateClipboardString(sndFile, pattern, PatternRect(PatternCursor(), PatternCursor(sndFile.Patterns[pattern].GetNumRows() - 1, sndFile.GetNumChannels() - 1, PatternCursor::lastColumn)));
 			}
 
-			data.AppendFormat("%u", patList[pattern]);
+			data += mpt::ToString(patList[pattern]);
 		}
 	}
 	if(!onlyOrders)
 	{
-		data.Append("\r\n" + patternData);
+		data += "\r\n" + patternData;
 	}
 	
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
-		CStringA desc;
-		desc.Format("%u %s (%u to %u)", last - first + 1, onlyOrders ? "Orders" : "Patterns", first, last);
+		CString desc;
+		desc.Format(_T("%u %s (%u to %u)"), last - first + 1, onlyOrders ? _T("Orders") : _T("Patterns"), first, last);
 		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
 
@@ -144,11 +143,9 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
 //-------------------------------------------------------------------------------------------
 {
-	CStringA data = CreateClipboardString(sndFile, pattern, selection);
-	if(data.IsEmpty())
-	{
+	std::string data = CreateClipboardString(sndFile, pattern, selection);
+	if(data.empty())
 		return false;
-	}
 
 	// Set up clipboard header.
 	data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\n" + data;
@@ -156,8 +153,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
-		CStringA desc;
-		desc.Format("%u rows, %u channels (pattern %u)", selection.GetNumRows(), selection.GetNumChannels(), pattern);
+		CString desc;
+		desc.Format(_T("%u rows, %u channels (pattern %u)"), selection.GetNumRows(), selection.GetNumChannels(), pattern);
 		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
 
@@ -166,13 +163,11 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 
 
 // Create the clipboard text for a pattern selection
-CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
-//----------------------------------------------------------------------------------------------------------------
+std::string PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
+//--------------------------------------------------------------------------------------------------------------------
 {
 	if(!sndFile.Patterns.IsValidPat(pattern))
-	{
 		return "";
-	}
 
 	if(selection.GetStartColumn() == PatternCursor::paramColumn)
 	{
@@ -185,22 +180,20 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 	const ROWINDEX startRow = selection.GetStartRow(), numRows = selection.GetNumRows();
 	const CHANNELINDEX startChan = selection.GetStartChannel(), numChans = selection.GetNumChannels();
 
-	CStringA data;
-	data.Preallocate(numRows * (numChans * 12 + 2));
+	std::string data;
+	data.reserve(numRows * (numChans * 12 + 2));
 
 	for(ROWINDEX row = 0; row < numRows; row++)
 	{
 		if(row + startRow >= sndFile.Patterns[pattern].GetNumRows())
-		{
 			break;
-		}
 
 		const ModCommand *m = sndFile.Patterns[pattern].GetpModCommand(row + startRow, startChan);
 
 		for(CHANNELINDEX chn = 0; chn < numChans; chn++, m++)
 		{
 			PatternCursor cursor(0, startChan + chn);
-			data.AppendChar('|');
+			data += '|';
 
 			// Note
 			if(selection.ContainsHorizontal(cursor))
@@ -208,17 +201,16 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 				if(m->IsNote())
 				{
 					// Need to guarantee that sharps are used for the clipboard.
-					char note[4];
-					sprintf(note, "%s%u", NoteNamesSharp[(m->note - NOTE_MIN) % 12], (m->note - NOTE_MIN) / 12);
-					data.Append(note);
+					data += NoteNamesSharp[(m->note - NOTE_MIN) % 12];
+					data += ('0' + (m->note - NOTE_MIN) / 12);
 				} else
 				{
-					data.Append(sndFile.GetNoteName(m->note).c_str());
+					data += sndFile.GetNoteName(m->note);
 				}
 			} else
 			{
 				// No note
-				data.Append("   ");
+				data += "   ";
 			}
 
 			// Instrument
@@ -227,15 +219,15 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 			{
 				if(m->instr)
 				{
-					data.AppendChar('0' + (m->instr / 10));
-					data.AppendChar('0' + (m->instr % 10));
+					data += ('0' + (m->instr / 10));
+					data += ('0' + (m->instr % 10));
 				} else
 				{
-					data.Append("..");
+					data += "..";
 				}
 			} else
 			{
-				data.Append("  ");
+				data += "  ";
 			}
 
 			// Volume
@@ -244,22 +236,22 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 			{
 				if(m->IsPcNote())
 				{
-					data.AppendFormat("%03u", m->GetValueVolCol());
+					data += mpt::fmt::dec0<3>(m->GetValueVolCol());
 				}
 				else
 				{
 					if(m->volcmd != VOLCMD_NONE && m->vol <= 99)
 					{
-						data.AppendChar(sndFile.GetModSpecifications().GetVolEffectLetter(m->volcmd));
-						data.AppendFormat("%02u", m->vol);
+						data += sndFile.GetModSpecifications().GetVolEffectLetter(m->volcmd);
+						data += mpt::fmt::dec0<2>(m->vol);
 					} else
 					{
-						data.Append("...");
+						data += "...";
 					}
 				}
 			} else
 			{
-				data.Append("   ");
+				data += "   ";
 			}
 			
 			// Effect
@@ -268,34 +260,34 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 			{
 				if(m->IsPcNote())
 				{
-					data.AppendFormat("%03u", m->GetValueEffectCol());
+					data += mpt::fmt::dec0<3>(m->GetValueEffectCol());
 				}
 				else
 				{
 					if(m->command != CMD_NONE)
 					{
-						data.AppendChar(sndFile.GetModSpecifications().GetEffectLetter(m->command));
+						data += sndFile.GetModSpecifications().GetEffectLetter(m->command);
 					} else
 					{
-						data.AppendChar('.');
+						data += '.';
 					}
 
 					if(m->param != 0 && m->command != CMD_NONE)
 					{
-						data.AppendFormat("%02X", m->param);
+						data += mpt::fmt::HEX0<2>(m->param);
 					} else
 					{
-						data.Append("..");
+						data += "..";
 					}
 				}
 			} else
 			{
-				data.Append("   ");
+				data += "   ";
 			}
 		}
 
 		// Next Row
-		data.Append("\r\n");
+		data += "\r\n";
 	}
 
 	return data;
@@ -306,7 +298,7 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect)
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
-	CStringA data;
+	std::string data;
 	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
@@ -321,44 +313,38 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(internalClipboard >= instance.clipboards.size())
-	{
 		return false;
-	}
+	
 	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder, pasteRect);
 }
 
 
 // Parse clipboard string and perform the pasting operation.
-bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CStringA &data, ORDERINDEX curOrder, PatternRect &pasteRect)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX pattern = pastePos.pattern;
 	if(sndFile.GetpModDoc() == nullptr)
-	{
 		return false;
-	}
 
 	CModDoc &modDoc = *(sndFile.GetpModDoc());
 
-	const uint32 tempoMin = sndFile.GetModSpecifications().GetTempoMin().GetInt();
-
 	bool success = false;
-	bool prepareUndo = true;	// prepare pattern for undo next time
-	bool firstUndo = true;		// for chaining undos (see overflow / multi-pattern paste)
+	bool prepareUndo = true;	// Prepare pattern for undo next time
+	bool firstUndo = true;		// For chaining undos (see overflow / multi-pattern paste)
 
 	// Search for signature
-	int pos, startPos = 0;
+	std::string::size_type pos, startPos = 0;
 	MODTYPE pasteFormat = MOD_TYPE_NONE;
-	while(pasteFormat == MOD_TYPE_NONE && (startPos = data.Find("ModPlug Tracker ", startPos)) != -1)
+	while(pasteFormat == MOD_TYPE_NONE && (startPos = data.find("ModPlug Tracker ", startPos)) != std::string::npos)
 	{
 		startPos += 16;
 		// Check paste format
-		const CStringA format = data.Mid(startPos, 3).Trim().MakeUpper();
+		const std::string format = mpt::ToUpperCaseAscii(mpt::String::Trim(data.substr(startPos, 3)));
 
 		for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 		{
-			const CStringA ext = GetFileExtension(ModSpecs::Collection[i]->fileExtension, false);
-			if(format == ext)
+			if(format == GetFileExtension(ModSpecs::Collection[i]->fileExtension, false))
 			{
 				pasteFormat = ModSpecs::Collection[i]->internalType;
 				startPos += 3;
@@ -367,54 +353,70 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		}
 	}
 
-	if(startPos == -1)
-	{
-		// What is this I don't even
+	// What is this I don't even
+	if(startPos == std::string::npos)
 		return false;
-	}
-
 	// Skip whitespaces
-	while(data[startPos] == '\r' || data[startPos] == '\n' || data[startPos] == ' ')
-	{
-		startPos++;
-	}
+	startPos = data.find_first_not_of(" \n\r\t", startPos);
+	if(startPos == std::string::npos)
+		return false;
 	
+	// Multi-order stuff
 	std::vector<PATTERNINDEX> patList;
-	bool multiPaste = false;
-	if(data.Mid(startPos, 8) == "Orders: ")
+	// Multi-order mix-paste stuff
+	std::vector<ORDERINDEX> ordList;
+	std::vector<std::string::size_type> patOffset;
+
+	bool multiPaste = false, multiPasteMix = false;
+	if(data.substr(startPos, 8) == "Orders: ")
 	{
 		// Pasting several patterns at once.
 		multiPaste = true;
-		mode = pmOverwrite;
+		multiPasteMix = (mode == pmMixPaste || mode == pmMixPasteIT);
+		if(!multiPasteMix)
+			mode = pmOverwrite;
 
-		if(sndFile.Order.IsValidPat(curOrder))
-		{
-			// Put new patterns after current pattern, if it exists
+		// Put new patterns after current pattern, if it exists
+		if(sndFile.Order.IsValidPat(curOrder) && !multiPasteMix)
 			curOrder++;
-		}
 
 		pos = startPos + 8;
-		startPos = data.Find("\n", pos) + 1;
+		startPos = data.find('\n', pos);
 		ORDERINDEX writeOrder = curOrder;
-		bool onlyOrders = (startPos == 0);
+		const bool onlyOrders = (startPos == std::string::npos);
 		if(onlyOrders)
 		{
 			// Only create order list, no patterns
-			startPos = data.GetLength();
+			startPos = data.size();
+		} else
+		{
+			startPos++;
 		}
 
-		while(pos < startPos && pos != 0)
+		while(pos < startPos && pos != std::string::npos)
 		{
 			PATTERNINDEX insertPat;
-			if(data[pos] == '+')
+			auto curPos = pos;
+			// Next order item, please
+			pos = data.find(',', pos + 1);
+			if(pos != std::string::npos)
+				pos++;
+
+			if(data[curPos] == '+')
 			{
 				insertPat = sndFile.Order.GetIgnoreIndex();
-			} else if(data[pos] == '-')
+			} else if(data[curPos] == '-')
 			{
 				insertPat = sndFile.Order.GetInvalidPatIndex();
 			} else
 			{
-				insertPat = ConvertStrTo<PATTERNINDEX>(data.Mid(pos, 16));
+				insertPat = ConvertStrTo<PATTERNINDEX>(data.substr(curPos, 10));
+				if(multiPasteMix)
+				{
+					// We only want the order of pasted patterns now, do not create any new patterns
+					ordList.push_back(insertPat);
+					continue;
+				}
 
 				if(insertPat < patList.size())
 				{
@@ -433,9 +435,6 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				}
 			}
 
-			// Next order item, please
-			pos = data.Find(",", pos + 1) + 1;
-
 			if((insertPat == sndFile.Order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex)
 				|| (insertPat == sndFile.Order.GetInvalidPatIndex() && !sndFile.GetModSpecifications().hasStopIndex)
 				|| insertPat == PATTERNINDEX_INVALID)
@@ -450,18 +449,46 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			sndFile.Order[writeOrder++] = insertPat;
 		}
 
-		if(!patList.empty())
+		if(!multiPasteMix)
 		{
-			// First pattern we're going to paste in.
-			pattern = patList[0];
+			if(!patList.empty())
+			{
+				// First pattern we're going to paste in.
+				pattern = patList[0];
+			}
+
+			// We already modified the order list...
+			success = true;
+			pastePos.pattern = pattern;
+			pastePos.row = 0;
+			pastePos.channel = 0;
+		} else
+		{
+			if(ordList.empty())
+				return success;
+			// Find pattern offsets
+			pos = startPos;
+			patOffset.reserve(ordList.size());
+			bool patStart = false;
+			while((pos = data.find_first_not_of(" \n\r\t", pos)) != std::string::npos)
+			{
+				auto eol = data.find('\n', pos + 1);
+				if(eol == std::string::npos)
+					eol = data.size();
+				if(data.substr(pos, 6) == "Rows: ")
+				{
+					patStart = true;
+				} else if(data.substr(pos, 1) == "|" && patStart)
+				{
+					patOffset.push_back(pos);
+					patStart = false;
+				}
+				pos = eol;
+			}
+			if(patOffset.empty())
+				return success;
+			startPos = patOffset[0];
 		}
-
-		// We already modified the order list...
-		success = true;
-
-		pastePos.pattern = pattern;
-		pastePos.row = 0;
-		pastePos.channel = 0;
 	}
 
 	size_t curPattern = 0;	// Currently pasted pattern for multi-paste
@@ -476,20 +503,22 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	}
 
 	const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(pasteFormat);
-	const bool overflowPaste = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward) && !multiPaste;
+	const bool overflowPaste = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward && (!multiPaste || multiPasteMix);
 	const bool doITStyleMix = (mode == pmMixPasteIT);
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
 	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M));
+	const bool insertNewPatterns = overflowPaste && multiPasteMix;
 
 	PatternCursor startPoint(startRow, startChan, PatternCursor::lastColumn), endPoint(startRow, startChan, PatternCursor::firstColumn);
 	ModCommand *patData = sndFile.Patterns[pattern].GetpModCommand(startRow, 0);
+	auto multiPastePos = ordList.cbegin();
 
 	pos = startPos;
 	while(curRow < sndFile.Patterns[pattern].GetNumRows() || multiPaste)
 	{
-		const int nextPatStart = data.Find('|', pos);
-		// Search for column separator or end of paste data.
-		if(nextPatStart == -1)
+		// Parse next line
+		pos = data.find_first_not_of(" \n\r\t", pos);
+		if(pos == std::string::npos)
 		{
 			// End of paste
 			if(mode == pmPasteFlood && curRow != startRow)
@@ -503,80 +532,95 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				break;
 			}
 		}
+		auto eol = data.find('\n', pos + 1);
+		if(eol == std::string::npos)
+			eol = data.size();
 
 		// Handle multi-paste: Read pattern information
 		if(multiPaste)
 		{
-			// Skip whitespaces
-			while(data[pos] == '\r' || data[pos] == '\n' || data[pos] == ' ')
-			{
-				pos++;
-			}
-
 			// Parse pattern header lines
-			while(pos < nextPatStart)
+			bool parsedLine = true;
+			if(data.substr(pos, 6) == "Rows: ")
 			{
-				int eol = data.Find("\n", pos + 1) + 1;
-				if(eol == -1)
+				pos += 6;
+				// Advance to next pattern
+				if(multiPasteMix)
 				{
-					break;
+					// In case of multi-pattern mix-paste, we know that we reached the end of the previous pattern and need to parse the next order now.
+					multiPastePos++;
+					if(multiPastePos == ordList.cend() || *multiPastePos >= patOffset.size())
+						pos = data.size();
+					else
+						pos = patOffset[*multiPastePos];
+					continue;
 				}
-				if(data.Mid(pos, 6) == "Rows: ")
+
+				// Otherwise, parse this pattern header normally.
+				do
 				{
-					pos += 6;
-					// Advance to next pattern
-					do 
+					if(curPattern >= patList.size())
 					{
-						if(curPattern >= patList.size())
-						{
-							return success;
-						}
-						pattern = patList[curPattern++];
-					} while (pattern == PATTERNINDEX_INVALID);
-					ROWINDEX numRows = ConvertStrTo<ROWINDEX>(data.Mid(pos, eol - pos));
-					sndFile.Patterns[pattern].Resize(numRows);
-					patData = sndFile.Patterns[pattern].GetpModCommand(0, 0);
-					curRow = 0;
-					prepareUndo = true;
-				} else if(data.Mid(pos, 6) == "Name: ")
-				{
-					pos += 6;
-					CString name = data.Mid(pos, eol - pos - 2).TrimRight();
-					sndFile.Patterns[pattern].SetName(name, name.GetLength());
-				} else if(data.Mid(pos, 11) == "Signature: ")
-				{
-					pos += 11;
-					int pos2 = data.Find("/", pos + 1) + 1;
-					ROWINDEX rpb = ConvertStrTo<ROWINDEX>(data.Mid(pos, pos2 - pos));
-					ROWINDEX rpm = ConvertStrTo<ROWINDEX>(data.Mid(pos2, eol - pos2));
-					sndFile.Patterns[pattern].SetSignature(rpb, rpm);
-				} else if(data.Mid(pos, 7) == "Swing: ")
-				{
-					pos += 7;
-					TempoSwing swing;
-					swing.resize(sndFile.Patterns[pattern].GetRowsPerBeat(), TempoSwing::Unity);
-					size_t i = 0;
-					while(pos > 0 && pos < eol && i < swing.size())
-					{
-						swing[i++] = ConvertStrTo<TempoSwing::value_type>(data.Mid(pos, eol - pos));
-						pos = data.Find(",", pos + 1) + 1;
+						return success;
 					}
-					sndFile.Patterns[pattern].SetTempoSwing(swing);
-				} else
+					pattern = patList[curPattern++];
+				} while (pattern == PATTERNINDEX_INVALID);
+				ROWINDEX numRows = ConvertStrTo<ROWINDEX>(data.substr(pos, 10));
+				sndFile.Patterns[pattern].Resize(numRows);
+				patData = sndFile.Patterns[pattern].GetpModCommand(0, 0);
+				curRow = 0;
+				prepareUndo = true;
+			} else if(data.substr(pos, 6) == "Name: ")
+			{
+				pos += 6;
+				auto name = mpt::String::RTrim(data.substr(pos, eol - pos - 2));
+				sndFile.Patterns[pattern].SetName(name);
+			} else if(data.substr(pos, 11) == "Signature: ")
+			{
+				pos += 11;
+				auto pos2 = data.find("/", pos + 1);
+				if(pos2 != std::string::npos)
 				{
-					break;
+					pos2++;
+					ROWINDEX rpb = ConvertStrTo<ROWINDEX>(data.substr(pos, pos2 - pos));
+					ROWINDEX rpm = ConvertStrTo<ROWINDEX>(data.substr(pos2, eol - pos2));
+					sndFile.Patterns[pattern].SetSignature(rpb, rpm);
 				}
+			} else if(data.substr(pos, 7) == "Swing: ")
+			{
+				pos += 7;
+				TempoSwing swing;
+				swing.resize(sndFile.Patterns[pattern].GetRowsPerBeat(), TempoSwing::Unity);
+				size_t i = 0;
+				while(pos != std::string::npos && pos < eol && i < swing.size())
+				{
+					swing[i++] = ConvertStrTo<TempoSwing::value_type>(data.substr(pos, eol - pos));
+					pos = data.find(',', pos + 1);
+					if(pos != std::string::npos)
+						pos++;
+				}
+				sndFile.Patterns[pattern].SetTempoSwing(swing);
+			} else
+			{
+				parsedLine = false;
+			}
+			if(parsedLine)
+			{
 				pos = eol;
+				continue;
 			}
 		}
-
-		// Search for column separator or end of paste data.
-		pos = nextPatStart;
+		if(data[pos] != '|')
+		{
+			// Not a valid line?
+			pos = eol;
+			continue;
+		}
 
 		success = true;
 		col = startChan;
 		// Paste columns
-		while((pos + 11 < data.GetLength()) && (data[pos] == '|'))
+		while((pos + 11 < data.size()) && (data[pos] == '|'))
 		{
 			pos++;
 			// Handle pasting large pattern into smaller pattern (e.g. 128-row pattern into MOD, which only allows 64 rows)
@@ -682,7 +726,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					{
 						if(m.IsPcNote())
 						{
-							m.SetValueVolCol(ConvertStrTo<uint16>(data.Mid(pos + 5, 3)));
+							m.SetValueVolCol(ConvertStrTo<uint16>(data.substr(pos + 5, 3)));
 						} else
 						{
 							m.volcmd = VOLCMD_NONE;
@@ -711,7 +755,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					{
 						firstCol = std::min(firstCol, PatternCursor::paramColumn);
 						lastCol = std::max(lastCol, PatternCursor::paramColumn);
-						m.SetValueEffectCol(ConvertStrTo<uint16>(data.Mid(pos + 8, 3)));
+						m.SetValueEffectCol(ConvertStrTo<uint16>(data.substr(pos + 8, 3)));
 					} else if(!origModCmd.IsPcNote())
 					{
 						// No value provided in clipboard
@@ -768,22 +812,16 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						case CMD_TEMPO:
 							if(!clipboardHasS3MCommands)
 							{
-								if(m.param < tempoMin)
-								{
+								if(m.param < 32)
 									m.command = CMD_SPEED;
-								} else
-								{
+								else
 									m.command = CMD_TEMPO;
-								}
 							} else
 							{
-								if(m.command == CMD_SPEED && m.param >= tempoMin)
-								{
+								if(m.command == CMD_SPEED && m.param >= 32)
 									m.param = CMD_TEMPO;
-								} else if(m.command == CMD_TEMPO && m.param < tempoMin)
-								{
+								else if(m.command == CMD_TEMPO && m.param < 32)
 									m.param = CMD_SPEED;
-								}
 							}
 							break;
 						}
@@ -795,13 +833,10 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						case CMD_TEMPO:
 							if(!clipboardHasS3MCommands)
 							{
-								if(m.param  < tempoMin)
-								{
+								if(m.param  < 32)
 									m.command = CMD_SPEED;
-								} else
-								{
+								else
 									m.command = CMD_TEMPO;
-								}
 							}
 							break;
 						}
@@ -835,6 +870,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		// Next row
 		patData += sndFile.GetNumChannels();
 		curRow++;
+		pos = eol;
 
 		if(overflowPaste)
 		{
@@ -844,7 +880,18 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			{
 				curRow = 0;
 				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size()) return success;
+				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size() || !sndFile.Patterns.IsValidPat(sndFile.Order[nextOrder]))
+				{
+					PATTERNINDEX newPat;
+					if(!insertNewPatterns
+						|| curOrder >= sndFile.GetModSpecifications().ordersMax
+						|| (newPat = sndFile.Patterns.InsertAny(sndFile.Patterns[pattern].GetNumRows(), true)) == PATTERNINDEX_INVALID
+						|| sndFile.Order.Insert(curOrder + 1, 1, newPat) == 0)
+					{
+						return success;
+					}
+					nextOrder = curOrder + 1;
+				}
 				pattern = sndFile.Order[nextOrder];
 				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
 				patData = sndFile.Patterns[pattern];
@@ -902,7 +949,7 @@ bool PatternClipboard::CycleBackward()
 void PatternClipboard::SetClipboardSize(clipindex_t maxEntries)
 //-------------------------------------------------------------
 {
-	instance.clipboards.resize(maxEntries, PatternClipboardElement("", "unused"));
+	instance.clipboards.resize(maxEntries, PatternClipboardElement("", _T("unused")));
 	LimitMax(instance.activeClipboard, maxEntries - 1);
 }
 
@@ -917,8 +964,8 @@ bool PatternClipboard::CanPaste()
 
 
 // System-specific clipboard functions
-bool PatternClipboard::ToSystemClipboard(const CStringA &data)
-//------------------------------------------------------------
+bool PatternClipboard::ToSystemClipboard(const std::string &data)
+//---------------------------------------------------------------
 {
 	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
 	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
@@ -927,7 +974,7 @@ bool PatternClipboard::ToSystemClipboard(const CStringA &data)
 	}
 
 	HGLOBAL hCpy;
-	if((hCpy = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, data.GetLength() + 1)) == NULL)
+	if((hCpy = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, data.size() + 1)) == NULL)
 	{
 		return false;
 	}
@@ -937,7 +984,7 @@ bool PatternClipboard::ToSystemClipboard(const CStringA &data)
 	void *clipboard;
 	if((clipboard = ::GlobalLock(hCpy)) != nullptr)
 	{
-		strcpy(clipboard, data);
+		memcpy(clipboard, data.c_str(), data.size() + 1);
 		::GlobalUnlock(hCpy);
 	}
 
@@ -950,8 +997,8 @@ bool PatternClipboard::ToSystemClipboard(const CStringA &data)
 
 
 // System-specific clipboard functions
-bool PatternClipboard::FromSystemClipboard(CStringA &data)
-//--------------------------------------------------------
+bool PatternClipboard::FromSystemClipboard(std::string &data)
+//-----------------------------------------------------------
 {
 	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
 	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
@@ -963,7 +1010,9 @@ bool PatternClipboard::FromSystemClipboard(CStringA &data)
 	LPSTR p = nullptr;
 	if(hCpy && (p = (LPSTR)::GlobalLock(hCpy)) != nullptr)
 	{
-		data.SetString(p, ::GlobalSize(hCpy));
+		auto size = ::GlobalSize(hCpy);
+		if(size > 0)
+			data.assign(p, size - 1);
 		::GlobalUnlock(hCpy);
 	}
 
@@ -1145,7 +1194,7 @@ void PatternClipboardDialog::OnEndEdit(bool apply)
 			return;
 		}
 
-		CStringA newName;
+		CString newName;
 		editNameBox.GetWindowText(newName);
 
 		PatternClipboard::instance.clipboards[sel].description = newName;
