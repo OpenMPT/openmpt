@@ -323,6 +323,7 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect)
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	const std::string whitespace(" \n\r\t");
 	PATTERNINDEX pattern = pastePos.pattern;
 	if(sndFile.GetpModDoc() == nullptr)
 		return false;
@@ -357,7 +358,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	if(startPos == std::string::npos)
 		return false;
 	// Skip whitespaces
-	startPos = data.find_first_not_of(" \n\r\t", startPos);
+	startPos = data.find_first_not_of(whitespace, startPos);
 	if(startPos == std::string::npos)
 		return false;
 	
@@ -470,7 +471,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			pos = startPos;
 			patOffset.reserve(ordList.size());
 			bool patStart = false;
-			while((pos = data.find_first_not_of(" \n\r\t", pos)) != std::string::npos)
+			while((pos = data.find_first_not_of(whitespace, pos)) != std::string::npos)
 			{
 				auto eol = data.find('\n', pos + 1);
 				if(eol == std::string::npos)
@@ -517,7 +518,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	while(curRow < sndFile.Patterns[pattern].GetNumRows() || multiPaste)
 	{
 		// Parse next line
-		pos = data.find_first_not_of(" \n\r\t", pos);
+		pos = data.find_first_not_of(whitespace, pos);
 		if(pos == std::string::npos)
 		{
 			// End of paste
@@ -573,7 +574,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			} else if(data.substr(pos, 6) == "Name: ")
 			{
 				pos += 6;
-				auto name = mpt::String::RTrim(data.substr(pos, eol - pos - 2));
+				auto name = mpt::String::RTrim(data.substr(pos, eol - pos - 1));
 				sndFile.Patterns[pattern].SetName(name);
 			} else if(data.substr(pos, 11) == "Signature: ")
 			{
@@ -710,7 +711,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				{
 					firstCol = std::min(firstCol, PatternCursor::instrColumn);
 					lastCol = std::max(lastCol, PatternCursor::instrColumn);
-					if(data[pos + 3] >= '0' && data[pos + 3] <= ('0' + (MAX_SAMPLES / 10)))
+					if(data[pos + 3] >= '0' && data[pos + 3] <= ('0' + (MAX_INSTRUMENTS / 10)))
 					{
 						m.instr = (data[pos + 3] - '0') * 10 + (data[pos + 4] - '0');
 					} else m.instr = 0;
@@ -759,7 +760,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					} else if(!origModCmd.IsPcNote())
 					{
 						// No value provided in clipboard
-						if(m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI && m.param < 128)
+						if((m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI) && m.param < 128)
 							m.SetValueEffectCol(static_cast<uint16>(Util::muldivr(m.param, ModCommand::maxColumnValue, 127)));
 						else
 							m.SetValueEffectCol(0);
