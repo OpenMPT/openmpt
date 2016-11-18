@@ -127,147 +127,146 @@ struct MixLoopState
 				// We probably didn't hit the loop end yet (first loop), so we do nothing
 				if (chn.position.GetInt() < 0) chn.position.SetInt(0);
 			}
-		} else
+		} else if (chn.position.GetUInt() >= chn.nLength)
+		{
 			// Past the end
-			if (chn.position.GetUInt() >= chn.nLength)
+			if(!chn.dwFlags[CHN_LOOP]) return 0; // not looping -> stop this channel
+			if(chn.dwFlags[CHN_PINGPONGLOOP])
 			{
-				if(!chn.dwFlags[CHN_LOOP]) return 0; // not looping -> stop this channel
-				if(chn.dwFlags[CHN_PINGPONGLOOP])
+				// Invert loop
+				if (nInc.IsPositive())
 				{
-					// Invert loop
-					if (nInc.IsPositive())
-					{
-						nInc.Negate();
-						chn.increment = nInc;
-					}
-					chn.dwFlags.set(CHN_PINGPONGFLAG);
-					// adjust loop position
-
-					SamplePosition invFract = chn.position.GetInvertedFract();
-					chn.position = SamplePosition(chn.nLength - (chn.position.GetInt() - chn.nLength) - invFract.GetInt(), invFract.GetFract());
-					if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength))
-					{
-						// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-						chn.position.SetInt(chn.nLength - std::min<SmpLength>(chn.nLength, ITPingPongMode ? 2 : 1));
-					}
-				} else
-				{
-					if (nInc.IsNegative()) // This is a bug
-					{
-						nInc.Negate();
-						chn.increment = nInc;
-					}
-					// Restart at loop start
-					chn.position += SamplePosition(nLoopStart - chn.nLength, 0);
-					MPT_ASSERT(chn.position.GetInt() >= nLoopStart);
-					// Interpolate correctly after wrapping around
-					chn.dwFlags.set(CHN_WRAPPED_LOOP);
+					nInc.Negate();
+					chn.increment = nInc;
 				}
-			}
+				chn.dwFlags.set(CHN_PINGPONGFLAG);
+				// adjust loop position
 
-			// Part 2: Compute how many samples we can render until we reach the end of sample / loop boundary / etc.
-
-			SamplePosition nPos = chn.position;
-			// too big increment, and/or too small loop length
-			if (nPos.GetInt() < nLoopStart)
-			{
-				if (nPos.IsNegative() || nInc.IsNegative()) return 0;
-			}
-			if (nPos.IsNegative() || nPos.GetUInt() >= chn.nLength) return 0;
-			uint32 nSmpCount = nSamples;
-			SamplePosition nInv = nInc;
-			if (nInc.IsNegative())
-			{
-				nInv.Negate();
-			}
-			LimitMax(nSamples, maxSamples);
-			SamplePosition incSamples = nInc * (nSamples - 1);
-			int32 nPosDest = (nPos + incSamples).GetInt();
-
-			const SmpLength nPosInt = nPos.GetUInt();
-			const bool isAtLoopStart = (nPosInt >= chn.nLoopStart && nPosInt < chn.nLoopStart + InterpolationMaxLookahead);
-			if(!isAtLoopStart)
-			{
-				chn.dwFlags.reset(CHN_WRAPPED_LOOP);
-			}
-
-			// Loop wrap-around magic.
-			bool checkDest = true;
-			if(lookaheadPointer != nullptr)
-			{
-				if(nPos.GetUInt() >= lookaheadStart)
+				SamplePosition invFract = chn.position.GetInvertedFract();
+				chn.position = SamplePosition(chn.nLength - (chn.position.GetInt() - chn.nLength) - invFract.GetInt(), invFract.GetFract());
+				if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength))
 				{
+					// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
+					chn.position.SetInt(chn.nLength - std::min<SmpLength>(chn.nLength, ITPingPongMode ? 2 : 1));
+				}
+			} else
+			{
+				if (nInc.IsNegative()) // This is a bug
+				{
+					nInc.Negate();
+					chn.increment = nInc;
+				}
+				// Restart at loop start
+				chn.position += SamplePosition(nLoopStart - chn.nLength, 0);
+				MPT_ASSERT(chn.position.GetInt() >= nLoopStart);
+				// Interpolate correctly after wrapping around
+				chn.dwFlags.set(CHN_WRAPPED_LOOP);
+			}
+		}
+
+		// Part 2: Compute how many samples we can render until we reach the end of sample / loop boundary / etc.
+
+		SamplePosition nPos = chn.position;
+		// too big increment, and/or too small loop length
+		if (nPos.GetInt() < nLoopStart)
+		{
+			if (nPos.IsNegative() || nInc.IsNegative()) return 0;
+		}
+		if (nPos.IsNegative() || nPos.GetUInt() >= chn.nLength) return 0;
+		uint32 nSmpCount = nSamples;
+		SamplePosition nInv = nInc;
+		if (nInc.IsNegative())
+		{
+			nInv.Negate();
+		}
+		LimitMax(nSamples, maxSamples);
+		SamplePosition incSamples = nInc * (nSamples - 1);
+		int32 nPosDest = (nPos + incSamples).GetInt();
+
+		const SmpLength nPosInt = nPos.GetUInt();
+		const bool isAtLoopStart = (nPosInt >= chn.nLoopStart && nPosInt < chn.nLoopStart + InterpolationMaxLookahead);
+		if(!isAtLoopStart)
+		{
+			chn.dwFlags.reset(CHN_WRAPPED_LOOP);
+		}
+
+		// Loop wrap-around magic.
+		bool checkDest = true;
+		if(lookaheadPointer != nullptr)
+		{
+			if(nPos.GetUInt() >= lookaheadStart)
+			{
 #if 0
-					const uint32 oldCount = nSmpCount;
+				const uint32 oldCount = nSmpCount;
 
-					// When going backwards - we can only go back up to lookaheadStart.
-					// When going forwards - read through the whole pre-computed wrap-around buffer if possible.
-					// TODO: ProTracker sample swapping needs hard cut at sample end.
-					int32 samplesToRead = nInc.IsNegative()
-						? (nPosInt - lookaheadStart)
-						//: 2 * InterpolationMaxLookahead - (nPosInt - mixLoopState.lookaheadStart);
-						: (chn.nLoopEnd - nPosInt);
-					//LimitMax(samplesToRead, chn.nLoopEnd - chn.nLoopStart);
-					nSmpCount = SamplesToBufferLength(samplesToRead, chn);
-					Limit(nSmpCount, 1u, oldCount);
+				// When going backwards - we can only go back up to lookaheadStart.
+				// When going forwards - read through the whole pre-computed wrap-around buffer if possible.
+				// TODO: ProTracker sample swapping needs hard cut at sample end.
+				int32 samplesToRead = nInc.IsNegative()
+					? (nPosInt - lookaheadStart)
+					//: 2 * InterpolationMaxLookahead - (nPosInt - mixLoopState.lookaheadStart);
+					: (chn.nLoopEnd - nPosInt);
+				//LimitMax(samplesToRead, chn.nLoopEnd - chn.nLoopStart);
+				nSmpCount = SamplesToBufferLength(samplesToRead, chn);
+				Limit(nSmpCount, 1u, oldCount);
 #else
-					if (nInc.IsNegative())
-					{
-						nSmpCount = DistanceToBufferLength(SamplePosition(lookaheadStart, 0), nPos, nInv);
-					} else
-					{
-						nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, 0), nInv);
-					}
-#endif
-					chn.pCurrentSample = lookaheadPointer;
-					checkDest = false;
-				} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
-				{
-					// We just restarted the loop, so interpolate correctly after wrapping around
-					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
-					chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
-					checkDest = false;
-				} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
-				{
-					// We shouldn't read that far if we're not using the pre-computed wrap-around buffer.
-					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(lookaheadStart, 0), nInv);
-					checkDest = false;
-				}
-			}
-
-			if(checkDest)
-			{
-				// Fix up sample count if target position is invalid
 				if (nInc.IsNegative())
 				{
-					if (nPosDest < nLoopStart)
-					{
-						nSmpCount = DistanceToBufferLength(SamplePosition(chn.nLoopStart, 0), nPos, nInv);
-					}
+					nSmpCount = DistanceToBufferLength(SamplePosition(lookaheadStart, 0), nPos, nInv);
 				} else
 				{
-					if (nPosDest >= (int32)chn.nLength)
-					{
-						nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, 0), nInv);
-					}
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, 0), nInv);
+				}
+#endif
+				chn.pCurrentSample = lookaheadPointer;
+				checkDest = false;
+			} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
+			{
+				// We just restarted the loop, so interpolate correctly after wrapping around
+				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
+				chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
+				checkDest = false;
+			} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
+			{
+				// We shouldn't read that far if we're not using the pre-computed wrap-around buffer.
+				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(lookaheadStart, 0), nInv);
+				checkDest = false;
+			}
+		}
+
+		if(checkDest)
+		{
+			// Fix up sample count if target position is invalid
+			if (nInc.IsNegative())
+			{
+				if (nPosDest < nLoopStart)
+				{
+					nSmpCount = DistanceToBufferLength(SamplePosition(chn.nLoopStart, 0), nPos, nInv);
+				}
+			} else
+			{
+				if (nPosDest >= (int32)chn.nLength)
+				{
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, 0), nInv);
 				}
 			}
+		}
 
-			Limit(nSmpCount, 1u, nSamples);
+		Limit(nSmpCount, 1u, nSamples);
 
 #ifdef _DEBUG
+		{
+			SmpLength posDest = (nPos + nInc * (nSmpCount - 1)).GetUInt();
+			if (posDest < 0 || posDest > chn.nLength)
 			{
-				SmpLength posDest = (nPos + nInc * (nSmpCount - 1)).GetUInt();
-				if (posDest < 0 || posDest > chn.nLength)
-				{
-					// We computed an invalid delta!
-					MPT_ASSERT_NOTREACHED();
-					return 0;
-				}
+				// We computed an invalid delta!
+				MPT_ASSERT_NOTREACHED();
+				return 0;
 			}
+		}
 #endif
 
-			return nSmpCount;
+		return nSmpCount;
 	}
 };
 
