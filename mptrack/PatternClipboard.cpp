@@ -368,17 +368,16 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	std::vector<ORDERINDEX> ordList;
 	std::vector<std::string::size_type> patOffset;
 
-	bool multiPaste = false, multiPasteMix = false;
+	enum { kSinglePaste, kMultiInsert, kMultiOverwrite } patternMode = kSinglePaste;
 	if(data.substr(startPos, 8) == "Orders: ")
 	{
 		// Pasting several patterns at once.
-		multiPaste = true;
-		multiPasteMix = (mode == pmMixPaste || mode == pmMixPasteIT);
-		if(!multiPasteMix)
+		patternMode = (mode == pmMixPaste || mode == pmMixPasteIT || mode == pmPasteFlood) ? kMultiOverwrite : kMultiInsert;
+		if(patternMode == kMultiInsert)
 			mode = pmOverwrite;
 
 		// Put new patterns after current pattern, if it exists
-		if(sndFile.Order.IsValidPat(curOrder) && !multiPasteMix)
+		if(sndFile.Order.IsValidPat(curOrder) && patternMode == kMultiInsert)
 			curOrder++;
 
 		pos = startPos + 8;
@@ -412,7 +411,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			} else
 			{
 				insertPat = ConvertStrTo<PATTERNINDEX>(data.substr(curPos, 10));
-				if(multiPasteMix)
+				if(patternMode == kMultiOverwrite)
 				{
 					// We only want the order of pasted patterns now, do not create any new patterns
 					ordList.push_back(insertPat);
@@ -450,7 +449,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			sndFile.Order[writeOrder++] = insertPat;
 		}
 
-		if(!multiPasteMix)
+		if(patternMode == kMultiInsert)
 		{
 			if(!patList.empty())
 			{
@@ -504,28 +503,30 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	}
 
 	const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(pasteFormat);
-	const bool overflowPaste = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward && (!multiPaste || multiPasteMix);
+	const bool overflowPaste = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward && patternMode != kMultiInsert;
 	const bool doITStyleMix = (mode == pmMixPasteIT);
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
 	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M));
-	const bool insertNewPatterns = overflowPaste && multiPasteMix;
+	const bool insertNewPatterns = overflowPaste && (patternMode == kMultiOverwrite);
 
 	PatternCursor startPoint(startRow, startChan, PatternCursor::lastColumn), endPoint(startRow, startChan, PatternCursor::firstColumn);
 	ModCommand *patData = sndFile.Patterns[pattern].GetpModCommand(startRow, 0);
-	auto multiPastePos = ordList.cbegin();
 
+	auto multiPastePos = ordList.cbegin();
 	pos = startPos;
-	while(curRow < sndFile.Patterns[pattern].GetNumRows() || multiPaste)
+
+	while(curRow < sndFile.Patterns[pattern].GetNumRows() || patternMode != kSinglePaste)
 	{
 		// Parse next line
 		pos = data.find_first_not_of(whitespace, pos);
 		if(pos == std::string::npos)
 		{
 			// End of paste
-			if(mode == pmPasteFlood && curRow != startRow)
+			if(mode == pmPasteFlood && curRow != startRow && curRow < sndFile.Patterns[pattern].GetNumRows())
 			{
 				// Restarting pasting from beginning.
 				pos = startPos;
+				multiPastePos = ordList.cbegin();
 				continue;
 			} else
 			{
@@ -538,7 +539,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			eol = data.size();
 
 		// Handle multi-paste: Read pattern information
-		if(multiPaste)
+		if(patternMode != kSinglePaste)
 		{
 			// Parse pattern header lines
 			bool parsedLine = true;
@@ -546,7 +547,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			{
 				pos += 6;
 				// Advance to next pattern
-				if(multiPasteMix)
+				if(patternMode == kMultiOverwrite)
 				{
 					// In case of multi-pattern mix-paste, we know that we reached the end of the previous pattern and need to parse the next order now.
 					multiPastePos++;
