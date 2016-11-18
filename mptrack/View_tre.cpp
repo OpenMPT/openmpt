@@ -1121,11 +1121,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
 	if (info.hSamples && sampleHint.GetType()[HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA])
 	{
-		const SAMPLEINDEX nSmp = sampleHint.GetSample();
+		const SAMPLEINDEX hintSmp = sampleHint.GetSample();
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
-		if (sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA] && (nSmp) && (nSmp < MAX_SAMPLES))
+		if (sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA] && hintSmp > 0 && hintSmp < MAX_SAMPLES)
 		{
-			smin = smax = nSmp;
+			smin = smax = hintSmp;
 		}
 		HTREEITEM hChild = GetNthChildItem(info.hSamples, smin - 1);
 		for(SAMPLEINDEX nSmp = smin; nSmp <= smax; nSmp++)
@@ -1183,10 +1183,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	if (info.hInstruments && instrHint.GetType()[HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT])
 	{
 		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
-		const INSTRUMENTINDEX nIns = instrHint.GetInstrument();
-		if (instrHint.GetType()[HINT_INSNAMES | HINT_INSTRUMENT] && (nIns) && (nIns < MAX_INSTRUMENTS))
+		const INSTRUMENTINDEX hintIns = instrHint.GetInstrument();
+		if (instrHint.GetType()[HINT_INSNAMES | HINT_INSTRUMENT] && hintIns > 0 && hintIns < MAX_INSTRUMENTS)
 		{
-			smin = smax = nIns;
+			smin = smax = hintIns;
 		}
 		HTREEITEM hChild = GetNthChildItem(info.hInstruments, smin - 1);
 		for (INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)

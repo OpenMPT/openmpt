@@ -1120,14 +1120,14 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 		return;
 	}
 
-	ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
-	new (msg) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
+	ProcessMsg *processMsg = static_cast<ProcessMsg *>(processMem.view);
+	new (processMsg) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
 
 	// Anticipate that many plugins will query the play position in a process call and send it along the process call
 	// to save some valuable inter-process calls.
 	sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPlugin::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid, nullptr, 0.0f));
 
-	buf_t *ptr = reinterpret_cast<buf_t *>(msg + 1);
+	buf_t *ptr = reinterpret_cast<buf_t *>(processMsg + 1);
 	for(VstInt32 i = 0; i < numInputs; i++)
 	{
 		memcpy(ptr, inputs[i], sampleFrames * sizeof(buf_t));
