@@ -15,12 +15,22 @@
   <Type Name="FlagSet&lt;*,*&gt;">
     <DisplayString>{($T1)bits_}</DisplayString>
   </Type>
-  
+
   <!-- Sample import/export formats -->
   <Type Name="SampleIO">
     <DisplayString>{(SampleIO::Bitdepth)(format &amp; 0xFF)} / {(SampleIO::Channels)((format >> 0x08) &amp; 0xFF)} / {(SampleIO::Endianness)((format >> 0x10) &amp; 0xFF)} / {(SampleIO::Encoding)((format >> 0x18) &amp; 0xFF)}</DisplayString>
   </Type>
-  
+
+  <!-- Pattern editor position -->
+  <Type Name="PatternCursor">
+    <DisplayString>Row {cursor >> 16}, Chn {(cursor &amp; 0xFFFF) >> 3}, {(PatternCursor::Columns)(cursor &amp; 0x07)}</DisplayString>
+    <Expand>
+      <Item Name="Row">cursor >> 16</Item>
+      <Item Name="Channel">(cursor &amp; 0xFFFF) >> 3</Item>
+      <Item Name="Column">(PatternCursor::Columns)(cursor &amp; 0x07)</Item>
+    </Expand>
+  </Type>
+
   <!-- Contents of memory-mapped files -->
   <Type Name="FileDataContainerMemory">
     <Expand>
@@ -30,7 +40,7 @@
       </ArrayItems>
     </Expand>
   </Type>
-  
+
   <!-- Memory spans -->
   <Type Name="mpt::span&lt;*&gt;">
     <Expand>
