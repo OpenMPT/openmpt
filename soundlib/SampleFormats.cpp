@@ -1644,8 +1644,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			SetSamplePath(smp, filename);
 			InputFile f(filename);
-			FileReader file = GetFileReader(f);
-			if(!ReadSampleFromFile(smp, file, false))
+			FileReader smpFile = GetFileReader(f);
+			if(!ReadSampleFromFile(smp, smpFile, false))
 			{
 				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
 				prevSmp--;
@@ -1745,6 +1745,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			memmove(sample.pSample8, sample.pSample8 + offset, sample.nLength * sample.GetBytesPerSample() - offset);
 			if(region->end > region->offset)
 				region->end -= region->offset;
+			sample.nLength -= region->offset;
 			sample.nLoopStart -= region->offset;
 			sample.nLoopEnd -= region->offset;
 			sample.uFlags.set(SMP_MODIFIED);

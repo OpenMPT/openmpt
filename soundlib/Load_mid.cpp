@@ -346,7 +346,7 @@ struct MThd
 	uint32be headerLength;
 	uint16be format;		// 0 = single-track, 1 = multi-track, 2 = multi-song
 	uint16be numTracks;		// Number of track chunks
-	int16be  division;		// Delta timing value: positive = units/beat; negative = smpte compatible units
+	uint16be division;		// Delta timing value: positive = units/beat; negative = smpte compatible units
 };
 
 MPT_BINARY_STRUCT(MThd, 10);
@@ -812,10 +812,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					uint8 tempoRaw[3];
 					chunk.ReadArray(tempoRaw);
-					uint32 t = (tempoRaw[0] << 16) | (tempoRaw[1] << 8) | tempoRaw[2];
-					if(t == 0)
+					uint32 tempoInt = (tempoRaw[0] << 16) | (tempoRaw[1] << 8) | tempoRaw[2];
+					if(tempoInt == 0)
 						break;
-					TEMPO newTempo(60000000.0 / t);
+					TEMPO newTempo(60000000.0 / tempoInt);
 					if(!tick)
 					{
 						m_nDefaultTempo = newTempo;
@@ -1362,10 +1362,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(f.Open(pszMidiMapName))
 				{
-					FileReader file = GetFileReader(f);
-					if(file.IsValid())
+					FileReader insFile = GetFileReader(f);
+					if(insFile.IsValid())
 					{
-						ReadInstrumentFromFile(nIns, file, false);
+						ReadInstrumentFromFile(nIns, insFile, false);
 						mpt::PathString szName = pszMidiMapName.GetFullFileName();
 						pIns = Instruments[nIns];
 						if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName.ToLocale().c_str());
