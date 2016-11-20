@@ -328,7 +328,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 		{
 			if (pmsh->flags & MMD_FLAG_8CHANNEL)
 			{
-				param = (param >= 10) ? 99 : bpmvals[param-1];
+				param = (param == 0 || param >= 10) ? 99 : bpmvals[param-1];
 			} else
 			// F.01 - F.0A: Set Speed
 			if (param <= 0x0A)
@@ -559,7 +559,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	#endif
 	} else
 	{
-		if((pmsh->flags & MMD_FLAG_8CHANNEL) && deftempo > 0 && deftempo <= 10)
+		if((pmsh->flags & MMD_FLAG_8CHANNEL) && deftempo > 0 && deftempo <= 9)
 			deftempo = bpmvals[deftempo-1];
 		else
 			deftempo = Util::muldiv(deftempo, 5 * 715909, 2 * 474326);
