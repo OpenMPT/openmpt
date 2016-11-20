@@ -5,11 +5,12 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta20.3
+### libopenmpt 0.2-beta20.3 (2016-11-20)
 
- *  [**Bug**] Possible crashes with malformed ITP files.
+ *  [**Bug**] Possible crashes with malformed ITP and MED files.
 
- *  Pattern loops ending on the last row a pattern were not executed correctly in S3M files.
+ *  Pattern loops ending on the last row a pattern were not executed correctly
+    in S3M files.
  *  Playback fixes for 8-channel MED files
  *  Tremolo on quiet notes was broken in 0.2-beta20.2.
 
