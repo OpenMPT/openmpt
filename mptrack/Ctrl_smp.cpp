@@ -1,5 +1,5 @@
 /*
- * ctrl_smp.cpp
+ * Ctrl_smp.cpp
  * ------------
  * Purpose: Sample tab, upper panel.
  * Notes  : (currently none)
@@ -158,20 +158,21 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
 	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
 	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
-	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio); //rewbs.timeStretchMods
+	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio);
 	//}}AFX_DATA_MAP
 }
 
 
-CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document) :
-//----------------------------------------------------------------------
-	CModControlDlg(parent, document),
-	m_nSequenceMs(0),
-	m_nSeekWindowMs(0),
-	m_nOverlapMs(0),
-	m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM),
-	rememberRawFormat(false),
-	m_nSample(1)
+CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document)
+//--------------------------------------------------------------------
+	: CModControlDlg(parent, document)
+	, m_nSequenceMs(0)
+	, m_nSeekWindowMs(0)
+	, m_nOverlapMs(0)
+	, m_dTimeStretchRatio(100)
+	, m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
+	, rememberRawFormat(false)
+	, m_nSample(1)
 {
 	m_nLockCount = 1;
 }
@@ -307,9 +308,6 @@ BOOL CCtrlSamples::OnInitDialog()
 		// Set 4096 as default FFT size
 		combo->SetCurSel(4);
 	}
-
-	// Stretch ratio
-	SetDlgItemInt(IDC_EDIT6, 100, FALSE);
 
 	// Stretch to size check box
 	OnEnableStretchToSize();
@@ -1850,15 +1848,15 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 				MemsetZero(buffer);
 				MixFuncTable::Functions[functionNdx](chn, m_sndFile.m_Resampler, buffer, procCount);
 
-				for(uint8 chn = 0; chn < numChannels; chn++)
+				for(uint8 c = 0; c < numChannels; c++)
 				{
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
 						break;
 					}
 				}
