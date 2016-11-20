@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta20.4
+
 ### libopenmpt 0.2-beta20.3 (2016-11-20)
 
  *  [**Bug**] Possible crashes with malformed ITP and MED files.
