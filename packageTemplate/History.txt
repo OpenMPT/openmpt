@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.07.00 (20 November 2016, revision 7386)
+v1.26.07.00 (20 November 2016, revision 7387)
 ---------------------------------------------
 Pattern tab
    [Mod] <js> Remember channel transpose amount also after closing the tab.

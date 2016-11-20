@@ -1935,9 +1935,9 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 			// Hack for situations where a non-latin keyboard layout without A...Z key code mapping may the current layout (e.g. Russian),
 			// but a latin layout (e.g. EN-US) is installed as well.
 			std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
-			GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+			GetKeyboardLayoutList(static_cast<int>(layouts.size()), &layouts[0]);
 			SHORT codeNmod = -1;
-			for(auto i = layouts.begin(); i != layouts.end() && codeNmod == -1; i++)
+			for(std::vector<HKL>::iterator i = layouts.begin(); i != layouts.end() && codeNmod == -1; i++)
 			{
 				codeNmod = VkKeyScanEx(effect, *i);
 			}
