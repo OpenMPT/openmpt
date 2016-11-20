@@ -26,8 +26,8 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.07.00 (? November 2016, revision 7373)
---------------------------------------------
+v1.26.07.00 (20 November 2016, revision 7380)
+---------------------------------------------
 Pattern tab
    [Mod] <js> Remember channel transpose amount also after closing the tab.
    [Mod] <js> When making an order list selection using the keyboard, do not update the play position.
@@ -36,6 +36,7 @@ Pattern tab
    [Fix] <js> Dragging a single pattern with "Follow Song" enabled could modify the dragged pattern selection on pattern transitions.
    [Fix] <js> Duplicating patterns did not apply the original pattern's tempo swing settings.
    [Fix] <js> Tempo swing settings were ignored when setting them to 100% for each row for a specific pattern, even if this differed from the global swing settings.
+   [Fix] <js> Pasting a partial PC event over a Z80...ZFF effect did not clear the parameter value properly.
 
 Instrument tab
    [Imp] <js> Allow a maximum fadeout value of 32767 in MPTM, like in XM.

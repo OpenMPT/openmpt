@@ -715,7 +715,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					} else if(!origModCmd.IsPcNote())
 					{
 						// No value provided in clipboard
-						if(m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI && m.param < 128)
+						if((m.command == CMD_MIDI || m.command == CMD_SMOOTHMIDI) && m.param < 128)
 							m.SetValueEffectCol(static_cast<uint16>(Util::muldivr(m.param, ModCommand::maxColumnValue, 127)));
 						else
 							m.SetValueEffectCol(0);
