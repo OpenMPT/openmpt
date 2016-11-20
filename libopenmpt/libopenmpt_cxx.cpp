@@ -21,13 +21,13 @@
 
 namespace openmpt {
 
-exception::exception( const std::string & text ) LIBOPENMPT_NOEXCEPT
+exception::exception( const std::string & text_ ) LIBOPENMPT_NOEXCEPT
 	: std::exception()
 	, text(0)
 {
-	this->text = static_cast<char*>( std::malloc( text.length() + 1 ) );
-	if ( this->text ) {
-		std::memcpy( this->text, text.c_str(), text.length() + 1 );
+	text = static_cast<char*>( std::malloc( text_.length() + 1 ) );
+	if ( text ) {
+		std::memcpy( text, text_.c_str(), text_.length() + 1 );
 	}
 }
 
