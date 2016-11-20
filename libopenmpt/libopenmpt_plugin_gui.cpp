@@ -82,9 +82,9 @@ protected:
 
 public:
 
-	CSettingsDialog( libopenmpt_settings * s, CString title, CWnd * parent = NULL )
+	CSettingsDialog( libopenmpt_settings * s_, CString title, CWnd * parent = NULL )
 		: CDialog( IDD_SETTINGS, parent )
-		, s( s )
+		, s( s_ )
 		, m_Title( title )
 	{
 		return;

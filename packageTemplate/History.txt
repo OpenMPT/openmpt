@@ -38,6 +38,9 @@ Pattern tab
    [Fix] <js> Tempo swing settings were ignored when setting them to 100% for each row for a specific pattern, even if this differed from the global swing settings.
    [Fix] <js> Pasting a partial PC event over a Z80...ZFF effect did not clear the parameter value properly.
 
+Sample tab
+   [Fix] <js> Very rare crash when trying to open sample tab.
+
 Instrument tab
    [Imp] <js> Allow a maximum fadeout value of 32767 in MPTM, like in XM.
 
@@ -64,6 +67,9 @@ Module cleanup
 
 Misc
    [Fix] <js> Windows key and other special keys were always intercepted since OpenMPT 1.26.01.00 (http://bugs.openmpt.org/view.php?id=886).
+
+Third-Party Libraries
+   [Mod] Update UNMO3 (v2.4.1.2).
 
 
 v1.26.06.00 (22 October 2016, revision 7297)
@@ -473,7 +479,7 @@ Bundled plugins
    [Fix] <js> SysEx messages received from a MIDI device are now handled properly by the MIDI Input / Output plugin.
 
 Third-Party Libraries
-   [Mod] Update lhasa (v0.3.1) and UnRAR (v5.3.11).
+   [Mod] Update lhasa (v0.3.1), UNMO3 (v2.4.1) and UnRAR (v5.3.11).
 
 Installer/release package
    [Fix] <js> Note Off shortcut was missing in US_mpt-ft2_classic.mkb / US_mpt-it2_classic.mkb keymaps (tx Garian).
@@ -1471,7 +1477,7 @@ Bundled plugins
    [Imp] <jh & js> The MIDI Input / Output Plugin can now compensate for OpenMPT's audio output latency by delaying the MIDI output accordingly.
 
 Third-Party Libraries
-   [Mod] Update flac (v1.3.0), SoundTouch (v1.8.0), smbPitchShift (v1.2), unmo3 (v2.4.0.5).
+   [Mod] Update flac (v1.3.0), SoundTouch (v1.8.0), smbPitchShift (v1.2), UNMO3 (v2.4.0.5).
 
 Installer/release package
    [New] <js> Added key maps that are compatible with MPT's classic FT2 / IT keymaps (US_mpt-ft2_classic.mkb, US_mpt-it2_classic.mkb, tx Gargaj).
@@ -2459,7 +2465,7 @@ Bundled plugins
    [New] <js> OpenMPT ships with a MIDI Input / Output plugin now. It can be used to send incoming MIDI Events to other plugins or send MIDI events to external MIDI gear.
 
 Third-Party Libraries
-   [Mod] Update unmo3 (v2.4.0.3), SoundTouch (v1.6.0), zlib (v1.2.7).
+   [Mod] Update UNMO3 (v2.4.0.3), SoundTouch (v1.6.0), zlib (v1.2.7).
 
 
 v1.19.04.00 (9 September 2011, revision 1027)
@@ -2769,7 +2775,7 @@ Misc
    [Reg] <js> "Set highlights to songs' time signatures" is gone. Custom song highlighting is now always applied, and the values found in the colour options are now always applied to new modules.
 
 Third-Party Libraries
-   [Mod] Update unmo3 (v2.4.0.1).
+   [Mod] Update UNMO3 (v2.4.0.1).
 
 
 v1.18.03.00 (4 August 2010, revision 673)

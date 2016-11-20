@@ -21,7 +21,7 @@ procedure VerifyUNMO3Checksum();
 begin
     if(IsTaskSelected('downloadmo3') And FileExists(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'))) then
     begin
-        if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '8ea5880d4e64f2366d923627ccea30c1cc34e36c') then
+        if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '4c285992c11edbef5612c0cbaf8708499bcaee01') then
       	begin
             MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that the downloaded file might corrupted or manipulated. The file has thus not been installed. Please re-download the OpenMPT installer from https://openmpt.org/ instead.', mbCriticalError, MB_OK)
       	end else
@@ -46,8 +46,8 @@ begin
         begin
             if(IsTaskSelected('downloadmo3')) then
             begin
-            	  ITD_AddFile('http://download.openmpt.org/archive/unmo3/2.4.1.0/win-x86/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
-            	  ITD_AddMirror('ftp://ftp.untergrund.net/users/sagamusix/openmpt/archive/unmo3/2.4.1.0/win-x86/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
+            	  ITD_AddFile('http://download.openmpt.org/archive/unmo3/2.4.1.2/win-x86/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
+            	  ITD_AddMirror('ftp://ftp.untergrund.net/users/sagamusix/openmpt/archive/unmo3/2.4.1.2/win-x86/unmo3.dll', ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
             end else
           	begin
                 ITD_ClearFiles();
