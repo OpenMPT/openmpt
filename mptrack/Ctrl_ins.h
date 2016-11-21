@@ -44,7 +44,7 @@ public:
 		: m_pParent(parent)
 		, m_modDoc(document)
 		, m_nPlayingNote(-1)
-		, m_nNote(NOTE_MIDDLEC - 1)
+		, m_nNote(NOTE_MIDDLEC - NOTE_MIN)
 		, m_nInstrument(0)
 		, m_cxFont(0)
 		, m_cyFont(0)
