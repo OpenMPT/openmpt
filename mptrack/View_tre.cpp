@@ -163,10 +163,6 @@ CModTree::CModTree(CModTree *pDataTree) :
 CModTree::~CModTree()
 //-------------------
 {
-	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
-	{
-		delete (*iter);
-	}
 	DocInfo.clear();
 
 	delete m_SongFile;
@@ -220,9 +216,9 @@ void CModTree::Init()
 			TrackerSettings::Instance().PathSongs.GetDefaultDir(),
 			mpt::PathString::FromNative(curDir.data())
 		};
-		for(int i = 0; i < CountOf(dirs); i++)
+		for(auto &path : dirs)
 		{
-			m_InstrLibPath = dirs[i];
+			m_InstrLibPath = path;
 			if(!m_InstrLibPath.empty()) break;
 		}
 		m_InstrLibPath.EnsureTrailingSlash();
@@ -468,27 +464,29 @@ void CModTree::AddDocument(CModDoc &modDoc)
 //-----------------------------------------
 {
 	// Check if document is already in the list
-	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto &doc : DocInfo)
 	{
-		if(&(*iter)->modDoc == &modDoc)
+		if(&(doc->modDoc) == &modDoc)
 		{
 			return;
 		}
 	}
 
-	ModTreeDocInfo *pInfo = new (std::nothrow) ModTreeDocInfo(modDoc);
-	if(!pInfo)
+	try
 	{
-		return;
-	}
-	DocInfo.push_back(pInfo);
+		auto pInfo = std::make_shared<ModTreeDocInfo>(modDoc);
+		DocInfo.push_back(pInfo);
 
-	UpdateView(*pInfo, UpdateHint().ModType());
-	if (pInfo->hSong)
+		UpdateView(*pInfo, UpdateHint().ModType());
+		if(pInfo->hSong)
+		{
+			Expand(pInfo->hSong, TVE_EXPAND);
+			EnsureVisible(pInfo->hSong);
+			SelectItem(pInfo->hSong);
+		}
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
-		Expand(pInfo->hSong, TVE_EXPAND);
-		EnsureVisible(pInfo->hSong);
-		SelectItem(pInfo->hSong);
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 	}
 }
 
@@ -501,7 +499,6 @@ void CModTree::RemoveDocument(CModDoc &modDoc)
 		if(&(*iter)->modDoc == &modDoc)
 		{
 			DeleteItem((*iter)->hSong);
-			delete (*iter);
 			DocInfo.erase(iter);
 			break;
 		}
@@ -525,7 +522,7 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 		const size_t doc = GetItemData(hItem);
 		if(doc < DocInfo.size() && hItem == DocInfo[doc]->hSong)
 		{
-			return DocInfo[doc];
+			return DocInfo[doc].get();
 		}
 	}
 	return nullptr;
@@ -536,11 +533,11 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 //------------------------------------------------------------------
 {
-	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for(auto iter : DocInfo)
 	{
-		if(&(*iter)->modDoc == &modDoc)
+		if(&(iter->modDoc) == &modDoc)
 		{
-			return (*iter);
+			return iter.get();
 		}
 	}
 	return nullptr;
@@ -1280,7 +1277,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	if(rootItemData < DocInfo.size())
 	{
 		m_nDocNdx = rootItemData;
-		ModTreeDocInfo *pInfo = DocInfo[rootItemData];
+		auto pInfo = DocInfo[rootItemData];
 
 		if(hItem == pInfo->hSong) return ModItem(MODITEM_HDR_SONG);
 		if(hRootParent == pInfo->hSong)
@@ -2308,8 +2305,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const uint32 modItemDropID = modItemDrop.val1;
 	const uint32 modItemDragID = m_itemDrag.val1;
 
-	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx] : nullptr);
-	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
+	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx].get() : nullptr);
+	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx].get() : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? &pInfoDrop->modDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	const bool sameModDoc = pInfoDrag && (pModDoc == &pInfoDrag->modDoc);
@@ -2804,11 +2801,10 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						bool anyPath = false, anyModified = false, anyMissing = false;
 						for(SAMPLEINDEX smp = 1; smp <= sndFile->GetNumSamples(); smp++)
 						{
-							const ModSample &sample = sndFile->GetSample(smp);
 							if(sndFile->SampleHasPath(smp) && smp != smpID)
 							{
 								anyPath = true;
-								if(sample.HasSampleData() && sample.uFlags[SMP_MODIFIED])
+								if(sndFile->GetSample(smp).HasSampleData() && sndFile->GetSample(smp).uFlags[SMP_MODIFIED])
 								{
 									anyModified = true;
 								}
