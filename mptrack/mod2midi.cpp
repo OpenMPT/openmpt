@@ -406,7 +406,6 @@ namespace MidiExport
 				{
 					instr.midiPWD = 12;
 				}
-				midiInstr.WritePitchWheelDepth();
 
 				instr.nMidiChannel = instrMap[i].nChannel;
 				if(instrMap[i].nChannel != MidiFirstChannel + 9)
@@ -425,6 +424,7 @@ namespace MidiExport
 						}
 					}
 				}
+				midiInstr.WritePitchWheelDepth();
 			}
 
 			mpt::IO::WriteRaw(m_file, "MThd", 4);
@@ -713,13 +713,14 @@ void CDoMidiConvert::Run()
 		return;
 	}
 
-	CMainFrame::GetMainFrame()->PauseMod(m_sndFile.GetpModDoc());
+	auto mainFrame = CMainFrame::GetMainFrame();
+	mainFrame->PauseMod(m_sndFile.GetpModDoc());
 	MidiExport::Conversion conv(m_sndFile, m_instrMap, f);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = Util::Round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
 	SetRange(0, Util::Round<uint32>(duration));
-	DWORD startTime = timeGetTime();
+	auto startTime = timeGetTime(), prevTime = startTime;
 
 	m_sndFile.SetCurrentOrder(0);
 	m_sndFile.GetLength(eAdjust, GetLengthTarget(0, 0));
@@ -728,19 +729,23 @@ void CDoMidiConvert::Run()
 	m_sndFile.SetRepeatCount(0);
 	m_sndFile.m_bIsRendering = true;
 
+	ITaskbarList3 *taskBarList = nullptr;
+	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&taskBarList);
+	if(taskBarList != nullptr)
+	{
+		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NORMAL);
+	}
+
 	MidiExport::DummyAudioTarget target;
 	UINT ok = IDOK;
-	int n = 0;
 	while(m_sndFile.Read(MIXBUFFERSIZE, target) > 0)
 	{
-		n++;
-		if(n == 100)
+		auto currentTime = timeGetTime();
+		if(currentTime - prevTime >= 16)
 		{
-			n = 0;
-
+			prevTime = currentTime;
 			uint64 curSamples = m_sndFile.GetTotalSampleCount();
 			uint32 curTime = static_cast<uint32>(curSamples / m_sndFile.m_MixerSettings.gdwMixingFreq);
-			const DWORD currentTime = timeGetTime();
 			uint32 timeRemaining = 0;
 			if(curSamples > 0 && curSamples < totalSamples)
 			{
@@ -757,6 +762,11 @@ void CDoMidiConvert::Run()
 				ok = IDCANCEL;
 				break;
 			}
+
+			if(taskBarList != nullptr)
+			{
+				taskBarList->SetProgressValue(mainFrame->m_hWnd, curSamples, totalSamples);
+			}
 		}
 	}
 
@@ -765,6 +775,12 @@ void CDoMidiConvert::Run()
 	m_sndFile.m_bIsRendering = false;
 	m_sndFile.m_PatternCuePoints.clear();
 	m_sndFile.SetRepeatCount(oldRepCount);
+
+	if(taskBarList)
+	{
+		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NOPROGRESS);
+		taskBarList->Release();
+	}
 
 	EndDialog(ok);
 }
