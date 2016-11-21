@@ -123,14 +123,16 @@ UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM /*wParam
 	if(uiMsg == WM_NOTIFY)
 	{
 		OFNOTIFY *ofn = reinterpret_cast<OFNOTIFY *>(lParam);
-		WCHAR path[MAX_PATH];
-		if(ofn->hdr.code == CDN_SELCHANGE && CommDlg_OpenSave_GetFilePathW(GetParent(hdlg), path, CountOf(path)) > 0)
+		int length = 0;
+		if(ofn->hdr.code == CDN_SELCHANGE && (length = CommDlg_OpenSave_GetFilePathW(GetParent(hdlg), nullptr, 0)) > 0)
 		{
+			std::vector<WCHAR> path(length);
+			CommDlg_OpenSave_GetFilePathW(GetParent(hdlg), path.data(), path.size());
 			FileDialog *that = reinterpret_cast<FileDialog *>(ofn->lpOFN->lCustData);
-			if(path[0] && that->lastPreviewFile != path)
+			if(path[0] && that->lastPreviewFile != path.data())
 			{
-				that->lastPreviewFile = path;
-				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromNative(path), NOTE_MIDDLEC))
+				that->lastPreviewFile = path.data();
+				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromNative(path.data()), NOTE_MIDDLEC))
 				{
 					that->stopPreview = true;
 				}
