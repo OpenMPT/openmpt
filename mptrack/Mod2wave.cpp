@@ -265,9 +265,9 @@ void CWaveConvert::FillTags()
 		m_EditGenre.Clear();
 		m_CbnGenre.ResetContent();
 		m_CbnGenre.AddString(_T(""));
-		for(auto genre = encTraits->genres.cbegin(); genre != encTraits->genres.cend(); ++genre)
+		for(const auto &genre : encTraits->genres)
 		{
-			m_CbnGenre.AddString(mpt::ToCString(*genre));
+			m_CbnGenre.AddString(mpt::ToCString(genre));
 		}
 	} else
 	{
@@ -321,18 +321,16 @@ void CWaveConvert::FillSamplerates()
 	int sel = -1;
 	if(TrackerSettings::Instance().ExportDefaultToSoundcardSamplerate)
 	{
-		for(auto it = encTraits->samplerates.cbegin(); it != encTraits->samplerates.cend(); ++it)
+		for(auto samplerate : encTraits->samplerates)
 		{
-			uint32 samplerate = *it;
 			if(samplerate == TrackerSettings::Instance().MixerSamplerate)
 			{
 				encSettings.Samplerate = samplerate;
 			}
 		}
 	}
-	for(auto it = encTraits->samplerates.cbegin(); it != encTraits->samplerates.cend(); ++it)
+	for(auto samplerate : encTraits->samplerates)
 	{
-		uint32 samplerate = *it;
 		int ndx = m_CbnSampleRate.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Hz"), samplerate)));
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
 		if(samplerate == encSettings.Samplerate)
@@ -816,7 +814,6 @@ void CWaveConvert::OnOK()
 void CWaveConvert::SaveEncoderSettings()
 //--------------------------------------
 {
-
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 
 	encSettings.Samplerate = static_cast<uint32>(m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel()));
@@ -1105,6 +1102,7 @@ void CDoWaveConvert::Run()
 
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
+	uint32 timeRemaining = 0;
 
 	uint64 bytesWritten = 0;
 
@@ -1124,8 +1122,7 @@ void CDoWaveConvert::Run()
 		}
 
 		// Process cue points (add base offset), if there are any to process.
-		std::vector<PatternCuePoint>::reverse_iterator iter;
-		for(iter = m_SndFile.m_PatternCuePoints.rbegin(); iter != m_SndFile.m_PatternCuePoints.rend(); ++iter)
+		for(auto iter = m_SndFile.m_PatternCuePoints.rbegin(); iter != m_SndFile.m_PatternCuePoints.rend(); ++iter)
 		{
 			if(iter->processed)
 			{
@@ -1192,10 +1189,9 @@ void CDoWaveConvert::Run()
 			DWORD seconds = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
 
 			const DWORD dwCurrentTime = timeGetTime();
-			uint32 timeRemaining = 0; // estimated remainig time
 			if((ullSamples > 0) && (ullSamples < max))
 			{
-				timeRemaining = static_cast<uint32>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
+				timeRemaining = static_cast<uint32>((timeRemaining + ((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000) / 2);
 			}
 
 			if(m_Settings.normalize)
@@ -1312,9 +1308,9 @@ void CDoWaveConvert::Run()
 		{
 			std::vector<uint64> cues;
 			cues.reserve(m_SndFile.m_PatternCuePoints.size());
-			for(auto iter = m_SndFile.m_PatternCuePoints.cbegin(); iter != m_SndFile.m_PatternCuePoints.cend(); iter++)
+			for(const auto &cue : m_SndFile.m_PatternCuePoints)
 			{
-				cues.push_back(static_cast<uint32>(iter->offset));
+				cues.push_back(static_cast<uint32>(cue.offset));
 			}
 			fileEnc->WriteCues(cues);
 		}

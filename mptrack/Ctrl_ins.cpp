@@ -347,15 +347,15 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				// Create sub menu with a list of all samples that are referenced by this instrument.
 				const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 
-				for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+				for(auto sample : referencedSamples)
 				{
-					if(*sample <= sndFile.GetNumSamples())
+					if(sample <= sndFile.GetNumSamples())
 					{
-						wsprintf(s, _T("%u: "), *sample);
+						wsprintf(s, _T("%u: "), sample);
 						size_t l = strlen(s);
-						memcpy(s + l, sndFile.m_szNames[*sample], MAX_SAMPLENAME);
+						memcpy(s + l, sndFile.m_szNames[sample], MAX_SAMPLENAME);
 						s[l + MAX_SAMPLENAME] = '\0';
-						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + *sample, s);
+						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, s);
 					}
 				}
 
@@ -405,13 +405,13 @@ void CNoteMapWnd::OnMapCopyNote()
 		m_undo = true;
 		bool bModified = false;
 		auto n = pIns->NoteMap[m_nNote];
-		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != n)
+		for (auto &key : pIns->NoteMap) if (key != n)
 		{
 			if(!bModified)
 			{
 				PrepareUndo("Map Notes");
 			}
-			pIns->NoteMap[i] = n;
+			key = n;
 			bModified = true;
 		}
 		if (bModified)
@@ -431,13 +431,13 @@ void CNoteMapWnd::OnMapCopySample()
 		m_undo = true;
 		bool bModified = false;
 		auto n = pIns->Keyboard[m_nNote];
-		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != n)
+		for (auto &sample : pIns->Keyboard) if (sample != n)
 		{
 			if(!bModified)
 			{
 				PrepareUndo("Map Samples");
 			}
-			pIns->Keyboard[i] = n;
+			sample = n;
 			bModified = true;
 		}
 		if (bModified)
@@ -483,13 +483,13 @@ void CNoteMapWnd::OnMapRemove()
 	{
 		m_undo = true;
 		bool bModified = false;
-		for (size_t i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != 0)
+		for (auto &sample: pIns->Keyboard) if (sample != 0)
 		{
 			if(!bModified)
 			{
 				PrepareUndo("Remove Sample Assocations");
 			}
-			pIns->Keyboard[i] = 0;
+			sample = 0;
 			bModified = true;
 		}
 		if (bModified)
@@ -1931,23 +1931,21 @@ void CCtrlInstruments::OnInstrumentOpen()
 void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH] = _T("");
-	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+	const ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 
 	if (!pIns) return;
+
+	std::string defaultName;
 	if (pIns->filename[0])
-	{
-		mpt::String::Copy(szFileName, pIns->filename);
-	} else
-	{
-		mpt::String::Copy(szFileName, pIns->name);
-	}
-	SanitizeFilename(szFileName);
+		defaultName = pIns->filename;
+	else
+		defaultName = pIns->name;
+	SanitizeFilename(defaultName);
 
 	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 1 : 2;
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
-		.DefaultFilename(szFileName)
+		.DefaultFilename(defaultName)
 		.ExtensionFilter((m_sndFile.GetType() == MOD_TYPE_XM) ?
 		"FastTracker II Instruments (*.xi)|*.xi|"
 		"Impulse Tracker Instruments (*.iti)|*.iti|"
@@ -2094,9 +2092,9 @@ void CCtrlInstruments::OnSetPanningChanged()
 
 			const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 
-			for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+			for(auto sample : referencedSamples)
 			{
-				if(*sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).uFlags[CHN_PANNING])
+				if(sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(sample).uFlags[CHN_PANNING])
 				{
 					smpPanningInUse = true;
 					break;
@@ -2110,11 +2108,10 @@ void CCtrlInstruments::OnSetPanningChanged()
 						"Do you wish to disable panning from those samples so that the instrument pan setting is effective "
 						"for the whole instrument?")) == cnfYes)
 				{
-					for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
+					for (auto sample : referencedSamples)
 					{
-						const SAMPLEINDEX smp = pIns->Keyboard[i];
-						if(smp > 0 && smp <= m_sndFile.GetNumSamples())
-							m_sndFile.GetSample(smp).uFlags.reset(CHN_PANNING);
+						if(sample <= m_sndFile.GetNumSamples())
+							m_sndFile.GetSample(sample).uFlags.reset(CHN_PANNING);
 					}
 					m_modDoc.UpdateAllViews(nullptr, SampleHint().Info().ModType(), this);
 				}
@@ -2372,9 +2369,9 @@ void CCtrlInstruments::OnMixPlugChanged()
 						// If we just dialled up an instrument plugin, zap the sample assignments.
 						const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
 						bool hasSamples = false;
-						for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+						for(auto sample : referencedSamples)
 						{
-							if(*sample > 0 && *sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).pSample != nullptr)
+							if(sample > 0 && sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(sample).pSample != nullptr)
 							{
 								hasSamples = true;
 								break;
