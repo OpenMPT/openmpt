@@ -94,10 +94,10 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().previewInFileDialogs = IsDlgButtonChecked(IDC_PREVIEW_SAMPLES) != BST_UNCHECKED;
 	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != BST_UNCHECKED;
 
-	std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
-	for(auto i = docs.begin(); i != docs.end(); i++)
+	auto docs = theApp.GetOpenDocuments();
+	for(auto modDoc : docs)
 	{
-		(**i).GetSampleUndo().RestrictBufferSize();
+		modDoc->GetSampleUndo().RestrictBufferSize();
 	}
 }
 

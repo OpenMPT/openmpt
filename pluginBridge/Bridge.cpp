@@ -190,9 +190,8 @@ void PluginBridge::MessageThread()
 		} else if(result == WAIT_OBJECT_0 + 1)
 		{
 			// Message got answered
-			for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
+			for(auto &msg : sharedMem->toHost)
 			{
-				BridgeMessage &msg = sharedMem->toHost[i];
 				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 				{
 					ackSignals[msg.header.signalID].Confirm();
@@ -221,9 +220,9 @@ void PluginBridge::MessageThread()
 	if(!closeInstance)
 	{
 		// Close any possible waiting queries
-		for(size_t i = 0; i < CountOf(ackSignals); i++)
+		for(auto &sig : ackSignals)
 		{
-			ackSignals[i].Send();
+			sig.Send();
 		}
 		BridgeMessage msg;
 		msg.Dispatch(effClose, 0, 0, 0, 0.0f, 0);
@@ -351,27 +350,26 @@ void PluginBridge::ParseNextMessage()
 {
 	assert(GetCurrentThreadId() == msgThreadID);
 
-	BridgeMessage *msg = &sharedMem->toBridge[0];
-	for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++, msg++)
+	for(auto &msg : sharedMem->toBridge)
 	{
-		if(InterlockedCompareExchange(&msg->header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
+		if(InterlockedCompareExchange(&msg.header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
 		{
-			switch(msg->header.type)
+			switch(msg.header.type)
 			{
 			case MsgHeader::newInstance:
-				NewInstance(&msg->newInstance);
+				NewInstance(&msg.newInstance);
 				break;
 			case MsgHeader::init:
-				InitBridge(&msg->init);
+				InitBridge(&msg.init);
 				break;
 			case MsgHeader::dispatch:
-				DispatchToPlugin(&msg->dispatch);
+				DispatchToPlugin(&msg.dispatch);
 				break;
 			case MsgHeader::setParameter:
-				SetParameter(&msg->parameter);
+				SetParameter(&msg.parameter);
 				break;
 			case MsgHeader::getParameter:
-				GetParameter(&msg->parameter);
+				GetParameter(&msg.parameter);
 				break;
 
 			case MsgHeader::automate:
@@ -379,7 +377,7 @@ void PluginBridge::ParseNextMessage()
 				break;
 			}
 
-			InterlockedExchange(&msg->header.status, MsgHeader::done);
+			InterlockedExchange(&msg.header.status, MsgHeader::done);
 			sigToBridge.Confirm();
 		}
 	}

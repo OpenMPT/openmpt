@@ -861,15 +861,14 @@ void CInstrumentUndo::RearrangeSamples(undobuf_t &buffer, const INSTRUMENTINDEX 
 	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 	if(sndFile.Instruments[ins] == nullptr || !InstrumentBufferExists(buffer, ins) || buffer[ins - 1].empty()) return;
 
-	for(auto i = buffer[ins - 1].begin(); i != buffer[ins - 1].end(); i++) if(i->editedEnvelope >= ENV_MAXTYPES)
+	for(auto &i : buffer[ins - 1]) if(i.editedEnvelope >= ENV_MAXTYPES)
 	{
-		auto &keyboard = i->instr.Keyboard;
-		for(size_t note = 0; note < CountOf(keyboard); note++)
+		for(auto &sample : i.instr.Keyboard)
 		{
-			if(keyboard[note] < newIndex.size())
-				keyboard[note] = newIndex[keyboard[note]];
+			if(sample < newIndex.size())
+				sample = newIndex[sample];
 			else
-				keyboard[note] = 0;
+				sample = 0;
 		}
 	}
 }

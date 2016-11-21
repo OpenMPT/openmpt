@@ -475,9 +475,9 @@ public:
 
 	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0)
 	{
-		for(size_t i = 0; i < CountOf(ackSignals); i++)
+		for(auto &sig : ackSignals)
 		{
-			ackSignals[i].Create();
+			sig.Create();
 		}
 	}
 

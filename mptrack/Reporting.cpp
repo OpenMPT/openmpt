@@ -78,7 +78,7 @@ static UINT ShowNotificationImpl(const std::wstring &text, const std::wstring &c
 		parent = CMainFrame::GetActiveWindow();
 	}
 	BypassInputHandler bih;
-	UINT result = ::MessageBoxW((parent ? parent->m_hWnd : NULL), text.c_str(), caption.empty() ? MAINFRAME_TITLEW : caption.c_str(), flags);
+	UINT result = ::MessageBoxW(parent->GetSafeHwnd(), text.c_str(), caption.empty() ? MAINFRAME_TITLEW : caption.c_str(), flags);
 
 	return result;
 }

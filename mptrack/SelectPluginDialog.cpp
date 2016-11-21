@@ -347,10 +347,10 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 	{
 		bool first = true;
 
-		for(auto p = pManager->begin(); p != pManager->end(); p++)
+		for(auto p : *pManager)
 		{
-			ASSERT(*p);
-			const VSTPluginLib &plug = **p;
+			ASSERT(p);
+			const VSTPluginLib &plug = *p;
 			if(nameFilterActive)
 			{
 				// Apply name filter
@@ -367,9 +367,9 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 				if(!matches)
 				{
 					mpt::ustring tags = mpt::ToLowerCase(plug.tags);
-					for(auto it = currentTags.cbegin(); it != currentTags.cend(); it++)
+					for(const auto &tag : currentTags)
 					{
-						if(!it->empty() && tags.find(*it, 0) != tags.npos)
+						if(!tag.empty() && tags.find(tag, 0) != tags.npos)
 						{
 							matches = true;
 							break;
@@ -596,11 +596,11 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		{ kEffectMagic, CCONST('Y', 'W', 'S', '!'), false, true },	// You Wa Shock ! always has to run in a shared instance
 	};
 
-	for(size_t p = 0; p < CountOf(problemPlugs); p++)
+	for(auto &p : problemPlugs)
 	{
-		if(problemPlugs[p].id2 == plug->pluginId2 && problemPlugs[p].id1 == plug->pluginId1)
+		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
-			std::string s = mpt::String::Print("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
+			std::string s = mpt::String::Print("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?", p.name, p.problem);
 			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
@@ -609,12 +609,12 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		}
 	}
 
-	for(size_t p = 0; p < CountOf(bridgedPlugs); p++)
+	for(auto &p : bridgedPlugs)
 	{
-		if(bridgedPlugs[p].id2 == plug->pluginId2 && bridgedPlugs[p].id1 == plug->pluginId1)
+		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
-			plug->useBridge = bridgedPlugs[p].useBridge;
-			plug->shareBridgeInstance = bridgedPlugs[p].shareInstance;
+			plug->useBridge = p.useBridge;
+			plug->shareBridgeInstance = p.shareInstance;
 			plug->WriteToCache();
 			break;
 		}
@@ -686,9 +686,9 @@ void CSelectPluginDlg::OnScanFolder()
 
 	// If any of the plugins was missing anywhere, try loading it
 	const CVstPluginManager *pManager = theApp.GetPluginManager();
-	for(auto p = pManager->begin(); p != pManager->end(); p++)
+	for(auto p : *pManager)
 	{
-		ReloadMissingPlugins(*p);
+		ReloadMissingPlugins(p);
 	}
 }
 

@@ -690,9 +690,9 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 		// get the old default device
 		SetSoundDeviceIdentifier(SoundDevice::Legacy::FindDeviceInfo(manager, m_SoundDeviceID_DEPRECATED).GetIdentifier());
 		// apply old global sound device settings to each found device
-		for(auto it = manager.begin(); it != manager.end(); ++it)
+		for(const auto &it : manager)
 		{
-			SetSoundDeviceSettings(it->GetIdentifier(), GetSoundDeviceSettingsDefaults());
+			SetSoundDeviceSettings(it.GetIdentifier(), GetSoundDeviceSettingsDefaults());
 		}
 	}
 #ifdef MPT_WITH_DSOUND

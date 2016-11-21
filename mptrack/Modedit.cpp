@@ -398,12 +398,12 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 				continue;
 			}
 			GetInstrumentUndo().RearrangeSamples(i, newIndex);
-			for(size_t note = 0; note < CountOf(ins->Keyboard); note++)
+			for(auto &sample : ins->Keyboard)
 			{
-				if(ins->Keyboard[note] < newIndex.size())
-					ins->Keyboard[note] = newIndex[ins->Keyboard[note]];
+				if(sample < newIndex.size())
+					sample = newIndex[sample];
 				else
-					ins->Keyboard[note] = 0;
+					sample = 0;
 			}
 		}
 	} else
@@ -1071,9 +1071,9 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 	s = pszEnvHdr;
 	s.AppendFormat(pszEnvFmt, env.size(), env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
 		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
-	for(auto i = env.cbegin(); i != env.cend(); i++)
+	for(auto &p : env)
 	{
-		s.AppendFormat("%d,%d\r\n", i->tick, i->value);
+		s.AppendFormat("%d,%d\r\n", p.tick, p.value);
 	}
 
 	// Writing release node
@@ -1119,7 +1119,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	env.dwFlags.set(ENV_ENABLED, nPoints > 0);
 
 	int oldn = 0;
-	for(auto i = env.begin(); i != env.end(); i++)
+	for(auto &p : env)
 	{
 		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
 		if (pos >= length) break;
@@ -1130,8 +1130,8 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 		int n2 = atoi(&s[pos]);
 		if (n1 < oldn) n1 = oldn + 1;
 		Limit(n2, ENVELOPE_MIN, ENVELOPE_MAX);
-		i->tick = (uint16)n1;
-		i->value = (uint8)n2;
+		p.tick = (uint16)n1;
+		p.value = (uint8)n2;
 		oldn = n1;
 		while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
 		if (pos >= length) break;

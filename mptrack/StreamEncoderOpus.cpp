@@ -120,12 +120,12 @@ private:
 			PushUint32LE(opus_comments_buf, 0);
 		}
 		PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(opus_comments.size()));
-		for(auto it = opus_comments.cbegin(); it != opus_comments.cend(); ++it)
+		for(const auto &it : opus_comments)
 		{
-			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(it->length()));
-			for(std::size_t i = 0; i < it->length(); ++i)
+			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(it.length()));
+			for(std::size_t i = 0; i < it.length(); ++i)
 			{
-				opus_comments_buf.push_back((*it)[i]);
+				opus_comments_buf.push_back(it[i]);
 			}
 		}
 		op.packet = opus_comments_buf.data();

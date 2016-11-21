@@ -154,9 +154,9 @@ CViewPattern::CViewPattern()
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
 
-	for(size_t i = 0; i < CountOf(octaveKeyMemory); i++)
+	for(auto &oct : octaveKeyMemory)
 	{
-		octaveKeyMemory[i] = NOTE_NONE;
+		oct = NOTE_NONE;
 	}
 }
 
@@ -323,7 +323,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 							return SetCurrentRow(newRow);
 					}
 				}
-				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
+				row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
 				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
@@ -2250,10 +2250,8 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 	
 	//for all channels where type is selected
-	for(auto iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(auto nchn : validChans)
 	{
-		CHANNELINDEX nchn = *iter;
-		
 		if (!IsInterpolationPossible(row0, row1, nchn, type))
 			continue; //skip chans where interpolation isn't possible
 
@@ -4665,7 +4663,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 			// This might be a note-off from a past note, but since we already hit a new note on this channel, we ignore it.
 			continue;
 		}
-		ModCommand *pTarget = sndFile.Patterns[editPos.pattern].GetpModCommand(editPos.row, noteChannels[i]);
+		pTarget = sndFile.Patterns[editPos.pattern].GetpModCommand(editPos.row, noteChannels[i]);
 
 		// -- write sdx if playing live
 		if(usePlaybackPosition && m_nPlayTick && pTarget->command == CMD_NONE && !doQuantize)
@@ -5163,20 +5161,20 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 		outNotes[numNotes++] = key;
 	}
 
-	for(size_t i = 0; i < CountOf(chord.notes); i++)
+	for(auto cnote: chord.notes)
 	{
-		if(chord.notes[i])
+		if(cnote)
 		{
-			ModCommand::NOTE note = key - NOTE_MIN;
+			ModCommand::NOTE chordNote = key - NOTE_MIN;
 			if(!relativeMode)
 			{
 				// Only use octave information from the base key
-				note = (note / 12) * 12;
+				chordNote = (chordNote / 12) * 12;
 			}
-			note += chord.notes[i];
-			if(specs.HasNote(note))
+			chordNote += cnote;
+			if(specs.HasNote(chordNote))
 			{
-				outNotes[numNotes++] = note;
+				outNotes[numNotes++] = chordNote;
 			}
 		}
 	}
@@ -6309,9 +6307,9 @@ bool CViewPattern::IsInterpolationPossible(PatternCursor::Columns colType) const
 
 	ROWINDEX startRow = m_Selection.GetStartRow();
 	ROWINDEX endRow   = m_Selection.GetEndRow();
-	for(auto iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(auto chn : validChans)
 	{
-		if(IsInterpolationPossible(startRow, endRow, *iter, colType))
+		if(IsInterpolationPossible(startRow, endRow, chn, colType))
 		{
 			return true;
 		}

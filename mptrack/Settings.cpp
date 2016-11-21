@@ -203,11 +203,9 @@ void SettingsContainer::NotifyListeners(const SettingPath &path)
 	const auto entry = mapListeners.find(path);
 	if(entry != mapListeners.end())
 	{
-		const auto beg = entry->second.begin();
-		const auto end = entry->second.end();
-		for(auto it = beg; it != end; ++it)
+		for(auto &it : entry->second)
 		{
-			(*it)->SettingChanged(path);
+			it->SettingChanged(path);
 		}
 	}
 }
@@ -216,12 +214,12 @@ void SettingsContainer::WriteSettings()
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	for(auto i = map.begin(); i != map.end(); ++i)
+	for(auto &i : map)
 	{
-		if(i->second.IsDirty())
+		if(i.second.IsDirty())
 		{
-			BackendsWriteSetting(i->first, i->second);
-			i->second.Clean();
+			BackendsWriteSetting(i.first, i.second);
+			i.second.Clean();
 		}
 	}
 }
