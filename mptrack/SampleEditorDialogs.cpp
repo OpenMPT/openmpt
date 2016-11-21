@@ -368,7 +368,7 @@ void CSampleXFadeDlg::OnLoopTypeChanged()
 		loopStart = m_sample.nSustainStart;
 		loopEnd = m_sample.nSustainEnd;
 	}
-	m_maxLength = Util::Min(m_sample.nLength, loopStart, loopEnd / 2u);
+	m_maxLength = std::min({ m_sample.nLength, loopStart, loopEnd / 2u });
 	m_loopLength = loopEnd - loopStart;
 
 	m_editLocked = true;
@@ -377,7 +377,7 @@ void CSampleXFadeDlg::OnLoopTypeChanged()
 	CheckDlgButton(IDC_CHECK1, m_afterloopFade ? BST_CHECKED : BST_UNCHECKED);
 
 	SmpLength numSamples = PercentToSamples(m_SliderLength.GetPos());
-	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
+	numSamples = std::min({ numSamples, m_loopLength, m_maxLength });
 	m_SpinSamples.SetPos(numSamples);
 	SetDlgItemInt(IDC_EDIT1, numSamples, FALSE);
 
@@ -390,7 +390,7 @@ void CSampleXFadeDlg::OnFadeLengthChanged()
 {
 	if(m_editLocked) return;
 	SmpLength numSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
-	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
+	numSamples = std::min({ numSamples, m_loopLength, m_maxLength });
 	m_SliderLength.SetPos(SamplesToPercent(numSamples));
 }
 
