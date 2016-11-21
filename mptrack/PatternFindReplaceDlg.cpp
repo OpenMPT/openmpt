@@ -271,7 +271,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		m_cbnCommand.SetRedraw(FALSE);
 		m_cbnCommand.InitStorage(m_effectInfo.GetNumEffects(), 20);
 		m_cbnCommand.SetItemData(m_cbnCommand.AddString(" None"), (DWORD_PTR)-1);
-		UINT count = m_effectInfo.GetNumEffects();
+		count = m_effectInfo.GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{
 			if(m_effectInfo.GetEffectInfo(n, s, true) && s[0])
@@ -280,7 +280,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		m_cbnCommand.SetCurSel(0);
-		UINT fxndx = m_effectInfo.GetIndexFromEffect(m_isReplaceTab ? m_settings.replaceCommand : m_settings.findCommand, static_cast<ModCommand::PARAM>(m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin));
+		fxndx = m_effectInfo.GetIndexFromEffect(m_isReplaceTab ? m_settings.replaceCommand : m_settings.findCommand, static_cast<ModCommand::PARAM>(m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin));
 		for (UINT i=0; i<=count; i++) if (fxndx == m_cbnCommand.GetItemData(i))
 		{
 			m_cbnCommand.SetCurSel(i);
@@ -472,7 +472,7 @@ void CFindReplaceTab::UpdateVolumeList()
 		CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 
-		int i = m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin;
+		int sel = m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin;
 		plug--;
 		m_cbnPCParam.SetRedraw(FALSE);
 		m_cbnPCParam.ResetContent();
@@ -488,7 +488,7 @@ void CFindReplaceTab::UpdateVolumeList()
 				m_cbnPCParam.SetItemData(m_cbnPCParam.AddString(s), i);
 			}
 		}
-		m_cbnPCParam.SetCurSel(i);
+		m_cbnPCParam.SetCurSel(sel);
 		m_cbnPCParam.SetRedraw(TRUE);
 		m_cbnPCParam.Invalidate(FALSE);
 	}
