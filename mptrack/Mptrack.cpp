@@ -515,47 +515,34 @@ std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 BOOL CTrackApp::LoadDefaultDLSBanks()
 //-----------------------------------
 {
-	mpt::PathString filename;
-
-	UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
-	for(size_t i = 0; i < numBanks; i++)
+	uint32 numBanks = theApp.GetSettings().Read<uint32>("DLS Banks", "NumBanks", 0);
+	gpDLSBanks.reserve(numBanks);
+	for(uint32 i = 0; i < numBanks; i++)
 	{
 		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", mpt::format("Bank%1")(i + 1), mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
 	}
 
-	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
-
-	WCHAR szFileNameW[MAX_PATH];
-	szFileNameW[0] = 0;
-	GetSystemDirectoryW(szFileNameW, CountOf(szFileNameW));
-	filename = mpt::PathString::FromNative(szFileNameW);
-	filename += MPT_PATHSTRING("\\GM.DLS");
-	if(!AddDLSBank(filename))
+	HKEY key;
+	if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
-		szFileNameW[0] = 0;
-		GetWindowsDirectoryW(szFileNameW, CountOf(szFileNameW));
-		filename = mpt::PathString::FromNative(szFileNameW);
-		filename += MPT_PATHSTRING("\\SYSTEM32\\DRIVERS\\GM.DLS");
-		if(!AddDLSBank(filename))
+		DWORD dwRegType = REG_SZ;
+		DWORD dwSize = 0;
+		if(RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, nullptr, &dwSize) == ERROR_SUCCESS && dwSize > 0)
 		{
-			HKEY key;
-			if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
+			std::vector<WCHAR> filenameW(dwSize / sizeof(WCHAR));
+			if (RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameW.data()), &dwSize) == ERROR_SUCCESS)
 			{
-				WCHAR szFileName[MAX_PATH];
-				DWORD dwRegType = REG_SZ;
-				DWORD dwSize = sizeof(szFileName);
-				szFileName[0] = 0;
-				if(RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
-				{
-					AddDLSBank(mpt::PathString::FromNative(szFileName));
-				}
-				RegCloseKey(key);
+				std::vector<WCHAR> filenameExpanded(::ExpandEnvironmentStringsW(filenameW.data(), nullptr, 0));
+				::ExpandEnvironmentStringsW(filenameW.data(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
+				auto filename = mpt::PathString::FromNative(filenameExpanded.data());
+				AddDLSBank(filename);
+				ImportMidiConfig(filename, TRUE);
 			}
 		}
+		RegCloseKey(key);
 	}
-	ImportMidiConfig(filename, TRUE);
 
 	return TRUE;
 }
@@ -564,14 +551,13 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
-	DWORD nBanks = 0;
-	for(size_t i = 0; i < gpDLSBanks.size(); i++)
+	uint32 nBanks = 0;
+	for(const auto &bank : gpDLSBanks)
 	{
-
-		if(!gpDLSBanks[i] || gpDLSBanks[i]->GetFileName().empty())
+		if(!bank || bank->GetFileName().empty())
 			continue;
 
-		mpt::PathString path = gpDLSBanks[i]->GetFileName();
+		mpt::PathString path = bank->GetFileName();
 		if(theApp.IsPortableMode())
 		{
 			path = theApp.AbsolutePathToRelative(path);
@@ -583,7 +569,7 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 		nBanks++;
 
 	}
-	theApp.GetSettings().Write<int32>("DLS Banks", "NumBanks", nBanks);
+	theApp.GetSettings().Write<uint32>("DLS Banks", "NumBanks", nBanks);
 	return TRUE;
 }
 
@@ -608,16 +594,20 @@ BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	{
 		if(gpDLSBanks[i] && !mpt::PathString::CompareNoCase(filename, gpDLSBanks[i]->GetFileName())) return TRUE;
 	}
-	CDLSBank *bank = new CDLSBank;
-	if(bank->Open(filename))
+	try
 	{
-		gpDLSBanks.push_back(bank);
-		return TRUE;
-	} else
-	{
+		CDLSBank *bank = new CDLSBank;
+		if(bank->Open(filename))
+		{
+			gpDLSBanks.push_back(bank);
+			return TRUE;
+		}
 		delete bank;
-		return FALSE;
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 	}
+	return FALSE;
 }
 
 
