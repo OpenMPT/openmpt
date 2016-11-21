@@ -168,12 +168,12 @@ void CCtrlGeneral::OnTapTempo()
 
 	// Now average over complete tap history
 	uint32 numSamples = 0, delay = 0;
-	for(uint32 i = 0; i < CountOf(tapLength); i++)
+	for(auto length : tapLength)
 	{
-		if(tapLength[i] < 2000)
+		if(length < 2000)
 		{
 			numSamples++;
-			delay += tapLength[i];
+			delay += length;
 		} else
 		{
 			break;
@@ -210,9 +210,9 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	{
 		m_CbnResampling.ResetContent();
 		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, false)) + _T(")")), SRCMODE_DEFAULT);
-		for(uint32 i = 0; i < CountOf(resamplingModes); i++)
+		for(auto mode : resamplingModes)
 		{
-			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(resamplingModes[i], false)), resamplingModes[i]);
+			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, false)), mode);
 		}
 		m_CbnResampling.Invalidate(FALSE);
 	}
@@ -382,21 +382,21 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 		else if(pSlider == (CSliderCtrl*)&m_SpinTempo)
 		{
-			int pos = m_SpinTempo.GetPos32();
-			if(pos != 0)
+			int pos32 = m_SpinTempo.GetPos32();
+			if(pos32 != 0)
 			{
 				TEMPO newTempo;
 				if(m_sndFile.GetModSpecifications().hasFractionalTempo)
 				{
-					pos *= TEMPO::fractFact;
+					pos32 *= TEMPO::fractFact;
 					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
-						pos /= 100;
+						pos32 /= 100;
 					else
-						pos /= 10;
-					newTempo.SetRaw(pos);
+						pos32 /= 10;
+					newTempo.SetRaw(pos32);
 				} else
 				{
-					newTempo = TEMPO(pos, 0);
+					newTempo = TEMPO(pos32, 0);
 				}
 				newTempo += m_sndFile.m_nDefaultTempo;
 				Limit(newTempo, tempoMin, tempoMax);

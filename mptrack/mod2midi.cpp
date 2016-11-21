@@ -419,9 +419,9 @@ namespace MidiExport
 					if(oldInstr != nullptr && oldInstr->nMidiChannel != MidiFirstChannel + 9) instr.nMidiProgram = 0;
 					if(instrMap[i].nProgram != 128)
 					{
-						for(size_t n = 0; n < CountOf(instr.NoteMap); n++)
+						for(auto &key : instr.NoteMap)
 						{
-							instr.NoteMap[n] = instrMap[i].nProgram + NOTE_MIN;
+							key = instrMap[i].nProgram + NOTE_MIN;
 						}
 					}
 				}

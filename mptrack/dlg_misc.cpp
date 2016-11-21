@@ -933,9 +933,9 @@ void CKeyboardControl::OnPaint()
 	}
 	if (oldpen) ::SelectObject(hdc, oldpen);
 	if (oldbrush) ::SelectObject(hdc, oldbrush);
-	for(int i = 0; i < CountOf(brushDot); i++)
+	for(auto &brush : brushDot)
 	{
-		DeleteBrush(brushDot[i]);
+		DeleteBrush(brush);
 	}
 	dc.SelectObject(oldFont);
 }
@@ -1136,9 +1136,9 @@ void CSampleMapDlg::OnUpdateSamples()
 
 		if (!isUsed)
 		{
-			for (size_t j = 0; j < CountOf(KeyboardMap); j++)
+			for (auto smp : KeyboardMap)
 			{
-				if (KeyboardMap[j] == i)
+				if (smp == i)
 				{
 					isUsed = true;
 					break;

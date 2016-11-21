@@ -101,13 +101,13 @@ BOOL COptionsGeneral::OnInitDialog()
 		{ MOD_TYPE_MPT, _T("MPTM") },
 	};
 	m_defaultFormat.SetCurSel(0);
-	for(size_t i = 0; i < CountOf(formats); i++)
+	for(const auto &fmt : formats)
 	{
-		int idx = m_defaultFormat.AddString(formats[i].str);
-		m_defaultFormat.SetItemData(idx, formats[i].type);
-		if(formats[i].type == TrackerSettings::Instance().defaultModType)
+		auto idx = m_defaultFormat.AddString(fmt.str);
+		m_defaultFormat.SetItemData(idx, fmt.type);
+		if(fmt.type == TrackerSettings::Instance().defaultModType)
 		{
-			m_defaultFormat.SetCurSel(i);
+			m_defaultFormat.SetCurSel(idx);
 		}
 	}
 
@@ -129,11 +129,11 @@ BOOL COptionsGeneral::OnInitDialog()
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().defaultNewFileAction);
 
-	for(int i = 0; i < CountOf(generalOptionsList); i++)
+	for(const auto &opt : generalOptionsList)
 	{
-		m_CheckList.AddString(generalOptionsList[i].name);
-		const int check = (TrackerSettings::Instance().m_dwPatternSetup & generalOptionsList[i].flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
-		m_CheckList.SetCheck(i, check);
+		auto idx = m_CheckList.AddString(opt.name);
+		const int check = (TrackerSettings::Instance().m_dwPatternSetup & opt.flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
+		m_CheckList.SetCheck(idx, check);
 	}
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();

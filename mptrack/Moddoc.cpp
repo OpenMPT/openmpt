@@ -775,9 +775,9 @@ mpt::ustring CModDoc::GetLogString() const
 //---------------------------------------
 {
 	mpt::ustring ret;
-	for(auto i = m_Log.cbegin(); i != m_Log.cend(); ++i)
+	for(const auto &i : m_Log)
 	{
-		ret += (*i).message;
+		ret += i.message;
 		ret += MPT_USTRING("\r\n");
 	}
 	return ret;
@@ -789,9 +789,9 @@ LogLevel CModDoc::GetMaxLogLevel() const
 {
 	LogLevel retval = LogInformation;
 	// find the most severe loglevel
-	for(auto i = m_Log.cbegin(); i != m_Log.cend(); ++i)
+	for(const auto i : m_Log)
 	{
-		retval = std::min(retval, i->level);
+		retval = std::min(retval, i.level);
 	}
 	return retval;
 }
@@ -1514,9 +1514,8 @@ SAMPLEINDEX CModDoc::FindInstrumentChild(INSTRUMENTINDEX nIns) const
 	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
 	if (pIns)
 	{
-		for (size_t i = 0; i < CountOf(pIns->Keyboard); i++)
+		for (auto n : pIns->Keyboard)
 		{
-			SAMPLEINDEX n = pIns->Keyboard[i];
 			if ((n) && (n <= m_SndFile.GetNumSamples())) return n;
 		}
 	}
@@ -1650,7 +1649,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			// Save channels' flags
 			channelFlags[i] = m_SndFile.ChnSettings[i].dwFlags;
 			// Ignore muted channels
-			if(channelFlags[i] & CHN_MUTE) usedChannels[i] = false;
+			if(channelFlags[i][CHN_MUTE]) usedChannels[i] = false;
 			// Mute each channel
 			m_SndFile.ChnSettings[i].dwFlags.set(CHN_MUTE);
 		}
