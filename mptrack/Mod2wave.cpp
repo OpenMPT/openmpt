@@ -1101,14 +1101,22 @@ void CDoWaveConvert::Run()
 	// Process the conversion
 
 	// For calculating the remaining time
-	DWORD dwStartTime = timeGetTime();
+	auto dwStartTime = timeGetTime(), prevTime = dwStartTime;
 	uint32 timeRemaining = 0;
 
 	uint64 bytesWritten = 0;
 
-	CMainFrame::GetMainFrame()->PauseMod();
+	auto mainFrame = CMainFrame::GetMainFrame();
+	mainFrame->PauseMod();
 	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
-	CMainFrame::GetMainFrame()->InitRenderer(&m_SndFile);
+	mainFrame->InitRenderer(&m_SndFile);
+
+	ITaskbarList3 *taskBarList = nullptr;
+	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&taskBarList);
+	if(taskBarList != nullptr)
+	{
+		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NORMAL);
+	}
 
 	for (UINT n = 0; ; n++)
 	{
@@ -1184,14 +1192,17 @@ void CDoWaveConvert::Run()
 		}
 		if (ullSamples >= ullMaxSamples)
 			break;
-		if (!(n % 10))
+
+		auto currentTime = timeGetTime();
+		if((currentTime - prevTime) >= 16)
 		{
+			prevTime = currentTime;
+
 			DWORD seconds = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
 
-			const DWORD dwCurrentTime = timeGetTime();
 			if((ullSamples > 0) && (ullSamples < max))
 			{
-				timeRemaining = static_cast<uint32>((timeRemaining + ((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000) / 2);
+				timeRemaining = static_cast<uint32>((timeRemaining + ((currentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000) / 2);
 			}
 
 			if(m_Settings.normalize)
@@ -1199,11 +1210,17 @@ void CDoWaveConvert::Run()
 			else
 				_stprintf(s, progressStr, bytesWritten >> 10, seconds / 60, seconds % 60u, timeRemaining / 60, timeRemaining % 60u);
 			SetText(s);
-		}
-		if (static_cast<uint32>(ullSamples >> 14) != pos)
-		{
-			pos = static_cast<uint32>(ullSamples >> 14);
-			SetProgress(pos);
+
+			if(static_cast<uint32>(ullSamples >> 14) != pos)
+			{
+				pos = static_cast<uint32>(ullSamples >> 14);
+				SetProgress(pos);
+			}
+
+			if(taskBarList != nullptr)
+			{
+				taskBarList->SetProgressValue(mainFrame->m_hWnd, ullSamples, max);
+			}
 		}
 		ProcessMessages();
 
@@ -1216,7 +1233,7 @@ void CDoWaveConvert::Run()
 
 	m_SndFile.m_nMaxOrderPosition = 0;
 
-	CMainFrame::GetMainFrame()->StopRenderer(&m_SndFile);
+	mainFrame->StopRenderer(&m_SndFile);
 
 	if(m_Settings.normalize)
 	{
@@ -1268,7 +1285,11 @@ void CDoWaveConvert::Run()
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<std::size_t>(newPos - oldPos);
 
+			auto currentTime = timeGetTime();
+			if((currentTime - prevTime) >= 16)
 			{
+				prevTime = currentTime;
+				
 				int percent = static_cast<int>(100 * framesProcessed / framesTotal);
 				if(percent != lastPercent)
 				{
@@ -1276,11 +1297,12 @@ void CDoWaveConvert::Run()
 					SetText(s);
 					SetProgress(percent);
 					lastPercent = percent;
-				}
-			}
 
-			if(!(framesToProcess % 10))
-			{
+					if(taskBarList != nullptr)
+					{
+						taskBarList->SetProgressValue(mainFrame->m_hWnd, percent, 100);
+					}
+				}
 				ProcessMessages();
 			}
 
@@ -1323,6 +1345,12 @@ void CDoWaveConvert::Run()
 
 	fileStream.flush();
 	fileStream.close();
+
+	if(taskBarList)
+	{
+		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NOPROGRESS);
+		taskBarList->Release();
+	}
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
 	EndDialog(ok);
