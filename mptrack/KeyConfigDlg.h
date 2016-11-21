@@ -26,12 +26,7 @@ public:
 
 	bool separatorAt(int c) const
 	{
-		for(auto i = separators.cbegin(); i != separators.cend(); i++)
-		{
-			if (*i == c)
-				return true;
-		}
-		return false;
+		return std::find(separators.begin(), separators.end(), c) != separators.end();
 	}
 
 
