@@ -151,9 +151,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		// Removing all instrument headers from channels
-		for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+		for(auto &chn : m_SndFile.m_PlayState.Chn)
 		{
-			m_SndFile.m_PlayState.Chn[nChn].pModInstrument = nullptr;
+			chn.pModInstrument = nullptr;
 		}
 
 		for(INSTRUMENTINDEX nIns = 0; nIns <= m_SndFile.GetNumInstruments(); nIns++) if (m_SndFile.Instruments[nIns])

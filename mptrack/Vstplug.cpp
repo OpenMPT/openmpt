@@ -1548,12 +1548,12 @@ void CVstPlugin::HardAllNotesOff()
 
 		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
 		{
-			for(CHANNELINDEX c = 0; c < CountOf(channel.noteOnMap[i]); c++)
+			for(auto &c : channel.noteOnMap[i])
 			{
-				while(channel.noteOnMap[i][c])
+				while(c != 0)
 				{
 					MidiSend(MIDIEvents::NoteOff(mc, static_cast<uint8>(i), 0));
-					channel.noteOnMap[i][c]--;
+					c--;
 				}
 			}
 		}
