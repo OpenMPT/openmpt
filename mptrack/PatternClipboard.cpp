@@ -372,9 +372,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	if(data.substr(startPos, 8) == "Orders: ")
 	{
 		// Pasting several patterns at once.
-		patternMode = (mode == pmMixPaste || mode == pmMixPasteIT || mode == pmPasteFlood) ? kMultiOverwrite : kMultiInsert;
-		if(patternMode == kMultiInsert)
-			mode = pmOverwrite;
+		patternMode = (mode == pmOverwrite) ?  kMultiInsert : kMultiOverwrite;
 
 		// Put new patterns after current pattern, if it exists
 		if(sndFile.Order.IsValidPat(curOrder) && patternMode == kMultiInsert)
@@ -1086,14 +1084,15 @@ void PatternClipboardDialog::UpdateList()
 	}
 	instance.clipList.ResetContent();
 	PatternClipboard::clipindex_t i = 0;
-	for(auto clip = PatternClipboard::instance.clipboards.cbegin(); clip != PatternClipboard::instance.clipboards.cend(); clip++, i++)
+	for(const auto &clip : PatternClipboard::instance.clipboards)
 	{
-		const int item = instance.clipList.AddString(clip->description);
+		const int item = instance.clipList.AddString(clip.description);
 		instance.clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
 		if(PatternClipboard::instance.activeClipboard == i)
 		{
 			instance.clipList.SetCurSel(item);
 		}
+		i++;
 	}
 }
 
