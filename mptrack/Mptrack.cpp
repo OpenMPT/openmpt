@@ -215,28 +215,28 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 	bActivate = FALSE;
 	if ((lpszCommand) && (*lpszCommand) && (theApp.m_pMainWnd))
 	{
-		CHAR s[_MAX_PATH], *pszCmd, *pszData;
+		TCHAR s[_MAX_PATH], *pszCmd, *pszData;
 		std::size_t len;
 
 		mpt::String::CopyN(s, lpszCommand);
-		len = strlen(s) - 1;
-		while ((len > 0) && (strchr("(){}[]\'\" ", s[len]))) s[len--] = 0;
+		len = _tcslen(s) - 1;
+		while ((len > 0) && (_tcschr(_T("(){}[]\'\" "), s[len]))) s[len--] = 0;
 		pszCmd = s;
-		while (pszCmd[0] == '[') pszCmd++;
+		while (pszCmd[0] == _T('[')) pszCmd++;
 		pszData = pszCmd;
-		while ((pszData[0] != '(') && (pszData[0]))
+		while ((pszData[0] != _T('(')) && (pszData[0]))
 		{
 			if (((BYTE)pszData[0]) <= (BYTE)0x20) *pszData = 0;
 			pszData++;
 		}
-		while ((*pszData) && (strchr("(){}[]\'\" ", *pszData)))
+		while ((*pszData) && (_tcschr(_T("(){}[]\'\" "), *pszData)))
 		{
 			*pszData = 0;
 			pszData++;
 		}
 		// Edit/Open
-		if ((!lstrcmpi(pszCmd, "Edit"))
-		 || (!lstrcmpi(pszCmd, "Open")))
+		if ((!lstrcmpi(pszCmd, _T("Edit")))
+		 || (!lstrcmpi(pszCmd, _T("Open"))))
 		{
 			if (pszData[0])
 			{
@@ -246,7 +246,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			}
 		} else
 		// New
-		if (!lstrcmpi(pszCmd, "New"))
+		if (!lstrcmpi(pszCmd, _T("New")))
 		{
 			OpenDocumentFile(mpt::PathString());
 			bResult = TRUE;
@@ -285,10 +285,10 @@ void CTrackApp::OnFileCloseAll()
 		}
 	}
 
-	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(auto doc = documents.begin(); doc != documents.end(); doc++)
+	auto documents = theApp.GetOpenDocuments();
+	for(auto &doc : documents)
 	{
-		(*doc)->SafeFileClose();
+		doc->SafeFileClose();
 	}
 }
 
@@ -1326,11 +1326,11 @@ void CTrackApp::OnFileNew()
 	if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 	{
 		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
-		for(size_t i = 0; i < CountOf(dirs); i++)
+		for(const auto &dir : dirs)
 		{
-			if((dirs[i] + templateFile).IsFile())
+			if((dir + templateFile).IsFile())
 			{
-				if(m_pModTemplate->OpenTemplateFile(dirs[i] + templateFile) != nullptr)
+				if(m_pModTemplate->OpenTemplateFile(dir + templateFile) != nullptr)
 				{
 					return;
 				}
@@ -1461,9 +1461,9 @@ void CTrackApp::OnFileOpen()
 {
 	FileDialog::PathList files;
 	OpenModulesDialog(files);
-	for(auto file = files.cbegin(); file != files.cend(); file++)
+	for(const auto &file : files)
 	{
-		OpenDocumentFile(*file);
+		OpenDocumentFile(file);
 	}
 }
 
@@ -1973,11 +1973,11 @@ BOOL CTrackApp::InitializeDXPlugins()
 	bool dialogShown = false;
 
 	// Read tags for built-in plugins
-	for(auto plug = m_pPluginManager->begin(); plug != m_pPluginManager->end(); plug++)
+	for(auto plug : *m_pPluginManager)
 	{
 		char tmp[32];
-		sprintf(tmp, "Plugin%08X%08X.Tags", (**plug).pluginId1, (**plug).pluginId2);
-		(**plug).tags = GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+		sprintf(tmp, "Plugin%08X%08X.Tags", plug->pluginId1, plug->pluginId2);
+		plug->tags = GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
 	}
 
 	// Restructured plugin cache
@@ -2051,29 +2051,29 @@ BOOL CTrackApp::UninitializeDXPlugins()
 
 #ifndef NO_PLUGINS
 
-	size_t plug = 0;
-	for(auto pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
+	size_t plugIndex = 0;
+	for(auto plug : *m_pPluginManager)
 	{
-		if(!(**pPlug).isBuiltIn)
+		if(!plug->isBuiltIn)
 		{
-			mpt::PathString plugPath = (**pPlug).dllPath;
+			mpt::PathString plugPath = plug->dllPath;
 			if(theApp.IsPortableMode())
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
 			}
-			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), plugPath);
+			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plugIndex), plugPath);
 
-			theApp.GetSettings().Write("VST Plugins", mpt::format("Plugin%1.Tags")(plug), (**pPlug).tags);
+			theApp.GetSettings().Write("VST Plugins", mpt::format("Plugin%1.Tags")(plugIndex), plug->tags);
 
-			plug++;
+			plugIndex++;
 		} else
 		{
 			char tmp[32];
-			sprintf(tmp, "Plugin%08X%08X.Tags", (**pPlug).pluginId1, (**pPlug).pluginId2);
-			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
+			sprintf(tmp, "Plugin%08X%08X.Tags", plug->pluginId1, plug->pluginId2);
+			theApp.GetSettings().Write("VST Plugins", tmp, plug->tags);
 		}
 	}
-	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);
+	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plugIndex);
 #endif // NO_PLUGINS
 
 	delete m_pPluginManager;

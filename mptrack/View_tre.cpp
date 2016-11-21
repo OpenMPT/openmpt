@@ -464,13 +464,8 @@ void CModTree::AddDocument(CModDoc &modDoc)
 //-----------------------------------------
 {
 	// Check if document is already in the list
-	for(auto &doc : DocInfo)
-	{
-		if(&(doc->modDoc) == &modDoc)
-		{
-			return;
-		}
-	}
+	if(std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; }) != DocInfo.end())
+		return;
 
 	try
 	{
@@ -494,14 +489,11 @@ void CModTree::AddDocument(CModDoc &modDoc)
 void CModTree::RemoveDocument(CModDoc &modDoc)
 //--------------------------------------------
 {
-	for(auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
+	if(doc != DocInfo.end())
 	{
-		if(&(*iter)->modDoc == &modDoc)
-		{
-			DeleteItem((*iter)->hSong);
-			DocInfo.erase(iter);
-			break;
-		}
+		DeleteItem((**doc).hSong);
+		DocInfo.erase(doc);
 	}
 	// Refresh all item IDs
 	for(size_t i = 0; i < DocInfo.size(); i++)
@@ -533,14 +525,11 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 //------------------------------------------------------------------
 {
-	for(auto iter : DocInfo)
-	{
-		if(&(iter->modDoc) == &modDoc)
-		{
-			return iter.get();
-		}
-	}
-	return nullptr;
+	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
+	if(doc != DocInfo.end())
+		return doc->get();
+	else
+		return nullptr;
 }
 
 
