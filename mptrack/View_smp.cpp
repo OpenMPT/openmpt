@@ -41,7 +41,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define SMP_LEFTBAR_CYBTN		22
 
 #define MIN_ZOOM	-6
-#define MAX_ZOOM	8
+#define MAX_ZOOM	10
 
 // Defines the minimum length for selection for which
 // trimming will be done. This is the minimum value for
