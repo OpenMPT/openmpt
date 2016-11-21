@@ -128,21 +128,20 @@ END_MESSAGE_MAP()
 // CViewSample operations
 
 CViewSample::CViewSample()
+	: m_lastDrawPoint(-1, -1)
+	, m_nGridSegments(0)
+	, m_nSample(1)
+	, m_nZoom(0)
+	, m_nBtnMouseOver(0xFFFF)
+	, noteChannel(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID)
 //------------------------
 {
-	m_nGridSegments = 0;
-	m_nSample = 1;
-	m_nZoom = 0;
-	m_nBtnMouseOver = 0xFFFF;
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &pos : m_dwNotifyPos)
 	{
-		m_dwNotifyPos[i] = Notification::PosInvalid;
+		pos = Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
-
-	m_lastDrawPoint.SetPoint(-1, -1);
-	noteChannel.assign(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID);
 }
 
 
@@ -325,9 +324,9 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetInfoText("");
 	m_nSample = nSmp;
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &pos : m_dwNotifyPos)
 	{
-		m_dwNotifyPos[i] = Notification::PosInvalid;
+		pos = Notification::PosInvalid;
 	}
 	UpdateScrollSize();
 	UpdateNcButtonState();
@@ -1220,10 +1219,10 @@ void CViewSample::DrawPositionMarks()
 		return;
 	}
 	CRect rect;
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
+	for(auto pos : m_dwNotifyPos) if (pos != Notification::PosInvalid)
 	{
 		rect.top = -2;
-		rect.left = SampleToScreen(m_dwNotifyPos[i]);
+		rect.left = SampleToScreen(pos);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
 		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) offScreenDC.InvertRect(&rect);
@@ -1239,11 +1238,11 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 	if (pnotify->type[Notification::Stop])
 	{
 		bool invalidate = false;
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &pos : m_dwNotifyPos)
 		{
-			if(m_dwNotifyPos[i] != Notification::PosInvalid)
+			if(pos != Notification::PosInvalid)
 			{
-				m_dwNotifyPos[i] = Notification::PosInvalid;
+				pos = Notification::PosInvalid;
 				invalidate = true;
 			}
 		}

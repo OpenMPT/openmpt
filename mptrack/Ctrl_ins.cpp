@@ -2061,9 +2061,8 @@ void CCtrlInstruments::OnGlobalVolChanged()
 			if(!m_startedEdit) PrepareUndo("Set Global Volume");
 			// Live-adjust volume
 			pIns->nGlobalVol = nVol;
-			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+			for(auto &chn : m_sndFile.m_PlayState.Chn)
 			{
-				auto &chn = m_sndFile.m_PlayState.Chn[i];
 				if(chn.pModInstrument == pIns)
 				{
 					chn.UpdateInstrumentVolume(chn.pModSample, pIns);
@@ -2472,17 +2471,14 @@ void CCtrlInstruments::OnEnableCutOff()
 	{
 		PrepareUndo("Toggle Cutoff");
 		pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
-		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &chn : m_sndFile.m_PlayState.Chn)
 		{
-			if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
+			if (chn.pModInstrument == pIns)
 			{
 				if (bCutOff)
-				{
-					m_sndFile.m_PlayState.Chn[i].nCutOff = pIns->GetCutoff();
-				} else
-				{
-					m_sndFile.m_PlayState.Chn[i].nCutOff = 0x7F;
-				}
+					chn.nCutOff = pIns->GetCutoff();
+				else
+					chn.nCutOff = 0x7F;
 			}
 		}
 	}
@@ -2502,17 +2498,14 @@ void CCtrlInstruments::OnEnableResonance()
 	{
 		PrepareUndo("Toggle Resonance");
 		pIns->SetResonance(pIns->GetResonance(), bReso);
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &chn : m_sndFile.m_PlayState.Chn)
 		{
-			if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
+			if (chn.pModInstrument == pIns)
 			{
 				if (bReso)
-				{
-					m_sndFile.m_PlayState.Chn[i].nResonance = pIns->GetResonance();
-				} else
-				{
-					m_sndFile.m_PlayState.Chn[i].nResonance = 0;
-				}
+					chn.nResonance = pIns->GetResonance();
+				else
+					chn.nResonance = 0;
 			}
 		}
 	}
@@ -2538,10 +2531,10 @@ void CCtrlInstruments::OnFilterModeChanged()
 			//Update channel settings where this instrument is active, if required.
 			if(instFiltermode != FLTMODE_UNCHANGED)
 			{
-				for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+				for(auto &chn : m_sndFile.m_PlayState.Chn)
 				{
-					if(m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
-						m_sndFile.m_PlayState.Chn[i].nFilterMode = instFiltermode;
+					if(chn.pModInstrument == pIns)
+						chn.nFilterMode = instFiltermode;
 				}
 			}
 		}
@@ -2687,12 +2680,12 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			// Update channels
 			if (filterChanged)
 			{
-				for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+				for(auto &chn : m_sndFile.m_PlayState.Chn)
 				{
-					if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
+					if (chn.pModInstrument == pIns)
 					{
-						if (pIns->IsCutoffEnabled()) m_sndFile.m_PlayState.Chn[i].nCutOff = pIns->GetCutoff();
-						if (pIns->IsResonanceEnabled()) m_sndFile.m_PlayState.Chn[i].nResonance = pIns->GetResonance();
+						if (pIns->IsCutoffEnabled()) chn.nCutOff = pIns->GetCutoff();
+						if (pIns->IsResonanceEnabled()) chn.nResonance = pIns->GetResonance();
 					}
 				}
 			}

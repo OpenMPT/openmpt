@@ -2668,9 +2668,8 @@ void CCtrlSamples::OnGlobalVolChanged()
 	{
 		// Live-adjust volume
 		sample.nGlobalVol = (uint16)nVol;
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &chn : m_sndFile.m_PlayState.Chn)
 		{
-			auto &chn = m_sndFile.m_PlayState.Chn[i];
 			if(chn.pModSample == &sample)
 			{
 				chn.UpdateInstrumentVolume(chn.pModSample, chn.pModInstrument);
@@ -2772,9 +2771,8 @@ void CCtrlSamples::OnFineTuneChangedDone()
 	finetuneBoxActive = false;
 	// Update all playing channels
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &chn : m_sndFile.m_PlayState.Chn)
 	{
-		ModChannel &chn = m_sndFile.m_PlayState.Chn[i];
 		if(chn.pModSample == &m_sndFile.GetSample(m_nSample))
 		{
 			chn.nTranspose = sample.RelativeTone;

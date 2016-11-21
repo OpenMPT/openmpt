@@ -156,9 +156,9 @@ CViewInstrument::CViewInstrument()
 //--------------------------------
 {
 	m_rcClient.bottom = 2;
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &pos : m_dwNotifyPos)
 	{
-		m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
+		pos = (uint32)Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
 
@@ -625,11 +625,11 @@ bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, M
 	CriticalSection cs;
 
 	// Update mixing flags...
-	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
-		if(sndFile.m_PlayState.Chn[nChn].pModInstrument == &ins)
+		if(chn.pModInstrument == &ins)
 		{
-			sndFile.m_PlayState.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
+			chn.GetEnvelope(envelope).flags.set(flags, enable);
 		}
 	}
 
@@ -1140,10 +1140,10 @@ void CViewInstrument::DrawPositionMarks()
 //---------------------------------------
 {
 	CRect rect;
-	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
+	for(auto pos : m_dwNotifyPos) if (pos != Notification::PosInvalid)
 	{
 		rect.top = -2;
-		rect.left = TickToScreen(m_dwNotifyPos[i]);
+		rect.left = TickToScreen(pos);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
 		InvertRect(m_dcMemMain.m_hDC, &rect);
@@ -1166,11 +1166,11 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 	if (pnotify->type[Notification::Stop])
 	{
 		bool invalidate = false;
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &pos : m_dwNotifyPos)
 		{
-			if(m_dwNotifyPos[i] != (uint32)Notification::PosInvalid)
+			if(pos != (uint32)Notification::PosInvalid)
 			{
-				m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
+				pos = (uint32)Notification::PosInvalid;
 				invalidate = true;
 			}
 		}
@@ -1197,7 +1197,6 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 			DrawPositionMarks();
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
-				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
 				uint32 newpos = (uint32)pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
