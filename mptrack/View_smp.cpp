@@ -1208,7 +1208,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	bool activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : false;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+		CChannelManagerDlg::sharedInstance()->SetDocument(this);
 }
 
 
@@ -2480,12 +2480,10 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 						INSTRUMENTINDEX rightIns = pModDoc->InsertInstrument(0, ins);
 						if(rightIns != INSTRUMENTINDEX_INVALID)
 						{
-							for(size_t i = 0; i < CountOf(sndFile.Instruments[rightIns]->Keyboard); i++)
+							for(auto &smp : sndFile.Instruments[rightIns]->Keyboard)
 							{
-								if(sndFile.Instruments[rightIns]->Keyboard[i] == m_nSample)
-								{
-									sndFile.Instruments[rightIns]->Keyboard[i] = rightSmp;
-								}
+								if(smp == m_nSample)
+									smp = rightSmp;
 							}
 						}
 						pModDoc->UpdateAllViews(this, InstrumentHint(rightIns).Info().Envelope().Names(), this);

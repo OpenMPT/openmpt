@@ -135,11 +135,11 @@ public:
 
 			// Write all cue points
 			uint32 index = 0;
-			for(auto iter = cues.cbegin(); iter != cues.cend(); iter++)
+			for(auto cue : cues)
 			{
 				WAVCuePoint cuePoint;
 				cuePoint.id = index++;
-				cuePoint.position = static_cast<uint32>(*iter);
+				cuePoint.position = static_cast<uint32>(cue);
 				cuePoint.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
 				cuePoint.chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
 				cuePoint.blockStart = 0;	// ditto

@@ -355,7 +355,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							const auto referencedSamples = pIns->GetSamples();
 
 							bool first = true;
-							for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+							for(auto sample : referencedSamples)
 							{
 								if(!first) strcat(s, ",");
 								first = false;
@@ -367,7 +367,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 									break;
 								}
 
-								wsprintf(s + l, "%u", *sample);
+								wsprintf(s + l, "%u", sample);
 							}
 						}
 						break;
@@ -521,7 +521,7 @@ void CViewComments::OnDraw(CDC* pDC)
 	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+		CChannelManagerDlg::sharedInstance()->SetDocument(this);
 }
 // -! NEW_FEATURE#0015
 
@@ -602,7 +602,7 @@ void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
 
 
 LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 {
 //	switch(wParam)
 //	{

@@ -306,9 +306,8 @@ void BridgeWrapper::MessageThread()
 		} else if(result == WAIT_OBJECT_0 + 1)
 		{
 			// Message got answered
-			for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++)
+			for(auto &msg : sharedMem->toBridge)
 			{
-				BridgeMessage &msg = sharedMem->toBridge[i];
 				LONG signalID = msg.header.signalID;
 				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 				{
@@ -319,9 +318,9 @@ void BridgeWrapper::MessageThread()
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 
 	// Close any possible waiting queries
-	for(size_t i = 0; i < CountOf(ackSignals); i++)
+	for(auto &sig : ackSignals)
 	{
-		ackSignals[i].Send();
+		sig.Send();
 	}
 }
 
@@ -351,9 +350,8 @@ bool BridgeWrapper::SendToBridge(BridgeMessage &sendMsg)
 			{
 				// Message got answered
 				bool done = false;
-				for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++)
+				for(auto &msg : sharedMem->toBridge)
 				{
-					BridgeMessage &msg = sharedMem->toBridge[i];
 					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 					{
 						if(&msg != addr)
@@ -417,15 +415,14 @@ void BridgeWrapper::ParseNextMessage()
 {
 	ASSERT(GetCurrentThreadId() == msgThreadID);
 
-	BridgeMessage *msg = &sharedMem->toHost[0];
-	for(size_t i = 0; i < CountOf(sharedMem->toHost); i++, msg++)
+	for(auto &msg : sharedMem->toHost)
 	{
-		if(InterlockedCompareExchange(&msg->header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
+		if(InterlockedCompareExchange(&msg.header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
 		{
-			switch(msg->header.type)
+			switch(msg.header.type)
 			{
 			case MsgHeader::dispatch:
-				DispatchToHost(&msg->dispatch);
+				DispatchToHost(&msg.dispatch);
 				break;
 
 			case MsgHeader::errorMsg:
@@ -434,7 +431,7 @@ void BridgeWrapper::ParseNextMessage()
 				break;
 			}
 
-			InterlockedExchange(&msg->header.status, MsgHeader::done);
+			InterlockedExchange(&msg.header.status, MsgHeader::done);
 			sigToHost.Confirm();
 		}
 	}

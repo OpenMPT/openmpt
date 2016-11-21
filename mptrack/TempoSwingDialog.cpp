@@ -183,13 +183,14 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	m_container.OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&(m_controls[0]->valueSlider)));
 	rect.MoveToY(m.paddingTop + containerRect.bottom + m.paddingY);
 	{
+		// Buttons at dialog bottom
 		CRect buttonRect;
-		GetDlgItem(IDOK)->GetWindowRect(buttonRect);
-		GetDlgItem(IDOK)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
-		GetDlgItem(IDCANCEL)->GetWindowRect(buttonRect);
-		GetDlgItem(IDCANCEL)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
-		GetDlgItem(IDC_BUTTON2)->GetWindowRect(buttonRect);
-		GetDlgItem(IDC_BUTTON2)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+		for(auto i : { IDOK, IDCANCEL, IDC_BUTTON2 })
+		{
+			auto wnd = GetDlgItem(i);
+			wnd->GetWindowRect(buttonRect);
+			wnd->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+		}
 	}
 
 	windowRect.bottom += displayHeight + m.paddingTop + m.footerHeight;

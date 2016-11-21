@@ -343,11 +343,11 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		// Check paste format
 		const std::string format = mpt::ToUpperCaseAscii(mpt::String::Trim(data.substr(startPos, 3)));
 
-		for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+		for(const auto &spec : ModSpecs::Collection)
 		{
-			if(format == GetFileExtension(ModSpecs::Collection[i]->fileExtension, false))
+			if(format == GetFileExtension(spec->fileExtension, false))
 			{
-				pasteFormat = ModSpecs::Collection[i]->internalType;
+				pasteFormat = spec->internalType;
 				startPos += 3;
 				break;
 			}

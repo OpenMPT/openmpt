@@ -477,15 +477,15 @@ BOOL CResamplingDlg::OnInitDialog()
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
 	cbnResampling->SetRedraw(FALSE);
 	const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER, SRCMODE_DEFAULT };
-	for(uint32 i = 0; i < CountOf(resamplingModes); i++)
+	for(auto mode : resamplingModes)
 	{
 		const TCHAR *desc = _T("r8brain (High Quality)");
-		if(resamplingModes[i] != SRCMODE_DEFAULT)
-			desc = CTrackApp::GetResamplingModeName(resamplingModes[i], false);
+		if(mode != SRCMODE_DEFAULT)
+			desc = CTrackApp::GetResamplingModeName(mode, false);
 
 		int index = cbnResampling->AddString(desc);
-		cbnResampling->SetItemData(index, resamplingModes[i]);
-		if(srcMode == resamplingModes[i])
+		cbnResampling->SetItemData(index, mode);
+		if(srcMode == mode)
 			cbnResampling->SetCurSel(index);
 	}
 	cbnResampling->SetRedraw(TRUE);

@@ -245,7 +245,7 @@ void CViewGlobals::OnDraw(CDC* pDC)
 	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+		CChannelManagerDlg::sharedInstance()->SetDocument(this);
 }
 
 
@@ -527,16 +527,16 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 
 		for (PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
-			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[iOut];
-			if(plugin.IsValidPlugin())
+			const SNDMIXPLUGIN &outPlug = sndFile.m_MixPlugins[iOut];
+			if(outPlug.IsValidPlugin())
 			{
-				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, plugin.GetLibraryName());
-				if(!strcmp(plugin.GetName(), "") || libName != plugin.GetName())
+				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, outPlug.GetLibraryName());
+				if(!strcmp(outPlug.GetName(), "") || libName != outPlug.GetName())
 				{
 					wsprintf(s, _T("FX%d: %s"), iOut + 1, libName.c_str());
 				} else
 				{
-					wsprintf(s, _T("FX%d: %s (%s)"), iOut + 1, libName.c_str(), plugin.GetName());
+					wsprintf(s, _T("FX%d: %s (%s)"), iOut + 1, libName.c_str(), outPlug.GetName());
 				}
 
 				int n = m_CbnOutput.AddString(s);
@@ -576,7 +576,7 @@ void CViewGlobals::PopulateChannelPlugins()
 		{
 			m_CbnEffects[ichn].SetRedraw(FALSE);
 			m_CbnEffects[ichn].ResetContent();
-			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString("No plugin"), 0);
+			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString(_T("No plugin")), 0);
 			int fxsel = 0;
 			for (PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
 			{
@@ -835,7 +835,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
-//----------------------------------------------------------------------
+//-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 

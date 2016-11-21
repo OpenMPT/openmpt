@@ -245,11 +245,11 @@ void COptionsSoundcard::UpdateLatency()
 		};
 		m_CbnLatencyMS.ResetContent();
 		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
-		for(std::size_t i = 0; i < CountOf(latencies); ++i)
+		for(auto lat : latencies)
 		{
-			if(m_CurrentDeviceCaps.LatencyMin <= latencies[i] && latencies[i] <= m_CurrentDeviceCaps.LatencyMax)
+			if(m_CurrentDeviceCaps.LatencyMin <= lat && lat <= m_CurrentDeviceCaps.LatencyMax)
 			{
-				m_CbnLatencyMS.AddString(PrintTime(latencies[i]));
+				m_CbnLatencyMS.AddString(PrintTime(lat));
 			}
 		}
 	}
@@ -281,11 +281,11 @@ void COptionsSoundcard::UpdateUpdateInterval()
 		};
 		m_CbnUpdateIntervalMS.ResetContent();
 		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
-		for(std::size_t i = 0; i < CountOf(updateIntervals); ++i)
+		for(auto upd : updateIntervals)
 		{
-			if(m_CurrentDeviceCaps.UpdateIntervalMin <= updateIntervals[i] && updateIntervals[i] <= m_CurrentDeviceCaps.UpdateIntervalMax)
+			if(m_CurrentDeviceCaps.UpdateIntervalMin <= upd && upd <= m_CurrentDeviceCaps.UpdateIntervalMax)
 			{
-				m_CbnUpdateIntervalMS.AddString(PrintTime(updateIntervals[i]));
+				m_CbnUpdateIntervalMS.AddString(PrintTime(upd));
 			}
 		}
 	}
@@ -335,14 +335,14 @@ void COptionsSoundcard::UpdateEverything()
 
 		UINT iItem = 0;
 
-		for(auto it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
+		for(const auto &it : *theApp.GetSoundDevicesManager())
 		{
-			auto extraData = it->extraData;
+			auto extraData = it.extraData;
 			int priority = ConvertStrTo<int>(extraData[MPT_USTRING("priority")]);
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
-				if(it->type == SoundDevice::TypePORTAUDIO_DS || it->type == SoundDevice::TypePORTAUDIO_WMME)
+				if(it.type == SoundDevice::TypePORTAUDIO_DS || it.type == SoundDevice::TypePORTAUDIO_WMME)
 				{
 					// skip those portaudio apis that are already implemented via our own SoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
@@ -364,24 +364,24 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
 				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT;
-				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it->GetIdentifier());
-				if(it->type == SoundDevice::TypeWAVEOUT || it->type == SoundDevice::TypePORTAUDIO_WMME)
+				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it.GetIdentifier());
+				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypePORTAUDIO_WMME)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it->type == SoundDevice::TypeDSOUND || it->type == SoundDevice::TypePORTAUDIO_DS)
+				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_DIRECTX;
-				} else if(it->type == SoundDevice::TypeASIO)
+				} else if(it.type == SoundDevice::TypeASIO)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_ASIO;
-				} else if(it->type == SoundDevice::TypePORTAUDIO_WASAPI)
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_SAMPLEMUTE; // // No real image available for now,
-				} else if(it->type == SoundDevice::TypePORTAUDIO_WDMKS)
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WDMKS)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_CHIP; // No real image available for now,
@@ -391,20 +391,20 @@ void COptionsSoundcard::UpdateEverything()
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
-				mpt::ustring name = it->name + (it->isDefault ? MPT_USTRING(" [default]") : MPT_USTRING(""));
+				mpt::ustring name = it.name + (it.isDefault ? MPT_USTRING(" [default]") : MPT_USTRING(""));
 				if(TrackerSettings::Instance().m_SoundShowNotRecommendedDeviceWarning && (priority < 0))
 				{
 					name += MPT_USTRING(" [not recommended]");
 				}
-				if(it->type == SoundDevice::TypeWAVEOUT || it->type == SoundDevice::TypeDSOUND || it->type == SoundDevice::TypeASIO)
+				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypeASIO)
 				{
 					// leave name alone
-				} else if(it->type == SoundDevice::TypePORTAUDIO_WASAPI || it->type == SoundDevice::TypePORTAUDIO_WDMKS)
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == SoundDevice::TypePORTAUDIO_WDMKS)
 				{
-					name = it->apiName + MPT_USTRING(" - ") + name;
+					name = it.apiName + MPT_USTRING(" - ") + name;
 				} else
 				{
-					name = ((it->apiPath.size() > 0) ? mpt::String::Combine(it->apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it->apiName + MPT_USTRING(" - ") + name;
+					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it.apiName + MPT_USTRING(" - ") + name;
 				}
 				TCHAR tmp[1024];
 				MemsetZero(tmp);
@@ -966,11 +966,11 @@ BOOL COptionsMixer::OnInitDialog()
 	// Resampling type
 	{
 		const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER };
-		for(uint32 i = 0; i < CountOf(resamplingModes); i++)
+		for(auto mode : resamplingModes)
 		{
-			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(resamplingModes[i], true));
-			m_CbnResampling.SetItemData(index, resamplingModes[i]);
-			if(TrackerSettings::Instance().ResamplerMode == resamplingModes[i])
+			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, true));
+			m_CbnResampling.SetItemData(index, mode);
+			if(TrackerSettings::Instance().ResamplerMode == mode)
 				m_CbnResampling.SetCurSel(index);
 		}
 	}
@@ -1803,13 +1803,13 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ _T("Record as MIDI Macros"), atRecordAsMacro },
 	};
 
-	for(int i = 0; i < CountOf(aftertouchOptions); i++)
+	for(const auto &atOpt : aftertouchOptions)
 	{
-		int item = m_ATBehaviour.AddString(aftertouchOptions[i].text);
-		m_ATBehaviour.SetItemData(item, aftertouchOptions[i].option);
-		if(aftertouchOptions[i].option == TrackerSettings::Instance().aftertouchBehaviour)
+		int item = m_ATBehaviour.AddString(atOpt.text);
+		m_ATBehaviour.SetItemData(item, atOpt.option);
+		if(atOpt.option == TrackerSettings::Instance().aftertouchBehaviour)
 		{
-			m_ATBehaviour.SetCurSel(i);
+			m_ATBehaviour.SetCurSel(item);
 		}
 	}
 

@@ -1046,11 +1046,11 @@ public:
 		}
 
 		int bitrate = settings.Bitrate;
-		for(std::size_t i = 0; i < CountOf(mpeg1layer3_bitrates); ++i)
+		for(auto rate : mpeg1layer3_bitrates)
 		{
-			if(bitrate <= mpeg1layer3_bitrates[i])
+			if(bitrate <= rate)
 			{
-				bitrate = mpeg1layer3_bitrates[i];
+				bitrate = rate;
 				break;
 			}
 		}
@@ -1415,9 +1415,9 @@ private:
 		}
 		try
 		{
-			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
+			for(auto rate : mpeg1layer3_samplerates)
 			{
-				EnumFormats(mpeg1layer3_samplerates[i], 2);
+				EnumFormats(rate, 2);
 			}
 		} catch(const Crash &)
 		{
@@ -1425,9 +1425,9 @@ private:
 		}
 		try
 		{
-			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
+			for(auto rate : mpeg1layer3_samplerates)
 			{
-				EnumFormats(mpeg1layer3_samplerates[i], 1);
+				EnumFormats(rate, 1);
 			}
 		} catch(const Crash &)
 		{
@@ -1462,18 +1462,19 @@ public:
 			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
 		}
 		traits.encoderSettingsName = MPT_USTRING("MP3ACM");
-		for(auto i = drivers.cbegin(); i != drivers.cend(); ++i)
+		for(const auto &i : drivers)
 		{
-			traits.description += (*i);
+			traits.description += i;
 		}
 		traits.canTags = true;
 		traits.maxChannels = 2;
 		traits.samplerates.clear();
-		for(int i = 0; i < CountOf(samplerates); ++i)
+		traits.samplerates.reserve(MPT_ARRAY_COUNT(samplerates));
+		for(auto rate : samplerates)
 		{
-			if(samplerates[i])
+			if(rate)
 			{
-				traits.samplerates.push_back(samplerates[i]);
+				traits.samplerates.push_back(rate);
 			}
 		}
 		traits.modes = Encoder::ModeEnumerated;
