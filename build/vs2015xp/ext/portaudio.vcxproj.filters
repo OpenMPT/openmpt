@@ -90,6 +90,9 @@
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_endianness.h">
       <Filter>src\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\portaudio\src\common\pa_gitrevision.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_hostapi.h">
       <Filter>src\common</Filter>
     </ClInclude>
@@ -103,9 +106,6 @@
       <Filter>src\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_stream.h">
-      <Filter>src\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\portaudio\src\common\pa_svnrevision.h">
       <Filter>src\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_trace.h">
