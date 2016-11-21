@@ -1463,21 +1463,13 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 static void SkipCommentLines(std::istream& iStrm, std::string& str)
 //-----------------------------------------------------------------
 {
+	std::string whitespace(" \t");
 	while(std::getline(iStrm, str))
 	{
-		LPCSTR psz = str.c_str();
-		for(; *psz != 0; psz++)
-		{
-			if (*psz == ' ' || *psz == '\t')
-				continue;
-			else
-			{
-				if (*psz != '!')
-					return;
-				else // Found comment line: break for loop and get another line.
-					break;
-			}
-		}
+		auto start = str.find_first_not_of(whitespace);
+		// Lines starting with a ! are comments
+		if(start != std::string::npos && str[start] != '!')
+			return;
 	}
 }
 
@@ -1485,7 +1477,7 @@ static void SkipCommentLines(std::istream& iStrm, std::string& str)
 static inline SclFloat CentToRatio(const SclFloat& val)
 //-----------------------------------------------------
 {
-    return pow(2.0, val / 1200.0);
+	return pow(2.0, val / 1200.0);
 }
 
 
@@ -1506,7 +1498,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 {
 	std::string str;
 	SkipCommentLines(iStrm, str);
-	// str should now contain comment line.
+	// str should now contain description text.
 	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
 	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
