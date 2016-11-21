@@ -216,6 +216,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:32")), 6);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:64")), 7);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:128")), 8);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:256")), 9);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:512")), 10);
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
