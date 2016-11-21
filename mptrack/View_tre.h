@@ -172,7 +172,7 @@ protected:
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
-	std::vector<ModTreeDocInfo *> DocInfo;
+	std::vector<std::shared_ptr<ModTreeDocInfo>> DocInfo;
 
 	// Instrument library
 	mpt::PathString m_InstrLibPath;				// Current path to be explored
