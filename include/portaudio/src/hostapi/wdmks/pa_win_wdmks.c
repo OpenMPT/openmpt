@@ -1,5 +1,5 @@
 /*
-* $Id: pa_win_wdmks.c 1945 2015-01-21 06:24:32Z rbencina $
+* $Id$
 * PortAudio Windows WDM-KS interface
 *
 * Author: Andrew Baldwin, Robert Bielik (WaveRT)
@@ -94,7 +94,9 @@ of a device for the duration of active stream using those devices
 #endif
 
 #include <windows.h>
+#ifndef __GNUC__ /* Fix for ticket #257: MinGW-w64: Inclusion of <winioctl.h> triggers multiple redefinition errors. */
 #include <winioctl.h>
+#endif
 #include <process.h>
 
 #include <math.h>
@@ -156,7 +158,7 @@ Default is to use the pin category.
 #define PA_THREAD_FUNC static DWORD WINAPI
 #endif
 
-#if 0
+#if 0 // OpenMPT
 
 #ifdef _MSC_VER
 #define NOMMIDS
@@ -168,17 +170,14 @@ Default is to use the pin category.
 #define DEFINE_GUIDEX(n) DEFINE_GUID_THUNK(n, STATIC_##n)
 #endif
 
-#else
-// OpenMPT:
-// We link against strmiids.lib.
-// This defines all those GUID symbols that portaudio needs.
-// So there is no need to play games with headers and macros, just use the headers as they are und use the GUIDS from the library.
-
-#ifdef _MSC_VER
-#define DYNAMIC_GUID(data) {data}
-#endif
-
-#endif
+#else // OpenMPT
+// We link against strmiids.lib. // OpenMPT
+// This defines all those GUID symbols that portaudio needs. // OpenMPT
+// So there is no need to play games with headers and macros, just use the headers as they are und use the GUIDS from the library. // OpenMPT
+#ifdef _MSC_VER // OpenMPT
+#define DYNAMIC_GUID(data) {data} // OpenMPT
+#endif // OpenMPT
+#endif // OpenMPT
 
 #include <setupapi.h>
 

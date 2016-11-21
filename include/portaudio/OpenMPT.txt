@@ -1,21 +1,20 @@
- - Portaudio SVN revision r1963, 2015-10-21
- - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
-   to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
- - src/common/pa_front.c has been fixed to compile with a C89 compiler.
-   Modifications have been marked with // OpenMPT.
- - src/hostapi/dsound/pa_win_ds.c unconditionally defined _WIN32_WINNT.
-   Only define it if it has not been defined already.
-   Modifications have been marked with // OpenMPT.
- - src/os/win/pa_x86_plain_converters.c has been modified to exclude inline asm for Clang/C2.
-   Modifications have been marked with // OpenMPT.
- - build/msvc/portaudio.def has been modified. Modifications are marked with
-   ";OpenMPT".
- - For building, premake is used to generate Visual Studio project files.
-   See ../build/premake/ for details.
- - A couple of unnecessary folders have been omitted in SVN:
-   bindings, cmake_support, doc, examples, pablio, test, testcvs
-
-   NOTE: Various versions of the Windows SDK (such as the one provided with the VS2008 x64 compiler) 
-   do not provide ksguid.lib. To simplify the build configuration, PA_WDMKS_NO_KSGUID_LIB
-   is defined in the premake projects to always use PortAudio's workaround, regardless of
-   the compiler version used.
+ *  Portaudio GIT 2016-10-30, commit 396fe4b6699ae929d3a685b3ef8a7e97396139a4
+ *  `build/msvc/portaudio.def` has been modified. Modifications are marked with
+    `;OpenMPT`.
+ *  `src/hostapi/dsound/pa_win_ds.c` unconditionally defined `_WIN32_WINNT`.
+    Only define it if it has not been defined already. Modifications have been
+    marked with `// OpenMPT`.
+ *  A small modification to portaudio code has been made in
+    `src/hostapi/wdmks/pa_win_wdmks.c` to facilitate linking against
+    `strmiids.lib`. Modifications have been marked with `// OpenMPT`.
+ *  `src/os/win/pa_x86_plain_converters.c` has been modified to exclude inline
+    asm for Clang/C2. Modifications have been marked with `// OpenMPT`.
+ *  A couple of unnecessary folders have been omitted in SVN:
+    bindings, cmake_support, doc, examples, pablio, test, testcvs
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
+    > NOTE: Various versions of the Windows SDK (such as the one provided with
+    > the VS2008 x64 compiler) do not provide ksguid.lib. To simplify the build
+    > configuration, PA_WDMKS_NO_KSGUID_LIB is defined in the premake projects
+    > to always use PortAudio's workaround, regardless of the compiler version
+    > used.

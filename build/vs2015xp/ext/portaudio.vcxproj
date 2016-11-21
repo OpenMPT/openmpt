@@ -522,12 +522,12 @@
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_debugprint.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_dither.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_endianness.h" />
+    <ClInclude Include="..\..\..\include\portaudio\src\common\pa_gitrevision.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_hostapi.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_memorybarrier.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_process.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_ringbuffer.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_stream.h" />
-    <ClInclude Include="..\..\..\include\portaudio\src\common\pa_svnrevision.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_trace.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_types.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_util.h" />
