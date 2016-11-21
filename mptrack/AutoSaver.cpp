@@ -87,14 +87,13 @@ bool CAutoSaver::DoSave(DWORD curTime)
 		theApp.BeginWaitCursor(); //display hour glass
 
 		auto docs = theApp.GetOpenDocuments();
-		for(auto doc = docs.begin(); doc != docs.end(); doc++)
+		for(auto &modDoc : docs)
 		{
-			CModDoc &modDoc = **doc;
-			if(modDoc.ModifiedSinceLastAutosave())
+			if(modDoc->ModifiedSinceLastAutosave())
 			{
-				if(SaveSingleFile(modDoc))
+				if(SaveSingleFile(*modDoc))
 				{
-					CleanUpBackups(modDoc);
+					CleanUpBackups(*modDoc);
 				} else
 				{
 					TrackerSettings::Instance().AutosaveEnabled = false;
@@ -168,7 +167,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	
 	mpt::PathString fileName = BuildFileName(modDoc);
 
-	// We are acutally not going to show the log for autosaved files.
+	// We are actually not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
 
 	bool success = false;

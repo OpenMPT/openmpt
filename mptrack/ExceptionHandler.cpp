@@ -157,11 +157,10 @@ int DebugReporter::RescueFiles()
 //------------------------------
 {
 	int numFiles = 0;
-	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(auto doc = documents.begin(); doc != documents.end(); doc++)
+	auto documents = theApp.GetOpenDocuments();
+	for(auto modDoc : documents)
 	{
-		CModDoc *pModDoc = *doc;
-		if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)
+		if(modDoc->IsModified() && modDoc->GetSoundFile() != nullptr)
 		{
 			if(numFiles == 0)
 			{
@@ -173,13 +172,13 @@ int DebugReporter::RescueFiles()
 			filename += crashDirectory.path;
 			filename += mpt::PathString::FromUnicode(mpt::ToUString(++numFiles));
 			filename += MPT_PATHSTRING("_");
-			filename += mpt::PathString::FromCStringSilent(pModDoc->GetTitle()).SanitizeComponent();
+			filename += mpt::PathString::FromCStringSilent(modDoc->GetTitle()).SanitizeComponent();
 			filename += MPT_PATHSTRING(".");
-			filename += mpt::PathString::FromUTF8(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+			filename += mpt::PathString::FromUTF8(modDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 
 			try
 			{
-				SaveDocumentSafe(pModDoc, filename);
+				SaveDocumentSafe(modDoc, filename);
 			} catch(...)
 			{
 				continue;
@@ -239,10 +238,10 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		if(&theApp.GetSettings())
 		{
 			SettingsContainer & settings = theApp.GetSettings();
-			for(auto it = settings.begin(); it != settings.end(); ++it)
+			for(const auto &it : settings)
 			{
 				f
-					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).first.FormatAsString() + MPT_USTRING(" = ") + (*it).second.GetRefValue().FormatValueAsString())
+					<< mpt::ToCharset(mpt::CharsetUTF8, it.first.FormatAsString() + MPT_USTRING(" = ") + it.second.GetRefValue().FormatValueAsString())
 					<< std::endl;
 			}
 		}
@@ -265,9 +264,9 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			if(&theApp.GetSettings())
 			{
 				SettingsContainer & settings = theApp.GetSettings();
-				for(auto it = settings.cbegin(); it != settings.cend(); ++it)
+				for(const auto &it : settings)
 				{
-					f.WriteSetting((*it).first, (*it).second.GetRefValue());
+					f.WriteSetting(it.first, it.second.GetRefValue());
 				}
 			}
 		}

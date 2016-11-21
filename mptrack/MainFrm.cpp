@@ -1146,23 +1146,23 @@ void CMainFrame::Dump(CDumpContext& dc) const
 void CMainFrame::UpdateColors()
 //-----------------------------
 {
-	COLORREF (&colors)[MAX_MODCOLORS] = TrackerSettings::Instance().rgbCustomColors;
-	struct { MODPLUGDIB *bitmap; uint32 lo, med, hi; } meters[] =
+	auto &colors = TrackerSettings::Instance().rgbCustomColors;
+	const struct { MODPLUGDIB *bitmap; uint32 lo, med, hi; } meters[] =
 	{
 		{ bmpVUMeters, MODCOLOR_VUMETER_LO, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_HI },
 		{ bmpPluginVUMeters, MODCOLOR_VUMETER_LO_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_HI_VST },
 	};
-	for(size_t i = 0; i < CountOf(meters); i++) if(meters[i].bitmap != nullptr)
+	for(auto &meter : meters) if(meter.bitmap != nullptr)
 	{
-		meters[i].bitmap->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
-		meters[i].bitmap->bmiColors[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
-		meters[i].bitmap->bmiColors[15] = rgb2quad(GetSysColor(COLOR_BTNHIGHLIGHT));
-		meters[i].bitmap->bmiColors[10] = rgb2quad(colors[meters[i].lo]);
-		meters[i].bitmap->bmiColors[11] = rgb2quad(colors[meters[i].med]);
-		meters[i].bitmap->bmiColors[9] = rgb2quad(colors[meters[i].hi]);
-		meters[i].bitmap->bmiColors[2] = rgb2quad((colors[meters[i].lo] >> 1) & 0x7F7F7F);
-		meters[i].bitmap->bmiColors[3] = rgb2quad((colors[meters[i].med] >> 1) & 0x7F7F7F);
-		meters[i].bitmap->bmiColors[1] = rgb2quad((colors[meters[i].hi] >> 1) & 0x7F7F7F);
+		meter.bitmap->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
+		meter.bitmap->bmiColors[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
+		meter.bitmap->bmiColors[15] = rgb2quad(GetSysColor(COLOR_BTNHIGHLIGHT));
+		meter.bitmap->bmiColors[10] = rgb2quad(colors[meter.lo]);
+		meter.bitmap->bmiColors[11] = rgb2quad(colors[meter.med]);
+		meter.bitmap->bmiColors[9] = rgb2quad(colors[meter.hi]);
+		meter.bitmap->bmiColors[2] = rgb2quad((colors[meter.lo] >> 1) & 0x7F7F7F);
+		meter.bitmap->bmiColors[3] = rgb2quad((colors[meter.med] >> 1) & 0x7F7F7F);
+		meter.bitmap->bmiColors[1] = rgb2quad((colors[meter.hi] >> 1) & 0x7F7F7F);
 	}
 	if (penSample) DeleteObject(penSample);
 	penSample = ::CreatePen(PS_SOLID, 0, colors[MODCOLOR_SAMPLE]);
@@ -1850,7 +1850,7 @@ void CMainFrame::SetupMidi(DWORD d, UINT_PTR n)
 
 
 void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
-//-----------------------------------------------------------
+//--------------------------------------------------------------
 {
 	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
 	if (pDocTmpl)
@@ -2287,9 +2287,9 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 		MPT_ASSERT(nId == UINT(isTemplateFile ? ID_FILE_OPENTEMPLATE_LASTINRANGE : ID_EXAMPLE_MODULES_LASTINRANGE));
 		FileDialog::PathList files;
 		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules") : theApp.GetAppDirPath() + MPT_PATHSTRING("ExampleSongs"));
-		for(auto file = files.cbegin(); file != files.cend(); file++)
+		for(const auto &file : files)
 		{
-			theApp.OpenDocumentFile(*file);
+			theApp.OpenDocumentFile(file);
 		}
 	}
 }

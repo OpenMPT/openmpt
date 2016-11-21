@@ -145,15 +145,15 @@ void COptionsAdvanced::ReInit()
 #endif
 
 	int i = 0;
-	for(auto it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
+	for(const auto &it : theApp.GetSettings())
 	{
 		// In MPT_USTRING_MODE_WIDE mode,
 		// this loop is heavily optimized to avoid as much string copies as possible
 		// in order to perform ok-ish in debug builds.
 		// MPT_USTRING_MODE_UTF8 is not optimized as we (currently) do not build in
 		// this mode by default.
-		const SettingPath &path = it->first;
-		const SettingState &state = it->second;
+		const SettingPath &path = it.first;
+		const SettingState &state = it.second;
 #if _WIN32_WINNT >= 0x0501
 		const mpt::ustring &section = path.GetRefSection();
 		const mpt::ustring &key = path.GetRefKey();

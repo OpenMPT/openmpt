@@ -71,13 +71,12 @@ BOOL CloseMainDialog::OnInitDialog()
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 
 	auto documents = theApp.GetOpenDocuments();
-	for(auto doc = documents.begin(); doc != documents.end(); doc++)
+	for(const auto &modDoc : documents)
 	{
-		CModDoc *pModDoc = *doc;
-		if(pModDoc->IsModified())
+		if(modDoc->IsModified())
 		{
-			int item = m_List.AddString(FormatTitle(pModDoc, true));
-			m_List.SetItemDataPtr(item, pModDoc);
+			int item = m_List.AddString(FormatTitle(modDoc, true));
+			m_List.SetItemDataPtr(item, modDoc);
 			m_List.SetSel(item, TRUE);
 		}
 	}

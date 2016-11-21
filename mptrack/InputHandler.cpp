@@ -95,12 +95,12 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 		{
 			commands.push_back(i->second);
 		}
-		for(auto i = commands.cbegin(); i != commands.cend(); i++)
+		for(auto i : commands)
 		{
-			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, *i, wParam))
+			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i, wParam))
 			{
 				// Command was handled, no need to let the OS handle the key
-				executeCommand = *i;
+				executeCommand = i;
 			}
 		}
 	}
@@ -222,13 +222,17 @@ void CInputHandler::SetupSpecialKeyInterception()
 //-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
-	for(auto i = keyMap.cbegin(); i != keyMap.cend(); i++)
+	for(const auto &i : keyMap)
 	{
-		ASSERT(i->second != kcNull);
-		if(i->first.Modifier() == HOTKEYF_EXT) m_bInterceptWindowsKeys = true;
-		if(i->first.KeyCode() == VK_NUMLOCK) m_bInterceptNumLock = true;
-		if(i->first.KeyCode() == VK_CAPITAL) m_bInterceptCapsLock = true;
-		if(i->first.KeyCode() == VK_SCROLL) m_bInterceptScrollLock = true;
+		ASSERT(i.second != kcNull);
+		if(i.first.Modifier() == HOTKEYF_EXT)
+			m_bInterceptWindowsKeys = true;
+		if(i.first.KeyCode() == VK_NUMLOCK)
+			m_bInterceptNumLock = true;
+		if(i.first.KeyCode() == VK_CAPITAL)
+			m_bInterceptCapsLock = true;
+		if(i.first.KeyCode() == VK_SCROLL)
+			m_bInterceptScrollLock = true;
 	}
 };
 

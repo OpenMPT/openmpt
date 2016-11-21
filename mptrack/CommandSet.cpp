@@ -1247,7 +1247,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			 ( (inKc.Context() == kCtxViewPatternsNote) || (inKc.Context() == kCtxViewPatterns) ) && //note scope or pattern scope
 			 ( ('0'<=inKc.KeyCode() && inKc.KeyCode()<='9') || (VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9) ) )  //is number key
 		{
-				KeyCombination newKc(kCtxViewPatternsNote, 0, inKc.KeyCode(), kKeyEventDown);
+				newKc = KeyCombination(kCtxViewPatternsNote, 0, inKc.KeyCode(), kKeyEventDown);
 				int offset = ('0'<=inKc.KeyCode() && inKc.KeyCode()<='9') ? newKc.KeyCode()-'0' : newKc.KeyCode()-VK_NUMPAD0;
 				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.KeyCode()-offset)), false);
 		}
@@ -1257,7 +1257,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	{
 		if (inCmd==kcSetSpacing && adding)
 		{
-			KeyCombination newKc(kCtxViewPatterns, inKc.Modifier(), 0, kKeyEventDown);
+			newKc = KeyCombination(kCtxViewPatterns, inKc.Modifier(), 0, kKeyEventDown);
 			for (char i = 0; i <= 9; i++)
 			{
 				newKc.KeyCode('0' + i);
@@ -1273,7 +1273,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				KeyCombination spacing = commands[kcSetSpacing].kcList[k];
 				if ((('0'<=inKc.KeyCode() && inKc.KeyCode()<='9')||(VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9)) && !adding)
 				{
-					KeyCombination newKc(kCtxViewPatterns, spacing.Modifier(), inKc.KeyCode(), spacing.EventType());
+					newKc = KeyCombination(kCtxViewPatterns, spacing.Modifier(), inKc.KeyCode(), spacing.EventType());
 					if ('0'<=inKc.KeyCode() && inKc.KeyCode()<='9')
 						Add(newKc, (CommandID)(kcSetSpacing0 + inKc.KeyCode() - '0'), false);
 					else if (VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9)
@@ -1370,26 +1370,20 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 	if (enforceRule[krCheckModifiers])
 	{
-		static const CommandID forcedModifiers[] = { kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing };
-
 		// for all commands that must be modifiers
-		for (int i = 0; i < CountOf(forcedModifiers); i++)
+		for (auto curCmd : { kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing })
 		{
-			CommandID curCmd = forcedModifiers[i];
-
 			//for all of this command's key combinations
-			for (size_t k=0; k<commands[curCmd].kcList.size(); k++)
+			for (auto &kc : commands[curCmd].kcList)
 			{
-				curKc = commands[curCmd].kcList[k];
-				if ((!curKc.Modifier()) || (curKc.KeyCode()!=VK_SHIFT && curKc.KeyCode()!=VK_CONTROL && curKc.KeyCode()!=VK_MENU && curKc.KeyCode()!=0 &&
-					curKc.KeyCode()!=VK_LWIN && curKc.KeyCode()!=VK_RWIN )) // Feature: use Windows keys as modifier keys
+				if ((!kc.Modifier()) || (kc.KeyCode()!=VK_SHIFT && kc.KeyCode()!=VK_CONTROL && kc.KeyCode()!=VK_MENU && kc.KeyCode()!=0 &&
+					kc.KeyCode()!=VK_LWIN && kc.KeyCode()!=VK_RWIN )) // Feature: use Windows keys as modifier keys
 				{
 					report += ("Error! " + GetCommandText((CommandID)curCmd) + " must be a modifier (shift/ctrl/alt), but is currently " + inKc.GetKeyText() + "\r\n");
 					//replace with dummy
-					commands[curCmd].kcList[k].Modifier(HOTKEYF_SHIFT);
-					commands[curCmd].kcList[k].KeyCode(0);
-					commands[curCmd].kcList[k].EventType(kKeyEventNone);
-					//commands[curCmd].kcList[k].ctx;
+					kc.Modifier(HOTKEYF_SHIFT);
+					kc.KeyCode(0);
+					kc.EventType(kKeyEventNone);
 				}
 			}
 
@@ -1473,8 +1467,8 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 		for(size_t k = 0; k < commands[cmd].kcList.size(); k++)
 		{
-			std::vector<KeyEventType> eventTypes;
-			std::vector<InputTargetContext> contexts;
+			eventTypes.clear();
+			contexts.clear();
 			curKc = commands[cmd].kcList[k];
 
 			// Handle keyEventType mask.
@@ -1580,10 +1574,10 @@ ctx:UID:Description:Modifier:Key:EventMask
 						<< kc.KeyCode();
 					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
 					{
-						UINT sc = 0;
+						UINT sc = 0, vk = kc.KeyCode();
 						for(auto i = layouts.begin(); i != layouts.end() && sc == 0; i++)
 						{
-							sc = MapVirtualKeyEx(kc.KeyCode(), MAPVK_VK_TO_VSC, *i);
+							sc = MapVirtualKeyEx(vk, MAPVK_VK_TO_VSC, *i);
 						}
 						f << "/" << sc;
 					}
@@ -1624,6 +1618,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
+	const std::string whitespace(" \n\r\t");
 	while(iStrm.getline(s, MPT_ARRAY_COUNT(s)))
 	{
 		curLine = s;
@@ -1632,9 +1627,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		// Cut everything after a //, trim whitespace
 		auto pos = curLine.find("//");
 		if(pos != std::string::npos) curLine.resize(pos);
-		pos = curLine.find_first_not_of(" \n\r\t");
+		pos = curLine.find_first_not_of(whitespace);
 		if(pos != std::string::npos) curLine.erase(0, pos);
-		pos = curLine.find_last_not_of(" \n\r\t");
+		pos = curLine.find_last_not_of(whitespace);
 		if(pos != std::string::npos) curLine.resize(pos + 1);
 
 		if (curLine.empty())
@@ -1667,9 +1662,10 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 			if(scPos != std::string::npos)
 			{
 				// Scan code present
+				UINT sc = ConvertStrTo<UINT>(tokens[3].substr(scPos + 1));
 				for(auto i = layouts.begin(); i != layouts.end() && vk == 0; i++)
 				{
-					vk = MapVirtualKeyEx(ConvertStrTo<UINT>(tokens[3].substr(scPos + 1)), MAPVK_VSC_TO_VK, *i);
+					vk = MapVirtualKeyEx(sc, MAPVK_VSC_TO_VK, *i);
 				}
 			}
 			if(vk == 0)
@@ -1721,8 +1717,8 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		size_t nSize = 0;
 		if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
 		{
-			mpt::istringstream iStrm(std::string(pData, nSize));
-			LoadFile(iStrm, std::wstring(), pTempCS);
+			mpt::istringstream intStrm(std::string(pData, nSize));
+			LoadFile(intStrm, std::wstring(), pTempCS);
 		}
 	} else
 	{
@@ -1895,12 +1891,12 @@ bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
 {
 	for (CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes; cmd=(CommandID)(cmd + 1))		//for all notes
 	{
-		for(auto kc = commands[cmd].kcList.begin(); kc != commands[cmd].kcList.end(); kc++)
+		for(auto &kc : commands[cmd].kcList)
 		{
 			if(repeat)
-				kc->EventType(kc->EventType() | kKeyEventRepeat);
+				kc.EventType(kc.EventType() | kKeyEventRepeat);
 			else
-				kc->EventType(kc->EventType() & ~kKeyEventRepeat);
+				kc.EventType(kc.EventType() & ~kKeyEventRepeat);
 		}
 	}
 	return true;
