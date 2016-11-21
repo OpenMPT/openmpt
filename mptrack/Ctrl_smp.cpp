@@ -3428,7 +3428,7 @@ void CCtrlSamples::OnXFade()
 	{
 		const SmpLength loopStart = dlg.m_useSustainLoop ? sample.nSustainStart: sample.nLoopStart;
 		const SmpLength loopEnd = dlg.m_useSustainLoop ? sample.nSustainEnd: sample.nLoopEnd;
-		const SmpLength maxSamples = Util::Min(sample.nLength, loopStart, loopEnd / 2);
+		const SmpLength maxSamples = std::min({ sample.nLength, loopStart, loopEnd / 2 });
 		SmpLength fadeSamples = dlg.PercentToSamples(dlg.m_fadeLength);
 		LimitMax(fadeSamples, maxSamples);
 		if(fadeSamples < 2) return;
@@ -3513,9 +3513,9 @@ void CCtrlSamples::PropagateAutoVibratoChanges()
 			// Propagate changes to all samples that belong to this instrument.
 			const ModSample &it = m_sndFile.GetSample(m_nSample);
 			m_sndFile.PropagateXMAutoVibrato(i, it.nVibType, it.nVibSweep, it.nVibDepth, it.nVibRate);
-			for(auto it = referencedSamples.cbegin(); it != referencedSamples.cend(); it++)
+			for(auto smp : referencedSamples)
 			{
-				m_modDoc.UpdateAllViews(nullptr, SampleHint(*it).Info(), this);
+				m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info(), this);
 			}
 		}
 	}
