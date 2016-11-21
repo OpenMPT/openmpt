@@ -22,9 +22,9 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt-small vs2010 || goto err
 %PREMAKE% --group=libopenmpt vs2010 || goto err
 %PREMAKE% --group=openmpt123 vs2010 || goto err
-%PREMAKE% --group=PluginBridge vs2010 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2010 || goto err
-%PREMAKE% --group=OpenMPT vs2010 || goto err
+rem %PREMAKE% --group=PluginBridge vs2010 || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2010 || goto err
+rem %PREMAKE% --group=OpenMPT vs2010 || goto err
 %PREMAKE% --group=all-externals vs2010 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2012 || goto err
@@ -34,9 +34,9 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt-small vs2012 || goto err
 %PREMAKE% --group=libopenmpt vs2012 || goto err
 %PREMAKE% --group=openmpt123 vs2012 || goto err
-%PREMAKE% --group=PluginBridge vs2012 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2012 || goto err
-%PREMAKE% --group=OpenMPT vs2012 || goto err
+rem %PREMAKE% --group=PluginBridge vs2012 || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2012 || goto err
+rem %PREMAKE% --group=OpenMPT vs2012 || goto err
 %PREMAKE% --group=all-externals vs2012 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2013 || goto err
@@ -70,9 +70,9 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt-small vs2010 --xp || goto err
 %PREMAKE% --group=libopenmpt vs2010 --xp || goto err
 %PREMAKE% --group=openmpt123 vs2010 --xp || goto err
-%PREMAKE% --group=PluginBridge vs2010 --xp || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2010 --xp || goto err
-%PREMAKE% --group=OpenMPT vs2010 --xp || goto err
+rem %PREMAKE% --group=PluginBridge vs2010 --xp || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2010 --xp || goto err
+rem %PREMAKE% --group=OpenMPT vs2010 --xp || goto err
 %PREMAKE% --group=all-externals vs2010 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2012 --xp || goto err
@@ -82,9 +82,9 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt-small vs2012 --xp || goto err
 %PREMAKE% --group=libopenmpt vs2012 --xp || goto err
 %PREMAKE% --group=openmpt123 vs2012 --xp || goto err
-%PREMAKE% --group=PluginBridge vs2012 --xp || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2012 --xp || goto err
-%PREMAKE% --group=OpenMPT vs2012 --xp || goto err
+rem %PREMAKE% --group=PluginBridge vs2012 --xp || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2012 --xp || goto err
+rem %PREMAKE% --group=OpenMPT vs2012 --xp || goto err
 %PREMAKE% --group=all-externals vs2012 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2013 --xp || goto err
