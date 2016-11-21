@@ -70,9 +70,6 @@
    "../../mptrack/mptrack.rc",
    "../../mptrack/res/*.*", -- resource data files
   }
-  excludes {
-    "../../mptrack/res/rt_manif.bin", -- the old build system manifest
-  }
 	pchheader "stdafx.h"
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
