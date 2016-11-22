@@ -67,11 +67,11 @@ Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: igno
 Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
 Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
 #ifdef WIN32OLD
-; Additional binaries for 32-bit legacy version
-Source: ..\bin\release\vs2008-static\x86-32-win2000\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\release\vs2008-static\x86-32-win2000\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\release\vs2008-static\x86-32-win2000\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\release\vs2008-static\x86-32-win2000\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+; Additional binaries for XP-compatible version
+Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\{#PlatformFolderOld}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\{#PlatformFolderOld}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\{#PlatformFolderOld}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
 #endif
 #ifndef DOWNLOAD_MO3
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
@@ -138,6 +138,10 @@ Type: files; Name: {app}\OpenMPT_SoundTouch_i16.dll
 Type: files; Name: {app}\SoundTouch\README.html
 Type: files; Name: {app}\SoundTouch\COPYING.TXT
 Type: dirifempty; Name: {app}\SoundTouch
+; MIDI Input/Output plugin was previously shipped as separate DLL
+Type: files; Name: {app}\Plugins\MIDI\MIDI Input Output.dll
+Type: dirifempty; Name: {app}\Plugins\MIDI
+Type: dirifempty; Name: {app}\Plugins
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
@@ -248,7 +252,7 @@ begin
 
     // Add items
     BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
-    BitnessPage.Add('32-Bit, for Windows Vista or older or CPU without SSE2 instruction set');
+    BitnessPage.Add('32-Bit, for Windows XP / Vista or CPU without SSE2 instruction set');
 
     BitnessPage.Values[1] := True;
 
