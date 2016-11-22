@@ -748,7 +748,7 @@ void CViewPattern::OnDestroy()
 	if (pModDoc)
 	{
 		pModDoc->SetOldPatternScrollbarsPos(CSize(m_nXScroll*m_szCell.cx, m_nYScroll*m_szCell.cy));
-	};
+	}
 	if (m_pEffectVis)
 	{
 		m_pEffectVis->DoClose();
@@ -1714,12 +1714,12 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 //-----------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if(pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return;
+	if(pModDoc == nullptr) return;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	const bool isMuted = pModDoc->IsChannelMuted(chn);
 	if(!isMuted) pModDoc->MuteChannel(chn, true);
-	pSndFile->m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, *pSndFile, chn);
+	sndFile.m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
 	if(!isMuted) pModDoc->MuteChannel(chn, false);
 }
 
@@ -6744,7 +6744,8 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	pos.channel = pastePos.GetChannel();
 	ORDERINDEX curOrder = GetCurrentOrder();
 	PatternRect rect;
-	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder, rect);
+	bool orderChanged = false;
+	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder, rect, orderChanged);
 	EndWaitCursor();
 
 	PatternHint updateHint = PatternHint(PATTERNINDEX_INVALID).Data();
@@ -6754,16 +6755,18 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 		SetCurrentPattern(pos.pattern);
 		curOrder = GetSoundFile()->Order.FindOrder(pos.pattern, curOrder);
 		SetCurrentOrder(curOrder);
-
+	}
+	if(orderChanged)
+	{
 		updateHint.Names();
-		GetDocument()->UpdateAllViews(NULL, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
+		GetDocument()->UpdateAllViews(nullptr, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
 	}
 
 	if(result)
 	{
 		SetCurSel(rect);
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, updateHint, nullptr);
+		GetDocument()->UpdateAllViews(nullptr, updateHint, nullptr);
 	}
 
 	return result;
