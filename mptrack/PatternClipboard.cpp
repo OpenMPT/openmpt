@@ -513,7 +513,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	auto multiPastePos = ordList.cbegin();
 	pos = startPos;
 
-	while(curRow < sndFile.Patterns[pattern].GetNumRows() || patternMode != kSinglePaste)
+	while(curRow < sndFile.Patterns[pattern].GetNumRows() || overflowPaste || patternMode == kMultiInsert)
 	{
 		// Parse next line
 		pos = data.find_first_not_of(whitespace, pos);
@@ -615,6 +615,35 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			// Not a valid line?
 			pos = eol;
 			continue;
+		}
+
+		if(overflowPaste)
+		{
+			// Handle overflow paste. Continue pasting in next pattern if enabled.
+			// If Paste Flood is enabled, this won't be called due to obvious reasons.
+			while(curRow >= sndFile.Patterns[pattern].GetNumRows())
+			{
+				curRow = 0;
+				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
+				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size() || !sndFile.Patterns.IsValidPat(sndFile.Order[nextOrder]))
+				{
+					PATTERNINDEX newPat;
+					if(!insertNewPatterns
+						|| curOrder >= sndFile.GetModSpecifications().ordersMax
+						|| (newPat = sndFile.Patterns.InsertAny(sndFile.Patterns[pattern].GetNumRows(), true)) == PATTERNINDEX_INVALID
+						|| sndFile.Order.Insert(curOrder + 1, 1, newPat) == 0)
+					{
+						return success;
+					}
+					nextOrder = curOrder + 1;
+				}
+				pattern = sndFile.Order[nextOrder];
+				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
+				patData = sndFile.Patterns[pattern];
+				curOrder = nextOrder;
+				prepareUndo = true;
+				startRow = 0;
+			}
 		}
 
 		success = true;
@@ -871,35 +900,6 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		patData += sndFile.GetNumChannels();
 		curRow++;
 		pos = eol;
-
-		if(overflowPaste)
-		{
-			// Handle overflow paste. Continue pasting in next pattern if enabled.
-			// If Paste Flood is enabled, this won't be called due to obvious reasons.
-			while(curRow >= sndFile.Patterns[pattern].GetNumRows())
-			{
-				curRow = 0;
-				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size() || !sndFile.Patterns.IsValidPat(sndFile.Order[nextOrder]))
-				{
-					PATTERNINDEX newPat;
-					if(!insertNewPatterns
-						|| curOrder >= sndFile.GetModSpecifications().ordersMax
-						|| (newPat = sndFile.Patterns.InsertAny(sndFile.Patterns[pattern].GetNumRows(), true)) == PATTERNINDEX_INVALID
-						|| sndFile.Order.Insert(curOrder + 1, 1, newPat) == 0)
-					{
-						return success;
-					}
-					nextOrder = curOrder + 1;
-				}
-				pattern = sndFile.Order[nextOrder];
-				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
-				patData = sndFile.Patterns[pattern];
-				curOrder = nextOrder;
-				prepareUndo = true;
-				startRow = 0;
-			}
-		}
 	}
 
 	return success;
