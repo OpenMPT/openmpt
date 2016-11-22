@@ -295,36 +295,37 @@ std::string PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERN
 
 
 // Try pasting a pattern selection from the system clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect)
-//--------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	std::string data;
-	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect))
+	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect, orderChanged))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
-		return Paste(sndFile, pastePos, mode, curOrder, pasteRect, instance.activeClipboard);
+		return Paste(sndFile, pastePos, mode, curOrder, pasteRect, instance.activeClipboard, orderChanged);
 	}
 	return true;
 }
 
 
 // Try pasting a pattern selection from an internal clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(internalClipboard >= instance.clipboards.size())
 		return false;
 	
-	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder, pasteRect);
+	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder, pasteRect, orderChanged);
 }
 
 
 // Parse clipboard string and perform the pasting operation.
-bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const std::string whitespace(" \n\r\t");
 	PATTERNINDEX pattern = pastePos.pattern;
+	orderChanged = false;
 	if(sndFile.GetpModDoc() == nullptr)
 		return false;
 
@@ -445,6 +446,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				break;
 			}
 			sndFile.Order[writeOrder++] = insertPat;
+			orderChanged = true;
 		}
 
 		if(patternMode == kMultiInsert)
@@ -635,6 +637,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					{
 						return success;
 					}
+					orderChanged = true;
 					nextOrder = curOrder + 1;
 				}
 				pattern = sndFile.Order[nextOrder];
