@@ -139,7 +139,7 @@ void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
 
 	file.ReadString<mpt::String::maybeNullTerminated>(s, inStrSize);
 	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
-	if(s != GetDeviceName(inID))
+	if(s != GetDeviceName(inID) || !IsInputDevice(inID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
 		const PmDeviceInfo *device;
@@ -155,7 +155,7 @@ void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
 
 	file.ReadString<mpt::String::maybeNullTerminated>(s, outStrSize);
 	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
-	if(s != GetDeviceName(outID))
+	if(s != GetDeviceName(outID) || !IsOutputDevice(outID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
 		const PmDeviceInfo *device;
@@ -488,11 +488,38 @@ const char *MidiInOut::GetDeviceName(PmDeviceID index) const
 //-----------------------------------------------------------
 {
 	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(index);
-
 	if(deviceInfo != nullptr)
 		return deviceInfo->name;
 	else
 		return "Unavailable";
+}
+
+
+bool MidiInOut::IsInputDevice(PmDeviceID index) const
+//----------------------------------------------------
+{
+	if(index == kNoDevice)
+		return true;
+
+	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(index);
+	if(deviceInfo != nullptr)
+		return deviceInfo->input != 0;
+	else
+		return false;
+}
+
+
+bool MidiInOut::IsOutputDevice(PmDeviceID index) const
+//----------------------------------------------------
+{
+	if(index == kNoDevice)
+		return true;
+
+	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(index);
+	if(deviceInfo != nullptr)
+		return deviceInfo->output != 0;
+	else
+		return false;
 }
 
 
