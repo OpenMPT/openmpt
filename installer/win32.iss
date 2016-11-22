@@ -1,4 +1,5 @@
-#define PlatformFolder "release\vs2010-static\x86-32-win7"
+#define PlatformFolder    "release-LTCG\vs2015-static\x86-32-win7"
+#define PlatformFolderOld "release-LTCG\vs2015-static\x86-32-winxp"
 #define PlatformName "32-Bit"
 #define WIN32OLD
 
