@@ -119,6 +119,7 @@ public:
 	public:
 	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd);
 	virtual void ActivateFrame(int nCmdShow);
 	virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
 	//}}AFX_VIRTUAL

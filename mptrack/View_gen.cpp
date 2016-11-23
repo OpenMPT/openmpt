@@ -236,19 +236,6 @@ void CViewGlobals::OnDestroy()
 }
 
 
-void CViewGlobals::OnDraw(CDC* pDC)
-//---------------------------------
-{
-	CView::OnDraw(pDC);
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
-
-	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument(this);
-}
-
-
 LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
 //------------------------------------------------------
 {

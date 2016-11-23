@@ -511,20 +511,6 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 ///////////////////////////////////////////////////////////////
 // CViewComments messages
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
-void CViewComments::OnDraw(CDC* pDC)
-{
-	CView::OnDraw(pDC);
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
-
-	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument(this);
-}
-// -! NEW_FEATURE#0015
-
 
 void CViewComments::OnSize(UINT nType, int cx, int cy)
 //----------------------------------------------------

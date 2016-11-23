@@ -24,6 +24,7 @@
 #include "View_ins.h"
 #include "View_com.h"
 #include "Childfrm.h"
+#include "ChannelManagerDlg.h"
 
 #include "../common/FileReader.h"
 #include "../common/mptIO.h"
@@ -48,6 +49,7 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	//{{AFX_MSG_MAP(CChildFrame)
 	ON_WM_DESTROY()
 	ON_WM_NCACTIVATE()
+	ON_WM_MDIACTIVATE()
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,	OnInstrumentSelected)
 	// toolbar "tooltip" notification
@@ -127,6 +129,24 @@ BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 //-------------------------------------------------
 {
 	return CMDIChildWnd::PreCreateWindow(cs);
+}
+
+
+void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd)
+//---------------------------------------------------------------------------------------
+{
+	CMDIChildWnd::OnMDIActivate(bActivate, pActivateWnd, pDeactivateWnd);
+
+	// Update channel manager according to active document
+	auto instance = CChannelManagerDlg::sharedInstance();
+	if(instance != nullptr)
+	{
+		auto view = dynamic_cast<CModControlView *>(GetActiveView());
+		if(!bActivate && pActivateWnd == nullptr)
+			instance->SetDocument(nullptr);
+		else if(bActivate && view != nullptr)
+			instance->SetDocument(view->GetDocument());
+	}
 }
 
 

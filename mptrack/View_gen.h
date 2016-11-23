@@ -71,8 +71,6 @@ public:
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	virtual HBRUSH OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor);
 
-	virtual void OnDraw(CDC* pDC);
-
 private:
 	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnSurround(const CHANNELINDEX chnMod4, const UINT itemID);
