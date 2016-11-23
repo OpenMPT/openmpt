@@ -1569,6 +1569,13 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 	CDocument::UpdateAllViews(pSender, hint.AsLPARAM(), pHint);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->UpdateTree(this, hint, pHint);
+	
+	if(hint.GetType()[HINT_MODCHANNELS])
+	{
+		auto instance = CChannelManagerDlg::sharedInstance();
+		if(instance != nullptr && pHint != instance && instance->GetDocument() == this)
+			instance->Update();
+	}
 }
 
 
@@ -2831,7 +2838,7 @@ void CModDoc::OnChannelManager()
 			instance->Hide();
 		else
 		{
-			instance->SetDocument(nullptr);
+			instance->SetDocument(this);
 			instance->Show();
 		}
 	}

@@ -12,23 +12,25 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModDoc;
+
 //======================================
 class CChannelManagerDlg: public CDialog
 //======================================
 {
 public:
 
-	static CChannelManagerDlg * sharedInstance(BOOL autoCreate = TRUE);
-	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = NULL;}
-	void SetDocument(void * parent);
+	static CChannelManagerDlg * sharedInstance(bool autoCreate = true);
+	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = nullptr;}
+	void SetDocument(CModDoc *modDoc);
+	CModDoc *GetDocument() const { return m_ModDoc; }
 	BOOL IsDisplayed(void);
 	void Update(void);
 	BOOL Show(void);
 	BOOL Hide(void);
 
 private:
-
-	static CChannelManagerDlg * sharedInstance_;
+	static CChannelManagerDlg *sharedInstance_;
 
 protected:
 
@@ -49,7 +51,7 @@ protected:
 	std::bitset<MAX_BASECHANNELS> state;
 	CRect move[MAX_BASECHANNELS];
 	CRect m_drawableArea;
-	void *parentCtrl;
+	CModDoc *m_ModDoc;
 	CHANNELINDEX nChannelsOld;
 	int currentTab;
 	HBITMAP bkgnd;
@@ -91,6 +93,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags,CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags,CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags,CPoint point);
+	afx_msg void OnMButtonDown(UINT nFlags,CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP();
 public:

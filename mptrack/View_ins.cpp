@@ -1010,12 +1010,6 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if (oldpen) m_dcMemMain.SelectObject(oldpen);
 
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
-
-	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 }
 
 

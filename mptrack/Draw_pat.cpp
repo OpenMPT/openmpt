@@ -744,15 +744,6 @@ void CViewPattern::OnDraw(CDC *pDC)
 		//HACK: Update visualizer on every pattern redraw. Cleary there's space for opt here.
 		if (m_pEffectVis->m_hWnd) m_pEffectVis->Update();
 	}
-
-
-// -> CODE#0015
-// -> DESC="channels management dlg"
-	bool activeDoc = pMainFrm ? (pMainFrm->GetActiveDoc() == GetDocument()) : false;
-
-	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
-// -! NEW_FEATURE#0015
 }
 
 
@@ -1726,8 +1717,7 @@ void CViewPattern::UpdateXInfoText()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr && pSndFile != nullptr)
 	{
-		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
-		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
+		xtraInfo.Format(_T("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s"),
 			nChn + 1,
 			pSndFile->m_PlayState.Chn[nChn].nGlobalVol,
 			pSndFile->m_PlayState.Chn[nChn].nActiveMacro,

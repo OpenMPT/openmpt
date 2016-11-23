@@ -661,16 +661,7 @@ void CCtrlPatterns::OnSequenceNext()
 void CCtrlPatterns::OnChannelManager()
 //------------------------------------
 {
-	if(CChannelManagerDlg::sharedInstance())
-	{
-		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
-			CChannelManagerDlg::sharedInstance()->Hide();
-		else
-		{
-			CChannelManagerDlg::sharedInstance()->SetDocument(NULL);
-			CChannelManagerDlg::sharedInstance()->Show();
-		}
-	}
+	m_modDoc.OnChannelManager();
 }
 
 

@@ -12,6 +12,8 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "ChannelManagerDlg.h"
+#include "dlg_misc.h"
+#include "../common/StringFixer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,6 +37,7 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONUP()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_MBUTTONDOWN()
 	ON_WM_CLOSE()
 	//{{AFX_MSG_MAP(CRemoveChannelsDlg)
 	ON_COMMAND(IDC_BUTTON1,	OnApply)
@@ -53,17 +56,17 @@ END_MESSAGE_MAP()
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
 
-CChannelManagerDlg * CChannelManagerDlg::sharedInstance(BOOL autoCreate)
+CChannelManagerDlg * CChannelManagerDlg::sharedInstance(bool autoCreate)
 {
 	if(CChannelManagerDlg::sharedInstance_ == nullptr && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
 	return CChannelManagerDlg::sharedInstance_;
 }
 
-void CChannelManagerDlg::SetDocument(void *parent)
+void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
 {
-	if(parent && parentCtrl != parent)
+	if(modDoc != m_ModDoc)
 	{
-		parentCtrl = parent;
+		m_ModDoc = modDoc;
 		nChannelsOld = 0;
 		InvalidateRect(NULL, FALSE);
 	}
@@ -85,7 +88,7 @@ void CChannelManagerDlg::Update(void)
 
 BOOL CChannelManagerDlg::Show(void)
 {
-	if(this->m_hWnd != NULL && show == false)
+	if(m_hWnd != NULL && show == false)
 	{
 		ShowWindow(SW_SHOW);
 		show = true;
@@ -108,7 +111,7 @@ BOOL CChannelManagerDlg::Hide(void)
 
 
 CChannelManagerDlg::CChannelManagerDlg(void)
-	: parentCtrl(nullptr)
+	: m_ModDoc(nullptr)
 	, leftButton(false)
 	, rightButton(false)
 	, moveRect(false)
@@ -129,6 +132,7 @@ CChannelManagerDlg::~CChannelManagerDlg(void)
 BOOL CChannelManagerDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 
 	HWND menu = ::GetDlgItem(m_hWnd,IDC_TAB1);
 
@@ -165,18 +169,15 @@ BOOL CChannelManagerDlg::OnInitDialog()
 
 void CChannelManagerDlg::OnApply()
 {
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(!pModDoc) return;
+	if(!m_ModDoc) return;
 
 	CHANNELINDEX nChannels, newMemory[4][MAX_BASECHANNELS];
 	std::vector<CHANNELINDEX> newChnOrder;
-	newChnOrder.reserve(pModDoc->GetNumChannels());
+	newChnOrder.reserve(m_ModDoc->GetNumChannels());
 
 	// Count new number of channels , copy pattern pointers & manager internal store memory
 	nChannels = 0;
-	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 	{
 		if(!removed[pattern[nChn]])
 		{
@@ -192,7 +193,7 @@ void CChannelManagerDlg::OnApply()
 
 	//Creating new order-vector for ReArrangeChannels.
 	CriticalSection cs;
-	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
+	if(m_ModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
 		cs.Leave();
 		EndWaitCursor();
@@ -223,11 +224,11 @@ void CChannelManagerDlg::OnApply()
 	ResetState(true, true, true, true, true);
 
 	// Update document & player
-	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType()); //refresh channel headers
+	m_ModDoc->SetModified();
+	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType(), this); //refresh channel headers
 
 	// Redraw channel manager window
-	InvalidateRect(NULL,TRUE);
+	InvalidateRect(NULL, FALSE);
 }
 
 void CChannelManagerDlg::OnClose()
@@ -242,11 +243,8 @@ void CChannelManagerDlg::OnClose()
 
 void CChannelManagerDlg::OnSelectAll()
 {
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc)
-		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+	if(m_ModDoc)
+		for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			select[nChn] = true;
 
 	InvalidateRect(NULL, FALSE);
@@ -254,77 +252,72 @@ void CChannelManagerDlg::OnSelectAll()
 
 void CChannelManagerDlg::OnInvert()
 {
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc)
-		for(CHANNELINDEX nChn = 0 ; nChn < pModDoc->GetNumChannels() ; nChn++)
+	if(m_ModDoc)
+		for(CHANNELINDEX nChn = 0 ; nChn < m_ModDoc->GetNumChannels() ; nChn++)
 			select[nChn] = !select[nChn];
 	InvalidateRect(NULL, FALSE);
 }
 
 void CChannelManagerDlg::OnAction1()
 {
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc)
+	if(m_ModDoc)
 	{
 		int nbOk = 0, nbSelect = 0;
 		
 		switch(currentTab)
 		{
 			case 0:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
 					{
 						if(select[nThisChn]) nbSelect++;
-						if(select[nThisChn] && pModDoc->IsChannelSolo(nThisChn)) nbOk++;
+						if(select[nThisChn] && m_ModDoc->IsChannelSolo(nThisChn)) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]){
-						if(pModDoc->IsChannelMuted(nThisChn)) pModDoc->MuteChannel(nThisChn, false);
-						if(nbSelect == nbOk) pModDoc->SoloChannel(nThisChn, !pModDoc->IsChannelSolo(nThisChn));
-						else pModDoc->SoloChannel(nThisChn, true);
+					if(select[nThisChn] && !removed[nThisChn])
+					{
+						if(m_ModDoc->IsChannelMuted(nThisChn)) m_ModDoc->MuteChannel(nThisChn, false);
+						if(nbSelect == nbOk) m_ModDoc->SoloChannel(nThisChn, !m_ModDoc->IsChannelSolo(nThisChn));
+						else m_ModDoc->SoloChannel(nThisChn, true);
 					}
-					else if(!pModDoc->IsChannelSolo(nThisChn)) pModDoc->MuteChannel(nThisChn, true);
+					else if(!m_ModDoc->IsChannelSolo(nThisChn)) m_ModDoc->MuteChannel(nThisChn, true);
 				}
 				break;
 			case 1:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
 					{
 						if(select[nThisChn]) nbSelect++;
-						BYTE rec = pModDoc->IsChannelRecord(nThisChn);
+						BYTE rec = m_ModDoc->IsChannelRecord(nThisChn);
 						if(select[nThisChn] && rec == 1) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn] && select[nThisChn])
 					{
-						if(select[nThisChn] && nbSelect != nbOk && pModDoc->IsChannelRecord(nThisChn) != 1) pModDoc->Record1Channel(nThisChn);
-						else if(nbSelect == nbOk) pModDoc->Record1Channel(nThisChn, false);
+						if(select[nThisChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(nThisChn) != 1) m_ModDoc->Record1Channel(nThisChn);
+						else if(nbSelect == nbOk) m_ModDoc->Record1Channel(nThisChn, false);
 					}
 				}
 				break;
 			case 2:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]) pModDoc->NoFxChannel(nThisChn, false);
+					if(select[nThisChn] && !removed[nThisChn]) m_ModDoc->NoFxChannel(nThisChn, false);
 				}
 				break;
 			case 3:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn]) removed[nThisChn] = !removed[nThisChn];
@@ -337,69 +330,67 @@ void CChannelManagerDlg::OnAction1()
 
 		ResetState();
 
-		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
+		m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
 		InvalidateRect(NULL, FALSE);
 	}
 }
 
 void CChannelManagerDlg::OnAction2()
 {
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc)
+	if(m_ModDoc)
 	{
 		
 		int nbOk = 0, nbSelect = 0;
 		
-		switch(currentTab){
+		switch(currentTab)
+		{
 			case 0:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
 					{
 						if(select[nThisChn]) nbSelect++;
-						if(select[nThisChn] && pModDoc->IsChannelMuted(nThisChn)) nbOk++;
+						if(select[nThisChn] && m_ModDoc->IsChannelMuted(nThisChn)) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn] && !removed[nThisChn])
 					{
-						if(pModDoc->IsChannelSolo(nThisChn)) pModDoc->SoloChannel(nThisChn, false);
-						if(nbSelect == nbOk) pModDoc->MuteChannel(nThisChn, !pModDoc->IsChannelMuted(nThisChn));
-						else pModDoc->MuteChannel(nThisChn, true);
+						if(m_ModDoc->IsChannelSolo(nThisChn)) m_ModDoc->SoloChannel(nThisChn, false);
+						if(nbSelect == nbOk) m_ModDoc->MuteChannel(nThisChn, !m_ModDoc->IsChannelMuted(nThisChn));
+						else m_ModDoc->MuteChannel(nThisChn, true);
 					}
 				}
 				break;
 			case 1:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
 					{
 						if(select[nThisChn]) nbSelect++;
-						BYTE rec = pModDoc->IsChannelRecord(nThisChn);
+						BYTE rec = m_ModDoc->IsChannelRecord(nThisChn);
 						if(select[nThisChn] && rec == 2) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn] && select[nThisChn])
 					{
-						if(select[nThisChn] && nbSelect != nbOk && pModDoc->IsChannelRecord(nThisChn) != 2) pModDoc->Record2Channel(nThisChn);
-						else if(nbSelect == nbOk) pModDoc->Record2Channel(nThisChn, false);
+						if(select[nThisChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(nThisChn) != 2) m_ModDoc->Record2Channel(nThisChn);
+						else if(nbSelect == nbOk) m_ModDoc->Record2Channel(nThisChn, false);
 					}
 				}
 				break;
 			case 2:
-				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]) pModDoc->NoFxChannel(nThisChn, true);
+					if(select[nThisChn] && !removed[nThisChn]) m_ModDoc->NoFxChannel(nThisChn, true);
 				}
 				break;
 			case 3:
@@ -411,18 +402,14 @@ void CChannelManagerDlg::OnAction2()
 
 		if(currentTab != 3) ResetState();
 
-		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
+		m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
 		InvalidateRect(NULL, FALSE);
 	}
 }
 
 void CChannelManagerDlg::OnStore(void)
 {
-	if(!show) return;
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-	if(pModDoc == nullptr)
+	if(!show || m_ModDoc == nullptr)
 	{
 		return;
 	}
@@ -430,24 +417,24 @@ void CChannelManagerDlg::OnStore(void)
 	switch(currentTab)
 	{
 		case 0:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
 				CHANNELINDEX nThisChn = pattern[nChn];
 				memory[0][nThisChn] = 0;
-				if(pModDoc->IsChannelMuted(nThisChn)) memory[0][nChn] |= 1;
-				if(pModDoc->IsChannelSolo(nThisChn))  memory[0][nChn] |= 2;
+				if(m_ModDoc->IsChannelMuted(nThisChn)) memory[0][nChn] |= 1;
+				if(m_ModDoc->IsChannelSolo(nThisChn))  memory[0][nChn] |= 2;
 			}
 			break;
 		case 1:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
-				memory[1][nChn] = pModDoc->IsChannelRecord(pattern[nChn]);
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				memory[1][nChn] = m_ModDoc->IsChannelRecord(pattern[nChn]);
 			break;
 		case 2:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
-				memory[2][nChn] = pModDoc->IsChannelNoFx(pattern[nChn]);
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				memory[2][nChn] = m_ModDoc->IsChannelNoFx(pattern[nChn]);
 			break;
 		case 3:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				memory[3][nChn] = pattern[nChn];
 			break;
 		default:
@@ -457,11 +444,7 @@ void CChannelManagerDlg::OnStore(void)
 
 void CChannelManagerDlg::OnRestore(void)
 {
-	if(!show) return;
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-	if(pModDoc == nullptr)
+	if(!show || m_ModDoc == nullptr)
 	{
 		return;
 	}
@@ -469,27 +452,27 @@ void CChannelManagerDlg::OnRestore(void)
 	switch(currentTab)
 	{
 		case 0:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
 				CHANNELINDEX nThisChn = pattern[nChn];
-				pModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0);
-				pModDoc->SoloChannel(nThisChn, (memory[0][nChn] & 2) != 0);
+				m_ModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0);
+				m_ModDoc->SoloChannel(nThisChn, (memory[0][nChn] & 2) != 0);
 			}
 			break;
 		case 1:
-			pModDoc->ReinitRecordState(true);
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			m_ModDoc->ReinitRecordState(true);
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
-				if(memory[1][nChn] != 2) pModDoc->Record1Channel(pattern[nChn], memory[1][nChn] == 1);
-				if(memory[1][nChn] != 1) pModDoc->Record2Channel(pattern[nChn], memory[1][nChn] == 2);
+				if(memory[1][nChn] != 2) m_ModDoc->Record1Channel(pattern[nChn], memory[1][nChn] == 1);
+				if(memory[1][nChn] != 1) m_ModDoc->Record2Channel(pattern[nChn], memory[1][nChn] == 2);
 			}
 			break;
 		case 2:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
-				pModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0);
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				m_ModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0);
 			break;
 		case 3:
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 				pattern[nChn] = memory[3][nChn];
 			ResetState(false, false, false, false, true);
 			break;
@@ -499,7 +482,7 @@ void CChannelManagerDlg::OnRestore(void)
 
 	if(currentTab != 3) ResetState();
 
-	pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
+	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -583,10 +566,9 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	const int dpiY = Util::GetDPIy(m_hWnd);
 
 	// Move butttons to bottom of the window
-	static const int buttons[] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 };
-	for(size_t i = 0; i < CountOf(buttons); i++)
+	for(auto id : { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 })
 	{
-		CWnd *button = GetDlgItem(buttons[i]);
+		CWnd *button = GetDlgItem(id);
 		if(button != nullptr)
 		{
 			CRect btn;
@@ -623,6 +605,7 @@ void CChannelManagerDlg::OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized)
 
 	if(show && !bMinimized)
 	{
+		m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 		ResetState(true, true, true, true, false);
 		nChannelsOld = 0;
 		InvalidateRect(NULL,TRUE);
@@ -637,25 +620,18 @@ BOOL CChannelManagerDlg::OnEraseBkgnd(CDC* pDC)
 
 void CChannelManagerDlg::OnPaint()
 {
-	if(!m_hWnd || show == false) return;
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc == nullptr)
+	if(!m_hWnd || show == false || m_ModDoc == nullptr)
 	{
 		return;
 	}
-
-	PAINTSTRUCT pDC;
-	::BeginPaint(m_hWnd,&pDC);
+	MPT_ASSERT(m_ModDoc == CMainFrame::GetMainFrame()->GetActiveDoc());
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
 
 	CHAR s[256];
 	UINT c=0,l=0;
-	CHANNELINDEX nChannels = pModDoc->GetNumChannels();
+	CHANNELINDEX nChannels = m_ModDoc->GetNumChannels();
 	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
 	CRect client,btn;
 
@@ -668,10 +644,12 @@ void CChannelManagerDlg::OnPaint()
 	if(chnSizeY != buttonHeight)
 	{
 		// Window height is not sufficient => resize window
-		::EndPaint(m_hWnd,&pDC);
 		CWnd::SetWindowPos(NULL, 0, 0, btn.Width(), btn.Height() + (buttonHeight - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
 		return;
 	}
+
+	PAINTSTRUCT pDC;
+	::BeginPaint(m_hWnd, &pDC);
 
 	chnSizeY = buttonHeight;
 
@@ -711,21 +689,19 @@ void CChannelManagerDlg::OnPaint()
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 
 	CRect intersection;
-	BOOL ok = intersection.IntersectRect(&pDC.rcPaint,&client);
-
-	if(pDC.fErase || (ok && nChannelsOld != nChannels))
+	if(pDC.fErase || (intersection.IntersectRect(&pDC.rcPaint, &client) && nChannelsOld != nChannels))
 	{
-		FillRect(pDC.hdc,&intersection,CMainFrame::brushHighLight);
-		FrameRect(pDC.hdc,&client,CMainFrame::brushBlack);
+		FillRect(pDC.hdc, &intersection, CMainFrame::brushHighLight);
+		FrameRect(pDC.hdc, &client, CMainFrame::brushBlack);
 		nChannelsOld = nChannels;
 	}
 
 	client.SetRect(client.left + 8,client.top + 6,client.right - 6,client.bottom - 6);
 
-	HBRUSH red = CreateSolidBrush(RGB(192,96,96));
-	HBRUSH green = CreateSolidBrush(RGB(96,192,96));
+	HBRUSH red = CreateSolidBrush(RGB(192, 96, 96));
+	HBRUSH green = CreateSolidBrush(RGB(96, 192, 96));
 
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
@@ -741,8 +717,8 @@ void CChannelManagerDlg::OnPaint()
 		btn.top = client.top + l * chnSizeY + borderY;
 		btn.bottom = btn.top + chnSizeY - borderY;
 
-		ok = intersection.IntersectRect(&pDC.rcPaint, &client);
-		if(ok) DrawChannelButton(pDC.hdc, &btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
+		if(intersection.IntersectRect(&pDC.rcPaint, &client))
+			DrawChannelButton(pDC.hdc, btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
 
 		btn.right = btn.left + chnSizeX / 7;
 
@@ -752,29 +728,24 @@ void CChannelManagerDlg::OnPaint()
 		switch(currentTab)
 		{
 			case 0:
-				if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE]) FillRect(pDC.hdc,&btn,red);
-				else if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_SOLO]) FillRect(pDC.hdc,&btn,green);
-				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
+				FillRect(pDC.hdc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green);
 				break;
 			case 1:
-				BYTE r;
-				if(pModDoc) r = pModDoc->IsChannelRecord(nThisChn);
-				else r = 0;
-				if(r == 1) FillRect(pDC.hdc,&btn,green);
-				else if(r == 2) FillRect(pDC.hdc,&btn,red);
-				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
+			{
+				const HBRUSH brushes[] = { CMainFrame::brushHighLight, green, red };
+				auto r = m_ModDoc->IsChannelRecord(nThisChn);
+				FillRect(pDC.hdc, btn, brushes[r % MPT_ARRAY_COUNT(brushes)]);
 				break;
+			}
 			case 2:
-				if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX]) FillRect(pDC.hdc,&btn,red);
-				else FillRect(pDC.hdc,&btn,green);
+				FillRect(pDC.hdc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green);
 				break;
 			case 3:
-				if(removed[nThisChn]) FillRect(pDC.hdc,&btn,red);
-				else FillRect(pDC.hdc,&btn,green);
+				FillRect(pDC.hdc, btn, removed[nThisChn] ? red : green);
 				break;
 		}
 		// Draw border around marker
-		FrameRect(pDC.hdc,&btn,CMainFrame::brushBlack);
+		FrameRect(pDC.hdc, btn, CMainFrame::brushBlack);
 
 		c++;
 		if(c >= CM_NB_COLS) { c = 0; l++; }
@@ -792,20 +763,13 @@ void CChannelManagerDlg::OnMove(int x, int y)
 	nChannelsOld = 0;
 }
 
-bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * invalidate )
+bool CChannelManagerDlg::ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate)
 {
 	const CRect &client = m_drawableArea;
 
-	if(!PtInRect(client,point)) return false;
-
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(pModDoc)
+	if(PtInRect(client, point) && m_ModDoc != nullptr)
 	{
-		//UINT nChannels = pModDoc->GetNumChannels();
 		UINT nColns = CM_NB_COLS;
-		//UINT nLines = nChannels / nColns + (nChannels % nColns ? 1 : 0);
 
 		int x = point.x - client.left;
 		int y = point.y - client.top;
@@ -816,7 +780,7 @@ bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * inv
 		x = x / dx;
 		y = y / dy;
 		CHANNELINDEX n = static_cast<CHANNELINDEX>(y * nColns + x);
-		if(n >= 0 && n < (int)pModDoc->GetNumChannels())
+		if(n < m_ModDoc->GetNumChannels())
 		{
 			if(id) *id = n;
 			if(invalidate)
@@ -841,7 +805,8 @@ void CChannelManagerDlg::ResetState(bool bSelection, bool bMove, bool bButton, b
 			select[pattern[nChn]] = false;
 		if(bButton)
 			state[pattern[nChn]]  = false;
-		if(bOrder){
+		if(bOrder)
+		{
 			pattern[nChn] = nChn;
 			removed[nChn] = false;
 		}
@@ -875,17 +840,14 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 	ReleaseCapture();
 	if(!m_hWnd || show == false) return;
 
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(moveRect && pModDoc)
+	if(moveRect && m_ModDoc)
 	{
 		CHANNELINDEX n, i, k;
 		CHANNELINDEX newpat[MAX_BASECHANNELS];
 
 		k = CHANNELINDEX_INVALID;
 		bool hit = ButtonHit(point,&n,NULL);
-		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+		for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			if(k == CHANNELINDEX_INVALID && select[pattern[nChn]]) k = nChn;
 
 		if(hit && k != CHANNELINDEX_INVALID)
@@ -903,7 +865,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 					i++;
 				}
 			}
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() ; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels() ; nChn++)
 			{
 				if(pattern[nChn] != CHANNELINDEX_INVALID && select[pattern[nChn]])
 				{
@@ -913,17 +875,17 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 				}
 			}
 			i = 0;
-			while(i < pModDoc->GetNumChannels())
+			while(i < m_ModDoc->GetNumChannels())
 			{
-				while(i < pModDoc->GetNumChannels() && pattern[i] == CHANNELINDEX_INVALID) i++;
-				if(i < pModDoc->GetNumChannels() && pattern[i] != CHANNELINDEX_INVALID)
+				while(i < m_ModDoc->GetNumChannels() && pattern[i] == CHANNELINDEX_INVALID) i++;
+				if(i < m_ModDoc->GetNumChannels() && pattern[i] != CHANNELINDEX_INVALID)
 				{
 					newpat[k] = pattern[i];
 					k++;
 					i++;
 				}
 			}
-			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
 				pattern[nChn] = newpat[nChn];
 				select[nChn] = false;
@@ -936,14 +898,13 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 		moveRect = false;
 		nChannelsOld = 0;
 		InvalidateRect(NULL, FALSE);
+		if(m_ModDoc) m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
 	}
 
 	leftButton = false;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS ; nChn++)
 		state[pattern[nChn]] = false;
-
-	if(pModDoc) pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 }
 
 void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
@@ -968,9 +929,6 @@ void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 	ResetState(false, false, true, false);
 
 	rightButton = false;
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm->GetActiveDoc();
-	if(pModDoc) pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 }
 
 void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
@@ -993,6 +951,26 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 	}
 }
 
+void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
+{
+	CHANNELINDEX chn;
+	CRect rect;
+	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
+	{
+		// Rename channel
+		TCHAR s[64];
+		wsprintf(s, _T("New name for channel %u:"), chn + 1);
+		CInputDlg dlg(this, s, m_ModDoc->GetrSoundFile().ChnSettings[chn].szName);
+		if(dlg.DoModal() == IDOK)
+		{
+			mpt::String::Copy(m_ModDoc->GetrSoundFile().ChnSettings[chn].szName, dlg.resultAsString.GetString());
+			InvalidateRect(rect, FALSE);
+			m_ModDoc->SetModified();
+			m_ModDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels(), this);
+		}
+	}
+}
+
 void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 {
 	CHANNELINDEX n;
@@ -1003,10 +981,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 	mx = point.x;
 	my = point.y;
 
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-
-	if(!pModDoc) return;
+	if(!m_ModDoc) return;
 
 	if(hit && !state[n] && button)
 	{
@@ -1027,45 +1002,45 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					if(button == CM_BT_LEFT)
 					{
 						if(m_buttonAction == kUndetermined)
-							m_buttonAction = (!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n)) ? kAction1 : kAction2;
+							m_buttonAction = (!m_ModDoc->IsChannelSolo(n) || m_ModDoc->IsChannelMuted(n)) ? kAction1 : kAction2;
 						if(m_buttonAction == kAction1)
 						{
-							pModDoc->MuteChannel(n, false);
-							pModDoc->SoloChannel(n, true);
-							for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++) if(nChn != n) pModDoc->MuteChannel(nChn, true);
+							m_ModDoc->MuteChannel(n, false);
+							m_ModDoc->SoloChannel(n, true);
+							for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++) if(nChn != n) m_ModDoc->MuteChannel(nChn, true);
 							invalidate = client = m_drawableArea;
 						}
-						else pModDoc->SoloChannel(n, false);
+						else m_ModDoc->SoloChannel(n, false);
 					} else
 					{
-						if(pModDoc->IsChannelSolo(n)) pModDoc->SoloChannel(n, false);
+						if(m_ModDoc->IsChannelSolo(n)) m_ModDoc->SoloChannel(n, false);
 						if(m_buttonAction == kUndetermined)
-							m_buttonAction = pModDoc->IsChannelMuted(n) ? kAction1 : kAction2;
-						pModDoc->MuteChannel(n, m_buttonAction == kAction2);
+							m_buttonAction = m_ModDoc->IsChannelMuted(n) ? kAction1 : kAction2;
+						m_ModDoc->MuteChannel(n, m_buttonAction == kAction2);
 					}
-					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
+					m_ModDoc->SetModified();
+					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
 				case 1:
 					BYTE rec;
-					rec = pModDoc->IsChannelRecord(n);
+					rec = m_ModDoc->IsChannelRecord(n);
 					if(m_buttonAction == kUndetermined)
 						m_buttonAction = (!rec || rec != (button == CM_BT_LEFT ? 1 : 2)) ? kAction1 : kAction2;
 
-					pModDoc->Record1Channel(n, false);
-					pModDoc->Record2Channel(n, false);
+					m_ModDoc->Record1Channel(n, false);
+					m_ModDoc->Record2Channel(n, false);
 					if(m_buttonAction == kAction1)
 					{
-						if(button == CM_BT_LEFT) pModDoc->Record1Channel(n);
-						else pModDoc->Record2Channel(n);
+						if(button == CM_BT_LEFT) m_ModDoc->Record1Channel(n);
+						else m_ModDoc->Record2Channel(n);
 					}
-					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
+					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
 				case 2:
-					if(button == CM_BT_LEFT) pModDoc->NoFxChannel(n, false);
-					else pModDoc->NoFxChannel(n, true);
-					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
+					if(button == CM_BT_LEFT) m_ModDoc->NoFxChannel(n, false);
+					else m_ModDoc->NoFxChannel(n, true);
+					m_ModDoc->SetModified();
+					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
 				case 3:
 					if(button == CM_BT_LEFT)

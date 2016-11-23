@@ -35,11 +35,6 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CViewComments)
-// -> CODE#0015
-// -> DESC="channels management dlg"
-//	virtual void OnDraw(CDC *) {}
-	virtual void OnDraw(CDC *);
-// -! NEW_FEATURE#0015
 	virtual void OnInitialUpdate();
 	virtual void UpdateView(UpdateHint hint, CObject *pObject = nullptr);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
