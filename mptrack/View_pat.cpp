@@ -1334,10 +1334,10 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 			if(modified && pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 			{
+				pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
 				if(duplicate)
 				{
 					// Number of channels changed: Update channel headers and other information.
-					pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType());
 					SetCurrentPattern(m_nPattern);
 				}
 				InvalidatePattern(true);
