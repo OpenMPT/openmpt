@@ -622,6 +622,7 @@ void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || show == false || m_ModDoc == nullptr)
 	{
+		ValidateRect(nullptr);
 		return;
 	}
 	MPT_ASSERT(m_ModDoc == CMainFrame::GetMainFrame()->GetActiveDoc());
