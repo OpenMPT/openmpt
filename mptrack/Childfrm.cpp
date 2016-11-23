@@ -141,11 +141,11 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 	auto instance = CChannelManagerDlg::sharedInstance();
 	if(instance != nullptr)
 	{
-		auto view = dynamic_cast<CModControlView *>(GetActiveView());
+		auto view = GetActiveView();
 		if(!bActivate && pActivateWnd == nullptr)
 			instance->SetDocument(nullptr);
 		else if(bActivate && view != nullptr)
-			instance->SetDocument(view->GetDocument());
+			instance->SetDocument(dynamic_cast<CModDoc *>(view->GetDocument()));
 	}
 }
 
