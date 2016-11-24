@@ -1,7 +1,7 @@
 /*
  * ChildFrm.cpp
  * ------------
- * Purpose: Implementation of tab interface class.
+ * Purpose: Implementation of the MDI document child windows.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -138,7 +138,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 	CMDIChildWnd::OnMDIActivate(bActivate, pActivateWnd, pDeactivateWnd);
 
 	// Update channel manager according to active document
-	auto instance = CChannelManagerDlg::sharedInstance();
+	auto instance = CChannelManagerDlg::sharedInstance(false);
 	if(instance != nullptr)
 	{
 		auto view = GetActiveView();
