@@ -48,8 +48,8 @@ protected:
 		CM_BT_RIGHT,
 	};
 
-	CChannelManagerDlg(void);
-	~CChannelManagerDlg(void);
+	CChannelManagerDlg();
+	~CChannelManagerDlg();
 
 	CHANNELINDEX memory[4][MAX_BASECHANNELS];
 	CHANNELINDEX pattern[MAX_BASECHANNELS];
@@ -59,19 +59,18 @@ protected:
 	CRect move[MAX_BASECHANNELS];
 	CRect m_drawableArea;
 	CModDoc *m_ModDoc;
-	CHANNELINDEX nChannelsOld;
-	int currentTab;
-	HBITMAP bkgnd;
-	int omx, omy;
-	int mx, my;
-	int buttonHeight;
+	HBITMAP m_bkgnd;
+	int m_currentTab;
+	int m_downX, m_downY;
+	int m_moveX, m_moveY;
+	int m_buttonHeight;
 	ButtonAction m_buttonAction;
-	bool rightButton : 1;
-	bool leftButton : 1;
-	bool moveRect : 1;
-	bool show : 1;
+	bool m_leftButton : 1;
+	bool m_rightButton : 1;
+	bool m_moveRect : 1;
+	bool m_show : 1;
 
-	bool ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate);
+	bool ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate);
 	void MouseEvent(UINT nFlags,CPoint point, MouseButton button);
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
 
@@ -92,9 +91,7 @@ protected:
 	afx_msg void OnTabSelchange(NMHDR*, LRESULT* pResult);
 	afx_msg void OnPaint();
 	afx_msg void OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSize(UINT nType,int cx,int cy);
-	afx_msg void OnMove(int x, int y);
 	afx_msg void OnMouseMove(UINT nFlags,CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags,CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags,CPoint point);
