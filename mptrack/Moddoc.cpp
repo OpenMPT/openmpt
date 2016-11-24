@@ -1570,7 +1570,7 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->UpdateTree(this, hint, pHint);
 	
-	if(hint.GetType()[HINT_MODCHANNELS])
+	if(hint.GetType()[HINT_MODCHANNELS | HINT_MODTYPE])
 	{
 		auto instance = CChannelManagerDlg::sharedInstance();
 		if(instance != nullptr && pHint != instance && instance->GetDocument() == this)

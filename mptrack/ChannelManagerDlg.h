@@ -24,10 +24,10 @@ public:
 	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = nullptr;}
 	void SetDocument(CModDoc *modDoc);
 	CModDoc *GetDocument() const { return m_ModDoc; }
-	BOOL IsDisplayed(void);
-	void Update(void);
-	BOOL Show(void);
-	BOOL Hide(void);
+	bool IsDisplayed();
+	void Update();
+	void Show();
+	void Hide();
 
 private:
 	static CChannelManagerDlg *sharedInstance_;
@@ -39,6 +39,13 @@ protected:
 		kUndetermined,
 		kAction1,
 		kAction2,
+	};
+
+	enum MouseButton
+	{
+		CM_BT_NONE,
+		CM_BT_LEFT,
+		CM_BT_RIGHT,
 	};
 
 	CChannelManagerDlg(void);
@@ -65,7 +72,7 @@ protected:
 	bool show : 1;
 
 	bool ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate);
-	void MouseEvent(UINT nFlags,CPoint point, BYTE button);
+	void MouseEvent(UINT nFlags,CPoint point, MouseButton button);
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
 
 	void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags);

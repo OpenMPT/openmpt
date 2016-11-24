@@ -18,8 +18,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define CM_BT_LEFT		1
-#define CM_BT_RIGHT		2
 #define CM_NB_COLS		8
 #define CM_BT_HEIGHT	22
 
@@ -58,7 +56,13 @@ CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance(bool autoCreate)
 {
-	if(CChannelManagerDlg::sharedInstance_ == nullptr && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
+	try
+	{
+		if(CChannelManagerDlg::sharedInstance_ == nullptr && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+	}
 	return CChannelManagerDlg::sharedInstance_;
 }
 
@@ -68,49 +72,53 @@ void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
 	{
 		m_ModDoc = modDoc;
 		nChannelsOld = 0;
-		InvalidateRect(NULL, FALSE);
+		if(show)
+		{
+			if(m_ModDoc)
+			{
+				ShowWindow(SW_SHOWNOACTIVATE);	// In case the window was hidden because no module was loaded
+				InvalidateRect(m_drawableArea, FALSE);
+			} else
+			{
+				ShowWindow(SW_HIDE);
+			}
+		}
 	}
 }
 
-BOOL CChannelManagerDlg::IsDisplayed(void)
+bool CChannelManagerDlg::IsDisplayed()
 {
 	return show;
 }
 
-void CChannelManagerDlg::Update(void)
+void CChannelManagerDlg::Update()
 {
 	if(!m_hWnd || show == false) return;
-
 	nChannelsOld = 0;
-
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(nullptr, FALSE);
 }
 
-BOOL CChannelManagerDlg::Show(void)
+void CChannelManagerDlg::Show()
 {
-	if(m_hWnd != NULL && show == false)
+	if(m_hWnd != nullptr && !show)
 	{
 		ShowWindow(SW_SHOW);
 		show = true;
 	}
-
-	return show;
 }
 
-BOOL CChannelManagerDlg::Hide(void)
+void CChannelManagerDlg::Hide()
 {
-	if(this->m_hWnd != NULL && show == true)
+	if(m_hWnd != nullptr && show)
 	{
 		ResetState(true, true, true, true, true);
 		ShowWindow(SW_HIDE);
 		show = false;
 	}
-
-	return show;
 }
 
 
-CChannelManagerDlg::CChannelManagerDlg(void)
+CChannelManagerDlg::CChannelManagerDlg()
 	: m_ModDoc(nullptr)
 	, leftButton(false)
 	, rightButton(false)
@@ -134,7 +142,7 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 
-	HWND menu = ::GetDlgItem(m_hWnd,IDC_TAB1);
+	HWND menu = ::GetDlgItem(m_hWnd, IDC_TAB1);
 
 	TCITEM tie;
 	tie.mask = TCIF_TEXT | TCIF_IMAGE;
@@ -228,7 +236,7 @@ void CChannelManagerDlg::OnApply()
 	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType(), this); //refresh channel headers
 
 	// Redraw channel manager window
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(nullptr, FALSE);
 }
 
 void CChannelManagerDlg::OnClose()
@@ -247,7 +255,7 @@ void CChannelManagerDlg::OnSelectAll()
 		for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			select[nChn] = true;
 
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(m_drawableArea, FALSE);
 }
 
 void CChannelManagerDlg::OnInvert()
@@ -255,7 +263,7 @@ void CChannelManagerDlg::OnInvert()
 	if(m_ModDoc)
 		for(CHANNELINDEX nChn = 0 ; nChn < m_ModDoc->GetNumChannels() ; nChn++)
 			select[nChn] = !select[nChn];
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(m_drawableArea, FALSE);
 }
 
 void CChannelManagerDlg::OnAction1()
@@ -331,7 +339,7 @@ void CChannelManagerDlg::OnAction1()
 		ResetState();
 
 		m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(m_drawableArea, FALSE);
 	}
 }
 
@@ -403,7 +411,7 @@ void CChannelManagerDlg::OnAction2()
 		if(currentTab != 3) ResetState();
 
 		m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(m_drawableArea, FALSE);
 	}
 }
 
@@ -483,7 +491,7 @@ void CChannelManagerDlg::OnRestore(void)
 	if(currentTab != 3) ResetState();
 
 	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(m_drawableArea, FALSE);
 }
 
 void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
@@ -527,7 +535,7 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 			break;
 	}
 
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(m_drawableArea, FALSE);
 }
 
 
@@ -578,25 +586,18 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 		}
 	}
 
+	if(bkgnd)
+	{
+		DeleteObject(bkgnd);
+		bkgnd = nullptr;
+	}
+
 	wnd.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
 	m_drawableArea = wnd;
 	buttonHeight = MulDiv(CM_BT_HEIGHT, dpiY, 96);
 
-	if(bkgnd) DeleteObject(bkgnd);
-	HDC dc = ::GetDC(m_hWnd);
-	bkgnd = ::CreateCompatibleBitmap(dc, wnd.Width(), wnd.Height());
-	if(!moveRect && bkgnd)
-	{
-		HDC bdc = ::CreateCompatibleDC(dc);
-		::SelectObject(bdc,bkgnd);
-		::BitBlt(bdc,0,0,wnd.Width(),wnd.Height(), dc,wnd.left,wnd.top,SRCCOPY);
-		::SelectObject(bdc,(HBITMAP)NULL);
-		::DeleteDC(bdc);
-	}
-	::ReleaseDC(m_hWnd, dc);
-
 	nChannelsOld = 0;
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(nullptr, FALSE);
 }
 
 void CChannelManagerDlg::OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized)
@@ -608,7 +609,7 @@ void CChannelManagerDlg::OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized)
 		m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 		ResetState(true, true, true, true, false);
 		nChannelsOld = 0;
-		InvalidateRect(NULL,TRUE);
+		InvalidateRect(m_drawableArea,TRUE);
 	}
 }
 
@@ -620,8 +621,9 @@ BOOL CChannelManagerDlg::OnEraseBkgnd(CDC* pDC)
 
 void CChannelManagerDlg::OnPaint()
 {
-	if(!m_hWnd || show == false || m_ModDoc == nullptr)
+	if(!m_hWnd || !show || m_ModDoc == nullptr)
 	{
+		ShowWindow(SW_HIDE);
 		ValidateRect(nullptr);
 		return;
 	}
@@ -630,10 +632,9 @@ void CChannelManagerDlg::OnPaint()
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
 
-	CHAR s[256];
-	UINT c=0,l=0;
 	CHANNELINDEX nChannels = m_ModDoc->GetNumChannels();
 	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
+	
 	CRect client,btn;
 
 	GetWindowRect(&btn);
@@ -651,6 +652,7 @@ void CChannelManagerDlg::OnPaint()
 
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd, &pDC);
+	const CRect &rcPaint = pDC.rcPaint;
 
 	chnSizeY = buttonHeight;
 
@@ -659,7 +661,7 @@ void CChannelManagerDlg::OnPaint()
 		// Only draw channels to be moved around
 		HDC bdc = ::CreateCompatibleDC(pDC.hdc);
 		::SelectObject(bdc, bkgnd);
-		::BitBlt(pDC.hdc, client.left, client.top, client.Width(), client.Height(), bdc, 0, 0, SRCCOPY);
+		::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), bdc, rcPaint.left, rcPaint.top, SRCCOPY);
 
 		BLENDFUNCTION ftn;
 		ftn.BlendOp = AC_SRC_OVER;
@@ -676,7 +678,7 @@ void CChannelManagerDlg::OnPaint()
 				btn.DeflateRect(3, 3, 0, 0);
 
 				AlphaBlend(pDC.hdc, btn.left + mx - omx, btn.top + my - omy, btn.Width(), btn.Height(), bdc,
-					btn.left - client.left, btn.top - client.top, btn.Width(), btn.Height(), ftn);
+					btn.left, btn.top, btn.Width(), btn.Height(), ftn);
 			}
 		}
 		::SelectObject(bdc, (HBITMAP)NULL);
@@ -687,13 +689,21 @@ void CChannelManagerDlg::OnPaint()
 	}
 
 	GetClientRect(&client);
-	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 
-	CRect intersection;
-	if(pDC.fErase || (intersection.IntersectRect(&pDC.rcPaint, &client) && nChannelsOld != nChannels))
+	HDC dc = ::CreateCompatibleDC(pDC.hdc);
+	if(!bkgnd)
+		bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
+	::SelectObject(dc, bkgnd);
+
+	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
+	// Draw background
 	{
-		FillRect(pDC.hdc, &intersection, CMainFrame::brushHighLight);
-		FrameRect(pDC.hdc, &client, CMainFrame::brushBlack);
+		auto brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+		FillRect(dc, &pDC.rcPaint, brush);
+		DeleteObject(brush);
+
+		FillRect(dc, &client, CMainFrame::brushHighLight);
+		FrameRect(dc, &client, CMainFrame::brushBlack);
 		nChannelsOld = nChannels;
 	}
 
@@ -702,15 +712,19 @@ void CChannelManagerDlg::OnPaint()
 	HBRUSH red = CreateSolidBrush(RGB(192, 96, 96));
 	HBRUSH green = CreateSolidBrush(RGB(96, 192, 96));
 
-	CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
+	UINT c = 0, l = 0;
+	const CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
+	std::string s;
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
+		const char *fmt;
 		if(sndFile.ChnSettings[nThisChn].szName[0] != '\0')
-			wsprintf(s, "%d: %s", (nThisChn + 1), sndFile.ChnSettings[nThisChn].szName);
+			fmt = "%1: %2";
 		else
-			wsprintf(s, "Channel %d", nThisChn + 1);
+			fmt = "Channel %1";
+		s = mpt::format(fmt)(nThisChn + 1, sndFile.ChnSettings[nThisChn].szName);
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
 		btn.left = client.left + c * chnSizeX + borderX;
@@ -718,8 +732,9 @@ void CChannelManagerDlg::OnPaint()
 		btn.top = client.top + l * chnSizeY + borderY;
 		btn.bottom = btn.top + chnSizeY - borderY;
 
-		if(intersection.IntersectRect(&pDC.rcPaint, &client))
-			DrawChannelButton(pDC.hdc, btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
+		CRect intersection;
+		if(intersection.IntersectRect(&pDC.rcPaint, &btn))
+			DrawChannelButton(dc, btn, s.c_str(), select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
 
 		btn.right = btn.left + chnSizeX / 7;
 
@@ -729,33 +744,37 @@ void CChannelManagerDlg::OnPaint()
 		switch(currentTab)
 		{
 			case 0:
-				FillRect(pDC.hdc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green);
+				FillRect(dc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green);
 				break;
 			case 1:
 			{
 				const HBRUSH brushes[] = { CMainFrame::brushHighLight, green, red };
 				auto r = m_ModDoc->IsChannelRecord(nThisChn);
-				FillRect(pDC.hdc, btn, brushes[r % MPT_ARRAY_COUNT(brushes)]);
+				FillRect(dc, btn, brushes[r % MPT_ARRAY_COUNT(brushes)]);
 				break;
 			}
 			case 2:
-				FillRect(pDC.hdc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green);
+				FillRect(dc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green);
 				break;
 			case 3:
-				FillRect(pDC.hdc, btn, removed[nThisChn] ? red : green);
+				FillRect(dc, btn, removed[nThisChn] ? red : green);
 				break;
 		}
 		// Draw border around marker
-		FrameRect(pDC.hdc, btn, CMainFrame::brushBlack);
+		FrameRect(dc, btn, CMainFrame::brushBlack);
 
 		c++;
 		if(c >= CM_NB_COLS) { c = 0; l++; }
 	}
 
+	::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), dc, rcPaint.left, rcPaint.top, SRCCOPY);
+	::SelectObject(dc, nullptr);
+	::DeleteDC(dc);
+
 	DeleteBrush(green);
 	DeleteBrush(red);
 
-	::EndPaint(m_hWnd,&pDC);
+	::EndPaint(m_hWnd, &pDC);
 }
 
 void CChannelManagerDlg::OnMove(int x, int y)
@@ -833,7 +852,7 @@ void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 		my = point.y;
 		return;
 	}
-	MouseEvent(nFlags, point, moveRect ? 0 : (leftButton ? CM_BT_LEFT : CM_BT_RIGHT));
+	MouseEvent(nFlags, point, moveRect ? CM_BT_NONE : (leftButton ? CM_BT_LEFT : CM_BT_RIGHT));
 }
 
 void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
@@ -898,7 +917,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 
 		moveRect = false;
 		nChannelsOld = 0;
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(m_drawableArea, FALSE);
 		if(m_ModDoc) m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), this);
 	}
 
@@ -943,7 +962,7 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 	{
 		ResetState(true, true, false, false, false);
 		nChannelsOld = 0;
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(m_drawableArea, FALSE);
 	} else
 	{
 		MouseEvent(nFlags,point,CM_BT_RIGHT);
@@ -972,10 +991,10 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	}
 }
 
-void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
+void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button)
 {
 	CHANNELINDEX n;
-	CRect client,invalidate;
+	CRect client, invalidate;
 	bool hit = ButtonHit(point, &n, &invalidate);
 	if(hit) n = pattern[n];
 
@@ -984,7 +1003,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 	if(!m_ModDoc) return;
 
-	if(hit && !state[n] && button)
+	if(hit && !state[n] && button != CM_BT_NONE)
 	{
 		if(nFlags & MK_CONTROL)
 		{
@@ -1023,8 +1042,8 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
 				case 1:
-					BYTE rec;
-					rec = m_ModDoc->IsChannelRecord(n);
+				{
+					auto rec = m_ModDoc->IsChannelRecord(n);
 					if(m_buttonAction == kUndetermined)
 						m_buttonAction = (!rec || rec != (button == CM_BT_LEFT ? 1 : 2)) ? kAction1 : kAction2;
 
@@ -1037,6 +1056,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					}
 					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
+				}
 				case 2:
 					if(button == CM_BT_LEFT) m_ModDoc->NoFxChannel(n, false);
 					else m_ModDoc->NoFxChannel(n, true);
@@ -1059,18 +1079,6 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 					if(select[n] || button == 0)
 					{
-						invalidate = client = m_drawableArea;
-						HDC dc = ::GetDC(m_hWnd);
-						if(!bkgnd) bkgnd = ::CreateCompatibleBitmap(dc,client.Width(),client.Height());
-						if(!moveRect && bkgnd)
-						{
-							HDC bdc = ::CreateCompatibleDC(dc);
-							::SelectObject(bdc,bkgnd);
-							::BitBlt(bdc,0,0,client.Width(),client.Height(), dc,client.left,client.top,SRCCOPY);
-							::SelectObject(bdc,(HBITMAP)NULL);
-							::DeleteDC(bdc);
-						}
-						::ReleaseDC(m_hWnd, dc);
 						moveRect = true;
 					}
 					break;
