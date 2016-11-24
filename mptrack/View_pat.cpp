@@ -5855,9 +5855,8 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFi
 bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const
 //------------------------------------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? 
-						(MF_STRING|MF_CHECKED) : MF_STRING, ID_PATTERN_MUTE, 
-						"&Mute Channel\t" + ih->GetKeyTextFromCommand(kcChannelMute));
+	AppendMenu(hMenu, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? (MF_STRING | MF_CHECKED) : MF_STRING,
+		ID_PATTERN_MUTE, _T("&Mute Channel\t") + ih->GetKeyTextFromCommand(kcChannelMute));
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
@@ -5875,18 +5874,15 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 		if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bUnmuteAll = bUnmuteAllPending = true;
 		if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
 	}
-	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "&Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
-	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "&Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
+	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, _T("&Solo Channel\t") + ih->GetKeyTextFromCommand(kcChannelSolo));
+	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, _T("&Unmute All\t") + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
 	
-	AppendMenu(hMenu, 
-			pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING|MF_CHECKED) : MF_STRING,
-			 ID_PATTERN_TRANSITIONMUTE,
-			pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ?
-			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
-			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
+	AppendMenu(hMenu, pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING | MF_CHECKED) : MF_STRING,
+		ID_PATTERN_TRANSITIONMUTE,
+		(pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? _T("On Transition: Unmute\t") : _T("On Transition: Mute\t")) + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 
-	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On Transition: Unmute All\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
-	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On Transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, _T("On Transition: Unmute All\t") + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
+	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, _T("On Transition: Solo\t") + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, "&Reset Channel\t" + ih->GetKeyTextFromCommand(kcChannelReset));
 	
