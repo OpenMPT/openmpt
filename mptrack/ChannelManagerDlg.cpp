@@ -131,13 +131,12 @@ CChannelManagerDlg::CChannelManagerDlg()
 CChannelManagerDlg::~CChannelManagerDlg(void)
 {
 	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = nullptr;
-	if(m_bkgnd) DeleteObject(m_bkgnd);
+	if(m_bkgnd) DeleteBitmap(m_bkgnd);
 }
 
 BOOL CChannelManagerDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 
 	HWND menu = ::GetDlgItem(m_hWnd, IDC_TAB1);
 
@@ -167,7 +166,7 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	}
 
 	m_buttonHeight = MulDiv(CM_BT_HEIGHT, Util::GetDPIy(m_hWnd), 96);
-	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1),SW_HIDE);
+	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), SW_HIDE);
 
 	return TRUE;
 }
@@ -180,7 +179,7 @@ void CChannelManagerDlg::OnApply()
 	std::vector<CHANNELINDEX> newChnOrder;
 	newChnOrder.reserve(m_ModDoc->GetNumChannels());
 
-	// Count new number of channels , copy pattern pointers & manager internal store memory
+	// Count new number of channels, copy pattern pointers & manager internal store memory
 	nChannels = 0;
 	for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 	{
@@ -228,7 +227,7 @@ void CChannelManagerDlg::OnApply()
 
 	ResetState(true, true, true, true, true);
 
-	// Update document & player
+	// Update document & windows
 	m_ModDoc->SetModified();
 	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType(), this); //refresh channel headers
 
@@ -707,11 +706,7 @@ void CChannelManagerDlg::OnPaint()
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
-		const char *fmt;
-		if(sndFile.ChnSettings[nThisChn].szName[0] != '\0')
-			fmt = "%1: %2";
-		else
-			fmt = "Channel %1";
+		auto fmt = (sndFile.ChnSettings[nThisChn].szName[0] != '\0') ? "%1: %2" : "Channel %1";
 		s = mpt::format(fmt)(nThisChn + 1, sndFile.ChnSettings[nThisChn].szName);
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
