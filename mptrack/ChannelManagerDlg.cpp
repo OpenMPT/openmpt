@@ -27,7 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
-	ON_WM_ACTIVATE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
@@ -52,16 +51,17 @@ END_MESSAGE_MAP()
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
 
-CChannelManagerDlg * CChannelManagerDlg::sharedInstance(bool autoCreate)
+CChannelManagerDlg * CChannelManagerDlg::sharedInstanceCreate()
 {
 	try
 	{
-		if(CChannelManagerDlg::sharedInstance_ == nullptr && autoCreate) CChannelManagerDlg::sharedInstance_ = new CChannelManagerDlg();
+		if(sharedInstance_ == nullptr)
+			sharedInstance_ = new CChannelManagerDlg();
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 	}
-	return CChannelManagerDlg::sharedInstance_;
+	return sharedInstance_;
 }
 
 void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
@@ -69,6 +69,7 @@ void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
 	if(modDoc != m_ModDoc)
 	{
 		m_ModDoc = modDoc;
+		ResetState(true, true, true, true, false);
 		if(m_show)
 		{
 			if(m_ModDoc)
@@ -96,11 +97,12 @@ void CChannelManagerDlg::Update()
 
 void CChannelManagerDlg::Show()
 {
-	if(m_hWnd != nullptr && !m_show)
+	if(!m_hWnd)
 	{
-		ShowWindow(SW_SHOW);
-		m_show = true;
+		Create(IDD_CHANNELMANAGER, nullptr);
 	}
+	ShowWindow(SW_SHOW);
+	m_show = true;
 }
 
 void CChannelManagerDlg::Hide()
@@ -124,13 +126,22 @@ CChannelManagerDlg::CChannelManagerDlg()
 	, m_moveRect(false)
 	, m_show(false)
 {
-	Create(IDD_CHANNELMANAGER, nullptr);
-	ShowWindow(SW_HIDE);
+	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	{
+		pattern[nChn] = nChn;
+		removed[nChn] = false;
+		select[nChn] = false;
+		state[nChn] = false;
+		memory[0][nChn] = 0;
+		memory[1][nChn] = 0;
+		memory[2][nChn] = 0;
+		memory[3][nChn] = nChn;
+	}
 }
 
 CChannelManagerDlg::~CChannelManagerDlg(void)
 {
-	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = nullptr;
+	if(this == sharedInstance_) sharedInstance_ = nullptr;
 	if(m_bkgnd) DeleteBitmap(m_bkgnd);
 }
 
@@ -152,18 +163,6 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	tie.pszText = _T("Reorder/Remove");
 	TabCtrl_InsertItem(menu, 3, &tie);
 	m_currentTab = 0;
-
-	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
-	{
-		pattern[nChn] = nChn;
-		removed[nChn] = false;
-		select[nChn] = false;
-		state[nChn] = false;
-		memory[0][nChn] = 0;
-		memory[1][nChn] = 0;
-		memory[2][nChn] = 0;
-		memory[3][nChn] = nChn;
-	}
 
 	m_buttonHeight = MulDiv(CM_BT_HEIGHT, Util::GetDPIy(m_hWnd), 96);
 	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), SW_HIDE);
@@ -595,18 +594,6 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	InvalidateRect(nullptr, FALSE);
 }
 
-void CChannelManagerDlg::OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized)
-{
-	CDialog::OnActivate(nState,pWndOther,bMinimized);
-
-	if(m_show && !bMinimized)
-	{
-		m_ModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
-		ResetState(true, true, true, true, false);
-		InvalidateRect(m_drawableArea,TRUE);
-	}
-}
-
 void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || !m_show || m_ModDoc == nullptr)
@@ -620,7 +607,6 @@ void CChannelManagerDlg::OnPaint()
 		CDialog::OnPaint();
 		return;
 	}
-	MPT_ASSERT(m_ModDoc == CMainFrame::GetMainFrame()->GetActiveDoc());
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
@@ -628,7 +614,7 @@ void CChannelManagerDlg::OnPaint()
 	CHANNELINDEX nChannels = m_ModDoc->GetNumChannels();
 	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
 	
-	CRect client,btn;
+	CRect client, btn;
 
 	GetWindowRect(&btn);
 	client = m_drawableArea;
@@ -819,7 +805,7 @@ void CChannelManagerDlg::ResetState(bool bSelection, bool bMove, bool bButton, b
 		m_leftButton = false;
 		m_rightButton = false;
 	}
-	if(move) m_moveRect = false;
+	if(bMove) m_moveRect = false;
 }
 
 
