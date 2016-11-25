@@ -615,6 +615,11 @@ void CChannelManagerDlg::OnPaint()
 		ShowWindow(SW_HIDE);
 		return;
 	}
+	if(IsIconic())
+	{
+		CDialog::OnPaint();
+		return;
+	}
 	MPT_ASSERT(m_ModDoc == CMainFrame::GetMainFrame()->GetActiveDoc());
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
