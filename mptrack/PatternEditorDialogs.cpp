@@ -1202,27 +1202,16 @@ void QuickChannelProperties::DoDataExchange(CDataExchange* pDX)
 
 
 QuickChannelProperties::QuickChannelProperties()
+	: visible(false)
 //----------------------------------------------
 {
-	visible = false;
-	Create(IDD_CHANNELSETTINGS, nullptr);
-
-	volSlider.SetRange(0, 64);
-	volSlider.SetTicFreq(8);
-	volSpin.SetRange(0, 64);
-
-	panSlider.SetRange(0, 64);
-	panSlider.SetTicFreq(8);
-	panSpin.SetRange(0, 256);
-
-	nameEdit.SetFocus();
-};
+}
 
 
 QuickChannelProperties::~QuickChannelProperties()
 //-----------------------------------------------
 {
-	CDialog::OnCancel();
+	DestroyWindow();
 }
 
 
@@ -1242,6 +1231,20 @@ void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
 //-----------------------------------------------------------------------------------------------------
 {
+	if(!m_hWnd)
+	{
+		Create(IDD_CHANNELSETTINGS, nullptr);
+
+		volSlider.SetRange(0, 64);
+		volSlider.SetTicFreq(8);
+		volSpin.SetRange(0, 64);
+
+		panSlider.SetRange(0, 64);
+		panSlider.SetTicFreq(8);
+		panSpin.SetRange(0, 256);
+
+		nameEdit.SetFocus();
+	}
 	document = modDoc;
 	channel = chn;
 	pattern = ptn;
