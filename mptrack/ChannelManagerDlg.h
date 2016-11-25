@@ -20,8 +20,9 @@ class CChannelManagerDlg: public CDialog
 {
 public:
 
-	static CChannelManagerDlg * sharedInstance(bool autoCreate = true);
-	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = nullptr;}
+	static CChannelManagerDlg * sharedInstance() { return sharedInstance_;  }
+	static CChannelManagerDlg * sharedInstanceCreate();
+	static void DestroySharedInstance() { delete sharedInstance_; sharedInstance_ = nullptr; }
 	void SetDocument(CModDoc *modDoc);
 	CModDoc *GetDocument() const { return m_ModDoc; }
 	bool IsDisplayed();
@@ -90,7 +91,6 @@ protected:
 	//{{AFX_MSG(CChannelManagerDlg)
 	afx_msg void OnTabSelchange(NMHDR*, LRESULT* pResult);
 	afx_msg void OnPaint();
-	afx_msg void OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized);
 	afx_msg void OnSize(UINT nType,int cx,int cy);
 	afx_msg void OnMouseMove(UINT nFlags,CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags,CPoint point);
@@ -98,11 +98,10 @@ protected:
 	afx_msg void OnRButtonUp(UINT nFlags,CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags,CPoint point);
 	afx_msg void OnMButtonDown(UINT nFlags,CPoint point);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP();
-public:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP();
 };
 
 OPENMPT_NAMESPACE_END

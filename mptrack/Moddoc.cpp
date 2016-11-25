@@ -269,7 +269,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	}
 
 	SetModifiedFlag(FALSE); // (bModified);
-	m_bHasValidPath=true;
+	m_bHasValidPath = true;
 
 	// Check if there are any missing samples, and if there are, show a dialog to relocate them.
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -2831,7 +2831,7 @@ void CModDoc::ViewMIDIMapping(PLUGINDEX plugin, PlugParamIndex param)
 void CModDoc::OnChannelManager()
 //------------------------------
 {
-	CChannelManagerDlg *instance = CChannelManagerDlg::sharedInstance();
+	CChannelManagerDlg *instance = CChannelManagerDlg::sharedInstanceCreate();
 	if(instance != nullptr)
 	{
 		if(instance->IsDisplayed())

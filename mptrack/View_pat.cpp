@@ -2843,6 +2843,7 @@ void CViewPattern::OnRemoveChannel()
 		keepMask[nChn] = false;
 		pModDoc->RemoveChannels(keepMask, true);
 		SetCurrentPattern(m_nPattern); //Updating the screen.
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels(), this);
 	}
 }
 
@@ -2868,7 +2869,7 @@ void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
 	if (pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, GeneralHint().General().Channels().ModType()); //refresh channel headers
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels(), this); //refresh channel headers
 		SetCurrentPattern(m_nPattern);
 	}
 	EndWaitCursor();
@@ -2903,7 +2904,7 @@ void CViewPattern::OnDuplicateChannel()
 	if(pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels().ModType()); //refresh channel headers
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels(), this); //refresh channel headers
 		SetCurrentPattern(m_nPattern);
 	}
 	EndWaitCursor();

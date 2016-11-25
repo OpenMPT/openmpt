@@ -138,7 +138,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 	CMDIChildWnd::OnMDIActivate(bActivate, pActivateWnd, pDeactivateWnd);
 
 	// Update channel manager according to active document
-	auto instance = CChannelManagerDlg::sharedInstance(false);
+	auto instance = CChannelManagerDlg::sharedInstance();
 	if(instance != nullptr)
 	{
 		auto view = GetActiveView();

@@ -421,9 +421,6 @@ void CModTypeDlg::OnOK()
 		sndFile.m_playBehaviour.set(i, m_playBehaviour[i] && (allowedFlags[i] || (sndFile.m_playBehaviour[i] && sndFile.GetType() == m_nType)));
 	}
 
-	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-		CChannelManagerDlg::sharedInstance()->Update();
-
 	DestroyIcon(m_warnIcon);
 	CDialog::OnOK();
 }
