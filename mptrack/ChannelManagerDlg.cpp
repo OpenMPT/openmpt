@@ -26,7 +26,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_PAINT()
-	ON_WM_SIZE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
@@ -74,6 +73,7 @@ void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
 		{
 			if(m_ModDoc)
 			{
+				ResizeWindow();
 				ShowWindow(SW_SHOWNOACTIVATE);	// In case the window was hidden because no module was loaded
 				InvalidateRect(m_drawableArea, FALSE);
 			} else
@@ -92,6 +92,7 @@ bool CChannelManagerDlg::IsDisplayed()
 void CChannelManagerDlg::Update()
 {
 	if(!m_hWnd || m_show == false) return;
+	ResizeWindow();
 	InvalidateRect(nullptr, FALSE);
 }
 
@@ -101,6 +102,7 @@ void CChannelManagerDlg::Show()
 	{
 		Create(IDD_CHANNELMANAGER, nullptr);
 	}
+	ResizeWindow();
 	ShowWindow(SW_SHOW);
 	m_show = true;
 }
@@ -118,6 +120,7 @@ void CChannelManagerDlg::Hide()
 
 CChannelManagerDlg::CChannelManagerDlg()
 	: m_ModDoc(nullptr)
+	, m_drawableArea(0, 0, 0, 0)
 	, m_buttonHeight(CM_BT_HEIGHT)
 	, m_currentTab(0)
 	, m_bkgnd(nullptr)
@@ -143,6 +146,7 @@ CChannelManagerDlg::~CChannelManagerDlg(void)
 {
 	if(this == sharedInstance_) sharedInstance_ = nullptr;
 	if(m_bkgnd) DeleteBitmap(m_bkgnd);
+	DestroyWindow();
 }
 
 BOOL CChannelManagerDlg::OnInitDialog()
@@ -200,9 +204,6 @@ void CChannelManagerDlg::OnApply()
 	{
 		cs.Leave();
 		EndWaitCursor();
-
-		ResetState(true, true, true, true, true);
-
 		return;
 	}
 	
@@ -231,6 +232,7 @@ void CChannelManagerDlg::OnApply()
 	m_ModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType(), this); //refresh channel headers
 
 	// Redraw channel manager window
+	ResizeWindow();
 	InvalidateRect(nullptr, FALSE);
 }
 
@@ -557,48 +559,65 @@ void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszTe
 }
 
 
-void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
+void CChannelManagerDlg::ResizeWindow()
 {
-	CWnd::OnSize(nType,cx,cy);
-	if(!m_hWnd || !m_show) return;
-
-	CRect wnd;
-	GetClientRect(&wnd);
+	if(!m_hWnd || !m_ModDoc) return;
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
 
-	// Move butttons to bottom of the window
-	for(auto id : { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 })
-	{
-		CWnd *button = GetDlgItem(id);
-		if(button != nullptr)
-		{
-			CRect btn;
-			button->GetClientRect(&btn);
-			button->MapWindowPoints(this, &btn);
-			button->SetWindowPos(nullptr, btn.left, wnd.Height() - btn.Height() - MulDiv(3, dpiY, 96), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		}
-	}
-
-	if(m_bkgnd)
-	{
-		DeleteObject(m_bkgnd);
-		m_bkgnd = nullptr;
-	}
-
-	wnd.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
-	m_drawableArea = wnd;
 	m_buttonHeight = MulDiv(CM_BT_HEIGHT, dpiY, 96);
 
-	InvalidateRect(nullptr, FALSE);
+	CHANNELINDEX channels = m_ModDoc->GetNumChannels();
+	int lines = channels / CM_NB_COLS + (channels % CM_NB_COLS ? 1 : 0);
+
+	CRect window;
+	GetWindowRect(window);
+
+	CRect client;
+	GetClientRect(client);
+	m_drawableArea = client;
+	m_drawableArea.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
+
+	int chnSizeY = m_drawableArea.Height() / lines;
+
+	if(chnSizeY != m_buttonHeight)
+	{
+		SetWindowPos(nullptr, 0, 0, window.Width(), window.Height() + (m_buttonHeight - chnSizeY) * lines, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREDRAW);
+
+		GetClientRect(client);
+
+		// Move butttons to bottom of the window
+		for(auto id : { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 })
+		{
+			CWnd *button = GetDlgItem(id);
+			if(button != nullptr)
+			{
+				CRect btn;
+				button->GetClientRect(btn);
+				button->MapWindowPoints(this, btn);
+				button->SetWindowPos(nullptr, btn.left, client.Height() - btn.Height() - MulDiv(3, dpiY, 96), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+			}
+		}
+
+		if(m_bkgnd)
+		{
+			DeleteObject(m_bkgnd);
+			m_bkgnd = nullptr;
+		}
+
+		m_drawableArea = client;
+		m_drawableArea.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
+		InvalidateRect(nullptr, FALSE);
+	}
 }
+
 
 void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || !m_show || m_ModDoc == nullptr)
 	{
-		ValidateRect(nullptr);
+		CDialog::OnPaint();
 		ShowWindow(SW_HIDE);
 		return;
 	}
@@ -614,26 +633,12 @@ void CChannelManagerDlg::OnPaint()
 	CHANNELINDEX nChannels = m_ModDoc->GetNumChannels();
 	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
 	
-	CRect client, btn;
-
-	GetWindowRect(&btn);
-	client = m_drawableArea;
-
-	int chnSizeX = client.Width() / CM_NB_COLS;
-	int chnSizeY = client.Height() / (int)nLines;
-
-	if(chnSizeY != m_buttonHeight)
-	{
-		// Window height is not sufficient => resize window
-		SetWindowPos(nullptr, 0, 0, btn.Width(), btn.Height() + (m_buttonHeight - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
-		return;
-	}
-
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd, &pDC);
 	const CRect &rcPaint = pDC.rcPaint;
 
-	chnSizeY = m_buttonHeight;
+	const int chnSizeX = m_drawableArea.Width() / CM_NB_COLS;
+	const int chnSizeY = m_buttonHeight;
 
 	if(m_currentTab == 3 && m_moveRect && m_bkgnd)
 	{
@@ -653,7 +658,7 @@ void CChannelManagerDlg::OnPaint()
 			CHANNELINDEX nThisChn = pattern[nChn];
 			if(select[nThisChn])
 			{
-				btn = move[nThisChn];
+				CRect btn = move[nThisChn];
 				btn.DeflateRect(3, 3, 0, 0);
 
 				AlphaBlend(pDC.hdc, btn.left + m_moveX - m_downX, btn.top + m_moveY - m_downY, btn.Width(), btn.Height(), bdc,
@@ -663,10 +668,11 @@ void CChannelManagerDlg::OnPaint()
 		::SelectObject(bdc, (HBITMAP)NULL);
 		::DeleteDC(bdc);
 
-		::EndPaint(m_hWnd,&pDC);
+		::EndPaint(m_hWnd, &pDC);
 		return;
 	}
 
+	CRect client;
 	GetClientRect(&client);
 
 	HDC dc = ::CreateCompatibleDC(pDC.hdc);
@@ -701,6 +707,7 @@ void CChannelManagerDlg::OnPaint()
 		s = mpt::format(fmt)(nThisChn + 1, sndFile.ChnSettings[nThisChn].szName);
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
+		CRect btn;
 		btn.left = client.left + c * chnSizeX + borderX;
 		btn.right = btn.left + chnSizeX - borderX;
 		btn.top = client.top + l * chnSizeY + borderY;
@@ -1051,10 +1058,10 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 		}
 
 		state[n] = false;
-		InvalidateRect(&invalidate, FALSE);
+		InvalidateRect(invalidate, FALSE);
 	} else
 	{
-		InvalidateRect(&m_drawableArea, FALSE);
+		InvalidateRect(m_drawableArea, FALSE);
 	}
 }
 
