@@ -74,6 +74,7 @@ protected:
 	bool ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate);
 	void MouseEvent(UINT nFlags,CPoint point, MouseButton button);
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
+	void ResizeWindow();
 
 	void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags);
 
@@ -91,7 +92,6 @@ protected:
 	//{{AFX_MSG(CChannelManagerDlg)
 	afx_msg void OnTabSelchange(NMHDR*, LRESULT* pResult);
 	afx_msg void OnPaint();
-	afx_msg void OnSize(UINT nType,int cx,int cy);
 	afx_msg void OnMouseMove(UINT nFlags,CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags,CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags,CPoint point);
