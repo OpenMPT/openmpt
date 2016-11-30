@@ -59,7 +59,7 @@ public:
 	CString GetKeyTextFromCommand(CommandID c);
 	CString GetMenuText(UINT id);
 	void UpdateMainMenu();
-	void SetNewCommandSet(CCommandSet * newSet);
+	void SetNewCommandSet(const CCommandSet *newSet);
 	bool noAltMenu() { return m_bNoAltMenu; };
 	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };

@@ -678,7 +678,7 @@ void CChannelManagerDlg::OnPaint()
 	HDC dc = ::CreateCompatibleDC(pDC.hdc);
 	if(!m_bkgnd)
 		m_bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
-	::SelectObject(dc, m_bkgnd);
+	HGDIOBJ oldBmp = ::SelectObject(dc, m_bkgnd);
 
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 	// Draw background
@@ -749,7 +749,7 @@ void CChannelManagerDlg::OnPaint()
 	}
 
 	::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), dc, rcPaint.left, rcPaint.top, SRCCOPY);
-	::SelectObject(dc, nullptr);
+	::SelectObject(dc, oldBmp);
 	::DeleteDC(dc);
 
 	DeleteBrush(green);
