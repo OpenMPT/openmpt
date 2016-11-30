@@ -1828,7 +1828,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 
 			sTrimMenuText += "\t" + ih->GetKeyTextFromCommand(kcSampleTrim);
 
-			::AppendMenu(hMenu, MF_STRING|(bIsGrayed) ? MF_GRAYED : 0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
+			::AppendMenu(hMenu, MF_STRING | (bIsGrayed ? MF_GRAYED : 0), ID_SAMPLE_TRIM, sTrimMenuText.c_str());
 			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < sample.nLength && m_dwEndSel == sample.nLength))
 			{
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, _T("Quick &Fade\t") + ih->GetKeyTextFromCommand(kcSampleQuickFade));

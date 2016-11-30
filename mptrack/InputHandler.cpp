@@ -571,8 +571,8 @@ void CInputHandler::UpdateMainMenu()
 }
 
 
-void CInputHandler::SetNewCommandSet(CCommandSet *newSet)
-//-------------------------------------------------------
+void CInputHandler::SetNewCommandSet(const CCommandSet *newSet)
+//-------------------------------------------------------------
 {
 	activeCommandSet->Copy(newSet);
 	activeCommandSet->GenKeyMap(keyMap);

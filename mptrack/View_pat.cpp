@@ -6205,7 +6205,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
 			wsprintf(s, "%02d: %s", nPlg + 1, sndFile->m_MixPlugins[nPlg].GetName());
-			AppendMenu(pluginChangeMenu, MF_STRING | ((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0, ID_CHANGE_INSTRUMENT + nPlg + 1, s);
+			AppendMenu(pluginChangeMenu, MF_STRING | (((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0), ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}
 
@@ -6223,7 +6223,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
-				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug.pMixPlugin->GetFormattedParamName(i));
+				AppendMenu(paramChangeMenu, MF_STRING | ((i == curParam) ? MF_CHECKED : 0), ID_CHANGE_PCNOTE_PARAM + i, plug.pMixPlugin->GetFormattedParamName(i));
 			}
 		}
 	}

@@ -906,21 +906,21 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 	m_OptionsMenu.CreatePopupMenu();
 
 	//Bypass
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.IsBypassed() ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.IsBypassed() ? MF_CHECKED : 0),
 							   ID_PLUG_BYPASS, "&Bypass Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
 	//Record Params
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_recordAutomation ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_recordAutomation ? MF_CHECKED : 0),
 							   ID_PLUG_RECORDAUTOMATION, "Record &Parameter Changes\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
 	//Record MIDI Out
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_recordMIDIOut ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_recordMIDIOut ? MF_CHECKED : 0),
 							   ID_PLUG_RECORD_MIDIOUT, "Record &MIDI Out to Pattern Editor\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
 	//Pass on keypresses
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_passKeypressesToPlug ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_passKeypressesToPlug ? MF_CHECKED : 0),
 							   ID_PLUG_PASSKEYS, "Pass &Keys to Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
 
 
 	m_Menu.DeleteMenu(3, MF_BYPOSITION);
-	m_Menu.InsertMenu(3, MF_BYPOSITION|MF_POPUP, reinterpret_cast<UINT_PTR>(m_OptionsMenu.m_hMenu), "&Options");
+	m_Menu.InsertMenu(3, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_OptionsMenu.m_hMenu), "&Options");
 
 }
 
