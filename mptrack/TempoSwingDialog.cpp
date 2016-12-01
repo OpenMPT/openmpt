@@ -172,6 +172,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		r->valueSlider.SetRange(-SliderResolution / 2, SliderResolution / 2);
 		r->valueSlider.SetTicFreq(SliderResolution / 8);
 		r->valueSlider.SetPageSize(SliderResolution / 8);
+		r->valueSlider.SetPos(1);	// Work around https://bugs.winehq.org/show_bug.cgi?id=41909
 		r->SetValue(m_tempoSwing[i]);
 		rect.MoveToY(rect.top + m.rowHeight);
 	}
