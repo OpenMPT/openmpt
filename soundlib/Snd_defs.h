@@ -581,6 +581,7 @@ protected:
 
 public:
 	static const size_t fractFact = FFact;
+	typedef T store_t;
 
 	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }
 	MPT_CONSTEXPR11_FUN FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
