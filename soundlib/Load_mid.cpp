@@ -618,7 +618,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				break;
 			}
-		} while(file.BytesLeft());
+		} while(file.CanRead(8));
 	}
 
 	MThd fileHeader;
