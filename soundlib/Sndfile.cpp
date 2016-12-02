@@ -1548,15 +1548,15 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempoModeClassic:
 	default:
-		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw() << 1);
+		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, std::max(TEMPO::store_t(1), m_PlayState.m_nMusicTempo.GetRaw() << 1));
 		break;
 
 	case tempoModeModern:
-		m_PlayState.m_nSamplesPerTick = static_cast<uint32>((Util::mul32to64_unsigned(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact) / (Util::mul32to64_unsigned(m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat) * m_PlayState.m_nMusicTempo.GetRaw())));
+		m_PlayState.m_nSamplesPerTick = static_cast<uint32>((Util::mul32to64_unsigned(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact) / std::max(uint64(1),  Util::mul32to64_unsigned(m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat) * m_PlayState.m_nMusicTempo.GetRaw())));
 		break;
 
 	case tempoModeAlternative:
-		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw());
+		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, std::max(TEMPO::store_t(1), m_PlayState.m_nMusicTempo.GetRaw()));
 		break;
 	}
 #ifndef MODPLUG_TRACKER
@@ -1578,11 +1578,11 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	{
 	case tempoModeClassic:
 	default:
-		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, playState.m_nMusicTempo.GetRaw() << 1);
+		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, std::max(TEMPO::store_t(1), playState.m_nMusicTempo.GetRaw() << 1));
 		break;
 
 	case tempoModeAlternative:
-		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, playState.m_nMusicTempo.GetRaw());
+		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, std::max(TEMPO::store_t(1), playState.m_nMusicTempo.GetRaw()));
 		break;
 
 	case tempoModeModern:
