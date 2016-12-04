@@ -905,7 +905,7 @@ BOOL CChordEditor::OnInitDialog()
 
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box
-	m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString("Relative"), MPTChord::relativeMode);
+	m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(_T("Relative")), MPTChord::relativeMode);
 	AppendNotesToControl(m_CbnBaseNote, NOTE_MIN, NOTE_MIN + 3 * 12 - 1);
 
 	// Minor notes
@@ -1012,7 +1012,9 @@ void CChordEditor::OnBaseNoteChanged()
 //------------------------------------
 {
 	MPTChord &chord = GetChord();
-	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel()) - NOTE_MIN;
+	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
+	if(basenote != MPTChord::relativeMode)
+		basenote -= NOTE_MIN;
 	chord.key = (uint8)basenote;
 	UpdateKeyboard();
 }
