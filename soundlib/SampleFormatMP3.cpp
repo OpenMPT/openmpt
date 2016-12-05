@@ -31,13 +31,23 @@ extern "C" {
 }
 #endif // MPT_WITH_MINIMP3
 
+#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
+#define MPT_MPG123_LATEST_KNOWN_API_VERSION 42
+#endif
+
 // mpg123 must be last because of mpg123 largfile support insanity
 #if defined(MPT_WITH_MPG123)
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
 #include <mpg123.h>
+#if (MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2) && defined(MPT_WITH_MPG123)
+// MSVC builds use mpg123.h.in which does not provide the autoconf symbol @API_VERSION@, which in turn causes MPG123_API_VERSION to be bogus.
+#undef MPG123_API_VERSION
+#define MPG123_API_VERSION MPT_MPG123_LATEST_KNOWN_API_VERSION
+#endif
 
 // check for utterly weird mpg123 largefile support
 
@@ -197,9 +207,7 @@ EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (vo
 
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
 
-#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
 #include <stddef.h>
-#endif // MPT_COMPILER
 
 #endif
 
