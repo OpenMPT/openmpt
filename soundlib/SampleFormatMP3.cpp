@@ -195,7 +195,13 @@ EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (vo
 
 #endif // MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
 
-#endif // MPT_WITH_MPG123
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
+
+#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#include <stddef.h>
+#endif // MPT_COMPILER
+
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -205,6 +211,24 @@ OPENMPT_NAMESPACE_BEGIN
 // MP3 Samples
 
 #if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
+
+#if MPT_COMPILER_MSVCCLANGC2
+typedef _off_t mpg123_off_t;
+#else // !MPT_COMPILER_MSVCCLANGC2
+typedef off_t mpg123_off_t;
+#endif // MPT_COMPILER_MSVCCLANGC2
+
+typedef size_t mpg123_size_t;
+
+#if defined(MPT_WITH_MPG123)
+typedef ssize_t mpg123_ssize_t;
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
+#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+typedef ptrdiff_t mpg123_ssize_t;
+#else // MPT_COMPILER
+typedef ssize_t mpg123_ssize_t;
+#endif // MPT_COMPILER
+#endif
 
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 
@@ -264,73 +288,32 @@ public:
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_open_handle_64 )(mpg123_handle*, void*);
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#if MPT_COMPILER_MSVCCLANGC2
 	int (*mpg123_replace_reader_handle)(mpg123_handle*,
-		size_t(*r_read)(void *, void *, size_t),
-		_off_t(*r_lseek)(void *, _off_t, int),
+		mpg123_ssize_t(*r_read)(void *, void *, mpg123_size_t),
+		mpg123_off_t(*r_lseek)(void *, mpg123_off_t, int),
 		void(*cleanup)(void *));
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
-		size_t(*r_read)(void *, void *, size_t),
-		_off_t(*r_lseek)(void *, _off_t, int),
+		mpg123_ssize_t(*r_read)(void *, void *, mpg123_size_t),
+		mpg123_off_t(*r_lseek)(void *, mpg123_off_t, int),
 		void(*cleanup)(void *));
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#elif MPT_COMPILER_MSVC
-	int (*mpg123_replace_reader_handle)(mpg123_handle*,
-		size_t(*r_read)(void *, void *, size_t),
-		off_t(*r_lseek)(void *, off_t, int),
-		void(*cleanup)(void *));
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
-		size_t(*r_read)(void *, void *, size_t),
-		off_t(*r_lseek)(void *, off_t, int),
-		void(*cleanup)(void *));
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#else // !MPT_COMPILER_MSVC
-	int (*mpg123_replace_reader_handle)(mpg123_handle*,
-		ssize_t(*r_read)(void *, void *, size_t),
-		off_t(*r_lseek)(void *, off_t, int),
-		void(*cleanup)(void *));
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
-		ssize_t(*r_read)(void *, void *, size_t),
-		off_t(*r_lseek)(void *, off_t, int),
-		void(*cleanup)(void *));
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#endif // MPT_COMPILER_MSVC
-	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
+	int (*mpg123_read )(mpg123_handle*, unsigned char*, mpg123_size_t, mpg123_size_t*);
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
-#if MPT_COMPILER_MSVCCLANGC2
-	_off_t (*mpg123_length )(mpg123_handle*);
+	mpg123_off_t (*mpg123_length )(mpg123_handle*);
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	_off_t (*mpg123_length_64 )(mpg123_handle*);
+	mpg123_off_t (*mpg123_length_64 )(mpg123_handle*);
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#else
-	off_t (*mpg123_length )(mpg123_handle*);
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	off_t (*mpg123_length_64 )(mpg123_handle*);
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
-#endif
 
-#if MPT_COMPILER_MSVCCLANGC2
-	static size_t FileReaderRead(void *fp, void *buf, size_t count)
-#elif MPT_COMPILER_MSVC
-	static size_t FileReaderRead(void *fp, void *buf, size_t count)
-#else // !MPT_COMPILER_MSVC
-	static ssize_t FileReaderRead(void *fp, void *buf, size_t count)
-#endif // MPT_COMPILER_MSVC
+	static mpg123_ssize_t FileReaderRead(void *fp, void *buf, mpg123_size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
 		file.ReadRaw(static_cast<char *>(buf), readBytes);
 		return readBytes;
 	}
-#if MPT_COMPILER_MSVCCLANGC2
-	static _off_t FileReaderLSeek(void *fp, _off_t offset, int whence)
-#else
-	static off_t FileReaderLSeek(void *fp, off_t offset, int whence)
-#endif
+	static mpg123_off_t FileReaderLSeek(void *fp, mpg123_off_t offset, int whence)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
@@ -640,7 +623,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 	if(Samples[sample].pSample != nullptr)
 	{
-		size_t ndecoded;
+		mpg123_size_t ndecoded = 0;
 		mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	}
 	mpg123->mpg123_delete(mh);
