@@ -67,6 +67,7 @@ IMPLEMENT_SERIAL(CViewSample, CModScrollView, 0)
 BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	//{{AFX_MSG_MAP(CViewSample)
 	ON_WM_ERASEBKGND()
+	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
 	ON_WM_NCCALCSIZE()
 	ON_WM_NCHITTEST()
@@ -311,11 +312,9 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 //--------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 
 	if (!pModDoc) return FALSE;
-	pSndFile = pModDoc->GetSoundFile();
-	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
+	if ((nSmp < 1) || (nSmp > pModDoc->GetNumSamples())) return FALSE;
 	pModDoc->SetNotifications(Notification::Sample, nSmp);
 	pModDoc->SetFollowWnd(m_hWnd);
 	if (nSmp == m_nSample) return FALSE;
@@ -332,6 +331,15 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
+}
+
+
+void CViewSample::OnSetFocus(CWnd *pOldWnd)
+//-----------------------------------------
+{
+	CScrollView::OnSetFocus(pOldWnd);
+	SetCurrentSample(m_nSample);
+
 }
 
 
