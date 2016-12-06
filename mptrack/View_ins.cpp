@@ -81,6 +81,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_MESSAGE(0x02E0, OnDPIChanged)
 #endif
 	ON_WM_ERASEBKGND()
+	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
 	ON_WM_NCCALCSIZE()
 	ON_WM_NCPAINT()
@@ -250,6 +251,14 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nE
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
+}
+
+
+void CViewInstrument::OnSetFocus(CWnd *pOldWnd)
+//---------------------------------------------
+{
+	CScrollView::OnSetFocus(pOldWnd);
+	SetCurrentInstrument(m_nInstrument, m_nEnv);
 }
 
 
