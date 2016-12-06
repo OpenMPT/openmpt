@@ -217,6 +217,9 @@ public:
 #endif
 #endif
 
+	// Convert a path to its canonical form, i.e. remove ".\" and "..\" entries
+	mpt::PathString Canonicalize() const;
+
 #else // !MPT_OS_WINDOWS
 
 	// conversions
@@ -252,6 +255,9 @@ public:
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #endif // MPT_ENABLE_CHARSET_LOCALE
+
+	// Convert a path to its canonical form (currenlty only implemented on Windows)
+	mpt::PathString Canonicalize() const { return path; }
 
 #endif // MPT_OS_WINDOWS
 
