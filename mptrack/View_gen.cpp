@@ -183,7 +183,7 @@ void CViewGlobals::OnInitialUpdate()
 	RecalcLayout();
 
 	// Initializing scroll ranges
-	for (int ichn=0; ichn<4; ichn++)
+	for (int ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
 		// Volume Slider
 		m_sbVolume[ichn].SetRange(0, 64);
@@ -345,9 +345,9 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	{
 		LockControls();
 		m_nActiveTab = static_cast<CHANNELINDEX>(nTabIndex);
-		for (CHANNELINDEX ichn = 0; ichn < 4; ichn++)
+		for (CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 		{
-			const CHANNELINDEX nChn = m_nActiveTab * 4 + ichn;
+			const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
 			const BOOL bEnable = (nChn < sndFile.GetNumChannels()) ? TRUE : FALSE;
 			if(nChn < MAX_BASECHANNELS)
 			{
@@ -556,9 +556,9 @@ void CViewGlobals::PopulateChannelPlugins()
 {
 	// Channel effect lists
 	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
-	for(CHANNELINDEX ichn = 0; ichn< 4; ichn++)
+	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
-		const CHANNELINDEX nChn = m_nActiveTab * 4 + ichn;
+		const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
 		if(nChn < MAX_BASECHANNELS)
 		{
 			m_CbnEffects[ichn].SetRedraw(FALSE);
@@ -616,7 +616,7 @@ void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
-		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
+		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
 		pModDoc->MuteChannel(nChn, b);
 		pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
 	}
@@ -636,7 +636,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
-		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
+		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
 		pModDoc->SurroundChannel(nChn, b);
 		pModDoc->UpdateAllViews(nullptr, GeneralHint(nChn).Channels());
 	}
@@ -651,7 +651,7 @@ void CViewGlobals::OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID)
 //-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
+	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
 	const int vol = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
 	{
@@ -673,7 +673,7 @@ void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
 //-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * 4) + chnMod4;
+	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
 	const int pan = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
 	{
@@ -703,14 +703,14 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CFormView::OnHScroll(nSBCode, nPos, pScrollBar);
 
 	pModDoc = GetDocument();
-	nChn = (CHANNELINDEX)(m_nActiveTab * 4);
+	nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB);
 	if ((pModDoc) && (!IsLocked()) && (nChn < MAX_BASECHANNELS))
 	{
 		BOOL bUpdate = FALSE;
 		short int pos;
 
 		LockControls();
-		const CHANNELINDEX nLoopLimit = std::min<CHANNELINDEX>(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
+		const CHANNELINDEX nLoopLimit = std::min<CHANNELINDEX>(CHANNELS_IN_TAB, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
 		{
 			if(pScrollBar == (CScrollBar *) &m_sbVolume[iCh])
@@ -830,7 +830,7 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		CHAR s[MAX_CHANNELNAME + 2];
-		const UINT nChn = m_nActiveTab * 4 + chnMod4;
+		const UINT nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
 
 		MemsetZero(s);
 		GetDlgItemText(itemID, s, CountOf(s));
@@ -857,7 +857,7 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHANNELINDEX nChn = m_nActiveTab * 4 + chnMod4;
+		CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
 		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
 		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->GetNumChannels())
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
@@ -1010,7 +1010,7 @@ void CViewGlobals::OnParamChanged()
 			return;
 		}
 	}
-	SetDlgItemText(IDC_EDIT14, "");
+	SetDlgItemText(IDC_EDIT14, _T(""));
 	m_sbValue.SetPos(0);
 }
 

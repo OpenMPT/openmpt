@@ -24,14 +24,14 @@ class CViewGlobals: public CFormView
 protected:
 	CRect m_rcClient;
 	CTabCtrl m_TabCtrl;
-	CComboBox m_CbnEffects[4];
+	CComboBox m_CbnEffects[CHANNELS_IN_TAB];
 	CComboBox m_CbnPlugin, m_CbnParam, m_CbnOutput;
 
-	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue, m_sbDryRatio;
+	CSliderCtrl m_sbVolume[CHANNELS_IN_TAB], m_sbPan[CHANNELS_IN_TAB], m_sbValue, m_sbDryRatio;
 
 	CComboBox m_CbnPreset;
 	CSliderCtrl m_sbWetDry;
-	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
+	CSpinButtonCtrl m_spinVolume[CHANNELS_IN_TAB], m_spinPan[CHANNELS_IN_TAB];
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nLockCount;
 	PlugParamIndex m_nCurrentParam;
