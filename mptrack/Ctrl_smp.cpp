@@ -1243,22 +1243,27 @@ void CCtrlSamples::OnSampleOpenRaw()
 void CCtrlSamples::OnSampleSave()
 //-------------------------------
 {
-	mpt::PathString fileName;
+	mpt::PathString fileName, defaultPath = TrackerSettings::Instance().PathSamples.GetWorkingDir();
 	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
 	SampleEditorDefaultFormat defaultFormat = TrackerSettings::Instance().m_defaultSampleFormat;
 
 	if(!doBatchSave)
 	{
-		// save this sample
-		if((!m_nSample) || (m_sndFile.GetSample(m_nSample).pSample == nullptr))
+		// Save this sample
+		const ModSample &sample = m_sndFile.GetSample(m_nSample);
+		if((!m_nSample) || (sample.pSample == nullptr))
 		{
 			SwitchToView();
 			return;
 		}
-		if(m_sndFile.GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if(m_sndFile.SampleHasPath(m_nSample))
 		{
-			fileName = mpt::PathString::FromLocale(m_sndFile.GetSample(m_nSample).filename);
+			// For on-disk samples, propose their original filename and location
+			auto path = m_sndFile.GetSamplePath(m_nSample);
+			fileName = path.GetFullFileName();
+			defaultPath = path.GetPath();
 		}
+		if(fileName.empty()) fileName = mpt::PathString::FromLocale(sample.filename);
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(m_sndFile.m_szNames[m_nSample]);
 		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
 
@@ -1267,7 +1272,7 @@ void CCtrlSamples::OnSampleSave()
 		else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".wav"))) defaultFormat = dfWAV;
 	} else
 	{
-		// save all samples
+		// Save all samples
 		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
 		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
 
@@ -1299,7 +1304,7 @@ void CCtrlSamples::OnSampleSave()
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
 			"RAW Audio (*.raw)|*.raw||")
-			.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
+			.WorkingDirectory(defaultPath)
 			.FilterIndex(&filter);
 	if(!dlg.Show(this)) return;
 
@@ -1308,34 +1313,31 @@ void CCtrlSamples::OnSampleSave()
 	const mpt::PathString ext = dlg.GetExtension();
 
 	SAMPLEINDEX minSmp = m_nSample, maxSmp = m_nSample;
-	CStringW sNumberFormat;
 	if(doBatchSave)
 	{
 		minSmp = 1;
 		maxSmp = m_sndFile.GetNumSamples();
-		sNumberFormat.Format(L"%s%d%s", L"%.", ((int)log10((float)maxSmp)) + 1, L"d");
 	}
+	auto numberFmt = mpt::Format().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
 
 	bool ok = false;
+	CString sSampleName, sSampleFilename;
+
 	for(SAMPLEINDEX smp = minSmp; smp <= maxSmp; smp++)
 	{
-		if (m_sndFile.GetSample(smp).pSample)
+		ModSample &sample = m_sndFile.GetSample(smp);
+		if (sample.pSample)
 		{
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				CStringW sSampleNumber;
-				CString sSampleName;
-				CString sSampleFilename;
-				sSampleNumber.Format(sNumberFormat, smp);
-
 				sSampleName = (m_sndFile.m_szNames[smp][0]) ? m_sndFile.m_szNames[smp] : "untitled";
-				sSampleFilename = (m_sndFile.GetSample(smp).filename[0]) ? m_sndFile.GetSample(smp).filename : m_sndFile.m_szNames[smp];
+				sSampleFilename = sample.filename[0] ? sample.filename : m_sndFile.m_szNames[smp];
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
 				std::wstring fileNameW = fileName.ToWide();
-				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", sSampleNumber);
+				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", numberFmt.ToWString(smp));
 				fileNameW = mpt::String::Replace(fileNameW, L"%sample_filename%", mpt::ToWide(sSampleFilename));
 				fileNameW = mpt::String::Replace(fileNameW, L"%sample_name%", mpt::ToWide(sSampleName));
 				fileName = mpt::PathString::FromWide(fileNameW);
@@ -1350,7 +1352,6 @@ void CCtrlSamples::OnSampleSave()
 			if(ok)
 			{
 				m_sndFile.SetSamplePath(smp, fileName);
-				ModSample &sample = m_sndFile.GetSample(smp);
 				sample.uFlags.reset(SMP_MODIFIED);
 				UpdateView(SampleHint().Info());
 
