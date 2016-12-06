@@ -21,6 +21,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#if MPT_OS_WINDOWS
+#define MPT_PATHSTRING_LITERAL(x) ( L ## x )
+#else
+#define MPT_PATHSTRING_LITERAL(x) ( x )
+#endif
 
 #if MPT_OS_WINDOWS
 
@@ -31,20 +36,20 @@ namespace mpt
 RawPathString PathString::AsNativePrefixed() const
 //------------------------------------------------
 {
-	if(path.length() <= MAX_PATH || path.substr(0, 4) == L"\\\\?\\")
+	if(path.length() <= MAX_PATH || path.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
 		return path;
 	}
 	const RawPathString absPath = mpt::GetAbsolutePath(path).AsNative();
-	if(absPath.substr(0, 2) == L"\\\\")
+	if(absPath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
 	{
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return L"\\\\?\\UNC" + absPath.substr(1);
+		return MPT_PATHSTRING_LITERAL("\\\\?\\UNC") + absPath.substr(1);
 	} else
 	{
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return L"\\\\?\\" + absPath;
+		return MPT_PATHSTRING_LITERAL("\\\\?\\") + absPath;
 	}
 }
 
@@ -53,6 +58,76 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 //-----------------------------------------------------------------------
 {
 	return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
+}
+
+
+// Convert a path to its canonical form, i.e. remove ".\" and "..\" entries
+// Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
+// and unlimited versions are only available on Windows 8 and later.
+// Furthermore, we also convert forward-slashes to backslashes and always remove trailing slashes.
+PathString PathString::Canonicalize() const
+//-----------------------------------------
+{
+	if(path.empty())
+		return MPT_PATHSTRING("\\");
+
+	std::vector<RawPathString> components;
+	RawPathString root;
+	RawPathString::size_type startPos = 0;
+	if(path.size() >= 2 && path[1] == MPT_PATHSTRING_LITERAL(':'))
+	{
+		// Drive letter
+		root = path.substr(0, 2) + MPT_PATHSTRING_LITERAL('\\');
+		startPos = 2;
+	} else if(path.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	{
+		// Network share
+		root = MPT_PATHSTRING_LITERAL("\\\\");
+		startPos = 2;
+	} else if(path.substr(0, 2) == MPT_PATHSTRING_LITERAL(".\\") || path.substr(0, 2) == MPT_PATHSTRING_LITERAL("./"))
+	{
+		// Special case for relative paths
+		root = MPT_PATHSTRING_LITERAL(".\\");
+		startPos = 2;
+	} else if(path.size() >= 1 && (path[0] == MPT_PATHSTRING_LITERAL('\\') || path[0] == MPT_PATHSTRING_LITERAL('/')))
+	{
+		// Special case for relative paths
+		root = MPT_PATHSTRING_LITERAL("\\");
+		startPos = 1;
+	}
+
+	while(startPos < path.size())
+	{
+		auto pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
+		if(pos == RawPathString::npos)
+			pos = path.size();
+		auto dir = path.substr(startPos, pos - startPos);
+		if(dir == MPT_PATHSTRING_LITERAL(".."))
+		{
+			// Go back one directory
+			if(!components.empty())
+			{
+				components.pop_back();
+			}
+		} else if(dir == MPT_PATHSTRING_LITERAL("."))
+		{
+			// nop
+		} else if(!dir.empty())
+		{
+			components.push_back(std::move(dir));
+		}
+		startPos = pos + 1;
+	}
+
+	RawPathString result = root;
+	result.reserve(path.size());
+	for(auto &c : components)
+	{
+		result += c + MPT_PATHSTRING_LITERAL("\\");
+	}
+	if(!components.empty())
+		result.pop_back();
+	return result;
 }
 
 } // namespace mpt
@@ -170,12 +245,12 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(AsNative().length() >= 2 && AsNative().at(0) == L'\\' && AsNative().at(1) != L'\\')
+	if(path.length() >= 2 && path.at(0) == MPT_PATHSTRING_LITERAL('\\') && path.at(1) != MPT_PATHSTRING_LITERAL('\\'))
 	{
 		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += path;
-	} else if(AsNative().length() >= 2 && AsNative().substr(0, 2) == L".\\")
+	} else if(path.length() >= 2 && path.substr(0, 2) == MPT_PATHSTRING_LITERAL(".\\"))
 	{
 		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		result = relativeTo; // "C:\OpenMPT\"
