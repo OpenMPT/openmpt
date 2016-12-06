@@ -353,11 +353,11 @@ BOOL CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
 void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 //-----------------------------------------------------------
 {
-	CSoundFile *pSndFile = (GetDocument()) ? GetDocument()->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr)
+	if(GetDocument() == nullptr)
 		return;
 
-	const ModSample &sample = pSndFile->GetSample(m_nSample);
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	const ModSample &sample = sndFile.GetSample(m_nSample);
 
 	// Snap to grid
 	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
@@ -414,13 +414,26 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
 
-				auto sampleRate = pSndFile->GetSample(m_nSample).GetSampleRate(pSndFile->GetType());
+				// Length in seconds
+				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
 				if (!sampleRate) sampleRate = 8363;
 				uint64 msec = (uint64(selLength) * 1000) / sampleRate;
 				if(msec < 1000)
-					s += mpt::String::Print("%1ms)", msec);
+					s += mpt::String::Print("%1ms", msec);
 				else
-					s += mpt::String::Print("%1.%2s)", msec / 1000, mpt::fmt::dec0<2>((msec / 10) % 100));
+					s += mpt::String::Print("%1.%2s", msec / 1000, mpt::fmt::dec0<2>((msec / 10) % 100));
+
+				// Length in beats
+				double beats = selLength;
+				if(sndFile.m_nTempoMode == tempoModeModern)
+				{
+					beats *= sndFile.m_PlayState.m_nMusicTempo.ToDouble() * (1.0 / 60.0) / sampleRate;
+				} else
+				{
+					sndFile.RecalculateSamplesPerTick();
+					beats *= sndFile.GetSampleRate() / (Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
+				}
+				s += mpt::String::Print(", %1 beats)", mpt::fmt::flt(beats, 0, 5));
 			}
 			pMainFrm->SetInfoText(s.c_str());
 		}
