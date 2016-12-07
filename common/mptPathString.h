@@ -218,7 +218,7 @@ public:
 #endif
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	mpt::PathString Simplified() const;
+	mpt::PathString Simplify() const;
 
 #else // !MPT_OS_WINDOWS
 
