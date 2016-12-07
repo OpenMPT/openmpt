@@ -61,12 +61,12 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 }
 
 
-// Convert a path to its canonical form, i.e. remove ".\" and "..\" entries
+// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 // Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
 // and unlimited versions are only available on Windows 8 and later.
 // Furthermore, we also convert forward-slashes to backslashes and always remove trailing slashes.
-PathString PathString::Canonicalize() const
-//-----------------------------------------
+PathString PathString::Simplify() const
+//-------------------------------------
 {
 	if(path.empty())
 		return MPT_PATHSTRING("\\");
