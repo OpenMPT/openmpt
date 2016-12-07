@@ -98,10 +98,10 @@ PathString PathString::Canonicalize() const
 
 	while(startPos < path.size())
 	{
-		auto pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
+		std::size_t pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
 		if(pos == RawPathString::npos)
 			pos = path.size();
-		auto dir = path.substr(startPos, pos - startPos);
+		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
 		if(dir == MPT_PATHSTRING_LITERAL(".."))
 		{
 			// Go back one directory
@@ -121,9 +121,9 @@ PathString PathString::Canonicalize() const
 
 	RawPathString result = root;
 	result.reserve(path.size());
-	for(auto &c : components)
+	for(std::vector<mpt::RawPathString>::const_iterator it = components.begin(); it != components.end(); ++it)
 	{
-		result += c + MPT_PATHSTRING_LITERAL("\\");
+		result += (*it) + MPT_PATHSTRING_LITERAL("\\");
 	}
 	if(!components.empty())
 		result.pop_back();
