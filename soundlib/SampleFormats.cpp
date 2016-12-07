@@ -1308,8 +1308,10 @@ struct SFZRegion
 	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
 	{
 		double valueF = ConvertStrTo<double>(valueStr);
-		if(std::numeric_limits<T>::is_integer)
+		MPT_CONSTANT_IF(std::numeric_limits<T>::is_integer)
+		{
 			valueF = Util::Round(valueF);
+		}
 		Limit(valueF, static_cast<double>(valueMin), static_cast<double>(valueMax));
 		value = static_cast<T>(valueF);
 	}
