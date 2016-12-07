@@ -1619,21 +1619,21 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("").Canonicalize(), MPT_PATHSTRING("\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING(" ").Canonicalize(), MPT_PATHSTRING(" "));
-	VERIFY_EQUAL(MPT_PATHSTRING("foo\\bar").Canonicalize(), MPT_PATHSTRING("foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo\\bar").Canonicalize(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\\\foo\\bar").Canonicalize(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("./\\foo\\bar").Canonicalize(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\foo\\bar").Canonicalize(), MPT_PATHSTRING("\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\..\\name_3\\").Canonicalize(), MPT_PATHSTRING("A:\\name_1\\name_3"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\..\\name_2\\./name_3").Canonicalize(), MPT_PATHSTRING("A:\\name_2\\name_3"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Canonicalize(), MPT_PATHSTRING("A:\\name_1\\name_2"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:foo\\\\bar").Canonicalize(), MPT_PATHSTRING("A:\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\..").Canonicalize(), MPT_PATHSTRING("C:\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\.").Canonicalize(), MPT_PATHSTRING("C:\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\.bar").Canonicalize(), MPT_PATHSTRING("\\\\.bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\..\\bar").Canonicalize(), MPT_PATHSTRING("\\\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("").Simplify(), MPT_PATHSTRING("\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING(" ").Simplify(), MPT_PATHSTRING(" "));
+	VERIFY_EQUAL(MPT_PATHSTRING("foo\\bar").Simplify(), MPT_PATHSTRING("foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("./\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\foo\\bar").Simplify(), MPT_PATHSTRING("\\foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), MPT_PATHSTRING("A:\\name_1\\name_3"));
+	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\..\\name_2\\./name_3").Simplify(), MPT_PATHSTRING("A:\\name_2\\name_3"));
+	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), MPT_PATHSTRING("A:\\name_1\\name_2"));
+	VERIFY_EQUAL(MPT_PATHSTRING("A:foo\\\\bar").Simplify(), MPT_PATHSTRING("A:\\foo\\bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\..").Simplify(), MPT_PATHSTRING("C:\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\.").Simplify(), MPT_PATHSTRING("C:\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\.bar").Simplify(), MPT_PATHSTRING("\\\\.bar"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\..\\bar").Simplify(), MPT_PATHSTRING("\\\\bar"));
 #endif
 
 

@@ -256,7 +256,7 @@ public:
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
-	// Convert a path to its canonical form (currently only implemented on Windows)
+	// Convert a path to its simplified form (currently only implemented on Windows)
 	MPT_DEPRECATED mpt::PathString Simplify() const { return path; }
 
 #endif // MPT_OS_WINDOWS
