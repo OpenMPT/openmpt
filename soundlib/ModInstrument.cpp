@@ -326,6 +326,12 @@ void ModInstrument::Sanitize(MODTYPE modType)
 	VolEnv.Sanitize();
 	PanEnv.Sanitize();
 	PitchEnv.Sanitize(range);
+
+	for(size_t i = 0; i < CountOf(NoteMap); i++)
+	{
+		if(NoteMap[i] < NOTE_MIN || NoteMap[i] > NOTE_MAX)
+			NoteMap[i] = static_cast<uint8>(i + NOTE_MIN);
+	}
 }
 
 
