@@ -99,7 +99,7 @@ enum
 #define PATTERN_CONTSCROLL			0x20000		// continous pattern scrolling
 #define PATTERN_KBDNOTEOFF			0x40000		// Record note-off events
 #define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
-//#define PATTERN_MIDIRECORD		0x100000	// MIDI Record on by default
+#define PATTERN_PLAYTRANSPOSE		0x100000	// Preview note transposition
 #define PATTERN_NOCLOSEDIALOG		0x200000	// Don't use OpenMPT's custom close dialog with a list of saved files when closing the main window
 #define PATTERN_DBLCLICKSELECT		0x400000	// Double-clicking pattern selects whole channel
 #define PATTERN_OLDCTXMENUSTYLE		0x800000	// Hide pattern context menu entries instead of greying them out.

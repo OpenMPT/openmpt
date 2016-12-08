@@ -519,6 +519,8 @@ private:
 	template<typename Func>
 	void ApplyToSelection(Func func);
 
+	void PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel);
+
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };

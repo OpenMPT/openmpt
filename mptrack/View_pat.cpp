@@ -2549,6 +2549,22 @@ bool CViewPattern::TransposeSelection(int transp)
 	});
 	SetModified(false);
 	InvalidateSelection();
+
+	if(m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
+	{
+		// Preview a single transposed note
+		ModCommand &m = *pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+		if(m.IsNote() && m.instr)
+		{
+			int vol = -1;
+			if(m.command == CMD_VOLUME)
+				vol = m.param * 4u;
+			else if(m.volcmd == VOLCMD_VOLUME)
+				vol = m.vol * 4u;
+			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
+		}
+	}
+
 	return true;
 }
 
@@ -2668,6 +2684,22 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	SetModified(false);
 	InvalidatePattern();
+
+	if(column == PatternCursor::noteColumn && m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
+	{
+		// Preview a single transposed note
+		ModCommand &m = *pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+		if(m.IsNote() && m.instr)
+		{
+			int vol = -1;
+			if(m.command == CMD_VOLUME)
+				vol = m.param * 4u;
+			else if(m.volcmd == VOLCMD_VOLUME)
+				vol = m.vol * 4u;
+			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
+		}
+	}
+
 	return true;
 }
 
@@ -5045,9 +5077,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 					}
 				}
 			}
-			bool isPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying()));
-			pModDoc->CheckNNA(newcmd.note, nPlayIns, m_baPlayingNote);
-			pModDoc->PlayNote(newcmd.note, nPlayIns, 0, !isPlaying, 4 * vol, 0, 0, nChn);
+			PlayNote(newcmd.note, nPlayIns, 4 * vol, nChn);
 		}
 	}
 
@@ -5121,6 +5151,17 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 			}
 		}
 	}
+}
+
+
+void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel)
+//-----------------------------------------------------------------------------------------------------------
+{
+	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+	CModDoc *modDoc = GetDocument();
+	bool isPlaying = ((mainFrm->GetModPlaying() == modDoc) && (mainFrm->IsPlaying()));
+	modDoc->CheckNNA(note, instr, m_baPlayingNote);
+	modDoc->PlayNote(note, instr, 0, !isPlaying, volume, 0, 0, channel);
 }
 
 
