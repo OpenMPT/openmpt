@@ -41,6 +41,7 @@ static const struct GeneralOptionsDescriptions
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
 	{PATTERN_PLAYEDITROW,	"Play whole row while recording",	"When this option is enabled, all notes on the current row are played when entering notes in the pattern editor."},
+	{PATTERN_PLAYTRANSPOSE,	"Play notes when transposing",		"When transposing a single note, the new note is previewed."},
 	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor."},
 	{PATTERN_SMOOTHSCROLL,	"Smooth pattern scrolling",			"Scroll patterns tick by tick rather than row by row at the expense of an increased CPU load."},
 	{PATTERN_HEXDISPLAY,	"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
