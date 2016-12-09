@@ -457,6 +457,8 @@ LibraryPath LibraryPath::AppFullName(const mpt::PathString &fullname)
 }
 
 
+#if defined(MODPLUG_TRACKER)
+
 LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const mpt::PathString &appdata)
 //-------------------------------------------------------------------------------------------------------
 {
@@ -466,6 +468,8 @@ LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const 
 	}
 	return LibraryPath(mpt::LibrarySearchPathFullPath, appdata.WithTrailingSlash() + fullname + GetDefaultSuffix());
 }
+
+#endif // MODPLUG_TRACKER
 
 
 LibraryPath LibraryPath::System(const mpt::PathString &basename)

@@ -355,10 +355,12 @@ public:
 		MPT_GLOBAL_BIND("mpg123", mpg123_scan);
 		MPT_GLOBAL_BIND("mpg123", mpg123_length);
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
-		AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("libmpg123-0"), GetComponentPath()));
-		AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("libmpg123"), GetComponentPath()));
-		AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("mpg123-0"), GetComponentPath()));
-		AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("mpg123"), GetComponentPath()));
+		#if defined(MODPLUG_TRACKER)
+			AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("libmpg123-0"), GetComponentPath()));
+			AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("libmpg123"), GetComponentPath()));
+			AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("mpg123-0"), GetComponentPath()));
+			AddLibrary("mpg123", mpt::LibraryPath::AppDataFullName(MPT_PATHSTRING("mpg123"), GetComponentPath()));
+		#endif // MODPLUG_TRACKER
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
