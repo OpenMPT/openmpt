@@ -85,6 +85,7 @@ external.png
 for p in pages:
     content = urlopen(base_url + '/index.php?title=' + p + '&action=render').read().decode('UTF-8')
     # Download and replace image URLs
+    content = re.sub(r' srcset=".+?"', '', content);
     content = re.sub(r'"/images/thumb/(\w+)/(\w+)/([^\/]+?)/([^\/]+?)"', replace_images, content)
     content = re.sub(r'"/images/(\w+)/(\w+)/([^\/]+?)"', replace_images, content)
     # Remove comments
@@ -102,12 +103,12 @@ for p in pages:
     if section:
         section_str =  section.group(1)
     
-    content = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml">
+    content = """<!DOCTYPE html>
+    <html lang="en">
     <head>
-    <link href="style.css" rel="stylesheet" />
-    <link href="help.css" rel="stylesheet" />
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="style.css" rel="stylesheet">
+    <link href="help.css" rel="stylesheet">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>OpenMPT Manual - """ + title(p) + """</title>
     </head>
     <body>
