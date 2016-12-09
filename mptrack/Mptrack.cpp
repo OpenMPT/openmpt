@@ -716,9 +716,11 @@ class ComponentManagerSettings
 {
 private:
 	TrackerSettings &conf;
+	mpt::PathString configPath;
 public:
-	ComponentManagerSettings(TrackerSettings &conf)
+	ComponentManagerSettings(TrackerSettings &conf, const mpt::PathString &configPath)
 		: conf(conf)
+		, configPath(configPath)
 	{
 		return;
 	}
@@ -733,6 +735,14 @@ public:
 	virtual bool IsBlocked(const std::string &key) const
 	{
 		return conf.IsComponentBlocked(key);
+	}
+	virtual mpt::PathString Path() const
+	{
+		if(BuildVariants::GetComponentArch().empty())
+		{
+			return mpt::PathString();
+		}
+		return configPath + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch() + MPT_PATHSTRING("\\");
 	}
 };
 
@@ -1079,7 +1089,7 @@ BOOL CTrackApp::InitInstance()
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
-	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance());
+	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
 
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 

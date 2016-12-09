@@ -485,6 +485,12 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 }
 
 
+mpt::PathString ComponentManager::GetComponentPath() const
+{
+	return m_Settings.Path();
+}
+
+
 #endif // MPT_COMPONENT_MANAGER
 
 

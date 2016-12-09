@@ -57,6 +57,8 @@ public:
 	static bool ProcessorCanRunCurrentBuild();
 	static bool SystemCanRunModernBuilds();
 
+	static mpt::PathString GetComponentArch();
+
 };
 
 OPENMPT_NAMESPACE_END

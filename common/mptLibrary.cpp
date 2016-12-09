@@ -144,6 +144,9 @@ public:
 					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
 					break;
 #endif
+				case mpt::LibrarySearchPathInvalid:
+					MPT_ASSERT_NOTREACHED();
+					break;
 			}
 		} else
 		{
@@ -160,6 +163,9 @@ public:
 					break;
 				case mpt::LibrarySearchPathFullPath:
 					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
+					break;
+				case mpt::LibrarySearchPathInvalid:
+					MPT_ASSERT_NOTREACHED();
 					break;
 			}
 		}
@@ -451,6 +457,17 @@ LibraryPath LibraryPath::AppFullName(const mpt::PathString &fullname)
 }
 
 
+LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const mpt::PathString &appdata)
+//-------------------------------------------------------------------------------------------------------
+{
+	if(appdata.empty())
+	{
+		return LibraryPath(mpt::LibrarySearchPathInvalid, MPT_PATHSTRING(""));
+	}
+	return LibraryPath(mpt::LibrarySearchPathFullPath, appdata.WithTrailingSlash() + fullname + GetDefaultSuffix());
+}
+
+
 LibraryPath LibraryPath::System(const mpt::PathString &basename)
 //--------------------------------------------------------------
 {
@@ -475,6 +492,14 @@ Library::Library()
 Library::Library(const mpt::LibraryPath &path)
 //--------------------------------------------
 {
+	if(path.GetSearchPath() == mpt::LibrarySearchPathInvalid)
+	{
+		return;
+	}
+	if(path.GetFileName().empty())
+	{
+		return;
+	}
 	m_Handle = std::make_shared<LibraryHandle>(path);
 }
 
