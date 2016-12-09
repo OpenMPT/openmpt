@@ -307,6 +307,7 @@ public:
 	virtual bool LoadOnStartup() const = 0;
 	virtual bool KeepLoaded() const = 0;
 	virtual bool IsBlocked(const std::string &key) const = 0;
+	virtual mpt::PathString Path() const = 0;
 };
 
 
@@ -317,6 +318,7 @@ public:
 	virtual bool LoadOnStartup() const { return false; }
 	virtual bool KeepLoaded() const { return true; }
 	virtual bool IsBlocked(const std::string & /*key*/ ) const { return false; }
+	virtual mpt::PathString Path() const { return mpt::PathString(); }
 };
 
 
@@ -369,6 +371,7 @@ public:
 	std::shared_ptr<const IComponent> ReloadComponent(const IComponentFactory &componentFactory);
 	std::vector<std::string> GetRegisteredComponents() const;
 	ComponentInfo GetComponentInfo(std::string name) const;
+	mpt::PathString GetComponentPath() const;
 };
 
 
@@ -408,6 +411,12 @@ std::shared_ptr<const type> ReloadComponent()
 }
 
 
+static inline mpt::PathString GetComponentPath()
+{
+	return ComponentManager::Instance()->GetComponentPath();
+}
+
+
 #else // !MPT_COMPONENT_MANAGER
 
 
@@ -430,6 +439,12 @@ std::shared_ptr<const type> GetComponent()
 		cache = component;
 	}
 	return component;
+}
+
+
+static inline mpt::PathString GetComponentPath()
+{
+	return mpt::PathString();
 }
 
 

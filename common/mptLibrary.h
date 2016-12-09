@@ -37,6 +37,7 @@ class LibraryHandle;
 
 enum LibrarySearchPath
 {
+	LibrarySearchPathInvalid,
 	LibrarySearchPathDefault,
 	LibrarySearchPathApplication,
 	LibrarySearchPathSystem,
@@ -76,6 +77,10 @@ public:
 	// Returns the library path in the application directory, with os-specific suffix added to fullname.
 	// e.g.: fullname = "libunmo3" --> "libunmo3.so" / "apppath/libunmo3.dll" 
 	static LibraryPath AppFullName(const mpt::PathString &fullname);
+
+	// Returns the library path in the application data directory, with os-specific suffix added to fullname.
+	// e.g.: fullname = "libunmo3" --> "libunmo3.so" / "appdata/libunmo3.dll" (appdata == C:\Users\SOMEUSER\AppData\OpenMPT\Components\)
+	static LibraryPath AppDataFullName(const mpt::PathString &fullname, const mpt::PathString &appdata);
 
 	// Returns a system library name with os-specific prefix and suffix added to basename, but without any full path in order to be searched in the default search path.
 	// e.g.: basename = "unmo3" --> "libunmo3.so" / "unmo3.dll"

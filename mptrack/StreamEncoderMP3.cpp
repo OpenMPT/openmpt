@@ -489,7 +489,19 @@ protected:
 		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame)))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame), true))
+			{
+				ok = true;
+				break;
+			}
+		}
+		if(ok)
+		{
+			return true;
+		}
+		for(std::size_t i=0; i<CountOf(dll_names); ++i)
+		{
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame), false))
 			{
 				ok = true;
 				break;
@@ -500,14 +512,24 @@ protected:
 
 private:
 
-	bool TryLoad(const mpt::PathString &filename)
+	bool TryLoad(const mpt::PathString &filename, bool appdata)
 	{
 		Reset();
 		ClearBindFailed();
-		if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppFullName(filename)))
+		if(appdata)
 		{
-			Reset();
-			return false;
+			if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppDataFullName(filename, GetComponentPath())))
+			{
+				Reset();
+				return false;
+			}
+		} else
+		{
+			if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppFullName(filename)))
+			{
+				Reset();
+				return false;
+			}
 		}
 		MPT_COMPONENT_BIND("libmp3lame", get_lame_version);
 		MPT_COMPONENT_BIND("libmp3lame", get_lame_short_version);
@@ -920,17 +942,33 @@ protected:
 	bool DoInitialize()
 	{
 		Reset();
-		if(TryLoad(MPT_PATHSTRING("lame_enc")))
+		if(TryLoad(MPT_PATHSTRING("lame_enc"), true))
 		{
 			isLame = true;
 			encoderDLL = MPT_PATHSTRING("lame_enc");
 			return true;
-		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL")))
+		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL"), true))
 		{
 			isLame = true;
 			encoderDLL = MPT_PATHSTRING("BladeMP3EncDLL");
 			return true;
-		} else if(TryLoad(MPT_PATHSTRING("bladeenc")))
+		} else if(TryLoad(MPT_PATHSTRING("bladeenc"), true))
+		{
+			isLame = false;
+			encoderDLL = MPT_PATHSTRING("bladeenc");
+			return true;
+		}
+		if(TryLoad(MPT_PATHSTRING("lame_enc"), false))
+		{
+			isLame = true;
+			encoderDLL = MPT_PATHSTRING("lame_enc");
+			return true;
+		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL"), false))
+		{
+			isLame = true;
+			encoderDLL = MPT_PATHSTRING("BladeMP3EncDLL");
+			return true;
+		} else if(TryLoad(MPT_PATHSTRING("bladeenc"), false))
 		{
 			isLame = false;
 			encoderDLL = MPT_PATHSTRING("bladeenc");
@@ -941,14 +979,24 @@ protected:
 
 private:
 
-	bool TryLoad(const mpt::PathString &filename)
+	bool TryLoad(const mpt::PathString &filename, bool appdata)
 	{
 		Reset();
 		ClearBindFailed();
-		if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppFullName(filename)))
+		if(appdata)
 		{
-			Reset();
-			return false;
+			if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppDataFullName(filename, GetComponentPath())))
+			{
+				Reset();
+				return false;
+			}
+		} else
+		{
+			if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppFullName(filename)))
+			{
+				Reset();
+				return false;
+			}
 		}
 		MPT_COMPONENT_BIND("BladeEnc", beVersion);
 		MPT_COMPONENT_BIND("BladeEnc", beInitStream);

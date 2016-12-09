@@ -312,4 +312,16 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 }
 
 
+mpt::PathString BuildVariants::GetComponentArch()
+{
+	#if (MPT_ARCH_BITS == 64)
+		return MPT_PATHSTRING("x64");
+	#elif (MPT_ARCH_BITS == 32)
+		return MPT_PATHSTRING("x86");
+	#else
+		return MPT_PATHSTRING("");
+	#endif
+}
+
+
 OPENMPT_NAMESPACE_END
