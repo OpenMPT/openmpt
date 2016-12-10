@@ -795,7 +795,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 	const ORDERINDEX insertWhere = selection.lastOrd + 1u;
 	if(insertWhere >= m_sndFile.GetModSpecifications().ordersMax)
 		return;
-	const ORDERINDEX insertCount = std::min(selection.lastOrd - selection.firstOrd + ORDERINDEX(1), m_sndFile.GetModSpecifications().ordersMax - insertWhere);
+	const ORDERINDEX insertCount = std::min<ORDERINDEX>(selection.lastOrd - selection.firstOrd + 1u, m_sndFile.GetModSpecifications().ordersMax - insertWhere);
 	if(!insertCount)
 		return;
 
