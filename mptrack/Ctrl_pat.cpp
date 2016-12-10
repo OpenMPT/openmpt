@@ -791,18 +791,22 @@ void CCtrlPatterns::OnPatternDuplicate()
 //--------------------------------------
 {
 	OrdSelection selection = m_OrderList.GetCurSel(false);
-	const ORDERINDEX insertCount = selection.lastOrd - selection.firstOrd;
-	const ORDERINDEX insertWhere = selection.firstOrd + insertCount + 1;
+	const ORDERINDEX insertFrom = selection.firstOrd;
+	const ORDERINDEX insertWhere = selection.lastOrd + 1u;
 	if(insertWhere >= m_sndFile.GetModSpecifications().ordersMax)
 		return;
+	const ORDERINDEX insertCount = std::min(selection.lastOrd - selection.firstOrd + ORDERINDEX(1), m_sndFile.GetModSpecifications().ordersMax - insertWhere);
+	if(!insertCount)
+		return;
+
 	bool success = false;
 	// Has this pattern been duplicated already? (for multiselect)
 	std::vector<PATTERNINDEX> patReplaceIndex(m_sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
 
-	for(ORDERINDEX i = 0; i <= insertCount; i++)
+	for(ORDERINDEX i = 0; i < insertCount; i++)
 	{
-		PATTERNINDEX curPat = m_sndFile.Order[selection.firstOrd + i];
-		if(m_sndFile.Patterns.IsValidIndex(curPat) && patReplaceIndex[curPat] == PATTERNINDEX_INVALID)
+		PATTERNINDEX curPat = m_sndFile.Order[insertFrom + i];
+		if(curPat < patReplaceIndex.size() && patReplaceIndex[curPat] == PATTERNINDEX_INVALID)
 		{
 			PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(curPat, true);
 			if(newPat != PATTERNINDEX_INVALID)
@@ -819,16 +823,16 @@ void CCtrlPatterns::OnPatternDuplicate()
 		{
 			// Invalid pattern, or it has been duplicated before (multiselect)
 			PATTERNINDEX newPat;
-			if(curPat < m_sndFile.Patterns.Size() && patReplaceIndex[curPat] != PATTERNINDEX_INVALID)
+			if(curPat < patReplaceIndex.size() && patReplaceIndex[curPat] != PATTERNINDEX_INVALID)
 			{
 				// Take care of patterns that have been duplicated before
 				newPat = patReplaceIndex[curPat];
 			} else
 			{
-				newPat = m_sndFile.Order[selection.firstOrd + i];
+				newPat = m_sndFile.Order[insertFrom + i];
 			}
 
-			m_sndFile.Order.Insert(selection.firstOrd + i + insertCount, 1, newPat);
+			m_sndFile.Order.Insert(insertWhere + i, 1, newPat);
 
 			success = true;
 		}
@@ -860,7 +864,8 @@ void CCtrlPatterns::OnPatternDuplicate()
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
 		m_modDoc.UpdateAllViews(NULL, PatternHint(PATTERNINDEX_INVALID).Names(), this);
-		if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = insertWhere + insertCount;
+		if(selection.lastOrd != selection.firstOrd)
+			m_OrderList.m_nScrollPos2nd = insertWhere + insertCount - 1u;
 	}
 	SwitchToView();
 }
