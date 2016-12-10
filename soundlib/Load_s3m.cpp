@@ -207,6 +207,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_S3M);
+	m_nMinPeriod = 64;
+	m_nMaxPeriod = 32767;
 
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
@@ -244,12 +246,18 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		else
 			m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		nonCompatTracker = true;
+		m_nMinPeriod = 1;
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
+		{
 			m_madeWithTracker = "BeRoTracker";
-		else
+			m_playBehaviour.set(kST3LimitPeriod);
+		} else
+		{
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
+			m_nMinPeriod = 1;
+		}
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
@@ -258,6 +266,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
 		m_madeWithTracker = "BeRoTracker";
+		m_playBehaviour.set(kST3LimitPeriod);
 		break;
 	case S3MFileHeader::trkCreamTracker:
 		m_madeWithTracker = "CreamTracker";
@@ -295,8 +304,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.name);
 
-	m_nMinPeriod = 64;
-	m_nMaxPeriod = 32767;
 	if(fileHeader.flags & S3MFileHeader::amigaLimits) m_SongFlags.set(SONG_AMIGALIMITS);
 	if(fileHeader.flags & S3MFileHeader::st2Vibrato) m_SongFlags.set(SONG_S3MOLDVIBRATO);
 
