@@ -232,6 +232,7 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 	if(GetCurrentRow() >= pSndFile->Patterns[m_nPattern].GetNumRows())
 	{
 		m_Cursor.SetRow(0);
+		updateScroll = true;
 	}
 	
 	SetSelToCursor();
