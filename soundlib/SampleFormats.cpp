@@ -1146,6 +1146,8 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 /////////////////////////////////////////////////////////////////////////////////////////
 // SFZ Instrument
 
+#ifdef MPT_EXTERNAL_SAMPLES
+
 struct SFZControl
 {
 	std::string defaultPath;
@@ -1472,7 +1474,6 @@ struct SFZRegion
 bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 //--------------------------------------------------------------------------
 {
-#ifdef MPT_EXTERNAL_SAMPLES
 	file.Rewind();
 
 	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kUnknown } section = kNone;
@@ -1733,7 +1734,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region->pitchLfoDepth, 32, 100));
 			sample.nVibRate = region->pitchLfoFreq * 4;
 		}
-		
+
 		if(region->loopMode != SFZRegion::LoopMode::kUnspecified)
 		{
 			switch(region->loopMode)
@@ -1816,12 +1817,13 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	pIns->Sanitize(MOD_TYPE_MPT);
 	pIns->Convert(MOD_TYPE_MPT, GetType());
 	return true;
-#else
-	MPT_UNREFERENCED_PARAMETER(nInstr);
-	MPT_UNREFERENCED_PARAMETER(file);
-	return false;
-#endif // MPT_EXTERNAL_SAMPLES
 }
+#else
+bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX, FileReader &)
+{
+	return false;
+}
+#endif // MPT_EXTERNAL_SAMPLES
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
