@@ -1261,10 +1261,28 @@ struct SFZEnvelope
 
 struct SFZRegion
 {
+	enum class LoopMode
+	{
+		kUnspecified,
+		kContinuous,
+		kOneShot,
+		kSustain,
+		kNoLoop
+	};
+
+	enum class LoopType
+	{
+		kUnspecified,
+		kForward,
+		kBackward,
+		kAlternate,
+	};
+
 	std::string filename;
 	SFZEnvelope ampEnv, pitchEnv, filterEnv;
 	SmpLength loopStart, loopEnd, end, offset;
-	FlagSet<ChannelFlags> loopMode, loopType;
+	LoopMode loopMode;
+	LoopType loopType;
 	int32 cutoff;			// in Hz
 	int32 filterRandom;		// 0...9600 cents
 	int16 volume;			// -144dB...+6dB
@@ -1284,8 +1302,8 @@ struct SFZRegion
 
 	SFZRegion()
 		: loopStart(0), loopEnd(0), end(MAX_SAMPLE_LENGTH), offset(0)
-		, loopMode(ChannelFlags(0))
-		, loopType(ChannelFlags(0))
+		, loopMode(LoopMode::kUnspecified)
+		, loopType(LoopType::kUnspecified)
 		, cutoff(0)
 		, filterRandom(0)
 		, volume(0)
@@ -1406,21 +1424,23 @@ struct SFZRegion
 			Read(value, loopEnd, SmpLength(0), MAX_SAMPLE_LENGTH);
 		else if(key == "loop_mode" || key == "loopmode")
 		{
-			if(value == "loop_continuous" || value == "one_shot")
-				loopMode = CHN_LOOP;
+			if(value == "loop_continuous")
+				loopMode = LoopMode::kContinuous;
+			else if(value == "one_shot")
+				loopMode = LoopMode::kOneShot;
 			else if(value == "loop_sustain")
-				loopMode = CHN_SUSTAINLOOP;
+				loopMode = LoopMode::kSustain;
 			else if(value == "no_loop")
-				loopMode = ChannelFlags(0);
+				loopMode = LoopMode::kNoLoop;
 		}
 		else if(key == "loop_type" || key == "looptype")
 		{
 			if(value == "forward")
-				loopType = ChannelFlags(0);
+				loopType = LoopType::kForward;
 			else if(value == "backward")
-				loopType = CHN_REVERSE;
+				loopType = LoopType::kBackward;
 			else if(value == "alternate")
-				loopType = CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN;
+				loopType = LoopType::kAlternate;
 		}
 		else if(key == "cutoff")
 			Read(value, cutoff, 0, 96000);
@@ -1714,25 +1734,54 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.nVibRate = region->pitchLfoFreq * 4;
 		}
 		
-		sample.uFlags.set(region->loopMode);
-		sample.uFlags.set(region->loopType);
+		if(region->loopMode != SFZRegion::LoopMode::kUnspecified)
+		{
+			switch(region->loopMode)
+			{
+			case SFZRegion::LoopMode::kContinuous:
+			case SFZRegion::LoopMode::kOneShot:
+				sample.uFlags.set(CHN_LOOP);
+				break;
+			case SFZRegion::LoopMode::kSustain:
+				sample.uFlags.set(CHN_SUSTAINLOOP);
+				break;
+			case SFZRegion::LoopMode::kNoLoop:
+				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP);
+			}
+		}
 		if(region->loopEnd > region->loopStart)
 		{
 			// Loop may also be defined in file, in which case loopStart and loopEnd are unset.
-			if(region->loopMode == CHN_SUSTAINLOOP)
+			if(region->loopMode == SFZRegion::LoopMode::kSustain)
 			{
 				sample.nSustainStart = region->loopStart;
 				sample.nSustainEnd = region->loopEnd + 1;
-			} else if(region->loopMode == CHN_LOOP)
+			} else if(region->loopMode == SFZRegion::LoopMode::kContinuous || region->loopMode == SFZRegion::LoopMode::kOneShot)
 			{
 				sample.nLoopStart = region->loopStart;
 				sample.nLoopEnd = region->loopEnd + 1;
 			}
-		} else if(sample.nLoopEnd <= sample.nLoopStart && region->loopMode)
+		} else if(sample.nLoopEnd <= sample.nLoopStart && region->loopMode != SFZRegion::LoopMode::kUnspecified && region->loopMode != SFZRegion::LoopMode::kNoLoop)
 		{
 			sample.nLoopEnd = sample.nLength;
 		}
-		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region->loopMode == CHN_SUSTAINLOOP)
+		switch(region->loopType)
+		{
+		case SFZRegion::LoopType::kUnspecified:
+			break;
+		case SFZRegion::LoopType::kForward:
+			sample.uFlags.reset(CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN | CHN_REVERSE);
+			break;
+		case SFZRegion::LoopType::kBackward:
+			sample.uFlags.set(CHN_REVERSE);
+			break;
+		case SFZRegion::LoopType::kAlternate:
+			sample.uFlags.set(CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
+			break;
+		default:
+			break;
+		}
+		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region->loopMode == SFZRegion::LoopMode::kSustain)
 		{
 			// Turn normal loop (imported from sample) into sustain loop
 			std::swap(sample.nSustainStart, sample.nLoopStart);
