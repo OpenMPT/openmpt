@@ -492,6 +492,20 @@ void CSoundFile::UpgradeModule()
 		{
 			m_playBehaviour.set(behaviours[i].behaviour, m_dwLastSavedWithVersion >= behaviours[i].version);
 		}
+	}
+	
+	if(GetType() == MOD_TYPE_XM)
+	{
+		// The following behaviours were added in/after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
+		static const PlayBehaviourVersion behaviours[] =
+		{
+			{ kFT2NoteOffFlags,					MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
+		};
+		for(size_t i = 0; i < CountOf(behaviours); i++)
+		{
+			if(m_dwLastSavedWithVersion < behaviours[i].version)
+				m_playBehaviour.reset(behaviours[i].behaviour);
+		}
 	} else if(GetType() == MOD_TYPE_S3M)
 	{
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
