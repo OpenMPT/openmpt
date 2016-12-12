@@ -2059,7 +2059,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
 				if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
 				{
-					plugNote = pChn->pModInstrument->NoteMap[note - NOTE_MIN];
+					plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
 				}
 				applyNNAtoPlug = pPlugin->IsNotePlaying(plugNote, GetBestMidiChannel(nChn), nChn);
 			}
