@@ -596,6 +596,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2PanWithDelayedNoteOff: desc = _T("Panning command with delayed note-off is ignored"); break;
 		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
 		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 16"); break;
+		case kFT2NoteOffFlags: desc = _T("Fade instrument on note-off when there is no volume envelope; instrument numbers reset note-off status."); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
@@ -1172,7 +1173,7 @@ void CSampleMapDlg::OnUpdateOctave()
 void CSampleMapDlg::OnUpdateKeyboard()
 //------------------------------------
 {
-	UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
+	SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 	UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 	BOOL bRedraw = FALSE;
 	for (UINT iNote=0; iNote<3*12; iNote++)
@@ -1202,7 +1203,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 	if ((lParam >= 0) && (lParam < 3*12))
 	{
 		SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
-		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
+		uint32 nBaseOctave = m_SbOctave.GetPos() & 7;
 		
 		const std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument).c_str();
 		if(temp.size() >= CountOf(s))
@@ -1213,7 +1214,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
 		{
-			UINT iNote = nBaseOctave * 12 + lParam;
+			uint32 iNote = static_cast<uint32>(nBaseOctave * 12 + lParam);
 
 			if(mouseAction == mouseUnknown)
 			{
@@ -1240,20 +1241,6 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			}
-
-/* rewbs.note: I don't think we need this with cust keys.
-// -> CODE#0009
-// -> DESC="instrument editor note play & octave change"
-			CMDIChildWnd *pMDIActive = CMainFrame::GetMainFrame() ? CMainFrame::GetMainFrame()->MDIGetActive() : NULL;
-			CView *pView = pMDIActive ? pMDIActive->GetActiveView() : NULL;
-
-			if(pView){
-				CModDoc *pModDoc = (CModDoc *)pView->GetDocument();
-				BOOL bNotPlaying = ((CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc) && (CMainFrame::GetMainFrame()->IsPlaying())) ? FALSE : TRUE;
-				pModDoc->PlayNote(iNote+1, m_nInstrument, 0, bNotPlaying);
-			}
-// -! BEHAVIOUR_CHANGE#0009
-*/
 			OnUpdateKeyboard();
 		}
 	}

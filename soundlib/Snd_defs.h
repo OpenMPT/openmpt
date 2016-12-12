@@ -440,6 +440,7 @@ enum PlayBehaviour
 	kFT2PanWithDelayedNoteOff,		// Pan command with delayed note-off
 	kFT2VolColDelay,				// FT2-style volume column handling if there is a note delay
 	kFT2FinetunePrecision,			// Only take the upper 4 bits of sample finetune.
+	kFT2NoteOffFlags,				// Set and reset the correct fade/key-off flags with note-off and instrument number after note-off
 
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3

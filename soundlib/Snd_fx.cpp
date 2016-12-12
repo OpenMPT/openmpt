@@ -2055,13 +2055,13 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				ModCommand::NOTE note = pChn->nNote;
+				ModCommand::NOTE plugNote = pChn->nNote;
 				// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-				if(m_playBehaviour[kITRealNoteMapping] && note < CountOf(pChn->pModInstrument->NoteMap))
+				if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
 				{
-					note = pChn->pModInstrument->NoteMap[note - 1];
+					plugNote = pChn->pModInstrument->NoteMap[note - NOTE_MIN];
 				}
-				applyNNAtoPlug = pPlugin->IsNotePlaying(note, GetBestMidiChannel(nChn), nChn);
+				applyNNAtoPlug = pPlugin->IsNotePlaying(plugNote, GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}
@@ -2074,7 +2074,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		nnaChn = GetNNAChannel(nChn);
 		if(nnaChn != 0)
 		{
-			ModChannel *p = &m_PlayState.Chn[nnaChn];
+			p = &m_PlayState.Chn[nnaChn];
 			// Copy Channel
 			*p = *pChn;
 			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
@@ -2450,6 +2450,10 @@ bool CSoundFile::ProcessEffects()
 					note = NOTE_NONE;
 					instr = 0;
 					retrigEnv = false;
+					// FT2 Compatbility: Start fading the note for notes with no delay. Only relevant when a volume command is encountered after the note-off.
+					// Test case: NoteOffFadeNoEnv.xm
+					if(m_SongFlags[SONG_FIRSTTICK] && m_playBehaviour[kFT2NoteOffFlags])
+						pChn->dwFlags.set(CHN_NOTEFADE);
 				} else if(m_playBehaviour[kFT2RetrigWithNoteDelay] && !m_SongFlags[SONG_FIRSTTICK])
 				{
 					// FT2 Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
@@ -2541,6 +2545,10 @@ bool CSoundFile::ProcessEffects()
 					pChn->nAutoVibDepth = 0;
 					pChn->nAutoVibPos = 0;
 					pChn->nFadeOutVol = 65536;
+					// FT2 Compatbility: Reset key-off status with instrument number
+					// Test case: NoteOffInstrChange.xm
+					if(m_playBehaviour[kFT2NoteOffFlags])
+						pChn->dwFlags.reset(CHN_KEYOFF);
 				}
 				if (!keepInstr) instr = 0;
 			}
@@ -2694,10 +2702,10 @@ bool CSoundFile::ProcessEffects()
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
-				uint32 param = 0;
+				uint32 porta = 0;
 				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 				{
-					param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
+					porta = ImpulseTrackerPortaVolCmd[vol & 0x0F];
 				} else
 				{
 					if(cmd == CMD_TONEPORTAMENTO && GetType() == MOD_TYPE_XM)
@@ -2709,16 +2717,16 @@ bool CSoundFile::ProcessEffects()
 						cmd = CMD_NONE;
 						vol *= 2;
 					}
-					param = vol << 4;
+					porta = vol << 4;
 
 					// FT2 compatibility: If there's a portamento and a note delay, execute the portamento, but don't update the parameter
 					// Test case: PortaDelay.xm
 					if(m_playBehaviour[kFT2PortaDelay] && nStartTick != 0)
 					{
-						param = 0;
+						porta = 0;
 					}
 				}
-				TonePortamento(pChn, param);
+				TonePortamento(pChn, porta);
 			} else
 			{
 				// FT2 Compatibility: FT2 ignores some volume commands with parameter = 0.
