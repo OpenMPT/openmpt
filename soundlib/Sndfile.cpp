@@ -996,6 +996,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2PanWithDelayedNoteOff);
 		playBehaviour.set(kFT2VolColDelay);
 		playBehaviour.set(kFT2FinetunePrecision);
+		playBehaviour.set(kFT2NoteOffFlags);
 		break;
 
 	case MOD_TYPE_S3M:
