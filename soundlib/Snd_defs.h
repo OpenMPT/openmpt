@@ -442,6 +442,8 @@ enum PlayBehaviour
 	kFT2FinetunePrecision,			// Only take the upper 4 bits of sample finetune.
 	kFT2NoteOffFlags,				// Set and reset the correct fade/key-off flags with note-off and instrument number after note-off
 
+	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
+
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.

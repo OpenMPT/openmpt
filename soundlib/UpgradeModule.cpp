@@ -448,9 +448,6 @@ void CSoundFile::UpgradeModule()
 		{
 			m_playBehaviour.set(behaviours[i].behaviour, (m_dwLastSavedWithVersion >= behaviours[i].version || m_dwLastSavedWithVersion == (behaviours[i].version & 0xFFFF0000)));
 		}
-
-		// The following behaviours were added in OpenMPT 1.26, so are not affected by the upgrade mechanism above.
-		m_playBehaviour.reset(kITInstrWithNoteOff);
 	} else if(compatModeXM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
 		// Pre-1.26: Detailed compatibility flags did not exist.
@@ -494,13 +491,31 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 	
-	if(GetType() == MOD_TYPE_XM)
+	if(GetType() == MOD_TYPE_IT)
 	{
 		// The following behaviours were added in/after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
 		static const PlayBehaviourVersion behaviours[] =
 		{
+			{ kITInstrWithNoteOff,				MAKE_VERSION_NUMERIC(1, 26, 00, 01) },
+			{ kITMultiSampleInstrumentNumber,	MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
+		};
+
+		for(size_t i = 0; i < CountOf(behaviours); i++)
+		{
+			if(m_dwLastSavedWithVersion < (behaviours[i].version & 0xFFFF0000))
+				m_playBehaviour.reset(behaviours[i].behaviour);
+			// Full version information available, i.e. not compatibility-exported.
+			if(m_dwLastSavedWithVersion > (behaviours[i].version & 0xFFFF0000) && m_dwLastSavedWithVersion < behaviours[i].version)
+				m_playBehaviour.reset(behaviours[i].behaviour);
+		}
+	} else if(GetType() == MOD_TYPE_XM)
+	{
+		// The following behaviours were added after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
+		static const PlayBehaviourVersion behaviours[] =
+		{
 			{ kFT2NoteOffFlags,					MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
 		};
+
 		for(size_t i = 0; i < CountOf(behaviours); i++)
 		{
 			if(m_dwLastSavedWithVersion < behaviours[i].version)

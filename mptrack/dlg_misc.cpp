@@ -597,6 +597,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
 		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 16"); break;
 		case kFT2NoteOffFlags: desc = _T("Fade instrument on note-off when there is no volume envelope; instrument numbers reset note-off status."); break;
+		case kITMultiSampleInstrumentNumber: desc = _T("Lone instrument number after portamento within multi-sampled instrument sets the target sample's settings."); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
