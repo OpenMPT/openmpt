@@ -1931,21 +1931,41 @@ void CCtrlInstruments::OnInstrumentOpen()
 void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
-	const ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
 
-	if (!pIns) return;
+	if(!doBatchSave && m_sndFile.Instruments[m_nInstrument] == nullptr)
+	{
+		SwitchToView();
+		return;
+	}
 
-	std::string defaultName;
-	if (pIns->filename[0])
-		defaultName = pIns->filename;
-	else
-		defaultName = pIns->name;
-	SanitizeFilename(defaultName);
+	mpt::PathString fileName;
+	if(!doBatchSave)
+	{
+		const ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+		if(pIns->filename[0])
+			fileName = mpt::PathString::FromLocale(pIns->filename);
+		else
+			fileName = mpt::PathString::FromLocale(pIns->name);
+	} else
+	{
+		// Save all samples
+		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
+		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
+
+		fileName += MPT_PATHSTRING(" - %instrument_number% - ");
+		if(m_sndFile.GetModSpecifications().sampleFilenameLengthMax == 0)
+			fileName += MPT_PATHSTRING("%instrument_name%");
+		else
+			fileName += MPT_PATHSTRING("%instrument_filename%");
+
+	}
+	SanitizeFilename(fileName);
 
 	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 1 : 2;
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
-		.DefaultFilename(defaultName)
+		.DefaultFilename(fileName)
 		.ExtensionFilter((m_sndFile.GetType() == MOD_TYPE_XM) ?
 		"FastTracker II Instruments (*.xi)|*.xi|"
 		"Impulse Tracker Instruments (*.iti)|*.iti|"
@@ -1960,11 +1980,46 @@ void CCtrlInstruments::OnInstrumentSave()
 
 	BeginWaitCursor();
 
+	INSTRUMENTINDEX minIns = m_nInstrument, maxIns = m_nInstrument;
+	if(doBatchSave)
+	{
+		minIns = 1;
+		maxIns = m_sndFile.GetNumInstruments();
+	}
+	auto numberFmt = mpt::Format().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxIns)));
+	CString instrName, instrFilename;
+
 	bool ok = false;
-	if(!mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi")))
-		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile());
-	else
-		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2), m_sndFile.GetType() != MOD_TYPE_XM && index == 3);
+	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi"));
+	const bool doCompress = index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2);
+	const bool allowExternal = m_sndFile.GetType() != MOD_TYPE_XM && index == 3;
+
+	for(INSTRUMENTINDEX ins = minIns; ins <= maxIns; ins++)
+	{
+		const ModInstrument *pIns = m_sndFile.Instruments[ins];
+		if(pIns != nullptr)
+		{
+			fileName = dlg.GetFirstFile();
+			if(doBatchSave)
+			{
+				instrName = pIns->name[0] ? pIns->name : "untitled";
+				instrFilename = pIns->filename[0] ? pIns->filename : pIns->name;
+				SanitizeFilename(instrName);
+				SanitizeFilename(instrFilename);
+
+				std::wstring fileNameW = fileName.ToWide();
+				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_number%", numberFmt.ToWString(ins));
+				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_filename%", mpt::ToWide(instrName));
+				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_name%", mpt::ToWide(instrFilename));
+				fileName = mpt::PathString::FromWide(fileNameW);
+			}
+
+			if(saveXI)
+				ok = m_sndFile.SaveXIInstrument(ins, fileName);
+			else
+				ok = m_sndFile.SaveITIInstrument(ins, fileName, doCompress, allowExternal);
+		}
+	}
 
 	EndWaitCursor();
 	if (!ok)
