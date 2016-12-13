@@ -1237,6 +1237,17 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 			returnAfterVolumeAdjust = true;
 		}
 	}
+	// IT compatibility: A lone instrument number should only reset sample properties to those of the corresponding sample in instrument mode.
+	// C#5 01 ... <-- sample 1
+	// C-5 .. g02 <-- sample 2
+	// ... 01 ... <-- still sample 1, but with properties of sample 2
+	// In the above example, no sample change happens on the second row. In the third row, sample 1 keeps playing but with the
+	// volume and panning properties of sample 2.
+	// Test case: InstrAfterMultisamplePorta.it
+	if(m_nInstruments && !instrumentChanged && sampleChanged && pChn->pCurrentSample != nullptr && m_playBehaviour[kITMultiSampleInstrumentNumber] && !pChn->rowCommand.IsNote())
+	{
+		returnAfterVolumeAdjust = true;
+	}
 
 	// IT Compatibility: Envelope pickup after SCx cut (but don't do this when working with plugins, or else envelope carry stops working)
 	// Test case: cut-carry.it
@@ -2524,15 +2535,18 @@ bool CSoundFile::ProcessEffects()
 				//IT compatibility: Instrument with no note.
 				if(m_playBehaviour[kITInstrWithoutNote] || GetType() == MOD_TYPE_PLM)
 				{
+					// IT compatibility: Completely retrigger note after sample end to also reset portamento.
+					// Test case: PortaResetAfterRetrigger.it
+					bool triggerAfterSmpEnd = m_playBehaviour[kITMultiSampleInstrumentNumber] && pChn->increment.IsZero();
 					if(GetNumInstruments())
 					{
 						// Instrument mode
-						if(instr <= GetNumInstruments() && pChn->pModInstrument != Instruments[instr])
+						if(instr <= GetNumInstruments() && (pChn->pModInstrument != Instruments[instr] || triggerAfterSmpEnd))
 							note = pChn->nNote;
 					} else
 					{
 						// Sample mode
-						if(instr < MAX_SAMPLES && pChn->pModSample != &Samples[instr])
+						if(instr < MAX_SAMPLES && (pChn->pModSample != &Samples[instr] || triggerAfterSmpEnd))
 							note = pChn->nNote;
 					}
 				}
