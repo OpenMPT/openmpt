@@ -93,7 +93,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcTransposeDown, 1008, _T("Transpose -1"));
 	DefineKeyCommand(kcTransposeOctUp, 1009, _T("Transpose +1 Octave"));
 	DefineKeyCommand(kcTransposeOctDown, 1010, _T("Transpose -1 Octave"));
-	DefineKeyCommand(kcSelectColumn, 1011, _T("Select channel / Select all"));
+	DefineKeyCommand(kcSelectChannel, 1011, _T("Select Channel / Select All"));
 	DefineKeyCommand(kcPatternAmplify, 1012, _T("Amplify selection"));
 	DefineKeyCommand(kcPatternSetInstrument, 1013, _T("Apply current instrument"));
 	DefineKeyCommand(kcPatternInterpolateVol, 1014, _T("Interpolate Volume"));
@@ -705,6 +705,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcLockPlaybackToRows, 1965, _T("Lock Playback to Rows"));
 	DefineKeyCommand(kcSwitchToInstrLibrary, 1966, _T("Switch To Instrument Library"));
 	DefineKeyCommand(kcPatternSetInstrumentNotEmpty, 1967, _T("Apply current instrument to existing only"));
+	DefineKeyCommand(kcSelectColumn, 1968, _T("Select Column"));
 
 	// Add new key commands here.
 
