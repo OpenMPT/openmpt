@@ -227,6 +227,7 @@ enum CommandID
 	kcCopySelectOffWithNav,
 	kcCopySelectWithSelect,
 	kcCopySelectOffWithSelect,
+	kcSelectChannel,
 	kcSelectColumn,
 	kcSelectRow,
 	kcSelectEvent,

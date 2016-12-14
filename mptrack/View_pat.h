@@ -358,7 +358,8 @@ protected:
 	afx_msg void OnGrowSelection();
 	afx_msg void OnShrinkSelection();
 	afx_msg void OnEditSelectAll();
-	afx_msg void OnEditSelectColumn();
+	afx_msg void OnEditSelectChannel();
+	afx_msg void OnSelectCurrentChannel();
 	afx_msg void OnSelectCurrentColumn();
 	afx_msg void OnEditFind();
 	afx_msg void OnEditGoto();
@@ -453,7 +454,6 @@ private:
 	bool BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns colType, CString label, UINT command) const;
 	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih,  CModDoc* pModDoc) const;
 	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const;
