@@ -439,7 +439,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				} else
 				{
 					sndFile.RecalculateSamplesPerTick();
-					beats *= sndFile.GetSampleRate() / (Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
+					beats *= sndFile.GetSampleRate() / static_cast<double>(Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
 				}
 				s += mpt::String::Print(", %1 beats)", mpt::fmt::flt(beats, 0, 5));
 			}
