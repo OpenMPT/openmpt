@@ -123,6 +123,13 @@ using namespace ::std;
  * - Consecutive accesses can happen from different threads.
  * - Different objects can be accessed concurrently from different threads.
  *
+ * \section libopenmpt-cpp-windows Windows support
+ *
+ * Using the libopenmpt C++ API when libopenmpt is compiled as a DLL on Windows
+ * requires `#define LIBOPENMPT_USE_DLL` (or some equivalent build system
+ * configuration) before `#include <libopenmpt/libopenmpt.hpp>` in order to
+ * correctly import the symbols from the DLL.
+ *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
  * \ref libopenmpt_cpp
