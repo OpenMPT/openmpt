@@ -131,6 +131,10 @@ newaction {
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013/OpenMPT-custom.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013/PluginBridge.vcxproj")
 
@@ -143,6 +147,10 @@ newaction {
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT-custom.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
 
@@ -179,6 +187,10 @@ newaction {
   postprocess_vs2010_main("build/vs2013xp/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013xp/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013xp/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013xp/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013xp/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2013xp/OpenMPT-custom.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013xp/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013xp/PluginBridge.vcxproj")
 
@@ -191,6 +203,10 @@ newaction {
   postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015xp/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015xp/OpenMPT-MP3.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2015xp/OpenMPT-custom.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015xp/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015xp/PluginBridge.vcxproj")
 
@@ -373,6 +389,7 @@ end
 
 if _OPTIONS["group"] == "OpenMPT" then
 
+mp3 = false
 layout = "custom"
 solution "OpenMPT-custom"
  location ( "../../build/" .. mpt_projectpathname )
@@ -396,6 +413,33 @@ solution "OpenMPT-custom"
  dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
+mp3 = true
+layout = ""
+solution "OpenMPT-MP3"
+ location ( "../../build/" .. mpt_projectpathname )
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ platforms { "x86", "x86_64" }
+
+ dofile "../../build/premake/mpt-OpenMPT.lua"
+ dofile "../../build/premake/mpt-PluginBridge.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-opus.lua"
+ dofile "../../build/premake/ext-opusfile.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portmidi.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+ dofile "../../build/premake/ext-lame.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
+
+mp3 = false
 layout = ""
 solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )

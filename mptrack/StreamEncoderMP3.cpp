@@ -487,6 +487,14 @@ protected:
 			{ "lame_enc" },
 		};
 		bool ok = false;
+		if(TryLoad(mpt::PathString::FromUTF8("openmpt-lame"), false))
+		{
+			ok = true;
+		}
+		if(ok)
+		{
+			return true;
+		}
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
 			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame), true))

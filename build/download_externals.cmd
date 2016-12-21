@@ -59,11 +59,18 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."          "-" || goto error
-call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                    "xmp-sdk.zip"                        "."          "-" || goto error
-call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" "-" || goto error
-call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   "-" || goto error
+call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"             "WA5.55_SDK.exe"                    "."             "-" || goto error
+call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                   "xmp-sdk.zip"                       "."             "-" || goto error
+call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                    "asiosdk2.3.zip"                    "ASIOSDK2.3"    "-" || goto error
+call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip" "vstsdk365_12_11_2015_build_67.zip" "VST3 SDK"      "-" || goto error
+call :download_and_unpack "lame"      "https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"  "lame-3.99.5.tar.gz"                "lame-3.99.5"   "lame-3.99.5.tar" || goto error
+call :download_and_unpack "mpg123"    "http://www.mpg123.de/download/mpg123-1.23.8.tar.bz2"                       "mpg123-1.23.8.tar.bz2"             "mpg123-1.23.8" "mpg123-1.23.8.tar" || goto error
 rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/minimp3.tar.gz"                         "minimp3.tar.gz"                     "minimp3"    "minimp3.tar" || goto error
+
+rem workaround https://sourceforge.net/p/mpg123/bugs/243/
+cd include\mpg123 || goto error
+powershell -Command "(Get-Content src/compat/compat.h -Raw).replace(\"typedef long ssize_t\", \"typedef ptrdiff_t ssize_t\") | Set-Content src/compat/compat.h -Force" || goto error
+cd ..\.. || goto error
 
 goto ok
 
