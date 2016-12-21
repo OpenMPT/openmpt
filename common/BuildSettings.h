@@ -240,7 +240,9 @@
 //#define NO_PLUGINS
 
 // Enable dynamic loading of libmpg123
+#if !defined(MPT_WITH_MPG123)
 #define MPT_ENABLE_MPG123_DYNBIND
+#endif
 
 // Enable dynamic loading of un4seen unmo3
 #define MPT_ENABLE_UNMO3_DYNBIND
