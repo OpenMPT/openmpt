@@ -69,7 +69,8 @@ rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/m
 
 rem workaround https://sourceforge.net/p/mpg123/bugs/243/
 cd include\mpg123 || goto error
-powershell -Command "(Get-Content src/compat/compat.h -Raw).replace(\"typedef long ssize_t\", \"typedef ptrdiff_t ssize_t\") | Set-Content src/compat/compat.h -Force" || goto error
+rem PowerShell 3 on Windows 7 requires https://www.microsoft.com/en-us/download/details.aspx?id=34595
+powershell -Version 3 -Command "(Get-Content src\compat\compat.h -Raw).replace(\"typedef long ssize_t\", \"typedef ptrdiff_t ssize_t\") | Set-Content src\compat\compat.h -Force" || goto error
 cd ..\.. || goto error
 
 goto ok
