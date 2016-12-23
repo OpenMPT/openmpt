@@ -1358,6 +1358,8 @@ void QuickChannelProperties::OnPanChanged()
 		document->SetChannelDefaultPan(channel, panning);
 		panSlider.SetPos(panning / 4u);
 		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+		// Surround is forced off when changing pan, so uncheck the checkbox.
+		CheckDlgButton(IDC_CHECK2, BST_UNCHECKED);
 	}
 }
 
