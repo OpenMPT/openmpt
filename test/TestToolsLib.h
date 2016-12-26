@@ -173,8 +173,8 @@ private:
 		}
 	}
 
-	template <typename Tx, typename Ty>
-	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y, const Tesp &eps)
+	template <typename Tx, typename Ty, typename Teps>
+	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y, const Teps &eps)
 	{
 		if(!IsEqualEpsilon(x, y, eps))
 		{
@@ -227,7 +227,7 @@ public:
 	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 
-	#define VERIFY_EQUAL_EPS(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;}, (eps) )
+	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;}, (eps) )
 
 #else
 
