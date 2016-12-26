@@ -602,7 +602,7 @@ bool CASIODevice::InternalOpen()
 		m_Callbacks.bufferSwitchTimeInfo = CallbackBufferSwitchTimeInfo;
 		MPT_ASSERT_ALWAYS(g_CallbacksInstance == nullptr);
 		g_CallbacksInstance = this;
-		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels, m_nAsioBufferLen));
+		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels.GetNumHostChannels(), m_nAsioBufferLen));
 		asioCall(createBuffers(m_BufferInfo.data(), m_Settings.GetTotalChannels(), m_nAsioBufferLen, &m_Callbacks));
 		m_BuffersCreated = true;
 
