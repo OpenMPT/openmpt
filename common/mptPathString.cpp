@@ -69,7 +69,7 @@ PathString PathString::Simplify() const
 //-------------------------------------
 {
 	if(path.empty())
-		return MPT_PATHSTRING("\\");
+		return PathString();
 
 	std::vector<RawPathString> components;
 	RawPathString root;
@@ -98,7 +98,7 @@ PathString PathString::Simplify() const
 
 	while(startPos < path.size())
 	{
-		std::size_t pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
+		auto pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
 		if(pos == RawPathString::npos)
 			pos = path.size();
 		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
@@ -121,7 +121,7 @@ PathString PathString::Simplify() const
 
 	RawPathString result = root;
 	result.reserve(path.size());
-	for(std::vector<mpt::RawPathString>::const_iterator it = components.begin(); it != components.end(); ++it)
+	for(auto it = components.cbegin(); it != components.cend(); ++it)
 	{
 		result += (*it) + MPT_PATHSTRING_LITERAL("\\");
 	}
