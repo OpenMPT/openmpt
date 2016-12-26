@@ -69,6 +69,9 @@ namespace mpt
 // This is also used as a type-tunnel pattern for mpt::String::Print.
 // Custom types that need to be converted to strings are encouraged to overload ToString() and ToWString().
 
+// fallback to member function ToString()
+template <typename T> auto ToString(const T & x) -> decltype(x.ToString()) { return x.ToString(); }
+
 static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
 MPT_DEPRECATED static inline std::string ToString(const char & x) { return std::string(1, x); } // deprecated to catch potential API mis-use, use std::string(1, x) instead
@@ -97,6 +100,9 @@ std::string ToString(const unsigned long long & x);
 std::string ToString(const float & x);
 std::string ToString(const double & x);
 std::string ToString(const long double & x);
+
+// fallback to member function ToUString()
+template <typename T> auto ToUString(const T & x) -> decltype(x.ToUString()) { return x.ToUString(); }
 
 static inline mpt::ustring ToUString(const mpt::ustring & x) { return x; }
 MPT_DEPRECATED mpt::ustring ToUString(const std::string & x); // Unknown encoding.
