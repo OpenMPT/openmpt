@@ -40,14 +40,15 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
- *  [**Bug**] Possible crashes with malformed IT, AMS, MDL, MED, MPTM, PSM and
-    Startrekker files.
+ *  [**Bug**] Possible crashes with malformed IT, ITP, AMS, MDL, MED, MPTM, PSM
+    and Startrekker files.
  *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
  *  [**Bug**] Plugins did not work correctly when changing the sample rate
     between two render calls.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
+ *  Playback improvements for IT and XM files.
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Added `libopenmpt_stream_callbacks_buffer.h` which adds
     `openmpt_stream_callbacks` support for in-memory buffers, possibly even only
