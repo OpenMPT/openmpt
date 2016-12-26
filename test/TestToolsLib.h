@@ -16,7 +16,12 @@
 #ifndef MODPLUG_TRACKER
 
 
+//#define MPT_TEST_CXX11
+
+
+#include "../common/Endianness.h"
 #include "../common/FlagSet.h"
+#include "../soundlib/Snd_defs.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -73,6 +78,17 @@ struct ToStringHelper
 	}
 };
 
+#ifdef MPT_TEST_CXX11
+
+template<>
+struct ToStringHelper<mpt::endian_type>
+{
+	std::string operator () (const mpt::endian_type &x)
+	{
+		return mpt::ToString(x.value);
+	}
+};
+
 template<typename enum_t, typename store_t>
 struct ToStringHelper<FlagSet<enum_t, store_t> >
 {
@@ -81,6 +97,45 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 		return mpt::ToString(x.GetRaw());
 	}
 };
+
+template<typename enum_t>
+struct ToStringHelper<enum_value_type<enum_t> >
+{
+	std::string operator () (const enum_value_type<enum_t> &x)
+	{
+		return mpt::ToString(x.as_bits());
+	}
+};
+
+template<typename Ta, typename Tb>
+struct ToStringHelper<std::pair<Ta, Tb> >
+{
+	std::string operator () (const std::pair<Ta, Tb> &x)
+	{
+		return std::string("{") + mpt::ToString(x.first) + std::string(",") + mpt::ToString(x.second) + std::string("}");
+	}
+};
+
+template<std::size_t FRACT, typename T>
+struct ToStringHelper<FPInt<FRACT, T> >
+{
+	std::string operator () (const FPInt<FRACT, T> &x)
+	{
+		return std::string("FPInt<") + mpt::ToString(FRACT) + std::string(",") + mpt::ToString(typeid(T).name()) + std::string(">{") + mpt::ToString(x.GetInt()) + std::string(".") + mpt::ToString(x.GetFract()) + std::string("}");
+	}
+};
+
+template<>
+struct ToStringHelper<SamplePosition>
+{
+	std::string operator () (const SamplePosition &x)
+	{
+		return mpt::ToString(x.GetInt()) + std::string(".") + std::string("0x") + mpt::fmt::hex0<8>(x.GetFract());
+	}
+};
+
+#endif // MPT_TEST_CXX11
+
 
 namespace Test {
 
@@ -159,7 +214,7 @@ private:
 
 public:
 
-#if 0 // C++11 version
+#ifdef MPT_TEST_CXX11
 
 private:
 
