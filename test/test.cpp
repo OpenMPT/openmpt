@@ -1115,7 +1115,7 @@ static MPT_NOINLINE void TestMisc()
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 	mpt::UUID uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
-	VERIFY_EQUAL(uuid2.ToUString(), MPT_USTRING("00010203-0405-0607-0809-0a0b0c0d0e0f"));
+	VERIFY_EQUAL(uuid2.ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds
@@ -1199,7 +1199,7 @@ static MPT_NOINLINE void TestMisc()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
-		VERIFY_EQUAL(a, 'a');
+		VERIFY_EQUAL(std::string(1, a), std::string(1, 'a'));
 	}
 
 	{
@@ -1264,7 +1264,7 @@ static MPT_NOINLINE void TestMisc()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
-		VERIFY_EQUAL(a, 'a');
+		VERIFY_EQUAL(std::string(1, a), std::string(1, 'a'));
 	}
 
 #ifdef MPT_WITH_ZLIB
