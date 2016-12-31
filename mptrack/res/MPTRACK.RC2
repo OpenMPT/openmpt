@@ -51,7 +51,7 @@ BEGIN
             VALUE "FileDescription",  "OpenMPT / ModPlug Tracker"
             VALUE "FileVersion",      VER_FILEVERSION_STR
             VALUE "InternalName",     "ModPlug Tracker"
-            VALUE "LegalCopyright",   "Copyright ©1997-2003 Olivier Lapicque; ©2004-2016 contributors."
+            VALUE "LegalCopyright",   "Copyright ©1997-2003 Olivier Lapicque; ©2004-2017 contributors."
             VALUE "LegalTrademarks",  "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
             VALUE "ProductName",      "OpenMPT / ModPlug Tracker"
