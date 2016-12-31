@@ -1,6 +1,6 @@
 The OpenMPT code is licensed under the BSD license.
 
-Copyright (c) 2004-2016, OpenMPT contributors
+Copyright (c) 2004-2017, OpenMPT contributors
 Copyright (c) 1997-2003, Olivier Lapicque
 All rights reserved.
 
