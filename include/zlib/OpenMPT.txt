@@ -1,4 +1,4 @@
-zlib 1.2.8.
+zlib 1.2.9.
 Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
  *  commit 0b5c0c94ffa8a11789c31726e13ebe59f93263fe
@@ -8,4 +8,6 @@ OpenMPT specific changes:
  *  iowin32.c ha sbeen modified to only use Windows 8 WinRT API when actually
     compiling for Windows 8 or later.
  *  All custom modifications are marked with // OpenMPT
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
 No further changes have been made.
