@@ -560,8 +560,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 			// Transpose + Finetune to Frequency
 			if ((m_sndFile.UseFinetuneAndTranspose()) && (m_nSample))
 			{
-				const ModSample &sample = m_sndFile.GetSample(m_nSample);
-				uint32 freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+				uint32 freqHz = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
 				wsprintf(pszText, _T("%luHz"), freqHz);
 				return TRUE;
 			}
