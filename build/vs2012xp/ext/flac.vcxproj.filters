@@ -126,6 +126,9 @@
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h">
       <Filter>src\libFLAC\include\protected</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\src\share\windows_unicode_filenames.h">
+      <Filter>src\share</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\bitmath.c">
@@ -216,6 +219,9 @@
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\window.c">
+      <Filter>src\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\flac\src\libFLAC\windows_unicode_filenames.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\share\win_utf8_io\win_utf8_io.c">

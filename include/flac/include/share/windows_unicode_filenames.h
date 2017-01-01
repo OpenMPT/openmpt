@@ -1,6 +1,5 @@
-/* libFLAC - Free Lossless Audio Codec
- * Copyright (C) 2004-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+/* libFLAC - Free Lossless Audio Codec library
+ * Copyright (C) 2013-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,19 +29,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
+#ifdef _WIN32
+
+#ifndef flac__windows_unicode_filenames_h
+#define flac__windows_unicode_filenames_h
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/utime.h>
+#include "FLAC/ordinals.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include "private/ogg_mapping.h"
+void flac_internal_set_utf8_filenames(FLAC__bool flag);
+FLAC__bool flac_internal_get_utf8_filenames(void);
+#define flac_set_utf8_filenames flac_internal_set_utf8_filenames
+#define flac_get_utf8_filenames flac_internal_get_utf8_filenames
 
-const unsigned FLAC__OGG_MAPPING_PACKET_TYPE_LEN = 8; /* bits */
+FILE* flac_internal_fopen_utf8(const char *filename, const char *mode);
+int flac_internal_stat64_utf8(const char *path, struct __stat64 *buffer);
+int flac_internal_chmod_utf8(const char *filename, int pmode);
+int flac_internal_utime_utf8(const char *filename, struct utimbuf *times);
+int flac_internal_unlink_utf8(const char *filename);
+int flac_internal_rename_utf8(const char *oldname, const char *newname);
 
-const FLAC__byte FLAC__OGG_MAPPING_FIRST_HEADER_PACKET_TYPE = 0x7f;
+#include <windows.h>
+HANDLE WINAPI flac_internal_CreateFile_utf8(const char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+#define CreateFile_utf8 flac_internal_CreateFile_utf8
 
-const FLAC__byte * const FLAC__OGG_MAPPING_MAGIC = (const FLAC__byte * const)"FLAC";
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
-const unsigned FLAC__OGG_MAPPING_VERSION_MAJOR_LEN = 8; /* bits */
-const unsigned FLAC__OGG_MAPPING_VERSION_MINOR_LEN = 8; /* bits */
-
-const unsigned FLAC__OGG_MAPPING_NUM_HEADERS_LEN = 16; /* bits */
+#endif
+#endif

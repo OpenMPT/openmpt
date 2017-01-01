@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -837,6 +837,11 @@ FLAC_API FLAC__bool FLAC__metadata_simple_iterator_delete_block(FLAC__Metadata_S
 	FLAC__ASSERT_DECLARATION(FLAC__off_t debug_target_offset = iterator->offset[iterator->depth];)
 	FLAC__bool ret;
 
+	if(!iterator->is_writable) {
+		iterator->status = FLAC__METADATA_SIMPLE_ITERATOR_STATUS_NOT_WRITABLE;
+		return false;
+	}
+
 	if(iterator->type == FLAC__METADATA_TYPE_STREAMINFO) {
 		iterator->status = FLAC__METADATA_SIMPLE_ITERATOR_STATUS_ILLEGAL_INPUT;
 		return false;
@@ -1085,7 +1090,7 @@ static FLAC__bool chain_merge_adjacent_padding_(FLAC__Metadata_Chain *chain, FLA
 {
 	if(node->data->type == FLAC__METADATA_TYPE_PADDING && 0 != node->next && node->next->data->type == FLAC__METADATA_TYPE_PADDING) {
 		const unsigned growth = FLAC__STREAM_METADATA_HEADER_LENGTH + node->next->data->length;
-		node->data->length += growth;
+		node->data->length += growth; /* new block size can be greater than max metadata block size, but it'll be fixed later in chain_prepare_for_write_() */
 
 		chain_delete_node_(chain, node->next);
 		return true;
@@ -1147,6 +1152,22 @@ static FLAC__off_t chain_prepare_for_write_(FLAC__Metadata_Chain *chain, FLAC__b
 					chain->tail->data->length -= delta;
 					current_length -= delta;
 					FLAC__ASSERT(current_length == chain->initial_length);
+				}
+			}
+		}
+	}
+
+	/* check sizes of all metadata blocks; reduce padding size if necessary */
+	{
+		FLAC__Metadata_Node *node;
+		for (node = chain->head; node; node = node->next) {
+			if(node->data->length >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN)) {
+				if(node->data->type == FLAC__METADATA_TYPE_PADDING) {
+					node->data->length = (1u << FLAC__STREAM_METADATA_LENGTH_LEN) - 1;
+					current_length = chain_calculate_length_(chain);
+				} else {
+					chain->status = FLAC__METADATA_CHAIN_STATUS_BAD_METADATA;
+					return 0;
 				}
 			}
 		}
@@ -1597,34 +1618,84 @@ FLAC_API FLAC__bool FLAC__metadata_chain_read_ogg_with_callbacks(FLAC__Metadata_
 	return chain_read_with_callbacks_(chain, handle, callbacks, /*is_ogg=*/true);
 }
 
+typedef enum {
+	LBS_NONE = 0,
+	LBS_SIZE_CHANGED,
+	LBS_BLOCK_ADDED,
+	LBS_BLOCK_REMOVED
+} LastBlockState;
+
 FLAC_API FLAC__bool FLAC__metadata_chain_check_if_tempfile_needed(FLAC__Metadata_Chain *chain, FLAC__bool use_padding)
 {
 	/* This does all the same checks that are in chain_prepare_for_write_()
 	 * but doesn't actually alter the chain.  Make sure to update the logic
 	 * here if chain_prepare_for_write_() changes.
 	 */
-	const FLAC__off_t current_length = chain_calculate_length_(chain);
+	FLAC__off_t current_length;
+	LastBlockState lbs_state = LBS_NONE;
+	unsigned lbs_size = 0;
 
 	FLAC__ASSERT(0 != chain);
 
+	current_length = chain_calculate_length_(chain);
+
 	if(use_padding) {
+		const FLAC__Metadata_Node * const node = chain->tail;
 		/* if the metadata shrank and the last block is padding, we just extend the last padding block */
-		if(current_length < chain->initial_length && chain->tail->data->type == FLAC__METADATA_TYPE_PADDING)
-			return false;
+		if(current_length < chain->initial_length && node->data->type == FLAC__METADATA_TYPE_PADDING) {
+			lbs_state = LBS_SIZE_CHANGED;
+			lbs_size = node->data->length + (chain->initial_length - current_length);
+		}
 		/* if the metadata shrank more than 4 bytes then there's room to add another padding block */
-		else if(current_length + (FLAC__off_t)FLAC__STREAM_METADATA_HEADER_LENGTH <= chain->initial_length)
-			return false;
+		else if(current_length + (FLAC__off_t)FLAC__STREAM_METADATA_HEADER_LENGTH <= chain->initial_length) {
+			lbs_state = LBS_BLOCK_ADDED;
+			lbs_size = chain->initial_length - (current_length + (FLAC__off_t)FLAC__STREAM_METADATA_HEADER_LENGTH);
+		}
 		/* if the metadata grew but the last block is padding, try cutting the padding to restore the original length so we don't have to rewrite the whole file */
 		else if(current_length > chain->initial_length) {
 			const FLAC__off_t delta = current_length - chain->initial_length;
-			if(chain->tail->data->type == FLAC__METADATA_TYPE_PADDING) {
+			if(node->data->type == FLAC__METADATA_TYPE_PADDING) {
 				/* if the delta is exactly the size of the last padding block, remove the padding block */
-				if((FLAC__off_t)chain->tail->data->length + (FLAC__off_t)FLAC__STREAM_METADATA_HEADER_LENGTH == delta)
-					return false;
+				if((FLAC__off_t)node->data->length + (FLAC__off_t)FLAC__STREAM_METADATA_HEADER_LENGTH == delta) {
+					lbs_state = LBS_BLOCK_REMOVED;
+					lbs_size = 0;
+				}
 				/* if there is at least 'delta' bytes of padding, trim the padding down */
-				else if((FLAC__off_t)chain->tail->data->length >= delta)
-					return false;
+				else if((FLAC__off_t)node->data->length >= delta) {
+					lbs_state = LBS_SIZE_CHANGED;
+					lbs_size = node->data->length - delta;
+				}
 			}
+		}
+	}
+
+	current_length = 0;
+	/* check sizes of all metadata blocks; reduce padding size if necessary */
+	{
+		const FLAC__Metadata_Node *node;
+		for(node = chain->head; node; node = node->next) {
+			unsigned block_len = node->data->length;
+			if(node == chain->tail) {
+				if(lbs_state == LBS_BLOCK_REMOVED)
+					continue;
+				else if(lbs_state == LBS_SIZE_CHANGED)
+					block_len = lbs_size;
+			}
+			if(block_len >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN)) {
+				if(node->data->type == FLAC__METADATA_TYPE_PADDING)
+					block_len = (1u << FLAC__STREAM_METADATA_LENGTH_LEN) - 1;
+				else
+					return false /* the return value doesn't matter */;
+			}
+			current_length += (FLAC__STREAM_METADATA_HEADER_LENGTH + block_len);
+		}
+
+		if(lbs_state == LBS_BLOCK_ADDED) {
+			/* test added padding block */
+			unsigned block_len = lbs_size;
+			if(block_len >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN))
+				block_len = (1u << FLAC__STREAM_METADATA_LENGTH_LEN) - 1;
+			current_length += (FLAC__STREAM_METADATA_HEADER_LENGTH + block_len);
 		}
 	}
 
@@ -2255,8 +2326,10 @@ FLAC__Metadata_SimpleIteratorStatus read_metadata_block_data_vorbis_comment_cb_(
 	if(block->num_comments == 0) {
 		block->comments = 0;
 	}
-	else if(0 == (block->comments = calloc(block->num_comments, sizeof(FLAC__StreamMetadata_VorbisComment_Entry))))
+	else if(0 == (block->comments = calloc(block->num_comments, sizeof(FLAC__StreamMetadata_VorbisComment_Entry)))) {
+		block->num_comments = 0;
 		return FLAC__METADATA_SIMPLE_ITERATOR_STATUS_MEMORY_ALLOCATION_ERROR;
+	}
 
 	for(i = 0; i < block->num_comments; i++) {
 		status = read_metadata_block_data_vorbis_comment_entry_cb_(handle, read_cb, block->comments + i, block_length);
@@ -2529,6 +2602,9 @@ FLAC__bool write_metadata_block_header_cb_(FLAC__IOHandle handle, FLAC__IOCallba
 	FLAC__byte buffer[FLAC__STREAM_METADATA_HEADER_LENGTH];
 
 	FLAC__ASSERT(block->length < (1u << FLAC__STREAM_METADATA_LENGTH_LEN));
+	/* double protection */
+	if(block->length >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN))
+		return false;
 
 	buffer[0] = (block->is_last? 0x80 : 0) | (FLAC__byte)block->type;
 	pack_uint32_(block->length, buffer + 1, 3);
@@ -3233,11 +3309,14 @@ local_snprintf(char *str, size_t size, const char *fmt, ...)
 	va_list va;
 	int rc;
 
-	va_start (va, fmt);
-
 #if defined _MSC_VER
 	if (size == 0)
 		return 1024;
+#endif
+
+	va_start (va, fmt);
+
+#if defined _MSC_VER
 	rc = vsnprintf_s (str, size, _TRUNCATE, fmt, va);
 	if (rc < 0)
 		rc = size - 1;
