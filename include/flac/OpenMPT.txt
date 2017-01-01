@@ -1,7 +1,8 @@
+flac 1.3.2.
 The FLAC package has been left pretty much untouched, except for a few changes:
-- Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
-  been removed.
-- src/share/win_utf8_io/win_utf8_io.c has been modified to compile with UNICODE.
-  Only additions were made and those are marked with // OpenMPT
-- For building, premake is used to generate Visual Studio project files.
-  See ../build/premake/ for details.
+ *  Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
+    been removed.
+ *  src/share/win_utf8_io/win_utf8_io.c has been modified to compile with UNICODE.
+    Only additions were made and those are marked with // OpenMPT
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.

@@ -55,9 +55,7 @@
    "../../include/flac/src/libFLAC/stream_encoder_intrin_ssse3.c",
    "../../include/flac/src/libFLAC/stream_encoder_framing.c",
    "../../include/flac/src/libFLAC/window.c",
-  }
-  files {
-   "../../include/flac/src/share/win_utf8_io/win_utf8_io.c",
+   "../../include/flac/src/libFLAC/windows_unicode_filenames.c",
   }
   files {
    "../../include/flac/src/libFLAC/include/private/all.h",
@@ -84,6 +82,12 @@
    "../../include/flac/src/libFLAC/include/protected/stream_decoder.h",
    "../../include/flac/src/libFLAC/include/protected/stream_encoder.h",
   }
+  filter { "action:vs*" }
+    files {
+     "../../include/flac/src/share/win_utf8_io/win_utf8_io.c",
+     "../../include/flac/src/share/windows_unicode_filenames.h",
+    }
+  filter {}
   files {
    "../../include/flac/include/FLAC/all.h",
    "../../include/flac/include/FLAC/assert.h",
@@ -100,7 +104,7 @@
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
-  defines { "VERSION=\"1.3.1\"" }
+  defines { "PACKAGE_VERSION=\"1.3.2\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }

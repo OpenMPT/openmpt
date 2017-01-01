@@ -224,7 +224,7 @@ void FLAC__MD5Init(FLAC__MD5Context *ctx)
 	ctx->bytes[0] = 0;
 	ctx->bytes[1] = 0;
 
-	ctx->internal_buf.p8= 0;
+	ctx->internal_buf.p8 = 0;
 	ctx->capacity = 0;
 }
 
@@ -262,7 +262,7 @@ void FLAC__MD5Final(FLAC__byte digest[16], FLAC__MD5Context *ctx)
 	memcpy(digest, ctx->buf, 16);
 	if (0 != ctx->internal_buf.p8) {
 		free(ctx->internal_buf.p8);
-		ctx->internal_buf.p8= 0;
+		ctx->internal_buf.p8 = 0;
 		ctx->capacity = 0;
 	}
 	memset(ctx, 0, sizeof(*ctx));	/* In case it's sensitive */
@@ -499,14 +499,12 @@ FLAC__bool FLAC__MD5Accumulate(FLAC__MD5Context *ctx, const FLAC__int32 * const 
 		return false;
 
 	if (ctx->capacity < bytes_needed) {
-		FLAC__byte *tmp = realloc(ctx->internal_buf.p8, bytes_needed);
-		if (0 == tmp) {
-			free(ctx->internal_buf.p8);
-			if (0 == (ctx->internal_buf.p8= safe_malloc_(bytes_needed)))
+		if (0 == (ctx->internal_buf.p8 = safe_realloc_(ctx->internal_buf.p8, bytes_needed))) {
+			if (0 == (ctx->internal_buf.p8 = safe_malloc_(bytes_needed))) {
+				ctx->capacity = 0;
 				return false;
+			}
 		}
-		else
-			ctx->internal_buf.p8= tmp;
 		ctx->capacity = bytes_needed;
 	}
 
