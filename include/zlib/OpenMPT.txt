@@ -1,11 +1,7 @@
-zlib 1.2.9.
+zlib 1.2.10.
 Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
- *  commit 0b5c0c94ffa8a11789c31726e13ebe59f93263fe
-    "Win32 implementation of minizip ZTELL64 broken"
-    from https://github.com/akrylysov/zlib/commit/0b5c0c94ffa8a11789c31726e13ebe59f93263fe
-    has been applied on top of zlib 1.2.8 release.
- *  iowin32.c ha sbeen modified to only use Windows 8 WinRT API when actually
+ *  iowin32.c has been modified to only use Windows 8 WinRT API when actually
     compiling for Windows 8 or later.
  *  All custom modifications are marked with // OpenMPT
  *  For building, premake is used to generate Visual Studio project files.
