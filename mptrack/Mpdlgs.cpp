@@ -1785,7 +1785,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{
 			mic.szPname[0] = 0;
 			if (midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
-				combo->SetItemData(combo->AddString(mic.szPname), i);
+				combo->SetItemData(combo->AddString(theApp.GetFriendlyMIDIPortName(mic.szPname, true)), i);
 		}
 		combo->SetCurSel((m_nMidiDevice == MIDI_MAPPER) ? 0 : m_nMidiDevice);
 	}
