@@ -590,9 +590,9 @@ BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
 {
 	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return FALSE;
 	// Check for dupes
-	for(size_t i = 0; i < gpDLSBanks.size(); i++)
+	for(const auto &bank : gpDLSBanks)
 	{
-		if(gpDLSBanks[i] && !mpt::PathString::CompareNoCase(filename, gpDLSBanks[i]->GetFileName())) return TRUE;
+		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return TRUE;
 	}
 	try
 	{
@@ -1273,9 +1273,9 @@ int CTrackApp::ExitInstance()
 	m_pSoundDevicesManager = nullptr;
 	ExportMidiConfig(theApp.GetSettings());
 	SaveDefaultDLSBanks();
-	for(size_t i = 0; i < gpDLSBanks.size(); i++)
+	for(auto &bank : gpDLSBanks)
 	{
-		delete gpDLSBanks[i];
+		delete bank;
 	}
 	gpDLSBanks.clear();
 
@@ -1417,9 +1417,9 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 
 	std::vector<const char *> modExtensions = CSoundFile::GetSupportedExtensions(true);
 	std::string exts;
-	for(size_t i = 0; i < modExtensions.size(); i++)
+	for(const auto &ext : modExtensions)
 	{
-		exts += std::string("*.") + modExtensions[i] + std::string(";");
+		exts += std::string("*.") + ext + std::string(";");
 	}
 
 	static int nFilterIndex = 0;
@@ -1970,7 +1970,6 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 	CDialog pluginScanDlg;
 	DWORD scanStart = GetTickCount();
-	bool dialogShown = false;
 
 	// Read tags for built-in plugins
 	for(auto plug : *m_pPluginManager)
@@ -1995,14 +1994,13 @@ BOOL CTrackApp::InitializeDXPlugins()
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
 
-			if(!dialogShown && GetTickCount() >= scanStart + 2000)
+			if(!pluginScanDlg.m_hWnd && GetTickCount() >= scanStart + 2000)
 			{
 				// If this is taking too long, show the user what they're waiting for.
-				dialogShown = true;
 				pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
 				pluginScanDlg.ShowWindow(SW_SHOW);
 				pluginScanDlg.CenterWindow(gpSplashScreen);
-			} else if(dialogShown)
+			} else if(pluginScanDlg.m_hWnd)
 			{
 				CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
 				std::wstring scanStr = mpt::String::Print(L"Scanning Plugin %1 / %2...\n%3", plug + 1, numPlugins + 1, plugPath);
@@ -2036,6 +2034,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 		}
 	}
 	GetPluginCache().Flush();
+	if(pluginScanDlg.m_hWnd)
+	{
+		pluginScanDlg.DestroyWindow();
+	}
 	if(!nonFoundPlugs.empty())
 	{
 		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs, L"OpenMPT", CWnd::GetDesktopWindow());
@@ -2150,5 +2152,13 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 	}
 	return _T("");
 }
+
+
+CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort)
+//-------------------------------------------------------------------------------------
+{
+	return GetSettings().Read<CString>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
+}
+
 
 OPENMPT_NAMESPACE_END

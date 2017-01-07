@@ -12,6 +12,7 @@
 #ifdef MODPLUG_TRACKER
 #include "MidiInOut.h"
 #include "MidiInOutEditor.h"
+#include "../../mptrack/Mptrack.h"
 #include "../../mptrack/resource.h"
 
 
@@ -75,17 +76,16 @@ void MidiInOutEditor::PopulateLists()
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
 
 	const PmDeviceInfo *device;
+	CString deviceName;
 
 	// Go through all PortMidi devices
 	for(PmDeviceID i = 0; (device = Pm_GetDeviceInfo(i)) != nullptr; i++)
 	{
-		std::string deviceName = std::string(device->name) + std::string(" [") + std::string(device->interf) + std::string("]");
-		// We could make use of Pm_GetDefaultInputDeviceID / Pm_GetDefaultOutputDeviceID here, but is it useful to show those actually?
-
 		if(device->input)
 		{
 			// We can actually receive MIDI data on this device.
-			int result = m_inputCombo.AddString(deviceName.c_str());
+			deviceName = theApp.GetFriendlyMIDIPortName(device->name, true) + _T(" [") + CString(device->interf) + _T("]");
+			int result = m_inputCombo.AddString(deviceName);
 			m_inputCombo.SetItemData(result, i);
 
 			if(result != CB_ERR && i == plugin.inputDevice.index)
@@ -95,7 +95,8 @@ void MidiInOutEditor::PopulateLists()
 		if(device->output)
 		{
 			// We can actually output MIDI data on this device.
-			int result = m_outputCombo.AddString(deviceName.c_str());
+			deviceName = theApp.GetFriendlyMIDIPortName(device->name, false) + _T(" [") + CString(device->interf) + _T("]");
+			int result = m_outputCombo.AddString(deviceName);
 			m_outputCombo.SetItemData(result, i);
 
 			if(result != CB_ERR && i == plugin.outputDevice.index)

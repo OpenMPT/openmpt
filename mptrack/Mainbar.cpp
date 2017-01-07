@@ -105,7 +105,7 @@ BOOL CToolBarEx::EnableControl(CWnd &wnd, UINT nIndex, UINT nHeight)
 }
 
 
-void CToolBarEx::ChangeCtrlStyle(long lStyle, BOOL bSetStyle)
+void CToolBarEx::ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle)
 //-----------------------------------------------------------
 {
 	if (m_hWnd)
@@ -609,7 +609,7 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 				mic.szPname[0] = 0;
 				if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
 				{
-					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, mic.szPname);
+					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, theApp.GetFriendlyMIDIPortName(mic.szPname, true));
 				}
 			}
 			if(!numDevs)
