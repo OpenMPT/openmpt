@@ -857,28 +857,28 @@ namespace Util {
 
 	MPT_FORCEINLINE int32 muldiv(int32 a, int32 b, int32 c)
 	{
-		return static_cast<int32>( mul32to64( a, b ) / c );
+		return mpt::saturate_cast<int32>( mul32to64( a, b ) / c );
 	}
 
 	MPT_FORCEINLINE int32 muldivr(int32 a, int32 b, int32 c)
 	{
-		return static_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
+		return mpt::saturate_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
 	MPT_FORCEINLINE uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
 	{
-		return static_cast<uint32>( mul32to64_unsigned( a, b ) / c );
+		return mpt::saturate_cast<uint32>( mul32to64_unsigned( a, b ) / c );
 	}
 	MPT_FORCEINLINE uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
 	{
-		return static_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2 ) ) / c );
+		return mpt::saturate_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2u ) ) / c );
 	}
 
 	MPT_FORCEINLINE int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
-		a += c / 2;
+		a += c / 2u;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
 
