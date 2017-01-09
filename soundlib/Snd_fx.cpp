@@ -5618,8 +5618,9 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 		return (period + c5speed - 8363) <<  FREQ_FRACBITS;
 	} else if(GetType() == MOD_TYPE_MDL)
 	{
+		LimitMax(period, Util::MaxValueOfType(period) >> 8);
 		if (!c5speed) c5speed = 8363;
-		return Util::muldiv(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+		return Util::muldiv_unsigned(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
@@ -5633,11 +5634,11 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			} else
 			{
 				if (!c5speed) c5speed = 8363;
-				return Util::muldiv(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+				return Util::muldiv_unsigned(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 			}
 		} else
 		{
-			return Util::muldiv(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+			return Util::muldiv_unsigned(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 		}
 	}
 }
