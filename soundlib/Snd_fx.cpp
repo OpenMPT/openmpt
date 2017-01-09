@@ -1526,7 +1526,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
 			return;
 		}
-		note = pIns->NoteMap[note-1];
+		note = pIns->NoteMap[note - NOTE_MIN];
 	}
 	// Key Off
 	if(note > NOTE_MAX)
@@ -1582,7 +1582,8 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	}
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified (fixes the guitars in spx-shuttledeparture.it)
 	// Test case: freqreset-noins.it
-	if(!bPorta && pSmp && m_playBehaviour[kITMultiSampleBehaviour]) pChn->nC5Speed = pSmp->nC5Speed;
+	if(!bPorta && pSmp && m_playBehaviour[kITMultiSampleBehaviour])
+		pChn->nC5Speed = pSmp->nC5Speed;
 
 	if(bPorta && pChn->increment.IsZero())
 	{
@@ -3609,9 +3610,15 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) con
 		{
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				int oldPeriod = pChn->nPeriod;
+				const auto oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideUpTable(this, param & 0x0F), 65536);
-				if(oldPeriod == pChn->nPeriod) pChn->nPeriod++;
+				if(oldPeriod == pChn->nPeriod)
+				{
+					if(m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+						pChn->nPeriod++;
+					else if(!m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod > 1)
+						pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
@@ -3649,9 +3656,15 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) c
 		{
 			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				int oldPeriod = pChn->nPeriod;
+				const auto oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideDownTable(this, param & 0x0F), 65536);
-				if(oldPeriod == pChn->nPeriod) pChn->nPeriod--;
+				if(oldPeriod == pChn->nPeriod)
+				{
+					if(!m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+						pChn->nPeriod++;
+					else if(m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod > 1)
+						pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod += (int)(param * 4);
@@ -5197,24 +5210,19 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
 		// IT Linear slides
-		const int32 nOldPeriod = pChn->nPeriod;
-		if (nFreqSlide < 0)
+		const auto nOldPeriod = pChn->nPeriod;
+		uint32 n = mpt::abs(nFreqSlide) / 4u;
+		LimitMax(n, 255u);
+		if(n != 0)
 		{
-			uint32 n = (-nFreqSlide) / 4;
-			if (n)
+			pChn->nPeriod = Util::muldivr(pChn->nPeriod, nFreqSlide < 0 ? GetLinearSlideUpTable(this, n) : GetLinearSlideDownTable(this, n), 65536);
+			if(pChn->nPeriod == nOldPeriod)
 			{
-				if (n > 255) n = 255;
-				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideUpTable(this, n), 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod++;
-			}
-		} else
-		{
-			uint32 n = (nFreqSlide) / 4;
-			if (n)
-			{
-				if (n > 255) n = 255;
-				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideDownTable(this, n), 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod--;
+				const bool incPeriod = m_playBehaviour[kHertzInLinearMode] == (nFreqSlide < 0);
+				if(incPeriod && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+					pChn->nPeriod++;
+				else if(!incPeriod && pChn->nPeriod > 1)
+					pChn->nPeriod--;
 			}
 		}
 	} else
