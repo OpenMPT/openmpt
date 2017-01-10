@@ -738,6 +738,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	return static_cast<UINT>( frames_rendered * get_frame_size() );
 }
 
+
 /*
 
 gstreamer modplug calls:
@@ -765,5 +766,101 @@ mSoundFile->GetCurrentPos
 mSoundFile->GetMusicTempo (inline)
 
 */
+
+
+// really very internal symbols, probably nothing calls these directly
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
+
+BOOL CSoundFile::ReadNote() { mpcpplog(); return 0; }
+BOOL CSoundFile::ProcessRow() { mpcpplog(); return 0; }
+BOOL CSoundFile::ProcessEffects() { mpcpplog(); return 0; }
+UINT CSoundFile::GetNNAChannel(UINT nChn) const { mpcpplog(); return 0; }
+void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut) { mpcpplog(); }
+void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv) { mpcpplog(); }
+void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta,BOOL bUpdVol,BOOL bResetEnv) { mpcpplog(); }
+void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::FinePortamentoUp(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::FinePortamentoDown(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::Vibrato(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::FineVibrato(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::ChannelVolSlide(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::FineVolumeUp(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::FineVolumeDown(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::Tremolo(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::Panbrello(MODCHANNEL *pChn, UINT param) { mpcpplog(); }
+void CSoundFile::RetrigNote(UINT nChn, UINT param) { mpcpplog(); }
+void CSoundFile::NoteCut(UINT nChn, UINT nTick) { mpcpplog(); }
+void CSoundFile::KeyOff(UINT nChn) { mpcpplog(); }
+int CSoundFile::PatternLoop(MODCHANNEL *, UINT param) { mpcpplog(); return 0; }
+void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param) { mpcpplog(); }
+void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param) { mpcpplog(); }
+void CSoundFile::ExtendedChannelEffect(MODCHANNEL *, UINT param) { mpcpplog(); }
+void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param) { mpcpplog(); }
+void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier) const { mpcpplog(); }
+void CSoundFile::DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide) { mpcpplog(); }
+void CSoundFile::SetTempo(UINT param) { mpcpplog(); }
+void CSoundFile::SetSpeed(UINT param) { mpcpplog(); }
+void CSoundFile::GlobalVolSlide(UINT param) { mpcpplog(); }
+DWORD CSoundFile::IsSongFinished(UINT nOrder, UINT nRow) const { mpcpplog(); return 0; }
+BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const { mpcpplog(); return 0; }
+UINT CSoundFile::PackSample(int &sample, int next) { mpcpplog(); return 0; }
+BOOL CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result) { mpcpplog(); return 0; }
+UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength) { mpcpplog(); return 0; }
+BOOL CSoundFile::DestroySample(UINT nSample) { mpcpplog(); return 0; }
+BOOL CSoundFile::DestroyInstrument(UINT nInstr) { mpcpplog(); return 0; }
+BOOL CSoundFile::IsSampleUsed(UINT nSample) { mpcpplog(); return 0; }
+BOOL CSoundFile::IsInstrumentUsed(UINT nInstr) { mpcpplog(); return 0; }
+BOOL CSoundFile::RemoveInstrumentSamples(UINT nInstr) { mpcpplog(); return 0; }
+UINT CSoundFile::DetectUnusedSamples(BOOL *) { mpcpplog(); return 0; }
+BOOL CSoundFile::RemoveSelectedSamples(BOOL *) { mpcpplog(); return 0; }
+void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns) { mpcpplog(); }
+BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *, UINT nSrcInstrument) { mpcpplog(); return 0; }
+BOOL CSoundFile::ReadSampleFromSong(UINT nSample, CSoundFile *, UINT nSrcSample) { mpcpplog(); return 0; }
+UINT CSoundFile::GetNoteFromPeriod(UINT period) const { mpcpplog(); return 0; }
+UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) const { mpcpplog(); return 0; }
+UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac) const { mpcpplog(); return 0; }
+void CSoundFile::ResetMidiCfg() { mpcpplog(); }
+UINT CSoundFile::MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote) { mpcpplog(); return 0; }
+BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers) { mpcpplog(); return 0; }
+UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate) { mpcpplog(); return 0; }
+UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen) { mpcpplog(); return 0; }
+#ifndef NO_FILTER
+DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const { mpcpplog(); return 0; }
+#endif
+DWORD CSoundFile::TransposeToFrequency(int transp, int ftune) { mpcpplog(); return 0; }
+int CSoundFile::FrequencyToTranspose(DWORD freq) { mpcpplog(); return 0; }
+void CSoundFile::FrequencyToTranspose(MODINSTRUMENT *psmp) { mpcpplog(); }
+MODCOMMAND *CSoundFile::AllocatePattern(UINT rows, UINT nchns) { mpcpplog(); return 0; }
+signed char* CSoundFile::AllocateSample(UINT nbytes) { mpcpplog(); return 0; }
+void CSoundFile::FreePattern(LPVOID pat) { mpcpplog(); }
+void CSoundFile::FreeSample(LPVOID p) { mpcpplog(); }
+UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc) { mpcpplog(); return 0; }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
 
 #endif // NO_LIBMODPLUG
