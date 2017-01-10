@@ -2,7 +2,7 @@
  * libopenmpt_modplug_cpp.cpp
  * --------------------------
  * Purpose: libopenmpt emulation of the libmodplug c++ interface
- * Notes  : WARNING! THIS IS INCOMPLETE!
+ * Notes  : WARNING! THIS IS A HACK!
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -17,9 +17,8 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 
 This is a dirty hack to emulate just so much of the libmodplug c++
 interface so that the current known users (mainly xmms-modplug itself,
-gstreamer modplug, and stuff based on those 2) work. This is neither
-a complete nor a correct implementation.
-Symbols unused by these implementations are not included.
+gstreamer modplug, audacious, and stuff based on those) work. This is
+neither a complete nor a correct implementation.
 Metadata and other state is not provided or updated.
 
 */
