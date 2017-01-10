@@ -55,10 +55,14 @@ Metadata and other state is not provided or updated.
 #define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API_HELPER_EXPORT
 #endif /* _MSC_VER */
 
+namespace {
+
 template <class T>
 void Clear( T & x )
 {
 	std::memset( &x, 0, sizeof(T) );
+}
+
 }
 
 class LIBOPENMPT_MODPLUG_API CSoundFile;
@@ -181,6 +185,68 @@ BOOL CSoundFile::Create( LPCBYTE lpStream, DWORD dwMemLength ) {
 		set_self( this, m );
 		std::strncpy( m_szNames[0], mod->get_metadata("title").c_str(), sizeof( m_szNames[0] ) );
 		m_szNames[0][ sizeof( m_szNames[0] ) - 1 ] = '\0';
+		std::string type = mod->get_metadata("type");
+		m_nType = MOD_TYPE_NONE;
+		if ( type == "mod" ) {
+			m_nType = MOD_TYPE_MOD;
+		} else if ( type == "s3m" ) {
+			m_nType = MOD_TYPE_S3M;
+		} else if ( type == "xm" ) {
+			m_nType = MOD_TYPE_XM;
+		} else if ( type == "med" ) {
+			m_nType = MOD_TYPE_MED;
+		} else if ( type == "mtm" ) {
+			m_nType = MOD_TYPE_MTM;
+		} else if ( type == "it" ) {
+			m_nType = MOD_TYPE_IT;
+		} else if ( type == "669" ) {
+			m_nType = MOD_TYPE_669;
+		} else if ( type == "ult" ) {
+			m_nType = MOD_TYPE_ULT;
+		} else if ( type == "stm" ) {
+			m_nType = MOD_TYPE_STM;
+		} else if ( type == "far" ) {
+			m_nType = MOD_TYPE_FAR;
+		} else if ( type == "s3m" ) {
+			m_nType = MOD_TYPE_WAV;
+		} else if ( type == "amf" ) {
+			m_nType = MOD_TYPE_AMF;
+		} else if ( type == "ams" ) {
+			m_nType = MOD_TYPE_AMS;
+		} else if ( type == "dsm" ) {
+			m_nType = MOD_TYPE_DSM;
+		} else if ( type == "mdl" ) {
+			m_nType = MOD_TYPE_MDL;
+		} else if ( type == "okt" ) {
+			m_nType = MOD_TYPE_OKT;
+		} else if ( type == "mid" ) {
+			m_nType = MOD_TYPE_MID;
+		} else if ( type == "dmf" ) {
+			m_nType = MOD_TYPE_DMF;
+		} else if ( type == "ptm" ) {
+			m_nType = MOD_TYPE_PTM;
+		} else if ( type == "dbm" ) {
+			m_nType = MOD_TYPE_DBM;
+		} else if ( type == "mt2" ) {
+			m_nType = MOD_TYPE_MT2;
+		} else if ( type == "amf0" ) {
+			m_nType = MOD_TYPE_AMF0;
+		} else if ( type == "psm" ) {
+			m_nType = MOD_TYPE_PSM;
+		} else if ( type == "j2b" ) {
+			m_nType = MOD_TYPE_J2B;
+		} else if ( type == "abc" ) {
+			m_nType = MOD_TYPE_ABC;
+		} else if ( type == "pat" ) {
+			m_nType = MOD_TYPE_PAT;
+		} else if ( type == "umx" ) {
+			m_nType = MOD_TYPE_UMX;
+		} else {
+			m_nType = MOD_TYPE_IT; // fallback, most complex type
+		}
+		m_nChannels = mod->get_num_channels();
+		m_nMasterVolume = 128;
+		m_nSamples = mod->get_num_samples();
 		return TRUE;
 	} catch ( ... ) {
 		Destroy();
@@ -195,6 +261,251 @@ BOOL CSoundFile::Destroy() {
 		set_self( this, 0 );
 	}
 	return TRUE;
+}
+
+UINT CSoundFile::GetNumChannels() const {
+	mpcpplog();
+	return mod->get_num_channels();
+}
+
+static std::int32_t vol128_To_millibel( unsigned int vol ) {
+	return static_cast<std::int32_t>( 2000.0 * std::log10( static_cast<int>( vol ) / 128.0 ) );
+}
+
+BOOL CSoundFile::SetMasterVolume( UINT vol, BOOL bAdjustAGC ) {
+	UNUSED(bAdjustAGC);
+	mpcpplog();
+	m_nMasterVolume = vol;
+	mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, vol128_To_millibel( m_nMasterVolume ) );
+	return TRUE;
+}
+
+UINT CSoundFile::GetNumPatterns() const {
+	mpcpplog();
+	return mod->get_num_patterns();
+}
+
+UINT CSoundFile::GetNumInstruments() const {
+	mpcpplog();
+	return mod->get_num_instruments();
+}
+
+void CSoundFile::SetCurrentOrder( UINT nOrder ) {
+	mpcpplog();
+	mod->set_position_order_row( nOrder, 0 );
+}
+
+UINT CSoundFile::GetSampleName( UINT nSample, LPSTR s ) const {
+	UNUSED(nSample);
+	mpcpplog();
+	if ( !s ) {
+		return 0;
+	}
+	// todo
+	return 0;
+}
+
+UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
+	UNUSED(nInstr);
+	mpcpplog();
+	if ( !s ) {
+		return 0;
+	}
+	// todo
+	return 0;
+}
+
+void CSoundFile::LoopPattern( int nPat, int nRow ) {
+	UNUSED(nPat);
+	UNUSED(nRow);
+	mpcpplog();
+	// todo
+}
+
+void CSoundFile::CheckCPUUsage( UINT nCPU ) {
+	UNUSED(nCPU);
+	mpcpplog();
+}
+
+BOOL CSoundFile::SetPatternName( UINT nPat, LPCSTR lpszName ) {
+	UNUSED(nPat);
+	mpcpplog();
+	if ( !lpszName ) {
+		return FALSE;
+	}
+	// todo
+	return TRUE;
+}
+
+BOOL CSoundFile::GetPatternName( UINT nPat, LPSTR lpszName, UINT cbSize ) const {
+	UNUSED(nPat);
+	mpcpplog();
+	if ( !lpszName || cbSize <= 0 ) {
+		return FALSE;
+	}
+	std::memset( lpszName, 0, cbSize );
+	// todo
+	return TRUE;
+}
+
+BOOL CSoundFile::ReadXM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadS3M(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMod(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMed(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadSTM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadIT(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::Read669(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadUlt(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadWav(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadFAR(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMDL(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadOKT(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadDMF(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadPTM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadDBM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadUMX(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadABC(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::TestABC(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadMID(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::TestMID(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::ReadPAT(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+BOOL CSoundFile::TestPAT(LPCBYTE lpStream, DWORD dwMemLength) { UNUSED(lpStream); UNUSED(dwMemLength); mpcpplog(); return FALSE; }
+
+#ifndef MODPLUG_NO_FILESAVE
+
+UINT CSoundFile::WriteSample( FILE * f, MODINSTRUMENT * pins, UINT nFlags, UINT nMaxLen ) {
+	UNUSED(f);
+	UNUSED(pins);
+	UNUSED(nFlags);
+	UNUSED(nMaxLen);
+	mpcpplog();
+	return 0;
+}
+
+BOOL CSoundFile::SaveXM( LPCSTR lpszFileName, UINT nPacking ) {
+	UNUSED(lpszFileName);
+	UNUSED(nPacking);
+	mpcpplog();
+	return FALSE;
+}
+
+BOOL CSoundFile::SaveS3M( LPCSTR lpszFileName, UINT nPacking ) {
+	UNUSED(lpszFileName);
+	UNUSED(nPacking);
+	mpcpplog();
+	return FALSE;
+}
+
+BOOL CSoundFile::SaveMod( LPCSTR lpszFileName, UINT nPacking ) {
+	UNUSED(lpszFileName);
+	UNUSED(nPacking);
+	mpcpplog();
+	return FALSE;
+}
+	
+BOOL CSoundFile::SaveIT( LPCSTR lpszFileName, UINT nPacking ) {
+	UNUSED(lpszFileName);
+	UNUSED(nPacking);
+	mpcpplog();
+	return FALSE;
+}
+
+#endif
+
+UINT CSoundFile::GetBestSaveFormat() const {
+	mpcpplog();
+	return MOD_TYPE_IT;
+}
+
+UINT CSoundFile::GetSaveFormats() const {
+	mpcpplog();
+	return MOD_TYPE_IT;
+}
+
+void CSoundFile::ConvertModCommand( MODCOMMAND * ) const {
+	mpcpplog();
+}
+
+void CSoundFile::S3MConvert( MODCOMMAND * m, BOOL bIT ) const {
+	UNUSED(m);
+	UNUSED(bIT);
+	mpcpplog();
+}
+
+void CSoundFile::S3MSaveConvert( UINT * pcmd, UINT * pprm, BOOL bIT ) const {
+	UNUSED(pcmd);
+	UNUSED(pprm);
+	UNUSED(bIT);
+	mpcpplog();
+}
+
+WORD CSoundFile::ModSaveCommand( const MODCOMMAND * m, BOOL bXM ) const {
+	UNUSED(m);
+	UNUSED(bXM);
+	mpcpplog();
+	return 0;
+}
+
+VOID CSoundFile::ResetChannels() {
+	mpcpplog();
+}
+
+UINT CSoundFile::CreateStereoMix( int count ) {
+	UNUSED(count);
+	mpcpplog();
+	return 0;
+}
+
+BOOL CSoundFile::FadeSong( UINT msec ) {
+	UNUSED(msec);
+	mpcpplog();
+	return TRUE;
+}
+
+BOOL CSoundFile::GlobalFadeSong( UINT msec ) {
+	UNUSED(msec);
+	mpcpplog();
+	return TRUE;
+}
+
+BOOL CSoundFile::InitPlayer( BOOL bReset ) {
+	UNUSED(bReset);
+	mpcpplog();
+	return TRUE;
+}
+
+BOOL CSoundFile::SetMixConfig( UINT nStereoSeparation, UINT nMaxMixChannels ) {
+	UNUSED(nMaxMixChannels);
+	mpcpplog();
+	m_nStereoSeparation = nStereoSeparation;
+ 	return TRUE;
+}
+
+DWORD CSoundFile::InitSysInfo() {
+	mpcpplog();
+	return 0;
+}
+
+void CSoundFile::SetAGC( BOOL b ) {
+	UNUSED(b);
+	mpcpplog();
+}
+
+void CSoundFile::ResetAGC() {
+	mpcpplog();
+}
+
+void CSoundFile::ProcessAGC( int count ) {
+	UNUSED(count);
+	mpcpplog();
 }
 
 BOOL CSoundFile::SetWaveConfig( UINT nRate, UINT nBits, UINT nChannels, BOOL bMMX ) {
@@ -304,6 +615,24 @@ UINT CSoundFile::GetSongComments( LPSTR s, UINT cbsize, UINT linesize ) {
 	return static_cast<UINT>( std::strlen( s ) + 1 );
 }
 
+UINT CSoundFile::GetRawSongComments( LPSTR s, UINT cbsize, UINT linesize ) {
+	UNUSED(linesize);
+	mpcpplog();
+	if ( !s ) {
+		return 0;
+	}
+	if ( cbsize <= 0 ) {
+		return 0;
+	}
+	if ( !mod ) {
+		s[0] = '\0';
+		return 1;
+	}
+	std::strncpy( s, mod->get_metadata("message_raw").c_str(), cbsize );
+	s[ cbsize - 1 ] = '\0';
+	return static_cast<UINT>( std::strlen( s ) + 1 );
+}
+
 void CSoundFile::SetCurrentPos( UINT nPos ) {
 	mpcpplog();
 	if ( mod ) mod->set_position_seconds( nPos );
@@ -313,6 +642,11 @@ UINT CSoundFile::GetCurrentPos() const {
 	mpcpplog();
 	if ( mod ) return static_cast<UINT>( mod->get_position_seconds() + 0.5 );
 	return 0;
+}
+
+static int get_stereo_separation() {
+	mpcpplog();
+	return CSoundFile::m_nStereoSeparation * 100 / 128;
 }
 
 static int get_filter_length() {
@@ -379,6 +713,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 		out = &tmpbuf[0];
 	}
 
+	mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, get_stereo_separation() );
 	mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, get_filter_length() );
 	std::size_t frames_rendered = 0;
 	if ( get_num_channels() == 1 ) {
