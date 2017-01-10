@@ -7,7 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta20.4
 
- *  libmodplug: Added a couple of more symbols to the C++ API.
+ *  libmodplug: Added all missing C++ API symbols that are accessable via the
+    public libmodplug header file.
 
 ### libopenmpt 0.2-beta20.3 (2016-11-20)
 
