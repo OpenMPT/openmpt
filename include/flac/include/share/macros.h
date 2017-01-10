@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2013-2014  Xiph.org Foundation
+ * Copyright (C) 2013-2016  Xiph.org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,11 +31,15 @@
 
 #include <errno.h>
 
-/* FLAC_CHECK_RETURN : Check the return value of of the provided function and
- * print and error message if it fails (ie returns a value < 0).
+/* FLAC_CHECK_RETURN : Check the return value of the provided function and
+ * print an error message if it fails (ie returns a value < 0).
+ *
+ * Ideally, a library should not print anything, but this macro is only used
+ * for things that extremely unlikely to fail, like `chown` to a previoulsy
+ * saved `uid`.
  */
 
 #define FLAC_CHECK_RETURN(x) \
 			{	if ((x) < 0) \
-					printf ("%s : %s\n", #x, strerror (errno)) ; \
+					fprintf (stderr, "%s : %s\n", #x, strerror (errno)) ; \
 			}

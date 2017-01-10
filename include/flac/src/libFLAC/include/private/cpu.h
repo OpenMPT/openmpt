@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,24 @@
 #include <config.h>
 #endif
 
-#if defined FLAC__HAS_X86INTRIN
+#ifndef FLAC__CPU_X86_64
+
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#define FLAC__CPU_X86_64
+#endif
+
+#endif
+
+#ifndef FLAC__CPU_IA32
+
+#if defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) ||defined( __i386) || defined(_M_IX86)
+#define FLAC__CPU_IA32
+#endif
+
+#endif
+
+
+#if FLAC__HAS_X86INTRIN
 /* SSE intrinsics support by ICC/MSVC/GCC */
 #if defined __INTEL_COMPILER
   #define FLAC__SSE_TARGET(x)
@@ -78,9 +95,11 @@
     #define FLAC__SSE2_SUPPORTED 1
     #define FLAC__SSSE3_SUPPORTED 1
     #define FLAC__SSE4_1_SUPPORTED 1
+#ifdef FLAC__USE_AVX
     #define FLAC__AVX_SUPPORTED 1
     #define FLAC__AVX2_SUPPORTED 1
     #define FLAC__FMA_SUPPORTED 1
+#endif
   #else /* for GCC older than 4.9 */
     #define FLAC__SSE_TARGET(x)
     #ifdef __SSE__
@@ -108,14 +127,20 @@
 #endif /* compiler version */
 #endif /* intrinsics support */
 
+
+#ifndef FLAC__AVX_SUPPORTED
+#define FLAC__AVX_SUPPORTED 0
+#endif
+
 typedef enum {
 	FLAC__CPUINFO_TYPE_IA32,
 	FLAC__CPUINFO_TYPE_X86_64,
 	FLAC__CPUINFO_TYPE_UNKNOWN
 } FLAC__CPUInfo_Type;
 
-#if defined FLAC__CPU_IA32
 typedef struct {
+	FLAC__bool intel;
+
 	FLAC__bool cmov;
 	FLAC__bool mmx;
 	FLAC__bool sse;
@@ -129,8 +154,10 @@ typedef struct {
 	FLAC__bool avx2;
 	FLAC__bool fma;
 } FLAC__CPUInfo_IA32;
-#elif defined FLAC__CPU_X86_64
+
 typedef struct {
+	FLAC__bool intel;
+
 	FLAC__bool sse3;
 	FLAC__bool ssse3;
 	FLAC__bool sse41;
@@ -139,30 +166,21 @@ typedef struct {
 	FLAC__bool avx2;
 	FLAC__bool fma;
 } FLAC__CPUInfo_x86;
-#endif
+
 
 typedef struct {
 	FLAC__bool use_asm;
 	FLAC__CPUInfo_Type type;
-#if defined FLAC__CPU_IA32
 	FLAC__CPUInfo_IA32 ia32;
-#elif defined FLAC__CPU_X86_64
 	FLAC__CPUInfo_x86 x86;
-#endif
 } FLAC__CPUInfo;
 
 void FLAC__cpu_info(FLAC__CPUInfo *info);
 
-#ifndef FLAC__NO_ASM
-# if defined FLAC__CPU_IA32 && defined FLAC__HAS_NASM
 FLAC__uint32 FLAC__cpu_have_cpuid_asm_ia32(void);
+
 void         FLAC__cpu_info_asm_ia32(FLAC__uint32 *flags_edx, FLAC__uint32 *flags_ecx);
-# endif
-# if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && defined FLAC__HAS_X86INTRIN
-FLAC__uint32 FLAC__cpu_have_cpuid_x86(void);
+
 void         FLAC__cpu_info_x86(FLAC__uint32 level, FLAC__uint32 *eax, FLAC__uint32 *ebx, FLAC__uint32 *ecx, FLAC__uint32 *edx);
-FLAC__uint32 FLAC__cpu_xgetbv_x86(void);
-# endif
-#endif
 
 #endif
