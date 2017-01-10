@@ -62,6 +62,7 @@ is just a high-level summary.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
  *  openmpt123: Improved section layout in man page.
+ *  libmodplug: Added a couple of more symbols to the C++ API.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
