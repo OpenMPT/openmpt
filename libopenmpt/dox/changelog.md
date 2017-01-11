@@ -49,6 +49,10 @@ is just a high-level summary.
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
  *  Playback improvements for IT and XM files.
+ *  Channel frequency could wrap around after some excessive portamento / down
+    in some formats since libopenmpt 0.2-beta17.
+ *  Playback improvements for S3M files made with Impulse Tracker and
+    Schism Tracker.
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
  *  Added `libopenmpt_stream_callbacks_buffer.h` which adds
     `openmpt_stream_callbacks` support for in-memory buffers, possibly even only
