@@ -217,16 +217,16 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_CbnResampling.Invalidate(FALSE);
 	}
 
-	if (updateAll)
+	if(updateAll)
 	{
 		CModSpecifications specs = m_sndFile.GetModSpecifications();
-		
+
 		// S3M HACK: ST3 will ignore speed 255, even though it can be used with Axx.
 		if(m_sndFile.GetType() == MOD_TYPE_S3M)
 			m_SpinSpeed.SetRange32(1, 254);
 		else
 			m_SpinSpeed.SetRange32(specs.speedMin, specs.speedMax);
-		
+
 		tempoMin = specs.GetTempoMin();
 		tempoMax = specs.GetTempoMax();
 		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
@@ -258,10 +258,13 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.Order.GetRestartPos() != 0));
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
-		
+
 		//Note: Sample volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)
+	}
 
+	if(updateAll || (hint.GetCategory() == HINTCAT_GLOBAL && hintType[HINT_MODCHANNELS]))
+	{
 		// MOD Type
 		const TCHAR *modType = _T("");
 		switch(m_sndFile.GetType())
