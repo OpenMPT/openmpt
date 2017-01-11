@@ -155,6 +155,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		r->valueSlider.SetTicFreq(SliderResolution / 8);
 		r->valueSlider.SetPageSize(SliderResolution / 8);
 		int32 val = Util::muldivr(static_cast<int32>(m_tempoSwing[i]) - TempoSwing::Unity, SliderUnity, TempoSwing::Unity);
+		r->valueSlider.SetPos(1);	// Work around https://bugs.winehq.org/show_bug.cgi?id=41909
 		r->valueSlider.SetPos(val);
 		rect.MoveToY(rect.top + m.rowHeight);
 	}

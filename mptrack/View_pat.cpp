@@ -1339,10 +1339,10 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 			if(modified && pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 			{
+				pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
 				if(duplicate)
 				{
 					// Number of channels changed: Update channel headers and other information.
-					pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType());
 					SetCurrentPattern(m_nPattern);
 				}
 				InvalidatePattern(true);
@@ -4415,7 +4415,7 @@ void CViewPattern::TempEnterVol(int v)
 	}
 
 	// Cursor step for command letter
-	if(!target.IsPcNote() && !isDigit && m_nSpacing > 0 && m_nSpacing <= MAX_SPACING && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	if(!target.IsPcNote() && !isDigit && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
@@ -4493,7 +4493,7 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 	}
 
 	// Cursor step for command letter
-	if(!target.IsPcNote() && m_nSpacing > 0 && m_nSpacing <= MAX_SPACING && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	if(!target.IsPcNote() && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
@@ -4899,7 +4899,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	// -- Chord autodetection: step back if we just entered a note
 	if (recordEnabled && recordGroup && !liveRecord && !ModCommand::IsPcNote(note))
 	{
-		if (m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
+		if (m_nSpacing > 0)
 		{
 			if ((timeGetTime() - m_dwLastNoteEntryTime < TrackerSettings::Instance().gnAutoChordWaitTime)
 				&& (editPos.row >= m_nSpacing) && (!m_bLastNoteEntryBlocked))
@@ -5083,7 +5083,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		// Set new cursor position (edit step aka row spacing)
 		if(!liveRecord)
 		{
-			if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
+			if(m_nSpacing > 0)
 			{
 				if(editPos.row + m_nSpacing < sndFile.Patterns[editPos.pattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
@@ -5334,7 +5334,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 	// Set new cursor position (edit step aka row spacing) - only when not recording live
 	if(recordEnabled && !liveRecord)
 	{
-		if(m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
+		if(m_nSpacing > 0)
 		{
 			// Shift from entering chord may have triggered this flag, which will prevent us from wrapping to the next pattern.
 			m_Status.reset(psKeyboardDragSelect);
@@ -5665,7 +5665,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 			PatternStep(GetCurrentRow());
 		}
 
-		if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
+		if (m_nSpacing > 0)
 			SetCurrentRow(GetCurrentRow() + m_nSpacing);
 
 		SetSelToCursor();

@@ -135,6 +135,7 @@ public:
 	virtual CString GetCurrentProgramName() { return programName; }
 	virtual void SetCurrentProgramName(const CString &name) { programName = name; }
 	virtual CString GetProgramName(int32) { return programName; }
+	virtual CString GetPluginVendor() { return _T("OpenMPT Project"); }
 
 	virtual bool HasEditor() const { return true; }
 protected:
@@ -159,6 +160,10 @@ protected:
 	void CloseDevice(MidiDevice &device);
 	// Get a device name
 	const char *GetDeviceName(PmDeviceID index) const;
+	// Check if the given device is an input device
+	bool IsInputDevice(PmDeviceID index) const;
+	// Check if the given device is an output device
+	bool IsOutputDevice(PmDeviceID index) const;
 
 	// Get current timestamp for sending
 	PtTimestamp Now() const;
