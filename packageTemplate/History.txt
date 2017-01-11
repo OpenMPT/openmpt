@@ -26,6 +26,43 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.08.00 (??? 2017, revision 7507)
+-------------------------------------
+General tab
+   [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
+
+Pattern tab
+   [Mod] <js> Do not wrap around the spin wheelfor the edit spacing box from 0 to 64.
+   [Fix] <js> Correctly center active row when switching to a pattern that has less rows than the previously edited pattern (http://bugs.openmpt.org/view.php?id=899).
+   [Fix] <js> Moving channels did not update the channel names in other windows.
+   [Fix] <js> The "switch to order list" shortcut also toggled overflow paste.
+   [Fix] <js> Quick Channel Settings: Entering a panning value manually did not reset the surround setting visually.
+
+Sample tab
+   [Mod] <js> Add 1:256 and 1:512 zoom factors.
+   [Fix] <js> Show the correct PAL sample rate for MOD files when hovering the finetune field.
+
+Mod Conversion
+   [Fix] <js> When converting from IT / MPTM / S3M to MOD and vice versa, samples were slightly detuned (MOD plays with PAL middle-C frequency, but was translated using NTSC middle-C frequency).
+
+Playback
+   [Fix] <js> When performing excessive portamento down in IT linear slide mode with legacy period mode enabled or excessive portamento up with Hertz mode, the channel frequency wrapped around since OpenMPT 1.26.01.00 (fixes https://modarchive.org/module.php?175019).
+
+S3M
+   [Fix] <js> Increase maximum sample frequency for S3Ms saved with Impulse Tracker and Schism Tracker (http://bugs.openmpt.org/view.php?id=898).
+
+Misc
+   [Fix] <js> Configuring relative chords was broken since OpenMPT 1.26.01.00.
+   [Fix] <js> Tempo Swing dialog: A swing amount of 100% is now displayed correctly on Wine prior to version 2.0.
+   [Fix] <js> When switching between multiple windows of a single module, sample and instrument editors are now receiving playback updates instantly.
+
+Bundled plugins
+   [Fix] <js> MIDI Input / Output plugin: Identically-named input and output ports could cause the previous plugin state to not be restored properly.
+
+Third-Party Libraries
+   [Mod] Update flac (v1.3.2), zlib (v.1.2.10).
+
+
 v1.26.07.00 (20 November 2016, revision 7387)
 ---------------------------------------------
 Pattern tab
