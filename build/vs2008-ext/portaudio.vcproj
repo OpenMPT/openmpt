@@ -1086,6 +1086,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\portaudio\src\common\pa_gitrevision.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\portaudio\src\common\pa_hostapi.h"
 					>
 				</File>
@@ -1115,10 +1119,6 @@
 				</File>
 				<File
 					RelativePath="..\..\include\portaudio\src\common\pa_stream.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\portaudio\src\common\pa_svnrevision.h"
 					>
 				</File>
 				<File
