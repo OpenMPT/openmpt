@@ -68,8 +68,6 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING ")";
 #endif
 
-#define EXPERIMENTAL_VIS
-
 #define USE_XMPLAY_FILE_IO
 
 #define USE_XMPLAY_ISTREAM
@@ -400,7 +398,6 @@ static void WINAPI ShortcutHandler( DWORD id ) {
 }
 
 
-#ifdef EXPERIMENTAL_VIS
 static double timeinfo_position = 0.0;
 struct timeinfo {
 	bool valid;
@@ -445,14 +442,6 @@ static timeinfo lookup_timeinfo( double seconds ) {
 static void clear_current_timeinfo() {
 	current_timeinfo = timeinfo();
 }
-#else
-static void update_timeinfos( std::int32_t samplerate, std::int32_t count ) {
-}
-static void reset_timeinfos( double position = 0.0 ) {
-}
-static void clear_current_timeinfo() {
-}
-#endif
 
 static void WINAPI openmpt_About( HWND win ) {
 	std::ostringstream about;
@@ -1302,8 +1291,6 @@ static DWORD WINAPI openmpt_GetSubSongs( float * length ) {
 	return static_cast<DWORD>( self->subsong_lengths.size() );
 }
 
-#ifdef EXPERIMENTAL_VIS
-
 enum ColorIndex
 {
 	col_background = 0,
@@ -1689,8 +1676,6 @@ static void WINAPI VisButton(DWORD x, DWORD y) {
 	//xmpopenmpt_lock guard;
 }
 
-#endif
-
 static XMPIN xmpin = {
 #ifdef USE_XMPLAY_FILE_IO
 	0 |
@@ -1722,7 +1707,6 @@ static XMPIN xmpin = {
 	NULL, // GetCues
 	NULL, // GetDownloaded
 
-#ifdef EXPERIMENTAL_VIS
 	"OpenMPT Pattern Display",
 	VisOpen,
 	VisClose,
@@ -1730,9 +1714,6 @@ static XMPIN xmpin = {
 	/*VisRender,*/NULL,
 	VisRenderDC,
 	/*VisButton,*/NULL,
-#else
-	0,0,0,0,0,0,0, // no built-in vis
-#endif
 
 	NULL, // reserved2
 	openmpt_GetConfig,// NULL, // GetConfig

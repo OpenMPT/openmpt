@@ -1510,7 +1510,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
 			return;
 		}
-		note = pIns->NoteMap[note-1];
+		note = pIns->NoteMap[note - NOTE_MIN];
 	}
 	// Key Off
 	if(note > NOTE_MAX)
@@ -1566,7 +1566,8 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	}
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified (fixes the guitars in spx-shuttledeparture.it)
 	// Test case: freqreset-noins.it
-	if(!bPorta && pSmp && m_playBehaviour[kITMultiSampleBehaviour]) pChn->nC5Speed = pSmp->nC5Speed;
+	if(!bPorta && pSmp && m_playBehaviour[kITMultiSampleBehaviour])
+		pChn->nC5Speed = pSmp->nC5Speed;
 
 	if(bPorta && pChn->nInc == 0)
 	{
@@ -3585,9 +3586,15 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) con
 		{
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				int oldPeriod = pChn->nPeriod;
+				const int32 oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideUpTable(this, param & 0x0F), 65536);
-				if(oldPeriod == pChn->nPeriod) pChn->nPeriod++;
+				if(oldPeriod == pChn->nPeriod)
+				{
+					if(m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+						pChn->nPeriod++;
+					else if(!m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod > 1)
+						pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
@@ -3625,9 +3632,15 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) c
 		{
 			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				int oldPeriod = pChn->nPeriod;
+				const int32 oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideDownTable(this, param & 0x0F), 65536);
-				if(oldPeriod == pChn->nPeriod) pChn->nPeriod--;
+				if(oldPeriod == pChn->nPeriod)
+				{
+					if(!m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+						pChn->nPeriod++;
+					else if(m_playBehaviour[kHertzInLinearMode] && pChn->nPeriod > 1)
+						pChn->nPeriod--;
+				}
 			} else
 			{
 				pChn->nPeriod += (int)(param * 4);
@@ -5174,23 +5187,18 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 	{
 		// IT Linear slides
 		const int32 nOldPeriod = pChn->nPeriod;
-		if (nFreqSlide < 0)
+		uint32 n = mpt::abs(nFreqSlide) / 4u;
+		LimitMax(n, 255u);
+		if(n != 0)
 		{
-			uint32 n = (-nFreqSlide) / 4;
-			if (n)
+			pChn->nPeriod = Util::muldivr(pChn->nPeriod, nFreqSlide < 0 ? GetLinearSlideUpTable(this, n) : GetLinearSlideDownTable(this, n), 65536);
+			if(pChn->nPeriod == nOldPeriod)
 			{
-				if (n > 255) n = 255;
-				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideUpTable(this, n), 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod++;
-			}
-		} else
-		{
-			uint32 n = (nFreqSlide) / 4;
-			if (n)
-			{
-				if (n > 255) n = 255;
-				pChn->nPeriod = Util::muldivr(pChn->nPeriod, GetLinearSlideDownTable(this, n), 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod--;
+				const bool incPeriod = m_playBehaviour[kHertzInLinearMode] == (nFreqSlide < 0);
+				if(incPeriod && pChn->nPeriod < Util::MaxValueOfType(pChn->nPeriod))
+					pChn->nPeriod++;
+				else if(!incPeriod && pChn->nPeriod > 1)
+					pChn->nPeriod--;
 			}
 		}
 	} else
@@ -5595,8 +5603,9 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 		return (period + c5speed - 8363) <<  FREQ_FRACBITS;
 	} else if(GetType() == MOD_TYPE_MDL)
 	{
+		LimitMax(period, Util::MaxValueOfType(period) >> 8);
 		if (!c5speed) c5speed = 8363;
-		return Util::muldiv(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+		return Util::muldiv_unsigned(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
@@ -5610,11 +5619,11 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			} else
 			{
 				if (!c5speed) c5speed = 8363;
-				return Util::muldiv(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+				return Util::muldiv_unsigned(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 			}
 		} else
 		{
-			return Util::muldiv(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
+			return Util::muldiv_unsigned(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 		}
 	}
 }
