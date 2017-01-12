@@ -43,6 +43,8 @@
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "../soundlib/plugins/PluginManager.h"
+#include "Vstplug.h"
 #include "FileDialog.h"
 #include <HtmlHelp.h>
 
@@ -2982,21 +2984,28 @@ ULONG TfLanguageProfileNotifySink::Release()
 //Misc helper functions
 /////////////////////////////////////////////
 
-void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN*plugarray, const bool librarynames)
-//---------------------------------------------------------------------------------------------------
+void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames)
+//----------------------------------------------------------------------------------------------------
 {
 #ifndef NO_PLUGINS
+	mpt::ustring str;
+	str.reserve(80);
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
-		CString str;
-		str.Preallocate(80);
-		str.Format(_T("FX%u: "), iPlug + 1);
-		const int size0 = str.GetLength();
-		str += (librarynames) ? mpt::ToCString(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToCString(mpt::CharsetLocale, plugin.GetName());
-		if(str.GetLength() <= size0) str += _T("undefined");
+		str = mpt::String::Print(MPT_USTRING("FX%1: "), iPlug + 1);
+		const size_t size0 = str.size();
+		str += (librarynames) ? mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::CharsetLocale, plugin.GetName());
+		if(str.size() <= size0) str += MPT_USTRING("undefined");
+		
+		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
+		if(vstPlug != nullptr && vstPlug->isBridged)
+		{
+			VSTPluginLib &lib = vstPlug->GetPluginFactory();
+			str += mpt::String::Print(MPT_USTRING(" (%1-Bit Bridged)"), lib.GetDllBits());
+		}
 
-		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
+		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);
 	}
 #endif // NO_PLUGINS
 }

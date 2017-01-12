@@ -3163,24 +3163,8 @@ void CCtrlInstruments::UpdatePluginList()
 	m_CbnMixPlug.Clear();
 	m_CbnMixPlug.ResetContent();
 #ifndef NO_PLUGINS
-	CHAR s[64];
-	for (PLUGINDEX nPlug = 0; nPlug <= MAX_MIXPLUGINS; nPlug++)
-	{
-		if(!nPlug)
-		{
-			strcpy(s, "No plugin");
-		}
-		else
-		{
-			const SNDMIXPLUGIN &plugin = m_sndFile.m_MixPlugins[nPlug - 1];
-			if(plugin.IsValidPlugin())
-				wsprintf(s, "FX%d: %s", nPlug, plugin.GetName());
-			else
-				wsprintf(s, "FX%d: undefined", nPlug);
-		}
-
-		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
-	}
+	m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(_T("No plugin")), 0);
+	AddPluginNamesToCombobox(m_CbnMixPlug, m_sndFile.m_MixPlugins, false);
 #endif // NO_PLUGINS
 	m_CbnMixPlug.SetRedraw(TRUE);
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
