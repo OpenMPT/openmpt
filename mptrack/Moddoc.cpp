@@ -2854,6 +2854,12 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos)
 	if(nOrd == ORDERINDEX_INVALID) return;
 
 	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, setSamplePos && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
+	if(t < 0)
+	{
+		// Position is never played regularly, but we may want to continue playing from here nevertheless.
+		m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
+		m_SndFile.m_PlayState.m_nRow = m_SndFile.m_PlayState.m_nNextRow = nRow;
+	}
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr) pMainFrm->SetElapsedTime(std::max(0.0, t));
