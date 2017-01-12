@@ -1327,6 +1327,7 @@ void CViewGlobals::OnMovePlugToSlot()
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
+		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
 	}
 }
 
