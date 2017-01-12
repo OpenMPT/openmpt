@@ -222,7 +222,7 @@ void IMixPlugin::Bypass(bool bypass)
 
 #ifdef MODPLUG_TRACKER
 	if(m_SndFile.GetpModDoc())
-		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
+		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot + 1).Info(), nullptr);
 #endif // MODPLUG_TRACKER
 }
 
