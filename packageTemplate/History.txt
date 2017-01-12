@@ -26,11 +26,11 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.08.00 (??? 2017, revision 7513)
+v1.26.08.00 (??? 2017, revision 7515)
 -------------------------------------
 General tab
    [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
-   [Fix] <js> Moving plugins did not update the Tree View.
+   [Fix] <js> Moving, inserting and cloning plugins did not update the tree view completely.
 
 Pattern tab
    [Mod] <js> Do not wrap around the spin wheelfor the edit spacing box from 0 to 64.
