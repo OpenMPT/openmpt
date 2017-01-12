@@ -26,18 +26,19 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.08.00 (??? 2017, revision 7515)
+v1.26.08.00 (??? 2017, revision 7517)
 -------------------------------------
 General tab
    [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
    [Fix] <js> Moving, inserting and cloning plugins did not update the tree view completely.
 
 Pattern tab
-   [Mod] <js> Do not wrap around the spin wheelfor the edit spacing box from 0 to 64.
+   [Mod] <js> Do not wrap around the spin wheel for the edit spacing box from 0 to 64.
    [Fix] <js> Correctly center active row when switching to a pattern that has less rows than the previously edited pattern (http://bugs.openmpt.org/view.php?id=899).
    [Fix] <js> Moving channels did not update the channel names in other windows.
    [Fix] <js> The "switch to order list" shortcut also toggled overflow paste.
    [Fix] <js> Quick Channel Settings: Entering a panning value manually did not reset the surround setting visually.
+   [Fix] <js> Trying to play a part of a pattern that is not part of the regular play sequence (e.g. rows after a pattern break) caused the pattern to be played from the first row instead.
 
 Sample tab
    [Mod] <js> Add 1:256 and 1:512 zoom factors.
