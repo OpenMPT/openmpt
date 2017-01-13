@@ -510,6 +510,14 @@
     <ClInclude Include="..\..\..\include\flac\include\FLAC\ordinals.h" />
     <ClInclude Include="..\..\..\include\flac\include\FLAC\stream_decoder.h" />
     <ClInclude Include="..\..\..\include\flac\include\FLAC\stream_encoder.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\alloc.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\compat.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\endswap.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\macros.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\private.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\safe_str.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\win_utf8_io.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\windows_unicode_filenames.h" />
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\private\all.h" />
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\private\bitmath.h" />
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\private\bitreader.h" />
@@ -533,7 +541,6 @@
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\protected\all.h" />
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\protected\stream_decoder.h" />
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h" />
-    <ClInclude Include="..\..\..\include\flac\src\share\windows_unicode_filenames.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\bitmath.c" />
