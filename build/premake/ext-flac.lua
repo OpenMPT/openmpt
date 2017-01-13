@@ -71,7 +71,6 @@
   filter { "action:vs*" }
     files {
      "../../include/flac/src/share/win_utf8_io/win_utf8_io.c",
-     "../../include/flac/src/share/windows_unicode_filenames.h",
     }
   filter {}
   files {
@@ -85,6 +84,20 @@
    "../../include/flac/include/FLAC/stream_decoder.h",
    "../../include/flac/include/FLAC/stream_encoder.h",
   }
+  files {
+   "../../include/flac/include/share/alloc.h",
+   "../../include/flac/include/share/compat.h",
+   "../../include/flac/include/share/endswap.h",
+   "../../include/flac/include/share/macros.h",
+   "../../include/flac/include/share/private.h",
+   "../../include/flac/include/share/safe_str.h",
+  }
+  filter { "action:vs*" }
+    files {
+     "../../include/flac/include/share/win_utf8_io.h",
+     "../../include/flac/include/share/windows_unicode_filenames.h",
+    }
+  filter {}
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }

@@ -942,6 +942,42 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="share"
+				>
+				<File
+					RelativePath="..\..\include\flac\include\share\alloc.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\compat.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\endswap.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\macros.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\private.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\safe_str.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\win_utf8_io.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\flac\include\share\windows_unicode_filenames.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="src"
@@ -1181,10 +1217,6 @@
 			<Filter
 				Name="share"
 				>
-				<File
-					RelativePath="..\..\include\flac\src\share\windows_unicode_filenames.h"
-					>
-				</File>
 				<Filter
 					Name="win_utf8_io"
 					>
