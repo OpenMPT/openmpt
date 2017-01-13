@@ -7,6 +7,9 @@
     <Filter Include="include\FLAC">
       <UniqueIdentifier>{4EFBC869-3A5E-580E-E3E3-90C4CF252491}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\share">
+      <UniqueIdentifier>{EB9C26A6-575D-A2DC-2098-EB598C17E7B8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -56,6 +59,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\flac\include\FLAC\stream_encoder.h">
       <Filter>include\FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\alloc.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\compat.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\endswap.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\macros.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\private.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\safe_str.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\win_utf8_io.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\windows_unicode_filenames.h">
+      <Filter>include\share</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\private\all.h">
       <Filter>src\libFLAC\include\private</Filter>
@@ -125,9 +152,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h">
       <Filter>src\libFLAC\include\protected</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\flac\src\share\windows_unicode_filenames.h">
-      <Filter>src\share</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
