@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.08.00 (??? 2017, revision 7517)
+v1.26.08.00 (??? 2017, revision 7522)
 -------------------------------------
 General tab
    [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
@@ -60,6 +60,7 @@ Misc
    [Fix] <js> Configuring chords with a relative base note was broken since OpenMPT 1.26.01.00.
    [Fix] <js> Tempo Swing dialog: A swing amount of 100% is now displayed correctly on Wine prior to version 2.0.
    [Fix] <js> When switching between multiple windows of a single module, sample and instrument editors are now receiving playback updates instantly.
+   [Fix] <js> SF2: Some stereo sample pairs were mismatched.
 
 Bundled plugins
    [Fix] <js> MIDI Input / Output plugin: Identically-named input and output ports could cause the previous plugin state to not be restored properly.
