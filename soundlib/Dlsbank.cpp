@@ -1608,11 +1608,10 @@ static uint16 ScaleEnvelope(uint32 time, float tempoScale)
 bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn)
 //---------------------------------------------------------------------------------------------------------
 {
-	uint8 RgnToSmp[DLSMAXREGIONS];
+	SAMPLEINDEX RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
 	ModInstrument *pIns;
 	uint32 nRgnMin, nRgnMax, nEnv;
-	SAMPLEINDEX nSample;
 
 	if (nIns >= m_Instruments.size()) return false;
 	pDlsIns = &m_Instruments[nIns];
@@ -1703,17 +1702,15 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	pIns->nDCT = DCT_NOTE;
 	pIns->nDNA = DNA_NOTEFADE;
 	sndFile.Instruments[nInstr] = pIns;
-	nSample = 0;
 	uint32 nLoadedSmp = 0;
+	SAMPLEINDEX nextSample = 0;
 	// Extract Samples
 	for (uint32 nRgn=nRgnMin; nRgn<nRgnMax; nRgn++)
 	{
-		bool bDupRgn;
-		uint32 nSmp;
+		bool bDupRgn = false;
+		SAMPLEINDEX nSmp = 0;
 		DLSREGION *pRgn = &pDlsIns->Regions[nRgn];
 		// Elimitate Duplicate Regions
-		nSmp = 0;
-		bDupRgn = false;
 		uint32 iDup;
 		for (iDup=nRgnMin; iDup<nRgn; iDup++)
 		{
@@ -1739,15 +1736,15 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				nSample = sndFile.GetNextFreeSample(nInstr, nSample + 1);
-				if (nSample == SAMPLEINDEX_INVALID) break;
-				if (nSample > sndFile.GetNumSamples()) sndFile.m_nSamples = nSample;
-				nSmp = nSample;
+				nextSample = sndFile.GetNextFreeSample(nInstr, nextSample + 1);
+				if (nextSample == SAMPLEINDEX_INVALID) break;
+				if (nextSample > sndFile.GetNumSamples()) sndFile.m_nSamples = nextSample;
+				nSmp = nextSample;
 				nLoadedSmp++;
 			}
 		}
 
-		RgnToSmp[nRgn] = (uint8)nSmp;
+		RgnToSmp[nRgn] = nSmp;
 		// Map all notes to the right sample
 		if (nSmp)
 		{
@@ -1755,20 +1752,20 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			{
 				if ((nRgn == nRgnMin) || ((iKey >= pRgn->uKeyMin) && (iKey <= pRgn->uKeyMax)))
 				{
-					pIns->Keyboard[iKey] = (SAMPLEINDEX)nSmp;
+					pIns->Keyboard[iKey] = nSmp;
 				}
 			}
 			// Load the sample
 			if(!bDupRgn)
 			{
-				ExtractSample(sndFile, nSample, nIns, nRgn, nTranspose);
-			} else if(sndFile.GetSample(nSample).GetNumChannels() == 1)
+				ExtractSample(sndFile, nSmp, nIns, nRgn, nTranspose);
+			} else if(sndFile.GetSample(nSmp).GetNumChannels() == 1)
 			{
 				// Try to combine stereo samples
 				uint8 pan1 = GetPanning(nIns, nRgn), pan2 = GetPanning(nIns, iDup);
 				if((pan1 == 0 || pan1 == 255) && (pan2 == 0 || pan2 == 255))
 				{
-					ModSample &sample = sndFile.GetSample(nSample);
+					ModSample &sample = sndFile.GetSample(nSmp);
 					ctrlSmp::ConvertToStereo(sample, sndFile);
 					std::vector<uint8> pWaveForm;
 					uint32 dwLen = 0;
