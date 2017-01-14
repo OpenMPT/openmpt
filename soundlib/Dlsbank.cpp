@@ -1033,6 +1033,7 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 			int32 lAttn = lAttenuation;
 			pRgn->uUnityNote = 0xFF;	// 0xFF means undefined -> use sample
 			pRgn->sFineTune = 0;
+			pRgn->nWaveLink = Util::MaxValueOfType(pRgn->nWaveLink);
 			// Load Generators
 			const SFINSTBAG *pbag = sf2info.pInstBags + ibagcnt;
 			for (uint32 igenndx=pbag[0].wGenNdx; igenndx<pbag[1].wGenNdx; igenndx++)
@@ -1727,7 +1728,6 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			}
 		}
 		// Create a new sample
-		//if (pRgn->nWaveLink == 0) nSmp = 0; else
 		if (!bDupRgn)
 		{
 			uint32 nmaxsmp = (m_nType & MOD_TYPE_XM) ? 16 : 32;
@@ -1756,7 +1756,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				}
 			}
 			// Load the sample
-			if(!bDupRgn)
+			if(!bDupRgn || sndFile.GetSample(nSmp).pSample == nullptr)
 			{
 				ExtractSample(sndFile, nSmp, nIns, nRgn, nTranspose);
 			} else if(sndFile.GetSample(nSmp).GetNumChannels() == 1)
