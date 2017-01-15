@@ -632,6 +632,15 @@ bool CSoundFile::ProcessRow()
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
 		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
 		{
+			if(m_playBehaviour[KST3PortaAfterArpeggio]
+				&& pChn->nCommand == CMD_ARPEGGIO	// Previous row state!
+				&& (m->command == CMD_PORTAMENTOUP || m->command == CMD_PORTAMENTODOWN))
+			{
+				// In ST3, a portamento immediately following an arpeggio continues where the arpeggio left off.
+				// Test case: PortaAfterArp.s3m
+				pChn->nPeriod = GetPeriodFromNote(pChn->nArpeggioLastNote, pChn->nFineTune, pChn->nC5Speed);
+			}
+
 			pChn->rowCommand = *m;
 
 			pChn->rightVol = pChn->newRightVol;
@@ -1353,6 +1362,12 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			pChn->m_ReCalculateFreqOnFirstTick = true;
 		} else
 		{
+			if(GetType() == MOD_TYPE_MT2 && m_SongFlags[SONG_FIRSTTICK])
+			{
+				// MT2 resets any previous portamento when an arpeggio occurs.
+				pChn->nPeriod = period = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+			}
+
 			if(m_playBehaviour[kITArpeggio])
 			{
 				//IT playback compatibility 01 & 02
@@ -1380,7 +1395,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					// Arpeggio is added on top of current note, but cannot do it the IT way because of
 					// the behaviour in ArpeggioClamp.xm.
 					// Test case: ArpSlide.xm
-					uint8 note = (uint8)GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);//pChn->nNote;
+					auto note = GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);
 
 					// The fact that arpeggio behaves in a totally fucked up way at 16 ticks/row or more is that the arpeggio offset LUT only has 16 entries in FT2.
 					// At more than 16 ticks/row, FT2 reads into the vibrato table, which is placed right after the arpeggio table.
@@ -1409,13 +1424,14 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				if(GetType() == MOD_TYPE_STM)
 					tick >>= 4;
 
-				int note = pChn->nNote;
+				// TODO other likely formats for MOD case: MED, OKT, etc
+				uint8 note = (GetType() != MOD_TYPE_MOD) ? pChn->nNote : static_cast<uint8>(GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed));
 				switch(tick % 3)
 				{
 				case 1: note += (pChn->nArpeggio >> 4); break;
 				case 2: note += (pChn->nArpeggio & 0x0F); break;
 				}
-				if(note != pChn->nNote || GetType() == MOD_TYPE_STM)
+				if(note != pChn->nNote || GetType() == MOD_TYPE_STM || m_playBehaviour[KST3PortaAfterArpeggio])
 				{
 					if(m_SongFlags[SONG_PT_MODE])
 					{
@@ -1432,11 +1448,14 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					}
 					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
-					// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
-					// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
 					if(GetType() & (MOD_TYPE_STM | MOD_TYPE_PSM))
 					{
+						// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
+						// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
 						pChn->nPeriod = period;
+					} else if(m_playBehaviour[KST3PortaAfterArpeggio])
+					{
+						pChn->nArpeggioLastNote = note;
 					}
 				}
 			}
@@ -1602,7 +1621,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 		const uint32 (&fineDownTable)[16] = useFreq ? FineLinearSlideDownTable : FineLinearSlideUpTable;
 
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
-		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !alternativeTuning)
+		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !alternativeTuning && GetType() != MOD_TYPE_MT2)
 		{
 			if(!pSmp->nVibRate)
 				return;

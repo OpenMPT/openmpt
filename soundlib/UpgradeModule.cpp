@@ -491,7 +491,7 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 	
-	if(GetType() == MOD_TYPE_IT)
+	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
 		// The following behaviours were added in/after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
 		static const PlayBehaviourVersion behaviours[] =
@@ -505,7 +505,7 @@ void CSoundFile::UpgradeModule()
 			if(m_dwLastSavedWithVersion < (behaviours[i].version & 0xFFFF0000))
 				m_playBehaviour.reset(behaviours[i].behaviour);
 			// Full version information available, i.e. not compatibility-exported.
-			if(m_dwLastSavedWithVersion > (behaviours[i].version & 0xFFFF0000) && m_dwLastSavedWithVersion < behaviours[i].version)
+			else if(m_dwLastSavedWithVersion > (behaviours[i].version & 0xFFFF0000) && m_dwLastSavedWithVersion < behaviours[i].version)
 				m_playBehaviour.reset(behaviours[i].behaviour);
 		}
 	} else if(GetType() == MOD_TYPE_XM)
@@ -523,16 +523,22 @@ void CSoundFile::UpgradeModule()
 		}
 	} else if(GetType() == MOD_TYPE_S3M)
 	{
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
-			m_playBehaviour.reset(kST3NoMutedChannels);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
-			m_playBehaviour.reset(kST3EffectMemory);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 00, 00))
-			m_playBehaviour.reset(kST3PortaSampleChange);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
-			m_playBehaviour.reset(kST3VibratoMemory);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
-			m_playBehaviour.reset(kITPanbrelloHold);
+		// We do not store any of these flags in S3M files.
+		static const PlayBehaviourVersion behaviours[] =
+		{
+			{ kST3NoMutedChannels,		MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kST3EffectMemory,			MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
+			{ kST3PortaSampleChange,	MAKE_VERSION_NUMERIC(1, 22, 00, 00) },
+			{ kST3VibratoMemory,		MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
+			{ kITPanbrelloHold,			MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
+			{ KST3PortaAfterArpeggio,	MAKE_VERSION_NUMERIC(1, 27, 00, 00) },
+		};
+
+		for(size_t i = 0; i < CountOf(behaviours); i++)
+		{
+			if(m_dwLastSavedWithVersion < behaviours[i].version)
+				m_playBehaviour.reset(behaviours[i].behaviour);
+		}
 	}
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
