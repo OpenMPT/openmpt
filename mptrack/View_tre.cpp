@@ -639,11 +639,7 @@ void CModTree::RefreshDlsBanks()
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 								name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
-				WORD wBanks[16];
-				HTREEITEM hBanks[16];
-				MemsetZero(wBanks);
-				MemsetZero(hBanks);
-				UINT nBanks = 0;
+				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 						"Drum Kits", IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
@@ -696,33 +692,26 @@ void CModTree::RefreshDlsBanks()
 						} else
 						// Melodic
 						{
-							HTREEITEM hbank = hBanks[0];
-							UINT mbank = (pDlsIns->ulBank & 0x7F7F);
-							UINT i;
-							for (i=0; i<nBanks; i++)
+							uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
+							auto hbankIt = banks.find(mbank);
+							HTREEITEM hbank;
+							if(hbankIt != banks.end())
 							{
-								if (wBanks[i] == mbank) break;
-							}
-							if (i < nBanks)
-							{
-								hbank = hBanks[i];
+								hbank = hbankIt->second;
 							} else
-							if (nBanks < 16)
 							{
-								wsprintf(s, (mbank) ? "Melodic Bank %02X.%02X" : "Melodic", mbank >> 8, mbank & 0x7F);
-								UINT j=0;
-								while ((j<nBanks) && (mbank > wBanks[j])) j++;
-								for (UINT k=nBanks; k>j; k--)
+								wsprintf(s, (mbank) ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
+								// Find out where to insert this bank in the tree
+								auto item = banks.insert(std::make_pair(mbank, nullptr)).first;
+								HTREEITEM insertAfter = TVI_FIRST;
+								if(item != banks.begin())
 								{
-									wBanks[k] = wBanks[k-1];
-									hBanks[k] = hBanks[k-1];
+									insertAfter = std::prev(item)->second;
 								}
 								hbank = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
-									m_tiDLS[iDls], (j > 0) ? hBanks[j-1] : TVI_FIRST);
-								wBanks[j] = (WORD)mbank;
-								hBanks[j] = hbank;
-								nBanks++;
+									m_tiDLS[iDls], insertAfter);
+								item->second = hbank;
 							}
 							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint16)iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
@@ -731,9 +720,9 @@ void CModTree::RefreshDlsBanks()
 					}
 				}
 				// Sort items
-				for (UINT iBnk=0; iBnk<nBanks; iBnk++) if (hBanks[iBnk])
+				for(auto &b : banks)
 				{
-					tvs.hParent = hBanks[iBnk];
+					tvs.hParent = b.second;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
 					tvs.lParam = (LPARAM)this;
 					SortChildrenCB(&tvs);
@@ -876,9 +865,9 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		if(!hasPlugs && firstPlug == lastPlug)
 		{
 			// If we only updated one plugin, we still need to check all the other slots if there is any plugin in them.
-			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			for(const auto &plug : sndFile.m_MixPlugins)
 			{
-				if(sndFile.m_MixPlugins[i].IsValidPlugin())
+				if(plug.IsValidPlugin())
 				{
 					hasPlugs = true;
 					break;
@@ -911,16 +900,21 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		// (only one seq remaining || previously only one sequence): update parent item
 		if((info.tiSequences.size() > 1 && sndFile.Order.GetNumSequences() == 1) || (info.tiSequences.size() == 1 && sndFile.Order.GetNumSequences() > 1))
 		{
-			for(size_t nSeq = 0; nSeq < info.tiOrders.size(); nSeq++)
+			for(auto &seq : info.tiOrders)
 			{
-				for(size_t nOrd = 0; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
+				for(auto &ord : seq)
 				{
-					if(info.tiOrders[nSeq][nOrd]) DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = NULL;
+					if(ord) DeleteItem(ord);
+					ord = nullptr;
 				}
-				if(info.tiSequences[nSeq]) DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = NULL;
+			}
+			for(auto &seq : info.tiSequences)
+			{
+				if(seq) DeleteItem(seq);
+				seq = nullptr;
 			}
 			info.tiOrders.resize(sndFile.Order.GetNumSequences());
-			info.tiSequences.resize(sndFile.Order.GetNumSequences(), NULL);
+			info.tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
 			adjustParentNode = true;
 		}
 
@@ -929,13 +923,13 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		{
 			for(size_t nOrd = 0; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
 			{
-				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = NULL;
+				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = nullptr;
 			}
-			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = NULL;
+			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = nullptr;
 		}
 		if (info.tiSequences.size() < sndFile.Order.GetNumSequences()) // Resize tiSequences if needed.
 		{
-			info.tiSequences.resize(sndFile.Order.GetNumSequences(), NULL);
+			info.tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
 			info.tiOrders.resize(sndFile.Order.GetNumSequences());
 		}
 
