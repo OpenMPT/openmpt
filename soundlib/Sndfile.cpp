@@ -1009,6 +1009,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3PortaSampleChange);
 		playBehaviour.set(kST3EffectMemory);
 		playBehaviour.set(kST3VibratoMemory);
+		playBehaviour.set(KST3PortaAfterArpeggio);
 		break;
 
 	case MOD_TYPE_MOD:
@@ -1619,7 +1620,7 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	}
 #ifndef MODPLUG_TRACKER
 	// when the user modifies the tempo, we do not really care about accurate tempo error accumulation
-	retval = Util::muldivr(retval, m_nTempoFactor, 65536);
+	retval = Util::muldivr_unsigned(retval, m_nTempoFactor, 65536);
 #endif // !MODPLUG_TRACKER
 	if(!retval)
 		retval  = 1;

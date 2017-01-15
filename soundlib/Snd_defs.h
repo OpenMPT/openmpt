@@ -449,6 +449,7 @@ enum PlayBehaviour
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
 	kST3VibratoMemory,				// Do not remember vibrato type in effect memory
 	kST3LimitPeriod,				// Cut note instead of limiting  final period (ModPlug Tracker style)
+	KST3PortaAfterArpeggio,			// Portamento after arpeggio continues at the note where the arpeggio left off
 
 	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
 	kMODIgnorePanning,				// Do not process any panning commands

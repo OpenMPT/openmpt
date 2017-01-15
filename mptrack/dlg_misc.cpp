@@ -603,6 +603,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
 		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
+		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note."); break;
 		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
