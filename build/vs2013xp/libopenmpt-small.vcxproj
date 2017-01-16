@@ -119,53 +119,53 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\lib\vs2013xp\x86\Debug\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86\Debug\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86\Debug\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\lib\vs2013xp\x86_64\Debug\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86_64\Debug\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86_64\Debug\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\lib\vs2013xp\x86\Release\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86\Release\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86\Release\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\lib\vs2013xp\x86_64\Release\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86_64\Release\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86_64\Release\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug\vs2013-shared\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86\DebugShared\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86\DebugShared\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug\vs2013-shared\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86_64\DebugShared\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86_64\DebugShared\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release\vs2013-shared\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86\ReleaseShared\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86\ReleaseShared\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release\vs2013-shared\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2013xp\libopenmpt\x86_64\ReleaseShared\</IntDir>
+    <IntDir>..\obj\vs2013xp\libopenmpt-small\x86_64\ReleaseShared\</IntDir>
     <TargetName>libopenmpt-small</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
@@ -268,7 +268,7 @@
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt-small.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt-small\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -292,7 +292,7 @@
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt-small.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt-small\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -323,7 +323,7 @@
       <AdditionalOptions>/arch:IA32 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt-small.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt-small\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -355,7 +355,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_SMALL;LIBOPENMPT_BUILD_DLL;MPT_BUILD_VER_SPECIAL_PREFIX=\"+small\";MPT_BUILD_VER_FILENAME=\"libopenmpt-small.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt-small\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;..\..\common;..\..\soundlib;$(IntDir)\svn_version;..\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
