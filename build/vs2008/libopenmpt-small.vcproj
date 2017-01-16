@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\lib\x86\Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x86\Debug"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86\Debug"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -89,7 +89,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="..\lib\x86_64\Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x86_64\Debug"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86_64\Debug"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -157,7 +157,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\lib\x86\Release"
-			IntermediateDirectory="..\obj\libopenmpt\x86\Release"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -225,7 +225,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="..\lib\x86_64\Release"
-			IntermediateDirectory="..\obj\libopenmpt\x86_64\Release"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86_64\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -294,7 +294,7 @@
 		<Configuration
 			Name="DebugShared|Win32"
 			OutputDirectory="..\..\bin\Win32-Shared-Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x86\DebugShared"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -372,7 +372,7 @@
 		<Configuration
 			Name="DebugShared|x64"
 			OutputDirectory="..\..\bin\x64-Shared-Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x86_64\DebugShared"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86_64\DebugShared"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -451,7 +451,7 @@
 		<Configuration
 			Name="ReleaseShared|Win32"
 			OutputDirectory="..\..\bin\Win32-Shared"
-			IntermediateDirectory="..\obj\libopenmpt\x86\ReleaseShared"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -532,7 +532,7 @@
 		<Configuration
 			Name="ReleaseShared|x64"
 			OutputDirectory="..\..\bin\x64-Shared"
-			IntermediateDirectory="..\obj\libopenmpt\x86_64\ReleaseShared"
+			IntermediateDirectory="..\obj\libopenmpt-small\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
