@@ -1,1 +1,1 @@
-#define PACKAGE_VERSION "1.1.3" // OpenMPT
+#define PACKAGE_VERSION "1.1.4" // OpenMPT
