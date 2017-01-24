@@ -619,44 +619,6 @@ openmpt123_SOURCES += src/openmpt123/openmpt123_waveout.hpp
 
 man1_MANS = man/openmpt123.1
 
+@DX_RULES@
+
 MOSTLYCLEANFILES += $(DX_CLEANFILES)
-
-if DX_COND_doc
-
-all-local: @DX_DOCDIR@/@PACKAGE@.tag
-
-install-data-local:
-	$(INSTALL) -d $(DESTDIR)$(docdir)/html/search
-	( cd @DX_DOCDIR@ && \
-	for f in `find html -type f \! -name "installdox"`; do	\
-		$(INSTALL_DATA) $$f $(DESTDIR)$(docdir)/$$f;	\
-	done )
-
-clean-local:
-	$(RM) -r html
-	$(RM) @DX_DOCDIR@/@PACKAGE@.tag
-
-uninstall-local:
-	$(RM) -r $(DESTDIR)$(docdir)/html
-
-if DX_COND_html
-DX_CLEAN_HTML = @DX_DOCDIR@/html
-endif DX_COND_html
-
-.PHONY: doxygen-run doxygen-doc
-
-.INTERMEDIATE: doxygen-run
-
-doxygen-run: @DX_DOCDIR@/@PACKAGE@.tag
-
-doxygen-doc: doxygen-run
-
-@DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG)
-	rm -rf @DX_DOCDIR@
-	$(DX_ENV) $(DX_DOXYGEN) $(DX_CONFIG)
-	touch $@
-
-DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag @DX_DOCDIR@/doxygen_sqlite3.db -r $(DX_CLEAN_HTML) 
-
-endif DX_COND_doc
-
