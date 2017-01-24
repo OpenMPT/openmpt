@@ -812,8 +812,7 @@ uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t 
 	{
 		if(!bytesLeft)
 		{
-			bitnum += 8;
-			return uint16_max;
+			throw std::range_error("Truncated MDL sample block");
 		}
 		bitbuf |= (((uint32)(*ibuf++)) << bitnum);
 		bitnum += 8;
