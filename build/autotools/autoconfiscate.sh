@@ -48,6 +48,7 @@ mkdir bin/dist-autotools/m4
 touch bin/dist-autotools/m4/emptydir
 svn export ./build/autotools/configure.ac bin/dist-autotools/configure.ac
 svn export ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
+svn export ./build/autotools/ax_cxx_compile_stdcxx.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx.m4
 svn export ./build/autotools/ax_cxx_compile_stdcxx_11.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx_11.m4
 svn export ./build/autotools/ax_prog_doxygen.m4 bin/dist-autotools/m4/ax_prog_doxygen.m4
 
