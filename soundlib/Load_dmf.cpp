@@ -16,6 +16,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#include <stdexcept>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1065,10 +1066,13 @@ static uint8 DMFReadBits(DMFHTree *tree, uint32 nbits)
 		if (tree->bitnum)
 		{
 			tree->bitnum--;
+		} else if(tree->ibuf < tree->ibufmax)
+		{
+			tree->bitbuf = *(tree->ibuf++);
+			tree->bitnum = 7;
 		} else
 		{
-			tree->bitbuf = (tree->ibuf < tree->ibufmax) ? *(tree->ibuf++) : 0;
-			tree->bitnum = 7;
+			throw std::range_error("Truncated DMF sample block");
 		}
 		if (tree->bitbuf & 1) x |= bitv;
 		bitv <<= 1;
@@ -1127,27 +1131,30 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 	DMFNewNode(&tree);
 	uint8 value = 0, delta = 0;
 
-	for(uint32 i = 0; i < maxlen; i++)
+	try
 	{
-		int actnode = 0;
-		uint8 sign = DMFReadBits(&tree, 1);
-		do
+		for(uint32 i = 0; i < maxlen; i++)
 		{
-			if(DMFReadBits(&tree, 1))
-				actnode = tree.nodes[actnode].right;
-			else
-				actnode = tree.nodes[actnode].left;
-			if(actnode > 255) break;
-			delta = tree.nodes[actnode].value;
-			if((tree.ibuf >= tree.ibufmax) && (!tree.bitnum)) break;
-		} while ((tree.nodes[actnode].left >= 0) && (tree.nodes[actnode].right >= 0));
-		if(sign) delta ^= 0xFF;
-		value += delta;
-		psample[i] = (i) ? value : 0;
+			int actnode = 0;
+			uint8 sign = DMFReadBits(&tree, 1);
+			do
+			{
+				if(DMFReadBits(&tree, 1))
+					actnode = tree.nodes[actnode].right;
+				else
+					actnode = tree.nodes[actnode].left;
+				if(actnode > 255) break;
+				delta = tree.nodes[actnode].value;
+			} while((tree.nodes[actnode].left >= 0) && (tree.nodes[actnode].right >= 0));
+			if(sign) delta ^= 0xFF;
+			value += delta;
+			psample[i] = (i) ? value : 0;
+		}
 	}
-#ifdef DMFLOG
-//	Log("DMFUnpack: %d remaining bytes\n", tree.ibufmax-tree.ibuf);
-#endif
+	catch(const std::range_error &)
+	{
+		//AddToLog(LogWarning, "Truncated DMF sample block");
+	}
 	return tree.ibuf - ibuf;
 }
 
