@@ -21,6 +21,7 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
+#include <stdexcept>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -189,6 +190,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			} catch(const std::range_error &)
 			{
 				// Data is not sufficient to decode the whole sample
+				//AddToLog(LogWarning, "Truncated MDL sample block");
 			}
 		}
 	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
