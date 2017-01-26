@@ -653,11 +653,7 @@ void CModTree::RefreshDlsBanks()
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 								name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
-				WORD wBanks[16];
-				HTREEITEM hBanks[16];
-				MemsetZero(wBanks);
-				MemsetZero(hBanks);
-				UINT nBanks = 0;
+				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 						"Drum Kits", IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
@@ -710,33 +706,26 @@ void CModTree::RefreshDlsBanks()
 						} else
 						// Melodic
 						{
-							HTREEITEM hbank = hBanks[0];
-							UINT mbank = (pDlsIns->ulBank & 0x7F7F);
-							UINT i;
-							for (i=0; i<nBanks; i++)
+							uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
+							std::map<uint16, HTREEITEM>::const_iterator hbankIt = banks.find(mbank);
+							HTREEITEM hbank;
+							if(hbankIt != banks.end())
 							{
-								if (wBanks[i] == mbank) break;
-							}
-							if (i < nBanks)
-							{
-								hbank = hBanks[i];
+								hbank = hbankIt->second;
 							} else
-							if (nBanks < 16)
 							{
-								wsprintf(s, (mbank) ? "Melodic Bank %02X.%02X" : "Melodic", mbank >> 8, mbank & 0x7F);
-								UINT j=0;
-								while ((j<nBanks) && (mbank > wBanks[j])) j++;
-								for (UINT k=nBanks; k>j; k--)
+								wsprintf(s, (mbank) ? _T("Melodic Bank %02X.%02X") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
+								// Find out where to insert this bank in the tree
+								std::map<uint16, HTREEITEM>::iterator item = banks.insert(std::make_pair(mbank, nullptr)).first;
+								HTREEITEM insertAfter = TVI_FIRST;
+								if(item != banks.begin())
 								{
-									wBanks[k] = wBanks[k-1];
-									hBanks[k] = hBanks[k-1];
+									insertAfter = std::prev(item)->second;
 								}
 								hbank = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
-									m_tiDLS[iDls], (j > 0) ? hBanks[j-1] : TVI_FIRST);
-								wBanks[j] = (WORD)mbank;
-								hBanks[j] = hbank;
-								nBanks++;
+									m_tiDLS[iDls], insertAfter);
+								item->second = hbank;
 							}
 							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint16)iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
@@ -745,9 +734,9 @@ void CModTree::RefreshDlsBanks()
 					}
 				}
 				// Sort items
-				for (UINT iBnk=0; iBnk<nBanks; iBnk++) if (hBanks[iBnk])
+				for(std::map<uint16, HTREEITEM>::const_iterator b = banks.begin(); b != banks.end(); b++)
 				{
-					tvs.hParent = hBanks[iBnk];
+					tvs.hParent = b->second;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
 					tvs.lParam = (LPARAM)this;
 					SortChildrenCB(&tvs);
@@ -943,13 +932,13 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		{
 			for(size_t nOrd = 0; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
 			{
-				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = NULL;
+				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = nullptr;
 			}
-			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = NULL;
+			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = nullptr;
 		}
 		if (info.tiSequences.size() < sndFile.Order.GetNumSequences()) // Resize tiSequences if needed.
 		{
-			info.tiSequences.resize(sndFile.Order.GetNumSequences(), NULL);
+			info.tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
 			info.tiOrders.resize(sndFile.Order.GetNumSequences());
 		}
 

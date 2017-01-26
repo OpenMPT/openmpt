@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.08.00 (??? 2017, revision 7541)
+v1.26.08.00 (??? 2017, revision 7542)
 -------------------------------------
 General tab
    [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
@@ -43,6 +43,9 @@ Pattern tab
 Sample tab
    [Imp] <js> Add 1:256 and 1:512 zoom factors.
    [Fix] <js> Show the correct PAL sample rate for MOD files when hovering the finetune field.
+
+Tree view
+   [Fix] <js> If a soundfont has more than 16 banks, do not cram items of further banks into the first bank's folder.
 
 Mod Conversion
    [Fix] <js> When converting from IT / MPTM / S3M to MOD and vice versa, samples were slightly detuned (MOD plays with PAL middle-C frequency, but was translated using NTSC middle-C frequency).
