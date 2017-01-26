@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta20.4
 
+ *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
+    routings.
+
  *  libmodplug: Added all missing C++ API symbols that are accessable via the
     public libmodplug header file.
  *  Channel frequency could wrap around after some excessive portamento / down
