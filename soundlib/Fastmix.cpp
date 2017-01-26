@@ -475,7 +475,7 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 	const float FloatToInt = m_PlayConfig.getFloatToInt();
 #endif // MPT_INTMIXER
 
-	// Setup float inputs
+	// Setup float inputs from samples
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
 		SNDMIXPLUGIN &plugin = m_MixPlugins[plug];
@@ -631,10 +631,11 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 					// Samples or plugins are being rendered, so turn off auto-bypass for this master effect.
 					if(plugin.pMixPlugin != nullptr) plugin.pMixPlugin->ResetSilence();
 					SNDMIXPLUGIN *chain = &plugin;
-					PLUGINDEX out = chain->GetOutputPlugin();
-					while(out > plug && out < MAX_MIXPLUGINS)
+					PLUGINDEX out = chain->GetOutputPlugin(), prevOut = plug;
+					while(out > prevOut && out < MAX_MIXPLUGINS)
 					{
 						chain = &m_MixPlugins[out];
+						prevOut = out;
 						out = chain->GetOutputPlugin();
 						if(chain->pMixPlugin)
 						{
