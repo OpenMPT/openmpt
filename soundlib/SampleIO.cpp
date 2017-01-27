@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Sample decompression routines in other source files
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
+uint8 MDLReadBits(uint32 &bitbuf, int32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
 uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
@@ -136,18 +136,18 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(GetEncoding() == MDL && GetChannelFormat() == mono && GetBitDepth() <= 16)
 	{
 		// Huffman MDL compressed samples
-		if(file.CanRead(8))
+		if(file.CanRead(8) && (fileSize = file.ReadUint32LE()) >= 4)
 		{
-			fileSize = file.ReadUint32LE();
 			FileReader chunk = file.ReadChunk(fileSize);
 			bytesRead = chunk.GetLength() + 4;
-			uint32 bitBuf = chunk.ReadUint32LE(), bitNum = 32;
+			uint32 bitBuf = chunk.ReadUint32LE();
+			int32 bitNum = 32;
 
 			restrictedSampleDataView = chunk.GetPinnedRawDataView();
 			sourceBuf = restrictedSampleDataView.data();
 
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf);
-			size_t bytesLeft = chunk.GetLength() - 4;
+			size_t bytesLeft = chunk.BytesLeft();
 
 			uint8 dlt = 0, lowbyte = 0;
 			const bool is16bit = GetBitDepth() == 16;
@@ -158,12 +158,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 					uint8 hibyte;
 					if(is16bit)
 					{
-						lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8));
+						lowbyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8);
 					}
 					bool sign = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1) != 0;
 					if(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
 					{
-						hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3));
+						hibyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3);
 					} else
 					{
 						hibyte = 8;
@@ -171,7 +171,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 						{
 							hibyte += 0x10;
 						}
-						hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4));
+						hibyte += MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4);
 					}
 					if(sign)
 					{
