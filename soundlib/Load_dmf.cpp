@@ -1053,71 +1053,66 @@ struct DMFHTree
 	int bitnum;
 	int lastnode, nodecount;
 	DMFHNode nodes[256];
-};
 
-
-// DMF Huffman ReadBits
-static uint8 DMFReadBits(DMFHTree *tree, uint32 nbits)
-//----------------------------------------------------
-{
-	uint8 x = 0, bitv = 1;
-	while(nbits--)
+	// DMF Huffman ReadBits
+	uint8 DMFReadBits(int nbits)
 	{
-		if (tree->bitnum)
+		if(bitnum < nbits)
 		{
-			tree->bitnum--;
-		} else if(tree->ibuf < tree->ibufmax)
+			if(ibuf < ibufmax)
+			{
+				bitbuf |= (((uint32)(*ibuf++)) << bitnum);
+				bitnum += 8;
+			} else
+			{
+				throw std::range_error("Truncated DMF sample block");
+			}
+		}
+
+		uint8 v = static_cast<uint8>(bitbuf & ((1 << nbits) - 1));
+		bitbuf >>= nbits;
+		bitnum -= nbits;
+		return v;
+	}
+
+
+	//
+	// tree: [8-bit value][12-bit index][12-bit index] = 32-bit
+	//
+
+	void DMFNewNode()
+	{
+		uint8 isleft, isright;
+		int actnode;
+
+		actnode = nodecount;
+		if(actnode > 255) return;
+		nodes[actnode].value = DMFReadBits(7);
+		isleft = DMFReadBits(1);
+		isright = DMFReadBits(1);
+		actnode = lastnode;
+		if(actnode > 255) return;
+		nodecount++;
+		lastnode = nodecount;
+		if(isleft)
 		{
-			tree->bitbuf = *(tree->ibuf++);
-			tree->bitnum = 7;
+			nodes[actnode].left = (int16)lastnode;
+			DMFNewNode();
 		} else
 		{
-			throw std::range_error("Truncated DMF sample block");
+			nodes[actnode].left = -1;
 		}
-		if (tree->bitbuf & 1) x |= bitv;
-		bitv <<= 1;
-		tree->bitbuf >>= 1;
+		lastnode = nodecount;
+		if(isright)
+		{
+			nodes[actnode].right = (int16)lastnode;
+			DMFNewNode();
+		} else
+		{
+			nodes[actnode].right = -1;
+		}
 	}
-	return x;
-}
-
-//
-// tree: [8-bit value][12-bit index][12-bit index] = 32-bit
-//
-
-static void DMFNewNode(DMFHTree *tree)
-//------------------------------------
-{
-	uint8 isleft, isright;
-	int actnode;
-
-	actnode = tree->nodecount;
-	if (actnode > 255) return;
-	tree->nodes[actnode].value = DMFReadBits(tree, 7);
-	isleft = DMFReadBits(tree, 1);
-	isright = DMFReadBits(tree, 1);
-	actnode = tree->lastnode;
-	if (actnode > 255) return;
-	tree->nodecount++;
-	tree->lastnode = tree->nodecount;
-	if(isleft)
-	{
-		tree->nodes[actnode].left = (int16)tree->lastnode;
-		DMFNewNode(tree);
-	} else
-	{
-		tree->nodes[actnode].left = -1;
-	}
-	tree->lastnode = tree->nodecount;
-	if(isright)
-	{
-		tree->nodes[actnode].right = (int16)tree->lastnode;
-		DMFNewNode(tree);
-	} else
-	{
-		tree->nodes[actnode].right = -1;
-	}
-}
+};
 
 
 uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
@@ -1128,7 +1123,7 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 	MemsetZero(tree);
 	tree.ibuf = ibuf;
 	tree.ibufmax = ibufmax;
-	DMFNewNode(&tree);
+	tree.DMFNewNode();
 	uint8 value = 0, delta = 0;
 
 	try
@@ -1136,10 +1131,10 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 		for(uint32 i = 0; i < maxlen; i++)
 		{
 			int actnode = 0;
-			uint8 sign = DMFReadBits(&tree, 1);
+			uint8 sign = tree.DMFReadBits(1);
 			do
 			{
-				if(DMFReadBits(&tree, 1))
+				if(tree.DMFReadBits(1))
 					actnode = tree.nodes[actnode].right;
 				else
 					actnode = tree.nodes[actnode].left;
@@ -1148,10 +1143,9 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 			} while((tree.nodes[actnode].left >= 0) && (tree.nodes[actnode].right >= 0));
 			if(sign) delta ^= 0xFF;
 			value += delta;
-			psample[i] = (i) ? value : 0;
+			psample[i] = value;
 		}
-	}
-	catch(const std::range_error &)
+	} catch(const std::range_error &)
 	{
 		//AddToLog(LogWarning, "Truncated DMF sample block");
 	}
