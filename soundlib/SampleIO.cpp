@@ -19,13 +19,14 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
+#include <stdexcept>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 // Sample decompression routines in other source files
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
+uint8 MDLReadBits(uint32 &bitbuf, int32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
 uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
@@ -133,48 +134,61 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(GetEncoding() == MDL && GetChannelFormat() == mono && GetBitDepth() <= 16)
 	{
 		// Huffman MDL compressed samples
-		fileSize = file.ReadUint32LE();
-		FileReader chunk = file.ReadChunk(fileSize);
-		bytesRead = chunk.GetLength() + 4;
-		if(chunk.CanRead(4))
+		if(file.CanRead(8) && (fileSize = file.ReadUint32LE()) >= 4)
 		{
-			uint32 bitBuf = chunk.ReadUint32LE(), bitNum = 32;
+			FileReader chunk = file.ReadChunk(fileSize);
+			bytesRead = chunk.GetLength() + 4;
+			uint32 bitBuf = chunk.ReadUint32LE();
+			int32 bitNum = 32;
 
 			restrictedSampleDataView = chunk.GetPinnedRawDataView();
 			sourceBuf = restrictedSampleDataView.data();
 
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf);
-			size_t bytesLeft = chunk.GetLength() - 4;
+			size_t bytesLeft = chunk.BytesLeft();
 
 			uint8 dlt = 0, lowbyte = 0;
-			const bool _16bit = GetBitDepth() == 16;
-			for(SmpLength j = 0; j < sample.nLength; j++)
+			const bool is16bit = GetBitDepth() == 16;
+			try
 			{
-				uint8 hibyte;
-				uint8 sign;
-				if(_16bit)
+				for(SmpLength j = 0; j < sample.nLength; j++)
 				{
-					lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8));
+					uint8 hibyte;
+					if(is16bit)
+					{
+						lowbyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8);
+					}
+					bool sign = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1) != 0;
+					if(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
+					{
+						hibyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3);
+					} else
+					{
+						hibyte = 8;
+						while(!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
+						{
+							hibyte += 0x10;
+						}
+						hibyte += MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4);
+					}
+					if(sign)
+					{
+						hibyte = ~hibyte;
+					}
+					dlt += hibyte;
+					if(!is16bit)
+					{
+						sample.pSample8[j] = dlt;
+					}
+					else
+					{
+						sample.pSample16[j] = lowbyte | (dlt << 8);
+					}
 				}
-				sign = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1));
-				if (MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
-				{
-					hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3));
-				} else
-				{
-					hibyte = 8;
-					while (!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1)) hibyte += 0x10;
-					hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4));
-				}
-				if (sign) hibyte = ~hibyte;
-				dlt += hibyte;
-				if(!_16bit)
-				{
-					sample.pSample8[j] = dlt;
-				} else
-				{
-					sample.pSample16[j] = lowbyte | (dlt << 8);
-				}
+			} catch(const std::range_error &)
+			{
+				// Data is not sufficient to decode the whole sample
+				//AddToLog(LogWarning, "Truncated MDL sample block");
 			}
 		}
 	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
@@ -822,7 +836,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			if(sample.uFlags[CHN_STEREO])
 			{
 				// Downmix stereo
-				s_new = (s_new + (*p) + 1) >> 1;
+				s_new = (s_new + (*p) + 1) / 2;
 				p++;
 			}
 			if(GetEncoding() == deltaPCM)
@@ -965,7 +979,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			p += sinc;
 			if (sample.uFlags[CHN_STEREO])
 			{
-				s_new = (s_new + ((int)*p) + 1) >> 1;
+				s_new = (s_new + ((int)*p) + 1) / 2;
 				p += sinc;
 			}
 			if (GetEncoding() == deltaPCM)
