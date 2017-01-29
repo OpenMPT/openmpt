@@ -2573,6 +2573,7 @@ bool CViewPattern::TransposeSelection(int transp)
 				vol = m.param * 4u;
 			else if(m.volcmd == VOLCMD_VOLUME)
 				vol = m.vol * 4u;
+			GetDocument()->NoteOff(NOTE_NONE, false, m.instr, m_Selection.GetStartChannel());
 			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
 		}
 	}
@@ -2708,6 +2709,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				vol = m.param * 4u;
 			else if(m.volcmd == VOLCMD_VOLUME)
 				vol = m.vol * 4u;
+			GetDocument()->NoteOff(NOTE_NONE, false, m.instr, m_Selection.GetStartChannel());
 			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
 		}
 	}
