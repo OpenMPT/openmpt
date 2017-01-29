@@ -417,7 +417,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					continue;
 				}
 
-				if(insertPat < patList.size())
+				if(insertPat < patList.size() && patList[insertPat] != PATTERNINDEX_INVALID)
 				{
 					// Duplicate pattern
 					insertPat = patList[insertPat];
