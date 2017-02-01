@@ -256,6 +256,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -272,6 +273,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -295,6 +297,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -319,6 +322,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -336,6 +340,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -351,6 +356,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -374,6 +380,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -398,6 +405,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -415,6 +423,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -431,6 +440,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -454,6 +464,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -478,6 +489,7 @@
       <StringPooling>true</StringPooling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4267 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
