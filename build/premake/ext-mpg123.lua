@@ -54,3 +54,7 @@
    "../../include/mpg123/src/libmpg123/tabinit.c",
   }
   defines { "DYNAMIC_BUILD", "OPT_GENERIC" }
+  filter {}
+  filter { "action:vs*" }
+    buildoptions { "/wd4244", "/wd4267", "/wd4334" }
+  filter {}
