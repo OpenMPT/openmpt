@@ -113,7 +113,7 @@
     }
   filter {}
   filter { "action:vs*" }
-    buildoptions { "/wd4244", "/wd4267", "/wd4334" }
+    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4334" }
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
