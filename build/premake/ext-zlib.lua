@@ -48,3 +48,6 @@
   filter { "kind:SharedLib" }
    defines { "ZLIB_DLL" }
   filter {}
+  filter { "action:vs*" }
+    buildoptions { "/wd4267" }
+  filter {}
