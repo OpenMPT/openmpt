@@ -58,3 +58,7 @@
    "../../include/lame/libmp3lame/vector/xmm_quantize_sub.c",
   }
   defines { "HAVE_CONFIG_H", "HAVE_MPGLIB", "USE_LAYER_2" }
+  filter {}
+  filter { "action:vs*" }
+    buildoptions { "/wd4267", "/wd4334" }
+  filter {}
