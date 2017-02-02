@@ -819,16 +819,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// chose config directory
 	mpt::PathString configPath = portableMode ? configPathApp : configPathGlobal;
 
-	// Set current directory to My Documents (normal) or OpenMPT directory (portable).
-	// If no sample / mod / etc. paths are set up by the user, this will be the default location for browsing files.
-	if(portableMode || SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) != S_OK)
-	{
-		SetCurrentDirectoryW(configPathApp.AsNative().c_str());
-	} else
-	{
-		SetCurrentDirectoryW(dir);
-	}
-
 	// Update state.
 
 	// store exe path
