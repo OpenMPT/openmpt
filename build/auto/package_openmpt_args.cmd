@@ -28,6 +28,9 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
+rmdir /s /q extraKeymaps
+mkdir extraKeymaps
+copy /y ..\..\packageTemplate\extraKeymaps\*.* .\extraKeymaps\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack.exe .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\OpenMPT_SoundTouch_f32.dll .\ || goto error
@@ -40,6 +43,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  OpenMPT_SoundTouch_f32.dll ^
  PluginBridge32.exe ^
  PluginBridge64.exe ^
+ extraKeymaps ^
  || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack.pdb || goto error
 cd .. || goto error
