@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.08.00 (??? 2017, revision 7542)
+v1.26.08.00 (??? 2017, revision 7555)
 -------------------------------------
 General tab
    [Fix] <js> When modifying the number of channels from the pattern editor, the upper part of the General tab was not updated (http://bugs.openmpt.org/view.php?id=903).
@@ -52,6 +52,7 @@ Mod Conversion
 
 VST / DMO Plugins
    [Fix] <js> Plugin Editor: Toggling bypass did not live-update the General tab for all plugins but the first (http://bugs.openmpt.org/view.php?id=911).
+   [Fix] <js> Completely disable silence detection for VST plugins, as plugins built with old versions of the JUCE framework falsely claim that they support this feature.
 
 Playback
    [Fix] <js> When performing excessive portamento down in IT linear slide mode with legacy period mode enabled or excessive portamento up with Hertz mode, the channel frequency wrapped around since OpenMPT 1.26.01.00 (fixes https://modarchive.org/module.php?175019).
@@ -67,6 +68,7 @@ Misc
    [Fix] <js> Tempo Swing dialog: A swing amount of 100% is now displayed correctly on Wine prior to version 2.0.
    [Fix] <js> When switching between multiple windows of a single module, sample and instrument editors are now receiving playback updates instantly.
    [Fix] <js> SF2: Some stereo sample pairs were mismatched.
+   [Fix] <js> Running OpenMPT with a relative path to a module file as a parameter did not work as intended.
 
 Bundled plugins
    [Fix] <js> MIDI Input / Output plugin: Identically-named input and output ports could cause the previous plugin state to not be restored properly.
