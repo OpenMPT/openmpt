@@ -79,7 +79,9 @@ public:
 	virtual size_t GetChunk(char *(&chunk), bool isBank);
 	virtual void SetChunk(size_t size, char *chunk, bool isBank);
 	// If true, the plugin produces an output even if silence is being fed into it.
-	virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	//virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	// Old JUCE versions set effFlagsNoSoundInStop even when the shouldn't (see various ValhallaDSP reverb plugins). While the user cannot change the plugin bypass setting manually yet, play safe with VST plugins and do not optimize.
+	virtual bool ShouldProcessSilence() { return true; }
 
 	virtual int32 GetNumPrograms() const;
 	virtual int32 GetCurrentProgram();
