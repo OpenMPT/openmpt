@@ -716,11 +716,13 @@ void CModTree::RefreshDlsBanks()
 							{
 								wsprintf(s, (mbank) ? _T("Melodic Bank %02X.%02X") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
 								// Find out where to insert this bank in the tree
-								std::map<uint16, HTREEITEM>::iterator item = banks.insert(std::make_pair(mbank, nullptr)).first;
+								std::map<uint16, HTREEITEM>::iterator item = banks.insert(std::make_pair(mbank, HTREEITEM(0))).first;
 								HTREEITEM insertAfter = TVI_FIRST;
 								if(item != banks.begin())
 								{
-									insertAfter = std::prev(item)->second;
+									std::map<uint16, HTREEITEM>::iterator prevItem = item;
+									std::advance(prevItem, -1);
+									insertAfter = prevItem->second;
 								}
 								hbank = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
