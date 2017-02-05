@@ -56,7 +56,7 @@ PluginBridge64.exe: Plugin bridge server for 64-bit VST plugins.
 OpenMPT_SoundTouch_f32.dll: SoundTouch library used in time stretching feature.
 readme.txt: This document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.25_ReleaseNotes.html: Release notes for this version.
+OMPT_1.26_ReleaseNotes.html: Release notes for this version.
 
 
 Steinberg Media Technologies GmbH
@@ -67,7 +67,7 @@ VST is a trademark of Steinberg Media Technologies GmbH
 
 unmo3.dll
 ---------
-Copyright (c) 2001-2014 Ian Luck. All rights reserved
+Copyright (c) 2001-2016 Ian Luck. All rights reserved
 
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!
