@@ -267,8 +267,8 @@ UINT CSoundFile::GetNumChannels() const {
 	return mod->get_num_channels();
 }
 
-static std::int32_t vol128_To_millibel( unsigned int vol ) {
-	return static_cast<std::int32_t>( 2000.0 * std::log10( static_cast<int>( vol ) / 128.0 ) );
+static int vol128_To_millibel( unsigned int vol ) {
+	return static_cast<int>( 2000.0 * std::log10( static_cast<int>( vol ) / 128.0 ) );
 }
 
 BOOL CSoundFile::SetMasterVolume( UINT vol, BOOL bAdjustAGC ) {
