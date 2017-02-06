@@ -5030,7 +5030,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
-				chn.nVolume = chn.nPeriod = 0;
+				chn.nPeriod = 0;
 			} else if(GetType() == MOD_TYPE_MOD && chn.dwFlags[CHN_LOOP])
 			{
 				chn.position.Set(chn.nLoopStart);
