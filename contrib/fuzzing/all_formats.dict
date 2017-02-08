@@ -197,6 +197,8 @@ s3m="SCRS"
 stm="!SCREAM!\x1A\x02"
 stm="BMOD2STM\x1A\x02"
 
+stp="STP3\x00"
+
 ult="MAS_UTrack_V004"
 
 umx="\xC1\x83\x2A\x9E"
