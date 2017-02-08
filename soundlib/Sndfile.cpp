@@ -309,6 +309,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			 && !ReadJ2B(file, loadFlags)
 			 && !ReadPT36(file, loadFlags)
 			 && !ReadSFX(file, loadFlags)
+			 && !ReadSTP(file, loadFlags)
 			 && !ReadMod(file, loadFlags)
 			 && !ReadICE(file, loadFlags)
 			 && !Read669(file, loadFlags)
@@ -1075,6 +1076,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_AMF0:
 	case MOD_TYPE_DIGI:
 	case MOD_TYPE_SFX:
+	case MOD_TYPE_STP:
 		return MOD_TYPE_MOD;
 	case MOD_TYPE_MED:
 		if(m_nDefaultTempo == TEMPO(125, 0) && m_nDefaultSpeed == 6 && !m_nInstruments)

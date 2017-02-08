@@ -319,6 +319,7 @@ DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.imf" ";"
 	"*.j2b" ";"
 	"*.plm" ";"
+	"*.stp" ";"
 	"*.sfx" ";"
 	"*.sfx2" ";"
 	"*.mms" ";"
