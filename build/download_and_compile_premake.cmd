@@ -59,37 +59,18 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-src.zip" "premake-5.0-alpha10-src.zip" "premake-5.0.0-alpha10" "-" || goto error
-
-rem https://github.com/premake/premake-core/issues/593
-powershell -Command "(Get-Content include/premake/src/host/http.c -Raw).replace(\"`t`tlua_pushnil(L);`n`t`tchar errorBuf[1024];`n\", \"`t`tchar errorBuf[1024];`n`t`tlua_pushnil(L);`n\") | Set-Content include/premake/src/host/http.c -Force" || goto error
-
-rem Premake does not ship VS2015 projects yet.
-rem See https://github.com/premake/premake-core/pull/562 .
-rem See https://github.com/premake/premake-core/issues/596 .
+call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha11/premake-5.0.0-alpha11-src.zip" "premake-5.0-alpha11-src.zip" "premake-5.0.0-alpha11" "-" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
- cd include\premake\build\vs2013 || goto error
- rem devenv curl-lib.vcxproj /Upgrade || goto error
- rem devenv lua-lib.vcxproj  /Upgrade || goto error
- rem devenv zip-lib.vcxproj  /Upgrade || goto error
- rem devenv zlib-lib.vcxproj /Upgrade || goto error
- rem devenv Premake5.vcxproj /Upgrade || goto error
- devenv Premake5.sln /Upgrade || goto error
+ cd include\premake\build\vs2015 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
- cd include\premake\build\vs2013 || goto error
- rem devenv curl-lib.vcxproj /Upgrade || goto error
- rem devenv lua-lib.vcxproj  /Upgrade || goto error
- rem devenv zip-lib.vcxproj  /Upgrade || goto error
- rem devenv zlib-lib.vcxproj /Upgrade || goto error
- rem devenv Premake5.vcxproj /Upgrade || goto error
- devenv Premake5.sln /Upgrade || goto error
+ cd include\premake\build\vs2015 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone

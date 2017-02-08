@@ -43,20 +43,11 @@ if [ ! -d "build/externals" ]; then
  mkdir build/externals
 fi
 
-download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-src.zip" "premake-5.0-alpha10-src.zip" "premake-5.0.0-alpha10"
+download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha11/premake-5.0.0-alpha11-src.zip" "premake-5.0-alpha11-src.zip" "premake-5.0.0-alpha11"
 
 cd include/premake
 
-#make -f Bootstrap.mak linux
-#bin/release/premake5 gmake
-#bin/release/premake5 embed
-#make
-#bin/release/premake5 test
-
 cd build/gmake.unix
-# https://github.com/premake/premake-core/issues/594
-cat Premake5.make | sed 's/\-lm\ \-ldl\ \-lrt/\-lm\ \-ldl\ \-lrt\ \-lssl\ \-lcrypto/g' > Premake5.make2
-mv Premake5.make2 Premake5.make
 make
 cd ../..
 bin/release/premake5 test
