@@ -6,10 +6,10 @@
 
 MPT_PREMAKE_VERSION = ""
 
-if _PREMAKE_VERSION == "5.0.0-alpha10" then
+if _PREMAKE_VERSION == "5.0.0-alpha11" then
  MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 5.0.0-alpha10 required"
+ print "Premake 5.0.0-alpha11 required"
  os.exit(1)
 end
 
