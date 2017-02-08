@@ -680,6 +680,7 @@ public:
 	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSFX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadSTP(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadUlt(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadUMX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadWav(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -884,7 +885,7 @@ public:
 	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.
 	static bool UseFinetuneAndTranspose(MODTYPE type)
 	{
-		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_XM));
+		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP | MOD_TYPE_XM));
 	}
 	bool UseFinetuneAndTranspose() const
 	{

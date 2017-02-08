@@ -47,6 +47,7 @@ Name: "associate_exotic\sfx"; Description: "SoundFX (SFX)";
 Name: "associate_exotic\sfx2"; Description: "SoundFX 2 (SFX2)";
 Name: "associate_exotic\st26"; Description: "SoundTracker 2.6 (ST26)";
 Name: "associate_exotic\stm"; Description: "Scream Tracker 2 (STM)";
+Name: "associate_exotic\stp"; Description: "Soundtracker Pro II (STP)";
 Name: "associate_exotic\ult"; Description: "UltraTracker (ULT)";
 Name: "associate_exotic\umx"; Description: "Unreal Music (UMX)";
 Name: "associate_exotic\wow"; Description: "Grave Composer (WOW)";
@@ -95,6 +96,7 @@ Root: HKCR; Subkey: ".sfx"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".sfx2"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\sfx2
 Root: HKCR; Subkey: ".st26"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\st26
 Root: HKCR; Subkey: ".stm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\stm
+Root: HKCR; Subkey: ".stp"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\stp
 Root: HKCR; Subkey: ".ult"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ult
 Root: HKCR; Subkey: ".umx"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\umx
 Root: HKCR; Subkey: ".wow"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\wow
@@ -165,6 +167,7 @@ Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociation
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx2"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".st26"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stp"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ult"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".umx"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".wow"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
@@ -211,6 +214,7 @@ Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".sfx2"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".st26"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".stm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".stp"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".ult"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".umx"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".wow"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
