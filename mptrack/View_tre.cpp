@@ -127,6 +127,8 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_SHOWDIRS,		OnShowDirectories)
 	ON_COMMAND(ID_MODTREE_SHOWALLFILES,	OnShowAllFiles)
 	ON_COMMAND(ID_MODTREE_SOUNDFILESONLY,OnShowSoundFiles)
+	ON_COMMAND(ID_MODTREE_GOTO_INSDIR,	OnGotoInstrumentDir)
+	ON_COMMAND(ID_MODTREE_GOTO_SMPDIR,	OnGotoSampleDir)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
 	//}}AFX_MSG_MAP
 	ON_WM_KILLFOCUS()		//rewbs.customKeys
@@ -693,29 +695,20 @@ void CModTree::RefreshDlsBanks()
 						// Melodic
 						{
 							uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
-							auto hbankIt = banks.find(mbank);
-							HTREEITEM hbank;
-							if(hbankIt != banks.end())
-							{
-								hbank = hbankIt->second;
-							} else
+							auto hbank = banks.find(mbank);
+							if(hbank == banks.end())
 							{
 								wsprintf(s, (mbank) ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
 								// Find out where to insert this bank in the tree
-								auto item = banks.insert(std::make_pair(mbank, nullptr)).first;
-								HTREEITEM insertAfter = TVI_FIRST;
-								if(item != banks.begin())
-								{
-									insertAfter = std::prev(item)->second;
-								}
-								hbank = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
+								hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
+								HTREEITEM insertAfter = (hbank == banks.begin()) ? TVI_FIRST : std::prev(hbank)->second;
+								hbank->second = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
 									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
 									m_tiDLS[iDls], insertAfter);
-								item->second = hbank;
 							}
 							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint16)iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
-								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank, TVI_LAST);
+								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank->second, TVI_LAST);
 						}
 					}
 				}
@@ -2865,6 +2858,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
+				{
+					auto insDir = TrackerSettings::Instance().PathInstruments.GetDefaultDir();
+					auto smpDir = TrackerSettings::Instance().PathSamples.GetDefaultDir();
+					if(!insDir.empty() && insDir != m_InstrLibPath)
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_GOTO_INSDIR, _T("Go to &Instrument directory"));
+					if(!smpDir.empty() && smpDir != insDir && smpDir != m_InstrLibPath)
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_GOTO_SMPDIR, _T("Go to Sa&mple directory"));
+				}
 				break;
 
 			case MODITEM_INSLIB_SONG:
@@ -3676,6 +3677,20 @@ void CModTree::OnShowSoundFiles()
 		m_bShowAllFiles = false;
 		OnRefreshInstrLib();
 	}
+}
+
+
+void CModTree::OnGotoInstrumentDir()
+//----------------------------------
+{
+	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathInstruments.GetDefaultDir(), false);
+}
+
+
+void CModTree::OnGotoSampleDir()
+//------------------------------
+{
+	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathSamples.GetDefaultDir(), false);
 }
 
 
