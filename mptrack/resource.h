@@ -1123,8 +1123,8 @@
 #define ID_MODTREE_RELOADALL            33907
 #define ID_MODTREE_SAVEALL              33908
 #define ID_MODTREE_FINDMISSING          33909
-#define ID_FACTORYPRESET                33914
-#define ID_FACTORYPRESET_DEFAULT        33915
+#define ID_MODTREE_GOTO_INSDIR          33910
+#define ID_MODTREE_GOTO_SMPDIR          33911
 #define ID_MODTREE_SETPATH              33916
 #define ID_MODTREE_SAVEITEM             33917
 #define ID_PLUGIN_SETUP                 33918

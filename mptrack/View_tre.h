@@ -295,6 +295,10 @@ protected:
 	afx_msg void OnShowDirectories();
 	afx_msg void OnShowAllFiles();
 	afx_msg void OnShowSoundFiles();
+
+	afx_msg void OnGotoInstrumentDir();
+	afx_msg void OnGotoSampleDir();
+
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
