@@ -290,11 +290,15 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 				mptSmp.cues[0] = mptSmp.nLoopStart;
 		}
 
-		STPLoopList loopList;
-
 		if(fileHeader.version >= 1)
 		{
+			nonLooped.resize(samplesInFile);
+			loopInfo.resize(samplesInFile);
+			STPLoopList &loopList = loopInfo[actualSmp - 1];
+			loopList.clear();
+
 			uint16 numLoops = file.ReadUint16BE();
+			loopList.reserve(numLoops);
 
 			STPLoopInfo loop;
 			loop.looped = loop.nonLooped = 0;
@@ -311,10 +315,6 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 				loopList.push_back(loop);
 			}
 		}
-
-		nonLooped.resize(actualSmp);
-		loopInfo.resize(actualSmp);
-		loopInfo[actualSmp - 1] = loopList;
 	}
 
 	// Load patterns
@@ -665,8 +665,8 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 
 				case 0x22: // retrigger note
-					m.command = CMD_RETRIG;
-					m.param = std::min(m.param, ModCommand::PARAM(15));
+					m.command = CMD_MODCMDEX;
+					m.param = 0x90 | std::min(m.param, ModCommand::PARAM(15));
 					break;
 
 				case 0x49: // set sample offset
@@ -818,12 +818,15 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 				SampleIO::signedPCM)
 				.ReadSample(Samples[smp], file);
 
+			if(smp > loopInfo.size())
+				continue;
+
 			ConvertLoopSequence(Samples[smp], loopInfo[smp - 1]);
 
 			// make a non-looping duplicate of this sample if needed
 			if(nonLooped[smp - 1])
 			{
-				ConvertLoopSlice(Samples[smp], Samples[nonLooped[smp-1]], 0, Samples[smp].nLength, false);
+				ConvertLoopSlice(Samples[smp], Samples[nonLooped[smp - 1]], 0, Samples[smp].nLength, false);
 			}
 
 			for(SAMPLEINDEX loop = 0; loop < loopInfo[smp - 1].size(); loop++)
