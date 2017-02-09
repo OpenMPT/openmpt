@@ -1,4 +1,4 @@
-zlib 1.2.10.
+zlib 1.2.11.
 Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
  *  iowin32.c has been modified to only use Windows 8 WinRT API when actually
