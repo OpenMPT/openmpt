@@ -1,0 +1,7 @@
+RtMidi 2.1.1 from https://www.music.mcgill.ca/~gary/rtmidi/
+Files not used by OpenMPT (config/, doc/, msw/, tests/, build systems, C API)
+have been removed from this folder. No further local changes have been made.
+License.txt has been extracted from the readme for OpenMPT's license package.
+For building, premake is used to generate Visual Studio project files.
+See ../build/premake/ for details.
+02:05 09.02.2017

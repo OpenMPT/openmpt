@@ -716,6 +716,9 @@ mpt::ustring GetFullCreditsString()
 		"http://schismtracker.org/\n"
 		"\n"
 #ifdef MODPLUG_TRACKER
+		"Gary P. Scavone for RtMidi\n"
+		"https://www.music.mcgill.ca/~gary/rtmidi/\n"
+		"\n"
 		"Alexander Uckun for decimal input field\n"
 		"http://www.codeproject.com/Articles/21257/_\n"
 		"\n"

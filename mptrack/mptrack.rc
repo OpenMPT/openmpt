@@ -465,8 +465,10 @@ BEGIN
     COMBOBOX        IDC_COMBO1,6,18,240,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "MIDI Output Device (Receives MIDI data from OpenMPT):",IDC_STATIC,6,36,240,12
     COMBOBOX        IDC_COMBO2,6,48,240,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Compensate for OpenMPT output latency",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,66,240,12
+    LTEXT           "Output Latency:",IDC_STATIC,6,68,60,8
+    EDITTEXT        IDC_EDIT1,66,66,36,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,90,60,11,12
+    LTEXT           "ms",IDC_STATIC,108,68,132,8
 END
 
 
@@ -690,18 +692,37 @@ END
 // remains consistent on all systems.
 IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // PNG
 //
 
 IDB_ENVTOOLBAR          PNG                     "res\\envelope_toolbar.png"
+
 IDB_IMAGELIST           PNG                     "res\\icons.png"
+
 IDB_MAINBAR             PNG                     "res\\main_toolbar.png"
+
 IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
+
 IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
+
 IDB_SPLASHNOFOLDFIN     PNG                     "res\\splashno.png"
+
 IDB_MPTRACK             PNG                     "res\\mptrack.png"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_MIDI_IO_PLUGIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2168,6 +2189,7 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\mptrack.ico"
 
+
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2210,8 +2232,11 @@ END
 //
 
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
+
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
+
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2369,8 +2394,11 @@ END
 //
 
 IDC_DRAGGING            CURSOR                  "res\\dragging.cur"
+
 IDC_NODROP              CURSOR                  "res\\nodrop.cur"
+
 IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3105,6 +3133,7 @@ END
 //
 
 IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
+
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 

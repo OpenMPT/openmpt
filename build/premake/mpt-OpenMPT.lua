@@ -122,8 +122,8 @@ end
    "opus",
    "opusfile",
    "portaudio",
-   "portmidi",
    "r8brain",
+   "rtmidi",
    "soundtouch",
    "vorbis",
   }

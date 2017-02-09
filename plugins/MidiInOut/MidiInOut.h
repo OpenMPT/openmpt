@@ -11,9 +11,10 @@
 #pragma once
 
 #include "../../common/mptMutex.h"
+#include "../../common/mptTime.h"
 #include "../../soundlib/plugins/PlugInterface.h"
-#include <portmidi/pm_common/portmidi.h>
-#include <portmidi/porttime/porttime.h>
+#include <rtmidi/RtMidi.h>
+#include <deque>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,16 +25,20 @@ class MidiDevice
 //==============
 {
 public:
-	PmDeviceID index;
-	PortMidiStream *stream;
+	typedef unsigned int ID;
+
+	RtMidi &stream;
 	std::string name;
+	ID index;
 
 public:
-	MidiDevice()
-		: index(-1)	// MidiInOut::kNoDevice
-		, stream(nullptr)
+	MidiDevice(RtMidi &stream)
+		: stream(stream)
 		, name("<none>")
+		, index(ID(-1))	// MidiInOut::kNoDevice
 	{ }
+
+	std::string GetPortName(ID port);
 };
 
 
@@ -56,32 +61,44 @@ protected:
 		kMaxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
 	};
 
-	std::string chunkData;					// Storage for GetChunk
-	std::vector<uint32> bufferedMessage;	// For receiving SysEx messages
-	mpt::mutex mutex;
-	double nextClock;
+	struct Message
+	{
+		double time;
+		std::vector<unsigned char> msg;
+	};
+
+	std::string m_chunkData;					// Storage for GetChunk
+	std::deque<Message> m_outQueue;				// Latency-compensated output
+	std::vector<unsigned char> m_bufferedInput;	// For receiving long SysEx messages
+	mpt::mutex m_mutex;
+	double m_nextClock;	// Remaining samples until next MIDI clock tick should be sent
+	double m_latency;	// User-adjusted latency in seconds
 
 	// I/O device settings
-	MidiDevice inputDevice;
-	MidiDevice outputDevice;
-	bool latencyCompensation;
+	Util::MultimediaClock m_clock;
+	RtMidiIn m_midiIn;
+	RtMidiOut m_midiOut;
+	MidiDevice m_inputDevice;
+	MidiDevice m_outputDevice;
+	bool m_latencyCompensation;
 
-	CString programName;
-	static int numInstances;
+#ifdef MODPLUG_TRACKER
+	CString m_programName;
+#endif
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	~MidiInOut();
 
-	// Translate a VST parameter to a PortMidi device ID
-	static PmDeviceID ParameterToDeviceID(float value)
+	// Translate a VST parameter to an RtMidi device ID
+	static MidiDevice::ID ParameterToDeviceID(float value)
 	{
-		return static_cast<PmDeviceID>(value * static_cast<float>(kMaxDevices)) - 1;
+		return static_cast<MidiDevice::ID>(value * static_cast<float>(kMaxDevices)) - 1;
 	}
 
-	// Translate a PortMidi device ID to a VST parameter
-	static float DeviceIDToParameter(PmDeviceID index)
+	// Translate a RtMidi device ID to a VST parameter
+	static float DeviceIDToParameter(MidiDevice::ID index)
 	{
 		return static_cast<float>(index + 1) / static_cast<float>(kMaxDevices);
 	}
@@ -92,13 +109,13 @@ public:
 	virtual int32 GetUID() const { return 'MMID'; }
 	virtual int32 GetVersion() const { return 2; }
 	virtual void Idle() { }
-	virtual uint32 GetLatency() const { return 0; }
+	virtual uint32 GetLatency() const;
 
 	virtual int32 GetNumPrograms() const { return kNumPrograms; }
 	virtual int32 GetCurrentProgram() { return 0; }
 	virtual void SetCurrentProgram(int32) { }
 
-	virtual PlugParamIndex GetNumParameters() const {return kNumParams; }
+	virtual PlugParamIndex GetNumParameters() const { return kNumParams; }
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue);
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex);
 
@@ -117,6 +134,7 @@ public:
 	virtual void Suspend();
 	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)
 	virtual void PositionChanged();
+	virtual void Bypass(bool bypass = true);
 	virtual bool IsInstrument() const { return true; }
 	virtual bool CanRecieveMidiEvents() { return true; }
 	// If false is returned, mixing this plugin can be skipped if its input are currently completely silent.
@@ -125,16 +143,12 @@ public:
 #ifdef MODPLUG_TRACKER
 	virtual CString GetDefaultEffectName() { return _T("MIDI Input / Output"); }
 
-	// Cache a range of names, in case one-by-one retrieval would be slow (e.g. when using plugin bridge)
-	virtual void CacheProgramNames(int32, int32) { }
-	virtual void CacheParameterNames(int32, int32) { }
-
 	virtual CString GetParamName(PlugParamIndex param);
 	virtual CString GetParamLabel(PlugParamIndex) { return CString(); }
 	virtual CString GetParamDisplay(PlugParamIndex param);
-	virtual CString GetCurrentProgramName() { return programName; }
-	virtual void SetCurrentProgramName(const CString &name) { programName = name; }
-	virtual CString GetProgramName(int32) { return programName; }
+	virtual CString GetCurrentProgramName() { return m_programName; }
+	virtual void SetCurrentProgramName(const CString &name) { m_programName = name; }
+	virtual CString GetProgramName(int32) { return m_programName; }
 	virtual CString GetPluginVendor() { return _T("OpenMPT Project"); }
 
 	virtual bool HasEditor() const { return true; }
@@ -155,18 +169,15 @@ public:
 
 protected:
 	// Open a device for input or output.
-	void OpenDevice(PmDeviceID newDevice, bool asInputDevice);
+	void OpenDevice(MidiDevice::ID newDevice, bool asInputDevice);
 	// Close an active device.
 	void CloseDevice(MidiDevice &device);
-	// Get a device name
-	const char *GetDeviceName(PmDeviceID index) const;
-	// Check if the given device is an input device
-	bool IsInputDevice(PmDeviceID index) const;
-	// Check if the given device is an output device
-	bool IsOutputDevice(PmDeviceID index) const;
 
-	// Get current timestamp for sending
-	PtTimestamp Now() const;
+	static void InputCallback(double deltatime, std::vector<unsigned char> *message, void *userData) { static_cast<MidiInOut *>(userData)->InputCallback(deltatime, *message); }
+	void InputCallback(double deltatime, std::vector<unsigned char> &message);
+
+	// Calculate the current output timestamp
+	double GetOutputTimestamp() const;
 };
 
 

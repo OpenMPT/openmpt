@@ -1182,11 +1182,11 @@
     <ProjectReference Include="ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
     </ProjectReference>
-    <ProjectReference Include="ext\portmidi.vcxproj">
-      <Project>{2512E2CA-578A-4F10-9363-4BFC9A5EF960}</Project>
-    </ProjectReference>
     <ProjectReference Include="ext\r8brain.vcxproj">
       <Project>{BC116B29-9958-4389-B294-7529BB7C7D37}</Project>
+    </ProjectReference>
+    <ProjectReference Include="ext\rtmidi.vcxproj">
+      <Project>{05BBD03D-0985-4D76-8DDD-534DA631C3A8}</Project>
     </ProjectReference>
     <ProjectReference Include="ext\soundtouch.vcxproj">
       <Project>{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}</Project>

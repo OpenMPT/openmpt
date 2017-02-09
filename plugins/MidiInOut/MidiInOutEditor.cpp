@@ -14,6 +14,7 @@
 #include "MidiInOutEditor.h"
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/resource.h"
+#include <rtmidi/RtMidi.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -23,7 +24,7 @@ BEGIN_MESSAGE_MAP(MidiInOutEditor, CAbstractVstEditor)
 	//{{AFX_MSG_MAP(MidiInOutEditor)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnInputChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnOutputChanged)
-	ON_COMMAND(IDC_CHECK1,			OnLatencyToggled)
+	ON_EN_CHANGE(IDC_EDIT1,			OnLatencyChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -35,13 +36,15 @@ void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(MidiInOutEditor)
 	DDX_Control(pDX, IDC_COMBO1,	m_inputCombo);
 	DDX_Control(pDX, IDC_COMBO2,	m_outputCombo);
-	DDX_Control(pDX, IDC_CHECK1,	m_latencyCheck);
+	DDX_Control(pDX, IDC_EDIT1,		m_latencyEdit);
+	DDX_Control(pDX, IDC_SPIN1,		m_latencySpin);
 	//}}AFX_DATA_MAP
 }
 
 
 MidiInOutEditor::MidiInOutEditor(MidiInOut &plugin)
 	: CAbstractVstEditor(plugin)
+	, m_locked(true)
 //-------------------------------------------------
 {
 }
@@ -51,8 +54,10 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
 	Create(IDD_MIDI_IO_PLUGIN, parent);
-	m_latencyCheck.SetCheck(static_cast<MidiInOut &>(m_VstPlugin).latencyCompensation ? BST_CHECKED : BST_UNCHECKED);
+	SetDlgItemInt(IDC_EDIT1, Util::Round<int>(static_cast<MidiInOut &>(m_VstPlugin).m_latency * 1000.0), TRUE);
+	m_latencySpin.SetRange32(Util::Round<int>(m_VstPlugin.GetOutputLatency() * -1000.0), int32_max);
 	PopulateLists();
+	m_locked = false;
 	return CAbstractVstEditor::OpenEditor(parent);
 }
 
@@ -75,32 +80,38 @@ void MidiInOutEditor::PopulateLists()
 	int selectOutputItem = 0;
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
 
-	const PmDeviceInfo *device;
-	CString deviceName;
-
-	// Go through all PortMidi devices
-	for(PmDeviceID i = 0; (device = Pm_GetDeviceInfo(i)) != nullptr; i++)
+	// Go through all RtMidi devices
+	unsigned int ports = plugin.m_midiIn.getPortCount();
+	std::string portName;
+	for(unsigned int i = 0; i < ports; i++)
 	{
-		if(device->input)
+		try
 		{
-			// We can actually receive MIDI data on this device.
-			deviceName = theApp.GetFriendlyMIDIPortName(device->name, true) + _T(" [") + CString(device->interf) + _T("]");
-			int result = m_inputCombo.AddString(deviceName);
+			portName = theApp.GetFriendlyMIDIPortName(plugin.m_inputDevice.GetPortName(i).c_str(), true);
+			int result = m_inputCombo.AddString(portName.c_str());
 			m_inputCombo.SetItemData(result, i);
 
-			if(result != CB_ERR && i == plugin.inputDevice.index)
+			if(result != CB_ERR && i == plugin.m_inputDevice.index)
 				selectInputItem = result;
 		}
-
-		if(device->output)
+		catch(RtMidiError &)
 		{
-			// We can actually output MIDI data on this device.
-			deviceName = theApp.GetFriendlyMIDIPortName(device->name, false) + _T(" [") + CString(device->interf) + _T("]");
-			int result = m_outputCombo.AddString(deviceName);
+		}
+	}
+
+	ports = plugin.m_midiOut.getPortCount();
+	for(unsigned int i = 0; i < ports; i++)
+	{
+		try
+		{
+			portName = theApp.GetFriendlyMIDIPortName(plugin.m_outputDevice.GetPortName(i).c_str(), false);
+			int result = m_outputCombo.AddString(portName.c_str());
 			m_outputCombo.SetItemData(result, i);
 
-			if(result != CB_ERR && i == plugin.outputDevice.index)
+			if(result != CB_ERR && i == plugin.m_outputDevice.index)
 				selectOutputItem = result;
+		} catch(RtMidiError &)
+		{
 		}
 	}
 
@@ -113,13 +124,13 @@ void MidiInOutEditor::PopulateLists()
 
 
 // Refresh current input / output device in GUI
-void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, PmDeviceID device)
-//-------------------------------------------------------------------------
+void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
+//-----------------------------------------------------------------------------
 {
 	int items = combo.GetCount();
 	for(int i = 0; i < items; i++)
 	{
-		if(static_cast<PmDeviceID>(combo.GetItemData(i)) == device)
+		if(static_cast<MidiDevice::ID>(combo.GetItemData(i)) == device)
 		{
 			combo.SetCurSel(i);
 			break;
@@ -132,7 +143,7 @@ static void IOChanged(MidiInOut &plugin, CComboBox &combo, PlugParamIndex param)
 //------------------------------------------------------------------------------
 {
 	// Update device ID and notify plugin.
-	PmDeviceID newDevice = static_cast<PmDeviceID>(combo.GetItemData(combo.GetCurSel()));
+	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(combo.GetItemData(combo.GetCurSel()));
 	plugin.SetParameter(param, MidiInOut::DeviceIDToParameter(newDevice));
 	plugin.AutomateParameter(param);
 }
@@ -152,13 +163,17 @@ void MidiInOutEditor::OnOutputChanged()
 }
 
 
-void MidiInOutEditor::OnLatencyToggled()
+void MidiInOutEditor::OnLatencyChanged()
 //--------------------------------------
 {
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	plugin.CloseDevice(plugin.outputDevice);
-	plugin.latencyCompensation = (m_latencyCheck.GetCheck() != BST_UNCHECKED);
-	plugin.OpenDevice(plugin.outputDevice.index, false);
+	BOOL success = FALSE;
+	int value = static_cast<int>(GetDlgItemInt(IDC_EDIT1, &success, TRUE));
+	if(success && !m_locked)
+	{
+		plugin.m_latency = value * (1.0 / 1000.0);
+		plugin.SetModified();
+	}
 }
 
 
