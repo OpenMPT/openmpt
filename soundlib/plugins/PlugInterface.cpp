@@ -645,11 +645,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 	if(pVstEditor && pVstEditor->m_hWnd)
 	{
 		// Mark track modified if GUI is open and format supports plugins
-		if(m_SndFile.GetModSpecifications().supportsPlugins)
-		{
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(modDoc);
-		}
-
+		SetModified();
 
 		if (CMainFrame::GetInputHandler()->ShiftPressed())
 		{
@@ -665,6 +661,17 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 			modDoc->LearnMacro(macroToLearn, param);
 			pVstEditor->SetLearnMacro(-1);
 		}
+	}
+}
+
+
+void IMixPlugin::SetModified()
+//----------------------------
+{
+	CModDoc *modDoc = GetModDoc();
+	if(modDoc != nullptr && m_SndFile.GetModSpecifications().supportsPlugins)
+	{
+		CMainFrame::GetMainFrame()->ThreadSafeSetModified(modDoc);
 	}
 }
 

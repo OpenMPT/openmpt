@@ -120,6 +120,7 @@ public:
 	virtual int32 GetUID() const = 0;
 	virtual int32 GetVersion() const = 0;
 	virtual void Idle() = 0;
+	// Plugin latency in samples
 	virtual uint32 GetLatency() const = 0;
 
 	virtual int32 GetNumPrograms() const = 0;
@@ -203,7 +204,10 @@ public:
 	void SetEditorPos(int32 x, int32 y);
 	void GetEditorPos(int32 &x, int32 &y) const;
 
+	// Notify OpenMPT that a plugin parameter has changed and set document as modified
 	void AutomateParameter(PlugParamIndex param);
+	// Plugin state changed, set document as modified.
+	void SetModified();
 #endif
 
 	virtual void BeginSetProgram(int32 /*program*/ = -1) { }

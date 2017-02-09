@@ -292,7 +292,6 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						break;
 					case SMPLIST_FILENAME:
 						mpt::String::Copy(s, sample.filename);
-						s[CountOf(sample.filename)] = 0;
 						break;
 					case SMPLIST_PATH:
 						mpt::String::Copy(s, sndFile.GetSamplePath(iSmp + 1).ToLocale());

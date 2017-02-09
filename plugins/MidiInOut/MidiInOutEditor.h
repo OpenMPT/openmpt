@@ -13,7 +13,6 @@
 #ifdef MODPLUG_TRACKER
 
 #include "../../mptrack/AbstractVstEditor.h"
-#include <portmidi/pm_common/portmidi.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -25,14 +24,16 @@ class MidiInOutEditor : public CAbstractVstEditor
 {
 protected:
 	CComboBox m_inputCombo, m_outputCombo;
-	CButton m_latencyCheck;
+	CEdit m_latencyEdit;
+	CSpinButtonCtrl m_latencySpin;
+	bool m_locked : 1;
 
 public:
 
 	MidiInOutEditor(MidiInOut &plugin);
 
 	// Refresh current input / output device in GUI
-	void SetCurrentDevice(bool asInputDevice, PmDeviceID device)
+	void SetCurrentDevice(bool asInputDevice, MidiDevice::ID device)
 	{
 		CComboBox &combo = asInputDevice ? m_inputCombo : m_outputCombo;
 		SetCurrentDevice(combo, device);
@@ -47,13 +48,13 @@ protected:
 	// Update lists of available input / output devices
 	void PopulateLists();
 	// Refresh current input / output device in GUI
-	void SetCurrentDevice(CComboBox &combo, PmDeviceID device);
+	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 
 	afx_msg void OnInputChanged();
 	afx_msg void OnOutputChanged();
-	afx_msg void OnLatencyToggled();
+	afx_msg void OnLatencyChanged();
 
 	DECLARE_MESSAGE_MAP()
 };
