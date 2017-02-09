@@ -43,6 +43,8 @@ is just a high-level summary.
  *  [**Bug**] Possible crashes with malformed IT, ITP, AMS, MDL, MED, MPTM, PSM
     and Startrekker files.
  *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
+ *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
+    routings.
  *  [**Bug**] Plugins did not work correctly when changing the sample rate
     between two render calls.
 
