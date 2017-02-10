@@ -49,7 +49,7 @@ struct STPSampleHeader
 	uint8be  reserved1;
 	uint32be loopStart;
 	uint32be loopLength;
-	uint16be defaultCommand;
+	uint16be defaultCommand;	// Default command to put next to note when editing patterns; not relevant for playback
 	// The following 4 bytes are reserved in version 0 and 1.
 	uint16be defaultPeriod;
 	uint8be  finetune;
@@ -214,6 +214,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.version > 2
 		|| fileHeader.numOrders > 128
 		|| fileHeader.numSamples >= MAX_SAMPLES
+		|| fileHeader.timerCount == 0
 		|| fileHeader.midiCount != 50)
 		return false;
 
@@ -381,11 +382,12 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 			PatternRow rowBase = Patterns[actualPat].GetpModCommand(row, 0);
 
 			bool didGlobalVolSlide = false;
-			bool shouldDelay = false;
 
 			// if a fractional speed value is in use then determine if we should stick a fine pattern delay somewhere
+			bool shouldDelay;
 			switch(fileHeader.speedFrac & 3)
 			{
+			default: shouldDelay = false; break;
 			// 1/4
 			case 1: shouldDelay = (row & 3) == 0; break;
 			// 1/2
@@ -420,12 +422,20 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 
 				// this is a nibble-swapped param value used for auto fine volside
 				// and auto global fine volside
-				uint8 swap = (m.param >> 4) | (m.param << 4);
+				uint8 swapped = (m.param >> 4) | (m.param << 4);
 
 				if((m.command & 0xF0) == 0xF0)
 				{
-					m.param = mpt::saturate_cast<ModCommand::PARAM>(Util::Round(ConvertTempo(m.param | (((uint16)m.command & 0xF) << 8)).ToDouble()));
-					m.command = CMD_TEMPO;
+					// 12-bit CIA tempo
+					uint16 ciaTempo = (static_cast<uint16>(m.command & 0x0F) << 8) | m.param;
+					if(ciaTempo)
+					{
+						m.param = mpt::saturate_cast<ModCommand::PARAM>(Util::Round(ConvertTempo(ciaTempo).ToDouble()));
+						m.command = CMD_TEMPO;
+					} else
+					{
+						m.command = CMD_NONE;
+					}
 				} else switch(m.command)
 				{
 				case 0x00: // arpeggio
@@ -483,7 +493,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 
 				case 0x08: // auto global fine volume slide
-					globalVolSlide = swap;
+					globalVolSlide = swapped;
 					m.command = m.param = 0;
 					break;
 
@@ -498,7 +508,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 
 				case 0x0B: // auto fine volume slide
-					autoVolSlide[chn] = swap;
+					autoVolSlide[chn] = swapped;
 					m.command = m.param = 0;
 					break;
 
@@ -638,7 +648,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 
 				case 0x1D: // fine volume slide (nibble order also swapped)
 					m.command = CMD_VOLUMESLIDE;
-					m.param = swap;
+					m.param = swapped;
 					if(m.param & 0xF0) // slide down
 						m.param |= 0x0F;
 					else if(m.param & 0x0F)
@@ -829,7 +839,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 				ConvertLoopSlice(Samples[smp], Samples[nonLooped[smp - 1]], 0, Samples[smp].nLength, false);
 			}
 
-			for(SAMPLEINDEX loop = 0; loop < loopInfo[smp - 1].size(); loop++)
+			for(size_t loop = 0; loop < loopInfo[smp - 1].size(); loop++)
 			{
 				STPLoopInfo &info = loopInfo[smp - 1][loop];
 
