@@ -36,7 +36,7 @@ namespace SoundDevice {
 	
 #ifdef MPT_WITH_PORTAUDIO
 
-#define PALOG(x, ...) do { } while(0)
+#define PALOG(x, ...) MPT_DO { } MPT_WHILE_0
 //#define PALOG Log
 
 
@@ -302,6 +302,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	{
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
+		caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency;
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else if(m_HostApiType == paWDMKS)
 	{
@@ -541,9 +542,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
-		PALOG(mpt::format(MPT_USTRING("PortAudio: %1, %2, %3, %4"))(result.id.GetIdRaw(), result.name, result.apiName, result.isDefault));
-		PALOG(mpt::format(MPT_USTRING(" low  : %1"))(mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->defaultLowOutputLatency)));
-		PALOG(mpt::format(MPT_USTRING(" high : %1"))(mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->defaultHighOutputLatency)));
+		PALOG(mpt::format(MPT_USTRING("PortAudio: %1, %2, %3, %4"))(result.internalID, result.name, result.apiName, result.isDefault));
+		PALOG(mpt::format(MPT_USTRING(" low  : %1"))(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
+		PALOG(mpt::format(MPT_USTRING(" high : %1"))(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
 		devices.push_back(result);
 	}
 	return devices;
