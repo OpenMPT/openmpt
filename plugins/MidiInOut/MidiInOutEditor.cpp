@@ -87,7 +87,7 @@ void MidiInOutEditor::PopulateLists()
 	{
 		try
 		{
-			portName = theApp.GetFriendlyMIDIPortName(plugin.m_inputDevice.GetPortName(i).c_str(), true);
+			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_inputDevice.GetPortName(i)), true);
 			int result = m_inputCombo.AddString(portName.c_str());
 			m_inputCombo.SetItemData(result, i);
 
@@ -104,7 +104,7 @@ void MidiInOutEditor::PopulateLists()
 	{
 		try
 		{
-			portName = theApp.GetFriendlyMIDIPortName(plugin.m_outputDevice.GetPortName(i).c_str(), false);
+			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_outputDevice.GetPortName(i)), false);
 			int result = m_outputCombo.AddString(portName.c_str());
 			m_outputCombo.SetItemData(result, i);
 
