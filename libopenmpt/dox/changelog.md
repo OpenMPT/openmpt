@@ -65,7 +65,8 @@ is just a high-level summary.
  *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
     created with ScreamTracker 3.
  *  Tremolo effect only had half the intended strength in MOD files.
- *  Pattern loops ending on the last row a pattern were not executed correctly in S3M files.
+ *  Pattern loops ending on the last row a pattern were not executed correctly
+    in S3M files.
  *  Playback fixes for 8-channel MED files
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
