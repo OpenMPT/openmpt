@@ -79,6 +79,7 @@ struct STPSampleHeader
 		} else if(mptSmp.nLoopEnd > mptSmp.nLoopStart)
 		{
 			mptSmp.uFlags.set(CHN_LOOP);
+			mptSmp.cues[0] = mptSmp.nLoopStart;
 		}
 	}
 };
@@ -185,7 +186,7 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 
 		// update loop info based on position in edited sample
 		info.loopStart = start;
-		if(i > 0 && i <= CountOf(newSmp.cues))
+		if(i > 0 && i <= MPT_ARRAY_COUNT(newSmp.cues))
 		{
 			newSmp.cues[i - 1] = start;
 		}
@@ -210,8 +211,8 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 
 	STPFileHeader fileHeader;
-	file.ReadStruct(fileHeader);
-	if(fileHeader.version > 2
+	if(!file.ReadStruct(fileHeader)
+		|| fileHeader.version > 2
 		|| fileHeader.numOrders > 128
 		|| fileHeader.numSamples >= MAX_SAMPLES
 		|| fileHeader.timerCount == 0
@@ -287,8 +288,6 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.version == 2)
 		{
 			mptSmp.nFineTune = static_cast<int8>(sampleHeader.finetune << 3);
-			if(mptSmp.uFlags[CHN_LOOP])
-				mptSmp.cues[0] = mptSmp.nLoopStart;
 		}
 
 		if(fileHeader.version >= 1)
