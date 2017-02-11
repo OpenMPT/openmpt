@@ -47,6 +47,8 @@ is just a high-level summary.
     routings.
  *  [**Bug**] Plugins did not work correctly when changing the sample rate
     between two render calls.
+ *  [**Bug**] Possible NULL-pointer dereference read during obscure
+    out-of-memory situations while handling exceptions in the C API.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
