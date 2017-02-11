@@ -67,12 +67,14 @@ static std::string format_exception( const char * const function ) {
 		err += function;
 		err += ": ";
 		err += "ERROR: ";
-		err += e.what();
+		const char * what = e.what();
+		err += what ? what : "";
 	} catch ( const std::exception & e ) {
 		err += function;
 		err += ": ";
 		err += "INTERNAL ERROR: ";
-		err += e.what();
+		const char * what = e.what();
+		err += what ? what : "";
 	} catch ( ... ) {
 		err += function;
 		err += ": ";

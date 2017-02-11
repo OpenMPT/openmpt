@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta20.6
 
+ *  [**Bug**] Possible NULL-pointer dereference read during obscure
+    out-of-memory situations while handling exceptions in the C API.
+
 ### libopenmpt 0.2-beta20.5 (2017-02-05)
 
  *  [**Bug**] libmodplug: C++ API did not build with MSVC2008 in 0.2-beta20.4.
