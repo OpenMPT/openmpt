@@ -2083,7 +2083,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
 				ModCommand::NOTE plugNote;
-				if(p->nArpeggioLastNote != NOTE_NONE)
+				if(pChn->nArpeggioLastNote != NOTE_NONE)
 				{
 					plugNote = pChn->nArpeggioLastNote;
 				} else
