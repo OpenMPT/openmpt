@@ -1913,16 +1913,16 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 //-----------------------------------------------------------------------------------------
 {
 	CHANNELINDEX nnaChn = CHANNELINDEX_INVALID;
-	ModChannel *pChn = &m_PlayState.Chn[nChn];
+	ModChannel &srcChn = m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = nullptr;
 	if(!ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
 	{
 		return nnaChn;
 	}
 	// Always NNA cut - using
-	if((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut) && !pChn->HasMIDIOutput())
+	if((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut) && !srcChn.HasMIDIOutput())
 	{
-		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->rightVol | pChn->leftVol))
+		if(!srcChn.nLength || srcChn.dwFlags[CHN_MUTE] || !(srcChn.rightVol | srcChn.leftVol))
 		{
 			return CHANNELINDEX_INVALID;
 		}
@@ -1931,7 +1931,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		if(!nnaChn) return CHANNELINDEX_INVALID;
 		ModChannel &chn = m_PlayState.Chn[nnaChn];
 		// Copy Channel
-		chn = *pChn;
+		chn = srcChn;
 		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_MUTE | CHN_PORTAMENTO);
 		chn.nPanbrelloOffset = 0;
 		chn.nMasterChn = nChn + 1;
@@ -1941,17 +1941,17 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		chn.nFadeOutVol = 0;
 		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
 		// Stop this channel
-		pChn->nLength = 0;
-		pChn->position.Set(0);
-		pChn->nROfs = pChn->nLOfs = 0;
-		pChn->rightVol = pChn->leftVol = 0;
+		srcChn.nLength = 0;
+		srcChn.position.Set(0);
+		srcChn.nROfs = srcChn.nLOfs = 0;
+		srcChn.rightVol = srcChn.leftVol = 0;
 		return nnaChn;
 	}
 	if(instr > GetNumInstruments()) instr = 0;
-	const ModSample *pSample = pChn->pModSample;
+	const ModSample *pSample = srcChn.pModSample;
 	// If no instrument is given, assume previous instrument to still be valid.
 	// Test case: DNA-NoInstr.it
-	pIns = instr > 0 ? Instruments[instr] : pChn->pModInstrument;
+	pIns = instr > 0 ? Instruments[instr] : srcChn.pModInstrument;
 	if(pIns != nullptr)
 	{
 		uint32 n = pIns->Keyboard[note - NOTE_MIN];
@@ -1967,40 +1967,40 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			return CHANNELINDEX_INVALID;
 		}
 	}
-	ModChannel *p = pChn;
-	//if (!pIns) return;
-	if (pChn->dwFlags[CHN_MUTE]) return CHANNELINDEX_INVALID;
+	if (srcChn.dwFlags[CHN_MUTE])
+		return CHANNELINDEX_INVALID;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
 
-	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; p++, i++)
-	if(i >= m_nChannels || p == pChn)
+	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; i++)
+	if(i >= m_nChannels || i == nChn)
 	{
+		ModChannel &chn = m_PlayState.Chn[i];
 		applyDNAtoPlug = false; //rewbs.VSTiNNA
-		if((p->nMasterChn == nChn + 1 || p == pChn) && p->pModInstrument != nullptr)
+		if((chn.nMasterChn == nChn + 1 || i == nChn) && chn.pModInstrument != nullptr)
 		{
 			bool bOk = false;
 			// Duplicate Check Type
-			switch(p->pModInstrument->nDCT)
+			switch(chn.pModInstrument->nDCT)
 			{
 			// Note
 			case DCT_NOTE:
-				if(note && p->nNote == note && pIns == p->pModInstrument) bOk = true;
+				if(note && chn.nNote == note && pIns == chn.pModInstrument) bOk = true;
 				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
 				break;
 			// Sample
 			case DCT_SAMPLE:
-				if(pSample != nullptr && pSample == p->pModSample) bOk = true;
+				if(pSample != nullptr && pSample == chn.pModSample) bOk = true;
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
-				if(pIns == p->pModInstrument) bOk = true;
+				if(pIns == chn.pModInstrument) bOk = true;
 				//rewbs.VSTiNNA
 				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
 			case DCT_PLUGIN:
-				if(pIns && (pIns->nMixPlug) && (pIns->nMixPlug == p->pModInstrument->nMixPlug))
+				if(pIns && (pIns->nMixPlug) && (pIns->nMixPlug == chn.pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
 					bOk = true;
@@ -2013,55 +2013,41 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			if (bOk)
 			{
 #ifndef NO_PLUGINS
-				if (applyDNAtoPlug && p->nNote != NOTE_NONE)
+				if (applyDNAtoPlug && chn.nNote != NOTE_NONE)
 				{
-					ModCommand::NOTE plugNote;
-					if(p->nArpeggioLastNote != NOTE_NONE)
-					{
-						plugNote = p->nArpeggioLastNote;
-					} else
-					{
-						plugNote = p->nNote;
-						// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-						if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
-						{
-							plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
-						}
-					}
-
-					switch(p->pModInstrument->nDNA)
+					switch(chn.pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:
 						// Switch off duplicated note played on this plugin
-						SendMIDINote(i, plugNote + NOTE_MAX_SPECIAL, 0);
-						p->nArpeggioLastNote = NOTE_NONE;
+						SendMIDINote(i, chn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]) + NOTE_MAX_SPECIAL, 0);
+						chn.nArpeggioLastNote = NOTE_NONE;
 						break;
 					}
 				}
 #endif // NO_PLUGINS
 
-				switch(p->pModInstrument->nDNA)
+				switch(chn.pModInstrument->nDNA)
 				{
 				// Cut
 				case DNA_NOTECUT:
-					KeyOff(p);
-					p->nVolume = 0;
+					KeyOff(&chn);
+					chn.nVolume = 0;
 					break;
 				// Note Off
 				case DNA_NOTEOFF:
-					KeyOff(p);
+					KeyOff(&chn);
 					break;
 				// Note Fade
 				case DNA_NOTEFADE:
-					p->dwFlags.set(CHN_NOTEFADE);
+					chn.dwFlags.set(CHN_NOTEFADE);
 					break;
 				}
-				if(!p->nVolume)
+				if(!chn.nVolume)
 				{
-					p->nFadeOutVol = 0;
-					p->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+					chn.nFadeOutVol = 0;
+					chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
 				}
 			}
 		}
@@ -2071,7 +2057,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	bool applyNNAtoPlug = false;
 #ifndef NO_PLUGINS
 	IMixPlugin *pPlugin = nullptr;
-	if(pChn->HasMIDIOutput() && ModCommand::IsNote(pChn->nNote)) // instro sends to a midi chan
+	if(srcChn.HasMIDIOutput() && ModCommand::IsNote(srcChn.nNote)) // instro sends to a midi chan
 	{
 		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 
@@ -2080,84 +2066,70 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
 			if(pPlugin)
 			{
-				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
+				// apply NNA to this plugin iff it is currently playing a note on this tracking channel
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				ModCommand::NOTE plugNote;
-				if(pChn->nArpeggioLastNote != NOTE_NONE)
-				{
-					plugNote = pChn->nArpeggioLastNote;
-				} else
-				{
-					plugNote = pChn->nNote;
-					// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-					if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
-					{
-						plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
-					}
-				}
-
-				applyNNAtoPlug = pPlugin->IsNotePlaying(plugNote, GetBestMidiChannel(nChn), nChn);
+				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]), GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}
 #endif // NO_PLUGINS
 
 	// New Note Action
-	//if ((pChn->nVolume) && (pChn->nLength))
-	if((pChn->nVolume != 0 && pChn->nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
+	//if ((pChn.nVolume) && (pChn.nLength))
+	if((srcChn.nVolume != 0 && srcChn.nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
 	{
 		nnaChn = GetNNAChannel(nChn);
 		if(nnaChn != 0)
 		{
-			p = &m_PlayState.Chn[nnaChn];
+			ModChannel &chn = m_PlayState.Chn[nnaChn];
 			// Copy Channel
-			*p = *pChn;
-			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
-			p->nPanbrelloOffset = 0;
+			chn = srcChn;
+			chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
+			chn.nPanbrelloOffset = 0;
 
-			p->nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
-			p->nCommand = CMD_NONE;
+			chn.nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
+			chn.nCommand = CMD_NONE;
 #ifndef NO_PLUGINS
 			if(applyNNAtoPlug && pPlugin)
 			{
 				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
 				//Actually a bad idea since it then become very hard to kill some notes.
-				//pPlugin->MoveNote(pChn->nNote, pChn->pModInstrument->nMidiChannel, nChn, n);
-				switch(pChn->nNNA)
+				//pPlugin->MoveNote(pChn.nNote, pChn.pModInstrument->nMidiChannel, nChn, n);
+				switch(srcChn.nNNA)
 				{
 				case NNA_NOTEOFF:
 				case NNA_NOTECUT:
 				case NNA_NOTEFADE:
 					//switch off note played on this plugin, on this tracker channel and midi channel
-					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
+					//pPlugin->MidiCommand(pChn.pModInstrument->nMidiChannel, pChn.pModInstrument->nMidiProgram, pChn.nNote + NOTE_MAX_SPECIAL, 0, n);
 					SendMIDINote(nChn, NOTE_KEYOFF, 0);
-					pChn->nArpeggioLastNote = NOTE_NONE;
+					srcChn.nArpeggioLastNote = NOTE_NONE;
 					break;
 				}
 			}
 #endif // NO_PLUGINS
 
 			// Key Off the note
-			switch(pChn->nNNA)
+			switch(srcChn.nNNA)
 			{
 			case NNA_NOTEOFF:
-				KeyOff(p);
+				KeyOff(&chn);
 				break;
 			case NNA_NOTECUT:
-				p->nFadeOutVol = 0;
+				chn.nFadeOutVol = 0;
 			case NNA_NOTEFADE:
-				p->dwFlags.set(CHN_NOTEFADE);
+				chn.dwFlags.set(CHN_NOTEFADE);
 				break;
 			}
-			if(!p->nVolume)
+			if(!chn.nVolume)
 			{
-				p->nFadeOutVol = 0;
-				p->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+				chn.nFadeOutVol = 0;
+				chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
 			}
 			// Stop this channel
-			pChn->nLength = 0;
-			pChn->position.Set(0);
-			pChn->nROfs = pChn->nLOfs = 0;
+			srcChn.nLength = 0;
+			srcChn.position.Set(0);
+			srcChn.nROfs = srcChn.nLOfs = 0;
 		}
 	}
 	return nnaChn;
