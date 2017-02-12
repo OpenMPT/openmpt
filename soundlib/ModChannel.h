@@ -175,6 +175,8 @@ struct ModChannel
 	typedef uint32 volume_t;
 	volume_t GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
+	ModCommand::NOTE GetPluginNote(bool realNoteMapping) const;
+
 	// Check if the channel has a valid MIDI output. This function guarantees that pModInstrument != nullptr.
 	bool HasMIDIOutput() const { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
 
