@@ -474,6 +474,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		OnEditCut(); return wParam;
 	case kcEditPaste:
 		OnPatternPaste(); return wParam;
+	case kcOrderlistEditCopyOrders:
+		OnEditCopyOrders(); return wParam;
 
 	// Orderlist navigation
 	case kcOrderlistNavigateLeftSelect:
