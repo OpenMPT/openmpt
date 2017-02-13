@@ -993,20 +993,20 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinInstrument.SetRange(0, 0);
 	m_SpinInstrument.EnableWindow(FALSE);
 	// NNA
-	m_ComboNNA.AddString("Note Cut");
-	m_ComboNNA.AddString("Continue");
-	m_ComboNNA.AddString("Note Off");
-	m_ComboNNA.AddString("Note Fade");
+	m_ComboNNA.AddString(_T("Note Cut"));
+	m_ComboNNA.AddString(_T("Continue"));
+	m_ComboNNA.AddString(_T("Note Off"));
+	m_ComboNNA.AddString(_T("Note Fade"));
 	// DCT
-	m_ComboDCT.AddString("Disabled");
-	m_ComboDCT.AddString("Note");
-	m_ComboDCT.AddString("Sample");
-	m_ComboDCT.AddString("Instrument");
-	m_ComboDCT.AddString("Plugin");
+	m_ComboDCT.AddString(_T("Disabled"));
+	m_ComboDCT.AddString(_T("Note"));
+	m_ComboDCT.AddString(_T("Sample"));
+	m_ComboDCT.AddString(_T("Instrument"));
+	m_ComboDCT.AddString(_T("Plugin"));
 	// DCA
-	m_ComboDCA.AddString("Note Cut");
-	m_ComboDCA.AddString("Note Off");
-	m_ComboDCA.AddString("Note Fade");
+	m_ComboDCA.AddString(_T("Note Cut"));
+	m_ComboDCA.AddString(_T("Note Off"));
+	m_ComboDCA.AddString(_T("Note Fade"));
 	// FadeOut Volume
 	m_SpinFadeOut.SetRange(0, 8192);
 	// Global Volume
@@ -1021,21 +1021,21 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_EditPWD.SubclassDlgItem(IDC_PITCHWHEELDEPTH, this);
 	m_EditPWD.AllowFractions(false);
 
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("None"), SRCMODE_NEAREST);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Linear"), SRCMODE_LINEAR);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Spline"), SRCMODE_SPLINE);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Polyphase"), SRCMODE_POLYPHASE);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString("XMMS"), SRCMODE_FIRFILTER);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default")), SRCMODE_DEFAULT);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("None")), SRCMODE_NEAREST);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Linear")), SRCMODE_LINEAR);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Spline")), SRCMODE_SPLINE);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Polyphase")), SRCMODE_POLYPHASE);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("XMMS")), SRCMODE_FIRFILTER);
 
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Channel default"), FLTMODE_UNCHANGED);
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force lowpass"), FLTMODE_LOWPASS);
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Channel default")), FLTMODE_UNCHANGED);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force lowpass")), FLTMODE_LOWPASS);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force highpass")), FLTMODE_HIGHPASS);
 
 	//VST velocity/volume handling
-	m_CbnPluginVolumeHandling.AddString("MIDI volume");
-	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
-	m_CbnPluginVolumeHandling.AddString("None");
+	m_CbnPluginVolumeHandling.AddString(_T("MIDI volume"));
+	m_CbnPluginVolumeHandling.AddString(_T("Dry/Wet ratio"));
+	m_CbnPluginVolumeHandling.AddString(_T("None"));
 
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 100);
@@ -1708,16 +1708,21 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 	if(pIns == nullptr) return FALSE;
 	if ((pszText) && (uId))
 	{
+		bool isEnabled = GetDlgItem(uId)->IsWindowEnabled();
 		switch(uId)
 		{
 		case IDC_EDIT_PITCHTEMPOLOCK:
 		case IDC_CHECK_PITCHTEMPOLOCK:
 			// Pitch/Tempo lock
+			if(isEnabled)
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
 				wsprintf(pszText, _T("Tempo range: %u - %u"), specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
-				return TRUE;
+			} else
+			{
+				_tcscpy(pszText, _T("Only available in MPTM format"));
 			}
+			return TRUE;
 
 		case IDC_EDIT7:
 			// Fade Out
@@ -1729,12 +1734,18 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 
 		case IDC_EDIT8:
 			// Global volume
-			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0));
+			if(isEnabled)
+				_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0));
+			else
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_EDIT9:
 			// Panning
-			_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
+			if(isEnabled)
+				_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
+			else
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 #ifndef NO_PLUGINS
@@ -1780,32 +1791,91 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			return TRUE;
 
 		case IDC_SLIDER1:
-			wsprintf(pszText, "±%d%% volume variation", pIns->nVolSwing);
+			if(isEnabled)
+				wsprintf(pszText, "±%d%% volume variation", pIns->nVolSwing);
+			else
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER2:
-			wsprintf(pszText, "±%d panning variation", pIns->nPanSwing);
+			if(isEnabled)
+			{
+				uint16 swing = pIns->nPanSwing;
+				if(m_sndFile.GetType() == MOD_TYPE_IT)
+					swing /= 4u;
+				wsprintf(pszText, "±%d panning variation", swing);
+			} else
+			{
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
+			}
 			return TRUE;
 
 		case IDC_SLIDER3:
-			wsprintf(pszText, _T("%u"), pIns->GetCutoff());
+			if(isEnabled)
+				wsprintf(pszText, _T("%u"), pIns->GetCutoff());
+			else
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER4:
-			wsprintf(pszText, _T("%u (%u dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
+			if(isEnabled)
+				wsprintf(pszText, _T("%u (%u dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
+			else
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER6:
-			wsprintf(pszText, "±%d cutoff variation", pIns->nCutSwing);
+			if(isEnabled)
+				wsprintf(pszText, "±%d cutoff variation", pIns->nCutSwing);
+			else
+				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER7:
-			wsprintf(pszText, "±%d resonance variation", pIns->nResSwing);
+			if(isEnabled)
+				wsprintf(pszText, "±%d resonance variation", pIns->nResSwing);
+			else
+				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_PITCHWHEELDEPTH:
 			_tcscpy(pszText, _T("Set this to the actual Pitch Wheel Depth used in your plugin on this channel."));
 			return TRUE;
+
+		case IDC_INSVIEWPLG:	// Open Editor
+			if(!isEnabled)
+			{
+				_tcscpy(pszText, _T("No plugin loaded"));
+				return TRUE;
+			}
+			break;
+
+		case IDC_SPIN9:		// Pan
+		case IDC_CHECK1:	// Pan
+		case IDC_COMBO1:	// NNA
+		case IDC_COMBO2:	// DCT
+		case IDC_COMBO3:	// DNA
+		case IDC_COMBO4:	// PPC
+		case IDC_SPIN12:	// PPS
+		case IDC_EDIT15:	// PPS
+			if(!isEnabled)
+			{
+				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
+				return TRUE;
+			}
+			break;
+
+		case IDC_COMBOTUNING:	// Tuning
+		case IDC_COMBO9:		// Resampling:
+		case IDC_SLIDER5:		// Ramping
+		case IDC_SPIN1:			// Ramping
+		case IDC_EDIT2:			// Ramping
+			if(!isEnabled)
+			{
+				_tcscpy(pszText, _T("Only available in MPTM format"));
+				return TRUE;
+			}
+			break;
 
 		}
 	}
@@ -3138,7 +3208,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 {
 	m_ComboTuning.ResetContent();
 
-	m_ComboTuning.AddString("OpenMPT IT behaviour"); //<-> Instrument pTuning pointer == NULL
+	m_ComboTuning.AddString(_T("OpenMPT IT behaviour")); //<-> Instrument pTuning pointer == NULL
 	for(size_t i = 0; i<m_sndFile.GetBuiltInTunings().GetNumTunings(); i++)
 	{
 		m_ComboTuning.AddString(m_sndFile.GetBuiltInTunings().GetTuning(i).GetName().c_str());
@@ -3151,7 +3221,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 	{
 		m_ComboTuning.AddString(m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName().c_str());
 	}
-	m_ComboTuning.AddString("Control Tunings...");
+	m_ComboTuning.AddString(_T("Control Tunings..."));
 	m_ComboTuning.SetCurSel(0);
 }
 
