@@ -3182,6 +3182,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleXFade:				PostCtrlMessage(IDC_SAMPLE_XFADE); return wParam;
 		case kcSampleAutotune:			PostCtrlMessage(IDC_SAMPLE_AUTOTUNE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
+		case kcSampleStereoSep:			PostCtrlMessage(IDC_SAMPLE_STEREOSEPARATION); return wParam;
 		case kcSampleSlice:				OnSampleSlice(); return wParam;
 
 		// Those don't seem to work.

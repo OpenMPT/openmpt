@@ -768,6 +768,43 @@ bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 
 
 template <class T>
+static void StereoSepSampleImpl(T *p, SmpLength length, int32 separation)
+//-----------------------------------------------------------------------
+{
+	const int32 fac1 = static_cast<int32>(32768 + separation / 2), fac2 = static_cast<int32>(32768 - separation / 2);
+	while(length--)
+	{
+		const int32 l = p[0], r = p[1];
+		p[0] = mpt::saturate_cast<T>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 16);
+		p[1] = mpt::saturate_cast<T>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 16);
+		p += 2;
+	}
+}
+
+// X-Fade sample data to create smooth loop transitions
+bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double separation, CSoundFile &sndFile)
+//----------------------------------------------------------------------------------------------------------
+{
+	LimitMax(end, smp.nLength);
+	if(!smp.HasSampleData() || start >= end || smp.GetNumChannels() != 2) return false;
+
+	const SmpLength length = end - start;
+	const uint8 numChn = smp.GetNumChannels();
+	const int32 sep32 = Util::Round<int32>(separation * (65536.0 / 100.0));
+
+	if(smp.GetElementarySampleSize() == 2)
+		StereoSepSampleImpl(smp.pSample16 + start * numChn, length, sep32);
+	else if(smp.GetElementarySampleSize() == 1)
+		StereoSepSampleImpl(smp.pSample8 + start * numChn, length, sep32);
+	else
+		return false;
+
+	PrecomputeLoops(smp, sndFile, false);
+	return true;
+}
+
+
+template <class T>
 static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 //----------------------------------------------------------------------
 {

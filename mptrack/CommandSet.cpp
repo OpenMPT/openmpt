@@ -706,6 +706,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSwitchToInstrLibrary, 1966, _T("Switch To Instrument Library"));
 	DefineKeyCommand(kcPatternSetInstrumentNotEmpty, 1967, _T("Apply current instrument to existing only"));
 	DefineKeyCommand(kcSelectColumn, 1968, _T("Select Column"));
+	DefineKeyCommand(kcSampleStereoSep, 1969, _T("Change Stereo Separation"));
 
 	// Add new key commands here.
 

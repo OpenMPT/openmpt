@@ -2808,6 +2808,12 @@ BEGIN
     IDC_VUMETER             "Global VU Meter (Click to reset clip indicator)"
 END
 
+STRINGTABLE
+BEGIN
+    IDC_SAMPLE_STEREOSEPARATION 
+                            "Change Stereo Separation\nChange Stereo Separation / Stereo Width of the sample"
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -704,6 +704,7 @@ enum CommandID
 	kcSampleMonoLeft,
 	kcSampleMonoRight,
 	kcSampleMonoSplit,
+	kcSampleStereoSep,
 	kcSampleUpsample,
 	kcSampleDownsample,
 	kcSampleResample,
