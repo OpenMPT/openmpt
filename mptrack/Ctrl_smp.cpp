@@ -81,6 +81,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,	OnSignUnSign)
 	ON_COMMAND(IDC_SAMPLE_DCOFFSET,		OnRemoveDCOffset)
 	ON_COMMAND(IDC_SAMPLE_XFADE,		OnXFade)
+	ON_COMMAND(IDC_SAMPLE_STEREOSEPARATION, OnStereoSeparation)
 	ON_COMMAND(IDC_SAMPLE_AUTOTUNE,		OnAutotune)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnKeepSampleOnDisk)
@@ -231,8 +232,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, TIMAGE_SAMPLE_NORMALIZE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, TIMAGE_SAMPLE_AMPLIFY);
 	m_ToolBar2.AddButton(IDC_SAMPLE_DCOFFSET, TIMAGE_SAMPLE_DCOFFSET);
+	m_ToolBar2.AddButton(IDC_SAMPLE_STEREOSEPARATION, TIMAGE_SAMPLE_STEREOSEP);
 	m_ToolBar2.AddButton(IDC_SAMPLE_RESAMPLE, TIMAGE_SAMPLE_RESAMPLE);
-	//m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, TIMAGE_SAMPLE_DOWNSAMPLE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, TIMAGE_SAMPLE_REVERSE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, TIMAGE_SAMPLE_SILENCE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
@@ -486,6 +487,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case IDC_SAMPLE_XFADE:
 		OnXFade();
+		break;
+
+	case IDC_SAMPLE_STEREOSEPARATION:
+		OnStereoSeparation();
 		break;
 
 	case IDC_SAMPLE_AUTOTUNE:
@@ -3330,6 +3335,9 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleResample:
 		OnResample();
 		break;
+	case kcSampleStereoSep:
+		OnStereoSeparation();
+		break;
 	}
 
 	if(transpose)
@@ -3438,6 +3446,42 @@ void CCtrlSamples::OnXFade()
 			loopEnd + (dlg.m_afterloopFade ? std::min(sample.nLength - loopEnd, fadeSamples) : 0));
 
 		if(ctrlSmp::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, dlg.m_useSustainLoop, m_sndFile))
+		{
+			SetModified(SampleHint().Info().Data(), true, true);
+		} else
+		{
+			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
+		}
+	}
+	SwitchToView();
+}
+
+
+void CCtrlSamples::OnStereoSeparation()
+//-------------------------------------
+{
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+
+	if(sample.pSample == nullptr
+		|| !sample.nLength
+		|| sample.GetNumChannels() != 2)
+	{
+		MessageBeep(MB_ICONWARNING);
+		SwitchToView();
+		return;
+	}
+
+	static double separation = 100.0;
+	CInputDlg dlg(this, _T("Stereo separation amount\n0% = mono, 100% = no change, 200% = double separation\nNegative values swap channels"), -200.0, 200.0, separation);
+	if(dlg.DoModal() == IDOK)
+	{
+		separation = dlg.resultAsDouble;
+
+		SampleSelectionPoints selection = GetSelectionPoints();
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Stereo Separation",
+			selection.nStart, selection.nEnd);
+
+		if(ctrlSmp::StereoSepSample(sample, selection.nStart, selection.nEnd, separation, m_sndFile))
 		{
 			SetModified(SampleHint().Info().Data(), true, true);
 		} else

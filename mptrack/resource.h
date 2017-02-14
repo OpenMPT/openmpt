@@ -811,6 +811,7 @@
 #define IDC_TEXT_PERCENT                2332
 #define IDC_EQ_WARNING                  2333
 #define IDC_PLUGFRAME                   2334
+#define IDC_SAMPLE_STEREOSEPARATION     2335
 #define IDC_TEXT_STRETCHPARAMS          2337
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define IDC_MIDI_MACRO_CONTROL          2339
