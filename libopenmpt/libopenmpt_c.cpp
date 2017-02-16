@@ -15,6 +15,7 @@
 #include "libopenmpt_impl.hpp"
 
 #include <limits>
+#include <new>
 #include <stdexcept>
 
 #include <cmath>
@@ -59,6 +60,34 @@ public:
 	}
 }; // class logfunc_logger
 
+namespace interface {
+
+class invalid_module_pointer : public openmpt::exception {
+public:
+	invalid_module_pointer() throw()
+		: openmpt::exception("module * not valid")
+	{
+		return;
+	}
+	virtual ~invalid_module_pointer() throw() {
+		return;
+	}
+};
+
+class argument_null_pointer : public openmpt::exception {
+public:
+	argument_null_pointer() throw()
+		: openmpt::exception("argument null pointer")
+	{
+		return;
+	}
+	virtual ~argument_null_pointer() throw() {
+		return;
+	}
+};
+
+} // namespace interface
+
 static std::string format_exception( const char * const function ) {
 	std::string err;
 	try {
@@ -83,13 +112,89 @@ static std::string format_exception( const char * const function ) {
 	return err;
 }
 
+static void error_message_from_exception( const char * * error_message, const std::exception & e ) {
+	if ( error_message ) {
+		const char * what = e.what();
+		*error_message = ( what ? openmpt::strdup( what ) : openmpt::strdup( "" ) );
+	}
+}
+
+static int error_from_exception( const char * * error_message ) {
+	int error = 0;
+	if ( error_message ) {
+		if ( *error_message ) {
+			openmpt_free_string( *error_message );
+			*error_message = NULL;
+		}
+	}
+	try {
+		throw;
+
+	} catch ( const std::bad_alloc & e ) {
+		error = OPENMPT_ERROR_OUT_OF_MEMORY;
+		error_message_from_exception( error_message, e );
+
+	} catch ( const openmpt::interface::invalid_module_pointer & e ) {
+		error = OPENMPT_ERROR_INVALID_MODULE_POINTER;
+		error_message_from_exception( error_message, e );
+	} catch ( const openmpt::interface::argument_null_pointer & e ) {
+		error = OPENMPT_ERROR_ARGUMENT_NULL_POINTER;
+		error_message_from_exception( error_message, e );
+	} catch ( const openmpt::exception & e ) {
+		error = OPENMPT_ERROR_GENERAL;
+		error_message_from_exception( error_message, e );
+
+	} catch ( const std::invalid_argument & e ) {
+		error = OPENMPT_ERROR_INVALID_ARGUMENT;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::out_of_range & e ) {
+		error = OPENMPT_ERROR_OUT_OF_RANGE;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::length_error & e ) {
+		error = OPENMPT_ERROR_LENGTH;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::domain_error & e ) {
+		error = OPENMPT_ERROR_DOMAIN;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::logic_error & e ) {
+		error = OPENMPT_ERROR_LOGIC;
+		error_message_from_exception( error_message, e );
+
+	} catch ( const std::underflow_error & e ) {
+		error = OPENMPT_ERROR_UNDERFLOW;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::overflow_error & e ) {
+		error = OPENMPT_ERROR_OVERFLOW;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::range_error & e ) {
+		error = OPENMPT_ERROR_RANGE;
+		error_message_from_exception( error_message, e );
+	} catch ( const std::runtime_error & e ) {
+		error = OPENMPT_ERROR_RUNTIME;
+		error_message_from_exception( error_message, e );
+
+	} catch ( const std::exception & e ) {
+		error = OPENMPT_ERROR_EXCEPTION;
+		error_message_from_exception( error_message, e );
+
+	} catch ( ... ) {
+		error = OPENMPT_ERROR_UNKNOWN;
+
+	}
+	return error;
+}
+
 } // namespace openmpt
 
 extern "C" {
 
 struct openmpt_module {
 	openmpt_log_func logfunc;
-	void * user;
+	void * loguser;
+	openmpt_error_func errfunc;
+	void * erruser;
+	int error;
+	const char * error_message;
 	openmpt::module_impl * impl;
 };
 
@@ -97,28 +202,53 @@ struct openmpt_module {
 
 namespace openmpt {
 
-static void do_report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const user = 0, openmpt::module_impl * const impl = 0 ) {
-	try {
-		const std::string message = format_exception( function );
-		if ( impl ) {
-			impl->PushToCSoundFileLog( message );
-		} else if ( logfunc ) {
-			logfunc( message.c_str(), user );
-		} else {
-			openmpt_log_func_default( message.c_str(), NULL );
+static void do_report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const loguser = 0, openmpt_error_func errfunc = 0, void * const erruser = 0, openmpt::module_impl * const impl = 0, openmpt_module * const mod = 0, int * const err = 0, const char * * err_msg = 0 ) {
+	int error = OPENMPT_ERROR_OK;
+	const char * error_message = NULL;
+	int error_func_result = OPENMPT_ERROR_FUNC_RESULT_DEFAULT;
+	if ( errfunc || mod || err || err_msg ) {
+		error = error_from_exception( mod ? &error_message : NULL );
+	}
+	if ( errfunc ) {
+		error_func_result = errfunc( error, erruser );
+	}
+	if ( mod && ( error_func_result & OPENMPT_ERROR_FUNC_RESULT_STORE ) ) {
+		mod->error = error;
+		mod->error_message = ( error_message ? openmpt::strdup( error_message ) : openmpt::strdup( "" ) );
+	}
+	if ( err ) {
+		*err = error;
+	}
+	if ( err_msg ) {
+		*err_msg = ( error_message ? openmpt::strdup( error_message ) : openmpt::strdup( "" ) );
+	}
+	if ( error_message ) {
+		openmpt_free_string( error_message );
+		error_message = NULL;
+	}
+	if ( error_func_result & OPENMPT_ERROR_FUNC_RESULT_LOG ) {
+		try {
+			const std::string message = format_exception( function );
+			if ( impl ) {
+				impl->PushToCSoundFileLog( message );
+			} else if ( logfunc ) {
+				logfunc( message.c_str(), loguser );
+			} else {
+				openmpt_log_func_default( message.c_str(), NULL );
+			}
+		} catch ( ... ) {
+			fprintf( stderr, "openmpt: %s:%i: UNKNOWN INTERNAL ERROR in error handling: function='%s', logfunc=%p, loguser=%p, errfunc=%p, erruser=%p, impl=%p\n", __FILE__, static_cast<int>( __LINE__ ), function ? function : "", logfunc, loguser, errfunc, erruser, impl );
+			fflush( stderr );
 		}
-	} catch ( ... ) {
-		fprintf( stderr, "openmpt: %s:%i: UNKNOWN INTERNAL ERROR in error handling: function='%s', logfunc=%p, user=%p, impl=%p\n", __FILE__, static_cast<int>( __LINE__ ), function ? function : "", logfunc, user, impl );
-		fflush( stderr );
 	}
 }
 
-static void report_exception( const char * const function, openmpt_module * mod = 0 ) {
-	do_report_exception( function, mod ? mod->logfunc : 0, mod ? mod->user : 0, mod ? mod->impl : 0 );
+static void report_exception( const char * const function, openmpt_module * mod = 0, int * error = 0, const char * * error_message = 0 ) {
+	do_report_exception( function, mod ? mod->logfunc : NULL, mod ? mod->loguser : NULL, mod ? mod->errfunc : NULL, mod ? mod->erruser : NULL, mod ? mod->impl : 0, mod ? mod : NULL, error ? error : NULL, error_message ? error_message : NULL );
 }
 
-static void report_exception( const char * const function, openmpt_log_func const logfunc, void * const user ) {
-	do_report_exception( function, logfunc, user );
+static void report_exception( const char * const function, openmpt_log_func const logfunc, void * const loguser, openmpt_error_func errfunc, void * const erruser, int * error, const char * * error_message ) {
+	do_report_exception( function, logfunc, loguser, errfunc, erruser, 0, 0, error, error_message );
 }
 
 namespace interface {
@@ -126,14 +256,14 @@ namespace interface {
 template < typename T >
 void check_soundfile( T * mod ) {
 	if ( !mod ) {
-		throw openmpt::exception("module * not valid");
+		throw openmpt::interface::invalid_module_pointer();
 	}
 }
 
 template < typename T >
 void check_pointer( T * p ) {
 	if ( !p ) {
-		throw openmpt::exception("null pointer");
+		throw openmpt::interface::argument_null_pointer();
 	}
 }
 
@@ -219,37 +349,139 @@ void openmpt_log_func_default( const char * message, void * /*user*/ ) {
 	fflush( stderr );
 }
 
-void openmpt_log_func_silent( const char * /*message*/, void * /*user*/ ) {
+void openmpt_log_func_silent( const char * /*message*/ , void * /*user*/ ) {
 	return;
 }
 
-double openmpt_could_open_probability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user ) {
-	try {
-		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
-	} catch ( ... ) {
-		openmpt::report_exception( __FUNCTION__, logfunc, user );
+int openmpt_error_is_transient( int error ) {
+	int result = 0;
+	switch ( error ) {
+		case OPENMPT_ERROR_OUT_OF_MEMORY:
+			result = 1;
+			break;
+		default:
+			result = 0;
+			break;
 	}
-	return 0.0;
+	return result;
 }
-double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user ) {
+
+const char * openmpt_error_string( int error ) {
+	const char * text = "unkown error";
+	switch ( error ) {
+		case OPENMPT_ERROR_OK:                
+			text = "";
+			break;
+		case OPENMPT_ERROR_UNKNOWN:
+			text = "unknown internal error";
+			break;
+		case OPENMPT_ERROR_EXCEPTION:
+			text = "unknown exception ";
+			break;
+		case OPENMPT_ERROR_OUT_OF_MEMORY:
+			text = "out of memory";
+			break;
+		case OPENMPT_ERROR_RUNTIME:
+			text = "runtime error";
+			break;
+		case OPENMPT_ERROR_RANGE:
+			text = "range error";
+			break;
+		case OPENMPT_ERROR_OVERFLOW:
+			text = "arithmetic overflow";
+			break;
+		case OPENMPT_ERROR_UNDERFLOW:
+			text = "arithmetic underflow";
+			break;
+		case OPENMPT_ERROR_LOGIC:
+			text = "logic error";
+			break;
+		case OPENMPT_ERROR_DOMAIN:
+			text = "value domain error";
+			break;
+		case OPENMPT_ERROR_LENGTH:
+			text = "maximum supported size exceeded";
+			break;
+		case OPENMPT_ERROR_OUT_OF_RANGE:
+			text = "argument out of range";
+			break;
+		case OPENMPT_ERROR_INVALID_ARGUMENT:
+			text = "invalid argument";
+			break;
+		case OPENMPT_ERROR_GENERAL:
+			text = "libopenmpt error";
+			break;
+	}
+	return openmpt::strdup( text );
+}
+
+int openmpt_error_func_default( int error, void * /* user */ ) {
+	(void)error;
+	return OPENMPT_ERROR_FUNC_RESULT_DEFAULT;
+}
+
+int openmpt_error_func_log( int error, void * /* user */ ) {
+	(void)error;
+	return OPENMPT_ERROR_FUNC_RESULT_LOG;
+}
+
+int openmpt_error_func_store( int error, void * /* user */ ) {
+	(void)error;
+	return OPENMPT_ERROR_FUNC_RESULT_STORE;
+}
+
+int openmpt_error_func_ignore( int error, void * /* user */ ) {
+	(void)error;
+	return OPENMPT_ERROR_FUNC_RESULT_NONE;
+}
+
+int openmpt_error_func_errno( int error, void * user ) {
+	int * e = (int *)user;
+	if ( !e ) {
+		return OPENMPT_ERROR_FUNC_RESULT_DEFAULT;
+	}
+	*e = error;
+	return OPENMPT_ERROR_FUNC_RESULT_NONE;
+}
+
+void * openmpt_error_func_errno_userdata( int * error ) {
+	return (void *)error;
+}
+
+double openmpt_could_open_probability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser ) {
+	return openmpt_could_open_probability2( stream_callbacks, stream, effort, logfunc, loguser, NULL, NULL, NULL, NULL );
+}
+double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser ) {
+	return openmpt_could_open_probability2( stream_callbacks, stream, effort, logfunc, loguser, NULL, NULL, NULL, NULL );
+}
+
+double openmpt_could_open_probability2( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
 	try {
 		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
+		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, loguser ) );
 	} catch ( ... ) {
-		openmpt::report_exception( __FUNCTION__, logfunc, user );
+		openmpt::report_exception( __FUNCTION__, logfunc, loguser, errfunc, erruser, error, error_message );
 	}
 	return 0.0;
 }
 
 openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
+	return openmpt_module_create2( stream_callbacks, stream, logfunc, user, NULL, NULL, NULL, NULL, ctls );
+}
+
+openmpt_module * openmpt_module_create2( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message, const openmpt_module_initial_ctl * ctls ) {
 	try {
 		openmpt_module * mod = (openmpt_module*)std::calloc( 1, sizeof( openmpt_module ) );
 		if ( !mod ) {
 			throw std::bad_alloc();
 		}
+		std::memset( mod, 0, sizeof( openmpt_module ) );
 		mod->logfunc = logfunc ? logfunc : openmpt_log_func_default;
-		mod->user = user;
+		mod->loguser = loguser;
+		mod->errfunc = errfunc ? errfunc : NULL;
+		mod->erruser = erruser;
+		mod->error = OPENMPT_ERROR_OK;
+		mod->error_message = NULL;
 		mod->impl = 0;
 		try {
 			std::map< std::string, std::string > ctls_map;
@@ -263,29 +495,42 @@ openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callback
 				}
 			}
 			openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );
+			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
-			openmpt::report_exception( __FUNCTION__, mod );
+			openmpt::report_exception( __FUNCTION__, mod, error, error_message );
 		}
 		delete mod->impl;
 		mod->impl = 0;
+		if ( mod->error_message ) {
+			openmpt_free_string( mod->error_message );
+			mod->error_message = NULL;
+		}
 		std::free( (void*)mod );
 		mod = NULL;
 	} catch ( ... ) {
-		openmpt::report_exception( __FUNCTION__ );
+		openmpt::report_exception( __FUNCTION__, 0, error, error_message );
 	}
 	return NULL;
 }
 
 openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
+	return openmpt_module_create_from_memory2( filedata, filesize, logfunc, user, NULL, NULL, NULL, NULL, ctls );
+}
+
+openmpt_module * openmpt_module_create_from_memory2( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message, const openmpt_module_initial_ctl * ctls ) {
 	try {
 		openmpt_module * mod = (openmpt_module*)std::calloc( 1, sizeof( openmpt_module ) );
 		if ( !mod ) {
 			throw std::bad_alloc();
 		}
+		std::memset( mod, 0, sizeof( openmpt_module ) );
 		mod->logfunc = logfunc ? logfunc : openmpt_log_func_default;
-		mod->user = user;
+		mod->loguser = loguser;
+		mod->errfunc = errfunc ? errfunc : NULL;
+		mod->erruser = erruser;
+		mod->error = OPENMPT_ERROR_OK;
+		mod->error_message = NULL;
 		mod->impl = 0;
 		try {
 			std::map< std::string, std::string > ctls_map;
@@ -298,17 +543,21 @@ openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_
 					}
 				}
 			}
-			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );
+			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
-			openmpt::report_exception( __FUNCTION__, mod );
+			openmpt::report_exception( __FUNCTION__, mod, error, error_message );
 		}
 		delete mod->impl;
 		mod->impl = 0;
+		if ( mod->error_message ) {
+			openmpt_free_string( mod->error_message );
+			mod->error_message = NULL;
+		}
 		std::free( (void*)mod );
 		mod = NULL;
 	} catch ( ... ) {
-		openmpt::report_exception( __FUNCTION__ );
+		openmpt::report_exception( __FUNCTION__, 0, error, error_message );
 	}
 	return NULL;
 }
@@ -318,8 +567,87 @@ void openmpt_module_destroy( openmpt_module * mod ) {
 		openmpt::interface::check_soundfile( mod );
 		delete mod->impl;
 		mod->impl = 0;
+		if ( mod->error_message ) {
+			openmpt_free_string( mod->error_message );
+			mod->error_message = NULL;
+		}
 		std::free( (void*)mod );
 		mod = NULL;
+		return;
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return;
+}
+
+void openmpt_module_set_log_func( openmpt_module * mod, openmpt_log_func logfunc, void * loguser ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		mod->logfunc = logfunc ? logfunc : openmpt_log_func_default;
+		mod->loguser = loguser;
+		return;
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return;
+}
+
+void openmpt_module_set_error_func( openmpt_module * mod, openmpt_error_func errfunc, void * erruser ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		mod->errfunc = errfunc ? errfunc : NULL;
+		mod->erruser = erruser;
+		mod->error = OPENMPT_ERROR_OK;
+		return;
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return;
+}
+
+int openmpt_module_error_get_last( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->error;
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return -1;
+}
+
+const char * openmpt_module_error_get_last_message( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->error_message ? openmpt::strdup( mod->error_message ) : openmpt::strdup( "" );
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return NULL;
+}
+
+void openmpt_module_error_set_last( openmpt_module * mod, int error ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		mod->error = error;
+		if ( mod->error_message ) {
+			openmpt_free_string( mod->error_message );
+			mod->error_message = NULL;
+		}
+		return;
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, mod );
+	}
+	return;
+}
+
+void openmpt_module_error_clear( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		mod->error = OPENMPT_ERROR_OK;
+		if ( mod->error_message ) {
+			openmpt_free_string( mod->error_message );
+			mod->error_message = NULL;
+		}
 		return;
 	} catch ( ... ) {
 		openmpt::report_exception( __FUNCTION__, mod );

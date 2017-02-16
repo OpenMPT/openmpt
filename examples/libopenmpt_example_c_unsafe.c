@@ -45,7 +45,7 @@ int main( int argc, char * argv[] ) {
 #else
 	file = fopen( argv[1], "rb" );
 #endif
-	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
+	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 	fclose( file );
 	Pa_Initialize();
 	Pa_OpenDefaultStream( &stream, 0, 2, paInt16 | paNonInterleaved, SAMPLERATE, paFramesPerBufferUnspecified, NULL, NULL );
