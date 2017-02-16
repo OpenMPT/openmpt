@@ -208,8 +208,11 @@ LIBOPENMPT_API const char * openmpt_get_supported_extensions(void);
  */
 LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
 
+/*! Seek to the given offset relative to the beginning of the file. */
 #define OPENMPT_STREAM_SEEK_SET 0
+/*! Seek to the given offset relative to the current position in the file. */
 #define OPENMPT_STREAM_SEEK_CUR 1
+/*! Seek to the given offset relative to the end of the file. */
 #define OPENMPT_STREAM_SEEK_END 2
 
 /*! \brief Read bytes from stream

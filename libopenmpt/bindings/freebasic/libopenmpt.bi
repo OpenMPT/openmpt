@@ -165,8 +165,11 @@ Declare Function openmpt_get_supported_extensions() As Const ZString Ptr
 '/
 Declare Function openmpt_is_extension_supported(ByVal extension As Const ZString Ptr) As Long
 
+'* Seek to the given offset relative to the beginning of the file.
 Const OPENMPT_STREAM_SEEK_SET = 0
+'* Seek to the given offset relative to the current position in the file.
 Const OPENMPT_STREAM_SEEK_CUR = 1
+'* Seek to the given offset relative to the end of the file.
 Const OPENMPT_STREAM_SEEK_END = 2
 
 /'* \brief Read bytes from stream
