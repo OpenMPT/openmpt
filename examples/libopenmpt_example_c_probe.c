@@ -47,7 +47,7 @@
 #error "libopenmpt too old."
 #endif
 
-static double libopenmpt_example_could_open_probability_prefix( const void * prefix_data, size_t prefix_size_, int64_t file_size, double effort, openmpt_log_func logfunc, void * user ) {
+static double libopenmpt_example_could_open_probability_prefix( const void * prefix_data, size_t prefix_size_, int64_t file_size, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
 	double ret = 0.0;
 	int64_t prefix_size = prefix_size_;
 	openmpt_stream_callbacks openmpt_stream_callbacks_prefix_probe;
@@ -68,7 +68,7 @@ static double libopenmpt_example_could_open_probability_prefix( const void * pre
 	}
 	openmpt_stream_callbacks_prefix_probe = openmpt_stream_get_buffer_callbacks();
 	openmpt_stream_buffer_init_prefix_only( &stream, prefix_data, prefix_size, file_size );
-	ret = openmpt_could_open_probability( openmpt_stream_callbacks_prefix_probe, &stream, effort, logfunc, user );
+	ret = openmpt_could_open_probability2( openmpt_stream_callbacks_prefix_probe, &stream, effort, logfunc, loguser, errfunc, erruser, error, error_message );
 	if ( openmpt_stream_buffer_overflowed( &stream ) ) {
 		ret = 0.5;
 	}
@@ -77,8 +77,8 @@ static double libopenmpt_example_could_open_probability_prefix( const void * pre
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
 
-static int libopenmpt_example_probe_file_header_prefix( const void * prefix_data, size_t prefix_size, int64_t file_size, openmpt_log_func logfunc, void * user ) {
-	double ret = libopenmpt_example_could_open_probability_prefix( prefix_data, prefix_size, file_size, 0.25, logfunc, user );
+static int libopenmpt_example_probe_file_header_prefix( const void * prefix_data, size_t prefix_size, int64_t file_size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
+	double ret = libopenmpt_example_could_open_probability_prefix( prefix_data, prefix_size, file_size, 0.25, logfunc, loguser, errfunc, erruser, error, error_message );
 	if ( ret >= 0.5 ) {
 		return 1;
 	}
@@ -96,8 +96,8 @@ static int libopenmpt_example_probe_file_header_prefix( const void * prefix_data
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
 
-static int libopenmpt_example_probe_file_header( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user ) {
-	double ret = openmpt_could_open_probability( stream_callbacks, stream, 0.25, logfunc, user );
+static int libopenmpt_example_probe_file_header( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
+	double ret = openmpt_could_open_probability2( stream_callbacks, stream, 0.25, logfunc, loguser, errfunc, erruser, error, error_message );
 	if ( ret >= 0.5 ) {
 		return 1;
 	}
@@ -222,6 +222,7 @@ int main( int argc, char * argv[] ) {
 #endif
 
 	int result = 0;
+	int mod_err = OPENMPT_ERROR_OK;
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
 	blob_t * blob = 0;
 #elif ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
@@ -233,6 +234,9 @@ int main( int argc, char * argv[] ) {
 #endif
 #if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
 	double probability = 0.0;
+#endif
+#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
+	int result_binary = 0;
 #endif
 
 	if ( argc != 2 ) {
@@ -284,16 +288,15 @@ int main( int argc, char * argv[] ) {
 			prefix_size = blob->size;
 		}
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-			if ( libopenmpt_example_probe_file_header_prefix( blob->data, prefix_size, blob->size, &libopenmpt_example_logfunc, NULL ) <= 0 ) {
-				fprintf( stdout, "%s\n", "Failure." );
-				result = 1;
-				goto cleanup;
+			result_binary = ( libopenmpt_example_probe_file_header_prefix( blob->data, prefix_size, blob->size, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
+			fprintf( stdout, "%s\n", result_binary ? "Success." : "Failure." );
+			if ( result_binary ) {
+				result = 0;
 			} else {
-				fprintf( stdout, "%s\n", "Success." );
-				result = 0; 
+				result = 1;
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
-			probability = libopenmpt_example_could_open_probability_prefix( blob->data, prefix_size, blob->size, 0.25, &libopenmpt_example_logfunc, NULL );
+			probability = libopenmpt_example_could_open_probability_prefix( blob->data, prefix_size, blob->size, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 			fprintf( stdout, "%s: %f\n", "Result", probability );
 			if ( probability >= 0.5 ) {
 				result = 0;
@@ -307,16 +310,15 @@ int main( int argc, char * argv[] ) {
 	#elif ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-			if ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL ) <= 0 ) {
-				fprintf( stdout, "%s\n", "Failure." );
-				result = 1;
-				goto cleanup;
+			result_binary = ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
+			fprintf( stdout, "%s\n", result_binary ? "Success." : "Failure." );
+			if ( result_binary ) {
+				result = 0;
 			} else {
-				fprintf( stdout, "%s\n", "Success." );
-				result = 0; 
+				result = 1;
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
-			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL );
+			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 			fprintf( stdout, "%s: %f\n", "Result", probability );
 			if ( probability >= 0.5 ) {
 				result = 0;

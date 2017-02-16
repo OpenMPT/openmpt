@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.0-pre
 
+ *  [**New**] New error handling functionality in the C API, which in particular
+    allows distinguishing potentially transient out-of-memory errors from parse
+    errors during module loading. 
  *  [**New**] New API `openmpt::module::get_selected_subsong()` (C++) and
     `openmpt_module_get_selected_subsong()` (C).
  *  [**New**] New API `openmpt::could_open_probability()` (C++) and
