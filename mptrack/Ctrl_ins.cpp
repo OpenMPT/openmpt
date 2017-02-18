@@ -1708,7 +1708,8 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 	if(pIns == nullptr) return FALSE;
 	if ((pszText) && (uId))
 	{
-		bool isEnabled = GetDlgItem(uId)->IsWindowEnabled() != FALSE;
+		CWnd *wnd = GetDlgItem(uId);
+		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
 		switch(uId)
 		{
 		case IDC_EDIT_PITCHTEMPOLOCK:
