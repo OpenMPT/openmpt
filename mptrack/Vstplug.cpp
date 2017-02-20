@@ -816,13 +816,12 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	, m_Effect(effect)
 	, isBridged(!memcmp(&effect.resvd2, "OMPT", 4))
 	, m_hLibrary(hLibrary)
+	, m_pProcessFP(nullptr)
 	, m_nSampleRate(sndFile.GetSampleRate())
 	, m_isInitialized(false)
 	, m_bNeedIdle(false)
 //----------------------------------------------------------------------------------------------------------------------------
 {
-	m_pProcessFP = nullptr;
-
 	// Open plugin and initialize data structures
 	Initialize();
 	InsertIntoFactoryList();
@@ -1110,7 +1109,7 @@ void CVstPlugin::SetCurrentProgramName(const CString &name)
 
 
 CString CVstPlugin::GetProgramName(int32 program)
-//---------------------------------------------
+//-----------------------------------------------
 {
 	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
 	if(m_Effect.numPrograms > 0)
@@ -1467,7 +1466,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 //------------------------------------------
 {
-	// Note-Offs go at the start of the queue.
+	// Note-Offs go at the start of the queue (since OpenMPT 1.17). Needed for situations like this:
+	// ... ..|C-5 01
+	// C-5 01|=== ..
+	// TODO: Should not be used with real-time notes! Letting the key go too quickly
+	// (e.g. while output device is being initalized) will cause the note to be stuck!
 	bool insertAtFront = (MIDIEvents::GetTypeFromEvent(dwMidiCode) == MIDIEvents::evNoteOff);
 
 	VstMidiEvent event;
@@ -1481,7 +1484,7 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 	event.noteOffVelocity = 0;
 	event.reserved1 = 0;
 	event.reserved2 = 0;
-	memcpy(event.midiData, &dwMidiCode, 4);
+	std::memcpy(event.midiData, &dwMidiCode, 4);
 
 	#ifdef VST_LOG
 		Log("Sending Midi %02X.%02X.%02X\n", event.midiData[0]&0xff, event.midiData[1]&0xff, event.midiData[2]&0xff);
