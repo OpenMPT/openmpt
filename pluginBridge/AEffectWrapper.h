@@ -97,7 +97,7 @@ typedef AEffectProto<int64_t> AEffect64;
 // Translate a VSTEvents struct to bridge format (placed in data vector)
 static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents *events, int32_t targetPtrSize)
 {
-	data.reserve(data.size() + sizeof(int32_t) + sizeof(VstEvent) * events->numEvents);
+	data.reserve(data.size() + sizeof(int32) + sizeof(VstEvent) * events->numEvents);
 	// Write number of events
 	PushToVector(data, events->numEvents);
 
@@ -113,6 +113,13 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 			data.resize(data.size() + 3 * targetPtrSize);									// Dump pointer + two reserved VstIntPtrs
 			// Embed SysEx dump as well...
 			data.insert(data.end(), event->sysexDump, event->sysexDump + event->dumpBytes);
+		} else if(events->events[i]->type == kVstMidiType)
+		{
+			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
+			VstMidiEvent event;
+			std::memcpy(&event, events->events[i], sizeof(event));
+			event.byteSize = sizeof(event);
+			PushToVector(data, event, sizeof(event));
 		} else
 		{
 			PushToVector(data, *events->events[i], events->events[i]->byteSize);
@@ -155,7 +162,7 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 	// Write pointers
 	VstEvents *events = reinterpret_cast<VstEvents *>(data.data());
 	events->numEvents = numEvents;
-	offset = &data[headerSize];
+	offset = data.data() + headerSize;
 	for(int32_t i = 0; i < numEvents; i++)
 	{
 		events->events[i] = reinterpret_cast<VstEvent *>(offset);
