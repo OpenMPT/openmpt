@@ -2000,13 +2000,28 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #ifndef NO_PLUGINS
 				if (applyDNAtoPlug && p->nNote != NOTE_NONE)
 				{
+					ModCommand::NOTE plugNote;
+					if(p->nArpeggioLastNote != NOTE_NONE)
+					{
+						plugNote = p->nArpeggioLastNote;
+					} else
+					{
+						plugNote = p->nNote;
+						// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
+						if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
+						{
+							plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
+						}
+					}
+
 					switch(p->pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:
 						// Switch off duplicated note played on this plugin
-						SendMIDINote(i, p->nNote + NOTE_MAX_SPECIAL, 0);
+						SendMIDINote(i, plugNote + NOTE_MAX_SPECIAL, 0);
+						p->nArpeggioLastNote = NOTE_NONE;
 						break;
 					}
 				}
@@ -2052,13 +2067,21 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				ModCommand::NOTE note = pChn->nNote;
-				// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-				if(m_playBehaviour[kITRealNoteMapping] && note < CountOf(pChn->pModInstrument->NoteMap))
+				ModCommand::NOTE plugNote;
+				if(p->nArpeggioLastNote != NOTE_NONE)
 				{
-					note = pChn->pModInstrument->NoteMap[note - 1];
+					plugNote = pChn->nArpeggioLastNote;
+				} else
+				{
+					plugNote = pChn->nNote;
+					// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
+					if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
+					{
+						plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
+					}
 				}
-				applyNNAtoPlug = pPlugin->IsNotePlaying(note, GetBestMidiChannel(nChn), nChn);
+
+				applyNNAtoPlug = pPlugin->IsNotePlaying(plugNote, GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}
@@ -2093,6 +2116,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					//switch off note played on this plugin, on this tracker channel and midi channel
 					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
 					SendMIDINote(nChn, NOTE_KEYOFF, 0);
+					pChn->nArpeggioLastNote = NOTE_NONE;
 					break;
 				}
 			}
@@ -5005,7 +5029,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
-				chn.nVolume = chn.nPeriod = 0;
+				chn.nPeriod = 0;
 			} else if(GetType() == MOD_TYPE_MOD && chn.dwFlags[CHN_LOOP])
 			{
 				chn.nPos = chn.nLoopStart;

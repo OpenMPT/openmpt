@@ -341,8 +341,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			{
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();
-
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				m_EditTempo.SetTempoValue(tempo);
 			}
 		}
 
@@ -354,8 +354,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.m_PlayState.m_nGlobalVolume = gv;
 				m_sndFile.m_nDefaultGlobalVolume = gv;
 				m_modDoc.SetModified();
-
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
 			}
 		}
 
@@ -368,6 +368,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				if(m_sndFile.GetType() != MOD_TYPE_MOD)
 					m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
 			}
 		}
 
@@ -380,6 +381,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.RecalculateGainForAllPlugs();
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
 			}
 		}
 
@@ -408,11 +410,11 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				LockControls();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				UnlockControls();
+				m_SliderTempo.SetPos((tempoMax - newTempo).GetInt());
+				m_EditTempo.SetTempoValue(newTempo);
 			}
 			m_SpinTempo.SetPos(0);
 		}
-
-		UpdateView(GeneralHint().General());
 	}
 }
 

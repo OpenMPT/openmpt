@@ -127,6 +127,8 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_SHOWDIRS,		OnShowDirectories)
 	ON_COMMAND(ID_MODTREE_SHOWALLFILES,	OnShowAllFiles)
 	ON_COMMAND(ID_MODTREE_SOUNDFILESONLY,OnShowSoundFiles)
+	ON_COMMAND(ID_MODTREE_GOTO_INSDIR,	OnGotoInstrumentDir)
+	ON_COMMAND(ID_MODTREE_GOTO_SMPDIR,	OnGotoSampleDir)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
 	//}}AFX_MSG_MAP
 	ON_WM_KILLFOCUS()		//rewbs.customKeys
@@ -2830,6 +2832,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
+				{
+					mpt::PathString insDir = TrackerSettings::Instance().PathInstruments.GetDefaultDir();
+					mpt::PathString smpDir = TrackerSettings::Instance().PathSamples.GetDefaultDir();
+					if(!insDir.empty() && insDir != m_InstrLibPath)
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_GOTO_INSDIR, _T("Go to &Instrument directory"));
+					if(!smpDir.empty() && smpDir != insDir && smpDir != m_InstrLibPath)
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_GOTO_SMPDIR, _T("Go to Sa&mple directory"));
+				}
 				break;
 
 			case MODITEM_INSLIB_SONG:
@@ -3641,6 +3651,20 @@ void CModTree::OnShowSoundFiles()
 		m_bShowAllFiles = false;
 		OnRefreshInstrLib();
 	}
+}
+
+
+void CModTree::OnGotoInstrumentDir()
+//----------------------------------
+{
+	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathInstruments.GetDefaultDir(), false);
+}
+
+
+void CModTree::OnGotoSampleDir()
+//------------------------------
+{
+	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathSamples.GetDefaultDir(), false);
 }
 
 

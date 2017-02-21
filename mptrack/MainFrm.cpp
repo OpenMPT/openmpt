@@ -1446,6 +1446,7 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 	if(!IsPlaying()) return true;
 
 	PausePlayback();
+	SetElapsedTime(0);
 	GenerateStopNotification();
 
 	m_pSndFile->ResetPlayPos();

@@ -87,7 +87,13 @@ public:
 		ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
 
 		BiggestVstEvent copyEvent;
-		memcpy(&copyEvent, event, std::min(size_t(event->byteSize), sizeof(copyEvent)));
+		size_t copySize = std::min(size_t(event->byteSize), sizeof(copyEvent));
+		// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
+		if(event->type == kVstSysExType)
+			copySize = sizeof(VstMidiSysexEvent);
+		else if(event->type == kVstMidiType)
+			copySize = sizeof(VstMidiEvent);
+		memcpy(&copyEvent, event, copySize);
 
 		if(copyEvent.type == kVstSysExType)
 		{

@@ -262,10 +262,6 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		PmEvent buffer;
 		Pm_Read(inputDevice.stream, &buffer, 1);
 
-		// Discard events if bypassed
-		if(IsBypassed())
-			continue;
-
 		mpt::byte message[sizeof(buffer.message)];
 		memcpy(message, &buffer.message, sizeof(message));
 
@@ -275,7 +271,8 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 			if(buffer.message & 0x80808080)
 			{
 				// End of message found!
-				ReceiveSysex(&bufferedMessage[0], bufferedMessage.size() * sizeof(bufferedMessage[0]));
+				if(!IsBypassed())
+					ReceiveSysex(&bufferedMessage[0], bufferedMessage.size() * sizeof(bufferedMessage[0]));
 				bufferedMessage.clear();
 			}
 			continue;
@@ -284,12 +281,13 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 			// Start of SysEx message...
 			if(message[1] != 0xF7 && message[2] != 0xF7 && message[3] != 0xF7)
 				bufferedMessage.push_back(buffer.message);	// ...but not the end!
-			else
+			else if(!IsBypassed())
 				ReceiveSysex(message, sizeof(message));
 			continue;
 		}
 
-		ReceiveMidi(buffer.message);
+		if(!IsBypassed())
+			ReceiveMidi(buffer.message);
 	}
 }
 
