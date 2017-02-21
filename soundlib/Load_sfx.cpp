@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "Tables.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -73,6 +74,27 @@ struct SFXSampleHeader
 
 MPT_BINARY_STRUCT(SFXSampleHeader, 30)
 
+static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
+//----------------------------------------------------------------------
+{
+	uint16 lowPeriod, highPeriod;
+
+	if(lowNote  < highNote &&
+	   lowNote  >= 36 + NOTE_MIN &&
+	   highNote >= 36 + NOTE_MIN &&
+	   lowNote  < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN &&
+	   highNote < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN)
+	{
+		lowPeriod  = ProTrackerPeriodTable[lowNote - 36 - NOTE_MIN];
+		highPeriod = ProTrackerPeriodTable[highNote - 36 - NOTE_MIN];
+
+		// with a fixed speed of 6 ticks/row, and excluding the first row,
+		// 1xx/2xx param has a max value of (low-high)/5 to avoid sliding too far
+		return std::min<uint8>(value, static_cast<uint8>((lowPeriod - highPeriod) / 5));
+	}
+
+	return 0;
+}
 
 bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
@@ -241,11 +263,23 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					case 0x3: // enable filter/LED
+						// give precedence to 7xy/8xy slides
+						if(slideRate[chn])
+						{
+							m.command = m.param = 0;
+							break;
+						}
 						m.command = CMD_MODCMDEX;
 						m.param = 0;
 						break;
 
 					case 0x4: // disable filter/LED
+						// give precedence to 7xy/8xy slides
+						if(slideRate[chn])
+						{
+							m.command = m.param = 0;
+							break;
+						}
 						m.command = CMD_MODCMDEX;
 						m.param = 1;
 						break;
@@ -255,6 +289,15 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							m.command = CMD_VOLUME;
 							m.param = std::min(ModCommand::PARAM(0x3F), static_cast<ModCommand::PARAM>((Samples[m.instr].nVolume / 4u) + m.param));
+
+							// give precedence to 7xy/8xy slides (and move this to the volume column)
+							if(slideRate[chn])
+							{
+								m.volcmd = VOLCMD_VOLUME;
+								m.vol = m.param;
+								m.command = m.param = 0;
+								break;
+							}
 						} else
 						{
 							m.command = m.param = 0;
@@ -269,6 +312,15 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 								m.param = static_cast<ModCommand::PARAM>(Samples[m.instr].nVolume / 4u) - m.param;
 							else
 								m.param = 0;
+
+							// give precedence to 7xy/8xy slides (and move this to the volume column)
+							if(slideRate[chn])
+							{
+								m.volcmd = VOLCMD_VOLUME;
+								m.vol = m.param;
+								m.command = m.param = 0;
+								break;
+							}
 						} else
 						{
 							m.command = m.param = 0;
@@ -279,14 +331,16 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						slideTo[chn] = lastNote[chn] - (m.param >> 4);
 
 						m.command = CMD_PORTAMENTODOWN;
-						m.param = slideRate[chn] = m.param & 0xF;
+						slideRate[chn] = m.param & 0xF;
+						m.param = ClampSlideParam(slideRate[chn], slideTo[chn], lastNote[chn]);
 						break;
 
 					case 0x8: // 8xy: slide up x semitones at speed y
 						slideTo[chn] = lastNote[chn] + (m.param >> 4);
 
 						m.command = CMD_PORTAMENTOUP;
-						m.param = slideRate[chn] = m.param & 0xF;
+						slideRate[chn] = m.param & 0xF;
+						m.param = ClampSlideParam(slideRate[chn], lastNote[chn], slideTo[chn]);
 						break;
 
 					default:
