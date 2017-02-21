@@ -318,12 +318,12 @@ mpt::ustring Version::GetNameShort() const
 			name = mpt::format(MPT_USTRING("wine-%1"))(v.Version().AsString());
 		} else if(v.RawVersion().length() > 0)
 		{
-			std::string rawVersion = v.RawVersion();
-			name = MPT_USTRING("wine-") + Util::BinToHex(mpt::as_span(rawVersion));
+			name = MPT_USTRING("wine-") + Util::BinToHex(mpt::as_span(v.RawVersion()));
 		} else
 		{
-			name = MPT_USTRING("wine");
+			name = MPT_USTRING("wine-");
 		}
+		name += MPT_USTRING("-") + Util::BinToHex(mpt::as_span(v.RawHostSysName()));
 	} else
 	{
 		name = mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::dec(SystemVersion >> 8), mpt::ufmt::HEX0<2>(SystemVersion & 0xFF));
