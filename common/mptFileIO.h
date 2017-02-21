@@ -232,6 +232,29 @@ public:
 
 
 
+// LazyFileRef is a simple reference to an on-disk file by the means of a
+// filename which allows easy assignment of the whole file contents to and from
+// byte buffers.
+class LazyFileRef {
+private:
+	const mpt::PathString m_Filename;
+public:
+	LazyFileRef(const mpt::PathString &filename)
+		: m_Filename(filename)
+	{
+		return;
+	}
+public:
+	LazyFileRef & operator = (const std::vector<mpt::byte> &data);
+	LazyFileRef & operator = (const std::vector<char> &data);
+	LazyFileRef & operator = (const std::string &data);
+	operator std::vector<mpt::byte> () const;
+	operator std::vector<char> () const;
+	operator std::string () const;
+};
+
+
+
 #if defined(MPT_ENABLE_FILEIO_STDIO)
 
 // class FILE_ostream, FILE_output_streambuf and FILE_output_buffered_streambuf

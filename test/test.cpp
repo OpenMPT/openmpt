@@ -189,6 +189,9 @@ void DoTests()
 }
 
 
+static mpt::PathString GetTempFilenameBase();
+
+
 static void RemoveFile(const mpt::PathString &filename)
 //-----------------------------------------------------
 {
@@ -1266,6 +1269,30 @@ static MPT_NOINLINE void TestMisc()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(std::string(1, a), std::string(1, 'a'));
 	}
+
+#ifdef MPT_ENABLE_FILEIO
+
+	{
+		std::vector<mpt::byte> data;
+		data.push_back(0);
+		data.push_back(255);
+		data.push_back(1);
+		data.push_back(2);
+		mpt::PathString fn = GetTempFilenameBase() + MPT_PATHSTRING("lazy");
+		RemoveFile(fn);
+		mpt::LazyFileRef f(fn);
+		f = data;
+		std::vector<mpt::byte> data2;
+		data2 = f;
+		VERIFY_EQUAL(data.size(), data2.size());
+		for(std::size_t i = 0; i < data.size() && i < data2.size(); ++i)
+		{
+			VERIFY_EQUAL(data[i], data2[i]);
+		}
+		RemoveFile(fn);
+	}
+
+#endif
 
 #ifdef MPT_WITH_ZLIB
 	VERIFY_EQUAL(crc32(0, mpt::byte_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
