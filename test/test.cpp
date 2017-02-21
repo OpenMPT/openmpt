@@ -141,7 +141,7 @@ void DoTests()
 			pathprefix = buf.data();
 		} else if(libopenmpt && IsDebuggerPresent())
 		{
-			pathprefix = L"../../../../";
+			pathprefix = L"../../";
 		}
 
 		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
