@@ -522,11 +522,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = std::min<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
+			param = std::min<PARAM>(param, 0x1F);
 			break;
 			break;
 		case CMD_TEMPO:
-			param = std::max<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x20 : 0x21);
+			param = std::max<PARAM>(param, 0x20);
 			break;
 		}
 	}
