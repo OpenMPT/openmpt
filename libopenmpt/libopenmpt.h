@@ -342,7 +342,7 @@ LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user )
 
 /*! General libopenmpt error. \since 0.3.0 */
 #define OPENMPT_ERROR_GENERAL                ( OPENMPT_ERROR_BASE + 101 )
-/*! openmpt_module * is invalud. \since 0.3.0 */
+/*! openmpt_module * is invalid. \since 0.3.0 */
 #define OPENMPT_ERROR_INVALID_MODULE_POINTER ( OPENMPT_ERROR_BASE + 102 )
 /*! NULL pointer argument. \since 0.3.0 */
 #define OPENMPT_ERROR_ARGUMENT_NULL_POINTER  ( OPENMPT_ERROR_BASE + 103 )
@@ -353,7 +353,7 @@ LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user )
  * \param error Error code.
  * \return Mask of OPENMPT_ERROR_FUNC_RESULT_LOG and OPENMPT_ERROR_FUNC_RESULT_STORE.
  * \retval 0 Error is not transient.
- * \retval 1 Error is transientr.
+ * \retval 1 Error is transient.
  * \sa OPENMPT_ERROR_OUT_OF_MEMORY
  * \since 0.3.0
  */
@@ -466,7 +466,7 @@ LIBOPENMPT_API void * openmpt_error_func_errno_userdata( int * error );
  * \param stream Input stream to scan.
  * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
  * \param logfunc Logging function where warning and errors are written. May be NULL.
- * \param user Logging function user context.
+ * \param user Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \return Probability between 0.0 and 1.0.
  * \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
  * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
@@ -483,7 +483,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_probability( open
  * \param stream Input stream to scan.
  * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
  * \param logfunc Logging function where warning and errors are written. May be NULL.
- * \param user Logging function user context.
+ * \param user Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \return Probability between 0.0 and 1.0.
  * \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
  * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
@@ -499,14 +499,14 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_propability( open
  * \param stream Input stream to scan.
  * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
  * \param logfunc Logging function where warning and errors are written. May be NULL.
- * \param loguser Logging function user context.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param errfunc Error function to define error behaviour. May be NULL.
- * \param erruser Error function user context.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \return Probability between 0.0 and 1.0.
- * \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
- * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5. \include libopenmpt_example_c_probe.c
+ * \remarks openmpt_could_open_probability2() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
+ * \remarks openmpt_could_open_probability2() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability2() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability2() returned 0.5. \include libopenmpt_example_c_probe.c
  * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
  * \since 0.3.0
@@ -544,7 +544,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create( ope
  * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module. May be NULL.
  * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param errfunc Error function to define error behaviour. May be NULL.
- * \param erruser Error function user context.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
@@ -577,7 +577,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create_from
  * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
  * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param errfunc Error function to define error behaviour. May be NULL.
- * \param erruser Error function user context.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
