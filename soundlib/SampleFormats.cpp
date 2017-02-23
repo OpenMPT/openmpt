@@ -1506,7 +1506,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		while(!s.empty())
 		{
 			s.erase(0, s.find_first_not_of(" \t"));
-			
+
 			// Replace macros
 			for(auto m = macros.cbegin(); m != macros.cend(); m++)
 			{
@@ -2539,10 +2539,11 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	DestroySampleThreadsafe(nSample);
 	// Default values
+	const uint8 bytesPerSample = memcmp(fileHeader.magic, "8SVX", 4) ? 2 : 1;
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
-	sample.nLoopStart = sampleHeader.oneShotHiSamples;
-	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples;
+	sample.nLoopStart = sampleHeader.oneShotHiSamples / bytesPerSample;
+	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples / bytesPerSample;
 	sample.nC5Speed = sampleHeader.samplesPerSec;
 	sample.nVolume = static_cast<uint16>(sampleHeader.volume >> 8);
 	if(!sample.nVolume || sample.nVolume > 256) sample.nVolume = 256;
@@ -2559,13 +2560,14 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		strcpy(m_szNames[nSample], "");
 	}
 
-	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength());
+	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength() / bytesPerSample);
 	if((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags.set(CHN_LOOP);
 
+	// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
 	SampleIO(
-		memcmp(fileHeader.magic, "8SVX", 4) ? SampleIO::_16bit : SampleIO::_8bit,
+		(bytesPerSample == 2) ? SampleIO::_16bit : SampleIO::_8bit,
 		SampleIO::mono,
-		SampleIO::bigEndian,
+		SampleIO::littleEndian,
 		SampleIO::signedPCM)
 		.ReadSample(sample, bodyChunk);
 	sample.PrecomputeLoops(*this, false);
