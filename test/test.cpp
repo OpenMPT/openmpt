@@ -38,9 +38,7 @@
 #include "../mptrack/MainFrm.h"
 #include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
-#ifndef MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
-#endif // !MODPLUG_TRACKER
 #ifdef LIBOPENMPT_BUILD
 #include "../libopenmpt/libopenmpt_version.h"
 #endif // LIBOPENMPT_BUILD
