@@ -135,6 +135,7 @@ struct DMFSampleHeader
 			mptSmp.nVolume = volume + 1;
 		else
 			mptSmp.nVolume = 256;
+		mptSmp.uFlags.set(SMP_NODEFAULTVOLUME, volume == 0);
 
 		if((flags & smpLoop) != 0 && mptSmp.nSustainEnd > mptSmp.nSustainStart)
 		{
@@ -1038,7 +1039,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 
 ///////////////////////////////////////////////////////////////////////
-// DMF Compression (from libmodplug)
+// DMF Compression
 
 struct DMFHNode
 {

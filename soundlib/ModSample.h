@@ -28,7 +28,7 @@ struct ModSample
 	};
 	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
 	uint16 nPan;							// Default sample panning (if pan flag is set), 0...256
-	uint16 nVolume;							// Default volume, 0...256
+	uint16 nVolume;							// Default volume, 0...256 (ignored if uFlags[SMP_NODEFAULTVOLUME] is set)
 	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this), 0...64
 	SampleFlags uFlags;						// Sample flags (see ChannelFlags enum)
 	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)

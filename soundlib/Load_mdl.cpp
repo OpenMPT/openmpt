@@ -632,10 +632,12 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				// Samples were already initialized above. Let's hope they are not going to be re-used with different volume / panning / vibrato...
 				ModSample &mptSmp = Samples[sampleHeader.smpNum];
 
-				// Not quite correct - this flag literally enables and disables the default volume of a sample. If you disable this flag,
+				// This flag literally enables and disables the default volume of a sample. If you disable this flag,
 				// the sample volume of a previously sample is re-used, even if you put an instrument number next to the note.
 				if(sampleHeader.volEnvFlags & 0x40)
 					mptSmp.nVolume = sampleHeader.volume;
+				else
+					mptSmp.uFlags.set(SMP_NODEFAULTVOLUME);
 				mptSmp.nPan = std::min<uint16>(sampleHeader.panning * 2, 254);
 				mptSmp.nVibType = MDLVibratoType[sampleHeader.vibType & 3];
 				mptSmp.nVibSweep = sampleHeader.vibSweep;
