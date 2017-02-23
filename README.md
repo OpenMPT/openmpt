@@ -94,7 +94,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
          -  xmp-openmpt: Requires Visual Studio with MFC.
 
-     -  You will need the Winamp 5 SDK and the xmplay SDK if you want to
+     -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
         compile the plugins for these 2 players:
 
          -  Winamp 5 SDK:
@@ -107,16 +107,16 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
             download the SDK.
             You can disable in_openmpt in the solution configuration.
 
-         -  xmplay SDK:
+         -  XMPlay SDK:
 
-            To build libopenmpt with xmplay input plugin support, copy the
+            To build libopenmpt with XMPlay input plugin support, copy the
             contents of xmp-sdk.zip into include/xmplay/.
 
             Please visit [un4seen.com](http://www.un4seen.com/xmplay.html) to
-            download to SDK.
+            download the SDK.
             You can disable xmp-openmpt in the solution configuration.
 
-        Alternatively, both, the Winamp and the xmplay SDK, can be downloaded
+        Alternatively, both, the Winamp and the XMPlay SDK, can be downloaded
         automatically on Windows 7 or later with 7-Zip installed by just running
         the `build/download_externals.cmd` script (works when run from either
         the project root or directly from the build directory).
