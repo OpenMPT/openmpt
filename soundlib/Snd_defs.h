@@ -153,6 +153,7 @@ enum ChannelFlags
 	// Sample storage flags (also saved in ModSample::uFlags, but are not relevant to mixing)
 	SMP_MODIFIED		= 0x1000,	// Sample data has been edited in the tracker
 	SMP_KEEPONDISK		= 0x2000,	// Sample is not saved to file, data is restored from original sample file
+	SMP_NODEFAULTVOLUME	= 0x4000,	// Ignore default volume setting
 };
 DECLARE_FLAGSET(ChannelFlags)
 

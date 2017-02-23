@@ -1272,13 +1272,16 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 	// Update Volume
 	if (bUpdVol && (!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || ((pSmp != nullptr && pSmp->pSample != nullptr) || pChn->HasMIDIOutput())))
 	{
-		pChn->nVolume = 0;
 		if(pSmp)
 		{
-			pChn->nVolume = pSmp->nVolume;
+			if(!pSmp->uFlags[SMP_NODEFAULTVOLUME])
+				pChn->nVolume = pSmp->nVolume;
 		} else if(pIns && pIns->nMixPlug)
 		{
 			pChn->nVolume = pChn->GetVSTVolume();
+		} else
+		{
+			pChn->nVolume = 0;
 		}
 	}
 
@@ -2511,7 +2514,8 @@ bool CSoundFile::ProcessEffects()
 
 				if(oldSample != nullptr)
 				{
-					pChn->nVolume = oldSample->nVolume;
+					if(!oldSample->uFlags[SMP_NODEFAULTVOLUME])
+						pChn->nVolume = oldSample->nVolume;
 					if(reloadSampleSettings)
 					{
 						// Also reload panning
@@ -2580,7 +2584,7 @@ bool CSoundFile::ProcessEffects()
 							smp = Instruments[instr]->Keyboard[pChn->nLastNote - NOTE_MIN];
 						}
 					}
-					if(smp > 0 && smp <= GetNumSamples())
+					if(smp > 0 && smp <= GetNumSamples() && !Samples[smp].uFlags[SMP_NODEFAULTVOLUME])
 						pChn->nVolume = Samples[smp].nVolume;
 				}
 				instr = 0;

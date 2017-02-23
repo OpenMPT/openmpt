@@ -225,7 +225,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.nVolume = std::min<uint8>(gdmSample.volume, 64) * 4;
 		} else
 		{
-			sample.nVolume = 256;
+			sample.uFlags.set(SMP_NODEFAULTVOLUME);
 		}
 
 		if(gdmSample.flags & GDMSampleHeader::smpPanning)

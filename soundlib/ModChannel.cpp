@@ -59,7 +59,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		rightVol = leftVol = 0;
 		newRightVol = newLeftVol = 0;
 		rightRamp = leftRamp = 0;
-		nVolume = 256;
+		nVolume = 0;	// Needs to be 0 for SMP_NODEFAULTVOLUME flag
 		nVibratoPos = nTremoloPos = nPanbrelloPos = 0;
 		nOldHiOffset = 0;
 		nLeftVU = nRightVU = 0;
