@@ -125,7 +125,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
     The makefile supports different build environments and targets via the
     `CONFIG=` parameter directly to the make invocation.
-    Use 'make CONFIG=$newconfig clean' when switching between different configs
+    Use `make CONFIG=$newconfig clean` when switching between different configs
     because the makefile cleans only intermediates and target that are active
     for the current config and no configuration state is kept around across
     invocations.
