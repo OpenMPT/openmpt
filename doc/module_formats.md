@@ -17,7 +17,7 @@ General hints
   endianness, which can be found in `common/Endianness.h`:
   * Big-Endian: (u)int8/16/32/64be, float32be, float64be
   * Little-Endian: (u)int8/16/32/64le, float32le, float64le
-* m_nChannels **MUST NOT** be changed after a pattern has been created, as
+* `m_nChannels` **MUST NOT** be changed after a pattern has been created, as
   existing patterns will be interpreted incorrectly. For module formats that
   support per-pattern channel amounts, the maximum number of channels must be
   determined beforehand.
@@ -35,6 +35,8 @@ General hints
   is valid for a given array, do not hard-code the array size but rather use
   `MPT_ARRAY_COUNT` or, for ensuring that char arrays are null-terminated,
   `mpt::String::SetNullTerminator`.
+* Pay attention to off-by-one errors when comparing against MAX_SAMPLES and
+  MAX_INSTRUMENTS, since sample and instrument numbers are 1-based. 
 * Placement of the loader function in `CSoundFile::Create` depends on various
   factors. In general, module formats that have very bad magic numbers (and thus
   might cause other formats to get mis-interpreted) should be placed at the
