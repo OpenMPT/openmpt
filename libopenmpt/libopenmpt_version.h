@@ -52,7 +52,7 @@
  */
 #define OPENMPT_API_VERSION_AT_LEAST(major, minor, patch) (OPENMPT_API_VERSION >= OPENMPT_API_VERSION_MAKE((major), (minor), (patch)))
 
-/*! \brief Check whether the libopenmpt API is at least the provided version
+/*! \brief Check whether the libopenmpt API is before the provided version
  *  \since 0.3
  *  \remarks Use the following shim if you need to support earlier libopenmpt versions:
  *           \code
