@@ -763,6 +763,7 @@ INPUT                  = libopenmpt/dox/index.dox \
                          libopenmpt/dox/todo.md \
                          libopenmpt/libopenmpt.hpp \
                          libopenmpt/libopenmpt.h \
+                         libopenmpt/libopenmpt_stream_callbacks_buffer.h \
                          libopenmpt/libopenmpt_stream_callbacks_fd.h \
                          libopenmpt/libopenmpt_stream_callbacks_file.h \
                          libopenmpt/libopenmpt_config.h \
