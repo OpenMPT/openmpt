@@ -61,7 +61,8 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_WAV);
+	InitializeGlobals(MOD_TYPE_MPT);
+	m_ContainerType = MOD_CONTAINERTYPE_WAV;
 	m_nChannels = std::max(wavFile.GetNumChannels(), uint16(2));
 	Patterns.ResizeArray(2);
 	if(!Patterns.Insert(0, 64) || !Patterns.Insert(1, 64))
