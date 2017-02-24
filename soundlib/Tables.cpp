@@ -123,15 +123,17 @@ static const ModContainerInfo modContainerInfo[] =
 	{ MOD_CONTAINERTYPE_XPK,   "XPK packed",               "xpk"   },
 	{ MOD_CONTAINERTYPE_PP20,  "PowerPack PP20",           "ppm"   },
 	{ MOD_CONTAINERTYPE_MMCMP, "Music Module Compressor",  "mmcmp" }
+#ifdef MODPLUG_TRACKER
+	,
+	{ MOD_CONTAINERTYPE_WAV,   "Wave",                     "wav"   },
+	{ MOD_CONTAINERTYPE_UAX,   "Unreal Sounds",            "uax"   }
+#endif
 };
 
 
 #ifdef MODPLUG_TRACKER
 static const ModFormatInfo otherFormatInfo[] =
 {
-	// Other stuff
-	{ MOD_TYPE_WAV,		"Wave",						"wav" }, // PCM as module
-	{ MOD_TYPE_UAX,		"Unreal Sounds",			"uax" }, // sampleset as module
 	{ MOD_TYPE_MID,		"MIDI",						"mid" },
 	{ MOD_TYPE_MID,		"MIDI",						"rmi" },
 	{ MOD_TYPE_MID,		"MIDI",						"smf" },
@@ -181,7 +183,6 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_MPT , mpt::CharsetWindows1252},
 	// random stuff
 	{ MOD_TYPE_MID , mpt::CharsetASCII      },
-	{ MOD_TYPE_WAV , mpt::CharsetASCII      },
 	// end
 	{ MOD_TYPE_NONE, mpt::CharsetASCII      }
 };
