@@ -25,7 +25,6 @@ MOSTLYCLEANFILES =
 dist_doc_DATA = 
 dist_doc_DATA += LICENSE
 dist_doc_DATA += README.md
-dist_doc_DATA += TODO
 nobase_dist_doc_DATA = 
 nobase_dist_doc_DATA += examples/libopenmpt_example_cxx.cpp
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_mem.c

@@ -30,7 +30,6 @@ mkdir bin/dist-autotools
 echo "Exporting svn ..."
 svn export ./LICENSE         bin/dist-autotools/LICENSE
 svn export ./README.md       bin/dist-autotools/README.md
-svn export ./TODO            bin/dist-autotools/TODO
 svn export ./common          bin/dist-autotools/common
 svn export ./soundbase       bin/dist-autotools/soundbase
 svn export ./soundlib        bin/dist-autotools/soundlib
