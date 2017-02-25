@@ -21,13 +21,24 @@ General hints
   existing patterns will be interpreted incorrectly. For module formats that
   support per-pattern channel amounts, the maximum number of channels must be
   determined beforehand.
-* Strings can be safely handled using `FileReader::ReadString` and friends,
-  `mpt::String::Read` and `mpt::String::Copy`. If the target is a char array
-  rather than a std::string, these will take care of properly null-terminating
-  the target char array, and prevent reading past the end of a (supposedly
-  null-terminated) source char array.
+* Strings can be safely handled using:
+  * `FileReader::ReadString` and friends for reading them directly from a file
+  * `mpt::String::Read` for reading them from a struct or char array,
+  * `mpt::String::Copy` for copying between char arrays or `std::string`.
+  "Read" functions take care of string padding (zero / space padding), so those
+  should be used when extracting strings from files. "Copy" should only be used
+  on strings that have previously bbeen read.
+  If the target is a char array rather than a `std::string`, these will take
+  care of properly null-terminating the target char array, and prevent reading
+  past the end of a (supposedly null-terminated) source char array.
 * Do not use static variables in your loader. Loaders need to be thread-safe for
   libopenmpt.
+* `FileReader` instances may be used to treat a portion of another file as its
+  own independent file (through `FileReader::ReadChunk`). This can be useful
+  with "embedded files" such as WAV or Ogg samples.
+* Samples *either* use middle-C frequency *or* finetune + transpose. For the few
+  weird formats that use both, it may make sense to translate everything into
+  middle-C frequency.
 * Add the new `MODTYPE` to `CSoundFile::UseFinetuneAndTranspose` if applicable,
   and see if any effect handlers in `soundlib/Snd_fx.cpp` need to know the new
   `MODTYPE`.
