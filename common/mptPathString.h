@@ -295,7 +295,7 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 
 // Deletes a complete directory tree. Handle with EXTREME care.
 // Returns false if any file could not be removed and aborts as soon as it
-// encounters any error.
+// encounters any error. path must be absolute.
 bool DeleteWholeDirectoryTree(mpt::PathString path);
 
 #endif // MODPLUG_TRACKER
