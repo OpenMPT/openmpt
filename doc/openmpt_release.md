@@ -33,39 +33,40 @@ OpenMPT release process
 
 Order of sections in History.txt
 --------------------------------
-General tab
-Pattern tab
-Pattern Tab::Note Properties
-Pattern tab::Find/Replace
-Sample tab
-Instrument tab
-Comments tab
-Tree view
-Mod Conversion
-MIDI Macros
-VST / DMO Plugins
-VST::Specific Plugin Fixes
-VST::Plugin Bridge
-Playback
-MPTM
-MPTM::Custom Tuning
-IT / MPTM
-IT
-IT:Loading (and Saving)
-IT::Compatible Playback Mode
-XM
-XM::Loading (and Saving)
-XM::Compatible Playback Mode
-S3M
-S3M:Loading (and Saving)
-MOD
-MOD::ProTracker 1/2 Mode
-MOD::Loading (and Saving)
-Other formats
-Stream Export
-Module cleanup
-Audio I/O
-Misc
-Bundled plugins
-Third-Party Libraries
-Installer/release package
+ *  General tab
+ *  Pattern tab
+ *  Pattern Tab::Note Properties
+ *  Pattern tab::Find/Replace
+ *  Sample tab
+ *  Instrument tab
+ *  Comments tab
+ *  Tree view
+ *  Mod Conversion
+ *  MIDI Macros
+ *  VST / DMO Plugins
+ *  VST::Specific Plugin Fixes
+ *  VST::Plugin Bridge
+ *  Playback
+ *  MPTM
+ *  MPTM::Custom Tuning
+ *  IT / MPTM
+ *  IT
+ *  IT:Loading (and Saving)
+ *  IT::Compatible Playback Mode
+ *  XM
+ *  XM::Loading (and Saving)
+ *  XM::Compatible Playback Mode
+ *  S3M
+ *  S3M:Loading (and Saving)
+ *  MOD
+ *  MOD::ProTracker 1/2 Mode
+ *  MOD::Loading (and Saving)
+ *  Other formats
+ *  Stream Export
+ *  Module cleanup
+ *  Audio I/O
+ *  Misc
+ *  Bundled plugins
+ *  Third-Party Libraries
+ *  Installer/release package
+
