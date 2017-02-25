@@ -69,6 +69,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 	}
 }
 
+#ifndef MODPLUG_NO_FILESAVE
 
 void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool compatibilityExport) const
 //------------------------------------------------------------------------------------------------------
@@ -195,6 +196,8 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	}
 }
 
+#endif // MODPLUG_NO_FILESAVE
+
 
 // File Header
 struct MODFileHeader
@@ -218,7 +221,7 @@ struct MODSampleHeader
 	uint16be loopLength;
 
 	// Convert an MOD sample header to OpenMPT's internal sample header.
-	void ConvertToMPT(ModSample &mptSmp) const
+	void ConvertToMPT(ModSample &mptSmp, bool is4Chn) const
 	{
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length * 2;
@@ -254,8 +257,12 @@ struct MODSampleHeader
 				mptSmp.nLoopEnd = 0;
 			}
 
-			// Fix for most likely broken sample loops. This fixes super_sufm_-_new_life.mod which has a long sample which is looped from 0 to 4.
-			if(mptSmp.nLoopEnd <= 8 && mptSmp.nLoopStart == 0 && mptSmp.nLength > mptSmp.nLoopEnd)
+			// Fix for most likely broken sample loops. This fixes super_sufm_-_new_life.mod (M.K.) which has a long sample which is looped from 0 to 4.
+			// This module also has notes outside of the Amiga frequency range, so we cannot say that it should be played using ProTracker one-shot loops.
+			// On the other hand, "Crew Generation" by Necros (6CHN) has a sample with a similar loop, which is supposed to be played.
+			// To be able to correctly play both modules, we will draw a somewhat arbitrary line here and trust the loop points in MODs with more than
+			// 4 channels, even if they are tiny and at the very beginning of the sample.
+			if(mptSmp.nLoopEnd <= 8 && mptSmp.nLoopStart == 0 && mptSmp.nLength > mptSmp.nLoopEnd && is4Chn)
 			{
 				mptSmp.nLoopEnd = 0;
 			}
@@ -366,11 +373,11 @@ static bool IsMagic(const char *magic1, const char *magic2)
 }
 
 
-static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
-//------------------------------------------------------------------------------------------------------------------------------
+static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME], bool is4Chn)
+//-------------------------------------------------------------------------------------------------------------------------------------------
 {
 	file.ReadStruct(sampleHeader);
-	sampleHeader.ConvertToMPT(sample);
+	sampleHeader.ConvertToMPT(sample, is4Chn);
 
 	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
@@ -537,8 +544,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nChannels = 4;
 		m_madeWithTracker = "Generic ProTracker or compatible";
-	} else if(IsMagic(magic, "M&K!")
-		|| IsMagic(magic, "FEST")	// "His Master's Noise" musicdisk
+	} else if(IsMagic(magic, "M&K!")	// "His Master's Noise" musicdisk
+		|| IsMagic(magic, "FEST")		// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "N.T."))
 	{
 		m_nChannels = 4;
@@ -611,7 +618,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
@@ -993,7 +1000,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 		invalidChars += CountInvalidChars(sampleHeader.name);
 
 		// Sanity checks
@@ -1359,7 +1366,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 	}
 	if(invalidChars > 256)
 	{
