@@ -27,7 +27,7 @@ General hints
   * `mpt::String::Copy` for copying between char arrays or `std::string`.
   "Read" functions take care of string padding (zero / space padding), so those
   should be used when extracting strings from files. "Copy" should only be used
-  on strings that have previously bbeen read.
+  on strings that have previously been read.
   If the target is a char array rather than a `std::string`, these will take
   care of properly null-terminating the target char array, and prevent reading
   past the end of a (supposedly null-terminated) source char array.
