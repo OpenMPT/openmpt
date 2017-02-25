@@ -968,6 +968,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
 		chn.nMasterChn = 0;	// remove NNA association
 		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
+		chn.nVolume = 256;
 
 		if (nins)
 		{
