@@ -1,0 +1,17 @@
+
+Steps to make a libopenmpt 0.2 release
+======================================
+
+ *  update `libopenmpt/dox/changelog.md` and in particular add the release date
+ *  run `build/release/buildall.cmd` on a machine that ahas both VS2008 and VS2010
+ *  copy `bin/libopenmpt-dev-vs2010.tar`, `bin/libopenmpt-win.tar`, and `bin/libopenmpt-winold.tar` from the Windows box to `build/release/` on a Linux machine
+ *  run `build/auto/dist.sh` on a 64bit Debian 8 machine
+ *  copy `bin/dist-autotools.tar`, `bin/dist-doc.tar`, `bin/dist-tar.tar` and `bin/dist-zip.tar` from the Debian box to `build/release/` on a Linux machine
+ *  tag release `# svn cp -m 'tag libopenmpt 0.2-beta20.5' https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26 https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.2.7561-beta20.5`
+ *  run `build/release/release.sh` on the Linux machine
+ *  have a checkout of `https://source.openmpt.org/svn/libopenmpt-website/trunk` available as `website`
+ *  update `website/index.md`
+ *  copy `build/release/bin`, `build/release/dev`, `build/release/doc` and `build/release/src` to `website/public/files/libopenmpt/`
+ *  extract `build/release/doc/*.tar.gz` to `website/public/doc/`
+ *  commit `website`
+ *  update `libopenmpt/dox/changelog.md` and `common/versionNumber.h` for new version
