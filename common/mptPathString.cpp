@@ -333,6 +333,10 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	{
 		return false;
 	}
+	if(PathIsRelativeW(path.AsNative().c_str()) == TRUE)
+	{
+		return false;
+	}
 	if(!path.FileOrDirectoryExists())
 	{
 		return true;
