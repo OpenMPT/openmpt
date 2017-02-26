@@ -145,6 +145,7 @@ LOCAL_SRC_FILES += \
 	common/mptStringParse.cpp \
 	common/mptTime.cpp \
 	common/mptUUID.cpp \
+	common/mptWine.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \
 	common/typedefs.cpp \
