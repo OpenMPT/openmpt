@@ -44,6 +44,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  OpenMPT_SoundTouch_f32.dll ^
  PluginBridge32.exe ^
  PluginBridge64.exe ^
+ openmpt-wine-support.zip ^
  extraKeymaps ^
  || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack.pdb || goto error
