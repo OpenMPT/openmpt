@@ -34,6 +34,7 @@
 #include "WelcomeDialog.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/plugins/PluginManager.h"
+#include "MPTrackWine.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -1139,6 +1140,13 @@ BOOL CTrackApp::InitInstance()
 	// load components
 	ComponentManager::Instance()->Startup();
 
+	// Wine Support
+	if(mpt::Windows::IsWine())
+	{
+		WineIntegration::Initialize();
+		WineIntegration::Load();
+	}
+
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(
 		IDR_MODULETYPE,
@@ -1165,6 +1173,9 @@ BOOL CTrackApp::InitInstance()
 	appInfo.SetHWND(*m_pMainWnd);
 	appInfo.BoostedThreadPriorityXP = TrackerSettings::Instance().SoundBoostedThreadPriority;
 	appInfo.BoostedThreadMMCSSClassVista = TrackerSettings::Instance().SoundBoostedThreadMMCSSClass;
+	appInfo.BoostedThreadRealtimePosix = TrackerSettings::Instance().SoundBoostedThreadRealtimePosix;
+	appInfo.BoostedThreadNicenessPosix = TrackerSettings::Instance().SoundBoostedThreadNicenessPosix;
+	appInfo.BoostedThreadRtprioPosix = TrackerSettings::Instance().SoundBoostedThreadRtprioPosix;
 	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, appInfo);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 

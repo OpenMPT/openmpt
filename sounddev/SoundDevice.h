@@ -254,10 +254,16 @@ struct AppInfo
 	uintptr_t UIHandle; // HWND on Windows
 	int BoostedThreadPriorityXP;
 	mpt::ustring BoostedThreadMMCSSClassVista;
+	bool BoostedThreadRealtimePosix;
+	int BoostedThreadNicenessPosix;
+	int BoostedThreadRtprioPosix;
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
 		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
+		, BoostedThreadRealtimePosix(false)
+		, BoostedThreadNicenessPosix(-5)
+		, BoostedThreadRtprioPosix(10)
 	{
 		return;
 	}

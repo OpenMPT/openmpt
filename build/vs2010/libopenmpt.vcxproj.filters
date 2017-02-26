@@ -108,6 +108,9 @@
     <ClInclude Include="..\..\common\mptUUID.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptWine.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\serialization_utils.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -390,6 +393,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptUUID.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptWine.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">

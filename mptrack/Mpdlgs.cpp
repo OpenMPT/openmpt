@@ -365,6 +365,7 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.cchTextMax = 0;
 				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT;
 				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it.GetIdentifier());
+				mpt::ustring TypeWineNative = MPT_USTRING("Wine-Native");
 				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypePORTAUDIO_WMME)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
@@ -385,6 +386,10 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_CHIP; // No real image available for now,
+				} else if(it.type.find(TypeWineNative + MPT_USTRING("-")) == 0)
+				{
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
+					cbi.iImage = IMAGE_TUX;
 				} else
 				{
 					cbi.iImage = 0;
@@ -402,6 +407,13 @@ void COptionsSoundcard::UpdateEverything()
 				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == SoundDevice::TypePORTAUDIO_WDMKS)
 				{
 					name = it.apiName + MPT_USTRING(" - ") + name;
+				/*
+				} else if(it->type.find(TypeWineNative + MPT_USTRING("-")) == 0 && it->apiPath.size() > 0)
+				{
+					std::vector<mpt::ustring> apiPath = it->apiPath;
+					apiPath.erase(apiPath.begin());
+					name = ((apiPath.size() > 0) ? mpt::String::Combine(apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it->apiName + MPT_USTRING(" - ") + name;
+				*/
 				} else
 				{
 					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it.apiName + MPT_USTRING(" - ") + name;
@@ -1883,6 +1895,92 @@ BOOL CMidiSetupDlg::OnSetActive()
 //-------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+	return CPropertyPage::OnSetActive();
+}
+
+
+// Wine
+
+
+BEGIN_MESSAGE_MAP(COptionsWine, CPropertyPage)
+	ON_COMMAND(IDC_CHECK_WINE_ENABLE, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_WINE_PULSEAUDIO, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_WINE_PORTAUDIO, OnSettingsChanged)
+END_MESSAGE_MAP()
+
+
+COptionsWine::COptionsWine()
+//--------------------------
+	: CPropertyPage(IDD_OPTIONS_WINE)
+{
+	return;
+}
+
+
+void COptionsWine::DoDataExchange(CDataExchange* pDX)
+//---------------------------------------------------
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(COptionsWine)
+	DDX_Control(pDX, IDC_COMBO_WINE_PULSEAUDIO, m_CbnPulseAudio);
+	DDX_Control(pDX, IDC_COMBO_WINE_PORTAUDIO, m_CbnPortAudio);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL COptionsWine::OnInitDialog()
+//-------------------------------
+{
+	CPropertyPage::OnInitDialog();
+	GetDlgItem(IDC_CHECK_WINE_ENABLE)->EnableWindow(mpt::Windows::IsWine() ? TRUE : FALSE);
+	CheckDlgButton(IDC_CHECK_WINE_ENABLE, TrackerSettings::Instance().WineSupportEnabled ? BST_CHECKED : BST_UNCHECKED);
+	int index;
+	index = m_CbnPulseAudio.AddString(TEXT("Auto"    )); m_CbnPulseAudio.SetItemData(index, 1);
+	index = m_CbnPulseAudio.AddString(TEXT("Enabled" )); m_CbnPulseAudio.SetItemData(index, 2);
+	index = m_CbnPulseAudio.AddString(TEXT("Disabled")); m_CbnPulseAudio.SetItemData(index, 0);
+	m_CbnPulseAudio.SetCurSel(0);
+	for(index = 0; index < 3; ++index)
+	{
+		if(m_CbnPulseAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnablePulseAudio))
+		{
+			m_CbnPulseAudio.SetCurSel(index);
+		}
+	}
+	index = m_CbnPortAudio.AddString(TEXT("Auto"    )); m_CbnPortAudio.SetItemData(index, 1);
+	index = m_CbnPortAudio.AddString(TEXT("Enabled" )); m_CbnPortAudio.SetItemData(index, 2);
+	index = m_CbnPortAudio.AddString(TEXT("Disabled")); m_CbnPortAudio.SetItemData(index, 0);
+	for(index = 0; index < 3; ++index)
+	{
+		if(m_CbnPortAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnablePortAudio))
+		{
+			m_CbnPortAudio.SetCurSel(index);
+		}
+	}
+	return TRUE;
+}
+
+
+void COptionsWine::OnSettingsChanged()
+//------------------------------------
+{
+	SetModified(TRUE);
+}
+
+
+void COptionsWine::OnOK()
+//-----------------------
+{
+	TrackerSettings::Instance().WineSupportEnabled = IsDlgButtonChecked(IDC_CHECK_WINE_ENABLE) ? true : false;
+	TrackerSettings::Instance().WineSupportEnablePulseAudio = m_CbnPulseAudio.GetItemData(m_CbnPulseAudio.GetCurSel());
+	TrackerSettings::Instance().WineSupportEnablePortAudio = m_CbnPortAudio.GetItemData(m_CbnPortAudio.GetCurSel());
+	CPropertyPage::OnOK();
+}
+
+
+BOOL COptionsWine::OnSetActive()
+//------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_WINE;
 	return CPropertyPage::OnSetActive();
 }
 

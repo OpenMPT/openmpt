@@ -1956,6 +1956,7 @@ void CMainFrame::OnViewOptions()
 	PathConfigDlg pathsdlg;
 	CUpdateSetupDlg updatedlg;
 	COptionsAdvanced advanced;
+	COptionsWine winedlg;
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&mixerdlg);
@@ -1970,6 +1971,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&pathsdlg);
 	dlg.AddPage(&updatedlg);
 	dlg.AddPage(&advanced);
+	if(mpt::Windows::IsWine()) dlg.AddPage(&winedlg);
 	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();
@@ -2674,7 +2676,7 @@ void CMainFrame::OnHelp()
 			case OPTIONS_PAGE_PATHS:		page = "::/Setup_Paths_Auto_Save.html"; break;
 			case OPTIONS_PAGE_UPDATE:		page = "::/Setup_Update.html"; break;
 			case OPTIONS_PAGE_ADVANCED:		page = "::/Setup_Advanced.html"; break;
-		}
+			case OPTIONS_PAGE_WINE:			page = "::/Setup_Wine.html"; break;		}
 	} else if(view != nullptr)
 	{
 		const char *className = view->GetRuntimeClass()->m_lpszClassName;

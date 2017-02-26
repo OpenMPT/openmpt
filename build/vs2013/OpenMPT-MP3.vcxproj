@@ -702,6 +702,7 @@
     <ClInclude Include="..\..\common\mptTime.h" />
     <ClInclude Include="..\..\common\mptTypeTraits.h" />
     <ClInclude Include="..\..\common\mptUUID.h" />
+    <ClInclude Include="..\..\common\mptWine.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\typedefs.h" />
@@ -746,6 +747,8 @@
     <ClInclude Include="..\..\mptrack\MIDIMapping.h" />
     <ClInclude Include="..\..\mptrack\MIDIMappingDialog.h" />
     <ClInclude Include="..\..\mptrack\MPTrackUtil.h" />
+    <ClInclude Include="..\..\mptrack\MPTrackUtilWine.h" />
+    <ClInclude Include="..\..\mptrack\MPTrackWine.h" />
     <ClInclude Include="..\..\mptrack\Mainbar.h" />
     <ClInclude Include="..\..\mptrack\Mainfrm.h" />
     <ClInclude Include="..\..\mptrack\ModConvert.h" />
@@ -812,6 +815,9 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceManager.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h" />
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h" />
+    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
@@ -906,6 +912,7 @@
     <ClCompile Include="..\..\common\mptStringParse.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />
     <ClCompile Include="..\..\common\mptUUID.cpp" />
+    <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -963,6 +970,8 @@
     <ClCompile Include="..\..\mptrack\MPTHacks.cpp" />
     <ClCompile Include="..\..\mptrack\MPTrackLink.cpp" />
     <ClCompile Include="..\..\mptrack\MPTrackUtil.cpp" />
+    <ClCompile Include="..\..\mptrack\MPTrackUtilWine.cpp" />
+    <ClCompile Include="..\..\mptrack\MPTrackWine.cpp" />
     <ClCompile Include="..\..\mptrack\MainFrm.cpp" />
     <ClCompile Include="..\..\mptrack\Mainbar.cpp" />
     <ClCompile Include="..\..\mptrack\Mod2wave.cpp" />
@@ -1023,6 +1032,9 @@
     <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp" />
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp" />
+    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />

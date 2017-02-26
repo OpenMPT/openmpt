@@ -141,6 +141,9 @@
     <ClInclude Include="..\..\common\mptUUID.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptWine.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\serialization_utils.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -271,6 +274,12 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\MPTrackUtil.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\MPTrackUtilWine.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\MPTrackWine.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\Mainbar.h">
@@ -469,6 +478,15 @@
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h">
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h">
@@ -749,6 +767,9 @@
     <ClCompile Include="..\..\common\mptUUID.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\mptWine.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -879,6 +900,12 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTrackUtil.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\MPTrackUtilWine.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\MPTrackWine.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MainFrm.cpp">
@@ -1059,6 +1086,15 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp">

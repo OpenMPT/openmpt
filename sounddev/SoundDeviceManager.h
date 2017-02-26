@@ -25,6 +25,10 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+class ComponentPulseaudio;
+#endif // MPT_ENABLE_PULSEAUDIO_FULL
+class ComponentPulseaudioSimple;
 class ComponentWaveOut;
 class ComponentDirectSound;
 class ComponentASIO;
@@ -49,6 +53,14 @@ private:
 	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+#if defined(MPT_WITH_PULSEAUDIO)
+	ComponentHandle<ComponentPulseaudio> m_Pulseaudio;
+#endif // MPT_WITH_PULSEAUDIO
+#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+	ComponentHandle<ComponentPulseaudioSimple> m_PulseaudioSimple;
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 #if MPT_OS_WINDOWS
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
 #endif // MPT_OS_WINDOWS
