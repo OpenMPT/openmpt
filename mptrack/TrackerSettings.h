@@ -666,6 +666,9 @@ public:
 
 	Setting<int> SoundBoostedThreadPriority;
 	Setting<mpt::ustring> SoundBoostedThreadMMCSSClass;
+	Setting<bool> SoundBoostedThreadRealtimePosix;
+	Setting<int> SoundBoostedThreadNicenessPosix;
+	Setting<int> SoundBoostedThreadRtprioPosix;
 
 	// MIDI Settings
 
@@ -796,6 +799,18 @@ public:
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<bool> UpdateSuggestDifferentBuildVariant;
 	Setting<CString> UpdateIgnoreVersion;
+
+	// Wine support
+
+	Setting<bool> WineSupportEnabled;
+	Setting<bool> WineSupportInitialQuestionAsked;
+	Setting<bool> WineSupportAlwaysRecompile;
+	Setting<bool> WineSupportAskCompile;
+	Setting<int32> WineSupportCompileVerbosity;
+	Setting<bool> WineSupportForeignOpenMPT;
+	Setting<bool> WineSupportAllowNonLinux;
+	Setting<int32> WineSupportEnablePulseAudio; // 0==off 1==auto 2==on
+	Setting<int32> WineSupportEnablePortAudio; // 0==off 1==auto 2==on
 
 public:
 

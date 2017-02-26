@@ -235,4 +235,31 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
+
+
+//======================================
+class COptionsWine: public CPropertyPage
+//======================================
+{
+
+protected:
+	CComboBox m_CbnPulseAudio;
+	CComboBox m_CbnPortAudio;
+
+public:
+	COptionsWine();
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);
+
+	afx_msg void OnSettingsChanged();
+	
+	DECLARE_MESSAGE_MAP()
+};
+
+
+
 OPENMPT_NAMESPACE_END

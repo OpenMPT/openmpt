@@ -67,6 +67,11 @@ How to compile
     If you need further help with the VST and ASIO SDKs, get in touch with the
     main developers. 
 
+ -  7-Zip is required to be installed in the default path in order to build the
+    required files for OpenMPT Wine integration.
+		
+		Please visit [7-zip.org](http://www.7-zip.org/) to download 7-Zip.
+
 
 ### libopenmpt and openmpt123
 

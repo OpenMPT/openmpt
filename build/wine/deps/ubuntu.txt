@@ -1,0 +1,9 @@
+coreutils
+dialog
+make pkg-config cpp gcc g++ binutils
+wine wine-dev libwine-dev (or wine-development wine-development-dev libwine-development-dev)
+libpulse-dev
+libjack-jackd2-dev
+portaudio19-dev
+libdbus-1-dev
+ccache

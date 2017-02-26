@@ -36,6 +36,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\OpenMPT_SoundTouch_f32.dll .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\PluginBridge32.exe .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\PluginBridge64.exe .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\openmpt-wine-support.zip .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

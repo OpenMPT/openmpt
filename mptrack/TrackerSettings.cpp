@@ -256,6 +256,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
 	, SoundBoostedThreadPriority(conf, "Sound Settings", "BoostedThreadPriority", SoundDevice::AppInfo().BoostedThreadPriorityXP)
 	, SoundBoostedThreadMMCSSClass(conf, "Sound Settings", "BoostedThreadMMCSSClass", SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
+	, SoundBoostedThreadRealtimePosix(conf, "Sound Settings", "BoostedThreadRealtimeLinux", SoundDevice::AppInfo().BoostedThreadRealtimePosix)
+	, SoundBoostedThreadNicenessPosix(conf, "Sound Settings", "BoostedThreadNicenessPosix", SoundDevice::AppInfo().BoostedThreadNicenessPosix)
+	, SoundBoostedThreadRtprioPosix(conf, "Sound Settings", "BoostedThreadRtprioLinux", SoundDevice::AppInfo().BoostedThreadRtprioPosix)
 	// MIDI Settings
 	, m_nMidiDevice(conf, "MIDI Settings", "MidiDevice", 0)
 	, midiDeviceName(conf, "MIDI Settings", "MidiDeviceName", "")
@@ -335,6 +338,16 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", true)
 	, UpdateSuggestDifferentBuildVariant(conf, "Update", "SuggestDifferentBuildVariant", true)
 	, UpdateIgnoreVersion(conf, "Update", "IgnoreVersion", _T(""))
+	// Wine suppport
+	, WineSupportEnabled(conf, "WineSupport", "Enabled", false)
+	, WineSupportInitialQuestionAsked(conf, "WineSupport", "InitialQuestionAsked", false)
+	, WineSupportAlwaysRecompile(conf, "WineSupport", "AlwaysRecompile", false)
+	, WineSupportAskCompile(conf, "WineSupport", "AskCompile", false)
+	, WineSupportCompileVerbosity(conf, "WineSupport", "CompileVerbosity", 2) // 0=silent 1=silentmake 2=progresswindow 3=standard 4=verbosemake 5=veryverbosemake 6=msgboxes
+	, WineSupportForeignOpenMPT(conf, "WineSupport", "ForeignOpenMPT", false)
+	, WineSupportAllowNonLinux(conf, "WineSupport", "AllowNonLinux", false)
+	, WineSupportEnablePulseAudio(conf, "WineSupport", "EnablePulseAudio", 1)
+	, WineSupportEnablePortAudio(conf, "WineSupport", "EnablePortAudio", 1)
 {
 
 	// Effects

@@ -400,6 +400,7 @@
     <ClInclude Include="..\..\common\mptTime.h" />
     <ClInclude Include="..\..\common\mptTypeTraits.h" />
     <ClInclude Include="..\..\common\mptUUID.h" />
+    <ClInclude Include="..\..\common\mptWine.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\typedefs.h" />
@@ -496,6 +497,7 @@
     <ClCompile Include="..\..\common\mptStringParse.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />
     <ClCompile Include="..\..\common\mptUUID.cpp" />
+    <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\stdafx.cpp" />
     <ClCompile Include="..\..\common\typedefs.cpp" />

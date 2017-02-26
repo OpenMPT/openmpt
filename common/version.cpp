@@ -716,6 +716,9 @@ mpt::ustring GetFullCreditsString()
 		"http://schismtracker.org/\n"
 		"\n"
 #ifdef MODPLUG_TRACKER
+		"Lennart Poettering and David Henningsson for RealtimeKit\n"
+		"http://git.0pointer.net/rtkit.git/\n"
+		"\n"
 		"Gary P. Scavone for RtMidi\n"
 		"https://www.music.mcgill.ca/~gary/rtmidi/\n"
 		"\n"

@@ -22,6 +22,22 @@
 #include <mmsystem.h>
 #endif // MPT_OS_WINDOWS
 
+#if !MPT_OS_WINDOWS
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#ifdef _POSIX_PRIORITY_SCHEDULING // from unistd.h
+#include <sched.h>
+#endif
+#endif
+
+#if defined(MPT_WITH_DBUS)
+#include <dbus/dbus.h>
+#endif
+#if defined(MPT_WITH_RTKIT)
+#include "rtkit/rtkit.h"
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -512,6 +528,149 @@ void CSoundDeviceWithThread::InternalStop()
 #if defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT) && !MPT_OS_WINDOWS
 
 
+class ThreadPriorityGuardImpl
+{
+
+private:
+
+	bool active;
+	bool successfull;
+	bool realtime;
+	int niceness;
+	int rt_priority;
+#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+	DBusConnection * bus;
+#endif // MPT_WITH_DBUS && MPT_WITH_RTKIT
+
+public:
+
+	ThreadPriorityGuardImpl(bool active, bool realtime, int niceness, int rt_priority)
+		: active(active)
+		, successfull(false)
+		, realtime(realtime)
+		, niceness(niceness)
+		, rt_priority(rt_priority)
+#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+		, bus(NULL)
+#endif // MPT_WITH_DBUS && MPT_WITH_RTKIT
+	{
+		if(active)
+		{
+			if(realtime)
+			{
+				#ifdef _POSIX_PRIORITY_SCHEDULING
+					sched_param p;
+					MemsetZero(p);
+					p.sched_priority = rt_priority;
+					#if MPT_OS_LINUX
+						if(sched_setscheduler(0, SCHED_RR|SCHED_RESET_ON_FORK, &p) == 0)
+						{
+							successfull = true;
+						} else
+						{
+							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+								MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+							#else
+								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+							#endif
+						}
+					#else
+						if(sched_setscheduler(0, SCHED_RR, &p) == 0)
+						{
+							successfull = true;
+						} else
+						{
+							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+								MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+							#else
+								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+							#endif
+						}
+					#endif
+				#endif
+			} else
+			{
+				if(setpriority(PRIO_PROCESS, 0, niceness) == 0)
+				{
+					successfull = true;
+				} else
+				{
+					#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+						MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("setpriority: %1"))(errno));
+					#else
+						MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("setpriority: %1"))(errno));
+					#endif
+				}
+			}
+			if(!successfull)
+			{
+				#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+					DBusError error;
+					dbus_error_init(&error);
+					bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
+					if(!bus)
+					{
+						MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("DBus: dbus_bus_get: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, error.message)));
+					}
+					dbus_error_free(&error);
+					if(bus)
+					{
+						if(realtime)
+						{
+							int e = rtkit_make_realtime(bus, 0, rt_priority);
+							if(e != 0) {
+								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("RtKit: rtkit_make_realtime: %1"))(e));
+							} else
+							{
+								successfull = true;
+							}
+						} else
+						{
+							int e = rtkit_make_high_priority(bus, 0, niceness);
+							if(e != 0) {
+								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("RtKit: rtkit_make_high_priority: %1"))(e));
+							} else
+							{
+								successfull = true;
+							}
+						}
+					}
+				#endif // MPT_WITH_DBUS && MPT_WITH_RTKIT
+			}
+		}
+	}
+
+	~ThreadPriorityGuardImpl()
+	{
+		if(active)
+		{
+			#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
+				if(bus)
+				{
+					// TODO: Do we want to reset priorities here?
+					dbus_connection_unref(bus);
+					bus = NULL;
+				}
+			#endif // MPT_WITH_DBUS && MPT_WITH_RTKIT
+		}
+	}
+
+};
+
+
+ThreadPriorityGuard::ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority)
+	: impl(mpt::make_unique<ThreadPriorityGuardImpl>(active, realtime, niceness, rt_priority))
+{
+	return;
+}
+
+
+ThreadPriorityGuard::~ThreadPriorityGuard()
+{
+	return;
+}
+
+
 ThreadBase::ThreadBase(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: Base(info, sysInfo)
 	, m_ThreadStopRequest(false)
@@ -535,6 +694,7 @@ void ThreadBase::ThreadProcStatic(ThreadBase * this_)
 
 void ThreadBase::ThreadProc()
 {
+	ThreadPriorityGuard priorityGuard(m_Settings.BoostThreadPriority, m_AppInfo.BoostedThreadRealtimePosix, m_AppInfo.BoostedThreadNicenessPosix, m_AppInfo.BoostedThreadRealtimePosix);
 	m_ThreadStarted.post();
 	InternalStartFromSoundThread();
 	while(!m_ThreadStopRequest.load())

@@ -35,6 +35,7 @@ class TrackerSettings;
 class ComponentManagerSettings;
 namespace mpt { namespace Wine {
 class VersionContext;
+class Context;
 } } // namespace mpt::Wine
 
 
@@ -192,6 +193,8 @@ protected:
 	mpt::PathString m_szConfigDirectory;
 	mpt::PathString m_szConfigFileName;
 	mpt::PathString m_szPluginCacheFileName;
+	std::shared_ptr<mpt::Wine::Context> m_Wine;
+	mpt::PathString m_WineWrapperDllName;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
 	DWORD m_dwLastPluginIdleCall;
@@ -289,6 +292,24 @@ public:
 	std::shared_ptr<mpt::Wine::VersionContext> GetWineVersion() const
 	{
 		return m_WineVersion;
+	}
+
+	void SetWine(std::shared_ptr<mpt::Wine::Context> wine)
+	{
+		m_Wine = wine;
+	}
+	std::shared_ptr<mpt::Wine::Context> GetWine() const
+	{
+		return m_Wine;
+	}
+
+	void SetWineWrapperDllFilename(mpt::PathString filename)
+	{
+		m_WineWrapperDllName = filename;
+	}
+	mpt::PathString GetWineWrapperDllFilename() const
+	{
+		return m_WineWrapperDllName;
 	}
 
 	/// Returns path to config folder including trailing '\'.

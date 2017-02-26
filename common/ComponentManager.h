@@ -391,7 +391,7 @@ bool ComponentListPush(ComponentListEntry *entry);
 		componentManager.Register(ComponentFactory< name >()); \
 	} \
 	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
-	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
+	bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
 	const char * const name :: g_ID = #name ; \
 	const char * const name :: g_SettingsKey = settingsKey ; \
 /**/

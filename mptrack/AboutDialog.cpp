@@ -6,6 +6,7 @@
 #include "TrackerSettings.h"
 #include "BuildVariants.h"
 #include "../common/version.h"
+#include "../common/mptWine.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -277,6 +278,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 3, _T("License"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Resources"), 0, 0, 0, 0);
+	if(mpt::Windows::IsWine()) m_Tab.InsertItem(TCIF_TEXT, 5, _T("Wine"), 0, 0, 0, 0);
 	m_Tab.SetCurSel(0);
 
 	OnTabChange(nullptr, nullptr);
@@ -312,6 +314,8 @@ void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
 mpt::ustring CAboutDlg::GetTabText(int tab)
 {
 	const mpt::ustring lf = MPT_USTRING("\n");
+	const mpt::ustring yes = MPT_USTRING("yes");
+	const mpt::ustring no = MPT_USTRING("no");
 	mpt::ustring text;
 	switch(tab)
 	{
@@ -489,6 +493,100 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += lf;
 			text += MPT_USTRING("Updates: ") + lf + MptVersion::GetURL("updates") + lf;
 			text += lf;
+			break;
+		case 5:
+			try
+			{
+				if(!theApp.GetWine())
+				{
+
+					text += MPT_USTRING("Wine integration not available.\n");
+
+				} else
+				{
+
+					mpt::Wine::Context & wine = *theApp.GetWine();
+					
+					text += mpt::format(MPT_USTRING("Windows: %1\n"))
+						( mpt::Windows::Version::Current().IsWindows() ? yes : no
+						);
+					text += mpt::format(MPT_USTRING("Windows NT: %1\n"))
+						( mpt::Windows::Version::Current().IsNT() ? yes : no
+						);
+					text += mpt::format(MPT_USTRING("Windows version: %1\n"))
+						( 
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win81) ? MPT_USTRING("Windows 8.1") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win8) ? MPT_USTRING("Windows 8") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7) ? MPT_USTRING("Windows 7") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista) ? MPT_USTRING("Windows Vista") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinXP) ? MPT_USTRING("Windows XP") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win2000) ? MPT_USTRING("Windows 2000") :
+						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinNT4) ? MPT_USTRING("Windows NT4") :
+						MPT_USTRING("unknown")
+						);
+					text += mpt::format(MPT_USTRING("Windows original: %1\n"))
+						( mpt::Windows::IsOriginal() ? yes : no
+						);
+
+					text += MPT_USTRING("\n");
+
+					text += mpt::format(MPT_USTRING("Wine: %1\n"))
+						( mpt::Windows::IsWine() ? yes : no
+						);
+					text += mpt::format(MPT_USTRING("Wine Version: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawVersion())
+						);
+					text += mpt::format(MPT_USTRING("Wine Build ID: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawBuildID())
+						);
+					text += mpt::format(MPT_USTRING("Wine Host Sys Name: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawHostSysName())
+						);
+					text += mpt::format(MPT_USTRING("Wine Host Release: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawHostRelease())
+						);
+
+					text += MPT_USTRING("\n");
+
+					text += mpt::format(MPT_USTRING("uname -m: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.Uname_m())
+						);
+					text += mpt::format(MPT_USTRING("HOME: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.HOME())
+						);
+					text += mpt::format(MPT_USTRING("XDG_DATA_HOME: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_DATA_HOME())
+						);
+					text += mpt::format(MPT_USTRING("XDG_CACHE_HOME: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_CACHE_HOME())
+						);
+					text += mpt::format(MPT_USTRING("XDG_CONFIG_HOME: %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_CONFIG_HOME())
+						);
+
+					text += MPT_USTRING("\n");
+
+					text += mpt::format(MPT_USTRING("OpenMPT folder: %1\n"))
+						( theApp.GetAppDirPath().ToUnicode()
+						);
+					text += mpt::format(MPT_USTRING("OpenMPT folder (host): %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetAppDirPath()))
+						);
+					text += mpt::format(MPT_USTRING("OpenMPT config folder: %1\n"))
+						( theApp.GetConfigPath().ToUnicode()
+						);
+					text += mpt::format(MPT_USTRING("OpenMPT config folder (host): %1\n"))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetConfigPath()))
+						);
+					text += mpt::format(MPT_USTRING("Host root: %1\n"))
+						( wine.PathToWindows("/").ToUnicode()
+						);
+
+				}
+			} catch(const mpt::Wine::Exception & e)
+			{
+				text += MPT_USTRING("Exception: ") + mpt::ToUnicode(mpt::CharsetASCII, e.what()) + MPT_USTRING("\n");
+			}
 			break;
 	}
 	return text;

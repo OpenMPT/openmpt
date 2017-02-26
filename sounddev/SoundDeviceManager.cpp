@@ -18,6 +18,11 @@
 #include "SoundDeviceDirectSound.h"
 #include "SoundDevicePortAudio.h"
 #include "SoundDeviceWaveout.h"
+#include "SoundDeviceStub.h"
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+#include "SoundDevicePulseaudio.h"
+#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#include "SoundDevicePulseSimple.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -82,6 +87,22 @@ void Manager::ReEnumerate()
 	m_PortAudio.Reload();
 #endif // MPT_WITH_PORTAUDIO
 
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+#if defined(MPT_WITH_PULSEAUDIO)
+	if(IsComponentAvailable(m_Pulseaudio))
+	{
+		EnumerateDevices<Pulseaudio>(GetSysInfo());
+	}
+#endif // MPT_WITH_PULSEAUDIO
+#endif // MPT_ENABLE_PULSEAUDIO_FULL
+
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+	if(IsComponentAvailable(m_PulseaudioSimple))
+	{
+		EnumerateDevices<PulseaudioSimple>(GetSysInfo());
+	}
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+
 #if MPT_OS_WINDOWS
 	if(IsComponentAvailable(m_WaveOut))
 	{
@@ -111,24 +132,58 @@ void Manager::ReEnumerate()
 	}
 #endif // MPT_WITH_PORTAUDIO
 
+#ifndef MPT_BUILD_WINESUPPORT
+	{
+		EnumerateDevices<SoundDeviceStub>(GetSysInfo());
+	}
+#endif // !MPT_BUILD_WINESUPPORT
+
 	std::map<SoundDevice::Type, int> typePriorities;
+#ifdef MPT_BUILD_WINESUPPORT
+	MPT_CONSTANT_IF(true)
+	{
+		typePriorities[MPT_USTRING("PulseAudio")] = 32;
+		typePriorities[MPT_USTRING("PulseAudio-Simple")] = 31;
+#ifdef MPT_WITH_PORTAUDIO
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paAL)] = 29;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paALSA)] = 28;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paJACK)] = 19;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paOSS)] = 18;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paAudioScienceHPI)] = 9;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paBeOS)] = -1;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paCoreAudio)] = -2;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paWASAPI)] = -3;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paMME)] = -4;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paDirectSound)] = -5;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paSoundManager)] = -6;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paWDMKS)] = -7;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paASIO)] = -8;
+#endif // MPT_WITH_PORTAUDIO
+	} else
+#endif
 	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux && GetSysInfo().WineVersion.IsAtLeast(mpt::Wine::Version(1,8,0)))
 	{ // Wine >= 1.8 on Linux
+		typePriorities[MPT_USTRING("Wine-Native-PulseAudio")] = 31;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
+		typePriorities[MPT_USTRING("Wine-Native-PulseAudio-Simple")] = 25;
 		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 		typePriorities[SoundDevice::TypeDSOUND] = -2;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -3;
 	} else if(GetSysInfo().IsWine)
 	{ // Wine
+		typePriorities[MPT_USTRING("Wine-Native-PulseAudio")] = 32;
+		typePriorities[MPT_USTRING("Wine-Native-PulseAudio-Simple")] = 31;
 		typePriorities[SoundDevice::TypeDSOUND] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 27;
 		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
+		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 	} else if(GetSysInfo().WindowsVersion.Is9x())
 	{ // Win9x

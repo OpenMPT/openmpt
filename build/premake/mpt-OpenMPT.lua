@@ -160,3 +160,71 @@ end
     }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
+
+ project "OpenMPT-NativeSupport"
+  uuid "563a631d-fe07-47bc-a98f-9fe5b3ebabfa"
+  language "C++"
+  location ( "../../build/" .. mpt_projectpathname )
+  vpaths { ["*"] = "../../" }
+  mpt_projectname = "OpenMPT-NativeSupport"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+  includedirs {
+   "../../common",
+   "../../include",
+   "../../include/msinttypes/inttypes",
+   "../../include/ASIOSDK2/common",
+   "../../include/portaudio/include",
+   "$(IntDir)/svn_version",
+   "../../build/svn_version",
+  }
+  files {
+   "../../common/*.cpp",
+   "../../common/*.h",
+   "../../soundbase/*.cpp",
+   "../../soundbase/*.h",
+   "../../sounddev/*.cpp",
+   "../../sounddev/*.h",
+   "../../mptrack/wine/*.cpp",
+   "../../mptrack/wine/*.h",
+  }
+  excludes {
+   "../../mptrack/wine/WineWrapper.cpp",
+  }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
+  largeaddressaware ( true )
+  characterset "Unicode"
+  flags { "ExtraWarnings" }
+  links {
+   "portaudio",
+  }
+  filter {}
+  prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
+
+ project "OpenMPT-WineWrapper"
+  uuid "f3da2bf5-e84a-4f71-80ab-884594863d3a"
+  language "C"
+  location ( "../../build/" .. mpt_projectpathname )
+  vpaths { ["*"] = "../../" }
+  mpt_projectname = "OpenMPT-WineWrapper"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+  includedirs {
+   "../../common",
+   "../../include",
+   "../../include/msinttypes/inttypes",
+   "$(IntDir)/svn_version",
+   "../../build/svn_version",
+  }
+  files {
+   "../../mptrack/wine/WineWrapper.c",
+  }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER" }
+  largeaddressaware ( true )
+  characterset "Unicode"
+  flags { "ExtraWarnings" }
+  links {
+   "OpenMPT-NativeSupport",
+  }
+  filter {}
+  postbuildcommands { "..\\..\\build\\wine\\build_wine_support.cmd $(IntDir) $(OutDir)" }

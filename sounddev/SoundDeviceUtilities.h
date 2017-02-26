@@ -174,6 +174,18 @@ public:
 };
 
 
+class ThreadPriorityGuardImpl;
+
+class ThreadPriorityGuard
+{
+private:
+	std::unique_ptr<ThreadPriorityGuardImpl> impl;
+public:
+	ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority);
+	~ThreadPriorityGuard();
+};
+
+
 class ThreadBase
 	: public SoundDevice::Base
 {
