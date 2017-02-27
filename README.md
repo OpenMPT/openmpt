@@ -325,7 +325,7 @@ conventions. Using common sense is recommended.
 ~~~~{.cpp}
 namespace openmpt {
 
-// This is totally meaningless code and just illustrates identation.
+// This is totally meaningless code and just illustrates indentation.
 
 class foo
 	: public base
@@ -353,7 +353,7 @@ public:
 int foo::bar() const {
 
 	for ( int i = 0; i < 23; ++i ) {
-		swtich ( x ) {
+		switch ( x ) {
 			case 2:
 				something( y );
 				break;
