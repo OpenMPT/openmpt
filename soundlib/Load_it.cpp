@@ -438,7 +438,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & ITFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_ITOLDEFFECTS, (fileHeader.flags & ITFileHeader::itOldEffects) != 0);
 	m_SongFlags.set(SONG_ITCOMPATGXX, (fileHeader.flags & ITFileHeader::itCompatGxx) != 0);
-	m_SongFlags.set(SONG_EMBEDMIDICFG, (fileHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (fileHeader.special & ITFileHeader::embedMIDIConfiguration));
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
@@ -570,17 +569,16 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading MIDI Output & Macros
-	if(m_SongFlags[SONG_EMBEDMIDICFG] && file.ReadStruct<MIDIMacroConfigData>(m_MidiCfg))
+	bool hasMidiConfig = (fileHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (fileHeader.special & ITFileHeader::embedMIDIConfiguration);
+	if(hasMidiConfig && file.ReadStruct<MIDIMacroConfigData>(m_MidiCfg))
 	{
-			m_MidiCfg.Sanitize();
+		m_MidiCfg.Sanitize();
 	}
 
 	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
 	if(fileHeader.cwtv < 0x0214)
 	{
-		MemsetZero(m_MidiCfg.szMidiSFXExt);
-		MemsetZero(m_MidiCfg.szMidiZXXExt);
-		m_SongFlags.set(SONG_EMBEDMIDICFG);
+		m_MidiCfg.ClearZxxMacros();
 	}
 
 	// Read pattern names: "PNAM"
@@ -1315,7 +1313,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		if(dwChnNamLen) dwExtra += dwChnNamLen + 8;
 	}
 
-	if(m_SongFlags[SONG_EMBEDMIDICFG])
+	if(!m_MidiCfg.IsMacroDefaultSetupUsed())
 	{
 		itHeader.flags |= ITFileHeader::reqEmbeddedMIDIConfig;
 		itHeader.special |= ITFileHeader::embedMIDIConfiguration;

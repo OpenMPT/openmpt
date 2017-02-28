@@ -111,8 +111,6 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 		strcpy(parameteredMacro, "Ec00z");
 		break;
 	case sfx_custom:
-		MPT_ASSERT_NOTREACHED();
-		break;
 	default:
 		MPT_ASSERT_NOTREACHED();
 		break;
@@ -176,8 +174,6 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 			break;
 
 		case zxx_custom:
-			MPT_ASSERT_NOTREACHED();
-			break;
 		default:
 			MPT_ASSERT_NOTREACHED();
 			break;
@@ -187,6 +183,27 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 
 
 #ifdef MODPLUG_TRACKER
+
+bool MIDIMacroConfig::operator== (const MIDIMacroConfig &other) const
+{
+	for(uint32 i = 0; i < CountOf(szMidiGlb); i++)
+	{
+		if(strncmp(szMidiGlb[i], other.szMidiGlb[i], MACRO_LENGTH))
+			return false;
+	}
+	for(uint32 i = 0; i < CountOf(szMidiSFXExt); i++)
+	{
+		if(strncmp(szMidiSFXExt[i], other.szMidiSFXExt[i], MACRO_LENGTH))
+			return false;
+	}
+	for(uint32 i = 0; i < CountOf(szMidiZXXExt); i++)
+	{
+		if(strncmp(szMidiZXXExt[i], other.szMidiZXXExt[i], MACRO_LENGTH))
+			return false;
+	}
+	return true;
+}
+
 
 // Returns macro description including plugin parameter / MIDI CC information
 CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin) const
@@ -395,6 +412,15 @@ void MIDIMacroConfig::Reset()
 	CreateParameteredMacro(0, sfx_cutoff);
 	// Z80-Z8F controls resonance
 	CreateFixedMacro(zxx_reso4Bit);
+}
+
+
+// Clear all Zxx macros so that they do nothing.
+void MIDIMacroConfig::ClearZxxMacros()
+//------------------------------------
+{
+	MemsetZero(szMidiSFXExt);
+	MemsetZero(szMidiZXXExt);
 }
 
 

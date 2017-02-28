@@ -440,18 +440,6 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 			m_SndFile.m_SongFlags.reset(SONG_EXFILTERRANGE);
 	}
 
-	// Embedded MIDI configuration in XM files
-	if(m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG] && !(originalSpecs->songFlags & SONG_EMBEDMIDICFG))
-	{
-		AddToLog("Found embedded MIDI macros");
-		foundHacks = true;
-		if(autofix)
-		{
-			m_SndFile.m_MidiCfg.Reset();
-			m_SndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
-		}
-	}
-
 	// Player flags
 	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
 	{

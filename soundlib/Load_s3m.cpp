@@ -299,8 +299,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	if(!keepMidiMacros)
 	{
 		// Remove macros so they don't interfere with tunes made in trackers that don't support Zxx
-		MemsetZero(m_MidiCfg.szMidiSFXExt);
-		MemsetZero(m_MidiCfg.szMidiZXXExt);
+		m_MidiCfg.ClearZxxMacros();
 	}
 
 	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.name);

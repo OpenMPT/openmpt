@@ -21,16 +21,14 @@ class CMidiMacroSetup: public CDialog
 //===================================
 {
 public:
-	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg), m_bEmbed(sndFile.m_SongFlags[SONG_EMBEDMIDICFG]) { }
+	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg) { }
 
-	bool m_bEmbed;
 	MIDIMacroConfig m_MidiCfg;
-
 
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
-	CColourEdit m_EditMacroValue[NUM_MACROS], m_EditMacroType[NUM_MACROS]; //rewbs.macroGUI
+	CColourEdit m_EditMacroValue[NUM_MACROS], m_EditMacroType[NUM_MACROS];
 	CButton m_EditMacro[NUM_MACROS], m_BtnMacroShowAll[NUM_MACROS];
 
 	CSoundFile &m_SndFile;
@@ -45,7 +43,6 @@ protected:
 	afx_msg void OnSetAsDefault();
 	afx_msg void OnResetCfg();
 	afx_msg void OnMacroHelp();
-	afx_msg void OnEmbedMidiCfg();
 	afx_msg void OnSFxChanged();
 	afx_msg void OnSFxPresetChanged();
 	afx_msg void OnZxxPresetChanged();

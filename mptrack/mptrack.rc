@@ -1625,7 +1625,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_STATISTICS,12,233,264,38,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
 END
 
-IDD_MIDIMACRO DIALOGEX 0, 0, 358, 354
+IDD_MIDIMACRO DIALOGEX 0, 0, 359, 335
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Zxx Macro Configuration"
@@ -1654,8 +1654,6 @@ BEGIN
     COMBOBOX        IDC_COMBO4,54,314,48,101,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Value:",IDC_STATIC,114,316,24,8
     EDITTEXT        IDC_EDIT2,144,314,116,12,ES_AUTOHSCROLL
-    CONTROL         "Embed macro configuration in file when saving",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,6,338,288,10
     COMBOBOX        IDC_MACROCC,63,257,111,111,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Macro Help",IDC_BUTTON3,300,84,50,14
 END
@@ -2103,9 +2101,9 @@ BEGIN
     IDD_MIDIMACRO, DIALOG
     BEGIN
         LEFTMARGIN, 4
-        RIGHTMARGIN, 354
+        RIGHTMARGIN, 355
         TOPMARGIN, 4
-        BOTTOMMARGIN, 349
+        BOTTOMMARGIN, 330
     END
 
     IDD_CHORDEDIT, DIALOG
@@ -2209,6 +2207,17 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\mptrack.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_MIDIMACRO AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 #ifdef APSTUDIO_INVOKED

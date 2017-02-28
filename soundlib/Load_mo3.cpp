@@ -1013,7 +1013,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			else
 				strcpy(m_MidiCfg.szMidiZXXExt[i], "");
 		}
-		m_SongFlags.set(SONG_EMBEDMIDICFG, !m_MidiCfg.IsMacroDefaultSetupUsed());
 	}
 
 	Order.ReadAsByte(musicChunk, fileHeader.numOrders, fileHeader.numOrders, 0xFF, 0xFE);
@@ -1954,9 +1953,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		|| (GetType() == MOD_TYPE_S3M && cwtv > 0x3100 && cwtv < 0x3214))
 	{
 		// Ignore MIDI data in files made with IT older than version 2.14.
-		MemsetZero(m_MidiCfg.szMidiSFXExt);
-		MemsetZero(m_MidiCfg.szMidiZXXExt);
-		m_SongFlags.set(SONG_EMBEDMIDICFG);
+		m_MidiCfg.ClearZxxMacros();
 	}
 
 	if(m_madeWithTracker.empty())
