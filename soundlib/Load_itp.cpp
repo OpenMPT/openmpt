@@ -110,7 +110,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	if(songFlags & ITP_EMBEDMIDICFG)	m_SongFlags.set(SONG_EMBEDMIDICFG);
 	if(songFlags & ITP_ITOLDEFFECTS)	m_SongFlags.set(SONG_ITOLDEFFECTS);
 	if(songFlags & ITP_ITCOMPATGXX)		m_SongFlags.set(SONG_ITCOMPATGXX);
 	if(songFlags & ITP_LINEARSLIDES)	m_SongFlags.set(SONG_LINEARSLIDES);
@@ -333,12 +332,9 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 8;
 
 	// Before OpenMPT 1.20.01.09, the MIDI macros were always read from the file, even if the "embed" flag was not set.
-	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1,20,01,09) && !m_SongFlags[SONG_EMBEDMIDICFG])
+	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1,20,01,09) && !(songFlags & ITP_EMBEDMIDICFG))
 	{
 		m_MidiCfg.Reset();
-	} else if(!m_MidiCfg.IsMacroDefaultSetupUsed())
-	{
-		m_SongFlags.set(SONG_EMBEDMIDICFG);
 	}
 
 	m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);

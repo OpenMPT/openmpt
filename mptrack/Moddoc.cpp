@@ -192,11 +192,6 @@ BOOL CModDoc::OnNewDocument()
 
 	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
 	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().GetSongFlags());
-	if(!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
-	{
-		m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG & m_SndFile.GetModSpecifications().GetSongFlags());
-	}
-
 
 	ReinitRecordState();
 	InitializeMod();
@@ -208,8 +203,6 @@ BOOL CModDoc::OnNewDocument()
 BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 //-----------------------------------------------------------
 {
-	BOOL bModified = TRUE;
-
 	ScopedLogCapturer logcapturer(*this);
 
 	if(filename.empty()) return OnNewDocument();
@@ -243,7 +236,6 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	case MOD_TYPE_XM:
 	case MOD_TYPE_IT:
 	case MOD_TYPE_MPT:
-		bModified = FALSE;
 		break;
 	default:
 		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
@@ -268,7 +260,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 			MptVersion::str));
 	}
 
-	SetModifiedFlag(FALSE); // (bModified);
+	SetModifiedFlag(FALSE);
 	m_bHasValidPath = true;
 
 	// Check if there are any missing samples, and if there are, show a dialog to relocate them.
@@ -2177,17 +2169,12 @@ void CModDoc::OnSetupZxxMacros()
 //------------------------------
 {
 	CMidiMacroSetup dlg(m_SndFile);
-	if (dlg.DoModal() == IDOK)
+	if(dlg.DoModal() == IDOK)
 	{
-		m_SndFile.m_MidiCfg = dlg.m_MidiCfg;
-		if (dlg.m_bEmbed || !m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
+		if(m_SndFile.m_MidiCfg != dlg.m_MidiCfg)
 		{
-			m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
+			m_SndFile.m_MidiCfg = dlg.m_MidiCfg;
 			SetModified();
-		} else
-		{
-			if (m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG]) SetModified();
-			m_SndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
 		}
 	}
 }

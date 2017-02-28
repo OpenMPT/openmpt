@@ -155,6 +155,7 @@ enum ChannelFlags
 	// Sample storage flags (also saved in ModSample::uFlags, but are not relevant to mixing)
 	SMP_MODIFIED		= 0x1000,	// Sample data has been edited in the tracker
 	SMP_KEEPONDISK		= 0x2000,	// Sample is not saved to file, data is restored from original sample file
+	// Misc sample flags (only present in ModSample::uFlags, but not relevant to mixing)
 	SMP_NODEFAULTVOLUME	= 0x4000,	// Ignore default volume setting
 };
 DECLARE_FLAGSET(ChannelFlags)
@@ -232,7 +233,7 @@ enum EnvelopeType
 // Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
-	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
+	//SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
 	SONG_FASTVOLSLIDES	= 0x0002,		// Old Scream Tracker 3.0 volume slides
 	SONG_ITOLDEFFECTS	= 0x0004,		// Old Impulse Tracker effect implementations
 	SONG_ITCOMPATGXX	= 0x0008,		// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
@@ -258,7 +259,7 @@ enum SongFlags
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE)
+#define SONG_FILE_FLAGS	(SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)

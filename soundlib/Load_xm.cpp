@@ -547,11 +547,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	
 	// Read midi config: "MIDI"
+	bool hasMidiConfig = false;
 	if(file.ReadMagic("MIDI"))
 	{
 		file.ReadStructPartial<MIDIMacroConfigData>(m_MidiCfg, file.ReadUint32LE());
 		m_MidiCfg.Sanitize();
-		m_SongFlags |= SONG_EMBEDMIDICFG;
+		hasMidiConfig = true;
 		madeWith.set(verConfirmed);
 	}
 
@@ -629,12 +630,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nMixLevels = mixLevelsCompatibleFT2;
 
-		if(!m_SongFlags[SONG_EMBEDMIDICFG])
+		if(!hasMidiConfig)
 		{
 			// FT2 allows typing in arbitrary unsupported effect letters such as Zxx.
 			// Prevent these commands from being interpreted as filter commands by erasing the default MIDI Config.
-			MemsetZero(m_MidiCfg.szMidiSFXExt);
-			MemsetZero(m_MidiCfg.szMidiZXXExt);
+			m_MidiCfg.ClearZxxMacros();
 		}
 
 		if(fileHeader.version >= 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
@@ -1065,7 +1065,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 			fwrite(m_songMessage.c_str(), 1, m_songMessage.length(), f);
 		}
 		// Writing midi cfg
-		if(m_SongFlags[SONG_EMBEDMIDICFG])
+		if(!m_MidiCfg.IsMacroDefaultSetupUsed())
 		{
 			memcpy(magic, "MIDI", 4);
 			fwrite(magic, 1, 4, f);

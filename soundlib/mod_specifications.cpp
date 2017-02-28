@@ -55,7 +55,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	mixLevels1_17RC3,							// defaultMixLevels
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	200,										// Max MIDI mapping directives
 	MAX_ENVPOINTS,								// Envelope point count
 	true,										// Has notecut.
@@ -201,7 +201,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
 	mixLevelsCompatibleFT2,						// defaultMixLevels
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE,	// Supported song flags
 	200,										// Max MIDI mapping directives
 	12,											// Envelope point count
 	false,										// No notecut.
@@ -343,7 +343,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	99,											// SamplesMax
 	99,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	25,											// Envelope point count
 	true,										// Has notecut.
@@ -390,7 +390,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	200,										// Max MIDI mapping directives
 	25,											// Envelope point count
 	true,										// Has notecut.

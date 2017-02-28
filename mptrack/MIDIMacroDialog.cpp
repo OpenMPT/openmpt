@@ -23,7 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
-	ON_COMMAND(IDC_CHECK1,			OnEmbedMidiCfg)
 	ON_COMMAND(IDC_BUTTON1,			OnSetAsDefault)
 	ON_COMMAND(IDC_BUTTON2,			OnResetCfg)
 	ON_COMMAND(IDC_BUTTON3,			OnMacroHelp)
@@ -62,7 +61,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 {
 	char s[128];
 	CDialog::OnInitDialog();
-	CheckDlgButton(IDC_CHECK1, m_bEmbed ? BST_CHECKED : BST_UNCHECKED);
 	m_EditSFx.SetLimitText(MACRO_LENGTH - 1);
 	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
 
@@ -263,13 +261,6 @@ void CMidiMacroSetup::OnMacroHelp()
 		"z - Zxx parameter (00-7F)\n\n"
 		"Macros can be up to 31 characters long and contain multiple MIDI messages. SysEx messages are automatically terminated if not specified by the user."),
 		_T("OpenMPT MIDI Macro quick reference"));
-}
-
-
-void CMidiMacroSetup::OnEmbedMidiCfg()
-//------------------------------------
-{
-	m_bEmbed = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 }
 
 
