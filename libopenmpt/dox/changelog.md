@@ -15,6 +15,8 @@ is just a high-level summary.
  *  [**New**] New API `openmpt::could_open_probability()` (C++) and
     `openmpt_could_open_probability()` (C). This fixes a spelling error in the
     old 0.2 API.
+ *  [**New**] openmpt123: openmpt123 can now open M3U, M3U8, M3UEXT, M3U8EXT and
+    PLSv2 playlists via the `--playlist` option.
 
  *  [**Change**] libopenmpt versioning changed and follows the more conventional
     major.minor.patch as well as the recommendations of the

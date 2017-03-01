@@ -301,17 +301,63 @@ static std::string replace( std::string str, const std::string & oldstr, const s
 	return str;
 }
 
-#if defined( WIN32 )
-static const char path_sep = '\\';
+static std::string default_path_separator() {
+#if defined(WIN32)
+	return "\\";
 #else
-static const char path_sep = '/';
+	return "/";
 #endif
+}
+
+static std::string path_separators() {
+#if defined(WIN32)
+	return "\\/";
+#else
+	return "/";
+#endif
+}
+
+static bool is_path_separator( char c ) {
+#if defined(WIN32)
+	return ( c == '\\' ) || ( c == '/' );
+#else
+	return c == '/';
+#endif
+}
+
+static std::string get_basepath( std::string filename ) {
+	std::string::size_type pos = filename.find_last_of( path_separators() );
+	if ( pos == std::string::npos ) {
+		return std::string();
+	}
+	return filename.substr( 0, pos ) + default_path_separator();
+}
+
+static bool is_absolute( std::string filename ) {
+#if defined(WIN32)
+	if ( begins_with( filename, "\\\\?\\UNC\\" ) {
+		return true;
+	}
+	if ( begins_with( filename, "\\\\?\\" ) {
+		return true;
+	}
+	if ( begins_with( filename, "\\\\" ) {
+		return true; // UNC
+	}
+	if ( begins_with( filename, "//" ) {
+		return true; // UNC
+	}
+	return ( filename.length() ) >= 3 && ( filename[1] == ":" ) && is_path_separator( filename[2] );
+#else
+	return ( filename.length() >= 1 ) && is_path_separator( filename[0] );
+#endif
+}
 
 static std::string get_filename( const std::string & filepath ) {
-	if ( filepath.find_last_of( std::string(1,path_sep) ) == std::string::npos ) {
+	if ( filepath.find_last_of( path_separators() ) == std::string::npos ) {
 		return filepath;
 	}
-	return filepath.substr( filepath.find_last_of( std::string(1,path_sep) ) + 1 );
+	return filepath.substr( filepath.find_last_of( path_separators() ) + 1 );
 }
 
 static std::string prepend_lines( std::string str, const std::string & prefix ) {
@@ -553,6 +599,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --pitch f              Set pitch factor f [default: " << pitch_flag_to_double( commandlineflags().pitch ) << "]" << std::endl;
 		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
+		log << "     --playlist file        Load playlist from file" << std::endl;
 		log << "     --[no-]randomize       Randomize playlist [default: " << commandlineflags().randomize << "]" << std::endl;
 		log << "     --[no-]shuffle         Shuffle through playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << "     --[no-]restart         Restart playlist when finished [default: " << commandlineflags().restart << "]" << std::endl;
@@ -1619,6 +1666,163 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
+static bool begins_with( const std::string & str, const std::string & match ) {
+	return ( str.find( match ) == 0 );
+}
+
+static bool ends_with( const std::string & str, const std::string & match ) {
+	return ( str.rfind( match ) == ( str.length() - match.length() ) );
+}
+
+static std::string trim_left(std::string str, const std::string &whitespace = std::string()) {
+	std::string::size_type pos = str.find_first_not_of(whitespace);
+	if(pos != std::string::npos) {
+		str.erase(str.begin(), str.begin() + pos);
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1) {
+		return std::string();
+	}
+	return str;
+}
+
+static std::string trim_right(std::string str, const std::string &whitespace = std::string()) {
+	std::string::size_type pos = str.find_last_not_of(whitespace);
+	if(pos != std::string::npos) {
+		str.erase(str.begin() + pos + 1, str.end());
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0) {
+		return std::string();
+	}
+	return str;
+}
+
+static std::string trim(std::string str, const std::string &whitespace = std::string()) {
+	return trim_right(trim_left(str, whitespace), whitespace);
+}
+
+static std::string trim_eol( const std::string & str ) {
+	return trim( str, "\r\n" );
+}
+
+
+static bool parse_playlist( commandlineflags & flags, std::string filename, std::ostream & log ) {
+	log.flush();
+	bool is_playlist = false;
+	bool m3u8 = false;
+	if ( ends_with( filename, ".m3u") || ends_with( filename, ".m3U") || ends_with( filename, ".M3u") || ends_with( filename, ".M3U") ) {
+		is_playlist = true;
+	}
+	if ( ends_with( filename, ".m3u8") || ends_with( filename, ".m3U8") || ends_with( filename, ".M3u8") || ends_with( filename, ".M3U8") ) {
+		is_playlist = true;
+		m3u8 = true;
+	}
+	if ( ends_with( filename, ".pls") || ends_with( filename, ".plS") || ends_with( filename, ".pLs") || ends_with( filename, ".pLS") || ends_with( filename, ".Pls")  || ends_with( filename, ".PlS")  || ends_with( filename, ".PLs")  || ends_with( filename, ".PLS") ) {
+		is_playlist = true;
+	}
+	std::string basepath = get_basepath( filename );
+	try {
+#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+		std::istringstream file_stream;
+#else
+		std::ifstream file_stream;
+#endif
+		#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+			// Only MSVC has std::ifstream::ifstream(std::wstring).
+			// Fake it for other compilers using _wfopen().
+			std::string data;
+			FILE * f = _wfopen( utf8_to_wstring( filename ).c_str(), L"rb" );
+			if ( f ) {
+				while ( !feof( f ) ) {
+					static const std::size_t BUFFER_SIZE = 4096;
+					char buffer[BUFFER_SIZE];
+					size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
+					std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
+				}
+				fclose( f );
+				f = NULL;
+			}
+			file_stream.str( data );
+		#elif defined(_MSC_VER) && defined(UNICODE)
+			file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
+		#else
+			file_stream.open( filename, std::ios::binary );
+		#endif
+		std::string line;
+		bool first = true;
+		bool extm3u = false;
+		bool pls = false;
+		while ( std::getline( file_stream, line ) ) {
+			std::string newfile;
+			line = trim_eol( line );
+			if ( first ) {
+				first = false;
+				if ( line == "#EXTM3U" ) {
+					extm3u = true;
+					continue;
+				} else if ( line == "[playlist]" ) {
+					pls = true;
+				}
+			}
+			if ( line.empty() ) {
+				continue;
+			}
+			if ( pls ) {
+				if ( begins_with( line, "File" ) ) {
+					if ( line.find( "=" ) != std::string::npos ) {
+						flags.filenames.push_back( line.substr( line.find( "=" ) + 1 ) );
+					}
+				} else if ( begins_with( line, "Title" ) ) {
+					continue;
+				} else if ( begins_with( line, "Length" ) ) {
+					continue;
+				} else if ( begins_with( line, "NumberOfEntries" ) ) {
+					continue;
+				} else if ( begins_with( line, "Version" ) ) {
+					continue;
+				} else {
+					continue;
+				}
+			} else if ( extm3u ) {
+				if ( begins_with( line, "#EXTINF" ) ) {
+					continue;
+				} else if ( begins_with( line, "#" ) ) {
+					continue;
+				}
+				if ( m3u8 ) {
+					newfile = line;
+				} else {
+#if defined(WIN32)
+					newfile = wstring_to_utf8( locale_to_wstring( line ) );
+#else
+					newfile = line;
+#endif
+				}
+			} else {
+				if ( m3u8 ) {
+					newfile = line;
+				} else {
+#if defined(WIN32)
+					newfile = wstring_to_utf8( locale_to_wstring( line ) );
+#else
+					newfile = line;
+#endif
+				}
+			}
+			if ( !newfile.empty() ) {
+				if ( !is_absolute( newfile ) ) {
+					newfile = basepath + newfile;
+				}
+				flags.filenames.push_back( newfile );
+			}
+		}
+	} catch ( std::exception & e ) {
+		log << "error loading '" << filename << "': " << e.what() << std::endl;
+	} catch ( ... ) {
+		log << "unknown error loading '" << filename << "'" << std::endl;
+	}
+	log.flush();
+	return is_playlist;
+}
+
+
 static commandlineflags parse_openmpt123( const std::vector<std::string> & args, std::ostream & log ) {
 
 	log.flush();
@@ -1828,6 +2032,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--dither" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.dither;
+				++i;
+			} else if ( arg == "--playlist" && nextarg != "" ) {
+				parse_playlist( flags, nextarg, log );
 				++i;
 			} else if ( arg == "--randomize" ) {
 				flags.randomize = true;
