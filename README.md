@@ -308,7 +308,7 @@ conventions. Using common sense is recommended.
      -  Opening parentheses are separated from keywords with a space.
      -  Opening parentheses are not separated from function names.
      -  Place spaces around operators and inside parentheses.
-     -  Align `:` and `,` when inheriting or initialiasing members in a
+     -  Align `:` and `,` when inheriting or initializing members in a
         constructor.
      -  The pointer `*` is separated from both the type and the variable name.
      -  Use tabs for identation, spaces for formatting.
