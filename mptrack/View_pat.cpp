@@ -2159,28 +2159,28 @@ void CViewPattern::OnVisualizeEffect()
 //------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if (pModDoc != nullptr && pModDoc->GetrSoundFile().Patterns.IsValidPat(m_nPattern))
 	{
 		const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 		const CHANNELINDEX nchn = m_Selection.GetStartChannel();
 		if (m_pEffectVis)
 		{
-			//window already there, update data
+			// Window already there, update data
 			m_pEffectVis->UpdateSelection(row0, row1, nchn, pModDoc, m_nPattern);
-		}
-		else
+		} else
 		{
-			//Open window & send data
+			// Open window & send data
 			CriticalSection cs;
-
-			m_pEffectVis = new CEffectVis(this, row0, row1, nchn, pModDoc, m_nPattern);
-			if (m_pEffectVis)
+			try
 			{
+				m_pEffectVis = new CEffectVis(this, row0, row1, nchn, pModDoc, m_nPattern);
 				m_pEffectVis->OpenEditor(CMainFrame::GetMainFrame());
-				// HACK: to get status window set up; must create clear destinction between 
+				// HACK: to get status window set up; must create clear destinction between
 				// construction, 1st draw code and all draw code.
 				m_pEffectVis->OnSize(0, 0, 0);
-
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			}
 		}
 	}
