@@ -100,6 +100,12 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_DEPRECATED __declspec(deprecated)
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_DEPRECATED __attribute__((deprecated))
+#elif defined(__has_cpp_attribute)
+	#if __has_cpp_attribute(deprecated)
+	#define MPT_DEPRECATED [[deprecated]]
+	#else
+	#define MPT_DEPRECATED
+	#endif
 #else
 #define MPT_DEPRECATED
 #endif
@@ -385,6 +391,12 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 #define MPT_FALLTHROUGH __fallthrough
 #elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_FALLTHROUGH [[clang::fallthrough]]
+#elif defined(__has_cpp_attribute)
+	#if __has_cpp_attribute(fallthrough)
+	#define MPT_FALLTHROUGH [[fallthrough]]
+	#else
+	#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
+	#endif
 #else
 #define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
 #endif
