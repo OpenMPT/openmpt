@@ -100,12 +100,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_DEPRECATED __declspec(deprecated)
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
 #define MPT_DEPRECATED __attribute__((deprecated))
-#elif defined(__has_cpp_attribute)
-	#if __has_cpp_attribute(deprecated)
-	#define MPT_DEPRECATED [[deprecated]]
-	#else
-	#define MPT_DEPRECATED
-	#endif
 #else
 #define MPT_DEPRECATED
 #endif
