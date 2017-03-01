@@ -301,6 +301,42 @@ static std::string replace( std::string str, const std::string & oldstr, const s
 	return str;
 }
 
+static bool begins_with( const std::string & str, const std::string & match ) {
+	return ( str.find( match ) == 0 );
+}
+
+static bool ends_with( const std::string & str, const std::string & match ) {
+	return ( str.rfind( match ) == ( str.length() - match.length() ) );
+}
+
+static std::string trim_left(std::string str, const std::string &whitespace = std::string()) {
+	std::string::size_type pos = str.find_first_not_of(whitespace);
+	if(pos != std::string::npos) {
+		str.erase(str.begin(), str.begin() + pos);
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1) {
+		return std::string();
+	}
+	return str;
+}
+
+static std::string trim_right(std::string str, const std::string &whitespace = std::string()) {
+	std::string::size_type pos = str.find_last_not_of(whitespace);
+	if(pos != std::string::npos) {
+		str.erase(str.begin() + pos + 1, str.end());
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0) {
+		return std::string();
+	}
+	return str;
+}
+
+static std::string trim(std::string str, const std::string &whitespace = std::string()) {
+	return trim_right(trim_left(str, whitespace), whitespace);
+}
+
+static std::string trim_eol( const std::string & str ) {
+	return trim( str, "\r\n" );
+}
+
 static std::string default_path_separator() {
 #if defined(WIN32)
 	return "\\";
@@ -335,19 +371,19 @@ static std::string get_basepath( std::string filename ) {
 
 static bool is_absolute( std::string filename ) {
 #if defined(WIN32)
-	if ( begins_with( filename, "\\\\?\\UNC\\" ) {
+	if ( begins_with( filename, "\\\\?\\UNC\\" ) ) {
 		return true;
 	}
-	if ( begins_with( filename, "\\\\?\\" ) {
+	if ( begins_with( filename, "\\\\?\\" ) ) {
 		return true;
 	}
-	if ( begins_with( filename, "\\\\" ) {
+	if ( begins_with( filename, "\\\\" ) ) {
 		return true; // UNC
 	}
-	if ( begins_with( filename, "//" ) {
+	if ( begins_with( filename, "//" ) ) {
 		return true; // UNC
 	}
-	return ( filename.length() ) >= 3 && ( filename[1] == ":" ) && is_path_separator( filename[2] );
+	return ( filename.length() ) >= 3 && ( filename[1] == ':' ) && is_path_separator( filename[2] );
 #else
 	return ( filename.length() >= 1 ) && is_path_separator( filename[0] );
 #endif
@@ -1663,43 +1699,6 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 	} catch ( ... ) {
 		throw;
 	}
-}
-
-
-static bool begins_with( const std::string & str, const std::string & match ) {
-	return ( str.find( match ) == 0 );
-}
-
-static bool ends_with( const std::string & str, const std::string & match ) {
-	return ( str.rfind( match ) == ( str.length() - match.length() ) );
-}
-
-static std::string trim_left(std::string str, const std::string &whitespace = std::string()) {
-	std::string::size_type pos = str.find_first_not_of(whitespace);
-	if(pos != std::string::npos) {
-		str.erase(str.begin(), str.begin() + pos);
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1) {
-		return std::string();
-	}
-	return str;
-}
-
-static std::string trim_right(std::string str, const std::string &whitespace = std::string()) {
-	std::string::size_type pos = str.find_last_not_of(whitespace);
-	if(pos != std::string::npos) {
-		str.erase(str.begin() + pos + 1, str.end());
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0) {
-		return std::string();
-	}
-	return str;
-}
-
-static std::string trim(std::string str, const std::string &whitespace = std::string()) {
-	return trim_right(trim_left(str, whitespace), whitespace);
-}
-
-static std::string trim_eol( const std::string & str ) {
-	return trim( str, "\r\n" );
 }
 
 
