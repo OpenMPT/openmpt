@@ -52,6 +52,26 @@ std::wstring utf8_to_wstring( const std::string & utf8_string ) {
 	return &unicode_buf[0];
 }
 
+std::string wstring_to_locale( const std::wstring & unicode_string ) {
+	int required_size = WideCharToMultiByte( CP_ACP, 0, unicode_string.c_str(), -1, NULL, 0, NULL, NULL );
+	if ( required_size <= 0 ) {
+		return std::string();
+	}
+	std::vector<char> locale_buf( required_size );
+	WideCharToMultiByte( CP_ACP, 0, unicode_string.c_str(), -1, &locale_buf[0], required_size, NULL, NULL );
+	return &locale_buf[0];
+}
+
+std::wstring locale_to_wstring( const std::string & locale_string ) {
+	int required_size = MultiByteToWideChar( CP_ACP, 0, locale_string.c_str(), -1, NULL, 0 );
+	if ( required_size <= 0 ) {
+		return std::wstring();
+	}
+	std::vector<wchar_t> unicode_buf( required_size );
+	MultiByteToWideChar( CP_ACP, 0, locale_string.data(), -1, &unicode_buf[0], required_size );
+	return &unicode_buf[0];
+}
+
 #endif // WIN32
 
 #if defined(MPT_NEEDS_THREADS)
