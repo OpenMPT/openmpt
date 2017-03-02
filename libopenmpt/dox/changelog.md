@@ -54,6 +54,7 @@ is just a high-level summary.
     between two render calls.
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
     out-of-memory situations while handling exceptions in the C API.
+ *  [**Bug**] libmodplug: `libmodplug.pc` was wrong.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
