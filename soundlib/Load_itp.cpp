@@ -255,13 +255,17 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
 	LimitMax(m_nSamples, SAMPLEINDEX(MAX_SAMPLES - 1));
 
-	// Read number of embedded samples
+	// Read number of embedded samples - at most as many as there are real samples in a valid file
 	uint32 embeddedSamples = file.ReadUint32LE();
+	if(embeddedSamples > m_nSamples)
+	{
+		return false;
+	}
 
 	// Read samples
-	for(uint32 smp = 0; smp < embeddedSamples; smp++)
+	for(uint32 smp = 0; smp < embeddedSamples && file.CanRead(8 + sizeof(ITSample)); smp++)
 	{
-		SAMPLEINDEX realSample = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
+		uint32 realSample = file.ReadUint32LE();
 		ITSample sampleHeader;
 		file.ReadStruct(sampleHeader);
 		FileReader sampleData = file.ReadChunk(file.ReadUint32LE());
