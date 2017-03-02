@@ -429,7 +429,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < Order.size(); i++)
+		for(ORDERINDEX i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -848,7 +848,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < Order.size(); i++)
+		for(ORDERINDEX i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -939,6 +939,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 //------------------------------------------------------------------------------------------------------------------------
 {
 	std::vector<int8> tempBuf(destSize, 0);
+	size_t depackSize = destSize;
 
 	// Unpack Loop
 	{
@@ -973,6 +974,8 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 				j--;
 			}
 		}
+		// j should only be non-zero for truncated samples
+		depackSize -= j;
 	}
 
 	// Bit Unpack Loop
@@ -981,7 +984,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 		uint16 bitcount = 0x80;
 		size_t k = 0;
 		uint8 *dst = static_cast<uint8 *>(dest);
-		for(size_t i = 0; i < destSize; i++)
+		for(size_t i = 0; i < depackSize; i++)
 		{
 			uint8 al = *out++;
 			uint16 dh = 0;
@@ -1005,7 +1008,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 	{
 		int8 old = 0;
 		int8 *out = static_cast<int8 *>(dest);
-		for(size_t i = destSize; i != 0; i--)
+		for(size_t i = depackSize; i != 0; i--)
 		{
 			int pos = *reinterpret_cast<uint8 *>(out);
 			if(pos != 128 && (pos & 0x80) != 0)
