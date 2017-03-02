@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
     out-of-memory situations while handling exceptions in the C API.
+ *  [**Bug**] libmodplug: `libmodplug.pc` was wrong.
 
 ### libopenmpt 0.2-beta20.5 (2017-02-05)
 
