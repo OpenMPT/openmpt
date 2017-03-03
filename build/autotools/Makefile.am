@@ -88,7 +88,7 @@ nobase_include_HEADERS =
 
 pkgconfig_DATA += libopenmpt/libopenmpt.pc
 lib_LTLIBRARIES += libopenmpt.la
-libopenmpt_la_LDFLAGS = -version-info $(LIBOPENMPT_LTVER_CURRENT):$(LIBOPENMPT_LTVER_REVISION):$(LIBOPENMPT_LTVER_AGE)
+libopenmpt_la_LDFLAGS = -version-info $(LIBOPENMPT_LTVER_CURRENT):$(LIBOPENMPT_LTVER_REVISION):$(LIBOPENMPT_LTVER_AGE) -no-undefined
 nobase_include_HEADERS += libopenmpt/libopenmpt.h
 nobase_include_HEADERS += libopenmpt/libopenmpt.hpp
 nobase_include_HEADERS += libopenmpt/libopenmpt_version.h
@@ -326,7 +326,7 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 
 if ENABLE_LIBOPENMPT_MODPLUG
 lib_LTLIBRARIES += libopenmpt_modplug.la
-libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0
+libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
 libopenmpt_modplug_la_CPPFLAGS = -I$(srcdir)/
 libopenmpt_modplug_la_CXXFLAGS = 
 libopenmpt_modplug_la_CFLAGS = 
@@ -339,7 +339,7 @@ endif
 if ENABLE_LIBMODPLUG
 pkgconfig_DATA += libmodplug/libmodplug.pc
 lib_LTLIBRARIES += libmodplug.la
-libmodplug_la_LDFLAGS = -version-info 1:0:0
+libmodplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
 nobase_include_HEADERS += libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
 libmodplug_la_CPPFLAGS = -I$(srcdir)/
 libmodplug_la_CXXFLAGS = 
