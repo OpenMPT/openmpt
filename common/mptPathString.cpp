@@ -142,15 +142,78 @@ namespace mpt
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 //------------------------------------------------------------------------------------------------------
 {
-	wchar_t tempDrive[_MAX_DRIVE];
-	wchar_t tempDir[_MAX_DIR];
-	wchar_t tempFname[_MAX_FNAME];
-	wchar_t tempExt[_MAX_EXT];
-	_wsplitpath(path.c_str(), tempDrive, tempDir, tempFname, tempExt);
-	if(drive) *drive = mpt::PathString::FromNative(tempDrive);
-	if(dir) *dir = mpt::PathString::FromNative(tempDir);
-	if(fname) *fname = mpt::PathString::FromNative(tempFname);
-	if(ext) *ext = mpt::PathString::FromNative(tempExt);
+	if(drive) *drive = mpt::PathString();
+	if(dir) *dir = mpt::PathString();
+	if(fname) *fname = mpt::PathString();
+	if(ext) *ext = mpt::PathString();
+
+	mpt::RawPathString p = path;
+
+	// remove \\?\\ prefix
+	if(p.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	{
+		p = MPT_PATHSTRING_LITERAL("\\\\") + p.substr(8);
+	} else if(p.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	{
+		p = p.substr(4);
+	}
+
+	if (p.length() >= 2 && (
+		p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\/")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("/\\")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("//")
+		))
+	{ // UNC
+		mpt::RawPathString::size_type first_slash = p.substr(2).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+		if(first_slash != mpt::RawPathString::npos)
+		{
+			mpt::RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+			if(second_slash != mpt::RawPathString::npos)
+			{
+				if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2 + first_slash + 1 + second_slash));
+				p = p.substr(2 + first_slash + 1 + second_slash);
+			} else
+			{
+				if(drive) *drive = mpt::PathString::FromNative(p);
+				p = mpt::RawPathString();
+			}
+		} else
+		{
+			if(drive) *drive = mpt::PathString::FromNative(p);
+			p = mpt::RawPathString();
+		}
+	} else
+	{ // local
+		if(p.length() >= 2 && (p[1] == MPT_PATHSTRING_LITERAL(':')))
+		{
+			if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2));
+			p = p.substr(2);
+		} else
+		{
+			if(drive) *drive = mpt::PathString();
+		}
+	}
+	mpt::RawPathString::size_type last_slash = p.find_last_of(MPT_PATHSTRING_LITERAL("\\/"));
+	if(last_slash != mpt::RawPathString::npos)
+	{
+		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
+		p = p.substr(last_slash + 1);
+	} else
+	{
+		if(dir) *dir = mpt::PathString();
+	}
+	mpt::RawPathString::size_type last_dot = p.find_last_of(MPT_PATHSTRING_LITERAL("."));
+	if(last_dot == mpt::RawPathString::npos)
+	{
+		if(fname) *fname = mpt::PathString::FromNative(p);
+		if(ext) *ext = mpt::PathString();
+	} else
+	{
+		if(fname) *fname = mpt::PathString::FromNative(p.substr(0, last_dot));
+		if(ext) *ext = mpt::PathString::FromNative(p.substr(last_dot));
+	}
+
 }
 
 PathString PathString::GetDrive() const

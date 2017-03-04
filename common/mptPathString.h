@@ -96,7 +96,8 @@ public:
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
-	PathString GetDrive() const;		// Drive letter + colon, e.g. "C:"
+	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
+	PathString GetDrive() const;		// Drive letter + colon, e.g. "C:" or \\server\\share
 	PathString GetDir() const;			// Directory, e.g. "\OpenMPT\"
 	PathString GetPath() const;			// Drive + Dir, e.g. "C:\OpenMPT\"
 	PathString GetFileName() const;		// File name without extension, e.g. "mptrack"
