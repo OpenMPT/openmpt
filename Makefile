@@ -56,6 +56,7 @@
 # Build flags for libopenmpt (provide on each `make` invocation)
 #  (defaults are 0):
 #
+#  USE_DLOPEN=1     Support loading 3rd party libraries with dlopen or LoadLibrary.
 #  NO_LTDL=1        Do not require libltdl
 #  NO_DL=1          Do not fallback to libdl
 #
@@ -352,6 +353,8 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 NO_ZLIB:=1
 endif
 
+ifeq ($(USE_DLOPEN),1)
+CPPFLAGS_DLOPEN := -DMPT_ENABLE_DLOPEN
 ifeq ($(NO_LTDL),1)
 ifeq ($(NO_DL),1)
 else
@@ -370,6 +373,7 @@ else
 CPPFLAGS_LTDL := -DMPT_WITH_LTDL
 LDLIBS_LTDL   := -lltdl
 PC_LIBS_LTDL := -lltdl
+endif
 endif
 
 ifeq ($(NO_ZLIB),1)
@@ -562,7 +566,7 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
 endif
 
-CPPFLAGS += $(CPPFLAGS_LTDL) $(CPPFLAGS_DL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
+CPPFLAGS += $(CPPFLAGS_DLOPEN) $(CPPFLAGS_LTDL) $(CPPFLAGS_DL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
 LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_DL) $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
 LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_DL) $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
 

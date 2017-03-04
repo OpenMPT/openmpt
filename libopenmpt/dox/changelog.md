@@ -33,6 +33,14 @@ is just a high-level summary.
  *  [**Change**] The `Makefile` build system now passes `std=c++11` to the
     compiler by default. Older compilers may still work if you pass
     `STDCXX=c++0x` to the `make` invocation.
+ *  [**Change**] The `Makefile` and Autotools build system got new options
+    `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
+    in order to load 3rd-party libraries dynamically. Additionally, the defaults
+    for detecting libdl and libltdl now also default to off with autotools. This
+    change has been made in order to make the default configuration as secure as
+    possible. Both build systems default to dependencies that facilitate native
+    MO3 decoding internally anyway, thus there is acutally no practical
+    disadvantage with the new default settings at all.
 
  *  [**Regression**] Support for GCC 4.1, GCC 4.2 and GCC 4.3, as well as the
     `Makefile` option `ANCIENT=1`, is gone.

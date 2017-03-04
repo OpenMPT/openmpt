@@ -100,9 +100,16 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
  ]
 )
 
+AC_ARG_ENABLE([dlopen], AS_HELP_STRING([--enable-dlopen], [Enable dynamic loading of 3rd-party libraries using dlopen or LoadLibray.]))
+AS_IF([test "x$enable-dlopen" = "xyes"],
+ [
+  AC_DEFINE([MPT_ENABLE_DLOPEN], [], [enable dlopen])
+ ]
+)
+  
 # Optional libopenmpt dependency: libltdl
-AC_ARG_WITH([ltdl], AS_HELP_STRING([--without-ltdl], [Disable the use of libtool libltdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_ltdl" != "xno"],
+AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl], [Enable the use of libtool libltdl for dynamic loading of third party libraries.]))
+AS_IF([test "x$with_ltdl" = "xyes"],
  [
   AC_CHECK_HEADER([ltdl.h],
    [
@@ -143,8 +150,8 @@ AC_SUBST([LTDL_CPPFLAGS])
 AC_SUBST([LTDL_LIBS])
 
 # Optional libopenmpt dependency: libdl
-AC_ARG_WITH([dl], AS_HELP_STRING([--without-dl], [Disable the use of libdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_dl" != "xno"],
+AC_ARG_WITH([dl], AS_HELP_STRING([--with-dl], [Enable the use of libdl for dynamic loading of third party libraries.]))
+AS_IF([test "x$with_dl" = "xyes"],
  [
   AC_SEARCH_LIBS([dlopen], [dl dld],
    [
