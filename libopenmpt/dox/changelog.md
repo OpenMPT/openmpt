@@ -11,6 +11,10 @@ is just a high-level summary.
     out-of-memory situations while handling exceptions in the C API.
  *  [**Bug**] libmodplug: `libmodplug.pc` was wrong.
 
+ *  Autotools build system now has options `--disable-openmpt123`,
+    `--disable-tests` and `--disable-examples` which may be desireable when
+    cross-compiling.
+
 ### libopenmpt 0.2-beta20.5 (2017-02-05)
 
  *  [**Bug**] libmodplug: C++ API did not build with MSVC2008 in 0.2-beta20.4.
