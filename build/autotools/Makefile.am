@@ -36,7 +36,11 @@ nobase_dist_doc_DATA += examples/libopenmpt_example_c_stdout.c
 bin_PROGRAMS = 
 check_PROGRAMS = 
 lib_LTLIBRARIES = 
+if ENABLE_TESTS
 TESTS = libopenmpttest
+endif
+
+if ENABLE_EXAMPLES
 
 check_PROGRAMS += libopenmpt_example_c_stdout
 check_PROGRAMS += libopenmpt_example_c_probe
@@ -80,6 +84,8 @@ libopenmpt_example_c_unsafe_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
 endif
 if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIOCPP_LIBS)
+endif
+
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -350,6 +356,7 @@ libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug.c
 libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
 endif
 
+if ENABLE_TESTS
 check_PROGRAMS += libopenmpttest
 libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
@@ -586,6 +593,9 @@ libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_buffer.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_fd.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_version.h
+endif
+
+if ENABLE_OPENMPT123
 
 bin_PROGRAMS += openmpt123
 openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
@@ -623,6 +633,8 @@ openmpt123_SOURCES += src/openmpt123/openmpt123_waveout.hpp
 #openmpt123_SOURCES += openmpt123/openmpt123_waveout.hpp
 
 man1_MANS = man/openmpt123.1
+
+endif
 
 @DX_RULES@
 

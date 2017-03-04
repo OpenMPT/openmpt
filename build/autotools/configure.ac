@@ -184,8 +184,24 @@ AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 
 
+# openmpt123
+AC_ARG_ENABLE([openmpt123], AS_HELP_STRING([--disable-openmpt123], [Disable the openmpt123 command line player.]))
+AM_CONDITIONAL([ENABLE_OPENMPT123], [test "x$enable_openmpt123" != "xno"])
+
+
+# examples
+AC_ARG_ENABLE([examples], AS_HELP_STRING([--disable-examples], [Disable the example programs.]))
+AM_CONDITIONAL([ENABLE_EXAMPLES], [test "x$enable_examples" != "xno"])
+
+
+# tests
+AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests], [Disable the test suite.]))
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
+
+
 # Optional openmpt123 dependency
 AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--without-pulseaudio], [Disable use of libpulse and libpulse-simple.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_pulseaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
@@ -203,9 +219,11 @@ AS_IF([test "x$with_pulseaudio" != "xno"],
   have_pulseaudio=0
  ]
 )
+],[have_pulseaudio=0])
 
 # Optional openmpt123 and examples dependency
 AC_ARG_WITH([portaudio], AS_HELP_STRING([--without-portaudio], [Disable use of libportaudio.]))
+AS_IF([test "x$enable_openmpt123$enable_examples" != "xnono"],[
 AS_IF([test "x$with_portaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
@@ -223,10 +241,12 @@ AS_IF([test "x$with_portaudio" != "xno"],
   have_portaudio=0
  ]
 )
+],[have_portaudio=0])
 AM_CONDITIONAL([HAVE_PORTAUDIO], [test x$have_portaudio = x1])
 
 # Optional examples dependency: PortAudio C++
 AC_ARG_WITH([portaudiocpp], AS_HELP_STRING([--without-portaudiocpp], [Disable use of libportaudiocpp.]))
+AS_IF([test "x$enable_examples" != "xno"],[
 AS_IF([test "x$with_portaudiocpp" != "xno"],
  [
   PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
@@ -244,39 +264,48 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
   have_portaudiocpp=0
  ]
 )
+],[have_portaudicppo=0])
 AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
 
 # Optional disabled openmpt123 dependency: libsdl2
 AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl2" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL2], [sdl2], [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])], [AC_MSG_ERROR([Unable to find libsdl2.])])
  ]
 )
+])
 
 # Optional disabled openmpt123 dependency: libsdl
 AC_ARG_WITH([sdl], AS_HELP_STRING([--with-sdl], [Enable use of libsdl.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL], [sdl], [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])], [AC_MSG_ERROR([Unable to find libsdl.])])
  ]
 )
+])
 
 # Optional openmpt123 dependency: libsndfile
 AC_ARG_WITH([sndfile], AS_HELP_STRING([--without-sndfile], [Disable use of libsndfile.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sndfile" != "xno"],
  [
   PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_ERROR([Unable to find libsndfile.])])
  ]
 )
+])
 
 # Optional openmpt123 dependency: libFLAC
 AC_ARG_WITH([flac], AS_HELP_STRING([--without-flac], [Disable use of libflac.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_flac" != "xno"],
  [
   PKG_CHECK_MODULES([FLAC], [flac >= 1.3.0], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac >= 1.3.0.])])
  ]
 )
+])
 
 # We want a modern C compiler 
 AC_PROG_CC_STDC
