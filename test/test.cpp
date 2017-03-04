@@ -1689,6 +1689,55 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.foo.txt").GetFileName(), MPT_PATHSTRING("tmp.foo"));
 	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.foo.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
 
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetDrive(), MPT_PATHSTRING("\\\\server"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetDir(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetPath(), MPT_PATHSTRING("\\\\server"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFileExt(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFullFileName(), MPT_PATHSTRING(""));
+
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetDrive(), MPT_PATHSTRING("\\\\server\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetDir(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetPath(), MPT_PATHSTRING("\\\\server\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFileExt(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFullFileName(), MPT_PATHSTRING(""));
+
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetDir(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetPath(), MPT_PATHSTRING("\\\\server\\share"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFileExt(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFullFileName(), MPT_PATHSTRING(""));
+
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetDir(), MPT_PATHSTRING("\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetPath(), MPT_PATHSTRING("\\\\server\\share\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFileExt(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFullFileName(), MPT_PATHSTRING(""));
+
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), MPT_PATHSTRING("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), MPT_PATHSTRING("name.foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), MPT_PATHSTRING(".ext"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), MPT_PATHSTRING("name.foo.ext"));
+
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), MPT_PATHSTRING("C:"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDir(), MPT_PATHSTRING("\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPath(), MPT_PATHSTRING("C:\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileName(), MPT_PATHSTRING("tmp.foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFullFileName(), MPT_PATHSTRING("tmp.foo.txt"));
+	
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), MPT_PATHSTRING("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), MPT_PATHSTRING("name.foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), MPT_PATHSTRING(".ext"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), MPT_PATHSTRING("name.foo.ext"));
+
 #endif
 
 #endif
