@@ -44,6 +44,7 @@
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD" }
+	defines { "MPT_ENABLE_DLOPEN" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib", "not action:vs2008" }

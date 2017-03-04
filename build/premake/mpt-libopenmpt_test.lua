@@ -47,6 +47,7 @@
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
+	defines { "MPT_ENABLE_DLOPEN" }
   links {
    "ogg",
    "vorbis",
