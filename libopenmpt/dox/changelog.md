@@ -79,6 +79,9 @@ is just a high-level summary.
  *  openmpt123: Improved section layout in man page.
  *  libmodplug: Added all missing C++ API symbols that are accessable via the
     public libmodplug header file.
+ *  Autotools build system now has options `--disable-openmpt123`,
+    `--disable-tests` and `--disable-examples` which may be desireable when
+    cross-compiling.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
