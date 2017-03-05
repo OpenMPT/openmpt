@@ -10,6 +10,9 @@ is just a high-level summary.
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
     out-of-memory situations while handling exceptions in the C API.
  *  [**Bug**] libmodplug: `libmodplug.pc` was wrong.
+ *  [**Bug**] Cross-compiling libopenmpt with autotools for Windows now properly
+    sets `-municode` and `-mconsole` as well as all required Windows system
+    libraries.
 
  *  [**Change**] The `Makefile` and Autotools build system got new options
     `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
