@@ -116,6 +116,16 @@ make check
 cd ..
 cd ..
 
+#echo "Testing tarball cross-compilation ..."
+#mkdir test-tarball2
+#cd test-tarball2
+#tar xvaf ../libopenmpt*.tar.gz
+#cd libopenmpt*
+#./configure --host=x86_64-w64-mingw32 --without-zlib --without-ogg --without-vorbis --without-vorbisfile --without-mpg123 --without-ltdl --without-dl --without-pulseaudio --without-portaudio --without-sndfile --without-flac --without-portaudiocpp --enable-modplug --disable-openmpt123 --disable-examples --disable-tests
+#make
+#cd ..
+#cd ..
+
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
 cd bin/dist-autotools
