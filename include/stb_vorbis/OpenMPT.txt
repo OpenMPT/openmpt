@@ -1,12 +1,8 @@
 This folder contains the stb_vorbis library from
 https://github.com/nothings/stb/blob/master/stb_vorbis.c
-(commit e713a69f1ea6ee1e0d55725ed0731520045a5993)
+(commit 6f6e11f85fd5c14bc9e9eb5edafb1b5dabd515d0
 
 Modifications:
- *  Apply commit f32854c809ab261c07f09f5f27435daadccc2728 of branch
-    https://github.com/rygorous/stb/tree/fix_vorbis_ilog (
-    https://github.com/rygorous/stb/commit/f32854c809ab261c07f09f5f27435daadccc2728
-    ).
  *  Use of alloca has been replaced with malloc, as alloca is not in C99 and
     fails to compile.
  *  Macro redefinition of STB_VORBIS_NO_STDIO has been fixed.
