@@ -39,7 +39,7 @@ is just a high-level summary.
     for detecting libdl and libltdl now also default to off with autotools. This
     change has been made in order to make the default configuration as secure as
     possible. Both build systems default to dependencies that facilitate native
-    MO3 decoding internally anyway, thus there is acutally no practical
+    MO3 decoding internally anyway, thus there is actually no practical
     disadvantage with the new default settings at all.
 
  *  [**Regression**] Support for GCC 4.1, GCC 4.2 and GCC 4.3, as well as the
