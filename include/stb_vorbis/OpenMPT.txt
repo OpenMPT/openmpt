@@ -1,6 +1,6 @@
 This folder contains the stb_vorbis library from
 https://github.com/nothings/stb/blob/master/stb_vorbis.c
-(commit 4c519106a7c3862524100f907736c1c74412725d)
+(commit e713a69f1ea6ee1e0d55725ed0731520045a5993)
 
 Modifications:
  *  Apply commit f32854c809ab261c07f09f5f27435daadccc2728 of branch
