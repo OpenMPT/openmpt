@@ -68,6 +68,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-64-%MPT_BIN_TARGET64%\openmpt1
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_openmpt.dll .\foobar2000\ || goto error
+copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -80,6 +81,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_open
  Winamp\in_openmpt.dll ^
  foobar2000\foo_openmpt.txt ^
  foobar2000\foo_openmpt.dll ^
+ download_mpg123.vbs ^
  || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-%MPT_PKG_TAG%.tar libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z || goto error
@@ -145,6 +147,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\libopenm
 copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-ogg.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-vorbis.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-zlib.dll bin\x86_64\ || goto error
+copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -166,6 +169,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-
  bin\x86_64\openmpt-ogg.dll ^
  bin\x86_64\openmpt-vorbis.dll ^
  bin\x86_64\openmpt-zlib.dll ^
+ download_mpg123.vbs ^
  || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z || goto error
