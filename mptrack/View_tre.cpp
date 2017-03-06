@@ -1870,7 +1870,8 @@ void CModTree::FillInstrumentLibrary()
 					if(!ext.empty())
 					{
 						ext.erase(0, 1);
-						std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+						ext = mpt::ToLowerCaseAscii(ext);
+						extPS = mpt::PathString::FromUTF8(ext);
 					}
 
 					if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
