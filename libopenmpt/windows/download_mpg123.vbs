@@ -1,8 +1,19 @@
 
 Set fso = CreateObject("Scripting.FileSystemObject")
+Set shell = CreateObject("Wscript.Shell")
+
+osmodern = False ' XP or older
+ostype = shell.RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\ProductOptions\ProductType")
+If ostype = "LanmanNT" Or ostype = "ServerNT" Or ostype = "WinNT" Then
+	osversion = shell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion")
+	osversionarray = Split(osversion, ".", 2)
+	If osversionarray(0) >= 6 Then
+		' Vista or newer
+		osmodern = True
+	End If
+End If
 
 ' change to script directory
-Set shell = CreateObject("Wscript.Shell")
 shell.CurrentDirectory = fso.GetParentFolderName(WScript.ScriptFullName)
 
 Function GetBinaryFile(filename)
@@ -67,11 +78,18 @@ End Sub
 
 CreateFolder "download.tmp"
 
-Download "https://mpg123.de/download/win32/mpg123-1.23.8-x86.zip", 569733, "054aaf106712cb7f8308e9e9edd138e3e2789d9e", "download.tmp\mpg123-1.23.8-x86.zip"
+httpprotocol = ""
+If osmodern Then
+	httpprotocol = "https"
+Else
+	httpprotocol = "http"
+End If
+
+Download httpprotocol & "://mpg123.de/download/win32/mpg123-1.23.8-x86.zip", 569733, "054aaf106712cb7f8308e9e9edd138e3e2789d9e", "download.tmp\mpg123-1.23.8-x86.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86")
 UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
-Download "https://mpg123.de/download/win64/mpg123-1.23.8-x86-64.zip", 616269, "c29414fa4d93f8d963009073122f1101842f86a7", "download.tmp\mpg123-1.23.8-x86-64.zip"
+Download httpprotocol & "://mpg123.de/download/win64/mpg123-1.23.8-x86-64.zip", 616269, "c29414fa4d93f8d963009073122f1101842f86a7", "download.tmp\mpg123-1.23.8-x86-64.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86-64")
 UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
