@@ -898,6 +898,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							offset += static_cast<SmpLength>(pChn->nOldHiOffset) << 16;
 						}
 						SampleOffset(*pChn, offset);
+					} else if(m.command == CMD_OFFSETPERCENTAGE)
+					{
+						SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, m.param, 255));
+					} else if(m.command == CMD_REVERSEOFFSET && pChn->pModSample != nullptr)
+					{
+						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+						ReverseSampleOffset(*pChn, m.param);
+						startTick = memory.state.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
 						if(m.vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
@@ -2958,6 +2966,14 @@ bool CSoundFile::ProcessEffects()
 			}
 			break;
 
+		// Disorder Tracker 2 percentage offset
+		case CMD_OFFSETPERCENTAGE:
+			if(triggerNote)
+			{
+				SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, param, 255));
+			}
+			break;
+
 		// Arpeggio
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
@@ -3235,13 +3251,7 @@ bool CSoundFile::ProcessEffects()
 
 		// PTM Reverse sample + offset (executed on every tick)
 		case CMD_REVERSEOFFSET:
-			if(pChn->pModSample != nullptr)
-			{
-				pChn->dwFlags.set(CHN_PINGPONGFLAG);
-				pChn->dwFlags.reset(CHN_LOOP);
-				pChn->nLength = pChn->pModSample->nLength;	// If there was a loop, extend sample to whole length.
-				pChn->position.Set((pChn->nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, pChn->nLength - 1), 0);
-			}
+			ReverseSampleOffset(*pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 #ifndef NO_PLUGINS
@@ -4977,10 +4987,6 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	{
 		// Digitrakker really uses byte offsets, not sample offsets. WTF!
 		param /= 2u;
-	} else if(GetType() == MOD_TYPE_PLM)
-	{
-		// Offset in Disorder Tracker 2 is a percentage
-		param = Util::muldiv_unsigned(chn.nLength, param >> 8, 255);
 	}
 
 	if(chn.rowCommand.IsNote())
@@ -5040,6 +5046,20 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	{
 		// Some trackers can also call offset effects without notes next to them...
 		chn.position.Set(param);
+	}
+}
+
+
+// 
+void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const
+//----------------------------------------------------------------------------------
+{
+	if(chn.pModSample != nullptr)
+	{
+		chn.dwFlags.set(CHN_PINGPONGFLAG);
+		chn.dwFlags.reset(CHN_LOOP);
+		chn.nLength = chn.pModSample->nLength;	// If there was a loop, extend sample to whole length.
+		chn.position.Set((chn.nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, chn.nLength - 1), 0);
 	}
 }
 

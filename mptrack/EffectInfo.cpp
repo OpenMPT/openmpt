@@ -130,6 +130,7 @@ static const MPTEFFECTINFO gFXInfo[] =
 	{CMD_NOTESLIDEDOWNRETRIG,0,0,	0,	MOD_TYPE_PTM,	"Note Slide Down + Retrigger Note"}, // PTM effect
 	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	"Revert Sample + Offset"}, // PTM effect
 	{CMD_DBMECHO,			0,0,	0,	MOD_TYPE_DBM,	"Echo Enable"}, // DBM effect
+	{CMD_OFFSETPERCENTAGE,	0,0,	0,	MOD_TYPE_DBM,	"Offset (Percentage)" }, // PLM effect
 };
 
 

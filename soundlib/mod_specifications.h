@@ -73,7 +73,7 @@ struct CModSpecifications
 	uint8 hasRestartPos : 1;			// Format has an automatic restart order position
 	uint8 supportsPlugins : 1;			// Format can store plugins
 	uint8 hasPatternSignatures : 1;		// Can patterns have a custom time signature?
-	uint8 hasPatternNames : 1;			// Cat patterns have a name?
+	uint8 hasPatternNames : 1;			// Can patterns have a name?
 	uint8 hasArtistName : 1;			// Can artist name be stored in file?
 	uint8 hasDefaultResampling : 1;		// Can default resampling be saved? (if not, it can still be modified in the GUI but won't set the module as modified)
 	uint8 hasFractionalTempo : 1;		// Are fractional tempos allowed?
