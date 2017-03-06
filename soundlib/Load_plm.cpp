@@ -318,7 +318,6 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 							m->param |= 0x0F;
 						}
 						break;
-#ifdef MODPLUG_TRACKER
 					case 0x0D:
 					case 0x16:
 						// Offset without note
@@ -327,7 +326,6 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 							m->note = lastNote[c];
 						}
 						break;
-#endif // MODPLUG_TRACKER
 					}
 				}
 			}
