@@ -72,7 +72,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	true,										// Has artist name
 	true,										// Has default resampling
 	true,										// Fixed point tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#???????",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 };
 
@@ -122,7 +122,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCD?FF?E?????????????????????",	// Supported Effects
+	" 0123456789ABCD?FF?E??????????????????????",	// Supported Effects
 	" ???????????????",							// Supported Volume Column commands
 };
 
@@ -170,7 +170,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCDRFFTE???GHK??XPL??????????",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK??XPL???????????",	// Supported Effects
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
@@ -218,7 +218,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#??????",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#???????",	// Supported Effects
 	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
@@ -265,7 +265,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?U??????????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?U???????????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
 
@@ -313,7 +313,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z??????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
 
@@ -360,7 +360,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z??????????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
@@ -407,7 +407,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#??????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#???????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 

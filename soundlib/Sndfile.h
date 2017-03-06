@@ -849,6 +849,7 @@ protected:
 	void Panning(ModChannel *pChn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
+	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
 	ROWINDEX PatternLoop(ModChannel *, uint32 param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);

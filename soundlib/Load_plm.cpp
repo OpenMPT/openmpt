@@ -211,7 +211,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_FINEVIBRATO,
 		CMD_VIBRATOVOL,
 		CMD_TONEPORTAVOL,
-		CMD_OFFSET,			// Percentage offset
+		CMD_OFFSETPERCENTAGE,
 	};
 
 	Order.clear();
@@ -319,17 +319,15 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 #ifdef MODPLUG_TRACKER
-					case 0x16:	// Percentage offset
-						if(m->instr > 0 && m->instr <= m_nSamples)
+					case 0x0D:
+					case 0x16:
+						// Offset without note
+						if(m->note == NOTE_NONE)
 						{
-							m->param = mpt::saturate_cast<ModCommand::PARAM>(((m->param * Samples[m->instr].nLength) / 255) >> 8);
+							m->note = lastNote[c];
 						}
 						break;
 #endif // MODPLUG_TRACKER
-					}
-					if((data[3] == 0x13 || data[3] == 0x16) && m->note == NOTE_NONE)
-					{
-						m->note = lastNote[c];
 					}
 				}
 			}
