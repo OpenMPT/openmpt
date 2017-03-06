@@ -246,8 +246,6 @@ protected:
 
 	void InsertOrDupItem(bool insert);
 
-	bool IsMediaFoundationExtension(const std::string &ext) const;
-
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CModTree)

@@ -1760,23 +1760,6 @@ void CModTree::EmptyInstrumentLibrary()
 }
 
 
-bool CModTree::IsMediaFoundationExtension(const std::string &ext) const
-//---------------------------------------------------------------------
-{
-	for(const auto &mfe : m_MediaFoundationExtensions)
-	{
-		if(mfe.empty())
-		{
-			continue;
-		}
-		if(mfe.ToLocale() == ext)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 // Refresh Instrument Library
 void CModTree::FillInstrumentLibrary()
 //------------------------------------
@@ -1845,8 +1828,6 @@ void CModTree::FillInstrumentLibrary()
 			}
 		}
 
-		std::vector<const char *> modExts = CSoundFile::GetSupportedExtensions(false);
-
 		// Enumerating Directories and samples/instruments
 		const mpt::PathString path = m_InstrLibPath + MPT_PATHSTRING("*.*");
 		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser, showInstrs = IsSampleBrowser();
@@ -1856,6 +1837,7 @@ void CModTree::FillInstrumentLibrary()
 		MemsetZero(wfd);
 		if((hFind = FindFirstFileW(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
+			auto modExts = CSoundFile::GetSupportedExtensions(false);
 			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
 			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx" };
 			auto allExtsBlacklist = { "txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol" };
@@ -1883,7 +1865,8 @@ void CModTree::FillInstrumentLibrary()
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
 					// Get lower-case file extension without dot.
-					std::string ext = mpt::ToCharset(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
+					mpt::PathString extPS = mpt::PathString::FromNative(wfd.cFileName).GetFileExt();
+					std::string ext = extPS.ToUTF8();
 					if(!ext.empty())
 					{
 						ext.erase(0, 1);
@@ -1907,14 +1890,15 @@ void CModTree::FillInstrumentLibrary()
 					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end())
 					{
 						// Songs
-						if (showDirs)
+						if(showDirs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_FOLDERSONG);
 						}
-					} else if(IsMediaFoundationExtension(ext)
+					} else if((!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
 						|| (m_bShowAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
 					{
-						if (showInstrs)
+						// MediaFoundation samples / other files
+						if(showInstrs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES);
 						}
