@@ -326,6 +326,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Plugins
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 	, enableAutoSuspend(conf, "VST Plugins", "EnableAutoSuspend", false)
+	, midiMappingInPluginEditor(conf, "VST Plugins", "EnableMidiMappingInEditor", true)
 	, pluginProjectPath(conf, "VST Plugins", "ProjectPath", std::wstring())
 	, vstHostProductString(conf, "VST Plugins", "HostProductString", "OpenMPT")
 	, vstHostVendorString(conf, "VST Plugins", "HostVendorString", "OpenMPT project")
