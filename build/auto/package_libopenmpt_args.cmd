@@ -78,17 +78,6 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_open
  XMPlay\xmp-openmpt.dll ^
  Winamp\in_openmpt.txt ^
  Winamp\in_openmpt.dll ^
- || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z ^
- LICENSE.txt ^
- Licenses ^
- changelog.md ^
- openmpt123\x86\openmpt123.exe ^
- openmpt123\x86_64\openmpt123.exe ^
- XMPlay\xmp-openmpt.txt ^
- XMPlay\xmp-openmpt.dll ^
- Winamp\in_openmpt.txt ^
- Winamp\in_openmpt.dll ^
  foobar2000\foo_openmpt.txt ^
  foobar2000\foo_openmpt.dll ^
  || goto error
