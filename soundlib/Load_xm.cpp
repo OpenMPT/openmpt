@@ -353,6 +353,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & XMFileHeader::extendedFilterRange) != 0);
+	if(m_SongFlags[SONG_EXFILTERRANGE] && madeWith == verFT2Generic | verNewModPlug)
+	{
+		madeWith = verFT2Clone | verNewModPlug | verConfirmed;
+	}
 
 	Order.ReadAsByte(file, fileHeader.orders);
 	if(fileHeader.orders == 0 && madeWith[verFT2Generic])
@@ -608,9 +612,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!memcmp(fileHeader.trackerName, "OpenMPT ", 8))
 	{
 		// Hey, I know this tracker!
-		char mptVersion[13];
-		memcpy(mptVersion, fileHeader.trackerName + 8, 12);
-		mpt::String::SetNullTerminator(mptVersion);
+		std::string mptVersion(fileHeader.trackerName + 8, 12);
 		m_dwLastSavedWithVersion = MptVersion::ToNum(mptVersion);
 		madeWith = verOpenMPT | verConfirmed;
 
