@@ -10,16 +10,17 @@ Quick Start {#quickstart}
      -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config >= 0.24**
      -  **zlib**
-     -  **libltdl**
      -  **libogg**, **libvorbis**, **libvorbisfile**
      -  **libmpg123**
      -  **doxygen >= 1.8**
+     -  **libpulse**, **libpulse-simple** (required only by openmpt123)
+     -  **portaudio-v19** (required only by openmpt123)
+     -  **libFLAC** (required only by openmpt123)
+     -  **libsndfile** (required only by openmpt123)
  3. *Optional*:
-     -  **libpulse**, **libpulse-simple**
-     -  **libSDL >= 1.2.x**
-     -  **portaudio-v19**
-     -  **libFLAC**
-     -  **libsndfile**
+     -  **libltdl**
+     -  **libdl**
+     -  **libSDL >= 1.2.x** (required only by openmpt123)
  4. Run:
     
         ./configure
@@ -45,18 +46,19 @@ Quick Start {#quickstart}
      -  **GNU make**
      -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config**
- 2. *Optional*:
      -  **zlib**
-     -  **libltdl**
      -  **libogg**, **libvorbis**, **libvorbisfile**
      -  **libmpg123**
-     -  **libpulse**, **libpulse-simple**
-     -  **libSDL >= 1.2.x**
-     -  **portaudio-v19**
+     -  **libpulse**, **libpulse-simple** (required only by openmpt123)
+     -  **portaudio-v19** (required only by openmpt123)
+     -  **libFLAC** (required only by openmpt123)
+     -  **libsndfile** (required only by openmpt123)
+ 2. *Optional*:
+     -  **libltdl**
+     -  **libdl**
+     -  **libSDL >= 1.2.x** (required only by openmpt123)
      -  **doxygen >= 1.8**
      -  **help2man**
-     -  **libFLAC**
-     -  **libsndfile**
  3. Run:
     
         svn checkout https://source.openmpt.org/svn/openmpt/trunk/OpenMPT/ openmpt-trunk
