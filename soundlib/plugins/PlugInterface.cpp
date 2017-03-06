@@ -647,7 +647,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 		// Mark track modified if GUI is open and format supports plugins
 		SetModified();
 
-		if (CMainFrame::GetInputHandler()->ShiftPressed())
+		if (CMainFrame::GetInputHandler()->ShiftPressed() && TrackerSettings::Instance().midiMappingInPluginEditor)
 		{
 			// Shift pressed -> Open MIDI mapping dialog
 			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.

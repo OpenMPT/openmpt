@@ -785,6 +785,7 @@ public:
 
 	Setting<bool> bridgeAllPlugins;
 	Setting<bool> enableAutoSuspend;
+	CachedSetting<bool> midiMappingInPluginEditor;
 	Setting<std::wstring> pluginProjectPath;
 	CachedSetting<std::string> vstHostProductString;
 	CachedSetting<std::string> vstHostVendorString;
