@@ -41,6 +41,8 @@ is just a high-level summary.
     possible. Both build systems default to dependencies that facilitate native
     MO3 decoding internally anyway, thus there is actually no practical
     disadvantage with the new default settings at all.
+ *  [**Change**] Un4seen unmo3 support is now completely disabled by default in
+    all configurations and build systems.
 
  *  [**Regression**] Support for GCC 4.1, GCC 4.2 and GCC 4.3, as well as the
     `Makefile` option `ANCIENT=1`, is gone.
