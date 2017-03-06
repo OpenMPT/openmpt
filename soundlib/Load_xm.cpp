@@ -353,7 +353,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & XMFileHeader::extendedFilterRange) != 0);
-	if(m_SongFlags[SONG_EXFILTERRANGE] && madeWith == verFT2Generic | verNewModPlug)
+	if(m_SongFlags[SONG_EXFILTERRANGE] && madeWith == (verFT2Generic | verNewModPlug))
 	{
 		madeWith = verFT2Clone | verNewModPlug | verConfirmed;
 	}
