@@ -312,13 +312,11 @@
 #if !defined(MPT_WITH_MPG123)
 #define MPT_ENABLE_MPG123_DYNBIND
 #endif
-//#if !(defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND) || defined(MPT_WITH_MINIMP3)) || defined(MPT_WITH_MEDIAFOUNDATION)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
-#if !(defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
-#if !defined(MPT_WITH_UNMO3)
-#define MPT_ENABLE_UNMO3_DYNBIND
-#endif
-#endif
+//#define MPT_ENABLE_UNMO3_DYNBIND
 #endif // MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WITH_DL)
+#else // !MPT_ENABLE_DLOPEN
+//#define MPT_ENABLE_MPG123_DYNBIND
+//#define MPT_ENABLE_UNMO3_DYNBIND
 #endif // MPT_ENABLE_DLOPEN
 #if ((defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND) || defined(MPT_WITH_MINIMP3)) || defined(MPT_WITH_MEDIAFOUNDATION)) && ((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
 #define MPT_ENABLE_MO3_BUILTIN
