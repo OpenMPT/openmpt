@@ -1763,13 +1763,13 @@ void CModTree::EmptyInstrumentLibrary()
 bool CModTree::IsMediaFoundationExtension(const std::string &ext) const
 //---------------------------------------------------------------------
 {
-	for(std::size_t i = 0; i < m_MediaFoundationExtensions.size(); ++i)
+	for(const auto &mfe : m_MediaFoundationExtensions)
 	{
-		if(m_MediaFoundationExtensions[i].empty())
+		if(mfe.empty())
 		{
 			continue;
 		}
-		if(m_MediaFoundationExtensions[i].ToLocale() == ext)
+		if(mfe.ToLocale() == ext)
 		{
 			return true;
 		}
@@ -1856,6 +1856,10 @@ void CModTree::FillInstrumentLibrary()
 		MemsetZero(wfd);
 		if((hFind = FindFirstFileW(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
+			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
+			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx" };
+			auto allExtsBlacklist = { "txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol" };
+
 			do
 			{
 				// Up Directory
@@ -1879,76 +1883,36 @@ void CModTree::FillInstrumentLibrary()
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
 					// Get lower-case file extension without dot.
-					const std::string ext = mpt::ToCharset(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
-					char s[16];
-					mpt::String::Copy(s, ext);
-
-					if(s[0])
+					std::string ext = mpt::ToCharset(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
+					if(!ext.empty())
 					{
-						const size_t len = strlen(s);
-						for(size_t i = 0; i < len; i++)
-						{
-							s[i] = (char)tolower(s[i + 1]);
-						}
+						ext.erase(0, 1);
+						std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 					}
 
-					// Instruments
-					if ((!strcmp(s, "xi"))
-						|| (!strcmp(s, "iti"))
-						|| (!strcmp(s, "sfz"))
-						|| (!strcmp(s, "sf2"))
-						|| (!strcmp(s, "sbk"))
-						|| (!strcmp(s, "dls"))
-						|| (!strcmp(s, "mss"))
-						|| (!strcmp(s, "pat")) )
+					if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
 					{
-						if (showInstrs)
+						// Instruments
+						if(showInstrs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_INSTRUMENTS);
 						}
-					} else if(std::find_if(modExts.begin(), modExts.end(),
-						[&s] (const char *str) -> bool { return !strcmp(s, str); }) != modExts.end())
+					} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
+					{
+						// Samples
+						if(showInstrs)
+						{
+							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES);
+						}
+					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end())
 					{
 						// Songs
 						if (showDirs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_FOLDERSONG);
 						}
-					} else
-					// Samples
-					if(!strcmp(s, "wav")
-						|| !strcmp(s, "flac")
-						|| !strcmp(s, "mp1")
-						|| !strcmp(s, "mp2")
-						|| !strcmp(s, "mp3")
-						|| !strcmp(s, "smp")
-						|| !strcmp(s, "raw")
-						|| !strcmp(s, "s3i")
-						|| !strcmp(s, "its")
-						|| !strcmp(s, "aif")
-						|| !strcmp(s, "aiff")
-						|| !strcmp(s, "snd")
-						|| !strcmp(s, "svx")
-						|| !strcmp(s, "voc")
-						|| !strcmp(s, "8sv")
-						|| !strcmp(s, "8svx")
-						|| !strcmp(s, "16sv")
-						|| !strcmp(s, "16svx")
-						|| IsMediaFoundationExtension(s)
-						|| (m_bShowAllFiles // Exclude the extensions below
-							&& strcmp(s, "txt")
-							&& strcmp(s, "diz")
-							&& strcmp(s, "nfo")
-							&& strcmp(s, "doc")
-							&& strcmp(s, "ini")
-							&& strcmp(s, "pdf")
-							&& strcmp(s, "zip")
-							&& strcmp(s, "rar")
-							&& strcmp(s, "lha")
-							&& strcmp(s, "exe")
-							&& strcmp(s, "dll")
-							&& strcmp(s, "mol"))
-						)
+					} else if(IsMediaFoundationExtension(ext)
+						|| (m_bShowAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
 					{
 						if (showInstrs)
 						{
