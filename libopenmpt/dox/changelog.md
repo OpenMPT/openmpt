@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta20.6
+### libopenmpt 0.2-beta22
 
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
     out-of-memory situations while handling exceptions in the C API.
@@ -29,6 +29,11 @@ is just a high-level summary.
  *  Windows binary packages now include a script `download_mpg123.vbs` which
     downloads libmpg123 and copies it to the appropriate directories relative
     to the uncompressed binary archive.
+
+### libopenmpt 0.2-beta21 (skipped)
+
+ *  Version 0.2-beta21 has been skipped in order to avoid confusion with libtool
+    version of libopenmpt 0.3.0-pre.0 and 0.3.0-pre.1 development versions.
 
 ### libopenmpt 0.2-beta20.5 (2017-02-05)
 
