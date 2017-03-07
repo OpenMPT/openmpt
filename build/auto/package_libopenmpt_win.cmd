@@ -58,6 +58,7 @@ copy /y ..\..\bin\x64\openmpt123.exe .\openmpt123\x86_64\ || goto error
 copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
+copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-win-r%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -70,6 +71,7 @@ copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
  Winamp\in_openmpt.dll ^
  foobar2000\foo_openmpt.txt ^
  foobar2000\foo_openmpt.dll ^
+ download_mpg123.vbs ^
  || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-win.tar libopenmpt-win-r%MPT_REVISION%.7z || goto error
@@ -133,6 +135,7 @@ copy /y ..\..\bin\x64-Shared\libopenmpt.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-ogg.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-vorbis.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
+copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-r%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
@@ -154,6 +157,7 @@ copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
  bin\x86_64\openmpt-ogg.dll ^
  bin\x86_64\openmpt-vorbis.dll ^
  bin\x86_64\openmpt-zlib.dll ^
+ download_mpg123.vbs ^
  || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-vs2010.tar libopenmpt-dev-vs2010-r%MPT_REVISION%.7z || goto error
