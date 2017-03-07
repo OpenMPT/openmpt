@@ -513,10 +513,10 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 					if(!found)
 					{
+						notFoundIDs.push_back(&m_MixPlugins[plug].Info);
 #ifdef MODPLUG_TRACKER
 						notFoundText.append(m_MixPlugins[plug].GetLibraryName());
 						notFoundText.append("\n");
-						notFoundIDs.push_back(&m_MixPlugins[plug].Info); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
 #else
 						AddToLog(LogWarning, MPT_USTRING("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].GetLibraryName()));
 #endif // MODPLUG_TRACKER
@@ -541,10 +541,10 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
 			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
-			for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
+			for(auto &id : notFoundIDs)
 			{
-				url += mpt::fmt::HEX0<8>((**i).dwPluginId2.get());
-				url += (**i).szLibraryName;
+				url += mpt::fmt::HEX0<8>(id->dwPluginId2.get());
+				url += id->szLibraryName;
 				url += "%0a";
 			}
 			CTrackApp::OpenURL(mpt::PathString::FromUTF8(url));
