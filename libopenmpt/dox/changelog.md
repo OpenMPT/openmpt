@@ -95,6 +95,9 @@ is just a high-level summary.
  *  Autotools build system now has options `--disable-openmpt123`,
     `--disable-tests` and `--disable-examples` which may be desireable when
     cross-compiling.
+ *  Windows binary packages now include a script `download_mpg123.vbs` which
+    downloads libmpg123 and copies it to the appropriate directories relative
+    to the uncompressed binary archive.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
