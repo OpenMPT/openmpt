@@ -978,6 +978,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 					case CMD_TONEPORTAVOL:
 					case CMD_VOLUMESLIDE:
+					case CMD_VIBRATOVOL:
 						if(m.param || (GetType() != MOD_TYPE_MOD))
 						{
 							for(uint32 i = 0; i < numTicks; i++)
