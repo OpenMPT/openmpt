@@ -17,6 +17,10 @@ General hints
   endianness, which can be found in `common/Endianness.h`:
   * Big-Endian: (u)int8/16/32/64be, float32be, float64be
   * Little-Endian: (u)int8/16/32/64le, float32le, float64le
+
+  Entire structs containing integers with defined endianness can be read in one
+  go if they are tagged with `MPT_BINARY_STRUCT` (see existing loaders for an
+  example).
 * `m_nChannels` **MUST NOT** be changed after a pattern has been created, as
   existing patterns will be interpreted incorrectly. For module formats that
   support per-pattern channel amounts, the maximum number of channels must be
@@ -25,27 +29,31 @@ General hints
   * `FileReader::ReadString` and friends for reading them directly from a file
   * `mpt::String::Read` for reading them from a struct or char array,
   * `mpt::String::Copy` for copying between char arrays or `std::string`.
+
   "Read" functions take care of string padding (zero / space padding), so those
   should be used when extracting strings from files. "Copy" should only be used
-  on strings that have previously been read.
+  on strings that have previously been read using the "Read" functions.
   If the target is a char array rather than a `std::string`, these will take
   care of properly null-terminating the target char array, and prevent reading
   past the end of a (supposedly null-terminated) source char array.
-* Do not use static variables in your loader. Loaders need to be thread-safe for
-  libopenmpt.
+* Do not use non-const static variables in your loader. Loaders need to be
+  thread-safe for libopenmpt.
 * `FileReader` instances may be used to treat a portion of another file as its
   own independent file (through `FileReader::ReadChunk`). This can be useful
-  with "embedded files" such as WAV or Ogg samples.
+  with "embedded files" such as WAV or Ogg samples. Container formats are
+  another good example for this usage.
 * Samples *either* use middle-C frequency *or* finetune + transpose. For the few
   weird formats that use both, it may make sense to translate everything into
   middle-C frequency.
 * Add the new `MODTYPE` to `CSoundFile::UseFinetuneAndTranspose` if applicable,
   and see if any effect handlers in `soundlib/Snd_fx.cpp` need to know the new
   `MODTYPE`.
-* Do not rely on hard-coded magic numbers. For example, comparing if an index
-  is valid for a given array, do not hard-code the array size but rather use
-  `MPT_ARRAY_COUNT` or, for ensuring that char arrays are null-terminated,
-  `mpt::String::SetNullTerminator`.
+* Do not rely on hard-coded magic numbers. For example, when comparing if an
+  index is valid for a given array, do not hard-code the array size but rather
+  use `MPT_ARRAY_COUNT` or, for ensuring that char arrays are null-terminated,
+  `mpt::String::SetNullTerminator`. Similarly, do not assume any specific
+  quantities for OpenMPT's constants like MAX_SAMPLES, MAX_PATTERN_ROWS, etc.
+  These may change at any time.
 * Pay attention to off-by-one errors when comparing against MAX_SAMPLES and
   MAX_INSTRUMENTS, since sample and instrument numbers are 1-based. 
 * Placement of the loader function in `CSoundFile::Create` depends on various

@@ -61,9 +61,10 @@ is just a high-level summary.
     packages.
  *  [**Bug**] Possible crashes with malformed IT, ITP, AMS, MDL, MED, MPTM, PSM
     and Startrekker files.
- *  [**Bug**] Possible hangs with malformed AMS, DBM, ITP, MPTM and PSM files.
+ *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
  *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
     routings.
+ *  [**Bug**] Excessive loading times with malformed ITP / truncated AMS files.
  *  [**Bug**] Plugins did not work correctly when changing the sample rate
     between two render calls.
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
