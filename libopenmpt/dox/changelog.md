@@ -25,6 +25,8 @@ is just a high-level summary.
     possible. Both build systems default to dependencies that facilitate native
     MO3 decoding internally anyway, thus there is actually no practical
     disadvantage with the new default settings at all.
+ *  [**Change**] Un4seen unmo3 support is now completely disabled by default in
+    all configurations and build systems.
 
  *  [**Regression**] In order to securely load libmpg123, the Windows binary
     packages only support the precise libmpg123 binary that is downloaded by the
