@@ -21,6 +21,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #if MPT_OS_WINDOWS
+#define MPT_PATHSTRING_LITERAL(x) ( L ## x )
+#else
+#define MPT_PATHSTRING_LITERAL(x) ( x )
+#endif
+
+
+#if MPT_OS_WINDOWS
 
 namespace mpt
 {
