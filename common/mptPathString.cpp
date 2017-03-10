@@ -16,6 +16,9 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
+#if defined(MODPLUG_TRACKER)
+#include <shlwapi.h>
+#endif
 #endif
 
 
@@ -134,14 +137,21 @@ PathString PathString::Simplify() const
 
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 namespace mpt
 {
 
+
+#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
+
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 //------------------------------------------------------------------------------------------------------
 {
+	// We cannot use CRT splitpath here, because:
+	//  * limited to _MAX_PATH or similar
+	//  * no support for UNC paths
+	//  * no support for \\?\ prefixed paths
+
 	if(drive) *drive = mpt::PathString();
 	if(dir) *dir = mpt::PathString();
 	if(fname) *fname = mpt::PathString();
@@ -260,6 +270,38 @@ PathString PathString::GetFullFileName() const
 }
 
 
+bool PathString::IsDirectory() const
+//----------------------------------
+{
+	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
+	// GetFileAttributesW also does the job just fine.
+	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+bool PathString::IsFile() const
+//-----------------------------
+{
+	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+#endif // MPT_OS_WINDOWS && MPT_ENABLE_DYNBIND
+
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+bool PathString::FileOrDirectoryExists() const
+//--------------------------------------------
+{
+	return ::PathFileExistsW(path.c_str()) != FALSE;
+}
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
 //--------------------------------------------------------------------
 {
@@ -323,7 +365,6 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 }
 
 
-#if MPT_OS_WINDOWS
 #if defined(_MFC_VER)
 
 mpt::PathString PathString::TunnelOutofCString(const CString &path)
@@ -360,15 +401,50 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 }
 
 #endif // MFC
-#endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 namespace mpt
 {
+
+
+bool IsPathSeparator(mpt::RawPathString::value_type c) {
+#if MPT_OS_WINDOWS
+	return (c == MPT_PATHSTRING_LITERAL('\\')) || (c == MPT_PATHSTRING_LITERAL('/'));
+#else
+	return c == MPT_PATHSTRING_LITERAL('/');
+#endif
+}
+
+bool PathIsAbsolute(const mpt::PathString &path) {
+	mpt::RawPathString rawpath = path.AsNative();
+#if MPT_OS_WINDOWS
+	if(rawpath.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	{
+		return true;
+	}
+	if(rawpath.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	{
+		return true;
+	}
+	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	{
+		return true; // UNC
+	}
+	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("//"))
+	{
+		return true; // UNC
+	}
+	return (rawpath.length()) >= 3 && (rawpath[1] == ':') && IsPathSeparator(rawpath[2]);
+#else
+	return (rawpath.length() >= 1) && IsPathSeparator(rawpath[0]);
+#endif
+}
+
 
 #if MPT_OS_WINDOWS
 

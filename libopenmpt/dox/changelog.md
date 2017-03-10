@@ -47,6 +47,10 @@ is just a high-level summary.
  *  [**Regression**] Support for GCC 4.1, GCC 4.2 and GCC 4.3, as well as the
     `Makefile` option `ANCIENT=1`, is gone.
  *  [**Regression**] Visual Studio 2008 support has been removed.
+ *  [**Regression**] In order to securely load libmpg123, the Windows binary
+    packages only support the precise libmpg123 binary that is downloaded by the
+    `download_mpg123.vbs` script. Other binaries might also work, but this has
+    neither been tested nor is officially supported from now on.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
@@ -68,6 +72,8 @@ is just a high-level summary.
  *  [**Bug**] Cross-compiling libopenmpt with autotools for Windows now properly
     sets `-municode` and `-mconsole` as well as all required Windows system
     libraries.
+ *  [**Bug**] libopenmpt on Windows did not properly guard against current
+    working directoy DLL injection attacks.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.

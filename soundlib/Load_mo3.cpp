@@ -75,6 +75,13 @@ class ComponentUnMO3
 #endif
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
+private:
+#if MPT_OS_WINDOWS
+#if defined(MPT_WITH_UNMO3)
+#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
+	mpt::Library MSVCRT;
+#endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
+#endif // MPT_OS_WINDOWS
 public:
 	uint32 (UNMO3_API * UNMO3_GetVersion)();
 	// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
@@ -108,6 +115,17 @@ public:
 		UNMO3_Decode_New = &(::UNMO3_Decode);
 		return true;
 #elif defined(MPT_ENABLE_UNMO3_DYNBIND)
+		#if MPT_OS_WINDOWS
+			// preload MSVCRT.DLL in order to prevent DLL preloading injection attacks from the current working directory.
+			MSVCRT = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("MSVCRT")));
+			#if defined(LIBOPENMPT_BUILD)
+				// require successful dependency loading for libopenmpt
+				if(!MSVCRT.IsValid())
+				{
+					return false;
+				}
+			#endif // LIBOPENMPT_BUILD
+		#endif // MPT_OS_WINDOWS
 		AddLibrary("unmo3", mpt::LibraryPath::App(MPT_PATHSTRING("unmo3")));
 		MPT_COMPONENT_BIND("unmo3", UNMO3_Free);
 		if(MPT_COMPONENT_BIND_OPTIONAL("unmo3", UNMO3_GetVersion))

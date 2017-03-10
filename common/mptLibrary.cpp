@@ -54,16 +54,16 @@ namespace mpt
 
 mpt::PathString GetAppPath()
 {
-#if defined(MODPLUG_TRACKER)
 	std::vector<WCHAR> exeFileName(MAX_PATH);
 	while(GetModuleFileNameW(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
 	{
+		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+		{
+			return mpt::PathString();
+		}
 		exeFileName.resize(exeFileName.size() * 2);
 	}
 	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
-#else
-	return mpt::PathString(); // dummy
-#endif
 }
 
 
@@ -123,7 +123,7 @@ public:
 				case mpt::LibrarySearchPathSystem:
 					hModule = LoadLibraryExW(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 					break;
-#if 0
+#if defined(MODPLUG_TRACKER)
 					// Using restricted search paths applies to potential DLL dependencies
 					// recursively.
 					// This fails loading for e.g. Codec or Plugin DLLs in application
@@ -131,17 +131,24 @@ public:
 					// located in the system directory).
 					// Just rely on the default search path here.
 				case mpt::LibrarySearchPathApplication:
+					{
+						const mpt::PathString dllPath = mpt::GetAppPath();
+						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						{
+							hModule = LoadLibraryW((dllPath + path.GetFileName()).AsNative().c_str());
+						}
+					}
+					break;
+				case mpt::LibrarySearchPathFullPath:
+					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
+					break;
+#else
+					// For libopenmpt, do the safe thing.
+				case mpt::LibrarySearchPathApplication:
 					hModule = LoadLibraryExW(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
 					break;
 				case mpt::LibrarySearchPathFullPath:
 					hModule = LoadLibraryExW(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
-					break;
-#else
-				case mpt::LibrarySearchPathApplication:
-					hModule = LoadLibraryW((mpt::GetAppPath() + path.GetFileName()).AsNative().c_str());
-					break;
-				case mpt::LibrarySearchPathFullPath:
-					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
 					break;
 #endif
 				case mpt::LibrarySearchPathInvalid:
@@ -156,10 +163,22 @@ public:
 					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
 					break;
 				case mpt::LibrarySearchPathApplication:
-					hModule = LoadLibraryW((mpt::GetAppPath() + path.GetFileName()).AsNative().c_str());
+					{
+						const mpt::PathString dllPath = mpt::GetAppPath();
+						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						{
+							hModule = LoadLibraryW((dllPath + path.GetFileName()).AsNative().c_str());
+						}
+					}
 					break;
 				case mpt::LibrarySearchPathSystem:
-					hModule = LoadLibraryW((mpt::GetSystemPath() + path.GetFileName()).AsNative().c_str());
+					{
+						const mpt::PathString dllPath = mpt::GetSystemPath();
+						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						{
+							hModule = LoadLibraryW((dllPath + path.GetFileName()).AsNative().c_str());
+						}
+					}
 					break;
 				case mpt::LibrarySearchPathFullPath:
 					hModule = LoadLibraryW(path.GetFileName().AsNative().c_str());
