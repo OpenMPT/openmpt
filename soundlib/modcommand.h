@@ -94,14 +94,15 @@ enum EffectCommands
 	CMD_MIDI				= 31,
 	CMD_SMOOTHMIDI			= 32,
 	CMD_DELAYCUT			= 33,
-	CMD_XPARAM				= 34, // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
+	CMD_XPARAM				= 34,
 	CMD_NOTESLIDEUP			= 35, // IMF Gxy / PTM Jxy (Slide y notes up every x ticks)
 	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy / PTM Kxy (Slide y notes down every x ticks)
 	CMD_NOTESLIDEUPRETRIG	= 37, // PTM Lxy (Slide y notes up every x ticks + retrigger note)
 	CMD_NOTESLIDEDOWNRETRIG	= 38, // PTM Mxy (Slide y notes down every x ticks + retrigger note)
 	CMD_REVERSEOFFSET		= 39, // PTM Nxx Revert sample + offset
 	CMD_DBMECHO				= 40, // DBM enable/disable echo
-	MAX_EFFECTS				= 41
+	CMD_OFFSETPERCENTAGE	= 41, // PLM Percentage Offset
+	MAX_EFFECTS				= 42
 };
 
 
