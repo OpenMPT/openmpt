@@ -313,7 +313,7 @@ mpt::ustring Version::GetNameShort() const
 		}
 		std::string rawHostSysName = v.RawHostSysName();
 		std::vector<char> bytes(rawHostSysName.begin(), rawHostSysName.end());
-		name += MPT_USTRING("-") + Util::BinToHex(rawHostSysName);
+		name += MPT_USTRING("-") + Util::BinToHex(bytes);
 	} else
 	{
 		name = mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::dec(SystemVersion >> 8), mpt::ufmt::HEX0<2>(SystemVersion & 0xFF));
