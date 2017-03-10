@@ -13,6 +13,7 @@ is just a high-level summary.
  *  [**Bug**] Cross-compiling libopenmpt with autotools for Windows now properly
     sets `-municode` and `-mconsole` as well as all required Windows system
     libraries.
+ *  [**Bug**] Excessive loading times with malformed ITP / truncated AMS files.
 
  *  [**Change**] The `Makefile` and Autotools build system got new options
     `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
@@ -29,6 +30,16 @@ is just a high-level summary.
  *  Windows binary packages now include a script `download_mpg123.vbs` which
     downloads libmpg123 and copies it to the appropriate directories relative
     to the uncompressed binary archive.
+ *  Do not set note volume to 0 on out-of-range offset in XM files.
+ *  Better import of some slide commands in SFX files.
+ *  Sample 15 in "Crew Generation" by Necros requires short loops at the
+    beginning of the sample to not be ignored. Since we need to ignore them in
+    some (non-ProTracker) modules, we heuristically disable the old loop
+    sanitization behaviour based on the module channel count.
+ *  Both normal and percentage offset in PLM files were handled as percentage
+    offset.
+ *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
+    slide part of combined volume slide + vibrato commands.
 
 ### libopenmpt 0.2-beta21 (skipped)
 

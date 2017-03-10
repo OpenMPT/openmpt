@@ -26,6 +26,47 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.09.00 (???, revision 7756)
+--------------------------------
+Pattern tab
+   [Fix] <js> Seeking with sample sync did not apply PTM reverse offset effect and the volume slide part of combined volume slide + vibrato commands.
+   [Fix] <js> "Copy orders" shortcut never worked (http://forum.openmpt.org/index.php?topic=5787.0).
+   [Fix] <js> Crash when trying to open effect visualizer for a module with no patterns.
+
+Sample tab
+   [Fix] <js> 16SV samples created by Fasttracker 2 / Awave were not loaded correctly.
+
+Tree view
+   [New] <js> Added "Go to Instrument / Sample directory" context menu entries to file browser to return to the default directories.
+
+Mod Conversion
+   [Fix] <js> F20 command was not converted corretly from MOD to S3M / IT / MPTM.
+
+VST / DMO Plugins
+   [Fix] <js> Duplicate Note Action checks did not work for instrument plugins with a transposed note map.
+   [Fix] <js> Changing to another instrument after an arpeggio did not always stop the last plugin note (http://bugs.openmpt.org/view.php?id=916).
+
+VST::Specific Plugin Fixes
+   [Fix] <js> MIDI notes sent by randomid VST by Insert Piz Here were not being received (http://forum.openmpt.org/index.php?topic=5791.0).
+
+XM
+   [Imp] <js> Improve detection of some XM files made with ModPlug Tracker that make use of extended filter range.
+
+XM::Compatible Playback Mode
+   [Fix] <js> An instrument-less note following a note with an out-of-range offset effect was played at volume 0 (tx eightbitbubsy).
+
+MOD
+   [Fix] <js> Sample 15 in "Crew Generation" by Necros was not looped correctly.
+
+Other formats
+   [Imp] <da> SFX: Improved import of slide commands (http://bugs.openmpt.org/view.php?id=921).
+   [Imp] <js> PLM: Improved import of percentage offset.
+   [Fix] <js> Speed up opening of some malformed ITP and truncated AMS files.
+
+Misc
+   [Imp] <js> Visually indicate whether playback was stopped or paused by resetting the elapsed time in the status bar to 0:00:00 when stopping.
+
+
 v1.26.08.00 (5 February 2017, revision 7557)
 --------------------------------------------
 General tab
