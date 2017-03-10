@@ -44,7 +44,7 @@ is just a high-level summary.
  *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
     routings.
 
- *  libmodplug: Added all missing C++ API symbols that are accessable via the
+ *  libmodplug: Added all missing C++ API symbols that are accessible via the
     public libmodplug header file.
  *  Channel frequency could wrap around after some excessive portamento / down
     in some formats since libopenmpt 0.2-beta17.
