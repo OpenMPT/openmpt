@@ -57,7 +57,7 @@ is just a high-level summary.
     packages.
  *  [**Bug**] Possible crashes with malformed IT, ITP, AMS, MDL, MED, MPTM, PSM
     and Startrekker files.
- *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
+ *  [**Bug**] Possible hangs with malformed AMS, DBM, ITP, MPTM and PSM files.
  *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
     routings.
  *  [**Bug**] Plugins did not work correctly when changing the sample rate
@@ -87,10 +87,20 @@ is just a high-level summary.
  *  Pattern loops ending on the last row a pattern were not executed correctly
     in S3M files.
  *  Playback fixes for 8-channel MED files
+ *  Do not set note volume to 0 on out-of-range offset in XM files.
+ *  Better import of some slide commands in SFX files.
+ *  Sample 15 in "Crew Generation" by Necros requires short loops at the
+    beginning of the sample to not be ignored. Since we need to ignore them in
+    some (non-ProTracker) modules, we heuristically disable the old loop
+    sanitization behaviour based on the module channel count.
+ *  Both normal and percentage offset in PLM files were handled as percentage
+    offset.
+ *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
+    slide part of combined volume slide + vibrato commands.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
  *  openmpt123: Improved section layout in man page.
- *  libmodplug: Added all missing C++ API symbols that are accessable via the
+ *  libmodplug: Added all missing C++ API symbols that are accessible via the
     public libmodplug header file.
  *  Autotools build system now has options `--disable-openmpt123`,
     `--disable-tests` and `--disable-examples` which may be desireable when
