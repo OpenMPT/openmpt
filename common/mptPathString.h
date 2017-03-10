@@ -93,7 +93,7 @@ public:
 
 	size_t Length() const { return path.size(); }
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
 	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
@@ -105,14 +105,19 @@ public:
 	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
 
 	// Verify if this path represents a valid directory on the file system.
-	bool IsDirectory() const { return ::PathIsDirectoryW(path.c_str()) != FALSE; }
+	bool IsDirectory() const;
 	// Verify if this path exists and is a file on the file system.
-	bool IsFile() const
-	{
-		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
-		return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-	}
-	bool FileOrDirectoryExists() const { return ::PathFileExistsW(path.c_str()) != FALSE; }
+	bool IsFile() const;
+
+#endif // MPT_OS_WINDOWS && MPT_ENABLE_DYNBIND
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+	bool FileOrDirectoryExists() const;
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
 	PathString ReplaceExt(const mpt::PathString &newExt) const;
@@ -286,6 +291,13 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 
 namespace mpt
 {
+
+
+
+bool IsPathSeparator(mpt::RawPathString::value_type c);
+
+bool PathIsAbsolute(const mpt::PathString &path);
+
 
 #if MPT_OS_WINDOWS
 
