@@ -15,7 +15,7 @@ is just a high-level summary.
     libraries.
  *  [**Bug**] Excessive loading times with malformed ITP / truncated AMS files.
  *  [**Bug**] libopenmpt on Windows did not properly guard against current
-    working directoy DLL injection attacks.
+    working directory DLL injection attacks.
 
  *  [**Change**] The `Makefile` and Autotools build system got new options
     `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
