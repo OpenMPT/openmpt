@@ -14,6 +14,8 @@ is just a high-level summary.
     sets `-municode` and `-mconsole` as well as all required Windows system
     libraries.
  *  [**Bug**] Excessive loading times with malformed ITP / truncated AMS files.
+ *  [**Bug**] libopenmpt on Windows did not properly guard against current
+    working directoy DLL injection attacks.
 
  *  [**Change**] The `Makefile` and Autotools build system got new options
     `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
@@ -23,6 +25,11 @@ is just a high-level summary.
     possible. Both build systems default to dependencies that facilitate native
     MO3 decoding internally anyway, thus there is actually no practical
     disadvantage with the new default settings at all.
+
+ *  [**Regression**] In order to securely load libmpg123, the Windows binary
+    packages only support the precise libmpg123 binary that is downloaded by the
+    `download_mpg123.vbs` script. Other binaries might also work, but this has
+    neither been tested nor is officially supported from now on.
 
  *  Autotools build system now has options `--disable-openmpt123`,
     `--disable-tests` and `--disable-examples` which may be desireable when
