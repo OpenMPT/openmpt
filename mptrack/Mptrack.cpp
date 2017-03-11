@@ -125,13 +125,13 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 			}
 			else //Case: Valid path but opening fails.
 			{
-				const int nOdc = theApp.GetOpenDocumentCount();
+				const int numDocs = theApp.GetOpenDocumentCount();
 				Reporting::Notification(mpt::String::Print(L"Opening \"%1\" failed. This can happen if "
-					L"no more documents can be opened or if the file type was not "
+					L"no more modules can be opened or if the file type was not "
 					L"recognised. If the former is true, it is "
-					L"recommended to close some documents as otherwise a crash is likely"
-					L"(currently there %2 %3 document%4 open).",
-					filename, (nOdc == 1) ? L"is" : L"are", nOdc, (nOdc == 1) ? L"" : L"s"));
+					L"recommended to close some modules as otherwise a crash is likely"
+					L" (currently there %2 %3 document%4 open).",
+					filename, (numDocs == 1) ? L"is" : L"are", numDocs, (numDocs == 1) ? L"" : L"s"));
 			}
 		}
 	}
@@ -817,16 +817,9 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		portableMode = true;
 	}
 
-	// chose config directory
-	mpt::PathString configPath = portableMode ? configPathApp : configPathGlobal;
-
-	// Update state.
-
-	// store exe path
+	// Update executable and config dirs
 	m_szExePath = mpt::GetAppPath();
-
-	// store the config path
-	m_szConfigDirectory = configPath;
+	m_szConfigDirectory = portableMode ? configPathApp : configPathGlobal;
 
 	// Set up default file locations
 	m_szConfigFileName = m_szConfigDirectory + MPT_PATHSTRING("mptrack.ini"); // config file
