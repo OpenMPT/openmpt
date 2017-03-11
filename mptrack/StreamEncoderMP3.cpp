@@ -1733,8 +1733,8 @@ public:
 		acmHeader.cbSrcLengthUsed = 0;
 		acmHeader.cbDstLength = static_cast<DWORD>(acmDstBuf.size());
 		acmHeader.cbDstLengthUsed = 0;
-		std::fill(acmSrcBuf.begin(), acmSrcBuf.end(), 0);
-		std::fill(acmDstBuf.begin(), acmDstBuf.end(), 0);
+		std::fill(acmSrcBuf.begin(), acmSrcBuf.end(), BYTE(0));
+		std::fill(acmDstBuf.begin(), acmDstBuf.end(), BYTE(0));
 		acmStreamUnprepareHeader(acmStream, &acmHeader, 0);
 		if(0 < acmHeader.cbDstLengthUsed && acmHeader.cbDstLengthUsed <= acmDstBuf.size())
 		{
