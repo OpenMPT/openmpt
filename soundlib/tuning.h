@@ -45,7 +45,7 @@ public:
 
 	virtual NOTEINDEXTYPE GetRatioTableBeginNote() const {return m_StepMin;}
 
-	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1);}
+	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));}
 
 	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
 
