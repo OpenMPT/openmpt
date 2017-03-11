@@ -61,6 +61,23 @@ if not exist "build\externals" mkdir "build\externals"
 
 call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha11/premake-5.0.0-alpha11-src.zip" "premake-5.0-alpha11-src.zip" "premake-5.0.0-alpha11" "-" || goto error
 
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2017.cmd || goto error
+ cd include\premake\build\vs2015 || goto error
+ devenv Premake5.sln /Upgrade || goto error
+ devenv Premake5.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2017.cmd || goto error
+ cd include\premake\build\vs2015 || goto error
+ devenv Premake5.sln /Upgrade || goto error
+ devenv Premake5.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
+
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake\build\vs2015 || goto error
