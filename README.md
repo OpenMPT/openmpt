@@ -27,6 +27,11 @@ How to compile
         To compile the project, open `build/vs2015/OpenMPT.sln` and hit the
         compile button.
 
+     -  Visual Studio 2017 Community/Professional/Enterprise
+
+        To compile the project, open `build/vs2017/OpenMPT.sln` and hit the
+        compile button.
+
  -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
 
     If you don't want this, uncomment `#define NO_VST` and comment out
@@ -88,7 +93,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2010 to 2015 in the
+     -  You will find solutions for Visual Studio 2010 to 2017 in the
         corresponding `build/vsVERSION/` folder.
         Projects that target Windows versions before Windows 7 are available in
         `build/vsVERSIONxp/`
