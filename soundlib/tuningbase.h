@@ -166,7 +166,7 @@ public:
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
-	virtual VRPAIR GetValidityRange() const {return VRPAIR(0,0);}
+	virtual VRPAIR GetValidityRange() const {return VRPAIR(NOTEINDEXTYPE(0),NOTEINDEXTYPE(0));}
 
 
 	//To try to set validity range to given range; returns
