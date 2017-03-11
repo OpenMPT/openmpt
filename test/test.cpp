@@ -1632,10 +1632,10 @@ static MPT_NOINLINE void TestCharsets()
 #endif
 
 
-	// Path splitting
-#ifdef MODPLUG_TRACKER
 
-#if MPT_OS_WINDOWS
+	// Path splitting
+
+#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
 
 	VERIFY_EQUAL(MPT_PATHSTRING("").GetDrive(), MPT_PATHSTRING(""));
 	VERIFY_EQUAL(MPT_PATHSTRING("").GetDir(), MPT_PATHSTRING(""));
@@ -1737,9 +1737,6 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), MPT_PATHSTRING("name.foo"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), MPT_PATHSTRING(".ext"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), MPT_PATHSTRING("name.foo.ext"));
-
-#endif
-
 #endif
 
 
