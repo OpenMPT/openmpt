@@ -70,7 +70,14 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 	OSVERSIONINFOEXW versioninfoex;
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4996) // 'GetVersionExW': was declared deprecated
+#endif // MPT_COMPILER_MSVC
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
 	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 }
