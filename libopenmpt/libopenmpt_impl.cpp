@@ -557,10 +557,13 @@ std::vector<std::string> module_impl::get_supported_extensions() {
 	std::copy( extensions.begin(), extensions.end(), std::back_insert_iterator<std::vector<std::string> >( retval ) );
 	return retval;
 }
+static char tolower_char( char c ) {
+	return static_cast<char>( tolower( c ) );
+}
 bool module_impl::is_extension_supported( const std::string & extension ) {
 	std::vector<std::string> extensions = get_supported_extensions();
 	std::string lowercase_ext = extension;
-	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), tolower );
+	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), &tolower_char);
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
 double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
