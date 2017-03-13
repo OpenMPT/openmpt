@@ -22,6 +22,10 @@ set MPT_PKG_TAG=win%MPT_DIST_VARIANT_SUFFIX%
 
 
 cd bin || goto error
+rmdir /s /q libopenmpt
+mkdir libopenmpt || goto error
+mkdir libopenmpt\bin.%MPT_PKG_TAG%
+mkdir libopenmpt\bin.%MPT_PKG_TAG%\%LIBOPENMPT_VERSION_STRING%
 rmdir /s /q libopenmpt-%MPT_PKG_TAG%
 del /f /q libopenmpt-%MPT_PKG_TAG%.tar
 del /f /q libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z
@@ -69,7 +73,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\xmp-open
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_openmpt.dll .\foobar2000\ || goto error
 copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt\bin.%MPT_PKG_TAG%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -84,12 +88,17 @@ copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
  download_mpg123.vbs ^
  || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-%MPT_PKG_TAG%.tar libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z || goto error
-del /f /q libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z
 rmdir /s /q libopenmpt-%MPT_PKG_TAG%
+"C:\Program Files\7-Zip\7z.exe" a -r -ttar libopenmpt-%MPT_PKG_TAG%.tar libopenmpt || goto error
+del /f /q libopenmpt\bin.%MPT_PKG_TAG%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.7z
+rmdir /s /q libopenmpt
 cd .. || goto error
 
 cd bin || goto error
+rmdir /s /q libopenmpt
+mkdir libopenmpt || goto error
+mkdir libopenmpt\dev.%MPT_PKG_TAG%.%MPT_VS_VER%
+mkdir libopenmpt\dev.%MPT_PKG_TAG%.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%
 rmdir /s /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%
 del /f /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar
 del /f /q libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z
@@ -148,7 +157,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-
 copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-vorbis.dll bin\x86_64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-zlib.dll bin\x86_64\ || goto error
 copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt\dev.%MPT_PKG_TAG%.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -172,9 +181,10 @@ copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
  download_mpg123.vbs ^
  || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z || goto error
-del /f /q libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z
 rmdir /s /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%
+"C:\Program Files\7-Zip\7z.exe" a -r -ttar libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%.tar libopenmpt || goto error
+del /f /q libopenmpt\dev.%MPT_PKG_TAG%.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.7z
+rmdir /s /q libopenmpt
 cd .. || goto error
 
 
