@@ -128,8 +128,11 @@ cd ..
 
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
+MPT_LIBOPENMPT_VERSION=$(make distversion-tarball)
 cd bin/dist-autotools
-tar cvf dist-autotools.tar *.tar.gz
+rm -rf libopenmpt
+mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
+cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
+tar cvf ../dist-autotools.tar libopenmpt
 cd ../..
-mv bin/dist-autotools/dist-autotools.tar bin/
 
