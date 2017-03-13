@@ -627,6 +627,7 @@ else
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+r$(MPT_SVNVERSION)
 endif
+DIST_LIBOPENMPT_TARBALL_VERSION:=$(DIST_LIBOPENMPT_VERSION_PURE)
 
 ifeq ($(MPT_SVNVERSION),)
 else
@@ -997,38 +998,42 @@ dist: bin/dist-tar.tar bin/dist-zip.tar bin/dist-doc.tar
 .PHONY: dist-tar
 dist-tar: bin/dist-tar.tar
 
-bin/dist-tar.tar: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist-tar.tar: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar.gz
 	rm -rf bin/dist-tar.tar
-	cd bin/ && cp dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist-tar.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	cd bin/dist-tar/ && rm -rf libopenmpt
+	cd bin/dist-tar/ && mkdir -p libopenmpt/src.makefile/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-tar/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar.gz libopenmpt/src.makefile/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-tar/ && tar cvf ../dist-tar.tar libopenmpt
 
 .PHONY: dist-zip
 dist-zip: bin/dist-zip.tar
 
-bin/dist-zip.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
+bin/dist-zip.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip
 	rm -rf bin/dist-zip.tar
-	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip ./
-	cd bin/ && tar cvf dist-zip.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
+	cd bin/dist-zip/ && rm -rf libopenmpt
+	cd bin/dist-zip/ && mkdir -p libopenmpt/src.msvc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-zip/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip libopenmpt/src.msvc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-zip/ && tar cvf ../dist-zip.tar libopenmpt
 
 .PHONY: dist-doc
 dist-doc: bin/dist-doc.tar
 
 bin/dist-doc.tar: bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
 	rm -rf bin/dist-doc.tar
-	cd bin/ && cp dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz ./
-	cd bin/ && tar cvf dist-doc.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz
+	cd bin/dist-doc/ && rm -rf libopenmpt
+	cd bin/dist-doc/ && mkdir -p libopenmpt/doc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-doc/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz libopenmpt/doc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-doc/ && tar cvf ../dist-doc.tar libopenmpt
 
 .PHONY: dist-js
 dist-js: bin/dist-js.tar
 
 bin/dist-js.tar: bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
 	rm -rf bin/dist-js.tar
-	cd bin/ && cp dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz ./
-	cd bin/ && tar cvf dist-js.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz
+	cd bin/dist-js/ && rm -rf libopenmpt
+	cd bin/dist-js/ && mkdir -p libopenmpt/bin.js/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-js/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.js.tar.gz libopenmpt/bin.js/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-js/ && tar cvf ../dist-js.tar libopenmpt
 
 .PHONY: bin/dist.mk
 bin/dist.mk:
@@ -1062,8 +1067,8 @@ bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar: docs
 	cp -Rv bin/docs/html bin/dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc/docs
 	cd bin/dist-doc/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc > libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar
 
-.PHONY: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
+.PHONY: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar
+bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist-tar
 	rm -rf bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
@@ -1087,10 +1092,10 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	svn export ./include/stb_vorbis bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis
 	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
-	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
+	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar
 
-.PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip
-bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip: bin/dist.mk bin/svn_version_dist.h
+.PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip
+bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
 	rm -rf bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
@@ -1122,7 +1127,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip: bin/dist.mk bin/
 	svn export ./include/zlib          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/zlib          --native-eol CRLF
 	cp bin/dist.mk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
-	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).windows.zip --compression-method deflate -9 *
+	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip --compression-method deflate -9 *
 
 .PHONY: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
 bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
@@ -1295,3 +1300,7 @@ distversion:
 .PHONY: distversion-pure
 distversion-pure:
 	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION_PURE)"
+
+.PHONY: distversion-tarball
+distversion-tarball:
+	$(SILENT)echo "$(DIST_LIBOPENMPT_TARBALL_VERSION)"
