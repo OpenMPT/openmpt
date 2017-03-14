@@ -448,6 +448,7 @@ enum PlayBehaviour
 	kFT2NoteOffFlags,				// Set and reset the correct fade/key-off flags with note-off and instrument number after note-off
 
 	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
+	kRowDelayWithNoteDelay,			// Retrigger note delays on every reptition of a row
 
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3

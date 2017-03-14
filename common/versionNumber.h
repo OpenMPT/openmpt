@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define VER_MAJORMAJOR          1
 #define VER_MAJOR               27
 #define VER_MINOR               00
-#define VER_MINORMINOR          36
+#define VER_MINORMINOR          37
 
 //Version string. For example "1.17.02.28"
 #define MPT_VERSION_STR         VER_STRINGIZE(VER_MAJORMAJOR) "." VER_STRINGIZE(VER_MAJOR) "." VER_STRINGIZE(VER_MINOR) "." VER_STRINGIZE(VER_MINORMINOR)
