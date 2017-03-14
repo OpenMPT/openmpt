@@ -432,6 +432,7 @@ void CSoundFile::UpgradeModule()
 			{ kITNoSurroundPan,					MAKE_VERSION_NUMERIC(1, 20, 00, 53) },
 			{ kITShortSampleRetrig,				MAKE_VERSION_NUMERIC(1, 20, 00, 54) },
 			{ kITPortaNoNote,					MAKE_VERSION_NUMERIC(1, 20, 00, 56) },
+			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 20, 00, 76) },
 			{ kITDontResetNoteOffOnPorta,		MAKE_VERSION_NUMERIC(1, 20, 02, 06) },
 			{ kITVolColMemory,					MAKE_VERSION_NUMERIC(1, 21, 01, 16) },
 			{ kITPortamentoSwapResetsPos,		MAKE_VERSION_NUMERIC(1, 21, 01, 25) },
@@ -514,6 +515,7 @@ void CSoundFile::UpgradeModule()
 		static const PlayBehaviourVersion behaviours[] =
 		{
 			{ kFT2NoteOffFlags,					MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
+			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)
@@ -528,6 +530,7 @@ void CSoundFile::UpgradeModule()
 		{
 			{ kST3NoMutedChannels,		MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
 			{ kST3EffectMemory,			MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
+			{ kRowDelayWithNoteDelay,	MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
 			{ kST3PortaSampleChange,	MAKE_VERSION_NUMERIC(1, 22, 00, 00) },
 			{ kST3VibratoMemory,		MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
 			{ kITPanbrelloHold,			MAKE_VERSION_NUMERIC(1, 26, 00, 00) },

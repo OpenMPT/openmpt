@@ -2348,17 +2348,17 @@ bool CSoundFile::ProcessEffects()
 		}
 
 		bool triggerNote = (m_PlayState.m_nTickCount == nStartTick);	// Can be delayed by a note delay effect
-		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && tickCount == nStartTick)
-		{
-			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
-			// Test case: PatternDelay-NoteDelay.it
-			triggerNote = true;
-		} else if(m_playBehaviour[kFT2OutOfRangeDelay] && nStartTick >= m_PlayState.m_nMusicSpeed)
+		if(m_playBehaviour[kFT2OutOfRangeDelay] && nStartTick >= m_PlayState.m_nMusicSpeed)
 		{
 			// FT2 compatibility: Note delays greater than the song speed should be ignored.
 			// However, EEx pattern delay is *not* considered at all.
 			// Test case: DelayCombination.xm, PortaDelay.xm
 			triggerNote = false;
+		} else if(m_playBehaviour[kRowDelayWithNoteDelay] && nStartTick > 0 && tickCount == nStartTick)
+		{
+			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 / FastTracker 2 do the same.
+			// Test case: PatternDelay-NoteDelay.it, PatternDelay-NoteDelay.xm
+			triggerNote = true;
 		}
 
 		// IT compatibility: Tick-0 vs non-tick-0 effect distinction is always based on tick delay.

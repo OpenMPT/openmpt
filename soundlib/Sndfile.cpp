@@ -963,6 +963,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITPatternLoopWithJumps);
 		playBehaviour.set(kITInstrWithNoteOff);
 		playBehaviour.set(kITMultiSampleInstrumentNumber);
+		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
 	case MOD_TYPE_XM:
@@ -999,6 +1000,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2VolColDelay);
 		playBehaviour.set(kFT2FinetunePrecision);
 		playBehaviour.set(kFT2NoteOffFlags);
+		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
 	case MOD_TYPE_S3M:
@@ -1011,6 +1013,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3EffectMemory);
 		playBehaviour.set(kST3VibratoMemory);
 		playBehaviour.set(KST3PortaAfterArpeggio);
+		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
 	case MOD_TYPE_MOD:
