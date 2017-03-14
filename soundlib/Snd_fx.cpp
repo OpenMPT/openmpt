@@ -3311,6 +3311,15 @@ bool CSoundFile::ProcessEffects()
 				m_PlayState.m_nNextRow++;
 			}
 
+			// IT Compatibility: If the restart row is past the end of the current pattern
+			// (e.g. when continued from a previous pattern without explicit SB0 effect), continue the next pattern.
+			// Test case: LoopStartAfterPatternEnd.it
+			if(nPatLoopRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
+			{
+				m_PlayState.m_nNextOrder++;
+				m_PlayState.m_nNextRow = 0;
+			}
+
 			// As long as the pattern loop is running, mark the looped rows as not visited yet
 			visitedSongRows.ResetPatternLoop(m_PlayState.m_nCurrentOrder, nPatLoopRow);
 		}
