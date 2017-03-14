@@ -445,7 +445,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		UINT nCount = 4;
 		UINT mask = 1 | 2 | 4 | 16;
 
-		if(pDoc->GetrSoundFile().GetModSpecifications().instrumentsMax > 0)
+		if(pDoc->GetrSoundFile().GetModSpecifications().instrumentsMax > 0 || pDoc->GetNumInstruments() > 0)
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph

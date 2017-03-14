@@ -15,6 +15,10 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
+#ifdef MPT_EXTERNAL_SAMPLES
+// For loading external data in Startrekker files
+#include "../common/mptPathString.h"
+#endif // MPT_EXTERNAL_SAMPLES
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -324,6 +328,30 @@ struct MODSampleHeader
 
 MPT_BINARY_STRUCT(MODSampleHeader, 30)
 
+// Synthesized StarTrekker instruments
+struct AMInstrument
+{
+	char     am[2];			// "AM"
+	char     zero[4];
+	uint16be startLevel;	// Start level
+	uint16be attack1Level;	// Attack 1 level
+	uint16be attack1Speed;	// Attack 1 speed
+	uint16be attack2Level;	// Attack 2 level
+	uint16be attack2Speed;	// Attack 2 speed
+	uint16be sustainLevel;	// Sustain level
+	uint16be decaySpeed;	// Decay speed
+	uint16be sustainTime;	// Sustain time
+	uint16be nt;			// ?
+	uint16be releaseSpeed;	// Release speed
+	uint16be waveform;		// Waveform
+	int16be  pitchFall;		// Pitch fall
+	uint16be vibAmp;		// Vibrato amplitude
+	uint16be vibSpeed;		// Vibrato speed
+	uint16be octave;		// Base frequency
+};
+
+MPT_BINARY_STRUCT(AMInstrument, 36)
+
 struct PT36IffChunk
 {
 	// IFF chunk names
@@ -533,7 +561,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = 4;
-	bool isNoiseTracker = false;
+	bool isNoiseTracker = false, isStartrekker = false;
 
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
@@ -573,6 +601,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
 		m_nChannels = magic[3] - '0';
 		m_madeWithTracker = "Startrekker";
+		isStartrekker = true;
+		m_playBehaviour.set(kMODVBlankTiming);
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
@@ -601,7 +631,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	const bool isFLT8 = IsMagic(magic, "FLT8") || IsMagic(magic, "EXO8");
+	const bool isFLT8 = isStartrekker && m_nChannels == 8;
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool isMdKd = IsMagic(magic, "M.K.");
 	// Adjust finetune values for modules saved with "His Master's Noisetracker"
@@ -670,7 +700,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// FLT8 has only even order items, so divide by two.
 		for(ORDERINDEX ord = 0; ord < Order.GetLength(); ord++)
 		{
-			Order[ord] /= 2;
+			Order[ord] /= 2u;
 		}
 	}
 	
@@ -691,7 +721,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
-	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);
 	m_nMinPeriod = 14 * 4;
@@ -801,6 +830,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(m.command || m.param)
 				{
+					// No support for Startrekker assembly macros
+					if(isStartrekker && m.command == 0x0E)
+					{
+						m.command = m.param = 0;
+					}
 					ConvertModCommand(m);
 				}
 
@@ -900,6 +934,147 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
+
+#ifdef MPT_EXTERNAL_SAMPLES
+	// Detect Startrekker files with external synth instruments.
+	// Note: Synthesized AM samples may overwrite existing samples (e.g. sample 1 in fa.worse face.mod),
+	// hence they are loaded here after all regular samples have been loaded.
+	if((loadFlags & loadSampleData) && isStartrekker)
+	{
+		InputFile amFile;
+		FileReader amData;
+		mpt::PathString filename = file.GetFileName();
+		if(!filename.empty())
+		{
+			// Find instrument definition file
+			const mpt::PathString exts[] = { MPT_PATHSTRING(".nt"), MPT_PATHSTRING(".NT"), MPT_PATHSTRING(".as"), MPT_PATHSTRING(".AS") };
+			for(size_t i = 0; i < CountOf(exts); i++)
+			{
+				mpt::PathString infoName = filename + exts[i];
+				char stMagic[16];
+				if(infoName.IsFile() && amFile.Open(infoName) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
+				{
+					if(!memcmp(stMagic, "ST1.2 ModuleINFO", 16))
+						m_madeWithTracker = "Startrekker 1.2";
+					else if(!memcmp(stMagic, "ST1.3 ModuleINFO", 16))
+						m_madeWithTracker = "Startrekker 1.3";
+					else if(!memcmp(stMagic, "AudioSculpture10", 16))
+						m_madeWithTracker = "AudioSculpture 1.0";
+					else
+						continue;
+
+					if(amData.Seek(144))
+					{
+						// Looks like a valid instrument definition file!
+						m_nInstruments = 31;
+						break;
+					}
+				}
+			}
+		}
+
+		for(SAMPLEINDEX smp = 1; smp <= m_nInstruments; smp++)
+		{
+			// For Startrekker AM synthesis, we need instrument envelopes.
+			ModInstrument *ins = AllocateInstrument(smp, smp);
+			if(ins == nullptr)
+			{
+				break;
+			}
+			mpt::String::Copy(ins->name, m_szNames[smp]);
+
+			AMInstrument am;
+			// Allow partial reads for fa.worse face.mod
+			if(amData.ReadStructPartial(am) && !memcmp(am.am, "AM", 2) && am.waveform < 4)
+			{
+				ModSample &sample = Samples[smp];
+				sample.nLength = am.waveform == 3 ? 1024 : 32;
+				sample.nLoopStart = 0;
+				sample.nLoopEnd = sample.nLength;
+				sample.uFlags.set(CHN_LOOP);
+				sample.nVolume = 256;	// prelude.mod has volume 0 in sample header
+				sample.nVibDepth = mpt::saturate_cast<uint8>(am.vibAmp * 2);
+				sample.nVibRate = static_cast<uint8>(am.vibSpeed);
+				sample.nVibType = VIB_SINE;
+				sample.RelativeTone = static_cast<int8>(-12 * am.octave);
+				if(sample.AllocateSample())
+				{
+					for(SmpLength i = 0; i < sample.nLength; i++)
+					{
+						switch(am.waveform)
+						{
+						default:
+						case 0: sample.pSample8[i] = ModSinusTable[i * 2];				break;	// Sine
+						case 1: sample.pSample8[i] = static_cast<int8>(-128 + i * 8);	break;	// Saw
+						case 2: sample.pSample8[i] = i < 16 ? -128 : 127;				break;	// Square
+						case 3: sample.pSample8[i] = mpt::random<int8>(AccessPRNG());	break;	// Noise
+						}
+					}
+				}
+
+				InstrumentEnvelope &volEnv = ins->VolEnv;
+				volEnv.dwFlags.set(ENV_ENABLED);
+				volEnv.reserve(6);
+				volEnv.push_back(0, static_cast<EnvelopeNode::value_t>(am.startLevel / 4));
+
+				struct
+				{
+					uint16 level, speed;
+				} points[] = { { am.startLevel, 0 }, { am.attack1Level, am.attack1Speed }, { am.attack2Level, am.attack2Speed }, { am.sustainLevel, am.decaySpeed }, { am.sustainLevel, am.sustainTime }, { 0, am.releaseSpeed } };
+
+				for(uint8 i = 1; i < CountOf(points); i++)
+				{
+					int duration = std::min(points[i].speed, uint16(256));
+					// Sustain time is already in ticks, no need to compute the segment duration.
+					if(i != 4)
+					{
+						if(duration == 0)
+						{
+							volEnv.dwFlags.set(ENV_LOOP);
+							volEnv.nLoopStart = volEnv.nLoopEnd = i - 1;
+							break;
+						}
+
+						// Startrekker increments / decrements the envelope level by the stage speed
+						// until it reaches the next stage level.
+						int a, b;
+						if(points[i].level > points[i - 1].level)
+						{
+							a = points[i].level - points[i - 1].level;
+							b = 256 - points[i - 1].level;
+						} else
+						{
+							a = points[i - 1].level - points[i].level;
+							b = points[i - 1].level;
+						}
+						// Release time is again special.
+						if(i == 5)
+							b = 256;
+						else if(b == 0)
+							b = 1;
+						duration = std::max((256 * a) / (duration * b), 1);
+					}
+					if(duration > 0)
+					{
+						volEnv.push_back(volEnv.back().tick + static_cast<EnvelopeNode::tick_t>(duration), static_cast<EnvelopeNode::value_t>(points[i].level / 4));
+					}
+				}
+
+				if(am.pitchFall)
+				{
+					InstrumentEnvelope &pitchEnv = ins->PitchEnv;
+					pitchEnv.dwFlags.set(ENV_ENABLED);
+					pitchEnv.reserve(2);
+					pitchEnv.push_back(0, ENVELOPE_MID);
+					pitchEnv.push_back(static_cast<EnvelopeNode::tick_t>(1024 / abs(am.pitchFall)), am.pitchFall > 0 ? ENVELOPE_MIN : ENVELOPE_MAX);
+				}
+			}
+
+			// This extra padding is probably present to have identical block sizes for AM and FM instruments.
+			amData.Skip(120 - sizeof(AMInstrument));
+		}
+	}
+#endif // MPT_EXTERNAL_SAMPLES
 
 	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
 	// Basically, this just converts all tempo commands into speed commands
@@ -1582,7 +1757,10 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		
 		m_madeWithTracker = "ProTracker " + version;
 	}
+	m_SongFlags.set(SONG_PT_MODE);
 	m_playBehaviour.set(kMODIgnorePanning);
+	m_playBehaviour.set(kMODOneShotLoops);
+	m_playBehaviour.set(kMODSampleSwap);
 	
 	return ok;
 }

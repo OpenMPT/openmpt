@@ -61,6 +61,9 @@ struct InstrumentEnvelope : public std::vector<EnvelopeNode>
 	void Sanitize(uint8 maxValue = ENVELOPE_MAX);
 
 	uint32 size() const { return static_cast<uint32>(std::vector<EnvelopeNode>::size()); }
+
+	using std::vector<EnvelopeNode>::push_back;
+	void push_back(EnvelopeNode::tick_t tick, EnvelopeNode::value_t value) { push_back(EnvelopeNode(tick, value)); }
 };
 
 // Instrument Struct
