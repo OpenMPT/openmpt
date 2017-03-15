@@ -5181,9 +5181,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		}
 		uint32 note = chn.nNewNote;
 		int32 oldPeriod = chn.nPeriod;
-		if ((note) && (note <= NOTE_MAX) && (chn.nLength)) CheckNNA(nChn, 0, note, true);
+		if (note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength)
+			CheckNNA(nChn, 0, note, true);
 		bool resetEnv = false;
-		if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))
+		if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 		{
 			if((chn.rowCommand.instr) && (param < 0x100))
 			{
@@ -5192,9 +5193,14 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			}
 			if (param < 0x100) resetEnv = true;
 		}
+		bool fading = chn.dwFlags[CHN_NOTEFADE];
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
 		NoteChange(&chn, note, m_playBehaviour[kITRetrigger], resetEnv);
+		// XM compatibility: Prevent NoteChange from resetting the fade flag in case an instrument number + note-off is present.
+		// Test case: RetrigFade.xm
+		if(fading && GetType() == MOD_TYPE_XM)
+			chn.dwFlags.set(CHN_NOTEFADE);
 		chn.nVolume = vol;
 		if(m_nInstruments)
 		{
