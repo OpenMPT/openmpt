@@ -548,7 +548,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				positionJumpOnThisRow = true;
 				memory.state.m_nNextOrder = static_cast<ORDERINDEX>(CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn));
 				memory.state.m_nNextPatStartRow = 0;  // FT2 E60 bug
-				// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+				// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				// Test case: PatternJump.mod
 				if(!patternBreakOnThisRow || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 					memory.state.m_nNextRow = 0;
@@ -3206,15 +3206,8 @@ bool CSoundFile::ProcessEffects()
 		case CMD_POSITIONJUMP:
 			m_PlayState.m_nNextPatStartRow = 0; // FT2 E60 bug
 			nPosJump = static_cast<ORDERINDEX>(CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn));
-			if(m_SongFlags[SONG_PATTERNLOOP] && m_PlayState.m_nSeqOverride == ORDERINDEX_INVALID)
-			{
-				m_PlayState.m_nSeqOverride = nPosJump;
-				//Releasing pattern loop after position jump could cause
-				//instant jumps - modifying behavior so that now position jumps
-				//occurs also when pattern loop is enabled.
-			}
 
-			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+			// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 			// Test case: PatternJump.mod
 			if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) && nBreakRow != ROWINDEX_INVALID)
 			{
@@ -3351,8 +3344,9 @@ bool CSoundFile::ProcessEffects()
 				}
 			}
 
-			m_PlayState.m_nNextOrder = nPosJump;
 			m_PlayState.m_nNextRow = nBreakRow;
+			if(!m_SongFlags[SONG_PATTERNLOOP])
+				m_PlayState.m_nNextOrder = nPosJump;
 		}
 
 	}
