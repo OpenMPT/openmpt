@@ -687,8 +687,24 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 			// Portamento Up/Down
 			case CMD_PORTAMENTOUP:
+				if(param)
+				{
+					// FT2 compatibility: Separate effect memory for all portamento commands
+					// Test case: Porta-LinkMem.xm
+					if(!m_playBehaviour[kFT2PortaUpDownMemory])
+						pChn->nOldPortaDown = param;
+					pChn->nOldPortaUp = param;
+				}
+				break;
 			case CMD_PORTAMENTODOWN:
-				if (param) pChn->nOldPortaUpDown = param;
+				if(param)
+				{
+					// FT2 compatibility: Separate effect memory for all portamento commands
+					// Test case: Porta-LinkMem.xm
+					if(!m_playBehaviour[kFT2PortaUpDownMemory])
+						pChn->nOldPortaUp = param;
+					pChn->nOldPortaDown = param;
+				}
 				break;
 			// Tone-Portamento
 			case CMD_TONEPORTAMENTO:
@@ -825,6 +841,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_VIBRATO:
 			case CMD_FINEVIBRATO:
 			case CMD_VIBRATOVOL:
+				if(adjustMode & eAdjust)
 				{
 					uint32 inc = pChn->nVibratoSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
 					if(m_playBehaviour[kITVibratoTremoloPanbrello])
@@ -834,17 +851,21 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 
 			case CMD_TREMOLO:
-			{
-				uint32 inc = pChn->nTremoloSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
-				if(m_playBehaviour[kITVibratoTremoloPanbrello])
-					inc *= 4;
-				pChn->nTremoloPos += static_cast<uint8>(inc);
-			}
-			break;
-			
+				if(adjustMode & eAdjust)
+				{
+					uint32 inc = pChn->nTremoloSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					if(m_playBehaviour[kITVibratoTremoloPanbrello])
+						inc *= 4;
+					pChn->nTremoloPos += static_cast<uint8>(inc);
+				}
+				break;
+
 			case CMD_PANBRELLO:
-				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed - 1;
-				ProcessPanbrello(pChn);
+				if(adjustMode & eAdjust)
+				{
+					pChn->nPanbrelloPos += pChn->nPanbrelloSpeed - 1;
+					ProcessPanbrello(pChn);
+				}
 				break;
 			}
 		}
@@ -3393,7 +3414,8 @@ void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param
 //-------------------------------------------------------------------------------------
 {
 	pChn->nOldVolumeSlide = param;	// Dxy / Kxy / Lxy
-	pChn->nOldPortaUpDown = param;	// Exx / Fxx
+	pChn->nOldPortaUp = param;		// Exx / Fxx
+	pChn->nOldPortaDown = param;	// Exx / Fxx
 	pChn->nTremorParam = param;		// Ixy
 	pChn->nArpeggio = param;		// Jxy
 	pChn->nRetrigParam = param;		// Qxy
@@ -3473,9 +3495,16 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
 	if(param)
-		pChn->nOldPortaUpDown = param;
-	else
-		param = pChn->nOldPortaUpDown;
+	{
+		// FT2 compatibility: Separate effect memory for all portamento commands
+		// Test case: Porta-LinkMem.xm
+		if(!m_playBehaviour[kFT2PortaUpDownMemory])
+			pChn->nOldPortaDown = param;
+		pChn->nOldPortaUp = param;
+	} else
+	{
+		param = pChn->nOldPortaUp;
+	}
 
 	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP));
 
@@ -3532,9 +3561,16 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
 	if(param)
-		pChn->nOldPortaUpDown = param;
-	else
-		param = pChn->nOldPortaUpDown;
+	{
+		// FT2 compatibility: Separate effect memory for all portamento commands
+		// Test case: Porta-LinkMem.xm
+		if(!m_playBehaviour[kFT2PortaUpDownMemory])
+			pChn->nOldPortaUp = param;
+		pChn->nOldPortaDown = param;
+	} else
+	{
+		param = pChn->nOldPortaDown;
+	}
 
 	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP));
 
@@ -3830,8 +3866,8 @@ void CSoundFile::TonePortamento(ModChannel *pChn, uint32 param) const
 	//IT compatibility 03: Share effect memory with portamento up/down
 	if((!m_SongFlags[SONG_ITCOMPATGXX] && m_playBehaviour[kITPortaMemoryShare]) || GetType() == MOD_TYPE_PLM)
 	{
-		if(param == 0) param = pChn->nOldPortaUpDown;
-		pChn->nOldPortaUpDown = static_cast<uint8>(param);
+		if(param == 0) param = pChn->nOldPortaUp;
+		pChn->nOldPortaUp = pChn->nOldPortaDown = static_cast<uint8>(param);
 	}
 
 	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)

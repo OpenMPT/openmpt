@@ -449,6 +449,7 @@ enum PlayBehaviour
 	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
 	kRowDelayWithNoteDelay,			// Retrigger note delays on every reptition of a row
 	kFT2TremoloRampWaveform,		// FT2-compatible tremolo ramp down / triangle waveform
+	kFT2PortaUpDownMemory,			// Portamento up and down have separate memory
 
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3
