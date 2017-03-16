@@ -91,7 +91,7 @@ struct ModChannel
 	uint8 nArpeggioLastNote, nArpeggioBaseNote;	// For plugin arpeggio
 	uint8 nNewNote, nNewIns, nOldIns, nCommand, nArpeggio;
 	uint8 nOldVolumeSlide, nOldFineVolUpDown;
-	uint8 nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
+	uint8 nOldPortaUp, nOldPortaDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
 	uint8 nOldPanSlide, nOldChnVolSlide;
 	uint8 nOldGlobalVolSlide;
 	uint8 nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
