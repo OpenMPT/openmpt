@@ -26,7 +26,6 @@ extern const int8 ModSinusTable[64];
 extern const int8 ModRampDownTable[64];
 extern const int8 ModRandomTable[64];
 extern const int8 ITSinusTable[256];
-extern const int8 ITRampDownTable[256];
 extern const int8 retrigTable1[16];
 extern const int8 retrigTable2[16];
 extern const uint16 XMPeriodTable[104];
