@@ -476,35 +476,36 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
 
-	if (loadFlags & loadPluginData)
+	if(loadFlags & loadPluginData)
 	{
 		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 		{
-			if(m_MixPlugins[plug].IsValidPlugin())
+			auto &plugin = m_MixPlugins[plug];
+			if(plugin.IsValidPlugin())
 			{
 #ifdef MODPLUG_TRACKER
 				// Provide some visual feedback
 				{
 					mpt::ustring s = mpt::format(MPT_USTRING("Loading Plugin FX%1: %2 (%3)"))(
 						mpt::ufmt::dec0<2>(plug + 1),
-						mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].Info.szLibraryName),
-						mpt::ToUnicode(mpt::CharsetLocale, m_MixPlugins[plug].Info.szName));
+						mpt::ToUnicode(mpt::CharsetUTF8, plugin.Info.szLibraryName),
+						mpt::ToUnicode(mpt::CharsetLocale, plugin.Info.szName));
 					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToCString(s));
 				}
 #endif // MODPLUG_TRACKER
-				CreateMixPluginProc(m_MixPlugins[plug], *this);
-				if (m_MixPlugins[plug].pMixPlugin)
+				CreateMixPluginProc(plugin, *this);
+				if(plugin.pMixPlugin)
 				{
 					// Plugin was found
-					m_MixPlugins[plug].pMixPlugin->RestoreAllParameters(m_MixPlugins[plug].defaultProgram);
+					plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
 				} else
 				{
 					// Plugin not found - add to list
 					bool found = false;
 					for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
 					{
-						if((**i).dwPluginId2 == m_MixPlugins[plug].Info.dwPluginId2
-							&& (**i).dwPluginId1 == m_MixPlugins[plug].Info.dwPluginId1)
+						if((**i).dwPluginId2 == plugin.Info.dwPluginId2
+							&& (**i).dwPluginId1 == plugin.Info.dwPluginId1)
 						{
 							found = true;
 							break;
@@ -513,12 +514,12 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 					if(!found)
 					{
-						notFoundIDs.push_back(&m_MixPlugins[plug].Info);
+						notFoundIDs.push_back(&plugin.Info);
 #ifdef MODPLUG_TRACKER
-						notFoundText.append(m_MixPlugins[plug].GetLibraryName());
+						notFoundText.append(plugin.GetLibraryName());
 						notFoundText.append("\n");
 #else
-						AddToLog(LogWarning, MPT_USTRING("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].GetLibraryName()));
+						AddToLog(LogWarning, MPT_USTRING("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()));
 #endif // MODPLUG_TRACKER
 					}
 				}
@@ -1001,6 +1002,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2FinetunePrecision);
 		playBehaviour.set(kFT2NoteOffFlags);
 		playBehaviour.set(kRowDelayWithNoteDelay);
+		playBehaviour.set(kFT2TremoloRampWaveform);
 		break;
 
 	case MOD_TYPE_S3M:
@@ -1045,6 +1047,8 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
 		playBehaviour.set(kITMultiSampleBehaviour);
+		playBehaviour.set(kITSampleAndHoldPanbrello);
+		playBehaviour.set(kITPanbrelloHold);
 		break;
 
 	case MOD_TYPE_XM:

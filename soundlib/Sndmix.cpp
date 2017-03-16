@@ -792,25 +792,41 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 			return;
 		}
 
-		uint32 trempos = pChn->nTremoloPos;
 		// IT compatibility: Why would you not want to execute tremolo at volume 0?
 		if(vol > 0 || m_playBehaviour[kITVibratoTremoloPanbrello])
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
 			const uint8 attenuation = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
-			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
+			int delta = GetVibratoDelta(pChn->nTremoloType, pChn->nTremoloPos);
 			if(GetType() == MOD_TYPE_DMF)
+			{
 				delta -= 127;
+			} else if((pChn->nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2TremoloRampWaveform])
+			{
+				// FT2 compatibility: Tremolo ramp down / triangle implementation is weird and affected by vibrato position (copypaste bug)
+				// Test case: TremoloWaveforms.xm, TremoloVibrato.xm
+				uint8 ramp = (pChn->nTremoloPos * 4u) & 0x7F;
+				// Volume-colum vibrato gets executed first in FT2, so we may need to advance the vibrato position first
+				uint32 vibPos = pChn->nVibratoPos;
+				if(!m_SongFlags[SONG_FIRSTTICK] && pChn->dwFlags[CHN_VIBRATO])
+					vibPos += pChn->nVibratoSpeed;
+				if((vibPos & 0x3F) >= 32)
+					ramp ^= 0x7F;
+				if((pChn->nTremoloPos & 0x3F) >= 32)
+					delta = -ramp;
+				else
+					delta = ramp;
+			}
 			vol += (delta * pChn->nTremoloDepth) / (1 << attenuation);
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
-				pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
+				pChn->nTremoloPos += 4 * pChn->nTremoloSpeed;
 			else
-				pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
+				pChn->nTremoloPos += pChn->nTremoloSpeed;
 		}
 	}
 }
@@ -1259,9 +1275,9 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 		uint32 panpos;
 		// IT compatibility: IT has its own, more precise tables
 		if(m_playBehaviour[kITVibratoTremoloPanbrello])
-			panpos = pChn->nPanbrelloPos & 0xFF;
+			panpos = pChn->nPanbrelloPos;
 		else
-			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
+			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2);
 
 		pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
 
@@ -1483,8 +1499,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			return;
 		}
 
-		uint32 vibpos = chn.nVibratoPos;
-		int vdelta = GetVibratoDelta(chn.nVibratoType, vibpos);
+		int vdelta = GetVibratoDelta(chn.nVibratoType, chn.nVibratoPos);
 
 		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
 		{
@@ -1586,9 +1601,9 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
-				chn.nVibratoPos = (vibpos + 4 * chn.nVibratoSpeed) & 0xFF;
+				chn.nVibratoPos += 4 * chn.nVibratoSpeed;
 			else
-				chn.nVibratoPos = (vibpos + chn.nVibratoSpeed) & 0x3F;
+				chn.nVibratoPos += chn.nVibratoSpeed;
 		}
 	} else if(chn.dwOldFlags[CHN_VIBRATO])
 	{

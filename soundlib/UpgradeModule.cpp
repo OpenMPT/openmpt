@@ -516,6 +516,7 @@ void CSoundFile::UpgradeModule()
 		{
 			{ kFT2NoteOffFlags,					MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
 			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
+			{ kFT2TremoloRampWaveform,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)

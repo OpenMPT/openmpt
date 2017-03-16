@@ -117,7 +117,7 @@ enum MODCONTAINERTYPE
 };
 
 
-// Channel flags:
+// Module channel / sample flags
 enum ChannelFlags
 {
 	// Sample Flags
@@ -143,7 +143,7 @@ enum ChannelFlags
 	CHN_TREMOLO			= 0x20000,		// Apply tremolo
 	//CHN_PANBRELLO		= 0x40000,		// Apply panbrello
 	CHN_PORTAMENTO		= 0x80000,		// Apply portamento
-	CHN_GLISSANDO		= 0x100000,		// Glissando mode
+	CHN_GLISSANDO		= 0x100000,		// Glissando (force portamento to semitones) mode
 	CHN_FASTVOLRAMP		= 0x200000,		// Force usage of global ramping settings instead of ramping over the complete render buffer length
 	CHN_EXTRALOUD		= 0x400000,		// Force sample to play at 0dB
 	CHN_REVERB			= 0x800000,		// Apply reverb on this channel
@@ -152,10 +152,9 @@ enum ChannelFlags
 	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
 	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
 
-	// Sample storage flags (also saved in ModSample::uFlags, but are not relevant to mixing)
+	// Sample flags (only present in ModSample::uFlags, may overlap with CHN_CHANNELFLAGS)
 	SMP_MODIFIED		= 0x1000,	// Sample data has been edited in the tracker
 	SMP_KEEPONDISK		= 0x2000,	// Sample is not saved to file, data is restored from original sample file
-	// Misc sample flags (only present in ModSample::uFlags, but not relevant to mixing)
 	SMP_NODEFAULTVOLUME	= 0x4000,	// Ignore default volume setting
 };
 DECLARE_FLAGSET(ChannelFlags)
@@ -259,7 +258,7 @@ enum SongFlags
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE)
+#define SONG_FILE_FLAGS	(SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
@@ -449,6 +448,7 @@ enum PlayBehaviour
 
 	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
 	kRowDelayWithNoteDelay,			// Retrigger note delays on every reptition of a row
+	kFT2TremoloRampWaveform,		// FT2-compatible tremolo ramp down / triangle waveform
 
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3
