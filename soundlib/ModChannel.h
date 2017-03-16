@@ -74,7 +74,6 @@ struct ModChannel
 	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
 	int32 nFineTune, nTranspose;
 	int32 nPortamentoSlide, nAutoVibDepth;
-	uint32 nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
 	int32 nVolSwing, nPanSwing;
 	int32 nCutSwing, nResSwing;
 	int32 nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
@@ -95,6 +94,7 @@ struct ModChannel
 	uint8 nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
 	uint8 nOldPanSlide, nOldChnVolSlide;
 	uint8 nOldGlobalVolSlide;
+	uint8 nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
 	uint8 nVibratoType, nVibratoSpeed, nVibratoDepth;
 	uint8 nTremoloType, nTremoloSpeed, nTremoloDepth;
 	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
