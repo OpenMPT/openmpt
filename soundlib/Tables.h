@@ -23,7 +23,6 @@ extern const uint8 ModEFxTable[16];
 extern const uint16 FreqS3MTable[16];
 extern const uint16 S3MFineTuneTable[16];
 extern const int8 ModSinusTable[64];
-extern const int8 ModRampDownTable[64];
 extern const int8 ModRandomTable[64];
 extern const int8 ITSinusTable[256];
 extern const int8 retrigTable1[16];
