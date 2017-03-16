@@ -818,6 +818,35 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				Vibrato(pChn, pChn->rowCommand.vol);
 				break;
 			}
+
+			// Process vibrato / tremolo / panbrello
+			switch(pChn->rowCommand.command)
+			{
+			case CMD_VIBRATO:
+			case CMD_FINEVIBRATO:
+			case CMD_VIBRATOVOL:
+				{
+					uint32 inc = pChn->nVibratoSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					if(m_playBehaviour[kITVibratoTremoloPanbrello])
+						inc *= 4;
+					pChn->nVibratoPos += static_cast<uint8>(inc);
+				}
+				break;
+
+			case CMD_TREMOLO:
+			{
+				uint32 inc = pChn->nTremoloSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+				if(m_playBehaviour[kITVibratoTremoloPanbrello])
+					inc *= 4;
+				pChn->nTremoloPos += static_cast<uint8>(inc);
+			}
+			break;
+			
+			case CMD_PANBRELLO:
+				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed - 1;
+				ProcessPanbrello(pChn);
+				break;
+			}
 		}
 
 		// Interpret F00 effect in XM files as "stop song"
