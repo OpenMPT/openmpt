@@ -713,14 +713,14 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		position &= 0xFF;
 		switch(type & 0x03)
 		{
-		case 0:
+		case 0:	// Sine
 		default:
 			return ITSinusTable[position];
-		case 1:
+		case 1:	// Ramp down
 			return 64 - (position + 1) / 2;
-		case 2:
+		case 2:	// Square
 			return position < 128 ? 64 : 0;
-		case 3:
+		case 3:	// Random
 			return mpt::random<int, 7>(AccessPRNG()) - 0x40;
 		}
 	} else
@@ -728,14 +728,14 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		position &= 0x3F;
 		switch(type & 0x03)
 		{
-		case 0:
+		case 0:	// Sine
 		default:
 			return ModSinusTable[position];
-		case 1:
-			return ModRampDownTable[position];
-		case 2:
+		case 1:	// Ramp down
+			return (position < 32 ? 0 : 255) - position * 4;
+		case 2:	// Square
 			return position < 32 ? 127 : -127;
-		case 3:
+		case 3:	// Random
 			return ModRandomTable[position];
 		}
 	}
