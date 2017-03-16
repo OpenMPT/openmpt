@@ -710,13 +710,14 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 	// IT compatibility: IT has its own, more precise tables
 	if(m_playBehaviour[kITVibratoTremoloPanbrello])
 	{
+		position &= 0xFF;
 		switch(type & 0x03)
 		{
 		case 0:
 		default:
 			return ITSinusTable[position];
 		case 1:
-			return ITRampDownTable[position];
+			return 64 - (position + 1) / 2;
 		case 2:
 			return position < 128 ? 64 : 0;
 		case 3:
@@ -724,6 +725,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		}
 	} else
 	{
+		position &= 0x3F;
 		switch(type & 0x03)
 		{
 		case 0:
@@ -1582,7 +1584,6 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				return;
 			}
 
-
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
 				chn.nVibratoPos = (vibpos + 4 * chn.nVibratoSpeed) & 0xFF;
@@ -1652,10 +1653,10 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				vdelta = mpt::random<int, 7>(AccessPRNG()) - 0x40;
 				break;
 			case VIB_RAMP_DOWN:
-				vdelta = ITRampDownTable[vibpos];
+				vdelta = 64 - (vibpos + 1) / 2;
 				break;
 			case VIB_RAMP_UP:
-				vdelta = -ITRampDownTable[vibpos];
+				vdelta = ((vibpos + 1) / 2) - 64;
 				break;
 			case VIB_SQUARE:
 				vdelta = vibpos < 128 ? 64 : 0;
