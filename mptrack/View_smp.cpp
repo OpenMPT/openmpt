@@ -370,9 +370,9 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 	// Snap to grid
 	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
 	{
-		const float sampsPerSegment = (float)(sample.nLength / m_nGridSegments);
-		nBegin = (SmpLength)(Util::Round((float)(nBegin / sampsPerSegment)) * sampsPerSegment);
-		nEnd = (SmpLength)(Util::Round((float)(nEnd / sampsPerSegment)) * sampsPerSegment);
+		auto sampsPerSegment = static_cast<double>(sample.nLength / m_nGridSegments);
+		nBegin = static_cast<SmpLength>(Util::Round((nBegin / sampsPerSegment)) * sampsPerSegment);
+		nEnd = static_cast<SmpLength>(Util::Round((nEnd / sampsPerSegment)) * sampsPerSegment);
 	}
 
 	if (nBegin > nEnd)
@@ -1547,7 +1547,7 @@ void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLe
 
 	for(SmpLength i = old; i != m_dwEndDrag; i += inc, data += ptrInc)
 	{
-		*data = static_cast<T>((float)oldvalue + (value - oldvalue) * ((float)i - old) / ((float)m_dwEndDrag - old));
+		*data = static_cast<T>(static_cast<double>(oldvalue) + (value - oldvalue) * (static_cast<double>(i - old) / static_cast<double>(m_dwEndDrag - old)));
 	}
 	*data = static_cast<T>(value);
 }
@@ -1595,13 +1595,16 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				else
 					wsprintf(s, "Beyond offset range");
 				pMainFrm->SetInfoText(s);
-			}
-			else
+			} else
 			{
 				pMainFrm->SetInfoText("");
 			}
 		}
-	} else UpdateIndicator(NULL);
+	} else
+	{
+		UpdateIndicator(NULL);
+	}
+
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
 		const SmpLength len = sndFile.GetSample(m_nSample).nLength;

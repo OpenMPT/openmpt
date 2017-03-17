@@ -1681,11 +1681,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	pMainFrm->PauseMod(this);
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
+	std::string fileNameAdd;
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
 		mpt::PathString thisName = fileName;
 		CString caption = "file";
-		char fileNameAdd[_MAX_FNAME] = "";
+		fileNameAdd.clear();
 
 		// Channel mode
 		if(wsdlg.m_bChannelMode)
@@ -1700,12 +1701,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			// Add channel number & name (if available) to path string
 			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
 			{
-				sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.ChnSettings[i].szName);
+				fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
 				caption.Format("%u:", i + 1);
 				caption += m_SndFile.ChnSettings[i].szName;
 			} else
 			{
-				sprintf(fileNameAdd, "-%03d", i + 1);
+				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
 				caption.Format("channel %u", i + 1);
 			}
 			// Unmute channel to process
@@ -1717,48 +1718,48 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(m_SndFile.GetNumInstruments() == 0)
 			{
 				// Re-mute previously processed sample
-				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
+				if(i > 0) MuteSample(static_cast<SAMPLEINDEX>(i), true);
 
-				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !IsSampleUsed((SAMPLEINDEX)(i + 1), false) || instrMuteState[i])
+				if(m_SndFile.GetSample(static_cast<SAMPLEINDEX>(i + 1)).pSample == nullptr || !IsSampleUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
 					continue;
 
 				// Add sample number & name (if available) to path string
 				if(strcmp(m_SndFile.m_szNames[i + 1], ""))
 				{
-					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.m_szNames[i + 1]);
+					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
 					caption.Format("%u: ", i + 1);
 					caption += m_SndFile.m_szNames[i + 1];
 				} else
 				{
-					sprintf(fileNameAdd, "-%03d", i + 1);
+					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
 					caption.Format("sample %u", i + 1);
 				}
 				// Unmute sample to process
-				MuteSample((SAMPLEINDEX)(i + 1), false);
+				MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
 			} else
 			{
 				// Re-mute previously processed instrument
-				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
+				if(i > 0) MuteInstrument(static_cast<INSTRUMENTINDEX>(i), true);
 
-				if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed((INSTRUMENTINDEX)(i + 1), false) || instrMuteState[i])
+				if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
 					continue;
 
 				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
 				{
-					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.Instruments[i + 1]->name);
+					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
 					caption.Format("%u:", i + 1);
 					caption += m_SndFile.Instruments[i + 1]->name;
 				} else
 				{
-					sprintf(fileNameAdd, "-%03d", i + 1);
+					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
 					caption.Format("instrument %u", i + 1);
 				}
 				// Unmute instrument to process
-				MuteInstrument((INSTRUMENTINDEX)(i + 1), false);
+				MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
 			}
 		}
 
-		if(strcmp(fileNameAdd, ""))
+		if(!fileNameAdd.empty())
 		{
 			SanitizeFilename(fileNameAdd);
 			thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
@@ -1802,7 +1803,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 						if(m_SndFile.ReadSampleFromFile(smp, file, false))
 						{
 							strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
-							strncat(m_SndFile.m_szNames[smp], fileNameAdd, MAX_SAMPLENAME - strlen("Render To Sample") - 1);
+							strncat(m_SndFile.m_szNames[smp], fileNameAdd.c_str(), MPT_ARRAY_COUNT(m_SndFile.m_szNames[smp]) - strlen("Render To Sample") - 1);
 							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 							if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
 							{

@@ -73,11 +73,8 @@ END_MESSAGE_MAP()
 
 CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 	: m_VstPlugin(plugin)
-	, m_currentPresetMenu(0)
-	, m_nLearnMacro(-1)
 	, m_isMinimized(false)
 	, m_updateDisplay(false)
-	, m_nCurProg(-1)
 {
 	m_Menu.LoadMenu(IDR_VSTMENU);
 	m_nInstrument = GetBestInstrumentCandidate();
@@ -87,9 +84,6 @@ CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 CAbstractVstEditor::~CAbstractVstEditor()
 //---------------------------------------
 {
-#ifdef VST_LOG
-	Log("~CVstEditor()\n");
-#endif
 	m_Menu.DestroyMenu();
 	m_PresetMenu.DestroyMenu();
 	m_InputMenu.DestroyMenu();
@@ -875,23 +869,24 @@ void CAbstractVstEditor::UpdateMacroMenu()
 
 		if(macroType == sfx_unused)
 		{
-			macroName = "Unused. Learn Param...";
+			macroName = _T("Unused. Learn Param...");
 			action= ID_LEARN_MACRO_FROM_PLUGGUI + nMacro;
 			greyed = false;
 		} else
 		{
 			macroName = midiCfg.GetParameteredMacroName(nMacro, &m_VstPlugin);
-			if(macroType != sfx_plug || macroName.Left(3) != "N/A")
+			if(macroType != sfx_plug || macroName.Left(3) != _T("N/A"))
 			{
 				greyed = false;
 			}
 		}
 
-		label.Format("SF%X: %s", nMacro, macroName);
+		label.Format(_T("SF%X: "), nMacro);
+		label += macroName;
 		m_MacroMenu.AppendMenu(MF_STRING | (greyed ? MF_GRAYED : 0), action, label);
 	}
 
-	pInfoMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_MacroMenu.m_hMenu), "&Macros");
+	pInfoMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_MacroMenu.m_hMenu), _T("&Macros"));
 }
 
 void CAbstractVstEditor::UpdateOptionsMenu()
@@ -907,20 +902,20 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 
 	//Bypass
 	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.IsBypassed() ? MF_CHECKED : 0),
-							   ID_PLUG_BYPASS, "&Bypass Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
+							   ID_PLUG_BYPASS, _T("&Bypass Plugin\t") + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
 	//Record Params
 	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_recordAutomation ? MF_CHECKED : 0),
-							   ID_PLUG_RECORDAUTOMATION, "Record &Parameter Changes\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
+							   ID_PLUG_RECORDAUTOMATION, _T("Record &Parameter Changes\t") + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
 	//Record MIDI Out
 	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_recordMIDIOut ? MF_CHECKED : 0),
-							   ID_PLUG_RECORD_MIDIOUT, "Record &MIDI Out to Pattern Editor\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
+							   ID_PLUG_RECORD_MIDIOUT, _T("Record &MIDI Out to Pattern Editor\t") + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
 	//Pass on keypresses
 	m_OptionsMenu.AppendMenu(MF_STRING | (m_VstPlugin.m_passKeypressesToPlug ? MF_CHECKED : 0),
-							   ID_PLUG_PASSKEYS, "Pass &Keys to Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
+							   ID_PLUG_PASSKEYS, _T("Pass &Keys to Plugin\t") + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
 
 
 	m_Menu.DeleteMenu(3, MF_BYPOSITION);
-	m_Menu.InsertMenu(3, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_OptionsMenu.m_hMenu), "&Options");
+	m_Menu.InsertMenu(3, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_OptionsMenu.m_hMenu), _T("&Options"));
 
 }
 

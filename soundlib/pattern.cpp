@@ -272,19 +272,6 @@ bool CPattern::SetName(const char *newName, size_t maxChars)
 }
 
 
-bool CPattern::GetName(char *buffer, size_t maxChars) const
-//---------------------------------------------------------
-{
-	if(buffer == nullptr || maxChars == 0)
-	{
-		return false;
-	}
-	strncpy(buffer, m_PatternName.c_str(), maxChars - 1);
-	buffer[maxChars - 1] = '\0';
-	return true;
-}
-
-
 // Write some kind of effect data to the pattern. Exact data to be written and write behaviour can be found in the EffectWriter object.
 bool CPattern::WriteEffect(EffectWriter &settings)
 //------------------------------------------------

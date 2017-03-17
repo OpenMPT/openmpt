@@ -101,7 +101,7 @@ public:
 
 	// Pattern name functions - bool functions return true on success.
 	bool SetName(const std::string &newName);
-	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
+	bool SetName(const char *newName, size_t maxChars);
 	template<size_t bufferSize>
 	bool SetName(const char (&buffer)[bufferSize])
 	{
@@ -109,11 +109,11 @@ public:
 	}
 
 	template<size_t bufferSize>
-	bool GetName(char (&buffer)[bufferSize]) const
+	void GetName(char (&buffer)[bufferSize]) const
 	{
-		return GetName(buffer, bufferSize);
+		strncpy(buffer, m_PatternName.c_str(), bufferSize - 1);
+		buffer[bufferSize - 1] = '\0';
 	}
-	bool GetName(char *buffer, size_t maxChars) const;
 	std::string GetName() const { return m_PatternName; };
 
 #ifdef MODPLUG_TRACKER
