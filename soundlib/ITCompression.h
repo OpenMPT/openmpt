@@ -32,7 +32,7 @@ public:
 	static const size_t blockSize = 0x8000;			// Block size (in bytes) in which samples are being processed
 
 protected:
-	std::vector<int> bwt;			// Bit width table
+	std::vector<int8> bwt;			// Bit width table for each sampling point
 	uint8 *packedData;				// Compressed data for current sample block
 	std::ostream *file;				// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
 	void *sampleData;				// Pre-processed sample data for currently compressed sample block
@@ -42,8 +42,8 @@ protected:
 	SmpLength baseLength;			// Length of the currently compressed sample block (in samples)
 
 	// Bit writer
-	int bitPos;		// Current bit position in this byte
-	int remBits;	// Remaining bits in this byte
+	int8 bitPos;	// Current bit position in this byte
+	int8 remBits;	// Remaining bits in this byte
 	uint8 byteVal;	// Current byte value to be written
 
 	bool is215;		// Use IT2.15 compression (double deltas)
@@ -57,13 +57,13 @@ protected:
 	template<typename Properties>
 	void Compress(const void *data, SmpLength offset, SmpLength actualLength);
 
-	static int GetWidthChangeSize(int w, bool is16);
+	static int8 GetWidthChangeSize(int8 w, bool is16);
 
 	template<typename Properties>
-	void SquishRecurse(int sWidth, int lWidth, int rWidth, int width, SmpLength offset, SmpLength length);
+	void SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length);
 
-	static int ConvertWidth(int curWidth, int newWidth);
-	void WriteBits(int width, int v);
+	static int8 ConvertWidth(int8 curWidth, int8 newWidth);
+	void WriteBits(int8 width, int v);
 
 	void WriteByte(uint8 v);
 };
@@ -77,22 +77,21 @@ public:
 	ITDecompression(FileReader &file, ModSample &sample, bool it215);
 
 protected:
-	FileReader chunk;			// Currently processed block
-	FileReader::PinnedRawDataView chunkView;	// view into Currently processed block
-
 	ModSample &mptSample;		// Sample that is being processed
 
 	SmpLength writtenSamples;	// Number of samples so far written on this channel
 	SmpLength writePos;			// Absolut write position in sample (for stereo samples)
 	SmpLength curLength;		// Length of currently processed block
-	FileReader::off_t dataPos;	// Position in input block
-	unsigned int mem1, mem2;				// Integrator memory
+	unsigned int mem1, mem2;	// Integrator memory
+	int dataPos, dataSize;		// Position in and size of input block
 
 	// Bit reader
-	int bitPos;		// Current bit position in this byte
-	int remBits;	// Remaining bits in this byte
+	int bitPos;					// Current bit position in this byte
+	int remBits;				// Remaining bits in this byte
 
-	bool is215;		// Use IT2.15 compression (double deltas)
+	bool is215;					// Use IT2.15 compression (double deltas)
+
+	mpt::byte chunk[65535];		// Input block
 
 	template<typename Properties>
 	void Uncompress(typename Properties::sample_t *target);

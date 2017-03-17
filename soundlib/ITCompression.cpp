@@ -26,7 +26,7 @@ struct IT16BitParams
 	typedef int16 sample_t;
 	static const int16 lowerTab[];
 	static const int16 upperTab[];
-	static const int fetchA = 4, lowerB = -8, upperB = 7, defWidth = 17;
+	static const int8 fetchA = 4, lowerB = -8, upperB = 7, defWidth = 17;
 	static int Clamp(sample_t v) { return int(v) & 0xFFFF; }
 };
 
@@ -39,14 +39,14 @@ struct IT8BitParams
 	typedef int8 sample_t;
 	static const int8 lowerTab[];
 	static const int8 upperTab[];
-	static const int fetchA = 3, lowerB = -4, upperB = 3, defWidth = 9;
+	static const int8 fetchA = 3, lowerB = -4, upperB = 3, defWidth = 9;
 	static int Clamp(sample_t v) { return int(v) & 0xFF; }
 };
 
 const int8 IT8BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -60, -124, -128 };
 const int8 IT8BitParams::upperTab[] = { 0, 1, 3, 7, 15, 31, 59, 123, 127 };
 
-static const int ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+static const int8 ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 
 //////////////////////////////////////////////////////////////////////////////
 // IT 2.14 compression
@@ -141,7 +141,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 		Deltafy<typename Properties::sample_t>();
 	}
 
-	const int defWidth = Properties::defWidth; // gcc static const member reference workaround
+	const int8 defWidth = Properties::defWidth; // gcc static const member reference workaround
 
 	// Initialise bit width table with initial values
 	bwt.assign(baseLength, defWidth);
@@ -151,7 +151,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 	
 	// Write those bits!
 	const typename Properties::sample_t *p = static_cast<typename Properties::sample_t *>(sampleData);
-	int width = defWidth;
+	int8 width = defWidth;
 	for(size_t i = 0; i < baseLength; i++)
 	{
 		if(bwt[i] != width)
@@ -186,11 +186,11 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 }
 
 
-int ITCompression::GetWidthChangeSize(int w, bool is16)
-//-----------------------------------------------------
+int8 ITCompression::GetWidthChangeSize(int8 w, bool is16)
+//-------------------------------------------------------
 {
 	MPT_ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
-	int wcs = ITWidthChangeSize[w - 1];
+	int8 wcs = ITWidthChangeSize[w - 1];
 	if(w <= 6 && is16)
 		wcs++;
 	return wcs;
@@ -198,8 +198,8 @@ int ITCompression::GetWidthChangeSize(int w, bool is16)
 
 
 template<typename Properties>
-void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width, SmpLength offset, SmpLength length)
-//------------------------------------------------------------------------------------------------------------------
+void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	if(width + 1 < 1)
 	{
@@ -226,13 +226,13 @@ void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width,
 			}
 
 			const SmpLength blockLength = i - start;
-			const int xlwidth = start == offset ? lWidth : sWidth;
-			const int xrwidth = i == end ? rWidth : sWidth;
+			const int8 xlwidth = start == offset ? lWidth : sWidth;
+			const int8 xrwidth = i == end ? rWidth : sWidth;
 
 			const bool is16 = sizeof(typename Properties::sample_t) > 1;
-			const int wcsl = GetWidthChangeSize(xlwidth, is16);
-			const int wcss = GetWidthChangeSize(sWidth, is16);
-			const int wcsw = GetWidthChangeSize(width + 1, is16);
+			const int8 wcsl = GetWidthChangeSize(xlwidth, is16);
+			const int8 wcss = GetWidthChangeSize(sWidth, is16);
+			const int8 wcsw = GetWidthChangeSize(width + 1, is16);
 
 			bool comparison;
 			if(i == baseLength)
@@ -266,8 +266,8 @@ void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width,
 }
 
 
-int ITCompression::ConvertWidth(int curWidth, int newWidth)
-//---------------------------------------------------------
+int8 ITCompression::ConvertWidth(int8 curWidth, int8 newWidth)
+//------------------------------------------------------------
 {
 	curWidth--;
 	newWidth--;
@@ -278,8 +278,8 @@ int ITCompression::ConvertWidth(int curWidth, int newWidth)
 }
 
 
-void ITCompression::WriteBits(int width, int v)
-//---------------------------------------------
+void ITCompression::WriteBits(int8 width, int v)
+//----------------------------------------------
 {
 	while(width > remBits)
 	{
@@ -329,8 +329,10 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		writtenSamples = writePos = 0;
 		while(writtenSamples < sample.nLength && file.CanRead(sizeof(uint16)))
 		{
-			chunk = file.ReadChunk(file.ReadUint16LE());
-			chunkView = chunk.GetPinnedRawDataView();
+			dataSize = file.ReadUint16LE();
+			if(!dataSize)
+				continue;	// Malformed sample?
+			file.ReadRaw(chunk, dataSize);
 
 			// Initialise bit reader
 			dataPos = 0;
@@ -358,7 +360,7 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 	int width = defWidth;
 	while(curLength > 0)
 	{
-		if(width < 1 || width > defWidth || dataPos >= chunkView.size())
+		if(width < 1 || width > defWidth || dataPos >= dataSize)
 		{
 			// Error!
 			return;
@@ -407,11 +409,10 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 int ITDecompression::ReadBits(int width)
 //--------------------------------------
 {
-	const mpt::byte *data = chunkView.begin();
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
-	while(width >= remBits && dataPos < chunkView.size())
+	while(width >= remBits && dataPos < dataSize)
 	{
-		v |= (data[dataPos] >> bitPos) << vPos;
+		v |= (chunk[dataPos] >> bitPos) << vPos;
 		vPos += remBits;
 		width -= remBits;
 		dataPos++;
@@ -419,9 +420,9 @@ int ITDecompression::ReadBits(int width)
 		bitPos = 0;
 	}
 
-	if(width > 0 && dataPos < chunkView.size())
+	if(width > 0 && dataPos < dataSize)
 	{
-		v |= (data[dataPos] >> bitPos) << vPos;
+		v |= (chunk[dataPos] >> bitPos) << vPos;
 		v &= vMask;
 		remBits -= width;
 		bitPos += width;
