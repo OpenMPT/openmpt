@@ -18,6 +18,9 @@ OPENMPT_NAMESPACE_END
 
 OPENMPT_NAMESPACE_BEGIN
 
+#ifdef MODPLUG_TRACKER
+
+
 #define DLSMAXREGIONS		128
 
 // Region Flags
@@ -75,9 +78,6 @@ struct DLSSAMPLEEX
 	uint8  byOriginalPitch;
 	int8   chPitchCorrection;
 };
-
-
-#ifdef MODPLUG_TRACKER
 
 
 #define SOUNDBANK_TYPE_INVALID	0

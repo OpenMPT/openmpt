@@ -648,7 +648,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK
 				DLSREGION *pregion = &pDlsIns->Regions[pDlsIns->nRegions];
 				WLNKCHUNK *p = (WLNKCHUNK *)pchunk;
 				pregion->nWaveLink = (uint16)p->ulTableIndex;
-				if ((pregion->nWaveLink < 16384) && (pregion->nWaveLink >= m_nMaxWaveLink)) m_nMaxWaveLink = pregion->nWaveLink + 1;
+				if ((pregion->nWaveLink < uint16_max) && (pregion->nWaveLink >= m_nMaxWaveLink)) m_nMaxWaveLink = pregion->nWaveLink + 1;
 				//Log("  WaveLink %d: fusOptions=0x%02X usPhaseGroup=0x%04X ", pDlsIns->nRegions, p->fusOptions, p->usPhaseGroup);
 				//Log("ulChannel=%d ulTableIndex=%4d\n", p->ulChannel, p->ulTableIndex);
 			}
@@ -1809,11 +1809,11 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			pIns->VolEnv.clear();
 			if (part->wVolAttack)
 			{
-				pIns->VolEnv.push_back(EnvelopeNode(0, (uint8)(ENVELOPE_MAX / (part->wVolAttack / 2 + 2) + 8))); //	/-----
-				pIns->VolEnv.push_back(EnvelopeNode(ScaleEnvelope(part->wVolAttack, tempoScale), ENVELOPE_MAX)); //	|
+				pIns->VolEnv.push_back(0, (uint8)(ENVELOPE_MAX / (part->wVolAttack / 2 + 2) + 8)); //	/-----
+				pIns->VolEnv.push_back(ScaleEnvelope(part->wVolAttack, tempoScale), ENVELOPE_MAX); //	|
 			} else
 			{
-				pIns->VolEnv.push_back(EnvelopeNode(0, ENVELOPE_MAX));
+				pIns->VolEnv.push_back(0, ENVELOPE_MAX);
 			}
 			// Hold section
 			// -> DLS Level 2
@@ -1841,7 +1841,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 									uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
 									if(tick > pIns->VolEnv.back().tick)
 									{
-										pIns->VolEnv.push_back(EnvelopeNode(tick, (uint8)(lFactor / 2)));
+										pIns->VolEnv.push_back(tick, (uint8)(lFactor / 2));
 									}
 								}
 							}
@@ -1851,14 +1851,14 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 					uint16 decayEnd = lStartTime + ScaleEnvelope(lDecayTime, tempoScale);
 					if (decayEnd > pIns->VolEnv.back().tick)
 					{
-						pIns->VolEnv.push_back(EnvelopeNode(decayEnd, (uint8)((part->nVolSustainLevel+1) / 2)));
+						pIns->VolEnv.push_back(decayEnd, (uint8)((part->nVolSustainLevel+1) / 2));
 					}
 				}
 				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
 			} else
 			{
 				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
-				pIns->VolEnv.push_back(EnvelopeNode(pIns->VolEnv.back().tick + 1u, pIns->VolEnv.back().value));
+				pIns->VolEnv.push_back(pIns->VolEnv.back().tick + 1u, pIns->VolEnv.back().value);
 			}
 			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = (uint8)(pIns->VolEnv.size() - 1);
 			// Release section
@@ -1883,16 +1883,16 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 							uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
 							if(tick > pIns->VolEnv.back().tick)
 							{
-								pIns->VolEnv.push_back(EnvelopeNode(tick, (uint8)lFactor));
+								pIns->VolEnv.push_back(tick, (uint8)lFactor);
 							}
 						}
 					}
 				}
 				if (lReleaseTime < 1) lReleaseTime = 1;
-				pIns->VolEnv.push_back(EnvelopeNode(lStartTime + ScaleEnvelope(lReleaseTime, tempoScale), ENVELOPE_MIN));
+				pIns->VolEnv.push_back(lStartTime + ScaleEnvelope(lReleaseTime, tempoScale), ENVELOPE_MIN);
 			} else
 			{
-				pIns->VolEnv.push_back(EnvelopeNode(pIns->VolEnv.back().tick + 1u, ENVELOPE_MIN));
+				pIns->VolEnv.push_back(pIns->VolEnv.back().tick + 1u, ENVELOPE_MIN);
 			}
 		}
 	}
@@ -1904,14 +1904,10 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 		{
 			pIns->VolEnv.dwFlags.set(ENV_ENABLED);
 			pIns->VolEnv.resize(4);
-			pIns->VolEnv[0].tick = 0;
-			pIns->VolEnv[0].value = ENVELOPE_MAX;
-			pIns->VolEnv[1].tick = ScaleEnvelope(5, tempoScale);
-			pIns->VolEnv[1].value = ENVELOPE_MAX;
-			pIns->VolEnv[2].tick = pIns->VolEnv[1].tick * 2u;
-			pIns->VolEnv[2].value = ENVELOPE_MID;
-			pIns->VolEnv[3].tick = pIns->VolEnv[2].tick * 2u;	// 1 second max. for drums
-			pIns->VolEnv[3].value = ENVELOPE_MIN;
+			pIns->VolEnv[0] = EnvelopeNode(0, ENVELOPE_MAX);
+			pIns->VolEnv[1] = EnvelopeNode(ScaleEnvelope(5, tempoScale), ENVELOPE_MAX);
+			pIns->VolEnv[2] = EnvelopeNode(pIns->VolEnv[1].tick * 2u, ENVELOPE_MID);
+			pIns->VolEnv[3] = EnvelopeNode(pIns->VolEnv[2].tick * 2u, ENVELOPE_MIN);	// 1 second max. for drums
 		}
 	}
 	return true;
