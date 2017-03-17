@@ -499,6 +499,7 @@ void CSoundFile::UpgradeModule()
 		{
 			{ kITInstrWithNoteOff,				MAKE_VERSION_NUMERIC(1, 26, 00, 01) },
 			{ kITMultiSampleInstrumentNumber,	MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
+			{ kDoubleVibratoCommand,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)
@@ -518,6 +519,7 @@ void CSoundFile::UpgradeModule()
 			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2TremoloRampWaveform,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2PortaUpDownMemory,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
+			{ kDoubleVibratoCommand,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)

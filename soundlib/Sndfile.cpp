@@ -965,6 +965,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITInstrWithNoteOff);
 		playBehaviour.set(kITMultiSampleInstrumentNumber);
 		playBehaviour.set(kRowDelayWithNoteDelay);
+		playBehaviour.set(kDoubleVibratoCommand);
 		break;
 
 	case MOD_TYPE_XM:
@@ -1004,6 +1005,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kRowDelayWithNoteDelay);
 		playBehaviour.set(kFT2TremoloRampWaveform);
 		playBehaviour.set(kFT2PortaUpDownMemory);
+		playBehaviour.set(kDoubleVibratoCommand);
 		break;
 
 	case MOD_TYPE_S3M:

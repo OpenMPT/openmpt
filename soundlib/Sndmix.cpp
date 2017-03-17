@@ -2126,6 +2126,24 @@ bool CSoundFile::ReadNote()
 			ProcessPitchFilterEnvelope(pChn, period);
 		}
 
+		if(m_playBehaviour[kDoubleVibratoCommand] && pChn->rowCommand.volcmd == VOLCMD_VIBRATODEPTH &&
+			(pChn->rowCommand.command == CMD_VIBRATO || pChn->rowCommand.command == CMD_VIBRATOVOL || pChn->rowCommand.command == CMD_FINEVIBRATO))
+		{
+			if(GetType() == MOD_TYPE_XM)
+			{
+				// XM Compatibility: Vibrato should be advanced twice (but not added up) if both volume-colum and effect column vibrato is present.
+				// Test case: VibratoDouble.xm
+				if(!m_SongFlags[SONG_FIRSTTICK])
+					pChn->nVibratoPos += pChn->nVibratoSpeed;
+			} else
+			{
+				// IT Compatibility: Vibrato should be applied twice if both volume-colum and effect column vibrato is present.
+				// Volume-column vibrato parameter has precedence.
+				// Test case: VibratoDouble.it
+				Vibrato(pChn, pChn->rowCommand.vol);
+				ProcessVibrato(nChn, period, vibratoFactor);
+			}
+		}
 		// Plugins may also receive vibrato
 		ProcessVibrato(nChn, period, vibratoFactor);
 
