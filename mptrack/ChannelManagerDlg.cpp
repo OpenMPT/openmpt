@@ -630,9 +630,6 @@ void CChannelManagerDlg::OnPaint()
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
 
-	CHANNELINDEX nChannels = m_ModDoc->GetNumChannels();
-	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
-	
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd, &pDC);
 	const CRect &rcPaint = pDC.rcPaint;
@@ -653,7 +650,7 @@ void CChannelManagerDlg::OnPaint()
 		ftn.SourceConstantAlpha = 192;
 		ftn.AlphaFormat = 0;
 
-		for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
+		for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 		{
 			CHANNELINDEX nThisChn = pattern[nChn];
 			if(select[nThisChn])
@@ -699,7 +696,7 @@ void CChannelManagerDlg::OnPaint()
 	UINT c = 0, l = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
 	std::string s;
-	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 

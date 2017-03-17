@@ -40,12 +40,13 @@ protected:
 		vstNumProcessEvents = 256,
 	};
 
-	HINSTANCE m_hLibrary;
+	HMODULE m_hLibrary;
 	AEffect &m_Effect;
 	AEffectProcessProc m_pProcessFP; //Function pointer to AEffect processReplacing if supported, else process.
 
 	double lastBarStartPos;
 	uint32 m_nSampleRate;
+
 	bool m_bIsVst2 : 1;
 	bool m_bIsInstrument : 1;
 	bool m_isInitialized : 1;
@@ -60,10 +61,10 @@ public:
 	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
 
 public:
-	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
+	CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
 	virtual ~CVstPlugin();
 
-	static AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
+	static AEffect *LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
 
 protected:
 	void Initialize();

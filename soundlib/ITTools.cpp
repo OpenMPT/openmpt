@@ -300,8 +300,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	// MPT used to have a slightly different encoding of MIDI program and banks which we are trying to fix here.
 	// Impulse Tracker / Schism Tracker will set trkvers to 0 in IT files,
 	// and we won't care about correctly importing MIDI programs and banks in ITI files.
-	// Chibi Tracker sets trkvers to 0x214, but always writes mpr=mbank=0.
-	// BeRoTracker sets trkvers to 0x214, but only writes mpr correctly.
+	// Chibi Tracker sets trkvers to 0x214, but always writes mpr=mbank=0 anyway.
+	// Old BeRoTracker versions set trkvers to 0x214 or 0x217.
 	//        <= MPT 1.07          <= MPT 1.16       OpenMPT 1.17-?      <= OpenMPT 1.26     definitely not MPT
 	if((trkvers == 0x0202 || trkvers == 0x0211 || trkvers == 0x0220 || trkvers == 0x0214) && mpr != 0xFF)
 	{

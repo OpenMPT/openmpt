@@ -153,7 +153,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		}
 		SetWindowText(s);
 
-		// pattern time signature
+		// Pattern time signature
 		const bool bOverride = pattern.GetOverrideSignature();
 		ROWINDEX nRPB = pattern.GetRowsPerBeat(), nRPM = pattern.GetRowsPerMeasure();
 		if(nRPB == 0 || !bOverride) nRPB = sndFile.m_nDefaultRowsPerBeat;
@@ -236,8 +236,9 @@ void CPatternPropertiesDlg::OnOK()
 	// Update pattern signature if necessary
 	if(sndFile.GetModSpecifications().hasPatternSignatures)
 	{
-		if(IsDlgButtonChecked(IDC_CHECK1))	// Enable signature
+		if(IsDlgButtonChecked(IDC_CHECK1))
 		{
+			// Enable signature
 			ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERMEASURE, NULL, FALSE);
 			if(nNewBeat != pattern.GetRowsPerBeat() || nNewMeasure != pattern.GetRowsPerMeasure() || m_tempoSwing != pattern.GetTempoSwing())
 			{
@@ -251,8 +252,9 @@ void CPatternPropertiesDlg::OnOK()
 				pattern.SetTempoSwing(m_tempoSwing);
 				modDoc.SetModified();
 			}
-		} else	// Disable signature
+		} else
 		{
+			// Disable signature
 			if(pattern.GetOverrideSignature() || pattern.HasTempoSwing())
 			{
 				pattern.RemoveSignature();

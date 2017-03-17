@@ -1235,26 +1235,26 @@ struct SFZEnvelope
 		}
 		if(attack > 0 || delay > 0)
 		{
-			env.push_back(EnvelopeNode(0, ToValue(startLevel, envType)));
+			env.push_back(0, ToValue(startLevel, envType));
 			if(delay > 0)
-				env.push_back(EnvelopeNode(ToTicks(delay, tickDuration), env.back().value));
-			env.push_back(EnvelopeNode(env.back().tick + ToTicks(attack, tickDuration), ToValue(100, envType)));
+				env.push_back(ToTicks(delay, tickDuration), env.back().value);
+			env.push_back(env.back().tick + ToTicks(attack, tickDuration), ToValue(100, envType));
 		}
 		if(hold > 0)
 		{
 			if(env.empty())
-				env.push_back(EnvelopeNode(0, ToValue(100, envType)));
-			env.push_back(EnvelopeNode(env.back().tick + ToTicks(hold, tickDuration), env.back().value));
+				env.push_back(0, ToValue(100, envType));
+			env.push_back(env.back().tick + ToTicks(hold, tickDuration), env.back().value);
 		}
 		if(env.empty())
-			env.push_back(EnvelopeNode(0, ToValue(100, envType)));
+			env.push_back(0, ToValue(100, envType));
 		auto sustain = ToValue(sustainLevel, envType);
 		if(env.back().value != sustain)
-			env.push_back(EnvelopeNode(env.back().tick + ToTicks(decay, tickDuration), sustain));
+			env.push_back(env.back().tick + ToTicks(decay, tickDuration), sustain);
 		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
 		if(sustainLevel != 0)
 		{
-			env.push_back(EnvelopeNode(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType)));
+			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType));
 			env.dwFlags.set(ENV_SUSTAIN);
 		}
 		env.dwFlags.set(ENV_ENABLED);

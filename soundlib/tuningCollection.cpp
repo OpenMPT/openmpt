@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <bitset>
 #include "../common/mptFileIO.h"
+#include "Loaders.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -203,15 +204,12 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSuccessful)
 //-----------------------------------------------------------------------------------
 {
-	//s_SerializationBeginMarker = 0x54435348;  //ascii of TCSH
-	//s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
-
 	loadingSuccessful = false;
 
 	//1. begin marker:
 	int32 beginMarker = 0;
 	mpt::IO::ReadIntLE<int32>(inStrm, beginMarker);
-	if(beginMarker != 0x54435348) return true;
+	if(beginMarker != MAGIC4BE('T','C','S','H')) return true;
 
 	//2. version
 	int32 version = 0;
@@ -237,7 +235,7 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 	//Not assigning the value yet, for if it sets some property const,
 	//further loading might fail.
 
-    //5. Tunings
+	//5. Tunings
 	{
 		uint32 s = 0;
 		mpt::IO::ReadIntLE<uint32>(inStrm, s);
@@ -252,7 +250,7 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 	//6. End marker
 	int32 endMarker = 0;
 	mpt::IO::ReadIntLE<int32>(inStrm, endMarker);
-	if(endMarker != 0x54435346) return false;
+	if(endMarker != MAGIC4BE('T','C','S','F')) return false;
 
 	m_EditMask = em;
 

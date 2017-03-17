@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Convert OpenMPT's internal envelope representation to XM envelope data.
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le &numPoints, uint8le &flags, uint8le &sustain, uint8le &loopStart, uint8le &loopEnd, EnvType env)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	numPoints = static_cast<uint8>(std::min(12u, mptEnv.size()));
 
@@ -137,11 +137,11 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8le numP
 		{
 		case EnvTypeVol:
 			mptEnv[i].tick = volEnv[i * 2];
-			mptEnv[i].value = static_cast<uint8>(volEnv[i * 2 + 1]);
+			mptEnv[i].value = static_cast<EnvelopeNode::value_t>(volEnv[i * 2 + 1]);
 			break;
 		case EnvTypePan:
 			mptEnv[i].tick = panEnv[i * 2];
-			mptEnv[i].value = static_cast<uint8>(panEnv[i * 2 + 1]);
+			mptEnv[i].value = static_cast<EnvelopeNode::value_t>(panEnv[i * 2 + 1]);
 			break;
 		}
 

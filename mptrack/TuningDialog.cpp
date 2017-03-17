@@ -69,12 +69,12 @@ CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* p
 CTuningDialog::~CTuningDialog()
 //----------------------------
 {
-	for(size_t i = 0; i<m_TuningCollections.size(); i++)
+	for(auto &tuningCol : m_TuningCollections)
 	{
-		if(IsDeletable(m_TuningCollections[i]))
+		if(IsDeletable(tuningCol))
 		{
-			delete m_TuningCollections[i];
-			m_TuningCollections[i] = NULL;
+			delete tuningCol;
+			tuningCol = nullptr;
 		}
 	}
 	m_TuningCollections.clear();
@@ -176,9 +176,9 @@ BOOL CTuningDialog::OnInitDialog()
 
 	//-->Creating treeview
 	m_TreeItemTuningItemMap.ClearMapping();
-	for(size_t i = 0; i<m_TuningCollections.size(); i++)
+	for(const auto &tuningCol : m_TuningCollections)
 	{
-		AddTreeItem(m_TuningCollections[i], NULL, NULL);
+		AddTreeItem(tuningCol, NULL, NULL);
 	}
 	//<-- Creating treeview
 
@@ -676,13 +676,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 	std::wstring sLoadReport;
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
-	const size_t nFiles = files.size();
-	for(size_t counter = 0; counter < nFiles; counter++)
+	const auto &files = dlg.GetFilenames();
+	for(const auto &file : files)
 	{
 		mpt::PathString fileName;
 		mpt::PathString fileExt;
-		files[counter].SplitPath(nullptr, nullptr, &fileName, &fileExt);
+		file.SplitPath(nullptr, nullptr, &fileName, &fileExt);
 		const std::wstring fileNameExt = (fileName + fileExt).ToWide();
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
@@ -694,7 +693,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				mpt::ifstream fin(files[counter], std::ios::binary);
+				mpt::ifstream fin(file, std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -719,7 +718,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				}
 			} else // scl import.
 			{
-				EnSclImport a = ImportScl(files[counter], fileName.ToUnicode());
+				EnSclImport a = ImportScl(file, fileName.ToUnicode());
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -747,7 +746,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// a separate collection - no possibility to
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files[counter]);
+			pNewTCol->SetSavefilePath(file);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = nullptr;
@@ -903,16 +902,15 @@ CTuningCollection* CTuningDialog::GetpTuningCollection(HTREEITEM ti) const
 }
 
 CTuningCollection* CTuningDialog::GetpTuningCollection(const CTuning* const pT) const
-//-----------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 {
-	for(size_t i = 0; i<m_TuningCollections.size(); i++)
+	for(auto &tuningCol : m_TuningCollections)
 	{
-		CTuningCollection& rCurTCol = *m_TuningCollections.at(i);
-		for(size_t j = 0; j<rCurTCol.GetNumTunings(); j++)
+		for(size_t j = 0; j < tuningCol->GetNumTunings(); j++)
 		{
-			if(pT == &rCurTCol.GetTuning(j))
+			if(pT == &tuningCol->GetTuning(j))
 			{
-				return &rCurTCol;
+				return tuningCol;
 			}
 		}
 	}

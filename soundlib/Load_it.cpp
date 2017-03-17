@@ -2211,12 +2211,12 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 		const uint32 code = file.ReadUint32LE();
 		const uint16 size = file.ReadUint16LE();
 
-		// Start of MPTM extensions, truncated field or non-ASCII ID
+		// Start of MPTM extensions, non-ASCII ID or truncated field
 		if(code == MAGIC4LE('2','2','8',4))
 		{
 			file.SkipBack(6);
 			break;
-		} else if(!file.CanRead(size) || (code & 0x80808080) || !(code & 0x60606060))
+		} else if((code & 0x80808080) || !(code & 0x60606060) || !file.CanRead(size))
 		{
 			break;
 		}

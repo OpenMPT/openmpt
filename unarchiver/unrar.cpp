@@ -241,7 +241,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 	ArchiveData.OpenMode = RAR_OM_EXTRACT;
 	ArchiveData.ArcNameW = &(ArcNameBuf[0]);
 	ArchiveData.Callback = RARCallback;
-	ArchiveData.UserData = reinterpret_cast<LPARAM>(reinterpret_cast<void*>(this));
+	ArchiveData.UserData = reinterpret_cast<LPARAM>(this);
 	rar = RAROpenArchiveEx(&ArchiveData);
 	if(!rar)
 	{

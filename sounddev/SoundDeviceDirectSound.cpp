@@ -221,12 +221,12 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		// nothing known about supported sample rates
 	} else
 	{
-		for(std::size_t i = 0; i < baseSampleRates.size(); ++i)
+		for(auto rate : baseSampleRates)
 		{
-			if(dscaps.dwMinSecondarySampleRate <= baseSampleRates[i] && baseSampleRates[i] <= dscaps.dwMaxSecondarySampleRate)
+			if(dscaps.dwMinSecondarySampleRate <= rate && rate <= dscaps.dwMaxSecondarySampleRate)
 			{
-				caps.supportedSampleRates.push_back(baseSampleRates[i]);
-				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
+				caps.supportedSampleRates.push_back(rate);
+				caps.supportedExclusiveSampleRates.push_back(rate);
 			}
 		}
 	}

@@ -184,7 +184,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		const parameteredMacroType macroType = m_MidiCfg.GetParameteredMacroType(m);
 		switch (macroType)
 		{
-		case sfx_plug: 
+		case sfx_plug:
 			s.Format(_T("Control Plugin Param %u"), m_MidiCfg.MacroToPlugParam(m));
 			break;
 
@@ -204,7 +204,6 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 void CMidiMacroSetup::UpdateDialog()
 //----------------------------------
 {
-	char s[MACRO_LENGTH];
 	UINT sfx, sfx_preset, zxx;
 
 	sfx = m_CbnSFx.GetCurSel();
@@ -212,17 +211,13 @@ void CMidiMacroSetup::UpdateDialog()
 	if(sfx < 16)
 	{
 		ToggleBoxes(sfx_preset, sfx);
-		memcpy(s, m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
-		mpt::String::SetNullTerminator(s);
-		m_EditSFx.SetWindowText(s);
+		m_EditSFx.SetWindowTextA(m_MidiCfg.szMidiSFXExt[sfx]);
 	}
 
 	zxx = m_CbnZxx.GetCurSel();
 	if(zxx < 0x80)
 	{
-		memcpy(s, m_MidiCfg.szMidiZXXExt[zxx], MACRO_LENGTH);
-		mpt::String::SetNullTerminator(s);
-		m_EditZxx.SetWindowText(s);
+		m_EditZxx.SetWindowTextA(m_MidiCfg.szMidiZXXExt[zxx]);
 	}
 	UpdateMacroList();
 }

@@ -1123,7 +1123,7 @@ void CCtrlPatterns::OnDetailHi()
 }
 
 void CCtrlPatterns::OnToggleOverflowPaste()
-//-------------------------------------
+//-----------------------------------------
 {
 	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
 	UpdateView(UpdateHint().MPTOptions());
