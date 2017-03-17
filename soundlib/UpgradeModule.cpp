@@ -191,6 +191,25 @@ struct UpgradePatternData
 			}
 		}
 
+		if(m.volcmd == VOLCMD_VIBRATODEPTH
+			&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 37)
+			&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 27, 00, 00))
+		{
+			// Fix handling of double vibrato commands - previously only one of them was applied at a time
+			if(m.command == CMD_VIBRATOVOL && m.vol > 0)
+			{
+				m.command = CMD_VOLUMESLIDE;
+			} else if((m.command == CMD_VIBRATO || m.command == CMD_FINEVIBRATO) && (m.param & 0x0F) == 0)
+			{
+				m.command = CMD_VIBRATO;
+				m.param |= (m.vol & 0x0F);
+				m.volcmd = VOLCMD_NONE;
+			} else if(m.command == CMD_VIBRATO || m.command == CMD_VIBRATOVOL || m.command == CMD_FINEVIBRATO)
+			{
+				m.volcmd = VOLCMD_NONE;
+			}
+		}
+
 		// Volume column offset in IT/XM is bad, mkay?
 		if(sndFile.GetType() != MOD_TYPE_MPT && m.volcmd == VOLCMD_OFFSET && m.command == CMD_NONE)
 		{
@@ -499,7 +518,6 @@ void CSoundFile::UpgradeModule()
 		{
 			{ kITInstrWithNoteOff,				MAKE_VERSION_NUMERIC(1, 26, 00, 01) },
 			{ kITMultiSampleInstrumentNumber,	MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
-			{ kDoubleVibratoCommand,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)
@@ -519,7 +537,6 @@ void CSoundFile::UpgradeModule()
 			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2TremoloRampWaveform,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2PortaUpDownMemory,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
-			{ kDoubleVibratoCommand,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)

@@ -601,7 +601,6 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kRowDelayWithNoteDelay: desc = _T("Note delays next to a row delay are repeated on every row repetition."); break;
 		case kFT2TremoloRampWaveform: desc = _T("Emulate FT2's tremolo ramp down / triangle waveform"); break;
 		case kFT2PortaUpDownMemory: desc = _T("Portamento Up and Down have separate effect memory"); break;
-		case kDoubleVibratoCommand: desc = _T("If there are two vibrato commands in a pattern cell, apply them both"); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
