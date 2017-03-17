@@ -2,7 +2,9 @@
  * DMOPlugin.h
  * -----------
  * Purpose: DirectX Media Object plugin handling / processing.
- * Notes  : (currently none)
+ * Notes  : Some default plugins only have the same output characteristics in the floating point code path (compared to integer PCM)
+ *          if we feed them input in the range [-32768, +32768] rather than the more usual [-1, +1].
+ *          Hence, OpenMPT uses this range for both the floating-point and integer path.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -202,7 +204,7 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
-	// This uses __m64, so it's not avilable on the MSVC 64-bit compiler.
+	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
@@ -255,7 +257,7 @@ static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * M
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
-	// This uses __m64, so it's not avilable on the MSVC 64-bit compiler.
+	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
@@ -318,8 +320,6 @@ void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	
 	if(m_useFloat)
 	{
-		// Some plugins only have the same output characteristics in the floating point code path (compared to integer PCM)
-		// if we feed them input in the range [-32768, +32768] rather than the more usual [-1, +1].
 		InterleaveStereo(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), m_alignedBuffer.f32, numFrames);
 		m_pMediaProcess->Process(numFrames * 2 * sizeof(float), reinterpret_cast<BYTE *>(m_alignedBuffer.f32), startTime, DMO_INPLACE_NORMAL);
 		DeinterleaveStereo(m_alignedBuffer.f32, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
