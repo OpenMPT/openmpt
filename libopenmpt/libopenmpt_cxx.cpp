@@ -83,6 +83,11 @@ double could_open_propability( std::istream & stream, double effort, std::ostrea
 	return openmpt::module_impl::could_open_probability( stream, effort, std::make_shared<std_ostream_log>( log ) );
 }
 
+#ifdef defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4702) // unreachable code
+#endif // _MSC_VER
+
 module::module( const module & ) {
 	throw exception("openmpt::module is non-copyable");
 }
@@ -90,6 +95,10 @@ module::module( const module & ) {
 void module::operator = ( const module & ) {
 	throw exception("openmpt::module is non-copyable");
 }
+
+#ifdef defined(_MSC_VER)
+#pragma warning(pop)
+#endif // _MSC_VER
 
 module::module() : impl(0) {
 	return;
