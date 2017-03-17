@@ -34,51 +34,6 @@ struct FixHackedPatterns
 		*foundHacks = false;
 	}
 
-	void operator()(ModCommand& m)
-	{
-		// definitely not perfect yet. :)
-		// Probably missing: Some extended effect parameters
-		if(!originalSpecs->HasNote(m.note))
-		{
-			*foundHacks = true;
-			if(autofix)
-				m.note = NOTE_NONE;
-		}
-
-		if(!originalSpecs->HasCommand(m.command))
-		{
-			*foundHacks = true;
-			if(autofix)
-				m.command = CMD_NONE;
-		}
-
-		if(!originalSpecs->HasVolCommand(m.volcmd))
-		{
-			*foundHacks = true;
-			if(autofix)
-				m.volcmd = VOLCMD_NONE;
-		}
-
-		if(type == MOD_TYPE_XM)		// ModPlug XM extensions
-		{
-			if(m.command == CMD_XFINEPORTAUPDOWN && m.param >= 0x30)
-			{
-				*foundHacks = true;
-				if(autofix)
-					m.command = CMD_NONE;
-			}
-		} else if(type == MOD_TYPE_IT)		// ModPlug IT extensions
-		{
-			if((m.command == CMD_S3MCMDEX) && ((m.param & 0xF0) == 0x90) && (m.param != 0x91))
-			{
-				*foundHacks = true;
-				if(autofix)
-					m.command = CMD_NONE;
-			}
-
-		}
-	}
-	
 	const CModSpecifications *originalSpecs;
 	MODTYPE type;
 	bool autofix;
@@ -112,7 +67,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 {
 	const CModSpecifications *originalSpecs = &m_SndFile.GetModSpecifications();
 	// retrieve original (not hacked) specs.
-	switch(m_SndFile.GetBestSaveFormat())
+	MODTYPE modType = m_SndFile.GetBestSaveFormat();
+	switch(modType)
 	{
 	case MOD_TYPE_MOD:
 		originalSpecs = &ModSpecs::mod;
@@ -134,9 +90,9 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for plugins
 #ifndef NO_PLUGINS
 	foundHere = false;
-	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(const auto &plug : m_SndFile.m_MixPlugins)
 	{
-		if(m_SndFile.m_MixPlugins[i].IsValidPlugin())
+		if(plug.IsValidPlugin())
 		{
 			foundHere = foundHacks = true;
 			break;
@@ -176,7 +132,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Global volume
-	if(m_SndFile.GetType() == MOD_TYPE_XM && m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
+	if(modType == MOD_TYPE_XM && m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
 	{
 		foundHacks = true;
 		AddToLog("XM format does not support default global volume");
@@ -232,7 +188,49 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 	// Check for invalid pattern commands
 	foundHere = false;
-	m_SndFile.Patterns.ForEachModCommand(FixHackedPatterns(originalSpecs, m_SndFile.GetType(), autofix, &foundHere));
+	m_SndFile.Patterns.ForEachModCommand([originalSpecs, &foundHere, autofix, modType] (ModCommand &m)
+	{
+		// definitely not perfect yet. :)
+		// Probably missing: Some extended effect parameters
+		if(!originalSpecs->HasNote(m.note))
+		{
+			foundHere = true;
+			if(autofix)
+				m.note = NOTE_NONE;
+		}
+
+		if(!originalSpecs->HasCommand(m.command))
+		{
+			foundHere = true;
+			if(autofix)
+				m.command = CMD_NONE;
+		}
+
+		if(!originalSpecs->HasVolCommand(m.volcmd))
+		{
+			foundHere = true;
+			if(autofix)
+				m.volcmd = VOLCMD_NONE;
+		}
+
+		if(modType == MOD_TYPE_XM)		// ModPlug XM extensions
+		{
+			if(m.command == CMD_XFINEPORTAUPDOWN && m.param >= 0x30)
+			{
+				foundHere = true;
+				if(autofix)
+					m.command = CMD_NONE;
+			}
+		} else if(modType == MOD_TYPE_IT)		// ModPlug IT extensions
+		{
+			if((m.command == CMD_S3MCMDEX) && ((m.param & 0xF0) == 0x90) && (m.param != 0x91))
+			{
+				foundHere = true;
+				if(autofix)
+					m.command = CMD_NONE;
+			}
+		}
+	});
 	if(foundHere)
 	{
 		AddToLog("Found invalid pattern commands");
@@ -240,14 +238,14 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for pattern names
-	if(m_SndFile.Patterns.GetNumNamedPatterns() > 0 && !originalSpecs->hasPatternNames)
+	const PATTERNINDEX numNamedPatterns = m_SndFile.Patterns.GetNumNamedPatterns();
+	if(numNamedPatterns > 0 && !originalSpecs->hasPatternNames)
 	{
 		AddToLog("Found pattern names");
 		foundHacks = true;
 		if(autofix)
 		{
-			const PATTERNINDEX numPats = m_SndFile.Patterns.GetNumPatterns();
-			for(PATTERNINDEX i = 0; i < numPats; i++)
+			for(PATTERNINDEX i = 0; i < numNamedPatterns; i++)
 			{
 				m_SndFile.Patterns[i].SetName("");
 			}
@@ -276,7 +274,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		{
 			foundHere = foundHacks = true;
 			if(autofix)
-				MemsetZero(m_SndFile.ChnSettings[i].szName);
+				strcpy(m_SndFile.ChnSettings[i].szName, "");
 			else
 				break;
 		}
@@ -297,7 +295,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
 		ModSample &smp = m_SndFile.GetSample(i);
-		if(m_SndFile.GetType() == MOD_TYPE_XM && smp.GetNumChannels() > 1)
+		if(modType == MOD_TYPE_XM && smp.GetNumChannels() > 1)
 		{
 			foundHere = foundHacks = true;
 			if(autofix)
@@ -441,12 +439,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Player flags
-	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
+	if((modType & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
 	{
 		AddToLog("Compatible play is deactivated");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetDefaultPlaybackBehaviour(m_SndFile.GetType());
+			m_SndFile.SetDefaultPlaybackBehaviour(modType);
 	}
 
 	// Check for restart position where it should not be
@@ -478,7 +476,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetMixLevels(m_SndFile.GetType() == MOD_TYPE_XM ? mixLevelsCompatibleFT2 : mixLevelsCompatible);
+			m_SndFile.SetMixLevels(modType == MOD_TYPE_XM ? mixLevelsCompatibleFT2 : mixLevelsCompatible);
 	}
 
 	if(autofix && foundHacks)
