@@ -815,6 +815,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_FINEVIBRATO:
 				FineVibrato(pChn, param);
 				break;
+			case CMD_TREMOLO:
+				Tremolo(pChn, param);
+				break;
+			case CMD_PANBRELLO:
+				Panbrello(pChn, param);
+				break;
 			}
 
 			switch(pChn->rowCommand.volcmd)
@@ -863,7 +869,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_PANBRELLO:
 				if(adjustMode & eAdjust)
 				{
-					pChn->nPanbrelloPos += pChn->nPanbrelloSpeed - 1;
+					// Panbrello effect is permanent in compatible mode, so actually apply panbrello for the last tick of this row
+					pChn->nPanbrelloPos += static_cast<uint8>(pChn->nPanbrelloSpeed * (numTicks - 1));
 					ProcessPanbrello(pChn);
 				}
 				break;
