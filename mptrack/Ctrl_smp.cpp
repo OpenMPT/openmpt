@@ -719,18 +719,18 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if (specs.sampleFilenameLengthMax == 0) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
-		SetDlgItemInt(IDC_EDIT7, sample.nVolume >> 2);
+		if(sample.uFlags[SMP_NODEFAULTVOLUME])
+			SetDlgItemText(IDC_EDIT7, _T("none"));
+		else
+			SetDlgItemInt(IDC_EDIT7, sample.nVolume / 4u);
 		// Global Volume
 		SetDlgItemInt(IDC_EDIT8, sample.nGlobalVol);
 		// Panning
 		CheckDlgButton(IDC_CHECK1, (sample.uFlags[CHN_PANNING]) ? BST_CHECKED : BST_UNCHECKED);
 		if (m_sndFile.GetType() == MOD_TYPE_XM)
-		{
 			SetDlgItemInt(IDC_EDIT9, sample.nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
-		} else
-		{
-			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4);	//displayed panning with anything but XM is 0-64 so we divide by 4
-		}
+		else
+			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4u);	//displayed panning with anything but XM is 0-64 so we divide by 4
 		// FineTune / C-4 Speed / BaseNote
 		int transp = 0;
 		if (m_sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
@@ -774,9 +774,9 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			}
 		}
 
-		SetDlgItemInt(IDC_EDIT14, (UINT)sample.nVibSweep);
-		SetDlgItemInt(IDC_EDIT15, (UINT)sample.nVibDepth);
-		SetDlgItemInt(IDC_EDIT16, (UINT)sample.nVibRate);
+		SetDlgItemInt(IDC_EDIT14, sample.nVibSweep);
+		SetDlgItemInt(IDC_EDIT15, sample.nVibDepth);
+		SetDlgItemInt(IDC_EDIT16, sample.nVibRate);
 		// Loop
 		d = 0;
 		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
@@ -2656,9 +2656,11 @@ void CCtrlSamples::OnVolumeChanged()
 	int nVol = GetDlgItemInt(IDC_EDIT7);
 	Limit(nVol, 0, 64);
 	nVol *= 4;
-	if (nVol != m_sndFile.GetSample(m_nSample).nVolume)
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if (nVol != sample.nVolume)
 	{
-		m_sndFile.GetSample(m_nSample).nVolume = (WORD)nVol;
+		sample.nVolume = static_cast<uint16>(nVol);
+		sample.uFlags.reset(SMP_NODEFAULTVOLUME);
 		SetModified(SampleHint().Info(), false, false);
 	}
 }
