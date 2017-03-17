@@ -307,7 +307,7 @@ struct MO3Instrument
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		} else if(midiChannel > 0 && midiChannel < 17)
 		{
-			// IT with old encoder (yes, channel 0 is represented the same way as "no channel")
+			// IT encoded with MO3 version prior to 2.4.1 (yes, channel 0 is represented the same way as "no channel")
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		}
 		mptIns.wMidiBank = midiBank;
@@ -451,7 +451,7 @@ struct MO3SampleChunk
 
 // length coded within control stream:
 // most significant bit is 1
-// than the first bit of each bits pair (noted n1),
+// then the first bit of each bits pair (noted n1),
 // until second bit is 0 (noted n0)
 
 #define DECODE_CTRL_BITS \
@@ -495,7 +495,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 		} else
 		{
 			// a 1 ctrl bit means compressed bytes are following
-			ebp = 0; // lenth adjustment
+			ebp = 0; // length adjustment
 			DECODE_CTRL_BITS; // read length, and if strLen > 3 (coded using more than 1 bits pair) also part of the offset value
 			strLen -=3;
 			if(strLen < 0)

@@ -526,6 +526,7 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 
 
 void FloatToMonoMix(const float *pIn, int *pOut, uint32 nCount, const float _f2ic)
+//--------------------------------------------------------------------------------
 {
 
 	#ifdef ENABLE_X86_AMD

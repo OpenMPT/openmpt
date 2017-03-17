@@ -23,7 +23,7 @@ namespace Ogg
 
 struct PageHeader
 {
-	char      capture_pattern[4]; // "OggS"
+	char     capture_pattern[4]; // "OggS"
 	uint8le  version;
 	uint8le  header_type;
 	uint64le granule_position;

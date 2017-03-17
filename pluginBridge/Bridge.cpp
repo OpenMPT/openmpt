@@ -18,9 +18,6 @@
 // Re-enable DEP in OpenMPT?
 // Clean up code :)
 
-#ifndef MODPLUG_TRACKER
-#define MODPLUG_TRACKER
-#endif
 #include "../common/BuildSettings.h"
 #include "../common/typedefs.h"
 #include <Windows.h>

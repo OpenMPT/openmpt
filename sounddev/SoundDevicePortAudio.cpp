@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-	
+
 #ifdef MPT_WITH_PORTAUDIO
 
 #define PALOG(x, ...) MPT_DO { } MPT_WHILE_0
@@ -399,7 +399,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 		controlEXE += MPT_PATHSTRING("\\");
 	}
 	controlEXE += MPT_PATHSTRING("control.exe");
-	return ((int)ShellExecuteW(NULL, L"open", controlEXE.AsNative().c_str(), (hasVista ? L"/name Microsoft.Sound" : L"mmsys.cpl"), NULL, SW_SHOW) > 32);
+	return (reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, L"open", controlEXE.AsNative().c_str(), (hasVista ? L"/name Microsoft.Sound" : L"mmsys.cpl"), NULL, SW_SHOW)) >= 32);
 #else // !MPT_OS_WINDOWS
 	return false;
 #endif // MPT_OS_WINDOWS

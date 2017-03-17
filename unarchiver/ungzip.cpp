@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
-	
+
 CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
 //--------------------------------------------------------------
 {

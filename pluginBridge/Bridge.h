@@ -28,7 +28,7 @@ protected:
 
 	// Plugin
 	AEffect *nativeEffect;
-	HINSTANCE library;
+	HMODULE library;
 	ERect windowSize;
 	HWND window, windowParent;
 	LONG isProcessing;
@@ -43,7 +43,7 @@ protected:
 
 	// Pointers to sample data
 	std::vector<void *> samplePointers;
-	uint32_t mixBufSize;
+	uint32 mixBufSize;
 
 	bool needIdle : 1 ;	// Plugin needs idle time
 	bool closeInstance : 1;
@@ -77,7 +77,7 @@ protected:
 	VstIntPtr Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
 	template<typename buf_t>
-	int32_t BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
+	int32 BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
 
 	void RenderThread();
 

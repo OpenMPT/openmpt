@@ -271,7 +271,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				if(m->IsNote() && instr && instr <= GetNumSamples())
 				{
 					const int newNote = m->note + m_SndFile.GetSample(instr).RelativeTone;
-					m->note = static_cast<uint8>(Clamp(newNote, specs.noteMin, specs.noteMax));
+					m->note = static_cast<ModCommand::NOTE>(Clamp(newNote, specs.noteMin, specs.noteMax));
 				}
 			}
 

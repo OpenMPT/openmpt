@@ -19,12 +19,12 @@ protected:
 	PNG::Bitmap *bitmapSrc, *bitmapTarget;
 	std::vector<int32_t> offset1, offset2;
 	int32_t *frontBuf, *backBuf;
-	DWORD lastFrame;	// Time of last frame
-	DWORD lastRipple;	// Time of last added ripple
-	bool frame;			// Backbuffer toggle
-	bool damp;			// Ripple damping status
-	bool activity;		// There are actually some ripples
-	bool showMouse;
+	DWORD lastFrame = 0;	// Time of last frame
+	DWORD lastRipple = 0;	// Time of last added ripple
+	bool frame = false;		// Backbuffer toggle
+	bool damp = true;		// Ripple damping status
+	bool activity = true;	// There are actually some ripples
+	bool showMouse = true;
 
 public:
 

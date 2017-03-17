@@ -175,6 +175,8 @@ struct AMFFEnvelope
 		// but just has room for 10 envelope points. That means that long (>= 16 points)
 		// envelopes are cut off, and envelopes have to be trimmed to 10 points, even if
 		// the header claims that they are longer.
+		// For XM files the number of points also appears to be off by one,
+		// but luckily there are no official J2Bs using envelopes anyway.
 		ConvertEnvelope(envFlags & 0x0F, envNumPoints & 0x0F, envSustainPoints & 0x0F, envLoopStarts & 0x0F, envLoopEnds & 0x0F, volEnv, mptIns.VolEnv);
 		ConvertEnvelope(envFlags >> 4, envNumPoints >> 4, envSustainPoints >> 4, envLoopStarts >> 4, envLoopEnds >> 4, panEnv, mptIns.PanEnv);
 	}

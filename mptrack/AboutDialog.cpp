@@ -32,11 +32,6 @@ CRippleBitmap::CRippleBitmap()
 	offset2.assign(bitmapSrc->GetNumPixels(), 0);
 	frontBuf = offset2.data();
 	backBuf = offset1.data();
-	activity = true;
-	lastFrame = 0;
-	frame = false;
-	damp = true;
-	showMouse = true;
 
 	// Pre-fill first and last row of output bitmap, since those won't be touched.
 	const PNG::Pixel *in1 = bitmapSrc->GetPixels(), *in2 = bitmapSrc->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;

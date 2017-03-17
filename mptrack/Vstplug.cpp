@@ -40,8 +40,8 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 //#define VST_LOG
 
 // Try loading the VST library.
-static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HINSTANCE &library)
-//----------------------------------------------------------------------------------
+static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HMODULE &library)
+//--------------------------------------------------------------------------------
 {
 	__try
 	{
@@ -55,8 +55,8 @@ static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HINSTANCE &libr
 
 
 // Try loading the VST plugin and retrieve the AEffect structure.
-static AEffect *GetAEffectSEH(HINSTANCE library)
-//----------------------------------------------
+static AEffect *GetAEffectSEH(HMODULE library)
+//--------------------------------------------
 {
 	__try
 	{
@@ -83,8 +83,8 @@ static AEffect *GetAEffectSEH(HINSTANCE library)
 }
 
 
-AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
-//-----------------------------------------------------------------------------------------
+AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge)
+//---------------------------------------------------------------------------------------
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 

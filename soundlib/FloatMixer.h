@@ -3,8 +3,7 @@
  * ------------
  * Purpose: Floating point mixer classes
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -22,9 +21,9 @@ struct IntToFloatTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 	static_assert(std::numeric_limits<input_t>::is_integer, "Input must be integer");
 	static_assert(!std::numeric_limits<output_t>::is_integer, "Output must be floating point");
 
-	static MPT_FORCEINLINE output_t Convert(const input_t x)
+	static MPT_CONSTEXPR11_FUN output_t Convert(const input_t x)
 	{
-		return static_cast<output_t>(x) * (static_cast<output_t>(1.0f) / static_cast<output_t>(int2float));
+		return static_cast<output_t>(x) * (static_cast<output_t>(1) / static_cast<output_t>(int2float));
 	}
 };
 

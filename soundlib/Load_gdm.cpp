@@ -155,7 +155,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	m_nDefaultGlobalVolume = MIN(fileHeader.masterVol * 4, 256);
+	m_nDefaultGlobalVolume = std::min(fileHeader.masterVol * 4u, 256u);
 	m_nDefaultSpeed = fileHeader.tempo;
 	m_nDefaultTempo.Set(fileHeader.bpm);
 

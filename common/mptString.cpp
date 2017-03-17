@@ -64,7 +64,7 @@ List of string types
 --------------------
 
  *  std::string (OpenMPT, libopenmpt)
-    C++ string of unspedicifed 8bit encoding. Try to always document the
+    C++ string of unspecifed 8bit encoding. Try to always document the
     encoding if not clear from context. Do not use unless there is an obvious
     reason to do so.
 
@@ -84,14 +84,14 @@ List of string types
 
  *  CString (OpenMPT)
     MFC string type, either encoded in locale/CP_ACP (if !UNICODE) or UTF16 (if
-    UNICODE). Specify literals with _T(""). Use in MFC gui code.
+    UNICODE). Specify literals with _T(""). Use in MFC GUI code.
 
  *  CStringA (OpenMPT)
     MFC ANSI string type. The encoding is always CP_ACP. Do not use unless there
     is an obvious reason to do so.
 
  *  CStringW (OpenMPT)
-    MFC Unicode string type. Use in MFC gui code when explicit Unicode support
+    MFC Unicode string type. Use in MFC GUI code when explicit Unicode support
     is required.
 
  *  mpt::PathString (OpenMPT, libopenmpt)
@@ -1654,7 +1654,7 @@ mpt::ustring ToLowerCase(const mpt::ustring &s)
 		return mpt::ToUnicode(tmp);
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);
-		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);	
+		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
 		return mpt::ToUnicode(ws);
 	#endif // _MFC_VER
 }
@@ -1667,7 +1667,7 @@ mpt::ustring ToUpperCase(const mpt::ustring &s)
 		return mpt::ToUnicode(tmp);
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);
-		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);	
+		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
 		return mpt::ToUnicode(ws);
 	#endif // _MFC_VER
 }
