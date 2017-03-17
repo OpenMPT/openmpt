@@ -763,10 +763,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	const ModCommand m0 = ModCommand::Empty();
 	const ModCommand *pPattern = sndFile.Patterns[nPattern];
-	CHAR s[256];
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
-	int row_col, row_bkcol;
 	UINT nColumnWidth;
 	
 	CHANNELINDEX ncols = sndFile.GetNumChannels();
@@ -795,12 +793,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	}
 	
 	bool bRowSel = false;
-	row_col = row_bkcol = -1;
+	int row_col = -1, row_bkcol = -1;
 	for (UINT row=startRow; row<numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
 		const int compRow = row + TrackerSettings::Instance().rowDisplayOffset;
 
+		CHAR s[32];
 		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY))
 			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", mpt::abs(compRow));
 		else
@@ -810,7 +809,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		rect.top = ypaint;
 		rect.right = rcClient.right;
 		rect.bottom = rect.top + m_szCell.cy;
-		if (!::RectVisible(hdc, &rect)) 
+		if (!::RectVisible(hdc, &rect))
 		{
 			// No speedup for these columns next time
 			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~COLUMN_BITS_SKIP;

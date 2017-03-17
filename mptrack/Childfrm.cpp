@@ -191,17 +191,19 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 	CDocument* pDocument = GetActiveDocument();
 	if (bAddToTitle)
 	{
-		TCHAR szText[256+_MAX_PATH];
+		CString szText;
 		if (pDocument == nullptr)
 		{
-			lstrcpy(szText, m_strTitle);
+			szText.Preallocate(m_strTitle.GetLength() + 10);
+			szText = m_strTitle;
 		} else
 		{
-			lstrcpy(szText, pDocument->GetTitle());
-			if (pDocument->IsModified()) lstrcat(szText, "*");
+			szText.Preallocate(pDocument->GetTitle().GetLength() + 10);
+			szText = pDocument->GetTitle();
+			if (pDocument->IsModified()) szText += "*";
 		}
 		if (m_nWindow > 0)
-			wsprintf(szText + lstrlen(szText), _T(":%d"), m_nWindow);
+			szText.AppendFormat(_T(":%d"), m_nWindow);
 
 		// set title if changed, but don't remove completely
 		AfxSetWindowText(m_hWnd, szText);

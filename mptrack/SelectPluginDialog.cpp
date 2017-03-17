@@ -758,18 +758,17 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	auto docs = theApp.GetOpenDocuments();
-	for(size_t i = 0; i < docs.size(); i++)
+	for(auto &modDoc : docs)
 	{
-		CModDoc &doc = *docs[i];
-		CSoundFile &sndFile = doc.GetrSoundFile();
+		CSoundFile &sndFile = modDoc->GetrSoundFile();
 		bool updateDoc = false;
-		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
+		for(auto &plugin : sndFile.m_MixPlugins)
 		{
-			SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug];
 			if(plugin.pMixPlugin == nullptr
 				&& plugin.Info.dwPluginId1 == lib->pluginId1
 				&& plugin.Info.dwPluginId2 == lib->pluginId2)
 			{
+				updateDoc = true;
 				pManager->CreateMixPlugin(plugin, sndFile);
 				if(plugin.pMixPlugin)
 				{
@@ -779,8 +778,8 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 		}
 		if(updateDoc)
 		{
-			doc.UpdateAllViews(nullptr, PluginHint().Info().Names());
-			CMainFrame::GetMainFrame()->UpdateTree(&doc, PluginHint().Info().Names());
+			modDoc->UpdateAllViews(nullptr, PluginHint().Info().Names());
+			CMainFrame::GetMainFrame()->UpdateTree(modDoc, PluginHint().Info().Names());
 		}
 	}
 }

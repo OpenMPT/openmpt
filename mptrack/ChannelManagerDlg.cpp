@@ -629,6 +629,7 @@ void CChannelManagerDlg::OnPaint()
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
+	const CHANNELINDEX channels = m_ModDoc->GetNumChannels();
 
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd, &pDC);

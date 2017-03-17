@@ -30,16 +30,16 @@ protected:
 	CMenu m_MacroMenu;
 	CMenu m_OptionsMenu;
 	static UINT m_clipboardFormat;
-	int32 m_currentPresetMenu;
+	int32 m_currentPresetMenu = 0;
 	int32 m_clientHeight;
-	int m_nLearnMacro;
+	int m_nLearnMacro = -1;
+	int m_nCurProg = -1;
 	INSTRUMENTINDEX m_nInstrument;
 	bool m_isMinimized : 1;
 	bool m_updateDisplay : 1;
 
 public:
 	IMixPlugin &m_VstPlugin;
-	int m_nCurProg;
 
 	CAbstractVstEditor(IMixPlugin &plugin);
 	virtual ~CAbstractVstEditor();

@@ -314,7 +314,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	}
 
 	TCHAR s[128];
-	nTabCount = (sndFile.m_nChannels + 3) / 4;
+	nTabCount = (sndFile.m_nChannels + (CHANNELS_IN_TAB - 1)) / CHANNELS_IN_TAB;
 	if (nTabCount != m_TabCtrl.GetItemCount())
 	{
 		UINT nOldSel = m_TabCtrl.GetCurSel();
@@ -323,12 +323,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_TabCtrl.DeleteAllItems();
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
-			const int lastItem = MIN(iItem * 4 + 4, MAX_BASECHANNELS);
-			wsprintf(s, _T("%d - %d"), iItem * 4 + 1, lastItem);
+			const int lastItem = MIN(iItem * CHANNELS_IN_TAB + CHANNELS_IN_TAB, MAX_BASECHANNELS);
+			wsprintf(s, _T("%u - %u"), iItem * CHANNELS_IN_TAB + 1, lastItem);
 			TC_ITEM tci;
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
 			tci.pszText = s;
-			tci.lParam = iItem * 4;
+			tci.lParam = iItem * CHANNELS_IN_TAB;
 			m_TabCtrl.InsertItem(iItem, &tci);
 		}
 		if (nOldSel >= (UINT)nTabCount) nOldSel = 0;
@@ -376,7 +376,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
 			}
 			else
-				SetDlgItemText(IDC_TEXT1+ichn, "");
+				SetDlgItemText(IDC_TEXT1 + ichn, _T(""));
 
 			// Enable/Disable controls for this channel
 			BOOL bIT = ((bEnable) && (sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)));
@@ -395,6 +395,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		}
 		UnlockControls();
 	}
+
 	// Update plugin names
 	if (genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
@@ -822,22 +823,20 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
-//-------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (!m_nLockCount))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME + 2];
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		TCHAR s[MAX_CHANNELNAME + 2] = _T("");
 		const UINT nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
 
-		MemsetZero(s);
 		GetDlgItemText(itemID, s, CountOf(s));
-		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->GetNumChannels()) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
+		if ((sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < sndFile.GetNumChannels()) && (strncmp(s, sndFile.ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
-			mpt::String::Copy(pSndFile->ChnSettings[nChn].szName, s);
+			mpt::String::Copy(sndFile.ChnSettings[nChn].szName, s);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
 		}
@@ -856,14 +855,14 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
 		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->GetNumChannels())
-		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
+		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < sndFile.GetNumChannels())
+		 && (sndFile.ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
-			if(pSndFile->GetModSpecifications().supportsPlugins)
+			sndFile.ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
+			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
 		}
