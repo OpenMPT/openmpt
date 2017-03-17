@@ -421,7 +421,7 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 			sample.nVibRate = 0;
 			sample.nVibSweep = 0;
 			sample.nVibType = 0;
-			sample.uFlags.reset(CHN_PANNING);
+			sample.uFlags.reset(CHN_PANNING | SMP_NODEFAULTVOLUME);
 			break;
 		case SmpResetVibrato:
 			sample.nVibDepth = 0;
