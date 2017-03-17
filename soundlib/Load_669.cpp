@@ -72,21 +72,27 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		|| (memcmp(fileHeader.magic, "if", 2) && memcmp(fileHeader.magic, "JN", 2))
 		|| fileHeader.samples > 64
 		|| fileHeader.restartPos >= 128
-		|| fileHeader.patterns > 128
-		|| !file.CanRead(fileHeader.samples * sizeof(_669Sample)))
+		|| fileHeader.patterns > 128)
 	{
 		return false;
 	}
 	
 	for(size_t i = 0; i < CountOf(fileHeader.breaks); i++)
 	{
-		if(fileHeader.breaks[i] > 64)
+		if(fileHeader.orders[i] >= 128 && fileHeader.orders[i] < 0xFE)
+			return false;
+		if(fileHeader.orders[i] < 128 && fileHeader.tempoList[i] == 0)
+			return false;
+		if(fileHeader.breaks[i] >= 64)
 			return false;
 	}
 
 	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
+	} else if(!file.CanRead(fileHeader.samples * sizeof(_669Sample) + fileHeader.patterns * 1536u))
+	{
+		return false;
 	}
 
 	InitializeGlobals(MOD_TYPE_669);
