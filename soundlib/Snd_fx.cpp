@@ -849,7 +849,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_VIBRATOVOL:
 				if(adjustMode & eAdjust)
 				{
-					uint32 inc = pChn->nVibratoSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					uint32 vibTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					uint32 inc = pChn->nVibratoSpeed * vibTicks;
 					if(m_playBehaviour[kITVibratoTremoloPanbrello])
 						inc *= 4;
 					pChn->nVibratoPos += static_cast<uint8>(inc);
@@ -859,7 +860,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_TREMOLO:
 				if(adjustMode & eAdjust)
 				{
-					uint32 inc = pChn->nTremoloSpeed * ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					uint32 tremTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+					uint32 inc = pChn->nTremoloSpeed * tremTicks;
 					if(m_playBehaviour[kITVibratoTremoloPanbrello])
 						inc *= 4;
 					pChn->nTremoloPos += static_cast<uint8>(inc);
