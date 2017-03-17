@@ -102,23 +102,23 @@ uint32 MMCMPBITBUFFER::GetBits(uint32 nBits)
 	return d;
 }
 
-static const uint32 MMCMP8BitCommands[8] =
+static const uint8 MMCMP8BitCommands[8] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF8
 };
 
-static const uint32 MMCMP8BitFetch[8] =
+static const uint8 MMCMP8BitFetch[8] =
 {
 	3, 3, 3, 3, 2, 1, 0, 0
 };
 
-static const uint32 MMCMP16BitCommands[16] =
+static const uint16 MMCMP16BitCommands[16] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF0,
 	0x1F0, 0x3F0, 0x7F0, 0xFF0, 0x1FF0, 0x3FF0, 0x7FF0, 0xFFF0
 };
 
-static const uint32 MMCMP16BitFetch[16] =
+static const uint8 MMCMP16BitFetch[16] =
 {
 	4, 4, 4, 4, 3, 2, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0
@@ -210,7 +210,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			if(!psubblk) return false;
 			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
-			uint32 dwSize = psubblk[subblk].unpk_size >> 1;
+			uint32 dwSize = psubblk[subblk].unpk_size;
 			uint32 dwPos = 0;
 			uint32 numbits = blk.num_bits;
 			uint32 oldval = 0;
@@ -267,9 +267,9 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 					{
 						newval ^= 0x8000;
 					}
-					pDest[dwPos*2 + 0] = (uint8)(((uint16)newval) & 0xff);
-					pDest[dwPos*2 + 1] = (uint8)(((uint16)newval) >> 8);
-					dwPos++;
+					pDest[dwPos + 0] = (uint8)(((uint16)newval) & 0xFF);
+					pDest[dwPos + 1] = (uint8)(((uint16)newval) >> 8);
+					dwPos += 2;
 				}
 				if (dwPos >= dwSize)
 				{
@@ -277,7 +277,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 					dwPos = 0;
 					if(!(subblk < blk.sub_blk)) break;
 					if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
-					dwSize = psubblk[subblk].unpk_size >> 1;
+					dwSize = psubblk[subblk].unpk_size;
 					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
 			}
@@ -365,11 +365,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 
 struct XPKFILEHEADER
 {
-	char      XPKF[4];
+	char     XPKF[4];
 	uint32be SrcLen;
-	char      SQSH[4];
+	char     SQSH[4];
 	uint32be DstLen;
-	char      Name[16];
+	char     Name[16];
 	uint32be Reserved;
 };
 

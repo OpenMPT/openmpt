@@ -1031,7 +1031,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						if(duration == 0)
 						{
 							volEnv.dwFlags.set(ENV_LOOP);
-							volEnv.nLoopStart = volEnv.nLoopEnd = i - 1;
+							volEnv.nLoopStart = volEnv.nLoopEnd = static_cast<uint8>(volEnv.size() - 1);
 							break;
 						}
 

@@ -22,7 +22,7 @@ struct STMSampleHeader
 	uint8le  disk;			// A blast from the past
 	uint16le offset;		// 20-bit offset in file (lower 4 bits are zero)
 	uint16le length;		// Sample length
-	uint16le loopStart;	// Loop start point
+	uint16le loopStart;		// Loop start point
 	uint16le loopEnd;		// Loop end point
 	uint8le  volume;		// Volume
 	uint8le  reserved2;
@@ -60,13 +60,13 @@ MPT_BINARY_STRUCT(STMSampleHeader, 32)
 struct STMFileHeader
 {
 	char  songname[20];
-	char  trackername[8];			// !SCREAM! for ST 2.xx
-	uint8 dosEof;					// 0x1A
-	uint8 filetype;					// 1=song, 2=module (only 2 is supported, of course) :)
+	char  trackername[8];	// !SCREAM! for ST 2.xx
+	uint8 dosEof;			// 0x1A
+	uint8 filetype;			// 1=song, 2=module (only 2 is supported, of course) :)
 	uint8 verMajor;
 	uint8 verMinor;
-	uint8 initTempo;				// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
-	uint8 numPatterns;				// number of patterns
+	uint8 initTempo;		// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
+	uint8 numPatterns;		// number of patterns
 	uint8 globalVolume;
 	uint8 reserved[13];
 };
@@ -289,13 +289,13 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
 			ModSample &sample = Samples[smp];
-			if(sample.nLength)
+			// ST2 just plays random noise for samples with a default volume of 0
+			if(sample.nLength && sample.nVolume > 0)
 			{
 				FileReader::off_t sampleOffset = sampleOffsets[smp - 1] << 4;
 				// acidlamb.stm has some bogus samples with sample offsets past EOF
-				if(sampleOffset > sizeof(STMFileHeader) && file.LengthIsAtLeast(sampleOffset))
+				if(sampleOffset > sizeof(STMFileHeader) && file.Seek(sampleOffset))
 				{
-					file.Seek(sampleOffset);
 					sampleIO.ReadSample(sample, file);
 				}
 			}
