@@ -1176,7 +1176,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				// Skip if we did get no buffer for this channel,
 				// Fill with zeroes.
-				std::fill(dstInt16, dstInt16 + countChunk, 0);
+				std::fill(dstInt16, dstInt16 + countChunk, int16(0));
 				continue;
 			}
 			switch(m_ChannelInfo[channel].type)
@@ -1216,7 +1216,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				// Skip if we did get no buffer for this channel,
 				// Fill with zeroes.
-				std::fill(dstInt32, dstInt32 + countChunk, 0);
+				std::fill(dstInt32, dstInt32 + countChunk, int32(0));
 				continue;
 			}
 			switch(m_ChannelInfo[channel].type)
