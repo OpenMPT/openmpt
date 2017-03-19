@@ -26,8 +26,8 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.09.00 (???, revision 7796)
---------------------------------
+v1.26.09.00 (19 March 2017, revision 7821)
+------------------------------------------
 Pattern tab
    [Fix] <js> Seeking with sample sync did not apply PTM reverse offset effect and the volume slide part of combined volume slide + vibrato commands.
    [Fix] <js> "Copy orders" shortcut never worked (http://forum.openmpt.org/index.php?topic=5787.0).
