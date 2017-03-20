@@ -80,14 +80,16 @@
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
-   links { "delayimp" }
-   linkoptions {
-    "/DELAYLOAD:mf.dll",
-    "/DELAYLOAD:mfplat.dll",
-    "/DELAYLOAD:mfreadwrite.dll",
---   "/DELAYLOAD:mfuuid.dll", -- static library
-    "/DELAYLOAD:propsys.dll",
-   }
+		if not _OPTIONS["xp"] then
+			links { "delayimp" }
+			linkoptions {
+				"/DELAYLOAD:mf.dll",
+				"/DELAYLOAD:mfplat.dll",
+				"/DELAYLOAD:mfreadwrite.dll",
+				--"/DELAYLOAD:mfuuid.dll", -- static library
+				"/DELAYLOAD:propsys.dll",
+			}
+		end
   filter {}
   links {
    "miniz",
