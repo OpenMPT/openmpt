@@ -544,7 +544,7 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 
 
-#if MPT_MSVC_BEFORE(2013,0)
+#if MPT_COMPILER_MSVC
 // warning LNK4221: no public symbols found; archive member will be inaccessible
 // There is no way to selectively disable linker warnings.
 // #pragma warning does not apply and a command line option does not exist.
