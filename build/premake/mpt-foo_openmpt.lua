@@ -48,14 +48,16 @@
   characterset "Unicode"
   links { "libopenmpt", "zlib", "vorbis", "ogg" }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
-  links { "delayimp" }
-  linkoptions {
-   "/DELAYLOAD:mf.dll",
-   "/DELAYLOAD:mfplat.dll",
-   "/DELAYLOAD:mfreadwrite.dll",
---   "/DELAYLOAD:mfuuid.dll", -- static library
-   "/DELAYLOAD:propsys.dll",
-  }
+	if not _OPTIONS["xp"] then
+		links { "delayimp" }
+		linkoptions {
+			"/DELAYLOAD:mf.dll",
+			"/DELAYLOAD:mfplat.dll",
+			"/DELAYLOAD:mfreadwrite.dll",
+			--"/DELAYLOAD:mfuuid.dll", -- static library
+			"/DELAYLOAD:propsys.dll",
+		}
+	end
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "configurations:Release" }

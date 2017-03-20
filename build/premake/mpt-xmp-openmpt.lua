@@ -54,13 +54,15 @@
   characterset "Unicode"
   flags { "MFC" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "pugixml" }
-  links { "delayimp" }
-  linkoptions {
-   "/DELAYLOAD:mf.dll",
-   "/DELAYLOAD:mfplat.dll",
-   "/DELAYLOAD:mfreadwrite.dll",
---   "/DELAYLOAD:mfuuid.dll", -- static library
-   "/DELAYLOAD:propsys.dll",
-  }
+	if not _OPTIONS["xp"] then
+		links { "delayimp" }
+		linkoptions {
+			"/DELAYLOAD:mf.dll",
+			"/DELAYLOAD:mfplat.dll",
+			"/DELAYLOAD:mfreadwrite.dll",
+			--"/DELAYLOAD:mfuuid.dll", -- static library
+			"/DELAYLOAD:propsys.dll",
+		}
+	end
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
