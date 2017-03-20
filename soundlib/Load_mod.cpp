@@ -348,6 +348,90 @@ struct AMInstrument
 	uint16be vibAmp;		// Vibrato amplitude
 	uint16be vibSpeed;		// Vibrato speed
 	uint16be octave;		// Base frequency
+
+	void ConvertToMPT(ModSample &sample, ModInstrument &ins, mpt::fast_prng &rng) const
+	{
+		sample.nLength = waveform == 3 ? 1024 : 32;
+		sample.nLoopStart = 0;
+		sample.nLoopEnd = sample.nLength;
+		sample.uFlags.set(CHN_LOOP);
+		sample.nVolume = 256;	// prelude.mod has volume 0 in sample header
+		sample.nVibDepth = mpt::saturate_cast<uint8>(vibAmp * 2);
+		sample.nVibRate = static_cast<uint8>(vibSpeed);
+		sample.nVibType = VIB_SINE;
+		sample.RelativeTone = static_cast<int8>(-12 * octave);
+		if(sample.AllocateSample())
+		{
+			for(SmpLength i = 0; i < sample.nLength; i++)
+			{
+				switch(waveform)
+				{
+				default:
+				case 0: sample.pSample8[i] = ModSinusTable[i * 2];				break;	// Sine
+				case 1: sample.pSample8[i] = static_cast<int8>(-128 + i * 8);	break;	// Saw
+				case 2: sample.pSample8[i] = i < 16 ? -128 : 127;				break;	// Square
+				case 3: sample.pSample8[i] = mpt::random<int8>(rng);			break;	// Noise
+				}
+			}
+		}
+
+		InstrumentEnvelope &volEnv = ins.VolEnv;
+		volEnv.dwFlags.set(ENV_ENABLED);
+		volEnv.reserve(6);
+		volEnv.push_back(0, static_cast<EnvelopeNode::value_t>(startLevel / 4));
+
+		const struct
+		{
+			uint16 level, speed;
+		} points[] = { { startLevel, 0 }, { attack1Level, attack1Speed }, { attack2Level, attack2Speed }, { sustainLevel, decaySpeed }, { sustainLevel, sustainTime }, { 0, releaseSpeed } };
+
+		for(uint8 i = 1; i < CountOf(points); i++)
+		{
+			int duration = std::min(points[i].speed, uint16(256));
+			// Sustain time is already in ticks, no need to compute the segment duration.
+			if(i != 4)
+			{
+				if(duration == 0)
+				{
+					volEnv.dwFlags.set(ENV_LOOP);
+					volEnv.nLoopStart = volEnv.nLoopEnd = static_cast<uint8>(volEnv.size() - 1);
+					break;
+				}
+
+				// Startrekker increments / decrements the envelope level by the stage speed
+				// until it reaches the next stage level.
+				int a, b;
+				if(points[i].level > points[i - 1].level)
+				{
+					a = points[i].level - points[i - 1].level;
+					b = 256 - points[i - 1].level;
+				} else
+				{
+					a = points[i - 1].level - points[i].level;
+					b = points[i - 1].level;
+				}
+				// Release time is again special.
+				if(i == 5)
+					b = 256;
+				else if(b == 0)
+					b = 1;
+				duration = std::max((256 * a) / (duration * b), 1);
+			}
+			if(duration > 0)
+			{
+				volEnv.push_back(volEnv.back().tick + static_cast<EnvelopeNode::tick_t>(duration), static_cast<EnvelopeNode::value_t>(points[i].level / 4));
+			}
+		}
+
+		if(pitchFall)
+		{
+			InstrumentEnvelope &pitchEnv = ins.PitchEnv;
+			pitchEnv.dwFlags.set(ENV_ENABLED);
+			pitchEnv.reserve(2);
+			pitchEnv.push_back(0, ENVELOPE_MID);
+			pitchEnv.push_back(static_cast<EnvelopeNode::tick_t>(1024 / abs(pitchFall)), pitchFall > 0 ? ENVELOPE_MIN : ENVELOPE_MAX);
+		}
+	}
 };
 
 MPT_BINARY_STRUCT(AMInstrument, 36)
@@ -935,12 +1019,13 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#ifdef MPT_EXTERNAL_SAMPLES
+#if defined(MPT_EXTERNAL_SAMPLES) || defined(MPT_BUILD_FUZZER)
 	// Detect Startrekker files with external synth instruments.
 	// Note: Synthesized AM samples may overwrite existing samples (e.g. sample 1 in fa.worse face.mod),
 	// hence they are loaded here after all regular samples have been loaded.
 	if((loadFlags & loadSampleData) && isStartrekker)
 	{
+#ifdef MPT_EXTERNAL_SAMPLES
 		InputFile amFile;
 		FileReader amData;
 		mpt::PathString filename = file.GetFileName();
@@ -972,6 +1057,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
+#elif defined(MPT_BUILD_FUZZER)
+		// For fuzzing this part of the code, just take random data from patterns
+		FileReader amData = file.GetChunkAt(1084, 31 * 120);
+		m_nInstruments = 31;
+#endif
 
 		for(SAMPLEINDEX smp = 1; smp <= m_nInstruments; smp++)
 		{
@@ -987,94 +1077,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			// Allow partial reads for fa.worse face.mod
 			if(amData.ReadStructPartial(am) && !memcmp(am.am, "AM", 2) && am.waveform < 4)
 			{
-				ModSample &sample = Samples[smp];
-				sample.nLength = am.waveform == 3 ? 1024 : 32;
-				sample.nLoopStart = 0;
-				sample.nLoopEnd = sample.nLength;
-				sample.uFlags.set(CHN_LOOP);
-				sample.nVolume = 256;	// prelude.mod has volume 0 in sample header
-				sample.nVibDepth = mpt::saturate_cast<uint8>(am.vibAmp * 2);
-				sample.nVibRate = static_cast<uint8>(am.vibSpeed);
-				sample.nVibType = VIB_SINE;
-				sample.RelativeTone = static_cast<int8>(-12 * am.octave);
-				if(sample.AllocateSample())
-				{
-					for(SmpLength i = 0; i < sample.nLength; i++)
-					{
-						switch(am.waveform)
-						{
-						default:
-						case 0: sample.pSample8[i] = ModSinusTable[i * 2];				break;	// Sine
-						case 1: sample.pSample8[i] = static_cast<int8>(-128 + i * 8);	break;	// Saw
-						case 2: sample.pSample8[i] = i < 16 ? -128 : 127;				break;	// Square
-						case 3: sample.pSample8[i] = mpt::random<int8>(AccessPRNG());	break;	// Noise
-						}
-					}
-				}
-
-				InstrumentEnvelope &volEnv = ins->VolEnv;
-				volEnv.dwFlags.set(ENV_ENABLED);
-				volEnv.reserve(6);
-				volEnv.push_back(0, static_cast<EnvelopeNode::value_t>(am.startLevel / 4));
-
-				struct
-				{
-					uint16 level, speed;
-				} points[] = { { am.startLevel, 0 }, { am.attack1Level, am.attack1Speed }, { am.attack2Level, am.attack2Speed }, { am.sustainLevel, am.decaySpeed }, { am.sustainLevel, am.sustainTime }, { 0, am.releaseSpeed } };
-
-				for(uint8 i = 1; i < CountOf(points); i++)
-				{
-					int duration = std::min(points[i].speed, uint16(256));
-					// Sustain time is already in ticks, no need to compute the segment duration.
-					if(i != 4)
-					{
-						if(duration == 0)
-						{
-							volEnv.dwFlags.set(ENV_LOOP);
-							volEnv.nLoopStart = volEnv.nLoopEnd = static_cast<uint8>(volEnv.size() - 1);
-							break;
-						}
-
-						// Startrekker increments / decrements the envelope level by the stage speed
-						// until it reaches the next stage level.
-						int a, b;
-						if(points[i].level > points[i - 1].level)
-						{
-							a = points[i].level - points[i - 1].level;
-							b = 256 - points[i - 1].level;
-						} else
-						{
-							a = points[i - 1].level - points[i].level;
-							b = points[i - 1].level;
-						}
-						// Release time is again special.
-						if(i == 5)
-							b = 256;
-						else if(b == 0)
-							b = 1;
-						duration = std::max((256 * a) / (duration * b), 1);
-					}
-					if(duration > 0)
-					{
-						volEnv.push_back(volEnv.back().tick + static_cast<EnvelopeNode::tick_t>(duration), static_cast<EnvelopeNode::value_t>(points[i].level / 4));
-					}
-				}
-
-				if(am.pitchFall)
-				{
-					InstrumentEnvelope &pitchEnv = ins->PitchEnv;
-					pitchEnv.dwFlags.set(ENV_ENABLED);
-					pitchEnv.reserve(2);
-					pitchEnv.push_back(0, ENVELOPE_MID);
-					pitchEnv.push_back(static_cast<EnvelopeNode::tick_t>(1024 / abs(am.pitchFall)), am.pitchFall > 0 ? ENVELOPE_MIN : ENVELOPE_MAX);
-				}
+				am.ConvertToMPT(Samples[smp], *ins, AccessPRNG());
 			}
 
 			// This extra padding is probably present to have identical block sizes for AM and FM instruments.
 			amData.Skip(120 - sizeof(AMInstrument));
 		}
 	}
-#endif // MPT_EXTERNAL_SAMPLES
+#endif // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
 
 	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
 	// Basically, this just converts all tempo commands into speed commands
