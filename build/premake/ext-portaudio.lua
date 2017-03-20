@@ -87,8 +87,8 @@
     buildoptions { "/wd4018", "/wd4267", "/wd4312" }
   filter {}
   links {
-   "ksuser",
    "winmm",
+   "ksuser",
   }
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
