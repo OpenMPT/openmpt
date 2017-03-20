@@ -665,6 +665,12 @@ std::string Context::GetPosixEnvVar(std::string var, std::string def)
 } // namespace mpt
 
 
+#else // !(MODPLUG_TRACKER && MPT_OS_WINDOWS)
+
+
+MPT_MSVC_WORKAROUND_LNK4221(mptWine)
+
+
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
