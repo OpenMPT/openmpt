@@ -526,7 +526,7 @@ public:
 	}
 }; // class xmplay_istream
 
-// Stream for memory-based files (required for could_open_propability)
+// Stream for memory-based files (required for could_open_probability)
 struct xmplay_membuf : std::streambuf {
 	xmplay_membuf( const char * base, size_t size ) {
 		char* p( const_cast<char *>( base ) );
@@ -805,25 +805,25 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 				case XMPFILE_TYPE_MEMORY:
 					{
 						xmplay_imemstream s( static_cast<const char *>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
-						return openmpt::could_open_propability( s ) > threshold;
+						return openmpt::could_open_probability( s ) > threshold;
 					}
 					break;
 				case XMPFILE_TYPE_FILE:
 				case XMPFILE_TYPE_NETFILE:
 				case XMPFILE_TYPE_NETSTREAM:
 				default:
-					return openmpt::could_open_propability( (xmplay_istream( file )) ) > threshold;
+					return openmpt::could_open_probability( (xmplay_istream( file )) ) > threshold;
 					break;
 			}
 		#else
 			if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-				return openmpt::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
+				return openmpt::could_open_probability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
 			} else {
-				return openmpt::could_open_propability( (read_XMPFILE( file )) ) > threshold;
+				return openmpt::could_open_probability( (read_XMPFILE( file )) ) > threshold;
 			}
 		#endif
 	#else
-		return openmpt::could_open_propability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
+		return openmpt::could_open_probability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
 	#endif
 }
 
