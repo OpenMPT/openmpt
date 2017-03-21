@@ -1,11 +1,18 @@
 @echo off
 
 if not "x%1" == "xauto" (
-	echo WARNING: This script will unconditionally remove all files from the destination directories.
-	echo This script requires Windows 7 or later (because of PowerShell).
-	echo This script requires 7-zip in "C:\Program Files\7-Zip\" (the default path for a native install).
-	echo When running from a Subversion working copy, this script requires at least Subversion 1.7 (because it removes subdirectories which should not contain .svn metadata).
+	echo "WARNING: This script will unconditionally remove all files from the destination directories."
+	echo "This script requires Windows 7 or later (because of PowerShell)."
+	echo "This script requires 7-zip in 'C:\Program Files\7-Zip\' (the default path for a native install)."
+	echo "When running from a Subversion working copy, this script requires at least Subversion 1.7 (because it removes subdirectories which should not contain .svn metadata)."
 	pause
+)
+
+if "x%2" == "xnodownload" (
+ set MPT_DOWNLOAD=no
+)
+if not "x%2" == "xnodownload" (
+ set MPT_DOWNLOAD=yes
 )
 
 set MY_DIR=%CD%
@@ -20,14 +27,16 @@ goto main
  set MPT_GET_FILE="%~3"
  set MPT_GET_SUBDIR="%~4"
  set MPT_GET_UNPACK_INTERMEDIATE="%~5"
- if not exist "build\externals\%~3" (
-  powershell -Command "(New-Object Net.WebClient).DownloadFile('%MPT_GET_URL%', 'build/externals/%~3')" || exit /B 1
-  cd build\externals || exit /B 1
-  if not "%~5" == "-" (
-   "C:\Program Files\7-Zip\7z.exe" x -y "%~3" || exit /B 1
+ if "%MPT_DOWNLOAD%" == "yes" (
+  if not exist "build\externals\%~3" (
+   powershell -Command "(New-Object Net.WebClient).DownloadFile('%MPT_GET_URL%', 'build/externals/%~3')" || exit /B 1
   )
-  cd ..\.. || exit /B 1
  )
+ cd build\externals || exit /B 1
+ if not "%~5" == "-" (
+  "C:\Program Files\7-Zip\7z.exe" x -y "%~3" || exit /B 1
+ )
+ cd ..\.. || exit /B 1
  cd include || exit /B 1
  if exist %MPT_GET_DESTDIR% rmdir /S /Q %MPT_GET_DESTDIR%
  if "%~4" == "." (
