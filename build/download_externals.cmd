@@ -1,11 +1,12 @@
 @echo off
 
-echo WARNING: This script will unconditionally remove all files from the destination directories.
-echo This script requires Windows 7 or later (because of PowerShell).
-echo This script requires 7-zip in "C:\Program Files\7-Zip\" (the default path for a native install).
-echo When running from a Subversion working copy, this script requires at least Subversion 1.7 (because it removes subdirectories which should not contain .svn metadata).
-
-pause
+if not "x%1" == "xauto" (
+	echo WARNING: This script will unconditionally remove all files from the destination directories.
+	echo This script requires Windows 7 or later (because of PowerShell).
+	echo This script requires 7-zip in "C:\Program Files\7-Zip\" (the default path for a native install).
+	echo When running from a Subversion working copy, this script requires at least Subversion 1.7 (because it removes subdirectories which should not contain .svn metadata).
+	pause
+)
 
 set MY_DIR=%CD%
 set BATCH_DIR=%~dp0
@@ -77,9 +78,15 @@ goto ok
 
 :ok
 echo "All OK."
+if "x%1" == "xauto" (
+	exit 0
+)
 goto end
 :error
 echo "Error!"
+if "x%1" == "xauto" (
+	exit 1
+)
 goto end
 :end
 cd %MY_DIR%
