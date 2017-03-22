@@ -14,9 +14,6 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
-devenv OpenMPT.sln /clean "%MPT_VS_CONF%|%MPT_VS_ARCH%" || goto error
-devenv PluginBridge.sln /clean "%MPT_VS_CONF%|%MPT_VS_ARCH_OTHER%" || goto error
-
 devenv OpenMPT.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH%" || goto error
 devenv PluginBridge.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH_OTHER%" || goto error
 
