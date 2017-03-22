@@ -13,7 +13,6 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
- devenv libopenmpt_test.sln /clean "Release|%MPT_VS_ARCH%" || goto error
  devenv libopenmpt_test.sln /build "Release|%MPT_VS_ARCH%" || goto error
 cd ..\.. || goto error
 
