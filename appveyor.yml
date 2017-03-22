@@ -21,7 +21,7 @@ cache:
   - build\externals
 
 install:
-  - build\download_externals.cmd
+  - build\download_externals.cmd auto
 
 
 
