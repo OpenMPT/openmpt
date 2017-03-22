@@ -35,5 +35,17 @@ build:
   parallel: true
   project: build\vs2015\OpenMPT.sln
 
-  verbosity: normal
+  verbosity: minimal
+
+after_build:
+  - build\auto\package_openmpt_args.cmd vs2015 default %PLATFORM% Release
+  - if "%PLATFORM%" == "Win32" appveyor PushArtifact bin\openmpt-win32.tar
+  - if "%PLATFORM%" == "x64"   appveyor PushArtifact bin\openmpt-win64.tar
+
+
+
+test: off
+
+
+
 
