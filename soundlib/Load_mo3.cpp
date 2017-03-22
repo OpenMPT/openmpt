@@ -1967,10 +1967,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if((GetType() == MOD_TYPE_IT && cwtv > 0x0100 && cwtv < 0x0214)
-		|| (GetType() == MOD_TYPE_S3M && cwtv > 0x3100 && cwtv < 0x3214))
+	if((GetType() == MOD_TYPE_IT && cwtv >= 0x0100 && cwtv < 0x0214)
+		|| (GetType() == MOD_TYPE_S3M && cwtv >= 0x3100 && cwtv < 0x3214)
+		|| (GetType() == MOD_TYPE_S3M && cwtv >= 0x1300 && cwtv < 0x1320))
 	{
-		// Ignore MIDI data in files made with IT older than version 2.14.
+		// Ignore MIDI data in files made with IT older than version 2.14 and old ST3 versions.
 		m_MidiCfg.ClearZxxMacros();
 	}
 
