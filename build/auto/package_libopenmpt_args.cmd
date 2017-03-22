@@ -13,7 +13,7 @@ call build\auto\setup_vs_any.cmd
 call build\auto\helper_get_svnversion.cmd
 call build\auto\helper_get_openmpt_version.cmd
 
-set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%+r%SVNVERSION%
+set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%+%SVNVERSION%
 
 
 
