@@ -2,7 +2,6 @@
 branches:
   only:
     - master
-    - OpenMPT-1.26
 
 skip_tags: true
 
@@ -14,9 +13,6 @@ image: Visual Studio 2015
 
 clone_depth: 1000
 
-matrix:
-  fast_finish: true
-
 cache:
   - build\externals
 
@@ -25,22 +21,15 @@ install:
 
 
 
-platform:
-  - Win32
-  - x64
-
-configuration: Release
-
-build:
-  parallel: true
-  project: build\vs2015\OpenMPT.sln
-
-  verbosity: minimal
+build_script:
+  - build\auto\build_openmpt_args.cmd vs2015 default Win32 Release
+  - build\auto\build_openmpt_args.cmd vs2015 default x64   Release
 
 after_build:
-  - build\auto\package_openmpt_args.cmd vs2015 default %PLATFORM% Release
-  - if "%PLATFORM%" == "Win32" appveyor PushArtifact bin\openmpt-win32.tar
-  - if "%PLATFORM%" == "x64"   appveyor PushArtifact bin\openmpt-win64.tar
+  - build\auto\package_openmpt_args.cmd vs2015 default Win32 Release
+  - build\auto\package_openmpt_args.cmd vs2015 default x64   Release
+  - appveyor PushArtifact bin\openmpt-win32.tar
+  - appveyor PushArtifact bin\openmpt-win64.tar
 
 
 
