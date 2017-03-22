@@ -28,7 +28,7 @@ set GITVERSION_VALID=false
 del /f gitversion.txt
 if "x%SVNVERSION%" == "xunknown" (
 	set GITVERSION_VALID=true
-	"C:\Program Files\Git\bin\git" log --format=format:%%ct -n 1 > gitversion.txt
+	git log --format=format:%%ct -n 1 > gitversion.txt
 	if errorlevel 1 (
 		set GITVERSION_VALID=false
 	)
