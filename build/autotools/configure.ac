@@ -231,8 +231,10 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 
 # Optional openmpt123 dependency
-AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--without-pulseaudio], [Disable use of libpulse and libpulse-simple.]))
+AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--with-pulseaudio], [Enable use of libpulse and libpulse-simple (enabled by default on Linux).]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
+case $host_os in
+ linux*)
 AS_IF([test "x$with_pulseaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
@@ -250,6 +252,27 @@ AS_IF([test "x$with_pulseaudio" != "xno"],
   have_pulseaudio=0
  ]
 )
+ ;;
+ *)
+AS_IF([test "x$with_pulseaudio" = "xyes"],
+ [
+  PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
+   [
+    have_pulseaudio=1
+    AC_DEFINE([MPT_WITH_PULSEAUDIO], [], [with libpulseaudio])
+   ],
+   [
+    have_pulseaudio=0
+    AC_MSG_ERROR([Unable to find libpulse and/or libpulse-simple.])
+   ]
+  )
+ ],
+ [
+  have_pulseaudio=0
+ ]
+)
+ ;;
+esac
 ],[have_pulseaudio=0])
 
 # Optional openmpt123 and examples dependency
