@@ -147,7 +147,7 @@ make check
 echo "Testing the tarball ..."
 mkdir test-tarball
 cd test-tarball
-tar xvaf ../libopenmpt*.tar.gz
+gunzip -c ../libopenmpt*.tar.gz | tar -xvf -
 cd libopenmpt*
 ./configure
 make
@@ -158,7 +158,7 @@ cd ..
 #echo "Testing tarball cross-compilation ..."
 #mkdir test-tarball2
 #cd test-tarball2
-#tar xvaf ../libopenmpt*.tar.gz
+#gunzip -c ../libopenmpt*.tar.gz | tar -xvf -
 #cd libopenmpt*
 #./configure --host=x86_64-w64-mingw32 --without-zlib --without-ogg --without-vorbis --without-vorbisfile --without-mpg123 --without-ltdl --without-dl --without-pulseaudio --without-portaudio --without-sndfile --without-flac --without-portaudiocpp --enable-modplug --disable-openmpt123 --disable-examples --disable-tests
 #make
@@ -172,6 +172,6 @@ cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
-tar cvf ../dist-autotools.tar libopenmpt
+tar -cvf ../dist-autotools.tar libopenmpt
 cd ../..
 
