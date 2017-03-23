@@ -16,11 +16,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable: 4725) // instruction may be inaccurate on some Pentiums
-#endif
-
-
 #ifndef NO_DSP
 
 
@@ -32,11 +27,8 @@ OPENMPT_NAMESPACE_BEGIN
 ////////////////////////////////////////////////////////////////////
 // DSP Effects internal state
 
-
-extern void X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-
-static void X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
-static void X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
+static void X86_StereoDCRemoval(int *, uint32 count, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l, int32 *nDCRFlt_Y1r, int32 *nDCRFlt_X1r);
+static void X86_MonoDCRemoval(int *, uint32 count, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -46,34 +38,19 @@ static void X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFl
 
 #define PI	3.14159265358979323f
 static inline float Sgn(float x) { return (x >= 0) ? 1.0f : -1.0f; }
-static void ShelfEQ(LONG scale,
-			 LONG *outA1, LONG *outB0, LONG *outB1,
-			 LONG F_c, LONG F_s, float gainDC, float gainFT, float gainPI)
+static void ShelfEQ(int32 scale,
+	int32 &outA1, int32 &outB0, int32 &outB1,
+	int32 F_c, int32 F_s, float gainDC, float gainFT, float gainPI)
 {
 	float a1, b0, b1;
 	float gainFT2, gainDC2, gainPI2;
 	float alpha, beta0, beta1, rho;
 	float wT, quad;
 
-	_asm {
-	// wT = PI*Fc/Fs
-	fild F_c
-	fldpi
-	fmulp ST(1), ST(0)
-	fild F_s
-	fdivp ST(1), ST(0)
-	fstp wT
-	// gain^2
-	fld gainDC
-	fld gainFT
-	fld gainPI
-	fmul ST(0), ST(0)
-	fstp gainPI2
-	fmul ST(0), ST(0)
-	fstp gainFT2
-	fmul ST(0), ST(0)
-	fstp gainDC2
-	}
+	wT = PI * F_c / F_s;
+	gainPI2 = gainPI * gainPI;
+	gainFT2 = gainFT * gainFT;
+	gainDC2 = gainDC * gainDC;
 
 	quad = gainPI2 + gainDC2 - (gainFT2*2);
 
@@ -82,7 +59,7 @@ static void ShelfEQ(LONG scale,
 	if (quad != 0)
 	{
 		float lambda = (gainPI2 - gainDC2) / quad;
-	alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
+		alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
 	}
 
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
@@ -95,22 +72,9 @@ static void ShelfEQ(LONG scale,
 	b1 = ((beta1 + rho*beta0) * quad);
 	a1 = - ((rho + alpha) * quad);
 
-	_asm {
-	fild scale
-	fld a1
-	mov eax, outA1
-	fmul ST(0), ST(1)
-	fistp dword ptr [eax]
-	fld b0
-	mov eax, outB0
-	fmul ST(0), ST(1)
-	fistp dword ptr [eax]
-	fld b1
-	mov eax, outB1
-	fmul ST(0), ST(1)
-	fistp dword ptr [eax]
-	fstp rho
-	}
+	outA1 = static_cast<int32>(a1 * scale);
+	outB0 = static_cast<int32>(b0 * scale);
+	outB1 = static_cast<int32>(b1 * scale);
 }
 
 
@@ -190,8 +154,8 @@ void CSurround::Initialize(bool bReset, DWORD MixingFreq)
 		if (nDolbyDepth < 1) nDolbyDepth = 1;
 		if (nDolbyDepth > 16) nDolbyDepth = 16;
 		// Setup biquad filters
-		ShelfEQ(1024, &nDolbyHP_A1, &nDolbyHP_B0, &nDolbyHP_B1, 200, MixingFreq, 0, 0.5f, 1);
-		ShelfEQ(1024, &nDolbyLP_A1, &nDolbyLP_B0, &nDolbyLP_B1, 7000, MixingFreq, 1, 0.75f, 0);
+		ShelfEQ(1024, nDolbyHP_A1, nDolbyHP_B0, nDolbyHP_B1, 200, MixingFreq, 0, 0.5f, 1);
+		ShelfEQ(1024, nDolbyLP_A1, nDolbyLP_B0, nDolbyLP_B1, 7000, MixingFreq, 1, 0.75f, 0);
 		nDolbyHP_X1 = nDolbyHP_Y1 = 0;
 		nDolbyLP_Y1 = 0;
 		// Surround Level
@@ -207,15 +171,14 @@ void CSurround::Initialize(bool bReset, DWORD MixingFreq)
 void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
 //---------------------------------------------------
 {
-
 	// Bass Expansion Reset
 	{
-		LONG a1 = 0, b0 = 1024, b1 = 0;
+		int32 a1 = 0, b0 = 1024, b1 = 0;
 		int nXBassCutOff = 50 + (m_Settings.m_nXBassRange+2) * 20;
 		int nXBassGain = m_Settings.m_nXBassDepth;
 		nXBassGain = mpt::clamp(nXBassGain, 2, 8);
 		nXBassCutOff = mpt::clamp(nXBassCutOff, 60, 600);
-		ShelfEQ(1024, &a1, &b0, &b1, nXBassCutOff, MixingFreq,
+		ShelfEQ(1024, a1, b0, b1, nXBassCutOff, MixingFreq,
 				1.0f + (1.0f/16.0f) * (0x300 >> nXBassGain),
 				1.0f,
 				0.0000001f);
@@ -303,8 +266,8 @@ void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, i
 }
 
 
-void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels)
-//-------------------------------------------------------------------------------------------
+void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uint32 nChannels)
+//---------------------------------------------------------------------------------------------
 {
 
 	if(nChannels >= 2)
@@ -318,12 +281,11 @@ void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 }
 
 
-void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels)
-//---------------------------------------------------------------------------------------
+void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uint32 nChannels)
+//---------------------------------------------------------------------------------------------
 {
 
 	if(nChannels >= 2)
-	// Bass Expansion
 	{
 		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf, &nDCRFlt_Y1rf, &nDCRFlt_X1rf);
 		if(nChannels > 2) X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lb, &nDCRFlt_X1lb, &nDCRFlt_Y1rb, &nDCRFlt_X1rb);
@@ -357,11 +319,8 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 		}
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
-
 	} else
 	{
-
-	// Bass Expansion
 		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
@@ -391,7 +350,7 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 
 #define DCR_AMOUNT		9
 
-static void X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
+static void X86_StereoDCRemoval(int *pBuffer, uint32 nSamples, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l, int32 *nDCRFlt_Y1r, int32 *nDCRFlt_X1r)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	int y1r=*nDCRFlt_Y1r, x1r=*nDCRFlt_X1r;
@@ -437,7 +396,7 @@ stereodcr:
 }
 
 
-static void X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
+static void X86_MonoDCRemoval(int *pBuffer, uint32 nSamples, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	_asm {
@@ -474,33 +433,31 @@ stereodcr:
 // Clean DSP Effects interface
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
-bool CMegaBass::SetXBassParameters(UINT nDepth, UINT nRange)
-//------------------------------------------------------
+void CMegaBass::SetXBassParameters(uint32 nDepth, uint32 nRange)
+//--------------------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
-	UINT gain = nDepth / 20;
+	uint32 gain = nDepth / 20;
 	if (gain > 4) gain = 4;
 	m_Settings.m_nXBassDepth = 8 - gain;	// filter attenuation 1/256 .. 1/16
-	UINT range = nRange / 5;
+	uint32 range = nRange / 5;
 	if (range > 5) range -= 5; else range = 0;
 	if (nRange > 16) nRange = 16;
 	m_Settings.m_nXBassRange = 21 - range;	// filter average on 0.5-1.6ms
-	return true;
 }
 
 
 // [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-50ms]
-bool CSurround::SetSurroundParameters(UINT nDepth, UINT nDelay)
-//-------------------------------------------------------------
+void CSurround::SetSurroundParameters(uint32 nDepth, uint32 nDelay)
+//-----------------------------------------------------------------
 {
-	UINT gain = (nDepth * 16) / 100;
+	uint32 gain = (nDepth * 16) / 100;
 	if (gain > 16) gain = 16;
 	if (gain < 1) gain = 1;
 	m_Settings.m_nProLogicDepth = gain;
 	if (nDelay < 4) nDelay = 4;
 	if (nDelay > 50) nDelay = 50;
 	m_Settings.m_nProLogicDelay = nDelay;
-	return true;
 }
 
 
