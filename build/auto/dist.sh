@@ -13,6 +13,9 @@ set -e
 # We want ccache
 export PATH="/usr/lib/ccache:$PATH"
 
+# Create bin directory
+mkdir -p bin
+
 # Check that the API headers are standard compliant
 echo "Checking C header ..."
 echo '' > bin/headercheck.c
