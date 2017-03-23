@@ -23,5 +23,5 @@ install:
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build/auto/dist.sh ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make && make test ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make VERBOSE=1 && make VERBOSE=1 test ; fi
 
