@@ -248,6 +248,8 @@ endif
 
 # build setup
 
+BINDIR_MADE:=$(shell mkdir -p bin)
+
 INSTALL_PROGRAM = $(INSTALL) -m 0755
 INSTALL_DATA = $(INSTALL) -m 0644
 INSTALL_LIB = $(INSTALL) -m 0644
