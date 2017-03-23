@@ -27,8 +27,8 @@ OPENMPT_NAMESPACE_BEGIN
 ////////////////////////////////////////////////////////////////////
 // DSP Effects internal state
 
-static void X86_StereoDCRemoval(int *, uint32 count, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l, int32 *nDCRFlt_Y1r, int32 *nDCRFlt_X1r);
-static void X86_MonoDCRemoval(int *, uint32 count, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l);
+static void X86_StereoDCRemoval(int *, uint32 count, int32 &nDCRFlt_Y1l, int32 &nDCRFlt_X1l, int32 &nDCRFlt_Y1r, int32 &nDCRFlt_X1r);
+static void X86_MonoDCRemoval(int *, uint32 count, int32 &nDCRFlt_Y1l, int32 &nDCRFlt_X1l);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -72,9 +72,9 @@ static void ShelfEQ(int32 scale,
 	b1 = ((beta1 + rho*beta0) * quad);
 	a1 = - ((rho + alpha) * quad);
 
-	outA1 = static_cast<int32>(a1 * scale);
-	outB0 = static_cast<int32>(b0 * scale);
-	outB1 = static_cast<int32>(b1 * scale);
+	outA1 = Util::Round<int32>(a1 * scale);
+	outB0 = Util::Round<int32>(b0 * scale);
+	outB1 = Util::Round<int32>(b1 * scale);
 }
 
 
@@ -244,8 +244,8 @@ void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, i
 	{
 		int vl = pr[0] >> 1;
 		int vr = pr[1] >> 1;
-		pr[(UINT)(MixRearBuffer-MixSoundBuffer)] += vl;
-		pr[((UINT)(MixRearBuffer-MixSoundBuffer))+1] += vr;
+		pr[(uint32)(MixRearBuffer-MixSoundBuffer)] += vl;
+		pr[((uint32)(MixRearBuffer-MixSoundBuffer))+1] += vr;
 		// Delay
 		int secho = SurroundBuffer[nSurroundPos];
 		SurroundBuffer[nSurroundPos] = (vr+vl+256) >> 9;
@@ -257,8 +257,8 @@ void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, i
 		hy1 = v0;
 		nDolbyLP_Y1 = v >> 8;
 		// Add echo
-		pr[(UINT)(MixRearBuffer-MixSoundBuffer)] += v;
-		pr[((UINT)(MixRearBuffer-MixSoundBuffer))+1] += v;
+		pr[(uint32)(MixRearBuffer-MixSoundBuffer)] += v;
+		pr[((uint32)(MixRearBuffer-MixSoundBuffer))+1] += v;
 		if (++nSurroundPos >= nSurroundSize) nSurroundPos = 0;
 		pr += 2;
 	}
@@ -287,8 +287,8 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, ui
 
 	if(nChannels >= 2)
 	{
-		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf, &nDCRFlt_Y1rf, &nDCRFlt_X1rf);
-		if(nChannels > 2) X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lb, &nDCRFlt_X1lb, &nDCRFlt_Y1rb, &nDCRFlt_X1rb);
+		X86_StereoDCRemoval(MixSoundBuffer, count, nDCRFlt_Y1lf, nDCRFlt_X1lf, nDCRFlt_Y1rf, nDCRFlt_X1rf);
+		if(nChannels > 2) X86_StereoDCRemoval(MixSoundBuffer, count, nDCRFlt_Y1lb, nDCRFlt_X1lb, nDCRFlt_Y1rb, nDCRFlt_X1rb);
 		int *px = MixSoundBuffer;
 		int *py = MixRearBuffer;
 		int x1 = nXBassFlt_X1;
@@ -321,7 +321,7 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, ui
 		nXBassFlt_Y1 = y1;
 	} else
 	{
-		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf);
+		X86_MonoDCRemoval(MixSoundBuffer, count, nDCRFlt_Y1lf, nDCRFlt_X1lf);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
@@ -350,82 +350,50 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, ui
 
 #define DCR_AMOUNT		9
 
-static void X86_StereoDCRemoval(int *pBuffer, uint32 nSamples, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l, int32 *nDCRFlt_Y1r, int32 *nDCRFlt_X1r)
+static void X86_StereoDCRemoval(int *pBuffer, uint32 nSamples, int32 &nDCRFlt_Y1l, int32 &nDCRFlt_X1l, int32 &nDCRFlt_Y1r, int32 &nDCRFlt_X1r)
 {
-	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
-	int y1r=*nDCRFlt_Y1r, x1r=*nDCRFlt_X1r;
+	int y1l = nDCRFlt_Y1l, x1l = nDCRFlt_X1l;
+	int y1r = nDCRFlt_Y1r, x1r = nDCRFlt_X1r;
 
-	_asm {
-	mov esi, pBuffer
-	mov ecx, nSamples
-stereodcr:
-	mov eax, [esi]
-	mov ebx, x1l
-	mov edx, [esi+4]
-	mov edi, x1r
-	add esi, 8
-	sub ebx, eax
-	mov x1l, eax
-	mov eax, ebx
-	sar eax, DCR_AMOUNT+1
-	sub edi, edx
-	sub eax, ebx
-	mov x1r, edx
-	add eax, y1l
-	mov edx, edi
-	sar edx, DCR_AMOUNT+1
-	mov [esi-8], eax
-	sub edx, edi
-	mov ebx, eax
-	add edx, y1r
-	sar ebx, DCR_AMOUNT
-	mov [esi-4], edx
-	mov edi, edx
-	sub eax, ebx
-	sar edi, DCR_AMOUNT
-	mov y1l, eax
-	sub edx, edi
-	dec ecx
-	mov y1r, edx
-	jnz stereodcr
+	while(nSamples--)
+	{
+		int inL = pBuffer[0];
+		int inR = pBuffer[1];
+		int diffL = x1l - inL;
+		int diffR = x1r - inR;
+		x1l = inL;
+		x1r = inR;
+		int outL = diffL / (1 << (DCR_AMOUNT + 1)) - diffL + y1l;
+		int outR = diffR / (1 << (DCR_AMOUNT + 1)) - diffR + y1r;
+		pBuffer[0] = outL;
+		pBuffer[1] = outR;
+		pBuffer += 2;
+		y1l = outL - outL / (1 << DCR_AMOUNT);
+		y1r = outR - outR / (1 << DCR_AMOUNT);
 	}
-	*nDCRFlt_Y1l = y1l;
-	*nDCRFlt_X1l = x1l;
-	*nDCRFlt_Y1r = y1r;
-	*nDCRFlt_X1r = x1r;
+
+	nDCRFlt_Y1l = y1l;
+	nDCRFlt_X1l = x1l;
+	nDCRFlt_Y1r = y1r;
+	nDCRFlt_X1r = x1r;
 }
 
 
-static void X86_MonoDCRemoval(int *pBuffer, uint32 nSamples, int32 *nDCRFlt_Y1l, int32 *nDCRFlt_X1l)
+static void X86_MonoDCRemoval(int *pBuffer, uint32 nSamples, int32 &nDCRFlt_Y1l, int32 &nDCRFlt_X1l)
 {
-	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
-	_asm {
-	mov esi, pBuffer
-	mov ecx, nSamples
-	mov edx, x1l
-	mov edi, y1l
-stereodcr:
-	mov eax, [esi]
-	mov ebx, edx
-	add esi, 4
-	sub ebx, eax
-	mov edx, eax
-	mov eax, ebx
-	sar eax, DCR_AMOUNT+1
-	sub eax, ebx
-	add eax, edi
-	mov [esi-4], eax
-	mov ebx, eax
-	sar ebx, DCR_AMOUNT
-	sub eax, ebx
-	dec ecx
-	mov edi, eax
-	jnz stereodcr
-	mov x1l, edx
-	mov y1l, edi
+	int y1l = nDCRFlt_Y1l, x1l = nDCRFlt_X1l;
+	while(nSamples--)
+	{
+		int inM = pBuffer[0];
+		int diff = x1l - inM;
+		x1l = inM;
+		pBuffer[0] = inM = diff / (1 << (DCR_AMOUNT + 1)) - diff + y1l;
+		pBuffer++;
+		y1l = inM - inM / (1 << DCR_AMOUNT);
 	}
-	*nDCRFlt_Y1l = y1l;
-	*nDCRFlt_X1l = x1l;
+
+	nDCRFlt_Y1l = y1l;
+	nDCRFlt_X1l = x1l;
 }
 
 
