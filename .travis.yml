@@ -1,0 +1,31 @@
+
+language: c++
+
+os:
+  - linux
+  - osx
+
+dist: trusty
+sudo: required
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+    - os: osx
+
+before_install:
+  - test -n $CC  && unset CC
+  - test -n $CXX && unset CXX
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -qq update ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev libportaudio-dev libpulse-dev libflac-dev libsndfile1-dev libltdl-dev ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install p7zip xz pkg-config help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile ; fi
+
+install:
+  - true
+
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./build/auto/dist.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then make && make test ; fi
+
