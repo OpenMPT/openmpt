@@ -48,7 +48,7 @@ fi
 rm bin/headercheck.*.out
 rm bin/headercheck.c
 echo "Checking C++ header ..."
-echo '' > bin/empty.cpp
+echo '#include <iostream>' > bin/empty.cpp
 touch bin/empty.dummy.out
 echo '' > bin/headercheck.cpp
 echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
