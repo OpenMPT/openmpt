@@ -614,8 +614,18 @@ SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
 ifeq ($(SVN_INFO),0)
 # in svn checkout
 MPT_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
-MPT_SVNURL :=  $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )
+MPT_SVNURL := $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )
 MPT_SVNDATE := $(shell svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )
+CPPFLAGS += -D MPT_SVNURL=\"$(MPT_SVNURL)\" -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\" -D MPT_SVNDATE=\"$(MPT_SVNDATE)\"
+DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+r$(MPT_SVNVERSION)
+else
+GIT_STATUS:=$(shell git status > /dev/null 2>&1 ; echo $$? )
+ifeq ($(GIT_STATUS),0)
+# in git chechout
+MPT_SVNVERSION := $(shell git log --grep=git-svn-id -n 1 | grep git-svn-id | tail -n 1 | tr ' ' '\n' | tail -n 2 | head -n 1 | sed 's/@/ /g' | awk '{print $$2;}' )$(shell if [ $$(git rev-list $$(git log --grep=git-svn-id -n 1 --format=format:'%H')  ^$$(git log -n 1 --format=format:'%H') --count ) -ne 0 ] ; then  echo M ; fi )
+MPT_SVNURL := $(shell git log --grep=git-svn-id -n 1 | grep git-svn-id | tail -n 1 | tr ' ' '\n' | tail -n 2 | head -n 1 | sed 's/@/ /g' | awk '{print $$1;}' )
+MPT_SVNDATE := $(shell git log -n 1 --date=iso --format=format:'%cd' | sed 's/ +0000/Z/g' | tr ' ' 'T' )
 CPPFLAGS += -D MPT_SVNURL=\"$(MPT_SVNURL)\" -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\" -D MPT_SVNDATE=\"$(MPT_SVNDATE)\"
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+r$(MPT_SVNVERSION)
@@ -623,6 +633,7 @@ else
 # not in svn checkout
 DIST_OPENMPT_VERSION:=rUNKNOWN
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(LIBOPENMPT_VERSION_PATCH)$(LIBOPENMPT_VERSION_PREREL)+rUNKNOWN
+endif
 endif
 else
 # in dist package

@@ -27,6 +27,7 @@ rm -rf bin/dist-autotools || true
 echo "Making tmp directory ..."
 mkdir bin/dist-autotools
 
+if `svn info . > /dev/null 2>&1` ; then
 echo "Exporting svn ..."
 svn export ./LICENSE         bin/dist-autotools/LICENSE
 svn export ./README.md       bin/dist-autotools/README.md
@@ -50,11 +51,45 @@ svn export ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
 svn export ./build/autotools/ax_cxx_compile_stdcxx.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx.m4
 svn export ./build/autotools/ax_cxx_compile_stdcxx_11.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx_11.m4
 svn export ./build/autotools/ax_prog_doxygen.m4 bin/dist-autotools/m4/ax_prog_doxygen.m4
+else
+echo "Exporting git ..."
+cp -r ./LICENSE         bin/dist-autotools/LICENSE
+cp -r ./README.md       bin/dist-autotools/README.md
+cp -r ./common          bin/dist-autotools/common
+cp -r ./soundbase       bin/dist-autotools/soundbase
+cp -r ./soundlib        bin/dist-autotools/soundlib
+cp -r ./test            bin/dist-autotools/test
+cp -r ./libopenmpt      bin/dist-autotools/libopenmpt
+cp -r ./examples        bin/dist-autotools/examples
+mkdir bin/dist-autotools/src
+cp -r ./openmpt123      bin/dist-autotools/src/openmpt123
+#cp -r ./openmpt123      bin/dist-autotools/openmpt123
+cp -r ./include/modplug/include/libmodplug bin/dist-autotools/libmodplug
+mkdir bin/dist-autotools/build
+mkdir bin/dist-autotools/build/svn_version
+cp -r ./build/svn_version/svn_version.h bin/dist-autotools/build/svn_version/svn_version.h
+mkdir bin/dist-autotools/m4
+touch bin/dist-autotools/m4/emptydir
+cp -r ./build/autotools/configure.ac bin/dist-autotools/configure.ac
+cp -r ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
+cp -r ./build/autotools/ax_cxx_compile_stdcxx.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx.m4
+cp -r ./build/autotools/ax_cxx_compile_stdcxx_11.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx_11.m4
+cp -r ./build/autotools/ax_prog_doxygen.m4 bin/dist-autotools/m4/ax_prog_doxygen.m4
+fi
 
 echo "Querying svn version ..."
-BUILD_SVNURL="$(svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' | sed 's/\//\\\//g' )"
-BUILD_SVNVERSION="$(svnversion -n . | tr ':' '-' )"
-BUILD_SVNDATE="$(svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )"
+if `svn info . > /dev/null 2>&1` ; then
+	BUILD_SVNURL="$(svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' | sed 's/\//\\\//g' )"
+	BUILD_SVNVERSION="$(svnversion -n . | tr ':' '-' )"
+	BUILD_SVNDATE="$(svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )"
+else
+	BUILD_SVNURL="$(git log --grep=git-svn-id -n 1 | grep git-svn-id | tail -n 1 | tr ' ' '\n' | tail -n 2 | head -n 1 | sed 's/@/ /g' | awk '{print $1;}' | sed 's/\//\\\//g')"
+	BUILD_SVNVERSION="$(git log --grep=git-svn-id -n 1 | grep git-svn-id | tail -n 1 | tr ' ' '\n' | tail -n 2 | head -n 1 | sed 's/@/ /g' | awk '{print $2;}')$(if [ $(git rev-list $(git log --grep=git-svn-id -n 1 --format=format:'%H')  ^$(git log -n 1 --format=format:'%H') --count ) -ne 0 ] ; then  echo M ; fi)"
+	BUILD_SVNDATE="$(git log -n 1 --date=iso --format=format:'%cd' | sed 's/ +0000/Z/g' | tr ' ' 'T')"
+fi
+echo " BUILD_SVNURL=${BUILD_SVNURL}"
+echo " BUILD_SVNVERSION=${BUILD_SVNVERSION}"
+echo " BUILD_SVNDATE=${BUILD_SVNDATE}"
 
 echo "Building man pages ..."
 make bin/openmpt123.1
@@ -78,9 +113,13 @@ cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_PREREL!!/${LIBOPENMPT_VERSION
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_CURRENT!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_REVISION!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_AGE!!/${LIBOPENMPT_LTVER_AGE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+echo " SVNURL"
 cat configure.ac | sed "s/!!MPT_SVNURL!!/${BUILD_SVNURL}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+echo " SVNVERSION"
 cat configure.ac | sed "s/!!MPT_SVNVERSION!!/${BUILD_SVNVERSION}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+echo " SVNDATE"
 cat configure.ac | sed "s/!!MPT_SVNDATE!!/${BUILD_SVNDATE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+echo " PACKAGE"
 cat configure.ac | sed "s/!!MPT_PACKAGE!!/true/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 
 echo "Generating 'Doxyfile.in' ..."

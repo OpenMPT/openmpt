@@ -94,7 +94,9 @@ make STRICT=1 check
 make STRICT=1 clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
+if `svn info . > /dev/null 2>&1` ; then
 make dist
+fi
 
 # Clean
 make clean
