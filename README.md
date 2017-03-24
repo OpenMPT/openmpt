@@ -14,14 +14,6 @@ How to compile
 
  -  Supported Visual Studio versions:
 
-     -  Visual Studio 2013 Update 4 Community/Professional/Premium/Ultimate
-        Edition with MBCS MFC Add-On (available at
-        [microsoft.com](https://www.microsoft.com/en-us/download/details.aspx?id=40770)
-        ).
-
-        To compile the project, open `build/vs2013/OpenMPT.sln` and hit the
-        compile button.
-
      -  Visual Studio 2015 Update 3 Community/Professional/Enterprise
 
         To compile the project, open `build/vs2015/OpenMPT.sln` and hit the

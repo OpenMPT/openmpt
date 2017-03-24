@@ -46,9 +46,9 @@ rem %PREMAKE% --group=OpenMPT vs2012 || goto err
 %PREMAKE% --group=libopenmpt-small vs2013 || goto err
 %PREMAKE% --group=libopenmpt vs2013 || goto err
 %PREMAKE% --group=openmpt123 vs2013 || goto err
-%PREMAKE% --group=PluginBridge vs2013 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2013 || goto err
-%PREMAKE% --group=OpenMPT vs2013 || goto err
+rem %PREMAKE% --group=PluginBridge vs2013 || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2013 || goto err
+rem %PREMAKE% --group=OpenMPT vs2013 || goto err
 %PREMAKE% --group=all-externals vs2013 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2015 || goto err
@@ -106,9 +106,9 @@ rem %PREMAKE% --group=OpenMPT vs2012 --xp || goto err
 %PREMAKE% --group=libopenmpt-small vs2013 --xp || goto err
 %PREMAKE% --group=libopenmpt vs2013 --xp || goto err
 %PREMAKE% --group=openmpt123 vs2013 --xp || goto err
-%PREMAKE% --group=PluginBridge vs2013 --xp || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2013 --xp || goto err
-%PREMAKE% --group=OpenMPT vs2013 --xp || goto err
+rem %PREMAKE% --group=PluginBridge vs2013 --xp || goto err
+rem %PREMAKE% --group=OpenMPT-VSTi vs2013 --xp || goto err
+rem %PREMAKE% --group=OpenMPT vs2013 --xp || goto err
 %PREMAKE% --group=all-externals vs2013 --xp || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2015 --xp || goto err
