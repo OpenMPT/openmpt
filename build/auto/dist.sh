@@ -104,3 +104,7 @@ make clean
 # Build autoconfiscated tarball
 ./build/autotools/autoconfiscate.sh
 
+# Test autotools tarball
+./build/autotools/test_tarball.sh
+
+
