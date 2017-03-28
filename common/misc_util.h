@@ -1111,7 +1111,7 @@ template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Ut
 } // namespace Util
 
 
-#ifdef MODPLUG_TRACKER || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
+#if defined(MODPLUG_TRACKER) || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 
 namespace mpt
 {
