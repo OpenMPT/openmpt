@@ -106,6 +106,8 @@ std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
 } // namespace Util
 
 
+#ifdef MODPLUG_TRACKER
+
 namespace mpt
 {
 
@@ -121,6 +123,8 @@ std::string getenv(const std::string &env_var, const std::string &def)
 }
 
 } // namespace mpt
+
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

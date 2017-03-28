@@ -86,7 +86,9 @@ public:
 	bool empty() const { return path.empty(); }
 
 #if MPT_OS_WINDOWS
+#if !MPT_OS_WINDOWS_WINRT
 	static int CompareNoCase(const PathString & a, const PathString & b);
+#endif // !MPT_OS_WINDOWS_WINRT
 #endif
 
 public:

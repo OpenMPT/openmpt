@@ -36,8 +36,28 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+#if defined(_WIN32_WINNT)
+#if (_WIN32_WINNT < 0x0602)
+#if MPT_COMPILER_MSVC
+#pragma message("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602.")
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#warning "Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602."
+#else
+// There is no portable way to display a warning.
+// Try to provoke a warning with an unused variable.
+static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Please_define_WIN32_WINNT_0x0602;
+#endif
+#endif // _WIN32_WINNT
+#endif // _WIN32_WINNT
+#endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+
 #if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#if MPT_OS_WINDOWS_WINRT
+#pragma comment(lib, "ole32.lib")
+#else
 #pragma comment(lib, "rpcrt4.lib")
+#endif
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "mfplat.lib")

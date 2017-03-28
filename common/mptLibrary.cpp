@@ -67,6 +67,8 @@ mpt::PathString GetAppPath()
 }
 
 
+#if !MPT_OS_WINDOWS_WINRT
+
 mpt::PathString GetSystemPath()
 {
 	DWORD size = GetSystemDirectoryW(nullptr, 0);
@@ -77,6 +79,8 @@ mpt::PathString GetSystemPath()
 	}
 	return mpt::PathString::FromNative(path.data()) + MPT_PATHSTRING("\\");
 }
+
+#endif // !MPT_OS_WINDOWS_WINRT
 
 
 class LibraryHandle
@@ -91,6 +95,34 @@ public:
 	LibraryHandle(const mpt::LibraryPath &path)
 		: hModule(NULL)
 	{
+
+#if MPT_OS_WINDOWS_WINRT
+
+#if (_WIN32_WINNT < 0x0602)
+		(void)path;
+		hModule = NULL; // unsupported
+#else
+		switch(path.GetSearchPath())
+		{
+			case mpt::LibrarySearchPathDefault:
+				hModule = LoadPackagedLibrary(path.GetFileName().AsNative().c_str(), 0);
+				break;
+			case mpt::LibrarySearchPathApplication:
+				hModule = LoadPackagedLibrary(path.GetFileName().AsNative().c_str(), 0);
+				break;
+			case mpt::LibrarySearchPathSystem:
+				hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
+				break;
+			case mpt::LibrarySearchPathFullPath:
+				hModule = NULL; // Absolute path is not supported in WinRT
+				break;
+			case mpt::LibrarySearchPathInvalid:
+				MPT_ASSERT_NOTREACHED();
+				break;
+		}
+#endif
+
+#else // !MPT_OS_WINDOWS_WINRT
 
 		mpt::Windows::Version WindowsVersion = mpt::Windows::Version::Current();
 
@@ -188,6 +220,9 @@ public:
 					break;
 			}
 		}
+
+#endif // MPT_OS_WINDOWS_WINRT
+
 	}
 
 	~LibraryHandle()

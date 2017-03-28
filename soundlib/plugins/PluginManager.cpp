@@ -522,7 +522,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		VSTPluginLib *plug = *p;
 		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
 			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2);
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		const bool matchName = !mpt::PathString::CompareNoCase(plug->libraryName, mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()));
 #else
 		const bool matchName = (mpt::ToLowerCaseAscii(plug->libraryName.ToUTF8()) == mpt::ToLowerCaseAscii(mixPlugin.GetLibraryName()));

@@ -20,9 +20,9 @@
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #include <rpc.h>
-#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || MPT_OS_WINDOWS_WINRT
 #include <objbase.h>
-#endif // MODPLUG_TRACKER || !NO_DMO
+#endif // MODPLUG_TRACKER || !NO_DMO || MPT_OS_WINDOWS_WINRT
 #endif // MPT_OS_WINDOWS
 
 
@@ -287,6 +287,8 @@ GUID CreateGUID()
 }
 
 
+#if !MPT_OS_WINDOWS_WINRT
+
 UUID StringToUUID(const mpt::ustring &str)
 //----------------------------------------
 {
@@ -348,6 +350,8 @@ mpt::ustring UUIDToString(UUID uuid)
 	}
 	return mpt::ToUnicode(wstr);
 }
+
+#endif // !MPT_OS_WINDOWS_WINRT
 
 
 bool IsValid(UUID uuid)
@@ -437,7 +441,19 @@ UUID::operator ::UUID () const
 
 UUID UUID::Generate()
 {
-	#if MPT_OS_WINDOWS
+	#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+		#if (_WIN32_WINNT >= 0x0602)
+			::GUID guid = ::GUID();
+			HRESULT result = CoCreateGuid(&guid);
+			if(result != S_OK)
+			{
+				return mpt::UUID::RFC4122Random();
+			}
+			return mpt::UUIDFromWin32(guid);
+		#else
+			return mpt::UUID::RFC4122Random();
+		#endif
+	#elif MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		::UUID uuid = ::UUID();
 		RPC_STATUS status = ::UuidCreate(&uuid);
 		if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
@@ -461,7 +477,19 @@ UUID UUID::Generate()
 
 UUID UUID::GenerateLocalUseOnly()
 {
-	#if MPT_OS_WINDOWS
+	#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+		#if (_WIN32_WINNT >= 0x0602)
+			::GUID guid = ::GUID();
+			HRESULT result = CoCreateGuid(&guid);
+			if(result != S_OK)
+			{
+				return mpt::UUID::RFC4122Random();
+			}
+			return mpt::UUIDFromWin32(guid);
+		#else
+			return mpt::UUID::RFC4122Random();
+		#endif
+	#elif MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		#if _WIN32_WINNT >= 0x0501
 			// Available since Win2000, but we check for WinXP in order to not use this
 			// function in Win32old builds. It is not available on some non-fully

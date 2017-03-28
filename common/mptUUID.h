@@ -51,10 +51,12 @@ std::wstring GUIDToString(GUID guid);
 // Create a COM GUID
 GUID CreateGUID();
 
+#if !MPT_OS_WINDOWS_WINRT
 // General UUID<->string conversion.
 // The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
 UUID StringToUUID(const mpt::ustring &str);
 mpt::ustring UUIDToString(UUID uuid);
+#endif // !MPT_OS_WINDOWS_WINRT
 
 // Checks the UUID against the NULL UUID. Returns false if it is NULL, true otherwise.
 bool IsValid(UUID uuid);

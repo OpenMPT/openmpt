@@ -28,6 +28,8 @@ namespace Windows
 #if MPT_OS_WINDOWS
 
 
+#if !MPT_OS_WINDOWS_WINRT
+
 static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 {
 	// GetVersionEx returns decimal.
@@ -40,6 +42,8 @@ static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 	result |= minor/10*0x10 + minor%10;
 	return result;
 }
+
+#endif // !MPT_OS_WINDOWS_WINRT
 
 
 static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
@@ -67,6 +71,9 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 			mpt::Windows::Version::WinNT4
 		#endif
 		;
+#if MPT_OS_WINDOWS_WINRT
+	SystemIsNT = true;
+#else // !MPT_OS_WINDOWS_WINRT
 	OSVERSIONINFOEXW versioninfoex;
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
@@ -80,6 +87,7 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 #endif // MPT_COMPILER_MSVC
 	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
 	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
+#endif // MPT_OS_WINDOWS_WINRT
 }
 
 

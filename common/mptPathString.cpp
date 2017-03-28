@@ -57,11 +57,15 @@ RawPathString PathString::AsNativePrefixed() const
 }
 
 
+#if !MPT_OS_WINDOWS_WINRT
+
 int PathString::CompareNoCase(const PathString & a, const PathString & b)
 //-----------------------------------------------------------------------
 {
 	return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
 }
+
+#endif // !MPT_OS_WINDOWS_WINRT
 
 
 // Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
