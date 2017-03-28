@@ -25,24 +25,34 @@
 #if defined(MPT_BUILD_TARGET_XP)
 
 #if defined(_M_X64)
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0502 // _WIN32_WINNT_WS03
+#endif
 #else // !_M_X64
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
+#endif
 #endif // _M_X64
 
 #else // MPT_BUILD_TARGET
 
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
+#endif
 
 #endif // MPT_BUILD_TARGET
 
 #else // MPT_COMPILER
 
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
+#endif
 
 #endif // MPT_COMPILER
 
+#ifndef WINVER
 #define WINVER       _WIN32_WINNT
+#endif
 
 #endif // MPT_OS_WINDOWS
 
