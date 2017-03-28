@@ -1111,7 +1111,7 @@ template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Ut
 } // namespace Util
 
 
-#ifdef MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 
 namespace mpt
 {
@@ -1123,7 +1123,7 @@ std::string getenv(const std::string &env_var, const std::string &def = std::str
 
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER || (LIBOPENMPT_BUILD && LIBOPENMPT_BUILD_TEST)
 
 
 OPENMPT_NAMESPACE_END

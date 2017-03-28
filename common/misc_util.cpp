@@ -106,7 +106,7 @@ std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
 } // namespace Util
 
 
-#ifdef MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 
 namespace mpt
 {
@@ -114,17 +114,21 @@ namespace mpt
 std::string getenv(const std::string &env_var, const std::string &def)
 //--------------------------------------------------------------------
 {
+#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+	return def;
+#else
 	const char *val = std::getenv(env_var.c_str());
 	if(!val)
 	{
 		return def;
 	}
 	return val;
+#endif
 }
 
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER || (LIBOPENMPT_BUILD && LIBOPENMPT_BUILD_TEST)
 
 
 OPENMPT_NAMESPACE_END
