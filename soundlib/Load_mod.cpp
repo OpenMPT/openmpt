@@ -1209,8 +1209,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 		invalidChars += CountInvalidChars(sampleHeader.name);
 
-		// Sanity checks
-		if(invalidChars > 20
+		// Sanity checks - invalid character count adjusted for ata.mod (MD5 937b79b54026fa73a1a4d3597c26eace, SHA1 3322ca62258adb9e0ae8e9afe6e0c29d39add874)
+		if(invalidChars > 48
 			|| sampleHeader.volume > 64
 			|| sampleHeader.finetune != 0
 			|| sampleHeader.length > 32768)
@@ -1325,7 +1325,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			// Reject files that contain a lot of illegal pattern data.
 			// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
 			// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
-			if(illegalBytes > 256)
+			// This also allows to play some rather damaged files like
+			// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
+			// but naturally we cannot recover the broken data.
+			if(illegalBytes > 1024)
 				return false;
 		}
 		// Check for empty space between the last Dxx command and the beginning of another pattern
