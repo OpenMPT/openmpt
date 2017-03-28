@@ -106,7 +106,7 @@ std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
 } // namespace Util
 
 
-#ifdef MODPLUG_TRACKER || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
+#if defined(MODPLUG_TRACKER) || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 
 namespace mpt
 {
