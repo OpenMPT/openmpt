@@ -1111,6 +1111,8 @@ template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Ut
 } // namespace Util
 
 
+#ifdef MODPLUG_TRACKER
+
 namespace mpt
 {
 
@@ -1120,6 +1122,8 @@ namespace mpt
 std::string getenv(const std::string &env_var, const std::string &def = std::string());
 
 } // namespace mpt
+
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

@@ -17,6 +17,8 @@ is just a high-level summary.
     old 0.2 API.
  *  [**New**] openmpt123: openmpt123 can now open M3U, M3U8, M3UEXT, M3U8EXT and
     PLSv2 playlists via the `--playlist` option.
+ *  [**New**] Libopenmpt now supports building for Windows 10 Universal API. We
+    have no build system for that yet though.
 
  *  [**Change**] libopenmpt versioning changed and follows the more conventional
     major.minor.patch as well as the recommendations of the

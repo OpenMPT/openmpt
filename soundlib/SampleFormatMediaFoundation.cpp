@@ -106,6 +106,8 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 
 		std::wstring stringVal;
 		std::vector<WCHAR> wcharVal(256);
+#if !MPT_OS_WINDOWS_WINRT
+		// WTF, no PropVariantToString() in WinRT 
 		for(;;)
 		{
 			HRESULT hrToString = PropVariantToString(propVal, wcharVal.data(), wcharVal.size());
@@ -121,6 +123,7 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 				break;
 			}
 		}
+#endif // !MPT_OS_WINDOWS_WINRT
 
 		PropVariantClear(&propVal);
 
@@ -162,6 +165,7 @@ public:
 		{
 			return false;
 		}
+#if !MPT_OS_WINDOWS_WINRT
 		if(!(true
 			&& AddLibrary("mf", mpt::LibraryPath::System(MPT_PATHSTRING("mf")))
 			&& AddLibrary("mfplat", mpt::LibraryPath::System(MPT_PATHSTRING("mfplat")))
@@ -171,6 +175,7 @@ public:
 		{
 			return false;
 		}
+#endif // !MPT_OS_WINDOWS_WINRT
 		if(!SUCCEEDED(MFStartup(MF_VERSION)))
 		{
 			return false;

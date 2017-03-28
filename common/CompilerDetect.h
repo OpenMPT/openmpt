@@ -257,6 +257,16 @@
 	#endif
 #elif defined(_WIN32)
 	#define MPT_OS_WINDOWS 1
+	#if defined(WINAPI_FAMILY)
+		#include <winapifamily.h>
+		#if (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
+			#define MPT_OS_WINDOWS_WINRT 0
+		#else
+			#define MPT_OS_WINDOWS_WINRT 1
+		#endif
+	#else // !WINAPI_FAMILY
+		#define MPT_OS_WINDOWS_WINRT 0
+	#endif // WINAPI_FAMILY
 #elif defined(__APPLE__)
 	#define MPT_OS_MACOSX_OR_IOS 1
 	//#include "TargetConditionals.h"
@@ -288,6 +298,9 @@
 #endif
 #ifndef MPT_OS_WINDOWS
 #define MPT_OS_WINDOWS 0
+#endif
+#ifndef MPT_OS_WINDOWS_WINRT
+#define MPT_OS_WINDOWS_WINRT 0
 #endif
 #ifndef MPT_OS_MACOSX_OR_IOS
 #define MPT_OS_MACOSX_OR_IOS 0

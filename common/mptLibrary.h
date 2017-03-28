@@ -25,8 +25,10 @@ namespace mpt
 // Returns the application path or an empty string (if unknown), e.g. "C:\mptrack\"
 mpt::PathString GetAppPath();
 
+#if !MPT_OS_WINDOWS_WINRT
 // Returns the system directory path, e.g. "C:\Windows\System32\"
 mpt::PathString GetSystemPath();
+#endif // !MPT_OS_WINDOWS_WINRT
 
 #endif // MPT_OS_WINDOWS
 
