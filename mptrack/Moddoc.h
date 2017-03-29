@@ -53,7 +53,7 @@ struct SplitKeyboardSettings
 	}
 };
 
-enum InputTargetContext;
+enum InputTargetContext : int8;
 
 
 struct LogEntry
@@ -110,10 +110,10 @@ protected:
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	time_t m_creationTime;
 
-	bool bModifiedAutosave; // Modified since last autosave?
+	bool bModifiedAutosave : 1; // Modified since last autosave?
 public:
-	bool m_ShowSavedialog;
-	bool m_bHasValidPath; //becomes true if document is loaded or saved.
+	bool m_ShowSavedialog : 1;
+	bool m_bHasValidPath : 1; //becomes true if document is loaded or saved.
 
 protected:
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;

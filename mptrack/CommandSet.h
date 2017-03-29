@@ -12,17 +12,16 @@
 #include <string>
 #include "../common/FlagSet.h"
 #include <map>
+#include <bitset>
 
 OPENMPT_NAMESPACE_BEGIN
-
-struct CModSpecifications;
 
 #define HOTKEYF_MIDI 0x10		// modifier mask for MIDI CCs
 #define HOTKEYF_RSHIFT 0x20		// modifier mask for right Shift key
 #define HOTKEYF_RCONTROL 0x40	// modifier mask for right Ctrl key
 #define HOTKEYF_RALT 0x80		// modifier mask for right Alt key
 
-enum InputTargetContext
+enum InputTargetContext : int8
 {
 	kCtxUnknownContext = -1,
 	kCtxAllContexts = 0,
@@ -51,7 +50,7 @@ enum InputTargetContext
 	kCtxMaxInputContexts
 };
 
-enum KeyEventType
+enum KeyEventType : int8
 {
 	kKeyEventNone	= 0,
 	kKeyEventDown	= 1 << 0,
@@ -59,7 +58,6 @@ enum KeyEventType
 	kKeyEventRepeat	= 1 << 2,
 	kNumKeyEvents	= 1 << 3
 };
-template <> struct enum_traits<KeyEventType> { typedef uint8 store_type; };
 DECLARE_FLAGSET(KeyEventType)
 
 
@@ -1168,89 +1166,83 @@ enum CommandID
 };
 
 
-enum Modifiers
+enum Modifiers : uint8
 {
-/*	NoModifier = 0,
-	LShift   = 1<<0,
-	RShift   = 1<<1,
-	LControl = 1<<2,
-	RControl = 1<<3,
-	LAlt     = 1<<4,
-	RAlt     = 1<<5,
-	MaxMod   = 1<<6,
-*/
-	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI | HOTKEYF_RSHIFT | HOTKEYF_RCONTROL | HOTKEYF_RALT,
+	ModNone = 0,
+	ModShift = HOTKEYF_SHIFT,
+	ModCtrl = HOTKEYF_CONTROL,
+	ModAlt = HOTKEYF_ALT,
+	ModWin = HOTKEYF_EXT,
+	ModMidi = HOTKEYF_MIDI,
+	ModRShift = HOTKEYF_RSHIFT,
+	ModRCtrl = HOTKEYF_RCONTROL,
+	ModRAlt = HOTKEYF_RALT,
+	MaxMod = ModShift | ModCtrl | ModAlt | ModWin | ModMidi | ModRShift | ModRCtrl | ModRAlt,
 };
+DECLARE_FLAGSET(Modifiers)
 
-
-#define MAINKEYS 256
 
 struct KeyCombination
 {
 protected:
-	uint8 ctx;	// TODO: This should probably rather be a member of CommandStruct and not of the individual key combinations for consistency's sake.
-	uint8 mod;
+	InputTargetContext ctx;	// TODO: This should probably rather be a member of CommandStruct and not of the individual key combinations for consistency's sake.
+	FlagSet<Modifiers> mod;
 	uint8 code;
-	uint8 event;
+	FlagSet<KeyEventType> event;
 
-	STATIC_ASSERT(static_cast<uint8>(kCtxMaxInputContexts - 1) == kCtxMaxInputContexts - 1);
-	STATIC_ASSERT(static_cast<uint8>(MaxMod) == MaxMod);
-	STATIC_ASSERT(static_cast<uint8>(MAINKEYS - 1) == MAINKEYS - 1);
-	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
-
-	uint32 AsUint32() const
+	MPT_CONSTEXPR11_FUN uint32 AsUint32() const
 	{
 		STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
 		return static_cast<uint32>(0)
-			| (static_cast<uint32>(ctx  ) << 24)
-			| (static_cast<uint32>(mod  ) << 16)
-			| (static_cast<uint32>(code ) <<  8)
-			| (static_cast<uint32>(event) <<  0)
+			| (static_cast<uint32>(ctx) << 24)
+			| (static_cast<uint32>(mod.GetRaw()) << 16)
+			| (static_cast<uint32>(code) <<  8)
+			| (static_cast<uint32>(event.GetRaw()) <<  0)
 			;
 	}
 
 public:
-	KeyCombination(InputTargetContext context = kCtxAllContexts, UINT modifier = 0, UINT key = 0, FlagSet<KeyEventType> type = kKeyEventNone)
-		: ctx(static_cast<uint8>(context))
-		, mod(static_cast<uint8>(modifier))
+	KeyCombination(InputTargetContext context = kCtxAllContexts, FlagSet<Modifiers> modifier = ModNone, UINT key = 0, FlagSet<KeyEventType> type = kKeyEventNone)
+		: ctx(context)
+		, mod(modifier)
 		, code(static_cast<uint8>(key))
-		, event(type.GetRaw())
+		, event(type)
 	{ }
 
-	bool operator== (const KeyCombination &other) const
+	MPT_CONSTEXPR11_FUN bool operator== (const KeyCombination &other) const
 	{
 		return ctx == other.ctx && mod == other.mod && code == other.code && event == other.event;
 	}
 
-	bool operator < (const KeyCombination &kc) const
+	MPT_CONSTEXPR11_FUN bool operator < (const KeyCombination &kc) const
 	{
 		return AsUint32() < kc.AsUint32();
 	}
 
 	// Getters / Setters
-	void Context(InputTargetContext context) { ctx = static_cast<uint8>(context); }
-	InputTargetContext Context() const { return static_cast<InputTargetContext>(ctx); }
+	void Context(InputTargetContext context) { ctx = context; }
+	MPT_CONSTEXPR11_FUN InputTargetContext Context() const { return ctx; }
 
-	void Modifier(UINT modifier) { mod = static_cast<uint8>(modifier); }
-	UINT Modifier() const { return static_cast<UINT>(mod); }
+	void Modifier(FlagSet<Modifiers> modifier) { mod = modifier; }
+	MPT_CONSTEXPR11_FUN FlagSet<Modifiers> Modifier() const { return mod; }
 	void Modifier(const KeyCombination &other) { mod = other.mod; }
-	void AddModifier(UINT modifier) { mod |= static_cast<uint8>(modifier); }
+	void AddModifier(FlagSet<Modifiers> modifier) { mod |= modifier; }
 	void AddModifier(const KeyCombination &other) { mod |= other.mod; }
 
 	void KeyCode(UINT key) { code = static_cast<uint8>(key); }
-	UINT KeyCode() const { return static_cast<UINT>(code); }
+	MPT_CONSTEXPR11_FUN UINT KeyCode() const { return code; }
 
-	void EventType(FlagSet<KeyEventType> type) { event = type.GetRaw(); }
-	FlagSet<KeyEventType> EventType() const { FlagSet<KeyEventType> result; result.SetRaw(event); return result; }
+	void EventType(FlagSet<KeyEventType> type) { event = type; }
+	MPT_CONSTEXPR11_FUN FlagSet<KeyEventType> EventType() const { return event; }
 
 	// Key combination to string
 	static const TCHAR *GetContextText(InputTargetContext ctx);
 	const TCHAR *GetContextText() const { return GetContextText(Context()); }
 
-	static CString GetModifierText(UINT mod);
+	static CString GetModifierText(FlagSet<Modifiers> mod);
 	CString GetModifierText() const { return GetModifierText(Modifier()); }
 
-	static CString GetKeyText(UINT mod, UINT code);
+	static CString GetKeyText(FlagSet<Modifiers> mod, UINT code);
 	CString GetKeyText() const { return GetKeyText(Modifier(), KeyCode()); }
 
 	static CString GetKeyEventText(FlagSet<KeyEventType> event);
@@ -1323,8 +1315,8 @@ protected:
 
 	const CModSpecifications *oldSpecs;
 	CommandStruct commands[kcNumCommands];
-	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
-	bool enforceRule[kNumRules];
+	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
+	std::bitset<kNumRules> enforceRule;
 
 public:
 
@@ -1347,7 +1339,7 @@ public:
 	bool isHidden(UINT c) const { return commands[c].isHidden; }
 	int GetKeyListSize(CommandID cmd) const { return (int)commands[cmd].kcList.size(); }
 	CString GetCommandText(CommandID cmd) const { return commands[cmd].Message; }
-	CString GetKeyTextFromCommand(CommandID c, UINT key);
+	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
 
 	//Pululation ;)
 	void Copy(const CCommandSet *source);	// copy the contents of a commandset into this command set

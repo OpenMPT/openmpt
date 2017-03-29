@@ -286,6 +286,12 @@ public:
 		return (load() & flags) == flags;
 	}
 
+	// Test if any but the specified flags are set.
+	MPT_CONSTEXPR11_FUN bool test_any_except(value_type flags) const
+	{
+		return (load() & ~flags);
+	}
+
 	// Test if any flag is set.
 	MPT_CONSTEXPR11_FUN bool any() const
 	{
