@@ -69,6 +69,95 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
+
+
+call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/83efdca3c3c63cb47bd1b4daa8b73d526841f900.zip" "genie-83efdca3c3c63cb47bd1b4daa8b73d526841f900.zip" "GENie-83efdca3c3c63cb47bd1b4daa8b73d526841f900" "-" || goto error
+
+xcopy /E /I /Y build\genie\genie\build\vs2010 include\genie\build\vs2010 || goto error
+xcopy /E /I /Y build\genie\genie\build\vs2012 include\genie\build\vs2012 || goto error
+xcopy /E /I /Y build\genie\genie\build\vs2013 include\genie\build\vs2013 || goto error
+xcopy /E /I /Y build\genie\genie\build\vs2015 include\genie\build\vs2015 || goto error
+xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2017.cmd || goto error
+ cd include\genie\build\vs2015 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2017.cmd || goto error
+ cd include\genie\build\vs2015 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2015.cmd || goto error
+ cd include\genie\build\vs2015 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2015.cmd || goto error
+ cd include\genie\build\vs2015 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2013.cmd || goto error
+ cd include\genie\build\vs2013 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2013.cmd || goto error
+ cd include\genie\build\vs2013 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2012.cmd || goto error
+ cd include\genie\build\vs2012 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2012.cmd || goto error
+ cd include\genie\build\vs2012 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+
+if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2010.cmd || goto error
+ cd include\genie\build\vs2010 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
+ call build\auto\setup_vs2010.cmd || goto error
+ cd include\genie\build\vs2010 || goto error
+ devenv genie.sln /build "Release|Win32" || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
+
+:geniedone
+
+
+
 call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha11/premake-5.0.0-alpha11-src.zip" "premake-5.0-alpha11-src.zip" "premake-5.0.0-alpha11" "-" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (

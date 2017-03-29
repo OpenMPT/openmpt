@@ -11,6 +11,21 @@ set PREMAKE=
 if exist "include\premake\premake5.exe" set PREMAKE=include\premake\premake5.exe
 if exist "include\premake\bin\release\premake5.exe" set PREMAKE=include\premake\bin\release\premake5.exe
 
+set GENIE=
+set GENIE=include\genie\bin\windows\genie.exe
+
+
+
+echo dofile "build/genie/genie.lua" > genie.lua || goto err
+
+%GENIE% --target="windesktop81" vs2015 || goto err
+%GENIE% --target="winphone8"    vs2012 || goto err
+%GENIE% --target="winphone81"   vs2013 || goto err
+%GENIE% --target="winstore81"   vs2013 || goto err
+%GENIE% --target="winstore82"   vs2015 || goto err
+
+del genie.lua || goto err
+
 
 
 echo dofile "build/premake/premake.lua" > premake5.lua || goto err
@@ -138,6 +153,7 @@ rem %PREMAKE% --group=OpenMPT vs2013 --xp || goto err
 %PREMAKE% postprocess || goto err
 
 del premake5.lua || goto err
+
 
 
 cd %MY_DIR% || goto err

@@ -279,14 +279,34 @@ bool PathString::IsDirectory() const
 {
 	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
 	// GetFileAttributesW also does the job just fine.
-	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	#if MPT_OS_WINDOWS_WINRT
+		WIN32_FILE_ATTRIBUTE_DATA data;
+		MemsetZero(data);
+		if(::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
+		{
+			return false;
+		}
+		DWORD dwAttrib = data.dwFileAttributes;
+	#else // !MPT_OS_WINDOWS_WINRT
+		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 bool PathString::IsFile() const
 //-----------------------------
 {
-	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	#if MPT_OS_WINDOWS_WINRT
+		WIN32_FILE_ATTRIBUTE_DATA data;
+		MemsetZero(data);
+		if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
+		{
+			return false;
+		}
+		DWORD dwAttrib = data.dwFileAttributes;
+	#else // !MPT_OS_WINDOWS_WINRT
+		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
