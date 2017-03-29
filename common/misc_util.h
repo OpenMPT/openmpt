@@ -839,7 +839,7 @@ namespace Util {
 	// MSVC generates unnecessarily complicated code for the unoptimized variant using _allmul.
 	MPT_FORCEINLINE int64 mul32to64(int32 a, int32 b)
 	{
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
 		return __emul(a, b);
 #else
 		return static_cast<int64>(a) * b;
@@ -848,7 +848,7 @@ namespace Util {
 
 	MPT_FORCEINLINE uint64 mul32to64_unsigned(uint32 a, uint32 b)
 	{
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
 		return __emulu(a, b);
 #else
 		return static_cast<uint64>(a) * b;
