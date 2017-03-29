@@ -37,7 +37,7 @@ enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
 CCommandSet::CCommandSet()
 //------------------------
 {
-	// Which keybinding rules to enforce?
+	// Which key binding rules to enforce?
 	enforceRule[krPreventDuplicate]				= true;
 	enforceRule[krDeleteOldOnConflict]			= true;
 	enforceRule[krAllowNavigationWithSelection]	= true;
@@ -1546,7 +1546,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 				{
 					f << ctx << ":"
 						<< commands[cmd].UID << ":"
-						<< kc.Modifier() << ":"
+						<< kc.Modifier().GetRaw() << ":"
 						<< kc.KeyCode();
 					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
 					{
@@ -1722,7 +1722,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 	mpt::ifstream fin(filename);
 	if(fin.fail())
 	{
-		Reporting::Warning(L"Can't open keybindings file " + filename.ToWide() + L" for reading. Default keybindings will be used.");
+		Reporting::Warning(L"Can't open key bindings file " + filename.ToWide() + L" for reading. Default key bindings will be used.");
 		return false;
 	} else
 	{
@@ -1893,7 +1893,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 
 	for(CommandID cmd = kcFixedFXStart; cmd <= kcFixedFXend; cmd = static_cast<CommandID>(cmd + 1))
 	{
-		//Remove all old choices
+		// Remove all old choices
 		choices = GetKeyListSize(cmd);
 		for(int p = choices; p >= 0; --p)
 		{
@@ -1931,7 +1931,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 				Add(kc, cmd, true);
 			}
 
-			if (effect >= '0' && effect <= '9')		//for numbers, ensure numpad works too
+			if (effect >= '0' && effect <= '9')		// For numbers, ensure numpad works too
 			{
 				kc.KeyCode(VK_NUMPAD0 + (effect - '0'));
 				Add(kc, cmd, true);

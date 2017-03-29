@@ -234,27 +234,24 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 {
 	FlagSet<Modifiers> tempModifierMask = ModNone;
 	// Scancode for right modifier keys should have bit 8 set, but Right Shift is actually 0x36.
-	const bool isRight = (TrackerSettings::Instance().MiscDistinguishModifiers && ((scancode & 0x100) || scancode == 0x36));
+	const bool isRight = ((scancode & 0x100) || scancode == 0x36) && TrackerSettings::Instance().MiscDistinguishModifiers;
 	switch(wParam)
 	{
 		case VK_CONTROL:
 			tempModifierMask.set(isRight ? ModRCtrl : ModCtrl);
 			break;
-
 		case VK_SHIFT:
 			tempModifierMask.set(isRight ? ModRShift : ModShift);
 			break;
-
 		case VK_MENU:
 			tempModifierMask.set(isRight ? ModRAlt : ModAlt);
 			break;
-
 		case VK_LWIN: case VK_RWIN: // Feature: use Windows keys as modifier keys
 			tempModifierMask.set(ModWin);
 			break;
 	}
 
-	if (tempModifierMask)	//This keypress just changed the modifier mask
+	if (tempModifierMask)	// This keypress just changed the modifier mask
 	{
 		if (keyEventType == kKeyEventDown)
 		{
@@ -266,8 +263,7 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 #ifdef _DEBUG
 			LogModifiers();
 #endif
-		}
-		if (keyEventType == kKeyEventUp)
+		} else if (keyEventType == kKeyEventUp)
 			m_modifierMask.reset(tempModifierMask);
 
 		return true;
@@ -309,7 +305,7 @@ void CInputHandler::LogModifiers()
 	Log(LogDebug, MPT_USTRING("----------------------------------\n"));
 	if (m_modifierMask[ModCtrl])  Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
 	if (m_modifierMask[ModShift]) Log(LogDebug, MPT_USTRING("\tShft On")); else Log(LogDebug, MPT_USTRING("\tShft --"));
-	if (m_modifierMask[ModAlt])   Log(LogDebug, MPT_USTRING("\tAlt  On\n")); else Log(LogDebug, MPT_USTRING("\tAlt  --\n"));
+	if (m_modifierMask[ModAlt])   Log(LogDebug, MPT_USTRING("\tAlt  On")); else Log(LogDebug, MPT_USTRING("\tAlt  --"));
 	if (m_modifierMask[ModWin])   Log(LogDebug, MPT_USTRING("\tWin  On\n")); else Log(LogDebug, MPT_USTRING("\tWin  --\n")); // Feature: use Windows keys as modifier keys
 }
 
@@ -411,9 +407,6 @@ CString CInputHandler::GetKeyTextFromCommand(CommandID c) const
 }
 
 
-#define FILENEW 1
-#define MAINVIEW 59392
-
 CString CInputHandler::GetMenuText(UINT id) const
 //-----------------------------------------------
 {
@@ -422,7 +415,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 
 	switch(id)
 	{
-		case FILENEW:				s = _T("&New"); c = kcFileNew; break;
+		case ID_FILE_NEW:			s = _T("&New"); c = kcFileNew; break;
 		case ID_FILE_OPEN:			s = _T("&Open..."); c = kcFileOpen; break;
 		case ID_FILE_OPENTEMPLATE:	return "Open &Template";
 		case ID_FILE_CLOSE:			s = _T("&Close"); c = kcFileClose; break;
@@ -444,7 +437,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		case ID_PLAYER_PAUSE:		s = _T("P&ause"); c = kcPauseSong; break;
 		case ID_MIDI_RECORD:		s = _T("&MIDI Record"); c = kcMidiRecord; break;
 		case ID_ESTIMATESONGLENGTH:	s = _T("&Estimate Song Length"); c = kcEstimateSongLength; break;
-		case ID_APPROX_BPM:			s = _T("Approx. real &BPM"); c = kcApproxRealBPM; break;
+		case ID_APPROX_BPM:			s = _T("Approximate Real &BPM"); c = kcApproxRealBPM; break;
 
 		case ID_EDIT_UNDO:			s = _T("&Undo"); c = kcEditUndo; break;
 		case ID_EDIT_REDO:			s = _T("&Redo"); c = kcEditRedo; break;
@@ -468,7 +461,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		case ID_VIEW_PATTERNS:		s = _T("&Patterns"); c = kcViewPattern; break;
 		case ID_VIEW_INSTRUMENTS:	s = _T("&Instruments"); c = kcViewInstruments; break;
 		case ID_VIEW_COMMENTS:		s = _T("&Comments"); c = kcViewComments; break;
-		case MAINVIEW:				s = _T("&Main"); c = kcViewMain; break;
+		case ID_VIEW_TOOLBAR:		s = _T("&Main"); c = kcViewMain; break;
 		case IDD_TREEVIEW:			s = _T("&Tree"); c = kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s = _T("S&etup"); c = kcViewOptions; break;
 		case ID_HELPSHOW:			s = _T("&Help"); c = kcHelp; break;
@@ -482,7 +475,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		// Help submenu:
 		case ID_EXAMPLE_MODULES:	return _T("&Example Modules");
 
-		default: return _T("Unknown Item.");
+		default: MPT_ASSERT_NOTREACHED(); return _T("Unknown Item.");
 	}
 
 	return s + CString(_T("\t")) + GetKeyTextFromCommand(c);
@@ -496,7 +489,7 @@ void CInputHandler::UpdateMainMenu()
 	if (!pMenu) return;
 
 #define UPDATEMENU(id) pMenu->ModifyMenu(id, MF_BYCOMMAND | MF_STRING, id, GetMenuText(id));
-	pMenu->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, 0, GetMenuText(FILENEW));
+	pMenu->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, 0, GetMenuText(ID_FILE_NEW));
 	UPDATEMENU(ID_FILE_OPEN);
 	UPDATEMENU(ID_FILE_APPENDMODULE);
 	UPDATEMENU(ID_FILE_CLOSE);
@@ -537,7 +530,7 @@ void CInputHandler::UpdateMainMenu()
 	UPDATEMENU(ID_VIEW_PATTERNS);
 	UPDATEMENU(ID_VIEW_INSTRUMENTS);
 	UPDATEMENU(ID_VIEW_COMMENTS);
-	UPDATEMENU(MAINVIEW);
+	UPDATEMENU(ID_VIEW_TOOLBAR);
 	UPDATEMENU(IDD_TREEVIEW);
 	UPDATEMENU(ID_VIEW_OPTIONS);
 	UPDATEMENU(ID_PLUGIN_SETUP);
