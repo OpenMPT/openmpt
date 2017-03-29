@@ -70,15 +70,15 @@ bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMe
 
 
 // Add or remove rows from the pattern.
-bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits)
-//-------------------------------------------------------------------------
+bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool resizeAtEnd)
+//-------------------------------------------------------------------------------------------
 {
 	CSoundFile &sndFile = GetSoundFile();
 	ModCommand *newPattern;
 
 	if(enforceFormatLimits)
 	{
-		const CModSpecifications& specs = sndFile.GetModSpecifications();
+		const CModSpecifications &specs = sndFile.GetModSpecifications();
 		if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin) return false;
 	} else
 	{
@@ -93,7 +93,15 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits)
 	}
 
 	// Copy over pattern data
-	memcpy(newPattern, m_ModCommands, GetNumChannels() * std::min(m_Rows, newRowCount) * sizeof(ModCommand));
+	size_t insertOffset = 0, copyOffset = 0;
+	if(!resizeAtEnd)
+	{
+		if(newRowCount > m_Rows)
+			insertOffset = GetNumChannels() * (newRowCount - m_Rows);
+		else
+			copyOffset = GetNumChannels() * (m_Rows - newRowCount);
+	}
+	std::memcpy(newPattern + insertOffset, m_ModCommands + copyOffset, GetNumChannels() * std::min(m_Rows, newRowCount) * sizeof(ModCommand));
 
 	FreePattern(m_ModCommands);
 	m_ModCommands = newPattern;

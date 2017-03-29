@@ -71,7 +71,7 @@ public:
 	CHANNELINDEX GetNumChannels() const;
 
 	// Add or remove rows from the pattern.
-	bool Resize(const ROWINDEX newRowCount, bool enforceFormatLimits = true);
+	bool Resize(const ROWINDEX newRowCount, bool enforceFormatLimits = true, bool resizeAtEnd = true);
 
 	// Check if there is any note data on a given row.
 	bool IsEmptyRow(ROWINDEX row) const;
