@@ -354,26 +354,23 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 //--------------------------------------------
 {
 #ifndef NO_PLUGINS
-	CString message, plugName, line;
+	CString message, plugName;
 	int sfx = id - ID_PLUGSELECT;
 	int param = m_MidiCfg.MacroToPlugParam(sfx);
-	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n", sfx);
+	message.Format(_T("These are the parameters that can be controlled by macro SF%X:\n\n"), sfx);
 
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
-		plugName = m_SndFile.m_MixPlugins[plug].GetName();
-		if(m_SndFile.m_MixPlugins[plug].Info.dwPluginId1 != 0)
+		IMixPlugin *pVstPlugin = m_SndFile.m_MixPlugins[plug].pMixPlugin;
+		if(pVstPlugin && param < pVstPlugin->GetNumParameters())
 		{
-			IMixPlugin *pVstPlugin = m_SndFile.m_MixPlugins[plug].pMixPlugin;
-			if(pVstPlugin && param <= pVstPlugin->GetNumParameters())
-			{
-				line.Format("FX%d: %s\t %s\n", plug + 1, plugName, pVstPlugin->GetFormattedParamName(param));
-				message += line;
-			}
+			plugName = m_SndFile.m_MixPlugins[plug].GetName();
+			message.AppendFormat("FX%d: ", plug + 1);
+			message += plugName + _T("\t") + pVstPlugin->GetFormattedParamName(param) + _T("\n");
 		}
 	}
 
-	Reporting::Notification(message, "Macro -> Params");
+	Reporting::Notification(message, _T("Macro -> Params"));
 #endif // NO_PLUGINS
 }
 
