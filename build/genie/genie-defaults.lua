@@ -32,7 +32,6 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
-   flags { "StaticRuntime" }
 
   configuration "DebugShared"
    defines { "DEBUG" }
@@ -43,7 +42,6 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
-   flags { "StaticRuntime" }
    flags { "OptimizeSpeed" }
    flags { "FloatFast" }
 
