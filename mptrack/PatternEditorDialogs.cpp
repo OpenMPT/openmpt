@@ -135,6 +135,9 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		}
 		combo->SetCurSel(nrows - specs.patternRowsMin);
 		combo->SetRedraw(TRUE);
+
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO2, IDC_RADIO2);
+
 		_stprintf(s, _T("Pattern #%d: %d row%s (%dK)"),
 			m_nPattern,
 			pattern.GetNumRows(),
@@ -269,12 +272,18 @@ void CPatternPropertiesDlg::OnOK()
 
 	// Check if any pattern data would be removed.
 	bool resize = (newSize != sndFile.Patterns[m_nPattern].GetNumRows());
-	for(ROWINDEX row = newSize; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
+	bool resizeAtEnd = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
+	if(newSize < sndFile.Patterns[m_nPattern].GetNumRows())
 	{
-		if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
+		ROWINDEX firstRow = resizeAtEnd ? newSize : 0;
+		ROWINDEX lastRow = resizeAtEnd ? sndFile.Patterns[m_nPattern].GetNumRows() : sndFile.Patterns[m_nPattern].GetNumRows() - newSize;
+		for(ROWINDEX row = firstRow; row < lastRow; row++)
 		{
-			resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
-			break;
+			if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
+			{
+				resize = (Reporting::Confirm("Data at the end of the pattern will be lost.\nDo you want to continue?", "Shrink Pattern") == cnfYes);
+				break;
+			}
 		}
 	}
 
@@ -282,7 +291,7 @@ void CPatternPropertiesDlg::OnOK()
 	{
 		modDoc.BeginWaitCursor();
 		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), "Resize");
-		if(sndFile.Patterns[m_nPattern].Resize(newSize))
+		if(sndFile.Patterns[m_nPattern].Resize(newSize, true, resizeAtEnd))
 		{
 			modDoc.SetModified();
 		}
