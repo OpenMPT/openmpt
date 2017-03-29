@@ -10,7 +10,7 @@ echo $MY_DIR
 cd "${MY_DIR}"
 cd ..
 
-GENIE=include/genie/bin/release/genie
+GENIE=include/genie/bin/linux/genie
 PREMAKE=include/premake/bin/release/premake5
 
 
