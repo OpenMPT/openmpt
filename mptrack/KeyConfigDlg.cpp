@@ -35,7 +35,7 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 {
 	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(dwMidiDataParam) != 0 && isFocussed)
 	{
-		SetKey(HOTKEYF_MIDI, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
+		SetKey(ModMidi, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
 		m_pOptKeyDlg->OnSetKeyChoice();
 	}
 	return 1;
@@ -65,8 +65,8 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 }
 
 
-void CCustEdit::SetKey(UINT inMod, UINT inCode)
-//---------------------------------------------
+void CCustEdit::SetKey(FlagSet<Modifiers> inMod, UINT inCode)
+//-----------------------------------------------------------
 {
 	mod = inMod;
 	code = inCode;
@@ -168,7 +168,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_sFullPathName = TrackerSettings::Instance().m_szKbdFile;
 
 	plocalCmdSet = new CCommandSet();
-	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
+	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->m_activeCommandSet.get());
 
 	//Fill category combo and automatically selects first category
 	DefineCommandCategories();
@@ -480,7 +480,7 @@ void COptionsKeyboard::OnClearHotKey()
 //------------------------------------
 {
 	// Focus key search: Clear input
-	m_eFindHotKey.SetKey(0, 0);
+	m_eFindHotKey.SetKey(ModNone, 0);
 }
 
 
@@ -643,7 +643,7 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 	{
 		m_nCurKeyChoice = choice;
 		m_bForceUpdate=true;
-		m_eCustHotKey.SetKey(0, 0);
+		m_eCustHotKey.SetKey(ModNone, 0);
 		m_bKeyDown.SetCheck(0);
 		m_bKeyHold.SetCheck(0);
 		m_bKeyUp.SetCheck(0);
@@ -707,7 +707,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	}
 
 	// Restore current key combination choice for currently selected command.
-	kc = ih->activeCommandSet->GetKey(cmd, m_nCurKeyChoice);
+	kc = ih->m_activeCommandSet->GetKey(cmd, m_nCurKeyChoice);
 	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
 	plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
 

@@ -22,45 +22,45 @@ enum
 
 class CInputHandler
 {
+protected:
+	CWnd *m_pMainFrm;
+	KeyMap m_keyMap;
+	FlagSet<Modifiers> m_modifierMask;
+	int m_bypassCount;
+	bool m_bInterceptWindowsKeys : 1, m_bInterceptNumLock : 1, m_bInterceptCapsLock : 1, m_bInterceptScrollLock : 1;
+
+public:
+	std::unique_ptr<CCommandSet> m_activeCommandSet;
 
 public:
 	CInputHandler(CWnd *mainframe);
-	~CInputHandler();
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
 	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
-	KeyEventType GetKeyEventType(UINT nFlags);
+	static KeyEventType GetKeyEventType(UINT nFlags);
 	bool isKeyPressHandledByTextBox(DWORD wparam);
 	CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message);
 
-	int GetKeyListSize(CommandID cmd);
+	int GetKeyListSize(CommandID cmd) const;
 
 protected:
-	CWnd *m_pMainFrm;
-	KeyMap keyMap;
-	void LogModifiers(UINT mask);
-	UINT modifierMask;
-	int bypassCount;
-	bool m_bNoAltMenu;
+	void LogModifiers();
 	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
-	bool m_bInterceptWindowsKeys, m_bInterceptNumLock, m_bInterceptCapsLock, m_bInterceptScrollLock;
-	bool InterceptSpecialKeys(UINT nChar , UINT nFlags, bool generateMsg);
+	bool InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateMsg);
 	void SetupSpecialKeyInterception();
 
 public:
-	CCommandSet *activeCommandSet;
-	bool ShiftPressed();
-	bool SelectionPressed();
-	bool CtrlPressed();
-	bool AltPressed();
-	bool IsBypassed();
+	bool ShiftPressed() const;
+	bool SelectionPressed() const;
+	bool CtrlPressed() const;
+	bool AltPressed() const;
+	bool IsBypassed() const;
 	void Bypass(bool);
-	WORD GetModifierMask();
-	void SetModifierMask(WORD mask);
-	CString GetKeyTextFromCommand(CommandID c);
-	CString GetMenuText(UINT id);
+	FlagSet<Modifiers> GetModifierMask() const;
+	void SetModifierMask(FlagSet<Modifiers> mask);
+	CString GetKeyTextFromCommand(CommandID c) const;
+	CString GetMenuText(UINT id) const;
 	void UpdateMainMenu();
 	void SetNewCommandSet(const CCommandSet *newSet);
-	bool noAltMenu() { return m_bNoAltMenu; };
 	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };
 

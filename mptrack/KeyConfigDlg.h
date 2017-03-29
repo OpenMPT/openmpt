@@ -48,12 +48,12 @@ protected:
 	bool isFocussed, isDummy;
 
 public:
-	UINT mod;
+	FlagSet<Modifiers> mod;
 	UINT code;
 
 	CCustEdit(bool dummyField) : m_hParent(nullptr), isFocussed(false), isDummy(dummyField), mod(0), code(0) { }
 	VOID SetParent(HWND h, UINT nID, COptionsKeyboard* pOKD) { m_hParent = h; m_nCtrlId = nID; m_pOptKeyDlg = pOKD;}
-	void SetKey(UINT mod, UINT code);
+	void SetKey(FlagSet<Modifiers> mod, UINT code);
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSetFocus(CWnd* pOldWnd);

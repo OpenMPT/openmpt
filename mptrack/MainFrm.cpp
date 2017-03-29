@@ -457,9 +457,9 @@ void CMainFrame::OnClose()
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
 	TrackerSettings::Instance().SaveSettings();
 
-	if(m_InputHandler && m_InputHandler->activeCommandSet)
+	if(m_InputHandler && m_InputHandler->m_activeCommandSet)
 	{
-		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
+		m_InputHandler->m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 	}
 
 	EndWaitCursor();
@@ -2547,10 +2547,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 void CMainFrame::OnInitMenu(CMenu* pMenu)
 //---------------------------------------
 {
-	m_InputHandler->SetModifierMask(0);
-	if (m_InputHandler->noAltMenu())
-		return;
-
+	m_InputHandler->SetModifierMask(ModNone);
+	// This used to not be called to prevent Alt key from activating the menu... but that never worked as imagined, I guess.
 	CMDIFrameWnd::OnInitMenu(pMenu);
 
 }
@@ -2597,7 +2595,7 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 	CMDIFrameWnd::OnKillFocus(pNewWnd);
 
 	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
-	m_InputHandler->SetModifierMask(0);
+	m_InputHandler->SetModifierMask(ModNone);
 }
 
 
@@ -2948,7 +2946,7 @@ HRESULT TfLanguageProfileNotifySink::OnLanguageChanged()
 	if(mainFrm != nullptr)
 	{
 		mainFrm->UpdateEffectKeys();
-		mainFrm->m_InputHandler->SetModifierMask(0);
+		mainFrm->m_InputHandler->SetModifierMask(ModNone);
 	}
 	return ResultFromScode(S_OK);
 }

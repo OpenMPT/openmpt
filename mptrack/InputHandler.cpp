@@ -28,7 +28,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	m_pMainFrm = mainframe;
 
 	//Init CommandSet and Load defaults
-	activeCommandSet = new CCommandSet();
+	m_activeCommandSet = std::make_unique<CCommandSet>();
 
 	mpt::PathString sDefaultPath = theApp.GetConfigPath() + MPT_PATHSTRING("Keybindings.mkb");
 
@@ -40,21 +40,21 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 4. If there were no keybinding setting already, create a keybinding file to default location
 	//    and set its path to settings.
 
-	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile)))
+	if (bNoExistingKbdFileSetting || !(m_activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile)))
 	{
 		if (bNoExistingKbdFileSetting)
 			TrackerSettings::Instance().m_szKbdFile = sDefaultPath;
 		bool bSuccess = false;
 		if (sDefaultPath.IsFile())
-			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
+			bSuccess = m_activeCommandSet->LoadFile(sDefaultPath);
 		if (!bSuccess)
 		{
 			// Load keybindings from resources.
 			Log(LogDebug, MPT_USTRING("Loading keybindings from resources\n"));
-			bSuccess = activeCommandSet->LoadDefaultKeymap();
+			bSuccess = m_activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
-				activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
+				m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 			}
 		}
 		if (!bSuccess)
@@ -64,20 +64,11 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	TrackerSettings::Instance().m_szKbdFile = sDefaultPath;
 
 	//Get Keymap
-	activeCommandSet->GenKeyMap(keyMap);
+	m_activeCommandSet->GenKeyMap(m_keyMap);
 	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
 
-	bypassCount = 0;
-	modifierMask = 0;
-	m_bNoAltMenu = true;
-
-}
-
-
-CInputHandler::~CInputHandler()
-//-----------------------------
-{
-	delete activeCommandSet;
+	m_bypassCount = 0;
+	m_modifierMask = ModNone;
 }
 
 
@@ -111,7 +102,7 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------
 {
-	KeyMapRange cmd = std::make_pair(keyMap.end(), keyMap.end());
+	KeyMapRange cmd = std::make_pair(m_keyMap.end(), m_keyMap.end());
 	KeyEventType keyEventType;
 
 	if(code == HC_ACTION)
@@ -141,12 +132,12 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
-			cmd = keyMap.equal_range(KeyCombination(context, modifierMask, wParam, keyEventType));
+			cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, wParam, keyEventType));
 		}
 	}
 	if(code == HC_MIDI)
 	{
-		cmd = keyMap.equal_range(KeyCombination(context, HOTKEYF_MIDI, wParam, kKeyEventDown));
+		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, wParam, kKeyEventDown));
 	}
 
 	return SendCommands(m_pMainFrm, cmd, wParam);
@@ -158,7 +149,7 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
-	KeyMapRange cmd = keyMap.equal_range(KeyCombination(context, modifierMask, nChar, keyEventType));
+	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, nChar, keyEventType));
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
@@ -222,10 +213,10 @@ void CInputHandler::SetupSpecialKeyInterception()
 //-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
-	for(const auto &i : keyMap)
+	for(const auto &i : m_keyMap)
 	{
 		ASSERT(i.second != kcNull);
-		if(i.first.Modifier() == HOTKEYF_EXT)
+		if(i.first.Modifier() == ModWin)
 			m_bInterceptWindowsKeys = true;
 		if(i.first.KeyCode() == VK_NUMLOCK)
 			m_bInterceptNumLock = true;
@@ -241,43 +232,43 @@ void CInputHandler::SetupSpecialKeyInterception()
 bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode)
 //---------------------------------------------------------------------------------------------
 {
-	UINT tempModifierMask = 0;
+	FlagSet<Modifiers> tempModifierMask = ModNone;
 	// Scancode for right modifier keys should have bit 8 set, but Right Shift is actually 0x36.
 	const bool isRight = (TrackerSettings::Instance().MiscDistinguishModifiers && ((scancode & 0x100) || scancode == 0x36));
 	switch(wParam)
 	{
 		case VK_CONTROL:
-			tempModifierMask |= isRight ? HOTKEYF_RCONTROL : HOTKEYF_CONTROL;
+			tempModifierMask.set(isRight ? ModRCtrl : ModCtrl);
 			break;
 
 		case VK_SHIFT:
-			tempModifierMask |= isRight ? HOTKEYF_RSHIFT : HOTKEYF_SHIFT;
+			tempModifierMask.set(isRight ? ModRShift : ModShift);
 			break;
 
 		case VK_MENU:
-			tempModifierMask |= isRight ? HOTKEYF_RALT : HOTKEYF_ALT;
+			tempModifierMask.set(isRight ? ModRAlt : ModAlt);
 			break;
 
 		case VK_LWIN: case VK_RWIN: // Feature: use Windows keys as modifier keys
-				tempModifierMask |= HOTKEYF_EXT;
-				break;
+			tempModifierMask.set(ModWin);
+			break;
 	}
 
 	if (tempModifierMask)	//This keypress just changed the modifier mask
 	{
 		if (keyEventType == kKeyEventDown)
 		{
-			modifierMask |= tempModifierMask;
+			m_modifierMask.set(tempModifierMask);
 			// Right Alt is registered as Ctrl+Alt.
 			// Left Ctrl + Right Alt seems like a pretty difficult to use key combination anyway, so just ignore Ctrl.
 			if(scancode == 0x138)
-				modifierMask &= ~HOTKEYF_CONTROL;
+				m_modifierMask.reset(ModCtrl);
 #ifdef _DEBUG
-			LogModifiers(modifierMask);
+			LogModifiers();
 #endif
 		}
 		if (keyEventType == kKeyEventUp)
-			modifierMask &= ~tempModifierMask;
+			m_modifierMask.reset(tempModifierMask);
 
 		return true;
 	}
@@ -300,10 +291,10 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 }
 
 
-int CInputHandler::GetKeyListSize(CommandID cmd)
-//----------------------------------------------
+int CInputHandler::GetKeyListSize(CommandID cmd) const
+//----------------------------------------------------
 {
-	return activeCommandSet->GetKeyListSize(cmd);
+	return m_activeCommandSet->GetKeyListSize(cmd);
 }
 
 
@@ -312,22 +303,14 @@ int CInputHandler::GetKeyListSize(CommandID cmd)
 //--------------------------------------------------------------
 
 
-
-/*
-void CInputHandler::GenCommandList(const KeyMap &km, CommandStruct coms[], )
-{
-
-}
-*/
-
-void CInputHandler::LogModifiers(UINT mask)
-//-----------------------------------------
+void CInputHandler::LogModifiers()
+//--------------------------------
 {
 	Log(LogDebug, MPT_USTRING("----------------------------------\n"));
-	if (mask & HOTKEYF_CONTROL) Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
-	if (mask & HOTKEYF_SHIFT)   Log(LogDebug, MPT_USTRING("\tShft On")); else Log(LogDebug, MPT_USTRING("\tShft --"));
-	if (mask & HOTKEYF_ALT)     Log(LogDebug, MPT_USTRING("\tAlt  On\n")); else Log(LogDebug, MPT_USTRING("\tAlt  --\n"));
-	if (mask & HOTKEYF_EXT)     Log(LogDebug, MPT_USTRING("\tWin  On\n")); else Log(LogDebug, MPT_USTRING("\tWin  --\n")); // Feature: use Windows keys as modifier keys
+	if (m_modifierMask[ModCtrl])  Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
+	if (m_modifierMask[ModShift]) Log(LogDebug, MPT_USTRING("\tShft On")); else Log(LogDebug, MPT_USTRING("\tShft --"));
+	if (m_modifierMask[ModAlt])   Log(LogDebug, MPT_USTRING("\tAlt  On\n")); else Log(LogDebug, MPT_USTRING("\tAlt  --\n"));
+	if (m_modifierMask[ModWin])   Log(LogDebug, MPT_USTRING("\tWin  On\n")); else Log(LogDebug, MPT_USTRING("\tWin  --\n")); // Feature: use Windows keys as modifier keys
 }
 
 
@@ -350,44 +333,42 @@ KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 }
 
 
-bool CInputHandler::SelectionPressed()
-//------------------------------------
+bool CInputHandler::SelectionPressed() const
+//------------------------------------------
 {
-	bool result=false;
-	int nSelectionKeys = activeCommandSet->GetKeyListSize(kcSelect);
+	int nSelectionKeys = m_activeCommandSet->GetKeyListSize(kcSelect);
 	KeyCombination key;
 
 	for (int k=0; k<nSelectionKeys; k++)
 	{
-		key = activeCommandSet->GetKey(kcSelect, k);
-		if (modifierMask & key.Modifier())
+		key = m_activeCommandSet->GetKey(kcSelect, k);
+		if (m_modifierMask & key.Modifier())
 		{
-			result=true;
-			break;
+			return true;
 		}
 	}
-	return result;
+	return false;
 }
 
 
-bool CInputHandler::ShiftPressed()
-//--------------------------------
+bool CInputHandler::ShiftPressed() const
+//--------------------------------------
 {
-	return (modifierMask & (HOTKEYF_SHIFT | HOTKEYF_RSHIFT)) != 0;
+	return m_modifierMask[ModShift | ModRShift];
 }
 
 
-bool CInputHandler::CtrlPressed()
-//-------------------------------
+bool CInputHandler::CtrlPressed() const
+//-------------------------------------
 {
-	return (modifierMask & (HOTKEYF_CONTROL | HOTKEYF_RCONTROL)) != 0;
+	return m_modifierMask[ModCtrl | ModRCtrl];
 }
 
 
-bool CInputHandler::AltPressed()
-//------------------------------
+bool CInputHandler::AltPressed() const
+//------------------------------------
 {
-	return (modifierMask & (HOTKEYF_ALT | HOTKEYF_RALT)) != 0;
+	return m_modifierMask[ModAlt | ModRAlt];
 }
 
 
@@ -395,46 +376,46 @@ void CInputHandler::Bypass(bool b)
 //--------------------------------
 {
 	if(b)
-		bypassCount++;
+		m_bypassCount++;
 	else
-		bypassCount--;
-	ASSERT(bypassCount >= 0);
+		m_bypassCount--;
+	ASSERT(m_bypassCount >= 0);
 }
 
 
-bool CInputHandler::IsBypassed()
-//------------------------------
+bool CInputHandler::IsBypassed() const
+//------------------------------------
 {
-	return bypassCount > 0;
+	return m_bypassCount > 0;
 }
 
 
-WORD CInputHandler::GetModifierMask()
-//-----------------------------------
-{
-	return (WORD)modifierMask;
-}
-
-
-void CInputHandler::SetModifierMask(WORD mask)
-//--------------------------------------------
-{
-	modifierMask=mask;
-}
-
-
-CString CInputHandler::GetKeyTextFromCommand(CommandID c)
+FlagSet<Modifiers> CInputHandler::GetModifierMask() const
 //-------------------------------------------------------
 {
-	return activeCommandSet->GetKeyTextFromCommand(c, 0);
+	return m_modifierMask;
+}
+
+
+void CInputHandler::SetModifierMask(FlagSet<Modifiers> mask)
+//----------------------------------------------------------
+{
+	m_modifierMask = mask;
+}
+
+
+CString CInputHandler::GetKeyTextFromCommand(CommandID c) const
+//-------------------------------------------------------------
+{
+	return m_activeCommandSet->GetKeyTextFromCommand(c, 0);
 }
 
 
 #define FILENEW 1
 #define MAINVIEW 59392
 
-CString CInputHandler::GetMenuText(UINT id)
-//-----------------------------------------
+CString CInputHandler::GetMenuText(UINT id) const
+//-----------------------------------------------
 {
 	const TCHAR *s;
 	CommandID c = kcNull;
@@ -574,8 +555,8 @@ void CInputHandler::UpdateMainMenu()
 void CInputHandler::SetNewCommandSet(const CCommandSet *newSet)
 //-------------------------------------------------------------
 {
-	activeCommandSet->Copy(newSet);
-	activeCommandSet->GenKeyMap(keyMap);
+	m_activeCommandSet->Copy(newSet);
+	m_activeCommandSet->GenKeyMap(m_keyMap);
 	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
 	UpdateMainMenu();
 }
@@ -585,8 +566,8 @@ bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 //----------------------------------------------------------------------
 {
 	Log("Changing command set.\n");
-	bool retval = activeCommandSet->QuickChange_SetEffects(modSpecs);
-	if(retval) activeCommandSet->GenKeyMap(keyMap);
+	bool retval = m_activeCommandSet->QuickChange_SetEffects(modSpecs);
+	if(retval) m_activeCommandSet->GenKeyMap(m_keyMap);
 	return retval;
 }
 
@@ -596,7 +577,7 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 {
 
 	//Alpha-numerics (only shift or no modifier):
-	if(!(GetModifierMask() & (~HOTKEYF_SHIFT))
+	if(!GetModifierMask().test_any_except(ModShift)
 		&&  ((key>='A'&&key<='Z') || (key>='0'&&key<='9') ||
 		 key==VK_DIVIDE  || key==VK_MULTIPLY || key==VK_SPACE || key==VK_RETURN ||
 		 key==VK_CAPITAL || (key>=VK_OEM_1 && key<=VK_OEM_3) || (key>=VK_OEM_4 && key<=VK_OEM_8)))
@@ -608,7 +589,7 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 		return true;
 
 	//Copy paste etc..
-	if(GetModifierMask()==HOTKEYF_CONTROL &&
+	if(GetModifierMask() == ModCtrl &&
 		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
 		return true;
 

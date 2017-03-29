@@ -650,7 +650,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 		if (CMainFrame::GetInputHandler()->ShiftPressed() && TrackerSettings::Instance().midiMappingInPluginEditor)
 		{
 			// Shift pressed -> Open MIDI mapping dialog
-			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
+			CMainFrame::GetInputHandler()->SetModifierMask(ModNone); // Make sure that the dialog will open only once.
 			CMainFrame::GetMainFrame()->PostMessage(WM_MOD_MIDIMAPPING, m_nSlot, param);
 		}
 
