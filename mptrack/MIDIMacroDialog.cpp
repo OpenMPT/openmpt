@@ -59,7 +59,7 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 BOOL CMidiMacroSetup::OnInitDialog()
 //----------------------------------
 {
-	char s[128];
+	CString s;
 	CDialog::OnInitDialog();
 	m_EditSFx.SetLimitText(MACRO_LENGTH - 1);
 	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
@@ -67,7 +67,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	// Parametered macro selection
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		wsprintf(s, "%d (SF%X)", isfx, isfx);
+		s.Format(_T("%d (SF%X)"), isfx, isfx);
 		m_CbnSFx.AddString(s);
 	}
 
@@ -82,14 +82,15 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	// MIDI CC selection box
 	for (int cc = MIDIEvents::MIDICC_start; cc <= MIDIEvents::MIDICC_end; cc++)
 	{
-		wsprintf(s, "CC %02d %s", cc, MIDIEvents::MidiCCNames[cc]);
-		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);	
+		s.Format(_T("CC %02d "), cc);
+		s += MIDIEvents::MidiCCNames[cc];
+		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);
 	}
 
 	// Z80...ZFF box
-	for(int zxx = 0; zxx < 128; zxx++)
+	for(int zxx = 0x80; zxx <= 0xFF; zxx++)
 	{
-		wsprintf(s, "Z%02X", zxx | 0x80);
+		s.Format(_T("Z%02X"), zxx);
 		m_CbnZxx.AddString(s);
 	}
 
@@ -110,7 +111,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	for(UINT m = 0; m < NUM_MACROS; m++)
 	{
-		m_EditMacro[m].Create("", /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
+		m_EditMacro[m].Create(_T(""), /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
 			CRect(offsetx, offsety + m * (separatory + height), offsetx + widthMacro, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacro[m].SetFont(GetFont());
 
@@ -122,7 +123,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 			CRect(offsetx + separatorx + widthType + widthMacro, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacroValue[m].SetFont(GetFont());
 
-		m_BtnMacroShowAll[m].Create("Show All...", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
+		m_BtnMacroShowAll[m].Create(_T("Show All..."), WS_CHILD | WS_TABSTOP | WS_VISIBLE,
 			CRect(offsetx + separatorx + widthType + widthMacro + widthVal, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal + widthBtn, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + m);
 		m_BtnMacroShowAll[m].SetFont(GetFont());
 	}
@@ -135,7 +136,8 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 		if(plugin.IsValidPlugin())
 		{
-			wsprintf(s, "FX%d: %s", i + 1, plugin.GetName());
+			s.Format(_T("FX%d: "), i + 1);
+			s += plugin.GetName();
 			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
 		}
 	}
@@ -313,8 +315,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 			char s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
-			mpt::String::SetNullTerminator(s);
-			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
+			mpt::String::Copy(m_MidiCfg.szMidiSFXExt[sfx], s);
 
 			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
@@ -365,7 +366,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 		if(pVstPlugin && param < pVstPlugin->GetNumParameters())
 		{
 			plugName = m_SndFile.m_MixPlugins[plug].GetName();
-			message.AppendFormat("FX%d: ", plug + 1);
+			message.AppendFormat(_T("FX%d: "), plug + 1);
 			message += plugName + _T("\t") + pVstPlugin->GetFormattedParamName(param) + _T("\n");
 		}
 	}
