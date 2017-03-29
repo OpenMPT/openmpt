@@ -1546,7 +1546,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 				{
 					f << ctx << ":"
 						<< commands[cmd].UID << ":"
-						<< kc.Modifier().GetRaw() << ":"
+						<< static_cast<int>(kc.Modifier().GetRaw()) << ":"
 						<< kc.KeyCode();
 					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
 					{
@@ -1558,7 +1558,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 						f << "/" << sc;
 					}
 					f << ":"
-						<< (int)kc.EventType().GetRaw() << "\t\t//"
+						<< static_cast<int>(kc.EventType().GetRaw()) << "\t\t//"
 						<< mpt::ToCharset(mpt::CharsetUTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
 						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyText()).c_str() << " ("
 						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyEventText()).c_str() << ")\n";
