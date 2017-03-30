@@ -132,12 +132,15 @@ void DoTests()
 			libopenmpt = true;
 		#endif
 
+#if !MPT_OS_WINDOWS_WINRT
 		// set path prefix for test files (if provided)
 		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
 		if(GetEnvironmentVariableW(L"srcdir", buf.data(), static_cast<DWORD>(buf.size())) > 0)
 		{
 			pathprefix = buf.data();
-		} else if(libopenmpt && IsDebuggerPresent())
+		} else
+#endif
+		if(libopenmpt && IsDebuggerPresent())
 		{
 			pathprefix = L"../../";
 		}
