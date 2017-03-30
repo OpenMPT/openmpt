@@ -21,6 +21,14 @@
 #endif
 #endif
 
+#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+#if defined(__MINGW32__) || defined(__MINGW64__)
+// MinGW-w64 headers do not declare this for WinRT, which is wrong.
+extern "C" {
+WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart);
+}
+#endif
+#endif
 
 OPENMPT_NAMESPACE_BEGIN
 
