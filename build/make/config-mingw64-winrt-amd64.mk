@@ -8,7 +8,7 @@ CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64 -DWINAPI_FAMILY=0x2 -D_WINNT_WIN32
 CXXFLAGS += -std=c++11 -municode -mconsole 
 CFLAGS   += -std=c99   -municode -mconsole 
 LDFLAGS  +=
-LDLIBS   += -lm -lrpcrt4 -lwinmm
+LDLIBS   += -lm -lole32 -lwinmm
 ARFLAGS  := rcs
 
 EXESUFFIX=.exe
