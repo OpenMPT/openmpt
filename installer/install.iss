@@ -1,13 +1,12 @@
 ; OpenMPT Install script
 ; Written by Johannes Schultz
 ; https://openmpt.org/
-; http://sagamusix.de/
+; https://sagamusix.de/
 
 ; This file cannot be compiled on its own. You need to compile any of these files:
 ; win32.iss - For generating the standard Win32 setup.
 ; win64.iss - For generating the standard Win64 setup.
-; install-unmo3-free-itd.iss - For generating the unmo3-free setup with InnoTools Downloader.
-; install-unmo3-free.iss - For generating the unmo3-free setup with Inno Download Plugin.
+; install-unmo3-free.iss - For generating the unmo3-free Win32 setup.
 
 #ifndef PlatformName
 #error You must specify which installer to build by compiling either win32.iss or win64.iss
@@ -24,7 +23,7 @@
 AppVerName=OpenMPT {#GetAppVersionShort} ({#PlatformName})
 AppVersion={#GetAppVersion}
 AppName=OpenMPT ({#PlatformName})
-AppPublisher=OpenMPT Devs / Olivier Lapicque
+AppPublisher=OpenMPT Devs
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
@@ -46,9 +45,6 @@ DisableWelcomePage=yes
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
 Name: startmenuicon; Description: "Create a Start Menu icon"; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
-#ifdef DOWNLOAD_MO3
-Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
-#endif
 Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
@@ -62,18 +58,16 @@ Name: english; MessagesFile: compiler:Default.isl
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; base folder
-Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
-Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
-Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
-Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
-#ifdef WIN32OLD
-; Additional binaries for XP-compatible version
-Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\{#PlatformFolderOld}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\{#PlatformFolderOld}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-Source: ..\bin\{#PlatformFolderOld}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
-#endif
-#ifndef DOWNLOAD_MO3
+Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+; Additional binaries for XP-/Vista-compatible version
+Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+#ifndef NO_MO3
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
@@ -155,22 +149,13 @@ Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
 Type: dirifempty; Name: {app}\Autosave; Tasks: portable
 Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
 Type: dirifempty; Name: {app}\tunings; Tasks: portable
-#ifdef DOWNLOAD_MO3
-Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
-#endif
 
 #include "utilities.iss"
 
 [Code]
-#ifdef WIN32OLD
 var
     BitnessPage: TInputOptionWizardPage;
     BuildType: Integer;
-#endif
-
-#ifdef DOWNLOAD_MO3
-procedure VerifyUNMO3Checksum(); forward;
-#endif
 
 // Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
 procedure CopyConfigsToAppDataDir();
@@ -227,46 +212,49 @@ begin
     end;
 end;
 
-Function InstallWin32Old(): Boolean;
+Function InstallWinOld(): Boolean;
 begin
-#ifdef WIN32OLD
     Result := (BuildType = 1);
-#else
-    Result := False;
-#endif
 end;
 
-#ifdef WIN32OLD
 function IsProcessorFeaturePresent(Feature: Integer): Integer;
 external 'IsProcessorFeaturePresent@Kernel32.dll stdcall delayload';
 
-function IsWine(): Integer;
+function IsWine(): PAnsiChar;
 external 'wine_get_version@ntdll.dll stdcall delayload';
 
 procedure InitializeWizard();
 var
     IsModernSystem: Boolean;
+    WineVersion: PAnsiChar;
 begin
     BitnessPage := CreateInputOptionPage(wpWelcome, 'OpenMPT Version', 'Select the version of OpenMPT you want to install.',
         'Select the version of OpenMPT you want to install. Setup already determined the most suitable version for your system.', True, False);
 
     // Add items
-    BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
-    BitnessPage.Add('32-Bit, for Windows XP / Vista or CPU without SSE2 instruction set');
-
-    BitnessPage.Values[1] := True;
-
-    // Win7?
-    IsModernSystem := (GetWindowsVersion >= $06010000);
-    // Check if installing in Wine
-    if(not IsModernSystem) then
-    begin
-        try
-            IsWine();
-            IsModernSystem := True;
-        except
-        end;
+    try
+        // Check if installing on Wine 1.8 or later
+        WineVersion := IsWine();
+        IsModernSystem := ((WineVersion <> nil) and (CompareStr(AnsiString(WineVersion), '1.8') >= 0));
+#if PlatformName = "32-Bit"
+        BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
+        BitnessPage.Add('32-Bit, for Windows XP / Vista or CPU without SSE2 instruction set');
+#else
+        BitnessPage.Add('64-Bit, for Windows 7 or newer');
+        BitnessPage.Add('64-Bit, for Windows XP / Vista');
+#endif
+    except
+        // Installing on Windows 7 or later
+        IsModernSystem := (GetWindowsVersion >= $06010000);
+#if PlatformName = "32-Bit"
+        BitnessPage.Add('32-Bit, for Wine 1.8 or newer and CPU with SSE2 instruction set');
+        BitnessPage.Add('32-Bit, for Wine 1.6 or CPU without SSE2 instruction set');
+#else
+        BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
+        BitnessPage.Add('64-Bit, for Wine 1.6');
+#endif
     end;
+    BitnessPage.Values[1] := True;
 
     if(IsModernSystem) then
     begin
@@ -281,7 +269,6 @@ begin
     end else
 
 end;
-#endif
 
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
@@ -297,12 +284,10 @@ begin
             end;
         end;
 
-#ifdef WIN32OLD
     BitnessPage.ID:
         begin;
             BuildType := BitnessPage.SelectedValueIndex;
         end;
-#endif
     end;
     Result := true;
 end;
@@ -312,11 +297,6 @@ begin
     case CurStep of
     ssPostInstall:
         begin
-
-#ifdef DOWNLOAD_MO3
-            VerifyUNMO3Checksum();
-#endif
-
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
         end;
