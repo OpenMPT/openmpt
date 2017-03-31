@@ -54,6 +54,9 @@ is just a high-level summary.
     packages only support the precise libmpg123 binary that is downloaded by the
     `download_mpg123.vbs` script. Other binaries might also work, but this has
     neither been tested nor is officially supported from now on.
+ *  [**Regression**] xmp-openmpt: xmp-openmpt now requires XMPlay 3.8 or later
+    and compiling xmp-openmpt requires an appropriate XMPlay SDK with
+    `XMPIN_FACE` >= `4`.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
