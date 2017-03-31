@@ -8,11 +8,6 @@
   dofile "../../build/premake/premake-defaults.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-lhasa"
-  filter { "action:vs2010" }
-   includedirs { "../../include/msinttypes/inttypes" }
-  filter { "action:vs2012" }
-   includedirs { "../../include/msinttypes/inttypes" }
-  filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
 	filter {}

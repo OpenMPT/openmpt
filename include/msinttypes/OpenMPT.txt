@@ -1,4 +1,0 @@
-This is msinttypes from https://github.com/chemeris/msinttypes/ .
-The header files have been moved to sperate directories so the availability to a certain compiler version can be selected by setting the include path.
-VS2008 needs both, VS1010 already has stdint.h so having msinttypes completely in the include path would just totally confuse the compiler.
-No further local changes were made.

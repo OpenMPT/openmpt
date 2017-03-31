@@ -633,11 +633,6 @@ mpt::ustring GetFullCreditsString()
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
 		"\n"
-#ifdef MODPLUG_TRACKER
-		"Alexander Chemeris for msinttypes\n"
-		"https://github.com/chemeris/msinttypes\n"
-		"\n"
-#endif
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
