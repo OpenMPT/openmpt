@@ -3353,7 +3353,7 @@ private:
 #if defined(MPT_WITH_MPG123)
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	mpt::Library MSVCRT;
-	mpt::Library LIBGCC;
+	mpt::Library SHLWAPI;
 #endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
 #endif // MPT_OS_WINDOWS
 
@@ -3479,18 +3479,15 @@ public:
 					return false;
 				}
 			#endif // LIBOPENMPT_BUILD
-			// preload libgcc_s_sjlj-1.dll for the same reasons (32bit only, 64bit libmpg123 does not require it)
-			MPT_CONSTANT_IF(sizeof(void*) == 4)
-			{
-				if(!LIBGCC.IsValid()) LIBGCC = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libgcc_s_sjlj-1")));
-				#if defined(LIBOPENMPT_BUILD)
-					// require successful dependency loading for libopenmpt
-					if(!LIBGCC.IsValid())
-					{
-						return false;
-					}
-				#endif // LIBOPENMPT_BUILD
-			}
+			// preload shlwapi.dll for the same reasons
+			if(!SHLWAPI.IsValid()) SHLWAPI = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("shlwapi")));
+			#if defined(LIBOPENMPT_BUILD)
+				// require successful dependency loading for libopenmpt
+				if(!SHLWAPI.IsValid())
+				{
+					return false;
+				}
+			#endif // LIBOPENMPT_BUILD
 		#endif // MPT_OS_WINDOWS
 		#if defined(MODPLUG_TRACKER)
 			AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));

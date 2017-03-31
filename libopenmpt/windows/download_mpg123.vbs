@@ -97,54 +97,45 @@ End If
 
 CreateFolder "download.tmp"
 
-' we cannot use mpg123-1.24.0 yet because of https://sourceforge.net/p/mpg123/bugs/246/
-
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-Download httpprotocol & "://mpg123.de/download/win32/mpg123-1.23.8-x86.zip", 569733, "233042ba6a72d136fbe9b8f1eb19e9b7", "054aaf106712cb7f8308e9e9edd138e3e2789d9e", "download.tmp\mpg123-1.23.8-x86.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win32/mpg123-1.24.0-x86.zip", 484764, "d45aa907e22091a476159162152f8074", "4f128c2a0045e02a408b9ee4ad8f94e6d1b16827", "download.tmp\mpg123-1.24.0-x86.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
-Download httpprotocol & "://mpg123.de/download/win64/mpg123-1.23.8-x86-64.zip", 616269, "7dc4e4accb90f85bef05d2d82a54b68b", "c29414fa4d93f8d963009073122f1101842f86a7", "download.tmp\mpg123-1.23.8-x86-64.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86-64")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.23.8-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win64/1.24.0/mpg123-1.24.0-x86-64.zip", 533671, "f72721c06c122a4cface218943bb43ea", "e37d127f58874f18b9b3b53b7d88decb7d52a82a", "download.tmp\mpg123-1.24.0-x86-64.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86-64")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
 CreateFolder "Licenses"
 
-fso.CopyFile "download.tmp\mpg123-1.23.8-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
+fso.CopyFile "download.tmp\mpg123-1.24.0-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
 
 If fso.FolderExists("bin") Then
 	CreateFolder "bin\x86"
 	CreateFolder "bin\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libgcc_s_sjlj-1.dll",    "bin\x86\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
-	'fso.CopyFile "download.tmp\mpg123-1.23.8-x86-64\libgcc_s_sjlj-1.dll", "bin\x86_64\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("openmpt123") Then
 	CreateFolder "openmpt123\x86"
 	CreateFolder "openmpt123\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libgcc_s_sjlj-1.dll",    "openmpt123\x86\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
-	'fso.CopyFile "download.tmp\mpg123-1.23.8-x86-64\libgcc_s_sjlj-1.dll", "openmpt123\x86_64\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("XMPlay") Then
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libgcc_s_sjlj-1.dll",    "XMPlay\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("foobar2000") Then
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libgcc_s_sjlj-1.dll",    "foobar2000\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("Winamp") Then
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libgcc_s_sjlj-1.dll",    "Winamp\libgcc_s_sjlj-1.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.23.8-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
 End If
 
 DeleteFolder "download.tmp"

@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta22.1
 
+ *  [**Change**] The libmpg123 binary download script on Windows now downloads
+    libmpg123 1.24.0.
 
 ### libopenmpt 0.2-beta22 (2017-03-11)
 
