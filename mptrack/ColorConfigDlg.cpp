@@ -13,6 +13,7 @@
 #include "ColorConfigDlg.h"
 #include "Settings.h"
 #include "FileDialog.h"
+#include "ColorSchemes.h"
 #include "../common/StringFixer.h"
 
 
@@ -47,17 +48,15 @@ static const struct ColorDescriptions
 
 BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_WM_DRAWITEM()
+	ON_WM_VSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnColorSelChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,		OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,		OnPresetChange)
 	ON_EN_CHANGE(IDC_PRIMARYHILITE,		OnSettingsChanged)
 	ON_EN_CHANGE(IDC_SECONDARYHILITE,	OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,				OnSelectColor1)
 	ON_COMMAND(IDC_BUTTON2,				OnSelectColor2)
 	ON_COMMAND(IDC_BUTTON3,				OnSelectColor3)
-	ON_COMMAND(IDC_BUTTON5,				OnPresetMPT)
-	ON_COMMAND(IDC_BUTTON6,				OnPresetFT2)
-	ON_COMMAND(IDC_BUTTON7,				OnPresetIT)
-	ON_COMMAND(IDC_BUTTON8,				OnPresetBuzz)
 	ON_COMMAND(IDC_BUTTON9,				OnChoosePatternFont)
 	ON_COMMAND(IDC_BUTTON10,			OnChooseCommentFont)
 	ON_COMMAND(IDC_BUTTON11,			OnClearWindowCache)
@@ -80,6 +79,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(COptionsColors)
 	DDX_Control(pDX, IDC_COMBO1,		m_ComboItem);
 	DDX_Control(pDX, IDC_COMBO2,		m_ComboFont);
+	DDX_Control(pDX, IDC_COMBO3,		m_ComboPreset);
 	DDX_Control(pDX, IDC_BUTTON1,		m_BtnColor1);
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnColor2);
 	DDX_Control(pDX, IDC_BUTTON3,		m_BtnColor3);
@@ -87,6 +87,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TEXT1,			m_TxtColor1);
 	DDX_Control(pDX, IDC_TEXT2,			m_TxtColor2);
 	DDX_Control(pDX, IDC_TEXT3,			m_TxtColor3);
+	DDX_Control(pDX, IDC_SPIN1,			m_ColorSpin);
 	//}}AFX_DATA_MAP
 }
 
@@ -144,6 +145,19 @@ BOOL COptionsColors::OnInitDialog()
 
 	commentFont = TrackerSettings::Instance().commentsFont;
 	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont).c_str());
+
+	m_ComboPreset.SetRedraw(FALSE);
+	m_ComboPreset.InitStorage(2 + MPT_ARRAY_COUNT(ColorSchemes), 20 * sizeof(TCHAR));
+	m_ComboPreset.AddString(_T("Choose a Colour Scheme..."));
+	m_ComboPreset.AddString(_T("OpenMPT (Default)"));
+	for(auto &preset : ColorSchemes)
+	{
+		m_ComboPreset.SetItemDataPtr(m_ComboPreset.AddString(preset.name), const_cast<ColorScheme *>(&preset));
+	}
+	m_ComboPreset.SetCurSel(0);
+	m_ComboPreset.SetRedraw(TRUE);
+
+	m_ColorSpin.SetRange32(-1, 1);
 	
 	OnColorSelChanged();
 	return TRUE;
@@ -425,7 +439,7 @@ void COptionsColors::SelectColor(COLORREF *lprgb)
 	cc.hInstance = NULL;
 	cc.rgbResult = *lprgb;
 	cc.lpCustColors = rgbCustomColors;
-	cc.Flags = CC_RGBINIT;
+	cc.Flags = CC_RGBINIT | CC_FULLOPEN;
 	cc.lCustData = 0;
 	cc.lpfnHook = NULL;
 	cc.lpTemplateName = NULL;
@@ -456,6 +470,20 @@ void COptionsColors::OnSelectColor3()
 //-----------------------------------
 {
 	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex3]);
+}
+
+
+void COptionsColors::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
+//-----------------------------------------------------------------------------
+{
+	CPropertyPage::OnVScroll(nSBCode, nPos, pScrollBar);
+	int newSel = m_ComboItem.GetCurSel() - m_ColorSpin.GetPos32();
+	if(newSel >= 0)
+	{
+		m_ComboItem.SetCurSel(newSel);
+		OnColorSelChanged();
+	}
+	m_ColorSpin.SetPos(0);
 }
 
 
@@ -518,128 +546,25 @@ void COptionsColors::OnPreviewChanged()
 	m_BtnColor3.InvalidateRect(NULL, FALSE);
 }
 
-void COptionsColors::OnPresetMPT()
-//--------------------------------
+
+void COptionsColors::OnPresetChange()
+//-----------------------------------
 {
+	auto curSel = m_ComboPreset.GetCurSel();
+	if(curSel == 0)
+		return;
 	TrackerSettings::GetDefaultColourScheme(CustomColors);
+	auto scheme = static_cast<const ColorScheme *>(m_ComboPreset.GetItemDataPtr(curSel));
+	if(scheme != nullptr)
+	{
+		for(auto &c : scheme->colors)
+		{
+			CustomColors[c.id] = c.color;
+		}
+	}
 	OnPreviewChanged();
 }
 
-
-void COptionsColors::OnPresetFT2()
-//--------------------------------
-{
-	// "blue"
-	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xF0, 0xF0, 0x50);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x40, 0x40, 0xA0);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x50, 0x50, 0x70);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x40, 0x80);
-	CustomColors[MODCOLOR_NOTE] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
-	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x2E, 0x2E, 0x5C);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x40, 0x80);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x99, 0x99, 0xCC);
-	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x2E, 0x2E, 0x5A);
-	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x40, 0x40);
-	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
-	OnPreviewChanged();
-}
-
-
-void COptionsColors::OnPresetIT()
-//-------------------------------
-{
-	// "green"
-	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0xE0, 0xE0, 0xE0);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x80, 0x80, 0x00);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x68, 0x40);
-	CustomColors[MODCOLOR_NOTE] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
-	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x23, 0x38, 0x23);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x68, 0x40);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x94, 0xBC, 0x94);
-	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x00, 0x40, 0x00);
-	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xFF, 0x80, 0x80);
-	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
-	OnPreviewChanged();
-}
-
-
-void COptionsColors::OnPresetBuzz()
-//---------------------------------
-{
-	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0xE1, 0xDB, 0xD0);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x3A, 0x34, 0x27);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0xC0, 0xB4, 0x9E);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xDD, 0xD7, 0xCC);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0xA9, 0x99, 0x7A);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0xCE, 0xC5, 0xB5);
-	CustomColors[MODCOLOR_NOTE] = RGB(0x00, 0x00, 0x5B);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0x00, 0x55, 0x55);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0x5E, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x68, 0x68);
-	CustomColors[MODCOLOR_PITCH] = RGB(0x62, 0x62, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0x66, 0x00, 0x00);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO_VST] = RGB(0x18, 0x96, 0xE1);
-	CustomColors[MODCOLOR_VUMETER_MED_VST] = RGB(0xFF, 0xC8, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI_VST] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xAC, 0xA8, 0xA1);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD6, 0xD0, 0xC6);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);
-	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0xE1, 0xDB, 0xD0);
-	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
-	OnPreviewChanged();
-}
 
 void COptionsColors::OnLoadColorScheme()
 //--------------------------------------
@@ -651,7 +576,7 @@ void COptionsColors::OnLoadColorScheme()
 	if(!dlg.Show(this)) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
-	OnPresetMPT();
+	TrackerSettings::GetDefaultColourScheme(CustomColors);
 	{
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)

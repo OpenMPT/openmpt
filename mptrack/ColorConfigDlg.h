@@ -19,8 +19,9 @@ class COptionsColors: public CPropertyPage
 protected:
 	COLORREF CustomColors[MAX_MODCOLORS];
 	UINT m_nColorItem;
-	CComboBox m_ComboItem, m_ComboFont;
+	CComboBox m_ComboItem, m_ComboFont, m_ComboPreset;
 	CButton m_BtnColor1, m_BtnColor2, m_BtnColor3, m_BtnPreview;
+	CSpinButtonCtrl m_ColorSpin;
 	CStatic m_TxtColor1, m_TxtColor2, m_TxtColor3;
 	MODPLUGDIB *m_pPreviewDib;
 	FontSetting patternFont, commentFont;
@@ -36,6 +37,7 @@ protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnSetActive();
+	virtual void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnChoosePatternFont();
 	afx_msg void OnChooseCommentFont();
 	afx_msg void OnUpdateDialog();
@@ -45,10 +47,7 @@ protected:
 	afx_msg void OnSelectColor1();
 	afx_msg void OnSelectColor2();
 	afx_msg void OnSelectColor3();
-	afx_msg void OnPresetMPT();
-	afx_msg void OnPresetFT2();
-	afx_msg void OnPresetIT();
-	afx_msg void OnPresetBuzz();
+	afx_msg void OnPresetChange();
 	afx_msg void OnLoadColorScheme();
 	afx_msg void OnSaveColorScheme();
 	afx_msg void OnClearWindowCache();
