@@ -99,15 +99,20 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
-	// NOTE: Historically the magic byte check is case-insensitive.
-	// Other libraries (mikmod, xmp, Milkyplay) do not do this.
+	// NOTE: Historically the magic byte check used to be case-insensitive.
+	// Other libraries (mikmod, xmp, Milkyplay) don't do this.
 	// ScreamTracker 2 and 3 do not care about the content of the magic bytes at all.
+	// After reviewing all STM files on ModLand and ModArchive, it was found that the
+	// case-insensitive comparison is most likely not necessary for any files in the wild.
 	STMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.filetype != 2
-		|| fileHeader.dosEof != 0x1A
-		|| (mpt::CompareNoCaseAscii(fileHeader.trackername, "!Scream!", 8)
-			&& mpt::CompareNoCaseAscii(fileHeader.trackername, "BMOD2STM", 8)
+		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
+		|| fileHeader.verMajor != 2
+		|| fileHeader.verMinor > 21	// ST3 only accepts 0, 10, 20 and 21
+		|| fileHeader.globalVolume > 64
+		|| (memcmp(fileHeader.trackername, "!Scream!", 8)
+			&& memcmp(fileHeader.trackername, "BMOD2STM", 8)
 			&& memcmp(fileHeader.trackername, "WUZAMOD!", 8))
 		|| !file.CanRead(31 * sizeof(STMSampleHeader) + 128))
 	{
@@ -122,7 +127,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
 
 	// Read STM header
-	m_madeWithTracker = mpt::String::Print("Scream Tracker %1.%2", fileHeader.verMajor, mpt::fmt::hex0<2>(fileHeader.verMinor));
+	m_madeWithTracker = mpt::String::Print("Scream Tracker %1.%2", fileHeader.verMajor, mpt::fmt::dec0<2>(fileHeader.verMinor));
 	m_nSamples = 31;
 	m_nChannels = 4;
 	m_nMinPeriod = 64;
@@ -135,7 +140,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.initTempo;
 #endif // MODPLUG_TRACKER
 	if(m_nDefaultSpeed < 1) m_nDefaultSpeed = 1;
-	m_nDefaultGlobalVolume = std::min<uint8>(fileHeader.globalVolume, 64) * 4;
+	m_nDefaultGlobalVolume = fileHeader.globalVolume * 4u;
 
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)
@@ -150,6 +155,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		STMSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
+		if(sampleHeader.zero != 0 && sampleHeader.zero != 46)	// putup10.stm has zero = 46
+			return false;
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.filename);
 		sampleOffsets[smp - 1] = sampleHeader.offset;
@@ -159,10 +166,10 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	Order.ReadAsByte(file, 128);
 	for(ORDERINDEX ord = 0; ord < 128; ord++)
 	{
-		if(Order[ord] >= 99)
-		{
+		if(Order[ord] == 99 || Order[ord] == 255)	// 99 is regular, sometimes a single 255 entry can be found too
 			Order[ord] = Order.GetInvalidPatIndex();
-		}
+		else if(Order[ord] > 99)
+			return false;
 	}
 
 	if(loadFlags & loadPatternData)
