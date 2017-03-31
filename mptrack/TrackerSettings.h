@@ -35,7 +35,7 @@ class Manager;
 
 
 // User-defined colors
-enum
+enum ModColor
 {
 	MODCOLOR_BACKNORMAL = 0,
 	MODCOLOR_TEXTNORMAL,

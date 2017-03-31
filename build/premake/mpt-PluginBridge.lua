@@ -26,6 +26,7 @@
    "../../pluginBridge/Bridge.h",
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeOpCodes.h",
+   "../../common/versionNumber.h",
   }
   files {
    "../../pluginBridge/PluginBridge.rc",

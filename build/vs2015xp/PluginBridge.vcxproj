@@ -685,6 +685,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-winxp\$(TargetF
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\common\versionNumber.h" />
     <ClInclude Include="..\..\pluginBridge\AEffectWrapper.h" />
     <ClInclude Include="..\..\pluginBridge\Bridge.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />

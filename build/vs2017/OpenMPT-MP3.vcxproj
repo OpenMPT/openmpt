@@ -723,6 +723,7 @@
     <ClInclude Include="..\..\mptrack\CleanupSong.h" />
     <ClInclude Include="..\..\mptrack\CloseMainDialog.h" />
     <ClInclude Include="..\..\mptrack\ColorConfigDlg.h" />
+    <ClInclude Include="..\..\mptrack\ColorSchemes.h" />
     <ClInclude Include="..\..\mptrack\ColourEdit.h" />
     <ClInclude Include="..\..\mptrack\CommandSet.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_com.h" />

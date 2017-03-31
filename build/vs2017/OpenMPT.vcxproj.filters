@@ -195,6 +195,9 @@
     <ClInclude Include="..\..\mptrack\ColorConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\ColorSchemes.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\ColourEdit.h">
       <Filter>mptrack</Filter>
     </ClInclude>
