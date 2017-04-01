@@ -150,11 +150,13 @@ DebugSettings::DebugSettings(SettingsContainer &conf)
 	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
 	, DebugStopSoundDeviceOnCrash(conf, "Debug", "StopSoundDeviceOnCrash", true)
 	, DebugStopSoundDeviceBeforeDump(conf, "Debug", "StopSoundDeviceBeforeDump", false)
+	, DebugDelegateToWindowsHandler(conf, "Debug", "DelegateToWindowsHandler", false)
 {
 
 	// Duplicate state for debug stuff in order to avoid calling into settings framework from crash context.
 	ExceptionHandler::stopSoundDeviceOnCrash = DebugStopSoundDeviceOnCrash;
 	ExceptionHandler::stopSoundDeviceBeforeDump = DebugStopSoundDeviceBeforeDump;
+	ExceptionHandler::delegateToWindowsHandler = DebugDelegateToWindowsHandler;
 
 		// enable debug features (as early as possible after reading the settings)
 	#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)

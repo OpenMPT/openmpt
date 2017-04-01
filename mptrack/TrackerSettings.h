@@ -552,6 +552,8 @@ private:
 	Setting<bool> DebugStopSoundDeviceOnCrash;
 	Setting<bool> DebugStopSoundDeviceBeforeDump;
 
+	Setting<bool> DebugDelegateToWindowsHandler;
+
 public:
 
 	DebugSettings(SettingsContainer &conf);
