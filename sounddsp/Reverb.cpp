@@ -250,7 +250,7 @@ static void I3dl2_to_Generic(
 	// Late Reverb Decay HF
 	flDecayTimeHF = (float)lReverbDecayTime * pReverb->flDecayHFRatio;
 	flDelayFactorHF = (flDecayTimeHF <= (float)lTankLength) ? 1.0f : ((float)lTankLength / flDecayTimeHF);
-	pRvb->flReverbDamping = pow(0.001f, flDelayFactorHF);
+	pRvb->flReverbDamping = std::pow(0.001f, flDelayFactorHF);
 }
 
 
@@ -1015,113 +1015,36 @@ rvbloop:
 }
 
 
-// (1-gcos(w)-sqrt(2g(1-cos w) - g2(1-(cos w)^2))) / (1-g)
 static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s)
 //-------------------------------------------------------------------------
 {
-	float cosw; // cos(2*PI*Fc/Fs)
-	float scale_over_1mg; // scale / (1.0f - g);
-	int32 result;
+	if(g > 0.999999f) return 0;
 
-	if (g > 0.999999f) return 0;
-	_asm {
-	fild scale
-	fld1
-	fld g
-	fld ST(0)
-	fmulp ST(1), ST(0)
-	fst g
-	fsubp ST(1), ST(0)
-	fdivp ST(1), ST(0)
-	fstp scale_over_1mg
-	fld F_c
-	fld F_s
-	fdivp ST(1), ST(0)
-	fldpi
-	fadd ST(0), ST(0)
-	fmulp ST(1), ST(0)
-	fcos
-	fstp cosw
-	fld g
-	fadd ST(0), ST(0)
-	fld1
-	fld cosw
-	fsubp ST(1), ST(0)
-	fmulp ST(1), ST(0)	// 2g*(1 cos(w))
-	fld g
-	fmul ST(0), ST(0)
-	fld1
-	fld cosw
-	fmul ST(0), ST(0)
-	fsubp ST(1), ST(0)
-	fmulp ST(1), ST(0)	// g*g*((1-cos w)^2)
-	fsubp ST(1), ST(0)
-	fsqrt
-	fld g
-	fmul cosw
-	faddp ST(1), ST(0)
-	fld1
-	fsubrp ST(1), ST(0)	// (1-gcos(w)-sqrt(2g(1-cos w) - g2(1-(cos w)^2)))
-	fld scale_over_1mg
-	fmulp ST(1), ST(0)
-	fistp result
-	}
-	return result;
+	g *= g;
+	double scale_over_1mg = scale / (1.0 - g);
+	double cosw = std::cos(2.0 * M_PI * F_c / F_s);
+	return Util::Round<int32>((1.0 - (std::sqrt((g + g) * (1.0 - cosw) - g * g * (1.0 - cosw * cosw)) + g * cosw)) * scale_over_1mg);
 }
 
+#define F2XM1(x) (std::pow(2.0, x) - 1.0)
 
 static int32 mBToLinear(int32 scale, int32 value_mB)
 {
-	// factor = log2(10)/(100*20)
-	const float _factor = 3.321928094887362304f / (100.0f * 20.0f);
-	long result;
+	if(!value_mB) return scale;
+	if(value_mB <= -10000) return 0;
 
-	if (!value_mB) return scale;
-	if (value_mB <= -10000) return 0;
-	_asm {
-	fild value_mB		// Load dB value
-	fld _factor			// Load the log2(10)/(20*65536) factor
-	fmulp ST(1), ST(0)	// ST(0) = value_dB/(20*65536)
-	fist result			// Store integer exponent
-	fisub result		// ST(0) = -1 <= (value_dB*log2(10)/(65536*20)) <= 1
-	f2xm1				// ST(0) = 2^(value_dB*log2(10)/(65536*20))-1
-	fild result			// load integer exponent
-	fild scale			// Load scale factor
-	fscale				// ST(0) = scale * 2^ST(1)
-	fstp ST(1)			// Remove the integer from the stack
-	fmul ST(1), ST(0)	// multiply with fractional part
-	faddp ST(1), ST(0)	// add 1*scale*integer_part
-	fistp result		// Convert to integer
-	}
-	return result;
+	const double factor = 3.321928094887362304 / (100.0 * 20.0);	// log2(10)/(100*20)
+	return Util::Round<int32>(F2XM1(value_mB * factor - static_cast<int32>(0.5 + value_mB * factor)) * scale + scale);
 }
 
 
 static float mBToLinear(int32 value_mB)
 {
-	// factor = log2(10)/(100*20)
-	const float _factor = 3.321928094887362304f / (100.0f * 20.0f);
-	long result;
-	float fresult;
+	if(!value_mB) return 1;
+	if(value_mB <= -100000) return 0;
 
-	if (!value_mB) return 1;
-	if (value_mB <= -100000) return 0;
-	_asm {
-	fild value_mB		// Load dB value
-	fld _factor			// Load the log2(10)/(20*65536) factor
-	fmulp ST(1), ST(0)	// ST(0) = value_dB/(20*65536)
-	fist result			// Store integer exponent
-	fisub result		// ST(0) = -1 <= (value_dB*log2(10)/(65536*20)) <= 1
-	f2xm1				// ST(0) = 2^(value_dB*log2(10)/(65536*20))-1
-	fild result			// load integer exponent
-	fld1				// Load scale factor
-	fscale				// ST(0) = scale * 2^ST(1)
-	fstp ST(1)			// Remove the integer from the stack
-	fmul ST(1), ST(0)	// multiply with fractional part
-	faddp ST(1), ST(0)	// add 1*scale*integer_part
-	fstp fresult		// Convert to integer
-	}
-	return fresult;
+	const double factor = 3.321928094887362304f / (100.0f * 20.0f);	// log2(10)/(100*20)
+	return static_cast<float>(F2XM1(value_mB * factor - static_cast<int32>(0.5 + value_mB * factor)) + 1.0);
 }
 
 #endif // NO_REVERB
