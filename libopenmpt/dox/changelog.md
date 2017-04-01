@@ -80,7 +80,7 @@ is just a high-level summary.
     sets `-municode` and `-mconsole` as well as all required Windows system
     libraries.
  *  [**Bug**] libopenmpt on Windows did not properly guard against current
-    working directoy DLL injection attacks.
+    working directory DLL injection attacks.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
@@ -108,6 +108,11 @@ is just a high-level summary.
     sanitization behaviour based on the module channel count.
  *  Both normal and percentage offset in PLM files were handled as percentage
     offset.
+ *  STM: Add support for "WUZAMOD!" magic bytes and allow some slightly
+    malformed STM files to load which were previously rejected.
+ *  Detect whether "hidden" patterns in the order list of SoundTracker modules
+    should be taken into account or not.
+ *  Tighten heuristics for rejecting invalid 669 and M15 files.
  *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
     slide part of combined volume slide + vibrato commands.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
