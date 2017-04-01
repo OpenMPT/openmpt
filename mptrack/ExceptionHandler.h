@@ -20,13 +20,30 @@ public:
 	static bool fullMemDump;
 	static bool stopSoundDeviceOnCrash;
 	static bool stopSoundDeviceBeforeDump;
+	static bool delegateToWindowsHandler;
+	static bool debugExceptionHandler;
 
-	// Call this to activate unhandled exception filtering.
-	static void Register() { ::SetUnhandledExceptionFilter(UnhandledExceptionFilter); };
+	// these are expected to be set on startup and never changed again
+	static bool useAnyCrashHandler;
+	static bool useImplicitFallbackSEH;
+	static bool useExplicitSEH;
+	static bool handleStdTerminate;
+	static bool handleStdUnexpected;
+	static bool handleMfcExceptions;
 
-protected:
+	// Call this to activate unhandled exception filtering
+	// and register a std::terminate_handler.
+	static void Register();
+	static void ConfigureSystemHandler();
+	static void UnconfigureSystemHandler();
+	static void Unregister();
 
-	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
+public:
+
+	static LONG WINAPI UnhandledExceptionFilterContinue(_EXCEPTION_POINTERS *pExceptionInfo);
+	static LONG WINAPI ExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
+
+	static void UnhandledMFCException(CException * e, const MSG * pMsg);
 
 };
 

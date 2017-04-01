@@ -331,7 +331,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 {
 public:
 	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck, m_bNoWine,
-		 m_bPortable;
+		 m_bPortable, m_bNoCrashHandler, m_bDebugCrashHandler;
 #ifdef _DEBUG
 	bool m_bNoTests;
 #endif
@@ -340,7 +340,7 @@ public:
 	CMPTCommandLineInfo()
 	{
 		m_bNoDls = m_bNoPlugins = m_bNoAssembly = m_bNoSysCheck = m_bNoWine =
-		m_bPortable = false;
+		m_bPortable = m_bNoCrashHandler = m_bDebugCrashHandler = false;
 #ifdef _DEBUG
 		m_bNoTests = false;
 #endif
@@ -357,6 +357,8 @@ public:
 			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noSysCheck"))) { m_bNoSysCheck = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noWine"))) { m_bNoWine = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noCrashHandler"))) { m_bNoCrashHandler = true; return; }
+			if (!lstrcmpi(lpszParam, _T("DebugCrashHandler"))) { m_bDebugCrashHandler = true; return; }
 #ifdef _DEBUG
 			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
 #endif
@@ -978,9 +980,11 @@ bool CTrackApp::CheckSystemSupport()
 }
 
 
-BOOL CTrackApp::InitInstance()
-//----------------------------
+BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
+//-------------------------------------------------------------
 {
+
+	// The first step of InitInstance, always executed without any crash handler.
 
 	// We probably should call the base class version here,
 	// but we historically did not do that.
@@ -997,27 +1001,64 @@ BOOL CTrackApp::InitInstance()
 	BOOL oleinit = AfxOleInit();
 	ASSERT(oleinit != FALSE); // no MPT_ASSERT here!
 
-	// Standard initialization
-
-	// Start loading
-	BeginWaitCursor();
-
-	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
-
 	// Initialize DocManager (for DDE)
 	// requires mpt::PathString
 	ASSERT(nullptr == m_pDocManager); // no MPT_ASSERT here!
 	m_pDocManager = new CModDocManager();
 
 	// Parse command line for standard shell commands, DDE, file open
-	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
+	
+	if(IsDebuggerPresent() && cmdInfo.m_bDebugCrashHandler)
+	{
+		ExceptionHandler::useAnyCrashHandler = true;
+		ExceptionHandler::useImplicitFallbackSEH = false;
+		ExceptionHandler::useExplicitSEH = true;
+		ExceptionHandler::handleStdTerminate = true;
+		ExceptionHandler::handleStdUnexpected = true;
+		ExceptionHandler::handleMfcExceptions = true;
+		ExceptionHandler::debugExceptionHandler = true;
+	}	else if(IsDebuggerPresent() || cmdInfo.m_bNoCrashHandler)
+	{
+		ExceptionHandler::useAnyCrashHandler = false;
+		ExceptionHandler::useImplicitFallbackSEH = false;
+		ExceptionHandler::useExplicitSEH = false;
+		ExceptionHandler::handleStdTerminate = false;
+		ExceptionHandler::handleStdUnexpected = false;
+		ExceptionHandler::handleMfcExceptions = false;
+		ExceptionHandler::debugExceptionHandler = false;
+	} else
+	{
+		ExceptionHandler::useAnyCrashHandler = true;
+		ExceptionHandler::useImplicitFallbackSEH = true;
+		ExceptionHandler::useExplicitSEH = true;
+		ExceptionHandler::handleStdTerminate = true;
+		ExceptionHandler::handleStdUnexpected = true;
+		ExceptionHandler::handleMfcExceptions = true;
+		ExceptionHandler::debugExceptionHandler = false;
+	}
+
+	return TRUE;
+}
+
+
+BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
+//------------------------------------------------------------
+{
 
 	m_GuiThreadId = GetCurrentThreadId();
 
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
 
-	ExceptionHandler::Register();
+	if(ExceptionHandler::useAnyCrashHandler)
+	{
+		ExceptionHandler::Register();
+	}
+
+	// Start loading
+	BeginWaitCursor();
+
+	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
 
 	// create the tracker-global random device
 	m_RD = mpt::make_unique<mpt::random_device>();
@@ -1063,6 +1104,11 @@ BOOL CTrackApp::InitInstance()
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
 	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT settings initialized."));
+
+	if(ExceptionHandler::useAnyCrashHandler)
+	{
+		ExceptionHandler::ConfigureSystemHandler();
+	}
 
 	// Create missing diretories
 	if(!TrackerSettings::Instance().PathTunings.GetDefaultDir().IsDirectory())
@@ -1255,13 +1301,119 @@ BOOL CTrackApp::InitInstance()
 		pMainFrame->PlayPreview();
 	}
 
-
 	return TRUE;
+}
+
+
+BOOL CTrackApp::InitInstance()
+//---------------------------
+{
+	CMPTCommandLineInfo cmdInfo;
+	if(!InitInstanceEarly(cmdInfo))
+	{
+		return FALSE;
+	}
+	return InitInstanceLate(cmdInfo);
+}
+
+
+BOOL CTrackApp::InitInstanceLate(CMPTCommandLineInfo &cmdInfo)
+//------------------------------------------------------------
+{
+	BOOL result = FALSE;
+	if(ExceptionHandler::useExplicitSEH)
+	{
+		// https://support.microsoft.com/en-us/kb/173652
+		__try
+		{
+			result = InitInstanceImpl(cmdInfo);
+		} __except(ExceptionHandler::ExceptionFilter(GetExceptionInformation()))
+		{
+			std::abort();
+		}
+	} else
+	{
+		result = InitInstanceImpl(cmdInfo);
+	}
+	return result;
+}
+
+
+int CTrackApp::Run()
+//------------------
+{
+	int result = 255;
+	if(ExceptionHandler::useExplicitSEH)
+	{
+		// https://support.microsoft.com/en-us/kb/173652
+		__try
+		{
+			result = CWinApp::Run();
+		} __except(ExceptionHandler::ExceptionFilter(GetExceptionInformation()))
+		{
+			std::abort();
+		}
+	} else
+	{
+		result = CWinApp::Run();
+	}
+	return result;
+}
+
+
+LRESULT CTrackApp::ProcessWndProcException(CException * e, const MSG * pMsg)
+//--------------------------------------------------------------------------
+{
+	if(ExceptionHandler::handleMfcExceptions)
+	{
+		LRESULT result = 0L; // as per documentation
+		if(pMsg)
+		{
+			if(pMsg->message == WM_COMMAND)
+			{
+				result = (LRESULT)TRUE; // as per documentation
+			}
+		}
+		if(dynamic_cast<CMemoryException*>(e))
+		{
+			e->ReportError();
+			//ExceptionHandler::UnhandledMFCException(e, pMsg);
+		} else
+		{
+			ExceptionHandler::UnhandledMFCException(e, pMsg);
+		}
+		return result;
+	} else
+	{
+		return CWinApp::ProcessWndProcException(e, pMsg);
+	}
 }
 
 
 int CTrackApp::ExitInstance()
 //---------------------------
+{
+	int result = 0;
+	if(ExceptionHandler::useExplicitSEH)
+	{
+		// https://support.microsoft.com/en-us/kb/173652
+		__try
+		{
+			result = ExitInstanceImpl();
+		} __except(ExceptionHandler::ExceptionFilter(GetExceptionInformation()))
+		{
+			std::abort();
+		}
+	} else
+	{
+		result = ExitInstanceImpl();
+	}
+	return result;
+}
+
+
+int CTrackApp::ExitInstanceImpl()
+//-------------------------------
 {
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
@@ -1302,7 +1454,13 @@ int CTrackApp::ExitInstance()
 	m_BestPRNG.reset();
 	mpt::set_global_random_device(nullptr);
 	m_RD.reset();
-	
+
+	if(ExceptionHandler::useAnyCrashHandler)
+	{
+		ExceptionHandler::UnconfigureSystemHandler();
+		ExceptionHandler::Unregister();
+	}
+
 	return CWinApp::ExitInstance();
 }
 

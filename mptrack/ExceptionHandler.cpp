@@ -25,10 +25,38 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+// Write full memory dump instead of minidump.
 bool ExceptionHandler::fullMemDump = false;
 
 bool ExceptionHandler::stopSoundDeviceOnCrash = true;
+
 bool ExceptionHandler::stopSoundDeviceBeforeDump = false;
+
+// Delegate to system-specific crash processing once our own crash handler is
+// finished. This is useful to allow attaching a debugger.
+bool ExceptionHandler::delegateToWindowsHandler = false;
+
+// Allow debugging the unhandled exception filter. Normally, if a debugger is
+// attached, no exceptions are unhandled because the debugger handles them. If
+// debugExceptionHandler is true, an additional __try/__catch is inserted around
+// InitInstance(), ExitInstance() and the main message loop, which will call our
+// filter, which then can be stepped through in a debugger. 
+bool ExceptionHandler::debugExceptionHandler = false;
+
+
+bool ExceptionHandler::useAnyCrashHandler = false;
+bool ExceptionHandler::useImplicitFallbackSEH = false;
+bool ExceptionHandler::useExplicitSEH = false;
+bool ExceptionHandler::handleStdTerminate = false;
+bool ExceptionHandler::handleStdUnexpected = false;
+bool ExceptionHandler::handleMfcExceptions = false;
+
+
+static LPTOP_LEVEL_EXCEPTION_FILTER g_OriginalUnhandledExceptionFilter = nullptr;
+static std::terminate_handler g_OriginalTerminateHandler = nullptr;
+static std::unexpected_handler g_OriginalUnexpectedHandler = nullptr;
+
+static UINT g_OriginalErrorMode = 0;
 
 
 enum DumpMode
@@ -190,7 +218,7 @@ int DebugReporter::RescueFiles()
 
 
 void DebugReporter::ReportError(mpt::ustring errorMessage)
-//---------------------------------------------------
+//--------------------------------------------------------
 {
 
 	if(!crashDirectory.valid)
@@ -390,17 +418,281 @@ bool DebugReporter::Cleanup(DumpMode mode)
 // Different entry points for different situations in which we want to dump some information
 
 
-LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
-//----------------------------------------------------------------------------------
+static bool IsCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
+{
+	if (!pExceptionInfo)
+		return false;
+	if (!pExceptionInfo->ExceptionRecord)
+		return false;
+	if (pExceptionInfo->ExceptionRecord->ExceptionCode != 0xE06D7363u)
+		return false;
+	return true;
+}
+
+
+template <typename E>
+static const E * GetCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
+{
+	// https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273
+	struct info_a_t
+	{
+		DWORD  bitmask;              // Probably: 1=Const, 2=Volatile
+		DWORD  destructor;           // RVA (Relative Virtual Address) of destructor for that exception object
+		DWORD  unknown;
+		DWORD  catchableTypesPtr;    // RVA of instance of type "B"
+	};
+	struct info_c_t
+	{
+		DWORD  someBitmask;
+		DWORD  typeInfo;             // RVA of std::type_info for that type
+		DWORD  memberDisplacement;   // Add to ExceptionInformation[1] in EXCEPTION_RECORD to obtain 'this' pointer.
+		DWORD  virtBaseRelated1;     // -1 if no virtual base
+		DWORD  virtBaseRelated2;     // ?
+		DWORD  objectSize;           // Size of the object in bytes
+		DWORD  probablyCopyCtr;      // RVA of copy constructor (?)
+	};
+	if(!pExceptionInfo)
+		return nullptr;
+	if (!pExceptionInfo->ExceptionRecord)
+		return nullptr;
+	if(pExceptionInfo->ExceptionRecord->ExceptionCode != 0xE06D7363u)
+		return nullptr;
+	#ifdef _WIN64
+		if(pExceptionInfo->ExceptionRecord->NumberParameters != 4)
+			return nullptr;
+	#else
+		if(pExceptionInfo->ExceptionRecord->NumberParameters != 3)
+			return nullptr;
+	#endif
+	if(pExceptionInfo->ExceptionRecord->ExceptionInformation[0] != 0x19930520u)
+		return nullptr;
+	std::uintptr_t base_address = 0;
+	#ifdef _WIN64
+		base_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[3];
+	#else
+		base_address = 0;
+	#endif
+	std::uintptr_t obj_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[1];
+	if(!obj_address)
+		return nullptr;
+	std::uintptr_t info_a_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[2];
+	if(!info_a_address)
+		return nullptr;
+	const info_a_t * info_a = reinterpret_cast<const info_a_t *>(info_a_address);
+	std::uintptr_t info_b_offset = info_a->catchableTypesPtr;
+	if(!info_b_offset)
+		return nullptr;
+	const DWORD * info_b = reinterpret_cast<const DWORD *>(base_address + info_b_offset);
+	for(DWORD type = 1; type <= info_b[0]; ++type)
+	{
+		std::uintptr_t info_c_offset = info_b[type];
+		if(!info_c_offset)
+			continue;
+		const info_c_t * info_c = reinterpret_cast<const info_c_t *>(base_address + info_c_offset);
+		if(!info_c->typeInfo)
+			continue;
+		const std::type_info * ti = reinterpret_cast<const std::type_info *>(base_address + info_c->typeInfo);
+		if(*ti != typeid(E))
+			continue;
+		const E * e = reinterpret_cast<const E *>(obj_address + info_c->memberDisplacement);
+		return e;
+	}
+	return nullptr;
+}
+
+
+void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
+//----------------------------------------------------------------------------
+{
+	DebugReporter report(DumpModeCrash, nullptr);
+	mpt::ustring errorMessage;
+	if(e && dynamic_cast<CSimpleException*>(e))
+	{
+		TCHAR tmp[1024 + 1];
+		MemsetZero(tmp);
+		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, MPT_ARRAY_COUNT(tmp) - 1) != 0)
+		{
+			tmp[1024] = 0;
+			errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1': %2."))
+				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
+				, mpt::ToUnicode(CString(tmp))
+				);
+		} else
+		{
+			errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1': %2."))
+				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
+				, mpt::ToUnicode(CString(tmp))
+				);
+		}
+	}
+	else
+	{
+		errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1'."))
+			( mpt::ufmt::dec(pMsg ? pMsg->message : 0)
+			);
+	}
+	report.ReportError(errorMessage);
+}
+
+
+static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
+//---------------------------------------------------------------------------
 {
 	DebugReporter report(DumpModeCrash, pExceptionInfo);
 
-	CString errorMessage;
-	errorMessage.Format(_T("Unhandled exception 0x%X at address %p occurred."), pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
-	report.ReportError(mpt::ToUnicode(errorMessage));
+	mpt::ustring errorMessage;
+	const std::exception * pE = GetCxxException<std::exception>(pExceptionInfo);
+	if(pE)
+	{
+		const std::exception & e = *pE;
+		errorMessage = mpt::format(MPT_USTRING("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
+			( mpt::ToUnicode(mpt::CharsetASCII, typeid(e).name())
+			, mpt::ufmt::hex0<sizeof(void*)*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
+			, mpt::ToUnicode(mpt::CharsetUTF8, e.what() ? e.what() : "")
+			);
+	} else
+	{
+		errorMessage = mpt::format(MPT_USTRING("Unhandled exception 0x%1 at address 0x%2 occurred."))
+			( mpt::ufmt::HEX0<8>(pExceptionInfo->ExceptionRecord->ExceptionCode)
+			, mpt::ufmt::hex0<sizeof(void*)*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
+			);
+	}
+	report.ReportError(errorMessage);
 
-	// Let Windows handle the exception...
+}
+
+
+LONG ExceptionHandler::UnhandledExceptionFilterContinue(_EXCEPTION_POINTERS *pExceptionInfo)
+//------------------------------------------------------------------------------------------
+{
+
+	UnhandledExceptionFilterImpl(pExceptionInfo);
+
+	// Disable the call to std::terminate() as that would re-renter the crash
+	// handler another time, but with less information available.
+#if 0
+	// MSVC implements calling std::terminate by its own UnhandledExeptionFilter.
+	// However, we do overwrite it here, thus we have to call std::terminate
+	// ourselves.
+	if (IsCxxException(pExceptionInfo))
+	{
+		std::terminate();
+	}
+#endif
+
+	// Let a potential debugger handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;
+
+}
+
+
+LONG ExceptionHandler::ExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
+//-------------------------------------------------------------------------
+{
+	UnhandledExceptionFilterImpl(pExceptionInfo);
+	// Let a potential debugger handle the exception...
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+
+static void mpt_unexpected_handler();
+static void mpt_terminate_handler();
+
+
+void ExceptionHandler::Register()
+//-------------------------------
+{
+	if(useImplicitFallbackSEH)
+	{
+		g_OriginalUnhandledExceptionFilter = ::SetUnhandledExceptionFilter(&UnhandledExceptionFilterContinue);
+	}
+	if(handleStdTerminate)
+	{
+		g_OriginalTerminateHandler = std::set_terminate(&mpt_terminate_handler);
+	}
+	if(handleStdUnexpected)
+	{
+		g_OriginalUnexpectedHandler = std::set_unexpected(&mpt_unexpected_handler);
+	}
+}
+
+
+void ExceptionHandler::ConfigureSystemHandler()
+//---------------------------------------------
+{
+	if(delegateToWindowsHandler)
+	{
+		//SetErrorMode(0);
+		g_OriginalErrorMode = ::GetErrorMode();
+	}	else
+	{
+		g_OriginalErrorMode = ::SetErrorMode(::GetErrorMode() | SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+	}
+}
+
+
+void ExceptionHandler::UnconfigureSystemHandler()
+//-----------------------------------------------
+{
+	::SetErrorMode(g_OriginalErrorMode);
+	g_OriginalErrorMode = 0;
+}
+
+
+void ExceptionHandler::Unregister()
+//---------------------------------
+{
+	if(handleStdUnexpected)
+	{
+		std::set_unexpected(g_OriginalUnexpectedHandler);
+		g_OriginalUnexpectedHandler = nullptr;
+	}
+	if(handleStdTerminate)
+	{
+		std::set_terminate(g_OriginalTerminateHandler);
+		g_OriginalTerminateHandler = nullptr;
+	}
+	if(useImplicitFallbackSEH)
+	{
+		::SetUnhandledExceptionFilter(g_OriginalUnhandledExceptionFilter);
+		g_OriginalUnhandledExceptionFilter = nullptr;
+	}
+}
+
+
+static void mpt_unexpected_handler()
+{
+	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("An unexpected C++ exception occured: std::unexpected() called."));
+	// We disable the call to std::terminate() as that would re-renter the crash
+	// handler another time, but with less information available.
+#if 1
+	std::abort();
+#else
+	if(g_OriginalUnexpectedHandler)
+	{
+		g_OriginalUnexpectedHandler();
+	} else
+	{
+		std::terminate();
+	}
+#endif
+}
+
+
+static void mpt_terminate_handler()
+{
+	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("A C++ runtime crash occured: std::terminate() called."));
+#if 1
+	std::abort();
+#else
+	if(g_OriginalTerminateHandler)
+	{
+		g_OriginalTerminateHandler();
+	} else
+	{
+		std::abort();
+	}
+#endif
 }
 
 

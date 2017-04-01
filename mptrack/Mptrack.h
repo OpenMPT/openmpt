@@ -153,6 +153,8 @@ public:
 	ComponentUXTheme() : ComponentSystemDLL(MPT_PATHSTRING("uxtheme")) { }
 };
 
+class CMPTCommandLineInfo;
+
 //=============================
 class CTrackApp: public CWinApp
 //=============================
@@ -335,7 +337,13 @@ public:
 	//{{AFX_VIRTUAL(CTrackApp)
 	public:
 	virtual BOOL InitInstance();
+	virtual BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
+	virtual BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
+	virtual BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
+	virtual int Run();
+	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 	virtual int ExitInstance();
+	virtual int ExitInstanceImpl();
 	virtual BOOL OnIdle(LONG lCount);
 	//}}AFX_VIRTUAL
 
