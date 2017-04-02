@@ -242,7 +242,7 @@ void CAbstractVstEditor::OnPasteParameters()
 
 		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
 		{
-			FileReader file(p, GlobalSize(hCpy));
+			FileReader file(mpt::as_span(p, GlobalSize(hCpy)));
 			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, m_VstPlugin);
 			GlobalUnlock(hCpy);
 

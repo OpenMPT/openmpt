@@ -121,7 +121,7 @@ size_t MidiInOut::GetChunk(char *(&chunk), bool /*isBank*/)
 void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
 //-----------------------------------------------------------------
 {
-	FileReader file(chunk, size);
+	FileReader file(mpt::as_span(chunk, size));
 	if(!file.CanRead(9 * sizeof(uint32))
 		|| !file.ReadMagic("fEvN")				// VST program chunk magic
 		|| file.ReadInt32LE() > GetVersion()	// Plugin version

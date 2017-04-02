@@ -1507,7 +1507,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			else if(pDlsIns->szName[0])
 				mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
 
-			FileReader chunk(pWaveForm.data(), dwLen);
+			FileReader chunk(mpt::as_span(pWaveForm.data(), dwLen));
 			SampleIO(
 				SampleIO::_16bit,
 				SampleIO::mono,
@@ -1518,7 +1518,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		bWaveForm = sample.pSample != nullptr;
 	} else
 	{
-		FileReader file(pWaveForm.data(), dwLen);
+		FileReader file(mpt::as_span(pWaveForm.data(), dwLen));
 		bWaveForm = sndFile.ReadWAVSample(nSample, file, false, &wsmpChunk);
 		if(pDlsIns->szName[0])
 			mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);

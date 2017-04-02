@@ -317,7 +317,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 					// but deal gracefully with badly mused streams in that regard.
 					continue;
 				}
-				FileReader packet(op.packet, op.bytes);
+				FileReader packet(mpt::as_span(op.packet, op.bytes));
 				if(packet.ReadIntLE<uint8>() == 0x7f && packet.ReadMagic("FLAC"))
 				{ // looks like OggFlac
 					oggOK = true;

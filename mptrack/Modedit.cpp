@@ -655,7 +655,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		if(VSTPresets::SaveFile(f, *srcVstPlug, false))
 		{
 			const std::string data = f.str();
-			FileReader file(data.c_str(), data.length());
+			FileReader file(mpt::as_span(data));
 			VSTPresets::LoadFile(file, *newVstPlug);
 		}
 	}
