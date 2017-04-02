@@ -811,7 +811,7 @@ private:
 
 public:
 	FileDataContainerMemory() : streamData(nullptr), streamLength(0) { }
-	FileDataContainerMemory(mpt::span<const mpt::byte> data) : streamData(data.data()), streamLength(data.size()) { }
+	FileDataContainerMemory(mpt::const_byte_span data) : streamData(data.data()), streamLength(data.size()) { }
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 	virtual
 #endif
