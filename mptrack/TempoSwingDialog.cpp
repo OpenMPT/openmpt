@@ -209,7 +209,7 @@ void CTempoSwingDlg::OnOK()
 	// If this is the default setup, just clear the vector.
 	if(m_pattern == PATTERNINDEX_INVALID)
 	{
-		if(static_cast<size_t>(std::count(m_tempoSwing.begin(), m_tempoSwing.end(), TempoSwing::Unity)) == m_tempoSwing.size())
+		if(static_cast<size_t>(std::count(m_tempoSwing.begin(), m_tempoSwing.end(), static_cast<TempoSwing::value_type>(TempoSwing::Unity))) == m_tempoSwing.size())
 		{
 			m_tempoSwing.clear();
 		}
