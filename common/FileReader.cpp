@@ -29,10 +29,8 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 	try
 	{
 		file.Rewind();
-#if defined(MPT_ENABLE_FILEIO)
 		if(file.GetFileName().empty())
 		{
-#endif // MPT_ENABLE_FILEIO
 			const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"), fileNameExtension);
 
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
@@ -110,12 +108,10 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 			m_Filename = tempName;
 			m_IsTempFile = true;
-#if defined(MPT_ENABLE_FILEIO)
 		} else
 		{
 			m_Filename = file.GetFileName();
 		}
-#endif // MPT_ENABLE_FILEIO
 	} catch (const std::runtime_error &)
 	{
 		m_IsTempFile = false;
