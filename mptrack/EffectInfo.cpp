@@ -643,7 +643,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				const uint8 macroIndex = sndFile.m_PlayState.Chn[chn].nActiveMacro;
 				const PLUGINDEX plugin = sndFile.GetBestPlugin(chn, PrioritiseChannel, EvenIfMuted) - 1;
 				IMixPlugin *pPlugin = (plugin < MAX_MIXPLUGINS ? sndFile.m_MixPlugins[plugin].pMixPlugin : nullptr);
-				wsprintf(pszName, _T("SFx MIDI Macro z=%d (SF%X: %s)"), param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, pPlugin));
+				wsprintf(pszName, _T("SFx MIDI Macro z=%d (SF%X: %s)"), param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, pPlugin).GetString());
 			} else
 			{
 				wsprintf(pszName, _T("SFx MIDI Macro z=%02X (%d)"), param, param);
