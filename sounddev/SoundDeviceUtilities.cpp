@@ -231,9 +231,6 @@ private:
 	long sleepMilliseconds;
 	int64 sleep100Nanoseconds;
 
-	Util::MultimediaClock clock_noxp;
-
-	bool period_nont_set;
 	bool periodic_nt_timer;
 
 	HANDLE sleepEvent;
@@ -253,28 +250,19 @@ public:
 		if(sleepMilliseconds < 1) sleepMilliseconds = 1;
 		if(sleep100Nanoseconds < 1) sleep100Nanoseconds = 1;
 
-		period_nont_set = false;
 		periodic_nt_timer = (sleep100Nanoseconds >= 10000); // can be represented as a millisecond period, otherwise use non-periodic timers which allow higher precision but might me slower because we have to set them again in each period
 
 		sleepEvent = NULL;
 
-		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
+		if(periodic_nt_timer)
 		{
-			if(periodic_nt_timer)
-			{
-				sleepEvent = CreateWaitableTimer(NULL, FALSE, NULL);
-				LARGE_INTEGER dueTime;
-				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
-				SetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
-			} else
-			{
-				sleepEvent = CreateWaitableTimer(NULL, TRUE, NULL);
-			}
+			sleepEvent = CreateWaitableTimer(NULL, FALSE, NULL);
+			LARGE_INTEGER dueTime;
+			dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
+			SetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
 		} else
 		{
-			sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-			clock_noxp.SetResolution(1); // increase resolution of multimedia timer
-			period_nont_set = true;
+			sleepEvent = CreateWaitableTimer(NULL, TRUE, NULL);
 		}
 
 	}
@@ -295,17 +283,11 @@ public:
 	//--------------
 	{
 		MPT_TRACE();
-		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
+		if(!periodic_nt_timer)
 		{
-			if(!periodic_nt_timer)
-			{
-				LARGE_INTEGER dueTime;
-				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
-				SetWaitableTimer(sleepEvent, &dueTime, 0, NULL, NULL, FALSE);
-			}
-		} else
-		{
-			timeSetEvent(sleepMilliseconds, 1, (LPTIMECALLBACK)sleepEvent, NULL, TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+			LARGE_INTEGER dueTime;
+			dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
+			SetWaitableTimer(sleepEvent, &dueTime, 0, NULL, NULL, FALSE);
 		}
 	}
 
@@ -313,24 +295,12 @@ public:
 	//-------------------------------
 	{
 		MPT_TRACE();
-		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
+		if(periodic_nt_timer)
 		{
-			if(periodic_nt_timer)
-			{
-				CancelWaitableTimer(sleepEvent);
-			}
-			CloseHandle(sleepEvent);
-			sleepEvent = NULL;
-		} else
-		{
-			if(period_nont_set)
-			{
-				clock_noxp.SetResolution(0);
-				period_nont_set = false;
-			}
-			CloseHandle(sleepEvent);
-			sleepEvent = NULL;
+			CancelWaitableTimer(sleepEvent);
 		}
+		CloseHandle(sleepEvent);
+		sleepEvent = NULL;
 	}
 
 };

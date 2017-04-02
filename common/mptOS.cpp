@@ -46,8 +46,8 @@ static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 #endif // !MPT_OS_WINDOWS_WINRT
 
 
-static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
-//-------------------------------------------------------------------------
+static void GatherWindowsVersion(uint32 & SystemVersion)
+//------------------------------------------------------
 {
 	// Initialize to used SDK version
 	SystemVersion =
@@ -71,9 +71,7 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 			mpt::Windows::Version::WinNT4
 		#endif
 		;
-#if MPT_OS_WINDOWS_WINRT
-	SystemIsNT = true;
-#else // !MPT_OS_WINDOWS_WINRT
+#if !MPT_OS_WINDOWS_WINRT
 	OSVERSIONINFOEXW versioninfoex;
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
@@ -85,9 +83,8 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
-	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
 	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
-#endif // MPT_OS_WINDOWS_WINRT
+#endif // !MPT_OS_WINDOWS_WINRT
 }
 
 
@@ -96,22 +93,19 @@ static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
 namespace {
 struct WindowsVersionCache
 {
-	bool SystemIsNT;
 	uint32 SystemVersion;
 	WindowsVersionCache()
-		: SystemIsNT(false)
-		, SystemVersion(mpt::Windows::Version::WinNT4)
+		: SystemVersion(mpt::Windows::Version::WinNT4)
 	{
-		GatherWindowsVersion(SystemIsNT, SystemVersion);
+		GatherWindowsVersion(SystemVersion);
 	}
 };
 }
 
-static void GatherWindowsVersionFromCache(bool & SystemIsNT, uint32 & SystemVersion)
-//----------------------------------------------------------------------------------
+static void GatherWindowsVersionFromCache(uint32 & SystemVersion)
+//---------------------------------------------------------------
 {
 	static WindowsVersionCache gs_WindowsVersionCache;
-	SystemIsNT = gs_WindowsVersionCache.SystemIsNT;
 	SystemVersion = gs_WindowsVersionCache.SystemVersion;
 }
 
@@ -124,7 +118,6 @@ static void GatherWindowsVersionFromCache(bool & SystemIsNT, uint32 & SystemVers
 Version::Version()
 //----------------
 	: SystemIsWindows(false)
-	, SystemIsNT(true)
 	, SystemVersion(mpt::Windows::Version::WinNT4)
 {
 	return;
@@ -138,9 +131,9 @@ mpt::Windows::Version Version::Current()
 	#if MPT_OS_WINDOWS
 		result.SystemIsWindows = true;
 		#ifdef MODPLUG_TRACKER
-			GatherWindowsVersionFromCache(result.SystemIsNT, result.SystemVersion);
+			GatherWindowsVersionFromCache(result.SystemVersion);
 		#else // !MODPLUG_TRACKER
-			GatherWindowsVersion(result.SystemIsNT, result.SystemVersion);
+			GatherWindowsVersion(result.SystemVersion);
 		#endif // MODPLUG_TRACKER
 	#endif // MPT_OS_WINDOWS
 	return result;
@@ -173,28 +166,6 @@ bool Version::IsAtLeast(mpt::Windows::Version::Number version) const
 		return false;
 	}
 	return (SystemVersion >= static_cast<uint32>(version));
-}
-
-
-bool Version::Is9x() const
-//------------------------
-{
-	if(!SystemIsWindows)
-	{
-		return false;
-	}
-	return !SystemIsNT;
-}
-
-
-bool Version::IsNT() const
-//------------------------
-{
-	if(!SystemIsWindows)
-	{
-		return false;
-	}
-	return SystemIsNT;
 }
 
 
@@ -247,54 +218,39 @@ mpt::ustring Version::GetName() const
 //-----------------------------------
 {
 	mpt::ustring name;
-	if(mpt::Windows::Version::IsNT())
+	if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
 	{
-		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
-		{
-			name = MPT_USTRING("Windows 10 (or newer)");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win10))
-		{
-			name = MPT_USTRING("Windows 10");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
-		{
-			name = MPT_USTRING("Windows 8.1");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
-		{
-			name = MPT_USTRING("Windows 8");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
-		{
-			name = MPT_USTRING("Windows 7");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
-		{
-			name = MPT_USTRING("Windows Vista");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP64))
-		{
-			name = MPT_USTRING("Windows XP x64 / Windows Server 2003");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
-		{
-			name = MPT_USTRING("Windows XP");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win2000))
-		{
-			name = MPT_USTRING("Windows 2000");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNT4))
-		{
-			name = MPT_USTRING("Windows NT4");
-		} else
-		{
-			name = MPT_USTRING("Generic Windows NT");
-		}
+		name = MPT_USTRING("Windows 10 (or newer)");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win10))
+	{
+		name = MPT_USTRING("Windows 10");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
+	{
+		name = MPT_USTRING("Windows 8.1");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
+	{
+		name = MPT_USTRING("Windows 8");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
+	{
+		name = MPT_USTRING("Windows 7");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	{
+		name = MPT_USTRING("Windows Vista");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP64))
+	{
+		name = MPT_USTRING("Windows XP x64 / Windows Server 2003");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
+	{
+		name = MPT_USTRING("Windows XP");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win2000))
+	{
+		name = MPT_USTRING("Windows 2000");
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNT4))
+	{
+		name = MPT_USTRING("Windows NT4");
 	} else
 	{
-		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinME))
-		{
-			name = MPT_USTRING("Windows ME (or newer)");
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win98))
-		{
-			name = MPT_USTRING("Windows 98");
-		} else
-		{
-			name = MPT_USTRING("Generic Windows 9x");
-		}
+		name = MPT_USTRING("Generic Windows NT");
 	}
 	mpt::ustring result = name;
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS

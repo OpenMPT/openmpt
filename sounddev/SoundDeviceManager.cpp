@@ -185,8 +185,8 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
 		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-	} else if(GetSysInfo().WindowsVersion.Is9x())
-	{ // Win9x
+	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::WinXP))
+	{ // < WinXP
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeDSOUND] = 28;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
