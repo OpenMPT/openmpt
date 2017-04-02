@@ -176,7 +176,7 @@ PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 		return nullptr;
 	}
 
-	FileReader file(pData, nSize);
+	FileReader file(mpt::as_span(pData, nSize));
 	return ReadPNG(file);
 }
 

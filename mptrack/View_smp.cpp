@@ -2261,7 +2261,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				sndFile.GetSample(m_nSample).pSample = nullptr;	// prevent old sample from being deleted.
 			}
 
-			FileReader file(p, GlobalSize(hCpy));
+			FileReader file(mpt::as_span(p, GlobalSize(hCpy)));
 			CriticalSection cs;
 			bool ok = sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 			GlobalUnlock(hCpy);
