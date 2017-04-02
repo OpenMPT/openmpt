@@ -90,11 +90,9 @@ public:
 		// Initialize file reader object with a CallbackStream.
 	FileReader(CallbackStream s)
 		: m_data(
-#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
-#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
 			)
 		, streamPos(0)
@@ -105,11 +103,9 @@ public:
 #if defined(MPT_ENABLE_FILEIO)
 	FileReader(CallbackStream s, const mpt::PathString *filename)
 		: m_data(
-#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
-#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
 			)
 		, streamPos(0)
@@ -124,11 +120,9 @@ public:
 	// Initialize file reader object with a std::istream.
 	FileReader(std::istream *s)
 		: m_data(
-#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
-#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
 			)
 		, streamPos(0)
@@ -139,11 +133,9 @@ public:
 #if defined(MPT_ENABLE_FILEIO)
 	FileReader(std::istream *s, const mpt::PathString *filename)
 		: m_data(
-#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
-#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
 			)
 		, streamPos(0)
