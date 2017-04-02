@@ -353,31 +353,6 @@ public:
 
 
 
-template<typename T, void (T::*Func)(void)>
-class pointer_to_member_functor {
-private:
-	T *that;
-public:
-	void operator () ()
-	{
-		(that->*Func)();
-	}
-	pointer_to_member_functor(T *that)
-		: that(that)
-	{
-		return;
-	}
-};
-
-// MPT_DELEGATE is a helper to use member functions of classes as thread entry
-//  points.
-// Implementing generic support in the mpt::thread constructor would result
-//  in horribly unreadable template code when not making use of at least some
-//  C++11 features.
-#define MPT_DELEGATE(type, func, inst) mpt::pointer_to_member_functor< type , & type :: func >( inst )
-
-
-
 #if defined(MODPLUG_TRACKER)
 
 #if MPT_OS_WINDOWS
