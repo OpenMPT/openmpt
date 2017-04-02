@@ -1334,7 +1334,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		s.Format(_T("Total edit time: %lluh %02llum %02llus (%u session%s)"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60, num, (num != 1) ? _T("s") : _T(""));
 		SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
 		// Window title
-		s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
+		s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle().GetString());
 		SetWindowText(s);
 	}
 	// Enable or disable Clear button
