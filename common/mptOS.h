@@ -30,12 +30,9 @@ public:
 	enum Number
 	{
 
-		// Win9x
+		WinNT4   = 0x0400,
 		Win98    = 0x0410,
 		WinME    = 0x0490,
-
-		// WinNT
-		WinNT4   = 0x0400,
 		Win2000  = 0x0500,
 		WinXP    = 0x0501,
 		WinXP64  = 0x0502,
@@ -56,7 +53,6 @@ private:
 
 	bool SystemIsWindows;
 
-	bool SystemIsNT;
 	uint32 SystemVersion;
 
 private:
@@ -73,9 +69,6 @@ public:
 
 	bool IsBefore(mpt::Windows::Version::Number version) const;
 	bool IsAtLeast(mpt::Windows::Version::Number version) const;
-
-	bool Is9x() const;
-	bool IsNT() const;
 
 	mpt::ustring GetName() const;
 #ifdef MODPLUG_TRACKER

@@ -505,9 +505,6 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					text += mpt::format(MPT_USTRING("Windows: %1\n"))
 						( mpt::Windows::Version::Current().IsWindows() ? yes : no
 						);
-					text += mpt::format(MPT_USTRING("Windows NT: %1\n"))
-						( mpt::Windows::Version::Current().IsNT() ? yes : no
-						);
 					text += mpt::format(MPT_USTRING("Windows version: %1\n"))
 						( 
 						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win81) ? MPT_USTRING("Windows 8.1") :
