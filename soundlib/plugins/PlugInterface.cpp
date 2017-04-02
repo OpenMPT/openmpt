@@ -127,7 +127,7 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 		name.Format(_T("%02u: Parameter %02u"), param, param);
 	} else
 	{
-		name.Format(_T("%02u: %s"), param, paramName);
+		name.Format(_T("%02u: %s"), param, paramName.GetString());
 	}
 	return name;
 }
@@ -160,7 +160,7 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 	if((unsigned char)rawname[0] < ' ')
 		formattedName.Format("%02u - Program %u", index, index);
 	else
-		formattedName.Format("%02u - %s", index, rawname);
+		formattedName.Format("%02u - %s", index, rawname.GetString());
 
 	return formattedName;
 }
