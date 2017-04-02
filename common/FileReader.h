@@ -58,12 +58,8 @@ private:
 
 	off_t streamPos;		// Cursor location in the file
 
-#if defined(MPT_ENABLE_FILEIO)
 	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr.
 	#define MPT_FILEREADER_INIT_FILENAME ,fileName(nullptr)
-#else // !MPT_ENABLE_FILEIO
-	#define MPT_FILEREADER_INIT_FILENAME
-#endif // MPT_ENABLE_FILEIO
 
 public:
 
@@ -74,9 +70,7 @@ public:
 
 	// Initialize file reader object with pointer to data and data length.
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-#if defined(MPT_ENABLE_FILEIO)
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
-#endif // MPT_ENABLE_FILEIO
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 		// Initialize file reader object with a CallbackStream.
@@ -92,7 +86,6 @@ public:
 	{
 		return;
 	}
-#if defined(MPT_ENABLE_FILEIO)
 	FileReader(CallbackStream s, const mpt::PathString *filename)
 		: m_data(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
@@ -105,7 +98,6 @@ public:
 	{
 		return;
 	}
-#endif // MPT_ENABLE_FILEIO
 #endif // MPT_FILEREADER_CALLBACK_STREAM
 
 
@@ -122,7 +114,6 @@ public:
 	{
 		return;
 	}
-#if defined(MPT_ENABLE_FILEIO)
 	FileReader(std::istream *s, const mpt::PathString *filename)
 		: m_data(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
@@ -135,16 +126,13 @@ public:
 	{
 		return;
 	}
-#endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object window.
 	FileReader(std::shared_ptr<const IFileDataContainer> other) : m_data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos)
-#if defined(MPT_ENABLE_FILEIO)
 		, fileName(other.fileName)
-#endif // MPT_ENABLE_FILEIO
 	{ }
 
 #else // !MPT_FILEREADER_STD_ISTREAM
@@ -154,21 +142,16 @@ public:
 
 	// Initialize file reader object with pointer to data and data length.
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-#if defined(MPT_ENABLE_FILEIO)
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0), fileName(filename) { }
-#endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos)
-#if defined(MPT_ENABLE_FILEIO)
 		, fileName(other.fileName)
-#endif // MPT_ENABLE_FILEIO
 	{ }
 
 #endif // MPT_FILEREADER_STD_ISTREAM
 
 
-#if defined(MPT_ENABLE_FILEIO)
 	mpt::PathString GetFileName() const
 	{
 		if(!fileName)
@@ -177,7 +160,6 @@ public:
 		}
 		return *fileName;
 	}
-#endif // MPT_ENABLE_FILEIO
 
 	// Returns true if the object points to a valid stream.
 	bool IsValid() const
@@ -1118,18 +1100,10 @@ FileReader GetFileReader(TInputFile &file)
 		{
 			return FileReader();
 		}
-		#ifdef MPT_ENABLE_FILEIO
-			return FileReader(tmp.first, tmp.second);
-		#else
-			return FileReader(tmp.first);
-		#endif
+		return FileReader(tmp.first, tmp.second);
 	#else
 		typename TInputFile::ContentsRef tmp = file.Get();
-		#ifdef MPT_ENABLE_FILEIO
-			return FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
-		#else
-			return FileReader(mpt::as_span(tmp.first.data, tmp.first.size));
-		#endif
+		return FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
 	#endif
 }
 #endif // MPT_ENABLE_FILEIO
