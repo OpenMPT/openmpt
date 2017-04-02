@@ -47,12 +47,12 @@ public:
 private:
 
 #if defined(MPT_FILEREADER_STD_ISTREAM)
+	std::shared_ptr<const IFileDataContainer> SharedDataContainer() const { return m_data; }
 	const IFileDataContainer & DataContainer() const { return *m_data; }
-	IFileDataContainer & DataContainer() { return *m_data; }
-	std::shared_ptr<IFileDataContainer> m_data;
+	std::shared_ptr<const IFileDataContainer> m_data;
 #else
+	const FileDataContainerMemory & SharedDataContainer() const { return m_data; }
 	const FileDataContainerMemory & DataContainer() const { return m_data; }
-	FileDataContainerMemory & DataContainer() { return m_data; }
 	FileDataContainerMemory m_data;
 #endif
 
@@ -154,7 +154,7 @@ public:
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object window.
-	FileReader(std::shared_ptr<IFileDataContainer> other) : m_data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(std::shared_ptr<const IFileDataContainer> other) : m_data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos)
@@ -322,7 +322,7 @@ protected:
 			return FileReader();
 		}
 		#if defined(MPT_FILEREADER_STD_ISTREAM)
-			return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(m_data, position, std::min(length, DataContainer().GetLength() - position))));
+			return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position))));
 		#else
 			return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
 		#endif
