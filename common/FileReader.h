@@ -73,9 +73,9 @@ public:
 	FileReader() : m_data(std::make_shared<FileDataContainerDummy>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::span<const mpt::byte> >(bytedata))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::span<const mpt::byte> >(bytedata))), streamPos(0), fileName(filename) { }
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
@@ -150,12 +150,12 @@ public:
 #else // !MPT_FILEREADER_STD_ISTREAM
 
 	// Initialize invalid file reader object.
-	FileReader() : m_data(mpt::span<const mpt::byte>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader() : m_data(mpt::const_byte_span()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(mpt::byte_cast<mpt::span<const mpt::byte> >(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(mpt::byte_cast<mpt::span<const mpt::byte> >(bytedata)), streamPos(0), fileName(filename) { }
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
@@ -388,7 +388,7 @@ public:
 			}
 		}
 	public:
-		mpt::span<const mpt::byte> GetSpan() const
+		mpt::const_byte_span GetSpan() const
 		{
 			if(pinnedData)
 			{
@@ -398,17 +398,17 @@ public:
 				return mpt::as_span(cache);
 			} else
 			{
-				return mpt::span<const mpt::byte>();
+				return mpt::const_byte_span();
 			}
 		}
-		mpt::span<const mpt::byte> span() const { return GetSpan(); }
+		mpt::const_byte_span span() const { return GetSpan(); }
 		void invalidate() { size_ = 0; pinnedData = nullptr; cache = std::vector<mpt::byte>(); }
 		const mpt::byte *data() const { return span().data(); }
 		std::size_t size() const { return size_; }
-		mpt::span<const mpt::byte>::iterator begin() const { return span().begin(); }
-		mpt::span<const mpt::byte>::iterator end() const { return span().end(); }
-		mpt::span<const mpt::byte>::const_iterator cbegin() const { return span().cbegin(); }
-		mpt::span<const mpt::byte>::const_iterator cend() const { return span().cend(); }
+		mpt::const_byte_span::iterator begin() const { return span().begin(); }
+		mpt::const_byte_span::iterator end() const { return span().end(); }
+		mpt::const_byte_span::const_iterator cbegin() const { return span().cbegin(); }
+		mpt::const_byte_span::const_iterator cend() const { return span().cend(); }
 	};
 
 	// Returns a pinned view into the remaining raw data from cursor position.

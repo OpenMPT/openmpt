@@ -1104,9 +1104,9 @@ namespace Util
 {
 
 std::vector<mpt::byte> HexToBin(const mpt::ustring &src);
-mpt::ustring BinToHex(mpt::span<const mpt::byte> src);
+mpt::ustring BinToHex(mpt::const_byte_span src);
 
-template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Util::BinToHex(mpt::byte_cast<mpt::span<const mpt::byte> >(src)); }
+template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Util::BinToHex(mpt::byte_cast<mpt::const_byte_span>(src)); }
 
 } // namespace Util
 
