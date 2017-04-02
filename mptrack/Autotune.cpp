@@ -162,10 +162,9 @@ struct AutotuneThreadData
 };
 
 
-DWORD WINAPI Autotune::AutotuneThread(void *info_)
-//------------------------------------------------
+void Autotune::AutotuneThread(AutotuneThreadData & info)
+//------------------------------------------------------
 {
-	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(info_);
 	info.histogram.resize(HISTORY_BINS, 0);
 #ifdef ENABLE_SSE2
 	const bool useSSE = (GetProcSupport() & PROCSUPPORT_SSE2) != 0;
@@ -216,7 +215,6 @@ DWORD WINAPI Autotune::AutotuneThread(void *info_)
 
 		info.histogram[noteBin] += autocorrSum;
 	}
-	return 0;
 }
 
 
@@ -242,8 +240,8 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	const uint32 numProcs = std::max<uint32>(mpt::thread::hardware_concurrency(), 1);
 	const uint32 notesPerThread = (END_NOTE - START_NOTE + 1) / numProcs;
 	std::vector<AutotuneThreadData> threadInfo(numProcs);
-	std::vector<HANDLE> threadHandles(numProcs);
 
+	// Setup.
 	for(uint32 p = 0; p < numProcs; p++)
 	{
 		threadInfo[p].pitchReference = pitchReference;
@@ -254,12 +252,21 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		threadInfo[p].endNote = START_NOTE + (p + 1) * notesPerThread;
 		if(p == numProcs - 1)
 			threadInfo[p].endNote = END_NOTE;
-
-		threadHandles[p] = mpt::UnmanagedThread(AutotuneThread, &threadInfo[p]);
-		ASSERT(threadHandles[p] != INVALID_HANDLE_VALUE);
 	}
 
-	WaitForMultipleObjects(numProcs, threadHandles.data(), TRUE, INFINITE);
+	{
+		std::vector<mpt::thread> threads(numProcs);
+		// Start threads.
+		for(uint32 p = 0; p < numProcs; p++)
+		{
+			threads[p] = std::move(mpt::thread([p, &threadInfo]() { AutotuneThread(threadInfo[p]); }));
+		}
+		// Wait for threads to finish.
+		for(uint32 p = 0; p < numProcs; p++)
+		{
+			threads[p].join();
+		}
+	}
 
 	// Histogram for all notes.
 	std::vector<uint64> autocorrHistogram(HISTORY_BINS, 0);
@@ -270,7 +277,6 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		{
 			autocorrHistogram[i] += threadInfo[p].histogram[i];
 		}
-		CloseHandle(threadHandles[p]);
 	}
 
 	// Interpolate the histogram...
