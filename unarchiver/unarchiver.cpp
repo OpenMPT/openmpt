@@ -74,9 +74,7 @@ static inline std::string GetExtension(const std::string &filename)
 {
 	if(filename.find_last_of(".") != std::string::npos)
 	{
-		std::string ext = filename.substr(filename.find_last_of(".") + 1);
-		std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
-		return ext;
+		return mpt::ToLowerCaseAscii(filename.substr(filename.find_last_of(".") + 1));
 	}
 	return std::string();
 }
