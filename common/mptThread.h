@@ -88,8 +88,8 @@ class thread
 
 private:
 
-	thread(const thread &) {} // = delete
-	thread & operator = (const thread &) { return *this; } // = delete
+	thread(const thread &) = delete;
+	thread & operator = (const thread &) = delete;
 
 private:
 
