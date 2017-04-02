@@ -15,6 +15,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+struct AutotuneThreadData;
+
 //============
 class Autotune
 //============
@@ -53,7 +55,7 @@ protected:
 
 	bool PrepareSample(SmpLength maxShift);
 
-	static DWORD WINAPI AutotuneThread(void *info);
+	static void AutotuneThread(AutotuneThreadData &info);
 };
 
 
