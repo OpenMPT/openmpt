@@ -36,56 +36,59 @@ class FileReader
 //==============
 {
 
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+
 public:
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
 	typedef IFileDataContainer::off_t off_t;
-#else
-	typedef FileDataContainerMemory::off_t off_t;
-#endif
 
 private:
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
 	std::shared_ptr<const IFileDataContainer> SharedDataContainer() const { return m_data; }
 	const IFileDataContainer & DataContainer() const { return *m_data; }
 	std::shared_ptr<const IFileDataContainer> m_data;
-#else
-	const FileDataContainerMemory & SharedDataContainer() const { return m_data; }
-	const FileDataContainerMemory & DataContainer() const { return m_data; }
-	FileDataContainerMemory m_data;
-#endif
+	static std::shared_ptr<const IFileDataContainer> DataInitializer() { return std::make_shared<FileDataContainerDummy>(); }
+	static std::shared_ptr<const IFileDataContainer> DataInitializer(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
 
-	off_t streamPos;		// Cursor location in the file
+	FileReader CreateChunkImpl(off_t position, off_t length) const
+	{
+		return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position))));
+	}
 
-	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr.
+#else // !MPT_FILEREADER_STD_ISTREAM
 
 public:
 
+	typedef FileDataContainerMemory::off_t off_t;
+
+private:
+
+	const FileDataContainerMemory & SharedDataContainer() const { return m_data; }
+	const FileDataContainerMemory & DataContainer() const { return m_data; }
+	FileDataContainerMemory m_data;
+	static FileDataContainerMemory DataInitializer() { return mpt::const_byte_span(); }
+	static FileDataContainerMemory DataInitializer(mpt::const_byte_span data) { return data; }
+
+	FileReader CreateChunkImpl(off_t position, off_t length) const
+	{
+		return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
+	}
+
+#endif // MPT_FILEREADER_STD_ISTREAM
+
+private:
+
+	off_t streamPos;		// Cursor location in the file
+
+	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr. Lifetime is managed outside of FileReader.
+
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 
-	// Initialize invalid file reader object.
-	FileReader() : m_data(std::make_shared<FileDataContainerDummy>()), streamPos(0), fileName(nullptr) { }
-
-	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(nullptr) { }
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(std::make_shared<FileDataContainerMemory>(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
+public:
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 		// Initialize file reader object with a CallbackStream.
-	FileReader(CallbackStream s)
-		: m_data(
-				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
-				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
-			)
-		, streamPos(0)
-		, fileName(nullptr)
-	{
-		return;
-	}
-	FileReader(CallbackStream s, const mpt::PathString *filename)
+	FileReader(CallbackStream s, const mpt::PathString *filename = nullptr)
 		: m_data(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
@@ -98,22 +101,9 @@ public:
 		return;
 	}
 #endif // MPT_FILEREADER_CALLBACK_STREAM
-
-
+	
 	// Initialize file reader object with a std::istream.
-	FileReader(std::istream *s)
-		: m_data(
-				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
-				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
-			)
-		, streamPos(0)
-		, fileName(nullptr)
-	{
-		return;
-	}
-	FileReader(std::istream *s, const mpt::PathString *filename)
+	FileReader(std::istream *s, const mpt::PathString *filename = nullptr)
 		: m_data(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
@@ -129,27 +119,20 @@ public:
 	// Initialize file reader object based on an existing file reader object window.
 	FileReader(std::shared_ptr<const IFileDataContainer> other) : m_data(other), streamPos(0), fileName(nullptr) { }
 
-	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
-	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos)
-		, fileName(other.fileName)
-	{ }
-
-#else // !MPT_FILEREADER_STD_ISTREAM
-
-	// Initialize invalid file reader object.
-	FileReader() : m_data(mpt::const_byte_span()), streamPos(0), fileName(nullptr) { }
-
-	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0), fileName(nullptr) { }
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename) : m_data(mpt::byte_cast<mpt::const_byte_span>(bytedata)), streamPos(0), fileName(filename) { }
-
-	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
-	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos)
-		, fileName(other.fileName)
-	{ }
-
 #endif // MPT_FILEREADER_STD_ISTREAM
 
+public:
+
+	// Initialize invalid file reader object.
+	FileReader() : m_data(DataInitializer()), streamPos(0), fileName(nullptr) { }
+
+	// Initialize file reader object with pointer to data and data length.
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
+
+	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
+	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos), fileName(other.fileName) { }
+
+public:
 
 	mpt::PathString GetFileName() const
 	{
@@ -278,11 +261,7 @@ protected:
 		{
 			return FileReader();
 		}
-		#if defined(MPT_FILEREADER_STD_ISTREAM)
-			return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position))));
-		#else
-			return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
-		#endif
+		return CreateChunkImpl(position, length);
 	}
 
 public:
