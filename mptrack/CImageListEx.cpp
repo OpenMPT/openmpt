@@ -46,42 +46,58 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	// They all support 1-bit transparency, though, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
 	// Additionally, since we create a bitmap that fits the device's bit depth, we apply this fix when using a bit depth that doesn't have an alpha channel.
 	if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::WinXP)
-		|| mpt::Windows::IsWine()
+		|| (mpt::Windows::IsWine() && !mpt::Wine::VersionContext().Version().IsAtLeast(mpt::Wine::Version(1,6,0)))
 		|| GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
 	{
-		PNG::Bitmap bitmapMask(bitmap->width, bitmap->height);
+		uint32 rowSize = (bitmap->width + 31u) / 32u * 4u;
+		std::vector<uint8> bitmapMask(rowSize * bitmap->height);
 
 		const COLORREF buttonColor = GetSysColor(COLOR_BTNFACE);
 		const uint8_t r = GetRValue(buttonColor), g = GetGValue(buttonColor), b = GetBValue(buttonColor);
 
-		PNG::Pixel *pixel = bitmap->GetPixels(), *mask = bitmapMask.GetPixels();
-		for(size_t i = bitmap->GetNumPixels(); i != 0; i--, pixel++, mask++)
+		PNG::Pixel *pixel = bitmap->GetPixels();
+		for(uint32 y = 0; y < bitmap->height; y++)
 		{
-			if(pixel->a != 0)
+			uint8 *mask = bitmapMask.data() + rowSize * y;
+			for(uint32 x = 0; x < bitmap->width; x++, pixel++)
 			{
-				// Pixel not fully transparent - multiply with default background colour
+				if(pixel->a != 0)
+				{
+					// Pixel not fully transparent - multiply with default background colour
 #define MIXCOLOR(c) (((pixel->##c) * pixel->a + (c) * (255 - pixel->a)) >> 8);
-				pixel->r = MIXCOLOR(r);
-				pixel->g = MIXCOLOR(g);
-				pixel->b = MIXCOLOR(b);
+					pixel->r = MIXCOLOR(r);
+					pixel->g = MIXCOLOR(g);
+					pixel->b = MIXCOLOR(b);
 #undef MIXCOLOR
-				mask->r = 0;
-				mask->g = 0;
-				mask->b = 0;
-				mask->a = 255;
-			} else
-			{
-				// Transparent pixel
-				mask->r = 255;
-				mask->g = 255;
-				mask->b = 255;
-				mask->a = 255;
+				} else
+				{
+					// Transparent pixel
+					mask[x / 8u] |= 1 << (7 - (x & 7));
+				}
 			}
 		}
 
 		CBitmap dib, dibMask;
 		bitmap->ToDIB(dib, dc);
-		bitmapMask.ToDIB(dibMask, dc);
+
+		struct
+		{
+			BITMAPINFOHEADER bi;
+			RGBQUAD col[2];
+		} bi;
+		MemsetZero(bi);
+		bi.bi.biSize = sizeof(BITMAPINFOHEADER);
+		bi.bi.biWidth = bitmap->width;
+		bi.bi.biHeight = -(int32)bitmap->height;
+		bi.bi.biPlanes = 1;
+		bi.bi.biBitCount = 1;
+		bi.bi.biCompression = BI_RGB;
+		bi.bi.biSizeImage = static_cast<DWORD>(bitmapMask.size());
+		bi.col[1].rgbBlue = bi.col[1].rgbGreen = bi.col[1].rgbRed = 255;
+
+		if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
+		dibMask.CreateCompatibleBitmap(dc, bitmap->width, bitmap->height);
+		SetDIBits(dc->GetSafeHdc(), dibMask, 0, bitmap->height, bitmapMask.data(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
 
 		result = CImageList::Create(cx, cy, ILC_COLOR24 | ILC_MASK, nInitial, nGrow)
 			&& CImageList::Add(&dib, &dibMask);
