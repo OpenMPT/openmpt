@@ -130,42 +130,6 @@ private:
 
 	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr. Lifetime is managed outside of FileReader.
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
-public:
-
-#if defined(MPT_FILEREADER_CALLBACK_STREAM)
-		// Initialize file reader object with a CallbackStream.
-	FileReader(CallbackStream s, const mpt::PathString *filename = nullptr)
-		: m_data(
-				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
-				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
-			)
-		, streamPos(0)
-		, fileName(filename)
-	{
-		return;
-	}
-#endif // MPT_FILEREADER_CALLBACK_STREAM
-	
-	// Initialize file reader object with a std::istream.
-	FileReader(std::istream *s, const mpt::PathString *filename = nullptr)
-		: m_data(
-				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
-				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
-			)
-		, streamPos(0)
-		, fileName(filename)
-	{
-		return;
-	}
-
-#endif // MPT_FILEREADER_STD_ISTREAM
-
 public:
 
 	// Initialize invalid file reader object.
@@ -175,7 +139,7 @@ public:
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
 
 	// Initialize file reader object based on an existing file reader object window.
-	explicit FileReader(value_data_type other) : m_data(other), streamPos(0), fileName(nullptr) { }
+	explicit FileReader(value_data_type other, const mpt::PathString *filename = nullptr) : m_data(other), streamPos(0), fileName(filename) { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos), fileName(other.fileName) { }
@@ -1113,6 +1077,49 @@ public:
 } // namespace detail
 
 typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
+
+
+#if defined(LIBOPENMPT_BUILD)
+
+// Initialize file reader object with pointer to data and data length.
+template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr)
+{
+	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), filename);
+}
+
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+
+#if defined(MPT_FILEREADER_CALLBACK_STREAM)
+
+// Initialize file reader object with a CallbackStream.
+static inline FileReader make_FileReader(CallbackStream s, const mpt::PathString *filename = nullptr)
+{
+	return FileReader(
+				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+				:
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
+			, filename
+		);
+}
+#endif // MPT_FILEREADER_CALLBACK_STREAM
+	
+// Initialize file reader object with a std::istream.
+static inline FileReader make_FileReader(std::istream *s, const mpt::PathString *filename = nullptr)
+{
+	return FileReader(
+				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
+				:
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
+			, filename
+		);
+}
+
+#endif // MPT_FILEREADER_STD_ISTREAM
+
+#endif // LIBOPENMT_BUILD
+
 
 #if defined(MPT_ENABLE_FILEIO)
 // templated in order to reduce header inter-dependencies
