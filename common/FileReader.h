@@ -1078,6 +1078,8 @@ public:
 
 typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
 
+typedef detail::FileReader<FileReaderTraitsMemory> MemoryFileReader;
+
 
 #if defined(LIBOPENMPT_BUILD)
 
