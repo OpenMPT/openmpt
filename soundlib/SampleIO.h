@@ -13,11 +13,13 @@
 #pragma once
 
 
+#include "../common/FileReaderFwd.h"
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
 struct ModSample;
-class FileReader;
 
 // Sample import / export formats
 //============

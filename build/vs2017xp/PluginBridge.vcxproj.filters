@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\versionNumber.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pluginBridge\AEffectWrapper.h" />
+    <ClInclude Include="..\..\pluginBridge\Bridge.h" />
+    <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
+    <ClInclude Include="..\..\pluginBridge\BridgeOpCodes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\pluginBridge\Bridge.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\pluginBridge\PluginBridge.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\pluginBridge\PluginBridge.rc" />
+  </ItemGroup>
+</Project>

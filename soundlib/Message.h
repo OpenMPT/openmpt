@@ -12,9 +12,9 @@
 
 #include <string>
 
-OPENMPT_NAMESPACE_BEGIN
+#include "../common/FileReaderFwd.h"
 
-class FileReader;
+OPENMPT_NAMESPACE_BEGIN
 
 //====================================
 class SongMessage : public std::string

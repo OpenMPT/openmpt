@@ -11,11 +11,10 @@
 #include "../common/Endianness.h"
 #include "../common/mptIO.h"
 
+#include "../common/FileReaderFwd.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-class FileReader;
 
 
 namespace Ogg

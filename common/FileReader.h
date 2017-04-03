@@ -22,6 +22,8 @@
 #include <vector>
 #include <cstring>
 
+#include "FileReaderFwd.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -31,52 +33,98 @@ OPENMPT_NAMESPACE_BEGIN
 #define FILEREADER_DEPRECATED
 
 
-//==============
-class FileReader
-//==============
+class FileReaderTraitsMemory
 {
-
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
-public:
-
-	typedef IFileDataContainer::off_t off_t;
-
-private:
-
-	std::shared_ptr<const IFileDataContainer> SharedDataContainer() const { return m_data; }
-	const IFileDataContainer & DataContainer() const { return *m_data; }
-	std::shared_ptr<const IFileDataContainer> m_data;
-	static std::shared_ptr<const IFileDataContainer> DataInitializer() { return std::make_shared<FileDataContainerDummy>(); }
-	static std::shared_ptr<const IFileDataContainer> DataInitializer(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
-
-	FileReader CreateChunkImpl(off_t position, off_t length) const
-	{
-		return FileReader(std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position))));
-	}
-
-#else // !MPT_FILEREADER_STD_ISTREAM
 
 public:
 
 	typedef FileDataContainerMemory::off_t off_t;
 
-private:
+	typedef FileDataContainerMemory data_type;
+	typedef const FileDataContainerMemory & ref_data_type;
+	typedef const FileDataContainerMemory & shared_data_type;
+	typedef FileDataContainerMemory value_data_type;
 
-	const FileDataContainerMemory & SharedDataContainer() const { return m_data; }
-	const FileDataContainerMemory & DataContainer() const { return m_data; }
-	FileDataContainerMemory m_data;
-	static FileDataContainerMemory DataInitializer() { return mpt::const_byte_span(); }
-	static FileDataContainerMemory DataInitializer(mpt::const_byte_span data) { return data; }
+	static shared_data_type get_shared(const data_type & data) { return data; }
+	static ref_data_type get_ref(const data_type & data) { return data; }
 
-	FileReader CreateChunkImpl(off_t position, off_t length) const
+	static value_data_type make_data() { return mpt::const_byte_span(); }
+	static value_data_type make_data(mpt::const_byte_span data) { return data; }
+
+	static value_data_type make_chunk(shared_data_type data, off_t position, off_t size)
 	{
-		return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
+		return mpt::as_span(data.GetRawData() + position, size);
 	}
+
+};
+
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+
+class FileReaderTraitsStdStream
+{
+
+public:
+
+	typedef IFileDataContainer::off_t off_t;
+
+	typedef std::shared_ptr<const IFileDataContainer> data_type;
+	typedef const IFileDataContainer & ref_data_type;
+	typedef std::shared_ptr<const IFileDataContainer> shared_data_type;
+	typedef std::shared_ptr<const IFileDataContainer> value_data_type;
+
+	static shared_data_type get_shared(const data_type & data) { return data; }
+	static ref_data_type get_ref(const data_type & data) { return *data; }
+
+	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
+	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
+
+	static value_data_type make_chunk(shared_data_type data, off_t position, off_t size)
+	{
+		return std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(data, position, size));
+	}
+
+};
+
+typedef FileReaderTraitsStdStream FileReaderTraitsDefault;
+
+#else // !MPT_FILEREADER_STD_ISTREAM
+
+typedef FileReaderTraitsMemory FileReaderTraitsDefault;
 
 #endif // MPT_FILEREADER_STD_ISTREAM
 
+namespace detail {
+
+template <typename Ttraits>
+class FileReader
+{
+
 private:
+
+	typedef Ttraits traits_type;
+	
+public:
+
+	typedef typename traits_type::off_t off_t;
+
+	typedef typename traits_type::data_type        data_type;
+	typedef typename traits_type::ref_data_type    ref_data_type;
+	typedef typename traits_type::shared_data_type shared_data_type;
+	typedef typename traits_type::value_data_type  value_data_type;
+
+protected:
+
+	shared_data_type SharedDataContainer() const { return traits_type::get_shared(m_data); }
+	ref_data_type DataContainer() const { return traits_type::get_ref(m_data); }
+
+	static value_data_type DataInitializer() { return traits_type::make_data(); }
+	static value_data_type DataInitializer(mpt::const_byte_span data) { return traits_type::make_data(data); }
+
+	static value_data_type CreateChunkImpl(shared_data_type data, off_t position, off_t size) { return traits_type::make_chunk(data, position, size); }
+
+private:
+
+	data_type m_data;
 
 	off_t streamPos;		// Cursor location in the file
 
@@ -116,9 +164,6 @@ public:
 		return;
 	}
 
-	// Initialize file reader object based on an existing file reader object window.
-	FileReader(std::shared_ptr<const IFileDataContainer> other) : m_data(other), streamPos(0), fileName(nullptr) { }
-
 #endif // MPT_FILEREADER_STD_ISTREAM
 
 public:
@@ -128,6 +173,9 @@ public:
 
 	// Initialize file reader object with pointer to data and data length.
 	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
+
+	// Initialize file reader object based on an existing file reader object window.
+	explicit FileReader(value_data_type other) : m_data(other), streamPos(0), fileName(nullptr) { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : m_data(other.m_data), streamPos(other.streamPos), fileName(other.fileName) { }
@@ -261,7 +309,7 @@ protected:
 		{
 			return FileReader();
 		}
-		return CreateChunkImpl(position, length);
+		return FileReader(CreateChunkImpl(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position)));
 	}
 
 public:
@@ -1062,9 +1110,12 @@ public:
 
 };
 
+} // namespace detail
+
+typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
 
 #if defined(MPT_ENABLE_FILEIO)
-// templated in order to reduce header inter-depoendencies
+// templated in order to reduce header inter-dependencies
 template <typename TInputFile>
 FileReader GetFileReader(TInputFile &file)
 {

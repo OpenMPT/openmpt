@@ -13,6 +13,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "../common/FileReaderFwd.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -74,7 +76,6 @@ private:
 };
 
 class CSoundFile;
-class FileReader;
 
 
 //===============

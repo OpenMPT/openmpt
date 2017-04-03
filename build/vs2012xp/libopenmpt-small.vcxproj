@@ -368,6 +368,7 @@
     <ClInclude Include="..\..\common\ComponentManager.h" />
     <ClInclude Include="..\..\common\Endianness.h" />
     <ClInclude Include="..\..\common\FileReader.h" />
+    <ClInclude Include="..\..\common\FileReaderFwd.h" />
     <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
