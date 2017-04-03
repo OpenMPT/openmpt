@@ -1353,6 +1353,18 @@ static MPT_NOINLINE void TestMisc()
 	
 	VERIFY_EQUAL(srlztn::ID::FromInt(static_cast<uint32>(0x87654321u)).AsString(), srlztn::ID("\x21\x43\x65\x87").AsString());
 
+#if defined(MODPLUG_TRACKER)
+
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.1.44" )).AsString() , MPT_USTRING("1.1.44"));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.6.2"  )).AsString() , MPT_USTRING("1.6.2" ));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.8"    )).AsString() , MPT_USTRING("1.8.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0-rc" )).AsString() , MPT_USTRING("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0-rc4")).AsString() , MPT_USTRING("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0"    )).AsString() , MPT_USTRING("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.4"    )).AsString() , MPT_USTRING("2.4.0" ));
+
+#endif // MODPLUG_TRACKER
+
 }
 
 
