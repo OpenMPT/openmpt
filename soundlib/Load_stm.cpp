@@ -75,9 +75,9 @@ STATIC_ASSERT(sizeof(STMSampleHeader) == 32);
 struct PACKED STMFileHeader
 {
 	char  songname[20];
-	char  trackername[8];			// !SCREAM! for ST 2.xx
-	uint8 dosEof;					// 0x1A
-	uint8 filetype;					// 1=song, 2=module (only 2 is supported, of course) :)
+	char  trackername[8];	// !Scream! for ST 2.xx
+	uint8 dosEof;			// 0x1A
+	uint8 filetype;			// 1=song, 2=module (only 2 is supported, of course) :)
 	uint8 verMajor;
 	uint8 verMinor;
 	uint8 initTempo;				// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
@@ -119,12 +119,16 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
+	// NOTE: Historically the magic byte check is case-insensitive.
+	// Other libraries (mikmod, xmp, Milkyplay) do not do this.
+	// ScreamTracker 2 and 3 do not care about the content of the magic bytes at all.
 	STMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.filetype != 2
 		|| fileHeader.dosEof != 0x1A
-		|| (mpt::CompareNoCaseAscii(fileHeader.trackername, "!SCREAM!", 8)
-			&& mpt::CompareNoCaseAscii(fileHeader.trackername, "BMOD2STM", 8))
+		|| (mpt::CompareNoCaseAscii(fileHeader.trackername, "!Scream!", 8)
+			&& mpt::CompareNoCaseAscii(fileHeader.trackername, "BMOD2STM", 8)
+			&& memcmp(fileHeader.trackername, "WUZAMOD!", 8))
 		|| !file.CanRead(31 * sizeof(STMSampleHeader) + 128))
 	{
 		return false;

@@ -439,13 +439,11 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 
 
 // Parse the order list to determine how many patterns are used in the file.
-static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, ORDERINDEX numOrders, size_t totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX numOrders, SmpLength totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
-#ifdef _DEBUG
 	PATTERNINDEX officialPatterns = 0;		// Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
-#endif
 	PATTERNINDEX numPatternsIllegal = 0;	// Total number of patterns in file, also counting in "invalid" pattern indexes >= 128
 
 	for(ORDERINDEX ord = 0; ord < 128; ord++)
@@ -454,12 +452,10 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 		if(pat < 128 && numPatterns <= pat)
 		{
 			numPatterns = pat + 1;
-#ifdef _DEBUG
 			if(ord < numOrders)
 			{
 				officialPatterns = numPatterns;
 			}
-#endif
 		}
 		if(pat >= numPatternsIllegal)
 		{
@@ -476,11 +472,42 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
 
-	// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
-	// Basically, WOW files seem to use the M.K. extensions, but are actually 8CHN files.
 	if(checkForWOW && sizeWithoutPatterns + numPatterns * 8 * 256 == file.GetLength())
 	{
+		// Check if this is a Mod's Grave WOW file... Never seen one of those, but apparently they *do* exist.
+		// WOW files should use the M.K. magic but are actually 8CHN files.
 		numChannels = 8;
+	} else if(numPatterns != officialPatterns && numChannels == 4 && !checkForWOW)
+	{
+		// Fix SoundTracker modules where "hidden" patterns should be ignored.
+		// razor-1911.mod (MD5 b75f0f471b0ae400185585ca05bf7fe8, SHA1 4de31af234229faec00f1e85e1e8f78f405d454b)
+		// and captain_fizz.mod (MD5 55bd89fe5a8e345df65438dbfc2df94e, SHA1 9e0e8b7dc67939885435ea8d3ff4be7704207a43)
+		// seem to have the "correct" file size when only taking the "official" patterns into account,
+		// but they only play correctly when also loading the inofficial patterns.
+		// On the other hand, the SoundTracker module
+		// wolf1.mod (MD5 a4983d7a432d324ce8261b019257f4ed, SHA1 aa6b399d02546bcb6baf9ec56a8081730dea3f44),
+		// wolf3.mod (MD5 af60840815aa9eef43820a7a04417fa6, SHA1 24d6c2e38894f78f6c5c6a4b693a016af8fa037b)
+		// and jean_baudlot_-_bad_dudes_vs_dragonninja-dragonf.mod (MD5 fa48e0f805b36bdc1833f6b82d22d936, SHA1 39f2f8319f4847fe928b9d88eee19d79310b9f91)
+		// only play correctly if we ignore the hidden patterns.
+		// Hence, we have a peek at the first hidden pattern and check if it contains a lot of illegal data.
+		// If that is the case, we assume it's part of the sample data and only consider the "official" patterns.
+		file.Seek(patternStartOffset + officialPatterns * 1024);
+		int illegalBytes = 0;
+		for(int i = 0; i < 256; i++)
+		{
+			uint8 data[4];
+			file.ReadArray(data);
+			if(data[0] & 0xE0)
+			{
+				illegalBytes++;
+				if(illegalBytes > 64)
+				{
+					numPatterns = officialPatterns;
+					break;
+				}
+			}
+		}
+		file.Seek(patternStartOffset);
 	}
 
 #ifdef _DEBUG
@@ -489,15 +516,9 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	// Interestingly, (broken) variants of the ProTracker modules
 	// "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021),
 	// "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c),
-	// and the SoundTracker modules
-	// razor-1911.mod (MD5 b75f0f471b0ae400185585ca05bf7fe8, SHA1 4de31af234229faec00f1e85e1e8f78f405d454b)
-	// and captain_fizz.mod (MD5 55bd89fe5a8e345df65438dbfc2df94e, SHA1 9e0e8b7dc67939885435ea8d3ff4be7704207a43)
 	// seem to have the "correct" file size when only taking the "official" patterns into account, but they only play
 	// correctly when also loading the inofficial patterns.
-	// On the other hand, the SoundTracker module
-	// wolf1.mod (MD5 a4983d7a432d324ce8261b019257f4ed, SHA1 aa6b399d02546bcb6baf9ec56a8081730dea3f44)
-	// does not play correctly with the current code. It's just a short jingle, though, so it's probably less
-	// important to play correctly than the aforementioned modules.
+	// See also the above check for ambiguities with SoundTracker modules.
 	// Keep this assertion in the code to find potential other broken MODs.
 	if(numPatterns != officialPatterns && sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
 	{
@@ -1043,8 +1064,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 		invalidChars += CountInvalidChars(sampleHeader.name);
 
-		// Sanity checks
-		if(invalidChars > 20
+		// Sanity checks - invalid character count adjusted for ata.mod (MD5 937b79b54026fa73a1a4d3597c26eace, SHA1 3322ca62258adb9e0ae8e9afe6e0c29d39add874)
+		if(invalidChars > 48
 			|| sampleHeader.volume > 64
 			|| sampleHeader.finetune != 0
 			|| sampleHeader.length > 32768)
@@ -1145,6 +1166,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Scan patterns to identify Ultimate Soundtracker modules.
 	uint8 emptyCmds = 0;
 	uint8 numDxx = 0;
+	uint32 illegalBytes = 0;
 	for(uint32 i = 0; i < numPatterns * 64u * 4u; i++)
 	{
 		uint8 data[4];
@@ -1152,6 +1174,18 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		const ROWINDEX row = (i / 4u) % 64u;
 		const bool firstInPattern = (i % (64u * 4u)) == 0;
 		const uint8 eff = data[2] & 0x0F, param = data[3];
+		if(data[0] & 0xF0)
+		{
+			illegalBytes++;
+			// Reject files that contain a lot of illegal pattern data.
+			// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
+			// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
+			// This also allows to play some rather damaged files like
+			// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
+			// but naturally we cannot recover the broken data.
+			if(illegalBytes > 1024)
+				return false;
+		}
 		// Check for empty space between the last Dxx command and the beginning of another pattern
 		if(emptyCmds != 0 && !firstInPattern && !memcmp(data, "\0\0\0\0", 4))
 		{

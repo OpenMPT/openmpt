@@ -205,7 +205,7 @@ ptm="\x1A\x03\x02"
 s3m="SCRM"
 s3m="SCRS"
 
-stm="!SCREAM!\x1A\x02"
+stm="!Scream!\x1A\x02"
 stm="BMOD2STM\x1A\x02"
 
 ult="MAS_UTrack_V004"
