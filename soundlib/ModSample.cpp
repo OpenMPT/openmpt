@@ -89,7 +89,10 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		if(nVibRate != 0 && nVibDepth != 0)
 		{
-			nVibSweep = 255 - nVibSweep;
+			if(nVibSweep != 0)
+				nVibSweep = mpt::saturate_cast<uint8>(Util::muldivr_unsigned(nVibDepth, 256, nVibSweep));
+			else
+				nVibSweep = 255;
 		}
 	}
 	// Convert incompatible autovibrato types

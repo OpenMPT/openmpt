@@ -532,12 +532,13 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 {
 	if ((pszText) && (uId))
 	{
+		UINT val = GetDlgItemInt(uId);
 		switch(uId)
 		{
 		case IDC_EDIT7:
 		case IDC_EDIT8:
 			// Volume to dB
-			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(uId), 64.0));
+			_tcscpy(pszText, CModDoc::LinearToDecibels(val, 64.0));
 			return TRUE;
 
 		case IDC_EDIT9:
@@ -560,6 +561,48 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 				return TRUE;
 			}
 			break;
+
+		case IDC_EDIT14:
+			// Vibrato Sweep
+			if(m_nSample)
+			{
+				const ModSample &sample = m_sndFile.GetSample(m_nSample);
+				int ticks = -1;
+				if(m_sndFile.m_playBehaviour[kITVibratoTremoloPanbrello])
+				{
+					if(val > 0)
+						ticks = Util::muldivr_unsigned(sample.nVibDepth, 256, val);
+				} else if(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				{
+					if(val > 0)
+						ticks = Util::muldivr_unsigned(sample.nVibDepth, 128, val);
+				} else
+				{
+					ticks = val;
+				}
+				if(ticks >= 0)
+					_stprintf(pszText, _T("%d ticks"), ticks);
+				else
+					_tcscpy(pszText, _T("No Vibrato"));
+			}
+			return TRUE;
+		case IDC_EDIT15:
+			// Vibrato Depth
+			_stprintf(pszText, _T("%d cents"), Util::muldivr_unsigned(val, 100, 64));
+			return TRUE;
+		case IDC_EDIT16:
+			// Vibrato Rate
+			if(val == 0)
+			{
+				_tcscpy(pszText, _T("Stopped"));
+			} else
+			{
+				uint32 ticksPerCycle = 256 / val;
+				uint32 ticksPerBeat = std::max(1u, (m_sndFile.m_PlayState.m_nCurrentRowsPerBeat * m_sndFile.m_PlayState.m_nMusicSpeed));
+				_stprintf(pszText, _T("%.2f beats per cycle (%d ticks)"), ticksPerCycle * (1.0 / ticksPerBeat), ticksPerCycle);
+			}
+			return TRUE;
+
 		case IDC_EDIT_STRETCHPARAMS:
 			_tcscpy(pszText, _T("SequenceMs SeekwindowMs OverlapMs"));
 			return TRUE;
