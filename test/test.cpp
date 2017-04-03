@@ -2833,7 +2833,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
 	mpt::ifstream stream(filename, std::ios::binary);
-	FileReader file(&stream);
+	FileReader file = make_FileReader(&stream);
 	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
 	return pSndFile;
