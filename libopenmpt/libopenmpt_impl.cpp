@@ -626,10 +626,10 @@ double module_impl::could_open_probability( callback_stream_wrapper stream, doub
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	return could_open_probability( FileReader( fstream ), effort, log );
+	return could_open_probability( make_FileReader( fstream ), effort, log );
 }
 double module_impl::could_open_probability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
-	return could_open_probability( FileReader( &stream ), effort, log );
+	return could_open_probability( make_FileReader( &stream ), effort, log );
 }
 
 module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
@@ -639,37 +639,37 @@ module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_in
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	load( FileReader( fstream ), ctls );
+	load( make_FileReader( fstream ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( &stream ), ctls );
+	load( make_FileReader( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( mpt::as_span( data ) ), ctls );
+	load( make_FileReader( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data ) ) ), ctls );
+	load( make_FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( mpt::as_span( data, size ) ), ctls );
+	load( make_FileReader( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data, size ) ) ), ctls );
+	load( make_FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data, size ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 	ctor( ctls );
-	load( FileReader( mpt::as_span( mpt::void_cast< const mpt::byte * >( data ), size ) ), ctls );
+	load( make_FileReader( mpt::as_span( mpt::void_cast< const mpt::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::~module_impl() {
