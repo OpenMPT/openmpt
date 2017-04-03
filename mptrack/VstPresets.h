@@ -12,9 +12,10 @@
 
 #include <iosfwd>
 
+#include "../common/FileReaderFwd.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
-class FileReader;
 class IMixPlugin;
 
 class VSTPresets

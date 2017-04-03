@@ -36,6 +36,9 @@
     <ClInclude Include="..\..\common\FileReader.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\FileReaderFwd.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\FlagSet.h">
       <Filter>common</Filter>
     </ClInclude>

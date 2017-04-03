@@ -10,9 +10,9 @@
 
 #pragma once
 
-OPENMPT_NAMESPACE_BEGIN
+#include "../common/FileReaderFwd.h"
 
-class FileReader;
+OPENMPT_NAMESPACE_BEGIN
 
 class MPEGFrame
 {

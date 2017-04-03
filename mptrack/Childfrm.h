@@ -12,11 +12,12 @@
 
 #include "PatternCursor.h"
 
+#include "../common/FileReaderFwd.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CModControlView;
 class CModControlDlg;
-class FileReader;
 class CChildFrame;
 
 typedef struct _GENERALVIEWSTATE

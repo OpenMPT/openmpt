@@ -51,11 +51,12 @@
 #include "patternContainer.h"
 #include "ModSequence.h"
 
+#include "../common/FileReaderFwd.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-class FileReader;
 // -----------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
 // -----------------------------------------------------------------------------

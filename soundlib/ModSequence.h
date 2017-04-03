@@ -13,11 +13,12 @@
 #include <algorithm>
 #include <vector>
 
+#include "../common/FileReaderFwd.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 class ModSequenceSet;
-class FileReader;
 
 class ModSequence
 //===============

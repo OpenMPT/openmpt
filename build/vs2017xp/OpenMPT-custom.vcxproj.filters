@@ -105,6 +105,9 @@
     <ClInclude Include="..\..\common\FileReader.h">
       <Filter>Headers\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\FileReaderFwd.h">
+      <Filter>Headers\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\FlagSet.h">
       <Filter>Headers\common</Filter>
     </ClInclude>
