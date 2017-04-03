@@ -59,7 +59,7 @@ private:
 
 public:
 
-	typedef std::size_t off_t;
+	typedef FileDataContainerMemory::off_t off_t;
 
 private:
 
