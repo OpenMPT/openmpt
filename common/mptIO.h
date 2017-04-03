@@ -799,11 +799,6 @@ class FileDataContainerMemory
 #endif
 {
 
-#if !defined(MPT_FILEREADER_STD_ISTREAM)
-public:
-	typedef std::size_t off_t;
-#endif
-
 private:
 
 	const mpt::byte *streamData;	// Pointer to memory-mapped file
