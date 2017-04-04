@@ -548,6 +548,8 @@ mpt::Wine::Version GetMinimumWineVersion()
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
 		#if MPT_MSVC_AT_LEAST(2013, 0) && !defined(MPT_BUILD_TARGET_XP)
 			minimumWineVersion = mpt::Wine::Version(1,8,0);
+		#elif MPT_MSVC_AT_LEAST(2015, 0) && defined(MPT_BUILD_TARGET_XP)
+			minimumWineVersion = mpt::Wine::Version(1,6,0);
 		#elif MPT_MSVC_AT_LEAST(2013, 0) && defined(MPT_BUILD_TARGET_XP)
 			minimumWineVersion = mpt::Wine::Version(1,4,0);
 		#elif MPT_MSVC_AT_LEAST(2012, 0)
