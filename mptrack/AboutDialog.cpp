@@ -388,8 +388,46 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
+			{
+				text += MPT_USTRING("Available CPU features: ");
+				std::vector<mpt::ustring> features;
+				#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
+					#if defined(ENABLE_X86)
+						features.push_back(MPT_USTRING("x86"));
+						if(GetRealProcSupport() & PROCSUPPORT_FPU) features.push_back(MPT_USTRING("fpu"));
+						if(GetRealProcSupport() & PROCSUPPORT_CMOV) features.push_back(MPT_USTRING("cmov"));
+					#endif
+					#if defined(ENABLE_X64)
+						features.push_back(MPT_USTRING("x86-64"));
+					#endif
+					#if defined(ENABLE_MMX)
+						if(GetRealProcSupport() & PROCSUPPORT_MMX) features.push_back(MPT_USTRING("mmx"));
+					#endif
+					#if defined(ENABLE_SSE)
+						if(GetRealProcSupport() & PROCSUPPORT_SSE) features.push_back(MPT_USTRING("sse"));
+					#endif
+					#if defined(ENABLE_SSE2)
+						if(GetRealProcSupport() & PROCSUPPORT_SSE2) features.push_back(MPT_USTRING("sse2"));
+					#endif
+					#if defined(ENABLE_SSE3)
+						if(GetRealProcSupport() & PROCSUPPORT_SSE3) features.push_back(MPT_USTRING("sse3"));
+						if(GetRealProcSupport() & PROCSUPPORT_SSSE3) features.push_back(MPT_USTRING("ssse3"));
+					#endif
+					#if defined(ENABLE_SSE4)
+						if(GetRealProcSupport() & PROCSUPPORT_SSE4_1) features.push_back(MPT_USTRING("sse4.1"));
+						if(GetRealProcSupport() & PROCSUPPORT_SSE4_2) features.push_back(MPT_USTRING("sse4.2"));
+					#endif
+					#if defined(ENABLE_X86_AMD)
+						if(GetRealProcSupport() & PROCSUPPORT_AMD_MMXEXT) features.push_back(MPT_USTRING("mmxext"));
+						if(GetRealProcSupport() & PROCSUPPORT_AMD_3DNOW) features.push_back(MPT_USTRING("3dnow"));
+						if(GetRealProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) features.push_back(MPT_USTRING("3dnowext"));
+					#endif
+				#endif
+				text += mpt::String::Combine(features, MPT_USTRING(" "));
+				text += lf;
+			}
 			text += lf;
-			if(GetProcSupport() & PROCSUPPORT_CPUID)
+			if(GetRealProcSupport() & PROCSUPPORT_CPUID)
 			{
 				text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
 					( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))

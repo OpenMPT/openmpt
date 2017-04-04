@@ -251,14 +251,14 @@ bool BuildVariants::ProcessorCanRunCurrentBuild()
 //-------------------------------------------
 {
 	BuildVariant build = GetCurrentBuildVariant();
-	if((GetProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags) return false;
+	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags) return false;
 	if(build.MinimumSSE >= 1)
 	{
-		if (!(GetProcSupport() & PROCSUPPORT_SSE)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE)) return false;
 	}
 	if(build.MinimumSSE >= 2)
 	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE2)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2)) return false;
 	}
 	return true;
 }
@@ -270,20 +270,20 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 	{
 		return false;
 	}
-	if((GetProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags)
+	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags)
 	{
 		return false;
 	}
 	if(build.MinimumSSE >= 1)
 	{
-		if (!(GetProcSupport() & PROCSUPPORT_SSE))
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE))
 		{
 			return false;
 		}
 	}
 	if(build.MinimumSSE >= 2)
 	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE2))
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2))
 		{
 			return false;
 		}

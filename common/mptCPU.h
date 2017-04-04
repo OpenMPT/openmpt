@@ -38,6 +38,7 @@ static const uint32 PROCSUPPORT_x86_SSE  = 0u | PROCSUPPORT_CPUID | PROCSUPPORT_
 static const uint32 PROCSUPPORT_x86_SSE2 = 0u | PROCSUPPORT_CPUID | PROCSUPPORT_CMOV | PROCSUPPORT_FPU | PROCSUPPORT_SSE | PROCSUPPORT_SSE2;
 static const uint32 PROCSUPPORT_AMD64    = 0u | PROCSUPPORT_CPUID | PROCSUPPORT_CMOV                   | PROCSUPPORT_SSE | PROCSUPPORT_SSE2;
 
+extern uint32 RealProcSupport;
 extern uint32 ProcSupport;
 extern char ProcVendorID[16+1];
 extern uint16 ProcFamily;
@@ -46,9 +47,16 @@ extern uint8 ProcStepping;
 
 void InitProcSupport();
 
+// enabled processor features for inline asm and intrinsics
 static inline uint32 GetProcSupport()
 {
 	return ProcSupport;
+}
+
+// available processor features
+static inline uint32 GetRealProcSupport()
+{
+	return RealProcSupport;
 }
 
 #endif // ENABLE_ASM
