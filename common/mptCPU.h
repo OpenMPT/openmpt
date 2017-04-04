@@ -29,16 +29,24 @@ OPENMPT_NAMESPACE_BEGIN
 #define PROCSUPPORT_SSSE3        0x00800 // Processor supports SSSE3 instructions
 #define PROCSUPPORT_SSE4_1       0x01000 // Processor supports SSE4.1 instructions
 #define PROCSUPPORT_SSE4_2       0x02000 // Processor supports SSE4.2 instructions
+extern uint32 RealProcSupport;
 extern uint32 ProcSupport;
 extern char ProcVendorID[16+1];
 extern uint16 ProcFamily;
 extern uint8 ProcModel;
 extern uint8 ProcStepping;
 void InitProcSupport();
+// enabled processor features for inline asm and intrinsics
 static inline uint32 GetProcSupport()
 {
 	return ProcSupport;
 }
+// available processor features
+static inline uint32 GetRealProcSupport()
+{
+	return RealProcSupport;
+}
+
 #endif // ENABLE_ASM
 
 

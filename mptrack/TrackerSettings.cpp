@@ -83,10 +83,10 @@ static ResamplingMode GetDefaultResamplerMode()
 	ResamplingMode result = CResamplerSettings().SrcMode;
 #ifdef ENABLE_ASM
 	// rough heuristic to select less cpu consuming defaults for old CPUs
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if(GetRealProcSupport() & PROCSUPPORT_SSE)
 	{
 		result = SRCMODE_POLYPHASE;
-	} else if(GetProcSupport() & PROCSUPPORT_MMX)
+	} else if(GetRealProcSupport() & PROCSUPPORT_MMX)
 	{
 		result = SRCMODE_SPLINE;
 	} else

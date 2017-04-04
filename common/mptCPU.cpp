@@ -18,6 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(ENABLE_ASM)
 
 
+uint32 RealProcSupport = 0;
 uint32 ProcSupport = 0;
 char ProcVendorID[16+1] = "";
 uint16 ProcFamily = 0;
@@ -114,6 +115,7 @@ void InitProcSupport()
 //--------------------
 {
 
+	RealProcSupport = 0;
 	ProcSupport = 0;
 	MemsetZero(ProcVendorID);
 	ProcFamily = 0;
@@ -265,6 +267,8 @@ void InitProcSupport()
 
 	// We do not have to check if SSE got enabled by the OS because we only do
 	// support Windows >= 98 SE which will always enable SSE if available.
+
+	RealProcSupport = ProcSupport;
 
 }
 

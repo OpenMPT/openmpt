@@ -885,13 +885,13 @@ bool CTrackApp::ProcessorCanRunCurrentBuild()
 {
 	if(GetMinimumSSEVersion() >= 2)
 	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE2)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2)) return false;
 	} else if(GetMinimumSSEVersion() >= 1)
 	{
-		if(!(GetProcSupport() & PROCSUPPORT_SSE)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_CMOV)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_TSC)) return false;
-		if(!(GetProcSupport() & PROCSUPPORT_CPUID)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_CMOV)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_TSC)) return false;
+		if(!(GetRealProcSupport() & PROCSUPPORT_CPUID)) return false;
 	}
 	return true;
 }
@@ -903,11 +903,11 @@ bool CTrackApp::SystemCanRunModernBuilds()
 	return true
 		&& mpt::Windows::Version::Current().IsNT()
 		&& mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7)
-		&& (GetProcSupport() & PROCSUPPORT_CPUID)
-		&& (GetProcSupport() & PROCSUPPORT_TSC)
-		&& (GetProcSupport() & PROCSUPPORT_CMOV)
-		&& (GetProcSupport() & PROCSUPPORT_SSE)
-		&& (GetProcSupport() & PROCSUPPORT_SSE2)
+		&& (GetRealProcSupport() & PROCSUPPORT_CPUID)
+		&& (GetRealProcSupport() & PROCSUPPORT_TSC)
+		&& (GetRealProcSupport() & PROCSUPPORT_CMOV)
+		&& (GetRealProcSupport() & PROCSUPPORT_SSE)
+		&& (GetRealProcSupport() & PROCSUPPORT_SSE2)
 		;
 }
 
@@ -1025,12 +1025,10 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	#ifdef ENABLE_ASM
+		InitProcSupport();
 		if(cmdInfo.m_bNoAssembly)
 		{
 			ProcSupport = 0;
-		} else
-		{
-			InitProcSupport();
 		}
 	#endif
 
