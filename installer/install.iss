@@ -70,6 +70,7 @@ Source: ..\bin\{#PlatformFolderOld}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; 
 #ifndef NO_MO3
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
+Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
 
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
 

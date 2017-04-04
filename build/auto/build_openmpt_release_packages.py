@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # OpenMPT packaging script by Saga Musix
-# http://openmpt.org/
-# Requires pywin32 (https://sourceforge.net/projects/pywin32/)
+# https://openmpt.org/
+# Requires pywin32 (pip install pypiwin32 or https://sourceforge.net/projects/pywin32/)
 
 from win32api import GetFileVersionInfo
 from subprocess import Popen
@@ -44,6 +44,7 @@ def copy_binaries(from_path, to_path):
     copy_file(from_path, to_path, "PluginBridge64.exe")
     copy_file(from_path, to_path, "OpenMPT_SoundTouch_f32.dll")
     copy_file(from_path, to_path, "unmo3.dll")
+    copy_file(from_path, to_path, "openmpt-wine-support.zip")
     #copy_file(from_path, to_path + "Plugins/MIDI/", "MIDI Input Output.dll")
 
 def copy_other(to_path, openmpt_version_short):
