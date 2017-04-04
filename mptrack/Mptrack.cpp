@@ -1447,7 +1447,10 @@ int CTrackApp::ExitInstanceImpl()
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
 
-	SetWineVersion(MPT_SHARED_PTR_NULL(mpt::Wine::VersionContext));
+	if(mpt::Windows::IsWine())
+	{
+		SetWineVersion(MPT_SHARED_PTR_NULL(mpt::Wine::VersionContext));
+	}
 
 	m_PRNG.reset();
 	mpt::set_global_prng(nullptr);
