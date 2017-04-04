@@ -58,7 +58,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		PNG::Pixel *pixel = bitmap->GetPixels();
 		for(uint32 y = 0; y < bitmap->height; y++)
 		{
-			uint8 *mask = bitmapMask.data() + rowSize * y;
+			uint8 *mask = &bitmapMask[rowSize * y];
 			for(uint32 x = 0; x < bitmap->width; x++, pixel++)
 			{
 				if(pixel->a != 0)
@@ -97,7 +97,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 
 		if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
 		dibMask.CreateCompatibleBitmap(dc, bitmap->width, bitmap->height);
-		SetDIBits(dc->GetSafeHdc(), dibMask, 0, bitmap->height, bitmapMask.data(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
+		SetDIBits(dc->GetSafeHdc(), dibMask, 0, bitmap->height, &bitmapMask[0], reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
 
 		result = CImageList::Create(cx, cy, ILC_COLOR24 | ILC_MASK, nInitial, nGrow)
 			&& CImageList::Add(&dib, &dibMask);
