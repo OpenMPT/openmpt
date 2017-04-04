@@ -13,6 +13,8 @@
 #include "CImageListEx.h"
 #include "PNG.h"
 
+#include "Mptrack.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -46,7 +48,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	// They all support 1-bit transparency, though, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
 	// Additionally, since we create a bitmap that fits the device's bit depth, we apply this fix when using a bit depth that doesn't have an alpha channel.
 	if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::WinXP)
-		|| (mpt::Windows::IsWine() && !mpt::Wine::VersionContext().Version().IsAtLeast(mpt::Wine::Version(1,6,0)))
+		|| (mpt::Windows::IsWine() && !theApp.GetWineVersion()->Version().IsAtLeast(mpt::Wine::Version(1,6,0)))
 		|| GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
 	{
 		uint32 rowSize = (bitmap->width + 31u) / 32u * 4u;
