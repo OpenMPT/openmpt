@@ -289,10 +289,13 @@ public:
 
 	void SetWineVersion(std::shared_ptr<mpt::Wine::VersionContext> wineVersion)
 	{
+		MPT_ASSERT_ALWAYS(mpt::Windows::IsWine());
 		m_WineVersion = wineVersion;
 	}
 	std::shared_ptr<mpt::Wine::VersionContext> GetWineVersion() const
 	{
+		MPT_ASSERT_ALWAYS(mpt::Windows::IsWine());
+		MPT_ASSERT_ALWAYS(m_WineVersion); // Verify initialization order. We should not should reach this until after Wine is detected.
 		return m_WineVersion;
 	}
 
