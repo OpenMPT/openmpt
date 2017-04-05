@@ -236,6 +236,9 @@
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 
+// Disable the built-in EQ effect
+//#define NO_EQ
+
 // Disable the built-in reverb effect
 //#define NO_REVERB
 
@@ -310,6 +313,7 @@
 #else
 #define NO_ARCHIVE_SUPPORT
 #endif
+#define NO_EQ
 #define NO_REVERB
 #define NO_DSP
 #define NO_EQ
