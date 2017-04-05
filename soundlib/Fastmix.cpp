@@ -304,17 +304,12 @@ void CSoundFile::CreateStereoMix(int count)
 
 		mixsample_t *pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
-#ifdef ENABLE_MMX
-		if(GetProcSupport() & PROCSUPPORT_MMX)
+		if(((m_MixerSettings.DSPMask & SNDDSP_REVERB) && !chn.dwFlags[CHN_NOREVERB]) || chn.dwFlags[CHN_REVERB])
 		{
-			if(((m_MixerSettings.DSPMask & SNDDSP_REVERB) && !chn.dwFlags[CHN_NOREVERB]) || chn.dwFlags[CHN_REVERB])
-			{
-				pbuffer = m_Reverb.GetReverbSendBuffer(count);
-				pOfsR = &m_Reverb.gnRvbROfsVol;
-				pOfsL = &m_Reverb.gnRvbLOfsVol;
-			}
+			pbuffer = m_Reverb.GetReverbSendBuffer(count);
+			pOfsR = &m_Reverb.gnRvbROfsVol;
+			pOfsL = &m_Reverb.gnRvbLOfsVol;
 		}
-#endif
 #endif
 		if(chn.dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels > 2)
 			pbuffer = MixRearBuffer;

@@ -1466,15 +1466,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		}
 	}
 	m_CbnReverbPreset.SetCurSel(nSel);
-	if(!(GetProcSupport() & PROCSUPPORT_MMX))
-	{
-		GetDlgItem(IDC_CHECK6)->EnableWindow(FALSE);
-		m_SbReverbDepth.EnableWindow(FALSE);
-		m_CbnReverbPreset.EnableWindow(FALSE);
-	} else
-	{
-		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, BST_CHECKED);
-	}
+	if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK6)->EnableWindow(FALSE);
 	m_SbReverbDepth.EnableWindow(FALSE);
