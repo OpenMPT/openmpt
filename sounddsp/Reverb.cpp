@@ -42,9 +42,12 @@ static MPT_FORCEINLINE __m64 Load32From16MMX(const int16 (&x)[2]) { return _mm_c
 static MPT_FORCEINLINE __m64 Load32From16MMX(const int16 &x) { return _mm_cvtsi32_si64(Two16To32(&x)); }
 // Store 64-bit value from register (MSVC does not have_mm_cvtsi64_si64x) - macro to avoid emms warnings
 #define Store64MMX(dst, src) \
-	STATIC_ASSERT(sizeof(dst[0]) == 4); \
-	dst[0] = _mm_cvtsi64_si32(src); \
-	dst[1] = _mm_cvtsi64_si32(_mm_unpackhi_pi32(src, src));
+	MPT_DO \
+	{ \
+		STATIC_ASSERT(sizeof(dst[0]) == 4); \
+		dst[0] = _mm_cvtsi64_si32(src); \
+		dst[1] = _mm_cvtsi64_si32(_mm_unpackhi_pi32(src, src)); \
+	} MPT_WHILE_0
 #endif
 #ifdef ENABLE_SSE2
 // Load two 32-bit values
