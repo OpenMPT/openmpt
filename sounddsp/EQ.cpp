@@ -20,6 +20,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#ifndef NO_EQ
+
+
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
 
@@ -552,6 +555,10 @@ void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChan
 		rear.ProcessStereo(rearBuffer, EQTempFloatBuffer, nCount);
 	}
 }
+
+
+
+#endif // !NO_EQ
 
 
 OPENMPT_NAMESPACE_END

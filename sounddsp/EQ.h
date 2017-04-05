@@ -15,6 +15,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#ifndef NO_EQ
+
 #define MAX_EQ_BANDS	6
 
 typedef struct _EQBANDSTRUCT
@@ -63,5 +65,7 @@ public:
 	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq);
 };
 
+
+#endif // !NO_EQ
 
 OPENMPT_NAMESPACE_END
