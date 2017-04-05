@@ -668,6 +668,7 @@ SOUNDLIB_CXX_SOURCES += \
  $(sort $(wildcard soundlib/*.cpp)) \
  $(sort $(wildcard soundlib/plugins/*.cpp)) \
  $(sort $(wildcard soundlib/plugins/dmo/*.cpp)) \
+ $(sort $(wildcard sounddsp/*.cpp)) \
  
 
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
@@ -1100,6 +1101,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./common             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
 	svn export ./soundbase          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundbase
 	svn export ./soundlib           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
+	svn export ./sounddsp           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/sounddsp
 	svn export ./test               bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
 	svn export ./libopenmpt         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
 	svn export ./examples           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
@@ -1127,6 +1129,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./common                bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF
 	svn export ./soundbase             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundbase             --native-eol CRLF
 	svn export ./soundlib              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib              --native-eol CRLF
+	svn export ./sounddsp              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/sounddsp              --native-eol CRLF
 	svn export ./test                  bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test                  --native-eol CRLF
 	svn export ./libopenmpt            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt            --native-eol CRLF
 	svn export ./examples              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples              --native-eol CRLF

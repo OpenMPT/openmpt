@@ -314,11 +314,7 @@
 #define NO_ARCHIVE_SUPPORT
 #endif
 #define NO_EQ
-#if MPT_COMPILER_MSVC
 //#define NO_REVERB
-#else
-#define NO_REVERB
-#endif
 #define NO_DSP
 #define NO_EQ
 #define NO_AGC

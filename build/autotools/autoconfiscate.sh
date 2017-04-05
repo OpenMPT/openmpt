@@ -34,6 +34,7 @@ svn export ./README.md       bin/dist-autotools/README.md
 svn export ./common          bin/dist-autotools/common
 svn export ./soundbase       bin/dist-autotools/soundbase
 svn export ./soundlib        bin/dist-autotools/soundlib
+svn export ./sounddsp        bin/dist-autotools/sounddsp
 svn export ./test            bin/dist-autotools/test
 svn export ./libopenmpt      bin/dist-autotools/libopenmpt
 svn export ./examples        bin/dist-autotools/examples
@@ -58,6 +59,7 @@ cp -r ./README.md       bin/dist-autotools/README.md
 cp -r ./common          bin/dist-autotools/common
 cp -r ./soundbase       bin/dist-autotools/soundbase
 cp -r ./soundlib        bin/dist-autotools/soundlib
+cp -r ./sounddsp        bin/dist-autotools/sounddsp
 cp -r ./test            bin/dist-autotools/test
 cp -r ./libopenmpt      bin/dist-autotools/libopenmpt
 cp -r ./examples        bin/dist-autotools/examples
