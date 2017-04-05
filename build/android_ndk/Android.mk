@@ -244,6 +244,10 @@ LOCAL_SRC_FILES += \
 	soundlib/plugins/dmo/WavesReverb.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \
+	sounddsp/AGC.cpp \
+	sounddsp/DSP.cpp \
+	sounddsp/EQ.cpp \
+	sounddsp/Reverb.cpp \
 	test/TestToolsLib.cpp \
 	test/test.cpp
 
