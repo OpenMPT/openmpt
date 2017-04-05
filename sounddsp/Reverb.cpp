@@ -25,10 +25,13 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#if defined(ENABLE_MMX) || defined(ENABLE_SSE2)
 // Obtain a 32-bit reference from a pointer to two 16-bit values
 static MPT_FORCEINLINE int32& Two16To32(int16 *x) { return *reinterpret_cast<int32 *>(x); }
 static MPT_FORCEINLINE int32& Two16To32(int16 &x) { return reinterpret_cast<int32 &>(x); }
 static MPT_FORCEINLINE const int32& Two16To32(const int16 *x) { return *reinterpret_cast<const int32 *>(x); }
+#endif // ENABLE_MMX || ENABLE_SSE2
 #ifdef ENABLE_MMX
 // Load two 32-bit values
 static MPT_FORCEINLINE __m64 Load64MMX(const int32 *x) { return _mm_set_pi32(x[1], x[0]); }
