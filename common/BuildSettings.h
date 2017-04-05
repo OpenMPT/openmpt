@@ -239,7 +239,7 @@
 // Disable the built-in reverb effect
 //#define NO_REVERB
 
-// Disable built-in miscellaneous DSP effects (surround, mega bass, noise reduction) 
+// Disable built-in miscellaneous DSP effects (surround, mega bass, noise reduction)
 //#define NO_DSP
 
 // Disable the built-in equalizer.
@@ -493,10 +493,6 @@
 
 #endif // arch
 #endif // ENABLE_ASM
-
-#if !defined(ENABLE_X86) && !defined(NO_DSP)
-#define NO_DSP // DSP requires x86 inline asm
-#endif
 
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
