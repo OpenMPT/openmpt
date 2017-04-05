@@ -10,6 +10,9 @@
     <Filter Include="soundbase">
       <UniqueIdentifier>{69D0CCEC-D53A-8163-1E79-32098A225FB8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sounddsp">
+      <UniqueIdentifier>{55EAB016-41B7-0B22-6AD0-F9C956FC40B0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="soundlib">
       <UniqueIdentifier>{050BB116-F1D7-0B22-1AF1-F9C9061D41B0}</UniqueIdentifier>
     </Filter>
@@ -170,6 +173,18 @@
     </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h">
       <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\AGC.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\DSP.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\EQ.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\Reverb.h">
+      <Filter>sounddsp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\AudioCriticalSection.h">
       <Filter>soundlib</Filter>
@@ -442,6 +457,18 @@
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp">
       <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\AGC.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\DSP.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\EQ.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\Reverb.cpp">
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
       <Filter>soundlib</Filter>

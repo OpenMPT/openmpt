@@ -16,6 +16,9 @@
     <Filter Include="soundlib\plugins\dmo">
       <UniqueIdentifier>{BFA8DAD5-AB37-649F-5456-789A40C47445}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sounddsp">
+      <UniqueIdentifier>{55EAB016-41B7-0B22-6AD0-F9C956FC40B0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="libopenmpt">
       <UniqueIdentifier>{FFE9848F-EBA1-C6DC-54A9-9F38408061CD}</UniqueIdentifier>
     </Filter>
@@ -314,6 +317,18 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h">
       <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\AGC.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\DSP.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\EQ.h">
+      <Filter>sounddsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddsp\Reverb.h">
+      <Filter>sounddsp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt.h">
       <Filter>libopenmpt</Filter>
@@ -682,6 +697,18 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp">
       <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\AGC.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\DSP.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\EQ.cpp">
+      <Filter>sounddsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\Reverb.cpp">
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp">
       <Filter>libopenmpt</Filter>

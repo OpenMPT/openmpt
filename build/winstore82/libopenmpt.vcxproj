@@ -749,6 +749,10 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
+    <ClInclude Include="..\..\sounddsp\AGC.h" />
+    <ClInclude Include="..\..\sounddsp\DSP.h" />
+    <ClInclude Include="..\..\sounddsp\EQ.h" />
+    <ClInclude Include="..\..\sounddsp\Reverb.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_config.h" />
@@ -1096,6 +1100,18 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\AGC.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\DSP.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\EQ.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\Reverb.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp">
       <ObjectFileName>$(IntDir)libopenmpt\</ObjectFileName>
