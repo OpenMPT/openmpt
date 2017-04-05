@@ -13,7 +13,7 @@
 
 #ifndef NO_REVERB
 #include "Reverb.h"
-#include "MixerLoops.h"
+#include "../soundlib/MixerLoops.h"
 
 #ifdef ENABLE_MMX
 #include <mmintrin.h>
