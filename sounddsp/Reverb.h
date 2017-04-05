@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define NUM_REVERBTYPES			29
 
-const char *GetReverbPresetName(UINT nPreset);
+const char *GetReverbPresetName(uint32 nPreset);
 
 /////////////////////////////////////////////////////////////////////////////
 //
