@@ -22,8 +22,13 @@
 #include <emmintrin.h>
 #endif
 
+#endif // NO_REVERB
+
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#ifndef NO_REVERB
 
 
 #if defined(ENABLE_MMX) || defined(ENABLE_SSE2)
@@ -1274,6 +1279,15 @@ void CReverb::ProcessLateReverb(SWLATEREVERB * MPT_RESTRICT pReverb, int16 * MPT
 	#undef DELAY_OFFSET
 }
 
-OPENMPT_NAMESPACE_END
+
+#else
+
+
+MPT_MSVC_WORKAROUND_LNK4221(Reverb)
+
 
 #endif // NO_REVERB
+
+
+OPENMPT_NAMESPACE_END
+
