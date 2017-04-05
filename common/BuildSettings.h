@@ -494,10 +494,6 @@
 #endif // arch
 #endif // ENABLE_ASM
 
-#if !defined(ENABLE_MMX) && !defined(NO_REVERB)
-#define NO_REVERB // reverb requires mmx
-#endif
-
 #if !defined(ENABLE_X86) && !defined(NO_DSP)
 #define NO_DSP // DSP requires x86 inline asm
 #endif
