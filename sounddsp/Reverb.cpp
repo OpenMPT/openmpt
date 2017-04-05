@@ -815,7 +815,7 @@ void CReverb::ProcessPreDelay(SWRVBREFDELAY * MPT_RESTRICT pPreDelay, const int3
 		pPreDelay->nPreDifPos = preDifPos;
 		(int32 &)pPreDelay->History = _mm_cvtsi128_si32(history);
 		return;
-	} else
+	}
 #endif
 #ifdef ENABLE_MMX
 	if(GetProcSupport() & PROCSUPPORT_MMX)
@@ -938,7 +938,7 @@ void CReverb::ProcessReflections(SWRVBREFDELAY * MPT_RESTRICT pPreDelay, int16 *
 			pOut += 2;
 		}
 		return;
-	} else
+	}
 #endif
 #ifdef ENABLE_MMX
 	if(GetProcSupport() & PROCSUPPORT_MMX)
@@ -1121,7 +1121,7 @@ void CReverb::ProcessLateReverb(SWLATEREVERB * MPT_RESTRICT pReverb, int16 * MPT
 		Store64SSE(pReverb->LPHistory, lpHistory);
 		pReverb->nDelayPos = delayPos;
 		return;
-	} else
+	}
 #endif
 #ifdef ENABLE_MMX
 	if(GetProcSupport() & PROCSUPPORT_MMX)
