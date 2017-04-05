@@ -557,6 +557,11 @@ void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChan
 }
 
 
+#else
+
+
+MPT_MSVC_WORKAROUND_LNK4221(EQ)
+
 
 #endif // !NO_EQ
 

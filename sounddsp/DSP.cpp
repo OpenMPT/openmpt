@@ -429,6 +429,12 @@ void CSurround::SetSurroundParameters(uint32 nDepth, uint32 nDelay)
 }
 
 
+#else
+
+
+MPT_MSVC_WORKAROUND_LNK4221(DSP)
+
+
 #endif // NO_DSP
 
 

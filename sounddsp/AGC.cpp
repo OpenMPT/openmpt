@@ -135,6 +135,12 @@ void CAGC::Initialize(bool bReset, DWORD MixingFreq)
 }
 
 
+#else
+
+
+MPT_MSVC_WORKAROUND_LNK4221(AGC)
+
+
 #endif // NO_AGC
 
 
