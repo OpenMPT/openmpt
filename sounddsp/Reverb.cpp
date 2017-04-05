@@ -812,7 +812,7 @@ void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int3
 			pPreDelay->RefDelayBuffer[delayPos].lr = _mm_cvtsi128_si32(_mm_adds_epi16(_mm_mulhi_epi16(preDifCoeffs, preDif2), preDif));
 		}
 		pPreDelay->nPreDifPos = preDifPos;
-		(int32 &)pPreDelay->History = _mm_cvtsi128_si32(history);
+		pPreDelay->History.lr = _mm_cvtsi128_si32(history);
 		return;
 	}
 #endif
@@ -903,10 +903,10 @@ void CReverb::ProcessReflections(SWRvbRefDelay * MPT_RESTRICT pPreDelay, LR16 * 
 		__m128i delayPos = _mm_set_epi16(GETDELAY(7), GETDELAY(6), GETDELAY(5), GETDELAY(4), GETDELAY(3), GETDELAY(2), GETDELAY(1), GETDELAY(0));
 #undef GETDELAY
 		delayPos = _mm_sub_epi16(_mm_set1_epi16(static_cast<int16>(pPreDelay->nDelayPos - 1)), delayPos);
-		__m128i gain12 = _mm_set_epi64x((int64 &)pPreDelay->Reflections[1].Gains, (int64 &)pPreDelay->Reflections[0].Gains);
-		__m128i gain34 = _mm_set_epi64x((int64 &)pPreDelay->Reflections[3].Gains, (int64 &)pPreDelay->Reflections[2].Gains);
-		__m128i gain56 = _mm_set_epi64x((int64 &)pPreDelay->Reflections[5].Gains, (int64 &)pPreDelay->Reflections[4].Gains);
-		__m128i gain78 = _mm_set_epi64x((int64 &)pPreDelay->Reflections[7].Gains, (int64 &)pPreDelay->Reflections[6].Gains);
+		__m128i gain12 = _mm_unpacklo_epi64(Load64SSE(pPreDelay->Reflections[0].Gains), Load64SSE(pPreDelay->Reflections[1].Gains));
+		__m128i gain34 = _mm_unpacklo_epi64(Load64SSE(pPreDelay->Reflections[2].Gains), Load64SSE(pPreDelay->Reflections[3].Gains));
+		__m128i gain56 = _mm_unpacklo_epi64(Load64SSE(pPreDelay->Reflections[4].Gains), Load64SSE(pPreDelay->Reflections[5].Gains));
+		__m128i gain78 = _mm_unpacklo_epi64(Load64SSE(pPreDelay->Reflections[6].Gains), Load64SSE(pPreDelay->Reflections[7].Gains));
 		// For 28-bit final output: 16+15-3 = 28
 		__m128i refGain = _mm_srai_epi32(_mm_set_epi32(0, 0, pPreDelay->ReflectionsGain.r, pPreDelay->ReflectionsGain.l), 3);
 		__m128i delayInc = _mm_set1_epi16(1), delayMask = _mm_set1_epi16(SNDMIX_REFLECTIONS_DELAY_MASK);
@@ -975,7 +975,7 @@ void CReverb::ProcessReflections(SWRvbRefDelay * MPT_RESTRICT pPreDelay, LR16 * 
 		numSamples = nSamples;
 		pRefOut -= nSamples;
 
-		__m64 refGain = _mm_unpacklo_pi16(_mm_cvtsi32_si64((int32 &)pPreDelay->ReflectionsGain), _mm_cvtsi32_si64(0));	// [0 | g_r | 0 | g_l]
+		__m64 refGain = _mm_unpacklo_pi16(_mm_cvtsi32_si64(pPreDelay->ReflectionsGain.lr), _mm_cvtsi32_si64(0));	// [0 | g_r | 0 | g_l]
 		refGain = _mm_srai_pi32(refGain, 3);	// For 28-bit final output: 16+15-3 = 28
 		int pos5 = pPreDelay->nDelayPos - pPreDelay->Reflections[4].Delay - 1;
 		int pos6 = pPreDelay->nDelayPos - pPreDelay->Reflections[5].Delay - 1;
