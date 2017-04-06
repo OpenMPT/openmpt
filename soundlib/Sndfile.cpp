@@ -43,9 +43,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Module decompression
-bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
 
 
 mpt::ustring FileHistory::AsISO8601() const
@@ -265,11 +265,15 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 			MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
 			std::vector<char> unpackedData;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_XPK;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_PP20;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(unpackedData, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(unpackedData, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
 			if(packedContainerType != MOD_CONTAINERTYPE_NONE)
 			{
+				if(loadFlags == onlyVerifyHeader)
+				{
+					return true;
+				}
 				file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
 			}
 
