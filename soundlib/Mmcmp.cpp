@@ -142,8 +142,8 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const M
 }
 
 
-bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
-//-----------------------------------------------------------------
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	unpackedData.clear();
@@ -157,6 +157,10 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	if(mmh.nblocks == 0) return false;
 	if(mmh.filesize == 0) return false;
 	if(mmh.filesize > 0x80000000) return false;
+	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	{
+		return true;
+	}
 	if(mmh.blktable > file.GetLength()) return false;
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
@@ -669,8 +673,8 @@ l7ca:
 }
 
 
-bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
-//---------------------------------------------------------------
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	unpackedData.clear();
@@ -683,6 +687,10 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	if(header.DstLen == 0) return false;
 	STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
 	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8)) return false;
+	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	{
+		return true;
+	}
 	if(!file.CanRead(header.SrcLen - (sizeof(XPKFILEHEADER) - 8))) return false;
 
 #ifdef MMCMP_LOG
@@ -803,8 +811,8 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 }
 
 
-bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
-//----------------------------------------------------------------
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	unpackedData.clear();
@@ -818,6 +826,10 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 		|| efficiency[2] < 9 || efficiency[2] > 15
 		|| efficiency[3] < 9 || efficiency[3] > 15)
 		return false;
+	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	{
+		return true;
+	}
 	FileReader::off_t length = file.GetLength();
 	if(!Util::TypeCanHoldValue<uint32>(length)) return false;
 	// Length word must be aligned
