@@ -258,7 +258,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	SetSizes(CSize(temp.Width(), temp.Height()), CSize(16, 16));
 
 	// Dropdown menus for New and MIDI buttons
-	DWORD dwExStyle = GetToolBarCtrl().SendMessage(TB_GETEXTENDEDSTYLE) | TBSTYLE_EX_DRAWDDARROWS;
+	LPARAM dwExStyle = GetToolBarCtrl().SendMessage(TB_GETEXTENDEDSTYLE) | TBSTYLE_EX_DRAWDDARROWS;
 	GetToolBarCtrl().SendMessage(TB_SETEXTENDEDSTYLE, 0, dwExStyle);
 	SetButtonStyle(CommandToIndex(ID_FILE_NEW), GetButtonStyle(CommandToIndex(ID_FILE_NEW)) | TBSTYLE_DROPDOWN);
 	SetButtonStyle(CommandToIndex(ID_MIDI_RECORD), GetButtonStyle(CommandToIndex(ID_MIDI_RECORD)) | TBSTYLE_DROPDOWN);
@@ -1154,14 +1154,13 @@ HWND CModTreeBar::GetModTreeHWND()
 	return m_pModTree->m_hWnd;
 }
 
-BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
-//------------------------------------------------------------------------------
+LRESULT CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
+//---------------------------------------------------------------------------------
 {
-	if (::GetFocus() == m_pModTree->m_hWnd)
+	if(::GetFocus() == m_pModTree->m_hWnd)
 		return m_pModTree->SendMessage(cmdID, wParam, lParam);
-	if (::GetFocus() == m_pModTreeData->m_hWnd)
+	if(::GetFocus() == m_pModTreeData->m_hWnd)
 		return m_pModTreeData->SendMessage(cmdID, wParam, lParam);
-
 	return 0;
 }
 
