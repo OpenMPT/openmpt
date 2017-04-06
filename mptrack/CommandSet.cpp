@@ -768,9 +768,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		}
 	}
 
-	if (pos < 0)
-		pos = kcList.size();
-	kcList.insert(kcList.begin() + pos, kc);
+	kcList.insert((pos < 0) ? kcList.end() : (kcList.begin() + pos), kc);
 
 	//enfore rules on CommandSet
 	report += EnforceAll(kc, cmd, true);

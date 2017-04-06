@@ -157,9 +157,6 @@ protected:
 #endif
 
 public:
-	virtual void BeginSetProgram(int32) { }
-	virtual void EndSetProgram() { }
-
 	virtual int GetNumInputChannels() const { return 0; }
 	virtual int GetNumOutputChannels() const { return 0; }
 
