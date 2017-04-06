@@ -742,6 +742,7 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Chorus.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
@@ -1079,6 +1080,9 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>

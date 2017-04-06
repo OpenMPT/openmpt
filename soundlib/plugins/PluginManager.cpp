@@ -21,6 +21,7 @@
 // Built-in plugins
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"
+#include "dmo/Chorus.h"
 #include "dmo/Compressor.h"
 #include "dmo/Distortion.h"
 #include "dmo/Echo.h"
@@ -154,6 +155,15 @@ CVstPluginManager::CVstPluginManager()
 	if(pluginList.empty())
 	{
 		// DirectX Media Objects Emulation
+		plug = new (std::nothrow) VSTPluginLib(DMO::Chorus::Create, true, MPT_PATHSTRING("{EFE6629C-81F7-4281-BD91-C9D604A95AF6}"), MPT_PATHSTRING("Chorus"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEFE6629C;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
 		plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, true, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"));
 		if(plug != nullptr)
 		{
@@ -667,7 +677,7 @@ void CVstPluginManager::ReportPlugException(const std::string &msg)
 }
 
 void CVstPluginManager::ReportPlugException(const std::wstring &msg)
-//--------------------------------------------------------------
+//------------------------------------------------------------------
 {
 	Reporting::Notification(msg);
 #ifdef VST_LOG
