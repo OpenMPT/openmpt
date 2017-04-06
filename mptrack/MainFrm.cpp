@@ -1960,7 +1960,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&mixerdlg);
-#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
+#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
 	COptionsPlayer dspdlg;
 	dlg.AddPage(&dspdlg);
 #endif

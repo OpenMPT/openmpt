@@ -180,7 +180,7 @@ public:
 	mixsample_t *GetReverbSendBuffer(uint32 nSamples);
 
 	// call once after all data has been sent.
-	void Process(int32 *MixSoundBuffer, uint32 nSamples);
+	void Process(mixsample_t *MixSoundBuffer, uint32 nSamples);
 
 private:
 	void Shutdown();

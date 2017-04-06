@@ -665,7 +665,7 @@ void CWaveConvert::OnPlayerOptions()
 	CPropertySheet dlg(_T("Mixer Settings"), this);
 	COptionsMixer mixerpage;
 	dlg.AddPage(&mixerpage);
-#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
+#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
 	COptionsPlayer dsppage;
 	dlg.AddPage(&dsppage);
 #endif
