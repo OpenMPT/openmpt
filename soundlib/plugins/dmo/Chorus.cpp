@@ -1,6 +1,6 @@
 /*
  * Chorus.cpp
- * ---------------
+ * ----------
  * Purpose: Implementation of the DMO Chorus DSP (for non-Windows platforms)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -66,9 +66,11 @@ void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
-	const bool isTriangle = m_param[kChorusWaveShape] < 0.5f;
+	const bool isTriangle = IsTriangle();
 
 	const float feedback = Feedback() / 100.0f;
+	const float wetDryMix = WetDryMix();
+	const uint32 phase = Phase();
 	for(uint32 i = numFrames; i != 0; i--)
 	{
 		const float leftIn = *(in[0])++;
@@ -102,19 +104,19 @@ void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		float left2 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayL2)];
 		float fracPos = (m_delayL1 & 0xFFF) * (1.0f / 4096.0f);
 		float leftOut = (left2 - left1) * fracPos + left1;
-		*(out[0])++ = leftIn + (leftOut - leftIn) * m_param[kChorusWetDryMix];
+		*(out[0])++ = leftIn + (leftOut - leftIn) * wetDryMix;
 
 		float right1 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayR1)];
 		float right2 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayR2)];
 		fracPos = (m_delayR1 & 0xFFF) * (1.0f / 4096.0f);
 		float rightOut = (right2 - right1) * fracPos + right1;
-		*(out[1])++ = rightIn + (rightOut - rightIn) * m_param[kChorusWetDryMix];
+		*(out[1])++ = rightIn + (rightOut - rightIn) * wetDryMix;
 
 		// Increment delay positions
-		m_delayL1 = m_delayOffset + (m_phase < 4 ? 1 : -1) * static_cast<int32>(waveMin * m_depthDelay);
+		m_delayL1 = m_delayOffset + (phase < 4 ? 1 : -1) * static_cast<int32>(waveMin * m_depthDelay);
 		m_delayL2 = m_delayL1 + 4096;
 
-		m_delayR1 = m_delayOffset + (m_phase < 2 ? -1 : 1) * static_cast<int32>(((m_phase % 2u) ? waveMax : waveMin) * m_depthDelay);
+		m_delayR1 = m_delayOffset + (phase < 2 ? -1 : 1) * static_cast<int32>(((phase % 2u) ? waveMax : waveMin) * m_depthDelay);
 		m_delayR2 = m_delayR1 + 4096;
 
 		if(m_bufPos <= 0)
@@ -170,7 +172,7 @@ void Chorus::Resume()
 
 	m_isResumed = true;
 	m_waveShapeMin = 0.0f;
-	m_waveShapeMax = (m_param[kChorusWaveShape] < 0.5f) ? 0.5f : 1.0f;
+	m_waveShapeMax = IsTriangle() ? 0.5f : 1.0f;
 	m_delayL1 = m_delayL2 = m_delayR1 = m_delayR2 = m_delayOffset;
 	m_bufPos = 0;
 }
@@ -231,7 +233,7 @@ CString Chorus::GetParamDisplay(PlugParamIndex param)
 		return (value < 0.5f) ? _T("Triangle") : _T("Sine");
 		break;
 	case kChorusPhase:
-		switch(m_phase)
+		switch(Phase())
 		{
 		case 0: return _T("-180");
 		case 1: return _T("-90");
@@ -259,15 +261,14 @@ void Chorus::RecalculateChorusParams()
 	const float sampleRate = static_cast<float>(m_SndFile.GetSampleRate());
 
 	float delaySamples = Delay() * sampleRate / 1000.0f;
-	m_depthDelay = m_param[kChorusDepth] * delaySamples * 2048.0f;
+	m_depthDelay = Depth() * delaySamples * 2048.0f;
 	m_delayOffset = Util::Round<int32>(4096.0f * (delaySamples + 2.0f));
 	m_frequency = FrequencyInHertz();
 	const float frequencySamples = m_frequency / sampleRate;
-	if(m_param[kChorusWaveShape] < 0.5f)
+	if(IsTriangle())
 		m_waveShapeVal = frequencySamples * 2.0f;
 	else
 		m_waveShapeVal = std::sin(frequencySamples * float(M_PI)) * 2.0f;
-	m_phase = Util::Round<uint32>(m_param[kChorusPhase] * 4.0f);
 }
 
 } // namespace DMO

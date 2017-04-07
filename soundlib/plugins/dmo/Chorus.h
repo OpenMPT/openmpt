@@ -1,12 +1,14 @@
 /*
  * Chorus.h
- * -------------
+ * --------
  * Purpose: Implementation of the DMO Chorus DSP (for non-Windows platforms)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+
+#pragma once
 
 #ifndef NO_PLUGINS
 
@@ -42,7 +44,6 @@ protected:
 	float m_depthDelay;
 	float m_frequency;
 	int32 m_delayOffset;
-	uint32 m_phase;
 
 	// State
 	std::vector<float> m_buffer;
@@ -102,9 +103,13 @@ public:
 protected:
 	int32 GetBufferIntOffset(int32 fpOffset) const;
 
-	float Feedback() const { return -99.0f + m_param[kChorusFeedback] * 198.0f; }
-	float Delay() const { return m_param[kChorusDelay] * 20.0f; }
-	float FrequencyInHertz() const { return m_param[kChorusFrequency] * 10.0f; }
+	virtual float WetDryMix() const { return m_param[kChorusWetDryMix]; }
+	virtual bool IsTriangle() const { return m_param[kChorusWaveShape] < 0.5f; }
+	virtual float Depth() const { return m_param[kChorusDepth]; }
+	virtual float Feedback() const { return -99.0f + m_param[kChorusFeedback] * 198.0f; }
+	virtual float Delay() const { return m_param[kChorusDelay] * 20.0f; }
+	virtual float FrequencyInHertz() const { return m_param[kChorusFrequency] * 10.0f; }
+	virtual int Phase() const { return Util::Round<uint32>(m_param[kChorusPhase] * 4.0f); }
 	void RecalculateChorusParams();
 };
 
