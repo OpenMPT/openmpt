@@ -56,7 +56,7 @@ public:
 
 protected:
 	virtual float WetDryMix() const { return m_param[kFlangerWetDryMix]; }
-	virtual bool IsTriangle() const { return m_param[kFlangerWaveShape] < 0.5f; }
+	virtual bool IsTriangle() const { return m_param[kFlangerWaveShape] < 1; }
 	virtual float Depth() const { return m_param[kFlangerDepth]; }
 	virtual float Feedback() const { return -99.0f + m_param[kFlangerFeedback] * 198.0f; }
 	virtual float Delay() const { return m_param[kFlangerDelay] * 4.0f; }
