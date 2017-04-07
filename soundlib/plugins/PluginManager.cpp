@@ -25,6 +25,7 @@
 #include "dmo/Compressor.h"
 #include "dmo/Distortion.h"
 #include "dmo/Echo.h"
+#include "dmo/Flanger.h"
 #include "dmo/Gargle.h"
 #include "dmo/ParamEq.h"
 #include "dmo/WavesReverb.h"
@@ -188,6 +189,15 @@ CVstPluginManager::CVstPluginManager()
 			pluginList.push_back(plug);
 			plug->pluginId1 = kDmoMagic;
 			plug->pluginId2 = 0xEF3E932C;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::Flanger::Create, true, MPT_PATHSTRING("{EFCA3D92-DFD8-4672-A603-7420894BAD98}"), MPT_PATHSTRING("Flanger"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEFCA3D92;
 			plug->category = VSTPluginLib::catDMO;
 		}
 

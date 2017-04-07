@@ -240,6 +240,7 @@ LOCAL_SRC_FILES += \
 	soundlib/plugins/dmo/Compressor.cpp \
 	soundlib/plugins/dmo/Distortion.cpp \
 	soundlib/plugins/dmo/Echo.cpp \
+	soundlib/plugins/dmo/Flanger.cpp \
 	soundlib/plugins/dmo/Gargle.cpp \
 	soundlib/plugins/dmo/ParamEq.cpp \
 	soundlib/plugins/dmo/WavesReverb.cpp \
