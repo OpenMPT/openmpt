@@ -53,8 +53,8 @@ void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value)
 	if(index < kFlangerNumParameters)
 	{
 		Limit(value, 0.0f, 1.0f);
-		if(index == kFlangerWaveShape)
-			value = Util::Round(value);
+		if(index == kFlangerWaveShape && value < 1.0f)
+			value = 0.0f;
 		else if(index == kFlangerPhase)
 			value = Util::Round(value * 4.0f) / 4.0f;
 		m_param[index] = value;
@@ -115,7 +115,7 @@ CString Flanger::GetParamDisplay(PlugParamIndex param)
 		value = FrequencyInHertz();
 		break;
 	case kFlangerWaveShape:
-		return (value < 0.5f) ? _T("Triangle") : _T("Sine");
+		return (value < 1) ? _T("Triangle") : _T("Sine");
 		break;
 	case kFlangerPhase:
 		switch(Phase())

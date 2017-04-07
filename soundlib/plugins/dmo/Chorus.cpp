@@ -145,8 +145,8 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 	if(index < kChorusNumParameters)
 	{
 		Limit(value, 0.0f, 1.0f);
-		if(index == kChorusWaveShape)
-			value = Util::Round(value);
+		if(index == kChorusWaveShape && value < 1.0f)
+			value = 0.0f;
 		else if(index == kChorusPhase)
 			value = Util::Round(value * 4.0f) / 4.0f;
 		m_param[index] = value;
