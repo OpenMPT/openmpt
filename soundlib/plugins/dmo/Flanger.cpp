@@ -141,6 +141,9 @@ CString Flanger::GetParamDisplay(PlugParamIndex param)
 
 } // namespace DMO
 
-OPENMPT_NAMESPACE_END
+#else
+MPT_MSVC_WORKAROUND_LNK4221(Flanger)
 
 #endif // !NO_PLUGINS
+
+OPENMPT_NAMESPACE_END

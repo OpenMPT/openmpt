@@ -273,6 +273,9 @@ void Chorus::RecalculateChorusParams()
 
 } // namespace DMO
 
-OPENMPT_NAMESPACE_END
+#else
+MPT_MSVC_WORKAROUND_LNK4221(Chorus)
 
 #endif // !NO_PLUGINS
+
+OPENMPT_NAMESPACE_END
