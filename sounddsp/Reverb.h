@@ -35,7 +35,7 @@ const char *GetReverbPresetName(uint32 nPreset);
 
 union LR16
 {
-	struct { int16 l, r; };
+	struct { int16 l, r; } c;
 	int32 lr;
 };
 
