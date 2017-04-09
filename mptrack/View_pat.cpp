@@ -2154,7 +2154,6 @@ void CViewPattern::OnCursorPaste()
 }
 
 
-//begin rewbs.fxvis
 void CViewPattern::OnVisualizeEffect()
 //------------------------------------
 {
@@ -2185,7 +2184,6 @@ void CViewPattern::OnVisualizeEffect()
 		}
 	}
 }
-//end rewbs.fxvis
 
 
 void CViewPattern::Interpolate(PatternCursor::Columns type)
@@ -3636,8 +3634,8 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 
 	case MIDIEvents::evNoteOn: // Note On
-		// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
-		if(!IsLiveRecord() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
+		// Continue playing as soon as MIDI notes are being received
+		if((pMainFrm->GetSoundFilePlaying() != &sndFile || sndFile.IsPaused()) && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 			pModDoc->OnPatternPlayNoLoop();
 
 		nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
