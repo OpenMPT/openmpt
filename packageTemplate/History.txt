@@ -26,6 +26,31 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.10.00 (* April 2017, revision 7977)
+-----------------------------------------
+Pattern tab
+   [Fix] <js> "Continue song as soon as MIDI notes are being received" also restarted playback from cursor position if "follow song" was disabled.
+
+Sample tab
+   [Imp] <js> Show tooltip explanations for auto-vibrato parameters.
+
+Mod Conversion
+   [Imp] <js> Convert auto-vibrato sweep between IT / MPTM and XM more accurately.
+
+Other formats
+   [Imp] <js> STM: Add support for "WUZAMOD!" magic bytes and allow some slightly malformed STM files to load which were previously rejected (putup10.stm, putup11.stm). Tighten some heuristics 
+   [Imp] <js> Tighten heuristics for rejecting invalid SoundTracker files.
+   [Fix] <js> Detect whether "hidden" patterns in the order list of SoundTracker modules should be taken into account or not. Fixes wolf1.mod, wolf3.mod and jean_baudlot_-_bad_dudes_vs_dragonninja-dragonf.mod.
+   [Fix] <js> MO3: Clear MIDI macros for files that were originally saved with Impulse Tracker 1.00 and Scream Tracker prior to version 3.20.
+
+Misc
+   [Imp] <jh> About Dialog: Show the real CPU features in addition to the enabled ones.
+   [Imp] <js> Use icons with alpha transparency on Wine 1.6 and newer.
+   [Fix] <js> Fix icons with broken transparency on some systems.
+   [Fix] <js> MIDI Macro Dialog: When viewing controllable plugin parameters, non-existing parameters could show up.
+   [Fix] <jh> A bogus warning was shown when launching with /noAssembly command line switch.
+
+
 v1.26.09.00 (19 March 2017, revision 7821)
 ------------------------------------------
 Pattern tab
