@@ -931,17 +931,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		//kill notes if required.
 		if ( (pause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
 		{
-			CriticalSection cs;
-
 			// All notes off
-			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-			{
-				if ((i < GetNumChannels()) || (m_SndFile.m_PlayState.Chn[i].nMasterChn))
-				{
-					m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_KEYOFF | CHN_NOTEFADE);
-					m_SndFile.m_PlayState.Chn[i].nFadeOutVol = 0;
-				}
-			}
+			m_SndFile.ResetChannels();
 		}
 
 		if (pMainFrm->GetModPlaying() != this)
