@@ -543,7 +543,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0, false);
+			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0);
 		}
 		return wParam;
 	}

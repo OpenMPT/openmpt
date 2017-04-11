@@ -2017,7 +2017,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				}
 				CriticalSection cs;
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
-				pModDoc->PlayNote(note, m_nInstrument, 0, false);
+				pModDoc->PlayNote(note, m_nInstrument, 0);
 			}
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
@@ -2029,7 +2029,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 		}
 	} else
 	{
-		pModDoc->PlayNote(note, m_nInstrument, 0, false);
+		pModDoc->PlayNote(note, m_nInstrument, 0);
 	}
 }
 

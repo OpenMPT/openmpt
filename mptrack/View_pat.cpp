@@ -5172,9 +5172,8 @@ void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int 
 {
 	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
 	CModDoc *modDoc = GetDocument();
-	bool isPlaying = ((mainFrm->GetModPlaying() == modDoc) && (mainFrm->IsPlaying()));
 	modDoc->CheckNNA(note, instr, m_baPlayingNote);
-	modDoc->PlayNote(note, instr, 0, !isPlaying, volume, 0, 0, channel);
+	modDoc->PlayNote(note, instr, 0, volume, 0, 0, channel);
 }
 
 
@@ -5373,11 +5372,10 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 					}
 				}
 			}
-			const bool isPlaying = pMainFrm->GetModPlaying() == pModDoc && pMainFrm->IsPlaying();
-			for(int i = 0; i < numNotes; i++)
+			for(auto note : chordNotes)
 			{
 				pModDoc->CheckNNA(note, nPlayIns, m_baPlayingNote);
-				pModDoc->PlayNote(chordNotes[i], nPlayIns, 0, !isPlaying && i == 0, -1, 0, 0, chn);
+				pModDoc->PlayNote(note, nPlayIns, 0, -1, 0, 0, chn);
 			}
 		}
 	} // end play note
