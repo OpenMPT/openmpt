@@ -2610,7 +2610,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 			else if(m_nZoom < 0 && loopend - loopstart < 4)
 				loopend = loopstart = 0;
 
-			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, false, volume, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
+			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, volume, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 

@@ -885,7 +885,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 			if(midiByte2 & 0x7F)
 			{
 				vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-				PlayNote(note, ins, 0, false, vol);
+				PlayNote(note, ins, 0, vol);
 			}
 			return;
 		} else if(plugin != nullptr)
@@ -917,8 +917,8 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 }
 
 
-CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, int32 nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHANNELINDEX nChn = GetNumChannels();
@@ -928,15 +928,11 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 	if (ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
 
-		//kill notes if required.
-		if ( (pause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this)
-		{
-			// All notes off
-			m_SndFile.ResetChannels();
-		}
-
 		if (pMainFrm->GetModPlaying() != this)
 		{
+			// All notes off when resuming paused playback
+			m_SndFile.ResetChannels();
+		
 			m_SndFile.m_SongFlags.set(SONG_PAUSED);
 			pMainFrm->PlayMod(this);
 		}
@@ -1038,8 +1034,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 				m_SndFile.NoteChange(&chn, note);
 			}
 		}
-
-		if (pause) m_SndFile.m_SongFlags.set(SONG_PAUSED);
 	}
 	return nChn;
 }
