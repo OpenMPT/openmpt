@@ -5372,10 +5372,10 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 					}
 				}
 			}
-			for(auto note : chordNotes)
+			for(auto chordNote : chordNotes)
 			{
-				pModDoc->CheckNNA(note, nPlayIns, m_baPlayingNote);
-				pModDoc->PlayNote(note, nPlayIns, 0, -1, 0, 0, chn);
+				pModDoc->CheckNNA(chordNote, nPlayIns, m_baPlayingNote);
+				pModDoc->PlayNote(chordNote, nPlayIns, 0, -1, 0, 0, chn);
 			}
 		}
 	} // end play note
