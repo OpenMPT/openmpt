@@ -1122,7 +1122,85 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(uuid2.ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
-	// check that empty stringstream behaves correctly with our MSVC workarounds
+	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
+
+	{ mpt::ostringstream ss; VERIFY_EQUAL(ss.tellp(), 0); }
+	{ mpt::ostringstream ss; ss.seekp(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ mpt::ostringstream ss; ss.seekp(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
+	{ mpt::ostringstream ss; ss.seekp(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
+	{ mpt::istringstream ss; VERIFY_EQUAL(ss.tellg(), 0); }
+	{ mpt::istringstream ss; ss.seekg(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ mpt::istringstream ss; ss.seekg(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
+	{ mpt::istringstream ss; ss.seekg(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
+
+	{
+		mpt::ostringstream s;
+		char b = 23;
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellp(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekp(0, std::ios_base::beg);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellp(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.write(&b, 1);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellp(), 1);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekp(0, std::ios_base::beg);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellp(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekp(0, std::ios_base::end);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellp(), 1);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.str(), std::string(1, b));
+	}
+
+	{
+		mpt::istringstream s;
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekg(0, std::ios_base::beg);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekg(0, std::ios_base::end);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+	}
+
+	{
+		mpt::istringstream s("a");
+		char a = 0;
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekg(0, std::ios_base::beg);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.read(&a, 1);
+		VERIFY_EQUAL(a, 'a');
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 1);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekg(0, std::ios_base::beg);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 0);
+		VERIFY_EQUAL(!s.fail(), true);
+		s.seekg(0, std::ios_base::end);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(s.tellg(), 1);
+		VERIFY_EQUAL(!s.fail(), true);
+		VERIFY_EQUAL(std::string(1, a), std::string(1, 'a'));
+	}
+
+	// check that empty native and fixed stringstream both behaves correctly with out IO functions
+
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
