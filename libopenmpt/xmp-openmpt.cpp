@@ -1052,9 +1052,7 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	}
 
 	if ( pos & XMPIN_POS_SUBSONG ) {
-#ifdef XMPIN_POS_SUBSONG1
 		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
-#endif
 		try
 		{
 			self->mod->select_subsong( pos & 0xffff );
