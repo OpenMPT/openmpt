@@ -1059,14 +1059,11 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	if ( !self->mod ) {
 		return -1.0;
 	}
-
 	if ( pos & XMPIN_POS_SUBSONG ) {
 		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
-		try
-		{
+		try {
 			self->mod->select_subsong( pos & 0xffff );
-		} catch ( ... )
-		{
+		} catch ( ... ) {
 			return 0.0;
 		}
 		openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
@@ -1074,7 +1071,6 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 		reset_timeinfos( 0 );
 		return 0.0;
 	}
-
 	double new_position = self->mod->set_position_seconds( static_cast<double>( pos ) * 0.001 );
 	reset_timeinfos( new_position );
 	return new_position;
