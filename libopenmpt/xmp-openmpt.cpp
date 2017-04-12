@@ -536,12 +536,17 @@ struct xmplay_imemstream : virtual xmplay_membuf, std::istream {
 
 #else // !USE_XMPLAY_ISTREAM
 
-static __declspec(deprecated) std::vector<char> read_XMPFILE( XMPFILE & file ) {
+static std::vector<char> read_XMPFILE_vector( XMPFILE & file ) {
 	std::vector<char> data( xmpffile->GetSize( file ) );
 	if ( data.size() != xmpffile->Read( file, data.data(), data.size() ) ) {
 		return std::vector<char>();
 	}
 	return data;
+}
+
+static std::string read_XMPFILE_string( XMPFILE & file ) {
+	std::vector<char> data = read_XMPFILE_vector( file );
+	return std::string( data.begin(), data.end() );
 }
 
 #endif // USE_XMPLAY_ISTREAM
@@ -755,9 +760,13 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 			}
 		#else
 			if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-				return openmpt::could_open_probability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
+				std::string data( reinterpret_cast<const char*>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
+				std::istringstream stream( data );
+				return openmpt::could_open_probability( stream ) > threshold;
 			} else {
-				return openmpt::could_open_probability( (read_XMPFILE( file )) ) > threshold;
+				std::string data = read_XMPFILE_string( file );
+				std::istringstream stream(data);
+				return openmpt::could_open_probability( stream ) > threshold;
 			}
 		#endif
 	#else
@@ -807,7 +816,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 						*tags = build_xmplay_tags( mod );
 					}
 				} else {
-					openmpt::module mod( (read_XMPFILE( file )) );
+					openmpt::module mod( read_XMPFILE_vector( file ) );
 					if ( length ) {
 						*length = build_xmplay_length( mod );
 					}
@@ -862,7 +871,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
 					self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
 				} else {
-					self->mod = new openmpt::module_ext( (read_XMPFILE( file )), std::clog, ctls );
+					self->mod = new openmpt::module_ext( read_XMPFILE_vector( file ), std::clog, ctls );
 				}
 			#endif
 		#else
