@@ -1166,7 +1166,7 @@ static void WINAPI openmpt_GetMessage( char * buf ) {
 		clear_xmplay_string( buf );
 		return;
 	}
-	write_xmplay_string( buf, convert_to_native( sanitize_xmplay_multiline_string( string_replace( self->mod->get_metadata("message_raw"), "\n", "\r" ) ) ) );
+	write_xmplay_string( buf, convert_to_native( sanitize_xmplay_multiline_string( string_replace( self->mod->get_metadata("message"), "\n", "\r" ) ) ) );
 }
 
 // Seek to a position (in granularity units)
