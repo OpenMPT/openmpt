@@ -148,6 +148,10 @@ using namespace ::std;
 
 namespace openmpt {
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4275)
+#endif
 class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
 	char * text;
@@ -156,6 +160,9 @@ public:
 	virtual ~exception() LIBOPENMPT_NOEXCEPT;
 	virtual const char * what() const LIBOPENMPT_NOEXCEPT;
 }; // class exception
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 //! Get the libopenmpt version number
 /*!
