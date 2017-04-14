@@ -146,7 +146,12 @@ CVstPluginManager::CVstPluginManager()
 	#endif
 
 	// DirectX Media Objects
-	EnumerateDirectXDMOs();
+	#ifdef MODPLUG_TRACKER
+		EnumerateDirectXDMOs(true);
+	#else // !MODPLUG_TRACKER
+		// For security reasons, we only load known DMO plugins in libopenmpt.
+		EnumerateDirectXDMOs(false);
+	#endif // MODPLUG_TRACKER
 
 	// Hard-coded "plugins"
 	VSTPluginLib *plug;
@@ -264,10 +269,38 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 }
 
 
-void CVstPluginManager::EnumerateDirectXDMOs()
-//--------------------------------------------
-{
 #ifndef NO_DMO
+
+static GUID make_GUID(uint32 d1, uint16 d2, uint16 d3, uint8 d41, uint8 d42, uint8 d43, uint8 d44, uint8 d45, uint8 d46, uint8 d47, uint8 d48)
+{
+	GUID guid = { d1, d2, d3, d41, d42, d43, d44, d45, d46, d47, d48 };
+	return guid;
+}
+
+static bool IsKnownDMO(const CLSID &clsid)
+//----------------------------------------
+{
+	if(IsEqualGUID(clsid, make_GUID(0xEFE6629C, 0x81F7, 0x4281u, 0xBD, 0x91, 0xC9, 0xD6, 0x04, 0xA9, 0x5A, 0xF6))) return true; // Chorus
+	if(IsEqualGUID(clsid, make_GUID(0xEF011F79, 0x4000, 0x406Du, 0x87, 0xAF, 0xBF, 0xFB, 0x3F, 0xC3, 0x9D, 0x57))) return true; // Compressor
+	if(IsEqualGUID(clsid, make_GUID(0xEF114C90, 0xCD1D, 0x484Eu, 0x96, 0xE5, 0x09, 0xCF, 0xAF, 0x91, 0x2A, 0x21))) return true; // Distortion
+	if(IsEqualGUID(clsid, make_GUID(0xEF3E932C, 0xD40B, 0x4F51u, 0x8C, 0xCF, 0x3F, 0x98, 0xF1, 0xB2, 0x9D, 0x5D))) return true; // Echo
+	if(IsEqualGUID(clsid, make_GUID(0xEFCA3D92, 0xDFD8, 0x4672u, 0xA6, 0x03, 0x74, 0x20, 0x89, 0x4B, 0xAD, 0x98))) return true; // Flanger
+	if(IsEqualGUID(clsid, make_GUID(0xDAFD8210, 0x5711, 0x4B91u, 0x9F, 0xE3, 0xF7, 0x5B, 0x7A, 0xE2, 0x79, 0xBF))) return true; // Gargle
+	if(IsEqualGUID(clsid, make_GUID(0xEF985E71, 0xD5C7, 0x42D4u, 0xBA, 0x4D, 0x2D, 0x07, 0x3E, 0x2E, 0x96, 0xF4))) return true; // I3DL2Reverb
+	if(IsEqualGUID(clsid, make_GUID(0x120CED89, 0x3BF4, 0x4173u, 0xA1, 0x32, 0x3C, 0xB4, 0x06, 0xCF, 0x32, 0x31))) return true; // ParamEq
+	if(IsEqualGUID(clsid, make_GUID(0x87FC0268, 0x9A55, 0x4360u, 0x95, 0xAA, 0x00, 0x4A, 0x1D, 0x9D, 0xE2, 0x6C))) return true; // WavesReverb
+	return false;
+}
+
+#endif // !NO_DMO
+
+
+void CVstPluginManager::EnumerateDirectXDMOs(bool loadDMOSystemUnknown)
+//---------------------------------------------------------------------
+{
+#ifdef NO_DMO
+	MPT_UNREFERENCED_PARAMETER(loadDMOSystemUnknown);
+#else
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
@@ -281,31 +314,34 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
 			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
-				HKEY hksub;
-				formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
-				if (RegOpenKeyW(HKEY_LOCAL_MACHINE, formattedKey.c_str(), &hksub) == ERROR_SUCCESS)
+				if(loadDMOSystemUnknown || IsKnownDMO(clsid))
 				{
-					WCHAR name[64];
-					DWORD datatype = REG_SZ;
-					DWORD datasize = sizeof(name);
-
-					if(ERROR_SUCCESS == RegQueryValueExW(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
+					HKEY hksub;
+					formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
+					if (RegOpenKeyW(HKEY_LOCAL_MACHINE, formattedKey.c_str(), &hksub) == ERROR_SUCCESS)
 					{
-						mpt::String::SetNullTerminator(name);
+						WCHAR name[64];
+						DWORD datatype = REG_SZ;
+						DWORD datasize = sizeof(name);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
-						if(plug != nullptr)
+						if(ERROR_SUCCESS == RegQueryValueExW(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 						{
-							pluginList.push_back(plug);
-							plug->pluginId1 = kDmoMagic;
-							plug->pluginId2 = clsid.Data1;
-							plug->category = VSTPluginLib::catDMO;
+							mpt::String::SetNullTerminator(name);
+
+							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
+							if(plug != nullptr)
+							{
+								pluginList.push_back(plug);
+								plug->pluginId1 = kDmoMagic;
+								plug->pluginId2 = clsid.Data1;
+								plug->category = VSTPluginLib::catDMO;
 #ifdef DMO_LOG
-							Log(mpt::String::Print(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
+								Log(mpt::String::Print(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
 #endif
+							}
 						}
+						RegCloseKey(hksub);
 					}
-					RegCloseKey(hksub);
 				}
 			}
 		}
