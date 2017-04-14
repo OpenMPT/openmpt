@@ -104,10 +104,10 @@ private:
 	uint8 Nn() const;
 	void MakeRFC4122(uint8 version);
 public:
-#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO))
 	explicit UUID(::UUID uuid);
 	operator ::UUID () const;
-#endif // MPT_OS_WINDOWS && MODPLUG_TRACKER
+#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || !NO_DMO)
 public:
 	UUID();
 	explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4);

@@ -423,7 +423,7 @@ mpt::UUID UUIDFromWin32(::UUID uuid)
 	return result;
 }
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 
 UUID::UUID(::UUID uuid)
 {
@@ -435,7 +435,7 @@ UUID::operator ::UUID () const
 	return UUIDToWin32(*this);
 }
 
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER || !NO_DMO
 
 #endif // MPT_OS_WINDOWS
 
