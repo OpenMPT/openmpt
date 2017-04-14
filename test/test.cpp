@@ -1091,6 +1091,7 @@ static MPT_NOINLINE void TestMisc()
 	{
 		VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull).ToUString(), MPT_USTRING("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
 		#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), MPT_UUID(2ed6593a,dfe6,4cf8,b2e5,75ad7f600c32));
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToGUID(L"{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}")));
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToCLSID(L"{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}")));
 		#endif
