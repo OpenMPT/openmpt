@@ -290,6 +290,7 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 }
 
 
+#ifndef NO_DMO
 static bool IsKnownDMO(const CLSID &clsid)
 //----------------------------------------
 {
@@ -305,12 +306,15 @@ static bool IsKnownDMO(const CLSID &clsid)
 	if(uuid == MPT_UUID(87FC0268,9A55,4360,95AA,004A1D9DE26C)) return true; // WavesReverb
 	return false;
 }
+#endif // !NO_DMO
 
 
 void CVstPluginManager::EnumerateDirectXDMOs(bool loadDMOSystemUnknown)
 //---------------------------------------------------------------------
 {
-#ifndef NO_DMO
+#ifdef NO_DMO
+	MPT_UNREFERENCED_PARAMETER(loadDMOSystemUnknown);
+#else
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
