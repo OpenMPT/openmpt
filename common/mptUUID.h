@@ -107,6 +107,9 @@ public:
 #if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO))
 	explicit UUID(::UUID uuid);
 	operator ::UUID () const;
+	static UUID FromGroups(uint32 group1, uint16 group2, uint16 group3, uint16 group4, uint64 group5);
+	#define MPT_UUID_HELPER( prefix , value , suffix ) ( prefix ## value ## suffix )
+	#define MPT_UUID(group1, group2, group3, group4, group5) mpt::UUID::FromGroups(MPT_UUID_HELPER(0x,group1,u), MPT_UUID_HELPER(0x,group2,u), MPT_UUID_HELPER(0x,group3,u), MPT_UUID_HELPER(0x,group4,u), MPT_UUID_HELPER(0x,group5,ull))
 #endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || !NO_DMO)
 public:
 	UUID();

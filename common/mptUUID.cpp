@@ -435,6 +435,17 @@ UUID::operator ::UUID () const
 	return UUIDToWin32(*this);
 }
 
+mpt::UUID UUID::FromGroups(uint32 group1, uint16 group2, uint16 group3, uint16 group4, uint64 group5)
+{
+	MPT_ASSERT((group5 & 0xffff000000000000ull) == 0ull);
+	return mpt::UUID
+		( group1
+		, group2
+		, group3
+		, (static_cast<uint64>(group4) << 48) | group5
+		);
+}
+
 #endif // MODPLUG_TRACKER || !NO_DMO
 
 #endif // MPT_OS_WINDOWS
