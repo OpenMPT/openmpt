@@ -27,6 +27,7 @@
 #include "dmo/Echo.h"
 #include "dmo/Flanger.h"
 #include "dmo/Gargle.h"
+#include "dmo/I3DL2Reverb.h"
 #include "dmo/ParamEq.h"
 #include "dmo/WavesReverb.h"
 #ifdef MODPLUG_TRACKER
@@ -212,6 +213,15 @@ CVstPluginManager::CVstPluginManager()
 			pluginList.push_back(plug);
 			plug->pluginId1 = kDmoMagic;
 			plug->pluginId2 = 0xDAFD8210;
+			plug->category = VSTPluginLib::catDMO;
+		}
+
+		plug = new (std::nothrow) VSTPluginLib(DMO::I3DL2Reverb::Create, true, MPT_PATHSTRING("{EF985E71-D5C7-42D4-BA4D-2D073E2E96F4}"), MPT_PATHSTRING("I3DL2Reverb"));
+		if(plug != nullptr)
+		{
+			pluginList.push_back(plug);
+			plug->pluginId1 = kDmoMagic;
+			plug->pluginId2 = 0xEF985E71;
 			plug->category = VSTPluginLib::catDMO;
 		}
 

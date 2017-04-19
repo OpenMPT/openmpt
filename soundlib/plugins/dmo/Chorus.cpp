@@ -248,7 +248,7 @@ CString Chorus::GetParamDisplay(PlugParamIndex param)
 	case kChorusDelay:
 		value = Delay();
 	}
-	s.Format("%.2f", value);
+	s.Format(_T("%.2f"), value);
 	return s;
 }
 

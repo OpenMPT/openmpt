@@ -23,7 +23,7 @@ namespace DMO
 class Chorus : public IMixPlugin
 //==============================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kChorusWetDryMix = 0,
@@ -36,7 +36,6 @@ public:
 		kChorusNumParameters
 	};
 
-protected:
 	float m_param[kChorusNumParameters];
 
 	// Calculated parameters

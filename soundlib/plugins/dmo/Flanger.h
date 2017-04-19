@@ -23,7 +23,7 @@ namespace DMO
 class Flanger : public Chorus
 //===========================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kFlangerWetDryMix = 0,

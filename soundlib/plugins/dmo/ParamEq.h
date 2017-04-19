@@ -21,7 +21,7 @@ namespace DMO
 class ParamEq : public IMixPlugin
 //===============================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kEqCenter = 0,
@@ -30,7 +30,6 @@ public:
 		kEqNumParameters
 	};
 
-protected:
 	float m_param[kEqNumParameters];
 
 	// Equalizer coefficients

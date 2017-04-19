@@ -242,6 +242,7 @@ LOCAL_SRC_FILES += \
 	soundlib/plugins/dmo/Echo.cpp \
 	soundlib/plugins/dmo/Flanger.cpp \
 	soundlib/plugins/dmo/Gargle.cpp \
+	soundlib/plugins/dmo/I3DL2Reverb.cpp \
 	soundlib/plugins/dmo/ParamEq.cpp \
 	soundlib/plugins/dmo/WavesReverb.cpp \
 	soundlib/plugins/PluginManager.cpp \

@@ -133,7 +133,7 @@ CString Flanger::GetParamDisplay(PlugParamIndex param)
 	case kFlangerDelay:
 		value = Delay();
 	}
-	s.Format("%.2f", value);
+	s.Format(_T("%.2f"), value);
 	return s;
 }
 

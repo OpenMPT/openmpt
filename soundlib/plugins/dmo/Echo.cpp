@@ -168,11 +168,11 @@ CString Echo::GetParamDisplay(PlugParamIndex param)
 	{
 	case kEchoWetDry:
 	case kEchoFeedback:
-		s.Format("%.2f", m_param[param] * 100.0f);
+		s.Format(_T("%.2f"), m_param[param] * 100.0f);
 		break;
 	case kEchoLeftDelay:
 	case kEchoRightDelay:
-		s.Format("%.2f", m_param[param] * 2000.0f);
+		s.Format(_T("%.2f"), m_param[param] * 2000.0f);
 		break;
 	case kEchoPanDelay:
 		s = (m_param[param] <= 0.5) ? _T("No") : _T("Yes");
