@@ -21,7 +21,7 @@ namespace DMO
 class Compressor : public IMixPlugin
 //==================================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kCompGain = 0,
@@ -33,7 +33,6 @@ public:
 		kCompNumParameters
 	};
 
-protected:
 	float m_param[kCompNumParameters];
 
 	// Calculated parameters and coefficients

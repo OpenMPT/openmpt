@@ -56,6 +56,10 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	uint32 delay1 = (m_delay[1] + m_state.combPos + 4) & 0x3FFF;
 	uint32 delay2 = (m_delay[2] + m_state.combPos + 4) & 0x3FFF;
 	uint32 delay3 = (m_delay[3] + m_state.combPos + 4) & 0x3FFF;
+	MPT_CHECKER_ASSUME((delay0 & 3) == 0);
+	MPT_CHECKER_ASSUME((delay1 & 3) == 0);
+	MPT_CHECKER_ASSUME((delay2 & 3) == 0);
+	MPT_CHECKER_ASSUME((delay3 & 3) == 0);
 	float delay0old = m_state.comb[delay0    ];
 	float delay1old = m_state.comb[delay1 + 1];
 	float delay2old = m_state.comb[delay2 + 2];
@@ -216,7 +220,7 @@ CString WavesReverb::GetParamDisplay(PlugParamIndex param)
 		break;
 	}
 	CString s;
-	s.Format("%.2f", value);
+	s.Format(_T("%.2f"), value);
 	return s;
 }
 

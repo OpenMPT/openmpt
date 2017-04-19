@@ -21,7 +21,7 @@ namespace DMO
 class Echo : public IMixPlugin
 //============================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kEchoWetDry = 0,
@@ -32,7 +32,6 @@ public:
 		kEchoNumParameters
 	};
 
-protected:
 	std::vector<float> m_delayLine;	// Echo delay line
 	float m_param[kEchoNumParameters];
 	uint32 m_bufferSize;			// Delay line length in frames

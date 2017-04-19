@@ -744,6 +744,7 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Flanger.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\I3DL2Reverb.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
@@ -1096,6 +1097,9 @@
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\I3DL2Reverb.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">

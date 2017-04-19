@@ -92,8 +92,8 @@ is just a high-level summary.
  *  Playback improvements for S3M files made with Impulse Tracker and
     Schism Tracker.
  *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
- *  The Chorus and Flanger DMO plugins are now emulated on non-Windows and
-    non-MSVC systems.
+ *  All standard DMO effects are now also emulated on non-Windows and non-MSVC
+    systems.
  *  Added `libopenmpt_stream_callbacks_buffer.h` which adds
     `openmpt_stream_callbacks` support for in-memory buffers, possibly even only
     using a truncated prefix view into a bigger file which is useful for

@@ -21,7 +21,7 @@ namespace DMO
 class Gargle : public IMixPlugin
 //===============================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kGargleRate = 0,
@@ -29,7 +29,6 @@ public:
 		kEqNumParameters
 	};
 
-protected:
 	float m_param[kEqNumParameters];
 
 	uint32 m_period, m_periodHalf, m_counter;	// In frames
@@ -58,7 +57,7 @@ public:
 
 	virtual void Resume();
 	virtual void Suspend() { m_isResumed = false; }
-	virtual void PositionChanged() { }
+	virtual void PositionChanged() { m_counter = 0; }
 
 	virtual bool IsInstrument() const { return false; }
 	virtual bool CanRecieveMidiEvents() { return false; }

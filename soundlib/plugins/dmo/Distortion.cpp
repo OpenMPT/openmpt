@@ -198,7 +198,7 @@ CString Distortion::GetParamDisplay(PlugParamIndex param)
 		break;
 	}
 	CString s;
-	s.Format("%.2f", value);
+	s.Format(_T("%.2f"), value);
 	return s;
 }
 

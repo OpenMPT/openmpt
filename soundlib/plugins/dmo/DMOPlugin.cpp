@@ -521,7 +521,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 				case MPT_FLOAT:
 					{
 						CString s;
-						s.Format("%.2f", md);
+						s.Format(_T("%.2f"), md);
 						return s;
 					}
 					break;

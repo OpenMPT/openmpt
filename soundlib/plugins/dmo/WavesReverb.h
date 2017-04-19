@@ -21,7 +21,7 @@ namespace DMO
 class WavesReverb : public IMixPlugin
 //===================================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kRvbInGain = 0,
@@ -31,7 +31,6 @@ public:
 		kDistNumParameters
 	};
 
-protected:
 	float m_param[kDistNumParameters];
 
 	// Parameters and coefficients

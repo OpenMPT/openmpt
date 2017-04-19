@@ -21,7 +21,7 @@ namespace DMO
 class Distortion : public IMixPlugin
 //==================================
 {
-public:
+protected:
 	enum Parameters
 	{
 		kDistGain = 0,
@@ -32,7 +32,6 @@ public:
 		kDistNumParameters
 	};
 
-protected:
 	float m_param[kDistNumParameters];
 
 	// Pre-EQ coefficients
