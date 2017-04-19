@@ -2323,7 +2323,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 						uint8 b = chunk.ReadUint8();
 						for(uint8 i = 0; i < 8; i++, bit++)
 						{
-							if((b & (1 << i)) && bit < m_playBehaviour.size())
+							if((b & (1 << i)) && bit <= kFT2FinetunePrecision)
 							{
 								m_playBehaviour.set(bit);
 							}
