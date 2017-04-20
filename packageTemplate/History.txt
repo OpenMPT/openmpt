@@ -26,7 +26,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.10.00 (* April 2017, revision 7977)
+v1.26.10.00 (* April 2017, revision 8002)
 -----------------------------------------
 Pattern tab
    [Fix] <js> "Continue song as soon as MIDI notes are being received" also restarted playback from cursor position if "follow song" was disabled.
@@ -46,6 +46,7 @@ Other formats
 Misc
    [Imp] <jh> About Dialog: Show the real CPU features in addition to the enabled ones.
    [Imp] <js> Use icons with alpha transparency on Wine 1.6 and newer.
+   [Fix] <js> Appending a sample-based module to an instrument-based module did not create instruments for the newly added samples.
    [Fix] <js> Fix icons with broken transparency on some systems.
    [Fix] <js> MIDI Macro Dialog: When viewing controllable plugin parameters, non-existing parameters could show up.
    [Fix] <jh> A bogus warning was shown when launching with /noAssembly command line switch.
