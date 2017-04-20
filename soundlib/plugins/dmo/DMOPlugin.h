@@ -92,8 +92,8 @@ public:
 	virtual bool HasEditor() const { return false; }
 #endif
 
-	virtual int GetNumInputChannels() const {return 2; }
-	virtual int GetNumOutputChannels() const {return 2; }
+	virtual int GetNumInputChannels() const { return 2; }
+	virtual int GetNumOutputChannels() const { return 2; }
 };
 
 OPENMPT_NAMESPACE_END

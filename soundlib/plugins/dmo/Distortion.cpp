@@ -216,7 +216,7 @@ void Distortion::RecalculateDistortionParams()
 	float edge = 2.0f + m_param[kDistEdge] * 29.0f;
 	m_edge = static_cast<uint8>(edge);	// 2...31 shifted bits
 
-	// Work out the magical shift factor (= floor(log2(edge)) + 1 / index of highest bit + 1)
+	// Work out the magical shift factor (= floor(log2(edge)) + 1 == index of highest bit + 1)
 	uint8 shift;
 	if(m_edge <= 3)
 		shift = 2;
@@ -228,16 +228,12 @@ void Distortion::RecalculateDistortionParams()
 		shift = 5;
 	m_shift = shift;
 
-	static const double LogNorm[32] =
+	static const float LogNorm[32] =
 	{
-		1.0000000000000000, 1.0000000000000000, 1.5000000000000000, 1.0000000000000000,
-		1.7500000000000000, 1.3999999999999999, 1.1699999999999999, 1.0000000000000000,
-		1.8799999999999999, 1.7600000000000000, 1.5000000000000000, 1.3600000000000001,
-		1.2500000000000000, 1.1499999999999999, 1.0700000000000001, 1.0000000000000000,
-		1.9399999999999999, 1.8200000000000001, 1.7200000000000000, 1.6299999999999999,
-		1.5500000000000000, 1.4800000000000000, 1.4099999999999999, 1.3500000000000001,
-		1.2900000000000000, 1.2400000000000000, 1.1899999999999999, 1.1499999999999999,
-		1.1100000000000001, 1.0700000000000001, 1.0300000000000000, 1.0000000000000000,
+		1.00f, 1.00f, 1.50f, 1.00f, 1.75f, 1.40f, 1.17f, 1.00f,
+		1.88f, 1.76f, 1.50f, 1.36f, 1.25f, 1.15f, 1.07f, 1.00f,
+		1.94f, 1.82f, 1.72f, 1.63f, 1.55f, 1.48f, 1.41f, 1.35f,
+		1.29f, 1.24f, 1.19f, 1.15f, 1.11f, 1.07f, 1.03f, 1.00f,
 	};
 
 	// Post-EQ
@@ -247,7 +243,7 @@ void Distortion::RecalculateDistortionParams()
 	const float t = std::tan(5.0e-1f * postBw);
 	m_postEQb1 = ((1.0f - t) / (1.0f + t));
 	m_postEQb0 = -std::cos(postFreq);
-	m_postEQa0 = static_cast<float>(gain * std::sqrt(1.0f - m_postEQb0 * m_postEQb0) * std::sqrt(1.0f - m_postEQb1 * m_postEQb1) * LogNorm[m_edge]);
+	m_postEQa0 = gain * std::sqrt(1.0f - m_postEQb0 * m_postEQb0) * std::sqrt(1.0f - m_postEQb1 * m_postEQb1) * LogNorm[m_edge];
 }
 
 } // namespace DMO
