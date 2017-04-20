@@ -203,6 +203,8 @@ CString Chorus::GetParamLabel(PlugParamIndex param)
 	switch(param)
 	{
 	case kChorusWetDryMix:
+	case kChorusDepth:
+	case kChorusFeedback:
 		return _T("%");
 	case kChorusFrequency:
 		return _T("Hz");

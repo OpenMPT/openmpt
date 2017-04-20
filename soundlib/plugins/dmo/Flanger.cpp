@@ -88,6 +88,8 @@ CString Flanger::GetParamLabel(PlugParamIndex param)
 	switch(param)
 	{
 	case kFlangerWetDryMix:
+	case kFlangerDepth:
+	case kFlangerFeedback:
 		return _T("%");
 	case kFlangerFrequency:
 		return _T("Hz");
