@@ -160,7 +160,7 @@ public:
 	static void ReportPlugException(const std::string &msg);
 
 protected:
-	void EnumerateDirectXDMOs(bool loadDMOSystemUnknown);
+	void EnumerateDirectXDMOs();
 
 #else // NO_PLUGINS
 public:

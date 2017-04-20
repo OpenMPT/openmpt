@@ -148,100 +148,94 @@ CVstPluginManager::CVstPluginManager()
 		}
 	#endif
 
-	// DirectX Media Objects
-	#ifdef MODPLUG_TRACKER
-		EnumerateDirectXDMOs(true);
-	#else // !MODPLUG_TRACKER
-		// For security reasons, we only load known DMO plugins in libopenmpt.
-		EnumerateDirectXDMOs(false);
-	#endif // MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
+	// For security reasons, we do not load untrusted DMO plugins in libopenmpt.
+	EnumerateDirectXDMOs();
+#endif
 
 	// Hard-coded "plugins"
 	VSTPluginLib *plug;
 
-	if(pluginList.empty())
+	// DirectX Media Objects Emulation
+	plug = new (std::nothrow) VSTPluginLib(DMO::Chorus::Create, true, MPT_PATHSTRING("{EFE6629C-81F7-4281-BD91-C9D604A95AF6}"), MPT_PATHSTRING("Chorus"));
+	if(plug != nullptr)
 	{
-		// DirectX Media Objects Emulation
-		plug = new (std::nothrow) VSTPluginLib(DMO::Chorus::Create, true, MPT_PATHSTRING("{EFE6629C-81F7-4281-BD91-C9D604A95AF6}"), MPT_PATHSTRING("Chorus"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEFE6629C;
-			plug->category = VSTPluginLib::catDMO;
-		}
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEFE6629C;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, true, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEF011F79;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, true, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF011F79;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, true, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEF114C90;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, true, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF114C90;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, true, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEF3E932C;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, true, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF3E932C;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::Flanger::Create, true, MPT_PATHSTRING("{EFCA3D92-DFD8-4672-A603-7420894BAD98}"), MPT_PATHSTRING("Flanger"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEFCA3D92;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::Flanger::Create, true, MPT_PATHSTRING("{EFCA3D92-DFD8-4672-A603-7420894BAD98}"), MPT_PATHSTRING("Flanger"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEFCA3D92;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::Gargle::Create, true, MPT_PATHSTRING("{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}"), MPT_PATHSTRING("Gargle"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xDAFD8210;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::Gargle::Create, true, MPT_PATHSTRING("{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}"), MPT_PATHSTRING("Gargle"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xDAFD8210;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::I3DL2Reverb::Create, true, MPT_PATHSTRING("{EF985E71-D5C7-42D4-BA4D-2D073E2E96F4}"), MPT_PATHSTRING("I3DL2Reverb"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0xEF985E71;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::I3DL2Reverb::Create, true, MPT_PATHSTRING("{EF985E71-D5C7-42D4-BA4D-2D073E2E96F4}"), MPT_PATHSTRING("I3DL2Reverb"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF985E71;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::ParamEq::Create, true, MPT_PATHSTRING("{120CED89-3BF4-4173-A132-3CB406CF3231}"), MPT_PATHSTRING("ParamEq"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0x120CED89;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::ParamEq::Create, true, MPT_PATHSTRING("{120CED89-3BF4-4173-A132-3CB406CF3231}"), MPT_PATHSTRING("ParamEq"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0x120CED89;
+		plug->category = VSTPluginLib::catDMO;
+	}
 
-		plug = new (std::nothrow) VSTPluginLib(DMO::WavesReverb::Create, true, MPT_PATHSTRING("{87FC0268-9A55-4360-95AA-004A1D9DE26C}"), MPT_PATHSTRING("WavesReverb"));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = kDmoMagic;
-			plug->pluginId2 = 0x87FC0268;
-			plug->category = VSTPluginLib::catDMO;
-		}
+	plug = new (std::nothrow) VSTPluginLib(DMO::WavesReverb::Create, true, MPT_PATHSTRING("{87FC0268-9A55-4360-95AA-004A1D9DE26C}"), MPT_PATHSTRING("WavesReverb"));
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0x87FC0268;
+		plug->category = VSTPluginLib::catDMO;
 	}
 
 	// DigiBooster Pro Echo DSP
@@ -305,6 +299,7 @@ static bool IsKnownDMO(const CLSID &clsid)
 //----------------------------------------
 {
 	const mpt::UUID uuid(clsid);
+	if(uuid == MPT_UUID(745057C7,F353,4F2D,A7EE,58434477730E)) return true; // AEC (Acoustic echo cancellation, not usable)
 	if(uuid == MPT_UUID(EFE6629C,81F7,4281,BD91,C9D604A95AF6)) return true; // Chorus
 	if(uuid == MPT_UUID(EF011F79,4000,406D,87AF,BFFB3FC39D57)) return true; // Compressor
 	if(uuid == MPT_UUID(EF114C90,CD1D,484E,96E5,09CFAF912A21)) return true; // Distortion
@@ -314,17 +309,16 @@ static bool IsKnownDMO(const CLSID &clsid)
 	if(uuid == MPT_UUID(EF985E71,D5C7,42D4,BA4D,2D073E2E96F4)) return true; // I3DL2Reverb
 	if(uuid == MPT_UUID(120CED89,3BF4,4173,A132,3CB406CF3231)) return true; // ParamEq
 	if(uuid == MPT_UUID(87FC0268,9A55,4360,95AA,004A1D9DE26C)) return true; // WavesReverb
+	if(uuid == MPT_UUID(F447B69E,1884,4A7E,8055,346F74D6EDB3)) return true; // Resampler DMO (not usable)
 	return false;
 }
 #endif // !NO_DMO
 
 
-void CVstPluginManager::EnumerateDirectXDMOs(bool loadDMOSystemUnknown)
-//---------------------------------------------------------------------
+void CVstPluginManager::EnumerateDirectXDMOs()
+//--------------------------------------------
 {
-#ifdef NO_DMO
-	MPT_UNREFERENCED_PARAMETER(loadDMOSystemUnknown);
-#else
+#ifndef NO_DMO
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
@@ -338,7 +332,7 @@ void CVstPluginManager::EnumerateDirectXDMOs(bool loadDMOSystemUnknown)
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
 			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
-				if(loadDMOSystemUnknown || IsKnownDMO(clsid))
+				if(!IsKnownDMO(clsid))
 				{
 					HKEY hksub;
 					formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
