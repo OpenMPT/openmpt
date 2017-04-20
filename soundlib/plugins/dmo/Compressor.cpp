@@ -64,12 +64,8 @@ void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		float leftIn  = *(in[0])++;
 		float rightIn = *(in[1])++;
 			
-		while(m_bufPos < 0)
-			m_bufPos += m_bufSize * 4096;
-
-		int32 writeOffset = (m_bufPos / 4096) % m_bufSize;
-		m_buffer[writeOffset * 2] = leftIn;
-		m_buffer[writeOffset * 2 + 1] = rightIn;
+		m_buffer[m_bufPos * 2] = leftIn;
+		m_buffer[m_bufPos * 2 + 1] = rightIn;
 
 		leftIn = mpt::abs(leftIn);
 		rightIn = mpt::abs(rightIn);
@@ -96,7 +92,7 @@ void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		}
 		compGainPow >>= (31 - compGainInt);
 		
-		int32 readOffset = m_predelay + m_bufPos + m_bufSize - 1;
+		int32 readOffset = m_predelay + m_bufPos * 4096 + m_bufSize - 1;
 		readOffset /= 4096;
 		readOffset %= m_bufSize;
 		
@@ -104,7 +100,8 @@ void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		*(out[0])++ = m_buffer[readOffset * 2] * outGain;
 		*(out[1])++ = m_buffer[readOffset * 2 + 1] * outGain;
 		
-		m_bufPos -= 4096;
+		if(m_bufPos-- == 0)
+			m_bufPos += m_bufSize;
 	}
 
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
@@ -137,13 +134,7 @@ void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
 void Compressor::Resume()
 //-----------------------
 {
-	uint64 bufferSize = Util::mul32to64_unsigned(m_SndFile.GetSampleRate(), 200) / 1000;
-	if(bufferSize > uint64(int32_max))
-	{
-		m_bufSize = 0;
-		return;
-	}
-	m_bufSize = static_cast<int32>(bufferSize);
+	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 200, 1000);
 	try
 	{
 		m_buffer.assign(m_bufSize * 2, 0.0f);
