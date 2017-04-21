@@ -61,7 +61,9 @@
 #elif defined(_MSC_VER)
 
 #define MPT_COMPILER_MSVC                            1
-#if (_MSC_VER >= 1900)
+#if (_MSC_VER >= 1910)
+#define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2017,0)
+#elif (_MSC_VER >= 1900)
 #define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2015,0)
 #elif (_MSC_VER >= 1800)
 #define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2013,0)
@@ -186,9 +188,6 @@
 
 
 // C++11 constexpr
-#if MPT_MSVC_BEFORE(2015,0)
-#define MPT_COMPILER_HAS_CONSTEXPR11 0
-#endif
 
 #if MPT_COMPILER_MSVC
 #define MPT_COMPILER_QUIRK_CONSTEXPR_NO_STRING_LITERALS
