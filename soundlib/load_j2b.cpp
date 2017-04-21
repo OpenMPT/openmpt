@@ -765,8 +765,6 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 			}
 
-			m_nInstruments = std::max(m_nInstruments, instr);
-
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
 			// read sample sub-chunks - this is a rather "flat" format compared to RIFF AM and has no nested RIFF chunks.
@@ -827,7 +825,6 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				continue;
 			}
-			m_nInstruments = std::max(m_nInstruments, instr);
 
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 

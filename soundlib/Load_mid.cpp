@@ -302,7 +302,6 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	}
 
 	m_nSamples++;
-	m_nInstruments++;
 	pIns->wMidiBank = bank + 1;
 	pIns->nMidiProgram = program + 1;
 	pIns->nFadeOut = 1024;

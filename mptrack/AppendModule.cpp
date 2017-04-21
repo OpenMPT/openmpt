@@ -123,7 +123,6 @@ void CModDoc::AppendModule(const CSoundFile &source)
 				}
 				if(m_SndFile.AllocateInstrument(targetIns, targetSmp) != nullptr)
 				{
-					m_SndFile.m_nInstruments = std::max(m_SndFile.m_nInstruments, targetIns);
 					m_SndFile.ReadSampleFromSong(targetSmp, source, i);
 				}
 				instrMapping[i] = targetIns;

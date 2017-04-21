@@ -752,7 +752,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			drumSample[i] = drumHeader.DrumSamples[i];
 			if(drumMap[i] != INSTRUMENTINDEX_INVALID)
 			{
-				m_nInstruments = drumMap[i];
 				ModInstrument *mptIns = AllocateInstrument(drumMap[i], drumHeader.DrumSamples[i] + 1);
 				if(mptIns != nullptr)
 				{
