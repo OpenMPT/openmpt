@@ -16,15 +16,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// nullptr for ancient gcc
-#if MPT_COMPILER_GCC
-#if MPT_GCC_BEFORE(4,6,0)
-#define nullptr 0
-#endif
-#endif
-
-
-
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline
@@ -55,7 +46,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // noexcept
-#if MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(4,6,0)
+#if MPT_MSVC_BEFORE(2015,0)
 #define MPT_NOEXCEPT throw()
 #else
 #define MPT_NOEXCEPT noexcept
@@ -77,8 +68,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
 #define MPT_ALIGNOF(type) __alignof( type )
-#elif MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,5,0)
-#define MPT_ALIGNOF(type) __alignof__( type )
 #else
 #define MPT_ALIGNOF(type) alignof( type )
 #endif
@@ -121,14 +110,6 @@ OPENMPT_NAMESPACE_END
 #include <utility>
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_GCC_BEFORE(4,6,0)
-#define MPT_SHARED_PTR_NULL(T) std::shared_ptr<T>()
-#define MPT_WEAK_PTR_NULL(T) std::weak_ptr<T>()
-#else
-#define MPT_SHARED_PTR_NULL(T) nullptr
-#define MPT_WEAK_PTR_NULL(T) std::weak_ptr<T>()
-#endif
-
 
 
 // std::make_unique is C++14
@@ -166,24 +147,12 @@ std::unique_ptr<T> make_unique(Args&&... args)
 #endif
 
 #if MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,6,0)
 #define MPT_MAYBE_CONSTANT_IF(x) \
   _Pragma("GCC diagnostic push") \
   _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
   if(x) \
   _Pragma("GCC diagnostic pop") \
 /**/
-#elif MPT_GCC_AT_LEAST(4,5,0)
-#define MPT_MAYBE_CONSTANT_IF(x) \
-  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
-  if(x) \
-/**/
-#else
-// GCC 4.4 does not like _Pragma diagnostic inside functions.
-// As GCC 4.4 is one of our major compilers, we do not want a noisy build.
-// Thus, just disable this warning globally. (not required for now)
-//#pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
 #endif
 
 #if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2

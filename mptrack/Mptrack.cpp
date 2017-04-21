@@ -1447,7 +1447,7 @@ int CTrackApp::ExitInstanceImpl()
 
 	if(mpt::Windows::IsWine())
 	{
-		SetWineVersion(MPT_SHARED_PTR_NULL(mpt::Wine::VersionContext));
+		SetWineVersion(nullptr);
 	}
 
 	m_PRNG.reset();

@@ -487,7 +487,7 @@ public:
 #if MPT_COMPONENT_MANAGER
 	void Reload()
 	{
-		component = MPT_SHARED_PTR_NULL(T);
+		component = nullptr;
 		component = ReloadComponent<T>();
 	}
 #endif

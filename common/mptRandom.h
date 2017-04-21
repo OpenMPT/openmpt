@@ -401,21 +401,6 @@ public:
 // required to seed a particular engine. VERY STUPID.
 // List the ones we are likely to use.
 
-#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-
-template <> struct engine_traits<std::mt19937> {
-	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
-	typedef std::mt19937 rng_type;
-	typedef rng_type::result_type result_type;
-	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
-	template<typename Trd> static inline rng_type make(Trd & rd)
-	{
-		return rng_type(rd);
-	}
-};
-
-#else
-
 template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
 	typedef std::mt19937 rng_type;
@@ -493,8 +478,6 @@ template <> struct engine_traits<std::ranlux48> {
 		return rng_type(seed);
 	}
 };
-
-#endif
 
 
 class prng_random_device_seeder
@@ -575,11 +558,7 @@ typedef mpt::sane_random_device random_device;
 // output domain which we rely upon.
 typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
 typedef std::mt19937       main_prng;
-#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-typedef std::mt19937       best_prng;
-#else
 typedef std::ranlux48      best_prng;
-#endif
 
 #endif // MPT_BUILD_FUZZER
 

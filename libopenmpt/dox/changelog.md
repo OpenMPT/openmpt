@@ -48,9 +48,15 @@ is just a high-level summary.
     disadvantage with the new default settings at all.
  *  [**Change**] Un4seen unmo3 support is now completely disabled by default in
     all configurations and build systems.
+ *  [**Change**] The `Makefile` option `ANCIENT=1` is gone.
 
- *  [**Regression**] Support for GCC 4.1, GCC 4.2 and GCC 4.3, as well as the
-    `Makefile` option `ANCIENT=1`, is gone.
+ *  [**Regression**] Support for GCC 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7 has been
+    removed.
+ *  [**Regression**] Support for Clang 3.0, 3.1, 3.2, 3.3 has been removed.
+ *  [**Regression**] Support for Emscripten verions older than 1.31.0 has been
+    removed.
+ *  [**Regression**] Support for Android NDK versions older than 11 has been
+    removed.
  *  [**Regression**] Visual Studio 2008 support has been removed.
  *  [**Regression**] In order to securely load libmpg123, the Windows binary
     packages only support the precise libmpg123 binary that is downloaded by the

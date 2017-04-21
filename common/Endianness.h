@@ -134,9 +134,7 @@ struct LittleEndian_tag
 // format.
 
 #if MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,8,0)
 #define MPT_bswap16 __builtin_bswap16
-#endif
 #define MPT_bswap32 __builtin_bswap32
 #define MPT_bswap64 __builtin_bswap64
 #elif MPT_COMPILER_MSVC
