@@ -622,10 +622,10 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 					mptIns->VolEnv.nLoopStart = mptIns->VolEnv.nLoopEnd = static_cast<uint8>(mptIns->VolEnv.size() - 1);
 					mptIns->VolEnv.dwFlags.set(ENV_LOOP);
 				}
-				for(auto it = mptIns->PitchEnv.begin(); it != mptIns->PitchEnv.end(); it++)
+				for(auto &p : mptIns->PitchEnv)
 				{
 					// Scale pitch envelope
-					it->value = (it->value * 6u) / 16u;
+					p.value = (p.value * 6u) / 16u;
 				}
 #endif // MODPLUG_TRACKER
 

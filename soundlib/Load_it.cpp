@@ -110,14 +110,14 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		//the addresses.
 		const uint16 tuningMapSize = static_cast<uint16>(tNameToShort_Map.size());
 		mpt::IO::WriteIntLE<uint16>(oStrm, tuningMapSize);
-		for(auto iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
+		for(auto &iter : tNameToShort_Map)
 		{
-			if(iter->first)
-				mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter->first->GetName());
+			if(iter.first)
+				mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter.first->GetName());
 			else //Case: Using original IT tuning.
 				mpt::IO::WriteSizedStringLE<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
-			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
+			mpt::IO::WriteIntLE<uint16>(oStrm, iter.second);
 		}
 
 		//Writing tuning data for instruments.

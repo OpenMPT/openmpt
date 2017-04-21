@@ -817,15 +817,15 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 		#endif
 			SFPRESETHEADER psfh;
 			chunk.ReadStruct(psfh);
-			for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
+			for (auto &dlsIns : m_Instruments)
 			{
-				mpt::String::Copy(pDlsIns->szName, psfh.achPresetName);
-				pDlsIns->ulInstrument = psfh.wPreset & 0x7F;
-				pDlsIns->ulBank = (psfh.wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh.wBank << 8);
-				pDlsIns->wPresetBagNdx = psfh.wPresetBagNdx;
-				pDlsIns->wPresetBagNum = 1;
+				mpt::String::Copy(dlsIns.szName, psfh.achPresetName);
+				dlsIns.ulInstrument = psfh.wPreset & 0x7F;
+				dlsIns.ulBank = (psfh.wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh.wBank << 8);
+				dlsIns.wPresetBagNdx = psfh.wPresetBagNdx;
+				dlsIns.wPresetBagNum = 1;
 				chunk.ReadStruct(psfh);
-				if (psfh.wPresetBagNdx > pDlsIns->wPresetBagNdx) pDlsIns->wPresetBagNum = (uint16)(psfh.wPresetBagNdx - pDlsIns->wPresetBagNdx);
+				if (psfh.wPresetBagNdx > dlsIns.wPresetBagNdx) dlsIns.wPresetBagNum = static_cast<uint16>(psfh.wPresetBagNdx - dlsIns.wPresetBagNdx);
 			}
 		}
 		break;
@@ -958,7 +958,7 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 	if (m_Instruments.empty() || m_SamplesEx.empty())
 		return false;
 
-	for (auto pDlsIns = m_Instruments.begin(); pDlsIns != m_Instruments.end(); pDlsIns++)
+	for (auto &dlsIns : m_Instruments)
 	{
 		DLSENVELOPE dlsEnv;
 		uint32 nInstrNdx = 0;
@@ -970,9 +970,9 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 		dlsEnv.nVolSustainLevel = 128;
 		dlsEnv.nDefPan = 128;
 		// Load Preset Bags
-		for (uint32 ipbagcnt=0; ipbagcnt<(uint32)pDlsIns->wPresetBagNum; ipbagcnt++)
+		for (uint32 ipbagcnt=0; ipbagcnt<(uint32)dlsIns.wPresetBagNum; ipbagcnt++)
 		{
-			uint32 ipbagndx = pDlsIns->wPresetBagNdx + ipbagcnt;
+			uint32 ipbagndx = dlsIns.wPresetBagNdx + ipbagcnt;
 			if ((ipbagndx+1 >= sf2info.nPresetBags) || (!sf2info.pPresetBags)) break;
 			// Load generators for each preset bag
 			const SFPRESETBAG *pbag = sf2info.pPresetBags + ipbagndx;
@@ -1007,27 +1007,27 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 			}
 		}
 		// Envelope
-		if (!(pDlsIns->ulBank & F_INSTRUMENT_DRUMS))
+		if (!(dlsIns.ulBank & F_INSTRUMENT_DRUMS))
 		{
 			m_Envelopes.push_back(dlsEnv);
-			pDlsIns->nMelodicEnv = m_Envelopes.size();
+			dlsIns.nMelodicEnv = m_Envelopes.size();
 		}
 		// Load Instrument Bags
 		if ((!nInstrNdx) || (nInstrNdx >= sf2info.nInsts) || (!sf2info.pInsts)) continue;
 		nInstrNdx--;
-		pDlsIns->nRegions = sf2info.pInsts[nInstrNdx+1].wInstBagNdx - sf2info.pInsts[nInstrNdx].wInstBagNdx;
+		dlsIns.nRegions = sf2info.pInsts[nInstrNdx+1].wInstBagNdx - sf2info.pInsts[nInstrNdx].wInstBagNdx;
 		//Log("\nIns %3d, %2d regions:\n", nIns, pSmp->nRegions);
-		if (pDlsIns->nRegions > DLSMAXREGIONS) pDlsIns->nRegions = DLSMAXREGIONS;
-		DLSREGION *pRgn = pDlsIns->Regions;
-		for (uint32 nRgn=0; nRgn<pDlsIns->nRegions; nRgn++, pRgn++)
+		if (dlsIns.nRegions > DLSMAXREGIONS) dlsIns.nRegions = DLSMAXREGIONS;
+		DLSREGION *pRgn = dlsIns.Regions;
+		for (uint32 nRgn = 0; nRgn < dlsIns.nRegions; nRgn++, pRgn++)
 		{
 			uint32 ibagcnt = sf2info.pInsts[nInstrNdx].wInstBagNdx + nRgn;
 			if ((ibagcnt >= sf2info.nInstBags) || (!sf2info.pInstBags)) break;
 			// Create a new envelope for drums
 			DLSENVELOPE *pDlsEnv = &dlsEnv;
-			if (!(pDlsIns->ulBank & F_INSTRUMENT_DRUMS) && pDlsIns->nMelodicEnv > 0 && pDlsIns->nMelodicEnv <= m_Envelopes.size())
+			if (!(dlsIns.ulBank & F_INSTRUMENT_DRUMS) && dlsIns.nMelodicEnv > 0 && dlsIns.nMelodicEnv <= m_Envelopes.size())
 			{
-				pDlsEnv = &m_Envelopes[pDlsIns->nMelodicEnv - 1];
+				pDlsEnv = &m_Envelopes[dlsIns.nMelodicEnv - 1];
 			}
 			// Region Default Values
 			int32 lAttn = lAttenuation;

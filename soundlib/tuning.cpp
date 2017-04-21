@@ -676,12 +676,10 @@ void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 //-------------------------------------------------------------------
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
-	CTuning::NNM_CITER iter = m.begin();
-	CTuning::NNM_CITER end = m.end();
-	for(; iter != end; iter++)
+	for(auto &mi : m)
 	{
-		mpt::IO::WriteIntLE<int16>(oStrm, iter->first);
-		mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter->second);
+		mpt::IO::WriteIntLE<int16>(oStrm, mi.first);
+		mpt::IO::WriteSizedStringLE<uint8>(oStrm, mi.second);
 	}
 }
 

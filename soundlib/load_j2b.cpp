@@ -729,9 +729,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 		PATTERNINDEX maxPattern = 0;
 		auto pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
 		Patterns.ResizeArray(static_cast<PATTERNINDEX>(pattChunks.size()));
-		for(auto patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+		for(auto chunk : pattChunks)
 		{
-			FileReader chunk(*patternIter);
 			PATTERNINDEX pat = chunk.ReadUint8();
 			size_t patternSize = chunk.ReadUint32LE();
 			ConvertAMPattern(chunk.ReadChunk(patternSize), pat, isAM, *this);
@@ -748,9 +747,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// "INST" - Instrument (only in RIFF AMFF)
 		auto instChunks = chunks.GetAllChunks(AMFFRiffChunk::idINST);
-		for(auto instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
+		for(auto chunk : instChunks)
 		{
-			FileReader chunk(*instIter);
 			AMFFInstrumentHeader instrHeader;
 			if(!chunk.ReadStruct(instrHeader))
 			{
@@ -800,9 +798,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// "RIFF" - Instrument (only in RIFF AM)
 		auto instChunks = chunks.GetAllChunks(AMFFRiffChunk::idRIFF);
-		for(auto instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
+		for(ChunkReader chunk : instChunks)
 		{
-			ChunkReader chunk(*instIter);
 			if(chunk.ReadUint32LE() != AMFFRiffChunk::idAI__)
 			{
 				continue;
@@ -835,14 +832,11 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			instrHeader.ConvertToMPT(*pIns, m_nSamples);
 
 			// Read sample sub-chunks (RIFF nesting ftw)
-			ChunkReader::ChunkList<AMFFRiffChunk> sampleChunkFile = chunk.ReadChunks<AMFFRiffChunk>(2);
-			auto sampleChunks = sampleChunkFile.GetAllChunks(AMFFRiffChunk::idRIFF);
+			auto sampleChunks = chunk.ReadChunks<AMFFRiffChunk>(2).GetAllChunks(AMFFRiffChunk::idRIFF);
 			MPT_ASSERT(sampleChunks.size() == instrHeader.numSamples);
 
-			for(auto smpIter = sampleChunks.begin(); smpIter != sampleChunks.end(); smpIter++)
+			for(auto sampleChunk : sampleChunks)
 			{
-				ChunkReader sampleChunk(*smpIter);
-
 				if(sampleChunk.ReadUint32LE() != AMFFRiffChunk::idAS__ || m_nSamples + 1 >= MAX_SAMPLES)
 				{
 					continue;
@@ -932,7 +926,6 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	int retVal = uncompress(amFileData.data(), &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
 
 	bool result = false;
-
 #ifndef MPT_BUILD_FUZZER
 	if(destSize == fileHeader.unpackedLength && retVal == Z_OK)
 #endif
@@ -941,7 +934,6 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader amFile(mpt::as_span(amFileData));
 		result = ReadAM(amFile, loadFlags);
 	}
-
 	return result;
 
 #endif

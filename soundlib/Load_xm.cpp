@@ -990,9 +990,8 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 				// e.g. sample 1 is assigned to instrument 1 and samples 2 to 10 aren't assigned to any instrument,
 				// we will assign those to sample 1. Any samples before the first referenced sample are going to be lost,
 				// but hey, I wrote this mostly for preserving instrument texts in existing modules, where we shouldn't encounter this situation...
-				for(std::vector<SAMPLEINDEX>::const_iterator sample = samples.begin(); sample != samples.end(); sample++)
+				for(auto smp : samples)
 				{
-					SAMPLEINDEX smp = *sample;
 					while(++smp <= GetNumSamples()
 						&& !sampleAssigned[smp]
 						&& insHeader.numSamples < (compatibilityExport ? 16 : 32))
