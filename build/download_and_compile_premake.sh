@@ -51,15 +51,6 @@ cd include/genie
 
 make
 
-mkdir -p build/vs2010
-./bin/linux/genie --to=../build/vs2010 vs2010
-
-mkdir -p build/vs2012
-./bin/linux/genie --to=../build/vs2012 vs2012
-
-mkdir -p build/vs2013
-./bin/linux/genie --to=../build/vs2013 vs2013
-
 mkdir -p build/vs2015
 ./bin/linux/genie --to=../build/vs2015 vs2015
 
