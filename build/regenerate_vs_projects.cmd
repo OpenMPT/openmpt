@@ -19,9 +19,6 @@ set GENIE=include\genie\bin\windows\genie.exe
 echo dofile "build/genie/genie.lua" > genie.lua || goto err
 
 %GENIE% --target="windesktop81" vs2015 || goto err
-%GENIE% --target="winphone8"    vs2012 || goto err
-%GENIE% --target="winphone81"   vs2013 || goto err
-%GENIE% --target="winstore81"   vs2013 || goto err
 %GENIE% --target="winstore82"   vs2015 || goto err
 
 del genie.lua || goto err
