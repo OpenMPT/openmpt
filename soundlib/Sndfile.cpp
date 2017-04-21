@@ -505,16 +505,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				} else
 				{
 					// Plugin not found - add to list
-					bool found = false;
-					for(auto i = notFoundIDs.cbegin(); i != notFoundIDs.cend(); ++i)
-					{
-						if((**i).dwPluginId2 == plugin.Info.dwPluginId2
-							&& (**i).dwPluginId1 == plugin.Info.dwPluginId1)
-						{
-							found = true;
-							break;
-						}
-					}
+					bool found = std::find_if(notFoundIDs.cbegin(), notFoundIDs.cend(),
+						[&plugin](const SNDMIXPLUGININFO *info) { return info->dwPluginId2 == plugin.Info.dwPluginId2 && info->dwPluginId1 == plugin.Info.dwPluginId1; }) != notFoundIDs.cend();
 
 					if(!found)
 					{
@@ -1858,14 +1850,14 @@ void CSoundFile::PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 s
 	const std::set<SAMPLEINDEX> referencedSamples = Instruments[ins]->GetSamples();
 
 	// Propagate changes to all samples that belong to this instrument.
-	for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+	for(auto sample : referencedSamples)
 	{
-		if(*sample <= m_nSamples)
+		if(sample <= m_nSamples)
 		{
-			Samples[*sample].nVibDepth = depth;
-			Samples[*sample].nVibType = type;
-			Samples[*sample].nVibRate = rate;
-			Samples[*sample].nVibSweep = sweep;
+			Samples[sample].nVibDepth = depth;
+			Samples[sample].nVibType = type;
+			Samples[sample].nVibRate = rate;
+			Samples[sample].nVibSweep = sweep;
 		}
 	}
 }
@@ -1877,17 +1869,17 @@ void TempoSwing::Normalize()
 {
 	if(empty()) return;
 	uint64 sum = 0;
-	for(iterator i = begin(); i != end(); i++)
+	for(auto &i : *this)
 	{
-		Limit(*i, Unity / 4u, Unity * 4u);
-		sum += *i;
+		Limit(i, Unity / 4u, Unity * 4u);
+		sum += i;
 	}
 	sum /= size();
 	int64 remain = Unity * size();
-	for(iterator i = begin(); i != end(); i++)
+	for(auto &i : *this)
 	{
-		*i = Util::muldivr_unsigned(*i, Unity, static_cast<int32>(sum));
-		remain -= *i;
+		i = Util::muldivr_unsigned(i, Unity, static_cast<int32>(sum));
+		remain -= i;
 	}
 	//MPT_ASSERT(static_cast<uint32>(mpt::abs(static_cast<int32>(remain))) <= size());
 	at(0) += static_cast<int32>(remain);

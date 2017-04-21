@@ -61,15 +61,15 @@ CTuningCollection::CTuningCollection(const std::string& name) : m_Name(name), m_
 CTuningCollection::~CTuningCollection()
 //-------------------------------------
 {
-	for(TITER i = m_Tunings.begin(); i != m_Tunings.end(); i++)
+	for(auto i : m_Tunings)
 	{
-		delete *i;
+		delete i;
 	}
 	m_Tunings.clear();
 
-	for(TITER i = m_DeletedTunings.begin(); i != m_DeletedTunings.end(); i++)
+	for(auto i : m_DeletedTunings)
 	{
-		delete *i;
+		delete i;
 	}
 	m_DeletedTunings.clear();
 }
@@ -87,8 +87,7 @@ CTuning* CTuningCollection::FindTuning(const std::string& name) const
 size_t CTuningCollection::FindTuning(const CTuning* const pT) const
 //-----------------------------------------------------------------
 {
-	CTITER citer = find(m_Tunings.begin(), m_Tunings.end(), pT);
-		return citer - m_Tunings.begin();
+	return std::find(m_Tunings.cbegin(), m_Tunings.cend(), pT) - m_Tunings.begin();
 }
 
 

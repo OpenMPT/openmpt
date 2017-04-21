@@ -265,13 +265,13 @@ CVstPluginManager::CVstPluginManager()
 CVstPluginManager::~CVstPluginManager()
 //-------------------------------------
 {
-	for(const_iterator p = begin(); p != end(); p++)
+	for(auto &plug : pluginList)
 	{
-		while((**p).pPluginsList != nullptr)
+		while(plug->pPluginsList != nullptr)
 		{
-			(**p).pPluginsList->Release();
+			plug->pPluginsList->Release();
 		}
-		delete *p;
+		delete plug;
 	}
 	#if MPT_OS_WINDOWS && !defined(NO_DMO)
 		if(MustUnInitilizeCOM)
@@ -286,9 +286,9 @@ CVstPluginManager::~CVstPluginManager()
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 //-------------------------------------------------------------------
 {
-	for(const_iterator p = begin(); p != end(); p++)
+	for(auto &plug : pluginList)
 	{
-		if(*p == pLib) return true;
+		if(plug == pLib) return true;
 	}
 	return false;
 }
@@ -405,9 +405,9 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	const mpt::PathString fileName = dllPath.GetFileName();
 
 	// Check if this is already a known plugin.
-	for(const_iterator dupePlug = begin(); dupePlug != end(); dupePlug++)
+	for(const auto &dupePlug : pluginList)
 	{
-		if(!dllPath.CompareNoCase(dllPath, (**dupePlug).dllPath)) return *dupePlug;
+		if(!dllPath.CompareNoCase(dllPath, dupePlug->dllPath)) return dupePlug;
 	}
 
 	if(checkFileExistence && errStr != nullptr && !dllPath.IsFile())
@@ -570,9 +570,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	// Find plugin in library
 	int8 match = 0;	// "Match quality" of found plugin. Higher value = better match.
-	for(const_iterator p = begin(); p != end(); p++)
+	for(const auto &plug : pluginList)
 	{
-		VSTPluginLib *plug = *p;
 		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
 			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2);
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
@@ -688,10 +687,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 void CVstPluginManager::OnIdle()
 //------------------------------
 {
-	for(const_iterator pFactory = begin(); pFactory != end(); pFactory++)
+	for(auto &factory : pluginList)
 	{
 		// Note: bridged plugins won't receive these messages and generate their own idle messages.
-		IMixPlugin *p = (**pFactory).pPluginsList;
+		IMixPlugin *p = factory->pPluginsList;
 		while (p)
 		{
 			//rewbs. VSTCompliance: A specific plug has requested indefinite periodic processing time.

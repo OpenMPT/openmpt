@@ -172,11 +172,11 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX kee
 
 	// Check which samples are used by the instrument we are going to nuke.
 	std::set<SAMPLEINDEX> referencedSamples = Instruments[nInstr]->GetSamples();
-	for(auto sample = referencedSamples.cbegin(); sample != referencedSamples.cend(); sample++)
+	for(auto sample : referencedSamples)
 	{
-		if((*sample) <= GetNumSamples())
+		if(sample <= GetNumSamples())
 		{
-			keepSamples[*sample] = false;
+			keepSamples[sample] = false;
 		}
 	}
 
@@ -1508,10 +1508,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			s.erase(0, s.find_first_not_of(" \t"));
 
 			// Replace macros
-			for(auto m = macros.cbegin(); m != macros.cend(); m++)
+			for(const auto &m : macros)
 			{
-				const auto &oldStr = m->first;
-				const auto &newStr = m->second;
+				auto &oldStr = m.first;
+				auto &newStr = m.second;
 				std::string::size_type pos = 0;
 				while((pos = s.find(oldStr, pos)) != std::string::npos)
 				{
@@ -1645,9 +1645,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	Instruments[nInstr] = pIns;
 
 	SAMPLEINDEX prevSmp = 0;
-	for(auto region = regions.begin(); region != regions.end(); region++)
+	for(auto &region : regions)
 	{
-		uint8 keyLo = region->keyLo, keyHi = region->keyHi;
+		uint8 keyLo = region.keyLo, keyHi = region.keyHi;
 		if(keyLo > keyHi)
 			continue;
 		Clamp<uint8, uint8>(keyLo, 0, NOTE_MAX - NOTE_MIN);
@@ -1658,10 +1658,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		prevSmp = smp;
 
 		ModSample &sample = Samples[smp];
-		mpt::PathString filename = mpt::PathString::FromUTF8(region->filename);
+		mpt::PathString filename = mpt::PathString::FromUTF8(region.filename);
 		if(!filename.empty())
 		{
-			if(region->filename.find(':') == std::string::npos)
+			if(region.filename.find(':') == std::string::npos)
 			{
 				filename = file.GetFileName().GetPath() + filename;
 			}
@@ -1681,15 +1681,15 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		sample.uFlags.set(SMP_KEEPONDISK, sample.pSample != nullptr);
 
-		if(region->useSampleKeyRoot)
+		if(region.useSampleKeyRoot)
 		{
 			if(sample.rootNote != NOTE_NONE)
-				region->keyRoot = sample.rootNote - NOTE_MIN;
+				region.keyRoot = sample.rootNote - NOTE_MIN;
 			else
-				region->keyRoot = 60;
+				region.keyRoot = 60;
 		}
 
-		int8 transp = region->transpose + (60 - region->keyRoot);
+		int8 transp = region.transpose + (60 - region.keyRoot);
 		for(uint8 i = keyLo; i <= keyHi; i++)
 		{
 			pIns->Keyboard[i] = smp;
@@ -1699,45 +1699,45 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(GetType() == MOD_TYPE_XM)
 			sample.Transpose(transp / 12.0);
 
-		pIns->nFilterMode = region->filterType;
-		if(region->cutoff != 0)
-			pIns->SetCutoff(FrequencyToCutOff(region->cutoff), true);
-		if(region->resonance != 0)
-			pIns->SetResonance(mpt::saturate_cast<uint8>(Util::muldivr(region->resonance, 128, 24)), true);
-		pIns->nCutSwing = mpt::saturate_cast<uint8>(Util::muldivr(region->filterRandom, m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24, 1200));
-		pIns->midiPWD = static_cast<int8>(region->pitchBend / 100);
+		pIns->nFilterMode = region.filterType;
+		if(region.cutoff != 0)
+			pIns->SetCutoff(FrequencyToCutOff(region.cutoff), true);
+		if(region.resonance != 0)
+			pIns->SetResonance(mpt::saturate_cast<uint8>(Util::muldivr(region.resonance, 128, 24)), true);
+		pIns->nCutSwing = mpt::saturate_cast<uint8>(Util::muldivr(region.filterRandom, m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24, 1200));
+		pIns->midiPWD = static_cast<int8>(region.pitchBend / 100);
 
 		pIns->nNNA = NNA_NOTEOFF;
-		if(region->polyphony == 1)
+		if(region.polyphony == 1)
 		{
 			pIns->nDNA = NNA_NOTECUT;
 			pIns->nDCT = DCT_SAMPLE;
 		}
-		region->ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
-		region->pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
-		//region->filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
+		region.ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
+		region.pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
+		//region.filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
 
-		sample.rootNote = region->keyRoot + NOTE_MIN;
-		sample.nGlobalVol = Util::Round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region->volume / 20.0));
-		if(region->panning != -128)
+		sample.rootNote = region.keyRoot + NOTE_MIN;
+		sample.nGlobalVol = Util::Round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
+		if(region.panning != -128)
 		{
-			sample.nPan = static_cast<decltype(sample.nPan)>(Util::muldivr_unsigned(region->panning + 100, 256, 200));
+			sample.nPan = static_cast<decltype(sample.nPan)>(Util::muldivr_unsigned(region.panning + 100, 256, 200));
 			sample.uFlags.set(CHN_PANNING);
 		}
-		sample.Transpose(region->finetune / 1200.0);
+		sample.Transpose(region.finetune / 1200.0);
 
-		if(region->pitchLfoDepth && region->pitchLfoFreq)
+		if(region.pitchLfoDepth && region.pitchLfoFreq)
 		{
 			sample.nVibSweep = 255;
-			if(region->pitchLfoFade > 0)
-				sample.nVibSweep = Util::Round<uint8>(255 / region->pitchLfoFade);
-			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region->pitchLfoDepth, 32, 100));
-			sample.nVibRate = region->pitchLfoFreq * 4;
+			if(region.pitchLfoFade > 0)
+				sample.nVibSweep = Util::Round<uint8>(255 / region.pitchLfoFade);
+			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region.pitchLfoDepth, 32, 100));
+			sample.nVibRate = region.pitchLfoFreq * 4;
 		}
 
-		if(region->loopMode != SFZRegion::LoopMode::kUnspecified)
+		if(region.loopMode != SFZRegion::LoopMode::kUnspecified)
 		{
-			switch(region->loopMode)
+			switch(region.loopMode)
 			{
 			case SFZRegion::LoopMode::kContinuous:
 			case SFZRegion::LoopMode::kOneShot:
@@ -1750,23 +1750,23 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP);
 			}
 		}
-		if(region->loopEnd > region->loopStart)
+		if(region.loopEnd > region.loopStart)
 		{
 			// Loop may also be defined in file, in which case loopStart and loopEnd are unset.
-			if(region->loopMode == SFZRegion::LoopMode::kSustain)
+			if(region.loopMode == SFZRegion::LoopMode::kSustain)
 			{
-				sample.nSustainStart = region->loopStart;
-				sample.nSustainEnd = region->loopEnd + 1;
-			} else if(region->loopMode == SFZRegion::LoopMode::kContinuous || region->loopMode == SFZRegion::LoopMode::kOneShot)
+				sample.nSustainStart = region.loopStart;
+				sample.nSustainEnd = region.loopEnd + 1;
+			} else if(region.loopMode == SFZRegion::LoopMode::kContinuous || region.loopMode == SFZRegion::LoopMode::kOneShot)
 			{
-				sample.nLoopStart = region->loopStart;
-				sample.nLoopEnd = region->loopEnd + 1;
+				sample.nLoopStart = region.loopStart;
+				sample.nLoopEnd = region.loopEnd + 1;
 			}
-		} else if(sample.nLoopEnd <= sample.nLoopStart && region->loopMode != SFZRegion::LoopMode::kUnspecified && region->loopMode != SFZRegion::LoopMode::kNoLoop)
+		} else if(sample.nLoopEnd <= sample.nLoopStart && region.loopMode != SFZRegion::LoopMode::kUnspecified && region.loopMode != SFZRegion::LoopMode::kNoLoop)
 		{
 			sample.nLoopEnd = sample.nLength;
 		}
-		switch(region->loopType)
+		switch(region.loopType)
 		{
 		case SFZRegion::LoopType::kUnspecified:
 			break;
@@ -1782,7 +1782,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		default:
 			break;
 		}
-		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region->loopMode == SFZRegion::LoopMode::kSustain)
+		if(sample.nSustainEnd <= sample.nSustainStart && sample.nLoopEnd > sample.nLoopStart && region.loopMode == SFZRegion::LoopMode::kSustain)
 		{
 			// Turn normal loop (imported from sample) into sustain loop
 			std::swap(sample.nSustainStart, sample.nLoopStart);
@@ -1791,20 +1791,20 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.uFlags.set(CHN_PINGPONGSUSTAIN, sample.uFlags[CHN_PINGPONGLOOP]);
 			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
-		if(region->offset && region->offset < sample.nLength)
+		if(region.offset && region.offset < sample.nLength)
 		{
-			auto offset = region->offset * sample.GetBytesPerSample();
+			auto offset = region.offset * sample.GetBytesPerSample();
 			memmove(sample.pSample8, sample.pSample8 + offset, sample.nLength * sample.GetBytesPerSample() - offset);
-			if(region->end > region->offset)
-				region->end -= region->offset;
-			sample.nLength -= region->offset;
-			sample.nLoopStart -= region->offset;
-			sample.nLoopEnd -= region->offset;
+			if(region.end > region.offset)
+				region.end -= region.offset;
+			sample.nLength -= region.offset;
+			sample.nLoopStart -= region.offset;
+			sample.nLoopEnd -= region.offset;
 			sample.uFlags.set(SMP_MODIFIED);
 		}
-		LimitMax(sample.nLength, region->end);
+		LimitMax(sample.nLength, region.end);
 
-		if(region->invertPhase)
+		if(region.invertPhase)
 		{
 			ctrlSmp::InvertSample(sample, 0, sample.nLength, *this);
 			sample.uFlags.set(SMP_MODIFIED);
@@ -2089,24 +2089,16 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		}
 
 		// Read markers
-		for(auto iter = markers.begin(); iter != markers.end(); iter++)
+		for(auto &m : markers)
 		{
-			if(iter->id == instrHeader.sustainLoop.beginLoop)
-			{
-				mptSample.nSustainStart = iter->position;
-			}
-			if(iter->id == instrHeader.sustainLoop.endLoop)
-			{
-				mptSample.nSustainEnd = iter->position;
-			}
-			if(iter->id == instrHeader.releaseLoop.beginLoop)
-			{
-				mptSample.nLoopStart = iter->position;
-			}
-			if(iter->id == instrHeader.releaseLoop.endLoop)
-			{
-				mptSample.nLoopEnd = iter->position;
-			}
+			if(m.id == instrHeader.sustainLoop.beginLoop)
+				mptSample.nSustainStart = m.position;
+			if(m.id == instrHeader.sustainLoop.endLoop)
+				mptSample.nSustainEnd = m.position;
+			if(m.id == instrHeader.releaseLoop.beginLoop)
+				mptSample.nLoopStart = m.position;
+			if(m.id == instrHeader.releaseLoop.endLoop)
+				mptSample.nLoopEnd = m.position;
 		}
 		mptSample.SanitizeLoops();
 	}
@@ -2404,13 +2396,13 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 
 	// Writing sample headers + data
 	std::vector<SampleIO> sampleFlags;
-	for(auto iter = smptable.begin(); iter != smptable.end(); iter++)
+	for(auto smp : smptable)
 	{
 		ITSample itss;
-		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress, allowExternal);
+		itss.ConvertToIT(Samples[smp], GetType(), compress, compress, allowExternal);
 		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
-		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[*iter]);
+		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
 
 		itss.samplepointer = filePos;
 		fwrite(&itss, 1, sizeof(itss), f);
@@ -2420,11 +2412,11 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		fseek(f, filePos, SEEK_SET);
 		if(!isExternal)
 		{
-			filePos += mpt::saturate_cast<uint32>(itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]));
+			filePos += mpt::saturate_cast<uint32>(itss.GetSampleFormat(0x0214).WriteSample(f, Samples[smp]));
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
-			const std::string filenameU8 = GetSamplePath(*iter).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
+			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
 			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))

@@ -407,14 +407,14 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		std::string textOut;
 		textOut.reserve(packedLength);
 
-		for(auto c = textIn.begin(); c != textIn.end(); c++)
+		for(auto c : textIn)
 		{
-			if(*c & 0x80)
+			if(c & 0x80)
 			{
-				textOut.insert(textOut.end(), (*c & 0x7F), ' ');
+				textOut.insert(textOut.end(), (c & 0x7F), ' ');
 			} else
 			{
-				textOut.push_back(*c);
+				textOut.push_back(c);
 			}
 		}
 
@@ -748,21 +748,21 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		instrHeader.ApplyFlags(instrument->PitchEnv, AMS2Instrument::vibEnvShift);
 
 		// Scale envelopes to correct range
-		for(auto it = instrument->VolEnv.begin(); it != instrument->VolEnv.end(); it++)
+		for(auto &p : instrument->VolEnv)
 		{
-			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((it->value * ENVELOPE_MAX + 64u) / 127u));
+			p.value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((p.value * ENVELOPE_MAX + 64u) / 127u));
 		}
-		for(auto it = instrument->PanEnv.begin(); it != instrument->PanEnv.end(); it++)
+		for(auto &p : instrument->PanEnv)
 		{
-			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((it->value * ENVELOPE_MAX + 128u) / 255u));
+			p.value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((p.value * ENVELOPE_MAX + 128u) / 255u));
 		}
-		for(auto it = instrument->PitchEnv.begin(); it != instrument->PitchEnv.end(); it++)
+		for(auto &p : instrument->PitchEnv)
 		{
 #ifdef MODPLUG_TRACKER
-			it->value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(it->value - 128), vibAmp, 255)));
+			p.value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(p.value - 128), vibAmp, 255)));
 #else
 			// Try to keep as much precision as possible... divide by 8 since that's the highest possible vibAmp factor.
-			it->value = static_cast<uint8>(128 + Util::muldivrfloor(static_cast<int8>(it->value - 128), vibAmp, 8));
+			p.value = static_cast<uint8>(128 + Util::muldivrfloor(static_cast<int8>(p.value - 128), vibAmp, 8));
 #endif
 		}
 

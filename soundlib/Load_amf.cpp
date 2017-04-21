@@ -499,10 +499,8 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 	uint16 trackCount = 0;
-	for(auto i = trackMap.cbegin(); i != trackMap.cend(); i++)
-	{
-		trackCount = std::max(trackCount, *i);
-	}
+	if(!trackMap.empty())
+		trackCount = *std::max_element(trackMap.cbegin(), trackMap.cend());
 
 	// Store Tracks Positions
 	std::vector<FileReader> trackData(trackCount);

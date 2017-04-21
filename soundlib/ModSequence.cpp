@@ -613,15 +613,15 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 	bool result = false;
 	std::vector<GetLengthType> length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
 	ModSequence &order = GetSequence(seq);
-	for(auto it = length.cbegin(); it != length.cend(); it++)
+	for(const auto &subSong : length)
 	{
-		if(it->endOrder != ORDERINDEX_INVALID && it->endRow != ROWINDEX_INVALID)
+		if(subSong.endOrder != ORDERINDEX_INVALID && subSong.endRow != ROWINDEX_INVALID)
 		{
 			if(Util::TypeCanHoldValue<ModCommand::PARAM>(order.GetRestartPos()))
 			{
-				PATTERNINDEX writePat = order.EnsureUnique(it->endOrder);
+				PATTERNINDEX writePat = order.EnsureUnique(subSong.endOrder);
 				result = m_sndFile.Patterns[writePat].WriteEffect(
-					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(it->endRow).Retry(EffectWriter::rmTryNextRow));
+					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(subSong.endRow).Retry(EffectWriter::rmTryNextRow));
 			} else
 			{
 				result = false;
@@ -835,10 +835,9 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 {
 	const uint16 size = seq.GetLength();
 	mpt::IO::WriteIntLE<uint16>(oStrm, size);
-	const auto endIter = seq.end();
-	for(auto citer = seq.begin(); citer != endIter; citer++)
+	for(auto o : seq)
 	{
-		const uint16 temp = static_cast<uint16>(*citer);
+		const uint16 temp = static_cast<uint16>(o);
 		mpt::IO::WriteIntLE<uint16>(oStrm, temp);
 	}
 }

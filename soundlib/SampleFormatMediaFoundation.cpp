@@ -291,9 +291,9 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 	RegCloseKey(hkHandlers);
 	hkHandlers = NULL;
 
-	for(auto it = guidMap.cbegin(); it != guidMap.cend(); ++it)
+	for(const auto &it : guidMap)
 	{
-		result.push_back(it->second);
+		result.push_back(it.second);
 	}
 
 #endif // MPT_WITH_MEDIAFOUNDATION

@@ -1111,14 +1111,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					startTimes[start] = mpt::lcm(startTimes[start], 1 + (param & 0x0F));
 				}
 			}
-			for(auto i = startTimes.begin(); i != startTimes.end(); i++)
+			for(const auto &i : startTimes)
 			{
-				memory.elapsedTime += (memory.elapsedTime - i->first) * (double)(i->second - 1);
+				memory.elapsedTime += (memory.elapsedTime - i.first) * (double)(i.second - 1);
 				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 				{
-					if(memory.chnSettings[nChn].patLoop == i->first)
+					if(memory.chnSettings[nChn].patLoop == i.first)
 					{
-						memory.state.m_lTotalSampleCount += (memory.state.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i->second - 1);
+						memory.state.m_lTotalSampleCount += (memory.state.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i.second - 1);
 						break;
 					}
 				}
@@ -1184,9 +1184,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 #ifndef NO_PLUGINS
 			// If there were any PC events, update plugin parameters to their latest value.
 			std::bitset<MAX_MIXPLUGINS> plugSetProgram;
-			for(auto param = memory.plugParams.cbegin(); param != memory.plugParams.cend(); param++)
+			for(const auto &param : memory.plugParams)
 			{
-				PLUGINDEX plug = param->first.first - 1;
+				PLUGINDEX plug = param.first.first - 1;
 				IMixPlugin *plugin = m_MixPlugins[plug].pMixPlugin;
 				if(plugin != nullptr)
 				{
@@ -1196,7 +1196,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						plugSetProgram.set(plug);
 						plugin->BeginSetProgram();
 					}
-					plugin->SetParameter(param->first.second, param->second / PlugParamValue(ModCommand::maxColumnValue));
+					plugin->SetParameter(param.first.second, param.second / PlugParamValue(ModCommand::maxColumnValue));
 				}
 			}
 			if(plugSetProgram.any())
