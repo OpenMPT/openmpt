@@ -85,7 +85,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2010 to 2017 in the
+     -  You will find solutions for Visual Studio 2015 to 2017 in the
         corresponding `build/vsVERSION/` folder.
         Projects that target Windows versions before Windows 7 are available in
         `build/vsVERSIONxp/`

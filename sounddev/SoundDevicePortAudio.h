@@ -48,7 +48,7 @@ protected:
 	unsigned long m_CurrentFrameCount;
 
 	double m_CurrentRealLatency; // seconds
-	mpt::atomic_uint32_t m_StatisticPeriodFrames;
+	std::atomic<uint32> m_StatisticPeriodFrames;
 
 public:
 

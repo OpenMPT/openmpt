@@ -309,12 +309,10 @@ mpt::Windows::Version::Number Version::GetMinimumKernelLevel()
 {
 	uint16 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		#if MPT_MSVC_AT_LEAST(2012, 0) && !defined(MPT_BUILD_TARGET_XP)
+		#if !defined(MPT_BUILD_TARGET_XP)
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
-		#elif MPT_MSVC_AT_LEAST(2012, 0) && defined(MPT_BUILD_TARGET_XP)
+		#else
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinXP);
-		#elif MPT_MSVC_AT_LEAST(2010, 0)
-			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
 		#endif
 	#endif
 	return static_cast<mpt::Windows::Version::Number>(minimumKernelVersion);
@@ -546,16 +544,10 @@ mpt::Wine::Version GetMinimumWineVersion()
 {
 	mpt::Wine::Version minimumWineVersion = mpt::Wine::Version(0,0,0);
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		#if MPT_MSVC_AT_LEAST(2013, 0) && !defined(MPT_BUILD_TARGET_XP)
+		#if !defined(MPT_BUILD_TARGET_XP)
 			minimumWineVersion = mpt::Wine::Version(1,8,0);
-		#elif MPT_MSVC_AT_LEAST(2015, 0) && defined(MPT_BUILD_TARGET_XP)
+		#else
 			minimumWineVersion = mpt::Wine::Version(1,6,0);
-		#elif MPT_MSVC_AT_LEAST(2013, 0) && defined(MPT_BUILD_TARGET_XP)
-			minimumWineVersion = mpt::Wine::Version(1,4,0);
-		#elif MPT_MSVC_AT_LEAST(2012, 0)
-			minimumWineVersion = mpt::Wine::Version(1,2,0);
-		#elif MPT_MSVC_AT_LEAST(2010, 0)
-			minimumWineVersion = mpt::Wine::Version(1,0,0);
 		#endif
 	#endif
 	return minimumWineVersion;

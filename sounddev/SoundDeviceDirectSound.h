@@ -47,8 +47,8 @@ protected:
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos;
 
-	mpt::atomic_uint32_t m_StatisticLatencyFrames;
-	mpt::atomic_uint32_t m_StatisticPeriodFrames;
+	std::atomic<uint32> m_StatisticLatencyFrames;
+	std::atomic<uint32> m_StatisticPeriodFrames;
 
 public:
 	CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);

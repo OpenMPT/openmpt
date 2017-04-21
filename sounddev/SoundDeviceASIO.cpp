@@ -1489,8 +1489,8 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 	ASIOError asioresult = ASE_InvalidParameter;
 	struct DebugRealtimeThreadIdGuard
 	{
-		mpt::atomic_uint32_t & ThreadID;
-		DebugRealtimeThreadIdGuard(mpt::atomic_uint32_t & ThreadID)
+		std::atomic<uint32> & ThreadID;
+		DebugRealtimeThreadIdGuard(std::atomic<uint32> & ThreadID)
 			: ThreadID(ThreadID)
 		{
 			ThreadID.store(GetCurrentThreadId());

@@ -45,15 +45,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// noexcept
-#if MPT_MSVC_BEFORE(2015,0)
-#define MPT_NOEXCEPT throw()
-#else
-#define MPT_NOEXCEPT noexcept
-#endif
-
-
-
 // MPT_ARRAY_COUNT macro computes the number of elements in a statically-allocated array.
 #if MPT_COMPILER_MSVC
 OPENMPT_NAMESPACE_END
@@ -62,14 +53,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_ARRAY_COUNT(x) _countof(x)
 #else
 #define MPT_ARRAY_COUNT(x) (sizeof((x))/sizeof((x)[0]))
-#endif
-
-
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2015,0)
-#define MPT_ALIGNOF(type) __alignof( type )
-#else
-#define MPT_ALIGNOF(type) alignof( type )
 #endif
 
 
@@ -114,19 +97,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 // std::make_unique is C++14
 namespace mpt {
-#if MPT_MSVC_BEFORE(2013,0)
-template <typename T> inline std::unique_ptr<T> make_unique() { return std::unique_ptr<T>(new T()); }
-template <typename T, typename T1> inline std::unique_ptr<T> make_unique(T1 && x1) { return std::unique_ptr<T>(new T(std::forward<T1>(x1))); }
-template <typename T, typename T1, typename T2> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2))); }
-template <typename T, typename T1, typename T2, typename T3> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2, T3 && x3) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2), std::forward<T3>(x3))); }
-template <typename T, typename T1, typename T2, typename T3, typename T4> inline std::unique_ptr<T> make_unique(T1 && x1, T2 && x2, T3 && x3, T4 && x4) { return std::unique_ptr<T>(new T(std::forward<T1>(x1), std::forward<T2>(x2), std::forward<T3>(x3), std::forward<T4>(x4))); }
-#else
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args)
 {
 	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
-#endif
 } // namespace mpt
 
 

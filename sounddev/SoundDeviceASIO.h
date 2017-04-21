@@ -13,7 +13,7 @@
 
 #include "SoundDeviceBase.h"
 
-#include "../common/mptAtomic.h"
+#include <atomic>
 
 #include "../common/ComponentManager.h"
 
@@ -81,18 +81,18 @@ protected:
 	bool m_DeviceRunning;
 	uint64 m_TotalFramesWritten;
 	long m_BufferIndex;
-	mpt::atomic_uint32_t m_RenderSilence;
-	mpt::atomic_uint32_t m_RenderingSilence;
+	std::atomic<uint32> m_RenderSilence;
+	std::atomic<uint32> m_RenderingSilence;
 
 	int64 m_StreamPositionOffset;
 
 	static const uint32 AsioRequestFlagLatenciesChanged = 1<<0;
-	mpt::atomic_uint32_t m_AsioRequestFlags;
+	std::atomic<uint32> m_AsioRequestFlags;
 
 	FlagSet<AsioFeatures> m_QueriedFeatures;
 	FlagSet<AsioFeatures> m_UsedFeatures;
 
-	mutable mpt::atomic_uint32_t m_DebugRealtimeThreadID;
+	mutable std::atomic<uint32> m_DebugRealtimeThreadID;
 
 private:
 	void ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo);

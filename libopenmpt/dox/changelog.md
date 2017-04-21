@@ -57,7 +57,8 @@ is just a high-level summary.
     removed.
  *  [**Regression**] Support for Android NDK versions older than 11 has been
     removed.
- *  [**Regression**] Visual Studio 2008 support has been removed.
+ *  [**Regression**] Visual Studio 2008, 2010, 2012, 2013 support has been
+    removed.
  *  [**Regression**] In order to securely load libmpg123, the Windows binary
     packages only support the precise libmpg123 binary that is downloaded by the
     `download_mpg123.vbs` script. Other binaries might also work, but this has
