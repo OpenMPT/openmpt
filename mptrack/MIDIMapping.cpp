@@ -23,10 +23,10 @@ size_t CMIDIMapper::GetSerializationSize() const
 //----------------------------------------------
 {
 	size_t s = 0;
-	for(const_iterator citer = Begin(); citer != End(); citer++)
+	for(const auto &d : m_Directives)
 	{
-		if(citer->GetParamIndex() <= uint8_max) s += 5;
-		else if(citer->GetParamIndex() <= uint16_max) s += 6;
+		if(d.GetParamIndex() <= uint8_max) s += 5;
+		else if(d.GetParamIndex() <= uint16_max) s += 6;
 		else s += 8;
 	}
 	return s;
@@ -37,17 +37,17 @@ void CMIDIMapper::Serialize(FILE* f) const
 //----------------------------------------
 {
 	//Bytes: 1 Flags, 2 key, 1 plugindex, 1,2,4,8 plug/etc.
-	for(const_iterator citer = Begin(); citer != End(); citer++)
+	for(const auto &d : m_Directives)
 	{
-		uint16 temp16 = (citer->GetChnEvent() << 1) + (citer->GetController() << 9);
-		if(citer->GetAnyChannel()) temp16 |= 1;
-		uint32 temp32 = citer->GetParamIndex();
+		uint16 temp16 = (d.GetChnEvent() << 1) + (d.GetController() << 9);
+		if(d.GetAnyChannel()) temp16 |= 1;
+		uint32 temp32 = d.GetParamIndex();
 
-		uint8 temp8 = citer->IsActive(); //bit 0
-		if(citer->GetCaptureMIDI()) temp8 |= (1 << 1); //bit 1
+		uint8 temp8 = d.IsActive(); //bit 0
+		if(d.GetCaptureMIDI()) temp8 |= (1 << 1); //bit 1
 		//bits 2-4: Mapping type: 0 for plug param control.
 		//bit 5: 
-		if(citer->GetAllowPatternEdit()) temp8 |= (1 << 5);
+		if(d.GetAllowPatternEdit()) temp8 |= (1 << 5);
 		//bits 6-7: Size: 5, 6, 8, 12
 
 		BYTE parambytes = 4;
@@ -60,7 +60,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 
 		fwrite(&temp8, 1, sizeof(temp8), f);
 		fwrite(&temp16, 1, sizeof(temp16), f);
-		temp8 = citer->GetPlugIndex();
+		temp8 = d.GetPlugIndex();
 		fwrite(&temp8, 1, sizeof(temp8), f);
 		fwrite(&temp32, 1, parambytes, f);
 	}

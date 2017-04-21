@@ -2483,11 +2483,11 @@ void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 {
 	if (pHint != this)
 	{
-		for (auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+		for (auto &doc : DocInfo)
 		{
-			if (&(*iter)->modDoc == pModDoc || !pModDoc)
+			if (&doc->modDoc == pModDoc || !pModDoc)
 			{
-				UpdateView((**iter), hint);
+				UpdateView(*doc, hint);
 				break;
 			}
 		}
@@ -3088,9 +3088,9 @@ void CModTree::OnRefreshTree()
 //----------------------------
 {
 	BeginWaitCursor();
-	for (auto iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
+	for (auto &doc : DocInfo)
 	{
-		UpdateView((**iter), UpdateHint().ModType());
+		UpdateView(*doc, UpdateHint().ModType());
 	}
 	RefreshMidiLibrary();
 	RefreshDlsBanks();

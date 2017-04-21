@@ -411,9 +411,8 @@ void Initialize()
 		commands.push_back("c++");
 		commands.push_back("ld");
 		commands.push_back("ccache");
-		for(std::vector<std::string>::const_iterator it = commands.begin(); it != commands.end(); ++it)
+		for(const auto &command : commands)
 		{
-			std::string command = *it;
 			script += std::string() + "command -v " + command + " 2>/dev/null 1>/dev/null" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			script += std::string() + " missing=\"$missing " + command + "\"" + "\n";
@@ -494,10 +493,10 @@ void Initialize()
 			winegcc.push_back("wineg++64");
 		}
 		winegcc.push_back("wineg++");
-		for(std::vector<std::string>::const_iterator it = winegcc.begin(); it != winegcc.end(); ++it)
+		for(const auto &c : winegcc)
 		{
-			script += std::string() + "if command -v " + (*it) + " 2>/dev/null 1>/dev/null ; then" + "\n";
-			script += std::string() + " MPT_WINEGXX=" + (*it) + "\n";
+			script += std::string() + "if command -v " + c + " 2>/dev/null 1>/dev/null ; then" + "\n";
+			script += std::string() + " MPT_WINEGXX=" + c + "\n";
 			script += std::string() + "fi" + "\n";
 		}
 		script += std::string() + "if [ -z $MPT_WINEGXX ] ; then" + "\n";

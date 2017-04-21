@@ -634,11 +634,10 @@ size_t CSampleUndo::GetBufferCapacity(const undobuf_t &buffer) const
 //------------------------------------------------------------------
 {
 	size_t sum = 0;
-	for(auto smp = buffer.begin(); smp != buffer.end(); smp++)
+	for(auto &smp : buffer)
 	{
-		for(size_t nStep = 0; nStep < smp->size(); nStep++)
+		for(auto &step : smp)
 		{
-			auto &step = smp->at(nStep);
 			if(step.samplePtr != nullptr)
 			{
 				sum += (step.changeEnd - step.changeStart) * step.OldSample.GetBytesPerSample();
