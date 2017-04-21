@@ -54,9 +54,9 @@ void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	const auto infos = Tdevice::EnumerateDevices(sysInfo);
 	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	for(auto it = infos.cbegin(); it != infos.cend(); ++it)
+	for(auto &i : infos)
 	{
-		SoundDevice::Identifier identifier = it->GetIdentifier();
+		SoundDevice::Identifier identifier = i.GetIdentifier();
 		if(!identifier.empty())
 		{
 			m_DeviceFactoryMethods[identifier] = ConstructSoundDevice<Tdevice>;
@@ -215,9 +215,9 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 
-	for(auto it = m_SoundDevices.begin(); it != m_SoundDevices.end(); ++it)
+	for(auto &i : m_SoundDevices)
 	{
-		(*it).extraData[MPT_USTRING("priority")] = mpt::ufmt::dec(typePriorities[(*it).type]); 
+		i.extraData[MPT_USTRING("priority")] = mpt::ufmt::dec(typePriorities[i.type]);
 	}
 
 	MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("Sound Devices enumerated:"))());
@@ -228,9 +228,9 @@ void Manager::ReEnumerate()
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  InternalID: %1"))(m_SoundDevices[i].internalID));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  API Name  : %1"))(m_SoundDevices[i].apiName));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Name      : %1"))(m_SoundDevices[i].name));
-		for(auto extraIt = m_SoundDevices[i].extraData.cbegin(); extraIt != m_SoundDevices[i].extraData.cend(); ++extraIt)
+		for(const auto &extra : m_SoundDevices[i].extraData)
 		{
-			Log(LogDebug, mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extraIt->first, extraIt->second));
+			Log(LogDebug, mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extra.first, extra.second));
 		}
 	}
 	
@@ -275,11 +275,11 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 	{
 		return SoundDevice::Info();
 	}
-	for(auto it = begin(); it != end(); ++it)
+	for(auto &info : *this)
 	{
-		if(it->GetIdentifier() == identifier)
+		if(info.GetIdentifier() == identifier)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return SoundDevice::Info();
@@ -296,11 +296,11 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 	}
 	if(!identifier.empty())
 	{ // valid identifier
-		for(auto it = begin(); it != end(); ++it)
+		for(auto &info : *this)
 		{
-			if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->GetIdentifier()))
+			if((info.GetIdentifier() == identifier) && !IsDeviceUnavailable(info.GetIdentifier()))
 			{ // exact match
-				return *it;
+				return info;
 			}
 		}
 		const SoundDevice::Type type = ParseType(identifier);
@@ -313,20 +313,20 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 		}
 		if(preferSameType)
 		{ // find first avilable device of given type
-			for(auto it = begin(); it != end(); ++it)
+			for(auto &info : *this)
 			{
-				if((it->type == type) && !IsDeviceUnavailable(it->GetIdentifier()))
+				if((info.type == type) && !IsDeviceUnavailable(info.GetIdentifier()))
 				{
-					return *it;
+					return info;
 				}
 			}
 		}
 	}
-	for(auto it = begin(); it != end(); ++it)
+	for(auto &info : *this)
 	{ // find first available device
-		if(!IsDeviceUnavailable(it->GetIdentifier()))
+		if(!IsDeviceUnavailable(info.GetIdentifier()))
 		{
-			return *it;
+			return info;
 		}
 	}
 	// default to first device
@@ -505,17 +505,17 @@ SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Leg
 	}
 	std::size_t index = static_cast<uint8>(id & SoundDevice::Legacy::MaskIndex);
 	std::size_t seenDevicesOfDesiredType = 0;
-	for(auto it = manager.begin(); it != manager.end(); ++it)
+	for(auto &info : manager)
 	{
-		if(it->type == type)
+		if(info.type == type)
 		{
 			if(seenDevicesOfDesiredType == index)
 			{
-				if(!it->IsValid())
+				if(!info.IsValid())
 				{	// fallback to first device
 					return *manager.begin();
 				}
-				return *it;
+				return info;
 			}
 			seenDevicesOfDesiredType++;
 		}

@@ -371,9 +371,9 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		caps.inputSourceNames.clear();
 		auto inputDevices = EnumerateInputOnlyDevices(m_HostApiType);
-		for(auto it = inputDevices.cbegin(); it != inputDevices.cend(); ++it)
+		for(const auto &dev : inputDevices)
 		{
-			caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(it->first), it->second));
+			caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(dev.first), dev.second));
 		}
 	}
 

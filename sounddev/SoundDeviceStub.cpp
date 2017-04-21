@@ -67,9 +67,9 @@ std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(SoundDevice::Sy
 	}
 	MPT_UNREFERENCED_PARAMETER(sysInfo); // we do not want to pass this to the native layer because it would actually be totally wrong
 	std::vector<SoundDevice::Info> result = json_cast<std::vector<SoundDevice::Info> >(WineWrapper->SoundDevice_EnumerateDevices());
-	for(std::vector<SoundDevice::Info>::iterator it = result.begin(); it != result.end(); ++it)
+	for(auto &info : result)
 	{
-		(*it) = AddTypePrefix(*it);
+		info = AddTypePrefix(info);
 	}
 	return result;
 }
