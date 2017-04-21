@@ -587,7 +587,6 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.Skip(32 + sizeof(MDLSampleHeader) * numSamples);
 				continue;
 			}
-			m_nInstruments = std::max<INSTRUMENTINDEX>(m_nInstruments, ins);
 
 			chunk.ReadString<mpt::String::spacePadded>(mptIns->name, 32);
 			while(numSamples--)

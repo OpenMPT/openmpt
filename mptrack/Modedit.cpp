@@ -831,11 +831,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	mpt::String::Copy(ins->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
 	ins->nMixPlug = plug + 1;
 	ins->nMidiChannel = 1;
-	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
-	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
-	//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
-
-	if(instr > m_SndFile.m_nInstruments) m_SndFile.m_nInstruments = instr;
 
 	InstrumentHint hint = InstrumentHint(instr).Info().Envelope().Names();
 	if(first) hint.ModType();

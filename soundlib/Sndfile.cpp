@@ -1768,6 +1768,10 @@ ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX
 		// Create new instrument
 		Instruments[instr] = ins = new (std::nothrow) ModInstrument(assignedSample);
 	}
+	if(ins != nullptr)
+	{
+		m_nInstruments = std::max(m_nInstruments, instr);
+	}
 	return ins;
 }
 
