@@ -658,7 +658,6 @@
     <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
-    <ClInclude Include="..\..\common\mptAtomic.h" />
     <ClInclude Include="..\..\common\mptBufferIO.h" />
     <ClInclude Include="..\..\common\mptCPU.h" />
     <ClInclude Include="..\..\common\mptCRC.h" />
