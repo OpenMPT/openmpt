@@ -18,9 +18,6 @@ PREMAKE=include/premake/bin/release/premake5
 echo dofile \"build/genie/genie.lua\" > genie.lua
 
 ${GENIE} --target="windesktop81" vs2015
-${GENIE} --target="winphone8"    vs2012
-${GENIE} --target="winphone81"   vs2013
-${GENIE} --target="winstore81"   vs2013
 ${GENIE} --target="winstore82"   vs2015
 
 rm genie.lua
