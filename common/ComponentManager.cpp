@@ -327,17 +327,17 @@ void ComponentManager::Startup()
 	MPT_LOG(LogDebug, "Components", MPT_USTRING("Startup"));
 	if(m_Settings.LoadOnStartup())
 	{
-		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
+		for(auto &it : m_Components)
 		{
-			(*it).second.instance = (*it).second.factoryMethod(*this);
-			(*it).second.weakInstance = (*it).second.instance;
+			it.second.instance = it.second.factoryMethod(*this);
+			it.second.weakInstance = it.second.instance;
 		}
 	}
 	if(!m_Settings.KeepLoaded())
 	{
-		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
+		for(auto &it : m_Components)
 		{
-			(*it).second.instance = nullptr;
+			it.second.instance = nullptr;
 		}
 	}
 }
@@ -432,9 +432,10 @@ std::shared_ptr<const IComponent> ComponentManager::ReloadComponent(const ICompo
 std::vector<std::string> ComponentManager::GetRegisteredComponents() const
 {
 	std::vector<std::string> result;
-	for(auto it = m_Components.cbegin(); it != m_Components.cend(); ++it)
+	result.reserve(m_Components.size());
+	for(const auto &it : m_Components)
 	{
-		result.push_back((*it).first);
+		result.push_back(it.first);
 	}
 	return result;
 }
