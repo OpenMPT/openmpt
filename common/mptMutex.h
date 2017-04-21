@@ -23,7 +23,7 @@
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
-#elif MPT_MSVC_AT_LEAST(2012,0) && !defined(MPT_QUIRK_NO_CPP_THREAD)
+#elif MPT_COMPILER_MSVC && !defined(MPT_QUIRK_NO_CPP_THREAD)
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0

@@ -175,7 +175,7 @@ inline void MemsetZero(T &a)
 //--------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
-#if MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
+#if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
@@ -193,7 +193,7 @@ void MemCopy(T &destination, const T &source)
 //-------------------------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
-#if MPT_MSVC_BEFORE(2015,0) || MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
+#if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
@@ -777,7 +777,7 @@ namespace Util
 	#define MPT_MAX_VALUE_OF_TYPE(integral_type) ( std::numeric_limits<integral_type>::is_signed ? MPT_MAX_SIGNED_VALUE(integral_type) : MPT_MAX_UNSIGNED_VALUE(integral_type) )
 
 	/// Returns value rounded to nearest integer.
-#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
+#if (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
 	// MSVC before 2013 does not support C99/C++11.
 	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
 	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}

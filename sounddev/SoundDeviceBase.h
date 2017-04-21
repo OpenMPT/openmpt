@@ -15,8 +15,8 @@
 
 #include "../common/mptMutex.h"
 #include "../common/misc_util.h"
-#include "../common/mptAtomic.h"
 
+#include <atomic>
 #include <vector>
 
 
@@ -77,9 +77,9 @@ private:
 
 	int64 m_StreamPositionRenderFrames; // only updated or read in audio CALLBACK or when device is stopped. requires no further locking
 
-	mpt::atomic_int64_t m_StreamPositionOutputFrames;
+	std::atomic<int64> m_StreamPositionOutputFrames;
 
-	mpt::atomic_uint32_t m_RequestFlags;
+	std::atomic<uint32> m_RequestFlags;
 
 public:
 

@@ -13,7 +13,7 @@
 #include "Logging.h"
 #include "mptFileIO.h"
 #if defined(MODPLUG_TRACKER)
-#include "mptAtomic.h"
+#include <atomic>
 #endif
 #include "version.h"
 
@@ -254,7 +254,7 @@ inline bool operator < (const Entry &a, const Entry &b)
 
 static std::vector<mpt::log::Trace::Entry> Entries;
 
-static mpt::atomic_uint32_t NextIndex = 0;
+static std::atomic<uint32> NextIndex = 0;
 
 static uint32 ThreadIdGUI = 0;
 static uint32 ThreadIdAudio = 0;

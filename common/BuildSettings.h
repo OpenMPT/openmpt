@@ -555,10 +555,6 @@
 #define MPT_ENABLE_THREAD // Tracker requires threads
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_ATOMIC)
-#define MPT_ENABLE_ATOMIC // Tracker requires threads
-#endif
-
 #if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_ENABLE_FILEIO)
 #define MPT_ENABLE_FILEIO // External samples require disk file io
 #endif
@@ -691,10 +687,6 @@
 
 // happens for immutable classes (i.e. classes containing const members)
 #pragma warning(disable:4512) // assignment operator could not be generated
-
-#if MPT_MSVC_AT_LEAST(2012,0) && MPT_MSVC_BEFORE(2013,0)
-#pragma warning(disable:4250) // 'mpt::fstream' : inherits 'std::basic_istream<_Elem,_Traits>::std::basic_istream<_Elem,_Traits>::_Add_vtordisp1' via dominance
-#endif
 
 #pragma warning(error:4309) // Treat "truncation of constant value"-warning as error.
 

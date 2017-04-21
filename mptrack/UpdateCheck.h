@@ -13,7 +13,8 @@
 #include <WinInet.h>
 #include <time.h>
 
-#include "../common/mptAtomic.h"
+#include <atomic>
+
 #include "resource.h"
 #include "Settings.h"
 
@@ -28,7 +29,7 @@ class CUpdateCheck
 
 private:
 
-	static mpt::atomic_int32_t s_InstanceCount;
+	static std::atomic<int32> s_InstanceCount;
 
 public:
 

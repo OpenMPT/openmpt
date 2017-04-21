@@ -79,8 +79,8 @@
 #define MPT_MSVC_AT_LEAST(version,sp)                (MPT_COMPILER_MSVC_VERSION >= MPT_COMPILER_MAKE_VERSION2((version),(sp)))
 #define MPT_MSVC_BEFORE(version,sp)                  (MPT_COMPILER_MSVC_VERSION <  MPT_COMPILER_MAKE_VERSION2((version),(sp)))
 
-#if MPT_MSVC_BEFORE(2010,0)
-#error "MSVC version 2010 required"
+#if MPT_MSVC_BEFORE(2015,0)
+#error "MSVC version 2015 required"
 #endif
 
 #if defined(_PREFAST_)

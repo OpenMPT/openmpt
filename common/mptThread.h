@@ -17,7 +17,7 @@
 #define MPT_STD_THREAD 0
 #elif MPT_COMPILER_GENERIC
 #define MPT_STD_THREAD 1
-#elif MPT_MSVC_AT_LEAST(2012,0)
+#elif MPT_COMPILER_MSVC
 #define MPT_STD_THREAD 1
 #elif MPT_COMPILER_GCC && !MPT_OS_WINDOWS
 #define MPT_STD_THREAD 1
@@ -226,7 +226,7 @@ public:
 		threadHandle = nullptr;
 	}
 
-	void swap(thread & other) MPT_NOEXCEPT
+	void swap(thread & other) noexcept
 	{
 		using std::swap;
 		swap(threadHandle, other.threadHandle);
@@ -234,12 +234,12 @@ public:
 		swap(functionMode, other.functionMode);
 	}
 
-	friend void swap(thread & a, thread & b) MPT_NOEXCEPT
+	friend void swap(thread & a, thread & b) noexcept
 	{
 		a.swap(b);
 	}
 
-	thread(thread && other) MPT_NOEXCEPT
+	thread(thread && other) noexcept
 		: threadHandle(nullptr)
 		, startupDoneEvent(nullptr)
 		, functionMode(FunctionModeNone)
@@ -247,7 +247,7 @@ public:
 		swap(other);
 	}
 
-	thread & operator=(thread && other) MPT_NOEXCEPT
+	thread & operator=(thread && other) noexcept
 	{
 		if(joinable())
 		{

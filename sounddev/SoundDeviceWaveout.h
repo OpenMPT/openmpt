@@ -65,7 +65,7 @@ protected:
 	static const uint32 DriverBugBufferFillAndHeaderInQueue = (1u<<2u);       //  4
 	static const uint32 DriverBugBufferFillAndHeaderNotDone = (1u<<3u);       //  8
 	static const uint32 DriverBugDoneNotificationOutOfOrder = (1u<<4u);       // 10
-	mpt::atomic_uint32_t m_DriverBugs;
+	std::atomic<uint32> m_DriverBugs;
 
 public:
 	CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
