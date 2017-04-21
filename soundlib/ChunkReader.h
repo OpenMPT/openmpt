@@ -60,7 +60,7 @@ public:
 		// Check if the list contains a given chunk.
 		bool ChunkExists(typename T::id_type id) const
 		{
-			return std::find_if(this->cbegin(), this->cend(), [&id](const ChunkListItem<T> &item) { return item.GetHeader().GetID() == id; }) != cend();
+			return std::find_if(this->cbegin(), this->cend(), [&id](const ChunkListItem<T> &item) { return item.GetHeader().GetID() == id; }) != this->cend();
 		}
 
 		// Retrieve the first chunk with a given ID.
