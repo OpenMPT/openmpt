@@ -347,9 +347,9 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	progress(userdata);
 
 	::CreateDirectoryW((dirWindows + MPT_PATHSTRING("filetree")).AsNative().c_str(), NULL);
-	for(std::map<std::string, std::vector<char> >::const_iterator file = filetree.begin(); file != filetree.end(); ++file)
+	for(const auto &file : filetree)
 	{
-		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::CharsetUTF8, file->first), MPT_USTRING("/"));
+		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::CharsetUTF8, file.first), MPT_USTRING("/"));
 		mpt::PathString combinedPath = dirWindows + MPT_PATHSTRING("filetree") + MPT_PATHSTRING("\\");
 		if(path.size() > 1)
 		{
@@ -372,8 +372,8 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		}
 		try
 		{
-			mpt::LazyFileRef out(dirWindows + MPT_PATHSTRING("filetree") + MPT_PATHSTRING("\\") + mpt::PathString::FromUTF8(mpt::String::Replace(file->first, "/", "\\")));
-			out = file->second;
+			mpt::LazyFileRef out(dirWindows + MPT_PATHSTRING("filetree") + MPT_PATHSTRING("\\") + mpt::PathString::FromUTF8(mpt::String::Replace(file.first, "/", "\\")));
+			out = file.second;
 		} catch(std::exception &)
 		{
 			throw mpt::Wine::Exception("Error writing filetree.");
