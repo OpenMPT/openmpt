@@ -92,9 +92,9 @@ std::string SoundDevice_EnumerateDevices()
 		return std::string();
 	}
 	std::vector<SoundDevice::Info> infos = std::vector<SoundDevice::Info>(manager->get().begin(), manager->get().end());
-	for(std::vector<SoundDevice::Info>::iterator it = infos.begin(); it != infos.end(); ++it)
+	for(auto &info : infos)
 	{
-		(*it) = AddTypePrefix(*it);
+		info = AddTypePrefix(info);
 	}
 	return json_cast<std::string>(infos);
 }

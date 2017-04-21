@@ -129,18 +129,18 @@ namespace JSON {
 		picojson::value enc(std::vector<Tval> src) const
 		{
 			picojson::value result = picojson::value(picojson::array());
-			for(typename std::vector<Tval>::const_iterator it = src.cbegin(); it != src.cend(); ++it)
+			for(const auto &it : src)
 			{
-				result.get<picojson::array>().push_back(JSON::encode(*it));
+				result.get<picojson::array>().push_back(JSON::encode(it));
 			}
 			return result;
 		}
 		std::vector<Tval> dec(picojson::value val) const
 		{
 			std::vector<Tval> result;
-			for(picojson::array::const_iterator it = val.get<picojson::array>().cbegin(); it != val.get<picojson::array>().cend(); ++it)
+			for(const auto &it : val.get<picojson::array>())
 			{
-				result.push_back(JSON::decode<Tval>(*it));
+				result.push_back(JSON::decode<Tval>(it));
 			}
 			return result;
 		}
@@ -151,18 +151,18 @@ namespace JSON {
 		picojson::value enc(std::map<mpt::ustring, Tval> src) const
 		{
 			picojson::value result = picojson::value(picojson::object());
-			for(typename std::map<mpt::ustring, Tval>::const_iterator it = src.cbegin(); it != src.cend(); ++it)
+			for(const auto &it : src)
 			{
-				result.get<picojson::object>().insert(std::make_pair(mpt::ToCharset(mpt::CharsetUTF8, (*it).first), JSON::encode((*it).second)));
+				result.get<picojson::object>().insert(std::make_pair(mpt::ToCharset(mpt::CharsetUTF8, it.first), JSON::encode(it.second)));
 			}
 			return result;
 		}
 		std::map<mpt::ustring, Tval> dec(picojson::value val) const
 		{
 			std::map<mpt::ustring, Tval> result;
-			for(picojson::object::const_iterator it = val.get<picojson::object>().cbegin(); it != val.get<picojson::object>().cend(); ++it)
+			for(const auto &it : val.get<picojson::object>())
 			{
-				result[mpt::ToUnicode(mpt::CharsetUTF8, (*it).first)] = JSON::decode<Tval>((*it).second);
+				result[mpt::ToUnicode(mpt::CharsetUTF8, it.first)] = JSON::decode<Tval>(it.second);
 			}
 			return result;
 		}

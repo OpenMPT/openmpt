@@ -5170,7 +5170,6 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel)
 //-----------------------------------------------------------------------------------------------------------
 {
-	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
 	CModDoc *modDoc = GetDocument();
 	modDoc->CheckNNA(note, instr, m_baPlayingNote);
 	modDoc->PlayNote(note, instr, 0, volume, 0, 0, channel);
