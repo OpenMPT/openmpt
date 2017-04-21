@@ -282,7 +282,7 @@ void ComponentManager::Release()
 //------------------------------
 {
 	MPT_LOG(LogInformation, "Components", MPT_USTRING("Release"));
-	g_ComponentManager = MPT_SHARED_PTR_NULL(ComponentManager);
+	g_ComponentManager = nullptr;
 }
 
 
@@ -315,8 +315,8 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 	RegisteredComponent registeredComponent;
 	registeredComponent.settingsKey = componentFactory.GetSettingsKey();
 	registeredComponent.factoryMethod = componentFactory.GetStaticConstructor();
-	registeredComponent.instance = MPT_SHARED_PTR_NULL(IComponent);
-	registeredComponent.weakInstance = MPT_WEAK_PTR_NULL(IComponent);
+	registeredComponent.instance = nullptr;
+	registeredComponent.weakInstance = std::weak_ptr<IComponent>();
 	m_Components.insert(std::make_pair(componentFactory.GetID(), registeredComponent));
 }
 
@@ -337,7 +337,7 @@ void ComponentManager::Startup()
 	{
 		for(auto it = m_Components.begin(); it != m_Components.end(); ++it)
 		{
-			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
+			(*it).second.instance = nullptr;
 		}
 	}
 }
@@ -368,7 +368,7 @@ void ComponentManager::InitializeComponent(std::shared_ptr<IComponent> component
 std::shared_ptr<const IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
 //---------------------------------------------------------------------------------------------------------
 {
-	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
+	std::shared_ptr<IComponent> component = nullptr;
 	auto it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
@@ -400,18 +400,18 @@ std::shared_ptr<const IComponent> ComponentManager::GetComponent(const IComponen
 std::shared_ptr<const IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
 //------------------------------------------------------------------------------------------------------------
 {
-	std::shared_ptr<IComponent> component = MPT_SHARED_PTR_NULL(IComponent);
+	std::shared_ptr<IComponent> component = nullptr;
 	auto it = m_Components.find(componentFactory.GetID());
 	if(it != m_Components.end())
 	{ // registered component
 		if((*it).second.instance)
 		{ // loaded
-			(*it).second.instance = MPT_SHARED_PTR_NULL(IComponent);
+			(*it).second.instance = nullptr;
 			if(!(*it).second.weakInstance.expired())
 			{
 				throw std::runtime_error("Component not completely unloaded. Cannot reload.");
 			}
-			(*it).second.weakInstance = MPT_WEAK_PTR_NULL(IComponent);
+			(*it).second.weakInstance = std::weak_ptr<IComponent>();
 		}
 		// not loaded
 		component = (*it).second.factoryMethod(*this);

@@ -168,38 +168,23 @@ void sane_random_device::init_fallback()
 	{
 		if(token.length() > 0)
 		{
-			#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-				uint32 seed_val = mpt::generate_timeseed<uint32>();
-				mpt::default_hash<uint32>::type hash;
-				for(std::size_t i = 0; i < token.length(); ++i)
-				{
-					hash(static_cast<unsigned char>(token[i]));
-				}
-				unsigned int seed = seed_val ^ hash.result();
-			#else
-				uint64 seed_val = mpt::generate_timeseed<uint64>();
-				std::vector<unsigned int> seeds;
-				seeds.push_back(static_cast<uint32>(seed_val >> 32));
-				seeds.push_back(static_cast<uint32>(seed_val >>  0));
-				for(std::size_t i = 0; i < token.length(); ++i)
-				{
-					seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
-				}
-				std::seed_seq seed(seeds.begin(), seeds.end());
-			#endif
+			uint64 seed_val = mpt::generate_timeseed<uint64>();
+			std::vector<unsigned int> seeds;
+			seeds.push_back(static_cast<uint32>(seed_val >> 32));
+			seeds.push_back(static_cast<uint32>(seed_val >>  0));
+			for(std::size_t i = 0; i < token.length(); ++i)
+			{
+				seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
+			}
+			std::seed_seq seed(seeds.begin(), seeds.end());
 			rd_fallback = mpt::make_unique<std::mt19937>(seed);
 		} else
 		{
-			#ifdef MPT_COMPILER_QUIRK_RANDOM_TR1
-				uint32 seed_val = mpt::generate_timeseed<uint32>();
-				unsigned int seed = seed_val;
-			#else
-				uint64 seed_val = mpt::generate_timeseed<uint64>();
-				unsigned int seeds[2];
-				seeds[0] = static_cast<uint32>(seed_val >> 32);
-				seeds[1] = static_cast<uint32>(seed_val >>  0);
-				std::seed_seq seed(seeds + 0, seeds + 2);
-			#endif
+			uint64 seed_val = mpt::generate_timeseed<uint64>();
+			unsigned int seeds[2];
+			seeds[0] = static_cast<uint32>(seed_val >> 32);
+			seeds[1] = static_cast<uint32>(seed_val >>  0);
+			std::seed_seq seed(seeds + 0, seeds + 2);
 			rd_fallback = mpt::make_unique<std::mt19937>(seed);
 		}
 	}

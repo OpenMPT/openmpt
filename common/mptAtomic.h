@@ -13,7 +13,7 @@
 
 #if defined(MPT_ENABLE_ATOMIC)
 
-#if !(MPT_MSVC_BEFORE(2012,0) || MPT_CLANG_BEFORE(3,1,0))
+#if !(MPT_MSVC_BEFORE(2012,0))
 #include <atomic>
 #endif // MPT_COMPILER
 
@@ -30,89 +30,7 @@ namespace mpt
 {
 
 
-#if MPT_CLANG_BEFORE(3,1,0)
-
-template < typename T >
-class atomic_impl {
-
-private:
-	mutable T Data;
-
-private: // disabled
-	atomic_impl( const atomic_impl<T> & src );
-	atomic_impl<T> & operator = ( const atomic_impl<T> & src );
-
-public:
-	
-	atomic_impl() {
-		return;
-	}
-	atomic_impl( T init ) {
-		T old = __sync_fetch_and_add( &Data, 0 );
-		while ( old != __sync_val_compare_and_swap( &Data, old, init ) ) {
-			// nothing
-		}
-	}
-	T operator = ( T src ) {
-		T old = __sync_fetch_and_add( &Data, 0 );
-		while ( old != __sync_val_compare_and_swap( &Data, old, src ) ) {
-			// nothing
-		}
-		return src;
-	}
-
-	operator T () const {
-		return __sync_fetch_and_add( &Data, 0 );
-	}
-
-	bool is_lock_free() const {
-		return true;
-	}
-
-	T load() const {
-		return __sync_fetch_and_add( &Data, 0 );
-	}
-	void store( T val ) {
-		T old = __sync_fetch_and_add( &Data, 0 );
-		while ( old != __sync_val_compare_and_swap( &Data, old, val ) ) {
-			// nothing
-		}
-	}
-	T exchange( T val ) {
-		T old = __sync_fetch_and_add( &Data, 0 );
-		while ( old != __sync_val_compare_and_swap( &Data, old, val ) ) {
-			// nothing
-		}
-		return old;
-	}
-
-	bool compare_exchange_strong( T & expected, T new_value ) {
-		return __sync_bool_compare_and_swap( &Data, expected, new_value );
-	}
-	bool compare_exchange_weak( T & expected, T new_value ) {
-		return __sync_bool_compare_and_swap( &Data, expected, new_value );
-	}
-
-	T fetch_add( T val ) {
-		return __sync_fetch_and_add( &Data, val );
-	}
-	T fetch_sub( T val ) {
-		return __sync_fetch_and_sub( &Data, val );
-	}
-
-	T fetch_and( T val ) {
-		return __sync_fetch_and_and( &Data, val );
-	}
-	T fetch_or( T val ) {
-		return __sync_fetch_and_or( &Data, val );
-	}
-	T fetch_xor( T val ) {
-		return __sync_fetch_and_xor( &Data, val );
-	}
-
-}; // class atomic
-
-#elif MPT_MSVC_BEFORE(2012,0)
+#if MPT_MSVC_BEFORE(2012,0)
 
 template < typename T >
 class atomic_impl_32 {
@@ -356,16 +274,7 @@ public:
 
 #endif // MPT_COMPILER
 
-#if MPT_CLANG_BEFORE(3,1,0)
-typedef mpt::atomic_impl<uint32> atomic_uint32_t;
-typedef mpt::atomic_impl<int32> atomic_int32_t;
-#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
-typedef mpt::atomic_impl<uint64> atomic_uint64_t;
-typedef mpt::atomic_impl<int64> atomic_int64_t;
-#define MPT_ATOMIC_HAVE_64
-#endif
-#define MPT_ATOMIC_PTR mpt::atomic_impl // use as MPT_ATOMIC_PTR<T*>
-#elif MPT_MSVC_BEFORE(2012,0)
+#if MPT_MSVC_BEFORE(2012,0)
 typedef mpt::atomic_impl_32<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl_32<int32> atomic_int32_t;
 #if defined(_M_AMD64)

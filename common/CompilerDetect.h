@@ -37,8 +37,8 @@
 #define MPT_CLANG_AT_LEAST(major,minor,patch)        (MPT_COMPILER_CLANG_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_CLANG_BEFORE(major,minor,patch)          (MPT_COMPILER_CLANG_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_CLANG_BEFORE(3,0,0)
-#error "clang version 3.0 required"
+#if MPT_CLANG_BEFORE(3,4,0)
+#error "clang version 3.4 required"
 #endif
 
 #if defined(__clang_analyzer__) 
@@ -54,8 +54,8 @@
 #define MPT_GCC_AT_LEAST(major,minor,patch)          (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_GCC_BEFORE(4,4,0)
-#error "GCC version 4.4 required"
+#if MPT_GCC_BEFORE(4,8,0)
+#error "GCC version 4.8 required"
 #endif
 
 #elif defined(_MSC_VER)
@@ -124,20 +124,16 @@
 #if MPT_COMPILER_MSVC
 	#define MPT_PLATFORM_LITTLE_ENDIAN
 #elif MPT_COMPILER_GCC
-	#if MPT_GCC_AT_LEAST(4,6,0)
-		#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-			#define MPT_PLATFORM_BIG_ENDIAN
-		#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-			#define MPT_PLATFORM_LITTLE_ENDIAN
-		#endif
+	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		#define MPT_PLATFORM_BIG_ENDIAN
+	#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+		#define MPT_PLATFORM_LITTLE_ENDIAN
 	#endif
 #elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-	#if MPT_CLANG_AT_LEAST(3,2,0)
-		#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-			#define MPT_PLATFORM_BIG_ENDIAN
-		#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-			#define MPT_PLATFORM_LITTLE_ENDIAN
-		#endif
+	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		#define MPT_PLATFORM_BIG_ENDIAN
+	#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+		#define MPT_PLATFORM_LITTLE_ENDIAN
 	#endif
 #endif
 
@@ -189,16 +185,8 @@
 
 
 
-#if MPT_GCC_BEFORE(4,5,0)
-#define MPT_COMPILER_QUIRK_RANDOM_TR1
-#endif
-
-
-
 // C++11 constexpr
-#if MPT_GCC_BEFORE(4,8,0) || MPT_CLANG_BEFORE(3,1,0) || MPT_MSVC_BEFORE(2015,0)
-// GCC 4.6 rejects valid code
-// GCC 4.7 crashes compiling FlagSet<T>
+#if MPT_MSVC_BEFORE(2015,0)
 #define MPT_COMPILER_HAS_CONSTEXPR11 0
 #endif
 

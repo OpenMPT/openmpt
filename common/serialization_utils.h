@@ -141,9 +141,7 @@ template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
 //-------------------------------------------------------
 {
-	#if !MPT_GCC_BEFORE(4,5,0)
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
+	static_assert(std::is_trivial<T>::value == true, "");
 	Binarywrite(oStrm, data);
 }
 
@@ -217,9 +215,7 @@ template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 //----------------------------------------------------------------------
 {
-	#if !MPT_GCC_BEFORE(4,5,0)
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
+	static_assert(std::is_trivial<T>::value == true, "");
 	if (nSize == sizeof(T) || nSize == invalidDatasize)
 		Binaryread(iStrm, data);
 	else
