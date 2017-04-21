@@ -136,9 +136,9 @@ PathString PathString::Simplify() const
 
 	RawPathString result = root;
 	result.reserve(path.size());
-	for(auto it = components.cbegin(); it != components.cend(); ++it)
+	for(const auto &c : components)
 	{
-		result += (*it) + MPT_PATHSTRING_LITERAL("\\");
+		result += c + MPT_PATHSTRING_LITERAL("\\");
 	}
 	if(!components.empty())
 		result.pop_back();
@@ -684,9 +684,9 @@ void SanitizeFilename(mpt::PathString &filename)
 //----------------------------------------------
 {
 	mpt::RawPathString tmp = filename.AsNative();
-	for(auto it = tmp.begin(); it != tmp.end(); ++it)
+	for(auto &c : tmp)
 	{
-		*it = SanitizeFilenameChar(*it);
+		c = SanitizeFilenameChar(c);
 	}
 	filename = mpt::PathString::FromNative(tmp);
 }
@@ -764,7 +764,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	{
 		filter += MPT_PATHSTRING(" (");
 		bool first = true;
-		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
+		for(auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -774,14 +774,14 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 				filter += MPT_PATHSTRING(",");
 			}
 			filter += MPT_PATHSTRING("*.");
-			filter += (*it);
+			filter += ext;
 		}
 		filter += MPT_PATHSTRING(")");
 	}
 	filter += MPT_PATHSTRING("|");
 	{
 		bool first = true;
-		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
+		for(auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -791,7 +791,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 				filter += MPT_PATHSTRING(";");
 			}
 			filter += MPT_PATHSTRING("*.");
-			filter += (*it);
+			filter += ext;
 		}
 	}
 	filter += MPT_PATHSTRING("|");
@@ -803,10 +803,10 @@ mpt::PathString FileType::AsFilterOnlyString() const
 //--------------------------------------------------
 {
 	mpt::PathString filter;
-	const std::vector<mpt::PathString> extensions = GetExtensions();
+	const auto extensions = GetExtensions();
 	{
 		bool first = true;
-		for(auto it = extensions.cbegin(); it != extensions.cend(); ++it)
+		for(auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -816,7 +816,7 @@ mpt::PathString FileType::AsFilterOnlyString() const
 				filter += MPT_PATHSTRING(";");
 			}
 			filter += MPT_PATHSTRING("*.");
-			filter += (*it);
+			filter += ext;
 		}
 	}
 	return filter;
@@ -834,9 +834,9 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 //----------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(auto it = fileTypes.cbegin(); it != fileTypes.cend(); ++it)
+	for(auto &type : fileTypes)
 	{
-		filter += it->AsFilterString(format);
+		filter += type.AsFilterString(format);
 	}
 	return filter;
 }
@@ -854,9 +854,9 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 //-----------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(auto it = fileTypes.cbegin(); it != fileTypes.cend(); ++it)
+	for(auto &type : fileTypes)
 	{
-		filter += it->AsFilterOnlyString();
+		filter += type.AsFilterOnlyString();
 	}
 	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
 }
