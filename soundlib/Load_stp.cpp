@@ -233,7 +233,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 
-	Order.ReadFromArray(fileHeader.orderList, fileHeader.numOrders);
+	ReadOrderFromArray(Order(), fileHeader.orderList, fileHeader.numOrders);
 
 	std::vector<STPLoopList> loopInfo;
 	// non-looped versions of samples with loops (when needed)

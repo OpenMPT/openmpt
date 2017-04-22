@@ -628,8 +628,6 @@ public:
 	//specific order&row etc. Return value is in seconds.
 	std::vector<GetLengthType> GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
-	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
-
 public:
 	//Returns song length in seconds.
 	double GetSongTime() { return GetLength(eNoAdjust).back().duration; }

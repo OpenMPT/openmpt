@@ -595,9 +595,8 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	if (version < '2')
 	{
 		uint32 nbo = pmsh->songlen;
-		if (nbo >= MAX_ORDERS) nbo = MAX_ORDERS-1;
 		if (!nbo) nbo = 1;
-		Order.ReadFromArray(pmsh->playseq, nbo);
+		ReadOrderFromArray(Order(), pmsh->playseq, nbo);
 		playtransp = pmsh->playtransp;
 	} else
 	{
@@ -612,7 +611,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		uint32 sectiontable = pmsh2->sectiontable;
 		if ((!nSections) || (!sectiontable) || (sectiontable >= dwMemLength-2)) nSections = 1;
 		nOrders = 0;
-		Order.resize(0);
+		Order().clear();
 		for (uint32 iSection=0; iSection<nSections; iSection++)
 		{
 			uint32 nplayseq = 0;
@@ -634,16 +633,16 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
 				if(m_songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmps->name);
-				ORDERINDEX n = std::min<ORDERINDEX>(pmps->length, ORDERINDEX_MAX - nOrders);
-				if (n <= (dwMemLength - pseq + 42) / 2u)
+				ORDERINDEX n = std::min<ORDERINDEX>(pmps->length, MAX_ORDERS - nOrders);
+				if (n <= (dwMemLength - pseq + 42) / 2u && n < MPT_ARRAY_COUNT(pmps->seq))
 				{
-					Order.resize(nOrders + n);
+					Order().resize(nOrders + n);
 					for (uint32 i=0; i<n; i++)
 					{
 						uint16 seqval = pmps->seq[i];
-						if ((seqval < wNumBlocks) && (nOrders < MAX_ORDERS-1))
+						if (seqval < wNumBlocks)
 						{
-							Order[nOrders++] = (ORDERINDEX)seqval;
+							Order()[nOrders++] = static_cast<ORDERINDEX>(seqval);
 						}
 					}
 				}

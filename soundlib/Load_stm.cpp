@@ -163,12 +163,12 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read order list
-	Order.ReadAsByte(file, 128);
-	for(ORDERINDEX ord = 0; ord < 128; ord++)
+	ReadOrderFromFile<uint8>(Order(), file, 128);
+	for(auto &pat : Order())
 	{
-		if(Order[ord] == 99 || Order[ord] == 255)	// 99 is regular, sometimes a single 255 entry can be found too
-			Order[ord] = Order.GetInvalidPatIndex();
-		else if(Order[ord] > 99)
+		if(pat == 99 || pat == 255)	// 99 is regular, sometimes a single 255 entry can be found too
+			pat = Order.GetInvalidPatIndex();
+		else if(pat > 99)
 			return false;
 	}
 

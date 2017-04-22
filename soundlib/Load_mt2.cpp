@@ -430,8 +430,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nVSTiVolume = 48;
 	m_nSamplePreAmp = 48 * 2;	// Double pre-amp because we will halve the volume of all non-drum instruments, because the volume of drum samples can exceed that of normal samples
 
-	Order.ReadAsByte(file, 256, fileHeader.numOrders);
-	Order.SetRestartPos(fileHeader.restartPos);
+	uint8 orders[256];
+	file.ReadArray(orders);
+	ReadOrderFromArray(Order(), orders, fileHeader.numOrders);
+	Order().SetRestartPos(fileHeader.restartPos);
 
 	FileReader drumData = file.ReadChunk(file.ReadUint16LE());
 	FileReader extraData = file.ReadChunk(file.ReadUint32LE());
@@ -775,11 +777,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<PATTERNINDEX> patMapping(fileHeader.numPatterns, PATTERNINDEX_INVALID);
 		for(uint32 ord = 0; ord < fileHeader.numOrders; ord++)
 		{
-			if(drumHeader.DrumPatternOrder[ord] >= drumHeader.numDrumPatterns || Order[ord] >= fileHeader.numPatterns)
+			if(drumHeader.DrumPatternOrder[ord] >= drumHeader.numDrumPatterns || Order()[ord] >= fileHeader.numPatterns)
 				continue;
 
 			// Figure out where to write this drum pattern
-			PATTERNINDEX writePat = Order[ord];
+			PATTERNINDEX writePat = Order()[ord];
 			if(patMapping[writePat] == PATTERNINDEX_INVALID)
 			{
 				patMapping[writePat] = drumHeader.DrumPatternOrder[ord];
@@ -790,7 +792,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				if(newPat != PATTERNINDEX_INVALID)
 				{
 					writePat = newPat;
-					Order[ord] = writePat;
+					Order()[ord] = writePat;
 				}
 			}
 			if(!Patterns.IsValidPat(writePat))

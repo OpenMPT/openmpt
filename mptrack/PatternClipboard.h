@@ -67,9 +67,9 @@ protected:
 public:
 
 	// Copy a range of patterns to both the system clipboard and the internal clipboard.
-	static bool Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders);
+	static bool Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders);
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
-	static bool Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
+	static bool Copy(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 	// Try pasting a pattern selection from the system clipboard.
 	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged);
 	// Try pasting a pattern selection from an internal clipboard.
@@ -94,7 +94,7 @@ protected:
 	static std::string GetFileExtension(const char *ext, bool addPadding);
 
 	// Create the clipboard text for a pattern selection
-	static std::string CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
+	static std::string CreateClipboardString(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
 	// Parse clipboard string and perform the pasting operation.
 	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged);

@@ -389,7 +389,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
-	Order.ReadAsByte(file, 256, 256, 0xFF, 0xFE);
+	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF, 0xFE);
 
 	m_nChannels = file.ReadUint8() + 1;
 	PATTERNINDEX numPats = file.ReadUint8() + 1;

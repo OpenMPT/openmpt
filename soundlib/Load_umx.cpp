@@ -346,7 +346,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 		m_ContainerType = MOD_CONTAINERTYPE_UAX;
 		m_nChannels = 4;
 		Patterns.Insert(0, 64);
-		Order[0] = 0;
+		Order().assign(1, 0);
 		return true;
 	} else
 #endif // MPT_IMPORT_UAX

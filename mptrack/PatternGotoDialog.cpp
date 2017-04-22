@@ -78,7 +78,7 @@ void CPatternGotoDialog::OnOK()
 	}
 	
 	// Does order match pattern?
-	if(validated && m_pSndFile->Order[m_nOrder] != m_nPattern)
+	if(validated && m_pSndFile->Order()[m_nOrder] != m_nPattern)
 	{
 		validated = false;
 	}
@@ -116,7 +116,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	}
 		
 	UpdateData();
-	m_nOrder = m_pSndFile->Order.FindOrder(static_cast<PATTERNINDEX>(m_nPattern), static_cast<ORDERINDEX>(m_nActiveOrder));
+	m_nOrder = m_pSndFile->Order().FindOrder(static_cast<PATTERNINDEX>(m_nPattern), static_cast<ORDERINDEX>(m_nActiveOrder));
 
 	if(m_nOrder == ORDERINDEX_INVALID)
 	{
@@ -137,9 +137,9 @@ void CPatternGotoDialog::OnEnChangeGotoOrd()
 
 	UpdateData();
 
-	if(m_nOrder<m_pSndFile->Order.size())
+	if(m_nOrder < m_pSndFile->Order().size())
 	{
-		PATTERNINDEX candidatePattern = m_pSndFile->Order[m_nOrder];
+		PATTERNINDEX candidatePattern = m_pSndFile->Order()[m_nOrder];
 		if(candidatePattern < m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
 		{
 			m_nPattern = candidatePattern;

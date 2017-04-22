@@ -248,8 +248,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	const bool adjustSamplePos = (adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions;
 
 	SEQUENCEINDEX sequence = target.sequence;
-	if(sequence > Order.GetNumSequences()) sequence = Order.GetCurrentSequenceIndex();
-	const ModSequence &orderList = Order.GetSequence(sequence);
+	if(sequence >= Order.GetNumSequences()) sequence = Order.GetCurrentSequenceIndex();
+	const ModSequence &orderList = Order(sequence);
 
 	GetLengthMemory memory(*this);
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
@@ -277,7 +277,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			if(ChnSettings[i].dwFlags[CHN_MUTE]) memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
 		}
-		if(target.mode == GetLengthTarget::SeekPosition && target.pos.order < orderList.GetLength())
+		if(target.mode == GetLengthTarget::SeekPosition && target.pos.order < orderList.size())
 		{
 			// If we know where to seek, we can directly rule out any channels on which a new note would be triggered right at the start.
 			const PATTERNINDEX seekPat = orderList[target.pos.order];
@@ -3387,7 +3387,7 @@ bool CSoundFile::ProcessEffects()
 			if(!doBreakRow) nBreakRow = 0;
 			m_SongFlags.set(SONG_BREAKTOROW);
 
-			if(nPosJump >= Order.size())
+			if(nPosJump >= Order().size())
 			{
 				nPosJump = 0;
 			}
@@ -5909,11 +5909,11 @@ void CSoundFile::HandlePatternTransitionEvents()
 		return;
 
 	// MPT sequence override
-	if(m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID && m_PlayState.m_nSeqOverride < Order.size())
+	if(m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID && m_PlayState.m_nSeqOverride < Order().size())
 	{
 		if(m_SongFlags[SONG_PATTERNLOOP])
 		{
-			m_PlayState.m_nPattern = Order[m_PlayState.m_nSeqOverride];
+			m_PlayState.m_nPattern = Order()[m_PlayState.m_nSeqOverride];
 		}
 		m_PlayState.m_nNextOrder = m_PlayState.m_nSeqOverride;
 		m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;

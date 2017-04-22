@@ -197,7 +197,6 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	Order.SetRestartPos(0);
 	m_SongFlags.reset();
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
@@ -207,6 +206,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	SetMixLevels(mixLevelsCompatible);
 
 	Patterns.ClearPatterns();
+	Order.Initialize();
 
 	m_songName.clear();
 	m_songArtist.clear();
@@ -242,8 +242,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
-
-	Order.resize(1);
 
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
@@ -464,9 +462,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	RecalculateSamplesPerTick();
 	visitedSongRows.Initialize(true);
 
-	for(SEQUENCEINDEX i = 0; i < Order.GetNumSequences(); i++)
+	for(auto &order : Order)
 	{
-		ModSequence &order = Order.GetSequence(i);
 		if(order.GetRestartPos() >= order.size())
 		{
 			order.SetRestartPos(0);
@@ -478,7 +475,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 	std::string notFoundText;
 #endif // MODPLUG_TRACKER
-	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
+	std::vector<const SNDMIXPLUGININFO *> notFoundIDs;
 
 	if(loadFlags & loadPluginData)
 	{
@@ -572,12 +569,12 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 bool CSoundFile::Destroy()
 //------------------------
 {
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &chn : m_PlayState.Chn)
 	{
-		m_PlayState.Chn[i].pModInstrument = nullptr;
-		m_PlayState.Chn[i].pModSample = nullptr;
-		m_PlayState.Chn[i].pCurrentSample = nullptr;
-		m_PlayState.Chn[i].nLength = 0;
+		chn.pModInstrument = nullptr;
+		chn.pModSample = nullptr;
+		chn.pCurrentSample = nullptr;
+		chn.nLength = 0;
 	}
 
 	Patterns.DestroyPatterns();
@@ -588,19 +585,19 @@ bool CSoundFile::Destroy()
 	m_madeWithTracker.clear();
 	m_FileHistory.clear();
 
-	for(SAMPLEINDEX i = 1; i < MAX_SAMPLES; i++)
+	for(auto &smp : Samples)
 	{
-		Samples[i].FreeSample();
+		smp.FreeSample();
 	}
-	for(INSTRUMENTINDEX i = 0; i < MAX_INSTRUMENTS; i++)
+	for(auto &ins : Instruments)
 	{
-		delete Instruments[i];
-		Instruments[i] = nullptr;
+		delete ins;
+		ins = nullptr;
 	}
 #ifndef NO_PLUGINS
-	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(auto &plug : m_MixPlugins)
 	{
-		m_MixPlugins[i].Destroy();
+		plug.Destroy();
 	}
 #endif // NO_PLUGINS
 
@@ -671,7 +668,7 @@ void CSoundFile::ResetPlayPos()
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
 
-	InitializeVisitedRows();
+	visitedSongRows.Initialize(true);
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
 	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
@@ -700,24 +697,24 @@ void CSoundFile::ResetPlayPos()
 void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 //-------------------------------------------------
 {
-	while ((nOrder < Order.size()) && (Order[nOrder] == Order.GetIgnoreIndex())) nOrder++;
-	if ((nOrder >= Order.size()) || (Order[nOrder] >= Patterns.Size())) return;
-	for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
+	while ((nOrder < Order().size()) && (Order()[nOrder] == Order.GetIgnoreIndex())) nOrder++;
+	if ((nOrder >= Order().size()) || (Order()[nOrder] >= Patterns.Size())) return;
+	for(auto &chn : m_PlayState.Chn)
 	{
-		m_PlayState.Chn[j].nPeriod = 0;
-		m_PlayState.Chn[j].nNote = NOTE_NONE;
-		m_PlayState.Chn[j].nPortamentoDest = 0;
-		m_PlayState.Chn[j].nCommand = 0;
-		m_PlayState.Chn[j].nPatternLoopCount = 0;
-		m_PlayState.Chn[j].nPatternLoop = 0;
-		m_PlayState.Chn[j].nVibratoPos = m_PlayState.Chn[j].nTremoloPos = m_PlayState.Chn[j].nPanbrelloPos = 0;
+		chn.nPeriod = 0;
+		chn.nNote = NOTE_NONE;
+		chn.nPortamentoDest = 0;
+		chn.nCommand = 0;
+		chn.nPatternLoopCount = 0;
+		chn.nPatternLoop = 0;
+		chn.nVibratoPos = chn.nTremoloPos = chn.nPanbrelloPos = 0;
 		//IT compatibility 15. Retrigger
 		if(m_playBehaviour[kITRetrigger])
 		{
-			m_PlayState.Chn[j].nRetrigCount = 0;
-			m_PlayState.Chn[j].nRetrigParam = 1;
+			chn.nRetrigCount = 0;
+			chn.nRetrigParam = 1;
 		}
-		m_PlayState.Chn[j].nTremorCount = 0;
+		chn.nTremorCount = 0;
 	}
 
 #ifndef NO_PLUGINS
@@ -747,10 +744,10 @@ void CSoundFile::SuspendPlugins()
 //-------------------------------
 {
 #ifndef NO_PLUGINS
-	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(auto &plug : m_MixPlugins)
 	{
-		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (pPlugin != nullptr && pPlugin->IsResumed())
+		IMixPlugin *pPlugin = plug.pMixPlugin;
+		if(pPlugin != nullptr && pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(false);
 			pPlugin->HardAllNotesOff();
@@ -764,10 +761,10 @@ void CSoundFile::ResumePlugins()
 //------------------------------
 {
 #ifndef NO_PLUGINS
-	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(auto &plugin : m_MixPlugins)
 	{
-		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (pPlugin != nullptr && !pPlugin->IsResumed())
+		IMixPlugin *pPlugin = plugin.pMixPlugin;
+		if(pPlugin != nullptr && !pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(true);
 			pPlugin->Resume();
@@ -781,10 +778,10 @@ void CSoundFile::StopAllVsti()
 //----------------------------
 {
 #ifndef NO_PLUGINS
-	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(auto &plugin : m_MixPlugins)
 	{
-		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (pPlugin != nullptr && pPlugin->IsResumed())
+		IMixPlugin *pPlugin = plugin.pMixPlugin;
+		if(pPlugin != nullptr && pPlugin->IsResumed())
 		{
 			pPlugin->HardAllNotesOff();
 		}
@@ -806,28 +803,24 @@ void CSoundFile::RecalculateGainForAllPlugs()
 //-------------------------------------------
 {
 #ifndef NO_PLUGINS
-	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(auto &plugin : m_MixPlugins)
 	{
-		if (!m_MixPlugins[i].pMixPlugin)
-			continue;  //most common branch
-
-		m_MixPlugins[i].pMixPlugin->RecalculateGain();
+		if(plugin.pMixPlugin != nullptr)
+			plugin.pMixPlugin->RecalculateGain();
 	}
 #endif // NO_PLUGINS
 }
 
-
-//end rewbs.VSTCompliance
 
 void CSoundFile::ResetChannels()
 //------------------------------
 {
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_PlayState.m_nBufferCount = 0;
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &chn : m_PlayState.Chn)
 	{
-		m_PlayState.Chn[i].nROfs = m_PlayState.Chn[i].nLOfs = 0;
-		m_PlayState.Chn[i].nLength = 0;
+		chn.nROfs = chn.nLOfs = 0;
+		chn.nLength = 0;
 	}
 }
 
@@ -840,7 +833,7 @@ void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
 	if(chnIndex >= m_nChannels)
 		return;
 
-	for(CHANNELINDEX i = 0; i<m_nChannels; i++)
+	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 	{
 		m_bChannelMuteTogglePending[i] = !ChnSettings[i].dwFlags[CHN_MUTE];
 	}
@@ -851,7 +844,7 @@ void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
 void CSoundFile::PatternTransitionChnUnmuteAll()
 //----------------------------------------------
 {
-	for(CHANNELINDEX i = 0; i<m_nChannels; i++)
+	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 	{
 		m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
 	}
@@ -881,7 +874,6 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 }
 
 
-//rewbs.playSongFromCursor
 void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 //----------------------------------------------------------------
 {
@@ -896,7 +888,6 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_PlayState.m_nNextPatStartRow = 0;
 	m_SongFlags.reset(SONG_PATTERNLOOP);
 }
-//end rewbs.playSongFromCursor
 
 
 void CSoundFile::SetDefaultPlaybackBehaviour(MODTYPE type)
@@ -1293,13 +1284,13 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 
 	ModSample &sample = Samples[nSample];
 
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &chn : m_PlayState.Chn)
 	{
-		if(m_PlayState.Chn[i].pModSample == &sample)
+		if(chn.pModSample == &sample)
 		{
-			m_PlayState.Chn[i].position.Set(0);
-			m_PlayState.Chn[i].nLength = 0;
-			m_PlayState.Chn[i].pCurrentSample = nullptr;
+			chn.position.Set(0);
+			chn.nLength = 0;
+			chn.pCurrentSample = nullptr;
 		}
 	}
 

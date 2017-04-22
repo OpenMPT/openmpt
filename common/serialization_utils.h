@@ -521,14 +521,31 @@ inline SsbRead::ReadIterator SsbRead::GetReadEnd()
 
 
 template <class T>
-struct ArrayWriter
-//================
+struct VectorWriter
+//=================
 {
-	ArrayWriter(size_t nCount) : m_nCount(nCount) {}
-	void operator()(std::ostream& oStrm, const T* pData) {
-		for(std::size_t i=0; i<m_nCount; ++i)
+	VectorWriter(size_t nCount) : m_nCount(nCount) {}
+	void operator()(std::ostream &oStrm, const std::vector<T> &vec)
+	{
+		for(size_t i = 0; i < m_nCount; i++)
 		{
-			Binarywrite(oStrm, pData[i]);
+			Binarywrite(oStrm, vec[i]);
+		}
+	}
+	size_t m_nCount;
+};
+
+template <class T>
+struct VectorReader
+//=================
+{
+	VectorReader(size_t nCount) : m_nCount(nCount) {}
+	void operator()(std::istream& iStrm, std::vector<T> &vec, const size_t)
+	{
+		vec.resize(m_nCount);
+		for(std::size_t i = 0; i < m_nCount; ++i)
+		{
+			Binaryread(iStrm, vec[i]);
 		}
 	}
 	size_t m_nCount;
@@ -539,7 +556,8 @@ struct ArrayReader
 //================
 {
 	ArrayReader(size_t nCount) : m_nCount(nCount) {}
-	void operator()(std::istream& iStrm, T* pData, const size_t) {
+	void operator()(std::istream& iStrm, T* pData, const size_t)
+	{
 		for(std::size_t i=0; i<m_nCount; ++i)
 		{
 			Binaryread(iStrm, pData[i]);

@@ -246,7 +246,7 @@ void CViewPattern::OnEditFindNext()
 						SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 					}
 					// This doesn't find the order if it's in another sequence :(
-					ORDERINDEX matchingOrder = sndFile.Order.FindOrder(pat, GetCurrentOrder());
+					ORDERINDEX matchingOrder = sndFile.Order().FindOrder(pat, GetCurrentOrder());
 					if(matchingOrder != ORDERINDEX_INVALID)
 					{
 						SetCurrentOrder(matchingOrder);

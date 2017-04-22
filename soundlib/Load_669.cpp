@@ -130,9 +130,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(fileHeader.songMessage), 108, 36, 0);
 
 	// Reading Orders
-	Order.ReadFromArray(fileHeader.orders, CountOf(fileHeader.orders), 0xFF, 0xFE);
-	if(Order[fileHeader.restartPos] < fileHeader.patterns)
-		Order.SetRestartPos(fileHeader.restartPos);
+	ReadOrderFromArray(Order(), fileHeader.orders, MPT_ARRAY_COUNT(fileHeader.orders), 0xFF, 0xFE);
+	if(Order()[fileHeader.restartPos] < fileHeader.patterns)
+		Order().SetRestartPos(fileHeader.restartPos);
 
 	// Set up panning
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)

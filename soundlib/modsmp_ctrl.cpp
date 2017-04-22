@@ -339,10 +339,9 @@ bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile)
 	CriticalSection cs;
 
 	// Update channels with new loop values
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if((sndFile.m_PlayState.Chn[i].pModSample == &smp) && sndFile.m_PlayState.Chn[i].nLength != 0)
+	for(auto &chn : sndFile.m_PlayState.Chn) if((chn.pModSample == &smp) && chn.nLength != 0)
 	{
 		bool looped = false, bidi = false;
-		ModChannel &chn = sndFile.m_PlayState.Chn[i];
 
 		if(smp.nSustainStart < smp.nSustainEnd && smp.nSustainEnd <= smp.nLength && smp.uFlags[CHN_SUSTAINLOOP] && !chn.dwFlags[CHN_KEYOFF])
 		{
@@ -549,11 +548,11 @@ float RemoveDCOffset(ModSample &smp,
 		CriticalSection cs;
 
 		smp.nGlobalVol = std::min((uint16)(smp.nGlobalVol / dAmplify), uint16(64));
-		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &chn : sndFile.m_PlayState.Chn)
 		{
-			if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
+			if(chn.pModSample == &smp)
 			{
-				sndFile.m_PlayState.Chn[i].UpdateInstrumentVolume(&smp, sndFile.m_PlayState.Chn[i].pModInstrument);
+				chn.UpdateInstrumentVolume(&smp, chn.pModInstrument);
 			}
 		}
 	}
@@ -859,11 +858,11 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 
 	CriticalSection cs;
 	smp.uFlags.reset(CHN_STEREO);
-	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
-		if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
+		if(chn.pModSample == &smp)
 		{
-			sndFile.m_PlayState.Chn[i].dwFlags.reset(CHN_STEREO);
+			chn.dwFlags.reset(CHN_STEREO);
 		}
 	}
 
@@ -923,9 +922,9 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
 
 	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16> > >(smp.pSample8, smp.nLength * smp.GetNumChannels(), 1, smp.pSample16, smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.reset(CHN_16BIT);
-	for(CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if(sndFile.m_PlayState.Chn[j].pModSample == &smp)
+	for(auto &chn : sndFile.m_PlayState.Chn) if(chn.pModSample == &smp)
 	{
-		sndFile.m_PlayState.Chn[j].dwFlags.reset(CHN_16BIT);
+		chn.dwFlags.reset(CHN_16BIT);
 	}
 
 	smp.PrecomputeLoops(sndFile, false);

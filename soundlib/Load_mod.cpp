@@ -775,7 +775,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadStruct(fileHeader);
 	file.Skip(4);	// Magic bytes (we already parsed these)
 
-	Order.ReadFromArray(fileHeader.orderList, CountOf(fileHeader.orderList));
+	ReadOrderFromArray(Order(), fileHeader.orderList);
 
 	ORDERINDEX realOrders = fileHeader.numOrders;
 	if(realOrders > 128)
@@ -786,14 +786,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Is this necessary?
 		realOrders = 128;
-		while(realOrders > 1 && Order[realOrders - 1] == 0)
+		while(realOrders > 1 && Order()[realOrders - 1] == 0)
 		{
 			realOrders--;
 		}
 	}
 
 	// Get number of patterns (including some order list sanity checks)
-	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, realOrders, totalSampleLen, m_nChannels, isMdKd);
+	PATTERNINDEX numPatterns = GetNumPatterns(file, Order(), realOrders, totalSampleLen, m_nChannels, isMdKd);
 	if(isMdKd && GetNumChannels() == 8)
 	{
 		// M.K. with 8 channels = Grave Composer
@@ -803,15 +803,15 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	if(isFLT8)
 	{
 		// FLT8 has only even order items, so divide by two.
-		for(ORDERINDEX ord = 0; ord < Order.GetLength(); ord++)
+		for(auto &pat : Order())
 		{
-			Order[ord] /= 2u;
+			pat /= 2u;
 		}
 	}
 	
 	// Restart position sanity checks
 	realOrders--;
-	Order.SetRestartPos(fileHeader.restartPos);
+	Order().SetRestartPos(fileHeader.restartPos);
 
 	// (Ultimate) Soundtracker didn't have a restart position, but instead stored a default tempo in this value.
 	// The default value for this is 0x78 (120 BPM). This is probably the reason why some M.K. modules
@@ -822,7 +822,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	MPT_ASSERT(fileHeader.restartPos != 0x78 || fileHeader.restartPos + 1u >= realOrders);
 	if(fileHeader.restartPos > realOrders || (fileHeader.restartPos == 0x78 && m_nChannels == 4))
 	{
-		Order.SetRestartPos(0);
+		Order().SetRestartPos(0);
 	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
@@ -1259,8 +1259,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			return false;
 	}
 
-	Order.ReadFromArray(fileHeader.orderList);
-	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, fileHeader.numOrders, totalSampleLen, m_nChannels, false);
+	ReadOrderFromArray(Order(), fileHeader.orderList);
+	PATTERNINDEX numPatterns = GetNumPatterns(file, Order(), fileHeader.numOrders, totalSampleLen, m_nChannels, false);
 
 	// Let's see if the file is too small (including some overhead for broken files like sll7.mod or ghostbus.mod)
 	if(file.BytesLeft() + 65536 < numPatterns * 64u * 4u + totalSampleLen)
@@ -1622,12 +1622,12 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	SetupMODPanning();
 
 	// Reading patterns
-	Order.resize(numOrders);
+	Order().resize(numOrders);
 	uint8 speed[2] = { 0, 0 }, speedPos = 0;
 	Patterns.ResizeArray(numOrders);
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
 	{
-		Order[pat] = pat;
+		Order()[pat] = pat;
 		if(!Patterns.Insert(pat, 64))
 			continue;
 
@@ -1868,19 +1868,19 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 
 	PATTERNINDEX writePatterns = 0;
 	uint8 writtenOrders = 0;
-	for(ORDERINDEX ord = 0; ord < Order.GetLength() && writtenOrders < 128; ord++)
+	for(ORDERINDEX ord = 0; ord < Order().GetLength() && writtenOrders < 128; ord++)
 	{
 		// Ignore +++ and --- patterns in order list, as well as high patterns (MOD officially only supports up to 128 patterns)
-		if(ord == Order.GetRestartPos())
+		if(ord == Order().GetRestartPos())
 		{
 			fileHeader.restartPos = writtenOrders;
 		}
-		if(Order[ord] < 128)
+		if(Order()[ord] < 128)
 		{
-			fileHeader.orderList[writtenOrders++] = static_cast<uint8>(Order[ord]);
-			if(writePatterns <= Order[ord])
+			fileHeader.orderList[writtenOrders++] = static_cast<uint8>(Order()[ord]);
+			if(writePatterns <= Order()[ord])
 			{
-				writePatterns = Order[ord] + 1;
+				writePatterns = Order()[ord] + 1;
 			}
 		}
 	}

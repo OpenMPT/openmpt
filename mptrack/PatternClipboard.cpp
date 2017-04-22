@@ -57,11 +57,12 @@ std::string PatternClipboard::GetFileExtension(const char *ext, bool addPadding)
 
 
 // Copy a range of patterns to both the system clipboard and the internal clipboard.
-bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders)
-//--------------------------------------------------------------------------------------------------
+bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders)
+//--------------------------------------------------------------------------------------------------------
 {
-	LimitMax(first, sndFile.Order.GetLength());
-	LimitMax(last, sndFile.Order.GetLength());
+	const ModSequence &order = sndFile.Order();
+	LimitMax(first, order.GetLength());
+	LimitMax(last, order.GetLength());
 
 	// Set up clipboard header.
 	std::string data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\nOrders: ";
@@ -74,15 +75,15 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	// Add order list and pattern information to header.
 	for(ORDERINDEX ord = first; ord <= last; ord++)
 	{
-		PATTERNINDEX pattern = sndFile.Order[ord];
+		PATTERNINDEX pattern = order[ord];
 
 		if(ord != first)
 			data += ',';
 		
-		if(pattern == sndFile.Order.GetInvalidPatIndex())
+		if(pattern == order.GetInvalidPatIndex())
 		{
 			data += '-';
-		} else if(pattern == sndFile.Order.GetIgnoreIndex())
+		} else if(pattern == order.GetIgnoreIndex())
 		{
 			data += '+';
 		} else if(sndFile.Patterns.IsValidPat(pattern))
@@ -140,8 +141,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 
 
 // Copy a pattern selection to both the system clipboard and the internal clipboard.
-bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
-//-------------------------------------------------------------------------------------------
+bool PatternClipboard::Copy(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
+//-------------------------------------------------------------------------------------------------
 {
 	std::string data = CreateClipboardString(sndFile, pattern, selection);
 	if(data.empty())
@@ -163,8 +164,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 
 
 // Create the clipboard text for a pattern selection
-std::string PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
-//--------------------------------------------------------------------------------------------------------------------
+std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
+//-------------------------------------------------------------------------------------------------------------------------
 {
 	if(!sndFile.Patterns.IsValidPat(pattern))
 		return "";
@@ -330,6 +331,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		return false;
 
 	CModDoc &modDoc = *(sndFile.GetpModDoc());
+	ModSequence &order = sndFile.Order();
 
 	bool success = false;
 	bool prepareUndo = true;	// Prepare pattern for undo next time
@@ -376,7 +378,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		patternMode = (mode == pmOverwrite) ?  kMultiInsert : kMultiOverwrite;
 
 		// Put new patterns after current pattern, if it exists
-		if(sndFile.Order.IsValidPat(curOrder) && patternMode == kMultiInsert)
+		if(order.IsValidPat(curOrder) && patternMode == kMultiInsert)
 			curOrder++;
 
 		pos = startPos + 8;
@@ -403,10 +405,10 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 
 			if(data[curPos] == '+')
 			{
-				insertPat = sndFile.Order.GetIgnoreIndex();
+				insertPat = order.GetIgnoreIndex();
 			} else if(data[curPos] == '-')
 			{
-				insertPat = sndFile.Order.GetInvalidPatIndex();
+				insertPat = order.GetInvalidPatIndex();
 			} else
 			{
 				insertPat = ConvertStrTo<PATTERNINDEX>(data.substr(curPos, 10));
@@ -434,18 +436,18 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				}
 			}
 
-			if((insertPat == sndFile.Order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex)
-				|| (insertPat == sndFile.Order.GetInvalidPatIndex() && !sndFile.GetModSpecifications().hasStopIndex)
+			if((insertPat == order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex)
+				|| (insertPat == order.GetInvalidPatIndex() && !sndFile.GetModSpecifications().hasStopIndex)
 				|| insertPat == PATTERNINDEX_INVALID)
 			{
 				continue;
 			}
 
-			if(sndFile.Order.Insert(writeOrder, 1) == 0)
+			if(order.insert(writeOrder, 1) == 0)
 			{
 				break;
 			}
-			sndFile.Order[writeOrder++] = insertPat;
+			order[writeOrder++] = insertPat;
 			orderChanged = true;
 		}
 
@@ -626,21 +628,21 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			while(curRow >= sndFile.Patterns[pattern].GetNumRows())
 			{
 				curRow = 0;
-				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder <= curOrder || nextOrder >= sndFile.Order.size() || !sndFile.Patterns.IsValidPat(sndFile.Order[nextOrder]))
+				ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
+				if(nextOrder <= curOrder || nextOrder >= order.size() || !sndFile.Patterns.IsValidPat(order[nextOrder]))
 				{
 					PATTERNINDEX newPat;
 					if(!insertNewPatterns
 						|| curOrder >= sndFile.GetModSpecifications().ordersMax
 						|| (newPat = sndFile.Patterns.InsertAny(sndFile.Patterns[pattern].GetNumRows(), true)) == PATTERNINDEX_INVALID
-						|| sndFile.Order.Insert(curOrder + 1, 1, newPat) == 0)
+						|| order.insert(curOrder + 1, 1, newPat) == 0)
 					{
 						return success;
 					}
 					orderChanged = true;
 					nextOrder = curOrder + 1;
 				}
-				pattern = sndFile.Order[nextOrder];
+				pattern = order[nextOrder];
 				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
 				patData = sndFile.Patterns[pattern];
 				curOrder = nextOrder;

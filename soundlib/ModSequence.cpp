@@ -9,120 +9,73 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
 #include "ModSequence.h"
+#include "Sndfile.h"
 #include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
-#include "../common/FileReader.h"
-#include <functional>
-
-#if defined(MODPLUG_TRACKER)
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
 
 #define str_SequenceTruncationNote ("Module has sequence of length %1; it will be truncated to maximum supported length, %2.")
 
 
-const ORDERINDEX ModSequenceSet::s_nCacheSize = MAX_ORDERS;
-
-
-ModSequence::ModSequence(CSoundFile &rSf,
-						 PATTERNINDEX* pArray,
-						 ORDERINDEX nSize,
-						 ORDERINDEX nCapacity,
-						 ORDERINDEX restartPos,
-						 const bool bDeletableArray) :
-		m_sndFile(rSf),
-		m_pArray(pArray),
-		m_nSize(nSize),
-		m_nCapacity(nCapacity),
-		m_restartPos(restartPos),
-		m_bDeletableArray(bDeletableArray)
-//-------------------------------------------------------
-{}
-
-
-ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
-	m_sndFile(rSf),
-	m_restartPos(0),
-	m_bDeletableArray(true)
-//------------------------------------------------------------
+ModSequence::ModSequence(CSoundFile &sndFile)
+	: m_sndFile(sndFile)
+	, m_restartPos(0)
+//-------------------------------------------
 {
-	m_nSize = nSize;
-	m_nCapacity = m_nSize;
-	m_pArray = new PATTERNINDEX[m_nCapacity];
-	std::fill(begin(), end(), GetInvalidPatIndex());
 }
 
 
-ModSequence::ModSequence(const ModSequence& seq) :
-	m_sndFile(seq.m_sndFile),
-	m_pArray(nullptr),
-	m_nSize(0),
-	m_nCapacity(0),
-	m_restartPos(seq.m_restartPos),
-	m_bDeletableArray(false)
-//------------------------------------------
+ModSequence& ModSequence::operator=(const ModSequence &other)
+//-----------------------------------------------------------
 {
-	*this = seq;
+	if(&other == this)
+		return *this;
+	std::vector<PATTERNINDEX>::assign(other.begin(), other.end());
+	m_name = other.m_name;
+	m_restartPos = other.m_restartPos;
+	return *this;
 }
 
 
 bool ModSequence::NeedsExtraDatafield() const
 //-------------------------------------------
 {
-	return (m_sndFile.GetType() == MOD_TYPE_MPT && m_sndFile.Patterns.Size() > 0xFD);
-}
-
-namespace
-{
-	// Functor for detecting non-valid patterns from sequence.
-	struct IsNotValidPat
-	{
-		IsNotValidPat(const CSoundFile &sf) : sndFile(sf) { }
-		bool operator() (PATTERNINDEX i) { return !sndFile.Patterns.IsValidPat(i); }
-		const CSoundFile &sndFile;
-	};
+	return (m_sndFile.GetType() == MOD_TYPE_MPT && m_sndFile.Patterns.GetNumPatterns() > 0xFD);
 }
 
 
 void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 //---------------------------------------------------------
 {
-	const CModSpecifications specs = m_sndFile.GetModSpecifications();
+	auto &specs = m_sndFile.GetModSpecifications();
 
 	if(oldtype != MOD_TYPE_NONE)
 	{
 		// If not supported, remove "+++" separator order items.
-		if(specs.hasIgnoreIndex == false)
+		if(!specs.hasIgnoreIndex)
 		{
 			RemovePattern(GetIgnoreIndex());
 		}
 		// If not supported, remove "---" items between patterns.
-		if(specs.hasStopIndex == false)
+		if(!specs.hasStopIndex)
 		{
 			RemovePattern(GetInvalidPatIndex());
 		}
 	}
 
 	//Resize orderlist if needed.
-	if(specs.ordersMax < GetLength())
+	if(specs.ordersMax < size())
 	{
-		// Order list too long? -> remove unnecessary order items first.
+		// Order list too long? Remove "unnecessary" order items first.
 		if(oldtype != MOD_TYPE_NONE && specs.ordersMax < GetLengthTailTrimmed())
 		{
-			iterator iter = std::remove_if(begin(), end(), IsNotValidPat(m_sndFile));
-			std::fill(iter, end(), GetInvalidPatIndex());
+			erase(std::remove_if(begin(), end(), [&] (PATTERNINDEX pat) { return !m_sndFile.Patterns.IsValidPat(pat); }), end());
 			if(GetLengthTailTrimmed() > specs.ordersMax)
 			{
 				m_sndFile.AddToLog("WARNING: Order list has been trimmed!");
@@ -136,89 +89,53 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 ORDERINDEX ModSequence::GetLengthTailTrimmed() const
 //--------------------------------------------------
 {
-	ORDERINDEX nEnd = GetLength();
-	if(nEnd == 0) return 0;
-	nEnd--;
-	const PATTERNINDEX iInvalid = GetInvalidPatIndex();
-	while(nEnd > 0 && (*this)[nEnd] == iInvalid)
-		nEnd--;
-	return ((*this)[nEnd] == iInvalid) ? 0 : nEnd+1;
+	if(empty())
+		return 0;
+	auto last = std::find_if(rbegin(), rend(), [] (PATTERNINDEX pat) { return pat != GetInvalidPatIndex(); });
+	return static_cast<ORDERINDEX>(std::distance(begin(), last.base()));
 }
 
 
 ORDERINDEX ModSequence::GetLengthFirstEmpty() const
 //-------------------------------------------------
 {
-	return static_cast<ORDERINDEX>(std::find(begin(), end(), GetInvalidPatIndex()) - begin());
+	return static_cast<ORDERINDEX>(std::distance(begin(), std::find(begin(), end(), GetInvalidPatIndex())));
 }
 
 
 ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
 //-----------------------------------------------------------------------------
 {
-	const ORDERINDEX nLength = GetLength();
-	if(nLength == 0) return 0;
-	ORDERINDEX next = std::min(ORDERINDEX(nLength - 1), ORDERINDEX(start + 1));
-	while(next+1 < nLength && (*this)[next] == GetIgnoreIndex()) next++;
-	return next;
+	if(empty())
+		return 0;
+	auto next = std::find_if(begin() + start + 1, end(), [] (PATTERNINDEX pat) { return pat != GetInvalidPatIndex(); });
+	return std::min(static_cast<ORDERINDEX>(std::distance(begin(), next)), GetLastIndex());
 }
 
 
 ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const
 //---------------------------------------------------------------------------------
 {
-	const ORDERINDEX nLength = GetLength();
-	if(start == 0 || nLength == 0) return 0;
-	ORDERINDEX prev = std::min(ORDERINDEX(start - 1), ORDERINDEX(nLength - 1));
-	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
+	const ORDERINDEX last = GetLastIndex();
+	if(start == 0 || last == 0) return 0;
+	ORDERINDEX prev = std::min(ORDERINDEX(start - 1), last);
+	while(prev > 0 && at(prev) == GetIgnoreIndex()) prev--;
 	return prev;
 }
 
 
-void ModSequence::Init()
-//----------------------
+void ModSequence::Remove(ORDERINDEX posBegin, ORDERINDEX posEnd)
+//--------------------------------------------------------------
 {
-	resize(MAX_ORDERS);
-	std::fill(begin(), end(), GetInvalidPatIndex());
-}
-
-
-void ModSequence::Remove(ORDERINDEX nPosBegin, ORDERINDEX nPosEnd)
-//----------------------------------------------------------------
-{
-	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
-	if (nPosEnd < nPosBegin || nPosEnd >= nLengthTt)
+	if(posEnd < posBegin || posEnd >= size())
 		return;
-	const ORDERINDEX nMoveCount = nLengthTt - (nPosEnd + 1);
-	// Move orders left.
-	if (nMoveCount > 0)
-		memmove(m_pArray + nPosBegin, m_pArray + nPosEnd + 1, sizeof(PATTERNINDEX) * nMoveCount);
-	// Clear tail orders.
-	std::fill(m_pArray + nPosBegin + nMoveCount, m_pArray + nLengthTt, GetInvalidPatIndex());
+	erase(begin() + posBegin, begin() + posEnd + 1);
 }
-
-
-// Functor for fixing jump commands to moved order items
-struct FixJumpCommands
-//====================
-{
-	FixJumpCommands(const std::vector<ORDERINDEX> &offsets) : jumpOffset(offsets) {};
-
-	void operator()(ModCommand& m)
-	{
-		if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
-		{
-			m.param = ModCommand::PARAM(int(m.param) - jumpOffset[m.param]);
-		}
-	}
-
-	const std::vector<ORDERINDEX> jumpOffset;
-};
 
 
 // Remove all references to a given pattern index from the order list. Jump commands are updated accordingly.
-void ModSequence::RemovePattern(PATTERNINDEX which)
-//-------------------------------------------------
+void ModSequence::RemovePattern(PATTERNINDEX pat)
+//-----------------------------------------------
 {
 	const ORDERINDEX orderLength = GetLengthTailTrimmed();
 	ORDERINDEX currentLength = orderLength;
@@ -229,20 +146,26 @@ void ModSequence::RemovePattern(PATTERNINDEX which)
 
 	for(ORDERINDEX i = 0; i < currentLength; i++)
 	{
-		if(At(i) == which)
+		if(at(i) == pat)
 		{
 			maxJump++;
 			// Move order list forwards, update jump counters
 			for(ORDERINDEX j = i + 1; j < orderLength; j++)
 			{
-				At(j - 1) = At(j);
+				at(j - 1) = at(j);
 				jumpOffset[j] = maxJump;
 			}
-			At(--currentLength) = GetInvalidPatIndex();
+			at(--currentLength) = GetInvalidPatIndex();
 		}
 	}
 
-	m_sndFile.Patterns.ForEachModCommand(FixJumpCommands(jumpOffset));
+	m_sndFile.Patterns.ForEachModCommand([&jumpOffset] (ModCommand &m)
+	{
+		if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
+		{
+			m.param = ModCommand::PARAM(int(m.param) - jumpOffset[m.param]);
+		}
+	});
 	if(m_restartPos < jumpOffset.size())
 	{
 		m_restartPos -= jumpOffset[m_restartPos];
@@ -250,62 +173,30 @@ void ModSequence::RemovePattern(PATTERNINDEX which)
 }
 
 
-ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX nFill)
-//------------------------------------------------------------------------------------
+void ModSequence::assign(ORDERINDEX newSize, PATTERNINDEX pat)
+//------------------------------------------------------------
 {
-	if (nPos >= m_sndFile.GetModSpecifications().ordersMax || nCount == 0)
+	LimitMax(newSize, m_sndFile.GetModSpecifications().ordersMax);
+	std::vector<PATTERNINDEX>::assign(newSize, pat);
+}
+
+
+ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill)
+//---------------------------------------------------------------------------------
+{
+	if (pos >= m_sndFile.GetModSpecifications().ordersMax || count == 0)
 		return 0;
-	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
-	// Limit number of orders to be inserted.
-	LimitMax(nCount, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - nPos));
-	// Calculate new length and resize if needed.
-	const ORDERINDEX newLength = std::min<ORDERINDEX>(std::max(nPos, nLengthTt) + nCount, m_sndFile.GetModSpecifications().ordersMax);
-	if (newLength > GetLength())
-		resize(newLength);
-	// Calculate how many orders would need to be moved(nNeededSpace) and how many can actually
-	// be moved(nFreeSpace).
-	const ORDERINDEX nNeededSpace = nLengthTt - nPos;
-	const ORDERINDEX nFreeSpace = GetLength() - (nPos + nCount);
-	// Move orders nCount steps right starting from nPos.
-	if (nPos < nLengthTt)
-		memmove(m_pArray + nPos + nCount, m_pArray + nPos, MIN(nFreeSpace, nNeededSpace) * sizeof(PATTERNINDEX));
-	// Set nFill to new orders.
-	std::fill(begin() + nPos, begin() + nPos + nCount, nFill);
-	return nCount;
-}
-
-
-void ModSequence::Append(PATTERNINDEX nPat)
-//-----------------------------------------
-{
-	resize(m_nSize + 1, nPat);
-}
-
-
-void ModSequence::resize(ORDERINDEX nNewSize, PATTERNINDEX nFill)
-//---------------------------------------------------------------
-{
-	if (nNewSize == m_nSize) return;
-	if (nNewSize <= m_nCapacity)
-	{
-		if (nNewSize > m_nSize)
-			std::fill(begin() + m_nSize, begin() + nNewSize, nFill);
-		m_nSize = nNewSize;
-	} else
-	{
-		const PATTERNINDEX* const pOld = m_pArray;
-		if(nNewSize < Util::MaxValueOfType(m_nCapacity) - 100)
-			m_nCapacity = nNewSize + 100;
-		else
-			m_nCapacity = Util::MaxValueOfType(m_nCapacity);
-		m_pArray = new PATTERNINDEX[m_nCapacity];
-		std::copy(pOld, pOld + m_nSize, m_pArray);
-		std::fill(m_pArray + m_nSize, m_pArray + nNewSize, nFill);
-		m_nSize = nNewSize;
-		if (m_bDeletableArray)
-			delete[] pOld;
-		m_bDeletableArray = true;
-	}
+	// Limit number of orders to be inserted so that we don't exceed the format limit.
+	LimitMax(count, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - pos));
+	reserve(pos + count);
+	// Inserting past the end of the container?
+	if(pos > size())
+		resize(pos);
+	std::vector<PATTERNINDEX>::insert(begin() + pos, count, fill);
+	// Did we overgrow? Remove patterns at end.
+	if(size() > m_sndFile.GetModSpecifications().ordersMax)
+		resize(m_sndFile.GetModSpecifications().ordersMax);
+	return count;
 }
 
 
@@ -313,79 +204,52 @@ bool ModSequence::IsValidPat(ORDERINDEX ord)
 //------------------------------------------
 {
 	if(ord < size())
-		return m_sndFile.Patterns.IsValidPat(At(ord));
+		return m_sndFile.Patterns.IsValidPat(at(ord));
 	return false;
 }
 
 
-void ModSequence::clear()
-//-----------------------
+ORDERINDEX ModSequence::FindOrder(PATTERNINDEX pat, ORDERINDEX startSearchAt, bool searchForward) const
+//-----------------------------------------------------------------------------------------------------
 {
-	m_nSize = 0;
-}
-
-
-ModSequence& ModSequence::operator=(const ModSequence& seq)
-//---------------------------------------------------------
-{
-	if (&seq == this)
-		return *this;
-	if(seq.GetLength() > 0)
+	const ORDERINDEX length = GetLength();
+	ORDERINDEX ord = startSearchAt;
+	for(ORDERINDEX p = 0; p < length; p++)
 	{
-		resize(seq.GetLength());
-		std::copy(seq.begin(), seq.end(), begin());
-	}
-	m_sName = seq.m_sName;
-	m_restartPos = seq.m_restartPos;
-	return *this;
-}
-
-
-ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, bool searchForward) const
-//-------------------------------------------------------------------------------------------------------
-{
-	const ORDERINDEX maxOrder = GetLength();
-	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
-	ORDERINDEX candidateOrder = 0;
-
-	for (ORDERINDEX p = 0; p < maxOrder; p++)
-	{
-		if (searchForward)
+		if(at(ord) == pat)
 		{
-			candidateOrder = (startFromOrder + p) % maxOrder;				// wrap around MAX_ORDERS
+			return ord;
+		}
+		if(searchForward)
+		{
+			if(++ord >= length)
+				ord = 0;
 		} else
 		{
-			candidateOrder = (startFromOrder - p + maxOrder) % maxOrder;	// wrap around 0 and MAX_ORDERS
-		}
-		if (At(candidateOrder) == nPat)
-		{
-			foundAtOrder = candidateOrder;
-			break;
+			if(ord-- == 0)
+				ord = length - 1;
 		}
 	}
-
-	return foundAtOrder;
+	return ORDERINDEX_INVALID;
 }
 
 
 PATTERNINDEX ModSequence::EnsureUnique(ORDERINDEX ord)
 //----------------------------------------------------
 {
-	PATTERNINDEX pat = At(ord);
-	SEQUENCEINDEX seqs = m_sndFile.Order.GetNumSequences();
-	for(SEQUENCEINDEX s = 0; s < seqs; s++)
+	PATTERNINDEX pat = at(ord);
+	for(const auto &sequence : m_sndFile.Order)
 	{
-		ModSequence &sequence = m_sndFile.Order.GetSequence(s);
 		ORDERINDEX ords = sequence.GetLength();
 		for(ORDERINDEX o = 0; o < ords; o++)
 		{
 			if(sequence[o] == pat && (o != ord || &sequence != this))
 			{
 				// Found duplicate usage.
-				ORDERINDEX newPat = m_sndFile.Patterns.Duplicate(pat);
+				PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(pat);
 				if(newPat != PATTERNINDEX_INVALID)
 				{
-					At(ord) = newPat;
+					at(ord) = newPat;
 					return newPat;
 				}
 			}
@@ -400,86 +264,42 @@ PATTERNINDEX ModSequence::EnsureUnique(ORDERINDEX ord)
 /////////////////////////////////////
 
 
-ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
-	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, 0, false),
-	  m_nCurrentSeq(0)
-//--------------------------------------------------------------
+ModSequenceSet::ModSequenceSet(CSoundFile &sndFile)
+	: m_sndFile(sndFile)
+//-------------------------------------------------
 {
-	std::fill(m_Cache, m_Cache + s_nCacheSize, GetInvalidPatIndex());
-	m_Sequences.push_back(ModSequence(sndFile, s_nCacheSize));
+	Initialize();
 }
 
 
-const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq) const
-//----------------------------------------------------------------------
+void ModSequenceSet::Initialize()
+//-------------------------------
 {
-	if(nSeq == GetCurrentSequenceIndex())
-		return *this;
-	else
-		return m_Sequences[nSeq];
-}
-
-
-ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
-//----------------------------------------------------------
-{
-	if(nSeq == GetCurrentSequenceIndex())
-		return *this;
-	else
-		return m_Sequences[nSeq];
-}
-
-
-void ModSequenceSet::CopyCacheToStorage()
-//---------------------------------------
-{
-	m_Sequences[m_nCurrentSeq] = *this;
-}
-
-
-void ModSequenceSet::CopyStorageToCache()
-//---------------------------------------
-{
-	const ModSequence& rSeq = m_Sequences[m_nCurrentSeq];
-	if(rSeq.GetLength() <= s_nCacheSize)
-	{
-		PATTERNINDEX* pOld = m_pArray;
-		m_pArray = m_Cache;
-		m_nSize = rSeq.GetLength();
-		m_nCapacity = s_nCacheSize;
-		m_sName = rSeq.m_sName;
-		m_restartPos = rSeq.m_restartPos;
-		std::copy(rSeq.m_pArray, rSeq.m_pArray+m_nSize, m_pArray);
-		if (m_bDeletableArray)
-			delete[] pOld;
-		m_bDeletableArray = false;
-	}
-	else
-		ModSequence::operator=(rSeq);
+	m_currentSeq = 0;
+	m_Sequences.assign(1, ModSequence(m_sndFile));
 }
 
 
 void ModSequenceSet::SetSequence(SEQUENCEINDEX n)
 //-----------------------------------------------
 {
-	if(n >= m_Sequences.size())
-		return;
-	CopyCacheToStorage();
-	m_nCurrentSeq = n;
-	CopyStorageToCache();
+	if(n < m_Sequences.size())
+		m_currentSeq = n;
 }
 
 
-SEQUENCEINDEX ModSequenceSet::AddSequence(bool bDuplicate)
-//--------------------------------------------------------
+SEQUENCEINDEX ModSequenceSet::AddSequence(bool duplicate)
+//-------------------------------------------------------
 {
 	if(GetNumSequences() == MAX_SEQUENCES)
 		return SEQUENCEINDEX_INVALID;
-	m_Sequences.push_back(ModSequence(m_sndFile, s_nCacheSize));
-	if (bDuplicate)
+	if(duplicate)
 	{
-		m_Sequences.back() = *this;
-		m_Sequences.back().m_sName = ""; // Don't copy sequence name.
+		m_Sequences.push_back(m_Sequences[m_currentSeq]);
+		m_Sequences.back().m_name.clear();	// Don't copy sequence name.
+	} else
+	{
+		m_Sequences.push_back(ModSequence(m_sndFile));
 	}
 	SetSequence(GetNumSequences() - 1);
 	return GetNumSequences() - 1;
@@ -490,33 +310,29 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 //--------------------------------------------------
 {
 	// Do nothing if index is invalid or if there's only one sequence left.
-	if(i >= m_Sequences.size() || m_Sequences.size() <= 1) 
+	if(i >= m_Sequences.size() || m_Sequences.size() <= 1)
 		return;
-	const bool bSequenceChanges = (i == m_nCurrentSeq);
 	m_Sequences.erase(m_Sequences.begin() + i);
-	if(i < m_nCurrentSeq || m_nCurrentSeq >= GetNumSequences())
-		m_nCurrentSeq--;
-	if(bSequenceChanges)
-		CopyStorageToCache();
+	if(i < m_currentSeq || m_currentSeq >= GetNumSequences())
+		m_currentSeq--;
 }
 
 
 #ifdef MODPLUG_TRACKER
 
-void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
-//----------------------------------------------------------
+void ModSequenceSet::OnModTypeChanged(MODTYPE oldType)
+//----------------------------------------------------
 {
-	const SEQUENCEINDEX nSeqs = GetNumSequences();
-	for(SEQUENCEINDEX n = 0; n < nSeqs; n++)
+	for(auto &seq : m_Sequences)
 	{
-		GetSequence(n).AdjustToNewModType(oldtype);
+		seq.AdjustToNewModType(oldType);
 	}
 	// Multisequences not suppported by other formats
-	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax <= 1)
+	if(oldType != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		MergeSequences();
 
 	// Convert sequence with separator patterns into multiple sequences?
-	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax > 1 && GetNumSequences() == 1)
+	if(oldType != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax > 1 && GetNumSequences() == 1)
 		ConvertSubsongsToMultipleSequences();
 }
 
@@ -528,56 +344,41 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	if(GetNumSequences() != 1 || m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		return false;
 
-	bool hasSepPatterns = false;
-	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
-	for(ORDERINDEX nOrd = 0; nOrd < nLengthTt; nOrd++)
-	{
-		if(!IsValidPat(nOrd) && At(nOrd) != GetIgnoreIndex())
-		{
-			hasSepPatterns = true;
-			break;
-		}
-	}
+	ORDERINDEX length = m_Sequences[0].GetLengthTailTrimmed();
+	bool hasSepPatterns = std::find_if(m_Sequences[0].begin(), m_Sequences[0].begin() + length,
+		[&] (PATTERNINDEX pat) { return pat != GetIgnoreIndex() && !m_sndFile.Patterns.IsValidPat(pat); }) != m_Sequences[0].end();
 	bool modified = false;
 
 	if(hasSepPatterns &&
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
 		"Order list conversion", false, true) == cnfYes)
 	{
-
-		SetSequence(0);
-		for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
+		for(ORDERINDEX ord = 0; ord < length; ord++)
 		{
-			// end of subsong?
-			if(!IsValidPat(nOrd) && At(nOrd) != GetIgnoreIndex())
+			// End of subsong?
+			if(!m_Sequences[0].IsValidPat(ord) && m_Sequences[0][ord] != GetIgnoreIndex())
 			{
-				ORDERINDEX oldLength = GetLengthTailTrimmed();
 				// remove all separator patterns between current and next subsong first
-				while(nOrd < oldLength && (!m_sndFile.Patterns.IsValidIndex(At(nOrd))))
+				while(ord < length && !m_sndFile.Patterns.IsValidIndex(m_Sequences[0][ord]))
 				{
-					At(nOrd) = GetInvalidPatIndex();
-					nOrd++;
+					m_Sequences[0][ord] = GetInvalidPatIndex();
+					ord++;
 					modified = true;
 				}
-				if(nOrd >= oldLength) break;
-				ORDERINDEX startOrd = nOrd;
+				if(ord >= length) break;
+				ORDERINDEX startOrd = ord;
 				modified = true;
 
 				SEQUENCEINDEX newSeq = AddSequence(false);
-				SetSequence(newSeq);
-
-				// resize new seqeuence if necessary
-				if(GetLength() < oldLength - startOrd)
-				{
-					resize(oldLength - startOrd);
-				}
+				m_Sequences[newSeq].reserve(length - startOrd);
 
 				// now, move all following orders to the new sequence
-				while(nOrd < oldLength)
+				while(ord < length && m_Sequences[0][ord] != GetInvalidPatIndex())
 				{
-					PATTERNINDEX copyPat = GetSequence(newSeq - 1)[nOrd];
-					At(nOrd - startOrd) = copyPat;
-					nOrd++;
+					PATTERNINDEX copyPat = m_Sequences[0][ord];
+					m_Sequences[newSeq].push_back(copyPat);
+					m_Sequences[0][ord] = GetInvalidPatIndex();
+					ord++;
 
 					// is this a valid pattern? adjust pattern jump commands, if necessary.
 					if(m_sndFile.Patterns.IsValidPat(copyPat))
@@ -592,12 +393,6 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 						}
 					}
 				}
-				SetSequence(newSeq - 1);
-				Remove(startOrd, oldLength - 1);
-				SetSequence(newSeq);
-				// start from beginning...
-				nOrd = 0;
-				if(GetLengthTailTrimmed() == 0 || !m_sndFile.Patterns.IsValidIndex(At(nOrd))) break;
 			}
 		}
 		SetSequence(0);
@@ -611,8 +406,8 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 //---------------------------------------------------------
 {
 	bool result = false;
-	std::vector<GetLengthType> length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
-	ModSequence &order = GetSequence(seq);
+	auto length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
+	ModSequence &order = m_Sequences[seq];
 	for(const auto &subSong : length)
 	{
 		if(subSong.endOrder != ORDERINDEX_INVALID && subSong.endRow != ROWINDEX_INVALID)
@@ -639,79 +434,67 @@ bool ModSequenceSet::MergeSequences()
 	if(GetNumSequences() <= 1)
 		return false;
 
-	SetSequence(0);
-	resize(GetLengthTailTrimmed());
-	SEQUENCEINDEX removedSequences = 0; // sequence count
-	std::vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
-	patternsFixed.resize(m_sndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);
-	// Set up vector
-	for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
+	ModSequence &firstSeq = m_Sequences[0];
+	firstSeq.resize(firstSeq.GetLengthTailTrimmed());
+	std::vector<SEQUENCEINDEX> patternsFixed(m_sndFile.Patterns.Size(), SEQUENCEINDEX_INVALID); // pattern fixed by other sequence already?
+	// Mark patterns handled in first sequence
+	for(auto pat : firstSeq)
 	{
-		PATTERNINDEX nPat = At(nOrd);
-		if(!m_sndFile.Patterns.IsValidPat(nPat)) continue;
-		patternsFixed[nPat] = 0;
+		if(m_sndFile.Patterns.IsValidPat(pat))
+			patternsFixed[pat] = 0;
 	}
 
-	while(GetNumSequences() > 1)
+	for(SEQUENCEINDEX seqNum = 1; seqNum < GetNumSequences(); seqNum++)
 	{
-		removedSequences++;
-		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
-		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_sndFile.GetModSpecifications().ordersMax)
+		ModSequence &seq = m_Sequences[seqNum];
+		const ORDERINDEX firstOrder = firstSeq.GetLength() + 1; // +1 for separator item
+		const ORDERINDEX lengthTrimmed = seq.GetLengthTailTrimmed();
+		if(firstOrder + lengthTrimmed > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			m_sndFile.AddToLog(mpt::String::Print("WARNING: Cannot merge Sequence %1 (too long!)", removedSequences));
-			RemoveSequence(1);
+			m_sndFile.AddToLog(mpt::String::Print("WARNING: Cannot merge Sequence %1 (too long!)", seqNum));
 			continue;
 		}
-		Append(GetInvalidPatIndex()); // Separator item
-		RestartPosToPattern(1);
-		const ORDERINDEX lengthTrimmed = GetSequence(1).GetLengthTailTrimmed();
-		for(ORDERINDEX nOrd = 0; nOrd < lengthTrimmed; nOrd++)
+		firstSeq.reserve(firstOrder + lengthTrimmed);
+		firstSeq.push_back(); // Separator item
+		RestartPosToPattern(seqNum);
+		for(ORDERINDEX ord = 0; ord < lengthTrimmed; ord++)
 		{
-			PATTERNINDEX nPat = GetSequence(1)[nOrd];
-			Append(nPat);
+			PATTERNINDEX pat = seq[ord];
+			firstSeq.push_back(pat);
 
-			// Try to fix patterns (Bxx commands)
-			if(!m_sndFile.Patterns.IsValidPat(nPat)) continue;
+			// Try to fix pattern jump commands
+			if(!m_sndFile.Patterns.IsValidPat(pat)) continue;
 
-			ModCommand *m = m_sndFile.Patterns[nPat];
-			for(size_t len = 0; len < m_sndFile.Patterns[nPat].GetNumRows() * m_sndFile.m_nChannels; m++, len++)
+			ModCommand *m = m_sndFile.Patterns[pat];
+			for(size_t len = 0; len < m_sndFile.Patterns[pat].GetNumRows() * m_sndFile.m_nChannels; m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
 				{
-					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
+					if(patternsFixed[pat] != SEQUENCEINDEX_INVALID && patternsFixed[pat] != seqNum)
 					{
 						// Oops, some other sequence uses this pattern already.
-						const PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(m_sndFile.Patterns[nPat].GetNumRows(), true);
+						const PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(pat, true);
 						if(newPat != PATTERNINDEX_INVALID)
 						{
-							// could create new pattern - copy data over and continue from here.
-							At(nFirstOrder + nOrd) = newPat;
-							ModCommand *pSrc = m_sndFile.Patterns[nPat];
-							ModCommand *pDest = m_sndFile.Patterns[newPat];
-							memcpy(pDest, pSrc, m_sndFile.Patterns[nPat].GetNumRows() * m_sndFile.m_nChannels * sizeof(ModCommand));
-							m = pDest + len;
-							patternsFixed.resize(MAX(newPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
-							nPat = newPat;
+							// Could create new pattern - copy data over and continue from here.
+							firstSeq[firstOrder + ord] = newPat;
+							m = m_sndFile.Patterns[newPat] + len;
+							if(newPat >= patternsFixed.size())
+								patternsFixed.resize(newPat + 1, SEQUENCEINDEX_INVALID);
+							pat = newPat;
 						} else
 						{
-							// cannot create new pattern: notify the user
-							m_sndFile.AddToLog(mpt::String::Print("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!", nPat));
+							// Cannot create new pattern: notify the user
+							m_sndFile.AddToLog(mpt::String::Print("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!", pat));
 						}
 					}
-					m->param  = static_cast<ModCommand::PARAM>(m->param + nFirstOrder);
-					patternsFixed[nPat] = removedSequences;
+					m->param = static_cast<ModCommand::PARAM>(m->param + firstOrder);
+					patternsFixed[pat] = seqNum;
 				}
 			}
-
 		}
-		RemoveSequence(1);
 	}
-	// Remove order name + fill up with empty patterns.
-	m_sName = "";
-	const ORDERINDEX CacheSize = s_nCacheSize; // work-around reference to static const member problem
-	const ORDERINDEX nMinLength = std::min(CacheSize, m_sndFile.GetModSpecifications().ordersMax);
-	if(GetLength() < nMinLength)
-		resize(nMinLength);
+	m_Sequences.erase(m_Sequences.begin() + 1, m_Sequences.end());
 	return true;
 }
 
@@ -731,81 +514,26 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position) const
 /////////////////////////////////////
 
 
-bool ModSequence::Deserialize(FileReader &file)
-//---------------------------------------------
-{
-	if(!file.CanRead(2 + 4)) return false;
-
-	uint16 version = file.ReadUint16LE();
-	if(version != 0) return false;
-
-	uint32 s = file.ReadUint32LE();
-	if(s > 65000 || !file.CanRead(s * 4)) return false;
-
-	const FileReader::off_t endPos = file.GetPosition() + s * 4;
-	LimitMax(s, ModSpecs::mptm.ordersMax);
-
-	resize(static_cast<ORDERINDEX>(s));
-	for(size_t i = 0; i < s; i++)
-	{
-		(*this)[i] = static_cast<PATTERNINDEX>(file.ReadUint32LE());
-	}
-	file.Seek(endPos);
-	return true;
-}
-
-
-size_t ModSequence::WriteAsByte(FILE* f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
+size_t ModSequence::WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
 //--------------------------------------------------------------------------------------------------------
 {
 	const size_t limit = std::min(count, GetLength());
 
-	size_t i = 0;
-	
-	for(i = 0; i < limit; i++)
+	for(size_t i = 0; i < limit; i++)
 	{
-		const PATTERNINDEX pat = (*this)[i];
-		uint8 temp = static_cast<uint8>((*this)[i]);
+		const PATTERNINDEX pat = at(i);
+		uint8 temp = static_cast<uint8>(pat);
 
 		if(pat == GetInvalidPatIndex()) temp = stopIndex;
 		else if(pat == GetIgnoreIndex() || pat > 0xFF) temp = ignoreIndex;
 		fwrite(&temp, 1, 1, f);
 	}
 	// Fill non-existing order items with stop indices
-	for(i = limit; i < count; i++)
+	for(size_t i = limit; i < count; i++)
 	{
 		fwrite(&stopIndex, 1, 1, f);
 	}
-	return i; //Returns the number of bytes written.
-}
-
-
-bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries, uint16 stopIndex, uint16 ignoreIndex)
-//----------------------------------------------------------------------------------------------------------------------
-{
-	if(!file.CanRead(howMany))
-	{
-		return false;
-	}
-	LimitMax(readEntries, howMany);
-	LimitMax(readEntries, ORDERINDEX_MAX);
-
-	if(GetLength() < readEntries)
-	{
-		resize((ORDERINDEX)readEntries);
-	}
-
-	for(size_t i = 0; i < readEntries; i++)
-	{
-		PATTERNINDEX pat = file.ReadUint8();
-		if(pat == stopIndex) pat = GetInvalidPatIndex();
-		if(pat == ignoreIndex) pat = GetIgnoreIndex();
-		(*this)[i] = pat;
-	}
-	std::fill(begin() + readEntries, end(), GetInvalidPatIndex());
-
-	file.Skip(howMany - readEntries);
-	return true;
+	return count; //Returns the number of bytes written.
 }
 
 
@@ -819,13 +547,12 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 		seq.m_sndFile.AddToLog(mpt::String::Print(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
-	seq.resize(size);
-
-	for(size_t i = 0; i < size; i++)
+	seq(0).resize(size);
+	for(auto &pat : seq(0))
 	{
 		uint16 temp;
 		mpt::IO::ReadIntLE<uint16>(iStrm, temp);
-		seq[i] = temp;
+		pat = temp;
 	}
 }
 
@@ -833,12 +560,11 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 //----------------------------------------------------------------------
 {
-	const uint16 size = seq.GetLength();
+	const uint16 size = seq().GetLength();
 	mpt::IO::WriteIntLE<uint16>(oStrm, size);
-	for(auto o : seq)
+	for(auto pat : seq())
 	{
-		const uint16 temp = static_cast<uint16>(o);
-		mpt::IO::WriteIntLE<uint16>(oStrm, temp);
+		mpt::IO::WriteIntLE<uint16>(oStrm, static_cast<uint16>(pat));
 	}
 }
 
@@ -848,10 +574,10 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
-	ssb.WriteItem(seq.m_sName, "n");
-	const uint16 nLength = seq.GetLengthTailTrimmed();
-	ssb.WriteItem<uint16>(nLength, "l");
-	ssb.WriteItem(seq.m_pArray, "a", srlztn::ArrayWriter<uint16>(nLength));
+	ssb.WriteItem(seq.GetName(), "n");
+	const uint16 length = seq.GetLengthTailTrimmed();
+	ssb.WriteItem<uint16>(length, "l");
+	ssb.WriteItem(seq, "a", srlztn::VectorWriter<uint16>(length));
 	if(seq.GetRestartPos() > 0)
 		ssb.WriteItem<uint16>(seq.GetRestartPos(), "r");
 	ssb.FinishWrite();
@@ -867,12 +593,11 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 		return;
 	std::string str;
 	ssb.ReadItem(str, "n");
-	seq.m_sName = str;
-	ORDERINDEX nSize = MAX_ORDERS;
+	seq.SetName(str);
+	ORDERINDEX nSize = 0;
 	ssb.ReadItem(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
-	seq.resize(std::max(nSize, ModSequenceSet::s_nCacheSize));
-	ssb.ReadItem(seq.m_pArray, "a", srlztn::ArrayReader<uint16>(nSize));
+	ssb.ReadItem(seq, "a", srlztn::VectorReader<uint16>(nSize));
 
 	ORDERINDEX restartPos = ORDERINDEX_INVALID;
 	if(ssb.ReadItem(restartPos, "r") != srlztn::SsbRead::EntryNotFound && restartPos < nSize)
@@ -891,10 +616,7 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 	ssb.WriteItem(nCurrent, "c");
 	for(uint8 i = 0; i < nSeqs; i++)
 	{
-		if (i == seq.GetCurrentSequenceIndex())
-			ssb.WriteItem(seq, srlztn::ID::FromInt<uint8>(i), &WriteModSequence);
-		else
-			ssb.WriteItem(seq.m_Sequences[i], srlztn::ID::FromInt<uint8>(i), &WriteModSequence);
+		ssb.WriteItem(seq(i), srlztn::ID::FromInt<uint8>(i), &WriteModSequence);
 	}
 	ssb.FinishWrite();
 }
@@ -907,26 +629,25 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	ssb.BeginRead(FileIdSequences, MptVersion::num);
 	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
-	uint8 nSeqs = 0;
-	uint8 nCurrent = 0;
-	ssb.ReadItem(nSeqs, "n");
-	if (nSeqs == 0)
+	SEQUENCEINDEX seqs = 0;
+	uint8 currentSeq = 0;
+	ssb.ReadItem(seqs, "n");
+	if (seqs == 0)
 		return;
-	LimitMax(nSeqs, MAX_SEQUENCES);
-	ssb.ReadItem(nCurrent, "c");
-	if (seq.GetNumSequences() < nSeqs)
-		seq.m_Sequences.resize(nSeqs, ModSequence(seq.m_sndFile, seq.s_nCacheSize));
+	LimitMax(seqs, MAX_SEQUENCES);
+	ssb.ReadItem(currentSeq, "c");
+	if (seq.GetNumSequences() < seqs)
+		seq.m_Sequences.resize(seqs, ModSequence(seq.m_sndFile));
 
 	// There used to be only one restart position for all sequences
-	ORDERINDEX legacyRestartPos = seq.GetRestartPos();
+	ORDERINDEX legacyRestartPos = seq(0).GetRestartPos();
 
-	for(uint8 i = 0; i < nSeqs; i++)
+	for(SEQUENCEINDEX i = 0; i < seqs; i++)
 	{
-		seq.m_Sequences[i].SetRestartPos(legacyRestartPos);
-		ssb.ReadItem(seq.m_Sequences[i], srlztn::ID::FromInt<uint8>(i), &ReadModSequence);
+		seq(i).SetRestartPos(legacyRestartPos);
+		ssb.ReadItem(seq(i), srlztn::ID::FromInt<uint8>(i), &ReadModSequence);
 	}
-	seq.m_nCurrentSeq = (nCurrent < seq.GetNumSequences()) ? nCurrent : 0;
-	seq.CopyStorageToCache();
+	seq.m_currentSeq = (currentSeq < seq.GetNumSequences()) ? currentSeq : 0;
 }
 
 

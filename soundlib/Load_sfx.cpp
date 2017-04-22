@@ -179,11 +179,11 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(fileHeader.restartPos < fileHeader.numOrders)
-		Order.SetRestartPos(fileHeader.restartPos);
+		Order().SetRestartPos(fileHeader.restartPos);
 	else
-		Order.SetRestartPos(0);
+		Order().SetRestartPos(0);
 
-	Order.ReadFromArray(fileHeader.orderList, fileHeader.numOrders);
+	ReadOrderFromArray(Order(), fileHeader.orderList, fileHeader.numOrders);
 
 	// SFX v2 / MMS modules have 4 extra bytes here for some reason
 	if(m_nSamples == 31)

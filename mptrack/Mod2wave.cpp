@@ -1073,7 +1073,7 @@ void CDoWaveConvert::Run()
 		m_SndFile.SetRepeatCount(0);
 
 		// Weird calculations ahead...
-		ORDERINDEX dwOrds = m_SndFile.Order.GetLengthFirstEmpty();
+		ORDERINDEX dwOrds = m_SndFile.Order().GetLengthFirstEmpty();
 		PATTERNINDEX maxPatterns = m_Settings.maxOrder - m_Settings.minOrder + 1;
 		if((maxPatterns < dwOrds) && (dwOrds > 0)) l = (l * maxPatterns) / dwOrds;
 	} else
@@ -1090,7 +1090,7 @@ void CDoWaveConvert::Run()
 
 	// No pattern cue points yet
 	m_SndFile.m_PatternCuePoints.clear();
-	m_SndFile.m_PatternCuePoints.reserve(m_SndFile.Order.GetLength());
+	m_SndFile.m_PatternCuePoints.reserve(m_SndFile.Order().size());
 
 	CString progressStr;
 	if(m_Settings.normalize)

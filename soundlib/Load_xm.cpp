@@ -342,7 +342,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 1;
 	m_nMaxPeriod = 31999;
 
-	Order.SetRestartPos(fileHeader.restartPos);
+	Order().SetRestartPos(fileHeader.restartPos);
 	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min<uint16>(fileHeader.instruments, MAX_INSTRUMENTS - 1u);
 	if(fileHeader.speed)
@@ -358,12 +358,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		madeWith = verFT2Clone | verNewModPlug | verConfirmed;
 	}
 
-	Order.ReadAsByte(file, fileHeader.orders);
+	ReadOrderFromFile<uint8>(Order(), file, fileHeader.orders);
 	if(fileHeader.orders == 0 && madeWith[verFT2Generic])
 	{
 		// Fix lamb_-_dark_lighthouse.xm, which only contains one pattern and an empty order list
-		Order.resize(1);
-		Order[0] = 0;
+		Order().assign(1, 0);
 	}
 	file.Seek(fileHeader.size + 60);
 
@@ -691,9 +690,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 02, 02))
 	{
 		if(!Patterns.IsValidPat(0xFE))
-			Order.RemovePattern(0xFE);
+			Order().RemovePattern(0xFE);
 		if(!Patterns.IsValidPat(0xFF))
-			Order.Replace(0xFF, Order.GetInvalidPatIndex());
+			Order().Replace(0xFF, Order.GetInvalidPatIndex());
 	}
 
 	return true;
@@ -733,7 +732,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing song header
 	fileHeader.version = 0x0104;					// XM Format v1.04
 	fileHeader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
-	fileHeader.restartPos = Order.GetRestartPos();
+	fileHeader.restartPos = Order().GetRestartPos();
 
 	fileHeader.channels = m_nChannels;
 	if((m_nChannels % 2u) && m_nChannels < 32)
@@ -748,18 +747,19 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
+	ORDERINDEX origOrderLength = Order().GetLengthTailTrimmed();
 	ORDERINDEX maxOrders = 0;
 	PATTERNINDEX numPatterns = Patterns.GetNumPatterns();
 	bool changeOrderList = false;
-	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
+	for(ORDERINDEX ord = 0; ord < origOrderLength; ord++)
 	{
-		if(Order[ord] == Order.GetIgnoreIndex() || Order[ord] == Order.GetInvalidPatIndex())
+		if(Order()[ord] == Order.GetIgnoreIndex() || Order()[ord] == Order.GetInvalidPatIndex())
 		{
 			changeOrderList = true;
 		} else
 		{
 			maxOrders++;
-			if(Order[ord] >= numPatterns) numPatterns = Order[ord] + 1;
+			if(Order()[ord] >= numPatterns) numPatterns = Order()[ord] + 1;
 		}
 	}
 	if(changeOrderList)
@@ -789,15 +789,15 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 	// write order list (without +++ and ---, explained above)
 	ORDERINDEX writtenOrders = 0;
-	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
+	for(PATTERNINDEX pat : Order())
 	{
 		if(compatibilityExport && (writtenOrders >= 256))
 		{
 			break;
 		}
-		if(Order[ord] != Order.GetIgnoreIndex() && Order[ord] != Order.GetInvalidPatIndex())
+		if(pat != Order.GetIgnoreIndex() && pat != Order.GetInvalidPatIndex())
 		{
-			uint8 ordItem = static_cast<uint8>(Order[ord]);
+			uint8 ordItem = static_cast<uint8>(pat);
 			fwrite(&ordItem, 1, 1, f);
 			writtenOrders++;
 		}

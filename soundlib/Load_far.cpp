@@ -149,8 +149,8 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	Order.ReadFromArray(orderHeader.orders, orderHeader.numOrders, 0xFF, 0xFE);
-	Order.SetRestartPos(orderHeader.restartPos);
+	ReadOrderFromArray(Order(), orderHeader.orders, orderHeader.numOrders, 0xFF, 0xFE);
+	Order().SetRestartPos(orderHeader.restartPos);
 
 	file.Seek(fileHeader.headerLength);
 	

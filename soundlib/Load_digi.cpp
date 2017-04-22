@@ -100,7 +100,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamplePreAmp = 256 / m_nChannels;
 	m_madeWithTracker = mpt::String::Print("Digi Booster %1.%2", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
 
-	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
+	ReadOrderFromArray(Order(), fileHeader.orders, fileHeader.lastOrdIndex + 1);
 
 	// Read sample headers
 	for(SAMPLEINDEX smp = 0; smp < 31; smp++)
