@@ -66,6 +66,7 @@ is just a high-level summary.
  *  [**Regression**] xmp-openmpt: xmp-openmpt now requires XMPlay 3.8 or later
     and compiling xmp-openmpt requires an appropriate XMPlay SDK with
     `XMPIN_FACE` >= `4`.
+ *  [**Regression**] Support for libmpg123 older than 1.13.0 has been removed.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.

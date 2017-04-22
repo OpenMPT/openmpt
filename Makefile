@@ -403,10 +403,10 @@ endif
 ifeq ($(NO_MPG123),1)
 else
 #LDLIBS   += -lmpg123
-ifeq ($(shell pkg-config --exists libmpg123 && echo yes),yes)
-CPPFLAGS_MPG123 := $(shell pkg-config --cflags-only-I libmpg123 ) -DMPT_WITH_MPG123
-LDFLAGS_MPG123  := $(shell pkg-config --libs-only-L   libmpg123 ) $(shell pkg-config --libs-only-other libmpg123 )
-LDLIBS_MPG123   := $(shell pkg-config --libs-only-l   libmpg123 )
+ifeq ($(shell pkg-config --exists 'libmpg123 >= 1.13.0' && echo yes),yes)
+CPPFLAGS_MPG123 := $(shell pkg-config --cflags-only-I 'libmpg123 >= 1.13.0' ) -DMPT_WITH_MPG123
+LDFLAGS_MPG123  := $(shell pkg-config --libs-only-L   'libmpg123 >= 1.13.0' ) $(shell pkg-config --libs-only-other 'libmpg123 >= 1.13.0' )
+LDLIBS_MPG123   := $(shell pkg-config --libs-only-l   'libmpg123 >= 1.13.0' )
 PC_REQUIRES_MPG123 := libmpg123
 else
 ifeq ($(FORCE_DEPS),1)

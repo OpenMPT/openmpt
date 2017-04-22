@@ -32,7 +32,7 @@ extern "C" {
 #endif // MPT_WITH_MINIMP3
 
 #if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
-#define MPT_MPG123_LATEST_KNOWN_API_VERSION 42
+#define MPT_MPG123_LATEST_KNOWN_API_VERSION 43
 #endif
 
 // mpg123 must be last because of mpg123 largfile support insanity
@@ -49,161 +49,20 @@ extern "C" {
 #define MPG123_API_VERSION MPT_MPG123_LATEST_KNOWN_API_VERSION
 #endif
 
-// check for utterly weird mpg123 largefile support
+// check for libmpg123 version
 
 #if !defined(MPG123_API_VERSION)
 #error "libmpg123 API version unknown. Assuming too old."
 #else
 
-#if (MPG123_API_VERSION < 11)
+#if (MPG123_API_VERSION < 29)
 #error "libmpg123 API version too old."
-
-#elif (MPG123_API_VERSION < 23)
-// OK
-
-#elif (MPG123_API_VERSION < 25) // < 1.12.0
-#if MPT_COMPILER_MSVC
-#pragma message("libmpg123 API version with split largefile support detected. This has not been tested at all.")
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#warning "libmpg123 API version with split largefile support detected. This has not been tested at all."
-#else
-// There is no portable way to display a warning.
-// Try to provoke a warning with an unused function.
-static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected__This_has_not_been_tested_at_all_() { }
-#endif
-
-#elif (MPG123_API_VERSION == 25) // == 1.12.x and some later
-// 1.12.2 introduced dumb wrappers for suffixed _32 and _64 functions.
-// We cannot detect whether it's one of the broken versions 1.12.0 or 1.12.1,
-// and thus have to implement a work-around for all of them (does not hurt though).
-#if defined(MPT_ARCH_BITS)
-#define MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
-#else // !MPT_ARCH_BITS
-#error message("libmpg123 API version largefile work-around requires MPT_ARCH_BITS to be defined. Please edit common/CompilerDetect.h and add support for your compiler.")
-#endif // MPT_ARCH_BITS
 
 #else // modern
 // OK
 
 #endif // MPG123_API_VERSION
 #endif // MPG123_API_VERSION
-
-#if defined(MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX)
-
-#if !MPT_COMPILER_MSVC
-#if defined(_FILE_OFFSET_BITS) && !defined(MPG123_LARGESUFFIX)
-#if defined(MPT_ARCH_BITS)
-#if MPT_ARCH_BITS_64
-
-// We are always compiling with _FILE_OFFSET_BITS==64, even on 64 bit platforms.
-// libmpg123 does not provide the suffixed _64 versions in this case.
-// Thus, on 64 bit, #undef all the wrapper macros.
-
-extern "C" {
-
-#ifdef mpg123_open
-#undef mpg123_open
-#endif
-EXPORT int mpg123_open(mpg123_handle *mh, const char *path);
-
-#ifdef mpg123_open_fd
-#undef mpg123_open_fd
-#endif
-EXPORT int mpg123_open_fd(mpg123_handle *mh, int fd);
-
-#ifdef mpg123_open_handle
-#undef mpg123_open_handle
-#endif
-EXPORT int mpg123_open_handle(mpg123_handle *mh, void *iohandle);
-
-#ifdef mpg123_framebyframe_decode
-#undef mpg123_framebyframe_decode
-#endif
-EXPORT int mpg123_framebyframe_decode(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
-
-#ifdef mpg123_decode_frame
-#undef mpg123_decode_frame
-#endif
-EXPORT int mpg123_decode_frame(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
-
-#ifdef mpg123_tell
-#undef mpg123_tell
-#endif
-EXPORT off_t mpg123_tell(mpg123_handle *mh);
-
-#ifdef mpg123_tellframe
-#undef mpg123_tellframe
-#endif
-EXPORT off_t mpg123_tellframe(mpg123_handle *mh);
-
-#ifdef mpg123_tell_stream
-#undef mpg123_tell_stream
-#endif
-EXPORT off_t mpg123_tell_stream(mpg123_handle *mh);
-
-#ifdef mpg123_seek
-#undef mpg123_seek
-#endif
-EXPORT off_t mpg123_seek(mpg123_handle *mh, off_t sampleoff, int whence);
-
-#ifdef mpg123_feedseek
-#undef mpg123_feedseek
-#endif
-EXPORT off_t mpg123_feedseek(mpg123_handle *mh, off_t sampleoff, int whence, off_t *input_offset);
-
-#ifdef mpg123_seek_frame
-#undef mpg123_seek_frame
-#endif
-EXPORT off_t mpg123_seek_frame(mpg123_handle *mh, off_t frameoff, int whence);
-
-#ifdef mpg123_timeframe
-#undef mpg123_timeframe
-#endif
-EXPORT off_t mpg123_timeframe(mpg123_handle *mh, double sec);
-
-#ifdef mpg123_index
-#undef mpg123_index
-#endif
-EXPORT int mpg123_index(mpg123_handle *mh, off_t **offsets, off_t *step, size_t *fill);
-
-#ifdef mpg123_set_index
-#undef mpg123_set_index
-#endif
-EXPORT int mpg123_set_index(mpg123_handle *mh, off_t *offsets, off_t step, size_t fill);
-
-#ifdef mpg123_position
-#undef mpg123_position
-#endif
-EXPORT int mpg123_position( mpg123_handle *mh, off_t frame_offset, off_t buffered_bytes, off_t *current_frame, off_t *frames_left, double *current_seconds, double *seconds_left);
-
-#ifdef mpg123_length
-#undef mpg123_length
-#endif
-EXPORT off_t mpg123_length(mpg123_handle *mh);
-
-#ifdef mpg123_set_filesize
-#undef mpg123_set_filesize
-#endif
-EXPORT int mpg123_set_filesize(mpg123_handle *mh, off_t size);
-
-#ifdef mpg123_replace_reader
-#undef mpg123_replace_reader
-#endif
-EXPORT int mpg123_replace_reader(mpg123_handle *mh, ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int));
-
-#ifdef mpg123_replace_reader_handle
-#undef mpg123_replace_reader_handle
-#endif
-EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (void *, void *, size_t), off_t (*r_lseek)(void *, off_t, int), void (*cleanup)(void*));
-
-} // extern "C"
-
-#endif
-#endif
-#endif
-#endif
-
-#endif // MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
 
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
 
@@ -263,7 +122,7 @@ typedef ssize_t mpg123_ssize_t;
 		MPG123_FEEDBUFFER
 	};
 
-	enum mpg123_parms_flags
+	enum mpg123_param_flags
 	{
 		MPG123_QUIET = 0x20
 	};
