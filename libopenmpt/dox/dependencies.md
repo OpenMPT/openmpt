@@ -50,7 +50,7 @@ Dependencies
      *  **zlib**
      *  **miniz** can be used internally if no zlib is available.
  *  Built-in **MO3** support requires:
-     *  **libmpg123**
+     *  **libmpg123 >= 1.13.0**
      *  **libogg**
      *  **libvorbis**
      *  **libvorbisfile**
