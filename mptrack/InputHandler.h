@@ -57,7 +57,7 @@ public:
 	void Bypass(bool);
 	FlagSet<Modifiers> GetModifierMask() const;
 	void SetModifierMask(FlagSet<Modifiers> mask);
-	CString GetKeyTextFromCommand(CommandID c) const;
+	CString GetKeyTextFromCommand(CommandID c, const TCHAR *prependText = nullptr) const;
 	CString GetMenuText(UINT id) const;
 	void UpdateMainMenu();
 	void SetNewCommandSet(const CCommandSet *newSet);

@@ -400,10 +400,17 @@ void CInputHandler::SetModifierMask(FlagSet<Modifiers> mask)
 }
 
 
-CString CInputHandler::GetKeyTextFromCommand(CommandID c) const
-//-------------------------------------------------------------
+CString CInputHandler::GetKeyTextFromCommand(CommandID c, const TCHAR *prependText) const
+//---------------------------------------------------------------------------------------
 {
-	return m_activeCommandSet->GetKeyTextFromCommand(c, 0);
+	CString s;
+	if(prependText != nullptr)
+	{
+		s = prependText;
+		s.AppendChar(_T('\t'));
+	}
+	s += m_activeCommandSet->GetKeyTextFromCommand(c, 0);
+	return s;
 }
 
 
@@ -478,7 +485,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		default: MPT_ASSERT_NOTREACHED(); return _T("Unknown Item.");
 	}
 
-	return s + CString(_T("\t")) + GetKeyTextFromCommand(c);
+	return GetKeyTextFromCommand(c, s);
 }
 
 

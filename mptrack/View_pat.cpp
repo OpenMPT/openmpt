@@ -1495,8 +1495,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			{
 				s.Append(_T("Settings..."));
 			}
-			s.Append(_T("\t") + ih->GetKeyTextFromCommand(kcQuantizeSettings));
-			AppendMenu(hMenu, MF_STRING | (TrackerSettings::Instance().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
+			AppendMenu(hMenu, MF_STRING | (TrackerSettings::Instance().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, ih->GetKeyTextFromCommand(kcQuantizeSettings, s));
 		}
 
 		ClientToScreen(&pt);
@@ -5908,7 +5907,7 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 //------------------------------------------------------------------------------------------------------------
 {
 	AppendMenu(hMenu, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? (MF_STRING | MF_CHECKED) : MF_STRING,
-		ID_PATTERN_MUTE, _T("&Mute Channel\t") + ih->GetKeyTextFromCommand(kcChannelMute));
+		ID_PATTERN_MUTE, ih->GetKeyTextFromCommand(kcChannelMute, _T("&Mute Channel")));
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
@@ -5926,17 +5925,17 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 		if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bUnmuteAll = bUnmuteAllPending = true;
 		if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
 	}
-	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, _T("&Solo Channel\t") + ih->GetKeyTextFromCommand(kcChannelSolo));
-	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, _T("&Unmute All\t") + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
+	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, ih->GetKeyTextFromCommand(kcChannelSolo, _T("&Solo Channel")));
+	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, ih->GetKeyTextFromCommand(kcChannelUnmuteAll, _T("&Unmute All")));
 	
 	AppendMenu(hMenu, pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING | MF_CHECKED) : MF_STRING,
 		ID_PATTERN_TRANSITIONMUTE,
-		(pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? _T("On Transition: Unmute\t") : _T("On Transition: Mute\t")) + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
+		ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? _T("On Transition: Unmute\t") : _T("On Transition: Mute\t")));
 
-	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, _T("On Transition: Unmute All\t") + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
-	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, _T("On Transition: Solo\t") + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition, _T("On Transition: Unmute All")));
+	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition, _T("On Transition: Solo")));
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, _T("&Reset Channel\t") + ih->GetKeyTextFromCommand(kcChannelReset));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, ih->GetKeyTextFromCommand(kcChannelReset, _T("&Reset Channel")));
 	
 	return true;
 }
@@ -5945,8 +5944,8 @@ bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELIND
 //--------------------------------------------------------------------------------------------
 {
 	const CModDoc *pModDoc = GetDocument();
-	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, _T("R&ecord select\t") + ih->GetKeyTextFromCommand(kcChannelRecordSelect));
-	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, _T("S&plit Record select\t") + ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect));
+	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, ih->GetKeyTextFromCommand(kcChannelRecordSelect, _T("R&ecord select")));
+	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect, _T("S&plit Record select")));
 	return true;
 }
 
@@ -5957,15 +5956,15 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
 	const CString label = (m_Selection.GetStartRow() != m_Selection.GetEndRow() ? _T("Rows") : _T("Row"));
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, _T("&Insert ") + label + _T("\t") + ih->GetKeyTextFromCommand(kcInsertRow));
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, _T("&Delete ") + label + _T("\t") + ih->GetKeyTextFromCommand(kcDeleteRows) );
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, ih->GetKeyTextFromCommand(kcInsertRow, _T("&Insert ") + label));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, ih->GetKeyTextFromCommand(kcDeleteRows, _T("&Delete ") + label));
 	return true;
 }
 
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-----------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, _T("Show Row Play Time\t") + ih->GetKeyTextFromCommand(kcTimeAtRow));
+	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, ih->GetKeyTextFromCommand(kcTimeAtRow, _T("Show Row Play Time")));
 
 	const CSoundFile &sndFile = *GetSoundFile();
 	CString lockStr;
@@ -5984,24 +5983,23 @@ bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	{
 		return true;
 	}
-	lockStr += "\t" + ih->GetKeyTextFromCommand(kcLockPlaybackToRows);
-	AppendMenu(hMenu, MF_STRING | (lockActive ? MF_CHECKED : 0), ID_LOCK_PATTERN_ROWS, lockStr);
+	AppendMenu(hMenu, MF_STRING | (lockActive ? MF_CHECKED : 0), ID_LOCK_PATTERN_ROWS, ih->GetKeyTextFromCommand(kcLockPlaybackToRows, lockStr));
 	return true;
 }
 
 bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //----------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECTCOLUMN, _T("Select &Channel\t") + ih->GetKeyTextFromCommand(kcSelectChannel));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECT_ALL, _T("Select &Pattern\t") + ih->GetKeyTextFromCommand(kcEditSelectAll));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECTCOLUMN, ih->GetKeyTextFromCommand(kcSelectChannel, _T("Select &Channel")));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECT_ALL, ih->GetKeyTextFromCommand(kcEditSelectAll, _T("Select &Pattern")));
 	return true;
 }
 
 bool CViewPattern::BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-----------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_GROW_SELECTION, _T("&Grow selection\t") + ih->GetKeyTextFromCommand(kcPatternGrowSelection));
-	AppendMenu(hMenu, MF_STRING, ID_SHRINK_SELECTION, _T("&Shrink selection\t") + ih->GetKeyTextFromCommand(kcPatternShrinkSelection));
+	AppendMenu(hMenu, MF_STRING, ID_GROW_SELECTION, ih->GetKeyTextFromCommand(kcPatternGrowSelection, _T("&Grow selection")));
+	AppendMenu(hMenu, MF_STRING, ID_SHRINK_SELECTION, ih->GetKeyTextFromCommand(kcPatternShrinkSelection, _T("&Shrink selection")));
 	return true;
 }
 
@@ -6013,10 +6011,10 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 	const bool isPCNote = sndFile->Patterns.IsValidPat(m_nPattern) && sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote();
 
 	HMENU subMenu = CreatePopupMenu();
-	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, _T("&Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, (isPCNote ? _T("&Plugin Column\t") : _T("&Instrument Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateInstr), ID_PATTERN_INTERPOLATE_INSTR)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? _T("&Parameter Column\t") : _T("&Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? _T("&Value Column\t") : _T("&Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
+	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateNote, _T("&Note Column")), ID_PATTERN_INTERPOLATE_NOTE)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateInstr, isPCNote ? _T("&Plugin Column") : _T("&Instrument Column")), ID_PATTERN_INTERPOLATE_INSTR)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateVol, isPCNote ? _T("&Parameter Column") : _T("&Volume Column")), ID_PATTERN_INTERPOLATE_VOLUME)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateEffect, isPCNote ? _T("&Value Column") : _T("&Effect Column")), ID_PATTERN_INTERPOLATE_EFFECT);
 	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), _T("I&nterpolate..."));
@@ -6049,27 +6047,27 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 //-----------------------------------------------------------------------------------------
 {
 	HMENU pasteSpecialMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, _T("Cu&t\t") + ih->GetKeyTextFromCommand(kcEditCut));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, _T("&Copy\t") + ih->GetKeyTextFromCommand(kcEditCopy));
-	AppendMenu(hMenu, MF_STRING | (PatternClipboard::CanPaste() ? 0 : MF_GRAYED), ID_EDIT_PASTE, _T("&Paste\t") + ih->GetKeyTextFromCommand(kcEditPaste));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, ih->GetKeyTextFromCommand(kcEditCut, _T("Cu&t")));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, ih->GetKeyTextFromCommand(kcEditCopy, _T("&Copy")));
+	AppendMenu(hMenu, MF_STRING | (PatternClipboard::CanPaste() ? 0 : MF_GRAYED), ID_EDIT_PASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("&Paste")));
 	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(pasteSpecialMenu), _T("Paste Special"));
-	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE, _T("&Mix Paste\t") + ih->GetKeyTextFromCommand(kcEditMixPaste));
-	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, _T("M&ix Paste (IT Style)\t") + ih->GetKeyTextFromCommand(kcEditMixPasteITStyle));
-	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, _T("Paste Fl&ood\t") + ih->GetKeyTextFromCommand(kcEditPasteFlood));
-	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, _T("&Push Forward Paste (Insert)\t") + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE, ih->GetKeyTextFromCommand(kcEditMixPaste, _T("&Mix Paste")));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, ih->GetKeyTextFromCommand(kcEditMixPasteITStyle, _T("M&ix Paste (IT Style)")));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PASTEFLOOD, ih->GetKeyTextFromCommand(kcEditPasteFlood, _T("Paste Fl&ood")));
+	AppendMenu(pasteSpecialMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, ih->GetKeyTextFromCommand(kcEditPushForwardPaste, _T("&Push Forward Paste (Insert)")));
 
 	DWORD greyed = pModDoc->GetPatternUndo().CanUndo() ? MF_ENABLED : MF_GRAYED;
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_UNDO, _T("&Undo\t") + ih->GetKeyTextFromCommand(kcEditUndo));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_UNDO, ih->GetKeyTextFromCommand(kcEditUndo, _T("&Undo")));
 	}
 	greyed = pModDoc->GetPatternUndo().CanRedo() ? MF_ENABLED : MF_GRAYED;
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_REDO, _T("&Redo\t") + ih->GetKeyTextFromCommand(kcEditRedo));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_REDO, ih->GetKeyTextFromCommand(kcEditRedo, _T("&Redo")));
 	}
 
-	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, _T("Clear Selection\t") + ih->GetKeyTextFromCommand(kcSampleDelete));
+	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, ih->GetKeyTextFromCommand(kcSampleDelete, _T("Clear Selection")));
 
 	return true;
 }
@@ -6081,7 +6079,7 @@ bool CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_VISUALIZE_EFFECT, _T("&Visualize Effect\t") + ih->GetKeyTextFromCommand(kcPatternVisualizeEffect));
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_VISUALIZE_EFFECT, ih->GetKeyTextFromCommand(kcPatternVisualizeEffect, _T("&Visualize Effect")));
 		return true;
 	}
 	return false;
@@ -6097,11 +6095,11 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, _T("Transpose +&1\t") + ih->GetKeyTextFromCommand(kcTransposeUp));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, _T("Transpose -&1\t") + ih->GetKeyTextFromCommand(kcTransposeDown));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, _T("Transpose +1&2\t") + ih->GetKeyTextFromCommand(kcTransposeOctUp));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, _T("Transpose -1&2\t") + ih->GetKeyTextFromCommand(kcTransposeOctDown));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_CUSTOM, _T("&Custom...\t") + ih->GetKeyTextFromCommand(kcTransposeCustom));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, ih->GetKeyTextFromCommand(kcTransposeUp, _T("Transpose +&1")));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, ih->GetKeyTextFromCommand(kcTransposeDown, _T("Transpose -&1")));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, ih->GetKeyTextFromCommand(kcTransposeOctUp, _T("Transpose +1&2")));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, ih->GetKeyTextFromCommand(kcTransposeOctDown, _T("Transpose -1&2")));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_CUSTOM, ih->GetKeyTextFromCommand(kcTransposeCustom, _T("&Custom...")));
 		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(transMenu), _T("&Transpose..."));
 		return true;
 	}
@@ -6116,7 +6114,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_AMPLIFY, _T("&Amplify\t") + ih->GetKeyTextFromCommand(kcPatternAmplify));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_AMPLIFY, ih->GetKeyTextFromCommand(kcPatternAmplify, _T("&Amplify")));
 		return true;
 	}
 	return false;
@@ -6133,8 +6131,8 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) co
 
 	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, _T("&Transpose Channel\t") + ih->GetKeyTextFromCommand(kcChannelTranspose));
-	AppendMenu(hMenu, MF_STRING | canAddChannels, ID_PATTERN_DUPLICATECHANNEL, _T("&Duplicate Channel\t") + ih->GetKeyTextFromCommand(kcChannelDuplicate));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, ih->GetKeyTextFromCommand(kcChannelTranspose, _T("&Transpose Channel")));
+	AppendMenu(hMenu, MF_STRING | canAddChannels, ID_PATTERN_DUPLICATECHANNEL, ih->GetKeyTextFromCommand(kcChannelDuplicate, _T("&Duplicate Channel")));
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP | canAddChannels, reinterpret_cast<UINT_PTR>(addChannelMenu), _T("&Add Channel\t"));
@@ -6177,7 +6175,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 		// Create the new menu and add it to the existing menu.
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
-		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(instrumentChangeMenu), _T("Change Instrument\t") + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(instrumentChangeMenu), ih->GetKeyTextFromCommand(kcPatternSetInstrument, _T("Change Instrument")));
 	
 		if(!greyed)
 		{
@@ -6243,7 +6241,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	// Create sub menu for "change plugin"
 	HMENU pluginChangeMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(pluginChangeMenu), _T("Change Plugin\t") + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(pluginChangeMenu), ih->GetKeyTextFromCommand(kcPatternSetInstrument, _T("Change Plugin")));
 	for(PLUGINDEX nPlg = 0; nPlg < MAX_MIXPLUGINS; nPlg++)
 	{
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
@@ -6301,7 +6299,7 @@ bool CViewPattern::BuildTogglePlugEditorCtxMenu(HMENU hMenu, CInputHandler *ih) 
 
 	if(plug && plug <= MAX_MIXPLUGINS && sndFile->m_MixPlugins[plug - 1].pMixPlugin != nullptr)
 	{
-		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, _T("Toggle Plugin &Editor\t") + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin, _T("Toggle Plugin &Editor")));
 		return true;
 	}
 	return false;

@@ -341,7 +341,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 		if (hMenu)
 		{
-			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, _T("Edit Sample &Map\t") + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
+			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap, _T("Edit Sample &Map")));
 			if (hSubMenu)
 			{
 				// Create sub menu with a list of all samples that are referenced by this instrument.
@@ -359,25 +359,25 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 					}
 				}
 
-				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), _T("&Edit Sample\t") + ih->GetKeyTextFromCommand(kcInsNoteMapEditSample));
+				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), ih->GetKeyTextFromCommand(kcInsNoteMapEditSample, _T("&Edit Sample")));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			wsprintf(s, _T("Map all notes to &sample %u\t") + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample), pIns->Keyboard[m_nNote]);
+			wsprintf(s, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, _T("Map all notes to &sample %u")), pIns->Keyboard[m_nNote]);
 			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					wsprintf(s, _T("Map all &notes to %s\t") + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+					wsprintf(s, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, _T("Map all &notes to %s")), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
 				}
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, _T("Transpose map &up\t") + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp));
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, _T("Transpose map &down\t") + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose map &down")));
 			}
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, _T("&Reset note mapping\t") + ih->GetKeyTextFromCommand(kcInsNoteMapReset));
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_REMOVE, _T("Remo&ve all samples\t") + ih->GetKeyTextFromCommand(kcInsNoteMapRemove));
-			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, ih->GetKeyTextFromCommand(kcInsNoteMapReset, _T("&Reset note mapping")));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_REMOVE, ih->GetKeyTextFromCommand(kcInsNoteMapRemove, _T("Remo&ve all samples")));
+			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate, _T("Duplicate &Instrument")));
 			SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 			ClientToScreen(&pt);
 			::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -1091,7 +1091,7 @@ void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			CMenu menu;
 			menu.CreatePopupMenu();
-			menu.AppendMenu(MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
+			menu.AppendMenu(MF_STRING, ID_INSTRUMENT_DUPLICATE, ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate, _T("Duplicate &Instrument")));
 			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
 			menu.DestroyMenu();
 		}

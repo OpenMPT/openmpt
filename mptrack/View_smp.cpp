@@ -1764,7 +1764,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
-				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, _T("Zoom\t") + ih->GetKeyTextFromCommand(kcSampleZoomSelection));
+				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, ih->GetKeyTextFromCommand(kcSampleZoomSelection, _T("Zoom")));
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As Loop"));
 				if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As Sustain Loop"));
@@ -1812,7 +1812,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						}
 						wsprintf(s, _T("Set Sample Cu&e to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
-						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, _T("Slice &at cue points") + ih->GetKeyTextFromCommand(kcSampleSlice));
+						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSlice, _T("Slice &at cue points")));
 					}
 
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
@@ -1820,29 +1820,28 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				}
 			}
 
-			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, _T("Convert to &8-bit\t") + ih->GetKeyTextFromCommand(kcSample8Bit));
-			else ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_16BITCONVERT, _T("Convert to &16-bit\t") + ih->GetKeyTextFromCommand(kcSample8Bit));
+			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, ih->GetKeyTextFromCommand(kcSample8Bit, _T("Convert to &8-bit")));
+			else ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_16BITCONVERT, ih->GetKeyTextFromCommand(kcSample8Bit, _T("Convert to &16-bit")));
 			if(sample.GetNumChannels() > 1)
 			{
 				HMENU hMonoMenu = ::CreatePopupMenu();
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, _T("&Mix Channels\t") + ih->GetKeyTextFromCommand(kcSampleMonoMix));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, _T("&Left Channel\t") + ih->GetKeyTextFromCommand(kcSampleMonoLeft));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, _T("&Right Channel\t") + ih->GetKeyTextFromCommand(kcSampleMonoRight));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, _T("&Split Sample\t") + ih->GetKeyTextFromCommand(kcSampleMonoSplit));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, ih->GetKeyTextFromCommand(kcSampleMonoMix, _T("&Mix Channels")));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, ih->GetKeyTextFromCommand(kcSampleMonoLeft, _T("&Left Channel")));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, ih->GetKeyTextFromCommand(kcSampleMonoRight, _T("&Right Channel")));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, ih->GetKeyTextFromCommand(kcSampleMonoSplit, _T("&Split Sample")));
 				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), _T("Convert to &Mono"));
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
-			std::string sTrimMenuText = "Tr&im";
+			CString trimMenuText = _T("Tr&im");
 			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
-								|| (m_dwEndSel - m_dwBeginSel == sample.nLength)
-							  );
+								|| (m_dwEndSel - m_dwBeginSel == sample.nLength));
 
 			if ((m_dwBeginSel == m_dwEndSel) && (sample.nLoopStart < sample.nLoopEnd))
 			{
 				// no selection => use loop points
-				sTrimMenuText += " around loop points";
+				trimMenuText += _T(" around loop points");
 				// Check whether trim menu item can be enabled (loop not too short or long for trimming).
 				if( (sample.nLoopEnd <= sample.nLength) &&
 					(sample.nLoopEnd - sample.nLoopStart >= MIN_TRIM_LENGTH) &&
@@ -1850,22 +1849,20 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					bIsGrayed = false;
 			}
 
-			sTrimMenuText += "\t" + ih->GetKeyTextFromCommand(kcSampleTrim);
-
-			::AppendMenu(hMenu, MF_STRING | (bIsGrayed ? MF_GRAYED : 0), ID_SAMPLE_TRIM, sTrimMenuText.c_str());
+			::AppendMenu(hMenu, MF_STRING | (bIsGrayed ? MF_GRAYED : 0), ID_SAMPLE_TRIM, ih->GetKeyTextFromCommand(kcSampleTrim, trimMenuText));
 			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < sample.nLength && m_dwEndSel == sample.nLength))
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, _T("Quick &Fade\t") + ih->GetKeyTextFromCommand(kcSampleQuickFade));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, ih->GetKeyTextFromCommand(kcSampleQuickFade, _T("Quick &Fade")));
 			}
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, _T("Cu&t\t") + ih->GetKeyTextFromCommand(kcEditCut));
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, _T("&Copy\t") + ih->GetKeyTextFromCommand(kcEditCopy));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, ih->GetKeyTextFromCommand(kcEditCut, _T("Cu&t")));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, ih->GetKeyTextFromCommand(kcEditCopy, _T("&Copy")));
 		}
 		const UINT clipboardFlag = (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED);
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, _T("&Paste (Replace)\t") + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, _T("Paste (&Insert)\t") + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, _T("Mi&x Paste\t") + ih->GetKeyTextFromCommand(kcEditMixPaste));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, _T("&Undo " + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))) + _T("\t") + ih->GetKeyTextFromCommand(kcEditUndo));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, _T("&Redo " + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))) + _T("\t") + ih->GetKeyTextFromCommand(kcEditRedo));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("&Paste (Replace)")));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, ih->GetKeyTextFromCommand(kcEditPushForwardPaste, _T("Paste (&Insert)")));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, ih->GetKeyTextFromCommand(kcEditMixPaste, _T("Mi&x Paste")));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, ih->GetKeyTextFromCommand(kcEditUndo, _T("&Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, ih->GetKeyTextFromCommand(kcEditRedo, _T("&Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -3435,8 +3432,7 @@ void CViewSample::OnUpdateUndo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetSampleUndo().CanUndo(m_nSample));
-		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
 	}
 }
 
@@ -3448,8 +3444,7 @@ void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetSampleUndo().CanRedo(m_nSample));
-		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
 	}
 }
 
