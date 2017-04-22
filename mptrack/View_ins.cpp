@@ -2756,8 +2756,7 @@ void CViewInstrument::OnUpdateUndo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanUndo(m_nInstrument));
-		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetInstrumentUndo().GetUndoName(m_nInstrument))
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + CString(pModDoc->GetInstrumentUndo().GetUndoName(m_nInstrument))));
 	}
 }
 
@@ -2769,8 +2768,7 @@ void CViewInstrument::OnUpdateRedo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanRedo(m_nInstrument));
-		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetInstrumentUndo().GetRedoName(m_nInstrument))
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + CString(pModDoc->GetInstrumentUndo().GetRedoName(m_nInstrument))));
 	}
 }
 
