@@ -347,7 +347,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 		case OktIffChunk::idPATT:
 			// Read the orderlist
-			Order.ReadAsByte(chunk, chunk.GetLength(), ORDERINDEX_MAX, 0xFF, 0xFE);
+			ReadOrderFromFile<uint8>(Order(), chunk, chunk.GetLength(), 0xFF, 0xFE);
 			break;
 
 		case OktIffChunk::idPBOD:
@@ -379,7 +379,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 0x358 * 4;
 
 	// Fix orderlist
-	Order.resize(numOrders);
+	Order().resize(numOrders);
 
 	// Read patterns
 	if(loadFlags & loadPatternData)

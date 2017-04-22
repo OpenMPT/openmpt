@@ -163,23 +163,20 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	///////////////////////////////////////////////////////////////////////////
 	// Copy order lists
 	const bool useOrderMapping = source.Order.GetNumSequences() == 1;
-	for(SEQUENCEINDEX seq = 0; seq < source.Order.GetNumSequences(); seq++)
+	for(auto &srcOrder : source.Order)
 	{
-		ORDERINDEX insertPos = m_SndFile.Order.GetLengthTailTrimmed();
-		if(specs.sequencesMax > m_SndFile.Order.GetNumSequences())
+		ORDERINDEX insertPos = 0;
+		if(m_SndFile.Order.GetNumSequences() < specs.sequencesMax)
 		{
-			SEQUENCEINDEX newSeq = m_SndFile.Order.AddSequence(false);
-			m_SndFile.Order.SetSequence(newSeq);
-			m_SndFile.Order.GetSequence(newSeq).SetName(source.Order.GetSequence(seq).GetName());
-			insertPos = 0;
+			m_SndFile.Order.AddSequence(false);
+			m_SndFile.Order().SetName(srcOrder.GetName());
 		} else
 		{
+			insertPos = m_SndFile.Order().GetLengthTailTrimmed();
 			if(specs.hasStopIndex)
-			{
 				insertPos++;
-			}
 		}
-		const ORDERINDEX ordLen = source.Order.GetSequence(seq).GetLengthTailTrimmed();
+		const ORDERINDEX ordLen = srcOrder.GetLengthTailTrimmed();
 		if(useOrderMapping) orderMapping.resize(ordLen, ORDERINDEX_INVALID);
 		for(ORDERINDEX ord = 0; ord < ordLen; ord++)
 		{
@@ -190,8 +187,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 
 			PATTERNINDEX insertPat = PATTERNINDEX_INVALID;
-
-			PATTERNINDEX srcPat = source.Order.GetSequence(seq)[ord];
+			PATTERNINDEX srcPat = srcOrder[ord];
 			if(source.Patterns.IsValidPat(srcPat) && srcPat < patternMapping.size())
 			{
 				if(patternMapping[srcPat] == PATTERNINDEX_INVALID && source.Patterns.IsValidPat(srcPat))
@@ -208,17 +204,17 @@ void CModDoc::AppendModule(const CSoundFile &source)
 					continue;
 				}
 				insertPat = patternMapping[srcPat];
-			} else if(srcPat == source.Order.GetIgnoreIndex() && specs.hasIgnoreIndex)
+			} else if(srcPat == srcOrder.GetIgnoreIndex() && specs.hasIgnoreIndex)
 			{
 				insertPat = m_SndFile.Order.GetIgnoreIndex();
-			} else if(srcPat == source.Order.GetInvalidPatIndex() && specs.hasStopIndex)
+			} else if(srcPat == srcOrder.GetInvalidPatIndex() && specs.hasStopIndex)
 			{
 				insertPat = m_SndFile.Order.GetInvalidPatIndex();
 			} else
 			{
 				continue;
 			}
-			m_SndFile.Order.Insert(insertPos, 1, insertPat);
+			m_SndFile.Order().insert(insertPos, 1, insertPat);
 			if(useOrderMapping) orderMapping[ord] = insertPos++;
 		}
 	}

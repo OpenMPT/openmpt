@@ -175,7 +175,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order().GetName().c_str());
 
 	m_OrderList.SetFocus();
 
@@ -229,7 +229,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(updateAll || updateSeq)
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order().GetName().c_str());
 
 		m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
@@ -564,9 +564,9 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		{
 			for (SEQUENCEINDEX nSeq = 0; nSeq < m_sndFile.Order.GetNumSequences(); nSeq++)
 			{
-				for (ORDERINDEX nOrd = 0; nOrd < m_sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(); nOrd++)
+				for (ORDERINDEX nOrd = 0; nOrd < m_sndFile.Order(nSeq).GetLength(); nOrd++)
 				{
-					if (m_sndFile.Order.GetSequence(nSeq)[nOrd] == nPat)
+					if (m_sndFile.Order(nSeq)[nOrd] == nPat)
 					{
 						m_OrderList.SelectSequence(nSeq);
 						m_OrderList.SetCurSel(nOrd, true);
@@ -585,10 +585,10 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		if(nSeq < m_sndFile.Order.GetNumSequences())
 		{
 			m_OrderList.SelectSequence(nSeq);
-			if((nOrd < m_sndFile.Order.GetSequence(nSeq).size()))
+			if((nOrd < m_sndFile.Order().size()))
 			{
 				m_OrderList.SetCurSel(nOrd);
-				SetCurrentPattern(m_sndFile.Order[nOrd]);
+				SetCurrentPattern(m_sndFile.Order()[nOrd]);
 			}
 		}
 	}
@@ -747,7 +747,7 @@ void CCtrlPatterns::OnPatternNew()
 //--------------------------------
 {
 	ORDERINDEX curOrd = m_OrderList.GetCurSel(true).firstOrd;
-	PATTERNINDEX curPat = m_sndFile.Order[curOrd];
+	PATTERNINDEX curPat = (curOrd < m_sndFile.Order().size()) ? m_sndFile.Order()[curOrd] : 0;
 	ROWINDEX rows = 64;
 	if(m_sndFile.Patterns.IsValidPat(curPat))
 	{
@@ -803,15 +803,16 @@ void CCtrlPatterns::OnPatternDuplicate()
 	// Has this pattern been duplicated already? (for multiselect)
 	std::vector<PATTERNINDEX> patReplaceIndex(m_sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
 
+	ModSequence &order = m_sndFile.Order();
 	for(ORDERINDEX i = 0; i < insertCount; i++)
 	{
-		PATTERNINDEX curPat = m_sndFile.Order[insertFrom + i];
+		PATTERNINDEX curPat = order[insertFrom + i];
 		if(curPat < patReplaceIndex.size() && patReplaceIndex[curPat] == PATTERNINDEX_INVALID)
 		{
 			PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(curPat, true);
 			if(newPat != PATTERNINDEX_INVALID)
 			{
-				m_sndFile.Order.Insert(insertWhere + i, 1, newPat);
+				order.insert(insertWhere + i, 1, newPat);
 				success = true;
 				// Mark as duplicated, so if this pattern is to be duplicated again, the same new pattern number is inserted into the order list.
 				patReplaceIndex[curPat] = newPat;
@@ -829,37 +830,28 @@ void CCtrlPatterns::OnPatternDuplicate()
 				newPat = patReplaceIndex[curPat];
 			} else
 			{
-				newPat = m_sndFile.Order[insertFrom + i];
+				newPat = order[insertFrom + i];
 			}
 
-			m_sndFile.Order.Insert(insertWhere + i, 1, newPat);
+			order.insert(insertWhere + i, 1, newPat);
 
 			success = true;
 		}
 	}
 	if(success)
 	{
-		Util::InsertItem(selection.firstOrd, selection.lastOrd, m_sndFile.m_PlayState.m_nNextOrder);
-		if(m_sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
-		{
-			Util::InsertItem(selection.firstOrd, selection.lastOrd, m_sndFile.m_PlayState.m_nSeqOverride);
-		}
-		// Adjust order lock position
-		if(m_sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
-		{
-			Util::InsertRange(selection.firstOrd, selection.lastOrd, m_sndFile.m_lockOrderStart, m_sndFile.m_lockOrderEnd);
-		}
+		m_OrderList.InsertUpdatePlaystate(selection.firstOrd, selection.lastOrd);
 
 		m_OrderList.InvalidateRect(NULL, FALSE);
 		m_OrderList.SetCurSel(insertWhere, true, false, true);
 
 		// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
-		ORDERINDEX showPattern = std::min(insertWhere, m_sndFile.Order.GetLastIndex());
-		while(!m_sndFile.Order.IsValidPat(showPattern) && showPattern < m_sndFile.Order.GetLastIndex())
+		ORDERINDEX showPattern = std::min(insertWhere, order.GetLastIndex());
+		while(!order.IsValidPat(showPattern) && showPattern < order.GetLastIndex())
 		{
 			showPattern++;
 		}
-		SetCurrentPattern(m_sndFile.Order[showPattern]);
+		SetCurrentPattern(order[showPattern]);
 
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
@@ -1060,11 +1052,11 @@ void CCtrlPatterns::OnSequenceNameChanged()
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
-	if(str != m_sndFile.Order.GetName().c_str())
+	if(str != m_sndFile.Order().GetName().c_str())
 	{
-		m_sndFile.Order.SetName(str.GetString());
+		m_sndFile.Order().SetName(str.GetString());
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
 	}
 }
 
@@ -1187,6 +1179,7 @@ BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 
 	return FALSE;
 }
+
 
 void CCtrlPatterns::OnSequenceNumChanged()
 //----------------------------------------

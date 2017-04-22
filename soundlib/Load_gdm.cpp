@@ -162,7 +162,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read orders
 	if(file.Seek(fileHeader.orderOffset))
 	{
-		Order.ReadAsByte(file, fileHeader.lastOrder + 1, fileHeader.lastOrder + 1, 0xFF, 0xFE);
+		ReadOrderFromFile<uint8>(Order(), file, fileHeader.lastOrder + 1, 0xFF, 0xFE);
 	}
 
 	// Read samples

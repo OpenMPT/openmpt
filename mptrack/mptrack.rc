@@ -2617,9 +2617,6 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_OPTIONS         "Configure the audio device, keyboard layout, colors etc...\nSetup"
-    ID_INSERT_PATTERN       "Create a new pattern"
-    ID_INSERT_SAMPLE        "Create a new sample"
-    ID_INSERT_INSTRUMENT    "Create a new instrument"
     ID_INSTRUMENTS_REMOVEALL "Remove all the instruments in the song."
     ID_CLEANUP_INSTRUMENTS  "Remove all unused instruments"
     ID_CLEANUP_SAMPLES      "Remove all unused samples"

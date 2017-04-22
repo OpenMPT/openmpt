@@ -932,13 +932,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	const ORDERINDEX numOrders = std::min(MAX_ORDERS, static_cast<ORDERINDEX>((chunk.GetLength() - sizeof(DMFSequence)) / 2));
-	Order.resize(numOrders, Order.GetInvalidPatIndex());
-
-	for(ORDERINDEX i = 0; i < numOrders; i++)
-	{
-		Order[i] = chunk.ReadUint16LE();
-	}
+	ReadOrderFromFile<uint16le>(Order(), chunk, (chunk.GetLength() - sizeof(DMFSequence)) / 2);
 
 	// Read patterns
 	chunk = chunks.GetChunk(DMFChunk::idPATT);
@@ -963,17 +957,17 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		// Now go through the order list and load them.
 		DMFPatternSettings settings(GetNumChannels());
 
-		Patterns.ResizeArray(Order.GetLength());
-		for(ORDERINDEX ord = 0; ord < Order.GetLength(); ord++)
+		Patterns.ResizeArray(Order().GetLength());
+		for(ORDERINDEX ord = 0; ord < Order().GetLength(); ord++)
 		{
 			// Create one pattern for each order item, as the same pattern can be played with different settings
-			PATTERNINDEX pat = Order[ord];
+			PATTERNINDEX pat = Order()[ord];
 			if(pat < patternChunks.size())
 			{
 				pat = ConvertDMFPattern(patternChunks[pat], settings, *this);
-				Order[ord] = pat;
+				Order()[ord] = pat;
 				// Loop end?
-				if(pat != PATTERNINDEX_INVALID && ord == seqHeader.loopEnd && (seqHeader.loopStart > 0 || ord < Order.GetLength() - 1))
+				if(pat != PATTERNINDEX_INVALID && ord == seqHeader.loopEnd && (seqHeader.loopStart > 0 || ord < Order().GetLastIndex()))
 				{
 					Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(seqHeader.loopStart)).Row(Patterns[pat].GetNumRows() - 1).Retry(EffectWriter::rmTryPreviousRow));
 				}

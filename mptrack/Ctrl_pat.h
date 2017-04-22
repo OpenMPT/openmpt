@@ -114,6 +114,11 @@ public:
 
 	void OnCopy(bool onlyOrders);
 
+	// Update play state and order lock ranges after inserting order items.
+	void InsertUpdatePlaystate(ORDERINDEX first, ORDERINDEX last);
+	// Update play state and order lock ranges after deleting order items.
+	void DeleteUpdatePlaystate(ORDERINDEX first, ORDERINDEX last);
+
 	//{{AFX_VIRTUAL(COrderList)
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);

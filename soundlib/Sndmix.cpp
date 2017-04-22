@@ -414,7 +414,7 @@ bool CSoundFile::ProcessRow()
 			m_PlayState.m_nRow = m_lockRowStart;
 		}
 		// "Lock order" editing feature
-		if(Order.IsPositionLocked(m_PlayState.m_nCurrentOrder) && !IsRenderingToDisc())
+		if(Order().IsPositionLocked(m_PlayState.m_nCurrentOrder) && !IsRenderingToDisc())
 		{
 			m_PlayState.m_nCurrentOrder = m_lockOrderStart;
 		}
@@ -423,25 +423,25 @@ bool CSoundFile::ProcessRow()
 		// Check if pattern is valid
 		if(!m_SongFlags[SONG_PATTERNLOOP])
 		{
-			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order.size()) ? Order[m_PlayState.m_nCurrentOrder] : Order.GetInvalidPatIndex();
+			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : Order.GetInvalidPatIndex();
 			if ((m_PlayState.m_nPattern < Patterns.Size()) && (!Patterns[m_PlayState.m_nPattern])) m_PlayState.m_nPattern = Order.GetIgnoreIndex();
 			while (m_PlayState.m_nPattern >= Patterns.Size())
 			{
 				// End of song?
-				if ((m_PlayState.m_nPattern == Order.GetInvalidPatIndex()) || (m_PlayState.m_nCurrentOrder >= Order.size()))
+				if ((m_PlayState.m_nPattern == Order.GetInvalidPatIndex()) || (m_PlayState.m_nCurrentOrder >= Order().size()))
 				{
 
 					//if (!m_nRepeatCount) return false;
 
-					ORDERINDEX restartPosOverride = Order.GetRestartPos();
-					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order.size() && m_PlayState.m_nCurrentOrder > 0)
+					ORDERINDEX restartPosOverride = Order().GetRestartPos();
+					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order().size() && m_PlayState.m_nCurrentOrder > 0)
 					{
 						/* Subtune detection. Subtunes are separated by "---" order items, so if we're in a
 						   subtune and there's no restart position, we go to the first order of the subtune
 						   (i.e. the first order after the previous "---" item) */
 						for(ORDERINDEX ord = m_PlayState.m_nCurrentOrder - 1; ord > 0; ord--)
 						{
-							if(Order[ord] == Order.GetInvalidPatIndex())
+							if(Order()[ord] == Order.GetInvalidPatIndex())
 							{
 								// Jump back to first order of this subtune
 								restartPosOverride = ord + 1;
@@ -499,13 +499,13 @@ bool CSoundFile::ProcessRow()
 					m_PlayState.m_nCurrentOrder = restartPosOverride;
 					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
-					while(m_PlayState.m_nCurrentOrder < Order.size() && Order[m_PlayState.m_nCurrentOrder] == Order.GetIgnoreIndex())
+					while(m_PlayState.m_nCurrentOrder < Order().size() && Order()[m_PlayState.m_nCurrentOrder] == Order.GetIgnoreIndex())
 					{
 						m_PlayState.m_nCurrentOrder++;
 					}
 					//Check for end of song or bad pattern
-					if (m_PlayState.m_nCurrentOrder >= Order.size()
-						|| !Order.IsValidPat(m_PlayState.m_nCurrentOrder))
+					if (m_PlayState.m_nCurrentOrder >= Order().size()
+						|| !Order().IsValidPat(m_PlayState.m_nCurrentOrder))
 					{
 						visitedSongRows.Initialize(true);
 						return false;
@@ -515,8 +515,8 @@ bool CSoundFile::ProcessRow()
 					m_PlayState.m_nCurrentOrder++;
 				}
 
-				if (m_PlayState.m_nCurrentOrder < Order.size())
-					m_PlayState.m_nPattern = Order[m_PlayState.m_nCurrentOrder];
+				if (m_PlayState.m_nCurrentOrder < Order().size())
+					m_PlayState.m_nPattern = Order()[m_PlayState.m_nCurrentOrder];
 				else
 					m_PlayState.m_nPattern = Order.GetInvalidPatIndex();
 
@@ -599,8 +599,8 @@ bool CSoundFile::ProcessRow()
 
 					m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
 					m_PlayState.m_nNextRow = m_PlayState.m_nRow;
-					if(Order.size() > m_PlayState.m_nCurrentOrder)
-						m_PlayState.m_nPattern = Order[m_PlayState.m_nCurrentOrder];
+					if(Order().size() > m_PlayState.m_nCurrentOrder)
+						m_PlayState.m_nPattern = Order()[m_PlayState.m_nCurrentOrder];
 					visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
 					if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
 						return false;

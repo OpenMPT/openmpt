@@ -105,11 +105,13 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamples;
 	if(fileHeader.restartPos < fileHeader.numOrders)
 	{
-		Order.SetRestartPos(fileHeader.restartPos);
+		Order().SetRestartPos(fileHeader.restartPos);
 	}
 	m_songName.clear();
 
-	Order.ReadAsByte(file, 256, fileHeader.numOrders);
+	uint8 orders[256];
+	file.ReadArray(orders);
+	ReadOrderFromArray(Order(), orders, fileHeader.numOrders);
 
 	// Read Sample Headers
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -415,7 +417,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Setup Order List
-	Order.resize(fileHeader.numOrders);
+	Order().resize(fileHeader.numOrders);
 	std::vector<uint16> patternLength;
 	const FileReader::off_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
 	if(fileHeader.version >= 14)
@@ -425,7 +427,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
 	{
-		Order[ord] = ord;
+		Order()[ord] = ord;
 		if(fileHeader.version >= 14)
 		{
 			patternLength[ord] = file.ReadUint16LE();

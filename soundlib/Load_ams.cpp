@@ -425,15 +425,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Order List
-	std::vector<uint16> orders;
-	if(file.ReadVectorLE(orders, fileHeader.numOrds))
-	{
-		Order.resize(fileHeader.numOrds);
-		for(ORDERINDEX i = 0; i < Order.size(); i++)
-		{
-			Order[i] = orders[i];
-		}
-	}
+	ReadOrderFromFile<uint16le>(Order(), file, fileHeader.numOrds);
 
 	// Read patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
@@ -844,15 +836,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Order List
-	std::vector<uint16> orders;
-	if(file.ReadVectorLE(orders, fileHeader.numOrds))
-	{
-		Order.resize(fileHeader.numOrds);
-		for(ORDERINDEX i = 0; i < Order.size(); i++)
-		{
-			Order[i] = orders[i];
-		}
-	}
+	ReadOrderFromFile<uint16le>(Order(), file, fileHeader.numOrds);
 
 	// Read Patterns
 	if(loadFlags & loadPatternData)

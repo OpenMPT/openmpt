@@ -649,7 +649,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	// Avoid generating test cases that take overly long to evaluate
 	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = 64;
 #else
-	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = ORDERINDEX_MAX;
+	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = MAX_ORDERS;
 #endif
 
 	m_songArtist = MPT_USTRING("MIDI Conversion");
@@ -673,7 +673,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if(!ppqn)
 		ppqn = 96;
-	Order.clear();
+	Order().clear();
 
 	MidiChannelState midiChnStatus[16];
 	const CHANNELINDEX tempoChannel = m_nChannels - 2, globalVolChannel = m_nChannels - 1;
@@ -725,11 +725,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
 		uint8 delay = static_cast<uint8>(modTicks % ticksPerRow);
 
-		if(ord >= Order.size())
+		if(ord >= Order().GetLength())
 		{
 			if(ord > MPT_MIDI_IMPORT_MAX_ORDERS)
 				break;
-			ORDERINDEX curSize = Order.size();
+			ORDERINDEX curSize = Order().GetLength();
 			// If we need to extend the order list by more than one pattern, this means that we
 			// will be filling in empty patterns. Just recycle one empty pattern for this job.
 			// We read events in chronological order, so it is never possible for the loader to
@@ -739,9 +739,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				if((emptyPattern = Patterns.InsertAny(patternLen)) == PATTERNINDEX_INVALID)
 					break;
 			}
-			Order.resize(ord + 1, emptyPattern);
+			Order().resize(ord + 1, emptyPattern);
 
-			if((Order[ord] = Patterns.InsertAny(patternLen)) == PATTERNINDEX_INVALID)
+			if((Order()[ord] = Patterns.InsertAny(patternLen)) == PATTERNINDEX_INVALID)
 				break;
 		}
 
@@ -755,7 +755,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			lastRow = std::max(lastRow, row);
 		}
 
-		PATTERNINDEX pat = Order[ord];
+		PATTERNINDEX pat = Order()[ord];
 		PatternRow patRow = Patterns[pat].GetRow(row);
 
 		uint8 data1 = track.ReadUint8();
@@ -796,7 +796,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					Patterns[pat].SetName(s);
 					if(!mpt::CompareNoCaseAscii(s, "loopStart"))
 					{
-						Order.SetRestartPos(ord);
+						Order().SetRestartPos(ord);
 						restartRow = row;
 					}
 				}
@@ -1002,7 +1002,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						// Non-standard MIDI loop point. May conflict with Apogee EMIDI CCs (110/111), which is why we also check if CC 110 is ever used.
 						if(data2 == 0)
 						{
-							Order.SetRestartPos(ord);
+							Order().SetRestartPos(ord);
 							restartRow = row;
 						}
 						break;
@@ -1196,17 +1196,17 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
 					break;
-				Order.clear();
+				Order().clear();
 			}
 		}
 	}
 
 	if(isEMIDI)
 	{
-		Order.SetRestartPos(0);
+		Order().SetRestartPos(0);
 	}
 
-	PATTERNINDEX lastPat = Order[lastOrd];
+	PATTERNINDEX lastPat = Order()[lastOrd];
 	if(Patterns.IsValidPat(lastPat))
 	{
 		Patterns[lastPat].Resize(lastRow + 1);

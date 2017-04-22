@@ -482,18 +482,18 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading orders
 	file.Seek(sizeof(ITFileHeader));
-	if(GetType() == MOD_TYPE_IT)
+	if(GetType() == MOD_TYPE_MPT && fileHeader.cwtv > 0x88A && fileHeader.cwtv <= 0x88D)
 	{
-		Order.ReadAsByte(file, fileHeader.ordnum, fileHeader.ordnum, 0xFF, 0xFE);
+		// Deprecated format used for MPTm files created with OpenMPT 1.17.02.46 - 1.17.02.48.
+		uint16 version = file.ReadUint16LE();
+		if(version != 0)
+			return false;
+		uint32 numOrd = file.ReadUint32LE();
+		if(numOrd > ModSpecs::mptm.ordersMax || !ReadOrderFromFile<uint32le>(Order(), file, numOrd))
+			return false;
 	} else
 	{
-		if(fileHeader.cwtv > 0x88A && fileHeader.cwtv <= 0x88D)
-		{
-			Order.Deserialize(file);
-		} else
-		{
-			Order.ReadAsByte(file, fileHeader.ordnum, fileHeader.ordnum, 0xFF, 0xFE);
-		}
+		ReadOrderFromFile<uint8>(Order(), file, fileHeader.ordnum, 0xFF, 0xFE);
 	}
 
 	// Reading instrument, sample and pattern offsets
@@ -1209,8 +1209,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		itHeader.ordnum = Order.GetLengthTailTrimmed();
-		if(Order.NeedsExtraDatafield() && itHeader.ordnum > 256)
+		itHeader.ordnum = Order().GetLengthTailTrimmed();
+		if(Order().NeedsExtraDatafield() && itHeader.ordnum > 256)
 		{
 			// If there are more order items, write them elsewhere.
 			itHeader.ordnum = 256;
@@ -1219,7 +1219,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
-		itHeader.ordnum = std::min(Order.GetLengthTailTrimmed(), specs.ordersMax) + 1;
+		itHeader.ordnum = std::min(Order().GetLengthTailTrimmed(), specs.ordersMax) + 1;
 		if(itHeader.ordnum < 2) itHeader.ordnum = 2;
 	}
 
@@ -1348,7 +1348,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Write file header
 	mpt::IO::Write(f, itHeader);
 
-	Order.WriteAsByte(f, itHeader.ordnum);
+	Order().WriteAsByte(f, itHeader.ordnum);
 	for(uint16 i = 0; i < itHeader.insnum; ++i)
 	{
 		mpt::IO::WriteIntLE<uint32>(f, inspos[i]);
@@ -1746,7 +1746,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		ssb.WriteItem(GetTuneSpecificTunings(), "0", &WriteTuningCollection);
 	if(AreNonDefaultTuningsUsed(*this))
 		ssb.WriteItem(*this, "1", &WriteTuningMap);
-	if(Order.NeedsExtraDatafield())
+	if(Order().NeedsExtraDatafield())
 		ssb.WriteItem(Order, "2", &WriteModSequenceOld);
 	if(bNeedsMptPatSave)
 		ssb.WriteItem(Patterns, FileIdPatterns, &WriteModPatterns);
@@ -2082,9 +2082,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('D','G','V','.'), m_nDefaultGlobalVolume);
 	}
 
-	if(GetType() != MOD_TYPE_XM && Order.GetRestartPos() != 0)
+	if(GetType() != MOD_TYPE_XM && Order().GetRestartPos() != 0)
 	{
-		WRITEMODULAR(MAGIC4BE('R','P','.','.'), Order.GetRestartPos());
+		WRITEMODULAR(MAGIC4BE('R','P','.','.'), Order().GetRestartPos());
 	}
 
 	if(m_nResampling != SRCMODE_DEFAULT && specs.hasDefaultResampling)
@@ -2238,7 +2238,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
-			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order.SetRestartPos(restartPos); } break;
+			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order().SetRestartPos(restartPos); } break;
 			case MAGIC4LE('R','S','M','P'):
 				ReadFieldCast(chunk, size, m_nResampling);
 				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;

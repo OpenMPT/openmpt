@@ -195,7 +195,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Song Orders
 	size = file.ReadUint32LE();
-	Order.ReadAsByte(file, size, size, 0xFF, 0xFE);
+	ReadOrderFromFile<uint8>(Order(), file, size, 0xFF, 0xFE);
 
 	// Song Patterns
 	const PATTERNINDEX numPats = static_cast<PATTERNINDEX>(file.ReadUint32LE());

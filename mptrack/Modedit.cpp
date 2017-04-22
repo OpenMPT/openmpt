@@ -259,26 +259,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 }
 
 
-// Functor for rewriting instrument numbers in patterns.
-struct RewriteInstrumentReferencesInPatterns
-//==========================================
-{
-	RewriteInstrumentReferencesInPatterns(const std::vector<ModCommand::INSTR> &indices) : instrumentIndices(indices)
-	{
-	}
-
-	void operator()(ModCommand& m)
-	{
-		if(!m.IsPcNote() && m.instr < instrumentIndices.size())
-		{
-			m.instr = instrumentIndices[m.instr];
-		}
-	}
-
-	const std::vector<ModCommand::INSTR> &instrumentIndices;
-};
-
-
 // Base code for adding, removing, moving and duplicating samples. Returns new number of samples on success, SAMPLEINDEX_INVALID otherwise.
 // The new sample vector can contain SAMPLEINDEX_INVALID for adding new (empty) samples.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first sample slot.
@@ -409,13 +389,13 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	} else
 	{
 		PrepareUndoForAllPatterns(false, "Rearrange Samples");
-
-		std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
-		for(size_t i = 0; i < newIndex.size(); i++)
+		m_SndFile.Patterns.ForEachModCommand([&newIndex] (ModCommand &m)
 		{
-			indices[i] = newIndex[i];
-		}
-		m_SndFile.Patterns.ForEachModCommand(RewriteInstrumentReferencesInPatterns(indices));
+			if(!m.IsPcNote() && m.instr < newIndex.size())
+			{
+				m.instr = static_cast<ModCommand::INSTR>(newIndex[m.instr]);
+			}
+		});
 	}
 
 	return GetNumSamples();
@@ -486,28 +466,24 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 
 	PrepareUndoForAllPatterns(false, "Rearrange Instrumens");
 	GetInstrumentUndo().RearrangeInstruments(newIndex);
-
-	std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
-	for(size_t i = 0; i < newIndex.size(); i++)
+	m_SndFile.Patterns.ForEachModCommand([&newIndex] (ModCommand &m)
 	{
-		indices[i] = newIndex[i];
-	}
-	m_SndFile.Patterns.ForEachModCommand(RewriteInstrumentReferencesInPatterns(indices));
+		if(!m.IsPcNote() && m.instr < newIndex.size())
+		{
+			m.instr = static_cast<ModCommand::INSTR>(newIndex[m.instr]);
+		}
+	});
 
 	return GetNumInstruments();
 }
 
 
-// Functor for converting instrument numbers to sample numbers in the patterns
-struct ConvertInstrumentsToSamplesInPatterns
-//==========================================
+bool CModDoc::ConvertInstrumentsToSamples()
+//-----------------------------------------
 {
-	ConvertInstrumentsToSamplesInPatterns(CSoundFile *pSndFile)
-	{
-		this->pSndFile = pSndFile;
-	}
-
-	void operator()(ModCommand& m)
+	if (!m_SndFile.GetNumInstruments()) return false;
+	GetInstrumentUndo().ClearUndo();
+	m_SndFile.Patterns.ForEachModCommand([&] (ModCommand &m)
 	{
 		if(m.instr && !m.IsPcNote())
 		{
@@ -518,9 +494,9 @@ struct ConvertInstrumentsToSamplesInPatterns
 			else
 				note = NOTE_MIDDLEC - NOTE_MIN;
 
-			if((instr < MAX_INSTRUMENTS) && (pSndFile->Instruments[instr]))
+			if((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
 			{
-				const ModInstrument *pIns = pSndFile->Instruments[instr];
+				const ModInstrument *pIns = m_SndFile.Instruments[instr];
 				newinstr = pIns->Keyboard[note];
 				newnote = pIns->NoteMap[note];
 				if(pIns->Keyboard[note] > Util::MaxValueOfType(m.instr)) newinstr = 0;
@@ -531,18 +507,7 @@ struct ConvertInstrumentsToSamplesInPatterns
 				m.note = newnote;
 			}
 		}
-	}
-
-	CSoundFile *pSndFile;
-};
-
-
-bool CModDoc::ConvertInstrumentsToSamples()
-//-----------------------------------------
-{
-	if (!m_SndFile.GetNumInstruments()) return false;
-	GetInstrumentUndo().ClearUndo();
-	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
+	});
 	return true;
 }
 
@@ -666,40 +631,13 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 //------------------------------------------------------------------
 {
-	const PATTERNINDEX i = m_SndFile.Patterns.InsertAny(nRows, true);
-	if(i == PATTERNINDEX_INVALID)
-		return i;
-
-	//Increasing orderlist size if given order is beyond current limit,
-	//or if the last order already has a pattern.
-	if((nOrd == m_SndFile.Order.size() ||
-		m_SndFile.Order.Last() < m_SndFile.Patterns.Size() ) &&
-		m_SndFile.Order.GetLength() < m_SndFile.GetModSpecifications().ordersMax)
+	PATTERNINDEX pat = m_SndFile.Patterns.InsertAny(nRows, true);
+	if(pat != PATTERNINDEX_INVALID)
 	{
-		m_SndFile.Order.Append();
+		m_SndFile.Order().insert(nOrd, 1, pat);
+		SetModified();
 	}
-
-	for (ORDERINDEX j = 0; j < m_SndFile.Order.size(); j++)
-	{
-		if (m_SndFile.Order[j] == i) break;
-		if (m_SndFile.Order[j] == m_SndFile.Order.GetInvalidPatIndex() && nOrd == ORDERINDEX_INVALID)
-		{
-			m_SndFile.Order[j] = i;
-			break;
-		}
-		if (j == nOrd)
-		{
-			for (ORDERINDEX k = m_SndFile.Order.size() - 1; k > j; k--)
-			{
-				m_SndFile.Order[k] = m_SndFile.Order[k - 1];
-			}
-			m_SndFile.Order[j] = i;
-			break;
-		}
-	}
-
-	SetModified();
-	return i;
+	return pat;
 }
 
 
@@ -864,19 +802,11 @@ INSTRUMENTINDEX CModDoc::HasInstrumentForPlugin(PLUGINDEX plug) const
 bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 //------------------------------------------------------------
 {
-	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order.GetSequence(nSeq).size())
+	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order(nSeq).size())
 		return false;
 
 	CriticalSection cs;
-
-	SEQUENCEINDEX nOldSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	m_SndFile.Order.SetSequence(nSeq);
-	for (ORDERINDEX i = nOrd; i < m_SndFile.Order.GetSequence(nSeq).size() - 1; i++)
-	{
-		m_SndFile.Order[i] = m_SndFile.Order[i + 1];
-	}
-	m_SndFile.Order[m_SndFile.Order.GetLastIndex()] = m_SndFile.Order.GetInvalidPatIndex();
-	m_SndFile.Order.SetSequence(nOldSeq);
+	m_SndFile.Order(nSeq).Remove(nOrd, nOrd);
 	SetModified();
 
 	return true;
@@ -928,7 +858,6 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 {
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
-		bool instrumentsLeft = false;
 		ConfirmAnswer result = cnfNo;
 		if(!m_SndFile.Instruments[nIns]->GetSamples().empty()) result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
 		if(result == cnfCancel)
@@ -939,7 +868,7 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 		{
 			CriticalSection cs;
 			if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
-			for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) instrumentsLeft = true;
+			bool instrumentsLeft = std::find_if(std::begin(m_SndFile.Instruments), std::end(m_SndFile.Instruments), [](ModInstrument *ins) { return ins != nullptr; }) != std::end(m_SndFile.Instruments);
 			if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
 			SetModified();
 
@@ -958,31 +887,24 @@ bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate
 	if(nSourceSeq == SEQUENCEINDEX_INVALID) nSourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 	if(nDestSeq == SEQUENCEINDEX_INVALID) nDestSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 	if (std::max(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
-	auto &sourceSeq = m_SndFile.Order.GetSequence(nSourceSeq);
+	auto &sourceSeq = m_SndFile.Order(nSourceSeq);
 	PATTERNINDEX nSourcePat = sourceSeq.GetInvalidPatIndex();
-	if(nSourceNdx < sourceSeq.GetLength())
+	if(nSourceNdx < sourceSeq.size())
 		nSourcePat = sourceSeq[nSourceNdx];
-
-	// save current working sequence
-	SEQUENCEINDEX nWorkingSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 
 	// Delete source
 	if (!bCopy)
 	{
-		m_SndFile.Order.SetSequence(nSourceSeq);
-		m_SndFile.Order.Remove(nSourceNdx, nSourceNdx);
+		sourceSeq.Remove(nSourceNdx, nSourceNdx);
 		if (nSourceNdx < nDestNdx && nSourceSeq == nDestSeq) nDestNdx--;
 	}
 	// Insert at dest
-	m_SndFile.Order.SetSequence(nDestSeq);
-	m_SndFile.Order.Insert(nDestNdx, 1, nSourcePat);
+	m_SndFile.Order(nDestSeq).insert(nDestNdx, 1, nSourcePat);
 
 	if (bUpdate)
 	{
 		UpdateAllViews(nullptr, SequenceHint().Data());
 	}
-
-	m_SndFile.Order.SetSequence(nWorkingSeq);
 	return true;
 }
 
@@ -1356,9 +1278,9 @@ bool CModDoc::GlobalVolumeToPattern()
 	bool result = false;
 	if(m_SndFile.GetModSpecifications().HasCommand(CMD_GLOBALVOLUME))
 	{
-		for(ORDERINDEX i = 0; i < m_SndFile.Order.GetLength(); i++)
+		for(ORDERINDEX i = 0; i < m_SndFile.Order().GetLength(); i++)
 		{
-			if(m_SndFile.Patterns[m_SndFile.Order[i]].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME).Retry(EffectWriter::rmTryNextRow)))
+			if(m_SndFile.Patterns[m_SndFile.Order()[i]].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME).Retry(EffectWriter::rmTryNextRow)))
 			{
 				result = true;
 				break;

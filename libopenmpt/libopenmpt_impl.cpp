@@ -887,10 +887,10 @@ double module_impl::set_position_seconds( double seconds ) {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
-	if ( order < 0 || order >= m_sndFile->Order.GetLengthTailTrimmed() ) {
+	if ( order < 0 || order >= m_sndFile->Order().GetLengthTailTrimmed() ) {
 		return m_currentPositionSeconds;
 	}
-	PATTERNINDEX pattern = m_sndFile->Order[order];
+	PATTERNINDEX pattern = m_sndFile->Order()[order];
 	if ( m_sndFile->Patterns.IsValidIndex( pattern ) ) {
 		if ( row < 0 || row >= static_cast<std::int32_t>( m_sndFile->Patterns[pattern].GetNumRows() ) ) {
 			return m_currentPositionSeconds;
@@ -1002,10 +1002,10 @@ std::int32_t module_impl::get_current_order() const {
 }
 std::int32_t module_impl::get_current_pattern() const {
 	std::int32_t order = m_sndFile->GetCurrentOrder();
-	if ( order < 0 || order >= m_sndFile->Order.GetLengthTailTrimmed() ) {
+	if ( order < 0 || order >= m_sndFile->Order().GetLengthTailTrimmed() ) {
 		return m_sndFile->GetCurrentPattern();
 	}
-	std::int32_t pattern = m_sndFile->Order[order];
+	std::int32_t pattern = m_sndFile->Order()[order];
 	if ( !m_sndFile->Patterns.IsValidIndex( static_cast<PATTERNINDEX>( pattern ) ) ) {
 		return -1;
 	}
@@ -1060,7 +1060,7 @@ std::int32_t module_impl::get_num_channels() const {
 	return m_sndFile->GetNumChannels();
 }
 std::int32_t module_impl::get_num_orders() const {
-	return m_sndFile->Order.GetLengthTailTrimmed();
+	return m_sndFile->Order().GetLengthTailTrimmed();
 }
 std::int32_t module_impl::get_num_patterns() const {
 	return m_sndFile->Patterns.GetNumPatterns();
@@ -1077,7 +1077,7 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
 	}
 	return retval;
 }
@@ -1090,10 +1090,10 @@ std::vector<std::string> module_impl::get_channel_names() const {
 }
 std::vector<std::string> module_impl::get_order_names() const {
 	std::vector<std::string> retval;
-	for ( ORDERINDEX i = 0; i < m_sndFile->Order.GetLengthTailTrimmed(); ++i ) {
-		PATTERNINDEX pat = m_sndFile->Order[i];
+	for ( ORDERINDEX i = 0; i < m_sndFile->Order().GetLengthTailTrimmed(); ++i ) {
+		PATTERNINDEX pat = m_sndFile->Order()[i];
 		if ( m_sndFile->Patterns.IsValidIndex( pat ) ) {
-			retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[ m_sndFile->Order[i] ].GetName() ) );
+			retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[ m_sndFile->Order()[i] ].GetName() ) );
 		} else {
 			if ( pat == m_sndFile->Order.GetIgnoreIndex() ) {
 				retval.push_back( "+++ skip" );
@@ -1129,10 +1129,10 @@ std::vector<std::string> module_impl::get_sample_names() const {
 }
 
 std::int32_t module_impl::get_order_pattern( std::int32_t o ) const {
-	if ( o < 0 || o >= m_sndFile->Order.GetLengthTailTrimmed() ) {
+	if ( o < 0 || o >= m_sndFile->Order().GetLengthTailTrimmed() ) {
 		return -1;
 	}
-	return m_sndFile->Order[o];
+	return m_sndFile->Order()[o];
 }
 std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
@@ -1321,11 +1321,11 @@ std::vector<std::string> module_impl::get_ctls() const {
 }
 std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
 	if ( !ctl.empty() ) {
-		std::string rightmost = ctl.substr( ctl.length() - 1, 1 );
-		if ( rightmost == "!" || rightmost == "?" ) {
-			if ( rightmost == "!" ) {
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
 				throw_if_unknown = true;
-			} else if ( rightmost == "?" ) {
+			} else if ( rightmost == '?' ) {
 				throw_if_unknown = false;
 			}
 			ctl = ctl.substr( 0, ctl.length() - 1 );
@@ -1367,11 +1367,11 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 }
 void module_impl::ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown ) {
 	if ( !ctl.empty() ) {
-		std::string rightmost = ctl.substr( ctl.length() - 1, 1 );
-		if ( rightmost == "!" || rightmost == "?" ) {
-			if ( rightmost == "!" ) {
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
 				throw_if_unknown = true;
-			} else if ( rightmost == "?" ) {
+			} else if ( rightmost == '?' ) {
 				throw_if_unknown = false;
 			}
 			ctl = ctl.substr( 0, ctl.length() - 1 );

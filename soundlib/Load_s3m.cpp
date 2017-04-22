@@ -172,21 +172,6 @@ enum S3MPattern
 };
 
 
-// Functor for fixing PixPlay 4-Bit Zxx panning commands
-struct FixPixPlayPanning
-//======================
-{
-	void operator()(ModCommand& m)
-	{
-		if(m.command == CMD_MIDI)
-		{
-			m.command = CMD_S3MCMDEX;
-			m.param |= 0x80;
-		}
-	}
-};
-
-
 bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -364,7 +349,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_nChannels = 1;
 	}
 
-	Order.ReadAsByte(file, fileHeader.ordNum, fileHeader.ordNum, 0xFF, 0xFE);
+	ReadOrderFromFile<uint8>(Order(), file, fileHeader.ordNum, 0xFF, 0xFE);
 
 	// Read sample header offsets
 	std::vector<uint16> sampleOffsets(fileHeader.smpNum);
@@ -557,7 +542,14 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	if(pixPlayPanning && zxxCountLeft + zxxCountRight >= m_nChannels && (-zxxCountLeft + zxxCountRight) < static_cast<int>(m_nChannels))
 	{
 		// There are enough Zxx commands, so let's assume this was made to be played with PixPlay
-		Patterns.ForEachModCommand(FixPixPlayPanning());
+		Patterns.ForEachModCommand([](ModCommand &m)
+		{
+			if(m.command == CMD_MIDI)
+			{
+				m.command = CMD_S3MCMDEX;
+				m.param |= 0x80;
+			}
+		});
 	}
 
 	return true;
@@ -587,7 +579,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 
 	// Orders
-	ORDERINDEX writeOrders = Order.GetLengthTailTrimmed();
+	ORDERINDEX writeOrders = Order().GetLengthTailTrimmed();
 	if(writeOrders < 2)
 	{
 		writeOrders = 2;
@@ -671,7 +663,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	}
 
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
-	Order.WriteAsByte(f, writeOrders);
+	Order().WriteAsByte(f, writeOrders);
 
 	// Comment about parapointers stolen from Schism Tracker:
 	// The sample data parapointers are 24+4 bits, whereas pattern data and sample headers are only 16+4

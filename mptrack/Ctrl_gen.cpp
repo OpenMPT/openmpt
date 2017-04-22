@@ -256,7 +256,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.Order.GetRestartPos() != 0));
+		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.Order().GetRestartPos() != 0));
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 
 		//Note: Sample volume slider is not disabled for MOD
@@ -284,8 +284,8 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE | HINT_RESTARTPOS]))
 	{
 		// Set max valid restart position
-		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
-		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order.GetRestartPos(), FALSE);
+		m_SpinRestartPos.SetRange32(0, m_sndFile.Order().GetLengthTailTrimmed() - 1);
+		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos(), FALSE);
 	}
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
@@ -476,13 +476,13 @@ void CCtrlGeneral::OnTempoChanged()
 void CCtrlGeneral::OnSpeedChanged()
 //---------------------------------
 {
-	CHAR s[16];
+	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditSpeed.GetWindowText(s, sizeof(s));
+		m_EditSpeed.GetWindowText(s, MPT_ARRAY_COUNT(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
+			UINT n = ConvertStrTo<UINT>(s);
 			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
 			if (n != m_sndFile.m_nDefaultSpeed)
 			{
@@ -504,10 +504,10 @@ void CCtrlGeneral::OnSpeedChanged()
 void CCtrlGeneral::OnVSTiVolChanged()
 //-----------------------------------
 {
-	CHAR s[16];
+	TCHAR s[16];
 	if (m_bInitialized)
 	{
-		m_EditVSTiVol.GetWindowText(s, sizeof(s));
+		m_EditVSTiVol.GetWindowText(s, MPT_ARRAY_COUNT(s));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<UINT>(s);
@@ -529,10 +529,10 @@ void CCtrlGeneral::OnVSTiVolChanged()
 void CCtrlGeneral::OnSamplePAChanged()
 //------------------------------------
 {
-	CHAR s[16];
+	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditSamplePA.GetWindowText(s, sizeof(s));
+		m_EditSamplePA.GetWindowText(s, MPT_ARRAY_COUNT(s));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<UINT>(s);
@@ -553,13 +553,13 @@ void CCtrlGeneral::OnSamplePAChanged()
 void CCtrlGeneral::OnGlobalVolChanged()
 //-------------------------------------
 {
-	CHAR s[16];
+	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditGlobalVol.GetWindowText(s, sizeof(s));
+		m_EditGlobalVol.GetWindowText(s, MPT_ARRAY_COUNT(s));
 		if (s[0])
 		{
-			UINT n = atoi(s) * GetGlobalVolumeFactor();
+			UINT n = ConvertStrTo<ORDERINDEX>(s) * GetGlobalVolumeFactor();
 			Limit(n, 0u, 256u);
 			if (n != m_sndFile.m_nDefaultGlobalVolume)
 			{ 
@@ -580,23 +580,23 @@ void CCtrlGeneral::OnGlobalVolChanged()
 void CCtrlGeneral::OnRestartPosChanged()
 //--------------------------------------
 {
-	CHAR s[32];
+	TCHAR s[32];
 	if(m_bInitialized)
 	{
-		m_EditRestartPos.GetWindowText(s, sizeof(s));
+		m_EditRestartPos.GetWindowText(s, MPT_ARRAY_COUNT(s));
 		if (s[0])
 		{
-			ORDERINDEX n = (ORDERINDEX)atoi(s);
-			Limit(n, (ORDERINDEX)0, m_sndFile.Order.size());
-			for (ORDERINDEX i = 0; i <= n; i++)
-				if (m_sndFile.Order[i] == m_sndFile.Order.GetInvalidPatIndex()) return;
+			ORDERINDEX n = ConvertStrTo<ORDERINDEX>(s);
+			LimitMax(n, m_sndFile.Order().GetLastIndex());
+			while(n > 0 && n < m_sndFile.Order().GetLastIndex() && !m_sndFile.Order().IsValidPat(n))
+				n++;
 
-			if (n != m_sndFile.Order.GetRestartPos())
+			if (n != m_sndFile.Order().GetRestartPos())
 			{
 				m_EditRestartPos.SetModify(FALSE);
-				m_sndFile.Order.SetRestartPos(n);
+				m_sndFile.Order().SetRestartPos(n);
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).RestartPos(), this);
 			}
 		}
 	}

@@ -117,8 +117,9 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading pattern order
-	const ORDERINDEX readOrders = fileHeader.lastOrder + 1;
-	Order.ReadAsByte(file, 128, readOrders, 0xFF, 0xFE);
+	uint8 orders[128];
+	file.ReadArray(orders);
+	ReadOrderFromArray(Order(), orders, fileHeader.lastOrder + 1, 0xFF, 0xFE);
 
 	// Reading Patterns
 	const ROWINDEX rowsPerPat = fileHeader.beatsPerTrack ? std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS) : 64;

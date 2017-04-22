@@ -444,17 +444,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Not supported in MOD format
 		if(m_SndFile.m_nDefaultSpeed != 6)
 		{
-			if(m_SndFile.Order.size() > 0)
+			if(!m_SndFile.Order().empty())
 			{
-				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultSpeed = 6;
 		}
 		if(m_SndFile.m_nDefaultTempo != TEMPO(125, 0))
 		{
-			if(m_SndFile.Order.size() > 0)
+			if(!m_SndFile.Order().empty())
 			{
-				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultTempo.Set(125);
 		}
@@ -467,7 +467,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Is the "restart position" value allowed in this format?
 	for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences(); seq++)
 	{
-		if(m_SndFile.Order.GetSequence(seq).GetRestartPos() > 0 && !specs.hasRestartPos)
+		if(m_SndFile.Order(seq).GetRestartPos() > 0 && !specs.hasRestartPos)
 		{
 			// Try to fix it by placing a pattern jump command in the pattern.
 			if(!m_SndFile.Order.RestartPosToPattern(seq))

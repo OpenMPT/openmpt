@@ -2179,7 +2179,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetRestartPos(), 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 1);
 
 	// Macros
 	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
@@ -2304,8 +2304,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 	// Sequences
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 1);
-	VERIFY_EQUAL_NONCONT(sndFile.Order[0], 0);
-	VERIFY_EQUAL_NONCONT(sndFile.Order[1], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[0], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], 1);
 
 	// Patterns
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
@@ -2603,19 +2603,19 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Sequences
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 2);
 
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetLengthTailTrimmed(), 3);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetName(), "First Sequence");
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[0], sndFile.Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[1], 0);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[2], sndFile.Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetRestartPos(), 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetLengthTailTrimmed(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetName(), "First Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[0], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[1], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[2], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetRestartPos(), 1);
 
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetLengthTailTrimmed(), 3);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetName(), "Second Sequence");
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[0], 1);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[1], 2);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[2], 3);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetRestartPos(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetLengthTailTrimmed(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetName(), "Second Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1)[0], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1)[1], 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1)[2], 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetRestartPos(), 2);
 
 	// Patterns
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
@@ -2712,7 +2712,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeClassic);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetRestartPos(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);
@@ -2787,12 +2787,12 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	}
 
 	// Orders
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetLengthTailTrimmed(), 5);
-	VERIFY_EQUAL_NONCONT(sndFile.Order[0], 0);
-	VERIFY_EQUAL_NONCONT(sndFile.Order[1], sndFile.Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(sndFile.Order[2], sndFile.Order.GetInvalidPatIndex());
-	VERIFY_EQUAL_NONCONT(sndFile.Order[3], 1);
-	VERIFY_EQUAL_NONCONT(sndFile.Order[4], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetLengthTailTrimmed(), 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[0], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[2], sndFile.Order.GetInvalidPatIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[3], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[4], 0);
 
 	// Patterns
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);

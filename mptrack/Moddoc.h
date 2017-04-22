@@ -410,9 +410,6 @@ public:
 	afx_msg void OnEditSamples();
 	afx_msg void OnEditInstruments();
 	afx_msg void OnEditComments();
-	afx_msg void OnInsertPattern();
-	afx_msg void OnInsertSample();
-	afx_msg void OnInsertInstrument();
 	afx_msg void OnShowCleanup();
 	afx_msg void OnSetupZxxMacros();
 	afx_msg void OnEstimateSongLength();

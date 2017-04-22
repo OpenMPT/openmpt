@@ -214,10 +214,9 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_OFFSETPERCENTAGE,
 	};
 
-	Order.clear();
-	for(uint16 i = 0; i < fileHeader.numOrders; i++)
+	Order().clear();
+	for(const auto &ord : order)
 	{
-		const PLMOrderItem &ord = order[i];
 		if(ord.pattern >= fileHeader.numPatterns
 			|| ord.y > fileHeader.numChannels
 			|| !file.Seek(patternPos[ord.pattern])) continue;
@@ -241,13 +240,11 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 				curRow = 0;
 				curOrd++;
 			}
-			if(curOrd >= Order.size())
+			if(curOrd >= Order().size())
 			{
-				PATTERNINDEX pat = Patterns.InsertAny(rowsPerPat);
-				Order.resize(curOrd + 1);
-				Order[curOrd] = pat;
+				Order().insert(curOrd + 1, 1, Patterns.InsertAny(rowsPerPat));
 			}
-			PATTERNINDEX pat = Order[curOrd];
+			PATTERNINDEX pat = Order()[curOrd];
 			if(!Patterns.IsValidPat(pat)) break;
 
 			ModCommand *m = Patterns[pat].GetpModCommand(curRow, ord.y);
@@ -280,7 +277,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						m->param = 0x30 | (m->param & 0x03);
 						break;
 					case 0x0B:	// Jump to order
-						if(m->param < fileHeader.numOrders)
+						if(m->param < order.size())
 						{
 							uint16 target = order[m->param].x;
 							m->param = static_cast<ModCommand::PARAM>(target / rowsPerPat);
@@ -339,7 +336,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	ROWINDEX endPatSize = maxPos % rowsPerPat;
 	if(endPatSize > 0)
 	{
-		PATTERNINDEX endPat = Order[maxPos / rowsPerPat];
+		PATTERNINDEX endPat = Order()[maxPos / rowsPerPat];
 		if(Patterns.IsValidPat(endPat))
 		{
 			Patterns[endPat].Resize(endPatSize, false);
@@ -347,15 +344,15 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	// If there are still any non-existent patterns in our order list, insert some blank patterns.
 	PATTERNINDEX blankPat = PATTERNINDEX_INVALID;
-	for(ORDERINDEX i = 0; i < Order.size(); i++)
+	for(auto &pat : Order())
 	{
-		if(Order[i] == Order.GetInvalidPatIndex())
+		if(pat == Order.GetInvalidPatIndex())
 		{
 			if(blankPat == PATTERNINDEX_INVALID)
 			{
 				blankPat = Patterns.InsertAny(rowsPerPat);
 			}
-			Order[i] = blankPat;
+			pat = blankPat;
 		}
 	}
 

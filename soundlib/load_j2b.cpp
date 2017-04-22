@@ -720,7 +720,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 		// "ORDR" - Order list
 		FileReader chunk(chunks.GetChunk(AMFFRiffChunk::idORDR));
 		uint8 numOrders = chunk.ReadUint8() + 1;
-		Order.ReadAsByte(chunk, numOrders, numOrders, 0xFF, 0xFE);
+		ReadOrderFromFile<uint8>(Order(), chunk, numOrders, 0xFF, 0xFE);
 	}
 
 	// "PATT" - Pattern data for one pattern

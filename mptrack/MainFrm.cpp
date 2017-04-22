@@ -1673,8 +1673,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_nChannels = 2;
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = tempoModeClassic;
-	m_WaveFile.Order.resize(1);
-	m_WaveFile.Order[0] = 0;
+	m_WaveFile.Order().assign(1, 0);
 	m_WaveFile.Patterns.Insert(0, 2);
 	m_WaveFile.m_SongFlags = SONG_LINEARSLIDES;
 }

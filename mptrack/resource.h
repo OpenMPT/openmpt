@@ -998,9 +998,6 @@
 #define ID_VIEW_SAMPLES                 32783
 #define ID_VIEW_INSTRUMENTS             32784
 #define ID_VIEW_OPTIONS                 32785
-#define ID_INSERT_PATTERN               32786
-#define ID_INSERT_SAMPLE                32787
-#define ID_INSERT_INSTRUMENT            32788
 #define ID_INSTRUMENTS_REMOVEALL        32789
 #define ID_CLEANUP_INSTRUMENTS          32790
 #define ID_CLEANUP_SAMPLES              32791

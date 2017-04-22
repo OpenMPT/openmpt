@@ -273,7 +273,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
 	titleChunk.ReadString<mpt::String::spacePadded>(m_songName, titleChunk.GetLength());
 
-	Order.clear();
+	Order().clear();
 	// Subsong setup
 	std::vector<PSMSubSong> subsongs;
 	bool subsongPanningDiffers = false; // Do we have subsongs with different panning positions?
@@ -296,14 +296,13 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::nullTerminated>(subsong.songName, songHeader.songType);
 
 #ifdef MPT_PSM_USE_REAL_SUBSONGS
-		if(Order.GetLength() != 0)
+		if(!Order().empty())
 		{
 			// Add a new sequence for this subsong
 			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
 				break;
-			Order.clear();
 		}
-		Order.SetName(subsong.songName);
+		Order().SetName(subsong.songName);
 #endif // MPT_PSM_USE_REAL_SUBSONGS
 
 		// Read "Sub chunks"
@@ -360,14 +359,14 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						case 0x01: // Play order list item
 							{
 								if(subsong.startOrder == ORDERINDEX_INVALID)
-									subsong.startOrder = Order.size();
-								subsong.endOrder = Order.size();
+									subsong.startOrder = Order().GetLength();
+								subsong.endOrder = Order().GetLength();
 								PATTERNINDEX pat = ReadPSMPatternIndex(subChunk, sinariaFormat);
 								if(pat == 0xFF)
 									pat = Order.GetInvalidPatIndex();
 								else if(pat == 0xFE)
 									pat = Order.GetIgnoreIndex();
-								Order.Append(pat);
+								Order().push_back(pat);
 								// Decide whether this is the first order chunk or not (for finding out the correct restart position)
 								if(firstOrderChunk == uint16_max)
 									firstOrderChunk = chunkCount;
@@ -382,7 +381,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 								uint16 restartChunk = subChunk.ReadUint16LE();
 								if(restartChunk >= firstOrderChunk)
 									subsong.restartPos = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);	// Close enough - we assume that order list is continuous (like in any real-world PSM)
-								Order.SetRestartPos(subsong.restartPos);
+								Order().SetRestartPos(subsong.restartPos);
 							}
 							break;
 
@@ -518,7 +517,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		if(subsong.startOrder != ORDERINDEX_INVALID && subsong.endOrder != ORDERINDEX_INVALID)
 		{
 			// Separate subsongs by "---" patterns
-			Order.Append();
+			Order().push_back();
 			subsongs.push_back(subsong);
 		}
 	}
@@ -586,7 +585,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// Make the default variables of the first subsong global
 	m_nDefaultSpeed = subsongs[0].defaultSpeed;
 	m_nDefaultTempo.Set(subsongs[0].defaultTempo);
-	Order.SetRestartPos(subsongs[0].restartPos);
+	Order().SetRestartPos(subsongs[0].restartPos);
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ChnSettings[chn].Reset();
@@ -851,9 +850,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		for(size_t i = 0; i < subsongs.size(); i++)
 		{
 #ifdef MPT_PSM_USE_REAL_SUBSONGS
-			ModSequence &order = Order.GetSequence(static_cast<SEQUENCEINDEX>(i));
+			ModSequence &order = Order(static_cast<SEQUENCEINDEX>(i));
 #else
-			ModSequence &order = Order;
+			ModSequence &order = Order();
 #endif // MPT_PSM_USE_REAL_SUBSONGS
 			const PSMSubSong &subsong = subsongs[i];
 			PATTERNINDEX startPattern = order[subsong.startOrder];
@@ -1074,7 +1073,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Read orders
 	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadMagic("PORD"))
 	{
-		Order.ReadAsByte(file, fileHeader.songOrders);
+		ReadOrderFromFile<uint8>(Order(), file, fileHeader.songOrders);
 	}
 
 	// Read pan positions

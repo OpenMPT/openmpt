@@ -429,7 +429,9 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = fileHeader.insNum;
 	m_nSamples = 0; // Will be incremented later
 
-	Order.ReadAsByte(file, 256, fileHeader.ordNum, uint16_max, 0xFF);
+	uint8 orders[256];
+	file.ReadArray(orders);
+	ReadOrderFromArray(Order(), orders, fileHeader.ordNum, uint16_max, 0xFF);
 
 	// Read patterns
 	if(loadFlags & loadPatternData)

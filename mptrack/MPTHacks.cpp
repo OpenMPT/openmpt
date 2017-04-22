@@ -104,30 +104,25 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 #endif // NO_PLUGINS
 
 	// Check for invalid order items
-	for(ORDERINDEX i = m_SndFile.Order.GetLengthTailTrimmed(); i > 0; i--)
+	if(!originalSpecs->hasIgnoreIndex && std::find(m_SndFile.Order().begin(), m_SndFile.Order().end(), m_SndFile.Order.GetIgnoreIndex()) != m_SndFile.Order().end())
 	{
-		if(m_SndFile.Order[i - 1] == m_SndFile.Order.GetIgnoreIndex() && !originalSpecs->hasIgnoreIndex)
+		foundHacks = true;
+		AddToLog("This format does not support separator (+++) patterns");
+
+		if(autofix)
 		{
-			foundHacks = true;
-			AddToLog("This format does not support separator (+++) patterns");
-
-			if(autofix)
-			{
-				m_SndFile.Order.RemovePattern(m_SndFile.Order.GetIgnoreIndex());
-			}
-
-			break;
+			m_SndFile.Order().RemovePattern(m_SndFile.Order.GetIgnoreIndex());
 		}
 	}
 
-	if(!originalSpecs->hasStopIndex && m_SndFile.Order.GetLengthFirstEmpty() != m_SndFile.Order.GetLengthTailTrimmed())
+	if(!originalSpecs->hasStopIndex && m_SndFile.Order().GetLengthFirstEmpty() != m_SndFile.Order().GetLengthTailTrimmed())
 	{
 		foundHacks = true;
 		AddToLog("The pattern sequence should end after the first stop (---) index in this format.");
 
 		if(autofix)
 		{
-			m_SndFile.Order.RemovePattern(m_SndFile.Order.GetInvalidPatIndex());
+			m_SndFile.Order().RemovePattern(m_SndFile.Order.GetInvalidPatIndex());
 		}
 	}
 
@@ -361,11 +356,15 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog("Two envelope points may not share the same tick.");
 
 	// Check for too many orders
-	if(m_SndFile.Order.GetLengthTailTrimmed() > originalSpecs->ordersMax)
+	if(m_SndFile.Order().GetLengthTailTrimmed() > originalSpecs->ordersMax)
 	{
 		AddToLog(mpt::String::Print("Found too many orders (%1 allowed)", originalSpecs->ordersMax));
 		foundHacks = true;
-		// REQUIRES (INTELLIGENT) AUTOFIX
+		if(autofix)
+		{
+			// Can we be more intelligent here and maybe remove stop patterns and such?
+			m_SndFile.Order().resize(originalSpecs->ordersMax);
+		}
 	}
 
 	// Check for invalid default tempo
@@ -450,7 +449,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for restart position where it should not be
 	for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences(); seq++)
 	{
-		if(m_SndFile.Order.GetSequence(0).GetRestartPos() > 0 && !originalSpecs->hasRestartPos)
+		if(m_SndFile.Order(seq).GetRestartPos() > 0 && !originalSpecs->hasRestartPos)
 		{
 			AddToLog("Found restart position");
 			foundHacks = true;

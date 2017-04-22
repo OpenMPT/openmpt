@@ -378,15 +378,13 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 		modDoc.AddToLog(mpt::String::Print("%1 duplicate pattern%2 merged.", foundDupes, foundDupes == 1 ? "" : "s"));
 
 		// Fix order list
-		const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
-		for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
+		for(auto &order : sndFile.Order)
 		{
-			for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
+			for(auto &pat : order)
 			{
-				PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
 				if(pat < numPatterns && patternMapping[pat] != PATTERNINDEX_INVALID)
 				{
-					sndFile.Order.GetSequence(seq)[ord] = patternMapping[pat];
+					pat = patternMapping[pat];
 				}
 			}
 		}
@@ -403,17 +401,15 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 //-----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
-	const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
 	std::vector<bool> patternUsed(numPatterns, false);
 
 	BeginWaitCursor();
 	// First, find all used patterns in all sequences.
-	for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
+	for(auto &order : sndFile.Order)
 	{
-		for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
+		for(auto pat : order)
 		{
-			PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
 			if(pat < numPatterns)
 			{
 				patternUsed[pat] = true;
@@ -466,7 +462,6 @@ bool CModCleanupDlg::RearrangePatterns()
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
 	std::vector<OrigPatSettings> patternSettings(numPatterns, defaultSettings);
 
@@ -477,18 +472,17 @@ bool CModCleanupDlg::RearrangePatterns()
 
 	// First, find all used patterns in all sequences.
 	PATTERNINDEX patOrder = 0;
-	for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
+	for(auto &order : sndFile.Order)
 	{
-		for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
+		for(auto &pat :order)
 		{
-			PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
 			if(pat < numPatterns)
 			{
 				if(patternSettings[pat].newIndex == PATTERNINDEX_INVALID)
 				{
 					patternSettings[pat].newIndex = patOrder++;
 				}
-				sndFile.Order.GetSequence(seq)[ord] = patternSettings[pat].newIndex;
+				pat = patternSettings[pat].newIndex;
 			}
 		}
 	}
@@ -904,11 +898,11 @@ bool CModCleanupDlg::ResetVariables()
 	sndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	sndFile.m_nSamplePreAmp = 48;
 	sndFile.m_nVSTiVolume = 48;
-	sndFile.Order.SetRestartPos(0);
+	sndFile.Order().SetRestartPos(0);
 
-	if(sndFile.Order.size() == 0)
+	if(sndFile.Order().empty())
 	{
-		sndFile.Order.Append(sndFile.Patterns.InsertAny(64));
+		sndFile.Order().push_back(sndFile.Patterns.InsertAny(64));
 	}
 
 	// Reset instruments (if there are any)
@@ -973,12 +967,7 @@ bool CModCleanupDlg::RemoveAllOrders()
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	sndFile.Order.SetSequence(0);
-	while(sndFile.Order.GetNumSequences() > 1)
-	{
-		sndFile.Order.RemoveSequence(1);
-	}
-	sndFile.Order.clear();
+	sndFile.Order.Initialize();
 	sndFile.SetCurrentOrder(0);
 	return true;
 }

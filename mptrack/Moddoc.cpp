@@ -97,9 +97,6 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_VIEW_EDITHISTORY,		OnViewEditHistory)
 	ON_COMMAND(ID_VIEW_MIDIMAPPING,		OnViewMIDIMapping)
 	ON_COMMAND(ID_VIEW_MPTHACKS,		OnViewMPTHacks)
-	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
-	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
-	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
 	ON_COMMAND(ID_EDIT_CLEANUP,			OnShowCleanup)
 	ON_COMMAND(ID_PATTERN_MIDIMACRO,	OnSetupZxxMacros)
 	ON_COMMAND(ID_CHANNEL_MANAGER,		OnChannelManager)
@@ -109,7 +106,6 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)
-	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_PATTERN_MIDIMACRO,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
@@ -590,12 +586,8 @@ BOOL CModDoc::InitializeMod()
 
 		// Refresh mix levels now that the correct mod type has been set
 		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
-		// ...and the order length
-		m_SndFile.Order.resize(std::min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
-		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
-			m_SndFile.Order[0] = 0;
-
+		m_SndFile.Order().assign(1, 0);
 		if (!m_SndFile.Patterns.IsValidPat(0))
 		{
 			m_SndFile.Patterns.Insert(0, 64);
@@ -1586,7 +1578,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order().GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
 	{
 		BypassInputHandler bih;
 		if (wsdlg.DoModal() != IDOK) return;
@@ -2042,17 +2034,17 @@ void CModDoc::OnPlayerPause()
 			{
 				CriticalSection cs;
 
-				if ((m_SndFile.m_PlayState.m_nCurrentOrder < m_SndFile.Order.size()) && (m_SndFile.Order[m_SndFile.m_PlayState.m_nCurrentOrder] == nPat))
+				if ((m_SndFile.m_PlayState.m_nCurrentOrder < m_SndFile.Order().GetLength()) && (m_SndFile.Order()[m_SndFile.m_PlayState.m_nCurrentOrder] == nPat))
 				{
 					m_SndFile.m_PlayState.m_nNextOrder = m_SndFile.m_PlayState.m_nCurrentOrder;
 					m_SndFile.m_PlayState.m_nNextRow = nNextRow;
 					m_SndFile.m_PlayState.m_nRow = nRow;
 				} else
 				{
-					for (ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.size(); nOrd++)
+					for (ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order().GetLength(); nOrd++)
 					{
-						if (m_SndFile.Order[nOrd] == m_SndFile.Order.GetInvalidPatIndex()) break;
-						if (m_SndFile.Order[nOrd] == nPat)
+						if (m_SndFile.Order()[nOrd] == m_SndFile.Order.GetInvalidPatIndex()) break;
+						if (m_SndFile.Order()[nOrd] == nPat)
 						{
 							m_SndFile.m_PlayState.m_nCurrentOrder = nOrd;
 							m_SndFile.m_PlayState.m_nNextOrder = nOrd;
@@ -2197,43 +2189,9 @@ void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
 void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 //---------------------------------------------------
 {
-	if (p)
+	if(p)
 		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT)) ? TRUE : FALSE);
 }
-
-
-void CModDoc::OnInsertPattern()
-//-----------------------------
-{
-	const PATTERNINDEX pat = InsertPattern();
-	if(pat != PATTERNINDEX_INVALID)
-	{
-		ORDERINDEX ord = 0;
-		for (ORDERINDEX i = 0; i < m_SndFile.Order.size(); i++)
-		{
-			if (m_SndFile.Order[i] == pat) ord = i;
-			if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
-		}
-		ViewPattern(pat, ord);
-	}
-}
-
-
-void CModDoc::OnInsertSample()
-//----------------------------
-{
-	SAMPLEINDEX smp = InsertSample();
-	if (smp != SAMPLEINDEX_INVALID) ViewSample(smp);
-}
-
-
-void CModDoc::OnInsertInstrument()
-//--------------------------------
-{
-	INSTRUMENTINDEX ins = InsertInstrument();
-	if (ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
-}
-
 
 
 void CModDoc::OnEstimateSongLength()
@@ -2353,10 +2311,10 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		ord = patternViewState.nOrder;
 	}
 
-	if(ord >= m_SndFile.Order.size())
+	if(ord >= m_SndFile.Order().size())
 	{
 		ord = 0;
-		pat = m_SndFile.Order[ord];
+		pat = m_SndFile.Order()[ord];
 	}
 	if(!m_SndFile.Patterns.IsValidPat(pat))
 	{
@@ -2368,9 +2326,9 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	}
 
 	//ensure order correlates with pattern.
-	if(m_SndFile.Order[ord] != pat)
+	if(m_SndFile.Order()[ord] != pat)
 	{
-		ord = m_SndFile.Order.FindOrder(pat);
+		ord = m_SndFile.Order().FindOrder(pat);
 	}
 
 	return followSonghWnd;
@@ -2415,7 +2373,7 @@ void CModDoc::OnPatternRestart(bool loop)
 			m_SndFile.m_PlayState.Chn[i].nFadeOutVol = 0;
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (m_SndFile.Order[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
+		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		if(loop)
 			m_SndFile.LoopPattern(nPat);
@@ -2472,7 +2430,7 @@ void CModDoc::OnPatternPlay()
 		{
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		if ((nOrd < m_SndFile.Order.size()) && (m_SndFile.Order[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
+		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.LoopPattern(nPat);
 
@@ -2528,7 +2486,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		}
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.SetCurrentOrder(nOrd);
-		if (m_SndFile.Order[nOrd] == nPat)
+		if (m_SndFile.Order()[nOrd] == nPat)
 			m_SndFile.DontLoopPattern(nPat, nRow);
 		else
 			m_SndFile.LoopPattern(nPat);

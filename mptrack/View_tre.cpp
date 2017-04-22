@@ -935,7 +935,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
 		if((seqHint.GetType()[HINT_SEQNAMES] && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
 		{
-			CString seqName = sndFile.Order.GetSequence(0).GetName().c_str();
+			CString seqName = sndFile.Order(0).GetName().c_str();
 			if(seqName.IsEmpty() || sndFile.Order.GetNumSequences() > 1)
 				seqName = _T("Sequence");
 			else
@@ -950,10 +950,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			if(sndFile.Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
-				if(sndFile.Order.GetSequence(nSeq).GetName().empty())
+				if(sndFile.Order(nSeq).GetName().empty())
 					seqName.Format(_T("Sequence %u"), nSeq);
 				else
-					seqName.Format("%u: %s", nSeq, sndFile.Order.GetSequence(nSeq).GetName().c_str());
+					seqName.Format("%u: %s", nSeq, sndFile.Order(nSeq).GetName().c_str());
 
 				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
@@ -977,7 +977,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				hAncestorNode = info.tiSequences[nSeq];
 			}
 
-			const ORDERINDEX ordLength = sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed();
+			const ORDERINDEX ordLength = sndFile.Order(nSeq).GetLengthTailTrimmed();
 			// If there are items past the new sequence length, delete them.
 			for(size_t nOrd = ordLength; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
 			{
@@ -987,28 +987,28 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				info.tiOrders[nSeq].resize(ordLength, nullptr);
 			const bool patNamesOnly = patternHint.GetType()[HINT_PATNAMES];
 
-			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order.size())) imin = imax = dwHintParam;
+			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order().GetLength())) imin = imax = dwHintParam;
 			for (ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
-				if(patNamesOnly && sndFile.Order.GetSequence(nSeq)[iOrd] != nPat)
+				if(patNamesOnly && sndFile.Order(nSeq)[iOrd] != nPat)
 					continue;
 				UINT state = (iOrd == info.nOrdSel && nSeq == info.nSeqSel) ? TVIS_BOLD : 0;
-				if (sndFile.Order.GetSequence(nSeq)[iOrd] < sndFile.Patterns.Size())
+				if (sndFile.Order(nSeq)[iOrd] < sndFile.Patterns.Size())
 				{
 					stmp[0] = 0;
-					sndFile.Patterns[sndFile.Order.GetSequence(nSeq)[iOrd]].GetName(stmp);
+					sndFile.Patterns[sndFile.Order(nSeq)[iOrd]].GetName(stmp);
 					if (stmp[0])
 					{
 						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %u: %s" : "[%02u] %u: %s",
-							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd], stmp);
+							iOrd, sndFile.Order(nSeq)[iOrd], stmp);
 					} else
 					{
 						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
-							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd]);
+							iOrd, sndFile.Order(nSeq)[iOrd]);
 					}
 				} else
 				{
-					if(sndFile.Order.GetSequence(nSeq)[iOrd] == sndFile.Order.GetIgnoreIndex())
+					if(sndFile.Order(nSeq)[iOrd] == sndFile.Order.GetIgnoreIndex())
 					{
 						// +++ Item
 						wsprintf(s, _T("[%02u] Skip"), iOrd);
@@ -1601,7 +1601,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			// First, find all used patterns in all sequences.
 			for(SEQUENCEINDEX seq = 0; seq < sndFile.Order.GetNumSequences(); seq++)
 			{
-				const auto sequence = sndFile.Order.GetSequence(seq);
+				const auto &sequence = sndFile.Order(seq);
 				const ORDERINDEX ordLength = sequence.GetLengthTailTrimmed();
 				for(ORDERINDEX ord = 0; ord < ordLength; ord++)
 				{
@@ -2251,7 +2251,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				{
 					// drop on sequence -> attach
 					nSeqTo = (SEQUENCEINDEX)modItemDrop.val1;
-					nOrdTo = pSndFile->Order.GetSequence(nSeqTo).GetLengthTailTrimmed();
+					nOrdTo = pSndFile->Order(nSeqTo).GetLengthTailTrimmed();
 				}
 
 				if (nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
@@ -2276,7 +2276,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				// copy mod sequence over.
 				CSoundFile &dragSndFile = pInfoDrag->modDoc.GetrSoundFile();
 				const SEQUENCEINDEX nOrigSeq = (SEQUENCEINDEX)modItemDragID;
-				const ModSequence &origSeq = dragSndFile.Order.GetSequence(nOrigSeq);
+				const ModSequence &origSeq = dragSndFile.Order(nOrigSeq);
 
 				if(pSndFile->GetModSpecifications().sequencesMax > 1)
 				{
@@ -2287,21 +2287,21 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					if(Reporting::Confirm(_T("Replace the current orderlist?"), _T("Sequence import")) == cnfNo)
 						return false;
 				}
-				pSndFile->Order.resize(std::min(pSndFile->GetModSpecifications().ordersMax, origSeq.GetLength()), pSndFile->Order.GetInvalidPatIndex());
+				pSndFile->Order().resize(std::min(pSndFile->GetModSpecifications().ordersMax, origSeq.GetLength()), pSndFile->Order.GetInvalidPatIndex());
 				for(ORDERINDEX nOrd = 0; nOrd < std::min(pSndFile->GetModSpecifications().ordersMax, origSeq.GetLengthTailTrimmed()); nOrd++)
 				{
-					PATTERNINDEX nOrigPat = dragSndFile.Order.GetSequence(nOrigSeq)[nOrd];
+					PATTERNINDEX nOrigPat = dragSndFile.Order(nOrigSeq)[nOrd];
 					// translate pattern index
 					if(nOrigPat == dragSndFile.Order.GetInvalidPatIndex())
-						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+						pSndFile->Order()[nOrd] = pSndFile->Order.GetInvalidPatIndex();
 					else if(nOrigPat == dragSndFile.Order.GetIgnoreIndex() && pSndFile->GetModSpecifications().hasIgnoreIndex)
-						pSndFile->Order[nOrd] = pSndFile->Order.GetIgnoreIndex();
+						pSndFile->Order()[nOrd] = pSndFile->Order.GetIgnoreIndex();
 					else if(nOrigPat == dragSndFile.Order.GetIgnoreIndex() && !pSndFile->GetModSpecifications().hasIgnoreIndex)
-						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+						pSndFile->Order()[nOrd] = pSndFile->Order.GetInvalidPatIndex();
 					else if(nOrigPat >= pSndFile->GetModSpecifications().patternsMax)
-						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+						pSndFile->Order()[nOrd] = pSndFile->Order.GetInvalidPatIndex();
 					else
-						pSndFile->Order[nOrd] = nOrigPat;
+						pSndFile->Order()[nOrd] = nOrigPat;
 				}
 				pModDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 				pModDoc->SetModified();
@@ -2674,7 +2674,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					bool isCurSeq = false;
 					if(sndFile && sndFile->GetModSpecifications().sequencesMax > 1)
 					{
-						if(sndFile->Order.GetSequence((SEQUENCEINDEX)modItemID).GetLength() == 0)
+						if(sndFile->Order((SEQUENCEINDEX)modItemID).GetLength() == 0)
 						{
 							nDefault = ID_MODTREE_SWITCHTO;
 						}
@@ -3804,7 +3804,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		{
 		case MODITEM_ORDER:
 			{
-				PATTERNINDEX pat = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val2)).At(static_cast<ORDERINDEX>(modItem.val1));
+				PATTERNINDEX pat = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
 				if(pat == sndFile.Order.GetInvalidPatIndex())
 					text = "---";
 				else if(pat == sndFile.Order.GetIgnoreIndex())
@@ -3824,7 +3824,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SEQUENCE:
 			if(modItem.val1 < sndFile.Order.GetNumSequences())
 			{
-				text = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName();
+				text = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName();
 				doLabelEdit = true;
 			}
 			break;
@@ -3905,7 +3905,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				{
 					valid = (pat < sndFile.Patterns.GetNumPatterns());
 				}
-				PATTERNINDEX &target = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val2)).At(static_cast<ORDERINDEX>(modItem.val1));
+				PATTERNINDEX &target = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
 				if(valid && pat != target)
 				{
 					target = pat;
@@ -3917,9 +3917,9 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 		case MODITEM_HDR_ORDERS:
 		case MODITEM_SEQUENCE:
-			if(modItem.val1 < sndFile.Order.GetNumSequences() && sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName() != info->item.pszText)
+			if(modItem.val1 < sndFile.Order.GetNumSequences() && sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName() != info->item.pszText)
 			{
-				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(info->item.pszText);
+				sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(info->item.pszText);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, SequenceHint((SEQUENCEINDEX)modItem.val1).Data().Names());
 			}

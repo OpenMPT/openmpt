@@ -546,12 +546,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			{
 				if(m_nOrder > 0)
 				{
-					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(m_nOrder);
+					ORDERINDEX prevOrder = sndFile.Order().GetPreviousOrderIgnoringSkips(m_nOrder);
 					//Skip +++ items
 
-					if(m_nOrder < sndFile.Order.size() && sndFile.Order[m_nOrder] == m_nPattern)
+					if(m_nOrder < sndFile.Order().size() && sndFile.Order()[m_nOrder] == m_nPattern)
 					{
-						nPrevPat = sndFile.Order[prevOrder];
+						nPrevPat = sndFile.Order()[prevOrder];
 					}
 				}
 			}
@@ -592,14 +592,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
-			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(m_nOrder);
+			ORDERINDEX nNextOrder = sndFile.Order().GetNextOrderIgnoringSkips(m_nOrder);
 			if(nNextOrder == m_nOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
-			const ORDERINDEX ordCount = sndFile.Order.GetLength();
+			const ORDERINDEX ordCount = sndFile.Order().GetLength();
 
-			if(nNextOrder < ordCount && sndFile.Order[m_nOrder] == m_nPattern)
+			if(nNextOrder < ordCount && sndFile.Order()[m_nOrder] == m_nPattern)
 			{
-				nNextPat = sndFile.Order[nNextOrder];
+				nNextPat = sndFile.Order()[nNextOrder];
 			}
 			if(sndFile.Patterns.IsValidPat(nNextPat))
 			{

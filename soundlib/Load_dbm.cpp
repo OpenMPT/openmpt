@@ -320,7 +320,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Song chunk
 	FileReader songChunk = chunks.GetChunk(DBMChunk::idSONG);
-	Order.clear();
+	Order().clear();
 	uint16 numSongs = infoData.songs;
 	for(uint16 i = 0; i < numSongs && songChunk.CanRead(46); i++)
 	{
@@ -330,29 +330,29 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			m_songName = name;
 		}
+		uint16 numOrders = songChunk.ReadUint16BE();
+
 #ifdef MPT_DBM_USE_REAL_SUBSONGS
-		if(Order.GetLength() != 0)
+		if(!Order().empty())
 		{
 			// Add a new sequence for this song
 			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
 				break;
-			Order.clear();
 		}
-		Order.SetName(name);
-#endif // MPT_DBM_USE_REAL_SUBSONGS
-
-		uint16 numOrders = songChunk.ReadUint16BE();
-		const ORDERINDEX startIndex = Order.GetLength();
-		if(startIndex < ORDERINDEX_MAX && songChunk.CanRead(numOrders * 2u))
+		Order().SetName(name);
+		ReadOrderFromFile<uint16le>(Order(), songChunk, numOrders);
+#else
+		const ORDERINDEX startIndex = Order().GetLength();
+		if(startIndex < MAX_ORDERS && songChunk.CanRead(numOrders * 2u))
 		{
-			LimitMax(numOrders, static_cast<ORDERINDEX>(ORDERINDEX_MAX - startIndex - 1));
-			Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
-
+			LimitMax(numOrders, static_cast<ORDERINDEX>(MAX_ORDERS - startIndex - 1));
+			Order().resize(startIndex + numOrders + 1);
 			for(uint16 ord = 0; ord < numOrders; ord++)
 			{
-				Order[startIndex + ord] = static_cast<PATTERNINDEX>(songChunk.ReadUint16BE());
+				Order()[startIndex + ord] = static_cast<PATTERNINDEX>(songChunk.ReadUint16BE());
 			}
 		}
+#endif // MPT_DBM_USE_REAL_SUBSONGS
 	}
 #ifdef MPT_DBM_USE_REAL_SUBSONGS
 	Order.SetSequence(0);
