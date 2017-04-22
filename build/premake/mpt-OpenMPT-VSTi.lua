@@ -92,9 +92,6 @@
    "soundtouch",
    "vorbis",
   }
-  linkoptions {
-   "/DELAYLOAD:uxtheme.dll",
-  }
   filter { "configurations:*Shared" }
   filter { "not configurations:*Shared" }
    linkoptions {

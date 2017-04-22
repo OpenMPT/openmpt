@@ -137,9 +137,6 @@ end
     "mpg123",
    }
   end
-  linkoptions {
-   "/DELAYLOAD:uxtheme.dll",
-  }
   filter { "configurations:*Shared" }
   filter { "not configurations:*Shared" }
    linkoptions {

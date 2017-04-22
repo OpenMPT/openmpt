@@ -750,9 +750,6 @@ public:
 };
 
 
-MPT_REGISTERED_COMPONENT(ComponentUXTheme, "UXTheme")
-
-
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
 // %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
 // Returns true on success.

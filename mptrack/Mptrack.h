@@ -146,13 +146,6 @@ public:
 // See mptrack.cpp for the implementation of this class
 //
 
-class ComponentUXTheme : public ComponentSystemDLL
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-public:
-	ComponentUXTheme() : ComponentSystemDLL(MPT_PATHSTRING("uxtheme")) { }
-};
-
 class CMPTCommandLineInfo;
 
 //=============================

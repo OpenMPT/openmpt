@@ -36,7 +36,7 @@ enum ComponentType
 {
 	ComponentTypeUnknown = 0,
 	ComponentTypeBuiltin,            // PortAudio
-	ComponentTypeSystem,             // uxtheme.dll, mf.dll
+	ComponentTypeSystem,             // mf.dll
 	ComponentTypeSystemInstallable,  // acm mp3 codec
 	ComponentTypeBundled,            // libsoundtouch
 	ComponentTypeForeign,            // libmp3lame

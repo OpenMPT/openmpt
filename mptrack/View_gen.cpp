@@ -1630,13 +1630,7 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
-		{
-			ComponentHandle<ComponentUXTheme> uxtheme;
-			if(IsComponentAvailable(uxtheme))
-			{
-				EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
-			}
-		}
+		EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
 		break;
 	}
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
