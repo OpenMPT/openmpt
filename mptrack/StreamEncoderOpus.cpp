@@ -258,42 +258,7 @@ public:
 		int num_coupled = 0;
 		unsigned char mapping[4] = { 0, 0, 0, 0 };
 
-		#if 1
-			// 1.1
-
-			st = opus_multistream_surround_encoder_create(samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &num_streams, &num_coupled, mapping, OPUS_APPLICATION_AUDIO, &opus_error);
-
-		#else
-			// 1.0
-
-			struct opus_channels_to_streams_t {
-				unsigned char streams;
-				unsigned char coupled;
-			};
-			static const opus_channels_to_streams_t channels_to_streams[] = {
-				/*0*/ { 0, 0 },
-				/*1*/ { 1, 0 },
-				/*2*/ { 1, 1 },
-				/*3*/ { 2, 1 },
-				/*4*/ { 2, 2 }
-			};
-			static const unsigned char channels_to_mapping [4][4] = {
-				{ 0, 0, 0, 0 },
-				{ 0, 1, 0, 0 },
-				{ 0, 1, 2, 0 },
-				{ 0, 1, 2, 3 }
-			};
-
-			st = opus_multistream_encoder_create(samplerate, opus_channels, channels_to_streams[channels].streams, channels_to_streams[channels].coupled, channels_to_mapping[channels], OPUS_APPLICATION_AUDIO, &opus_error);
-
-			num_streams = channels_to_streams[channels].streams;
-			num_coupled = channels_to_streams[channels].coupled;
-			for(int channel=0; channel<opus_channels; ++channel)
-			{
-				mapping[channel] = channels_to_mapping[opus_channels][channel];
-			}
-
-		#endif
+		st = opus_multistream_surround_encoder_create(samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &num_streams, &num_coupled, mapping, OPUS_APPLICATION_AUDIO, &opus_error);
 
 		opus_int32 ctl_lookahead = 0;
 		opus_multistream_encoder_ctl(st, OPUS_GET_LOOKAHEAD(&ctl_lookahead));
