@@ -2,7 +2,7 @@
  * Load_mo3.cpp
  * ------------
  * Purpose: MO3 module loader.
- * Notes  : OpenMPT has its own built-in decoder (enabled with MPT_ENABLE_MO3_BUILTIN),
+ * Notes  : OpenMPT has its own built-in decoder,
  *          but can also make use of the official, closed-source library (unmo3.dll / libunmo3.so).
  * Authors: Johannes Schultz / OpenMPT Devs
  *          Based on documentation and the decompression routines from the
@@ -17,7 +17,6 @@
 #include "Loaders.h"
 #include "../common/ComponentManager.h"
 
-#ifdef MPT_ENABLE_MO3_BUILTIN
 #include "Tables.h"
 #include "../common/version.h"
 
@@ -42,8 +41,6 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #endif // MPT_WITH_STBVORBIS
-
-#endif // MPT_ENABLE_MO3_BUILTIN
 
 #if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 // unmo3.h
@@ -146,8 +143,6 @@ MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
 
 #endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
 
-
-#ifdef MPT_ENABLE_MO3_BUILTIN
 
 struct MO3FileHeader
 {
@@ -795,10 +790,6 @@ static long VorbisfileFilereaderTell(void *datasource)
 
 
 
-#endif // MPT_ENABLE_MO3_BUILTIN
-
-
-
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -819,26 +810,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-#if !(defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)) && !defined(MPT_ENABLE_MO3_BUILTIN)
-	// As of May 2016, the format revision is 5; Versions > 31 are unlikely to ever exist,
-	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
-	// (avoid log entry with e.g. .MOD files that have a song name starting with "MO3").
-	if(version > 31)
-	{
-		return false;
-	}
-
-	AddToLog(LogError, MPT_USTRING("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
-	return false;
-
-#elif defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
+#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 
 	MPT_UNUSED_VARIABLE(version);
 
-	bool shouldUseUnmo3 = true;
-#ifdef MPT_ENABLE_MO3_BUILTIN
-	shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis();
-#endif // MPT_ENABLE_MO3_BUILTIN
+	const bool shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis();
 
 	if(shouldUseUnmo3)
 	{
@@ -885,18 +861,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			return true;
 		}
-	} else
-	{
-		#ifndef MPT_ENABLE_MO3_BUILTIN
-			AddToLog(LogError, MPT_USTRING("Loading MO3 file failed because the unmo3 library could not be loaded."));
-			return false;
-		#endif // MPT_ENABLE_MO3_BUILTIN
 	}
 	}
 
 #endif
-
-#ifdef MPT_ENABLE_MO3_BUILTIN
 
 	if(version > 5)
 	{
@@ -1986,9 +1954,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	return true;
-#else
-	return false;
-#endif // MPT_ENABLE_MO3_BUILTIN
 }
 
 

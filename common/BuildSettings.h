@@ -265,9 +265,6 @@
 // Enable dynamic loading of un4seen unmo3
 #define MPT_ENABLE_UNMO3_DYNBIND
 
-// Enable built-in MO3 decoder
-#define MPT_ENABLE_MO3_BUILTIN
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -332,7 +329,6 @@
 //#define MPT_ENABLE_MPG123_DYNBIND
 //#define MPT_ENABLE_UNMO3_DYNBIND
 #endif // MPT_ENABLE_DLOPEN
-#define MPT_ENABLE_MO3_BUILTIN
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -527,10 +523,6 @@
 
 #if (defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND) || defined(MPT_WITH_MINIMP3)) && !defined(MPT_ENABLE_MP3_SAMPLES)
 #define MPT_ENABLE_MP3_SAMPLES
-#endif
-
-#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND) || defined(MPT_ENABLE_MO3_BUILTIN)
-#define MPT_ENABLE_MO3
 #endif
 
 #if defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
