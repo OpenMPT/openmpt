@@ -154,7 +154,7 @@ namespace mpt
 {
 
 
-#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
+#if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
 
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 //------------------------------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ bool PathString::IsFile() const
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-#endif // MPT_OS_WINDOWS && MPT_ENABLE_DYNBIND
+#endif // MPT_OS_WINDOWS && (MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE)
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS

@@ -95,7 +95,7 @@ public:
 
 	size_t Length() const { return path.size(); }
 
-#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
+#if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
 	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
@@ -111,7 +111,7 @@ public:
 	// Verify if this path exists and is a file on the file system.
 	bool IsFile() const;
 
-#endif // MPT_OS_WINDOWS && MPT_ENABLE_DYNBIND
+#endif // MPT_OS_WINDOWS && (MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE)
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
