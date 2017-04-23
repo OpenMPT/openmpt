@@ -16,6 +16,16 @@ is just a high-level summary.
  *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
     confused in previous versions. This version resets both to the defaults.
 
+   * Add support for "WUZAMOD!" magic bytes in STM files and allow some slightly
+     malformed STM files to load which were previously rejected (putup10.stm,
+     putup11.stm) while tightening some other heuristics.
+   * Tighten heuristics for rejecting invalid SoundTracker files.
+   * Detect whether "hidden" patterns in the order list of SoundTracker modules
+     should be taken into account or not. Fixes wolf1.mod, wolf3.mod and
+     jean_baudlot_-_bad_dudes_vs_dragonninja-dragonf.mod.
+   * MO3: Clear MIDI macros for files that were originally saved with
+     Impulse Tracker 1.0 and Scream Tracker prior to version 3.20.
+
 ### libopenmpt 0.2-beta22 (2017-03-11)
 
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
