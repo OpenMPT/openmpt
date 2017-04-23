@@ -683,7 +683,7 @@ bool ModSequenceSet::MergeSequences()
 					{
 						// Oops, some other sequence uses this pattern already.
 						const PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(m_sndFile.Patterns[nPat].GetNumRows(), true);
-						if(newPat != SEQUENCEINDEX_INVALID)
+						if(newPat != PATTERNINDEX_INVALID)
 						{
 							// could create new pattern - copy data over and continue from here.
 							At(nFirstOrder + nOrd) = newPat;
