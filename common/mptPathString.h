@@ -317,6 +317,28 @@ bool DeleteWholeDirectoryTree(mpt::PathString path);
 
 #endif // MPT_OS_WINDOWS
 
+
+#if MPT_OS_WINDOWS
+
+#if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
+
+// Returns the application path or an empty string (if unknown), e.g. "C:\mptrack\"
+mpt::PathString GetAppPath();
+
+#endif // MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE
+
+#if defined(MPT_ENABLE_DYNBIND)
+
+#if !MPT_OS_WINDOWS_WINRT
+// Returns the system directory path, e.g. "C:\Windows\System32\"
+mpt::PathString GetSystemPath();
+#endif // !MPT_OS_WINDOWS_WINRT
+
+#endif // MPT_ENABLE_DYNBIND
+
+#endif // MPT_OS_WINDOWS
+
+
 #if defined(MPT_ENABLE_TEMPFILE)
 #if MPT_OS_WINDOWS
 

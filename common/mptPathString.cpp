@@ -557,6 +557,52 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 
 #endif // MPT_OS_WINDOWS
 
+
+
+#if MPT_OS_WINDOWS
+
+#if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
+
+mpt::PathString GetAppPath()
+{
+	std::vector<WCHAR> exeFileName(MAX_PATH);
+	while(GetModuleFileNameW(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
+	{
+		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+		{
+			return mpt::PathString();
+		}
+		exeFileName.resize(exeFileName.size() * 2);
+	}
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
+}
+
+#endif // MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE
+
+
+#if defined(MPT_ENABLE_DYNBIND)
+
+#if !MPT_OS_WINDOWS_WINRT
+
+mpt::PathString GetSystemPath()
+{
+	DWORD size = GetSystemDirectoryW(nullptr, 0);
+	std::vector<WCHAR> path(size + 1);
+	if(!GetSystemDirectoryW(path.data(), size + 1))
+	{
+		return mpt::PathString();
+	}
+	return mpt::PathString::FromNative(path.data()) + MPT_PATHSTRING("\\");
+}
+
+#endif // !MPT_OS_WINDOWS_WINRT
+
+#endif // MPT_ENABLE_DYNBIND
+
+#endif // MPT_OS_WINDOWS
+
+
+
 #if defined(MPT_ENABLE_TEMPFILE)
 #if MPT_OS_WINDOWS
 
@@ -863,6 +909,7 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 
 
 #endif // MODPLUG_TRACKER
+
 
 
 OPENMPT_NAMESPACE_END
