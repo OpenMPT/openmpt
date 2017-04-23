@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta24
+
 ### libopenmpt 0.2-beta23 (2017-04-23)
 
  *  [**Change**] The libmpg123 binary download script on Windows now downloads
