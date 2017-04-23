@@ -91,6 +91,8 @@ is just a high-level summary.
     libraries.
  *  [**Bug**] libopenmpt on Windows did not properly guard against current
     working directory DLL injection attacks.
+ *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
+    confused in previous versions. This version resets both to the defaults.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
