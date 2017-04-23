@@ -2,32 +2,6 @@
 LOCAL_PATH := $(call my-dir)
 
 
-ifeq ($(MPT_WITH_UNMO3),1)
-
-ifeq ($(TARGET_ARCH_ABI),armeabi)
-include $(CLEAR_VARS)
-LOCAL_MODULE := unmo3
-LOCAL_SRC_FILES := unmo3lib/android/armeabi/libunmo3.so
-include $(PREBUILT_SHARED_LIBRARY)
-endif
-
-ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-include $(CLEAR_VARS)
-LOCAL_MODULE := unmo3
-LOCAL_SRC_FILES := unmo3lib/android/armeabi-v7a/libunmo3.so
-include $(PREBUILT_SHARED_LIBRARY)
-endif
-
-ifeq ($(TARGET_ARCH_ABI),x86)
-include $(CLEAR_VARS)
-LOCAL_MODULE := unmo3
-LOCAL_SRC_FILES := unmo3lib/android/x86/libunmo3.so
-include $(PREBUILT_SHARED_LIBRARY)
-endif
-
-endif
-
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := openmpt
@@ -92,23 +66,6 @@ LOCAL_CPPFLAGS   +=#-DMPT_WITH_STBVORBIS
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_SRC_FILES  += 	include/stb_vorbis/stb_vorbis.c
 LOCAL_LDLIBS     += 
-endif
-
-ifeq ($(MPT_WITH_UNMO3),1)
-LOCAL_CFLAGS     += -DMPT_WITH_UNMO3
-LOCAL_CPPFLAGS   +=#-DMPT_WITH_UNMO3
-LOCAL_C_INCLUDES += 
-LOCAL_SRC_FILES  += 
-LOCAL_LDLIBS     += 
-ifeq ($(TARGET_ARCH_ABI),armeabi)
-LOCAL_SHARED_LIBRARIES := unmo3
-endif
-ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-LOCAL_SHARED_LIBRARIES := unmo3
-endif
-ifeq ($(TARGET_ARCH_ABI),x86)
-LOCAL_SHARED_LIBRARIES := unmo3
-endif
 endif
 
 ifeq ($(MPT_WITH_VORBIS),1)

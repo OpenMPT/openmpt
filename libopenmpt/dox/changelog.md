@@ -46,8 +46,6 @@ is just a high-level summary.
     possible. Both build systems default to dependencies that facilitate native
     MO3 decoding internally anyway, thus there is actually no practical
     disadvantage with the new default settings at all.
- *  [**Change**] Un4seen unmo3 support is now completely disabled by default in
-    all configurations and build systems.
  *  [**Change**] The `Makefile` option `ANCIENT=1` is gone.
 
  *  [**Regression**] Support for GCC 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7 has been
@@ -67,6 +65,7 @@ is just a high-level summary.
     and compiling xmp-openmpt requires an appropriate XMPlay SDK with
     `XMPIN_FACE` >= `4`.
  *  [**Regression**] Support for libmpg123 older than 1.13.0 has been removed.
+ *  [**Regression**] Un4seen unmo3 support has been removed.
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.

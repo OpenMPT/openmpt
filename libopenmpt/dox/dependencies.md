@@ -104,10 +104,3 @@ Optional dependencies
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.
 
-
-Deprecated features
--------------------
- *  To be removed 2018-01-01: **MO3** support via libunmo3 requires:
-     *  closed-source **libunmo3** from un4seen
-     *  **libltdl** from libtool on Unix-like platforms or **libdl**
-
