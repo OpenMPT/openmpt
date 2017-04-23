@@ -16,6 +16,7 @@
   defines {
    "NOMINMAX",
    "NOVOLUME",
+   "UNRAR",
    "RAR_NOCRYPT",
    "RARDLL",
    "SILENT",
@@ -111,6 +112,7 @@
    "../../include/unrar/raros.hpp",
    "../../include/unrar/rartypes.hpp",
    "../../include/unrar/rarvm.hpp",
+   "../../include/unrar/rawint.hpp",
    "../../include/unrar/rawread.hpp",
    "../../include/unrar/rdwrfn.hpp",
    "../../include/unrar/recvol.hpp",

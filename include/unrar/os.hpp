@@ -30,13 +30,8 @@
 #undef _WIN32_WINNT
 #define WINVER 0x0501
 #define _WIN32_WINNT 0x0501
-// OpenMPT wants to support pre-WinXP systems, thus set WINVER to Win2000 // OPENMPT ADDITION
-#undef WINVER // OPENMPT ADDITION
-#undef _WIN32_WINNT // OPENMPT ADDITION
-#define WINVER 0x0500 // OPENMPT ADDITION
-#define _WIN32_WINNT 0x0500 // OPENMPT ADDITION
 
-#if !defined(ZIPSFX) && !defined(SHELL_EXT) && !defined(SETUP)
+#if !defined(ZIPSFX)
 #define RAR_SMP
 #endif
 
@@ -48,6 +43,7 @@ struct IUnknown; // OPENMPT ADDITION
 #include <windows.h>
 #include <prsht.h>
 #include <shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 #include <shellapi.h>
 #include <shlobj.h>
 #include <winioctl.h>
@@ -122,7 +118,7 @@ struct IUnknown; // OPENMPT ADDITION
   #define _forceinline inline
 #endif
 
-#endif
+#endif // defined(_WIN_ALL) || defined(_EMX)
 
 #ifdef _UNIX
 
@@ -139,14 +135,7 @@ struct IUnknown; // OPENMPT ADDITION
   #include <sys/sysctl.h>
 #endif
 #ifndef SFX_MODULE
-  #ifdef _ANDROID
-    #include <sys/vfs.h>
-    #define statvfs statfs
-  #else
     #include <sys/statvfs.h>
-  #endif
-#endif
-#if defined(__FreeBSD__) || defined (__NetBSD__) || defined (__OpenBSD__) || defined(__APPLE__)
 #endif
 #include <pwd.h>
 #include <grp.h>
@@ -170,7 +159,7 @@ struct IUnknown; // OPENMPT ADDITION
 #define SAVE_LINKS
 #endif
 
-#if defined(__linux) && !defined (_ANDROID) || defined(__FreeBSD__)
+#if defined(__linux) || defined(__FreeBSD__)
 #include <sys/time.h>
 #define USE_LUTIMES
 #endif
@@ -212,9 +201,18 @@ struct IUnknown; // OPENMPT ADDITION
   #endif
 #endif
 
+#if _POSIX_C_SOURCE >= 200809L
+  #define UNIX_TIME_NS // Nanosecond time precision in Unix.
 #endif
 
+#endif // _UNIX
+
+#if 0
+  #define MSGID_INT
+  typedef int MSGID;
+#else
   typedef const wchar* MSGID;
+#endif
 
 #ifndef SSE_ALIGNMENT // No SSE use and no special data alignment is required.
   #define SSE_ALIGNMENT 1

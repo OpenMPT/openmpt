@@ -1,7 +1,7 @@
 #include "rar.hpp"
 
 /*	// OPENMPT ADDITION
-#ifdef _WIN_ALL
+#if defined(_WIN_ALL)
 typedef BOOL (WINAPI *CRYPTPROTECTMEMORY)(LPVOID pData,DWORD cbData,DWORD dwFlags);
 typedef BOOL (WINAPI *CRYPTUNPROTECTMEMORY)(LPVOID pData,DWORD cbData,DWORD dwFlags);
 
@@ -39,6 +39,7 @@ class CryptLoader
         hCrypt = LoadSysLibrary(L"Crypt32.dll");
         if (hCrypt != NULL)
         {
+          // Available since Vista.
           pCryptProtectMemory = (CRYPTPROTECTMEMORY)GetProcAddress(hCrypt, "CryptProtectMemory");
           pCryptUnprotectMemory = (CRYPTUNPROTECTMEMORY)GetProcAddress(hCrypt, "CryptUnprotectMemory");
         }
@@ -58,6 +59,7 @@ CryptLoader GlobalCryptLoader;
 SecPassword::SecPassword()
 {
   return;	// OPENMPT ADDITION
+  CrossProcess=false;
   Set(L"");
 }
 
@@ -83,6 +85,8 @@ void SecPassword::Clean()
 void cleandata(void *data,size_t size)
 {
   return;	// OPENMPT ADDITION
+  if (data==NULL || size==0)
+    return;
 #if defined(_WIN_ALL) && defined(_MSC_VER)
   SecureZeroMemory(data,size);
 #else
@@ -122,6 +126,8 @@ void SecPassword::Get(wchar *Psw,size_t MaxSize)
   else
     *Psw=0;
 }
+
+
 
 
 void SecPassword::Set(const wchar *Psw)
@@ -171,7 +177,9 @@ bool SecPassword::operator == (SecPassword &psw)
 void SecHideData(void *Data,size_t DataSize,bool Encode,bool CrossProcess)
 {
   /*	// OPENMPT ADDITION
-#ifdef _WIN_ALL
+  // CryptProtectMemory is not available in UWP and CryptProtectData
+  // increases data size not allowing in place conversion.
+#if defined(_WIN_ALL)
   // Try to utilize the secure Crypt[Un]ProtectMemory if possible.
   if (GlobalCryptLoader.pCryptProtectMemory==NULL)
     GlobalCryptLoader.Load();
