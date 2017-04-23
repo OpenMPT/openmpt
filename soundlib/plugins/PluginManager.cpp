@@ -294,31 +294,25 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 }
 
 
-#ifndef NO_DMO
-static bool IsKnownDMO(const CLSID &clsid)
-//----------------------------------------
-{
-	const mpt::UUID uuid(clsid);
-	if(uuid == MPT_UUID(745057C7,F353,4F2D,A7EE,58434477730E)) return true; // AEC (Acoustic echo cancellation, not usable)
-	if(uuid == MPT_UUID(EFE6629C,81F7,4281,BD91,C9D604A95AF6)) return true; // Chorus
-	if(uuid == MPT_UUID(EF011F79,4000,406D,87AF,BFFB3FC39D57)) return true; // Compressor
-	if(uuid == MPT_UUID(EF114C90,CD1D,484E,96E5,09CFAF912A21)) return true; // Distortion
-	if(uuid == MPT_UUID(EF3E932C,D40B,4F51,8CCF,3F98F1B29D5D)) return true; // Echo
-	if(uuid == MPT_UUID(EFCA3D92,DFD8,4672,A603,7420894BAD98)) return true; // Flanger
-	if(uuid == MPT_UUID(DAFD8210,5711,4B91,9FE3,F75B7AE279BF)) return true; // Gargle
-	if(uuid == MPT_UUID(EF985E71,D5C7,42D4,BA4D,2D073E2E96F4)) return true; // I3DL2Reverb
-	if(uuid == MPT_UUID(120CED89,3BF4,4173,A132,3CB406CF3231)) return true; // ParamEq
-	if(uuid == MPT_UUID(87FC0268,9A55,4360,95AA,004A1D9DE26C)) return true; // WavesReverb
-	if(uuid == MPT_UUID(F447B69E,1884,4A7E,8055,346F74D6EDB3)) return true; // Resampler DMO (not usable)
-	return false;
-}
-#endif // !NO_DMO
-
-
 void CVstPluginManager::EnumerateDirectXDMOs()
 //--------------------------------------------
 {
 #ifndef NO_DMO
+	const mpt::UUID knownDMOs[] =
+	{
+		MPT_UUID(745057C7,F353,4F2D,A7EE,58434477730E), // AEC (Acoustic echo cancellation, not usable)
+		MPT_UUID(EFE6629C,81F7,4281,BD91,C9D604A95AF6), // Chorus
+		MPT_UUID(EF011F79,4000,406D,87AF,BFFB3FC39D57), // Compressor
+		MPT_UUID(EF114C90,CD1D,484E,96E5,09CFAF912A21), // Distortion
+		MPT_UUID(EF3E932C,D40B,4F51,8CCF,3F98F1B29D5D), // Echo
+		MPT_UUID(EFCA3D92,DFD8,4672,A603,7420894BAD98), // Flanger
+		MPT_UUID(DAFD8210,5711,4B91,9FE3,F75B7AE279BF), // Gargle
+		MPT_UUID(EF985E71,D5C7,42D4,BA4D,2D073E2E96F4), // I3DL2Reverb
+		MPT_UUID(120CED89,3BF4,4173,A132,3CB406CF3231), // ParamEq
+		MPT_UUID(87FC0268,9A55,4360,95AA,004A1D9DE26C), // WavesReverb
+		MPT_UUID(F447B69E,1884,4A7E,8055,346F74D6EDB3), // Resampler DMO (not usable)
+	};
+
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
@@ -332,7 +326,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
 			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
-				if(!IsKnownDMO(clsid))
+				if(std::find(std::begin(knownDMOs), std::end(knownDMOs), clsid) == std::end(knownDMOs))
 				{
 					HKEY hksub;
 					formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
