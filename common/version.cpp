@@ -321,7 +321,6 @@ std::string GetBuildFeaturesString()
 		#if !(defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) && !defined(MPT_WITH_STBVORBIS)
 			retval += " -VORBIS";
 		#endif
-		retval += " +MO3";
 		#if !defined(NO_PLUGINS)
 			retval += " +PLUGINS";
 		#else
