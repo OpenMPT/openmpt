@@ -1043,11 +1043,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			chunk.Rewind();
 			chunk.ReadStruct(insHeader);
 
-			std::vector<MT2Group> groups(insHeader.numSamples);
-			for(uint32 grp = 0; grp < insHeader.numSamples; grp++)
-			{
-				file.ReadStruct(groups[grp]);
-			}
+			std::vector<MT2Group> groups;
+			file.ReadVector(groups, insHeader.numSamples);
 
 			mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
 			mptIns->AssignSample(0);

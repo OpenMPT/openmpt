@@ -119,16 +119,11 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamples;
 
 	std::vector<PLMOrderItem> order(fileHeader.numOrders);
-	for(uint16 i = 0; i < fileHeader.numOrders; i++)
-	{
-		PLMOrderItem ord;
-		file.ReadStruct(ord);
-		order[i] = ord;
-	}
+	file.ReadVector(order, fileHeader.numOrders);
 
-	std::vector<uint32> patternPos, samplePos;
-	file.ReadVectorLE(patternPos, fileHeader.numPatterns);
-	file.ReadVectorLE(samplePos, fileHeader.numSamples);
+	std::vector<uint32le> patternPos, samplePos;
+	file.ReadVector(patternPos, fileHeader.numPatterns);
+	file.ReadVector(samplePos, fileHeader.numSamples);
 
 	for(SAMPLEINDEX smp = 0; smp < fileHeader.numSamples; smp++)
 	{

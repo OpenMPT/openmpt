@@ -497,10 +497,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading instrument, sample and pattern offsets
-	std::vector<uint32> insPos, smpPos, patPos;
-	if(!file.ReadVectorLE(insPos, fileHeader.insnum)
-		|| !file.ReadVectorLE(smpPos, fileHeader.smpnum)
-		|| !file.ReadVectorLE(patPos, fileHeader.patnum))
+	std::vector<uint32le> insPos, smpPos, patPos;
+	if(!file.ReadVector(insPos, fileHeader.insnum)
+		|| !file.ReadVector(smpPos, fileHeader.smpnum)
+		|| !file.ReadVector(patPos, fileHeader.patnum))
 	{
 		return false;
 	}
@@ -510,21 +510,18 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// as some early versions of Schism Tracker set the history flag, but didn't save anything.
 	// We will consider the history invalid if it ends after the first parapointer.
 	uint32 minPtr = Util::MaxValueOfType(minPtr);
-	for(uint16 n = 0; n < fileHeader.insnum; n++)
+	for(uint32 pos : insPos)
 	{
-		if(insPos[n] > 0) minPtr = std::min(minPtr, insPos[n]);
+		if(pos > 0) minPtr = std::min(minPtr, pos);
 	}
-
-	for(uint16 n = 0; n < fileHeader.smpnum; n++)
+	for(uint32 pos : smpPos)
 	{
-		if(smpPos[n] > 0) minPtr = std::min(minPtr, smpPos[n]);
+		if(pos > 0) minPtr = std::min(minPtr, pos);
 	}
-
-	for(uint16 n = 0; n < fileHeader.patnum; n++)
+	for(uint32 pos : patPos)
 	{
-		if(patPos[n] > 0) minPtr = std::min(minPtr, patPos[n]);
+		if(pos > 0) minPtr = std::min(minPtr, pos);
 	}
-
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
 	{
 		minPtr = std::min<uint32>(minPtr, fileHeader.msgoffset);
