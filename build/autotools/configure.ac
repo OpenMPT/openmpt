@@ -124,93 +124,9 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
  ]
 )
 
-AC_ARG_ENABLE([dlopen], AS_HELP_STRING([--enable-dlopen], [Enable dynamic loading of 3rd-party libraries using dlopen or LoadLibray.]))
-AS_IF([test "x$enable-dlopen" = "xyes"],
- [
-  AC_DEFINE([MPT_ENABLE_DLOPEN], [], [enable dlopen])
- ]
-)
-  
-# Optional libopenmpt dependency: libltdl
-AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl], [Enable the use of libtool libltdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_ltdl" = "xyes"],
- [
-  AC_CHECK_HEADER([ltdl.h],
-   [
-    AC_CHECK_LIB([ltdl], [lt_dlinit],
-     [
-      have_ltdl=1
-     ],
-     [
-      have_ltdl=0
-     ]
-    )
-   ],
-   [
-    have_ltdl=0
-   ]
-  )
-  AS_IF([test "x$have_ltdl" = "x0"],
-   [
-    AC_MSG_ERROR([Unable to find libltdl.])
-   ]
-  )
- ],
- [
-  have_ltdl=0
- ]
-)
-AS_IF([test "x$have_ltdl" = "x1"],
- [
-  LTDL_CPPFLAGS=-DMPT_WITH_LTDL
-  LTDL_LIBS=-lltdl
- ],
- [
-  LTDL_CPPFLAGS=
-  LTDL_LIBS=
- ]
-)
-AC_SUBST([LTDL_CPPFLAGS])
-AC_SUBST([LTDL_LIBS])
-
-# Optional libopenmpt dependency: libdl
-AC_ARG_WITH([dl], AS_HELP_STRING([--with-dl], [Enable the use of libdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_dl" = "xyes"],
- [
-  AC_SEARCH_LIBS([dlopen], [dl dld],
-   [
-    have_dl=1
-   ],
-   [
-    have_dl=0
-   ]
-  )
-  AS_IF([test "x$have_dl" = "x0"],
-   [
-    AC_MSG_ERROR([Unable to find libdl.])
-   ]
-  )
- ],
- [
-  have_dl=0
- ]
-)
-AS_IF([test "x$have_dl" = "x1"],
- [
-  DL_CPPFLAGS=-DMPT_WITH_DL
-  DL_LIBS=  
- ],
- [
-  DL_CPPFLAGS=
-  DL_LIBS=
- ]
-)
-AC_SUBST([DL_CPPFLAGS])
-AC_SUBST([DL_LIBS])
-
 
 LIBOPENMPT_REQUIRES_PRIVATE="$ZLIB_PKG $MPG123_PKG $OGG_PKG $VORBIS_PKG $VORBISFILE_PKG"
-LIBOPENMPT_LIBS_PRIVATE="$LTDL_LIBS $DL_LIBS"
+LIBOPENMPT_LIBS_PRIVATE=""
 AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 

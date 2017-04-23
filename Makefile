@@ -56,10 +56,6 @@
 # Build flags for libopenmpt (provide on each `make` invocation)
 #  (defaults are 0):
 #
-#  USE_DLOPEN=1     Support loading 3rd party libraries with dlopen or LoadLibrary.
-#  NO_LTDL=1        Do not require libltdl
-#  NO_DL=1          Do not fallback to libdl
-#
 #  NO_ZLIB=1        Avoid using zlib, even if found
 #  NO_MPG123=1      Avoid using libmpg123, even if found
 #  NO_OGG=1         Avoid using libogg, even if found
@@ -361,29 +357,6 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 NO_ZLIB:=1
 endif
 
-ifeq ($(USE_DLOPEN),1)
-CPPFLAGS_DLOPEN := -DMPT_ENABLE_DLOPEN
-ifeq ($(NO_LTDL),1)
-ifeq ($(NO_DL),1)
-else
-ifeq ($(UNAME_S),Linux)
-CPPFLAGS_DL := -DMPT_WITH_DL
-LDLIBS_DL   := -ldl
-PC_LIBS_DL := -ldl
-endif
-ifeq ($(UNAME_S),FreeBSD)
-CPPFLAGS_DL := -DMPT_WITH_DL
-LDLIBS_DL   := 
-PC_LIBS_DL := 
-endif
-endif
-else
-CPPFLAGS_LTDL := -DMPT_WITH_LTDL
-LDLIBS_LTDL   := -lltdl
-PC_LIBS_LTDL := -lltdl
-endif
-endif
-
 ifeq ($(NO_ZLIB),1)
 else
 #LDLIBS   += -lz
@@ -574,9 +547,9 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
 endif
 
-CPPFLAGS += $(CPPFLAGS_DLOPEN) $(CPPFLAGS_LTDL) $(CPPFLAGS_DL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
-LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_DL) $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
-LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_DL) $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
+CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
+LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
+LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
 
 CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
 LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
@@ -935,7 +908,7 @@ bin/libopenmpt.pc:
 	$(VERYSILENT)echo 'Version: $(DIST_LIBOPENMPT_VERSION)' >> $@.tmp
 	$(VERYSILENT)echo 'Requires.private: $(PC_REQUIRES_ZLIB) $(PC_REQUIRES_MPG123) $(PC_REQUIRES_OGG) $(PC_REQUIRES_VORBIS) $(PC_REQUIRES_VORBISFILE)' >> $@.tmp
 	$(VERYSILENT)echo 'Libs: -L$${libdir} -lopenmpt' >> $@.tmp
-	$(VERYSILENT)echo 'Libs.private: $(PC_LIBS_DL) $(PC_LIBS_LTDL)' >> $@.tmp
+	$(VERYSILENT)echo 'Libs.private: ' >> $@.tmp
 	$(VERYSILENT)echo 'Cflags: -I$${includedir}' >> $@.tmp
 	$(VERYSILENT)mv $@.tmp $@
 
