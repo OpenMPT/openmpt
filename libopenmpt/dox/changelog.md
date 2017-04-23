@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Change**] The libmpg123 binary download script on Windows now downloads
     libmpg123 1.24.0.
+ *  [**Change**] MSVC builds of libopenmpt will now only load known DMO plugins.
 
 ### libopenmpt 0.2-beta22 (2017-03-11)
 
