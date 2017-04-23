@@ -15,4 +15,4 @@ Steps to make a libopenmpt 0.2 release
  *  copy `build/release/bin`, `build/release/dev`, `build/release/doc` and `build/release/src` to `website/public/files/libopenmpt/`
  *  extract `build/release/doc/*.tar.gz` to `website/public/doc/`
  *  commit `website`
- *  update `libopenmpt/dox/changelog.md` and `common/versionNumber.h` for new version
+ *  update `libopenmpt/dox/changelog.md`, `common/versionNumber.h` and `-version-info` in `build/autotools/Makefile.am` for new version
