@@ -52,37 +52,6 @@ namespace mpt
 #endif
 
 
-mpt::PathString GetAppPath()
-{
-	std::vector<WCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileNameW(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
-	{
-		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-		{
-			return mpt::PathString();
-		}
-		exeFileName.resize(exeFileName.size() * 2);
-	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
-}
-
-
-#if !MPT_OS_WINDOWS_WINRT
-
-mpt::PathString GetSystemPath()
-{
-	DWORD size = GetSystemDirectoryW(nullptr, 0);
-	std::vector<WCHAR> path(size + 1);
-	if(!GetSystemDirectoryW(path.data(), size + 1))
-	{
-		return mpt::PathString();
-	}
-	return mpt::PathString::FromNative(path.data()) + MPT_PATHSTRING("\\");
-}
-
-#endif // !MPT_OS_WINDOWS_WINRT
-
-
 class LibraryHandle
 {
 
