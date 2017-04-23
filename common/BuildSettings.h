@@ -517,6 +517,10 @@
 #define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
+#if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_DYNBIND // MediaFoundation needs dynamic loading in order to test availability of delay loaded libs
+#endif
+
 #if defined(MPT_ENABLE_MPG123_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
 #endif
