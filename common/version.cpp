@@ -321,17 +321,7 @@ std::string GetBuildFeaturesString()
 		#if !(defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) && !defined(MPT_WITH_STBVORBIS)
 			retval += " -VORBIS";
 		#endif
-		#if defined(MPT_ENABLE_MO3_BUILTIN)
-			retval += " +MO3";
-		#endif
-		#if defined(MPT_WITH_UNMO3)
-			retval += " +UNMO3";
-		#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
-			retval += " +UNMO3-DYNBIND";
-		#endif
-		#if !defined(MPT_WITH_UNMO3) && !defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_MO3_BUILTIN)
-			retval += " -MO3";
-		#endif
+		retval += " +MO3";
 		#if !defined(NO_PLUGINS)
 			retval += " +PLUGINS";
 		#else
@@ -625,11 +615,9 @@ mpt::ustring GetFullCreditsString()
 		"http://www.un4seen.com/mo3.html\n"
 		"\n"
 #endif
-#ifdef MPT_ENABLE_MO3_BUILTIN
 		"Laurent Cl\xc3\xA9vy for unofficial MO3 documentation and decompression code\n"
 		"https://github.com/lclevy/unmo3\n"
 		"\n"
-#endif
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
 		"\n"
