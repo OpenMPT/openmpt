@@ -242,7 +242,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(curOrd >= Order().size())
 			{
-				Order().insert(curOrd + 1, 1, Patterns.InsertAny(rowsPerPat));
+				Order().resize(curOrd + 1);
+				Order()[curOrd] = Patterns.InsertAny(rowsPerPat);
 			}
 			PATTERNINDEX pat = Order()[curOrd];
 			if(!Patterns.IsValidPat(pat)) break;
