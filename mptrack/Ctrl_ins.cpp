@@ -329,7 +329,7 @@ void CNoteMapWnd::OnLButtonDblClk(UINT, CPoint)
 void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 //----------------------------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
 	CInputHandler* ih = CMainFrame::GetInputHandler();
 
 	CSoundFile &sndFile = m_modDoc.GetrSoundFile();
@@ -352,9 +352,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 					if(sample <= sndFile.GetNumSamples())
 					{
 						wsprintf(s, _T("%u: "), sample);
-						size_t l = strlen(s);
-						memcpy(s + l, sndFile.m_szNames[sample], MAX_SAMPLENAME);
-						s[l + MAX_SAMPLENAME] = '\0';
+						_tcscat(s, sndFile.m_szNames[sample]);
 						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, s);
 					}
 				}
@@ -362,15 +360,16 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), ih->GetKeyTextFromCommand(kcInsNoteMapEditSample, _T("&Edit Sample")));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			wsprintf(s, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, _T("Map all notes to &sample %u")), pIns->Keyboard[m_nNote]);
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
+			wsprintf(s, _T("Map all notes to &sample %u"), pIns->Keyboard[m_nNote]);
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, s));
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					wsprintf(s, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, _T("Map all &notes to %s")), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
+					_tcscpy(s, _T("Map all &notes to "));
+					_tcscat(s, sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, s));
 				}
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose map &down")));
