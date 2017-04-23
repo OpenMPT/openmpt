@@ -24,7 +24,7 @@ else
 	cd test-tarball2
 	gunzip -c ../libopenmpt*.tar.gz | tar -xvf -
 	cd libopenmpt*
-	./configure --host=$1 --without-zlib --without-ogg --without-vorbis --without-vorbisfile --without-mpg123 --without-ltdl --without-dl --without-pulseaudio --without-portaudio -without-sndfile --without-flac --without-portaudiocpp --enable-modplug --disable-openmpt123 --disable-examples --disable-tests
+	./configure --host=$1 --without-zlib --without-ogg --without-vorbis --without-vorbisfile --without-mpg123 --without-pulseaudio --without-portaudio -without-sndfile --without-flac --without-portaudiocpp --enable-modplug --disable-openmpt123 --disable-examples --disable-tests
 	make
 	cd ..
 	cd ..
