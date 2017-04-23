@@ -352,18 +352,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint8>(Order(), file, fileHeader.ordNum, 0xFF, 0xFE);
 
 	// Read sample header offsets
-	std::vector<uint16> sampleOffsets(fileHeader.smpNum);
-	for(size_t i = 0; i < fileHeader.smpNum; i++)
-	{
-		sampleOffsets[i] = file.ReadUint16LE();
-	}
-
+	std::vector<uint16le> sampleOffsets;
+	file.ReadVector(sampleOffsets, fileHeader.smpNum);
 	// Read pattern offsets
-	std::vector<uint16> patternOffsets(fileHeader.patNum);
-	for(size_t i = 0; i < fileHeader.patNum; i++)
-	{
-		patternOffsets[i] = file.ReadUint16LE();
-	}
+	std::vector<uint16le> patternOffsets;
+	file.ReadVector(patternOffsets, fileHeader.patNum);
 
 	// Read extended channel panning
 	if(fileHeader.usePanningTable == S3MFileHeader::idPanning)

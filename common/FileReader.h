@@ -876,18 +876,18 @@ public:
 		return true;
 	}
 
-	// Read an array of byte-sized values.
+	// Read an array of binary-safe T values.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
 	template<typename T, off_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
-		STATIC_ASSERT(sizeof(T) == 1);
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		if(CanRead(sizeof(destArray)))
 		{
-			for(std::size_t i = 0; i < destSize; ++i)
+			for(auto &i : destArray)
 			{
-				Read(destArray[i]);
+				Read(i);
 			}
 			return true;
 		} else
@@ -897,68 +897,19 @@ public:
 		}
 	}
 
-	// Read an array.
-	// If successful, the file cursor is advanced by the size of the array.
-	// Otherwise, the target is zeroed.
-	template<typename T, off_t destSize>
-	bool ReadArrayLE(T (&destArray)[destSize])
-	{
-		if(CanRead(sizeof(destArray)))
-		{
-			for(std::size_t i = 0; i < destSize; ++i)
-			{
-				destArray[i] = ReadIntLE<T>();
-			}
-			return true;
-		} else
-		{
-			MemsetZero(destArray);
-			return false;
-		}
-	}
-
-	// Read destSize elements of byte-sized type T into a vector.
+	// Read destSize elements of binary-safe type T into a vector.
 	// If successful, the file cursor is advanced by the size of the vector.
 	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
 	template<typename T>
 	bool ReadVector(std::vector<T> &destVector, size_t destSize)
 	{
-		STATIC_ASSERT(sizeof(T) == 1);
-		const off_t readSize = sizeof(T) * destSize;
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		destVector.resize(destSize);
-		if(CanRead(readSize))
+		if(CanRead(sizeof(T) * destSize))
 		{
-			for(std::size_t i = 0; i < destSize; ++i)
+			for(auto &i : destVector)
 			{
-				Read(destVector[i]);
-			}
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-
-	// Read destSize elements of type T into a vector.
-	// If successful, the file cursor is advanced by the size of the vector.
-	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
-	template<typename T>
-	bool ReadVectorLE(std::vector<T> &destVector, size_t destSize)
-	{
-		const off_t readSize = sizeof(T) * destSize;
-		try
-		{
-			destVector.resize(destSize);
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			return false;
-		}
-		if(CanRead(readSize))
-		{
-			for(std::size_t i = 0; i < destSize; ++i)
-			{
-				destVector[i] = ReadIntLE<T>();
+				Read(i);
 			}
 			return true;
 		} else

@@ -148,8 +148,8 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(fileHeader.packEnable)
 		{
-			std::vector<uint8> eventMask;
-			patternChunk.ReadVector(eventMask, 64);
+			uint8 eventMask[64];
+			patternChunk.ReadArray(eventMask);
 
 			// Compressed patterns are stored in row-major order...
 			for(ROWINDEX row = 0; row < 64; row++)

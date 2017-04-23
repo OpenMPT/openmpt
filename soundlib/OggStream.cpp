@@ -98,13 +98,13 @@ bool ReadPage(FileReader &file, PageInfo &pageInfo, std::vector<uint8> &pageData
 	{
 		return false;
 	}
-	filePageReader.ReadVectorLE(pageData, pageDataSize);
+	filePageReader.ReadVector(pageData, pageDataSize);
 	filePageReader.SkipBack(pageInfo.GetPagePhysicalSize());
 	{
 		mpt::crc32_ogg calculatedCRC;
 		uint8 rawHeader[sizeof(PageHeader)];
 		MemsetZero(rawHeader);
-		filePageReader.ReadArrayLE(rawHeader);
+		filePageReader.ReadArray(rawHeader);
 		std::memset(rawHeader + 22, 0, 4); // clear out old crc
 		calculatedCRC.process(rawHeader, rawHeader + sizeof(rawHeader));
 		calculatedCRC.process(pageInfo.segment_table, pageInfo.segment_table + pageInfo.header.page_segments);
