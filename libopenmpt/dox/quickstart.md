@@ -18,8 +18,6 @@ Quick Start {#quickstart}
      -  **libFLAC** (required only by openmpt123)
      -  **libsndfile** (required only by openmpt123)
  3. *Optional*:
-     -  **libltdl**
-     -  **libdl**
      -  **libSDL >= 1.2.x** (required only by openmpt123)
  4. Run:
     
@@ -54,8 +52,6 @@ Quick Start {#quickstart}
      -  **libFLAC** (required only by openmpt123)
      -  **libsndfile** (required only by openmpt123)
  2. *Optional*:
-     -  **libltdl**
-     -  **libdl**
      -  **libSDL >= 1.2.x** (required only by openmpt123)
      -  **doxygen >= 1.8**
      -  **help2man**
