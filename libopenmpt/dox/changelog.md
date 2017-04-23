@@ -11,6 +11,9 @@ is just a high-level summary.
     libmpg123 1.24.0.
  *  [**Change**] MSVC builds of libopenmpt will now only load known DMO plugins.
 
+ *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
+    confused in previous versions. This version resets both to the defaults.
+
 ### libopenmpt 0.2-beta22 (2017-03-11)
 
  *  [**Bug**] Possible NULL-pointer dereference read during obscure
