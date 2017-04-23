@@ -19,7 +19,7 @@
   #endif
 #endif
 
-#if defined(ANDROID) || defined(__ANDROID__)
+#if defined(ANDROID) || defined(_0__)
   #define _UNIX
   #define _ANDROID
 #endif

@@ -1,4 +1,4 @@
-#ifndef _UNRAR_DLL_
+#ifndef _1_DLL_
 #define _UNRAR_DLL_
 
 #if 1 // OPENMPT ADDITION
@@ -35,7 +35,7 @@
 #define RAR_VOL_ASK           0
 #define RAR_VOL_NOTIFY        1
 
-#define RAR_DLL_VERSION       7
+#define RAR_DLL_VERSION       8
 
 #define RAR_HASH_NONE         0
 #define RAR_HASH_CRC32        1
@@ -106,7 +106,13 @@ struct RARHeaderDataEx
   wchar_t      *RedirName;
   unsigned int RedirNameSize;
   unsigned int DirTarget;
-  unsigned int Reserved[994];
+  unsigned int MtimeLow;
+  unsigned int MtimeHigh;
+  unsigned int CtimeLow;
+  unsigned int CtimeHigh;
+  unsigned int AtimeLow;
+  unsigned int AtimeHigh;
+  unsigned int Reserved[988];
 };
 
 
