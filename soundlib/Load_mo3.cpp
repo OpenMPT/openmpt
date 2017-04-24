@@ -697,14 +697,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
-	// No valid MO3 file (magic bytes: "MO3")
 	if(!file.CanRead(12) || !file.ReadMagic("MO3"))
 	{
 		return false;
 	}
 	const uint8 version = file.ReadUint8();
 	const uint32 musicSize = file.ReadUint32LE();
-	if(musicSize <= 422 /*sizeof(MO3FileHeader)*/)
+	if(musicSize <= sizeof(MO3FileHeader) || version > 5)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -712,10 +711,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	if(version > 5)
-	{
-		return false;
-	}
 	uint32 compressedSize = uint32_max;
 	if(version >= 5)
 	{
@@ -854,10 +849,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader patLengthChunk = musicChunk.ReadChunk(fileHeader.numPatterns * sizeof(uint16));
 	std::vector<FileReader> tracks(fileHeader.numTracks);
 
-	for(uint32 track = 0; track < fileHeader.numTracks; track++)
+	for(auto &track : tracks)
 	{
 		uint32 len = musicChunk.ReadUint32LE();
-		tracks[track] = musicChunk.ReadChunk(len);
+		track = musicChunk.ReadChunk(len);
 	}
 
 	/*
