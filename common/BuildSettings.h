@@ -517,6 +517,10 @@
 #define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
+#if defined(MPT_WITH_MPG123) && defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT && !defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_DYNBIND // static MSVC builds require dynbind to load delay-loaded DLLs
+#endif
+
 #if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // MediaFoundation needs dynamic loading in order to test availability of delay loaded libs
 #endif
