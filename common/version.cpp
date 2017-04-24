@@ -607,11 +607,6 @@ mpt::ustring GetFullCreditsString()
 		"http://www.hermannseib.com/english/vsthost.htm\n"
 		"\n"
 #endif
-#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
-		"Ian Luck for UNMO3\n"
-		"http://www.un4seen.com/mo3.html\n"
-		"\n"
-#endif
 		"Laurent Cl\xc3\xA9vy for unofficial MO3 documentation and decompression code\n"
 		"https://github.com/lclevy/unmo3\n"
 		"\n"
