@@ -68,6 +68,9 @@ public:
 	// Replaces all occurences of oldPat with newPat.
 	void Replace(PATTERNINDEX oldPat, PATTERNINDEX newPat) { if(oldPat != newPat) std::replace(begin(), end(), oldPat, newPat); }
 
+	// Removes any "---" patterns at the end of the list.
+	void Shrink() { resize(GetLengthTailTrimmed()); }
+
 	// Check if pattern at sequence position ord is valid.
 	bool IsValidPat(ORDERINDEX ord);
 

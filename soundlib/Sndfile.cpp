@@ -461,6 +461,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	for(auto &order : Order)
 	{
+		order.Shrink();
 		if(order.GetRestartPos() >= order.size())
 		{
 			order.SetRestartPos(0);
