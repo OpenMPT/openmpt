@@ -65,22 +65,13 @@ uint32 MidiInOut::GetLatency() const
 void MidiInOut::SaveAllParameters()
 //---------------------------------
 {
-	char *chunk = nullptr;
+	mpt::byte *chunk = nullptr;
 	size_t size = GetChunk(chunk, false);
 	if(size == 0 || chunk == nullptr)
 		return;
 
 	m_pMixStruct->defaultProgram = -1;
-	if(m_pMixStruct->nPluginDataSize != size || m_pMixStruct->pPluginData == nullptr)
-	{
-		delete[] m_pMixStruct->pPluginData;
-		m_pMixStruct->nPluginDataSize = size;
-		m_pMixStruct->pPluginData = new (std::nothrow) char[size];
-	}
-	if(m_pMixStruct->pPluginData != nullptr)
-	{
-		memcpy(m_pMixStruct->pPluginData, chunk, size);
-	}
+	m_pMixStruct->pluginData.assign(chunk, chunk + size);
 }
 
 
@@ -88,12 +79,12 @@ void MidiInOut::RestoreAllParameters(int32 program)
 //-------------------------------------------------
 {
 	IMixPlugin::RestoreAllParameters(program);	// First plugin version didn't use chunks.
-	SetChunk(m_pMixStruct->nPluginDataSize, m_pMixStruct->pPluginData, false);
+	SetChunk(m_pMixStruct->pluginData.size(), m_pMixStruct->pluginData.data(), false);
 }
 
 
-size_t MidiInOut::GetChunk(char *(&chunk), bool /*isBank*/)
-//---------------------------------------------------------
+size_t MidiInOut::GetChunk(mpt::byte *(&chunk), bool /*isBank*/)
+//--------------------------------------------------------------
 {
 	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, m_programName);
 	const std::string inputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, m_inputDevice.name);
@@ -113,13 +104,13 @@ size_t MidiInOut::GetChunk(char *(&chunk), bool /*isBank*/)
 	mpt::IO::WriteRaw(s, inputName8.c_str(), inputName8.size());
 	mpt::IO::WriteRaw(s, outputName8.c_str(), outputName8.size());
 	m_chunkData = s.str();
-	chunk = const_cast<char *>(m_chunkData.c_str());
+	chunk = const_cast<mpt::byte *>(mpt::byte_cast<const mpt::byte *>(m_chunkData.c_str()));
 	return m_chunkData.size();
 }
 
 
-void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
-//-----------------------------------------------------------------
+void MidiInOut::SetChunk(size_t size, mpt::byte *chunk, bool /*isBank*/)
+//----------------------------------------------------------------------
 {
 	FileReader file(mpt::as_span(chunk, size));
 	if(!file.CanRead(9 * sizeof(uint32))

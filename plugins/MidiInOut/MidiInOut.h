@@ -161,8 +161,8 @@ public:
 	virtual int GetNumOutputChannels() const { return 0; }
 
 	virtual bool ProgramsAreChunks() const { return true; }
-	virtual size_t GetChunk(char *(&chunk), bool isBank);
-	virtual void SetChunk(size_t size, char *chunk, bool isBank);
+	virtual size_t GetChunk(mpt::byte *(&chunk), bool isBank);
+	virtual void SetChunk(size_t size, mpt::byte *chunk, bool isBank);
 
 protected:
 	// Open a device for input or output.

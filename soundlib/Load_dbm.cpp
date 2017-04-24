@@ -565,12 +565,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szName, "Echo");
 			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szLibraryName, "DigiBooster Pro Echo");
 
-			plugin.nPluginDataSize = sizeof(DigiBoosterEcho::PluginChunk);
-			plugin.pPluginData = new (std::nothrow) char[sizeof(DigiBoosterEcho::PluginChunk)];
-			if(plugin.pPluginData != nullptr)
-			{
-				new (plugin.pPluginData) DigiBoosterEcho::PluginChunk(settings[1], settings[3], settings[5], settings[7]);
-			}
+			plugin.pluginData.resize(sizeof(DigiBoosterEcho::PluginChunk));
+			new (plugin.pluginData.data()) DigiBoosterEcho::PluginChunk(settings[1], settings[3], settings[5], settings[7]);
 		}
 	}
 

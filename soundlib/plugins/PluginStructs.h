@@ -49,7 +49,7 @@ struct SNDMIXPLUGININFO
 	uint8le gain;					// Divide by 10 to get real gain
 	uint8le reserved;
 	uint32le dwOutputRouting;		// 0 = send to master 0x80 + x = send to plugin x
-	uint32le dwReserved[4];		// Reserved for routing info
+	uint32le dwReserved[4];			// Reserved for routing info
 	char    szName[32];				// User-chosen plugin display name - this is locale ANSI!
 	char    szLibraryName[64];		// original DLL name - this is UTF-8!
 
@@ -63,12 +63,20 @@ MPT_BINARY_STRUCT(SNDMIXPLUGININFO, 128)	// this is directly written to files, s
 struct SNDMIXPLUGIN
 {
 	IMixPlugin *pMixPlugin;
-	char *pPluginData;
-	uint32 nPluginDataSize;
+	std::vector<mpt::byte> pluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
 	int32 defaultProgram;
 	int32 editorX, editorY;
+
+	SNDMIXPLUGIN()
+		: pMixPlugin(nullptr)
+		, fDryRatio(0.0f)
+		, defaultProgram(0)
+		, editorX(0), editorY(0)
+	{
+		MemsetZero(Info);
+	}
 
 	const char *GetName() const
 		{ return Info.szName; }

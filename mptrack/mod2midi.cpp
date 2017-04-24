@@ -346,7 +346,7 @@ namespace MidiExport
 	{
 		std::vector<ModInstrument *> m_oldInstruments;
 		std::vector<MidiTrack *> m_tracks;
-		SNDMIXPLUGIN m_oldPlugins[MAX_MIXPLUGINS];
+		std::vector<SNDMIXPLUGIN> m_oldPlugins;
 		SNDMIXPLUGIN tempoTrackPlugin;
 		VSTPluginLib m_plugFactory;
 		CSoundFile &m_sndFile;
@@ -361,9 +361,8 @@ namespace MidiExport
 			, m_file(file)
 			, m_wasInstrumentMode(sndFile.GetNumInstruments() > 0)
 		{
-			MemCopy(m_oldPlugins, m_sndFile.m_MixPlugins);
-			MemsetZero(m_sndFile.m_MixPlugins);
-			MemsetZero(tempoTrackPlugin);
+			m_oldPlugins.assign(std::begin(m_sndFile.m_MixPlugins), std::end(m_sndFile.m_MixPlugins));
+			std::fill(std::begin(m_sndFile.m_MixPlugins), std::end(m_sndFile.m_MixPlugins), SNDMIXPLUGIN());
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_oldInstruments[i - 1] = m_sndFile.Instruments[i];
@@ -457,16 +456,16 @@ namespace MidiExport
 				m_sndFile.m_nInstruments = 0;
 			}
 
-			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			for(auto &plug : m_sndFile.m_MixPlugins)
 			{
-				m_sndFile.m_MixPlugins[i].Destroy();
+				plug.Destroy();
 			}
-			for(size_t i = 0; i < m_tracks.size(); i++)
+			for(auto &track : m_tracks)
 			{
-				delete m_tracks[i];
+				delete track;	// Resets m_MixPlugins[i].pMixPlugin, so do it before copying back the old structs
 			}
-			MemCopy(m_sndFile.m_MixPlugins, m_oldPlugins);
-			
+			std::copy(m_oldPlugins.cbegin(), m_oldPlugins.cend(), std::begin(m_sndFile.m_MixPlugins));
+
 			// Be sure that instrument pointers to our faked instruments are gone.
 			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{

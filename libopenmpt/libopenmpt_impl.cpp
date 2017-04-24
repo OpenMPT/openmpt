@@ -476,7 +476,7 @@ void module_impl::load( const FileReader & file, const std::map< std::string, st
 			load_flags &= ~CSoundFile::loadPatternData;
 		}
 		if ( m_ctl_load_skip_plugins ) {
-			load_flags &= ~CSoundFile::loadPluginData;
+			load_flags &= ~(CSoundFile::loadPluginData | CSoundFile::loadPluginInstance);
 		}
 		if ( !m_sndFile->Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
 			throw openmpt::exception("error loading file");

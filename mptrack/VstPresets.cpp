@@ -93,7 +93,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			uint32 chunkSize = file.ReadUint32BE();
 			// Some nasty plugins (e.g. SmartElectronix Ambience) write to our memory block.
 			// Directly writing to a memory-mapped file block results in a crash...
-			char *chunkData = new (std::nothrow) char[chunkSize];
+			mpt::byte *chunkData = new (std::nothrow) mpt::byte[chunkSize];
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
@@ -144,7 +144,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			uint32 chunkSize = file.ReadUint32BE();
 			// Some nasty plugins (e.g. SmartElectronix Ambience) write to our memory block.
 			// Directly writing to a memory-mapped file block results in a crash...
-			char *chunkData = new (std::nothrow) char[chunkSize];
+			mpt::byte *chunkData = new (std::nothrow) mpt::byte[chunkSize];
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
@@ -193,7 +193,7 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 
 		if(writeChunk)
 		{
-			char *chunk = nullptr;
+			mpt::byte *chunk = nullptr;
 			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, true));
 			if(chunkSize && chunk)
 			{
@@ -251,7 +251,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 
 	if(writeChunk)
 	{
-		char *chunk = nullptr;
+		mpt::byte *chunk = nullptr;
 		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, false));
 		if(chunkSize && chunk)
 		{

@@ -132,9 +132,6 @@ CSoundFile::CSoundFile() :
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
-#ifndef NO_PLUGINS
-	MemsetZero(m_MixPlugins);
-#endif // NO_PLUGINS
 	m_PlayState.m_lTotalSampleCount = 0;
 	m_PlayState.m_bPositionChanged = true;
 
@@ -246,7 +243,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 #ifndef NO_PLUGINS
-	MemsetZero(m_MixPlugins);
+	std::fill(std::begin(m_MixPlugins), std::end(m_MixPlugins), SNDMIXPLUGIN());
 #endif // NO_PLUGINS
 
 	if(file.IsValid())
@@ -477,7 +474,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 	std::vector<const SNDMIXPLUGININFO *> notFoundIDs;
 
-	if(loadFlags & loadPluginData)
+	if(loadFlags & (loadPluginData | loadPluginInstance))
 	{
 		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 		{

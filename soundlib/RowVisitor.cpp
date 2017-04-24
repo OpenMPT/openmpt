@@ -214,8 +214,7 @@ void RowVisitor::ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow)
 	
 	// Unvisit all rows that are in the visited row buffer, until we hit the start row for this pattern loop.
 	ROWINDEX row = ROWINDEX_INVALID;
-	std::vector<ROWINDEX>::reverse_iterator iter = m_visitOrder.rbegin();
-	while(iter != m_visitOrder.rend() && row != startRow)
+	for(auto iter = m_visitOrder.crbegin(); iter != m_visitOrder.crend() && row != startRow; iter++)
 	{
 		row = *(iter++);
 		Unvisit(ord, row);

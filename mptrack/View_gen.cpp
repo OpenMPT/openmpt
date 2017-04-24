@@ -1355,28 +1355,28 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	if (src == dest)
 		return false;
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	BeginWaitCursor();
 
 	CriticalSection cs;
 
 	// Move plug data
-	MemCopy(pSndFile->m_MixPlugins[dest], pSndFile->m_MixPlugins[src]);
-	MemsetZero(pSndFile->m_MixPlugins[src]);
+	sndFile.m_MixPlugins[dest] = std::move(sndFile.m_MixPlugins[src]);
+	sndFile.m_MixPlugins[src] = SNDMIXPLUGIN();
 
-	//Prevent plug from pointing backwards.
-	if(!pSndFile->m_MixPlugins[dest].IsOutputToMaster())
+	// Prevent plug from pointing backwards.
+	if(!sndFile.m_MixPlugins[dest].IsOutputToMaster())
 	{
-		PLUGINDEX nOutput = pSndFile->m_MixPlugins[dest].GetOutputPlugin();
+		PLUGINDEX nOutput = sndFile.m_MixPlugins[dest].GetOutputPlugin();
 		if (nOutput <= dest && nOutput != PLUGINDEX_INVALID)
 		{
-			pSndFile->m_MixPlugins[dest].SetOutputToMaster();
+			sndFile.m_MixPlugins[dest].SetOutputToMaster();
 		}
 	}
 
 	// Update current plug
-	IMixPlugin *pPlugin = pSndFile->m_MixPlugins[dest].pMixPlugin;
+	IMixPlugin *pPlugin = sndFile.m_MixPlugins[dest].pMixPlugin;
 	if(pPlugin != nullptr)
 	{
 		pPlugin->SetSlot(dest);
@@ -1389,35 +1389,35 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	// Update all other plugs' outputs
 	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++)
 	{
-		if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
+		if(!sndFile.m_MixPlugins[nPlug].IsOutputToMaster())
 		{
-			if(pSndFile->m_MixPlugins[nPlug].GetOutputPlugin() == src)
+			if(sndFile.m_MixPlugins[nPlug].GetOutputPlugin() == src)
 			{
-				pSndFile->m_MixPlugins[nPlug].SetOutputPlugin(dest);
+				sndFile.m_MixPlugins[nPlug].SetOutputPlugin(dest);
 			}
 		}
 	}
 	// Update channels
-	for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+	for (CHANNELINDEX nChn = 0; nChn < sndFile.GetNumChannels(); nChn++)
 	{
-		if (pSndFile->ChnSettings[nChn].nMixPlugin == src + 1u)
+		if (sndFile.ChnSettings[nChn].nMixPlugin == src + 1u)
 		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = dest + 1u;
+			sndFile.ChnSettings[nChn].nMixPlugin = dest + 1u;
 		}
 	}
 
 	// Update instruments
-	for (INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
+	for (INSTRUMENTINDEX nIns = 1; nIns <= sndFile.GetNumInstruments(); nIns++)
 	{
-		if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == src + 1))
+		if (sndFile.Instruments[nIns] && (sndFile.Instruments[nIns]->nMixPlug == src + 1))
 		{
-			pSndFile->Instruments[nIns]->nMixPlug = dest + 1u;
+			sndFile.Instruments[nIns]->nMixPlug = dest + 1u;
 		}
 	}
 
 	// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
-	if (bAdjustPat && pSndFile->GetModSpecifications().HasNote(NOTE_PC))
-		pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(src + 1, src + 1, int(dest) - int(src)));
+	if (bAdjustPat && sndFile.GetModSpecifications().HasNote(NOTE_PC))
+		sndFile.Patterns.ForEachModCommand(PlugIndexModifier(src + 1, src + 1, int(dest) - int(src)));
 
 	cs.Leave();
 
