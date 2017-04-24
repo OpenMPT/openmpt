@@ -128,7 +128,6 @@
 #define MPT_WITH_MPG123
 #define MPT_WITH_OGG
 //#define MPT_WITH_STBVORBIS
-//#define MPT_WITH_UNMO3
 #define MPT_WITH_VORBIS
 #define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
@@ -154,7 +153,6 @@
 //#define MPT_WITH_MPG123
 //#define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
-//#define MPT_WITH_UNMO3
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
 //#define MPT_WITH_ZLIB
@@ -175,7 +173,6 @@
 #define MPT_WITH_MPG123
 #define MPT_WITH_OGG
 //#define MPT_WITH_STBVORBIS
-//#define MPT_WITH_UNMO3
 #define MPT_WITH_VORBIS
 #define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
@@ -249,9 +246,6 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Enable dynamic loading of un4seen unmo3
-#define MPT_ENABLE_UNMO3_DYNBIND
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -305,13 +299,6 @@
 #define NO_DMO
 #endif
 //#define NO_PLUGINS
-#if defined(MPT_ENABLE_DLOPEN)
-#if MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WITH_DL)
-//#define MPT_ENABLE_UNMO3_DYNBIND
-#endif // MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WITH_DL)
-#else // !MPT_ENABLE_DLOPEN
-//#define MPT_ENABLE_UNMO3_DYNBIND
-#endif // MPT_ENABLE_DLOPEN
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -510,10 +497,6 @@
 
 #if (defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)) && !defined(MPT_ENABLE_MP3_SAMPLES)
 #define MPT_ENABLE_MP3_SAMPLES
-#endif
-
-#if defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // unmo3 is loaded dynamically
 #endif
 
 #if defined(ENABLE_TESTS)

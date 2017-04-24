@@ -2,8 +2,7 @@
  * Load_mo3.cpp
  * ------------
  * Purpose: MO3 module loader.
- * Notes  : OpenMPT has its own built-in decoder,
- *          but can also make use of the official, closed-source library (unmo3.dll / libunmo3.so).
+ * Notes  : (currently none)
  * Authors: Johannes Schultz / OpenMPT Devs
  *          Based on documentation and the decompression routines from the
  *          open-source UNMO3 project (https://github.com/lclevy/unmo3).
@@ -42,106 +41,9 @@
 #include "../soundbase/SampleFormatCopy.h"
 #endif // MPT_WITH_STBVORBIS
 
-#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
-// unmo3.h
-#if MPT_OS_WINDOWS
-#define UNMO3_API __stdcall
-#else
-#define UNMO3_API
-#endif
-#if !defined(MPT_ENABLE_UNMO3_DYNBIND)
-extern "C" {
-OPENMPT_NAMESPACE::uint32 UNMO3_API UNMO3_GetVersion(void);
-void UNMO3_API UNMO3_Free(const void *data);
-OPENMPT_NAMESPACE::int32 UNMO3_API UNMO3_Decode(const void **data, OPENMPT_NAMESPACE::uint32 *len, OPENMPT_NAMESPACE::uint32 flags);
-}
-#endif // !MPT_ENABLE_UNMO3_DYNBIND
-#endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
-
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
-
-class ComponentUnMO3
-#if defined(MPT_WITH_UNMO3)
-	: public ComponentBuiltin
-#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
-	: public ComponentLibrary
-#endif
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-private:
-#if MPT_OS_WINDOWS
-#if defined(MPT_WITH_UNMO3)
-#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
-	mpt::Library MSVCRT;
-#endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
-#endif // MPT_OS_WINDOWS
-public:
-	uint32 (UNMO3_API * UNMO3_GetVersion)();
-	// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
-	// IN: data/len = MO3 data/len
-	// OUT: data/len = decoded data/len (if successful)
-	// flags & 1: Don't load samples
-	int32 (UNMO3_API * UNMO3_Decode_Old)(const void **data, uint32 *len);
-	int32 (UNMO3_API * UNMO3_Decode_New)(const void **data, uint32 *len, uint32 flags);
-	// Free the data returned by UNMO3_Decode
-	void (UNMO3_API * UNMO3_Free)(const void *data);
-	int32 UNMO3_Decode(const void **data, uint32 *len, uint32 flags) const
-	{
-		return (UNMO3_Decode_New ? UNMO3_Decode_New(data, len, flags) : UNMO3_Decode_Old(data, len));
-	}
-public:
-	ComponentUnMO3()
-#if defined(MPT_WITH_UNMO3)
-		: ComponentBuiltin()
-#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
-		: ComponentLibrary(ComponentTypeForeign)
-#endif
-	{
-		return;
-	}
-	bool DoInitialize()
-	{
-#if defined(MPT_WITH_UNMO3)
-		UNMO3_GetVersion = &(::UNMO3_GetVersion);
-		UNMO3_Free = &(::UNMO3_Free);
-		UNMO3_Decode_Old = nullptr;
-		UNMO3_Decode_New = &(::UNMO3_Decode);
-		return true;
-#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
-		#if MPT_OS_WINDOWS
-			// preload MSVCRT.DLL in order to prevent DLL preloading injection attacks from the current working directory.
-			MSVCRT = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("MSVCRT")));
-			#if defined(LIBOPENMPT_BUILD)
-				// require successful dependency loading for libopenmpt
-				if(!MSVCRT.IsValid())
-				{
-					return false;
-				}
-			#endif // LIBOPENMPT_BUILD
-		#endif // MPT_OS_WINDOWS
-		AddLibrary("unmo3", mpt::LibraryPath::App(MPT_PATHSTRING("unmo3")));
-		MPT_COMPONENT_BIND("unmo3", UNMO3_Free);
-		if(MPT_COMPONENT_BIND_OPTIONAL("unmo3", UNMO3_GetVersion))
-		{
-			UNMO3_Decode_Old = nullptr;
-			MPT_COMPONENT_BIND_SYMBOL("unmo3", "UNMO3_Decode", UNMO3_Decode_New);
-		} else
-		{
-			// Old API version: No "flags" parameter.
-			UNMO3_Decode_New = nullptr;
-			MPT_COMPONENT_BIND_SYMBOL("unmo3", "UNMO3_Decode", UNMO3_Decode_Old);
-		}
-		return !HasBindFailed();
-#endif
-	}
-};
-MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
-
-#endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
 
 
 struct MO3FileHeader
@@ -809,62 +711,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-
-#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
-
-	MPT_UNUSED_VARIABLE(version);
-
-	const bool shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis();
-
-	if(shouldUseUnmo3)
-	{
-	// Try to load unmo3 dynamically.
-	ComponentHandle<ComponentUnMO3> unmo3;
-	if(IsComponentAvailable(unmo3))
-	{
-		file.Rewind();
-		FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
-		const void *stream = mpt::void_cast<const void*>(fileView.data());
-		uint32 length = mpt::saturate_cast<uint32>(fileView.size());
-
-		if(unmo3->UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1) != 0)
-		{
-			return false;
-		}
-
-		fileView.invalidate();
-
-		// If decoding was successful, stream and length will keep the new pointers now.
-		FileReader unpackedFile(mpt::as_span(mpt::void_cast<const mpt::byte*>(stream), length));
-
-		bool result = false;	// Result of trying to load the module, false == fail.
-
-		result = ReadXM(unpackedFile, loadFlags)
-			|| ReadIT(unpackedFile, loadFlags)
-			|| ReadS3M(unpackedFile, loadFlags)
-			|| ReadMTM(unpackedFile, loadFlags)
-			|| ReadMod(unpackedFile, loadFlags)
-			|| ReadM15(unpackedFile, loadFlags);
-		if(result)
-		{
-			#ifdef MODPLUG_TRACKER
-				AddToLog(LogNotification, MPT_USTRING("Loading MO3 file used Un4seen unmo3."));
-			#else
-				AddToLog(LogWarning, MPT_USTRING("Loading MO3 file used Un4seen unmo3. Un4seen unmo3 support is deprecated in libopenmpt and will be removed in favour of the built-in decoder on 2018-01-01."));
-			#endif
-			m_ContainerType = MOD_CONTAINERTYPE_MO3;
-		}
-
-		unmo3->UNMO3_Free(stream);
-
-		if(result)
-		{
-			return true;
-		}
-	}
-	}
-
-#endif
 
 	if(version > 5)
 	{
