@@ -111,8 +111,8 @@ public:
 	virtual int GetNumOutputChannels() const { return 2; }
 
 	virtual bool ProgramsAreChunks() const { return true; }
-	virtual size_t GetChunk(char *(&data), bool);
-	virtual void SetChunk(size_t size, char *data, bool);
+	virtual size_t GetChunk(mpt::byte *(&data), bool);
+	virtual void SetChunk(size_t size, mpt::byte *data, bool);
 
 protected:
 	void RecalculateEchoParams();
