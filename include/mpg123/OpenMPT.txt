@@ -1,0 +1,5 @@
+libmpg123 library version 1.24.0.
+The following changes have been made:
+- Obviously, unnecessary folders and files have been removed.
+- For building, premake is used to generate Visual Studio project files.
+  See ../build/premake/ for details.

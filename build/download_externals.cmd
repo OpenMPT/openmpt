@@ -74,7 +74,6 @@ call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip" 
 call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                    "asiosdk2.3.zip"                    "ASIOSDK2.3"    "-" || goto error
 call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip" "vstsdk365_12_11_2015_build_67.zip" "VST3 SDK"      "-" || goto error
 call :download_and_unpack "lame"      "https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"  "lame-3.99.5.tar.gz"                "lame-3.99.5"   "lame-3.99.5.tar" || goto error
-call :download_and_unpack "mpg123"    "http://www.mpg123.de/download/mpg123-1.24.0.tar.bz2"                       "mpg123-1.24.0.tar.bz2"             "mpg123-1.24.0" "mpg123-1.24.0.tar" || goto error
 rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/minimp3.tar.gz"                         "minimp3.tar.gz"                     "minimp3"    "minimp3.tar" || goto error
 
 goto ok
