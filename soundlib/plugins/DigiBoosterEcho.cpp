@@ -204,7 +204,7 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 size_t DigiBoosterEcho::GetChunk(mpt::byte *(&data), bool)
 //--------------------------------------------------------
 {
-	data = reinterpret_cast<char *>(&chunk);
+	data = reinterpret_cast<mpt::byte *>(&chunk);
 	return sizeof(chunk);
 }
 
