@@ -24,7 +24,7 @@
    "../../examples/libopenmpt_example_cxx.cpp",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "portaudiocpp", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
 		if not _OPTIONS["xp"] then
 			links { "delayimp" }
@@ -64,7 +64,7 @@
    "../../examples/libopenmpt_example_c.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
 		if not _OPTIONS["xp"] then
 			links { "delayimp" }
@@ -104,7 +104,7 @@
    "../../examples/libopenmpt_example_c_mem.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
 		if not _OPTIONS["xp"] then
 			links { "delayimp" }
@@ -144,7 +144,7 @@
    "../../examples/libopenmpt_example_c_unsafe.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared" }
 		if not _OPTIONS["xp"] then
 			links { "delayimp" }

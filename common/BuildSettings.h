@@ -125,7 +125,7 @@
 #endif
 //#define MPT_WITH_MINIMP3
 //#define MPT_WITH_MINIZ
-//#define MPT_WITH_MPG123
+#define MPT_WITH_MPG123
 #define MPT_WITH_OGG
 //#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
@@ -180,7 +180,7 @@
 #endif
 //#define MPT_WITH_MINIMP3
 //#define MPT_WITH_MINIZ
-//#define MPT_WITH_MPG123
+#define MPT_WITH_MPG123
 #define MPT_WITH_OGG
 //#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3

@@ -9,6 +9,8 @@
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
    "../../include",
+   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
@@ -61,6 +63,7 @@
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
 	defines { "MPT_ENABLE_DLOPEN" }
   links {
+   "mpg123",
    "ogg",
    "vorbis",
    "zlib",

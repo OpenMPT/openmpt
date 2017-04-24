@@ -1,24 +1,12 @@
 
 if layout == "custom" then
- if mp3 == true then
-  project "OpenMPT-MP3-custom"
-  mpt_projectname = "OpenMPT-MP3-custom"
-   uuid "0baf7cd8-6f2e-4438-9299-ea6b217c7184"
- else
   project "OpenMPT-custom"
   mpt_projectname = "OpenMPT-custom"
    uuid "6b9af880-af37-4268-bb91-2b982ff6499a"
- end
 else
- if mp3 == true then
-  project "OpenMPT-MP3"
-  mpt_projectname = "OpenMPT-MP3"
-   uuid "e1d79f74-8a0d-4fb4-b900-07c5197f843e"
- else
   project "OpenMPT"
   mpt_projectname = "OpenMPT"
    uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
- end
 end
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
@@ -47,7 +35,10 @@ end
    "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
    "../../include/flac/include",
+   "../../include/lame/include",
    "../../include/lhasa/lib/public",
+   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/opus/include",
    "../../include/opusfile/include",
@@ -55,11 +46,6 @@ end
    "../../include/vorbis/include",
    "../../include/zlib",
   }
- if mp3 == true then
-  table.insert(extincludedirs, "../../include/mpg123/ports/MSVC++")
-  table.insert(extincludedirs, "../../include/mpg123/src/libmpg123")
-  table.insert(extincludedirs, "../../include/lame/include")
- end
 	filter { "action:vs*" }
 		includedirs ( extincludedirs )
 	filter { "not action:vs*" }
@@ -118,6 +104,7 @@ end
    "smbPitchShift",
    "lhasa",
    "flac",
+   "mpg123",
    "ogg",
    "opus",
    "opusfile",
@@ -127,19 +114,10 @@ end
    "soundtouch",
    "vorbis",
   }
-  if mp3 == true then
-   defines {
-    "MPT_WITH_LAME",
-    "MPT_WITH_MPG123",
-   }
-   links {
-    "lame",
-    "mpg123",
-   }
-  end
   filter { "configurations:*Shared" }
   filter { "not configurations:*Shared" }
    linkoptions {
+    "/DELAYLOAD:openmpt-mpg123.dll",
     "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
    }
    targetname "mptrack"
