@@ -6,32 +6,20 @@ Installation
 ------------
 
 * If you have an existing *portable* installation of OpenMPT and wish to re-use
-  its settings, copy your mptrack.ini and plugin.cache to the directory into
-  which you extract the archive.
+  its settings, copy mptrack.ini, SongSettings.ini, Keybindings.mkb and
+  plugin.cache to the directory into which you extract the archive.
 * If there is no previous installation or if you have an existing *standard*
   installation of OpenMPT, you're done: just extract the archive and launch
   mptrack.exe.
+* Hints on making an OpenMPT installation portable can be found in the
+  System Setup chapter of the manual (OpenMPT Manual.chm).
 
 
 Uninstallation
 --------------
 
 Delete the files extracted from the archive and optionally the OpenMPT
-setting files, which are by default stored in %APPDATA%\OpenMPT.
-
-
-Making OpenMPT portable
------------------------
-
-By default, OpenMPT stores its settings in %APPDATA%\OpenMPT. To avoid this,
-create a file called "mptrack.ini" in the same directory as mptrack.exe (if
-it does not exist yet) and add the following lines to this file:
-[Paths]
-UseAppDataDirectory=0
-
-Alternatively, you can copy your existing configuration file over from
-%APPDATA%\OpenMPT and add UseAppDataDirectory=0 in the [Paths] section of this
-file.
+setting files, which are stored in %APPDATA%\OpenMPT by default.
 
 
 Detailed help and documentation
@@ -43,7 +31,7 @@ Detailed help and documentation
 Changes in this version
 -----------------------
 
-See History.txt.
+...can be found in History.txt.
 
 
 Questions, comments, bug reports...
@@ -75,42 +63,17 @@ Package contents
 * open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 * OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
-* unmo3.dll: Used in MO3-file import.
+* openmpt-mpg123.dll: Optional component for MPEG sample support in the sample editor and MO3 format if Media Foundation codecs are not available.
+* openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
 * OMPT_1.27_ReleaseNotes.html: Release notes for this version.
 
 
-Steinberg Media Technologies GmbH
----------------------------------
+License
+-------
+
+OpenMPT is released under the 3-clause BSD license. See License.txt for details.
+OpenMPT uses various other open source projects.
+Their respective license information can be found in the Licenses folder.
 
 ASIO is a trademark and software of Steinberg Media Technologies GmbH
 VST is a trademark of Steinberg Media Technologies GmbH
-
-unmo3.dll
----------
-
-Copyright (c) 2001-2014 Ian Luck. All rights reserved
-
-The MO3 software is free for non-commercial use; if anyone tries to
-charge you for it, kick 'em where it hurts!
-
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THIS SOFTWARE IS PROVIDED "AS
-IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT 
-NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD LIABLE FOR ANY DAMAGE THAT MAY
-RESULT FROM THE USE OF THIS SOFTWARE. YOU USE THIS SOFTWARE ENTIRELY AT YOUR OWN
-RISK.
-
-Visit http://www.un4seen.com/mo3.html for more information.
-
-libmpg123
----------
-
-OpenMPT makes use of libmpg123, which is released under the LGPL license.
-A copy of the LGPL license can be found in Licenses\License.SoundTouch.txt
-Visit https://mpg123.de/ for more information.
-
-other liberaries
-----------------
-
-OpenMPT uses various other open source projects.
-Their respective license information can be found in the Licenses folder.
