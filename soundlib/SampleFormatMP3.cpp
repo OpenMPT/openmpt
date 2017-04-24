@@ -137,7 +137,9 @@ typedef ssize_t mpg123_ssize_t;
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
 class ComponentMPG123
-#if defined(MPT_WITH_MPG123)
+#if defined(MPT_WITH_MPG123) && defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
+	: public ComponentBundledDLL
+#elif defined(MPT_WITH_MPG123)
 	: public ComponentBuiltin
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	: public ComponentLibrary
@@ -202,7 +204,9 @@ public:
 
 public:
 	ComponentMPG123()
-#if defined(MPT_WITH_MPG123)
+#if defined(MPT_WITH_MPG123) && defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
+		: ComponentBundledDLL(MPT_PATHSTRING("openmpt-mpg123"))
+#elif defined(MPT_WITH_MPG123)
 		: ComponentBuiltin()
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
 		: ComponentLibrary(ComponentTypeForeign)
@@ -212,6 +216,12 @@ public:
 	}
 	bool DoInitialize()
 	{
+#if defined(MPT_WITH_MPG123) && defined(MPT_BUILD_MSVC_STATIC)
+		if(!ComponentBundledDLL::DoInitialize())
+		{
+			return false;
+		}
+#endif
 #if defined(MPT_WITH_MPG123)
 		MPT_GLOBAL_BIND("mpg123", mpg123_init);
 		MPT_GLOBAL_BIND("mpg123", mpg123_exit);
