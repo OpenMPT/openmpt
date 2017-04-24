@@ -42,6 +42,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  Licenses ^
  mptrack.exe ^
  OpenMPT_SoundTouch_f32.dll ^
+ openmpt-mpg123.dll ^
  PluginBridge32.exe ^
  PluginBridge64.exe ^
  openmpt-wine-support.zip ^

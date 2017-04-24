@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "ext\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpg123", "ext\mpg123.vcxproj", "{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "ext\ogg.vcxproj", "{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
@@ -75,6 +77,22 @@ Global
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|Win32.Build.0 = Release|Win32
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|x64.ActiveCfg = Release|x64
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|x64.Build.0 = Release|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.DebugShared|Win32.Build.0 = DebugShared|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.DebugShared|x64.ActiveCfg = DebugShared|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.DebugShared|x64.Build.0 = DebugShared|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Debug|Win32.Build.0 = Debug|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Debug|x64.ActiveCfg = Debug|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Debug|x64.Build.0 = Debug|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.ReleaseShared|Win32.ActiveCfg = ReleaseShared|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.ReleaseShared|Win32.Build.0 = ReleaseShared|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.ReleaseShared|x64.ActiveCfg = ReleaseShared|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.ReleaseShared|x64.Build.0 = ReleaseShared|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Release|Win32.ActiveCfg = Release|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Release|Win32.Build.0 = Release|Win32
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Release|x64.ActiveCfg = Release|x64
+		{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}.Release|x64.Build.0 = Release|x64
 		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
 		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.DebugShared|Win32.Build.0 = DebugShared|Win32
 		{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}.DebugShared|x64.ActiveCfg = DebugShared|x64

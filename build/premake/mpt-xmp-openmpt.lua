@@ -53,9 +53,12 @@
 
   characterset "Unicode"
   flags { "MFC" }
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "pugixml" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "pugixml" }
+	links { "delayimp" }
+   linkoptions {
+    "/DELAYLOAD:openmpt-mpg123.dll",
+   }
 	if not _OPTIONS["xp"] then
-		links { "delayimp" }
 		linkoptions {
 			"/DELAYLOAD:mf.dll",
 			"/DELAYLOAD:mfplat.dll",

@@ -46,10 +46,13 @@
 	filter {}
 
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123" }
+	links { "delayimp" }
+   linkoptions {
+    "/DELAYLOAD:openmpt-mpg123.dll",
+   }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
 	if not _OPTIONS["xp"] then
-		links { "delayimp" }
 		linkoptions {
 			"/DELAYLOAD:mf.dll",
 			"/DELAYLOAD:mfplat.dll",

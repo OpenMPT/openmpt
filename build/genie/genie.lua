@@ -41,6 +41,7 @@ solution "libopenmpt"
 	end
 
  dofile "../../build/genie/mpt-libopenmpt.lua"
+ dofile "../../build/genie/ext-mpg123.lua"
  dofile "../../build/genie/ext-ogg.lua"
  dofile "../../build/genie/ext-vorbis.lua"
  dofile "../../build/genie/ext-zlib.lua"

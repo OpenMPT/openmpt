@@ -9,6 +9,8 @@
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
    "../../include",
+   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
@@ -95,6 +97,7 @@
   links {
    "vorbis",
    "ogg",
+   "mpg123",
    "zlib",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
