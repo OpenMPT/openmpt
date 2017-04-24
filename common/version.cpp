@@ -300,8 +300,6 @@ std::string GetBuildFeaturesString()
 		#endif
 		#if defined(MPT_WITH_MPG123)
 			retval += " +MPG123";
-		#elif defined(MPT_ENABLE_MPG123_DYNBIND)
-			retval += " +MPG123-DYNBIND";
 		#endif
 		#if defined(MPT_WITH_MINIMP3)
 			retval += " +MINIMP3";
@@ -309,7 +307,7 @@ std::string GetBuildFeaturesString()
 		#if defined(MPT_WITH_MEDIAFOUNDATION)
 			retval += " +MF";
 		#endif
-		#if !defined(MPT_WITH_MPG123) && !defined(MPT_ENABLE_MPG123_DYNBIND) && !defined(MPT_WITH_MINIMP3) && !defined(MPT_WITH_MEDIAFOUNDATION)
+		#if !defined(MPT_WITH_MPG123) && !defined(MPT_WITH_MINIMP3) && !defined(MPT_WITH_MEDIAFOUNDATION)
 			retval += " -MP3";
 		#endif
 		#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
@@ -650,7 +648,7 @@ mpt::ustring GetFullCreditsString()
 		"https://xiph.org/flac/\n"
 		"\n"
 #endif
-#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123)
 		"The mpg123 project for libmpg123\n"
 		"http://mpg123.de/\n"
 		"\n"

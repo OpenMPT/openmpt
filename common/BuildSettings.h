@@ -257,11 +257,6 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Enable dynamic loading of libmpg123
-#if !defined(MPT_WITH_MPG123)
-#define MPT_ENABLE_MPG123_DYNBIND
-#endif
-
 // Enable dynamic loading of un4seen unmo3
 #define MPT_ENABLE_UNMO3_DYNBIND
 
@@ -320,13 +315,9 @@
 //#define NO_PLUGINS
 #if defined(MPT_ENABLE_DLOPEN)
 #if MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WITH_DL)
-#if !defined(MPT_WITH_MPG123)
-#define MPT_ENABLE_MPG123_DYNBIND
-#endif
 //#define MPT_ENABLE_UNMO3_DYNBIND
 #endif // MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WITH_DL)
 #else // !MPT_ENABLE_DLOPEN
-//#define MPT_ENABLE_MPG123_DYNBIND
 //#define MPT_ENABLE_UNMO3_DYNBIND
 #endif // MPT_ENABLE_DLOPEN
 //#define NO_LIBOPENMPT_C
@@ -525,11 +516,7 @@
 #define MPT_ENABLE_DYNBIND // MediaFoundation needs dynamic loading in order to test availability of delay loaded libs
 #endif
 
-#if defined(MPT_ENABLE_MPG123_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
-#endif
-
-#if (defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND) || defined(MPT_WITH_MINIMP3)) && !defined(MPT_ENABLE_MP3_SAMPLES)
+#if (defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)) && !defined(MPT_ENABLE_MP3_SAMPLES)
 #define MPT_ENABLE_MP3_SAMPLES
 #endif
 
