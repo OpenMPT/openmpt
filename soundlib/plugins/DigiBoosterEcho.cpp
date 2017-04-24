@@ -88,15 +88,14 @@ void DigiBoosterEcho::SaveAllParameters()
 //---------------------------------------
 {
 	m_pMixStruct->defaultProgram = -1;
-	if(m_pMixStruct->nPluginDataSize != sizeof(chunk) || m_pMixStruct->pPluginData == nullptr)
+	try
 	{
-		delete[] m_pMixStruct->pPluginData;
-		m_pMixStruct->nPluginDataSize = sizeof(chunk);
-		m_pMixStruct->pPluginData = new (std::nothrow) char[sizeof(chunk)];
-	}
-	if(m_pMixStruct->pPluginData != nullptr)
+		m_pMixStruct->pluginData.resize(sizeof(chunk));
+		memcpy(m_pMixStruct->pluginData.data(), &chunk, sizeof(chunk));
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
-		memcpy(m_pMixStruct->pPluginData, &chunk, sizeof(chunk));
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		m_pMixStruct->pluginData.clear();
 	}
 }
 
@@ -104,9 +103,9 @@ void DigiBoosterEcho::SaveAllParameters()
 void DigiBoosterEcho::RestoreAllParameters(int32 program)
 //-------------------------------------------------------
 {
-	if(m_pMixStruct->nPluginDataSize == sizeof(chunk) && !memcmp(m_pMixStruct->pPluginData, "Echo", 4))
+	if(m_pMixStruct->pluginData.size() == sizeof(chunk) && !memcmp(m_pMixStruct->pluginData.data(), "Echo", 4))
 	{
-		memcpy(&chunk, m_pMixStruct->pPluginData, sizeof(chunk));
+		memcpy(&chunk, m_pMixStruct->pluginData.data(), sizeof(chunk));
 	} else
 	{
 		IMixPlugin::RestoreAllParameters(program);

@@ -672,34 +672,32 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					}
 
 					// Read plugin settings
+					uint32 dataSize;
 					if(vstHeader.useChunks)
 					{
 						// MT2 only ever calls effGetChunk for programs, and OpenMPT uses the defaultProgram value to determine
 						// whether it should use effSetChunk for programs or banks...
 						mixPlug.defaultProgram = -1;
-						LimitMax(vstHeader.n, Util::MaxValueOfType(mixPlug.nPluginDataSize) - 4);
-						mixPlug.nPluginDataSize = vstHeader.n + 4;
+						LimitMax(vstHeader.n, Util::MaxValueOfType(dataSize) - 4);
+						dataSize = vstHeader.n + 4;
 					} else
 					{
 						mixPlug.defaultProgram = vstHeader.programNr;
-						LimitMax(vstHeader.n, (Util::MaxValueOfType(mixPlug.nPluginDataSize) / 4u) - 1);
-						mixPlug.nPluginDataSize = vstHeader.n * 4 + 4;
+						LimitMax(vstHeader.n, (Util::MaxValueOfType(dataSize) / 4u) - 1);
+						dataSize = vstHeader.n * 4 + 4;
 					}
-					mixPlug.pPluginData = new (std::nothrow) char[mixPlug.nPluginDataSize];
-					if(mixPlug.pPluginData != nullptr)
+					mixPlug.pluginData.resize(dataSize);
+					if(vstHeader.useChunks)
 					{
-						if(vstHeader.useChunks)
+						memcpy(mixPlug.pluginData.data(), "fEvN", 4);	// 'NvEf' plugin data type
+						chunk.ReadRaw(mixPlug.pluginData.data() + 4, vstHeader.n);
+					} else
+					{
+						float32 *f = reinterpret_cast<float32 *>(mixPlug.pluginData.data());
+						*(f++) = 0;	// Plugin data type
+						for(uint32 param = 0; param < vstHeader.n; param++, f++)
 						{
-							memcpy(mixPlug.pPluginData, "fEvN", 4);	// 'NvEf' plugin data type
-							chunk.ReadRaw(mixPlug.pPluginData + 4, vstHeader.n);
-						} else
-						{
-							float32 *f = reinterpret_cast<float32 *>(mixPlug.pPluginData);
-							*(f++) = 0;	// Plugin data type
-							for(uint32 param = 0; param < vstHeader.n; param++, f++)
-							{
-								*f = chunk.ReadFloatLE();
-							}
+							*f = chunk.ReadFloatLE();
 						}
 					}
 				} else

@@ -518,27 +518,20 @@ void IMixPlugin::SaveAllParameters()
 	uint32 nLen = numParams * sizeof(IEEE754binary32LE);
 	if (!nLen) return;
 	nLen += sizeof(uint32);
-	if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
+
+	try
 	{
-		m_pMixStruct->nPluginDataSize = nLen;
-	} else
-	{
-		if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
-		m_pMixStruct->nPluginDataSize = 0;
-		m_pMixStruct->pPluginData = new (std::nothrow) char[nLen];
-		if (m_pMixStruct->pPluginData)
-		{
-			m_pMixStruct->nPluginDataSize = nLen;
-		}
-	}
-	if (m_pMixStruct->pPluginData != nullptr)
-	{
-		std::pair<mpt::span<char>, mpt::IO::Offset> memFile = std::make_pair(mpt::as_span(m_pMixStruct->pPluginData, nLen), 0);
+		m_pMixStruct->pluginData.resize(nLen);
+		auto memFile = std::make_pair(mpt::as_span(m_pMixStruct->pluginData), mpt::IO::Offset(0));
 		mpt::IO::WriteIntLE<uint32>(memFile, 0);	// Plugin data type
 		for(PlugParamIndex i = 0; i < numParams; i++)
 		{
 			mpt::IO::Write(memFile, IEEE754binary32LE(GetParameter(i)));
 		}
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		m_pMixStruct->pluginData.clear();
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 	}
 }
 
@@ -546,14 +539,14 @@ void IMixPlugin::SaveAllParameters()
 void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 //------------------------------------------------------
 {
-	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= sizeof(uint32))
+	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= sizeof(uint32))
 	{
-		FileReader memFile(mpt::as_span(mpt::byte_cast<const mpt::byte *>(m_pMixStruct->pPluginData), m_pMixStruct->nPluginDataSize));
+		FileReader memFile(mpt::as_span(m_pMixStruct->pluginData));
 		uint32 type = memFile.ReadUint32LE();
 		if(type == 0)
 		{
 			const uint32 numParams = GetNumParameters();
-			if((m_pMixStruct->nPluginDataSize - sizeof(uint32)) >= (numParams * sizeof(IEEE754binary32LE)))
+			if((m_pMixStruct->pluginData.size() - sizeof(uint32)) >= (numParams * sizeof(IEEE754binary32LE)))
 			{
 				BeginSetProgram(-1);
 				for(uint32 i = 0; i < numParams; i++)
@@ -1052,15 +1045,13 @@ void SNDMIXPLUGIN::SetBypass(bool bypass)
 void SNDMIXPLUGIN::Destroy()
 //--------------------------
 {
-	delete[] pPluginData;
-	pPluginData = nullptr;
-	nPluginDataSize = 0;
-
 	if(pMixPlugin)
 	{
 		pMixPlugin->Release();
 		pMixPlugin = nullptr;
 	}
+	pluginData.clear();
+	pluginData.shrink_to_fit();
 }
 
 OPENMPT_NAMESPACE_END

@@ -556,9 +556,9 @@ bool CModDoc::ConvertSamplesToInstruments()
 PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 //---------------------------------------------------------------
 {
-	//Remove all plugins whose keepMask[plugindex] is false.
+	// Remove all plugins whose keepMask[plugindex] is false.
 	PLUGINDEX nRemoved = 0;
-	const PLUGINDEX maxPlug = static_cast<PLUGINDEX>(MIN(MAX_MIXPLUGINS, keepMask.size()));
+	const PLUGINDEX maxPlug = std::min(MAX_MIXPLUGINS, static_cast<PLUGINDEX>(keepMask.size()));
 
 	CriticalSection cs;
 	for(PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
@@ -574,18 +574,8 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 			nRemoved++;
 		}
 
-		delete[] plug.pPluginData;
-		plug.pPluginData = nullptr;
-
-		if(plug.pMixPlugin)
-		{
-			plug.pMixPlugin->Release();
-			plug.pMixPlugin = nullptr;
-		}
-		MemsetZero(plug.Info);
-		plug.nPluginDataSize = 0;
-		plug.fDryRatio = 0;
-		plug.defaultProgram = 0;
+		plug.Destroy();
+		plug = SNDMIXPLUGIN();
 	}
 
 	return nRemoved;
@@ -599,10 +589,8 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	IMixPlugin *srcVstPlug = source.pMixPlugin;
 	target.Destroy();
 	target = source;
-	// Don't want this stuff to be accidentally erased again...
+	// Don't want this plugin to be accidentally erased again...
 	target.pMixPlugin = nullptr;
-	target.pPluginData = nullptr;
-	target.nPluginDataSize = 0;
 	if(target.editorX != int32_min)
 	{
 		// Move target editor a bit to visually distinguish it from the original editor

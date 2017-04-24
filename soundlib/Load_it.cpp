@@ -1803,10 +1803,7 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			{
 				plugin.pMixPlugin->SaveAllParameters();
 			}
-			if(plugin.pPluginData)
-			{
-				nPluginSize += plugin.nPluginDataSize;
-			}
+			nPluginSize += plugin.pluginData.size();
 
 			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
 									 4 + sizeof(int32);			// Default Program
@@ -1825,10 +1822,11 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				// write plugin size:
 				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
 				mpt::IO::Write(f, m_MixPlugins[i].Info);
-				mpt::IO::WriteIntLE<uint32>(f, m_MixPlugins[i].nPluginDataSize);
-				if(m_MixPlugins[i].pPluginData)
+				uint32 dataSize = mpt::saturate_cast<uint32>(m_MixPlugins[i].pluginData.size());
+				mpt::IO::WriteIntLE<uint32>(f, dataSize);
+				if(dataSize)
 				{
-					mpt::IO::WriteRaw(f, m_MixPlugins[i].pPluginData, m_MixPlugins[i].nPluginDataSize);
+					mpt::IO::WriteRaw(f, m_MixPlugins[i].pluginData.data(), dataSize);
 				}
 
 				mpt::IO::WriteIntLE<uint32>(f, MPTxPlugDataSize);
@@ -1907,7 +1905,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		{
 			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
 			{
-				ChnSettings[ch].nMixPlugin = (uint8)chunk.ReadUint32LE();
+				ChnSettings[ch].nMixPlugin = static_cast<PLUGINDEX>(chunk.ReadUint32LE());
 			}
 #ifndef NO_PLUGINS
 		}
@@ -1947,19 +1945,14 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 	mpt::String::SetNullTerminator(plugin.Info.szLibraryName);
 	plugin.editorX = plugin.editorY = int32_min;
 
-	//data for VST setchunk? size lies just after standard plugin data.
+	// Plugin user data
 	const uint32 pluginDataChunkSize = file.ReadUint32LE();
 	FileReader pluginDataChunk = file.ReadChunk(pluginDataChunkSize);
 
 	if(pluginDataChunk.IsValid())
 	{
-		plugin.nPluginDataSize = 0;
-		plugin.pPluginData = new (std::nothrow) char[pluginDataChunkSize];
-		if(plugin.pPluginData)
-		{
-			plugin.nPluginDataSize = pluginDataChunkSize;
-			pluginDataChunk.ReadRaw(plugin.pPluginData, pluginDataChunkSize);
-		}
+		plugin.pluginData.resize(pluginDataChunkSize);
+		pluginDataChunk.ReadRaw(plugin.pluginData.data(), pluginDataChunkSize);
 	}
 
 	FileReader modularData = file.ReadChunk(file.ReadUint32LE());

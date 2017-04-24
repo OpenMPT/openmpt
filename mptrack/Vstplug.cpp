@@ -1588,12 +1588,12 @@ void CVstPlugin::SaveAllParameters()
 		void *p = nullptr;
 
 		// Try to get whole bank
-		uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0, 0, &p, 0));
+		VstIntPtr nByteSize = Dispatch(effGetChunk, 0, 0, &p, 0);
 
 		if (!p)
 		{
 			// Getting bank failed, try to get just preset
-			nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1, 0, &p, 0));
+			nByteSize = Dispatch(effGetChunk, 1, 0, &p, 0);
 		} else
 		{
 			// We managed to get the bank, now we need to remember which program we're on.
@@ -1602,24 +1602,17 @@ void CVstPlugin::SaveAllParameters()
 		if (p != nullptr)
 		{
 			LimitMax(nByteSize, Util::MaxValueOfType(nByteSize) - 4);
-			if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nByteSize + 4))
+			try
 			{
-				m_pMixStruct->nPluginDataSize = nByteSize + 4;
-			} else
-			{
-				delete[] m_pMixStruct->pPluginData;
-				m_pMixStruct->nPluginDataSize = 0;
-				m_pMixStruct->pPluginData = new char[nByteSize + 4];
-				if (m_pMixStruct->pPluginData)
-				{
-					m_pMixStruct->nPluginDataSize = nByteSize + 4;
-				}
-			}
-			if (m_pMixStruct->pPluginData)
-			{
-				*reinterpret_cast<uint32 *>(m_pMixStruct->pPluginData) = 'NvEf';
-				memcpy(m_pMixStruct->pPluginData + 4, p, nByteSize);
+				m_pMixStruct->pluginData.resize(nByteSize + 4);
+				auto data = m_pMixStruct->pluginData.data();
+				uint32 type = 'NvEf';
+				memcpy(data, &type, 4);
+				memcpy(data + 4, p, nByteSize);
 				return;
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			}
 		}
 	}
@@ -1631,22 +1624,24 @@ void CVstPlugin::SaveAllParameters()
 void CVstPlugin::RestoreAllParameters(int32 program)
 //--------------------------------------------------
 {
-	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
+	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= 4)
 	{
-		uint32 type = *reinterpret_cast<const uint32 *>(m_pMixStruct->pPluginData);
+		auto data = m_pMixStruct->pluginData.data();
+		uint32 type;
+		memcpy(&type, data, 4);
 
 		if ((type == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
 		{
 			if ((program>=0) && (program < m_Effect.numPrograms))
 			{
 				// Bank
-				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
+				Dispatch(effSetChunk, 0, m_pMixStruct->pluginData.size() - 4, data + 4, 0);
 				SetCurrentProgram(program);
 			} else
 			{
 				// Program
 				BeginSetProgram(-1);
-				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
+				Dispatch(effSetChunk, 1, m_pMixStruct->pluginData.size() - 4, data + 4, 0);
 				EndSetProgram();
 			}
 		} else
@@ -1735,15 +1730,15 @@ void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
 }
 
 
-size_t CVstPlugin::GetChunk(char *(&chunk), bool isBank)
-//------------------------------------------------------
+size_t CVstPlugin::GetChunk(mpt::byte *(&chunk), bool isBank)
+//-----------------------------------------------------------
 {
 	return Dispatch(effGetChunk, isBank ? 0 : 1, 0, &chunk, 0);
 }
 
 
-void CVstPlugin::SetChunk(size_t size, char *chunk, bool isBank)
-//--------------------------------------------------------------
+void CVstPlugin::SetChunk(size_t size, mpt::byte *chunk, bool isBank)
+//-------------------------------------------------------------------
 {
 	Dispatch(effSetChunk, isBank ? 0 : 1, size, chunk, 0);
 }
