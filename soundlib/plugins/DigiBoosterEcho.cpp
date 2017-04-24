@@ -201,16 +201,16 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 #endif // MODPLUG_TRACKER
 
 
-size_t DigiBoosterEcho::GetChunk(char *(&data), bool)
-//---------------------------------------------------
+size_t DigiBoosterEcho::GetChunk(mpt::byte *(&data), bool)
+//--------------------------------------------------------
 {
 	data = reinterpret_cast<char *>(&chunk);
 	return sizeof(chunk);
 }
 
 
-void DigiBoosterEcho::SetChunk(size_t size, char *data, bool)
-//-----------------------------------------------------------
+void DigiBoosterEcho::SetChunk(size_t size, mpt::byte *data, bool)
+//----------------------------------------------------------------
 {
 	if(size == sizeof(chunk) && !memcmp(data, "Echo", 4))
 	{
