@@ -126,6 +126,8 @@ Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "Vi
 Filename: {app}\mptrack.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
+; We no longer require unmo3
+Type: files; Name: {app}\unmo3.dll
 ; i16 -> f32
 Type: files; Name: {app}\OpenMPT_SoundTouch_i16.dll
 ; Old SoundTouch documents

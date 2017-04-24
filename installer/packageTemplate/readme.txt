@@ -5,8 +5,8 @@ OpenMPT 1.27
 Uninstallation
 --------------
 
-An uninstaller is provided. Don't worry, it will ask you if you want to keep
-your personal settings, none of these will be deleted automatically.
+An uninstaller is provided. It will ask you if you want to keep your personal
+settings, none of these will be deleted automatically.
 Custom files that are created by the user (e.g. key bindings) will never be
 removed.
 
@@ -14,7 +14,7 @@ removed.
 Detailed help and documentation
 -------------------------------
 
-See OpenMPT Manual.chm.
+...can be found in OpenMPT Manual.chm.
 
 
 Changes in this version
@@ -52,42 +52,17 @@ Package contents
 * open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 * OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
-* unmo3.dll: Used in MO3-file import.
+* openmpt-mpg123.dll: Optional component for MPEG sample support in the sample editor and MO3 format if Media Foundation codecs are not available.
+* openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
 * OMPT_1.27_ReleaseNotes.html: Release notes for this version.
 
 
-Steinberg Media Technologies GmbH
----------------------------------
+License
+-------
+
+OpenMPT is released under the 3-clause BSD license. See License.txt for details.
+OpenMPT uses various other open source projects.
+Their respective license information can be found in the Licenses folder.
 
 ASIO is a trademark and software of Steinberg Media Technologies GmbH
 VST is a trademark of Steinberg Media Technologies GmbH
-
-unmo3.dll
----------
-
-Copyright (c) 2001-2014 Ian Luck. All rights reserved
-
-The MO3 software is free for non-commercial use; if anyone tries to
-charge you for it, kick 'em where it hurts!
-
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THIS SOFTWARE IS PROVIDED "AS
-IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT 
-NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD LIABLE FOR ANY DAMAGE THAT MAY
-RESULT FROM THE USE OF THIS SOFTWARE. YOU USE THIS SOFTWARE ENTIRELY AT YOUR OWN
-RISK.
-
-Visit http://www.un4seen.com/mo3.html for more information.
-
-libmpg123
----------
-
-OpenMPT makes use of libmpg123, which is released under the LGPL license.
-A copy of the LGPL license can be found in Licenses\License.SoundTouch.txt
-Visit https://mpg123.de/ for more information.
-
-other liberaries
-----------------
-
-OpenMPT uses various other open source projects.
-Their respective license information can be found in the Licenses folder.
