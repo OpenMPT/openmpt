@@ -10,6 +10,8 @@
   dofile "../../build/genie/genie-defaults-winver.lua"
   local extincludedirs = {
    "../../include",
+   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
@@ -72,6 +74,7 @@
   defines { "LIBOPENMPT_BUILD" }
 	defines { "MPT_ENABLE_DLOPEN" }
   links {
+   "mpg123",
    "vorbis",
    "ogg",
    "zlib",
