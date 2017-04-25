@@ -1,10 +1,10 @@
  
- project "libopenmpt"
-  uuid "9C5101EF-3E20-4558-809B-277FDD50E878"
+ project "libopenmpt-full"
+  uuid "76c962ad-c957-46c2-9b66-b74e476ecabc"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "libopenmpt"
+  mpt_projectname = "libopenmpt-full"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
@@ -56,6 +56,10 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 
+	filter { "action:vs*" }
+		resdefines {
+			"MPT_BUILD_VER_SPECIAL_PREFIX=\"+full\"",
+		}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
@@ -78,11 +82,21 @@
 
   characterset "Unicode"
   flags { "ExtraWarnings" }
-  defines { "LIBOPENMPT_BUILD" }
+  defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_FULL" }
 	defines { "MPT_ENABLE_DLOPEN" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
+		if not _OPTIONS["xp"] then
+			links { "delayimp" }
+			linkoptions {
+				"/DELAYLOAD:mf.dll",
+				"/DELAYLOAD:mfplat.dll",
+				"/DELAYLOAD:mfreadwrite.dll",
+				--"/DELAYLOAD:mfuuid.dll", -- static library
+				"/DELAYLOAD:propsys.dll",
+			}
+		end
   filter {}
   links {
    "vorbis",

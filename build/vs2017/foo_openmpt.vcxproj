@@ -73,7 +73,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>delayimp.lib;..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2017-static\x86-32-win7\foo_openmpt.lib</ImportLibrary>
-      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -107,7 +107,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>delayimp.lib;..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2017-static\x86-32-win7\foo_openmpt.lib</ImportLibrary>
-      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
