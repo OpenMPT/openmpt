@@ -6,11 +6,9 @@ This is preliminary documentation.
  1. Copy the whole libopenmpt source tree below your jni directory.
  2. Copy build/android_ndk/* into the root of libopenmpt, i.e. also into the
     jni directory and adjust as needed.
- 3. If you want to support MO3 decoding. download
-    http://keyj.emphy.de/files/projects/minimp3.tar.gz from
-    http://keyj.emphy.de/minimp3/ and put its contents into jni/include/minimp3
-    (beware that minimp3 is LGPL 2.1 licensed) OR make libmpg123, libogg,
-    libvorbis and libvorbisfile available.
+ 3. If you want to support MO3 decoding, you have to either make libmpg123,
+    libogg, libvorbis and libvorbisfile available (recommended) OR build
+    libopenmpt with minimp3 and stb_vorbis support (not recommended).
     Pass the appropriate options to ndk-build:
         MPT_WITH_MINIMP3=1    : Build minimp3 into libopenmpt
         MPT_WITH_MPG123=1     : Link against libmpg123 compiled externally

@@ -80,8 +80,6 @@ rmdir /s /q include\VST_SDK || goto error
 
 call :download_and_unpack "lame"      "https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"   "lame-3.99.5.tar.gz"                 "lame-3.99.5"      "lame-3.99.5.tar" || goto error
 
-rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/minimp3.tar.gz"                          "minimp3.tar.gz"                     "minimp3"        "minimp3.tar" || goto error
-
 goto ok
 
 :ok
