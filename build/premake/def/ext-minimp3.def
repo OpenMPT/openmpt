@@ -1,0 +1,6 @@
+LIBRARY
+EXPORTS
+;
+mp3_create
+mp3_decode
+mp3_done

@@ -53,7 +53,7 @@
 #define FRAC_RND(a) (((a) + (FRAC_ONE/2)) >> FRAC_BITS)
 #define FIXHR(a) ((int)((a) * (1LL<<32) + 0.5))
 
-#ifndef _MSC_VER
+#if !(defined(_MSC_VER) && defined(_M_IX86)) // OpenMPT
     #define MULL(a,b) (((int64_t)(a) * (int64_t)(b)) >> FRAC_BITS)
     #define MULH(a,b) (((int64_t)(a) * (int64_t)(b)) >> 32)
 #else
