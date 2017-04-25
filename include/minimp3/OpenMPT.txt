@@ -1,0 +1,6 @@
+minimp3 version as of 2017-04-25 from
+http://keyj.emphy.de/files/projects/minimp3.tar.gz .
+The following changes have been made:
+- Obviously, unnecessary folders and files have been removed.
+- For building, premake is used to generate Visual Studio project files.
+  See ../build/premake/ for details.
