@@ -82,18 +82,9 @@
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
-		if not _OPTIONS["xp"] then
-			links { "delayimp" }
-			linkoptions {
-				"/DELAYLOAD:mf.dll",
-				"/DELAYLOAD:mfplat.dll",
-				"/DELAYLOAD:mfreadwrite.dll",
-				--"/DELAYLOAD:mfuuid.dll", -- static library
-				"/DELAYLOAD:propsys.dll",
-			}
-		end
   filter {}
   links {
+   "minimp3",
    "miniz",
    "stb_vorbis"
   }
