@@ -2631,10 +2631,18 @@ retry:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#if 1 // OpenMPT
+mp3_decoder_t *mp3_create(void) { // OpenMPT
+#else // OpenMPT
 mp3_decoder_t mp3_create(void) {
+#endif // OpenMPT
     void *dec = libc_calloc(sizeof(mp3_context_t), 1);
     if (dec) mp3_decode_init((mp3_context_t*) dec);
+#if 1 // OpenMPT
+		return (mp3_decoder_t*) dec; // OpenMPT
+#else // OpenMPT
     return (mp3_decoder_t) dec;
+#endif // OpenMPT
 }
 
 void mp3_done(mp3_decoder_t *dec) {
