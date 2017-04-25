@@ -176,80 +176,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 #endif // MPT_WITH_MPG123 || MPT_WITH_MINIMP3
 
-#if defined(MPT_WITH_MINIMP3)
-
-	file.Rewind();
-	FileReader::PinnedRawDataView rawDataView = file.GetPinnedRawDataView();
-	int64 bytes_left = rawDataView.size();
-	const uint8 *stream_pos = mpt::byte_cast<const uint8 *>(rawDataView.data());
-
-	std::vector<int16> raw_sample_data;
-
-	mp3_decoder_t *mp3 = reinterpret_cast<mp3_decoder_t *>(mp3_create()); // workaround minimp3 header typo
-
-	int rate = 0;
-	int channels = 0;
-
-	mp3_info_t info;
-	int frame_size = 0;
-	do
-	{
-		int16 sample_buf[MP3_MAX_SAMPLES_PER_FRAME];
-		frame_size = mp3_decode(mp3, const_cast<uint8 *>(stream_pos), bytes_left, sample_buf, &info); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
-		if(rate != 0 && rate != info.sample_rate) break; // inconsistent stream
-		if(channels != 0 && channels != info.channels) break; // inconsistent stream
-		rate = info.sample_rate;
-		channels = info.channels;
-		if(rate <= 0) break; // broken stream
-		if(channels != 1 && channels != 2) break; // broken stream
-		stream_pos += frame_size;
-		bytes_left -= frame_size;
-		if(info.audio_bytes >= 0)
-		{
-			try
-			{
-				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-				break;
-			}
-		}
-	} while((bytes_left >= 0) && (frame_size > 0));
-
-	mp3_free(mp3);
-
-	if(rate == 0 || channels == 0 || raw_sample_data.empty())
-	{
-		return false;
-	}
-
-	DestroySampleThreadsafe(sample);
-	if(!mo3Decode)
-	{
-		strcpy(m_szNames[sample], "");
-		Samples[sample].Initialize();
-		Samples[sample].nC5Speed = rate;
-	}
-	Samples[sample].nLength = raw_sample_data.size() / channels;
-
-	Samples[sample].uFlags.set(CHN_16BIT);
-	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
-	Samples[sample].AllocateSample();
-
-	if(Samples[sample].pSample != nullptr)
-	{
-		std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
-	}
-
-	if(!mo3Decode)
-	{
-		Samples[sample].Convert(MOD_TYPE_IT, GetType());
-		Samples[sample].PrecomputeLoops(*this, false);
-	}
-	return Samples[sample].pSample != nullptr;
-
-#elif defined(MPT_WITH_MPG123)
+#if defined(MPT_WITH_MPG123)
 
 	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
@@ -324,6 +251,79 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	}
 	mpg123_delete(mh);
+
+	if(!mo3Decode)
+	{
+		Samples[sample].Convert(MOD_TYPE_IT, GetType());
+		Samples[sample].PrecomputeLoops(*this, false);
+	}
+	return Samples[sample].pSample != nullptr;
+
+#elif defined(MPT_WITH_MINIMP3)
+
+	file.Rewind();
+	FileReader::PinnedRawDataView rawDataView = file.GetPinnedRawDataView();
+	int64 bytes_left = rawDataView.size();
+	const uint8 *stream_pos = mpt::byte_cast<const uint8 *>(rawDataView.data());
+
+	std::vector<int16> raw_sample_data;
+
+	mp3_decoder_t *mp3 = reinterpret_cast<mp3_decoder_t *>(mp3_create()); // workaround minimp3 header typo
+
+	int rate = 0;
+	int channels = 0;
+
+	mp3_info_t info;
+	int frame_size = 0;
+	do
+	{
+		int16 sample_buf[MP3_MAX_SAMPLES_PER_FRAME];
+		frame_size = mp3_decode(mp3, const_cast<uint8 *>(stream_pos), bytes_left, sample_buf, &info); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
+		if(rate != 0 && rate != info.sample_rate) break; // inconsistent stream
+		if(channels != 0 && channels != info.channels) break; // inconsistent stream
+		rate = info.sample_rate;
+		channels = info.channels;
+		if(rate <= 0) break; // broken stream
+		if(channels != 1 && channels != 2) break; // broken stream
+		stream_pos += frame_size;
+		bytes_left -= frame_size;
+		if(info.audio_bytes >= 0)
+		{
+			try
+			{
+				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+				break;
+			}
+		}
+	} while((bytes_left >= 0) && (frame_size > 0));
+
+	mp3_free(mp3);
+
+	if(rate == 0 || channels == 0 || raw_sample_data.empty())
+	{
+		return false;
+	}
+
+	DestroySampleThreadsafe(sample);
+	if(!mo3Decode)
+	{
+		strcpy(m_szNames[sample], "");
+		Samples[sample].Initialize();
+		Samples[sample].nC5Speed = rate;
+	}
+	Samples[sample].nLength = raw_sample_data.size() / channels;
+
+	Samples[sample].uFlags.set(CHN_16BIT);
+	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
+	Samples[sample].AllocateSample();
+
+	if(Samples[sample].pSample != nullptr)
+	{
+		std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+	}
 
 	if(!mo3Decode)
 	{
