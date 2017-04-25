@@ -21,6 +21,7 @@ newoption {
   { "libopenmpt-all", "libopenmpt-all" },
   { "libopenmpt_test", "libopenmpt_test" },
   { "libopenmpt", "libopenmpt" },
+  { "libopenmpt-full", "libopenmpt-full" },
   { "libopenmpt-small", "libopenmpt-small" },
   { "foo_openmpt", "foo_openmpt" },
   { "in_openmpt", "in_openmpt" },
@@ -167,6 +168,7 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
+ dofile "../../build/premake/mpt-libopenmpt-full.lua"
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
  dofile "../../build/premake/mpt-foo_openmpt.lua"
@@ -245,6 +247,21 @@ solution "xmp-openmpt"
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-pugixml.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
+end
+
+if _OPTIONS["group"] == "libopenmpt-full" then
+
+solution "libopenmpt-full"
+ location ( "../../build/" .. mpt_projectpathname )
+ configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+ platforms { "x86", "x86_64" }
+
+ dofile "../../build/premake/mpt-libopenmpt-full.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
+ dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
