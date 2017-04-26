@@ -40,6 +40,25 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+// C++17 std::size
+OPENMPT_NAMESPACE_END
+#include <cstddef>
+OPENMPT_NAMESPACE_BEGIN
+namespace mpt {
+template <typename T>
+MPT_CONSTEXPR11_FUN auto size(const T & v) -> decltype(v.size())
+{
+	return v.size();
+}
+template <typename T, std::size_t N>
+MPT_CONSTEXPR11_FUN std::size_t size(const T(&)[N]) noexcept
+{
+	return N;
+}
+} // namespace mpt
+
+
+
 // MPT_ARRAY_COUNT macro computes the number of elements in a statically-allocated array.
 #if MPT_COMPILER_MSVC
 OPENMPT_NAMESPACE_END

@@ -61,6 +61,7 @@ struct IUnknown;
 // <memory>
 // <new>
 // <climits>
+// <cstddef>
 // <cstdint>
 // <stdint.h>
 
