@@ -436,7 +436,7 @@ static std::wstring From8bit(const std::string &str, const uint32 (&table)[256],
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = static_cast<uint32>(static_cast<uint8>(str[i]));
-		if(c < CountOf(table))
+		if(c < mpt::size(table))
 		{
 			res.push_back(static_cast<wchar_t>(static_cast<uint32>(table[c])));
 		} else
@@ -459,7 +459,7 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 		// Try non-control characters first.
 		// In cases where there are actual characters mirrored in this range (like in AMS/AMS2 character sets),
 		// characters in the common range are preferred this way.
-		for(std::size_t x = 0x20; x < CountOf(table); ++x)
+		for(std::size_t x = 0x20; x < mpt::size(table); ++x)
 		{
 			if(c == table[x])
 			{
@@ -471,7 +471,7 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 		if(!found)
 		{
 			// try control characters
-			for(std::size_t x = 0x00; x < CountOf(table) && x < 0x20; ++x)
+			for(std::size_t x = 0x00; x < mpt::size(table) && x < 0x20; ++x)
 			{
 				if(c == table[x])
 				{
