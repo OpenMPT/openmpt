@@ -169,34 +169,36 @@ bool Version::IsAtLeast(mpt::Windows::Version::Number version) const
 }
 
 
+static MPT_CONSTEXPR11_VAR struct { Version::Number version; const MPT_UCHAR_TYPE * name; } versionMap[] =
+{
+	{ mpt::Windows::Version::WinNewer, MPT_ULITERAL("Windows 10 (or newer)") },
+	{ mpt::Windows::Version::Win10, MPT_ULITERAL("Windows 10") },
+	{ mpt::Windows::Version::Win81, MPT_ULITERAL("Windows 8.1") },
+	{ mpt::Windows::Version::Win8, MPT_ULITERAL("Windows 8") },
+	{ mpt::Windows::Version::Win7, MPT_ULITERAL("Windows 7") },
+	{ mpt::Windows::Version::WinVista, MPT_ULITERAL("Windows Vista") },
+	{ mpt::Windows::Version::WinXP64, MPT_ULITERAL("Windows XP x64 / Windows Server 2003") },
+	{ mpt::Windows::Version::WinXP, MPT_ULITERAL("Windows XP") },
+	{ mpt::Windows::Version::Win2000, MPT_ULITERAL("Windows 2000") },
+	{ mpt::Windows::Version::WinME, MPT_ULITERAL("Windows ME") },
+	{ mpt::Windows::Version::Win98, MPT_ULITERAL("Windows 98") },
+	{ mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4") },
+};
+
+
 mpt::ustring Version::VersionToString(uint16 version)
 //---------------------------------------------------
 {
 	mpt::ustring result;
-	static MPT_CONSTEXPR11_VAR std::pair<Number, const MPT_UCHAR_TYPE *> versionMap[] =
-	{
-		std::make_pair(mpt::Windows::Version::WinNewer, MPT_ULITERAL("Windows 10 (or newer)")),
-		std::make_pair(mpt::Windows::Version::Win10, MPT_ULITERAL("Windows 10")),
-		std::make_pair(mpt::Windows::Version::Win81, MPT_ULITERAL("Windows 8.1")),
-		std::make_pair(mpt::Windows::Version::Win8, MPT_ULITERAL("Windows 8")),
-		std::make_pair(mpt::Windows::Version::Win7, MPT_ULITERAL("Windows 7")),
-		std::make_pair(mpt::Windows::Version::WinVista, MPT_ULITERAL("Windows Vista")),
-		std::make_pair(mpt::Windows::Version::WinXP64, MPT_ULITERAL("Windows XP x64 / Windows Server 2003")),
-		std::make_pair(mpt::Windows::Version::WinXP, MPT_ULITERAL("Windows XP")),
-		std::make_pair(mpt::Windows::Version::Win2000, MPT_ULITERAL("Windows 2000")),
-		std::make_pair(mpt::Windows::Version::WinME, MPT_ULITERAL("Windows ME")),
-		std::make_pair(mpt::Windows::Version::Win98, MPT_ULITERAL("Windows 98")),
-		std::make_pair(mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4")),
-	};
 	for(const auto &v : versionMap)
 	{
-		if(version > v.first)
+		if(version > v.version)
 		{
-			result = MPT_USTRING("> ") + v.second;
+			result = MPT_USTRING("> ") + v.name;
 			break;
-		} else if(version == v.first)
+		} else if(version == v.version)
 		{
-			result = v.second;
+			result = v.name;
 			break;
 		}
 	}
@@ -219,40 +221,14 @@ mpt::ustring Version::VersionToString(Number version)
 mpt::ustring Version::GetName() const
 //-----------------------------------
 {
-	mpt::ustring name;
-	if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
+	mpt::ustring name = MPT_USTRING("Generic Windows NT");
+	for(const auto &v : versionMap)
 	{
-		name = MPT_USTRING("Windows 10 (or newer)");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win10))
-	{
-		name = MPT_USTRING("Windows 10");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
-	{
-		name = MPT_USTRING("Windows 8.1");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
-	{
-		name = MPT_USTRING("Windows 8");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
-	{
-		name = MPT_USTRING("Windows 7");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
-	{
-		name = MPT_USTRING("Windows Vista");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP64))
-	{
-		name = MPT_USTRING("Windows XP x64 / Windows Server 2003");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
-	{
-		name = MPT_USTRING("Windows XP");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win2000))
-	{
-		name = MPT_USTRING("Windows 2000");
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNT4))
-	{
-		name = MPT_USTRING("Windows NT4");
-	} else
-	{
-		name = MPT_USTRING("Generic Windows NT");
+		if(mpt::Windows::Version::IsAtLeast(v.version))
+		{
+			name = v.name;
+			break;
+		}
 	}
 	mpt::ustring result = name;
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
