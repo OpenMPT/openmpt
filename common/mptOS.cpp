@@ -173,20 +173,20 @@ mpt::ustring Version::VersionToString(uint16 version)
 //---------------------------------------------------
 {
 	mpt::ustring result;
-	const std::pair<Number, mpt::ustring> versionMap[] =
+	static MPT_CONSTEXPR11_VAR std::pair<Number, const MPT_UCHAR_TYPE *> versionMap[] =
 	{
-		std::make_pair(mpt::Windows::Version::WinNewer, MPT_USTRING("Windows 10 (or newer)")),
-		std::make_pair(mpt::Windows::Version::Win10, MPT_USTRING("Windows 10")),
-		std::make_pair(mpt::Windows::Version::Win81, MPT_USTRING("Windows 8.1")),
-		std::make_pair(mpt::Windows::Version::Win8, MPT_USTRING("Windows 8")),
-		std::make_pair(mpt::Windows::Version::Win7, MPT_USTRING("Windows 7")),
-		std::make_pair(mpt::Windows::Version::WinVista, MPT_USTRING("Windows Vista")),
-		std::make_pair(mpt::Windows::Version::WinXP64, MPT_USTRING("Windows XP x64 / Windows Server 2003")),
-		std::make_pair(mpt::Windows::Version::WinXP, MPT_USTRING("Windows XP")),
-		std::make_pair(mpt::Windows::Version::Win2000, MPT_USTRING("Windows 2000")),
-		std::make_pair(mpt::Windows::Version::WinME, MPT_USTRING("Windows ME")),
-		std::make_pair(mpt::Windows::Version::Win98, MPT_USTRING("Windows 98")),
-		std::make_pair(mpt::Windows::Version::WinNT4, MPT_USTRING("Windows NT4")),
+		std::make_pair(mpt::Windows::Version::WinNewer, MPT_ULITERAL("Windows 10 (or newer)")),
+		std::make_pair(mpt::Windows::Version::Win10, MPT_ULITERAL("Windows 10")),
+		std::make_pair(mpt::Windows::Version::Win81, MPT_ULITERAL("Windows 8.1")),
+		std::make_pair(mpt::Windows::Version::Win8, MPT_ULITERAL("Windows 8")),
+		std::make_pair(mpt::Windows::Version::Win7, MPT_ULITERAL("Windows 7")),
+		std::make_pair(mpt::Windows::Version::WinVista, MPT_ULITERAL("Windows Vista")),
+		std::make_pair(mpt::Windows::Version::WinXP64, MPT_ULITERAL("Windows XP x64 / Windows Server 2003")),
+		std::make_pair(mpt::Windows::Version::WinXP, MPT_ULITERAL("Windows XP")),
+		std::make_pair(mpt::Windows::Version::Win2000, MPT_ULITERAL("Windows 2000")),
+		std::make_pair(mpt::Windows::Version::WinME, MPT_ULITERAL("Windows ME")),
+		std::make_pair(mpt::Windows::Version::Win98, MPT_ULITERAL("Windows 98")),
+		std::make_pair(mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4")),
 	};
 	for(const auto &v : versionMap)
 	{
