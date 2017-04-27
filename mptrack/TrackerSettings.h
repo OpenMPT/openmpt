@@ -150,7 +150,7 @@ static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 
 template<> inline SettingValue ToSettingValue(const EQPreset &val)
 {
 	EQPresetPacked valpacked;
-	std::memcpy(valpacked.szName, val.szName, CountOf(valpacked.szName));
+	std::memcpy(valpacked.szName, val.szName, mpt::size(valpacked.szName));
 	std::copy(val.Gains, val.Gains + MAX_EQ_BANDS, valpacked.Gains);
 	std::copy(val.Freqs, val.Freqs + MAX_EQ_BANDS, valpacked.Freqs);
 	return SettingValue(EncodeBinarySetting<EQPresetPacked>(valpacked), "EQPreset");
@@ -160,7 +160,7 @@ template<> inline EQPreset FromSettingValue(const SettingValue &val)
 	ASSERT(val.GetTypeTag() == "EQPreset");
 	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<mpt::byte> >());
 	EQPreset valresult;
-	std::memcpy(valresult.szName, valpacked.szName, CountOf(valresult.szName));
+	std::memcpy(valresult.szName, valpacked.szName, mpt::size(valresult.szName));
 	std::copy(valpacked.Gains, valpacked.Gains + MAX_EQ_BANDS, valresult.Gains);
 	std::copy(valpacked.Freqs, valpacked.Freqs + MAX_EQ_BANDS, valresult.Freqs);
 	return valresult;
