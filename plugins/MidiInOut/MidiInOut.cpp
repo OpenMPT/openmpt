@@ -87,8 +87,6 @@ size_t MidiInOut::GetChunk(mpt::byte *(&chunk), bool /*isBank*/)
 //--------------------------------------------------------------
 {
 	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, m_programName);
-	const std::string inputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, m_inputDevice.name);
-	const std::string outputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, m_outputDevice.name);
 
 	std::ostringstream s;
 	mpt::IO::WriteRaw(s, "fEvN", 4);	// VST program chunk magic
@@ -101,8 +99,8 @@ size_t MidiInOut::GetChunk(mpt::byte *(&chunk), bool /*isBank*/)
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_outputDevice.name.size()));
 	mpt::IO::WriteIntLE<uint32>(s, m_latencyCompensation);
 	mpt::IO::WriteRaw(s, programName8.c_str(), programName8.size());
-	mpt::IO::WriteRaw(s, inputName8.c_str(), inputName8.size());
-	mpt::IO::WriteRaw(s, outputName8.c_str(), outputName8.size());
+	mpt::IO::WriteRaw(s, m_inputDevice.name.c_str(), m_inputDevice.name.size());
+	mpt::IO::WriteRaw(s, m_outputDevice.name.c_str(), m_outputDevice.name.size());
 	m_chunkData = s.str();
 	chunk = const_cast<mpt::byte *>(mpt::byte_cast<const mpt::byte *>(m_chunkData.c_str()));
 	return m_chunkData.size();
@@ -131,7 +129,6 @@ void MidiInOut::SetChunk(size_t size, mpt::byte *chunk, bool /*isBank*/)
 	m_programName = mpt::ToCString(mpt::CharsetUTF8, s);
 
 	file.ReadString<mpt::String::maybeNullTerminated>(s, inStrSize);
-	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
 	if(s != m_inputDevice.GetPortName(inID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
@@ -152,7 +149,6 @@ void MidiInOut::SetChunk(size_t size, mpt::byte *chunk, bool /*isBank*/)
 	}
 
 	file.ReadString<mpt::String::maybeNullTerminated>(s, outStrSize);
-	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
 	if(s != m_outputDevice.GetPortName(outID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
@@ -411,7 +407,7 @@ void MidiInOut::HardAllNotesOff()
 		Resume();
 	}
 
-	for(uint8 mc = 0; mc < CountOf(m_MidiCh); mc++)		//all midi chans
+	for(uint8 mc = 0; mc < mpt::size(m_MidiCh); mc++)		//all midi chans
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
 		channel.ResetProgram();
@@ -419,7 +415,7 @@ void MidiInOut::HardAllNotesOff()
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
-		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
+		for(size_t i = 0; i < mpt::size(channel.noteOnMap); i++)	//all notes
 		{
 			for(auto &c : channel.noteOnMap[i])
 			{
