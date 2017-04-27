@@ -100,9 +100,9 @@ static T generate_timeseed()
 		std::memcpy(bytes, &t, sizeof(t));
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
 		{
-			std::reverse(bytes + 0, bytes + CountOf(bytes));
+			std::reverse(std::begin(bytes), std::end(bytes));
 		}
-		hash(bytes + 0, bytes + CountOf(bytes));
+		hash(std::begin(bytes), std::end(bytes));
 	}
 
 	{
@@ -111,9 +111,9 @@ static T generate_timeseed()
 		std::memcpy(bytes, &c, sizeof(c));
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
 		{
-			std::reverse(bytes + 0, bytes + CountOf(bytes));
+			std::reverse(std::begin(bytes), std::end(bytes));
 		}
-		hash(bytes + 0, bytes + CountOf(bytes));
+		hash(std::begin(bytes), std::end(bytes));
 	}
 
 	return static_cast<T>(hash.result());
