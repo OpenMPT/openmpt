@@ -1507,7 +1507,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
+#if defined(MPT_WITH_STBVORBIS)
 			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
+#endif // MPT_WITH_STBVORBIS
 
 #endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
 
