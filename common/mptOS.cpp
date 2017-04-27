@@ -173,28 +173,30 @@ mpt::ustring Version::VersionToString(uint16 version)
 //---------------------------------------------------
 {
 	mpt::ustring result;
-	std::vector<std::pair<uint16, mpt::ustring> > versionMap;
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNewer), MPT_USTRING("Windows 10 (or newer)")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win10), MPT_USTRING("Windows 10")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win81), MPT_USTRING("Windows 8.1")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinVista), MPT_USTRING("Windows Vista")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP64), MPT_USTRING("Windows XP x64 / Windows Server 2003")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP), MPT_USTRING("Windows XP")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win2000), MPT_USTRING("Windows 2000")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinME), MPT_USTRING("Windows ME")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win98), MPT_USTRING("Windows 98")));
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNT4), MPT_USTRING("Windows NT4")));
-	for(std::size_t i = 0; i < versionMap.size(); ++i)
+	const std::pair<Number, mpt::ustring> versionMap[] =
 	{
-		if(version > versionMap[i].first)
+		std::make_pair(mpt::Windows::Version::WinNewer, MPT_USTRING("Windows 10 (or newer)")),
+		std::make_pair(mpt::Windows::Version::Win10, MPT_USTRING("Windows 10")),
+		std::make_pair(mpt::Windows::Version::Win81, MPT_USTRING("Windows 8.1")),
+		std::make_pair(mpt::Windows::Version::Win8, MPT_USTRING("Windows 8")),
+		std::make_pair(mpt::Windows::Version::Win7, MPT_USTRING("Windows 7")),
+		std::make_pair(mpt::Windows::Version::WinVista, MPT_USTRING("Windows Vista")),
+		std::make_pair(mpt::Windows::Version::WinXP64, MPT_USTRING("Windows XP x64 / Windows Server 2003")),
+		std::make_pair(mpt::Windows::Version::WinXP, MPT_USTRING("Windows XP")),
+		std::make_pair(mpt::Windows::Version::Win2000, MPT_USTRING("Windows 2000")),
+		std::make_pair(mpt::Windows::Version::WinME, MPT_USTRING("Windows ME")),
+		std::make_pair(mpt::Windows::Version::Win98, MPT_USTRING("Windows 98")),
+		std::make_pair(mpt::Windows::Version::WinNT4, MPT_USTRING("Windows NT4")),
+	};
+	for(const auto &v : versionMap)
+	{
+		if(version > v.first)
 		{
-			result = MPT_USTRING("> ") + versionMap[i].second;
+			result = MPT_USTRING("> ") + v.second;
 			break;
-		} else if(version == versionMap[i].first)
+		} else if(version == v.first)
 		{
-			result = versionMap[i].second;
+			result = v.second;
 			break;
 		}
 	}
