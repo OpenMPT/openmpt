@@ -275,7 +275,7 @@ void I3DL2Reverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		float outL = earlyRefOutL + lateRevOutL;
 		float outR = earlyRefOutR + lateRevOutR;
 
-		for(size_t d = 0; d < MPT_ARRAY_COUNT(m_delayLines); d++)
+		for(std::size_t d = 0; d < mpt::size(m_delayLines); d++)
 			m_delayLines[d].Advance();
 
 		if(!(m_quality & kFullSampleRate))
@@ -517,7 +517,7 @@ void I3DL2Reverb::SetDelayTaps()
 	m_delayTaps[13] = static_cast<int32>(3.25f / 1000.0f * sampleRate);
 	m_delayTaps[14] = static_cast<int32>(3.53f / 1000.0f * sampleRate);
 
-	for(size_t d = 0; d < MPT_ARRAY_COUNT(m_delayTaps); d++)
+	for(std::size_t d = 0; d < mpt::size(m_delayTaps); d++)
 		m_delayLines[d].SetDelayTap(m_delayTaps[d]);
 }
 
