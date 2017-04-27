@@ -452,7 +452,7 @@ static uint8 XPK_ReadTable(int32 index)
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
 	};
 	if(index < 0) throw XPK_error();
-	if(static_cast<std::size_t>(index) >= static_cast<std::size_t>(CountOf(xpk_table))) throw XPK_error();
+	if(static_cast<std::size_t>(index) >= mpt::size(xpk_table)) throw XPK_error();
 	return xpk_table[index];
 }
 
