@@ -11,9 +11,6 @@ LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s EXPORT_NAME=
 LDLIBS   += 
 ARFLAGS  := rcs
 
-# help older and slower compilers with huge functions
-#LDFLAGS += -s OUTLINING_LIMIT=16000
-
 # allow growing heap (might be slower, especially with V8 (as used by Chrome))
 #LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 # limit memory to 64MB, faster but loading modules bigger than about 16MB will not work

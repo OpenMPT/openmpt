@@ -182,11 +182,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         `node.js` binary, you might have to edit
         `build/make/config-emscripten.mk`.
 
-        Older and obsolete versions of emscripten may require a slightly
-        different configuration:
-
-            make CONFIG=emscripten-old
-
      -  Haiku:
 
         To compile libopenmpt on Haiku (using the 32-bit gcc2h), run:
