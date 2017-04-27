@@ -47,9 +47,9 @@ static Encoder::Traits VorbisBuildTraits()
 		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.maxChannels = 4;
-		traits.samplerates = std::vector<uint32>(vorbis_samplerates, vorbis_samplerates + CountOf(vorbis_samplerates));
+		traits.samplerates = mpt::make_vector(vorbis_samplerates);
 		traits.modes = Encoder::ModeABR | Encoder::ModeQuality;
-		traits.bitrates = std::vector<int>(vorbis_bitrates, vorbis_bitrates + CountOf(vorbis_bitrates));
+		traits.bitrates = mpt::make_vector(vorbis_bitrates);
 		traits.defaultSamplerate = 48000;
 		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeQuality;

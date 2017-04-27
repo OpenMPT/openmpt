@@ -49,9 +49,9 @@ static Encoder::Traits BuildTraits()
 		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.maxChannels = 4;
-		traits.samplerates = std::vector<uint32>(opus_samplerates, opus_samplerates + CountOf(opus_samplerates));
+		traits.samplerates = mpt::make_vector(opus_samplerates);
 		traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
-		traits.bitrates = std::vector<int>(opus_bitrates, opus_bitrates + CountOf(opus_bitrates));
+		traits.bitrates = mpt::make_vector(opus_bitrates);
 		traits.defaultSamplerate = 48000;
 		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeVBR;
