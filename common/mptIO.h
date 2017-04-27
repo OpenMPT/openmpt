@@ -468,7 +468,7 @@ bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
 		}
 	}
 	out[numBytes++] = static_cast<mpt::byte>(v & 0x7F);
-	MPT_ASSERT(numBytes <= CountOf(out));
+	MPT_ASSERT(numBytes <= mpt::size(out));
 	if(bytesWritten != nullptr) *bytesWritten = numBytes;
 	return mpt::IO::WriteRaw(f, out, numBytes);
 }
