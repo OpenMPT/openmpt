@@ -213,11 +213,11 @@ std::string Context::EscapePosixShell(std::string line)
 	const char escape_chars [] = { '|', '&', ';', '<', '>', '(', ')', '$', '`', '"', '\'', ' ', '\t' };
 	const char maybe_escape_chars [] = { '*', '?', '[', '#', '~', '=', '%' };
 	line = mpt::String::Replace(line, "\\", "\\\\");
-	for(std::size_t i = 0; i < CountOf(escape_chars); ++i)
+	for(std::size_t i = 0; i < mpt::size(escape_chars); ++i)
 	{
 		line = mpt::String::Replace(line, std::string(1, escape_chars[i]), "\\" + std::string(1, escape_chars[i]));
 	}
-	for(std::size_t i = 0; i < CountOf(maybe_escape_chars); ++i)
+	for(std::size_t i = 0; i < mpt::size(maybe_escape_chars); ++i)
 	{
 		line = mpt::String::Replace(line, std::string(1, maybe_escape_chars[i]), "\\" + std::string(1, maybe_escape_chars[i]));
 	}
