@@ -12,7 +12,6 @@ cd packageTemplate || goto error
 copy /y ..\LICENSE .\License.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
-copy /y ..\include\bladeenc\BladeDLL.html                 .\Licenses\License.BladeDLL.html || goto error
 copy /y ..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
 rem copy /y ..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 rem copy /y ..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
