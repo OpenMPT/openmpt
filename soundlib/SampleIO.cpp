@@ -876,7 +876,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 				buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
 			}
 			bufcount++;
-			if(bufcount >= CountOf(buffer16))
+			if(bufcount >= mpt::size(buffer16))
 			{
 				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 				bufcount = 0;
@@ -910,7 +910,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 				{
 					buffer8[bufcount++] = (int8)(s_new + s_ofs);
 				}
-				if(bufcount >= CountOf(buffer8))
+				if(bufcount >= mpt::size(buffer8))
 				{
 					mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 					bufcount = 0;
@@ -946,7 +946,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 					buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
 				}
 				bufcount++;
-				if(bufcount >= CountOf(buffer16))
+				if(bufcount >= mpt::size(buffer16))
 				{
 					mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 					bufcount = 0;
@@ -971,7 +971,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		{
 			buffer8[bufcount] = (int8)((uint8)(pSample8[j]) + 0x80);
 			bufcount++;
-			if(bufcount >= CountOf(buffer8))
+			if(bufcount >= mpt::size(buffer8))
 			{
 				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 				bufcount = 0;
@@ -1019,7 +1019,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			{
 				buffer8[bufcount++] = (int8)(s_new + s_ofs);
 			}
-			if(bufcount >= CountOf(buffer8))
+			if(bufcount >= mpt::size(buffer8))
 			{
 				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 				bufcount = 0;
