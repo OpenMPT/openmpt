@@ -50,10 +50,6 @@ typedef enum vbr_mode_e {
 #endif
 #endif // MPT_MP3ENCODER_LAME
 
-#ifdef MPT_MP3ENCODER_BLADE
-#include <bladeenc/bladedll.h>
-#endif // MPT_MP3ENCODER_BLADE
-
 #ifdef MPT_MP3ENCODER_ACM
 #include <mmreg.h>
 #include <msacm.h>
@@ -903,301 +899,6 @@ public:
 
 
 
-#ifdef MPT_MP3ENCODER_BLADE
-
-class ComponentBlade
-	: public ComponentLibrary
-{
-
-	MPT_DECLARE_COMPONENT_MEMBERS
-
-public:
-
-	bool isLame;
-	mpt::PathString encoderDLL;
-
-	VOID (*beVersion) (PBE_VERSION);
-	BE_ERR (*beInitStream) (PBE_CONFIG, PDWORD, PDWORD, PHBE_STREAM);
-	BE_ERR (*beEncodeChunk) (HBE_STREAM, DWORD, PSHORT, PBYTE, PDWORD);
-	BE_ERR (*beDeinitStream) (HBE_STREAM, PBYTE, PDWORD);
-	BE_ERR (*beCloseStream) (HBE_STREAM);
-
-private:
-
-	void Reset()
-	{
-		ClearLibraries();
-		isLame = false;
-		encoderDLL = mpt::PathString();
-	}
-
-public:
-
-	ComponentBlade()
-		: ComponentLibrary(ComponentTypeForeign)
-		, isLame(false)
-	{
-		return;
-	}
-
-protected:
-
-	bool DoInitialize()
-	{
-		Reset();
-		if(TryLoad(MPT_PATHSTRING("lame_enc"), true))
-		{
-			isLame = true;
-			encoderDLL = MPT_PATHSTRING("lame_enc");
-			return true;
-		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL"), true))
-		{
-			isLame = true;
-			encoderDLL = MPT_PATHSTRING("BladeMP3EncDLL");
-			return true;
-		} else if(TryLoad(MPT_PATHSTRING("bladeenc"), true))
-		{
-			isLame = false;
-			encoderDLL = MPT_PATHSTRING("bladeenc");
-			return true;
-		}
-		if(TryLoad(MPT_PATHSTRING("lame_enc"), false))
-		{
-			isLame = true;
-			encoderDLL = MPT_PATHSTRING("lame_enc");
-			return true;
-		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL"), false))
-		{
-			isLame = true;
-			encoderDLL = MPT_PATHSTRING("BladeMP3EncDLL");
-			return true;
-		} else if(TryLoad(MPT_PATHSTRING("bladeenc"), false))
-		{
-			isLame = false;
-			encoderDLL = MPT_PATHSTRING("bladeenc");
-			return true;
-		}
-		return false;
-	}
-
-private:
-
-	bool TryLoad(const mpt::PathString &filename, bool appdata)
-	{
-		Reset();
-		ClearBindFailed();
-		if(appdata)
-		{
-			if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppDataFullName(filename, GetComponentPath())))
-			{
-				Reset();
-				return false;
-			}
-		} else
-		{
-			if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppFullName(filename)))
-			{
-				Reset();
-				return false;
-			}
-		}
-		MPT_COMPONENT_BIND("BladeEnc", beVersion);
-		MPT_COMPONENT_BIND("BladeEnc", beInitStream);
-		MPT_COMPONENT_BIND("BladeEnc", beEncodeChunk);
-		MPT_COMPONENT_BIND("BladeEnc", beDeinitStream);
-		MPT_COMPONENT_BIND("BladeEnc", beCloseStream);
-		if(HasBindFailed())
-		{
-			Reset();
-			return false;
-		}
-		return true;
-	}
-
-public:
-
-	Encoder::Traits BuildTraits() const
-	{
-		Encoder::Traits traits;
-		if(!IsAvailable())
-		{
-			return traits;
-		}
-		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = MPT_USTRING("MP3");
-		traits.fileDescription = MPT_USTRING("MPEG-1 Layer 3");
-		traits.encoderSettingsName = MPT_USTRING("MP3Blade");
-		traits.encoderName = mpt::String::Print(MPT_USTRING("%2.dll (%1)"), (isLame ? MPT_USTRING("Lame_enc") : MPT_USTRING("BladeEnc")), encoderDLL.ToUnicode());
-		BE_VERSION ver;
-		MemsetZero(ver);
-		beVersion(&ver);
-		traits.description = MPT_USTRING("");
-		traits.description += mpt::String::Print(MPT_USTRING("DLL version: %1.%2\n"), (int)ver.byDLLMajorVersion, (int)ver.byDLLMinorVersion);
-		traits.description += mpt::String::Print(MPT_USTRING("Engine version: %1.%2 %3-%4-%5\n")
-			, (int)ver.byMajorVersion, (int)ver.byMinorVersion
-			, mpt::ufmt::dec0<4>((int)ver.wYear), mpt::ufmt::dec0<2>((int)ver.byMonth), mpt::ufmt::dec0<2>((int)ver.byDay)
-			);
-		std::string url;
-		mpt::String::Copy(url, ver.zHomepage);
-		traits.description += mpt::String::Print(MPT_USTRING("URL: %1\n"), mpt::ToUnicode(mpt::CharsetASCII, url));
-		traits.canTags = true;
-		traits.maxChannels = 2;
-		traits.samplerates = mpt::make_vector(mpeg1layer3_samplerates);
-		traits.modes = Encoder::ModeABR;
-		traits.bitrates = mpt::make_vector(mpeg1layer3_bitrates);
-		traits.defaultSamplerate = 44100;
-		traits.defaultChannels = 2;
-		traits.defaultMode = Encoder::ModeABR;
-		traits.defaultBitrate = 256;
-		return traits;
-	}
-};
-MPT_REGISTERED_COMPONENT(ComponentBlade, "BladeEnc")
-
-class MP3BladeStreamWriter : public StreamWriterBase
-{
-private:
-	const ComponentBlade &blade;
-	DWORD blade_inputsamples;
-	DWORD blade_outputbytes;
-	SC::Convert<int16,float> sampleConv[2];
-	std::deque<int16> blade_sampleBuf;
-	PBE_CONFIG becfg;
-	HBE_STREAM bestream;
-
-	std::vector<SHORT> samples;
-public:
-	MP3BladeStreamWriter(const ComponentBlade &blade_, std::ostream &stream)
-		: StreamWriterBase(stream)
-		, blade(blade_)
-	{
-		blade_inputsamples = 0;
-		blade_outputbytes = 0;
-		becfg = nullptr;
-		bestream = HBE_STREAM();
-	}
-	virtual ~MP3BladeStreamWriter()
-	{
-		Finalize();
-	}
-	virtual void SetFormat(const Encoder::Settings &settings)
-	{
-		uint32 samplerate = settings.Samplerate;
-		uint16 channels = settings.Channels;
-
-		if(samplerate <= 32000)
-		{
-			samplerate = 32000;
-		} else if(samplerate <= 44100)
-		{
-			samplerate = 44100;
-		} else
-		{
-			samplerate = 48000;
-		}
-
-		int bitrate = settings.Bitrate;
-		for(auto rate : mpeg1layer3_bitrates)
-		{
-			if(bitrate <= rate)
-			{
-				bitrate = rate;
-				break;
-			}
-		}
-		LimitMax(bitrate, mpeg1layer3_bitrates[mpt::size(mpeg1layer3_bitrates)-1]);
-
-		bestream = HBE_STREAM();
-
-		becfg = new BE_CONFIG();
-		becfg->dwConfig = BE_CONFIG_MP3;
-		becfg->format.mp3.dwSampleRate = samplerate;
-		becfg->format.mp3.byMode = (channels == 2) ? BE_MP3_MODE_STEREO : BE_MP3_MODE_MONO;
-		becfg->format.mp3.wBitrate = (WORD)bitrate;
-		becfg->format.mp3.bPrivate = FALSE;
-		becfg->format.mp3.bCRC = FALSE;
-		becfg->format.mp3.bCopyright = FALSE;
-		becfg->format.mp3.bOriginal = TRUE;
-
-		blade_inputsamples = 1152 * channels; // 1 frame
-		blade_outputbytes = 1440; // 320kBit 32kHz frame
-		blade.beInitStream(becfg, &blade_inputsamples, &blade_outputbytes, &bestream);
-
-	}
-	virtual void WriteMetatags(const FileTags &tags)
-	{
-		ID3V2Tagger tagger;
-		tagger.WriteID3v2Tags(f, tags);
-	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
-	{
-		if(becfg->format.mp3.byMode == BE_MP3_MODE_MONO)
-		{
-			for(std::size_t i = 0; i < count; ++i)
-			{
-				blade_sampleBuf.push_back(sampleConv[0](interleaved[i]));
-			}
-		} else
-		{
-			for(std::size_t i = 0; i < count; ++i)
-			{
-				blade_sampleBuf.push_back(sampleConv[0](interleaved[i*2+0]));
-				blade_sampleBuf.push_back(sampleConv[1](interleaved[i*2+1]));
-			}
-		}
-		count *= (becfg->format.mp3.byMode == BE_MP3_MODE_STEREO) ? 2 : 1;
-		while(blade_sampleBuf.size() >= blade_inputsamples)
-		{
-			samples.clear();
-			for(std::size_t i = 0; i < blade_inputsamples; ++i)
-			{
-				samples.push_back(blade_sampleBuf.front());
-				blade_sampleBuf.pop_front();
-			}
-			DWORD size = 0;
-			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), samples.data(), (PBYTE)buf.data(), &size);
-			ASSERT(size <= buf.size());
-			buf.resize(size);
-			WriteBuffer();
-		}
-	}
-	virtual void Finalize()
-	{
-		if(!bestream)
-		{
-			return;
-		}
-		if(blade_sampleBuf.size() > 0)
-		{
-			samples.resize(blade_sampleBuf.size());
-			std::copy(blade_sampleBuf.begin(), blade_sampleBuf.end(), samples.begin());
-			blade_sampleBuf.clear();
-			DWORD size = 0;
-			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), samples.data(), (PBYTE)buf.data(), &size);
-			ASSERT(size <= buf.size());
-			buf.resize(size);
-			WriteBuffer();
-		}
-		{
-			DWORD size = 0;
-			buf.resize(blade_outputbytes);
-			blade.beDeinitStream(bestream, (PBYTE)buf.data(), &size);
-			buf.resize(size);
-			WriteBuffer();
-		}
-		blade.beCloseStream(bestream);
-		bestream = HBE_STREAM();
-		delete becfg;
-		becfg = nullptr;
-	}
-};
-
-#endif // MPT_MP3ENCODER_BLADE
-
-
-
 #ifdef MPT_MP3ENCODER_ACM
 
 class ComponentAcmMP3
@@ -1779,17 +1480,6 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME
-#ifdef MPT_MP3ENCODER_BLADE
-	if(type == MP3EncoderDefault || type == MP3EncoderBlade)
-	{
-		if(IsComponentAvailable(m_Blade))
-		{
-			m_Type = MP3EncoderBlade;
-			SetTraits(m_Blade->BuildTraits());
-			return;
-		}
-	}
-#endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
 	if(type == MP3EncoderDefault || type == MP3EncoderACM)
 	{
@@ -1812,9 +1502,6 @@ bool MP3Encoder::IsAvailable() const
 		|| ((m_Type == MP3EncoderLame) && IsComponentAvailable(m_Lame))
 		|| ((m_Type == MP3EncoderLameCompatible) && IsComponentAvailable(m_Lame))
 #endif // MPT_MP3ENCODER_ACM
-#ifdef MPT_MP3ENCODER_BLADE
-		|| ((m_Type == MP3EncoderBlade) && IsComponentAvailable(m_Blade))
-#endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
 		|| ((m_Type == MP3EncoderACM) && IsComponentAvailable(m_Acm))
 #endif // MPT_MP3ENCODER_ACM
@@ -1841,11 +1528,6 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 	{
 		result = new MP3LameStreamWriter(*m_Lame, file, (m_Type == MP3EncoderLameCompatible));
 #endif // MPT_MP3ENCODER_LAME
-#ifdef MPT_MP3ENCODER_BLADE
-	} else if(m_Type == MP3EncoderBlade)
-	{
-		result = new MP3BladeStreamWriter(*m_Blade, file);
-#endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
 	} else if(m_Type == MP3EncoderACM)
 	{
@@ -1880,12 +1562,6 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 mpt::ustring MP3Encoder::DescribeBitrateABR(int bitrate) const
 //------------------------------------------------------------
 {
-#ifdef MPT_MP3ENCODER_BLADE
-	if(m_Type == MP3EncoderBlade)
-	{
-		return mpt::String::Print(MPT_USTRING("%1 kbit"), bitrate);
-	}
-#endif // MPT_MP3ENCODER_BLADE
 	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
 }
 
