@@ -495,9 +495,9 @@ protected:
 		{
 			return true;
 		}
-		for(std::size_t i=0; i<CountOf(dll_names); ++i)
+		for(const auto & dll : dll_names)
 		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame), true))
+			if(TryLoad(mpt::PathString::FromUTF8(dll.lame), true))
 			{
 				ok = true;
 				break;
@@ -507,9 +507,9 @@ protected:
 		{
 			return true;
 		}
-		for(std::size_t i=0; i<CountOf(dll_names); ++i)
+		for(const auto & dll : dll_names)
 		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame), false))
+			if(TryLoad(mpt::PathString::FromUTF8(dll.lame), false))
 			{
 				ok = true;
 				break;
@@ -628,13 +628,13 @@ public:
 		traits.modesWithFixedGenres = (compatible ? Encoder::ModeCBR : Encoder::ModeInvalid);
 		traits.maxChannels = 2;
 		traits.samplerates = (compatible
-			? std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates))
-			: std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates))
+			? mpt::make_vector(mpeg1layer3_samplerates)
+			: mpt::make_vector(layer3_samplerates)
 			);
 		traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
 		traits.bitrates = (compatible
-			? std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates))
-			: std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates))
+			? mpt::make_vector(mpeg1layer3_bitrates)
+			: mpt::make_vector(layer3_bitrates)
 			);
 		traits.defaultSamplerate = 44100;
 		traits.defaultChannels = 2;
@@ -1047,9 +1047,9 @@ public:
 		traits.description += mpt::String::Print(MPT_USTRING("URL: %1\n"), mpt::ToUnicode(mpt::CharsetASCII, url));
 		traits.canTags = true;
 		traits.maxChannels = 2;
-		traits.samplerates = std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates));;
+		traits.samplerates = mpt::make_vector(mpeg1layer3_samplerates);
 		traits.modes = Encoder::ModeABR;
-		traits.bitrates = std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates));
+		traits.bitrates = mpt::make_vector(mpeg1layer3_bitrates);
 		traits.defaultSamplerate = 44100;
 		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeABR;
@@ -1110,7 +1110,7 @@ public:
 				break;
 			}
 		}
-		LimitMax(bitrate, mpeg1layer3_bitrates[CountOf(mpeg1layer3_bitrates)-1]);
+		LimitMax(bitrate, mpeg1layer3_bitrates[mpt::size(mpeg1layer3_bitrates)-1]);
 
 		bestream = HBE_STREAM();
 
@@ -1214,7 +1214,7 @@ class ComponentAcmMP3
 public:
 
 	bool found_codec;
-	int samplerates[CountOf(layer3_samplerates)];
+	int samplerates[mpt::size(layer3_samplerates)];
 
 	std::vector<Encoder::Format> formats;
 	std::vector<HACMDRIVERID> formats_driverids;
@@ -1392,7 +1392,7 @@ private:
 			AppendField(driverDescription, MPT_USTRING("Licensing"), mpt::FromTcharBuf(add.szLicensing));
 			AppendField(driverDescription, MPT_USTRING("Features"), mpt::FromTcharBuf(add.szFeatures));
 
-			for(int i = 0; i < CountOf(layer3_samplerates); ++i)
+			for(std::size_t i = 0; i < mpt::size(layer3_samplerates); ++i)
 			{
 				if(layer3_samplerates[i] == (int)pafd->pwfx->nSamplesPerSec)
 				{
@@ -1525,7 +1525,6 @@ public:
 		traits.canTags = true;
 		traits.maxChannels = 2;
 		traits.samplerates.clear();
-		traits.samplerates.reserve(MPT_ARRAY_COUNT(samplerates));
 		for(auto rate : samplerates)
 		{
 			if(rate)
