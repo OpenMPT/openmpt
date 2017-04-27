@@ -1,5 +1,7 @@
 libmpg123 library version 1.24.0.
 The following changes have been made:
 - Obviously, unnecessary folders and files have been removed.
+- src/libmpg123/synth_sse3d.h has been removed because of unclear licensing.
+  See https://sourceforge.net/p/mpg123/bugs/249/ .
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
