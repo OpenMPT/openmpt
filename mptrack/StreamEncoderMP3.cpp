@@ -65,8 +65,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if defined(MPT_MP3ENCODER_BLADE) || defined(MPT_MP3ENCODER_ACM)
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
 
@@ -372,9 +370,6 @@ void ID3V2Tagger::WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, s
 
 	totalID3v2Size += (sizeof(tFrame) + sFramecontent.size());
 }
-
-
-#endif // MPT_MP3ENCODER_BLADE || MPT_MP3ENCODER_ACM
 
 
 
