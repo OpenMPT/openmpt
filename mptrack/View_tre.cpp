@@ -1596,26 +1596,21 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_PATTERN:
 		{
-			CSoundFile &sndFile = modDoc->GetrSoundFile();
+			PATTERNINDEX pat = static_cast<PATTERNINDEX>(modItemID);
 			bool isUsed = false;
 			// First, find all used patterns in all sequences.
-			for(SEQUENCEINDEX seq = 0; seq < sndFile.Order.GetNumSequences(); seq++)
+			for(const auto &sequence : modDoc->GetrSoundFile().Order)
 			{
-				const auto &sequence = sndFile.Order(seq);
-				const ORDERINDEX ordLength = sequence.GetLengthTailTrimmed();
-				for(ORDERINDEX ord = 0; ord < ordLength; ord++)
+				if(std::find(sequence.cbegin(), sequence.cend(), pat) != sequence.cend())
 				{
-					if(sequence[ord] == modItemID)
-					{
-						isUsed = true;
-						break;
-					}
+					isUsed = true;
+					break;
 				}
 			}
 			wsprintf(s, _T("Remove pattern %u?\nThis pattern is currently%s used."), modItemID, isUsed ? _T("") : _T(" not"));
-			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern((PATTERNINDEX)modItemID))
+			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
-				modDoc->UpdateAllViews(nullptr, PatternHint((PATTERNINDEX)modItemID).Data().Names());
+				modDoc->UpdateAllViews(nullptr, PatternHint(pat).Data().Names());
 			}
 		}
 		break;
