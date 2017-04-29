@@ -211,12 +211,12 @@ void RowVisitor::ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow)
 //------------------------------------------------------------------
 {
 	MPT_ASSERT(ord == m_currentOrder);	// Shouldn't trigger, unless we're jumping around in the GUI during a pattern loop.
-	
+
 	// Unvisit all rows that are in the visited row buffer, until we hit the start row for this pattern loop.
 	ROWINDEX row = ROWINDEX_INVALID;
 	for(auto iter = m_visitOrder.crbegin(); iter != m_visitOrder.crend() && row != startRow; iter++)
 	{
-		row = *(iter++);
+		row = *iter;
 		Unvisit(ord, row);
 	}
 }
