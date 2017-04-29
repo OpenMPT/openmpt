@@ -475,7 +475,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 	std::vector<const SNDMIXPLUGININFO *> notFoundIDs;
 
-	if(loadFlags & (loadPluginData | loadPluginInstance))
+	if((loadFlags & (loadPluginData | loadPluginInstance)) == (loadPluginData | loadPluginInstance))
 	{
 		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 		{
