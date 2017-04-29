@@ -1076,63 +1076,53 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 //---------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if (pModDoc && nTick >= 0)
 	{
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
-		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-		if (pIns)
+		InstrumentEnvelope *envelope = GetEnvelopePtr();
+		if(envelope != nullptr && envelope->size() < pModDoc->GetrSoundFile().GetModSpecifications().envelopePointsMax)
 		{
-			if(nTick < 0) return 0;
-			nValue = Clamp(nValue, 0, 64);
+			nValue = Clamp(nValue, ENVELOPE_MIN, ENVELOPE_MAX);
 
-			InstrumentEnvelope *envelope = GetEnvelopePtr();
-			if(envelope == nullptr) return 0;
-
-			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<EnvelopeNode::tick_t>(nTick), 0),
+			if(std::binary_search(envelope->cbegin(), envelope->cend(), EnvelopeNode(static_cast<EnvelopeNode::tick_t>(nTick), 0),
 				[] (const EnvelopeNode &l, const EnvelopeNode &r) -> bool { return l.tick < r.tick; }))
 			{
 				// Don't want to insert a node at the same position as another node.
 				return 0;
 			}
 
-
 			uint8 defaultValue;
-
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				defaultValue = 64;
+				defaultValue = ENVELOPE_MAX;
 				break;
 			case ENV_PANNING:
-				defaultValue = 32;
+				defaultValue = ENVELOPE_MID;
 				break;
 			case ENV_PITCH:
-				defaultValue = pIns->PitchEnv.dwFlags[ENV_FILTER] ? 64 : 32;
+				defaultValue = envelope->dwFlags[ENV_FILTER] ? ENVELOPE_MAX : ENVELOPE_MID;
 				break;
 			default:
 				return 0;
 			}
 
-			if (envelope->size() < sndFile.GetModSpecifications().envelopePointsMax)
+			PrepareUndo("Insert Envelope Point");
+			if(envelope->empty())
 			{
-				PrepareUndo("Insert Envelope Point");
-				if (envelope->empty())
-				{
-					envelope->push_back(EnvelopeNode(0, defaultValue));
-					envelope->dwFlags.set(ENV_ENABLED);
-				}
-				uint32 i = 0;
-				for (i = 0; i < envelope->size(); i++) if (nTick <= envelope->at(i).tick) break;
-				envelope->insert(envelope->begin() + i, EnvelopeNode(mpt::saturate_cast<EnvelopeNode::tick_t>(nTick), static_cast<EnvelopeNode::value_t>(nValue)));
-				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
-				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
-				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
-				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
-				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
-
-				SetModified(InstrumentHint().Envelope(), true);
-				return i + 1;
+				envelope->push_back(EnvelopeNode(0, defaultValue));
+				envelope->dwFlags.set(ENV_ENABLED);
 			}
+			uint32 i = 0;
+			for(i = 0; i < envelope->size(); i++) if(nTick <= envelope->at(i).tick) break;
+			envelope->insert(envelope->begin() + i, EnvelopeNode(mpt::saturate_cast<EnvelopeNode::tick_t>(nTick), static_cast<EnvelopeNode::value_t>(nValue)));
+			if(envelope->nLoopStart >= i) envelope->nLoopStart++;
+			if(envelope->nLoopEnd >= i) envelope->nLoopEnd++;
+			if(envelope->nSustainStart >= i) envelope->nSustainStart++;
+			if(envelope->nSustainEnd >= i) envelope->nSustainEnd++;
+			if(envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
+
+			SetModified(InstrumentHint().Envelope(), true);
+			return i + 1;
 		}
 	}
 	return 0;
@@ -2011,7 +2001,6 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 	}
 	if (note > 0 && note<128)
 	{
-		CHAR s[64];
 		if (m_nInstrument && !m_baPlayingNote[note])
 		{
 			CSoundFile &sndFile = pModDoc->GetrSoundFile();
@@ -2029,13 +2018,12 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
 				pModDoc->PlayNote(note, m_nInstrument, 0);
 			}
-			s[0] = 0;
-			if ((note) && (note <= NOTE_MAX))
+			std::string noteName;
+			if(ModCommand::IsNote(note))
 			{
-				const std::string temp = sndFile.GetNoteName(note, m_nInstrument);
-				mpt::String::Copy(s, temp.c_str());
+				noteName = sndFile.GetNoteName(note, m_nInstrument);
 			}
-			pMainFrm->SetInfoText(s);
+			pMainFrm->SetInfoText(noteName.c_str());
 		}
 	} else
 	{
