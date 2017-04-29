@@ -585,7 +585,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		patNames = file.ReadChunk(file.ReadUint32LE());
 	}
 
-	m_nChannels = GetModSpecifications().channelsMin;
+	m_nChannels = 1;
 	// Read channel names: "CNAM"
 	if(file.ReadMagic("CNAM"))
 	{
@@ -1327,7 +1327,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Mix Plugins. Just calculate the size of this extra block for now.
 	if(!compatibilityExport)
 	{
-		dwExtra += SaveMixPlugins(NULL, true);
+		dwExtra += SaveMixPlugins(nullptr, true);
 	}
 
 	// Edit History. Just calculate the size of this extra block for now.
@@ -1414,20 +1414,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Writing instruments
+	const ModInstrument dummyInstr;
 	for(INSTRUMENTINDEX nins = 1; nins <= itHeader.insnum; nins++)
 	{
 		ITInstrumentEx iti;
 		uint32 instSize;
 
-		if(Instruments[nins])
-		{
-			instSize = iti.ConvertToIT(*Instruments[nins], compatibilityExport, *this);
-		} else
-		{
-			// Save Empty Instrument
-			ModInstrument dummy;
-			instSize = iti.ConvertToIT(dummy, compatibilityExport, *this);
-		}
+		const ModInstrument &instr = (Instruments[nins] != nullptr) ? *Instruments[nins] : dummyInstr;
+		instSize = iti.ConvertToIT(instr, compatibilityExport, *this);
 
 		// Writing instrument
 		inspos[nins - 1] = static_cast<uint32>(dwPos);
@@ -1435,7 +1429,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		mpt::IO::WritePartial(f, iti, instSize);
 	}
 
-	// Writing sample headers
+	// Writing dummy sample headers (until we know the correct sample data offset)
 	ITSample itss;
 	MemsetZero(itss);
 	for(SAMPLEINDEX smp = 0; smp < itHeader.smpnum; smp++)
@@ -1679,7 +1673,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
 			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
-			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
+			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
 			{
@@ -1893,7 +1887,9 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		char code[4];
 		file.ReadArray(code);
 		const uint32 chunkSize = file.ReadUint32LE();
-		if(!file.CanRead(chunkSize))
+		if(!memcmp(code, "IMPI", 4)	// IT instrument, we definitely read too far
+			|| !memcmp(code, "IMPS", 4)	// IT sample, we definitely read too far
+			|| !file.CanRead(chunkSize))
 		{
 			file.SkipBack(8);
 			return;
