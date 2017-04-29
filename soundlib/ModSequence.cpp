@@ -108,7 +108,7 @@ ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
 {
 	if(empty())
 		return 0;
-	auto next = std::find_if(begin() + start + 1, end(), [] (PATTERNINDEX pat) { return pat != GetInvalidPatIndex(); });
+	auto next = std::find_if(begin() + start + 1, end(), [] (PATTERNINDEX pat) { return pat != GetIgnoreIndex(); });
 	return std::min(static_cast<ORDERINDEX>(std::distance(begin(), next)), GetLastIndex());
 }
 
