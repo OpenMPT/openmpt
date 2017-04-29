@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_WM_NCMOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_XBUTTONUP()
@@ -1693,13 +1694,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			// Shift-Click: Insert envelope point here
 			if(CMainFrame::GetInputHandler()->ShiftPressed())
 			{
-				m_nDragItem = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y)); // returns point ID + 1 if successful, else 0.
-				if(m_nDragItem > 0)
-				{
-					// Drag point if successful
-					SetCapture();
-					m_dwStatus |= INSSTATUS_DRAGGING;
-				} else if(oldDragItem)
+				if(InsertAtPoint(pt) == 0 && oldDragItem != 0)
 				{
 					InvalidateRect(NULL, FALSE);
 				}
@@ -1961,6 +1956,21 @@ void CViewInstrument::OnEnvInsertPoint()
 		// => Try next tick
 		EnvInsertPoint(tick + 1, value);
 	}
+}
+
+
+bool CViewInstrument::InsertAtPoint(CPoint pt)
+//--------------------------------------------
+{
+	auto item = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y)); // returns point ID + 1 if successful, else 0.
+	if(item > 0)
+	{
+		// Drag point if successful
+		SetCapture();
+		m_dwStatus |= INSSTATUS_DRAGGING;
+		m_nDragItem = item;
+	}
+	return item > 0;
 }
 
 

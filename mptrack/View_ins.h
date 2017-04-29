@@ -149,6 +149,7 @@ protected:
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;
+	bool InsertAtPoint(CPoint pt);
 	UINT EnvInsertPoint(int nTick, int nValue);
 	bool EnvRemovePoint(UINT nPoint);
 	int TickToScreen(int nTick) const;
@@ -195,6 +196,7 @@ protected:
 	afx_msg void OnMouseMove(UINT, CPoint);
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonUp(UINT, CPoint);
+	afx_msg void OnLButtonDblClk(UINT /*nFlags*/, CPoint point) { InsertAtPoint(point); }
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnMButtonDown(UINT, CPoint);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
