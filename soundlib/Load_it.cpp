@@ -600,10 +600,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read mix plugins information
-	if(file.CanRead(9))
-	{
-		LoadMixPlugins(file);
-	}
+	FileReader pluginChunk = file.ReadChunk((minPtr >= file.GetPosition()) ? minPtr - file.GetPosition() : file.BytesLeft());
+	LoadMixPlugins(pluginChunk);
 
 	// Read Song Message
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
@@ -1888,7 +1886,9 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		file.ReadArray(code);
 		const uint32 chunkSize = file.ReadUint32LE();
 		if(!memcmp(code, "IMPI", 4)	// IT instrument, we definitely read too far
-			|| !memcmp(code, "IMPS", 4)	// IT sample, we definitely read too far
+			|| !memcmp(code, "IMPS", 4)	// IT sample, ditto
+			|| !memcmp(code, "XTPM", 4)	// Instrument extensions, ditto
+			|| !memcmp(code, "STPM", 4)	// Song extensions, ditto
 			|| !file.CanRead(chunkSize))
 		{
 			file.SkipBack(8);
@@ -1921,11 +1921,6 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			m_madeWithTracker = "BeRoTracker";
-		} else if(!memcmp(code, "XTPM", 4))
-		{
-			// Read too far, chicken out...
-			file.SkipBack(8);
-			return;
 		}
 	}
 }
