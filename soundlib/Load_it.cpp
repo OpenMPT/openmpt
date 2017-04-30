@@ -431,7 +431,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
 			{
 				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
