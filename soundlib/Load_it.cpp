@@ -406,7 +406,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
 			{
-				// OpenMPT 1.17 and 1.18 (raped IT format)
+				// OpenMPT 1.17.02.26 (r122) to 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
@@ -430,6 +430,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
+				interpretModPlugMade = true;
+			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+			{
+				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
 				interpretModPlugMade = true;
 			}
 		}
@@ -2215,7 +2220,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MAGIC4BE('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
+			case MAGIC4BE('L','S','W','V'): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
