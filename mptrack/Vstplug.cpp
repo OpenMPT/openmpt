@@ -1104,7 +1104,7 @@ CString CVstPlugin::GetCurrentProgramName()
 void CVstPlugin::SetCurrentProgramName(const CString &name)
 //---------------------------------------------------------
 {
-	Dispatch(effSetProgramName, 0, 0, (void *)mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str(), 0.0f);
+	Dispatch(effSetProgramName, 0, 0, const_cast<char *>(mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str()), 0.0f);
 }
 
 
@@ -1583,7 +1583,7 @@ void CVstPlugin::SaveAllParameters()
 	}
 	m_pMixStruct->defaultProgram = -1;
 
-	if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
+	if(ProgramsAreChunks())
 	{
 		void *p = nullptr;
 
@@ -1606,8 +1606,7 @@ void CVstPlugin::SaveAllParameters()
 			{
 				m_pMixStruct->pluginData.resize(nByteSize + 4);
 				auto data = m_pMixStruct->pluginData.data();
-				uint32 type = 'NvEf';
-				memcpy(data, &type, 4);
+				memcpy(data, "fEvN", 4);	// 'NvEf', return value of deprecated effIdentify call
 				memcpy(data + 4, p, nByteSize);
 				return;
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
@@ -1627,10 +1626,7 @@ void CVstPlugin::RestoreAllParameters(int32 program)
 	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= 4)
 	{
 		auto data = m_pMixStruct->pluginData.data();
-		uint32 type;
-		memcpy(&type, data, 4);
-
-		if ((type == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
+		if (memcmp(data, "fEvN", 4))	// 'NvEf', return value of deprecated effIdentify call
 		{
 			if ((program>=0) && (program < m_Effect.numPrograms))
 			{
@@ -1657,12 +1653,13 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 {
 	try
 	{
-		if (HasEditor())
+		if(HasEditor())
 			return new COwnerVstEditor(*this);
 		else
 			return new CDefaultVstEditor(*this);
-	} catch(CMemoryException &)
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		ReportPlugException(L"Exception in OpenEditor()");
 		return nullptr;
 	}
