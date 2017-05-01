@@ -402,7 +402,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// OpenMPT Version number (Major.Minor)
 				// This will only be interpreted as "made with ModPlug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
 				m_dwLastSavedWithVersion = (fileHeader.cwtv & 0x0FFF) << 16;
-				if(!memcmp(fileHeader.reserved, "OMPT", 4))
+				if(!memcmp(&fileHeader.reserved, "OMPT", 4))
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
 			{
@@ -410,7 +410,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
 				{
@@ -425,13 +425,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					m_madeWithTracker = "OpenMPT 1.17 (compatibility export)";
 				}
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
+			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && fileHeader.reserved == 0 && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
 			{
 				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
@@ -558,7 +558,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Oops, we were not supposed to read this.
 			file.SkipBack(2);
 		}
-	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
+	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && fileHeader.reserved == 0 && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
 	{
 		// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
 		// at all, but still writes the two edit history length bytes (zeroes)...
@@ -984,7 +984,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_dwLastSavedWithVersion && m_madeWithTracker.empty())
 	{
 		m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
-		if(memcmp(fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
+		if(memcmp(&fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
 			m_madeWithTracker += " (compatibility export)";
 		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
@@ -1003,22 +1003,22 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
 				&& fileHeader.insnum == 0 && fileHeader.patnum + 1 == fileHeader.ordnum
 				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
-				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
 				m_madeWithTracker = "OpenSPC conversion";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
 				m_madeWithTracker = "ModPlug Tracker 1.00a5";
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(&fileHeader.reserved, "CHBI", 4))
 			{
 				m_madeWithTracker = "ChibiTracker";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && fileHeader.reserved == 0 && m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				m_madeWithTracker = "CheeseTracker";
-			} else if(fileHeader.cmwt < 0x0888)
+			} else if(fileHeader.cmwt < 0x0300)
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
@@ -1033,12 +1033,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					m_madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
-				if(m_FileHistory.empty() && memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{
-					// IT encrypts the total edit time of a module in the "reserved" fild
-					uint32 editTime;
-					memcpy(&editTime, fileHeader.reserved, 4);
-					editTime = SwapBytesLE(editTime);
+					// IT encrypts the total edit time of a module in the "reserved" field
+					uint32 editTime = fileHeader.reserved;
 					if(fileHeader.cwtv >= 0x0208)
 					{
 						editTime ^= 0x4954524B;	// 'ITRK'
@@ -1257,7 +1255,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		if(!compatibilityExport)
 		{
 			// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
-			memcpy(itHeader.reserved, "OMPT", 4);
+			memcpy(&itHeader.reserved, "OMPT", 4);
 		}
 	}
 
