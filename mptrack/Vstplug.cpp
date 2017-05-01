@@ -1626,7 +1626,7 @@ void CVstPlugin::RestoreAllParameters(int32 program)
 	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= 4)
 	{
 		auto data = m_pMixStruct->pluginData.data();
-		if (memcmp(data, "fEvN", 4))	// 'NvEf', return value of deprecated effIdentify call
+		if (!memcmp(data, "fEvN", 4))	// 'NvEf', return value of deprecated effIdentify call
 		{
 			if ((program>=0) && (program < m_Effect.numPrograms))
 			{
