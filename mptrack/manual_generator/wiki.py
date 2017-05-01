@@ -16,7 +16,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 shutil.rmtree('html', ignore_errors=True)
 shutil.copytree('source', 'html')
 
-style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read().decode('UTF-8')
+style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles|site.styles&only=styles&skin=vector&*').read().decode('UTF-8')
 # Remove a few unused CSS classes
 style = re.sub(r'\}(\w+)?[\.#]vector([\w >]+)\{.+?\}', '}', style)
 style_file = open('html/style.css', 'w')
@@ -106,6 +106,7 @@ for p in pages:
     content = """<!DOCTYPE html>
     <html lang="en">
     <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href="style.css" rel="stylesheet">
     <link href="help.css" rel="stylesheet">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -131,7 +132,7 @@ toc.write("""
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML>
 <HEAD>
-<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta name="GENERATOR" content="OpenMPT Help Generator">
 <!-- Sitemap 1.0 -->
 </HEAD><BODY>
 <OBJECT type="text/site properties">
