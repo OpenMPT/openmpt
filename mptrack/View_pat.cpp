@@ -1382,7 +1382,6 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 //-----------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	HMENU hMenu;
 
 	// Too far left to get a ctx menu:
@@ -1415,7 +1414,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		return;
 	}
 
-	pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	m_MenuCursor = GetPositionFromPoint(pt);
 
 	// Right-click outside single-point selection? Reposition cursor to the new location
@@ -1431,12 +1430,12 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	}
 	const CHANNELINDEX nChn = m_MenuCursor.GetChannel();
 
-	if((flags & MK_CONTROL) != 0 && nChn < pSndFile->GetNumChannels() && (pt.y < m_szHeader.cy))
+	if((flags & MK_CONTROL) != 0 && nChn < sndFile.GetNumChannels() && (pt.y < m_szHeader.cy))
 	{
 		// Ctrl+Right-Click: Open quick channel properties.
 		ClientToScreen(&pt);
 		quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
-	} else if(nChn < pSndFile->GetNumChannels() && pSndFile->Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
+	} else if(nChn < sndFile.GetNumChannels() && sndFile.Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
 
@@ -1444,7 +1443,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		if(m_Status[psShowPluginNames] &&
 			(pt.y > m_szHeader.cy - m_szPluginHeader.cy) && (pt.y < m_szHeader.cy))
 		{
-			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
+			BuildPluginCtxMenu(hMenu, nChn, sndFile);
 		}
 		
 		//------ Channel Header Menu ---------- :
@@ -1455,7 +1454,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				//Don't bring up menu if shift is pressed, else we won't get button up msg.
 			} else
 			{
-				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, sndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 				BuildRecordCtxMenu(hMenu, ih, nChn);
 				BuildChannelControlCtxMenu(hMenu, ih);
@@ -2509,6 +2508,16 @@ void CViewPattern::OnTransposeCustom()
 		m_nTransposeAmount = dlg.resultAsInt;
 		TransposeSelection(dlg.resultAsInt);
 	}
+}
+
+
+void CViewPattern::OnTransposeCustomQuick()
+//-----------------------------------------
+{
+	if(m_nTransposeAmount != 0)
+		TransposeSelection(m_nTransposeAmount);
+	else
+		OnTransposeCustom();
 }
 
 
@@ -4017,6 +4026,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
 		case kcTransposeOctDown:			OnTransposeOctDown(); return wParam;
 		case kcTransposeCustom:				OnTransposeCustom(); return wParam;
+		case kcTransposeCustomQuick:		OnTransposeCustomQuick(); return wParam;
 		case kcDataEntryUp:					DataEntry(true, false); return wParam;
 		case kcDataEntryDown:				DataEntry(false, false); return wParam;
 		case kcDataEntryUpCoarse:			DataEntry(true, true); return wParam;
@@ -5865,33 +5875,34 @@ bool CViewPattern::IsNoteSplit(int note) const
 }
 
 
-bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const
-//---------------------------------------------------------------------------------------
+bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &sndFile) const
+//--------------------------------------------------------------------------------------------
 {
 	for(PLUGINDEX plug = 0; plug <= MAX_MIXPLUGINS; plug++)
 	{
 
 		bool itemFound = false;
 
-		CHAR s[64];
+		TCHAR s[64];
 
 		if(!plug)
 		{
-			strcpy(s, "No plugin");
+			_tcscpy(s, _T("No plugin"));
 			itemFound = true;
 		} else
 		{
-			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[plug - 1];
+			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug - 1];
 			if(plugin.IsValidPlugin())
 			{
-				wsprintf(s, "FX%d: %s", plug, plugin.GetName());
+				wsprintf(s, _T("FX%u: "), plug);
+				_tcscat(s, plugin.GetName());
 				itemFound = true;
 			}
 		}
 
 		if (itemFound)
 		{
-			if (plug == pSndFile->ChnSettings[nChn].nMixPlugin)
+			if (plug == sndFile.ChnSettings[nChn].nMixPlugin)
 			{
 				AppendMenu(hMenu, (MF_STRING | MF_CHECKED), ID_PLUGSELECT + plug, s);
 			} else
@@ -5903,34 +5914,35 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFi
 	return true;
 }
 
-bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const
-//------------------------------------------------------------------------------------------------------------
+
+bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, const CSoundFile &sndFile) const
+//-----------------------------------------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? (MF_STRING | MF_CHECKED) : MF_STRING,
+	AppendMenu(hMenu, sndFile.ChnSettings[nChn].dwFlags[CHN_MUTE] ? (MF_STRING | MF_CHECKED) : MF_STRING,
 		ID_PATTERN_MUTE, ih->GetKeyTextFromCommand(kcChannelMute, _T("&Mute Channel")));
 	bool bSolo = false, bUnmuteAll = false;
 	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
-	for (CHANNELINDEX i = 0; i < pSndFile->GetNumChannels(); i++)
+	for (CHANNELINDEX i = 0; i < sndFile.GetNumChannels(); i++)
 	{
 		if(i != nChn)
 		{
-			if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
-			if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
+			if(!sndFile.ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
+			if(sndFile.ChnSettings[i].dwFlags[CHN_MUTE] && sndFile.m_bChannelMuteTogglePending[i]) bSoloPending = true;
 		} else
 		{
-			if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
-			if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
+			if(sndFile.ChnSettings[i].dwFlags[CHN_MUTE]) bSolo = bSoloPending = true;
+			if(!sndFile.ChnSettings[i].dwFlags[CHN_MUTE] && sndFile.m_bChannelMuteTogglePending[i]) bSoloPending = true;
 		}
-		if(pSndFile->ChnSettings[i].dwFlags[CHN_MUTE]) bUnmuteAll = bUnmuteAllPending = true;
-		if(!pSndFile->ChnSettings[i].dwFlags[CHN_MUTE] && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
+		if(sndFile.ChnSettings[i].dwFlags[CHN_MUTE]) bUnmuteAll = bUnmuteAllPending = true;
+		if(!sndFile.ChnSettings[i].dwFlags[CHN_MUTE] && sndFile.m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
 	}
 	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, ih->GetKeyTextFromCommand(kcChannelSolo, _T("&Solo Channel")));
 	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, ih->GetKeyTextFromCommand(kcChannelUnmuteAll, _T("&Unmute All")));
 	
-	AppendMenu(hMenu, pSndFile->m_bChannelMuteTogglePending[nChn] ? (MF_STRING | MF_CHECKED) : MF_STRING,
+	AppendMenu(hMenu, sndFile.m_bChannelMuteTogglePending[nChn] ? (MF_STRING | MF_CHECKED) : MF_STRING,
 		ID_PATTERN_TRANSITIONMUTE,
-		ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition, pSndFile->ChnSettings[nChn].dwFlags[CHN_MUTE] ? _T("On Transition: Unmute\t") : _T("On Transition: Mute\t")));
+		ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition, sndFile.ChnSettings[nChn].dwFlags[CHN_MUTE] ? _T("On Transition: Unmute\t") : _T("On Transition: Mute\t")));
 
 	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition, _T("On Transition: Unmute All")));
 	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition, _T("On Transition: Solo")));
