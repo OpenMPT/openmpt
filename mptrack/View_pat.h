@@ -397,6 +397,7 @@ protected:
 	afx_msg void OnTransposeOctUp() { TransposeSelection(12000); }
 	afx_msg void OnTransposeOctDown() { TransposeSelection(-12000); }
 	afx_msg void OnTransposeCustom();
+	afx_msg void OnTransposeCustomQuick();
 	afx_msg void OnSetSelInstrument();
 	afx_msg void OnAddChannelFront() { AddChannelBefore(m_MenuCursor.GetChannel()); }
 	afx_msg void OnAddChannelAfter() { AddChannelBefore(m_MenuCursor.GetChannel() + 1); };
@@ -443,9 +444,9 @@ private:
 	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const;
-	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
+	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &sndFile) const;
 	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn) const;
-	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
+	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, const CSoundFile &sndFile) const;
 	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler *ih) const;

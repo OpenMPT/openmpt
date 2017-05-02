@@ -298,6 +298,7 @@ enum CommandID
 	kcTransposeOctUp,
 	kcTransposeOctDown,
 	kcTransposeCustom,
+	kcTransposeCustomQuick,
 	kcDataEntryUp,
 	kcDataEntryDown,
 	kcDataEntryUpCoarse,
