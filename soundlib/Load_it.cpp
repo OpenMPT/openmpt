@@ -322,7 +322,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 	{
 		tm epoch, *verTime;
 		MemsetZero(epoch);
-		epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
+		epoch.tm_year = 109; epoch.tm_mon = 9; epoch.tm_mday = 31;
 		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
 		if((verTime = localtime(&versionSec)) != nullptr)
 		{
@@ -333,7 +333,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 		}
 	} else
 	{
-		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv & 0xFF));
+		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv));
 	}
 	return version;
 }
@@ -649,6 +649,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		lastSampleOffset = smpPos[fileHeader.smpnum - 1] + sizeof(ITSample);
 	}
 
+	// Other things we could check (but don't need to): Song name no longer than 20 characters, all channels center-panned or muted, all channel volumes are 64.
+	const bool possibleXMconversion = fileHeader.cwtv == 0x0204 && fileHeader.cmwt == 0x0200 && fileHeader.special == 0 && fileHeader.reserved == 0
+		&& (fileHeader.flags & ~ITFileHeader::linearSlides) == (ITFileHeader::useStereoPlayback | ITFileHeader::instrumentMode | ITFileHeader::itOldEffects)
+		&& fileHeader.globalvol == 128 && fileHeader.mv == 48 && fileHeader.sep == 128 && fileHeader.pwd == 0 && fileHeader.msglength == 0;
+
 	// Reading Samples
 	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpnum, MAX_SAMPLES - 1);
 	bool lastSampleCompressed = false;
@@ -657,51 +662,55 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ITSample sampleHeader;
 		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadStruct(sampleHeader))
 		{
-			if(!memcmp(sampleHeader.id, "IMPS", 4))
+			// IT does not check for the IMPS magic, and some bad XM->IT converter out there doesn't write the magic bytes for empty sample slots.
+			ModSample &sample = Samples[i + 1];
+			size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
+
+			mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
+
+			if(!file.Seek(sampleOffset))
+				continue;
+
+			lastSampleCompressed = false;
+			if(!sample.uFlags[SMP_KEEPONDISK])
 			{
-				ModSample &sample = Samples[i + 1];
-				size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
-
-				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
-
-				if(!file.Seek(sampleOffset))
-					continue;
-
-				lastSampleCompressed = false;
-				if(!sample.uFlags[SMP_KEEPONDISK])
+				SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
+				if(loadFlags & loadSampleData)
 				{
-					SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
-					if(loadFlags & loadSampleData)
-					{
-						sampleIO.ReadSample(sample, file);
-					} else
-					{
-						if(sampleIO.GetEncoding() == SampleIO::signedPCM)
-							file.Skip(sample.nLength * (sampleIO.GetBitDepth() / 8) * sampleIO.GetNumChannels());
-						else
-							lastSampleCompressed = true;
-					}
+					sampleIO.ReadSample(sample, file);
 				} else
 				{
-					// External sample in MPTM file
-					size_t strLen;
-					file.ReadVarInt(strLen);
-					if(loadFlags & loadSampleData)
-					{
-						std::string filenameU8;
-						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
-#ifdef MPT_EXTERNAL_SAMPLES
-						SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
-#else
-						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
-#endif // MPT_EXTERNAL_SAMPLES
-					} else
-					{
-						file.Skip(strLen);
-					}
+					if(sampleIO.IsVariableLengthEncoded())
+						lastSampleCompressed = true;
+					else
+						file.Skip(sampleIO.CalculateEncodedSize(sample.nLength));
 				}
-				lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
+				if(sampleIO.GetEncoding() == SampleIO::unsignedPCM && sample.nLength != 0 && possibleXMconversion)
+				{
+					// There is some XM to IT converter (don't know which one) and it identifies as IT 2.04.
+					// The only safe way to distinguish it from an IT-saved file are the unsigned samples.
+					m_madeWithTracker = "XM Conversion";
+				}
+			} else
+			{
+				// External sample in MPTM file
+				size_t strLen;
+				file.ReadVarInt(strLen);
+				if(loadFlags & loadSampleData)
+				{
+					std::string filenameU8;
+					file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
+					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
+#else
+					AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+#endif // MPT_EXTERNAL_SAMPLES
+				} else
+				{
+					file.Skip(strLen);
+				}
 			}
+			lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 		}
 	}
 	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
