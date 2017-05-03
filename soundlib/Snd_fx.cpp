@@ -2017,9 +2017,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					{
 						plugNote = p->nNote;
 						// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-						if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
+						if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(p->pModInstrument->NoteMap))
 						{
-							plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
+							plugNote = p->pModInstrument->NoteMap[plugNote - NOTE_MIN];
 						}
 					}
 
