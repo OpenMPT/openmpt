@@ -676,7 +676,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	LoadExtendedSongProperties(file, &interpretOpenMPTMade);
 
-	if(interpretOpenMPTMade && m_dwLastSavedWithVersion == 0)
+	if(interpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
 		// when saving a file in OpenMPT for the first time.

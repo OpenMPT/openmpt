@@ -328,7 +328,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 	{
 		tm epoch, *verTime;
 		MemsetZero(epoch);
-		epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
+		epoch.tm_year = 109; epoch.tm_mon = 9; epoch.tm_mday = 31;
 		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
 		if((verTime = localtime(&versionSec)) != nullptr)
 		{
@@ -339,7 +339,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 		}
 	} else
 	{
-		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv & 0xFF));
+		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv));
 	}
 	return version;
 }
@@ -400,7 +400,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
 			{
-				// OpenMPT 1.17 and 1.18 (raped IT format)
+				// OpenMPT 1.17.02.26 (r122) to 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
@@ -424,6 +424,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
+				interpretModPlugMade = true;
+			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
+			{
+				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
 				interpretModPlugMade = true;
 			}
 		} else // case: type == MOD_TYPE_MPT
@@ -656,6 +661,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		lastSampleOffset = smpPos[fileHeader.smpnum - 1] + sizeof(ITSample);
 	}
 
+	// Other things we could check (but don't need to): Song name no longer than 20 characters, all channels center-panned or muted, all channel volumes are 64.
+	const bool possibleXMconversion = fileHeader.cwtv == 0x0204 && fileHeader.cmwt == 0x0200 && fileHeader.special == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
+		&& (fileHeader.flags & ~ITFileHeader::linearSlides) == (ITFileHeader::useStereoPlayback | ITFileHeader::instrumentMode | ITFileHeader::itOldEffects)
+		&& fileHeader.globalvol == 128 && fileHeader.mv == 48 && fileHeader.sep == 128 && fileHeader.pwd == 0 && fileHeader.msglength == 0;
+
 	// Reading Samples
 	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
 	bool lastSampleCompressed = false;
@@ -664,51 +674,55 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ITSample sampleHeader;
 		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadConvertEndianness(sampleHeader))
 		{
-			if(!memcmp(sampleHeader.id, "IMPS", 4))
+			// IT does not check for the IMPS magic, and some bad XM->IT converter out there doesn't write the magic bytes for empty sample slots.
+			ModSample &sample = Samples[i + 1];
+			size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
+
+			mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
+
+			if(!file.Seek(sampleOffset))
+				continue;
+
+			lastSampleCompressed = false;
+			if(!sample.uFlags[SMP_KEEPONDISK])
 			{
-				ModSample &sample = Samples[i + 1];
-				size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
-
-				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
-
-				if(!file.Seek(sampleOffset))
-					continue;
-
-				lastSampleCompressed = false;
-				if(!sample.uFlags[SMP_KEEPONDISK])
+				SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
+				if(loadFlags & loadSampleData)
 				{
-					SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
-					if(loadFlags & loadSampleData)
-					{
-						sampleIO.ReadSample(sample, file);
-					} else
-					{
-						if(sampleIO.GetEncoding() == SampleIO::signedPCM)
-							file.Skip(sample.nLength * (sampleIO.GetBitDepth() / 8) * sampleIO.GetNumChannels());
-						else
-							lastSampleCompressed = true;
-					}
+					sampleIO.ReadSample(sample, file);
 				} else
 				{
-					// External sample in MPTM file
-					size_t strLen;
-					file.ReadVarInt(strLen);
-					if(loadFlags & loadSampleData)
-					{
-						std::string filenameU8;
-						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
-#ifdef MPT_EXTERNAL_SAMPLES
-						SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
-#else
-						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
-#endif // MPT_EXTERNAL_SAMPLES
-					} else
-					{
-						file.Skip(strLen);
-					}
+					if(sampleIO.IsVariableLengthEncoded())
+						lastSampleCompressed = true;
+					else
+						file.Skip(sampleIO.CalculateEncodedSize(sample.nLength));
 				}
-				lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
+				if(sampleIO.GetEncoding() == SampleIO::unsignedPCM && sample.nLength != 0 && possibleXMconversion)
+				{
+					// There is some XM to IT converter (don't know which one) and it identifies as IT 2.04.
+					// The only safe way to distinguish it from an IT-saved file are the unsigned samples.
+					m_madeWithTracker = "XM Conversion";
+				}
+			} else
+			{
+				// External sample in MPTM file
+				size_t strLen;
+				file.ReadVarInt(strLen);
+				if(loadFlags & loadSampleData)
+				{
+					std::string filenameU8;
+					file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
+					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
+#else
+					AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+#endif // MPT_EXTERNAL_SAMPLES
+				} else
+				{
+					file.Skip(strLen);
+				}
 			}
+			lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 		}
 	}
 	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
@@ -2236,7 +2250,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MAGIC4BE('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
+			case MAGIC4BE('L','S','W','V'): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
