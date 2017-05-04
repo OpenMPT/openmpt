@@ -169,7 +169,7 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX kee
 	std::vector<bool> keepSamples(GetNumSamples() + 1, true);
 
 	// Check which samples are used by the instrument we are going to nuke.
-	std::set<SAMPLEINDEX> referencedSamples = Instruments[nInstr]->GetSamples();
+	auto referencedSamples = Instruments[nInstr]->GetSamples();
 	for(auto sample : referencedSamples)
 	{
 		if(sample <= GetNumSamples())
@@ -228,9 +228,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	std::vector<SAMPLEINDEX> targetSample;	// Sample index in target song
 	SAMPLEINDEX targetIndex = 0;		// Next index for inserting sample
 
-	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
+	for(auto &sample : pIns->Keyboard)
 	{
-		const SAMPLEINDEX sourceIndex = pIns->Keyboard[i];
+		const SAMPLEINDEX sourceIndex = sample;
 		if(sourceIndex > 0 && sourceIndex <= srcSong.GetNumSamples())
 		{
 			const auto entry = std::find(sourceSample.cbegin(), sourceSample.cend(), sourceIndex);
@@ -242,20 +242,20 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 				{
 					sourceSample.push_back(sourceIndex);
 					targetSample.push_back(targetIndex);
-					pIns->Keyboard[i] = targetIndex;
+					sample = targetIndex;
 				} else
 				{
-					pIns->Keyboard[i] = 0;
+					sample = 0;
 				}
 			} else
 			{
 				// Sample reference has already been created, so only need to update the sample map.
-				pIns->Keyboard[i] = *(entry - sourceSample.begin() + targetSample.begin());
+				sample = *(entry - sourceSample.begin() + targetSample.begin());
 			}
 		} else
 		{
 			// Invalid or no source sample
-			pIns->Keyboard[i] = 0;
+			sample = 0;
 		}
 	}
 
@@ -684,12 +684,17 @@ struct GF1Layer
 MPT_BINARY_STRUCT(GF1Layer, 47)
 
 
-static int32 PatchFreqToNote(uint32 nFreq)
-//----------------------------------------
+static double PatchFreqToNote(uint32 nFreq)
+//-----------------------------------------
 {
-	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)
-	const float base = 1.0f / 2044.0f;
-	return Util::Round<int32>(std::log(nFreq * base) * (12.0f * inv_log_2));
+	return std::log(nFreq / 2044.0) * (12.0 * 1.44269504088896340736);	// 1.0/std::log(2.0)
+}
+
+
+static int32 PatchFreqToNoteInt(uint32 nFreq)
+//-------------------------------------------
+{
+	return Util::Round<int32>(PatchFreqToNote(nFreq));
 }
 
 
@@ -703,6 +708,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.Initialize();
 	if(sampleHeader.flags & 4) sample.uFlags.set(CHN_LOOP);
 	if(sampleHeader.flags & 8) sample.uFlags.set(CHN_PINGPONGLOOP);
+	if(sampleHeader.flags & 16) sample.uFlags.set(CHN_REVERSE);
 	sample.nLength = sampleHeader.length;
 	sample.nLoopStart = sampleHeader.loopstart;
 	sample.nLoopEnd = sampleHeader.loopend;
@@ -716,10 +722,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.nVibRate = sampleHeader.vibrato_rate / 4;
 	if(sampleHeader.scale_factor)
 	{
-		sample.FrequencyToTranspose();
-		sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
-		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (sampleHeader.scale_frequency - 60));
-		sample.TransposeToFrequency();
+		sample.Transpose((84.0 - PatchFreqToNote(sampleHeader.root_freq)) / 12.0);
 	}
 
 	SampleIO sampleIO(
@@ -827,9 +830,9 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		// Load it
 		GF1SampleHeader sampleHeader;
 		PatchToSample(this, nextSample, sampleHeader, file);
-		int32 nMinNote = (sampleHeader.low_freq > 100) ? PatchFreqToNote(sampleHeader.low_freq) : 0;
-		int32 nMaxNote = (sampleHeader.high_freq > 100) ? PatchFreqToNote(sampleHeader.high_freq) : NOTE_MAX;
-		int32 nBaseNote = (sampleHeader.root_freq > 100) ? PatchFreqToNote(sampleHeader.root_freq) : -1;
+		int32 nMinNote = (sampleHeader.low_freq > 100) ? PatchFreqToNoteInt(sampleHeader.low_freq) : 0;
+		int32 nMaxNote = (sampleHeader.high_freq > 100) ? PatchFreqToNoteInt(sampleHeader.high_freq) : NOTE_MAX;
+		int32 nBaseNote = (sampleHeader.root_freq > 100) ? PatchFreqToNoteInt(sampleHeader.root_freq) : -1;
 		if(!sampleHeader.scale_factor && layerHeader.samples == 1) { nMinNote = 0; nMaxNote = NOTE_MAX; }
 		// Fill Note Map
 		for(int32 k = 0; k < NOTE_MAX; k++)
