@@ -892,7 +892,7 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
 	{
 		CriticalSection cs;
-
+		GetPatternUndo().PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), "Remove Pattern");
 		m_SndFile.Patterns.Remove(nPat);
 		SetModified();
 
