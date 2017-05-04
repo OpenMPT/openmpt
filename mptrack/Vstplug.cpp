@@ -1104,7 +1104,7 @@ CString CVstPlugin::GetCurrentProgramName()
 void CVstPlugin::SetCurrentProgramName(const CString &name)
 //---------------------------------------------------------
 {
-	Dispatch(effSetProgramName, 0, 0, (void *)mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str(), 0.0f);
+	Dispatch(effSetProgramName, 0, 0, const_cast<char *>(mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str()), 0.0f);
 }
 
 
@@ -1583,7 +1583,7 @@ void CVstPlugin::SaveAllParameters()
 	}
 	m_pMixStruct->defaultProgram = -1;
 
-	if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
+	if(ProgramsAreChunks())
 	{
 		void *p = nullptr;
 
@@ -1635,7 +1635,7 @@ void CVstPlugin::RestoreAllParameters(int32 program)
 	{
 		uint32 type = *reinterpret_cast<const uint32 *>(m_pMixStruct->pPluginData);
 
-		if ((type == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
+		if (type == 'NvEf')
 		{
 			if ((program>=0) && (program < m_Effect.numPrograms))
 			{
@@ -1662,7 +1662,7 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 {
 	try
 	{
-		if (HasEditor())
+		if(HasEditor())
 			return new COwnerVstEditor(*this);
 		else
 			return new CDefaultVstEditor(*this);
