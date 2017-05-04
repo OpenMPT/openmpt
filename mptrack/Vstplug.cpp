@@ -1094,10 +1094,10 @@ int32 CVstPlugin::GetCurrentProgram()
 CString CVstPlugin::GetCurrentProgramName()
 //-----------------------------------------
 {
-	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
-	Dispatch(effGetProgramName, 0, 0, rawname, 0);
-	mpt::String::SetNullTerminator(rawname);
-	return mpt::ToCString(mpt::CharsetLocale, rawname);
+	std::vector<char> s(256, 0);
+	// kVstMaxProgNameLen is 24... too short for some plugins, so use at least 256 bytes.
+	Dispatch(effGetProgramName, 0, 0, s.data(), 0);
+	return mpt::ToCString(mpt::CharsetLocale, s.data());
 }
 
 
@@ -1111,27 +1111,27 @@ void CVstPlugin::SetCurrentProgramName(const CString &name)
 CString CVstPlugin::GetProgramName(int32 program)
 //-----------------------------------------------
 {
-	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
-	if(m_Effect.numPrograms > 0)
+	// kVstMaxProgNameLen is 24... too short for some plugins, so use at least 256 bytes.
+	std::vector<char> rawname(256, 0);
+	if(program < m_Effect.numPrograms)
 	{
-		if(Dispatch(effGetProgramNameIndexed, program, -1 /*category*/, rawname, 0) != 1)
+		if(Dispatch(effGetProgramNameIndexed, program, -1 /*category*/, rawname.data(), 0) != 1)
 		{
 			// Fallback: Try to get current program name.
-			strcpy(rawname, "");
+			rawname.assign(256, 0);
 			VstInt32 curProg = GetCurrentProgram();
 			if(program != curProg)
 			{
 				SetCurrentProgram(program);
 			}
-			Dispatch(effGetProgramName, 0, 0, rawname, 0);
+			Dispatch(effGetProgramName, 0, 0, rawname.data(), 0);
 			if(program != curProg)
 			{
 				SetCurrentProgram(curProg);
 			}
 		}
 	}
-	mpt::String::SetNullTerminator(rawname);
-	return mpt::ToCString(mpt::CharsetLocale, rawname);
+	return mpt::ToCString(mpt::CharsetLocale, rawname.data());
 }
 
 
@@ -1204,15 +1204,14 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 //-------------------------------------------------------------------------
 {
-	char s[MAX(kVstMaxParamStrLen + 1, 64)]; // Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
-	s[0] = '\0';
-
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
 	{
-		Dispatch(opcode, param, 0, s, 0);
-		mpt::String::SetNullTerminator(s);
+		// Increased to 256 bytes since SynthMaster 2.8 writes more than 64 bytes of 0-padding. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
+		std::vector<char> s(256, 0);
+		Dispatch(opcode, param, 0, s.data(), 0);
+		return mpt::ToCString(mpt::CharsetLocale, s.data());
 	}
-	return mpt::ToCString(mpt::CharsetLocale, s);
+	return CString();
 }
 
 
@@ -1235,12 +1234,13 @@ CString CVstPlugin::GetParamName(PlugParamIndex param)
 CString CVstPlugin::GetDefaultEffectName()
 //----------------------------------------
 {
-	char s[256] = "";
 	if(m_bIsVst2)
 	{
-		Dispatch(effGetEffectName, 0, 0, s, 0);
+		std::vector<char> s(256, 0);
+		Dispatch(effGetEffectName, 0, 0, s.data(), 0);
+		return mpt::ToCString(mpt::CharsetLocale, s.data());
 	}
-	return mpt::ToCString(mpt::CharsetLocale, s);
+	return CString();
 }
 
 
@@ -1691,7 +1691,7 @@ bool CVstPlugin::IsInstrument() const
 bool CVstPlugin::CanRecieveMidiEvents()
 //-------------------------------------
 {
-	return (CVstPlugin::Dispatch(effCanDo, 0, 0, "receiveVstMidiEvent", 0.0f) != 0);
+	return Dispatch(effCanDo, 0, 0, "receiveVstMidiEvent", 0.0f) != 0;
 }
 
 
