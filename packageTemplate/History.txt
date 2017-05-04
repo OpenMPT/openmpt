@@ -26,6 +26,22 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.11.00 (* May 2017, revision 8133)
+---------------------------------------
+Tree view
+   [Fix] <js> Deleting patterns was not undo-able.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> Crash when trying to use SynthMaster 2.8.
+   [Fix] <js> Plugin data of some newer JUCE-based plugins (e.g. latest TAL-Filter-2 version) was not saved correctly inside module files (http://bugs.openmpt.org/view.php?id=946).
+
+Playback
+   [Fix] <js> Possible crash when using Duplicate Note Actions with instruments that are associated to plugins (http://bugs.openmpt.org/view.php?id=951).
+
+IT
+   [Imp] <js> Properly identify files made with OpenMPT 1.17.02.20-25 and some unknown XM conversion tool.
+
+
 v1.26.10.00 (23 April 2017, revision 8041)
 ------------------------------------------
 Pattern tab
