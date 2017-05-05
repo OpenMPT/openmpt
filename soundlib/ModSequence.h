@@ -32,8 +32,8 @@ protected:
 
 public:
 	ModSequence(CSoundFile &sndFile);
-	ModSequence(ModSequence &&other) = default;
-	ModSequence(const ModSequence &other) = default;
+	ModSequence(ModSequence &&) = default;
+	ModSequence(const ModSequence &) = default;
 	ModSequence& operator=(const ModSequence &other);
 
 	ORDERINDEX GetLength() const { return mpt::saturate_cast<ORDERINDEX>(size()); }
