@@ -265,7 +265,7 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 {
 	if(trkvers < 0x0200)
 	{
-		// Load old format (IT 1.xx) instrument
+		// Load old format (IT 1.xx) instrument (early IT 2.xx modules may have cmwt set to 1.00 for backwards compatibility)
 		ITOldInstrument instrumentHeader;
 		if(!file.ReadConvertEndianness(instrumentHeader))
 		{
@@ -543,6 +543,31 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		minPtr = std::min(minPtr, fileHeader.msgoffset);
 	}
 
+	const bool possiblyUNMO3 = fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
+		&& fileHeader.pwd == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.flags & (ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig)) == 0;
+
+	if(possiblyUNMO3 && fileHeader.insnum == 0 && fileHeader.smpnum > 0 && file.GetPosition() + 4 * smpPos.size() + 2 <= minPtr)
+	{
+		// UNMO3 < v2.4.0.1 reserves some space for instrument parapointers even in sample mode.
+		// This makes reading MIDI macros and plugin information impossible.
+		// Note: While UNMO3 and CheeseTracker header fingerprints are almost identical, we cannot mis-detect CheeseTracker here,
+		// as it always sets the instrument mode flag and writes non-zero row highlights.
+		bool oldUNMO3 = true;
+		for(uint16 i = 0; i < fileHeader.smpnum; i++)
+		{
+			if(file.ReadUint32LE() != 0)
+			{
+				oldUNMO3 = false;
+				file.SkipBack(4 + i * 4);
+				break;
+			}
+		}
+		if(oldUNMO3)
+		{
+			m_madeWithTracker = "UNMO3 <= 2.4";
+		}
+	}
+
 	// Reading IT Edit History Info
 	// This is only supposed to be present if bit 1 of the special flags is set.
 	// However, old versions of Schism and probably other trackers always set this bit
@@ -564,20 +589,34 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				itHistory.ConvertToMPT(mptHistory);
 				m_FileHistory.push_back(mptHistory);
 			}
+
+			if(possiblyUNMO3 && nflt == 0)
+			{
+				if(fileHeader.special & ITFileHeader::embedPatternHighlights)
+					m_madeWithTracker = "UNMO3 <= 2.4.0.1";	// Set together with MIDI macro embed flag
+				else
+					m_madeWithTracker = "UNMO3";	// Either 2.4.0.2+ or no MIDI macros embedded
+			}
 		} else
 		{
 			// Oops, we were not supposed to read this.
 			file.SkipBack(2);
 		}
-	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
+	} else if(possiblyUNMO3 && fileHeader.special <= 1)
 	{
-		// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
-		// at all, but still writes the two edit history length bytes (zeroes)...
-		if(file.ReadUint16LE() != 0)
+		// UNMO3 < v2.4.0.1 will set the edit history special bit iff the MIDI macro embed bit is also set,
+		// but it always writes the two extra bytes for the edit history length (zeroes).
+		// If MIDI macros are embedded, we are fine and end up in the first case of the if statement (read edit history).
+		// Otherwise we end up here and might have to read the edit history length.
+		if(file.ReadUint16LE() == 0)
 		{
-			// These were not zero bytes -> We're in the wrong place!
+			m_madeWithTracker = "UNMO3 <= 2.4";
+		} else
+		{
+			// These were not zero bytes, but potentially belong to the upcoming MIDI config - need to skip back.
+			// I think the only application that could end up here is CheeseTracker, if it allows to write 0 for both row highlight values.
+			// IT 2.14 itself will always write the edit history.
 			file.SkipBack(2);
-			m_madeWithTracker = "UNMO3";
 		}
 	}
 
@@ -621,15 +660,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	LoadMixPlugins(pluginChunk);
 
 	// Read Song Message
-	if(fileHeader.special & ITFileHeader::embedSongMessage)
+	if((fileHeader.special & ITFileHeader::embedSongMessage) && fileHeader.msglength > 0 && file.Seek(fileHeader.msgoffset))
 	{
-		if(fileHeader.msglength > 0 && file.Seek(fileHeader.msgoffset))
-		{
-			// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
-			// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
-			// But we'll just use autodetection here:
-			m_songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
-		}
+		// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
+		// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
+		// But we'll just use autodetection here:
+		m_songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
 	}
 
 	// Reading Instruments
@@ -661,10 +697,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		lastSampleOffset = smpPos[fileHeader.smpnum - 1] + sizeof(ITSample);
 	}
 
-	// Other things we could check (but don't need to): Song name no longer than 20 characters, all channels center-panned or muted, all channel volumes are 64.
-	const bool possibleXMconversion = fileHeader.cwtv == 0x0204 && fileHeader.cmwt == 0x0200 && fileHeader.special == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
-		&& (fileHeader.flags & ~ITFileHeader::linearSlides) == (ITFileHeader::useStereoPlayback | ITFileHeader::instrumentMode | ITFileHeader::itOldEffects)
-		&& fileHeader.globalvol == 128 && fileHeader.mv == 48 && fileHeader.sep == 128 && fileHeader.pwd == 0 && fileHeader.msglength == 0;
+	bool possibleXMconversion = false;
 
 	// Reading Samples
 	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
@@ -697,11 +730,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					else
 						file.Skip(sampleIO.CalculateEncodedSize(sample.nLength));
 				}
-				if(sampleIO.GetEncoding() == SampleIO::unsignedPCM && sample.nLength != 0 && possibleXMconversion)
+				if(sampleIO.GetEncoding() == SampleIO::unsignedPCM && sample.nLength != 0)
 				{
 					// There is some XM to IT converter (don't know which one) and it identifies as IT 2.04.
 					// The only safe way to distinguish it from an IT-saved file are the unsigned samples.
-					m_madeWithTracker = "XM Conversion";
+					possibleXMconversion = true;
 				}
 			} else
 			{
@@ -726,6 +759,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
+
+	if(possibleXMconversion && fileHeader.cwtv == 0x0204 && fileHeader.cmwt == 0x0200 && fileHeader.special == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
+		&& (fileHeader.flags & ~ITFileHeader::linearSlides) == (ITFileHeader::useStereoPlayback | ITFileHeader::instrumentMode | ITFileHeader::itOldEffects)
+		&& fileHeader.globalvol == 128 && fileHeader.mv == 48 && fileHeader.sep == 128 && fileHeader.pwd == 0 && fileHeader.msglength == 0)
+	{
+		for(size_t i = 20; i < CountOf(fileHeader.songname); i++)
+		{
+			if(fileHeader.songname[i] != 0)
+				possibleXMconversion = false;
+		}
+		if(possibleXMconversion)
+			m_madeWithTracker = "XM Conversion";
+	}
 
 	m_nMinPeriod = 0;
 	m_nMaxPeriod = int32_max;
@@ -1036,7 +1082,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
 				m_madeWithTracker = "ChibiTracker";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
+				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
+				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				m_madeWithTracker = "CheeseTracker";
 			} else if(fileHeader.cmwt < 0x0888)
@@ -1056,7 +1104,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(m_FileHistory.empty() && memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 				{
-					// IT encrypts the total edit time of a module in the "reserved" fild
+					// IT encrypts the total edit time of a module in the "reserved" field
 					uint32 editTime;
 					memcpy(&editTime, fileHeader.reserved, 4);
 					SwapBytesLE(editTime);
