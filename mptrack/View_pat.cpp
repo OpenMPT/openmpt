@@ -3063,25 +3063,32 @@ void CViewPattern::UndoRedo(bool undo)
 
 
 // Apply amplification and fade function to volume
-static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, bool fadeIn, bool fadeOut, Fade::Func &fadeFunc)
-//-------------------------------------------------------------------------------------------------------------------------
+static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int fadeIn, int fadeOut, Fade::Func &fadeFunc)
+//-----------------------------------------------------------------------------------------------------------------------
 {
-	vol *= amp;
-	if(fadeIn && fadeOut)
+	const bool doFadeIn = fadeIn != amp, doFadeOut = fadeOut != amp;
+	const double fadeStart = fadeIn / 100.0, fadeStartDiff = (amp - fadeIn) / 100.0;
+	const double fadeEnd = fadeOut / 100.0, fadeEndDiff = (amp - fadeOut) / 100.0;
+
+	double l;
+	if(doFadeIn && doFadeOut)
 	{
 		ROWINDEX numRows2 = numRows / 2;
 		if(row < numRows2)
-			vol = fadeFunc(vol, row + 1, numRows2);
+			l = fadeStart + fadeFunc(static_cast<double>(row + 1) / numRows2) * fadeStartDiff;
 		else
-			vol = fadeFunc(vol, numRows - row, numRows - numRows2);
-	} else if(fadeIn)
+			l = fadeEnd + fadeFunc(static_cast<double>(numRows - row) / numRows - numRows2) * fadeEndDiff;
+	} else if(doFadeIn)
 	{
-		vol = fadeFunc(vol, row + 1, numRows);
-	} else if(fadeOut)
+		l = fadeStart + fadeFunc(static_cast<double>(row + 1) / numRows) * fadeStartDiff;
+	} else if(doFadeOut)
 	{
-		vol = fadeFunc(vol, numRows - row, numRows);
+		l = fadeEnd + fadeFunc(static_cast<double>(numRows - row) / numRows) * fadeEndDiff;
+	} else
+	{
+		l = amp / 100.0;
 	}
-	vol = (vol + 50) / 100;
+	vol = Util::Round<int>(vol * l);
 	LimitMax(vol, 64);
 }
 
@@ -3089,197 +3096,188 @@ static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, bool 
 void CViewPattern::OnPatternAmplify()
 //-----------------------------------
 {
-	static int16 oldAmp = 100;
-	static Fade::Law fadeLaw = Fade::kLinear;
-	CAmpDlg dlg(this, oldAmp, fadeLaw, 0);
+	static CAmpDlg::AmpSettings settings { Fade::kLinear, 0, 0, 100, false, false };
+
+	CAmpDlg dlg(this, settings, 0);
 	if(dlg.DoModal() != IDOK)
 	{
 		return;
 	}
 
-	CSoundFile *pSndFile = GetSoundFile();
+	CSoundFile &sndFile = *GetSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
+		return;
 
-	const bool useVolCol = pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME);
+	const bool useVolCol = sndFile.GetModSpecifications().HasVolCommand(VOLCMD_VOLUME);
 
 	BeginWaitCursor();
 	PrepareUndo(m_Selection, "Amplify");
-	oldAmp = dlg.m_nFactor;
-	fadeLaw = dlg.m_fadeLaw;
-	Fade::Func fadeFunc = GetFadeFunc(fadeLaw);
 
-	if(pSndFile->Patterns.IsValidPat(m_nPattern))
+	m_Selection.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
+	CHANNELINDEX firstChannel = m_Selection.GetStartChannel(), lastChannel = m_Selection.GetEndChannel();
+	ROWINDEX firstRow = m_Selection.GetStartRow(), lastRow = m_Selection.GetEndRow();
+
+	// For partically selected start and end channels, we check if the start and end columns contain the relevant columns.
+	bool firstChannelValid, lastChannelValid;
+	if(useVolCol)
 	{
-		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
-		CHANNELINDEX firstChannel = m_Selection.GetStartChannel(), lastChannel = m_Selection.GetEndChannel();
-		ROWINDEX firstRow = m_Selection.GetStartRow(), lastRow = m_Selection.GetEndRow();
-
-		// For partically selected start and end channels, we check if the start and end columns contain the relevant columns.
-		bool firstChannelValid, lastChannelValid;
-		if(useVolCol)
-		{
-			// Volume column
-			firstChannelValid = m_Selection.ContainsHorizontal(PatternCursor(0, firstChannel, PatternCursor::volumeColumn));
-			lastChannelValid = m_Selection.ContainsHorizontal(PatternCursor(0, lastChannel, PatternCursor::volumeColumn));
-		} else
-		{
-			// Effect column
-			firstChannelValid = true;	// We cannot start "too far right" in the channel, since this is the last column.
-			lastChannelValid = m_Selection.GetLowerRight().CompareColumn(PatternCursor(0, lastChannel, PatternCursor::effectColumn)) >= 0;
-		}
-
-		// adjust min/max channel if they're only partly selected (i.e. volume column or effect column (when using .MOD) is not covered)
-		// XXX if only the effect column is marked in the XM format, we cannot amplify volume commands there. Does anyone use that?
-		if(!firstChannelValid)
-		{
-			if(firstChannel >= lastChannel)
-			{
-				// Selection too small!
-				EndWaitCursor();
-				return;
-			}
-			firstChannel++;
-		}
-		if(!lastChannelValid)
-		{
-			if(lastChannel <= firstChannel)
-			{
-				// Selection too small!
-				EndWaitCursor();
-				return;
-			}
-			lastChannel--;
-		}
-
-		// Volume memory for each channel.
-		std::vector<uint8> chvol(lastChannel + 1, 64);
-
-		for(ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
-		{
-			ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
-			for(CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
-			{
-				if(m->command == CMD_VOLUME && m->param <= 64)
-				{
-					chvol[nChn] = m->param;
-					break;
-				}
-				if(m->volcmd == VOLCMD_VOLUME)
-				{
-					chvol[nChn] = m->vol;
-					break;
-				}
-				if(m->IsNote() && m->instr != 0)
-				{
-					SAMPLEINDEX nSmp = m->instr;
-					if(pSndFile->GetNumInstruments())
-					{
-						if(nSmp <= pSndFile->GetNumInstruments() && pSndFile->Instruments[nSmp] != nullptr)
-						{
-							nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
-							if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
-						} else
-						{
-							nSmp = 0;
-						}
-					}
-					if(nSmp > 0 && nSmp <= pSndFile->GetNumSamples())
-					{
-						chvol[nChn] = (uint8)(pSndFile->GetSample(nSmp).nVolume / 4);
-						break;
-					} else
-					{
-						//nonexistant sample and no volume present in patten? assume volume=64.
-						if(useVolCol)
-						{
-							m->volcmd = VOLCMD_VOLUME;
-							m->vol = 64;
-						} else
-						{
-							m->command = CMD_VOLUME;
-							m->param = 64;
-						}
-						chvol[nChn] = 64;
-						break;
-					}
-				}
-			}
-		}
-
-		for(ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
-		{
-			ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, firstChannel);
-			const int cy = lastRow - firstRow + 1; // total rows (for fading)
-			for(CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++, m++)
-			{
-				if(m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME
-					&& m->IsNote() && m->instr)
-				{
-					SAMPLEINDEX nSmp = m->instr;
-					bool overrideSampleVol = false;
-					if(pSndFile->GetNumInstruments())
-					{
-						if(nSmp <= pSndFile->GetNumInstruments() && pSndFile->Instruments[nSmp] != nullptr)
-						{
-							nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
-							// hack for instruments without samples
-							if(!nSmp)
-							{
-								nSmp = 1;
-								overrideSampleVol = true;
-							}
-						} else
-						{
-							nSmp = 0;
-						}
-					}
-					if(nSmp > 0 && (nSmp <= pSndFile->GetNumSamples()))
-					{
-						if(useVolCol)
-						{
-							m->volcmd = VOLCMD_VOLUME;
-							m->vol = static_cast<ModCommand::VOL>((overrideSampleVol) ? 64 : pSndFile->GetSample(nSmp).nVolume / 4u);
-						} else
-						{
-							m->command = CMD_VOLUME;
-							m->param = static_cast<ModCommand::PARAM>((overrideSampleVol) ? 64 : pSndFile->GetSample(nSmp).nVolume / 4u);
-						}
-					}
-				}
-
-				if(m->volcmd == VOLCMD_VOLUME) chvol[nChn] = m->vol;
-
-				if((dlg.m_bFadeIn || dlg.m_bFadeOut) && m->command != CMD_VOLUME && m->volcmd == VOLCMD_NONE)
-				{
-					if(useVolCol)
-					{
-						m->volcmd = VOLCMD_VOLUME;
-						m->vol = chvol[nChn];
-					} else
-					{
-						m->command = CMD_VOLUME;
-						m->param = chvol[nChn];
-					}
-				}
-
-				if(m->volcmd == VOLCMD_VOLUME)
-				{
-					int vol = m->vol;
-					AmplifyFade(vol, dlg.m_nFactor, nRow - firstRow, cy, dlg.m_bFadeIn, dlg.m_bFadeOut, fadeFunc);
-					m->vol = static_cast<ModCommand::VOL>(vol);
-				}
-
-				if(m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::paramColumn)))
-				{
-					if(m->command == CMD_VOLUME && m->param <= 64)
-					{
-						int vol = m->param;
-						AmplifyFade(vol, dlg.m_nFactor, nRow - firstRow, cy, dlg.m_bFadeIn, dlg.m_bFadeOut, fadeFunc);
-						m->param = static_cast<ModCommand::PARAM>(vol);
-					}
-				}
-			}
-		}
+		// Volume column
+		firstChannelValid = m_Selection.ContainsHorizontal(PatternCursor(0, firstChannel, PatternCursor::volumeColumn));
+		lastChannelValid = m_Selection.ContainsHorizontal(PatternCursor(0, lastChannel, PatternCursor::volumeColumn));
+	} else
+	{
+		// Effect column
+		firstChannelValid = true;	// We cannot start "too far right" in the channel, since this is the last column.
+		lastChannelValid = m_Selection.GetLowerRight().CompareColumn(PatternCursor(0, lastChannel, PatternCursor::effectColumn)) >= 0;
 	}
+
+	// adjust min/max channel if they're only partly selected (i.e. volume column or effect column (when using .MOD) is not covered)
+	// XXX if only the effect column is marked in the XM format, we cannot amplify volume commands there. Does anyone use that?
+	if(!firstChannelValid)
+	{
+		if(firstChannel >= lastChannel)
+		{
+			// Selection too small!
+			EndWaitCursor();
+			return;
+		}
+		firstChannel++;
+	}
+	if(!lastChannelValid)
+	{
+		if(lastChannel <= firstChannel)
+		{
+			// Selection too small!
+			EndWaitCursor();
+			return;
+		}
+		lastChannel--;
+	}
+
+	// Volume memory for each channel.
+	std::vector<uint8> chvol(lastChannel + 1, 64);
+
+	// In the first step, we fill the volume memory and put volume commands in all places with non-existent samples
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX nChn)
+	{
+		if(m.command == CMD_VOLUME && m.param <= 64)
+		{
+			chvol[nChn] = m.param;
+			return;
+		}
+		if(m.volcmd == VOLCMD_VOLUME)
+		{
+			chvol[nChn] = m.vol;
+			return;
+		}
+		if(m.IsNote() && m.instr != 0)
+		{
+			SAMPLEINDEX nSmp = m.instr;
+			if(sndFile.GetNumInstruments())
+			{
+				if(nSmp <= sndFile.GetNumInstruments() && sndFile.Instruments[nSmp] != nullptr)
+				{
+					nSmp = sndFile.Instruments[nSmp]->Keyboard[m.note];
+					if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
+				} else
+				{
+					nSmp = 0;
+				}
+			}
+			if(nSmp > 0 && nSmp <= sndFile.GetNumSamples())
+			{
+				chvol[nChn] = (uint8)(sndFile.GetSample(nSmp).nVolume / 4);
+				return;
+			} else
+			{
+				// Nonexistant sample and no volume present in patten? assume volume=64.
+				if(useVolCol)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = 64;
+				} else
+				{
+					m.command = CMD_VOLUME;
+					m.param = 64;
+				}
+				chvol[nChn] = 64;
+				return;
+			}
+		}
+	});
+
+	Fade::Func fadeFunc = GetFadeFunc(settings.fadeLaw);
+
+	// Now do the actual amplification
+	const int cy = lastRow - firstRow + 1; // total rows (for fading)
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX nRow, CHANNELINDEX nChn)
+	{
+		if(m.volcmd == VOLCMD_NONE && m.command != CMD_VOLUME && m.IsNote() && m.instr)
+		{
+			SAMPLEINDEX nSmp = m.instr;
+			bool overrideSampleVol = false;
+			if(sndFile.GetNumInstruments())
+			{
+				if(nSmp <= sndFile.GetNumInstruments() && sndFile.Instruments[nSmp] != nullptr)
+				{
+					nSmp = sndFile.Instruments[nSmp]->Keyboard[m.note];
+					// hack for instruments without samples
+					if(!nSmp)
+					{
+						nSmp = 1;
+						overrideSampleVol = true;
+					}
+				} else
+				{
+					nSmp = 0;
+				}
+			}
+			if(nSmp > 0 && (nSmp <= sndFile.GetNumSamples()))
+			{
+				if(useVolCol)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = static_cast<ModCommand::VOL>((overrideSampleVol) ? 64 : sndFile.GetSample(nSmp).nVolume / 4u);
+				} else
+				{
+					m.command = CMD_VOLUME;
+					m.param = static_cast<ModCommand::PARAM>((overrideSampleVol) ? 64 : sndFile.GetSample(nSmp).nVolume / 4u);
+				}
+			}
+		}
+
+		if(m.volcmd == VOLCMD_VOLUME) chvol[nChn] = m.vol;
+
+		if((settings.fadeIn || settings.fadeOut) && m.command != CMD_VOLUME && m.volcmd == VOLCMD_NONE)
+		{
+			if(useVolCol)
+			{
+				m.volcmd = VOLCMD_VOLUME;
+				m.vol = chvol[nChn];
+			} else
+			{
+				m.command = CMD_VOLUME;
+				m.param = chvol[nChn];
+			}
+		}
+
+		if(m.volcmd == VOLCMD_VOLUME)
+		{
+			int vol = m.vol;
+			AmplifyFade(vol, settings.factor, nRow - firstRow, cy, settings.fadeIn ? settings.fadeInStart : settings.factor, settings.fadeOut ? settings.fadeOutEnd : settings.factor, fadeFunc);
+			m.vol = static_cast<ModCommand::VOL>(vol);
+		}
+
+		if(m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::paramColumn)))
+		{
+			if(m.command == CMD_VOLUME && m.param <= 64)
+			{
+				int vol = m.param;
+				AmplifyFade(vol, settings.factor, nRow - firstRow, cy, settings.fadeIn ? settings.fadeInStart : settings.factor, settings.fadeOut ? settings.fadeOutEnd : settings.factor, fadeFunc);
+				m.param = static_cast<ModCommand::PARAM>(vol);
+			}
+		}
+	});
 	SetModified(false);
 	InvalidateSelection();
 	EndWaitCursor();

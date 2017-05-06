@@ -1637,37 +1637,45 @@ void CCtrlSamples::OnRemoveDCOffset()
 
 
 template<typename T>
-static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLength end, int32 amp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 {
 	pSample += start;
 	SmpLength len = end - start, len2 = len / 2;
 	Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaw);
+	const bool doFadeIn = fadeIn != amp, doFadeOut = fadeOut != amp;
+	const double fadeStart = fadeIn / 100.0, fadeStartDiff = (amp - fadeIn) / 100.0;
+	const double fadeEnd = fadeOut / 100.0, fadeEndDiff = (amp - fadeOut) / 100.0;
+	const double ampD = amp / 100.0;
 
 	for(SmpLength i = 0; i < len; i++)
 	{
-		int32 l = (pSample[i] * amp) / 100;
-		if(fadeIn && fadeOut)
+		double l;
+		if(doFadeIn && doFadeOut)
 		{
 			if(i < len2)
-				l = fadeFunc(l, i, len2);
+				l = fadeStart + fadeFunc(static_cast<double>(i) / len2) * fadeStartDiff;
 			else
-				l = fadeFunc(l, len - i, len - len2);
-		} else if(fadeIn)
+				l = fadeEnd + fadeFunc(static_cast<double>(len - i) / (len - len2)) * fadeEndDiff;
+		} else if(doFadeIn)
 		{
-			l = fadeFunc(l, i, len);
-		} else if(fadeOut)
+			l = fadeStart + fadeFunc(static_cast<double>(i) / len) * fadeStartDiff;
+		} else if(doFadeOut)
 		{
-			l = fadeFunc(l, len - i, len);
+			l = fadeEnd + fadeFunc(static_cast<double>(len - i) / len) * fadeEndDiff;
+		} else
+		{
+			l = ampD;
 		}
+		l *= pSample[i];
 		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		pSample[i] = static_cast<T>(l);
+		pSample[i] = Util::Round<T>(l);
 	}
 }
 
 
-void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw)
-//---------------------------------------------------------------------------------------
+void CCtrlSamples::ApplyAmplify(int32 lAmp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
+//-----------------------------------------------------------------------------------------
 {
 	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
 
@@ -1697,13 +1705,11 @@ void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut, Fade::Law
 void CCtrlSamples::OnAmplify()
 //----------------------------
 {
-	static int16 oldAmp = 100;
-	static Fade::Law fadeLaw = Fade::kLinear;
-	CAmpDlg dlg(this, oldAmp, fadeLaw);
+	static CAmpDlg::AmpSettings settings { Fade::kLinear, 0, 0, 100, false, false };
+
+	CAmpDlg dlg(this, settings);
 	if (dlg.DoModal() != IDOK) return;
-	oldAmp = dlg.m_nFactor;
-	fadeLaw = dlg.m_fadeLaw;
-	ApplyAmplify(dlg.m_nFactor, dlg.m_bFadeIn, dlg.m_bFadeOut, dlg.m_fadeLaw);
+	ApplyAmplify(settings.factor, settings.fadeIn ? settings.fadeInStart : settings.factor, settings.fadeOut ? settings.fadeOutEnd : settings.factor, settings.fadeLaw);
 }
 
 
@@ -1718,7 +1724,7 @@ void CCtrlSamples::OnQuickFade()
 	SampleSelectionPoints sel = GetSelectionPoints();
 	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == m_sndFile.GetSample(m_nSample).nLength))
 	{
-		ApplyAmplify(100, (sel.nStart == 0), (sel.nEnd == m_sndFile.GetSample(m_nSample).nLength), Fade::kLinear);
+		ApplyAmplify(100, (sel.nStart == 0) ? 0 : 100, (sel.nEnd == m_sndFile.GetSample(m_nSample).nLength) ? 0 : 100, Fade::kLinear);
 	} else
 	{
 		// Can't apply quick fade as no appropriate selection has been made, so ask the user to amplify the whole sample instead.
@@ -2029,7 +2035,7 @@ class ComponentSoundTouch
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentBuiltin()	
+		: ComponentBuiltin()
 	{
 		return;
 	}
@@ -2046,7 +2052,7 @@ class ComponentSoundTouch
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))	
+		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
 	{
 		return;
 	}
@@ -2357,20 +2363,19 @@ public:
 
 		// Allocate working buffer
 		const size_t bufferSize = MAX_BUFFER_LENGTH + fft;
-#ifdef _DEBUG
-		float *buffer = new float[bufferSize];
-#else
-		float *buffer = new (std::nothrow) float[bufferSize];
-#endif
-
-		int8 *pNewSample = static_cast<int8 *>(ModSample::AllocateSample(sample.nLength, sample.GetBytesPerSample()));
-
-		if(buffer == nullptr || pNewSample == nullptr)
+		std::vector<float> buffer;
+		try
 		{
-			delete[] buffer;
-			ModSample::FreeSample(pNewSample);
+			buffer.resize(bufferSize);
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			return kOutOfMemory;
 		}
+
+		int8 *pNewSample = static_cast<int8 *>(ModSample::AllocateSample(sample.nLength, sample.GetBytesPerSample()));
+		if(pNewSample == nullptr)
+			return kOutOfMemory;
 
 		DWORD timeLast = 0;
 
@@ -2423,8 +2428,8 @@ public:
 				// Re-initialize pitch-shifter with blank FFT before processing 1st chunk of current channel
 				if(bufstart)
 				{
-					for(UINT j = 0; j < fft; j++) buffer[j] = 0.0f;
-					smbPitchShift(m_ratio, fft, fft, ovs, sampleRate, buffer, buffer);
+					std::fill(buffer.begin(), buffer.begin() + fft, 0.0f);
+					smbPitchShift(m_ratio, fft, fft, ovs, sampleRate, buffer.data(), buffer.data());
 				}
 
 				// Convert current channel's data chunk to float
@@ -2433,18 +2438,19 @@ public:
 				switch(smpsize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer, len, 1, ptr, sizeof(int8) * len * nChn, nChn);
+					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer.data(), len, 1, ptr, sizeof(int8) * len * nChn, nChn);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer, len, 1, (int16 *)ptr, sizeof(int16) * len * nChn, nChn);
+					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer.data(), len, 1, (int16 *)ptr, sizeof(int16) * len * nChn, nChn);
 					break;
 				}
 
 				// Fills extra blank samples (read TRICK description comment above)
-				if(bufend) for(SmpLength j = len ; j < len + finaloffset ; j++) buffer[j] = 0.0f;
+				if(bufend)
+					std::fill(buffer.begin() + len, buffer.begin() + len + finaloffset, 0.0f);
 
 				// Apply pitch shifting
-				smbPitchShift(m_ratio, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer, buffer);
+				smbPitchShift(m_ratio, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer.data(), buffer.data());
 
 				// Restore pitched-shifted float sample into original sample buffer
 				ptr = pNewSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
@@ -2453,10 +2459,10 @@ public:
 				switch(smpsize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float> > >((int8 *)ptr, copyLength, nChn, buffer + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float> > >((int8 *)ptr, copyLength, nChn, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float> > >((int16 *)ptr, copyLength, nChn, buffer + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float> > >((int16 *)ptr, copyLength, nChn, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
 					break;
 				}
 
@@ -2464,9 +2470,6 @@ public:
 				pos += MAX_BUFFER_LENGTH;
 			}
 		}
-
-		// Free working buffer
-		delete[] buffer;
 
 		if(!m_abort)
 		{

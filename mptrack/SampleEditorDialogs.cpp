@@ -35,15 +35,12 @@ void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-CAmpDlg::CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin, int16 factorMax)
-//-----------------------------------------------------------------------------------------------
+CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 factorMax)
+//-------------------------------------------------------------------------------------
 	: CDialog(IDD_SAMPLE_AMPLIFY, parent)
-	, m_nFactor(factor)
+	, m_settings(settings)
 	, m_nFactorMin(factorMin)
 	, m_nFactorMax(factorMax)
-	, m_bFadeIn(FALSE)
-	, m_bFadeOut(FALSE)
-	, m_fadeLaw(fadeLaw)
 {}
 
 BOOL CAmpDlg::OnInitDialog()
@@ -51,15 +48,27 @@ BOOL CAmpDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
-	if (spin)
-	{
-		spin->SetRange32(m_nFactorMin, m_nFactorMax);
-		spin->SetPos32(m_nFactor);
-	}
-	SetDlgItemInt(IDC_EDIT1, m_nFactor);
+	spin->SetRange32(m_nFactorMin, m_nFactorMax);
+	spin->SetPos32(m_settings.factor);
+	spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN2);
+	spin->SetRange32(0, 100);
+	spin->SetPos32(m_settings.fadeInStart);
+	spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN3);
+	spin->SetRange32(0, 100);
+	spin->SetPos32(m_settings.fadeOutEnd);
+
+	SetDlgItemInt(IDC_EDIT1, m_settings.factor);
+	SetDlgItemInt(IDC_EDIT2, m_settings.fadeInStart);
+	SetDlgItemInt(IDC_EDIT3, m_settings.fadeOutEnd);
 	m_edit.SubclassDlgItem(IDC_EDIT1, this);
 	m_edit.AllowFractions(false);
 	m_edit.AllowNegative(m_nFactorMin < 0);
+	m_editFadeIn.SubclassDlgItem(IDC_EDIT2, this);
+	m_editFadeIn.AllowFractions(false);
+	m_editFadeIn.AllowNegative(m_nFactorMin < 0);
+	m_editFadeOut.SubclassDlgItem(IDC_EDIT3, this);
+	m_editFadeOut.AllowFractions(false);
+	m_editFadeOut.AllowNegative(m_nFactorMin < 0);
 
 	const struct
 	{
@@ -77,28 +86,39 @@ BOOL CAmpDlg::OnInitDialog()
 	// Create icons for fade laws
 	const int cx = Util::ScalePixels(16, m_hWnd);
 	const int cy = Util::ScalePixels(16, m_hWnd);
+	const int imgWidth = cx * CountOf(fadeLaws);
 	m_list.Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 1);
-	std::vector<COLORREF> bits;
+	std::vector<COLORREF> bits(imgWidth * cy, RGB(255, 0, 255));
 	const COLORREF col = GetSysColor(COLOR_WINDOWTEXT);
 	for(size_t i = 0; i < CountOf(fadeLaws); i++)
 	{
-		bits.assign(cx * cy, RGB(255, 0, 255));
 		Fade::Func fadeFunc = Fade::GetFadeFunc(static_cast<Fade::Law>(i));
+		int oldVal = cy - 1;
+		int baseX = i * cx;
 		for(int x = 0; x < cx; x++)
 		{
-			int32 val = cy - fadeFunc(cy, x, cx) - 1;
+			int val = cy - 1 - Util::Round<int>(cy * fadeFunc(static_cast<double>(x) / cx));
 			Limit(val, 0, cy - 1);
-			bits[x + val * cx] = col;
-			// Draw another pixel for fake interpolation
-			val = cy - fadeFunc(cy, x * 2 + 1, cx * 2) - 1;
-			Limit(val, 0, cy - 1);
-			bits[x + val * cx] = col;
+			if(oldVal > val && x > 0)
+			{
+				int dy = (oldVal - val) / 2;
+				for(int y = oldVal * imgWidth; dy != 0; y -= imgWidth, dy--)
+				{
+					bits[baseX + (x - 1) + y] = col;
+				}
+				oldVal -= dy + 1;
+			}
+			for(int y = oldVal * imgWidth; y >= val * imgWidth; y -= imgWidth)
+			{
+				bits[baseX + x + y] = col;
+			}
+			oldVal = val;
 		}
-		CBitmap bitmap;
-		bitmap.CreateBitmap(cx, cy, 1, 32, bits.data());
-		m_list.Add(&bitmap, RGB(255, 0, 255));
-		bitmap.DeleteObject();
 	}
+	CBitmap bitmap;
+	bitmap.CreateBitmap(cx * CountOf(fadeLaws), cy, 1, 32, bits.data());
+	m_list.Add(&bitmap, RGB(255, 0, 255));
+	bitmap.DeleteObject();
 	m_fadeBox.SetImageList(&m_list);
 
 	// Add fade laws to list
@@ -112,7 +132,7 @@ BOOL CAmpDlg::OnInitDialog()
 		cbi.iImage = cbi.iSelectedImage = i;
 		cbi.lParam = fadeLaws[i].id;
 		m_fadeBox.InsertItem(&cbi);
-		if(fadeLaws[i].id == m_fadeLaw) m_fadeBox.SetCurSel(i);
+		if(fadeLaws[i].id == m_settings.fadeLaw) m_fadeBox.SetCurSel(i);
 	}
 
 	return TRUE;
@@ -129,12 +149,12 @@ void CAmpDlg::OnDestroy()
 void CAmpDlg::OnOK()
 //------------------
 {
-	int nVal = static_cast<int>(GetDlgItemInt(IDC_EDIT1));
-	Limit(nVal, m_nFactorMin, m_nFactorMax);
-	m_nFactor = static_cast<int16>(nVal);
-	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
-	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
-	m_fadeLaw = static_cast<Fade::Law>(m_fadeBox.GetItemData(m_fadeBox.GetCurSel()));
+	m_settings.factor = static_cast<int16>(Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT1)), m_nFactorMin, m_nFactorMax));
+	m_settings.fadeInStart = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT2)), m_nFactorMin, m_nFactorMax);
+	m_settings.fadeOutEnd = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT3)), m_nFactorMin, m_nFactorMax);
+	m_settings.fadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	m_settings.fadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	m_settings.fadeLaw = static_cast<Fade::Law>(m_fadeBox.GetItemData(m_fadeBox.GetCurSel()));
 	CDialog::OnOK();
 }
 

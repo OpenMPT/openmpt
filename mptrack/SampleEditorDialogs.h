@@ -25,17 +25,24 @@ class CAmpDlg: public CDialog
 //===========================
 {
 public:
-	Fade::Law m_fadeLaw;
-	int16 m_nFactor, m_nFactorMin, m_nFactorMax;
-	bool m_bFadeIn, m_bFadeOut;
+	struct AmpSettings
+	{
+		Fade::Law fadeLaw;
+		int fadeInStart, fadeOutEnd;
+		int16 factor;
+		bool fadeIn, fadeOut;
+	};
+
+	AmpSettings &m_settings;
+	int16 m_nFactorMin, m_nFactorMax;
 
 protected:
 	CComboBoxEx m_fadeBox;
 	CImageList m_list;
-	CNumberEdit m_edit;
+	CNumberEdit m_edit, m_editFadeIn, m_editFadeOut;
 
 public:
-	CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin = int16_min, int16 factorMax = int16_max);
+	CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin = int16_min, int16 factorMax = int16_max);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
