@@ -26,20 +26,21 @@ namespace Fade
 		kHalfSine,
 	};
 
-	typedef int32 (*Func) (int32 val, int64 i, int64 max);
+	// Maps fade curve position in [0,1] to value in [0,1]
+	typedef double (*Func) (double pos);
 
-	static int32 LinearFunc(int32 val, int64 i, int64 max)
-		{ return static_cast<int32>((val * i) / max); }
-	static int32 PowFunc(int32 val, int64 i, int64 max)
-		{ return static_cast<int32>((val * i * i) / (max * max)); }
-	static int32 SqrtFunc(int32 val, int64 i, int64 max)
-		{ return Util::Round<int32>(val * std::sqrt(static_cast<double>(i) / max)); }
-	static int32 LogFunc(int32 val, int64 i, int64 max)
-		{ return Util::Round<int32>(val * std::log10(1.0 + (static_cast<double>(i) / max) * 99.0) * 0.5); }
-	static int32 QuarterSineFunc(int32 val, int64 i, int64 max)
-		{ return Util::Round<int32>(val * std::sin(M_PI_2 * static_cast<double>(i) / max)); }
-	static int32 HalfSineFunc(int32 val, int64 i, int64 max)
-		{ return Util::Round<int32>(val * (1.0 + std::cos(M_PI + M_PI * static_cast<double>(i) / max)) * 0.5); }
+	static double LinearFunc(double pos)
+		{ return pos; }
+	static double PowFunc(double pos)
+		{ return pos * pos; }
+	static double SqrtFunc(double pos)
+		{ return std::sqrt(pos); }
+	static double LogFunc(double pos)
+		{ return std::log10(1.0 + pos * 99.0) * 0.5; }
+	static double QuarterSineFunc(double pos)
+		{ return std::sin(M_PI_2 * pos); }
+	static double HalfSineFunc(double pos)
+		{ return (1.0 + std::cos(M_PI + M_PI * pos)) * 0.5; }
 
 	static Func GetFadeFunc(Law fadeLaw)
 	{
