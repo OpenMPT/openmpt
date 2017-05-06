@@ -29,7 +29,7 @@
 #include "../common/mptBufferIO.h"
 #include "../common/version.h"
 #include "ITTools.h"
-#include <time.h>
+#include <ctime>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -876,7 +876,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load instrument and song extensions.
 	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
-	if(interpretModPlugMade)
+	if(interpretModPlugMade && m_madeWithTracker != "BeRoTracker")
 	{
 		m_playBehaviour.reset();
 		m_nMixLevels = mixLevelsOriginal;
@@ -1989,6 +1989,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			m_madeWithTracker = "BeRoTracker";
+			m_dwLastSavedWithVersion = 0;	// Reset MPT detection for old files that have a similar fingerprint
 		}
 	}
 }
