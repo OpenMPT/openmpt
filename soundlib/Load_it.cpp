@@ -312,25 +312,48 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
+// Date calculation derived from https://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
+template<int32 y, int32 m, int32 d>
+struct SchismVersionFromDate
+{
+	static const int32 mm = (m + 9) % 12;
+	static const int32 yy = y - mm / 10;
+	static const int32 date = yy * 365 + yy / 4 - yy / 100 + yy / 400 + (mm * 306 + 5) / 10 + (d - 1);
+
+	static constexpr int32 Version()
+	{
+		return 0x1050 + date - SchismVersionFromDate<2009, 10, 31>::date;
+	}
+};
+
+
 // Get version of Schism Tracker that was used to create an IT/S3M file.
 std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 //----------------------------------------------------------
 {
+	// Schism Tracker version information in a nutshell:
+	// < 0x020: a proper version (files saved by such versions are likely very rare)
+	// = 0x020: any version between the 0.2a release (2005-04-29?) and 2007-04-17
+	// = 0x050: anywhere from 2007-04-17 to 2009-10-31
+	// > 0x050: the number of days since 2009-10-31
+
 	cwtv &= 0xFFF;
 	std::string version;
 	if(cwtv > 0x050)
 	{
-		tm epoch, *verTime;
-		MemsetZero(epoch);
-		epoch.tm_year = 109; epoch.tm_mon = 9; epoch.tm_mday = 31;
-		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
-		if((verTime = localtime(&versionSec)) != nullptr)
+		int32 date = SchismVersionFromDate<2009, 10, 31>::date + cwtv - 0x050;
+		int32 y = static_cast<int32>((Util::mul32to64(10000, date) + 14780) / 3652425);
+		int32 ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
+		if(ddd < 0)
 		{
-			version = mpt::String::Print("Schism Tracker %1-%2-%3",
-				mpt::fmt::dec0<4>(verTime->tm_year + 1900),
-				mpt::fmt::dec0<2>(verTime->tm_mon + 1),
-				mpt::fmt::dec0<2>(verTime->tm_mday));
+			y--;
+			ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		}
+		int32 mi = (100 * ddd + 52) / 3060;
+		version = mpt::String::Print("Schism Tracker %1-%2-%3",
+			mpt::fmt::dec0<4>(y + (mi + 2) / 12),
+			mpt::fmt::dec0<2>((mi + 2) % 12 + 1),
+			mpt::fmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
 		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv));
@@ -1121,10 +1144,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 1:
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
-			if(fileHeader.cwtv < 0x17CC)
+			if(fileHeader.cwtv < SchismVersionFromDate<2015, 01, 29>::Version())
 				m_playBehaviour.reset(kHertzInLinearMode);
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
-			if(fileHeader.cwtv < 0x19A2)
+			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
