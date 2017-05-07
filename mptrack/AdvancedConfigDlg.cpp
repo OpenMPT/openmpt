@@ -51,7 +51,6 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
 
-#if _WIN32_WINNT >= 0x0501
 	ListView_EnableGroupView(m_List.m_hWnd, FALSE); // try to set known state
 	int enableGroupsResult1 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
 	int enableGroupsResult2 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
@@ -71,9 +70,6 @@ BOOL COptionsAdvanced::OnInitDialog()
 		ListView_EnableGroupView(m_List.m_hWnd, FALSE);
 		m_listGrouped = false;
 	}
-#else
-	m_listGrouped = false;
-#endif
 
 	if(m_listGrouped)
 	{
@@ -107,20 +103,16 @@ void COptionsAdvanced::ReInit()
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
-#if _WIN32_WINNT >= 0x0501
 	if(m_listGrouped)
 	{
 		ListView_RemoveAllGroups(m_List.m_hWnd);
 	}
-#endif
-	m_List.SetItemCount(theApp.GetSettings().size());
+	m_List.SetItemCount(static_cast<int>(theApp.GetSettings().size()));
 
 	m_indexToPath.clear();
 	m_indexToPath.reserve(theApp.GetSettings().size());
 	m_groups.clear();
-#if _WIN32_WINNT >= 0x0501
 	int numGroups = 0;
-#endif
 
 	CStringW findStr;
 	HWND findWnd = ::GetDlgItem(m_hWnd, IDC_EDIT1);
@@ -131,18 +123,14 @@ void COptionsAdvanced::ReInit()
 
 	LVITEMW lvi;
 	lvi.mask = LVIF_TEXT | LVIF_PARAM;
-#if _WIN32_WINNT >= 0x0501
 	lvi.mask |= (m_listGrouped ? LVIF_GROUPID : 0);
-#endif
 	lvi.iSubItem = 0;
 	lvi.state = 0;
 	lvi.stateMask = 0;
 	lvi.cchTextMax = 0;
 	lvi.iImage = 0;
 	lvi.iIndent = 0;
-#if _WIN32_WINNT >= 0x0501
 	lvi.iGroupId = 0;
-#endif
 
 	int i = 0;
 	for(const auto &it : theApp.GetSettings())
@@ -154,10 +142,8 @@ void COptionsAdvanced::ReInit()
 		// this mode by default.
 		const SettingPath &path = it.first;
 		const SettingState &state = it.second;
-#if _WIN32_WINNT >= 0x0501
 		const mpt::ustring &section = path.GetRefSection();
 		const mpt::ustring &key = path.GetRefKey();
-#endif
 		const SettingValue &value = state.GetRefValue();
 		const SettingValue &defaultValue = state.GetRefDefault();
 
@@ -183,7 +169,6 @@ void COptionsAdvanced::ReInit()
 		lvi.iItem = i++;
 		lvi.lParam = m_indexToPath.size();
 
-#if _WIN32_WINNT >= 0x0501
 		if(m_listGrouped)
 		{
 
@@ -226,7 +211,6 @@ void COptionsAdvanced::ReInit()
 			index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
 
 		} else
-#endif
 		{
 
 			const mpt::ustring sectionAndKey = path.FormatAsString();
