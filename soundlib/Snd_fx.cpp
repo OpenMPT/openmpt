@@ -751,17 +751,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
-// 				if((GetType() & MOD_TYPE_S3M) && memory.musicSpeed <= 1)
-// 				{
-// 					break;
-// 				}
-
-				if(!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
+				if(!(GetType() & GLOBALVOL_7BIT_FORMATS) && param < 128) param *= 2;
 				// IT compatibility 16. ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
-					memory.state.m_nGlobalVolume = param << 1;
+					memory.state.m_nGlobalVolume = param * 2;
 				} else if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)))
 				{
 					memory.state.m_nGlobalVolume = 256;
