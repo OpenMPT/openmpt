@@ -540,7 +540,33 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				memory.chnSettings[nChn].vol = 0xFF;
 			}
 			if (pChn->rowCommand.IsNote()) pChn->nLastNote = note;
+
+			// Update channel panning
+			if(pChn->rowCommand.IsNote() || pChn->rowCommand.instr)
+			{
+				SAMPLEINDEX smp = 0;
+				if(GetNumInstruments())
+				{
+					ModInstrument *pIns;
+					if(pChn->nNewIns <= GetNumInstruments() && (pIns = Instruments[pChn->nNewIns]) != nullptr)
+					{
+						if(pIns->dwFlags[INS_SETPANNING])
+							pChn->nPan = pIns->nPan;
+						if(ModCommand::IsNote(note))
+							smp = pIns->Keyboard[note - NOTE_MIN];
+					}
+				} else
+				{
+					smp = pChn->nNewIns;
+				}
+				if(smp > 0 && smp <= GetNumSamples() && Samples[smp].uFlags[CHN_PANNING])
+				{
+					pChn->nPan = Samples[smp].nPan;
+				}
+			}
+
 			if (pChn->rowCommand.volcmd == VOLCMD_VOLUME)	{ memory.chnSettings[nChn].vol = pChn->rowCommand.vol; }
+
 			switch(command)
 			{
 			// Position Jump
