@@ -79,6 +79,7 @@ public:
 	bool InsertSample(bool duplicate, int8 *confirm = nullptr);
 	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
+	void OpenSamples(const std::vector<mpt::PathString> &files, FlagSet<OpenSampleTypes> types);
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:

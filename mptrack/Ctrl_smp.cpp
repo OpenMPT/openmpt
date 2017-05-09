@@ -752,7 +752,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
 
 		// Length / Type
-		wsprintf(s, _T("%u-bit %s, len: %u"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
+		wsprintf(s, _T("%u-bit %s, len: %lu"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
@@ -1145,6 +1145,73 @@ bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 }
 
 
+static constexpr struct
+{
+	const char *name;
+	const char *exts;
+} SampleFormats[]
+{
+	{ "Wave Files (*.wav)", "*.wav" },
+#ifdef MPT_WITH_FLAC
+	{ "FLAC Files (*.flac,*.oga)", "*.flac;*.oga" },
+#endif // MPT_WITH_FLAC
+#if defined(MPT_WITH_OPUSFILE)
+	{ "Opus Files (*.opus,*.oga)", "*.opus;*.oga" },
+#endif // MPT_WITH_OPUSFILE
+#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
+	{ "Ogg Vorbis Files (*.ogg,*.oga)", "*.ogg;*.oga" },
+#endif // VORBIS
+#if defined(MPT_ENABLE_MP3_SAMPLES)
+	{ "MPEG Files (*.mp1,*.mp2,*.mp3)", "*.mp1;*.mp2;*.mp3" },
+#endif // MPT_ENABLE_MP3_SAMPLES
+	{ "XI Samples (*.xi)", "*.xi" },
+	{ "Impulse Tracker Samples (*.its)", "*.its" },
+	{ "ScreamTracker Samples (*.s3i,*.smp)", "*.s3i;*.smp" },
+	{ "GF1 Patches (*.pat)", "*.pat" },
+	{ "AIFF Files (*.aiff,*.8svx)", "*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx" },
+	{ "Sun Audio (*.au,*.snd)", "*.au;*.snd" },
+};
+
+
+static mpt::ustring ConstructFileFilter(bool includeRaw)
+//-----------------------------------------------------
+{
+	mpt::ustring s = MPT_ULITERAL("All Samples|");
+	bool first = true;
+	for(auto &fmt : SampleFormats)
+	{
+		if(!first)
+			s += MPT_ULITERAL(";");
+		else
+			first = false;
+		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.exts);
+	}
+#if defined(MPT_WITH_MEDIAFOUNDATION)
+	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
+	s += ToFilterOnlyString(mediaFoundationTypes, true).ToUnicode();
+#endif
+	if(includeRaw)
+	{
+		s += MPT_ULITERAL(";*.raw;*.snd;*.pcm");
+	}
+	s += MPT_ULITERAL("|");
+	for(auto &fmt : SampleFormats)
+	{
+		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.name) + MPT_ULITERAL("|");
+		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.exts) + MPT_ULITERAL("|");
+	}
+#if defined(MPT_WITH_MEDIAFOUNDATION)
+	s += ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToUnicode();
+#endif
+	if(includeRaw)
+	{
+		s += MPT_ULITERAL("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
+	}
+	s += MPT_ULITERAL("All Files (*.*)|*.*||");
+	return s;
+}
+
+
 void CCtrlSamples::OnSampleOpen()
 //-------------------------------
 {
@@ -1153,50 +1220,14 @@ void CCtrlSamples::OnSampleOpen()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.raw;*.xi;*.aif;*.aiff;*.au;*.snd;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
-			"Wave Files (*.wav)|*.wav|"
-	#ifdef MPT_WITH_FLAC
-			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
-	#endif // MPT_WITH_FLAC
-	#if defined(MPT_WITH_OPUSFILE)
-			"Opus Files (*.opus,*.oga)|*.opus;*.oga|"
-	#endif // MPT_WITH_OPUSFILE
-	#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-			"Ogg Vorbis Files (*.ogg,*.oga)|*.ogg;*.oga|"
-	#endif // VORBIS
-	#if defined(MPT_ENABLE_MP3_SAMPLES)
-			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-	#endif // MPT_ENABLE_MP3_SAMPLES
-			"XI Samples (*.xi)|*.xi|"
-			"Impulse Tracker Samples (*.its)|*.its|"
-			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
-			"GF1 Patches (*.pat)|*.pat|"
-			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
-			"Sun Audio (*.au;*.snd)|*.au;*.snd|"
-	#if defined(MPT_WITH_MEDIAFOUNDATION)
-			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
-	#endif
-			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
-			"All Files (*.*)|*.*||")
+		.ExtensionFilter(ConstructFileFilter(true))
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
 
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
-	int8 confirm = -1;
-	for(size_t counter = 0; counter < files.size(); counter++)
-	{
-		// If loading multiple samples, create new slots for them
-		if(counter > 0)
-		{
-			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
-		}
-
-		if(!OpenSample(files[counter], OpenSampleKnown | OpenSampleRaw))
-			ErrorBox(IDS_ERR_FILEOPEN, this);
-	}
+	OpenSamples(dlg.GetFilenames(), OpenSampleKnown | OpenSampleRaw);
 	SwitchToView();
 }
 
@@ -1209,49 +1240,14 @@ void CCtrlSamples::OnSampleOpenKnown()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
-			"Wave Files (*.wav)|*.wav|"
-	#ifdef MPT_WITH_FLAC
-			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
-	#endif // MPT_WITH_FLAC
-	#if defined(MPT_WITH_OPUSFILE)
-			"Opus Files (*.opus,*.oga)|*.opus;*.oga|"
-	#endif // MPT_WITH_OPUSFILE
-	#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-			"Ogg Vorbis Files (*.ogg,*.oga)|*.ogg;*.oga|"
-	#endif // VORBIS
-	#if defined(MPT_ENABLE_MP3_SAMPLES)
-			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-	#endif // MPT_ENABLE_MP3_SAMPLES
-			"XI Samples (*.xi)|*.xi|"
-			"Impulse Tracker Samples (*.its)|*.its|"
-			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
-			"GF1 Patches (*.pat)|*.pat|"
-			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
-	#if defined(MPT_WITH_MEDIAFOUNDATION)
-			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
-	#endif
-			"All Files (*.*)|*.*||")
+		.ExtensionFilter(ConstructFileFilter(false))
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
 
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
-	int8 confirm = -1;
-	for(size_t counter = 0; counter < files.size(); counter++)
-	{
-		// If loading multiple samples, create new slots for them
-		if(counter > 0)
-		{
-			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
-		}
-
-		if(!OpenSample(files[counter], OpenSampleKnown))
-			ErrorBox(IDS_ERR_FILEOPEN, this);
-	}
-	SwitchToView();
+	OpenSamples(dlg.GetFilenames(), OpenSampleKnown);
 }
 
 
@@ -1270,17 +1266,27 @@ void CCtrlSamples::OnSampleOpenRaw()
 
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
+	OpenSamples(dlg.GetFilenames(), OpenSampleRaw);
+}
+
+
+void CCtrlSamples::OpenSamples(const std::vector<mpt::PathString> &files, FlagSet<OpenSampleTypes> types)
+//-------------------------------------------------------------------------------------------------------
+{
 	int8 confirm = -1;
-	for(size_t counter = 0; counter < files.size(); counter++)
+	bool first = true;
+	for(auto &file : files)
 	{
 		// If loading multiple samples, create new slots for them
-		if(counter > 0)
+		if(!first)
 		{
-			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
+			if(!InsertSample(false, &confirm))
+				break;
 		}
 
-		if(!OpenSample(files[counter], OpenSampleRaw))
+		if(OpenSample(file, types))
+			first = false;
+		else
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 	SwitchToView();
@@ -1542,7 +1548,7 @@ void CCtrlSamples::OnNormalize()
 			if (bOk)
 			{
 				sample.PrecomputeLoops(m_sndFile, false);
-				m_modDoc.UpdateAllViews(NULL, SampleHint(iSmp).Data());
+				m_modDoc.UpdateAllViews(nullptr, SampleHint(iSmp).Data());
 			}
 		}
 	}
@@ -1576,35 +1582,34 @@ void CCtrlSamples::OnRemoveDCOffset()
 	SAMPLEINDEX numModified = 0;
 	float fReportOffset = 0;
 
-	for(SAMPLEINDEX iSmp = minSample; iSmp <= maxSample; iSmp++)
+	for(SAMPLEINDEX smp = minSample; smp <= maxSample; smp++)
 	{
 		SmpLength selStart, selEnd;
 
-		if(m_sndFile.GetSample(iSmp).pSample == nullptr)
+		if(m_sndFile.GetSample(smp).pSample == nullptr)
 			continue;
 
 		if (minSample != maxSample)
 		{
 			selStart = 0;
-			selEnd = m_sndFile.GetSample(iSmp).nLength;
-		}
-		else
+			selEnd = m_sndFile.GetSample(smp).nLength;
+		} else
 		{
 			SampleSelectionPoints selection = GetSelectionPoints();
 			selStart = selection.nStart;
 			selEnd = selection.nEnd;
 		}
 
-		m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, "Remove DC Offset", selStart, selEnd);
+		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_update, "Remove DC Offset", selStart, selEnd);
 
-		const float fOffset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(iSmp), selStart, selEnd, m_sndFile.GetType(), m_sndFile);
+		const float fOffset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(smp), selStart, selEnd, m_sndFile.GetType(), m_sndFile);
 
 		if(fOffset == 0.0f) // No offset removed.
 			continue;
 
 		fReportOffset += fOffset;
 		numModified++;
-		m_modDoc.UpdateAllViews(nullptr, SampleHint(iSmp).Info().Data());
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data());
 	}
 
 	EndWaitCursor();
@@ -1619,13 +1624,11 @@ void CCtrlSamples::OnRemoveDCOffset()
 		if(numModified == 1)
 		{
 			dcInfo.Format(_T("Removed DC offset (%.1f%%)"), fReportOffset * 100);
-		}
-		else
+		} else
 		{
 			dcInfo.Format(_T("Removed DC offset from %u samples (avg %0.1f%%)"), numModified, fReportOffset / numModified * 100);
 		}
-	}
-	else
+	} else
 	{
 		dcInfo.SetString(_T("No DC offset found"));
 	}
