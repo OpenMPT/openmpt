@@ -25,10 +25,6 @@ end
    targetname "OpenMPT"
   filter { "not configurations:*Shared" }
    targetname "mptrack"
-  filter { "action:vs2010" }
-   includedirs { "../../include/msinttypes/inttypes" }
-  filter { "action:vs2012" }
-   includedirs { "../../include/msinttypes/inttypes" }
   filter {}
   local extincludedirs = {
    "../../include",
@@ -129,7 +125,7 @@ end
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
-  filter { "action:vs2015*" }
+  filter { "action:vs*" }
     files {
       "../../build/vs/debug/openmpt.natvis",
     }
