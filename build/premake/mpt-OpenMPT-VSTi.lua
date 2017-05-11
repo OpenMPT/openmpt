@@ -7,10 +7,6 @@
   mpt_projectname = "OpenMPT-VSTi"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  filter { "action:vs2010" }
-   includedirs { "../../include/msinttypes/inttypes" }
-  filter { "action:vs2012" }
-   includedirs { "../../include/msinttypes/inttypes" }
   filter {}
   local extincludedirs = {
    "../../include",
@@ -110,7 +106,7 @@
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
-  filter "action:vs2015"
+  filter "action:vs*"
     files {
       "../../build/vs/debug/openmpt.natvis",
     }
