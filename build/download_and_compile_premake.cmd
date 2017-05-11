@@ -79,6 +79,7 @@ xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
+ devenv genie.sln /Upgrade || goto error
  devenv genie.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
@@ -86,6 +87,7 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
 if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
+ devenv genie.sln /Upgrade || goto error
  devenv genie.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
