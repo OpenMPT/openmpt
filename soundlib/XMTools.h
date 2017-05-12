@@ -86,7 +86,7 @@ struct XMInstrument
 	// Convert OpenMPT's internal envelope representation to XM envelope data.
 	void ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le &numPoints, uint8le &flags, uint8le &sustain, uint8le &loopStart, uint8le &loopEnd, EnvType env);
 	// Convert XM envelope data to an OpenMPT's internal envelope representation.
-	void ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8le numPoints, uint8le flags, uint8le sustain, uint8le loopStart, uint8le loopEnd, EnvType env) const;
+	void ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const;
 
 	// Convert OpenMPT's internal sample representation to an XMInstrument.
 	uint16 ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport);

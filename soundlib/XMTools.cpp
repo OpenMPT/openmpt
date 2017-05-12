@@ -12,6 +12,7 @@
 #include "Loaders.h"
 #include "XMTools.h"
 #include "Sndfile.h"
+#include "../common/version.h"
 #include <algorithm>
 
 
@@ -125,8 +126,8 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 
 
 // Convert XM envelope data to an OpenMPT's internal envelope representation.
-void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8le numPoints, uint8le flags, uint8le sustain, uint8le loopStart, uint8le loopEnd, EnvType env) const
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	mptEnv.resize(std::min<uint8>(numPoints, 12));
 
@@ -215,8 +216,10 @@ void XMInstrument::ApplyAutoVibratoToXM(const ModSample &mptSmp, MODTYPE fromTyp
 
 	if((vibDepth | vibRate) != 0 && !(fromType & MOD_TYPE_XM))
 	{
-		// Sweep is upside down in XM
-		vibSweep = 255 - vibSweep;
+		if(mptSmp.nVibSweep != 0)
+			vibSweep = mpt::saturate_cast<decltype(vibSweep)::base_type>(Util::muldivr_unsigned(mptSmp.nVibDepth, 256, mptSmp.nVibSweep));
+		else
+			vibSweep = 255;
 	}
 }
 
@@ -298,7 +301,8 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
 	eof = 0x1A;
 
-	memcpy(trackerName, "Created by OpenMPT  ", 20);
+	const std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
+	mpt::String::Write<mpt::String::spacePadded>(trackerName, openMptTrackerName);
 
 	version = 0x102;
 }
