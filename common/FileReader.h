@@ -885,9 +885,9 @@ public:
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		if(CanRead(sizeof(destArray)))
 		{
-			for(auto &i : destArray)
+			for(auto &element : destArray)
 			{
-				Read(i);
+				Read(element);
 			}
 			return true;
 		} else
@@ -907,9 +907,9 @@ public:
 		destVector.resize(destSize);
 		if(CanRead(sizeof(T) * destSize))
 		{
-			for(auto &i : destVector)
+			for(auto &element : destVector)
 			{
-				Read(i);
+				Read(element);
 			}
 			return true;
 		} else
