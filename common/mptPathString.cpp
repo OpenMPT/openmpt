@@ -136,9 +136,9 @@ PathString PathString::Simplify() const
 
 	RawPathString result = root;
 	result.reserve(path.size());
-	for(const auto &c : components)
+	for(const auto &component : components)
 	{
-		result += c + MPT_PATHSTRING_LITERAL("\\");
+		result += component + MPT_PATHSTRING_LITERAL("\\");
 	}
 	if(!components.empty())
 		result.pop_back();
@@ -810,7 +810,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	{
 		filter += MPT_PATHSTRING(" (");
 		bool first = true;
-		for(auto &ext : extensions)
+		for(const auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -827,7 +827,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	filter += MPT_PATHSTRING("|");
 	{
 		bool first = true;
-		for(auto &ext : extensions)
+		for(const auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -852,7 +852,7 @@ mpt::PathString FileType::AsFilterOnlyString() const
 	const auto extensions = GetExtensions();
 	{
 		bool first = true;
-		for(auto &ext : extensions)
+		for(const auto &ext : extensions)
 		{
 			if(first)
 			{
@@ -880,7 +880,7 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 //----------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(auto &type : fileTypes)
+	for(const auto &type : fileTypes)
 	{
 		filter += type.AsFilterString(format);
 	}
@@ -900,7 +900,7 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 //-----------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
-	for(auto &type : fileTypes)
+	for(const auto &type : fileTypes)
 	{
 		filter += type.AsFilterOnlyString();
 	}

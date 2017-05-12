@@ -436,11 +436,11 @@ public:
 	FileType() { }
 	FileType(const std::vector<FileType> &group)
 	{
-		for(auto &g : group)
+		for(const auto &type : group)
 		{
-			m_MimeTypes.insert(m_MimeTypes.end(), g.m_MimeTypes.begin(), g.m_MimeTypes.end());
-			m_Extensions.insert(m_Extensions.end(), g.m_Extensions.begin(), g.m_Extensions.end());
-			m_Prefixes.insert(m_Prefixes.end(), g.m_Prefixes.begin(), g.m_Prefixes.end());
+			m_MimeTypes.insert(m_MimeTypes.end(), type.m_MimeTypes.begin(), type.m_MimeTypes.end());
+			m_Extensions.insert(m_Extensions.end(), type.m_Extensions.begin(), type.m_Extensions.end());
+			m_Prefixes.insert(m_Prefixes.end(), type.m_Prefixes.begin(), type.m_Prefixes.end());
 		}
 	}
 	static FileType Any()
