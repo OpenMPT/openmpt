@@ -182,7 +182,7 @@ static MPT_CONSTEXPR11_VAR struct { Version::Number version; const MPT_UCHAR_TYP
 	{ mpt::Windows::Version::Win2000, MPT_ULITERAL("Windows 2000") },
 	{ mpt::Windows::Version::WinME, MPT_ULITERAL("Windows ME") },
 	{ mpt::Windows::Version::Win98, MPT_ULITERAL("Windows 98") },
-	{ mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4") },
+	{ mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4") }
 };
 
 
