@@ -28,8 +28,8 @@ FolderScanner::~FolderScanner()
 
 
 // Return one file at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found.
-bool FolderScanner::NextFile(mpt::PathString &file)
-//-------------------------------------------------
+bool FolderScanner::NextFileOrDirectory(mpt::PathString &file, bool allowDirectories)
+//-----------------------------------------------------------------------------------
 {
 	bool foundFile = false;
 	do
@@ -55,10 +55,17 @@ bool FolderScanner::NextFile(mpt::PathString &file)
 				file = currentPath + mpt::PathString::FromNative(wfd.cFileName);
 				if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if(findInSubDirs && wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
+					if(wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
 					{
-						// Add sub directory
-						paths.push_back(file);
+						if(findInSubDirs)
+						{
+							// Add sub directory
+							paths.push_back(file);
+						}
+						if(allowDirectories)
+						{
+							foundFile = true;
+						}
 					}
 				} else
 				{

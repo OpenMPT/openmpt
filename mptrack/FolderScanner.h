@@ -26,7 +26,11 @@ protected:
 public:
 	FolderScanner(const mpt::PathString &path, bool findInSubDirs);
 	~FolderScanner();
-	bool NextFile(mpt::PathString &file);
+	bool NextFile(mpt::PathString &file) { return NextFileOrDirectory(file, false); }
+	bool NextFileOrDirectory(mpt::PathString &file) { return NextFileOrDirectory(file, true); }
+
+protected:
+	bool NextFileOrDirectory(mpt::PathString &file, bool allowDirectories);
 };
 
 OPENMPT_NAMESPACE_END
