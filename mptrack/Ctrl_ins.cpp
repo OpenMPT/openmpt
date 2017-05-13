@@ -2079,8 +2079,8 @@ void CCtrlInstruments::OnInstrumentSave()
 
 				std::wstring fileNameW = fileName.ToWide();
 				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_number%", numberFmt.ToWString(ins));
-				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_filename%", mpt::ToWide(instrName));
-				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_name%", mpt::ToWide(instrFilename));
+				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_filename%", mpt::ToWide(instrFilename));
+				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_name%", mpt::ToWide(instrName));
 				fileName = mpt::PathString::FromWide(fileNameW);
 			}
 
