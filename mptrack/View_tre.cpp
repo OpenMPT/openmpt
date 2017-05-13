@@ -23,6 +23,7 @@
 #include "FileDialog.h"
 #include "Globals.h"
 #include "ExternalSamples.h"
+#include "FolderScanner.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
@@ -2098,12 +2099,26 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		} else
 		{
 			// Drives are formatted like "E:\", folders are just folder name without slash.
-			if(!dir.HasTrailingSlash())
+			do
 			{
-				dir = m_InstrLibPath + dir;
-				dir.EnsureTrailingSlash();
-			}
-			m_InstrLibHighlightPath = MPT_PATHSTRING("..");	// Highlight first entry
+				if(!dir.HasTrailingSlash())
+				{
+					dir = m_InstrLibPath + dir;
+					dir.EnsureTrailingSlash();
+				}
+				m_InstrLibHighlightPath = MPT_PATHSTRING("..");	// Highlight first entry
+
+				FolderScanner scan(dir, false);
+				mpt::PathString name;
+				if(scan.NextFileOrDirectory(name) && !scan.NextFileOrDirectory(name) && name.IsDirectory())
+				{
+					// There is only one directory and nothing else in the path,
+					// so skip this directory and automatically descend further down into the tree.
+					dir = name;
+					dir.EnsureTrailingSlash();
+					continue;
+				}
+			} while(false);
 		}
 
 		if(dir.IsDirectory())
