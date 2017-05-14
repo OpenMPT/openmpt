@@ -162,7 +162,7 @@ toc.write("""
 """)
 toc.close()
 
-if(subprocess.call(['htmlhelp/hhc.exe', '"html/OpenMPT Manual.hhp"']) != 1):
+if(subprocess.call(['../../include/htmlhelp/hhc.exe', '"html/OpenMPT Manual.hhp"']) != 1):
     raise Exception("Something went wrong during manual creation!")
 try:
     os.remove('../../packageTemplate/html/OpenMPT Manual.chm')

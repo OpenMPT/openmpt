@@ -80,6 +80,8 @@ rmdir /s /q include\VST_SDK || goto error
 
 call :download_and_unpack "lame"      "https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"   "lame-3.99.5.tar.gz"                 "lame-3.99.5"      "lame-3.99.5.tar" || goto error
 
+call :download_and_unpack "htmlhelp" "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
+
 goto ok
 
 :ok
