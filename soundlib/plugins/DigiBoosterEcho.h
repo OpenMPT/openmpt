@@ -68,7 +68,7 @@ public:
 	virtual void Release() { delete this; }
 	virtual void SaveAllParameters();
 	virtual void RestoreAllParameters(int32 program);
-	virtual int32 GetUID() const { int32 id; memcpy(&id, "Echo", 4); return id; }
+	virtual int32 GetUID() const { int32le id; memcpy(&id, "Echo", 4); return id; }
 	virtual int32 GetVersion() const { return 0; }
 	virtual void Idle() { }
 	virtual uint32 GetLatency() const { return 0; }
