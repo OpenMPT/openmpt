@@ -833,6 +833,10 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 void CVstPlugin::Initialize()
 //---------------------------
 {
+	// If filename matched during load but plugin ID didn't, make sure it's updated.
+	m_pMixStruct->Info.dwPluginId1 = m_Factory.pluginId1 = m_Effect.magic;
+	m_pMixStruct->Info.dwPluginId2 = m_Factory.pluginId2 = m_Effect.uniqueID;
+
 	// Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	m_Effect.resvd1 = ToVstPtr(this);
 	m_nSampleRate = m_SndFile.GetSampleRate();
@@ -1019,8 +1023,8 @@ bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
 }
 
 
-VstInt32 CVstPlugin::GetUID() const
-//---------------------------------
+int32 CVstPlugin::GetUID() const
+//------------------------------
 {
 	return m_Effect.uniqueID;
 }
