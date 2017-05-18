@@ -578,16 +578,16 @@ static std::string extract_date( const openmpt::module & mod ) {
 		// Search the sample, instrument and message texts for possible release years.
 		// We'll look for things that may vaguely resemble a release year, such as 4-digit numbers
 		// or 2-digit numbers with a leading apostrophe. Generally, only years between
-		// 1988 (release of Ultimate SoundTracker) and the current year + 1 (saftey margin) will
+		// 1988 (release of Ultimate SoundTracker) and the current year + 1 (safety margin) will
 		// be considered.
 		std::string s = " " + mod.get_metadata("message");
-		std::vector<std::string> names = mod.get_sample_names();
-		for ( std::vector<std::string>::const_iterator i = names.begin(); i != names.end(); ++i ) {
-			s += " " + *i;
+		auto names = mod.get_sample_names();
+		for ( auto &name : names ) {
+			s += " " + name;
 		}
 		names = mod.get_instrument_names();
-		for ( std::vector<std::string>::const_iterator i = names.begin(); i != names.end(); ++i ) {
-			s += " " + *i;
+		for ( auto &name : names ) {
+			s += " " + name;
 		}
 		s += " ";
 
@@ -598,7 +598,7 @@ static std::string extract_date( const openmpt::module & mod ) {
 		const int32_t current_year = time.wYear + 1;
 
 #define MPT_NUMERIC( x ) ( ( x >= '0' ) && ( x <= '9' ) )
-		for ( std::string::const_iterator i = s.begin(); i != s.end(); ++i ) {
+		for ( auto i = s.cbegin(); i != s.cend(); ++i ) {
 			std::size_t len = s.length();
 			std::size_t idx = i - s.begin();
 			std::size_t remaining = len - idx;
@@ -683,8 +683,7 @@ static void clear_xmplay_string( char * str ) {
 static std::string sanitize_xmplay_info_string( const std::string & str ) {
 	std::string result;
 	result.reserve(str.size());
-	for ( std::size_t i = 0; i < str.length(); ++i ) {
-		const char c = str[i];
+	for ( auto c : str ) {
 		switch ( c ) {
 			case '\0':
 			case '\t':
@@ -702,8 +701,7 @@ static std::string sanitize_xmplay_info_string( const std::string & str ) {
 static std::string sanitize_xmplay_multiline_info_string( const std::string & str ) {
 	std::string result;
 	result.reserve(str.size());
-	for ( std::size_t i = 0; i < str.length(); ++i ) {
-		const char c = str[i];
+	for ( auto c : str ) {
 		switch ( c ) {
 			case '\0':
 			case '\t':
@@ -724,8 +722,7 @@ static std::string sanitize_xmplay_multiline_info_string( const std::string & st
 static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 	std::string result;
 	result.reserve(str.size());
-	for ( std::size_t i = 0; i < str.length(); ++i ) {
-		const char c = str[i];
+	for ( auto c : str ) {
 		switch ( c ) {
 			case '\0':
 			case '\t':
