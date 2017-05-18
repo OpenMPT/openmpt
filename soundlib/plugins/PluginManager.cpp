@@ -148,11 +148,6 @@ CVstPluginManager::CVstPluginManager()
 		}
 	#endif
 
-#ifdef MODPLUG_TRACKER
-	// For security reasons, we do not load untrusted DMO plugins in libopenmpt.
-	EnumerateDirectXDMOs();
-#endif
-
 	// Hard-coded "plugins"
 	static constexpr struct
 	{
@@ -180,6 +175,7 @@ CVstPluginManager::CVstPluginManager()
 #endif // MODPLUG_TRACKER
 	};
 
+	pluginList.reserve(mpt::size(BuiltInPlugins));
 	for(const auto &plugin : BuiltInPlugins)
 	{
 		VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(plugin.createProc, true, mpt::PathString::FromUTF8(plugin.filename), mpt::PathString::FromUTF8(plugin.name));
@@ -192,6 +188,11 @@ CVstPluginManager::CVstPluginManager()
 			plug->isInstrument = plugin.isInstrument;
 		}
 	}
+
+#ifdef MODPLUG_TRACKER
+	// For security reasons, we do not load untrusted DMO plugins in libopenmpt.
+	EnumerateDirectXDMOs();
+#endif
 }
 
 
@@ -219,11 +220,7 @@ CVstPluginManager::~CVstPluginManager()
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 //-------------------------------------------------------------------
 {
-	for(auto &plug : pluginList)
-	{
-		if(plug == pLib) return true;
-	}
-	return false;
+	return std::find(pluginList.begin(), pluginList.end(), pLib) != pluginList.end();
 }
 
 
@@ -276,10 +273,17 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
 							if(plug != nullptr)
 							{
-								pluginList.push_back(plug);
-								plug->pluginId1 = kDmoMagic;
-								plug->pluginId2 = clsid.Data1;
-								plug->category = VSTPluginLib::catDMO;
+								try
+								{
+									pluginList.push_back(plug);
+									plug->pluginId1 = kDmoMagic;
+									plug->pluginId2 = clsid.Data1;
+									plug->category = VSTPluginLib::catDMO;
+								} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+								{
+									MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+									delete plug;
+								}
 #ifdef DMO_LOG
 								Log(mpt::String::Print(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
 #endif
@@ -315,10 +319,9 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 	}
 
 #ifdef MODPLUG_TRACKER
-	CStringA s;
-	CVstPlugin::DispatchSEH(effect, effGetVendorString, 0, 0, s.GetBuffer(256), 0, exception);
-	s.ReleaseBuffer();
-	library.vendor = mpt::ToCString(mpt::CharsetLocale, s);
+	std::vector<char> s(256, 0);
+	CVstPlugin::DispatchSEH(effect, effGetVendorString, 0, 0, s.data(), 0, exception);
+	library.vendor = mpt::ToCString(mpt::CharsetLocale, s.data());
 #endif // MODPLUG_TRACKER
 }
 #endif // NO_VST
