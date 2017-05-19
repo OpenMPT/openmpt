@@ -58,17 +58,6 @@ CUnarchiver::~CUnarchiver()
 }
 
 
-struct find_str
-{
-	find_str(const char *str): s1(str) { }
-	bool operator() (const char *s2) const
-	{
-		return !strcmp(s1, s2);
-	}
-	const char *s1;
-};
-
-
 static inline std::string GetExtension(const std::string &filename)
 //-----------------------------------------------------------------
 {
@@ -97,17 +86,17 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 		}
 		const std::string ext = GetExtension(at(i).name.ToUTF8());
 
-		// Compare with list of preferred extensions
-		if(std::find_if(extensions.begin(), extensions.end(), find_str(ext.c_str())) != extensions.end())
-		{
-			bestIndex = i;
-			break;
-		}
-
 		if(ext == "diz" || ext == "nfo" || ext == "txt")
 		{
 			// we do not want these
 			continue;
+		}
+
+		// Compare with list of preferred extensions
+		if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+		{
+			bestIndex = i;
+			break;
 		}
 
 		if(at(i).size >= biggestSize)
