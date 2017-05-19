@@ -29,6 +29,7 @@ public:
 		return std::find(separators.begin(), separators.end(), c) != separators.end();
 	}
 
+	void AddCommands(CommandID first, CommandID last);
 
 	CString name;
 	InputTargetContext id;
