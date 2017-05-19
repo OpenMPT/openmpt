@@ -309,11 +309,9 @@
 #define NO_EQ
 #define NO_AGC
 #define NO_VST
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT && MPT_COMPILER_MSVC && defined(LIBOPENMPT_BUILD_FULL)
-//#define NO_DMO
-#else
+//#if !MPT_OS_WINDOWS || MPT_OS_WINDOWS_WINRT || !MPT_COMPILER_MSVC || !defined(LIBOPENMPT_BUILD_FULL)
 #define NO_DMO
-#endif
+//#endif
 //#define NO_PLUGINS
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX

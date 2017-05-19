@@ -135,12 +135,12 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 
 CVstPluginManager::CVstPluginManager()
 //------------------------------------
-#if MPT_OS_WINDOWS && !defined(NO_DMO)
+#ifndef NO_DMO
 	: MustUnInitilizeCOM(false)
 #endif
 {
 
-	#if MPT_OS_WINDOWS && !defined(NO_DMO)
+	#ifndef NO_DMO
 		HRESULT COMinit = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 		if(COMinit == S_OK || COMinit == S_FALSE)
 		{
@@ -207,7 +207,7 @@ CVstPluginManager::~CVstPluginManager()
 		}
 		delete plug;
 	}
-	#if MPT_OS_WINDOWS && !defined(NO_DMO)
+	#ifndef NO_DMO
 		if(MustUnInitilizeCOM)
 		{
 			CoUninitialize();
