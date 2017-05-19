@@ -73,8 +73,6 @@ struct RIFFChunk
 		idTURL  = MAGIC4LE('T','U','R','L'), // url
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32le id;		// See ChunkIdentifiers
 	uint32le length;	// Chunk size without header
 
@@ -83,9 +81,9 @@ struct RIFFChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 
@@ -360,7 +358,7 @@ public:
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	size_t Finalize();
 	// Begin writing a new chunk to the file.
-	void StartChunk(RIFFChunk::id_type id);
+	void StartChunk(RIFFChunk::ChunkIdentifiers id);
 
 	// Skip some bytes... For example after writing sample data.
 	void Skip(size_t numBytes) { Seek(position + numBytes); }
@@ -412,7 +410,7 @@ protected:
 	void Write(const void *data, size_t numBytes);
 
 	// Write a single tag into a open idLIST chunk
-	void WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext);
+	void WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext);
 };
 
 #endif // MODPLUG_NO_FILESAVE

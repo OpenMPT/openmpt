@@ -42,7 +42,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	isDLS = (fileHeader.magic == RIFFHeader::idLIST);
 
-	ChunkReader::ChunkList<RIFFChunk> chunks = file.ReadChunks<RIFFChunk>(2);
+	auto chunks = file.ReadChunks<RIFFChunk>(2);
 
 	if(chunks.size() >= 4
 		&& chunks[1].GetHeader().GetID() == RIFFChunk::iddata
@@ -354,8 +354,8 @@ size_t WAVWriter::Finalize()
 
 
 // Write a new chunk header to the file.
-void WAVWriter::StartChunk(RIFFChunk::id_type id)
-//-----------------------------------------------
+void WAVWriter::StartChunk(RIFFChunk::ChunkIdentifiers id)
+//--------------------------------------------------------
 {
 	FinalizeChunk();
 
@@ -497,8 +497,8 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 
 
 // Write a single tag into a open idLIST chunk
-void WAVWriter::WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext)
-//------------------------------------------------------------------------
+void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext)
+//---------------------------------------------------------------------------------
 {
 	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, utext);
 	if(!text.empty())

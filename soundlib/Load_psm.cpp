@@ -52,8 +52,6 @@ struct PSMChunk
 		idDSMP	= MAGIC4LE('D','S','M','P'),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32le id;
 	uint32le length;
 
@@ -62,9 +60,9 @@ struct PSMChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 
