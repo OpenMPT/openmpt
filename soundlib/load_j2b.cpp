@@ -71,8 +71,6 @@ struct AMFFRiffChunk
 		idAS__	= MAGIC4LE('A','S',' ',' '),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32le id;		// See ChunkIdentifiers
 	uint32le length;	// Chunk size without header
 
@@ -81,9 +79,9 @@ struct AMFFRiffChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 

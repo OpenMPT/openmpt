@@ -45,8 +45,6 @@ struct MDLChunk
 		ifSampleData	= MAGIC2LE('S','A'),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint16le id;
 	uint32le length;
 
@@ -55,9 +53,9 @@ struct MDLChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 

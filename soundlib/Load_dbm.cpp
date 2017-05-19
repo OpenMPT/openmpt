@@ -52,8 +52,6 @@ struct DBMChunk
 		idMPEG	= MAGIC4BE('M','P','E','G'),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32be id;
 	uint32be length;
 
@@ -62,9 +60,9 @@ struct DBMChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 

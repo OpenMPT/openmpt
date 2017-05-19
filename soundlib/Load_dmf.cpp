@@ -50,8 +50,6 @@ struct DMFChunk
 		idSETT	= MAGIC4LE('S','E','T','T'),	// Probably contains GUI settings
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32le id;
 	uint32le length;
 
@@ -60,9 +58,9 @@ struct DMFChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 
