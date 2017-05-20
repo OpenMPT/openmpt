@@ -200,8 +200,8 @@ ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fi
 }
 
 
-bool ModSequence::IsValidPat(ORDERINDEX ord)
-//------------------------------------------
+bool ModSequence::IsValidPat(ORDERINDEX ord) const
+//------------------------------------------------
 {
 	if(ord < size())
 		return m_sndFile.Patterns.IsValidPat(at(ord));

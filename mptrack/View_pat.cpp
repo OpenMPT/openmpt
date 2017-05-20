@@ -148,8 +148,7 @@ CViewPattern::CViewPattern()
 	m_nPattern = 0;
 	m_nOrder = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;
-	m_pEditWnd = NULL;
-	m_pGotoWnd = NULL;
+	m_pEditWnd = nullptr;
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
@@ -762,13 +761,6 @@ void CViewPattern::OnDestroy()
 		m_pEditWnd->DestroyWindow();
 		delete m_pEditWnd;
 		m_pEditWnd = NULL;
-	}
-
-	if (m_pGotoWnd)
-	{
-		m_pGotoWnd->DestroyWindow();
-		delete m_pGotoWnd;
-		m_pGotoWnd = NULL;
 	}
 
 	CModScrollView::OnDestroy();
@@ -1971,42 +1963,25 @@ void CViewPattern::OnInsertRows()
 void CViewPattern::OnEditGoto()
 //-----------------------------
 {
-	CModDoc* pModDoc = GetDocument();
+	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc)
 		return;
 
+	ORDERINDEX curOrder = GetCurrentOrder();
+	CHANNELINDEX curChannel = GetCurrentChannel() + 1;
+	CPatternGotoDialog dlg(this, GetCurrentRow(), curChannel, m_nPattern, curOrder, pModDoc->GetrSoundFile());
 
-	if (!m_pGotoWnd)
+	if (dlg.DoModal() == IDOK)
 	{
-		m_pGotoWnd = new CPatternGotoDialog(this);
-		//if (m_pGotoWnd) m_pGotoWnd->SetParent(this/*, GetDocument()*/);
-	}
-	if (m_pGotoWnd)
-	{
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
-		ORDERINDEX curOrder = GetCurrentOrder();
-		CHANNELINDEX curChannel = GetCurrentChannel() + 1;
-
-		m_pGotoWnd->UpdatePos(GetCurrentRow(), curChannel, m_nPattern, curOrder, sndFile);
-
-		if (m_pGotoWnd->DoModal() == IDOK)
-		{
-			//Position should be valididated.
-
-			if (m_pGotoWnd->m_nPattern != m_nPattern)
-				SetCurrentPattern(m_pGotoWnd->m_nPattern);
-
-			if (m_pGotoWnd->m_nOrder != curOrder)
-				SetCurrentOrder( m_pGotoWnd->m_nOrder);
-
-			if (m_pGotoWnd->m_nChannel != curChannel)
-				SetCurrentColumn(m_pGotoWnd->m_nChannel - 1);
-
-			if (m_pGotoWnd->m_nRow != GetCurrentRow())
-				SetCurrentRow(m_pGotoWnd->m_nRow);
-
-			pModDoc->SetElapsedTime(m_pGotoWnd->m_nOrder, m_pGotoWnd->m_nRow, false);
-		}
+		if(dlg.m_nPattern != m_nPattern)
+			SetCurrentPattern(dlg.m_nPattern);
+		if (dlg.m_nOrder != curOrder)
+			SetCurrentOrder(dlg.m_nOrder);
+		if (dlg.m_nChannel != curChannel)
+			SetCurrentColumn(dlg.m_nChannel - 1);
+		if (dlg.m_nRow != GetCurrentRow())
+			SetCurrentRow(dlg.m_nRow);
+		pModDoc->SetElapsedTime(dlg.m_nOrder, dlg.m_nRow, false);
 	}
 	return;
 }

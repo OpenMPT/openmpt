@@ -72,7 +72,7 @@ public:
 	void Shrink() { resize(GetLengthTailTrimmed()); }
 
 	// Check if pattern at sequence position ord is valid.
-	bool IsValidPat(ORDERINDEX ord);
+	bool IsValidPat(ORDERINDEX ord) const;
 
 	void AdjustToNewModType(const MODTYPE oldtype);
 

@@ -19,7 +19,6 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CEditCommand;
 class CEffectVis;
-class CPatternGotoDialog;
 class CInputHandler;
 
 // Drag & Drop info
@@ -133,7 +132,6 @@ protected:
 	CDC m_offScreenDC;
 	CBitmap m_offScreenBitmap;
 	CEditCommand *m_pEditWnd;
-	CPatternGotoDialog *m_pGotoWnd;
 	CSize m_szHeader, m_szPluginHeader, m_szCell;
 	CRect m_oldClient;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;

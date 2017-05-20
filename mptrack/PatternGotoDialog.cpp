@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "PatternGotoDialog.h"
-#include ".\patterngotodialog.h"
 #include "Sndfile.h"
 
 
@@ -20,21 +19,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 // CPatternGotoDialog dialog
 
-IMPLEMENT_DYNAMIC(CPatternGotoDialog, CDialog)
-CPatternGotoDialog::CPatternGotoDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CPatternGotoDialog::IDD, pParent)
-	, m_nRow(0)
-	, m_nChannel(0)
-	, m_nPattern(0)
-	, m_nOrder(0)
-{
-	m_bControlLock=false;
-	::CreateDialog(NULL, MAKEINTRESOURCE(IDD), pParent->m_hWnd, NULL); 
-}
+CPatternGotoDialog::CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, const CSoundFile &sndFile)
+	: CDialog(IDD_EDIT_GOTO, pParent)
+	, m_SndFile(sndFile)
+	, m_nRow(row)
+	, m_nChannel(chan)
+	, m_nPattern(pat)
+	, m_nOrder(ord)
+	, m_nActiveOrder(ord)
+	, m_bControlLock(false)
+{ }
 
-CPatternGotoDialog::~CPatternGotoDialog()
-{
-}
 
 void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 {
@@ -55,54 +50,33 @@ END_MESSAGE_MAP()
 
 // CPatternGotoDialog message handlers
 
-void CPatternGotoDialog::UpdatePos(ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, CSoundFile &sndFile)
-{
-	m_nRow = row;
-	m_nChannel = chan;
-	m_nPattern = pat;
-	m_nActiveOrder = ord;
-	m_nOrder = ord;
-	m_pSndFile = &sndFile;
-}
-
 void CPatternGotoDialog::OnOK()
+//-----------------------------
 {
 	UpdateData();
-	
+	auto &Order = m_SndFile.Order();
+
 	bool validated = true;
-	
-	// Does pattern exist?
-	if(validated && !m_pSndFile->Patterns.IsValidPat(static_cast<PATTERNINDEX>(m_nPattern)))
-	{
+	// Valid order item?
+	if(m_nOrder >= Order.size())
 		validated = false;
-	}
-	
 	// Does order match pattern?
-	if(validated && m_pSndFile->Order()[m_nOrder] != m_nPattern)
-	{
+	else if(Order[m_nOrder] != m_nPattern)
 		validated = false;
-	}
-
+	// Does pattern exist?
+	if(!Order.IsValidPat(m_nOrder))
+		validated = false;
 	// Does pattern have enough rows?
-	if(validated && m_pSndFile->Patterns[m_nPattern].GetNumRows() <= m_nRow)
-	{
+	else if(m_SndFile.Patterns[m_nPattern].GetNumRows() <= m_nRow)
 		validated = false;
-	}
-	
 	// Does track have enough channels?
-	if(validated && m_pSndFile->m_nChannels < m_nChannel)
-	{
+	else if(m_SndFile.GetNumChannels() < m_nChannel)
 		validated = false;
-	}
 
-
-	if (validated)
-	{
+	if(validated)
 		CDialog::OnOK();
-	} else
-	{
+	else
 		CDialog::OnCancel();
-	}
 
 
 }
@@ -112,11 +86,11 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 {
 	if(ControlsLocked())
 	{
-		return;				//the change to textbox did not come from user.
+		return;	// The change to textbox did not come from user.
 	}
 		
 	UpdateData();
-	m_nOrder = m_pSndFile->Order().FindOrder(static_cast<PATTERNINDEX>(m_nPattern), static_cast<ORDERINDEX>(m_nActiveOrder));
+	m_nOrder = m_SndFile.Order().FindOrder(m_nPattern, m_nActiveOrder);
 
 	if(m_nOrder == ORDERINDEX_INVALID)
 	{
@@ -128,22 +102,20 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	UnlockControls();
 }
 
+
 void CPatternGotoDialog::OnEnChangeGotoOrd()
+//------------------------------------------
 {
 	if(ControlsLocked())
 	{
-		return;				//the change to textbox did not come from user.
+		return;	//the change to textbox did not come from user.
 	}
 
 	UpdateData();
 
-	if(m_nOrder < m_pSndFile->Order().size())
+	if(m_SndFile.Order().IsValidPat(m_nOrder))
 	{
-		PATTERNINDEX candidatePattern = m_pSndFile->Order()[m_nOrder];
-		if(candidatePattern < m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
-		{
-			m_nPattern = candidatePattern;
-		}
+		m_nPattern = m_SndFile.Order()[m_nOrder];
 	}
 
 	LockControls();
