@@ -86,6 +86,9 @@ is just a high-level summary.
     working directory DLL injection attacks.
  *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
     confused in previous versions. This version resets both to the defaults.
+ *  [**Bug**] localtime() was used to determine the version of Schism Tracker
+    used to save IT and S3M files. This function is not guaranteed to be
+    thread-safe by the standard and is now no longer used.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
@@ -106,6 +109,9 @@ is just a high-level summary.
  *  Tremolo effect only had half the intended strength in MOD files.
  *  Pattern loops ending on the last row a pattern were not executed correctly
     in S3M files.
+ *  Work-around for reading MIDI macros and plugin settings in some malformed IT
+    files written by old UNMO3 versions.
+ *  Improve tracker detection in IT format.
  *  Playback fixes for 8-channel MED files
  *  Do not set note volume to 0 on out-of-range offset in XM files.
  *  Better import of some slide commands in SFX files.
@@ -120,6 +126,9 @@ is just a high-level summary.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
     should be taken into account or not.
  *  Tighten heuristics for rejecting invalid 669 and M15 files.
+ *  Improvements to seeking: Channel panning was not always updated from
+    instruments / samples when seeking, and out-of-range global volume was not
+    applied correctly in some formats.
  *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
     slide part of combined volume slide + vibrato commands.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
