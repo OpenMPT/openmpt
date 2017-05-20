@@ -747,29 +747,32 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
-	ORDERINDEX origOrderLength = Order().GetLengthTailTrimmed();
-	ORDERINDEX maxOrders = 0;
+	std::vector<uint8> orderList(Order().size());
+	const ORDERINDEX orderLimit = compatibilityExport ? 256 : uint16_max;
+	ORDERINDEX numOrders = 0;
 	PATTERNINDEX numPatterns = Patterns.GetNumPatterns();
 	bool changeOrderList = false;
-	for(ORDERINDEX ord = 0; ord < origOrderLength; ord++)
+	for(PATTERNINDEX pat : Order())
 	{
-		if(Order()[ord] == Order.GetIgnoreIndex() || Order()[ord] == Order.GetInvalidPatIndex())
+		if(pat == Order.GetIgnoreIndex() || pat == Order.GetInvalidPatIndex() || pat > uint8_max)
 		{
 			changeOrderList = true;
-		} else
+		} else if(numOrders < orderLimit)
 		{
-			maxOrders++;
-			if(Order()[ord] >= numPatterns) numPatterns = Order()[ord] + 1;
+			orderList[numOrders++] = static_cast<uint8>(pat);
+			if(pat >= numPatterns)
+				numPatterns = pat + 1;
 		}
 	}
 	if(changeOrderList)
 	{
 		AddToLog("Skip and stop order list items (+++ and ---) are not saved in XM files.");
 	}
+	orderList.resize(compatibilityExport ? 256 : numOrders);
 
-	fileHeader.orders = maxOrders;
+	fileHeader.orders = numOrders;
 	fileHeader.patterns = numPatterns;
-	fileHeader.size = fileHeader.size + (compatibilityExport ? 256 : maxOrders);
+	fileHeader.size += static_cast<uint32>(orderList.size());
 
 	uint16 writeInstruments;
 	if(m_nInstruments > 0)
@@ -782,35 +785,13 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	fileHeader.flags = fileHeader.flags;
 
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
-	fileHeader.tempo = static_cast<uint16>(m_nDefaultTempo.GetInt());
+	fileHeader.tempo = mpt::saturate_cast<uint16>(m_nDefaultTempo.GetInt());
 	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
 
-	fwrite(&fileHeader, 1, sizeof(fileHeader), f);
+	mpt::IO::Write(f, fileHeader);
 
-	// write order list (without +++ and ---, explained above)
-	ORDERINDEX writtenOrders = 0;
-	for(PATTERNINDEX pat : Order())
-	{
-		if(compatibilityExport && (writtenOrders >= 256))
-		{
-			break;
-		}
-		if(pat != Order.GetIgnoreIndex() && pat != Order.GetInvalidPatIndex())
-		{
-			uint8 ordItem = static_cast<uint8>(pat);
-			fwrite(&ordItem, 1, 1, f);
-			writtenOrders++;
-		}
-	}
-	if(compatibilityExport)
-	{
-		while(writtenOrders < 256)
-		{
-			uint8 ordItem = 0;
-			fwrite(&ordItem, 1, 1, f);
-			writtenOrders++;
-		}
-	}
+	// Write processed order list
+	mpt::IO::WriteRaw(f, orderList.data(), orderList.size());
 
 	// Writing patterns
 
@@ -821,27 +802,27 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		uint8 patHead[9];
-		MemsetZero(patHead);
+		uint8 patHead[9] = { 0 };
 		patHead[0] = 9;
 
 		if(!Patterns.IsValidPat(pat))
 		{
 			// There's nothing to write... chicken out.
 			patHead[5] = 64;
-			fwrite(patHead, 1, 9, f);
+			mpt::IO::Write(f, patHead);
 			continue;
 		}
 
-		patHead[5] = static_cast<uint8>(Patterns[pat].GetNumRows() & 0xFF);
-		patHead[6] = static_cast<uint8>(Patterns[pat].GetNumRows() >> 8);
+		const uint16 numRows = mpt::saturate_cast<uint16>(Patterns[pat].GetNumRows());
+		patHead[5] = static_cast<uint8>(numRows & 0xFF);
+		patHead[6] = static_cast<uint8>(numRows >> 8);
 
 		const ModCommand *p = Patterns[pat];
 		size_t len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPattern = true;
 
-		for(size_t j = m_nChannels * Patterns[pat].GetNumRows(); j > 0; j--, p++)
+		for(size_t j = m_nChannels * numRows; j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
@@ -894,7 +875,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 			// Apparently, completely empty patterns are loaded as empty 64-row patterns in FT2, regardless of their original size.
 			// We have to avoid this, so we add a "break to row 0" command in the last row.
-			if(j == 1 && emptyPattern && Patterns[pat].GetNumRows() != 64)
+			if(j == 1 && emptyPattern && numRows != 64)
 			{
 				command = 0x0D;
 				param = 0;
@@ -932,7 +913,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 			ASSERT_CAN_WRITE(5);
 		}
 
-		if(emptyPattern && Patterns[pat].GetNumRows() == 64)
+		if(emptyPattern && numRows == 64)
 		{
 			// Be smart when saving empty patterns!
 			len = 0;
@@ -947,8 +928,8 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 		patHead[7] = static_cast<uint8>(len & 0xFF);
 		patHead[8] = static_cast<uint8>(len >> 8);
-		fwrite(patHead, 1, 9, f);
-		if(len) fwrite(s.data(), len, 1, f);
+		mpt::IO::Write(f, patHead);
+		if(len) mpt::IO::WriteRaw(f, s.data(), len);
 	}
 
 #undef ASSERT_CAN_WRITE
@@ -1018,7 +999,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 		insHeader.Finalise();
 		size_t insHeaderSize = insHeader.size;
-		fwrite(&insHeader, 1, insHeaderSize, f);
+		mpt::IO::WritePartial(f, insHeader, insHeaderSize);
 
 		std::vector<SampleIO> sampleFlags(samples.size());
 
@@ -1037,7 +1018,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 			mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
 
-			fwrite(&xmSample, 1, sizeof(xmSample), f);
+			mpt::IO::Write(f, xmSample);
 		}
 
 		// Write Sample Data
@@ -1053,45 +1034,31 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	if(!compatibilityExport)
 	{
 		// Writing song comments
-		char magic[4];
-		int32le size;
 		if(!m_songMessage.empty())
 		{
-			memcpy(magic, "text", 4);
-			fwrite(magic, 1, 4, f);
-
-			size = m_songMessage.length();
-			fwrite(&size, 1, 4, f);
-
-			fwrite(m_songMessage.c_str(), 1, m_songMessage.length(), f);
+			uint32 size = mpt::saturate_cast<uint32>(m_songMessage.length());
+			mpt::IO::WriteRaw(f, "text", 4);
+			mpt::IO::WriteIntLE<uint32>(f, size);
+			mpt::IO::WriteRaw(f, m_songMessage.c_str(), size);
 		}
 		// Writing midi cfg
 		if(!m_MidiCfg.IsMacroDefaultSetupUsed())
 		{
-			memcpy(magic, "MIDI", 4);
-			fwrite(magic, 1, 4, f);
-
-			size = sizeof(MIDIMacroConfigData);
-			fwrite(&size, 1, 4, f);
-
-			fwrite(static_cast<MIDIMacroConfigData*>(&m_MidiCfg), 1, sizeof(MIDIMacroConfigData), f);
+			mpt::IO::WriteRaw(f, "MIDI", 4);
+			mpt::IO::WriteIntLE<uint32>(f, sizeof(MIDIMacroConfigData));
+			mpt::IO::Write(f, static_cast<MIDIMacroConfigData &>(m_MidiCfg));
 		}
 		// Writing Pattern Names
 		const PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
 		if(numNamedPats > 0)
 		{
-			memcpy(magic, "PNAM", 4);
-			fwrite(magic, 1, 4, f);
-
-			size = numNamedPats * MAX_PATTERNNAME;
-			fwrite(&size, 1, 4, f);
-
+			mpt::IO::WriteRaw(f, "PNAM", 4);
+			mpt::IO::WriteIntLE<uint32>(f, numNamedPats * MAX_PATTERNNAME);
 			for(PATTERNINDEX pat = 0; pat < numNamedPats; pat++)
 			{
 				char name[MAX_PATTERNNAME];
-				MemsetZero(name);
-				Patterns[pat].GetName(name);
-				fwrite(name, 1, MAX_PATTERNNAME, f);
+				mpt::String::Write<mpt::String::maybeNullTerminated>(name, Patterns[pat].GetName());
+				mpt::IO::Write(f, name);
 			}
 		}
 		// Writing Channel Names
@@ -1104,15 +1071,13 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 			// Do it!
 			if(numNamedChannels)
 			{
-				memcpy(magic, "CNAM", 4);
-				fwrite(magic, 1, 4, f);
-
-				size = numNamedChannels * MAX_CHANNELNAME;
-				fwrite(&size, 1, 4, f);
-
+				mpt::IO::WriteRaw(f, "CNAM", 4);
+				mpt::IO::WriteIntLE<uint32>(f, numNamedChannels * MAX_CHANNELNAME);
 				for(CHANNELINDEX chn = 0; chn < numNamedChannels; chn++)
 				{
-					fwrite(ChnSettings[chn].szName, 1, MAX_CHANNELNAME, f);
+					char name[MAX_CHANNELNAME];
+					mpt::String::Write<mpt::String::maybeNullTerminated>(name, ChnSettings[chn].szName);
+					mpt::IO::Write(f, name);
 				}
 			}
 		}
