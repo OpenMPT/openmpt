@@ -250,7 +250,7 @@ void XMInstrument::ApplyAutoVibratoToXM(const ModSample &mptSmp, MODTYPE fromTyp
 	if((vibDepth | vibRate) != 0 && !(fromType & MOD_TYPE_XM))
 	{
 		if(mptSmp.nVibSweep != 0)
-			vibSweep = mpt::saturate_cast<decltype(vibSweep)::base_type>(Util::muldivr_unsigned(mptSmp.nVibDepth, 256, mptSmp.nVibSweep));
+			vibSweep = mpt::saturate_cast<uint8>(Util::muldivr_unsigned(mptSmp.nVibDepth, 256, mptSmp.nVibSweep));
 		else
 			vibSweep = 255;
 	}
