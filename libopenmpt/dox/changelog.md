@@ -10,6 +10,7 @@ is just a high-level summary.
  *  [**Bug**] localtime() was used to determine the version of Schism Tracker
     used to save IT and S3M files. This function is not guaranteed to be
     thread-safe by the standard and is now no longer used.
+ *  [**Bug**] Compilation with GCC 4.1 was broken since 0.2-beta20.5.
 
  *  Improvements to seeking: Channel panning was not always updated from
     instruments / samples when seeking, and out-of-range global volume was not

@@ -12,6 +12,8 @@
 #include "Loaders.h"
 #include "ChunkReader.h"
 
+#include <stdexcept>
+
 OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
