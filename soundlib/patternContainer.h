@@ -58,6 +58,13 @@ public:
 	template <class Func>
 	Func ForEachModCommand(Func func) { return ForEachModCommand(0, Size() - 1, func); }
 
+	std::vector<MODPATTERN>::iterator begin() { return m_Patterns.begin();  }
+	std::vector<MODPATTERN>::const_iterator begin() const { return m_Patterns.begin(); }
+	std::vector<MODPATTERN>::const_iterator cbegin() const { return m_Patterns.cbegin(); }
+	std::vector<MODPATTERN>::iterator end() { return m_Patterns.end(); }
+	std::vector<MODPATTERN>::const_iterator end() const { return m_Patterns.end(); }
+	std::vector<MODPATTERN>::const_iterator cend() const { return m_Patterns.cend(); }
+
 	PATTERNINDEX Size() const { return static_cast<PATTERNINDEX>(m_Patterns.size()); }
 
 	CSoundFile& GetSoundFile() { return m_rSndFile; }
