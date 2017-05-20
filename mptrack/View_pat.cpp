@@ -4122,7 +4122,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = GetCurrentOrder();
 								ORDERINDEX newOrder = pSndFile->Order().FindOrder(m_nPattern, currentOrder, true);
-								SetCurrentOrder(newOrder);
+								if(newOrder != ORDERINDEX_INVALID)
+									SetCurrentOrder(newOrder);
 								return wParam;
 							}
 		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size() - 1;
@@ -4130,7 +4131,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								SetCurrentPattern(n);
 								ORDERINDEX currentOrder = GetCurrentOrder();
 								ORDERINDEX newOrder = pSndFile->Order().FindOrder(m_nPattern, currentOrder, false);
-								SetCurrentOrder(newOrder);
+								if(newOrder != ORDERINDEX_INVALID)
+									SetCurrentOrder(newOrder);
 								return wParam;
 							}
 		case kcSelectWithCopySelect:
