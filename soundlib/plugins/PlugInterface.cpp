@@ -237,8 +237,8 @@ double IMixPlugin::GetOutputLatency() const
 }
 
 
-void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const
-//-------------------------------------------------------------------------------------------------------------------------------
+void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT pOutR, float * MPT_RESTRICT leftPlugOutput, float * MPT_RESTRICT rightPlugOutput, uint32 numFrames) const
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 /*	float *leftPlugOutput;
 	float *rightPlugOutput;
@@ -290,8 +290,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	wetRatio *= m_fGain;
 	dryRatio *= m_fGain;
 
-	float *plugInputL = m_mixBuffer.GetInputBuffer(0);
-	float *plugInputR = m_mixBuffer.GetInputBuffer(1);
+	float * MPT_RESTRICT plugInputL = m_mixBuffer.GetInputBuffer(0);
+	float * MPT_RESTRICT plugInputR = m_mixBuffer.GetInputBuffer(1);
 
 	// Mix operation
 	switch(mixop)
