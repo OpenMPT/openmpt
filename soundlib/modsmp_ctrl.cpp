@@ -547,7 +547,7 @@ float RemoveDCOffset(ModSample &smp,
 	{
 		CriticalSection cs;
 
-		smp.nGlobalVol = std::min((uint16)(smp.nGlobalVol / dAmplify), uint16(64));
+		smp.nGlobalVol = std::min(Util::Round<uint16>(smp.nGlobalVol / dAmplify), uint16(64));
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
