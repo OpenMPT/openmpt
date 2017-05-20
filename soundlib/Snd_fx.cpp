@@ -523,7 +523,33 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				memory.chnSettings[nChn].vol = 0xFF;
 			}
 			if (pChn->rowCommand.IsNote()) pChn->nLastNote = note;
+
+			// Update channel panning
+			if(pChn->rowCommand.IsNote() || pChn->rowCommand.instr)
+			{
+				SAMPLEINDEX smp = 0;
+				if(GetNumInstruments())
+				{
+					ModInstrument *pIns;
+					if(pChn->nNewIns <= GetNumInstruments() && (pIns = Instruments[pChn->nNewIns]) != nullptr)
+					{
+						if(pIns->dwFlags[INS_SETPANNING])
+							pChn->nPan = pIns->nPan;
+						if(ModCommand::IsNote(note))
+							smp = pIns->Keyboard[note - NOTE_MIN];
+					}
+				} else
+				{
+					smp = pChn->nNewIns;
+				}
+				if(smp > 0 && smp <= GetNumSamples() && Samples[smp].uFlags[CHN_PANNING])
+				{
+					pChn->nPan = Samples[smp].nPan;
+				}
+			}
+
 			if (pChn->rowCommand.volcmd == VOLCMD_VOLUME)	{ memory.chnSettings[nChn].vol = pChn->rowCommand.vol; }
+
 			switch(command)
 			{
 			// Position Jump
@@ -692,17 +718,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
-// 				if((GetType() & MOD_TYPE_S3M) && memory.musicSpeed <= 1)
-// 				{
-// 					break;
-// 				}
-
-				if(!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
+				if(!(GetType() & GLOBALVOL_7BIT_FORMATS) && param < 128) param *= 2;
 				// IT compatibility 16. ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
-					memory.state.m_nGlobalVolume = param << 1;
+					memory.state.m_nGlobalVolume = param * 2;
 				} else if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)))
 				{
 					memory.state.m_nGlobalVolume = 256;
