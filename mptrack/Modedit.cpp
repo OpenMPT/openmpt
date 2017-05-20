@@ -37,10 +37,7 @@ static char THIS_FILE[] = __FILE__;
 OPENMPT_NAMESPACE_BEGIN
 
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
-
-	// Change the number of channels.
+// Change the number of channels.
 // Return true on success.
 bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg)
 //------------------------------------------------------------------------------------------
@@ -60,22 +57,21 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 	if (nNewChannels < GetNumChannels())
 	{
 		// Remove channels
-		UINT nChnToRemove = 0;
-		CHANNELINDEX nFound = 0;
+		CHANNELINDEX chnsToRemove = 0, maxRemoveCount = 0;
 
 		//nNewChannels = 0 means user can choose how many channels to remove
 		if(nNewChannels > 0)
 		{
-			nChnToRemove = GetNumChannels() - nNewChannels;
-			nFound = nChnToRemove;
+			chnsToRemove = GetNumChannels() - nNewChannels;
+			maxRemoveCount = chnsToRemove;
 		} else
 		{
-			nChnToRemove = 0;
-			nFound = GetNumChannels();
+			chnsToRemove = 0;
+			maxRemoveCount = GetNumChannels();
 		}
 		
-		CRemoveChannelsDlg rem(m_SndFile, nChnToRemove, showCancelInRemoveDlg);
-		CheckUsedChannels(rem.m_bKeepMask, nFound);
+		CRemoveChannelsDlg rem(m_SndFile, chnsToRemove, showCancelInRemoveDlg);
+		CheckUsedChannels(rem.m_bKeepMask, maxRemoveCount);
 		if (rem.DoModal() != IDOK) return false;
 
 		// Removing selected channels
@@ -177,12 +173,12 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		PrepareUndoForAllPatterns(true, "Rearrange Channels");
 	}
 
-	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) 
+	for(auto &pat : m_SndFile.Patterns)
 	{
-		if(m_SndFile.Patterns.IsValidPat(pat))
+		if(pat)
 		{
-			ModCommand *oldPatData = m_SndFile.Patterns[pat];
-			ModCommand *newPatData = CPattern::AllocatePattern(m_SndFile.Patterns[pat].GetNumRows(), newNumChannels);
+			ModCommand *oldPatData = pat;
+			ModCommand *newPatData = CPattern::AllocatePattern(pat.GetNumRows(), newNumChannels);
 			if(!newPatData)
 			{
 				cs.Leave();
@@ -190,18 +186,18 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 				return CHANNELINDEX_INVALID;
 			}
 			ModCommand *m = newPatData;
-			for(ROWINDEX row = 0; row < m_SndFile.Patterns[pat].GetNumRows(); row++)
+			for(ROWINDEX row = 0; row < pat.GetNumRows(); row++)
 			{
 				for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, m++)
 				{
 					if(newOrder[chn] < GetNumChannels()) //Case: getting old channel to the new channel order.
-						*m = *m_SndFile.Patterns[pat].GetpModCommand(row, newOrder[chn]);
+						*m = *pat.GetpModCommand(row, newOrder[chn]);
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
 						*m = ModCommand::Empty();
 
 				}
 			}
-			m_SndFile.Patterns[pat] = newPatData;
+			pat.SetData(newPatData, pat.GetNumRows());
 			CPattern::FreePattern(oldPatData);
 		}
 	}
@@ -499,7 +495,7 @@ bool CModDoc::ConvertInstrumentsToSamples()
 			if((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
 			{
 				const ModInstrument *pIns = m_SndFile.Instruments[instr];
-				newinstr = pIns->Keyboard[note];
+				newinstr = static_cast<ModCommand::INSTR>(pIns->Keyboard[note]);
 				newnote = pIns->NoteMap[note];
 				if(pIns->Keyboard[note] > Util::MaxValueOfType(m.instr)) newinstr = 0;
 			}
@@ -736,7 +732,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 void CModDoc::InitializeInstrument(ModInstrument *pIns)
 //-----------------------------------------------------
 {
-	pIns->nPluginVolumeHandling = TrackerSettings::Instance().DefaultPlugVolumeHandling;
+	pIns->nPluginVolumeHandling = static_cast<uint8>(TrackerSettings::Instance().DefaultPlugVolumeHandling);
 }
 
 
@@ -755,7 +751,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	if(ins == nullptr) return INSTRUMENTINDEX_INVALID;
 	InitializeInstrument(ins);
 
-	_snprintf(ins->name, CountOf(ins->name) - 1, _T("%u: %s"), plug + 1, m_SndFile.m_MixPlugins[plug].GetName());
+	mpt::String::Copy(ins->name, mpt::String::Print("%1: %2", plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
 	mpt::String::Copy(ins->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
 	ins->nMixPlug = plug + 1;
 	ins->nMidiChannel = 1;
@@ -1015,11 +1011,11 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		return false;
 	}
-	env.nSustainStart = susBegin;
-	env.nSustainEnd = susEnd;
-	env.nLoopStart = loopBegin;
-	env.nLoopEnd = loopEnd;
-	env.nReleaseNode = releaseNode;
+	env.nSustainStart = static_cast<decltype(env.nSustainStart)>(susBegin);
+	env.nSustainEnd = static_cast<decltype(env.nSustainEnd)>(susEnd);
+	env.nLoopStart = static_cast<decltype(env.nLoopStart)>(loopBegin);
+	env.nLoopEnd = static_cast<decltype(env.nLoopEnd)>(loopEnd);
+	env.nReleaseNode = static_cast<decltype(env.nReleaseNode)>(releaseNode);
 	env.dwFlags.set(ENV_LOOP, bLoop != 0);
 	env.dwFlags.set(ENV_SUSTAIN, bSus != 0);
 	env.dwFlags.set(ENV_CARRY, bCarry != 0);
@@ -1185,12 +1181,12 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 	{
 		return true;
 	}
-	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
+	for(auto &pat : m_SndFile.Patterns)
 	{
-		if(m_SndFile.Patterns.IsValidPat(nPat))
+		if(pat)
 		{
-			const ModCommand *p = m_SndFile.Patterns[nPat] + nChn;
-			for(ROWINDEX nRow = m_SndFile.Patterns[nPat].GetNumRows(); nRow > 0; nRow--, p += nChannels)
+			const ModCommand *p = pat.GetpModCommand(0, nChn);
+			for(ROWINDEX nRow = pat.GetNumRows(); nRow > 0; nRow--, p += nChannels)
 			{
 				if(!p->IsEmpty())
 				{
@@ -1268,9 +1264,9 @@ bool CModDoc::GlobalVolumeToPattern()
 	bool result = false;
 	if(m_SndFile.GetModSpecifications().HasCommand(CMD_GLOBALVOLUME))
 	{
-		for(ORDERINDEX i = 0; i < m_SndFile.Order().GetLength(); i++)
+		for(PATTERNINDEX pat : m_SndFile.Order())
 		{
-			if(m_SndFile.Patterns[m_SndFile.Order()[i]].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME).Retry(EffectWriter::rmTryNextRow)))
+			if(m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, mpt::saturate_cast<ModCommand::PARAM>(m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME)).Retry(EffectWriter::rmTryNextRow)))
 			{
 				result = true;
 				break;
