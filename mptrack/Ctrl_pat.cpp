@@ -804,7 +804,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 	const ORDERINDEX insertWhere = selection.firstOrd + insertCount + 1;
 	if(insertWhere >= m_sndFile.GetModSpecifications().ordersMax)
 		return;
-	bool success = false;
+	bool success = false, outOfPatterns = false;
 	// Has this pattern been duplicated already? (for multiselect)
 	std::vector<PATTERNINDEX> patReplaceIndex(m_sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
 
@@ -822,6 +822,8 @@ void CCtrlPatterns::OnPatternDuplicate()
 				patReplaceIndex[curPat] = newPat;
 			} else
 			{
+				if(m_sndFile.Patterns.IsValidPat(curPat))
+					outOfPatterns = true;
 				continue;
 			}
 		} else
@@ -855,7 +857,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			Util::InsertRange(selection.firstOrd, selection.lastOrd, m_sndFile.m_lockOrderStart, m_sndFile.m_lockOrderEnd);
 		}
 
-		m_OrderList.InvalidateRect(NULL, FALSE);
+		m_OrderList.InvalidateRect(nullptr, FALSE);
 		m_OrderList.SetCurSel(insertWhere, true, false, true);
 
 		// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
@@ -867,9 +869,14 @@ void CCtrlPatterns::OnPatternDuplicate()
 		SetCurrentPattern(m_sndFile.Order[showPattern]);
 
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
-		m_modDoc.UpdateAllViews(NULL, PatternHint(PATTERNINDEX_INVALID).Names(), this);
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
+		m_modDoc.UpdateAllViews(nullptr, PatternHint(PATTERNINDEX_INVALID).Names(), this);
 		if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = insertWhere + insertCount;
+	}
+	if(outOfPatterns)
+	{
+		const CModSpecifications &specs = m_sndFile.GetModSpecifications();
+		Reporting::Error(mpt::String::Print("Pattern limit of the %1 format (%2 patterns) has been reached!", mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Duplicate Patterns");
 	}
 	SwitchToView();
 }
