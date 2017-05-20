@@ -30,10 +30,22 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.11.00 (* May 2017, revision 8133)
+v1.26.11.00 (* May 2017, revision 8175)
 ---------------------------------------
+Pattern tab
+   [Imp] <js> Show a warning when duplicating patterns exceeds the pattern limit of the format. 
+   [Fix] <js> Channel panning was not always updated from instruments / samples when seeking (tx oerg866).
+   [Fix] <js> Out-of-range global volume was not applied correctly in some formats when seeking.
+
+Instrument tab
+   [Fix] <js> Properly convert vibrato sweep when saving XI from MPTM / IT files.
+
 Tree view
+   [Imp] <js> When descending into a directory that contains nothing but one subdirectory, automatically descent further down into that directory.
    [Fix] <js> Deleting patterns was not undo-able.
+
+VST / DMO Plugins
+   [Fix] <js> If a plugin's unique ID has changed (e.g. by replacing the plugin DLL with that of another plugin), the old ID was still written to module files.
 
 VST::Specific Plugin Fixes
    [Fix] <js> Crash when trying to use SynthMaster 2.8.

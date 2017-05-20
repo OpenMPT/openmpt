@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta24
 
+ *  [**Bug**] localtime() was used to determine the version of Schism Tracker
+    used to save IT and S3M files. This function is not guaranteed to be
+    thread-safe by the standard and is now no longer used.
+
+ *  Improvements to seeking: Channel panning was not always updated from
+    instruments / samples when seeking, and out-of-range global volume was not
+    applied correctly in some formats.
+ *  Work-around for reading MIDI macros and plugin settings in some malformed IT
+    files written by old UNMO3 versions.
+ *  Improve tracker detection in IT format.
+
 ### libopenmpt 0.2-beta23 (2017-04-23)
 
  *  [**Change**] The libmpg123 binary download script on Windows now downloads
@@ -16,14 +27,14 @@ is just a high-level summary.
  *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
     confused in previous versions. This version resets both to the defaults.
 
-   * Add support for "WUZAMOD!" magic bytes in STM files and allow some slightly
+ *   Add support for "WUZAMOD!" magic bytes in STM files and allow some slightly
      malformed STM files to load which were previously rejected (putup10.stm,
      putup11.stm) while tightening some other heuristics.
-   * Tighten heuristics for rejecting invalid SoundTracker files.
-   * Detect whether "hidden" patterns in the order list of SoundTracker modules
+ *   Tighten heuristics for rejecting invalid SoundTracker files.
+ *   Detect whether "hidden" patterns in the order list of SoundTracker modules
      should be taken into account or not. Fixes wolf1.mod, wolf3.mod and
      jean_baudlot_-_bad_dudes_vs_dragonninja-dragonf.mod.
-   * MO3: Clear MIDI macros for files that were originally saved with
+ *   MO3: Clear MIDI macros for files that were originally saved with
      Impulse Tracker 1.0 and Scream Tracker prior to version 3.20.
 
 ### libopenmpt 0.2-beta22 (2017-03-11)
