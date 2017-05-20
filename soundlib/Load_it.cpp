@@ -29,7 +29,6 @@
 #include "../common/mptBufferIO.h"
 #include "../common/version.h"
 #include "ITTools.h"
-#include <ctime>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -244,16 +243,6 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 //////////////////////////////////////////////////////////
 // Impulse Tracker IT file support
 
-#ifndef MODPLUG_NO_FILESAVE
-
-static uint8 ConvertVolParam(const ModCommand *m)
-//-----------------------------------------------
-{
-	return MIN(m->vol, 9);
-}
-
-#endif // MODPLUG_NO_FILESAVE
-
 
 size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers)
 //-----------------------------------------------------------------------------------
@@ -419,7 +408,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(GetType() == MOD_TYPE_IT)
 		{
-			// Which tracker was used to made this?
+			// Which tracker was used to make this?
 			if((fileHeader.cwtv & 0xF000) == 0x5000)
 			{
 				// OpenMPT Version number (Major.Minor)
@@ -437,7 +426,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
 				{
-					// ModPlug Tracker 1.16 (semi-raped IT format)
+					// ModPlug Tracker 1.16 (semi-raped IT format) or BeRoTracker (will be determined later)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 					m_madeWithTracker = "ModPlug Tracker 1.09 - 1.16";
 				} else
@@ -1460,31 +1449,28 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing pattern names
 	if(numNamedPats)
 	{
-		char magic[4];
-		memcpy(magic, "PNAM", 4);
-		mpt::IO::WriteRaw(f, magic, 4);
+		mpt::IO::WriteRaw(f, "PNAM", 4);
 		mpt::IO::WriteIntLE<uint32>(f, numNamedPats * MAX_PATTERNNAME);
 
-		for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
+		for(PATTERNINDEX pat = 0; pat < numNamedPats; pat++)
 		{
 			char name[MAX_PATTERNNAME];
-			MemsetZero(name);
-			Patterns[nPat].GetName(name);
-			mpt::IO::WriteRaw(f, name, MAX_PATTERNNAME);
+			mpt::String::Write<mpt::String::maybeNullTerminated>(name, Patterns[pat].GetName());
+			mpt::IO::Write(f, name);
 		}
 	}
 
 	// Writing channel names
 	if(dwChnNamLen && !compatibilityExport)
 	{
-		char magic[4];
-		memcpy(magic, "CNAM", 4);
-		mpt::IO::WriteRaw(f, magic, 4);
+		mpt::IO::WriteRaw(f, "CNAM", 4);
 		mpt::IO::WriteIntLE<uint32>(f, dwChnNamLen);
 		uint32 nChnNames = dwChnNamLen / MAX_CHANNELNAME;
 		for(uint32 inam = 0; inam < nChnNames; inam++)
 		{
-			mpt::IO::WriteRaw(f, ChnSettings[inam].szName, MAX_CHANNELNAME);
+			char name[MAX_CHANNELNAME];
+			mpt::String::Write<mpt::String::maybeNullTerminated>(name, ChnSettings[inam].szName);
+			mpt::IO::Write(f, name);
 		}
 	}
 
@@ -1590,29 +1576,30 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 				if (m->instr) b |= 2;
 				if (m->volcmd != VOLCMD_NONE)
 				{
+					vol = std::min(m->vol, uint8(9));
 					switch(m->volcmd)
 					{
-					case VOLCMD_VOLUME:			vol = m->vol; if (vol > 64) vol = 64; break;
-					case VOLCMD_PANNING:		vol = m->vol + 128; if (vol > 192) vol = 192; break;
-					case VOLCMD_VOLSLIDEUP:		vol = 85 + ConvertVolParam(m); break;
-					case VOLCMD_VOLSLIDEDOWN:	vol = 95 + ConvertVolParam(m); break;
-					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m); break;
-					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m); break;
-					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m); break;
+					case VOLCMD_VOLUME:			vol = std::min(m->vol, uint8(64)); break;
+					case VOLCMD_PANNING:		vol = std::min(m->vol, uint8(64)) + 128; break;
+					case VOLCMD_VOLSLIDEUP:		vol += 85; break;
+					case VOLCMD_VOLSLIDEDOWN:	vol += 95; break;
+					case VOLCMD_FINEVOLUP:		vol += 65; break;
+					case VOLCMD_FINEVOLDOWN:	vol += 75; break;
+					case VOLCMD_VIBRATODEPTH:	vol += 203; break;
 					case VOLCMD_VIBRATOSPEED:	if(command == CMD_NONE)
 												{
 													// illegal command -> move if possible
 													command = CMD_VIBRATO;
-													param = ConvertVolParam(m) << 4;
+													param = std::min(m->vol, uint8(15)) << 4;
 												} else
 												{
 													vol = 203;
 												}
 												break;
-					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m); break;
-					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m); break;
-					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m); break;
-					case VOLCMD_OFFSET:			if(!compatibilityExport) vol = 223 + ConvertVolParam(m); //rewbs.volOff
+					case VOLCMD_TONEPORTAMENTO:	vol += 193; break;
+					case VOLCMD_PORTADOWN:		vol += 105; break;
+					case VOLCMD_PORTAUP:		vol += 115; break;
+					case VOLCMD_OFFSET:			if(!compatibilityExport) vol += 223;
 												break;
 					default:					vol = 0xFF;
 					}
