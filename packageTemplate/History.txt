@@ -58,6 +58,9 @@ IT
    [Imp] <js> Properly identify files made with OpenMPT 1.17.02.20-25, CheeseTracker, UNMO3 and some unknown XM conversion tool.
    [Imp] <js> Work-around for reading MIDI macros and plugin settings in some malformed IT files written by old UNMO3 versions.
 
+Installer/release package
+   [New] <js> Register OpenMPT as a default application.
+
 
 v1.26.10.00 (23 April 2017, revision 8041)
 ------------------------------------------

@@ -1,6 +1,6 @@
 ; OpenMPT Install script - File associations
 ; Written by Johannes Schultz
-; http://openmpt.org/
+; https://openmpt.org/
 ; http://sagamusix.de/
 
 [Setup]
@@ -100,13 +100,121 @@ Root: HKCR; Subkey: ".umx"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".wow"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\wow
 
 ; important (setup)
-Root: HKCR; Subkey: "OpenMPTFile"; ValueType: string; ValueName: ""; ValueData: "OpenMPT Module"; Flags: uninsdeletekey; Tasks: associate_common or associate_exotic
-Root: HKCR; SubKey: "OpenMPTFile"; ValueType: string; ValueName: "PerceivedType"; ValueData: "audio"; Tasks: associate_common or associate_exotic                                                                                                           
-Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic                                                                                                           
-Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" ""%1"""; Tasks: associate_common or associate_exotic
-Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "[Edit(""%1"")]"; Tasks: associate_common or associate_exotic
+Root: HKCR; Subkey: "OpenMPTFile"; ValueType: string; ValueName: ""; ValueData: "OpenMPT Module"; Flags: uninsdeletekey; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; SubKey: "OpenMPTFile"; ValueType: string; ValueName: "PerceivedType"; ValueData: "audio"; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" ""%1"""; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "[Edit(""%1"")]"; Tasks: associate_common or associate_exotic or not portable
+
+; Application capabilities
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT"; Flags: uninsdeletekeyifempty; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Open ModPlug Tracker is an application for editing and playing tracked music in various formats."; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "OpenMPT"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities"; ValueType: string; ValueName: "ApplicationIcon"; ValueData: "{app}\mptrack.exe,0"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/it"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/xm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/s3m"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-s3m"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-zipped-mod"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-zipped-it"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-tracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-screamtracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-protracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-startracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-fasttracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-oktalyzer-tracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\MIMEAssociations"; ValueType: string; ValueName: "audio/x-taketracker-module"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mod"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".s3m"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".xm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".it"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mptm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mdr"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mdz"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".s3z"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".xmz"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".itz"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mptmz"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".669"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".amf"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ams"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dbm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".digi"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dmf"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dsm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".far"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gdm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".imf"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ice"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".itp"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".j2b"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".m15"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mdl"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".med"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mms"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mo3"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mt2"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mtm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".okt"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".plm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".psm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pt36"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ptm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx2"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".st26"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ult"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".umx"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".wow"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+
+Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "OpenMPT"; ValueData: "Software\Clients\Media\OpenMPT\Capabilities"; Flags: uninsdeletevalue; Tasks: not portable
+
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mod"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".s3m"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".xm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".it"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mptm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mdr"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mdz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".s3z"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".xmz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".itz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mptmz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".669"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".amf"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".ams"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dbm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".digi"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dmf"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dsm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".far"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".gdm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".imf"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".ice"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".itp"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".j2b"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".m15"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mdl"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".med"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mms"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mo3"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mt2"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mtm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".okt"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".plm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".psm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".pt36"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".ptm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".sfx"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".sfx2"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".st26"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".stm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".ult"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".umx"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".wow"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 
 [Files]
 ; icon file (should be moved into EXE)
 Source: "..\packageTemplate\mpt.ico";            DestDir: "{app}"; Flags: ignoreversion
-
