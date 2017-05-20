@@ -309,6 +309,7 @@ public:
 	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 
 	void FindInstrument();
+	void JumpToPrevOrNextEntry(bool nextEntry);
 
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
 

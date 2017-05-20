@@ -4092,6 +4092,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 
+		case kcPrevEntryInColumn:
+		case kcNextEntryInColumn:
+			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumn);
+			return wParam;
+
 		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
 								while ((n < pSndFile->Patterns.Size()) && !pSndFile->Patterns.IsValidPat(n)) n++;
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
@@ -6500,20 +6505,20 @@ void CViewPattern::OnShowTimeAtRow()
 
 	CString msg;
 	ORDERINDEX currentOrder = GetCurrentOrder();
-	if(pSndFile->Order()[currentOrder] == m_nPattern)
+	if(currentOrder < pSndFile->Order().size() && pSndFile->Order()[currentOrder] == m_nPattern)
 	{
 		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, GetCurrentRow(), false, false);
 		if(t < 0)
-			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence.", currentOrder, GetCurrentRow());
+			msg.Format(_T("Unable to determine the time. Possible cause: No order %d, row %d found in play sequence."), currentOrder, GetCurrentRow());
 		else
 		{
 			const uint32 minutes = static_cast<uint32>(t / 60.0);
 			const double seconds = t - (minutes * 60);
-			msg.Format("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds.", currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? "" : "s", seconds);
+			msg.Format(_T("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds."), currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? "" : "s", seconds);
 		}
 	} else
 	{
-		msg.Format("Unable to determine the time: pattern at current order (%d) does not correspond to pattern at pattern view (pattern %d).", currentOrder, m_nPattern);
+		msg.Format(_T("Unable to determine the time: pattern at current order (%d) does not correspond to pattern in pattern view (pattern %d)."), currentOrder, m_nPattern);
 	}
 	
 	Reporting::Notification(msg);
@@ -6708,7 +6713,7 @@ void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
 void CViewPattern::FindInstrument()
 //---------------------------------
 {
-	CSoundFile *sndFile = GetSoundFile();
+	const CSoundFile *sndFile = GetSoundFile();
 	if(sndFile == nullptr)
 	{
 		return;
@@ -6717,12 +6722,12 @@ void CViewPattern::FindInstrument()
 	PATTERNINDEX pat = m_nPattern;
 	ROWINDEX row = m_Cursor.GetRow();
 
-	while(sndFile->Patterns.IsValidPat(pat) && sndFile->Patterns[pat].GetNumRows() != 0)
+	while(sndFile->Patterns.IsValidPat(pat))
 	{
 		// Seek upwards
 		do
 		{
-			ModCommand &m = *sndFile->Patterns[pat].GetpModCommand(row, m_Cursor.GetChannel());
+			auto &m = *sndFile->Patterns[pat].GetpModCommand(row, m_Cursor.GetChannel());
 			if(!m.IsPcNote() && m.instr != 0)
 			{
 				SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
@@ -6743,6 +6748,68 @@ void CViewPattern::FindInstrument()
 			return;
 		}
 		row = sndFile->Patterns[pat].GetNumRows() - 1;
+	}
+}
+
+
+// Find previous or next column entry (note, instrument, ...) on this channel
+void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
+//------------------------------------------------------
+{
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || GetCurrentOrder() >= sndFile->Order().size())
+	{
+		return;
+	}
+	ORDERINDEX ord = GetCurrentOrder();
+	PATTERNINDEX pat = m_nPattern;
+	CHANNELINDEX chn = m_Cursor.GetChannel();
+	PatternCursor::Columns column = m_Cursor.GetColumnType();
+	int32 row = m_Cursor.GetRow();
+
+	int direction = nextEntry ? 1 : -1;
+	row += direction;	// Don't want to find the cell we're already in
+	while(sndFile->Patterns.IsValidPat(pat))
+	{
+		while(sndFile->Patterns[pat].IsValidRow(row))
+		{
+			auto &m = *sndFile->Patterns[pat].GetpModCommand(row, chn);
+			bool found;
+			switch(column)
+			{
+			case PatternCursor::noteColumn:
+				found = m.note != NOTE_NONE;
+				break;
+			case PatternCursor::instrColumn:
+				found = m.instr != 0;
+				break;
+			case PatternCursor::volumeColumn:
+				found = m.volcmd != VOLCMD_NONE;
+				break;
+			case PatternCursor::effectColumn:
+			case PatternCursor::paramColumn:
+				found = m.command != CMD_NONE;
+				break;
+			default:
+				found = false;
+			}
+			
+			if(found)
+			{
+				SetCurrentOrder(ord);
+				SetCurrentPattern(pat, row);
+				return;
+			}
+			row += direction;
+		}
+
+		// Continue search in prev/next pattern
+		ORDERINDEX nextOrd = nextEntry ? sndFile->Order().GetNextOrderIgnoringSkips(ord) : sndFile->Order().GetPreviousOrderIgnoringSkips(ord);
+		pat = sndFile->Order()[nextOrd];
+		if(nextOrd == ord || !sndFile->Patterns.IsValidPat(pat))
+			return;
+		ord = nextOrd;
+		row = nextEntry ? 0 : (sndFile->Patterns[pat].GetNumRows() - 1);
 	}
 }
 
