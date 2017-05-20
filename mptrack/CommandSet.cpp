@@ -473,7 +473,7 @@ void CCommandSet::SetupCommands()
 	//time saving HACK:
 	for(int j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
 	{
-		DefineKeyCommand((CommandID)j, 1388 + j - kcSampStartNotes, _T("Auto Note in some context"), kcHidden, kcNoDummy);
+		DefineKeyCommand((CommandID)j, 1388 + j - kcSampStartNotes, _T("Sample editor note entry"), kcHidden, kcNoDummy);
 	}
 	//end hack
 	DefineKeyCommand(kcPatternGrowSelection, 1660, _T("Grow selection"));
@@ -513,7 +513,7 @@ void CCommandSet::SetupCommands()
 	//time saving HACK:
 	for(int j = kcVSTGUIStartNotes; j <= kcVSTGUIEndNoteStops; j++)
 	{
-		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, _T("Auto Note in some context"), kcHidden, kcNoDummy);
+		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, _T("Plugin note entry"), kcHidden, kcNoDummy);
 	}
 	//end hack
 	DefineKeyCommand(kcVSTGUIPrevPreset, 1763, _T("Previous Plugin Preset"));
@@ -706,6 +706,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSelectColumn, 1968, _T("Select Column"));
 	DefineKeyCommand(kcSampleStereoSep, 1969, _T("Change Stereo Separation"));
 	DefineKeyCommand(kcTransposeCustomQuick, 1970, _T("Transpose Custom (Quick)"));
+	DefineKeyCommand(kcPrevEntryInColumn, 1971, _T("Jump to previous entry in column"));
+	DefineKeyCommand(kcNextEntryInColumn, 1972, _T("Jump to next entry in column"));
 
 	// Add new key commands here.
 

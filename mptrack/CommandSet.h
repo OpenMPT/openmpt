@@ -238,6 +238,8 @@ enum CommandID
 	kcCursorCopy,
 	kcCursorPaste,
 	kcFindInstrument,
+	kcPrevEntryInColumn,
+	kcNextEntryInColumn,
 	kcPatternRecord,
 	kcPatternPlayRow,
 	kcSetSpacing,
