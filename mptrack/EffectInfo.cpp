@@ -425,16 +425,14 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 }
 
 
-bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELINDEX chn) const
-//-------------------------------------------------------------------------------------------
+bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNELINDEX chn) const
+//----------------------------------------------------------------------------------------------
 {
-	TCHAR s[128];
-	const char *continueOrIgnore;
+	CString s;
+	const TCHAR *continueOrIgnore;
 
-	if ((!pszName) || (ndx >= CountOf(gFXInfo)) || (!gFXInfo[ndx].name)) return false;
-	_tcscpy(pszName, gFXInfo[ndx].name);
-	_tcscat(pszName, _T(": "));
-	s[0] = 0;
+	if (ndx >= CountOf(gFXInfo) || !gFXInfo[ndx].name) return false;
+	pszName = mpt::ToCString(mpt::CharsetUTF8, gFXInfo[ndx].name) + _T(": ");
 
 	// for effects that don't have effect memory in MOD format.
 	if(sndFile.GetType() == MOD_TYPE_MOD)
@@ -442,7 +440,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 	else
 		continueOrIgnore = _T("continue");
 
-	TCHAR *plusChar = _T("+"), *minusChar = _T("-");
+	const TCHAR *plusChar = _T("+"), *minusChar = _T("-");
 
 	switch(gFXInfo[ndx].effect)
 	{
@@ -451,9 +449,9 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			continueOrIgnore = _T("ignore");
 
 		if (param)
-			wsprintf(s, _T("note+%d note+%d"), param >> 4, param & 0x0F);
+			s.Format(_T("note+%d note+%d"), param >> 4, param & 0x0F);
 		else
-			_tcscpy(s, continueOrIgnore);
+			s = continueOrIgnore;
 		break;
 
 	case CMD_PORTAMENTOUP:
@@ -463,22 +461,22 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			TCHAR sign = (gFXInfo[ndx].effect == CMD_PORTAMENTOUP) ? _T('+') : _T('-');
 
 			if((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0))
-				wsprintf(s, _T("fine %c%d"), sign, (param & 0x0F));
+				s.Format(_T("fine %c%d"), sign, (param & 0x0F));
 			else if((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xE0))
-				wsprintf(s, _T("extra fine %c%d"), sign, (param & 0x0F));
+				s.Format(_T("extra fine %c%d"), sign, (param & 0x0F));
 			else
-				wsprintf(s, _T("%c%d"), sign, param);
+				s.Format(_T("%c%d"), sign, param);
 		} else
 		{
-			_tcscpy(s, continueOrIgnore);
+			s = continueOrIgnore;
 		}
 		break;
 
 	case CMD_TONEPORTAMENTO:
 		if (param)
-			wsprintf(s, _T("speed %d"), param);
+			s.Format(_T("speed %d"), param);
 		else
-			_tcscpy(s, _T("continue"));
+			s = _T("continue");
 		break;
 
 	case CMD_VIBRATO:
@@ -486,31 +484,31 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 	case CMD_PANBRELLO:
 	case CMD_FINEVIBRATO:
 		if (param)
-			wsprintf(s, _T("speed=%d depth=%d"), param >> 4, param & 0x0F);
+			s.Format(_T("speed=%d depth=%d"), param >> 4, param & 0x0F);
 		else
-			_tcscpy(s, "continue");
+			s = _T("continue");
 		break;
 
 	case CMD_SPEED:
-		wsprintf(s, _T("%d ticks/row"), param);
+		s.Format(_T("%d ticks/row"), param);
 		break;
 
 	case CMD_TEMPO:
 		if (param == 0)
-			_tcscpy(s, _T("continue"));
+			s = _T("continue");
 		else if (param < 0x10)
-			wsprintf(s, _T("-%d bpm (slower)"), param & 0x0F);
+			s.Format(_T("-%d bpm (slower)"), param & 0x0F);
 		else if (param < 0x20)
-			wsprintf(s, _T("+%d bpm (faster)"), param & 0x0F);
+			s.Format(_T("+%d bpm (faster)"), param & 0x0F);
 		else
-			wsprintf(s, _T("%d bpm"), param);
+			s.Format(_T("%d bpm"), param);
 		break;
 
 	case CMD_PANNING8:
 		if(sndFile.GetType() == MOD_TYPE_S3M && param == 0xA4)
-			_tcscpy(s, _T("Surround"));
+			s = _T("Surround");
 		else
-			wsprintf(s, _T("%d"), param);
+			s.Format(_T("%d"), param);
 		break;
 
 	case CMD_RETRIG:
@@ -518,29 +516,27 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 		{
 		case  0:
 			if(sndFile.GetType() & MOD_TYPE_XM)
-				_tcscpy(s, _T("continue"));
+				s = _T("continue");
 			else
-				_tcscpy(s, _T("vol *1"));
+				s = _T("vol *1");
 			break;
-		case  1: _tcscpy(s, _T("vol -1")); break;
-		case  2: _tcscpy(s, _T("vol -2")); break;
-		case  3: _tcscpy(s, _T("vol -4")); break;
-		case  4: _tcscpy(s, _T("vol -8")); break;
-		case  5: _tcscpy(s, _T("vol -16")); break;
-		case  6: _tcscpy(s, _T("vol *0.66")); break;
-		case  7: _tcscpy(s, _T("vol *0.5")); break;
-		case  8: _tcscpy(s, _T("vol *1")); break;
-		case  9: _tcscpy(s, _T("vol +1")); break;
-		case 10: _tcscpy(s, _T("vol +2")); break;
-		case 11: _tcscpy(s, _T("vol +4")); break;
-		case 12: _tcscpy(s, _T("vol +8")); break;
-		case 13: _tcscpy(s, _T("vol +16")); break;
-		case 14: _tcscpy(s, _T("vol *1.5")); break;
-		case 15: _tcscpy(s, _T("vol *2")); break;
+		case  1: s = _T("vol -1"); break;
+		case  2: s = _T("vol -2"); break;
+		case  3: s = _T("vol -4"); break;
+		case  4: s = _T("vol -8"); break;
+		case  5: s = _T("vol -16"); break;
+		case  6: s = _T("vol *0.66"); break;
+		case  7: s = _T("vol *0.5"); break;
+		case  8: s = _T("vol *1"); break;
+		case  9: s = _T("vol +1"); break;
+		case 10: s = _T("vol +2"); break;
+		case 11: s = _T("vol +4"); break;
+		case 12: s = _T("vol +8"); break;
+		case 13: s = _T("vol +16"); break;
+		case 14: s = _T("vol *1.5"); break;
+		case 15: s = _T("vol *2"); break;
 		}
-		char spd[10];
-		wsprintf(spd, _T(" speed %d"), param & 0x0F);
-		_tcscat(s, spd);
+		s.AppendFormat(_T(" speed %d"), param & 0x0F);
 		break;
 
 	case CMD_VOLUMESLIDE:
@@ -564,38 +560,38 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 
 		if (!param)
 		{
-			wsprintf(s, _T("continue"));
+			s.Format(_T("continue"));
 		} else if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
-			wsprintf(s, _T("fine %s%d"), plusChar, param >> 4);
+			s.Format(_T("fine %s%d"), plusChar, param >> 4);
 		} else if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
-			wsprintf(s, _T("fine %s%d"), minusChar, param & 0x0F);
+			s.Format(_T("fine %s%d"), minusChar, param & 0x0F);
 		} else if ((param & 0x0F) != param && (param & 0xF0) != param)	// both nibbles are set.
 		{
-			_tcscpy(s, _T("undefined"));
+			s = _T("undefined");
 		} else if (param & 0x0F)
 		{
-			wsprintf(s, _T("%s%d"), minusChar, param & 0x0F);
+			s.Format(_T("%s%d"), minusChar, param & 0x0F);
 		} else
 		{
-			wsprintf(s, _T("%s%d"), plusChar, param >> 4);
+			s.Format(_T("%s%d"), plusChar, param >> 4);
 		}
 		break;
 
 	case CMD_PATTERNBREAK:
-		wsprintf(pszName, _T("Break to row %u"), param);
+		pszName.Format(_T("Break to row %u"), param);
 		break;
 
 	case CMD_POSITIONJUMP:
-		wsprintf(pszName, _T("Jump to position %u"), param);
+		pszName.Format(_T("Jump to position %u"), param);
 		break;
 
 	case CMD_OFFSET:
 		if (param)
-			wsprintf(pszName, _T("Set Offset to %u"), param);
+			pszName.Format(_T("Set Offset to %u"), param);
 		else
-			_tcscpy(s, _T("continue"));
+			s = _T("continue");
 		break;
 
 	case CMD_CHANNELVOLUME:
@@ -604,9 +600,9 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			ModCommand::PARAM minVal = 0, maxVal = 128;
 			GetEffectInfo(ndx, nullptr, false, &minVal, &maxVal);
 			if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) && param > maxVal)
-				_tcscpy(s, _T("undefined"));
+				s = _T("undefined");
 			else
-				wsprintf(s, _T("%u"), std::min<uint32>(param, maxVal));
+				s.Format(_T("%u"), std::min<uint32>(param, maxVal));
 		}
 		break;
 
@@ -623,15 +619,15 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				if(ontime == 0) ontime = 1;
 				if(offtime == 0) offtime = 1;
 			}
-			wsprintf(s, _T("ontime %u, offtime %u"), ontime, offtime);
+			s.Format(_T("ontime %u, offtime %u"), ontime, offtime);
 		} else
 		{
-			_tcscpy(s, _T("continue"));
+			s = _T("continue");
 		}
 		break;
 
 	case CMD_SETENVPOSITION:
-		wsprintf(s, _T("Tick %u"), param);
+		s.Format(_T("Tick %u"), param);
 		break;
 
 	case CMD_MIDI:
@@ -643,19 +639,19 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				const uint8 macroIndex = sndFile.m_PlayState.Chn[chn].nActiveMacro;
 				const PLUGINDEX plugin = sndFile.GetBestPlugin(chn, PrioritiseChannel, EvenIfMuted) - 1;
 				IMixPlugin *pPlugin = (plugin < MAX_MIXPLUGINS ? sndFile.m_MixPlugins[plugin].pMixPlugin : nullptr);
-				wsprintf(pszName, _T("SFx MIDI Macro z=%d (SF%X: %s)"), param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, pPlugin).GetString());
+				pszName.Format(_T("SFx MIDI Macro z=%d (SF%X: %s)"), param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, pPlugin).GetString());
 			} else
 			{
-				wsprintf(pszName, _T("SFx MIDI Macro z=%02X (%d)"), param, param);
+				pszName.Format(_T("SFx MIDI Macro z=%02X (%d)"), param, param);
 			}
 		} else
 		{
-			wsprintf(pszName, _T("Fixed Macro Z%02X"), param);
+			pszName.Format(_T("Fixed Macro Z%02X"), param);
 		}
 		break;
 
 	case CMD_DELAYCUT:
-		wsprintf(pszName, _T("Note delay: %d, cut after %d ticks"), (param >> 4), (param & 0x0F));
+		pszName.Format(_T("Note delay: %d, cut after %d ticks"), (param >> 4), (param & 0x0F));
 		break;
 
 	default:
@@ -667,17 +663,17 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			{
 				switch(param & 0x0F)
 				{
-				case 0x00:	_tcscpy(s, _T("90: Surround Off")); break;
-				case 0x01:	_tcscpy(s, _T("91: Surround On")); break;
-				case 0x08:	_tcscpy(s, _T("98: Reverb Off")); break;
-				case 0x09:	_tcscpy(s, _T("99: Reverb On")); break;
-				case 0x0A:	_tcscpy(s, _T("9A: Center surround")); break;
-				case 0x0B:	_tcscpy(s, _T("9B: Quad surround")); break;
-				case 0x0C:	_tcscpy(s, _T("9C: Global filters")); break;
-				case 0x0D:	_tcscpy(s, _T("9D: Local filters")); break;
-				case 0x0E:	_tcscpy(s, _T("9E: Play Forward")); break;
-				case 0x0F:	_tcscpy(s, _T("9F: Play Backward")); break;
-				default:	wsprintf(s, _T("%02X: undefined"), param);
+				case 0x00:	s = _T("90: Surround Off"); break;
+				case 0x01:	s = _T("91: Surround On"); break;
+				case 0x08:	s = _T("98: Reverb Off"); break;
+				case 0x09:	s = _T("99: Reverb On"); break;
+				case 0x0A:	s = _T("9A: Center surround"); break;
+				case 0x0B:	s = _T("9B: Quad surround"); break;
+				case 0x0C:	s = _T("9C: Global filters"); break;
+				case 0x0D:	s = _T("9D: Local filters"); break;
+				case 0x0E:	s = _T("9E: Play Forward"); break;
+				case 0x0F:	s = _T("9F: Play Backward"); break;
+				default:	s.Format(_T("%02X: undefined"), param);
 				}
 			} else
 				if (((gFXInfo[ndx].effect == CMD_XFINEPORTAUPDOWN) || (gFXInfo[ndx].effect == CMD_S3MCMDEX))
@@ -685,90 +681,90 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				{
 					switch(param & 0x0F)
 					{
-					case 0x00:	_tcscpy(s, _T("70: Past note cut")); break;
-					case 0x01:	_tcscpy(s, _T("71: Past note off")); break;
-					case 0x02:	_tcscpy(s, _T("72: Past note fade")); break;
-					case 0x03:	_tcscpy(s, _T("73: NNA note cut")); break;
-					case 0x04:	_tcscpy(s, _T("74: NNA continue")); break;
-					case 0x05:	_tcscpy(s, _T("75: NNA note off")); break;
-					case 0x06:	_tcscpy(s, _T("76: NNA note fade")); break;
-					case 0x07:	_tcscpy(s, _T("77: Volume Env Off")); break;
-					case 0x08:	_tcscpy(s, _T("78: Volume Env On")); break;
-					case 0x09:	_tcscpy(s, _T("79: Pan Env Off")); break;
-					case 0x0A:	_tcscpy(s, _T("7A: Pan Env On")); break;
-					case 0x0B:	_tcscpy(s, _T("7B: Pitch Env Off")); break;
-					case 0x0C:	_tcscpy(s, _T("7C: Pitch Env On")); break;
-					case 0x0D:	if(sndFile.GetType() == MOD_TYPE_MPT) { _tcscpy(s, _T("7D: Force Pitch Env")); break; }
+					case 0x00:	s = _T("70: Past note cut"); break;
+					case 0x01:	s = _T("71: Past note off"); break;
+					case 0x02:	s = _T("72: Past note fade"); break;
+					case 0x03:	s = _T("73: NNA note cut"); break;
+					case 0x04:	s = _T("74: NNA continue"); break;
+					case 0x05:	s = _T("75: NNA note off"); break;
+					case 0x06:	s = _T("76: NNA note fade"); break;
+					case 0x07:	s = _T("77: Volume Env Off"); break;
+					case 0x08:	s = _T("78: Volume Env On"); break;
+					case 0x09:	s = _T("79: Pan Env Off"); break;
+					case 0x0A:	s = _T("7A: Pan Env On"); break;
+					case 0x0B:	s = _T("7B: Pitch Env Off"); break;
+					case 0x0C:	s = _T("7C: Pitch Env On"); break;
+					case 0x0D:	if(sndFile.GetType() == MOD_TYPE_MPT) { s = _T("7D: Force Pitch Env"); break; }
 								MPT_FALLTHROUGH;
-					case 0x0E:	if(sndFile.GetType() == MOD_TYPE_MPT) { _tcscpy(s, _T("7E: Force Filter Env")); break; }
+					case 0x0E:	if(sndFile.GetType() == MOD_TYPE_MPT) { s = _T("7E: Force Filter Env"); break; }
 								MPT_FALLTHROUGH;
-					default:	wsprintf(s, _T("%02X: undefined"), param); break;
+					default:	s.Format(_T("%02X: undefined"), param); break;
 					}
 				} else
 				{
-					wsprintf(s, _T("%d"), param & 0x0F);
+					s.Format(_T("%d"), param & 0x0F);
 					if(gFXInfo[ndx].effect == CMD_S3MCMDEX)
 					{
 						switch(param & 0xF0)
 						{
 						case 0x10: // glissando control
 							if((param & 0x0F) == 0)
-								_tcscpy(s, _T("smooth"));
+								s = _T("smooth");
 							else
-								_tcscpy(s, _T("semitones"));
+								s = _T("semitones");
 							break;
 						case 0x20: // set finetune
-							wsprintf(s, _T("%dHz"), S3MFineTuneTable[param & 0x0F]);
+							s.Format(_T("%dHz"), S3MFineTuneTable[param & 0x0F]);
 							break;
 						case 0x30: // vibrato waveform
 						case 0x40: // tremolo waveform
 						case 0x50: // panbrello waveform
 							if(((param & 0x0F) > 0x03) && sndFile.m_playBehaviour[kITVibratoTremoloPanbrello])
 							{
-								_tcscpy(s, _T("ignore"));
+								s = _T("ignore");
 								break;
 							}
 							switch(param & 0x0F)
 							{
-							case 0x00: _tcscpy(s, _T("sine wave")); break;
-							case 0x01: _tcscpy(s, _T("ramp down")); break;
-							case 0x02: _tcscpy(s, _T("square wave")); break;
-							case 0x03: _tcscpy(s, _T("random")); break;
-							case 0x04: _tcscpy(s, _T("sine wave (cont.)")); break;
-							case 0x05: _tcscpy(s, _T("ramp down (cont.)")); break;
-							case 0x06: _tcscpy(s, _T("square wave (cont.)")); break;
-							case 0x07: _tcscpy(s, _T("random (cont.)")); break;
-							default: _tcscpy(s, _T("ignore")); break;
+							case 0x00: s = _T("sine wave"); break;
+							case 0x01: s = _T("ramp down"); break;
+							case 0x02: s = _T("square wave"); break;
+							case 0x03: s = _T("random"); break;
+							case 0x04: s = _T("sine wave (cont.)"); break;
+							case 0x05: s = _T("ramp down (cont.)"); break;
+							case 0x06: s = _T("square wave (cont.)"); break;
+							case 0x07: s = _T("random (cont.)"); break;
+							default: s = _T("ignore"); break;
 							}
 							break;
 
 						case 0x60: // fine pattern delay (ticks)
-							_tcscat(s, _T(" ticks"));
+							s += _T(" ticks");
 							break;
 
 						case 0xA0: // high offset
-							wsprintf(s, _T("+ %u samples"), (param & 0x0F) * 0x10000);
+							s.Format(_T("+ %u samples"), (param & 0x0F) * 0x10000);
 							break;
 
 						case 0xB0: // pattern loop
 							if((param & 0x0F) == 0x00)
-								_tcscpy(s, _T("loop start"));
+								s = _T("loop start");
 							else
-								_tcscat(s, _T(" times"));
+								s += _T(" times");
 							break;
 						case 0xC0: // note cut
 						case 0xD0: // note delay
 							//IT compatibility 22. SD0 == SD1, SC0 == SC1
 							if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
-								_tcscpy(s, _T("1 tick"));
+								s = _T("1 tick");
 							else
-								_tcscat(s, _T(" ticks"));
+								s += _T(" ticks");
 							break;
 						case 0xE0: // pattern delay (rows)
-							_tcscat(s, _T(" rows"));
+							s += _T(" rows");
 							break;
 						case 0xF0: // macro
-							_tcscpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F));
+							s = sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F);
 							break;
 						default:
 							break;
@@ -781,30 +777,30 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 						case 0x00:
 							// Filter
 							if(param & 1)
-								_tcscpy(s, _T("off"));
+								s = _T("off");
 							else
-								_tcscpy(s, _T("on"));
+								s = _T("on");
 							break;
 
 						case 0x30: // glissando control
 							if((param & 0x0F) == 0)
-								_tcscpy(s, _T("smooth"));
+								s = _T("smooth");
 							else
-								_tcscpy(s, _T("semitones"));
+								s = _T("semitones");
 							break;					
 						case 0x40: // vibrato waveform
 						case 0x70: // tremolo waveform
 							switch(param & 0x0F)
 							{
-							case 0x00: case 0x08: _tcscpy(s, _T("sine wave")); break;
-							case 0x01: case 0x09: _tcscpy(s, _T("ramp down")); break;
-							case 0x02: case 0x0A: _tcscpy(s, _T("square wave")); break;
-							case 0x03: case 0x0B: _tcscpy(s, _T("square wave")); break;
+							case 0x00: case 0x08: s = _T("sine wave"); break;
+							case 0x01: case 0x09: s = _T("ramp down"); break;
+							case 0x02: case 0x0A: s = _T("square wave"); break;
+							case 0x03: case 0x0B: s = _T("square wave"); break;
 
-							case 0x04: case 0x0C: _tcscpy(s, _T("sine wave (cont.)")); break;
-							case 0x05: case 0x0D: _tcscpy(s, _T("ramp down (cont.)")); break;
-							case 0x06: case 0x0E: _tcscpy(s, _T("square wave (cont.)")); break;
-							case 0x07: case 0x0F: _tcscpy(s, _T("square wave (cont.)")); break;
+							case 0x04: case 0x0C: s = _T("sine wave (cont.)"); break;
+							case 0x05: case 0x0D: s = _T("ramp down (cont.)"); break;
+							case 0x06: case 0x0E: s = _T("square wave (cont.)"); break;
+							case 0x07: case 0x0F: s = _T("square wave (cont.)"); break;
 							}
 							break;
 						case 0x50: // set finetune
@@ -819,37 +815,37 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 									// MOD finetune
 									if(nFinetune > 7) nFinetune -= 16;
 								}
-								wsprintf(s, _T("%d"), nFinetune);
+								s.Format(_T("%d"), nFinetune);
 							}
 							break;
 						case 0x60: // pattern loop
 							if((param & 0x0F) == 0x00)
-								_tcscpy(s, _T("loop start"));
+								s = _T("loop start");
 							else
-								_tcscat(s, _T(" times"));
+								s += _T(" times");
 							break;
 						case 0x90: // retrigger
-							wsprintf(s, _T("speed %d"), param & 0x0F);
+							s.Format(_T("speed %d"), param & 0x0F);
 							break;
 						case 0xC0: // note cut
 						case 0xD0: // note delay
-							_tcscat(s, _T(" ticks"));
+							s += _T(" ticks");
 							break;
 						case 0xE0: // pattern delay (rows)
-							_tcscat(s, _T(" rows"));
+							s += _T(" rows");
 							break;
 						case 0xF0:
 							if(sndFile.GetType() == MOD_TYPE_MOD)
 							{
 								// invert loop
 								if((param & 0x0F) == 0)
-									_tcscpy(s, _T("Stop"));
+									s = _T("Stop");
 								else
-									wsprintf(s, _T("Speed %d"), param & 0x0F);
+									s.Format(_T("Speed %d"), param & 0x0F);
 							} else
 							{
 								// macro
-								_tcscpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F));
+								s = sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F);
 							}
 							break;
 						default:
@@ -860,10 +856,10 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 
 		} else
 		{
-			wsprintf(s, _T("%u"), param);
+			s.Format(_T("%u"), param);
 		}
 	}
-	_tcscat(pszName, s);
+	pszName += s;
 	return true;
 }
 

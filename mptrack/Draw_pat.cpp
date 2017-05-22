@@ -1619,13 +1619,13 @@ void CViewPattern::UpdateIndicator()
 					// display instrument
 					if (m->instr)
 					{
-						TCHAR sztmp[128] = "";
+						s.Format(_T("%u: "), m->instr);
 						if(m->IsPcNote())
 						{
 							// display plugin name.
 							if(m->instr <= MAX_MIXPLUGINS)
 							{
-								mpt::String::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName());
+								s += pSndFile->m_MixPlugins[m->instr - 1].GetName();
 							}
 						} else
 						{
@@ -1635,7 +1635,7 @@ void CViewPattern::UpdateIndicator()
 								if ((m->instr <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[m->instr]))
 								{
 									ModInstrument *pIns = pSndFile->Instruments[m->instr];
-									mpt::String::Copy(sztmp, pIns->name);
+									s += pIns->name;
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
 										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
@@ -1643,19 +1643,19 @@ void CViewPattern::UpdateIndicator()
 										{
 											if (pSndFile->m_szNames[nsmp][0])
 											{
-												wsprintf(sztmp + strlen(sztmp), " (%d: %s)", nsmp, pSndFile->m_szNames[nsmp]);
+												s.AppendFormat(_T(" (%d: "));
+												s += pSndFile->m_szNames[nsmp];
+												s.AppendChar(_T(')'));
 											}
 										}
 									}
 								}
 							} else if (m->instr <= pSndFile->GetNumSamples())
 							{
-								mpt::String::Copy(sztmp, pSndFile->m_szNames[m->instr]);
+								s += pSndFile->m_szNames[m->instr];
 							}
 
 						}
-						mpt::String::SetNullTerminator(sztmp);
-						s.Format("%d: %s", m->instr, sztmp);
 					}
 					break;
 
@@ -1675,9 +1675,9 @@ void CViewPattern::UpdateIndicator()
 					} else if(m->volcmd != VOLCMD_NONE)
 					{
 						// "normal" volume command
-						TCHAR sztmp[64] = "";
+						CHAR sztmp[64] = "";
 						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), sztmp);
-						_tcscat(sztmp, _T(": "));
+						strcat(sztmp, ": ");
 						effectInfo.GetVolCmdParamInfo(*m, sztmp + strlen(sztmp));
 						s = sztmp;
 					}
@@ -1691,7 +1691,7 @@ void CViewPattern::UpdateIndicator()
 						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
 					} else if(m->command != CMD_NONE)
 					{
-						TCHAR sztmp[128] = "";
+						CString sztmp;
 						LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
 						if(fxndx >= 0)
 						{
@@ -1701,7 +1701,11 @@ void CViewPattern::UpdateIndicator()
 							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param * xMultiplier + xParam, nChn);
 						}
 						//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
-						if(sztmp[0]) s.Format(_T("%c%02X: %s"), pSndFile->GetModSpecifications().GetEffectLetter(m->command), m->param, sztmp);
+						if(!sztmp.IsEmpty())
+						{
+							s.Format(_T("%c%02X: "), pSndFile->GetModSpecifications().GetEffectLetter(m->command), m->param);
+							s += sztmp;
+						}
 					}
 					break;
 				}

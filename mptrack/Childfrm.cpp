@@ -372,16 +372,13 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 //--------------------------------------------------------------------
 {
 	// need to handle both ANSI and UNICODE versions of the message
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
 	TCHAR szFullText[256];
 	CString strTipText;
 
-	ASSERT(pNMHDR->code == TTN_NEEDTEXTA || pNMHDR->code == TTN_NEEDTEXTW);
 	szFullText[0] = 0;
 	UINT_PTR nID = pNMHDR->idFrom;
-	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
-		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	if (pTTT->uFlags & TTF_IDISHWND)
 	{
 		// idFrom is actually the HWND of the tool
 		nID = (UINT_PTR)::GetDlgCtrlID((HWND)nID);
@@ -398,13 +395,10 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			AfxLoadString(nID, szFullText);
 			// this is the command id, not the button index
-			AfxExtractSubString(strTipText, szFullText, 1, '\n');
+			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
 		}
 	}
-	if (pNMHDR->code == TTN_NEEDTEXTA)
-		lstrcpyn(pTTTA->szText, strTipText, sizeof(pTTTA->szText));
-	else
-		_mbstowcsz(pTTTW->szText, strTipText, sizeof(pTTTW->szText));
+	lstrcpyn(pTTT->szText, strTipText, mpt::size(pTTT->szText));
 	*pResult = 0;
 
 	// bring the tooltip window above other popup windows

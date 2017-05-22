@@ -405,9 +405,9 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		m_Pages[nIndex] = pDlg;
 	}
 	RecalcLayout();
-	pMainFrm->SetUserText("");
-	pMainFrm->SetInfoText("");
-	pMainFrm->SetXInfoText(""); //rewbs.xinfo
+	pMainFrm->SetUserText(_T(""));
+	pMainFrm->SetInfoText(_T(""));
+	pMainFrm->SetXInfoText(_T("")); //rewbs.xinfo
 	pDlg->ShowWindow(SW_SHOW);
 	((CChildFrame *)GetParentFrame())->SetSplitterHeight(pDlg->GetSplitPosRef());
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
@@ -647,11 +647,11 @@ LRESULT CModScrollView::OnDPIChanged(WPARAM wParam, LPARAM)
 }
 
 
-void CModScrollView::UpdateIndicator(LPCSTR lpszText)
-//---------------------------------------------------
+void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
+//----------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetUserText((lpszText) ? lpszText : "");
+	if (pMainFrm) pMainFrm->SetUserText((lpszText) ? lpszText : _T(""));
 }
 
 
