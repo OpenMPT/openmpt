@@ -37,7 +37,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
 
-UINT CAbstractVstEditor::m_clipboardFormat = RegisterClipboardFormat("VST Preset Data");
+UINT CAbstractVstEditor::m_clipboardFormat = RegisterClipboardFormat(_T("VST Preset Data"));
 
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
@@ -351,7 +351,7 @@ void CAbstractVstEditor::UpdatePresetField()
 		}
 
 		CString programName = m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram());
-		programName.Replace("&", "&&");
+		programName.Replace(_T("&"), _T("&&"));
 		m_Menu.ModifyMenu(8, MF_BYPOSITION, ID_VSTPRESETNAME, programName);
 	}
 
@@ -672,7 +672,7 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 	}
 
 	// Add Factory menu to main menu
-	m_Menu.InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(m_PresetMenu.m_hMenu), "&Presets");
+	m_Menu.InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(m_PresetMenu.m_hMenu), _T("&Presets"));
 
 	if(m_PresetMenu.GetMenuItemCount() != 0)
 	{
@@ -723,7 +723,7 @@ void CAbstractVstEditor::GeneratePresetMenu(int32 offset, CMenu &parent)
 	for(int32 p = offset, row = 0, id = 0; p < endProg; p++, row++, id++)
 	{
 		CString programName = m_VstPlugin.GetFormattedProgramName(p);
-		programName.Replace("&", "&&");
+		programName.Replace(_T("&"), _T("&&"));
 		UINT splitMenuFlag = 0;
 
 		if(row == PRESETS_PER_COLUMN)
@@ -759,41 +759,44 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	std::vector<IMixPlugin *> inputPlugs;
 	m_VstPlugin.GetInputPlugList(inputPlugs);
-	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
+	for(auto plug : inputPlugs)
 	{
-		name.Format("FX%02u: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
-		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + inputPlugs[nPlug]->m_nSlot, name);
+		name.Format(_T("FX%02u: "), plug->m_nSlot + 1);
+		name += plug->m_pMixStruct->GetName();
+		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 	}
 
 	std::vector<CHANNELINDEX> inputChannels;
 	m_VstPlugin.GetInputChannelList(inputChannels);
-	for(size_t nChn=0; nChn<inputChannels.size(); nChn++)
+	bool addSeparator = !inputPlugs.empty();
+	for(auto chn : inputChannels)
 	{
-		if(nChn == 0 && inputPlugs.size())
+		if(addSeparator)
 		{
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
+			addSeparator = false;
 		}
-		name.Format("Chn%02u: %s", inputChannels[nChn] + 1, sndFile.ChnSettings[inputChannels[nChn]].szName);
+		name.Format(_T("Chn%02u: "), chn + 1);
+		name += sndFile.ChnSettings[chn].szName;
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 
 	std::vector<INSTRUMENTINDEX> inputInstruments;
 	m_VstPlugin.GetInputInstrumentList(inputInstruments);
-	for(size_t nIns = 0; nIns<inputInstruments.size(); nIns++)
+	addSeparator = !inputPlugs.empty() || !inputChannels.empty();
+	for(auto ins : inputInstruments)
 	{
-		bool checked = false;
-		if(nIns == 0 && (inputPlugs.size() || inputChannels.size()))
+		if(addSeparator)
 		{
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
+			addSeparator = false;
 		}
-		name.Format("Ins%02u: %s", inputInstruments[nIns], sndFile.GetInstrumentName(inputInstruments[nIns]));
-		if(inputInstruments[nIns] == m_nInstrument)	checked = true;
-		m_InputMenu.AppendMenu(MF_STRING | (checked ? MF_CHECKED : 0), ID_SELECTINST + inputInstruments[nIns], name);
+		name.Format(_T("Ins%02u: "), ins);
+		name += sndFile.GetInstrumentName(ins);
+		m_InputMenu.AppendMenu(MF_STRING | ((ins == m_nInstrument) ? MF_CHECKED : 0), ID_SELECTINST + ins, name);
 	}
 
-	if(inputPlugs.size() == 0 &&
-		inputChannels.size() == 0 &&
-		inputInstruments.size() == 0)
+	if(inputPlugs.empty() && inputChannels.empty() && inputInstruments.empty())
 	{
 		m_InputMenu.AppendMenu(MF_STRING | MF_GRAYED, NULL, _T("None"));
 	}
@@ -821,21 +824,20 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	m_VstPlugin.GetOutputPlugList(outputPlugs);
 	CString name;
 
-	for(size_t nPlug = 0; nPlug < outputPlugs.size(); nPlug++)
+	for(auto plug : outputPlugs)
 	{
-		if(outputPlugs[nPlug] != nullptr)
+		if(plug != nullptr)
 		{
-			name.Format("FX%02d: %s", outputPlugs[nPlug]->m_nSlot + 1,
-									outputPlugs[nPlug]->m_pMixStruct->GetName());
-			m_OutputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + outputPlugs[nPlug]->m_nSlot, name);
+			name.Format(_T("FX%02d: "), plug->m_nSlot + 1);
+			name += plug->m_pMixStruct->GetName();
+			m_OutputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 		} else
 		{
-			name = "Master Output";
+			name = _T("Master Output");
 			m_OutputMenu.AppendMenu(MF_STRING | MF_GRAYED, NULL, name);
 		}
-
 	}
-	pInfoMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_OutputMenu.m_hMenu), "Ou&tputs");
+	pInfoMenu->InsertMenu(1, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_OutputMenu.m_hMenu), _T("Ou&tputs"));
 }
 
 

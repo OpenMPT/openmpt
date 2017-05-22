@@ -212,7 +212,7 @@ public:
 	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
 	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
 	BOOL PostCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
-	void UpdateIndicator(LPCSTR lpszText=NULL);
+	void UpdateIndicator(LPCTSTR lpszText = nullptr);
 
 public:
 	//{{AFX_VIRTUAL(CModScrollView)

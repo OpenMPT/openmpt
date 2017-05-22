@@ -310,7 +310,7 @@ protected:
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
 
-	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
+	TCHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
 
 	CAutoSaver m_AutoSaver;
 
@@ -370,10 +370,10 @@ public:
 
 	// Misc functions
 public:
-	void SetUserText(LPCSTR lpszText);
-	void SetInfoText(LPCSTR lpszText);
-	void SetXInfoText(LPCSTR lpszText);
-	void SetHelpText(LPCSTR lpszText);
+	void SetUserText(LPCTSTR lpszText);
+	void SetInfoText(LPCTSTR lpszText);
+	void SetXInfoText(LPCTSTR lpszText);
+	void SetHelpText(LPCTSTR lpszText);
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();

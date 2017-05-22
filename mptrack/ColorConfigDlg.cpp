@@ -123,12 +123,12 @@ BOOL COptionsColors::OnInitDialog()
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
 
 	patternFont = TrackerSettings::Instance().patternFont;
-	m_ComboFont.AddString("Built-in (small)");
-	m_ComboFont.AddString("Built-in (large)");
-	m_ComboFont.AddString("Built-in (small, x2)");
-	m_ComboFont.AddString("Built-in (large, x2)");
-	m_ComboFont.AddString("Built-in (small, x3)");
-	m_ComboFont.AddString("Built-in (large, x3)");
+	m_ComboFont.AddString(_T("Built-in (small)"));
+	m_ComboFont.AddString(_T("Built-in (large)"));
+	m_ComboFont.AddString(_T("Built-in (small, x2)"));
+	m_ComboFont.AddString(_T("Built-in (large, x2)"));
+	m_ComboFont.AddString(_T("Built-in (small, x3)"));
+	m_ComboFont.AddString(_T("Built-in (large, x3)"));
 	int sel = 0;
 	if(patternFont.name == PATTERNFONT_SMALL)
 	{

@@ -266,7 +266,7 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 //------------------------------------------------------------------
 {
-	TOOLTIPTEXT* pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
 	UINT_PTR nID = pNMHDR->idFrom;
 	if (pTTT->uFlags & TTF_IDISHWND)
 	{
@@ -859,9 +859,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
 	if(numRemoved != 0)
 	{
-		TCHAR s[64];
-		wsprintf(s, _T("%u unused plugin%s removed"), numRemoved, (numRemoved == 1) ? _T("") : _T("s"));
-		modDoc.AddToLog(s);
+		modDoc.AddToLog(LogInformation, mpt::String::Print(MPT_ULITERAL("%1 unused plugin%2 removed"), numRemoved, (numRemoved == 1) ? MPT_ULITERAL("") : MPT_ULITERAL("s")));
 		return true;
 	}
 	return false;

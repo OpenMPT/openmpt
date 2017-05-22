@@ -481,9 +481,9 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			if (nCurrentTempo <= TEMPO(0, 0)) m_SpinTempo.EnableWindow(TRUE);
 			nCurrentTempo = nTempo;
 			if(nCurrentTempo.GetFract() == 0)
-				_stprintf(s, "%u", nCurrentTempo.GetInt());
+				_stprintf(s, _T("%u"), nCurrentTempo.GetInt());
 			else
-				_stprintf(s, "%.4f", nCurrentTempo.ToDouble());
+				_stprintf(s, _T("%.4f"), nCurrentTempo.ToDouble());
 			m_EditTempo.SetWindowText(s);
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;

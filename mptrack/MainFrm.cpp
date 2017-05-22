@@ -341,7 +341,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	RemoveControlBar(&m_wndStatusBar); //Removing statusbar because corrupted statusbar inifiledata can crash the program.
 	m_wndTree.EnableDocking(0); //To prevent a crash when there's "Docking=1" for treebar in ini-settings.
 	// Restore toobar positions
-	LoadBarState("Toolbars");
+	LoadBarState(_T("Toolbars"));
 
 	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
 
@@ -349,7 +349,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) midiOpenDevice(false);
 
-	HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 
 	return 0;
 }
@@ -365,7 +365,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
-	HtmlHelpW(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelpW(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
@@ -453,7 +453,7 @@ void CMainFrame::OnClose()
 
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
-	SaveBarState("Toolbars");
+	SaveBarState(_T("Toolbars"));
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
 	TrackerSettings::Instance().SaveSettings();
 
@@ -605,7 +605,7 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 	{
 		TCHAR szText[256+_MAX_PATH];
 		lstrcpy(szText, pDocument->GetTitle());
-		if (pDocument->IsModified()) lstrcat(szText, "*");
+		if (pDocument->IsModified()) lstrcat(szText, _T("*"));
 		UpdateFrameTitleForDocument(szText);
 	} else
 	{
@@ -1867,41 +1867,41 @@ void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
 }
 
 
-void CMainFrame::SetUserText(LPCSTR lpszText)
-//-------------------------------------------
+void CMainFrame::SetUserText(LPCTSTR lpszText)
+//--------------------------------------------
 {
 	if (lpszText[0] | m_szUserText[0])
 	{
-		strcpy(m_szUserText, lpszText);
-		OnUpdateUser(NULL);
+		_tcscpy(m_szUserText, lpszText);
+		OnUpdateUser(nullptr);
 	}
 }
 
 
-void CMainFrame::SetInfoText(LPCSTR lpszText)
-//-------------------------------------------
+void CMainFrame::SetInfoText(LPCTSTR lpszText)
+//--------------------------------------------
 {
 	if (lpszText[0] | m_szInfoText[0])
 	{
-		strcpy(m_szInfoText, lpszText);
-		OnUpdateInfo(NULL);
+		_tcscpy(m_szInfoText, lpszText);
+		OnUpdateInfo(nullptr);
 	}
 }
 
 
-void CMainFrame::SetXInfoText(LPCSTR lpszText)
-//-------------------------------------------
+void CMainFrame::SetXInfoText(LPCTSTR lpszText)
+//---------------------------------------------
 {
 	if (lpszText[0] | m_szXInfoText[0])
 	{
-		strcpy(m_szXInfoText, lpszText);
-		OnUpdateInfo(NULL);
+		_tcscpy(m_szXInfoText, lpszText);
+		OnUpdateInfo(nullptr);
 	}
 }
 
 
-void CMainFrame::SetHelpText(LPCSTR lpszText)
-//-------------------------------------------
+void CMainFrame::SetHelpText(LPCTSTR lpszText)
+//--------------------------------------------
 {
 	m_wndStatusBar.SetPaneText(0, lpszText);
 }
@@ -1944,7 +1944,7 @@ void CMainFrame::OnViewOptions()
 	if (m_bOptionsLocked)
 		return;
 
-	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
+	CPropertySheet dlg(_T("OpenMPT Setup"), this, m_nLastOptionsPage);
 	COptionsGeneral general;
 	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_SoundDeviceIdentifier);
 	COptionsSampleEditor smpeditor;
@@ -2685,7 +2685,7 @@ void CMainFrame::OnHelp()
 	}
 
 	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
-	if(!HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
+	if(!::HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
 		return;

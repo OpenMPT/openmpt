@@ -429,7 +429,7 @@ void CModTypeDlg::OnOK()
 BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 //---------------------------------------------------------------
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	const TCHAR *text = _T("");
 	UINT_PTR nID = pNMHDR->idFrom;
 	if(pTTT->uFlags & TTF_IDISHWND)
@@ -479,12 +479,12 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 					s.AppendFormat(_T("%u%%"), Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
-			mpt::String::CopyN(pTTT->szText, s);
+			lstrcpyn(pTTT->szText, s, mpt::size(pTTT->szText));
 			return TRUE;
 		}
 	}
 
-	mpt::String::CopyN(pTTT->szText, text);
+	lstrcpyn(pTTT->szText, text, mpt::size(pTTT->szText));
 	return TRUE;
 }
 
@@ -713,28 +713,29 @@ END_MESSAGE_MAP()
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
-	CHAR label[MAX(100, 20 + MAX_CHANNELNAME)];
+	CString s;
 	CDialog::OnInitDialog();
-	for (UINT n = 0; n < m_nChannels; n++)
+	for (CHANNELINDEX n = 0; n < m_nChannels; n++)
 	{
+		s.Format(_T("Channel %u"), n + 1);
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
-			wsprintf(label, "Channel %d: %s", (n + 1), sndFile.ChnSettings[n].szName);
-		else
-			wsprintf(label, "Channel %d", n + 1);
-
-		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
+		{
+			s += _T(": ");
+			s +=  sndFile.ChnSettings[n].szName;
+		}
+		m_RemChansList.SetItemData(m_RemChansList.AddString(s), n);
 		if (!m_bKeepMask[n]) m_RemChansList.SetSel(n);
 	}
 
 	if (m_nRemove > 0)
 	{
-		wsprintf(label, "Select %u channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
+		s.Format(_T("Select %u channel%s to remove:"), m_nRemove, (m_nRemove != 1) ? _T("s") : _T(""));
 	} else
 	{
-		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %u)", sndFile.GetModSpecifications().channelsMin);
+		s.Format(_T("Select channels to remove (the minimum number of remaining channels is %u)"), sndFile.GetModSpecifications().channelsMin);
 	}
 	
-	SetDlgItemText(IDC_QUESTION1, label);
+	SetDlgItemText(IDC_QUESTION1, s);
 	if(GetDlgItem(IDCANCEL)) GetDlgItem(IDCANCEL)->ShowWindow(m_ShowCancel);
 
 	OnChannelChanged();
@@ -804,8 +805,8 @@ BOOL CSoundBankProperties::OnInitDialog()
 //---------------------------------------
 {
 	CDialog::OnInitDialog();
-	SetDlgItemTextA(IDC_EDIT1, m_szInfo.c_str());
-	SetWindowTextW(m_hWnd, (fileName.AsNative() + L" - Sound Bank Information").c_str());
+	::SetDlgItemTextA(m_hWnd, IDC_EDIT1, m_szInfo.c_str());
+	::SetWindowTextW(m_hWnd, (fileName.AsNative() + L" - Sound Bank Information").c_str());
 	return TRUE;
 }
 
