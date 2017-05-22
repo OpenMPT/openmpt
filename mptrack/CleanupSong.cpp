@@ -859,7 +859,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
 	if(numRemoved != 0)
 	{
-		modDoc.AddToLog(LogInformation, mpt::String::Print(MPT_ULITERAL("%1 unused plugin%2 removed"), numRemoved, (numRemoved == 1) ? MPT_ULITERAL("") : MPT_ULITERAL("s")));
+		modDoc.AddToLog(LogInformation, mpt::String::Print(MPT_USTRING("%1 unused plugin%2 removed"), numRemoved, (numRemoved == 1) ? MPT_USTRING("") : MPT_USTRING("s")));
 		return true;
 	}
 	return false;

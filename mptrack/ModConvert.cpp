@@ -592,7 +592,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		
 	if(warnings[wResizedPatterns])
 	{
-		AddToLog(LogInformation, mpt::String::Print(MPT_ULITERAL("%1 patterns have been resized to 64 rows"), nResizedPatterns));
+		AddToLog(LogInformation, mpt::String::Print(MPT_USTRING("%1 patterns have been resized to 64 rows"), nResizedPatterns));
 	}
 	static constexpr struct
 	{
