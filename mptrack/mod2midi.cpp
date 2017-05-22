@@ -538,7 +538,7 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 BOOL CModToMidi::OnInitDialog()
 //-----------------------------
 {
-	TCHAR s[256];
+	CString s;
 
 	CDialog::OnInitDialog();
 	// Fill instruments box
@@ -562,7 +562,8 @@ BOOL CModToMidi::OnInitDialog()
 		{
 			if (m_sndFile.GetSample(nSmp).pSample != nullptr && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
 			{
-				wsprintf(s, "%02d: %s", nSmp, m_sndFile.m_szNames[nSmp]);
+				s.Format(_T("%02d: "), nSmp);
+				s += m_sndFile.m_szNames[nSmp];
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nSmp);
 			}
 		}
@@ -573,7 +574,7 @@ BOOL CModToMidi::OnInitDialog()
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), MidiFirstChannel + 9);
 	for (UINT iCh=1; iCh<=16; iCh++) if (iCh != 10)
 	{
-		wsprintf(s, _T("Melodic %u"), iCh);
+		s.Format(_T("Melodic %u"), iCh);
 		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), MidiFirstChannel - 1 + iCh);
 	}
 	m_nCurrInstr = 1;
@@ -590,8 +591,6 @@ BOOL CModToMidi::OnInitDialog()
 void CModToMidi::FillProgramBox(bool percussion)
 //----------------------------------------------
 {
-	CHAR s[256];
-	
 	if (m_bPerc == percussion) return;
 	m_CbnProgram.ResetContent();
 	if (percussion)
@@ -599,16 +598,16 @@ void CModToMidi::FillProgramBox(bool percussion)
 		for (ModCommand::NOTE i = 0; i < 61; i++)
 		{
 			ModCommand::NOTE note = i + 24;
-			sprintf(s, "%u (%s): %s", note, m_sndFile.GetNoteName(note + NOTE_MIN).c_str(), szMidiPercussionNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note);
+			auto s = mpt::String::Print(_T("%1 (%2): %3"), note, m_sndFile.GetNoteName(note + NOTE_MIN), szMidiPercussionNames[i]);
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s.c_str()), note);
 		}
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 128);
 	} else
 	{
 		for (int i = 0; i < 128; i++)
 		{
-			sprintf(s, "%03d: %s", i + 1, szMidiProgramNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
+			auto s = mpt::String::Print(_T("%1: %2"), mpt::fmt::dec0<3>(i + 1), szMidiProgramNames[i]);
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s.c_str()), i);
 		}
 	}
 	m_bPerc = percussion;

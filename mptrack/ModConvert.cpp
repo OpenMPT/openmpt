@@ -590,41 +590,51 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		m_SndFile.m_nResampling = SRCMODE_DEFAULT;
 	}
 		
+	if(warnings[wResizedPatterns])
+	{
+		AddToLog(LogInformation, mpt::String::Print(MPT_ULITERAL("%1 patterns have been resized to 64 rows"), nResizedPatterns));
+	}
+	static constexpr struct
+	{
+		enmWarnings warning;
+		char *mesage;
+	} messages[] =
+	{
 	// Pattern warnings
-	TCHAR s[64];
-	wsprintf(s, _T("%u patterns have been resized to 64 rows"), nResizedPatterns);
-	CHANGEMODTYPE_CHECK(wResizedPatterns, s);
-	CHANGEMODTYPE_CHECK(wRestartPos, _T("Restart position is not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wPatternSignatures, _T("Pattern-specific time signatures are not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wChannelVolSurround, _T("Channel volume and surround are not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wChannelPanning, _T("Channel panning is not supported by the new format."));
-
+	{ wRestartPos, "Restart position is not supported by the new format." },
+	{ wPatternSignatures, "Pattern-specific time signatures are not supported by the new format." },
+	{ wChannelVolSurround, "Channel volume and surround are not supported by the new format." },
+	{ wChannelPanning, "Channel panning is not supported by the new format." },
 	// Sample warnings
-	CHANGEMODTYPE_CHECK(wSampleBidiLoops, _T("Sample bidi loops are not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wSampleSustainLoops, _T("New format doesn't support sample sustain loops."));
-	CHANGEMODTYPE_CHECK(wSampleAutoVibrato, _T("New format doesn't support sample autovibrato."));
-	CHANGEMODTYPE_CHECK(wMODSampleFrequency, _T("Sample C-5 frequencies will be lost."));
-	CHANGEMODTYPE_CHECK(wMOD31Samples, _T("Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available."));
-
+	{ wSampleBidiLoops, "Sample bidi loops are not supported by the new format." },
+	{ wSampleSustainLoops, "New format doesn't support sample sustain loops." },
+	{ wSampleAutoVibrato, "New format doesn't support sample autovibrato." },
+	{ wMODSampleFrequency, "Sample C-5 frequencies will be lost." },
+	{ wMOD31Samples, "Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available." },
 	// Instrument warnings
-	CHANGEMODTYPE_CHECK(wInstrumentsToSamples, _T("All instruments have been converted to samples."));
-	CHANGEMODTYPE_CHECK(wTrimmedEnvelopes, _T("Instrument envelopes have been shortened."));
-	CHANGEMODTYPE_CHECK(wInstrumentSustainLoops, _T("Sustain loops were converted to sustain points."));
-	CHANGEMODTYPE_CHECK(wInstrumentTuning, _T("Instrument tunings will be lost."));
-	CHANGEMODTYPE_CHECK(wPitchToTempoLock, _T("Pitch / Tempo Lock instrument property is not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wBrokenNoteMap, _T("Instrument Note Mapping is not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wReleaseNode, _T("Instrument envelope release nodes are not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wFilterVariation, _T("Random filter variation is not supported by the new format."));
-
+	{ wInstrumentsToSamples, "All instruments have been converted to samples." },
+	{ wTrimmedEnvelopes, "Instrument envelopes have been shortened." },
+	{ wInstrumentSustainLoops, "Sustain loops were converted to sustain points." },
+	{ wInstrumentTuning, "Instrument tunings will be lost." },
+	{ wPitchToTempoLock, "Pitch / Tempo Lock instrument property is not supported by the new format." },
+	{ wBrokenNoteMap, "Instrument Note Mapping is not supported by the new format." },
+	{ wReleaseNode, "Instrument envelope release nodes are not supported by the new format." },
+	{ wFilterVariation, "Random filter variation is not supported by the new format." },
 	// General warnings
-	CHANGEMODTYPE_CHECK(wMODGlobalVars, _T("Default speed, tempo and global volume will be lost."));
-	CHANGEMODTYPE_CHECK(wLinearSlides, _T("Linear Frequency Slides not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wEditHistory, _T("Edit history will not be saved in the new format."));
-	CHANGEMODTYPE_CHECK(wMixmode, _T("Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats."));
-	CHANGEMODTYPE_CHECK(wVolRamp, _T("Fasttracker 2 compatible super soft volume ramping gets lost when converting XM files to another type."));
-	CHANGEMODTYPE_CHECK(wGlobalVolumeNotSupported, _T("Default global volume is not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wResamplingMode, _T("Song-specific resampling mode is not supported by the new format."));
-	CHANGEMODTYPE_CHECK(wFractionalTempo, _T("Fractional tempo is not supported by the new format."));
+	{ wMODGlobalVars, "Default speed, tempo and global volume will be lost." },
+	{ wLinearSlides, "Linear Frequency Slides not supported by the new format." },
+	{ wEditHistory, "Edit history will not be saved in the new format." },
+	{ wMixmode, "Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats." },
+	{ wVolRamp, "Fasttracker 2 compatible super soft volume ramping gets lost when converting XM files to another type." },
+	{ wGlobalVolumeNotSupported, "Default global volume is not supported by the new format." },
+	{ wResamplingMode, "Song-specific resampling mode is not supported by the new format." },
+	{ wFractionalTempo, "Fractional tempo is not supported by the new format." },
+	};
+	for(auto &msg : messages)
+	{
+		if(warnings[msg.warning])
+			AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetUTF8, msg.mesage));
+	}
 
 	SetModified();
 	GetPatternUndo().ClearUndo();

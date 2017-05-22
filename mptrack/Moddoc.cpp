@@ -1679,12 +1679,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
 			{
 				fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
-				caption.Format("%u:", i + 1);
+				caption.Format(_T("%u:"), i + 1);
 				caption += m_SndFile.ChnSettings[i].szName;
 			} else
 			{
 				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-				caption.Format("channel %u", i + 1);
+				caption.Format(_T("channel %u"), i + 1);
 			}
 			// Unmute channel to process
 			m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
@@ -1704,12 +1704,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				if(strcmp(m_SndFile.m_szNames[i + 1], ""))
 				{
 					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
-					caption.Format("%u: ", i + 1);
+					caption.Format(_T("%u: "), i + 1);
 					caption += m_SndFile.m_szNames[i + 1];
 				} else
 				{
 					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-					caption.Format("sample %u", i + 1);
+					caption.Format(_T("sample %u"), i + 1);
 				}
 				// Unmute sample to process
 				MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
@@ -1724,12 +1724,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
 				{
 					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
-					caption.Format("%u:", i + 1);
+					caption.Format(_T("%u:"), i + 1);
 					caption += m_SndFile.Instruments[i + 1]->name;
 				} else
 				{
 					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-					caption.Format("instrument %u", i + 1);
+					caption.Format(_T("instrument %u"), i + 1);
 				}
 				// Unmute instrument to process
 				MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
@@ -1909,7 +1909,7 @@ void CModDoc::OnFileCompatibilitySave()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return;
 
-	std::string pattern;
+	CString pattern;
 
 	const MODTYPE type = m_SndFile.GetType();
 
