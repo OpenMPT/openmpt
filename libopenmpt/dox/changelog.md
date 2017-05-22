@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta24
+### libopenmpt 0.2-beta24 (2017-05-22)
 
  *  [**Bug**] localtime() was used to determine the version of Schism Tracker
     used to save IT and S3M files. This function is not guaranteed to be
