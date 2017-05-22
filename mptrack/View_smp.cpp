@@ -164,8 +164,8 @@ void CViewSample::OnInitialUpdate()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		pMainFrm->SetInfoText("");
-		pMainFrm->SetXInfoText("");
+		pMainFrm->SetInfoText(_T(""));
+		pMainFrm->SetXInfoText(_T(""));
 	}
 	UpdateScrollSize();
 	UpdateNcButtonState();
@@ -321,7 +321,7 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_dwStatus.reset(SMPSTATUS_DRAWING);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetInfoText("");
+	if (pMainFrm) pMainFrm->SetInfoText(_T(""));
 	m_nSample = nSmp;
 	for(auto &pos : m_dwNotifyPos)
 	{
@@ -1556,7 +1556,7 @@ void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLe
 void CViewSample::OnMouseMove(UINT, CPoint point)
 //-----------------------------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
 	CModDoc *pModDoc = GetDocument();
 
 	if(m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS || m_dwStatus[SMPSTATUS_NCLBTNDOWN])
@@ -1565,14 +1565,14 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		m_nBtnMouseOver = 0xFFFF;
 		UpdateNcButtonState();
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetHelpText("");
+		if (pMainFrm) pMainFrm->SetHelpText(_T(""));
 	}
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
 		const SmpLength x = ScreenToSample(point.x);
-		wsprintf(s, "Cursor: %u", x);
+		wsprintf(s, _T("Cursor: %u"), x);
 		UpdateIndicator(s);
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -1589,20 +1589,20 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				if(xHigh == 0)
-					wsprintf(s, "Offset: %c%02X", cOffsetChar, xLow);
+					wsprintf(s, _T("Offset: %c%02X"), cOffsetChar, xLow);
 				else if(bHasHighOffset && xHigh < 0x10)
-					wsprintf(s, "Offset: %c%02X, %cA%X", cOffsetChar, xLow, cHighOffsetChar, xHigh);
+					wsprintf(s, _T("Offset: %c%02X, %cA%X"), cOffsetChar, xLow, cHighOffsetChar, xHigh);
 				else
-					wsprintf(s, "Beyond offset range");
+					_tcscpy(s, _T("Beyond offset range"));
 				pMainFrm->SetInfoText(s);
 			} else
 			{
-				pMainFrm->SetInfoText("");
+				pMainFrm->SetInfoText(_T(""));
 			}
 		}
 	} else
 	{
-		UpdateIndicator(NULL);
+		UpdateIndicator(nullptr);
 	}
 
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])

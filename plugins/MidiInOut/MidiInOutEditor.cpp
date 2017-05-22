@@ -82,13 +82,13 @@ void MidiInOutEditor::PopulateLists()
 
 	// Go through all RtMidi devices
 	unsigned int ports = plugin.m_midiIn.getPortCount();
-	std::string portName;
+	CString portName;
 	for(unsigned int i = 0; i < ports; i++)
 	{
 		try
 		{
 			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_inputDevice.GetPortName(i)), true);
-			int result = m_inputCombo.AddString(portName.c_str());
+			int result = m_inputCombo.AddString(portName);
 			m_inputCombo.SetItemData(result, i);
 
 			if(result != CB_ERR && i == plugin.m_inputDevice.index)
@@ -105,7 +105,7 @@ void MidiInOutEditor::PopulateLists()
 		try
 		{
 			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_outputDevice.GetPortName(i)), false);
-			int result = m_outputCombo.AddString(portName.c_str());
+			int result = m_outputCombo.AddString(portName);
 			m_outputCombo.SetItemData(result, i);
 
 			if(result != CB_ERR && i == plugin.m_outputDevice.index)

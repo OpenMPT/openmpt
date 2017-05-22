@@ -200,7 +200,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 
 	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
 
-	TCHAR s[512], stmp[256];
+	CString s;
 	LV_ITEM lvi, lvi2;
 
 	m_ItemList.SetRedraw(FALSE);
@@ -237,28 +237,29 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
 					const ModSample &sample = sndFile.GetSample(iSmp + 1);
-					s[0] = 0;
+					s.Empty();
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						mpt::String::Copy(s, sndFile.m_szNames[iSmp + 1]);
+						s = sndFile.m_szNames[iSmp + 1];
 						break;
 					case SMPLIST_SAMPLENO:
-						wsprintf(s, "%02u", iSmp + 1);
+						s.Format(_T("%02u"), iSmp + 1);
 						break;
 					case SMPLIST_SIZE:
 						if (sample.nLength)
 						{
-							if(sample.GetSampleSizeInBytes() >= 1024)
-								wsprintf(s, "%u KB", sample.GetSampleSizeInBytes() >> 10);
+							auto size = sample.GetSampleSizeInBytes();
+							if(size >= 1024)
+								s.Format(_T("%u KB"), size >> 10);
 							else
-								wsprintf(s, "%u B", sample.GetSampleSizeInBytes());
+								s.Format(_T("%u B"), size);
 						}
 						break;
 					case SMPLIST_TYPE:
 						if(sample.nLength)
 						{
-							wsprintf(s, "%u Bit", sample.GetElementarySampleSize() * 8);
+							s.Format(_T("%u Bit"), sample.GetElementarySampleSize() * 8);
 						}
 						break;
 					case SMPLIST_INSTR:
@@ -269,17 +270,10 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							{
 								if (sndFile.IsSampleReferencedByInstrument(iSmp + 1, i))
 								{
-									if (!first) strcat(s, ",");
+									if (!first) s.AppendChar(_T(','));
 									first = false;
 
-									wsprintf(stmp, "%u", i);
-									strcat(s, stmp);
-
-									if (strlen(s) > sizeof(s) - 10)
-									{
-										strcat(s, "...");
-										break;
-									}
+									s.AppendFormat(_T("%u"), i);
 								}
 							}
 						}
@@ -287,31 +281,32 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					case SMPLIST_MIDDLEC:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%u Hz", sample.GetSampleRate(sndFile.GetType()));
+							s.Format(_T("%u Hz"), sample.GetSampleRate(sndFile.GetType()));
 						}
 						break;
 					case SMPLIST_FILENAME:
-						mpt::String::Copy(s, sample.filename);
+						s = sample.filename;
 						break;
 					case SMPLIST_PATH:
-						mpt::String::Copy(s, sndFile.GetSamplePath(iSmp + 1).ToLocale());
+						s = sndFile.GetSamplePath(iSmp + 1).ToCString();
 						break;
 					}
 					lvi.mask = LVIF_TEXT;
 					lvi.iItem = iSmp;
 					lvi.iSubItem = nCol;
-					lvi.pszText = (LPTSTR)s;
+					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iSmp < nCount))
 					{
 						bool bOk = true;
 						if (iSmp < nCount)
 						{
+							TCHAR stmp[512];
 							lvi2 = lvi;
-							lvi2.pszText = (LPTSTR)stmp;
-							lvi2.cchTextMax = sizeof(stmp);
+							lvi2.pszText = stmp;
+							lvi2.cchTextMax = mpt::size(stmp);
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
-							if (!strcmp(s, stmp)) bOk = false;
+							if (s == stmp) bOk = false;
 						}
 						if (bOk) m_ItemList.SetItem(&lvi);
 					} else
@@ -339,14 +334,14 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
 				{
 					ModInstrument *pIns = sndFile.Instruments[iIns+1];
-					s[0] = 0;
+					s.Empty();
 					switch(iCol)
 					{
 					case INSLIST_INSTRUMENTNAME:
-						if (pIns) mpt::String::Copy(s, pIns->name);
+						if (pIns) s = pIns->name;
 						break;
 					case INSLIST_INSTRUMENTNO:
-						wsprintf(s, "%02u", iIns+1);
+						s.Format(_T("%02u"), iIns+1);
 						break;
 					case INSLIST_SAMPLES:
 						if (pIns)
@@ -356,57 +351,50 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							bool first = true;
 							for(auto sample : referencedSamples)
 							{
-								if(!first) strcat(s, ",");
+								if(!first) s.AppendChar(_T(','));
 								first = false;
-
-								size_t l = strlen(s);
-								if(l >= sizeof(s) - 8)
-								{
-									strcat(s, "...");
-									break;
-								}
-
-								wsprintf(s + l, "%u", sample);
+								s.AppendFormat(_T("%u"), sample);
 							}
 						}
 						break;
 					case INSLIST_ENVELOPES:
 						if (pIns)
 						{
-							if (pIns->VolEnv.dwFlags[ENV_ENABLED]) strcat(s, "Vol");
-							if (pIns->PanEnv.dwFlags[ENV_ENABLED]) { if (s[0]) strcat(s, ", "); strcat(s, "Pan"); }
-							if (pIns->PitchEnv.dwFlags[ENV_ENABLED]) { if (s[0]) strcat(s, ", "); strcat(s, (pIns->PitchEnv.dwFlags[ENV_FILTER]) ? "Filter" : "Pitch"); }
+							if (pIns->VolEnv.dwFlags[ENV_ENABLED]) s += _T("Vol");
+							if (pIns->PanEnv.dwFlags[ENV_ENABLED]) { if (!s.IsEmpty()) s += _T(", "); s += _T("Pan"); }
+							if (pIns->PitchEnv.dwFlags[ENV_ENABLED]) { if (!s.IsEmpty()) s += _T(", "); s += (pIns->PitchEnv.dwFlags[ENV_FILTER] ? _T("Filter") : _T("Pitch")); }
 						}
 						break;
 					case INSLIST_FILENAME:
 						if (pIns)
 						{
-							memcpy(s, pIns->filename, sizeof(pIns->filename));
-							s[CountOf(pIns->filename)] = 0;
+							s = pIns->filename;
 						}
 						break;
 					case INSLIST_PLUGIN:
 						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
 						{
-							wsprintf(s, "FX%02u: %s", pIns->nMixPlug, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
+							s.Format(_T("FX%02u: "), pIns->nMixPlug);
+							s += mpt::ToCString(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName());
 						}
 						break;
 					}
 					lvi.mask = LVIF_TEXT;
 					lvi.iItem = iIns;
 					lvi.iSubItem = nCol;
-					lvi.pszText = (LPTSTR)s;
+					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iIns < nCount))
 					{
 						BOOL bOk = TRUE;
 						if (iIns < nCount)
 						{
+							TCHAR stmp[512];
 							lvi2 = lvi;
-							lvi2.pszText = (LPTSTR)stmp;
-							lvi2.cchTextMax = sizeof(stmp);
+							lvi2.pszText = stmp;
+							lvi2.cchTextMax = mpt::size(stmp);
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
-							if (!strcmp(s, stmp)) bOk = FALSE;
+							if (s == stmp) bOk = FALSE;
 						}
 						if (bOk) m_ItemList.SetItem(&lvi);
 					} else

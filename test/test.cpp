@@ -251,42 +251,31 @@ static MPT_NOINLINE void TestVersion()
 	//Verify that the version obtained from the executable file is the same as
 	//defined in MptVersion.
 	{
-		char  szFullPath[MAX_PATH];
+		WCHAR szFullPath[MAX_PATH];
 		DWORD dwVerHnd;
 		DWORD dwVerInfoSize;
 
 		// Get version information from the application
-		::GetModuleFileName(NULL, szFullPath, sizeof(szFullPath));
-		dwVerInfoSize = ::GetFileVersionInfoSize(szFullPath, &dwVerHnd);
+		::GetModuleFileNameW(NULL, szFullPath, mpt::size(szFullPath));
+		dwVerInfoSize = ::GetFileVersionInfoSizeW(szFullPath, &dwVerHnd);
 		if (!dwVerInfoSize)
 			throw std::runtime_error("!dwVerInfoSize is true");
 
-		char *pVersionInfo;
-		try
-		{
-			pVersionInfo = new char[dwVerInfoSize];
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			throw std::runtime_error("Could not allocate memory for pVersionInfo");
-		}
+		std::vector<TCHAR> pVersionInfo(dwVerInfoSize);
 
-		char* szVer = NULL;
+		WCHAR *szVer = nullptr;
 		UINT uVerLength;
-		if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd,
-								   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo)))
+		if (!(::GetFileVersionInfoW(szFullPath, (DWORD)dwVerHnd,
+								   (DWORD)dwVerInfoSize, pVersionInfo.data())))
 		{
-			delete[] pVersionInfo;
 			throw std::runtime_error("GetFileVersionInfo() returned false");
 		}
-		if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"),
+		if (!(::VerQueryValueW(pVersionInfo.data(), L"\\StringFileInfo\\040904b0\\FileVersion",
 							  (LPVOID*)&szVer, &uVerLength))) {
-			delete[] pVersionInfo;
 			throw std::runtime_error("VerQueryValue() returned false");
 		}
 
-		std::string version = szVer;
-		delete[] pVersionInfo;
+		std::string version = mpt::ToCharset(mpt::CharsetASCII, szVer);
 
 		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
 		version = mpt::String::Replace(version, ",", ".");

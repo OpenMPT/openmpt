@@ -5863,32 +5863,26 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &
 
 		bool itemFound = false;
 
-		TCHAR s[64];
-
+		CString s;
 		if(!plug)
 		{
-			_tcscpy(s, _T("No plugin"));
+			s = _T("No Plugin");
 			itemFound = true;
 		} else
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug - 1];
 			if(plugin.IsValidPlugin())
 			{
-				wsprintf(s, _T("FX%u: "), plug);
-				_tcscat(s, plugin.GetName());
+				s.Format(_T("FX%u: "), plug);
+				s += plugin.GetName();
 				itemFound = true;
 			}
 		}
 
 		if (itemFound)
 		{
-			if (plug == sndFile.ChnSettings[nChn].nMixPlugin)
-			{
-				AppendMenu(hMenu, (MF_STRING | MF_CHECKED), ID_PLUGSELECT + plug, s);
-			} else
-			{
-				AppendMenu(hMenu, MF_STRING, ID_PLUGSELECT + plug, s);
-			}
+			UINT flags = MF_STRING | ((plug == sndFile.ChnSettings[nChn].nMixPlugin) ? MF_CHECKED : 0);
+			AppendMenu(hMenu, flags, ID_PLUGSELECT + plug, s);
 		}
 	}
 	return true;
@@ -6176,7 +6170,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			{
 				for(INSTRUMENTINDEX i = 1; i <= sndFile->GetNumInstruments() ; i++)
 				{
-					if (sndFile->Instruments[i] == NULL)
+					if (sndFile->Instruments[i] == nullptr)
 						continue;
 
 					CString instString = modDoc->GetPatternViewInstrumentName(i, true);
@@ -6189,10 +6183,11 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 			} else
 			{
-				CHAR s[64];
+				CString s;
 				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).pSample != nullptr)
 				{
-					wsprintf(s, "%02d: %s", i, sndFile->GetSampleName(i));
+					s.Format(_T("%02d: "), i);
+					s += sndFile->GetSampleName(i);
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, s);
 					addSeparator = true;
 				}
@@ -6229,7 +6224,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 		return false;
 	}
 	
-	char s[72];
+	CString s;
 
 	// Create sub menu for "change plugin"
 	HMENU pluginChangeMenu = ::CreatePopupMenu();
@@ -6238,7 +6233,8 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	{
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
-			wsprintf(s, "%02d: %s", nPlg + 1, sndFile->m_MixPlugins[nPlg].GetName());
+			s.Format(_T("%02u: "), nPlg + 1);
+			s += sndFile->m_MixPlugins[nPlg].GetName();
 			AppendMenu(pluginChangeMenu, MF_STRING | (((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0), ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}

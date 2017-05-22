@@ -202,12 +202,12 @@ void CViewGlobals::OnInitialUpdate()
 	m_sbValue.SetPos(0);
 	m_sbValue.SetRange(0, 100);
 
-	m_CbnSpecialMixProcessing.AddString("Default");
-	m_CbnSpecialMixProcessing.AddString("Wet subtract");
-	m_CbnSpecialMixProcessing.AddString("Dry subtract");
-	m_CbnSpecialMixProcessing.AddString("Mix subtract");
-	m_CbnSpecialMixProcessing.AddString("Middle subtract");
-	m_CbnSpecialMixProcessing.AddString("LR balance");
+	m_CbnSpecialMixProcessing.AddString(_T("Default"));
+	m_CbnSpecialMixProcessing.AddString(_T("Wet Subtract"));
+	m_CbnSpecialMixProcessing.AddString(_T("Dry Subtract"));
+	m_CbnSpecialMixProcessing.AddString(_T("Mix Subtract"));
+	m_CbnSpecialMixProcessing.AddString(_T("Middle Subtract"));
+	m_CbnSpecialMixProcessing.AddString(_T("LR Balance"));
 	m_SpinMixGain.SetRange(0,80);
 	m_SpinMixGain.SetPos(10);
 	SetDlgItemText(IDC_EDIT16, _T("Gain: x1.0"));
@@ -264,11 +264,10 @@ void CViewGlobals::RecalcLayout()
 int CViewGlobals::GetDlgItemIntEx(UINT nID)
 //-----------------------------------------
 {
-	CHAR s[80];
-	s[0] = 0;
-	GetDlgItemText(nID, s, sizeof(s));
-	if ((s[0] < '0') || (s[0] > '9')) return -1;
-	return atoi(s);
+	CString s;
+	GetDlgItemText(nID, s);
+	if(s.GetLength() < 1 || s[0] < _T('0') || s[0] > _T('9')) return -1;
+	return _ttoi(s);
 }
 
 
@@ -313,7 +312,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		return;
 	}
 
-	TCHAR s[128];
+	CString s;
 	nTabCount = (sndFile.m_nChannels + (CHANNELS_IN_TAB - 1)) / CHANNELS_IN_TAB;
 	if (nTabCount != m_TabCtrl.GetItemCount())
 	{
@@ -324,10 +323,10 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
 			const int lastItem = MIN(iItem * CHANNELS_IN_TAB + CHANNELS_IN_TAB, MAX_BASECHANNELS);
-			wsprintf(s, _T("%u - %u"), iItem * CHANNELS_IN_TAB + 1, lastItem);
+			s.Format(_T("%u - %u"), iItem * CHANNELS_IN_TAB + 1, lastItem);
 			TC_ITEM tci;
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
-			tci.pszText = s;
+			tci.pszText = const_cast<TCHAR *>(s.GetString());
 			tci.lParam = iItem * CHANNELS_IN_TAB;
 			m_TabCtrl.InsertItem(iItem, &tci);
 		}
@@ -352,8 +351,10 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			if(nChn < MAX_BASECHANNELS)
 			{
 				// Text
-				s[0] = 0;
-				if (bEnable) wsprintf(s, _T("Channel %u"), nChn + 1);
+				if(bEnable)
+					s.Format(_T("Channel %u"), nChn + 1);
+				else
+					s.Empty();
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
 				// Mute
 				CheckDlgButton(IDC_CHECK1 + ichn * 2, sndFile.ChnSettings[nChn].dwFlags[CHN_MUTE] ? TRUE : FALSE);
@@ -371,7 +372,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
 
 				// Channel name
-				mpt::String::Copy(s, sndFile.ChnSettings[nChn].szName);
+				s = sndFile.ChnSettings[nChn].szName;
 				SetDlgItemText(IDC_EDIT9 + ichn, s);
 				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
 			}
@@ -438,7 +439,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		int gain = plugin.GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
-		_stprintf(s, _T("Gain: x%1.1f"), value);
+		s.Format(_T("Gain: x%1.1f"), value);
 		SetDlgItemText(IDC_EDIT16, s);
 		m_SpinMixGain.SetPos(gain);
 
@@ -460,13 +461,13 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 
 			// Input / Output type
 			int in = pPlugin->GetNumInputChannels(), out = pPlugin->GetNumOutputChannels();
-			if (in < 1) _tcscpy(s, _T("No input"));
-			else if (in == 1) _tcscpy(s, _T("Mono-In"));
-			else _tcscpy(s, _T("Stereo-In"));
-			_tcscat(s, _T(", "));
-			if (out < 1) _tcscat(s, _T("No output"));
-			else if (out == 1) _tcscat(s, _T("Mono-Out"));
-			else _tcscat(s, _T("Stereo-Out"));
+			if (in < 1) s = _T("No input");
+			else if (in == 1) s = _T("Mono-In");
+			else s = _T("Stereo-In");
+			s += _T(", ");
+			if (out < 1) s += _T("No output");
+			else if (out == 1) s += _T("Mono-Out");
+			else s += _T("Stereo-Out");
 
 			// For now, only display the "current" preset.
 			// This prevents the program from hanging when switching between plugin slots or
@@ -483,15 +484,13 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			GetDlgItem(IDC_EDIT14)->EnableWindow(TRUE);
 		} else
 		{
-			s[0] = 0;
+			s.Empty();
 			if (m_CbnParam.GetCount() > 0) m_CbnParam.ResetContent();
 			m_nCurrentParam = 0;
 
-			CHAR s2[16];
 			m_CbnPreset.SetRedraw(FALSE);
 			m_CbnPreset.ResetContent();
-			wsprintf(s2, "none");
-			m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
+			m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("none")), 0);
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(FALSE);
@@ -519,12 +518,13 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			if(outPlug.IsValidPlugin())
 			{
 				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, outPlug.GetLibraryName());
+				s.Format(_T("FX%d: "), iOut + 1);
+				s += libName.c_str();
 				if(!strcmp(outPlug.GetName(), "") || libName != outPlug.GetName())
 				{
-					wsprintf(s, _T("FX%d: %s"), iOut + 1, libName.c_str());
-				} else
-				{
-					wsprintf(s, _T("FX%d: %s (%s)"), iOut + 1, libName.c_str(), outPlug.GetName());
+					s += _T(" (");
+					s += outPlug.GetName();
+					s += _T(")");
 				}
 
 				int n = m_CbnOutput.AddString(s);
@@ -557,6 +557,7 @@ void CViewGlobals::PopulateChannelPlugins()
 {
 	// Channel effect lists
 	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	CString s;
 	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
 		const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
@@ -572,8 +573,8 @@ void CViewGlobals::PopulateChannelPlugins()
 					|| (strcmp(sndFile.m_MixPlugins[ifx].GetName(), "")
 					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1)))
 				{
-					CHAR s[128];
-					wsprintf(s, "FX%u: %s", ifx + 1, sndFile.m_MixPlugins[ifx].GetName());
+					s.Format(_T("FX%u: "), ifx + 1);
+					s += sndFile.m_MixPlugins[ifx].GetName();
 					int n = m_CbnEffects[ichn].AddString(s);
 					m_CbnEffects[ichn].SetItemData(n, ifx+1);
 					if (sndFile.ChnSettings[nChn].nMixPlugin == ifx+1) fxsel = n;
@@ -879,7 +880,6 @@ void CViewGlobals::OnFx4Changed() {OnFxChanged(3);}
 void CViewGlobals::OnPluginNameChanged()
 //--------------------------------------
 {
-	CHAR s[32];
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
@@ -887,11 +887,11 @@ void CViewGlobals::OnPluginNameChanged()
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 
-		GetDlgItemText(IDC_EDIT13, s, CountOf(s));
-		mpt::String::SetNullTerminator(s);
-		if (strcmp(s, plugin.GetName()))
+		CString s;
+		GetDlgItemText(IDC_EDIT13, s);
+		if (s != plugin.GetName())
 		{
-			mpt::String::Copy(plugin.Info.szName, s);
+			mpt::String::Copy(plugin.Info.szName, s.GetString());
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);
@@ -1026,7 +1026,7 @@ void CViewGlobals::OnFocusParam()
 		{
 			TCHAR s[32];
 			float fValue = pPlugin->GetParameter(m_nCurrentParam);
-			sprintf(s, _T("%f"), fValue);
+			_stprintf(s, _T("%f"), fValue);
 			LockControls();
 			SetDlgItemText(IDC_EDIT14, s);
 			UnlockControls();
@@ -1450,9 +1450,8 @@ void CViewGlobals::OnInsertSlot()
 //-------------------------------
 {
 	CString prompt;
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
-	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin + 1);
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	prompt.Format(_T("Insert empty slot before slot FX%d?"), m_nCurrentPlugin + 1);
 
 	// If last plugin slot is occupied, move it so that the plugin is not lost.
 	// This could certainly be improved...
@@ -1465,7 +1464,7 @@ void CViewGlobals::OnInsertSlot()
 			moveLastPlug = true;
 		} else
 		{
-			prompt.Append("\nWarning: plugin data in last slot will be lost.");
+			prompt += _T("\nWarning: plugin data in last slot will be lost.");
 		}
 	}
 	if(Reporting::Confirm(prompt) == cnfYes)

@@ -385,9 +385,9 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 			memcpy(undo.samplePtr, oldSample.pSample8 + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
 #ifdef _DEBUG
-			char s[64];
+			TCHAR s[64];
 			const size_t nSize = (GetBufferCapacity(UndoBuffer) + GetBufferCapacity(RedoBuffer) + changeLen * bytesPerSample) >> 10;
-			wsprintf(s, "Sample undo/redo buffer size is now %u.%u MB\n", nSize >> 10, (nSize & 1023) * 100 / 1024);
+			wsprintf(s, _T("Sample undo/redo buffer size is now %u.%u MB\n"), nSize >> 10, (nSize & 1023) * 100 / 1024);
 			Log(s);
 #endif
 
