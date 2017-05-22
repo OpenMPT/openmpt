@@ -115,11 +115,12 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	m_EventCBox.SetItemData(m_EventCBox.AddString(_T("Channel Aftertouch")), MIDIEvents::evChannelAftertouch);
 	
 	// Add controller names
-	CString temp;
+	CString s;
 	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
 	{
-		temp.Format("%3u %s", i, MIDIEvents::MidiCCNames[i]);
-		m_ControllerCBox.AddString(temp);
+		s.Format(_T("%3u "), i);
+		s += MIDIEvents::MidiCCNames[i];
+		m_ControllerCBox.AddString(s);
 	}
 
 	// Add plugin names

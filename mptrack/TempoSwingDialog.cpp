@@ -427,7 +427,7 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 BOOL CTempoSwingDlg::SliderContainer::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 //-----------------------------------------------------------------------------------
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	for(size_t i = 0; i < m_parent.m_controls.size(); i++)
 	{
 		if((HWND)pNMHDR->idFrom == m_parent.m_controls[i]->valueSlider.m_hWnd)

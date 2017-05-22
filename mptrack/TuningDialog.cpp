@@ -781,9 +781,8 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 {
 	if(m_pActiveTuning)
 	{
-		const BYTE BS = 5;
-		char buffer[BS];
-		m_EditFineTuneSteps.GetWindowText(buffer, BS);
+		TCHAR buffer[5];
+		m_EditFineTuneSteps.GetWindowText(buffer, mpt::size(buffer));
 		m_EditFineTuneSteps.SetWindowText(mpt::ToString(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))).c_str());
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();

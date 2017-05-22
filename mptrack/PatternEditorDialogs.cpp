@@ -795,7 +795,7 @@ void CEditCommand::UpdateVolCmdValue()
 void CEditCommand::UpdateEffectValue(bool set)
 //--------------------------------------------
 {
-	TCHAR s[128] = _T("");
+	CString s;
 
 	uint16 newPlugParam = 0;
 	ModCommand::PARAM newParam = 0;
@@ -804,7 +804,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 	{
 		// plugin param control note
 		newPlugParam = static_cast<uint16>(sldParam.GetPos());
-		wsprintf(s, _T("Value: %u"), newPlugParam);
+		s.Format(_T("Value: %u"), newPlugParam);
 	} else
 	{
 		// process as effect
@@ -905,7 +905,6 @@ BOOL CChordEditor::OnInitDialog()
 //-------------------------------
 {
 	CMainFrame *pMainFrm;
-	CHAR s[128];
 
 	CDialog::OnInitDialog();
 	m_Keyboard.Init(m_hWnd, 2);
@@ -920,14 +919,21 @@ BOOL CChordEditor::OnInitDialog()
 	AppendNotesToControl(m_CbnBaseNote, NOTE_MIN, NOTE_MIN + 3 * 12 - 1);
 
 	// Minor notes
+	CString s;
 	for (int inotes=-1; inotes<24; inotes++)
 	{
-		if (inotes < 0) strcpy(s, "--"); else
-			if (inotes < 12) wsprintf(s, "%s", CSoundFile::m_NoteNames[inotes % 12]);
-			else wsprintf(s, "%s (+%d)", CSoundFile::m_NoteNames[inotes % 12], inotes / 12);
-			m_CbnNote1.AddString(s);
-			m_CbnNote2.AddString(s);
-			m_CbnNote3.AddString(s);
+		if(inotes < 0)
+		{
+			s = _T("--");
+		} else
+		{
+			s = CSoundFile::m_NoteNames[inotes % 12];
+			if(inotes >= 12)
+				s.AppendFormat(_T(" (+%d)"), inotes / 12);
+		}
+		m_CbnNote1.AddString(s);
+		m_CbnNote2.AddString(s);
+		m_CbnNote3.AddString(s);
 	}
 	// Update Dialog
 	OnChordChanged();

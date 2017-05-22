@@ -293,7 +293,7 @@ void CSelectPluginDlg::OnNameFilterChanged()
 //------------------------------------------
 {
 	// Update name filter text
-	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(GetWindowTextW(*GetDlgItem(IDC_NAMEFILTER))));
+	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(::GetWindowTextW(*GetDlgItem(IDC_NAMEFILTER))));
 
 	UpdatePluginsList();
 }
@@ -546,7 +546,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	{
 		SetDlgItemText(IDC_VENDOR, _T(""));
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T(""));
-		SetDlgItemText(IDC_PLUGINTAGS, "");
+		SetDlgItemText(IDC_PLUGINTAGS, _T(""));
 	}
 	GetDlgItem(IDC_PLUGINTAGS)->EnableWindow(enableTagsTextBox);
 	GetDlgItem(IDC_BUTTON2)->EnableWindow(enableRemoveButton);

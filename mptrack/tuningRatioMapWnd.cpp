@@ -60,8 +60,7 @@ void CTuningRatioMapWnd::OnPaint()
 	if ((m_cxFont > 0) && (m_cyFont > 0))
 	{
 		BOOL bFocus = (::GetFocus() == m_hWnd) ? TRUE : FALSE;
-		CHAR s[64];
-		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
+		CString s;
 		CRect rect;
 
 		NOTEINDEXTYPE nNotes = static_cast<NOTEINDEXTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
@@ -69,13 +68,12 @@ void CTuningRatioMapWnd::OnPaint()
 		NOTEINDEXTYPE nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
 
-
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
 			BOOL bHighLight;
 			// Note
 			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
-			s[0] = 0;
+			s.Empty();
 
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 			std::string temp;
@@ -84,10 +82,10 @@ void CTuningRatioMapWnd::OnPaint()
 				temp = "(" + mpt::ToString(noteToDraw) + ")   " + m_pTuning->GetNoteName(noteToDraw);
 			}
 
-			if(isValidNote && temp.size()+1 < sizeofS)
-				wsprintf(s, "%s", temp.c_str());
+			if(isValidNote)
+				s = temp.c_str();
 			else
-				wsprintf(s, "%s", "...");
+				s = _T("...");
 
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
@@ -96,7 +94,7 @@ void CTuningRatioMapWnd::OnPaint()
 			bHighLight = ((bFocus) && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
-			strcpy(s, "...");
+			s = _T("...");
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if (nPos == (int)m_nNote)
 			{
@@ -105,8 +103,8 @@ void CTuningRatioMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			std::string str = mpt::ToString(m_pTuning->GetRatio(noteToDraw));
-			dc.DrawText(str.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			s = mpt::ToString(m_pTuning->GetRatio(noteToDraw)).c_str();
+			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
 		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);

@@ -246,7 +246,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Volume Command
 	m_cbnVolCmd.SetRedraw(FALSE);
 	m_cbnVolCmd.InitStorage(m_effectInfo.GetNumVolCmds(), 15);
-	m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(" None"), (DWORD_PTR)-1);
+	m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(_T(" None")), (DWORD_PTR)-1);
 	UINT count = m_effectInfo.GetNumVolCmds();
 	for (UINT n=0; n<count; n++)
 	{
@@ -352,14 +352,14 @@ void CFindReplaceTab::UpdateInstrumentList()
 		AddPluginNamesToCombobox(m_cbnInstr, m_sndFile.m_MixPlugins, false);
 	} else
 	{
-		TCHAR s[256];
+		CString s;
 		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
 		{
-			wsprintf(s, _T("%03d:"), n);
+			s.Format(_T("%03d:"), n);
 			if(m_sndFile.GetNumInstruments())
-				_tcscat(s, m_sndFile.GetInstrumentName(n));
+				s += m_sndFile.GetInstrumentName(n);
 			else
-				_tcscat(s, m_sndFile.m_szNames[n]);
+				s += m_sndFile.m_szNames[n];
 			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);
 		}
 	}
@@ -707,8 +707,8 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 		{
 			if(isHex)
 			{
-				std::string sHex(m_cbnParam.GetWindowTextLengthA(), ' ');
-				m_cbnParam.GetWindowTextA(&sHex[0], sHex.length() + 1);
+				std::string sHex(::GetWindowTextLengthA(m_cbnParam), ' ');
+				::GetWindowTextA(m_cbnParam, &sHex[0], sHex.length() + 1);
 				item = mpt::String::Parse::HexToUnsignedInt(sHex);
 			} else
 			{
@@ -803,8 +803,8 @@ void CFindReplaceTab::OnParamChanged()
 		item = m_cbnParam.GetItemData(item);
 	} else
 	{
-		std::string s(m_cbnParam.GetWindowTextLengthA(), ' ');
-		m_cbnParam.GetWindowTextA(&s[0], s.length() + 1);
+		std::string s(::GetWindowTextLengthA(m_cbnParam), ' ');
+		::GetWindowTextA(m_cbnParam, &s[0], s.length() + 1);
 		item = mpt::String::Parse::HexToUnsignedInt(s);
 	}
 

@@ -53,9 +53,9 @@ BOOL COptionsSampleEditor::OnInitDialog()
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, 200);
 	RecalcUndoSize();
 
-	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("FLAC"), dfFLAC);
-	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("WAV"), dfWAV);
-	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("RAW"), dfRAW);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("FLAC")), dfFLAC);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("WAV")), dfWAV);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("RAW")), dfRAW);
 	m_cbnDefaultSampleFormat.SetCurSel(TrackerSettings::Instance().m_defaultSampleFormat);
 
 	CSliderCtrl *slider = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1));
@@ -67,9 +67,9 @@ BOOL COptionsSampleEditor::OnInitDialog()
 
 	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? BST_CHECKED : BST_UNCHECKED);
 
-	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("MIDI volume"), PLUGIN_VOLUMEHANDLING_MIDI);
-	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("Dry/Wet ratio"), PLUGIN_VOLUMEHANDLING_DRYWET);
-	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("None"), PLUGIN_VOLUMEHANDLING_IGNORE);
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString(_T("MIDI volume")), PLUGIN_VOLUMEHANDLING_MIDI);
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString(_T("Dry/Wet ratio")), PLUGIN_VOLUMEHANDLING_DRYWET);
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString(_T("None")), PLUGIN_VOLUMEHANDLING_IGNORE);
 	m_cbnDefaultVolumeHandling.SetCurSel(TrackerSettings::Instance().DefaultPlugVolumeHandling);
 
 	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? BST_CHECKED : BST_UNCHECKED);

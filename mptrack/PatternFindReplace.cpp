@@ -478,15 +478,15 @@ EndSearch:
 		// Note
 		if(FindReplace::instance.findFlags[FindReplace::Note])
 		{
-			result.Append(sndFile.GetNoteName(FindReplace::instance.findNoteMin).c_str());
+			result += sndFile.GetNoteName(FindReplace::instance.findNoteMin).c_str();
 			if(FindReplace::instance.findNoteMax > FindReplace::instance.findNoteMin)
 			{
-				result.Append(_T("-"));
-				result.Append(sndFile.GetNoteName(FindReplace::instance.findNoteMax).c_str());
+				result.AppendChar(_T('-'));
+				result += sndFile.GetNoteName(FindReplace::instance.findNoteMax).c_str();
 			}
 		} else
 		{
-			result.Append(_T("???"));
+			result += _T("???");
 		}
 		result.AppendChar(_T(' '));
 
