@@ -53,7 +53,7 @@ public:
 		m_boldFont.CreateFontIndirect(&lf);
 		GetDlgItem(IDC_VERSION2)->SetFont(&m_boldFont);
 
-		GetDlgItem(IDC_VERSION1)->SetWindowText(MptVersion::str);
+		GetDlgItem(IDC_VERSION1)->SetWindowText(mpt::ToCString(mpt::CharsetASCII, MptVersion::str));
 		GetDlgItem(IDC_VERSION2)->SetWindowText(m_releaseVersion);
 		GetDlgItem(IDC_DATE)->SetWindowText(m_releaseDate);
 		GetDlgItem(IDC_SYSLINK1)->SetWindowText(_T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));

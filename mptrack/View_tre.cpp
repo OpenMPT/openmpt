@@ -232,13 +232,13 @@ void CModTree::Init()
 	if (!IsSampleBrowser())
 	{
 		// Create Midi Library
-		m_hMidiLib = InsertItem("MIDI Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
+		m_hMidiLib = InsertItem(_T("MIDI Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 		for (UINT iMidGrp=0; iMidGrp<17; iMidGrp++)
 		{
 			InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
 		}
 	}
-	m_hInsLib = InsertItem("Instrument Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
+	m_hInsLib = InsertItem(_T("Instrument Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 	RefreshMidiLibrary();
 	RefreshDlsBanks();
 	RefreshInstrumentLibrary();
@@ -645,7 +645,7 @@ void CModTree::RefreshDlsBanks()
 				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-						"Drum Kits", IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
+						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
 				// Add Instruments
 				UINT nInstr = pDlsBank->GetNumInstruments();
 				for (UINT iIns=0; iIns<nInstr; iIns++)
@@ -2179,9 +2179,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 	case MODITEM_INSLIB_INSTRUMENT:
 		if(!m_SongFileName.empty())
 		{
-			TCHAR s[32];
-			mpt::String::CopyN(s, GetItemText(m_hItemDrag));
-			const uint32 n = ConvertStrTo<uint32>(s);
+			const uint32 n = ConvertStrTo<uint32>(GetItemText(m_hItemDrag));
 			dropInfo.dwDropType = (m_itemDrag.type == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
 			dropInfo.dwDropItem = n;
 			dropInfo.pModDoc = nullptr;
@@ -2801,7 +2799,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Map Instrument"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, _T("&Play Instrument"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Unmap Instrument"));
-				AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+				AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 			case MODITEM_HDR_MIDILIB:
 			case MODITEM_HDR_MIDIGROUP:
 				AppendMenu(hMenu, MF_STRING, ID_IMPORT_MIDILIB, _T("&Import MIDI Library"));

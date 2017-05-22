@@ -157,10 +157,10 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 	index++;
 
 	CString formattedName;
-	if((unsigned char)rawname[0] < ' ')
-		formattedName.Format("%02u - Program %u", index, index);
+	if(rawname[0] >= 0 && rawname[0] < _T(' '))
+		formattedName.Format(_T("%02u - Program %u"), index, index);
 	else
-		formattedName.Format("%02u - %s", index, rawname.GetString());
+		formattedName.Format(_T("%02u - %s"), index, rawname.GetString());
 
 	return formattedName;
 }

@@ -1443,7 +1443,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		m_nBtnMouseOver = 0xFFFF;
 		UpdateNcButtonState();
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetHelpText("");
+		if (pMainFrm) pMainFrm->SetHelpText(_T(""));
 	}
 	int nTick = ScreenToTick(pt.x);
 	int nVal = Clamp(ScreenToValue(pt.y), ENVELOPE_MIN, ENVELOPE_MAX);
