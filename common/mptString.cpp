@@ -1660,9 +1660,15 @@ int CompareNoCaseAscii(const std::string &a, const std::string &b)
 mpt::ustring ToLowerCase(const mpt::ustring &s)
 {
 	#if defined(_MFC_VER)
-		CStringW tmp = mpt::ToCStringW(s);
-		tmp.MakeLower();
-		return mpt::ToUnicode(tmp);
+		#if defined(UNICODE)
+			CString tmp = mpt::ToCString(s);
+			tmp.MakeLower();
+			return mpt::ToUnicode(tmp);
+		#else // !UNICODE
+			CStringW tmp = mpt::ToCStringW(s);
+			tmp.MakeLower();
+			return mpt::ToUnicode(tmp);
+		#endif // UNICODE
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);
 		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
@@ -1673,9 +1679,15 @@ mpt::ustring ToLowerCase(const mpt::ustring &s)
 mpt::ustring ToUpperCase(const mpt::ustring &s)
 {
 	#if defined(_MFC_VER)
-		CStringW tmp = mpt::ToCStringW(s);
-		tmp.MakeUpper();
-		return mpt::ToUnicode(tmp);
+		#if defined(UNICODE)
+			CString tmp = mpt::ToCString(s);
+			tmp.MakeUpper();
+			return mpt::ToUnicode(tmp);
+		#else // !UNICODE
+			CStringW tmp = mpt::ToCStringW(s);
+			tmp.MakeUpper();
+			return mpt::ToUnicode(tmp);
+		#endif // UNICODE
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);
 		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);

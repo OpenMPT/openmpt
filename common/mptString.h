@@ -259,7 +259,7 @@ std::string ToCharset(Charset to, const CString &str);
 MPT_DEPRECATED static inline CString ToCStringW(const CString &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(const std::wstring &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
-MPT_DEPRECATED static inline CString ToCStringW(Charset from, const char * str) { return ToCStringW(from, str ? std::string(str) : std::string()); }
+MPT_DEPRECATED static inline CString ToCStringW(Charset from, const char * str) { return ToCString(from, str ? std::string(str) : std::string()); }
 #else // !UNICODE
 CStringW ToCStringW(const CString &str);
 CStringW ToCStringW(const std::wstring &str);
