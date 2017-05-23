@@ -1147,44 +1147,44 @@ bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 
 static constexpr struct
 {
-	const char *name;
-	const char *exts;
+	const MPT_UCHAR_TYPE *name;
+	const MPT_UCHAR_TYPE *exts;
 } SampleFormats[]
 {
-	{ "Wave Files (*.wav)", "*.wav" },
+	{ MPT_ULITERAL("Wave Files (*.wav)"), MPT_ULITERAL("*.wav") },
 #ifdef MPT_WITH_FLAC
-	{ "FLAC Files (*.flac,*.oga)", "*.flac;*.oga" },
+	{ MPT_ULITERAL("FLAC Files (*.flac,*.oga)"), MPT_ULITERAL("*.flac;*.oga") },
 #endif // MPT_WITH_FLAC
 #if defined(MPT_WITH_OPUSFILE)
-	{ "Opus Files (*.opus,*.oga)", "*.opus;*.oga" },
+	{ MPT_ULITERAL("Opus Files (*.opus,*.oga)"), MPT_ULITERAL("*.opus;*.oga") },
 #endif // MPT_WITH_OPUSFILE
 #if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-	{ "Ogg Vorbis Files (*.ogg,*.oga)", "*.ogg;*.oga" },
+	{ MPT_ULITERAL("Ogg Vorbis Files (*.ogg,*.oga)"), MPT_ULITERAL("*.ogg;*.oga") },
 #endif // VORBIS
 #if defined(MPT_ENABLE_MP3_SAMPLES)
-	{ "MPEG Files (*.mp1,*.mp2,*.mp3)", "*.mp1;*.mp2;*.mp3" },
+	{ MPT_ULITERAL("MPEG Files (*.mp1,*.mp2,*.mp3)"), MPT_ULITERAL("*.mp1;*.mp2;*.mp3") },
 #endif // MPT_ENABLE_MP3_SAMPLES
-	{ "XI Samples (*.xi)", "*.xi" },
-	{ "Impulse Tracker Samples (*.its)", "*.its" },
-	{ "ScreamTracker Samples (*.s3i,*.smp)", "*.s3i;*.smp" },
-	{ "GF1 Patches (*.pat)", "*.pat" },
-	{ "AIFF Files (*.aiff,*.8svx)", "*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx" },
-	{ "Sun Audio (*.au,*.snd)", "*.au;*.snd" },
+	{ MPT_ULITERAL("XI Samples (*.xi)"), MPT_ULITERAL("*.xi") },
+	{ MPT_ULITERAL("Impulse Tracker Samples (*.its)"), MPT_ULITERAL("*.its") },
+	{ MPT_ULITERAL("ScreamTracker Samples (*.s3i,*.smp)"), MPT_ULITERAL("*.s3i;*.smp") },
+	{ MPT_ULITERAL("GF1 Patches (*.pat)"), MPT_ULITERAL("*.pat") },
+	{ MPT_ULITERAL("AIFF Files (*.aiff,*.8svx)"), MPT_ULITERAL("*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx") },
+	{ MPT_ULITERAL("Sun Audio (*.au,*.snd)"), MPT_ULITERAL("*.au;*.snd") },
 };
 
 
 static mpt::ustring ConstructFileFilter(bool includeRaw)
-//-----------------------------------------------------
+//------------------------------------------------------
 {
-	mpt::ustring s = MPT_ULITERAL("All Samples|");
+	mpt::ustring s = MPT_USTRING("All Samples|");
 	bool first = true;
-	for(auto &fmt : SampleFormats)
+	for(const auto &fmt : SampleFormats)
 	{
 		if(!first)
-			s += MPT_ULITERAL(";");
+			s += MPT_USTRING(";");
 		else
 			first = false;
-		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.exts);
+		s += fmt.exts;
 	}
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
@@ -1192,22 +1192,22 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 #endif
 	if(includeRaw)
 	{
-		s += MPT_ULITERAL(";*.raw;*.snd;*.pcm");
+		s += MPT_USTRING(";*.raw;*.snd;*.pcm");
 	}
-	s += MPT_ULITERAL("|");
-	for(auto &fmt : SampleFormats)
+	s += MPT_USTRING("|");
+	for(const auto &fmt : SampleFormats)
 	{
-		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.name) + MPT_ULITERAL("|");
-		s += mpt::ToUnicode(mpt::CharsetASCII, fmt.exts) + MPT_ULITERAL("|");
+		s += fmt.name + MPT_USTRING("|");
+		s += fmt.exts + MPT_USTRING("|");
 	}
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 	s += ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToUnicode();
 #endif
 	if(includeRaw)
 	{
-		s += MPT_ULITERAL("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
+		s += MPT_USTRING("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
 	}
-	s += MPT_ULITERAL("All Files (*.*)|*.*||");
+	s += MPT_USTRING("All Files (*.*)|*.*||");
 	return s;
 }
 
