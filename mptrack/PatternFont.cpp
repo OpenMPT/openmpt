@@ -326,13 +326,15 @@ void PatternFont::UpdateFont(HWND hwnd)
 	hDC.SetTextAlign(TA_TOP | TA_LEFT);
 
 	// Empty cells (dots - i-th bit set = dot in the i-th column of a cell)
-	const uint8_t dots[5] = { 1 | 2 | 4, 2 | 4, 2 | 4, 1, 1 | 2 };
+	const uint8 dots[5] = { 1 | 2 | 4, 2 | 4, 2 | 4, 1, 1 | 2 };
+	const auto dotStr = TrackerSettings::Instance().patternFontDot.Get();
+	auto dotChar = dotStr.empty() ? MPT_UCHAR('.') : dotStr[0];
 	for(size_t cell = 0, offset = 0; cell < CountOf(dots); cell++)
 	{
-		uint8_t dot = dots[cell];
+		uint8 dot = dots[cell];
 		for(int i = 0; dot != 0; i++)
 		{
-			if(dot & 1) DrawChar(hDC, '.', pf.nClrX + offset + i * charWidth, pf.nClrY, charWidth, charHeight);
+			if(dot & 1) DrawChar(hDC, dotChar, pf.nClrX + offset + i * charWidth, pf.nClrY, charWidth, charHeight);
 			dot >>= 1;
 		}
 		offset += pf.nEltWidths[cell];
