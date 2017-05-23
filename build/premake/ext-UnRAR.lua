@@ -139,6 +139,8 @@
    "../../include/unrar/version.hpp",
    "../../include/unrar/volume.hpp",
   }
+  filter { "action:vs*" }
+    buildoptions { "/wd4996" }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll.def" }
