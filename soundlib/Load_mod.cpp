@@ -877,6 +877,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						leftPanning = true;
 					else if(m.param > 0x8F && m.param != 0xA4)
 						extendedPanning = true;
+				} else if(m.command == 0x0E && (m.param & 0xF0) == 0x80)
+				{
+					maxPanning = std::max<uint8>(maxPanning, m.param << 4);
 				}
 			}
 		}
@@ -892,13 +895,12 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	Patterns.ResizeArray(numPatterns);
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		PATTERNINDEX actualPattern = pat;
 		ModCommand *rowBase = nullptr;
 
 		if(isFLT8)
 		{
 			// FLT8: Only create "even" patterns and either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
-			actualPattern /= 2;
+			PATTERNINDEX actualPattern = pat / 2u;
 			if((pat % 2u) == 0 && !Patterns.Insert(actualPattern, 64))
 			{
 				break;
@@ -920,7 +922,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 		// For detecting PT1x mode
 		std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
-		std::vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
+		std::vector<uint8> instrWithoutNoteCount(GetNumChannels(), 0);
 
 		for(ROWINDEX row = 0; row < 64; row++, rowBase += m_nChannels)
 		{
@@ -998,12 +1000,15 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_PT_MODE);
 		m_playBehaviour.set(kMODSampleSwap);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
-		// Don't enable these hacks for ScreamTracker modules (restart position = 0x7F), to fix e.g. sample 10 in BASIC001.MOD (SHA1: 11298a5620e677beaa50bd4ed00c3710b75c81af)
-		// Note: restart position = 0x7F can also be found in ProTracker modules, e.g. professionaltracker.mod by h0ffman
-		if(maxPanning < 0x20 && fileHeader.restartPos != 0x7F)
+		if(maxPanning < 0x20)
 		{
-			m_playBehaviour.set(kMODOneShotLoops);
-			if(maxPanning > 0) m_playBehaviour.set(kMODIgnorePanning);
+			m_playBehaviour.set(kMODIgnorePanning);
+			if(fileHeader.restartPos != 0x7F)
+			{
+				// Don't enable these hacks for ScreamTracker modules (restart position = 0x7F), to fix e.g. sample 10 in BASIC001.MOD (SHA1: 11298a5620e677beaa50bd4ed00c3710b75c81af)
+				// Note: restart position = 0x7F can also be found in ProTracker modules, e.g. professionaltracker.mod by h0ffman
+				m_playBehaviour.set(kMODOneShotLoops);
+			}
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
 	{
