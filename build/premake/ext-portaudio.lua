@@ -86,10 +86,9 @@
   filter { "action:vs*" }
     buildoptions { "/wd4018", "/wd4267", "/wd4312" }
   filter {}
-  links {
-   "winmm",
-   "ksuser",
-  }
+  filter { "action:vs*" }
+   files { "../../build/premake/lnk/ext-portaudio.c" }
+  filter {}
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter { "configurations:DebugShared" }
