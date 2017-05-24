@@ -27,7 +27,7 @@ is just a high-level summary.
     major.minor.patch as well as the recommendations of the
     [SemVer](http://semver.org/) scheme now.
  *  [**Change**] The output directories of the MSVC build system were changed to
-    'bin/vs2015-shared/x86-64-win7/' (and similar) layout which allows building
+    `bin/vs2015-shared/x86-64-win7/` (and similar) layout which allows building
     in the same tree with different compiler versions without overwriting other
     outputs.
  *  [**Change**] The emscripten build now exports libopenmpt as 'libopenmpt'
