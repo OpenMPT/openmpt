@@ -112,7 +112,7 @@ using namespace ::std;
  *
  * \section libopenmpt_cpp_threads libopenmpt in multi-threaded environments
  *
- * - libopenmpt is tread-aware.
+ * - libopenmpt is thread-aware.
  * - Individual libopenmpt objects are not thread-safe.
  * - libopenmpt itself does not spawn any user-visible threads but may spawn
  * threads for internal use.
