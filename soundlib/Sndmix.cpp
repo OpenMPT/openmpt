@@ -196,7 +196,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 #ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
 	{
-		if(plug.pMixPlugin)
+		if(m_MixPlugins[i].pMixPlugin)
 		{
 			mixPlugins = true;
 			break;
