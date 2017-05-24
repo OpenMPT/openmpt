@@ -31,7 +31,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
-static const uint32 PreAmpTable[16] =
+static const uint8 PreAmpTable[16] =
 {
 	0x60, 0x60, 0x60, 0x70,	// 0-7
 	0x80, 0x88, 0x90, 0x98,	// 8-15
@@ -40,7 +40,7 @@ static const uint32 PreAmpTable[16] =
 };
 
 #ifndef NO_AGC
-static const uint32 PreAmpAGCTable[16] =
+static const uint8 PreAmpAGCTable[16] =
 {
 	0x60, 0x60, 0x60, 0x64,
 	0x68, 0x70, 0x78, 0x80,
@@ -121,15 +121,14 @@ bool CSoundFile::FadeSong(uint32 msec)
 	// Ramp everything down
 	for (uint32 noff=0; noff < m_nMixChannels; noff++)
 	{
-		ModChannel *pramp = &m_PlayState.Chn[m_PlayState.ChnMix[noff]];
-		if (!pramp) continue;
-		pramp->newRightVol = pramp->newLeftVol = 0;
-		pramp->leftRamp = (-pramp->leftVol << VOLUMERAMPPRECISION) / nRampLength;
-		pramp->rightRamp = (-pramp->rightVol << VOLUMERAMPPRECISION) / nRampLength;
-		pramp->rampLeftVol = pramp->leftVol << VOLUMERAMPPRECISION;
-		pramp->rampRightVol = pramp->rightVol << VOLUMERAMPPRECISION;
-		pramp->nRampLength = nRampLength;
-		pramp->dwFlags.set(CHN_VOLUMERAMP);
+		ModChannel &pramp = m_PlayState.Chn[m_PlayState.ChnMix[noff]];
+		pramp.newRightVol = pramp.newLeftVol = 0;
+		pramp.leftRamp = (-pramp.leftVol << VOLUMERAMPPRECISION) / nRampLength;
+		pramp.rightRamp = (-pramp.rightVol << VOLUMERAMPPRECISION) / nRampLength;
+		pramp.rampLeftVol = pramp.leftVol << VOLUMERAMPPRECISION;
+		pramp.rampRightVol = pramp.rightVol << VOLUMERAMPPRECISION;
+		pramp.nRampLength = nRampLength;
+		pramp.dwFlags.set(CHN_VOLUMERAMP);
 	}
 	return true;
 }
@@ -197,7 +196,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 #ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
 	{
-		if(m_MixPlugins[i].pMixPlugin)
+		if(plug.pMixPlugin)
 		{
 			mixPlugins = true;
 			break;
@@ -436,9 +435,9 @@ bool CSoundFile::ProcessRow()
 					ORDERINDEX restartPosOverride = Order().GetRestartPos();
 					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order().size() && m_PlayState.m_nCurrentOrder > 0)
 					{
-						/* Subtune detection. Subtunes are separated by "---" order items, so if we're in a
-						   subtune and there's no restart position, we go to the first order of the subtune
-						   (i.e. the first order after the previous "---" item) */
+						// Subtune detection. Subtunes are separated by "---" order items, so if we're in a
+						// subtune and there's no restart position, we go to the first order of the subtune
+						// (i.e. the first order after the previous "---" item)
 						for(ORDERINDEX ord = m_PlayState.m_nCurrentOrder - 1; ord > 0; ord--)
 						{
 							if(Order()[ord] == Order.GetInvalidPatIndex())
@@ -799,10 +798,7 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 			const uint8 attenuation = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(pChn->nTremoloType, pChn->nTremoloPos);
-			if(GetType() == MOD_TYPE_DMF)
-			{
-				delta -= 127;
-			} else if((pChn->nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2TremoloRampWaveform])
+			if((pChn->nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2TremoloRampWaveform])
 			{
 				// FT2 compatibility: Tremolo ramp down / triangle implementation is weird and affected by vibrato position (copypaste bug)
 				// Test case: TremoloWaveforms.xm, TremoloVibrato.xm
@@ -818,7 +814,14 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 				else
 					delta = ramp;
 			}
-			vol += (delta * pChn->nTremoloDepth) / (1 << attenuation);
+			if(GetType() != MOD_TYPE_DMF)
+			{
+				vol += (delta * pChn->nTremoloDepth) / (1 << attenuation);
+			} else
+			{
+				// Tremolo in DMF always attenuates by a percentage of the current note volume
+				vol -= (vol * pChn->nTremoloDepth * (64 - delta)) / (128 * 64);
+			}
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
@@ -1493,7 +1496,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		{
 			if(chn.nVibratoPos % 2u)
 			{
-				period += chn.nVibratoDepth * 166;	// Already multiplied by 4, and it seems like the real factor here is 669... how original =)
+				period += chn.nVibratoDepth * 167;	// Already multiplied by 4, and it seems like the real factor here is 669... how original =)
 			}
 			chn.nVibratoPos++;
 			return;
@@ -2309,11 +2312,6 @@ bool CSoundFile::ReadNote()
 				pChn->resamplingMode = static_cast<uint8>(m_Resampler.m_Settings.SrcMode);
 			}
 
-			/*if (m_pConfig->getUseGlobalPreAmp())
-			{
-				pChn->nNewRightVol >>= MIXING_ATTENUATION;
-				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
-			}*/
 			const int extraAttenuation = m_PlayConfig.getExtraSampleAttenuation();
 			pChn->newLeftVol /= (1 << extraAttenuation);
 			pChn->newRightVol /= (1 << extraAttenuation);
