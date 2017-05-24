@@ -146,9 +146,6 @@
   characterset "Unicode"
   links { "libopenmpt", "zlib", "vorbis", "ogg" }
   filter { "not configurations:*Shared" }
-  links { "delayimp" }
-  linkoptions {
-  }
   filter { "configurations:*Shared" }
    defines { "LIBOPENMPT_USE_DLL" }
   filter {}
