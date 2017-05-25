@@ -35,8 +35,6 @@
 #endif
 #endif // _MSC_VER
 
-#define LIBOPENMPT_EXT_IS_EXPERIMENTAL
-
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif

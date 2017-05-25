@@ -651,114 +651,116 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\CompilerDetect.h" />
-    <ClInclude Include="..\..\common\ComponentManager.h" />
+    <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\Endianness.h" />
-    <ClInclude Include="..\..\common\FileReader.h" />
-    <ClInclude Include="..\..\common\FileReaderFwd.h" />
-    <ClInclude Include="..\..\common\FlagSet.h" />
-    <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
-    <ClInclude Include="..\..\common\mptBufferIO.h" />
-    <ClInclude Include="..\..\common\mptCPU.h" />
-    <ClInclude Include="..\..\common\mptCRC.h" />
-    <ClInclude Include="..\..\common\mptFileIO.h" />
-    <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptLibrary.h" />
-    <ClInclude Include="..\..\common\mptMutex.h" />
-    <ClInclude Include="..\..\common\mptOS.h" />
-    <ClInclude Include="..\..\common\mptPathString.h" />
-    <ClInclude Include="..\..\common\mptRandom.h" />
-    <ClInclude Include="..\..\common\mptString.h" />
-    <ClInclude Include="..\..\common\mptStringFormat.h" />
-    <ClInclude Include="..\..\common\mptStringParse.h" />
-    <ClInclude Include="..\..\common\mptThread.h" />
-    <ClInclude Include="..\..\common\mptTime.h" />
-    <ClInclude Include="..\..\common\mptTypeTraits.h" />
-    <ClInclude Include="..\..\common\mptUUID.h" />
-    <ClInclude Include="..\..\common\mptWine.h" />
+    <ClInclude Include="..\..\common\FileReaderFwd.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
-    <ClInclude Include="..\..\common\serialization_utils.h" />
-    <ClInclude Include="..\..\common\stdafx.h" />
+    <ClInclude Include="..\..\common\mptLibrary.h" />
     <ClInclude Include="..\..\common\StringFixer.h" />
+    <ClInclude Include="..\..\common\Logging.h" />
+    <ClInclude Include="..\..\common\mptCRC.h" />
+    <ClInclude Include="..\..\common\mptTypeTraits.h" />
+    <ClInclude Include="..\..\common\mptStringParse.h" />
+    <ClInclude Include="..\..\common\mptCPU.h" />
+    <ClInclude Include="..\..\common\mptWine.h" />
+    <ClInclude Include="..\..\common\serialization_utils.h" />
+    <ClInclude Include="..\..\common\mptOS.h" />
+    <ClInclude Include="..\..\common\mptUUID.h" />
     <ClInclude Include="..\..\common\typedefs.h" />
-    <ClInclude Include="..\..\common\version.h" />
+    <ClInclude Include="..\..\common\FileReader.h" />
+    <ClInclude Include="..\..\common\mptStringFormat.h" />
+    <ClInclude Include="..\..\common\mptString.h" />
+    <ClInclude Include="..\..\common\mptIO.h" />
+    <ClInclude Include="..\..\common\ComponentManager.h" />
+    <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\common\mptFileIO.h" />
+    <ClInclude Include="..\..\common\mptThread.h" />
+    <ClInclude Include="..\..\common\FlagSet.h" />
+    <ClInclude Include="..\..\common\version.h" />
+    <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\WriteMemoryDump.h" />
+    <ClInclude Include="..\..\common\mptTime.h" />
+    <ClInclude Include="..\..\common\mptBufferIO.h" />
+    <ClInclude Include="..\..\common\mptMutex.h" />
+    <ClInclude Include="..\..\common\mptRandom.h" />
+    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
-    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
-    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
-    <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
-    <ClInclude Include="..\..\soundlib\ChunkReader.h" />
-    <ClInclude Include="..\..\soundlib\Dither.h" />
-    <ClInclude Include="..\..\soundlib\Dlsbank.h" />
-    <ClInclude Include="..\..\soundlib\FloatMixer.h" />
-    <ClInclude Include="..\..\soundlib\IntMixer.h" />
-    <ClInclude Include="..\..\soundlib\ITCompression.h" />
-    <ClInclude Include="..\..\soundlib\ITTools.h" />
-    <ClInclude Include="..\..\soundlib\Loaders.h" />
-    <ClInclude Include="..\..\soundlib\Message.h" />
-    <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
-    <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
-    <ClInclude Include="..\..\soundlib\Mixer.h" />
-    <ClInclude Include="..\..\soundlib\MixerInterface.h" />
-    <ClInclude Include="..\..\soundlib\MixerLoops.h" />
-    <ClInclude Include="..\..\soundlib\MixerSettings.h" />
-    <ClInclude Include="..\..\soundlib\MixFuncTable.h" />
-    <ClInclude Include="..\..\soundlib\ModChannel.h" />
-    <ClInclude Include="..\..\soundlib\modcommand.h" />
-    <ClInclude Include="..\..\soundlib\ModInstrument.h" />
-    <ClInclude Include="..\..\soundlib\ModSample.h" />
-    <ClInclude Include="..\..\soundlib\ModSampleCopy.h" />
-    <ClInclude Include="..\..\soundlib\ModSequence.h" />
-    <ClInclude Include="..\..\soundlib\modsmp_ctrl.h" />
-    <ClInclude Include="..\..\soundlib\mod_specifications.h" />
-    <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
-    <ClInclude Include="..\..\soundlib\OggStream.h" />
-    <ClInclude Include="..\..\soundlib\pattern.h" />
-    <ClInclude Include="..\..\soundlib\patternContainer.h" />
-    <ClInclude Include="..\..\soundlib\Resampler.h" />
-    <ClInclude Include="..\..\soundlib\RowVisitor.h" />
-    <ClInclude Include="..\..\soundlib\S3MTools.h" />
-    <ClInclude Include="..\..\soundlib\SampleIO.h" />
-    <ClInclude Include="..\..\soundlib\Sndfile.h" />
-    <ClInclude Include="..\..\soundlib\Snd_defs.h" />
-    <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h" />
-    <ClInclude Include="..\..\soundlib\Tables.h" />
     <ClInclude Include="..\..\soundlib\Tagging.h" />
-    <ClInclude Include="..\..\soundlib\tuning.h" />
-    <ClInclude Include="..\..\soundlib\tuningbase.h" />
+    <ClInclude Include="..\..\soundlib\ModSampleCopy.h" />
+    <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
+    <ClInclude Include="..\..\soundlib\mod_specifications.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
-    <ClInclude Include="..\..\soundlib\WAVTools.h" />
-    <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
+    <ClInclude Include="..\..\soundlib\Dlsbank.h" />
+    <ClInclude Include="..\..\soundlib\ModSample.h" />
+    <ClInclude Include="..\..\soundlib\OggStream.h" />
+    <ClInclude Include="..\..\soundlib\Message.h" />
+    <ClInclude Include="..\..\soundlib\Loaders.h" />
+    <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h" />
+    <ClInclude Include="..\..\soundlib\ITTools.h" />
+    <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
+    <ClInclude Include="..\..\soundlib\FloatMixer.h" />
+    <ClInclude Include="..\..\soundlib\ModSequence.h" />
+    <ClInclude Include="..\..\soundlib\Tables.h" />
+    <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\..\soundlib\MixerSettings.h" />
+    <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\XMTools.h" />
-    <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\modcommand.h" />
+    <ClInclude Include="..\..\soundlib\RowVisitor.h" />
+    <ClInclude Include="..\..\soundlib\Snd_defs.h" />
+    <ClInclude Include="..\..\soundlib\ModInstrument.h" />
+    <ClInclude Include="..\..\soundlib\ITCompression.h" />
+    <ClInclude Include="..\..\soundlib\MixFuncTable.h" />
+    <ClInclude Include="..\..\soundlib\MixerInterface.h" />
+    <ClInclude Include="..\..\soundlib\tuningbase.h" />
+    <ClInclude Include="..\..\soundlib\MixerLoops.h" />
+    <ClInclude Include="..\..\soundlib\IntMixer.h" />
+    <ClInclude Include="..\..\soundlib\modsmp_ctrl.h" />
+    <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
+    <ClInclude Include="..\..\soundlib\Mixer.h" />
+    <ClInclude Include="..\..\soundlib\Resampler.h" />
+    <ClInclude Include="..\..\soundlib\S3MTools.h" />
+    <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
+    <ClInclude Include="..\..\soundlib\ModChannel.h" />
+    <ClInclude Include="..\..\soundlib\tuning.h" />
+    <ClInclude Include="..\..\soundlib\pattern.h" />
+    <ClInclude Include="..\..\soundlib\Dither.h" />
+    <ClInclude Include="..\..\soundlib\SampleIO.h" />
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
+    <ClInclude Include="..\..\soundlib\Sndfile.h" />
+    <ClInclude Include="..\..\soundlib\WAVTools.h" />
+    <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
-    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
-    <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
-    <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
-    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
-    <ClInclude Include="..\..\soundlib\plugins\dmo\Chorus.h" />
+    <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h" />
-    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
-    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Chorus.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Flanger.h" />
-    <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\I3DL2Reverb.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
-    <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
-    <ClInclude Include="..\..\sounddsp\DSP.h" />
-    <ClInclude Include="..\..\sounddsp\EQ.h" />
     <ClInclude Include="..\..\sounddsp\Reverb.h" />
+    <ClInclude Include="..\..\sounddsp\EQ.h" />
+    <ClInclude Include="..\..\sounddsp\DSP.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_config.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext_impl.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_impl.hpp" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_internal.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h" />
@@ -767,361 +769,361 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\ComponentManager.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\FileReader.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\Logging.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\misc_util.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptCPU.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptFileIO.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptIO.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptLibrary.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptOS.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptPathString.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptRandom.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptString.cpp">
-      <ObjectFileName>$(IntDir)common\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptStringFormat.cpp">
+    <ClCompile Include="..\..\common\Profiler.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\common\mptStringParse.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\common\mptPathString.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\common\mptTime.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\common\Logging.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\common\mptUUID.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptWine.cpp">
+    <ClCompile Include="..\..\common\typedefs.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\common\Profiler.cpp">
+    <ClCompile Include="..\..\common\mptStringFormat.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\common\misc_util.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptFileIO.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptString.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\common\stdafx.cpp">
+    <ClCompile Include="..\..\common\mptCPU.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\common\typedefs.cpp">
+    <ClCompile Include="..\..\common\mptIO.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\common\FileReader.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
       <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\stdafx.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\Dither.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\mptWine.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\Dlsbank.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\mptLibrary.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\Fastmix.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\ComponentManager.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\mptOS.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\ITCompression.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\ITTools.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_669.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_amf.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_ams.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_dbm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    <ClCompile Include="..\..\common\mptRandom.cpp">
+      <ObjectFileName>$(IntDir)common\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_digi.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_dmf.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_far.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_imf.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_it.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_itp.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\load_j2b.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mdl.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_med.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mid.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mo3.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mod.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mt2.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_mtm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_okt.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_plm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_psm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_ptm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_s3m.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_sfx.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_stm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_stp.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_ult.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_umx.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_wav.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_xm.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Message.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MIDIMacros.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MixerLoops.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MixerSettings.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MixFuncTable.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Mmcmp.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\ModChannel.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\modcommand.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\ModInstrument.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\ModSample.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\ModSequence.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\modsmp_ctrl.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\mod_specifications.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\MPEGFrame.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\OggStream.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\pattern.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\patternContainer.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\S3MTools.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormats.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SampleIO.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Sndfile.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Sndmix.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Snd_flt.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Snd_fx.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Tables.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Tagging.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
+    <ClCompile Include="..\..\soundlib\Load_ptm.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
+    <ClCompile Include="..\..\soundlib\Snd_fx.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Snd_flt.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_it.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_xm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\OggStream.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_stm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_imf.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModSequence.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\WAVTools.cpp">
+    <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\WindowedFIR.cpp">
+    <ClCompile Include="..\..\soundlib\patternContainer.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModInstrument.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_sfx.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Mmcmp.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Fastmix.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\modcommand.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MIDIMacros.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Message.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Dlsbank.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixerLoops.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\XMTools.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\modsmp_ctrl.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\load_j2b.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ITCompression.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Dither.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\WAVTools.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mod.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixFuncTable.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Sndmix.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MixerSettings.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\pattern.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mtm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Tables.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_psm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dbm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mt2.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_stp.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mo3.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_umx.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Sndfile.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormats.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_plm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mid.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_s3m.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\S3MTools.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\mod_specifications.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dmf.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ITTools.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Tagging.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_amf.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_itp.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MPEGFrame.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_wav.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_669.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_okt.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\WindowedFIR.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ult.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_far.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModSample.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_med.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ams.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleIO.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ModChannel.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mdl.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
+    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp">
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
-      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
-      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
-      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Flanger.cpp">
-      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\I3DL2Reverb.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\sounddsp\AGC.cpp">
-      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\sounddsp\DSP.cpp">
-      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\dmo\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\EQ.cpp">
       <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\Reverb.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\AGC.cpp">
+      <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddsp\DSP.cpp">
       <ObjectFileName>$(IntDir)sounddsp\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp">
@@ -1130,7 +1132,7 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp">
       <ObjectFileName>$(IntDir)libopenmpt\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext.cpp">
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp">
       <ObjectFileName>$(IntDir)libopenmpt\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp">

@@ -1,63 +1,52 @@
+/*
+ * libopenmpt_ext_impl.cpp
+ * -----------------------
+ * Purpose: libopenmpt extensions - implementation
+ * Notes  :
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 #include "common/stdafx.h"
 
-#define LIBOPENMPT_EXT_IS_EXPERIMENTAL
-
 #include "libopenmpt_internal.h"
 #include "libopenmpt_ext.hpp"
-#include "libopenmpt_impl.hpp"
+
+#include "libopenmpt_ext_impl.hpp"
 
 #include <stdexcept>
 
 #include "soundlib/Sndfile.h"
 
-#if defined(_MSC_VER)
-#pragma warning(disable:4702) // unreachable code
-#endif
-
 using namespace OpenMPT;
-
-#ifndef NO_LIBOPENMPT_CXX
 
 namespace openmpt {
 
-class module_ext_impl
-	: public module_impl
-	, public ext::pattern_vis
-	, public ext::interactive
-
-
-
-	/* add stuff here */
-
-
-
-{
-public:
-	module_ext_impl( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls ) {
+	module_ext_impl::module_ext_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, log, ctls ) {
 		ctor();
 	}
-	module_ext_impl( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::make_shared<std_ostream_log>( log ), ctls ) {
+	module_ext_impl::module_ext_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, log, ctls ) {
 		ctor();
 	}
-	module_ext_impl( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
+	module_ext_impl::module_ext_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, log, ctls ) {
 		ctor();
 	}
-	module_ext_impl( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
+	module_ext_impl::module_ext_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, log, ctls ) {
+		ctor();
+	}
+	module_ext_impl::module_ext_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
+		ctor();
+	}
+	module_ext_impl::module_ext_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
+		ctor();
+	}
+	module_ext_impl::module_ext_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
 		ctor();
 	}
 
-private:
 
 
-
-	/* add stuff here */
-
-
-
-private:
-
-	void ctor() {
+	void module_ext_impl::ctor() {
 
 
 
@@ -67,9 +56,9 @@ private:
 
 	}
 
-public:
 
-	~module_ext_impl() {
+
+	module_ext_impl::~module_ext_impl() {
 
 
 
@@ -79,9 +68,9 @@ public:
 
 	}
 
-public:
 
-	void * get_interface( const std::string & interface_id ) {
+
+	void * module_ext_impl::get_interface( const std::string & interface_id ) {
 		if ( interface_id.empty() ) {
 			return 0;
 		} else if ( interface_id == ext::pattern_vis_id ) {
@@ -102,7 +91,7 @@ public:
 
 	// pattern_vis
 
-	virtual effect_type get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
+	module_ext_impl::effect_type module_ext_impl::get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
 		std::uint8_t byte = get_pattern_row_channel_command( pattern, row, channel, module::command_volumeffect );
 		switch ( ModCommand::GetVolumeEffectType( byte ) ) {
 			case EFFECT_TYPE_NORMAL : return effect_general; break;
@@ -114,7 +103,7 @@ public:
 		}
 	}
 
-	virtual effect_type get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
+	module_ext_impl::effect_type module_ext_impl::get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
 		std::uint8_t byte = get_pattern_row_channel_command( pattern, row, channel, module::command_effect );
 		switch ( ModCommand::GetEffectType( byte ) ) {
 			case EFFECT_TYPE_NORMAL : return effect_general; break;
@@ -128,21 +117,21 @@ public:
 
 	// interactive
 
-	virtual void set_current_speed( std::int32_t speed ) {
+	void module_ext_impl::set_current_speed( std::int32_t speed ) {
 		if ( speed < 1 || speed > 65535 ) {
 			throw openmpt::exception("invalid tick count");
 		}
 		m_sndFile->m_PlayState.m_nMusicSpeed = speed;
 	}
 
-	virtual void set_current_tempo( std::int32_t tempo ) {
+	void module_ext_impl::set_current_tempo( std::int32_t tempo ) {
 		if ( tempo < 32 || tempo > 512 ) {
 			throw openmpt::exception("invalid tempo");
 		}
 		m_sndFile->m_PlayState.m_nMusicTempo.Set( tempo );
 	}
 
-	virtual void set_tempo_factor( double factor ) {
+	void module_ext_impl::set_tempo_factor( double factor ) {
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid tempo factor");
 		}
@@ -150,11 +139,11 @@ public:
 		m_sndFile->RecalculateSamplesPerTick();
 	}
 
-	virtual double get_tempo_factor( ) const {
+	double module_ext_impl::get_tempo_factor( ) const {
 		return 65536.0 / m_sndFile->m_nTempoFactor;
 	}
 
-	virtual void set_pitch_factor( double factor ) {
+	void module_ext_impl::set_pitch_factor( double factor ) {
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid pitch factor");
 		}
@@ -162,22 +151,22 @@ public:
 		m_sndFile->RecalculateSamplesPerTick();
 	}
 
-	virtual double get_pitch_factor( ) const {
+	double module_ext_impl::get_pitch_factor( ) const {
 		return m_sndFile->m_nFreqFactor / 65536.0;
 	}
 
-	virtual void set_global_volume( double volume ) {
+	void module_ext_impl::set_global_volume( double volume ) {
 		if ( volume < 0.0 || volume > 1.0 ) {
 			throw openmpt::exception("invalid global volume");
 		}
 		m_sndFile->m_PlayState.m_nGlobalVolume = Util::Round<uint32_t>( volume * MAX_GLOBAL_VOLUME );
 	}
 
-	virtual double get_global_volume( ) const {
+	double module_ext_impl::get_global_volume( ) const {
 		return m_sndFile->m_PlayState.m_nGlobalVolume / static_cast<double>( MAX_GLOBAL_VOLUME );
 	}
 	
-	virtual void set_channel_volume( std::int32_t channel, double volume ) {
+	void module_ext_impl::set_channel_volume( std::int32_t channel, double volume ) {
 		if ( channel < 0 || channel >= get_num_channels() ) {
 			throw openmpt::exception("invalid channel");
 		}
@@ -187,14 +176,14 @@ public:
 		m_sndFile->m_PlayState.Chn[channel].nGlobalVol = Util::Round<std::int32_t>(volume * 64.0);
 	}
 
-	virtual double get_channel_volume( std::int32_t channel ) const {
+	double module_ext_impl::get_channel_volume( std::int32_t channel ) const {
 		if ( channel < 0 || channel >= get_num_channels() ) {
 			throw openmpt::exception("invalid channel");
 		}
 		return m_sndFile->m_PlayState.Chn[channel].nGlobalVol / 64.0;
 	}
 
-	virtual void set_channel_mute_status( std::int32_t channel, bool mute ) {
+	void module_ext_impl::set_channel_mute_status( std::int32_t channel, bool mute ) {
 		if ( channel < 0 || channel >= get_num_channels() ) {
 			throw openmpt::exception("invalid channel");
 		}
@@ -211,14 +200,14 @@ public:
 		}
 	}
 
-	virtual bool get_channel_mute_status( std::int32_t channel ) const {
+	bool module_ext_impl::get_channel_mute_status( std::int32_t channel ) const {
 		if ( channel < 0 || channel >= get_num_channels() ) {
 			throw openmpt::exception("invalid channel");
 		}
 		return m_sndFile->m_PlayState.Chn[channel].dwFlags[CHN_MUTE];
 	}
 	
-	virtual void set_instrument_mute_status( std::int32_t instrument, bool mute ) {
+	void module_ext_impl::set_instrument_mute_status( std::int32_t instrument, bool mute ) {
 		const bool instrument_mode = get_num_instruments() != 0;
 		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
@@ -233,7 +222,7 @@ public:
 		}
 	}
 
-	virtual bool get_instrument_mute_status( std::int32_t instrument ) const {
+	bool module_ext_impl::get_instrument_mute_status( std::int32_t instrument ) const {
 		const bool instrument_mode = get_num_instruments() != 0;
 		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
@@ -249,7 +238,7 @@ public:
 		}
 	}
 
-	virtual std::int32_t play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) {
+	std::int32_t module_ext_impl::play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) {
 		const bool instrument_mode = get_num_instruments() != 0;
 		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
@@ -289,7 +278,7 @@ public:
 		return free_channel;
 	}
 
-	virtual void stop_note( std::int32_t channel ) {
+	void module_ext_impl::stop_note( std::int32_t channel ) {
 		if ( channel < 0 || channel >= MAX_CHANNELS ) {
 			throw openmpt::exception("invalid channel");
 		}
@@ -303,40 +292,5 @@ public:
 
 
 
-}; // class module_ext_impl
-
-module_ext::module_ext( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( stream, log, ctls );
-	set_impl( ext_impl );
-}
-module_ext::module_ext( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, log, ctls );
-	set_impl( ext_impl );
-}
-module_ext::module_ext( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, size, log, ctls );
-	set_impl( ext_impl );
-}
-module_ext::module_ext( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, size, log, ctls );
-	set_impl( ext_impl );
-}
-module_ext::~module_ext() {
-	set_impl( 0 );
-	delete ext_impl;
-	ext_impl = 0;
-}
-module_ext::module_ext( const module_ext & other ) : module(other) {
-	throw std::runtime_error("openmpt::module_ext is non-copyable");
-}
-void module_ext::operator = ( const module_ext & ) {
-	throw std::runtime_error("openmpt::module_ext is non-copyable");
-}
-
-void * module_ext::get_interface( const std::string & interface_id ) {
-	return ext_impl->get_interface( interface_id );
-}
-
 } // namespace openmpt
 
-#endif // NO_LIBOPENMPT_CXX

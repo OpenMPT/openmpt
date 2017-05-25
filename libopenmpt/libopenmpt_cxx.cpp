@@ -11,10 +11,13 @@
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"
+#include "libopenmpt_ext.hpp"
 
 #include "libopenmpt_impl.hpp"
+#include "libopenmpt_ext_impl.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 #include <cstdlib>
 #include <cstring>
@@ -325,6 +328,46 @@ std::string module::ctl_get( const std::string & ctl ) const {
 }
 void module::ctl_set( const std::string & ctl, const std::string & value ) {
 	impl->ctl_set( ctl, value );
+}
+
+module_ext::module_ext( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
+	ext_impl = new module_ext_impl( stream, std::make_shared<std_ostream_log>( log ), ctls );
+	set_impl( ext_impl );
+}
+module_ext::module_ext( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
+	ext_impl = new module_ext_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+	set_impl( ext_impl );
+}
+module_ext::module_ext( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
+	ext_impl = new module_ext_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	set_impl( ext_impl );
+}
+module_ext::module_ext( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
+	ext_impl = new module_ext_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	set_impl( ext_impl );
+}
+module_ext::~module_ext() {
+	set_impl( 0 );
+	delete ext_impl;
+	ext_impl = 0;
+}
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4702) // unreachable code
+#endif // _MSC_VER
+module_ext::module_ext( const module_ext & other ) : module(other) {
+	throw std::runtime_error("openmpt::module_ext is non-copyable");
+}
+void module_ext::operator = ( const module_ext & ) {
+	throw std::runtime_error("openmpt::module_ext is non-copyable");
+}
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif // _MSC_VER
+
+void * module_ext::get_interface( const std::string & interface_id ) {
+	return ext_impl->get_interface( interface_id );
 }
 
 } // namespace openmpt

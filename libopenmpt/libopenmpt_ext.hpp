@@ -1,8 +1,8 @@
 /*
  * libopenmpt_ext.hpp
  * ------------------
- * Purpose: libopenmpt public c++ interface for extending libopenmpt
- * Notes  : The API defined in this file is currently not considered stable yet. Do NOT ship in distributions yet to avoid applications relying on API/ABI compatibility.
+ * Purpose: libopenmpt public c++ interface for libopenmpt extensions
+ * Notes  :
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -13,32 +13,10 @@
 #include "libopenmpt_config.h"
 #include "libopenmpt.hpp"
 
-#if !defined(LIBOPENMPT_EXT_IS_EXPERIMENTAL)
-
-#error "libopenmpt_ext is still completely experimental. The ABIs and APIs WILL change. Use at your own risk, and use only internally for now. You have to #define LIBOPENMPT_EXT_IS_EXPERIMENTAL to use it."
-
-#else // LIBOPENMPT_EXT_IS_EXPERIMENTAL
-
 /*!
  * \page libopenmpt_ext_cpp_overview libopenmpt_ext C++ API
  *
- * \section libopenmpt-ext-cpp-experimental libopenmpt_ext is experimental
- *
- * libopenmpt_ext is currently experimental and still subject to change without
- * further notice.
- * 
- * Only a C++ interface is provided.
- *
- * libopenmpt_ext is included in all builds by default.
- *
- * You need to `#define LIBOPENMPT_EXT_IS_EXPERIMENTAL` before including
- * `libopenmpt_ext.hpp` in order to acknowledge the experimental state and
- * potentially unstable API and ABI.
- *
- * When relying on libopenmpt_ext, it is currently recommended to either, bundle
- * a copy of libopenmpt with your project and link it statically, or,
- * explicitely state a dependency on a particular libopenmpt version, in order
- * to get the exact required API semantics in libopenmpt_ext.
+ * libopenmpt_ext is now included in all builds by default.
  *
  * \section libopenmpt-ext-cpp-detailed Detailed documentation
  *
@@ -77,8 +55,16 @@ public:
 	/*! Example: Retrieving the interactive extension to change the tempo of a module:
 	  \code{.cpp}
 	  openmpt::module_ext *mod = new openmpt::module_ext( stream );
-	  openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
-	  interactive->set_tempo_factor( 2.0 ); // play module at double speed
+	  #ifdef LIBOPENMPT_EXT_INTERFACE_INTERACTIVE
+	    openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
+	    if ( interactive ) {
+	      interactive->set_tempo_factor( 2.0 ); // play module at double speed
+	    } else {
+	      // interface not available
+	    }
+	  #else
+	    // interfae not available
+	  #endif
 	  \endcode
 	  \param interface_id The name of the extension interface to retrieve.
 	  \return The interface object. This may be a nullptr if the extension was not found.
@@ -89,26 +75,28 @@ public:
 
 namespace ext {
 
-#define LIBOPENMPT_DECLARE_EXT_INTERFACE(name) \
+#define LIBOPENMPT_DECLARE_EXT_CXX_INTERFACE(name) \
 	static const char name ## _id [] = # name ; \
 	class name; \
 /**/
 
-#define LIBOPENMPT_EXT_INTERFACE(name) \
+#define LIBOPENMPT_EXT_CXX_INTERFACE(name) \
 	protected: \
 		name () {} \
-		virtual ~ name() {} \
+		virtual ~ name () {} \
 	public: \
 /**/
 
 
+#ifndef LIBOPENMPT_EXT_INTERFACE_PATTERN_VIS
 #define LIBOPENMPT_EXT_INTERFACE_PATTERN_VIS
+#endif
 
-LIBOPENMPT_DECLARE_EXT_INTERFACE(pattern_vis)
+LIBOPENMPT_DECLARE_EXT_CXX_INTERFACE(pattern_vis)
 
 class pattern_vis {
 
-	LIBOPENMPT_EXT_INTERFACE(pattern_vis)
+	LIBOPENMPT_EXT_CXX_INTERFACE(pattern_vis)
 
 	//! Pattern command type
 	enum effect_type {
@@ -145,13 +133,15 @@ class pattern_vis {
 }; // class pattern_vis
 
 
+#ifndef LIBOPENMPT_EXT_INTERFACE_INTERACTIVE
 #define LIBOPENMPT_EXT_INTERFACE_INTERACTIVE
+#endif
 
-LIBOPENMPT_DECLARE_EXT_INTERFACE(interactive)
+LIBOPENMPT_DECLARE_EXT_CXX_INTERFACE(interactive)
 
 class interactive {
 
-	LIBOPENMPT_EXT_INTERFACE(interactive)
+	LIBOPENMPT_EXT_CXX_INTERFACE(interactive)
 
 	//! Set the current ticks per row (speed)
 	/*!
@@ -302,8 +292,8 @@ class interactive {
 
 
 
-#undef LIBOPENMPT_DECLARE_EXT_INTERFACE
-#undef LIBOPENMPT_EXT_INTERFACE
+#undef LIBOPENMPT_DECLARE_EXT_CXX_INTERFACE
+#undef LIBOPENMPT_EXT_CXX_INTERFACE
 
 } // namespace ext
 
@@ -312,7 +302,5 @@ class interactive {
 /*!
   @}
 */
-
-#endif // LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
 #endif // LIBOPENMPT_EXT_HPP
