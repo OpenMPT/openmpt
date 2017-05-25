@@ -670,7 +670,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
-		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
+		|| IsMagic(magic, "M!K!")	// ProTracker (>64 patterns)
 		|| IsMagic(magic, "PATT")	// ProTracker 3.6
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
@@ -966,7 +966,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = 0x91;
 					} else
 					{
-						m.param = MIN(m.param * 2, 0xFF);
+						m.param = mpt::saturate_cast<ModCommand::PARAM>(m.param * 2);
 					}
 				}
 				if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
@@ -1059,9 +1059,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// Find instrument definition file
 			const mpt::PathString exts[] = { MPT_PATHSTRING(".nt"), MPT_PATHSTRING(".NT"), MPT_PATHSTRING(".as"), MPT_PATHSTRING(".AS") };
-			for(size_t i = 0; i < CountOf(exts); i++)
+			for(const auto &ext : exts)
 			{
-				mpt::PathString infoName = filename + exts[i];
+				mpt::PathString infoName = filename + ext;
 				char stMagic[16];
 				if(infoName.IsFile() && amFile.Open(infoName) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
 				{
@@ -1898,7 +1898,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	if(writeChannels == 4)
 	{
 		// ProTracker may not load files with more than 64 patterns correctly if we do not specify the M!K! magic.
-		if(writePatterns < 64)
+		if(writePatterns <= 64)
 			memcpy(modMagic, "M.K.", 4);
 		else
 			memcpy(modMagic, "M!K!", 4);
