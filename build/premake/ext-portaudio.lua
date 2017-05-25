@@ -84,7 +84,7 @@
    "../../include/portaudio/include/portaudio.h",
   }
   filter { "action:vs*" }
-    buildoptions { "/wd4018", "/wd4267", "/wd4312" }
+    buildoptions { "/wd4018", "/wd4091", "/wd4267", "/wd4312" }
   filter {}
   filter { "action:vs*" }
    files { "../../build/premake/lnk/ext-portaudio.c" }
