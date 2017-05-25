@@ -138,7 +138,13 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_config.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt_ext.hpp">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_ext_impl.hpp">
       <Filter>libopenmpt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt_impl.hpp">
@@ -440,7 +446,7 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp">
       <Filter>libopenmpt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext.cpp">
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp">
       <Filter>libopenmpt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp">

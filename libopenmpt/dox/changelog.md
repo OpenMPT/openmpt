@@ -20,6 +20,8 @@ is just a high-level summary.
  *  [**New**] Libopenmpt now supports building for Windows 10 Universal (Windows
     Store 8.2) APIs with MSVC, and also for the older Windows Runtime APIs with
     MinGW-w64.
+ *  [**New**] New API header `libopenmpt_ext.h` which implements the libopenmpt
+    extension APIs also for the C interface.
  *  [**New**] The Reverb effect (S99 in S3M/IT/MPTM, and X99 in XM) is now
     implemented in libopenmpt.
 

@@ -43,7 +43,9 @@
    "../../libopenmpt/libopenmpt.h",
    "../../libopenmpt/libopenmpt.hpp",
    "../../libopenmpt/libopenmpt_config.h",
+   "../../libopenmpt/libopenmpt_ext.h",
    "../../libopenmpt/libopenmpt_ext.hpp",
+   "../../libopenmpt/libopenmpt_ext_impl.hpp",
    "../../libopenmpt/libopenmpt_impl.hpp",
    "../../libopenmpt/libopenmpt_internal.h",
    "../../libopenmpt/libopenmpt_stream_callbacks_buffer.h",
@@ -52,7 +54,7 @@
    "../../libopenmpt/libopenmpt_version.h",
    "../../libopenmpt/libopenmpt_c.cpp",
    "../../libopenmpt/libopenmpt_cxx.cpp",
-   "../../libopenmpt/libopenmpt_ext.cpp",
+   "../../libopenmpt/libopenmpt_ext_impl.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 

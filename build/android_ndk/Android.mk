@@ -110,7 +110,7 @@ LOCAL_SRC_FILES += \
 	libopenmpt/libopenmpt_c.cpp \
 	libopenmpt/libopenmpt_cxx.cpp \
 	libopenmpt/libopenmpt_impl.cpp \
-	libopenmpt/libopenmpt_ext.cpp \
+	libopenmpt/libopenmpt_ext_impl.cpp \
 	soundlib/AudioCriticalSection.cpp \
 	soundlib/Dither.cpp \
 	soundlib/Dlsbank.cpp \
