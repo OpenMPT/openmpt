@@ -198,6 +198,9 @@
     <ClInclude Include="..\..\soundlib\ChunkReader.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\Container.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\Dither.h">
       <Filter>soundlib</Filter>
     </ClInclude>

@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "../common/FileReader.h"
+#include "Container.h"
 
 #include <stdexcept>
 
@@ -142,11 +143,11 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const M
 }
 
 
-bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------------------------------------------
+bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
-	unpackedData.clear();
+	containerItems.clear();
 
 	MMCMPFILEHEADER mfh;
 	if(!file.ReadStruct(mfh)) return false;
@@ -163,6 +164,10 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file, CSoundFile::
 	}
 	if(mmh.blktable > file.GetLength()) return false;
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
+
+	containerItems.emplace_back();
+	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
+	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
 	unpackedData.resize(mmh.filesize);
 	// 8-bit deltas
@@ -357,6 +362,8 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file, CSoundFile::
 			}
 		}
 	}
+
+	containerItems.back().file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
 
 	return true;
 }
@@ -673,11 +680,11 @@ l7ca:
 }
 
 
-bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------------
+bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//-----------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
-	unpackedData.clear();
+	containerItems.clear();
 
 	XPKFILEHEADER header;
 	if(!file.ReadStruct(header)) return false;
@@ -692,6 +699,10 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file, CSoundFile::Mo
 		return true;
 	}
 	if(!file.CanRead(header.SrcLen - (sizeof(XPKFILEHEADER) - 8))) return false;
+
+	containerItems.emplace_back();
+	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
+	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
 #ifdef MMCMP_LOG
 	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
@@ -709,6 +720,10 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file, CSoundFile::Mo
 		return false;
 	}
 
+	if(result)
+	{
+		containerItems.back().file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
+	}
 	return result;
 }
 
@@ -811,11 +826,11 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 }
 
 
-bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------------------
+bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
-	unpackedData.clear();
+	containerItems.clear();
 
 	if(!file.ReadMagic("PP20")) return false;
 	if(!file.CanRead(8)) return false;
@@ -830,6 +845,11 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file, CSoundFile::M
 	{
 		return true;
 	}
+
+	containerItems.emplace_back();
+	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
+	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
+
 	FileReader::off_t length = file.GetLength();
 	if(!Util::TypeCanHoldValue<uint32>(length)) return false;
 	// Length word must be aligned
@@ -851,7 +871,14 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file, CSoundFile::M
 		return false;
 	}
 	file.Seek(4);
-	return PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(unpackedData.data()), dstLen);
+	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(unpackedData.data()), dstLen);
+
+	if(result)
+	{
+		containerItems.back().file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
+	}
+
+	return result;
 }
 
 
