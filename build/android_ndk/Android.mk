@@ -147,6 +147,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_stm.cpp \
 	soundlib/Load_stp.cpp \
 	soundlib/Load_ult.cpp \
+	soundlib/Load_uax.cpp \
 	soundlib/Load_umx.cpp \
 	soundlib/Load_wav.cpp \
 	soundlib/Load_xm.cpp \
@@ -182,6 +183,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Snd_fx.cpp \
 	soundlib/Sndmix.cpp \
 	soundlib/SoundFilePlayConfig.cpp \
+	soundlib/UMXTools.cpp \
 	soundlib/UpgradeModule.cpp \
 	soundlib/Tables.cpp \
 	soundlib/Tagging.cpp \

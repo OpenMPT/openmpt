@@ -727,6 +727,7 @@
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
+    <ClInclude Include="..\..\soundlib\UMXTools.h" />
     <ClInclude Include="..\..\soundlib\WAVTools.h" />
     <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\..\soundlib\XMTools.h" />
@@ -936,6 +937,9 @@
     <ClCompile Include="..\..\soundlib\Load_stp.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_uax.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
@@ -1057,6 +1061,9 @@
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\UMXTools.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp">
