@@ -169,6 +169,7 @@ MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.cpp
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.h
 MPT_FILES_SOUNDLIB += soundlib/AudioReadTarget.h
 MPT_FILES_SOUNDLIB += soundlib/ChunkReader.h
+MPT_FILES_SOUNDLIB += soundlib/Container.h
 MPT_FILES_SOUNDLIB += soundlib/Dither.cpp
 MPT_FILES_SOUNDLIB += soundlib/Dither.h
 MPT_FILES_SOUNDLIB += soundlib/Dlsbank.cpp
