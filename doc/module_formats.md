@@ -70,7 +70,7 @@ Adding loader to the build systems and various other locations
 Apart from writing the module loader itself, there are a couple of other places
 that need to be updated:
 * Add loader file to `build/android_ndk/Android.mk`.
-* Add loader file to `build/autotools/Makefile.am` (twice!).
+* Add loader file to `build/autotools/Makefile.am`.
 * Run `build/regenerate_vs_projects.sh` / `build/regenerate_vs_projects.cmd`
   (depending on your platform)
 * Add file extension to `installer/filetypes.iss` (in four places).
