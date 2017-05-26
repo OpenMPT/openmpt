@@ -107,26 +107,33 @@ static int op_tags_ensure_capacity(OpusTags *_tags,size_t _ncomments){
   char   **user_comments;
   int     *comment_lengths;
   int      cur_ncomments;
-  char    *binary_suffix_data;
-  int      binary_suffix_len;
   size_t   size;
   if(OP_UNLIKELY(_ncomments>=(size_t)INT_MAX))return OP_EFAULT;
   size=sizeof(*_tags->comment_lengths)*(_ncomments+1);
   if(size/sizeof(*_tags->comment_lengths)!=_ncomments+1)return OP_EFAULT;
   cur_ncomments=_tags->comments;
+  /*We only support growing.
+    Trimming requires cleaning up the allocated strings in the old space, and
+     is best handled separately if it's ever needed.*/
+  OP_ASSERT(_ncomments>=cur_ncomments);
   comment_lengths=_tags->comment_lengths;
-  binary_suffix_len=comment_lengths==NULL?0:comment_lengths[cur_ncomments];
   comment_lengths=(int *)_ogg_realloc(_tags->comment_lengths,size);
   if(OP_UNLIKELY(comment_lengths==NULL))return OP_EFAULT;
-  comment_lengths[_ncomments]=binary_suffix_len;
+  if(_tags->comment_lengths==NULL){
+    OP_ASSERT(cur_ncomments==0);
+    comment_lengths[cur_ncomments]=0;
+  }
+  comment_lengths[_ncomments]=comment_lengths[cur_ncomments];
   _tags->comment_lengths=comment_lengths;
   size=sizeof(*_tags->user_comments)*(_ncomments+1);
   if(size/sizeof(*_tags->user_comments)!=_ncomments+1)return OP_EFAULT;
-  user_comments=_tags->user_comments;
-  binary_suffix_data=user_comments==NULL?NULL:user_comments[cur_ncomments];
   user_comments=(char **)_ogg_realloc(_tags->user_comments,size);
   if(OP_UNLIKELY(user_comments==NULL))return OP_EFAULT;
-  user_comments[_ncomments]=binary_suffix_data;
+  if(_tags->user_comments==NULL){
+    OP_ASSERT(cur_ncomments==0);
+    user_comments[cur_ncomments]=NULL;
+  }
+  user_comments[_ncomments]=user_comments[cur_ncomments];
   _tags->user_comments=user_comments;
   return 0;
 }
