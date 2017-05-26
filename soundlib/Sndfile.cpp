@@ -47,6 +47,8 @@ OPENMPT_NAMESPACE_BEGIN
 bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
 bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
 bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
+bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
+
 
 
 mpt::ustring FileHistory::AsISO8601() const
@@ -265,6 +267,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
 			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
 			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
 
 			if(packedContainerType != MOD_CONTAINERTYPE_NONE && !containerItems.empty())
 			{
@@ -291,7 +294,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			 && !ReadUlt(file, loadFlags)
 			 && !ReadDMF(file, loadFlags)
 			 && !ReadDSM(file, loadFlags)
-			 && !ReadUMX(file, loadFlags)
+#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
+			 && !ReadUAX(file, loadFlags)
+#endif // MODPLUG_TRACKER || MPT_FUZZ_TRACKER
 			 && !ReadAMF_Asylum(file, loadFlags)
 			 && !ReadAMF_DSMI(file, loadFlags)
 			 && !ReadPSM(file, loadFlags)

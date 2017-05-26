@@ -267,6 +267,9 @@
     <ClInclude Include="..\..\soundlib\tuningcollection.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\UMXTools.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\WAVTools.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -548,6 +551,9 @@
     <ClCompile Include="..\..\soundlib\Load_stp.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_uax.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -669,6 +675,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\UMXTools.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp">

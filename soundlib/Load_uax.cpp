@@ -1,8 +1,8 @@
 /*
- * Load_umx.cpp
+ * Load_uax.cpp
  * ------------
- * Purpose: UMX (Unreal Music) module ripper
- * Notes  : Obviously, this code only rips modules from older Unreal Engine games, such as Unreal 1, Unreal Tournament 1 and Deus Ex.
+ * Purpose: UAX (Unreal Sounds) module ripper
+ * Notes  : The sounds are read into module sample slots.
  * Authors: Johannes Schultz (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -11,18 +11,15 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "UMXTools.h"
-#include "Container.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//-----------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
 	file.Rewind();
-	containerItems.clear();
-
 	UMXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
@@ -38,12 +35,12 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 	// in their name table because they usually import such files. However, it spares us
 	// from wildly seeking through the file, as the name table is usually right at the
 	// start of the file, so it is hopefully a good enough heuristic for our purposes.
-	if(!FindUMXNameTableEntry(file, fileHeader, "music"))
+	if(!FindUMXNameTableEntry(file, fileHeader, "sound"))
 	{
 		return false;
 	}
 
-	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
@@ -75,6 +72,8 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 	}
 
 	// Now we can be pretty sure that we're doing the right thing.
+	InitializeGlobals();
+	m_madeWithTracker = mpt::String::Print("Unreal Package v%1", fileHeader.packageVersion);
 	
 	for(uint32 i = 0; i < fileHeader.exportCount && file.CanRead(4); i++)
 	{
@@ -86,14 +85,14 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 			continue;
 		}
 
-		// Look up object class name (we only want music).
+		// Look up object class name (we only want sounds).
 		objClass = -objClass - 1;
-		bool isMusic = false;
+		bool isSound = false;
 		if(static_cast<size_t>(objClass) < classes.size())
 		{
-			isMusic = (names[classes[objClass]] == "music");
+			isSound = (names[classes[objClass]] == "sound");
 		}
-		if(!isMusic)
+		if(!isSound)
 		{
 			continue;
 		}
@@ -148,24 +147,37 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 				// Old Unreal Packagaes
 				ReadUMXIndex(chunk);
 			}
-
 			int32 size = ReadUMXIndex(chunk);
 
-			ContainerItem item;
+			FileReader fileChunk = chunk.ReadChunk(size);
 
-			if(objName >= 0 && static_cast<std::size_t>(objName) < names.size())
+			if(GetNumSamples() < MAX_SAMPLES - 1)
 			{
-				item.name = mpt::ToUnicode(mpt::CharsetISO8859_1, names[objName]);
+				// Read as sample
+				if(ReadSampleFromFile(GetNumSamples() + 1, fileChunk, true))
+				{
+					if(static_cast<size_t>(objName) < names.size())
+					{
+						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
+					}
+				}
 			}
-
-			item.file = chunk.ReadChunk(size);
-
-			containerItems.push_back(std::move(item));
-
 		}
 	}
 
-	return !containerItems.empty();
+	if(m_nSamples != 0)
+	{
+		InitializeChannels();
+		SetType(MOD_TYPE_MPT);
+		m_ContainerType = MOD_CONTAINERTYPE_UAX;
+		m_nChannels = 4;
+		Patterns.Insert(0, 64);
+		Order().assign(1, 0);
+		return true;
+	} else
+	{
+		return false;
+	}
 }
 
 
