@@ -1041,6 +1041,10 @@
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
     <ClCompile Include="..\..\sounddsp\Reverb.cpp" />
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp" />
+    <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp" />
+    <ClCompile Include="..\..\soundlib\ContainerPP20.cpp" />
+    <ClCompile Include="..\..\soundlib\ContainerUMX.cpp" />
+    <ClCompile Include="..\..\soundlib\ContainerXPK.cpp" />
     <ClCompile Include="..\..\soundlib\Dither.cpp" />
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
@@ -1076,7 +1080,6 @@
     <ClCompile Include="..\..\soundlib\Load_stp.cpp" />
     <ClCompile Include="..\..\soundlib\Load_uax.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ult.cpp" />
-    <ClCompile Include="..\..\soundlib\Load_umx.cpp" />
     <ClCompile Include="..\..\soundlib\Load_wav.cpp" />
     <ClCompile Include="..\..\soundlib\Load_xm.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
@@ -1086,7 +1089,6 @@
     <ClCompile Include="..\..\soundlib\MixFuncTable.cpp" />
     <ClCompile Include="..\..\soundlib\MixerLoops.cpp" />
     <ClCompile Include="..\..\soundlib\MixerSettings.cpp" />
-    <ClCompile Include="..\..\soundlib\Mmcmp.cpp" />
     <ClCompile Include="..\..\soundlib\ModChannel.cpp" />
     <ClCompile Include="..\..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\..\soundlib\ModSample.cpp" />

@@ -112,6 +112,10 @@ LOCAL_SRC_FILES += \
 	libopenmpt/libopenmpt_impl.cpp \
 	libopenmpt/libopenmpt_ext_impl.cpp \
 	soundlib/AudioCriticalSection.cpp \
+	soundlib/ContainerMMCMP.cpp \
+	soundlib/ContainerPP20.cpp \
+	soundlib/ContainerUMX.cpp \
+	soundlib/ContainerXPK.cpp \
 	soundlib/Dither.cpp \
 	soundlib/Dlsbank.cpp \
 	soundlib/Fastmix.cpp \
@@ -148,7 +152,6 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_stp.cpp \
 	soundlib/Load_ult.cpp \
 	soundlib/Load_uax.cpp \
-	soundlib/Load_umx.cpp \
 	soundlib/Load_wav.cpp \
 	soundlib/Load_xm.cpp \
 	soundlib/Message.cpp \
@@ -157,7 +160,6 @@ LOCAL_SRC_FILES += \
 	soundlib/MixerLoops.cpp \
 	soundlib/MixerSettings.cpp \
 	soundlib/MixFuncTable.cpp \
-	soundlib/Mmcmp.cpp \
 	soundlib/ModChannel.cpp \
 	soundlib/modcommand.cpp \
 	soundlib/ModInstrument.cpp \
