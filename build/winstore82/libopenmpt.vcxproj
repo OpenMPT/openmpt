@@ -840,6 +840,18 @@
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerPP20.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerUMX.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerXPK.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Dither.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
@@ -948,9 +960,6 @@
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_umx.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_wav.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
@@ -973,9 +982,6 @@
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MixFuncTable.cpp">
-      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Mmcmp.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModChannel.cpp">

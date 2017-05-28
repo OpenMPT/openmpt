@@ -1,6 +1,6 @@
 /*
- * Load_umx.cpp
- * ------------
+ * ContainerUMX.cpp
+ * ----------------
  * Purpose: UMX (Unreal Music) module ripper
  * Notes  : Obviously, this code only rips modules from older Unreal Engine games, such as Unreal 1, Unreal Tournament 1 and Deus Ex.
  * Authors: Johannes Schultz (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)

@@ -491,6 +491,18 @@
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerPP20.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerUMX.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\ContainerXPK.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Dither.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -596,9 +608,6 @@
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\Load_umx.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_wav.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -624,9 +633,6 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MixerSettings.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Mmcmp.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModChannel.cpp">
