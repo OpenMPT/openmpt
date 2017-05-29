@@ -25,4 +25,17 @@ struct ContainerItem
 };
 
 
+enum ContainerLoadingFlags
+{
+	ContainerOnlyVerifyHeader = 0x00,
+	ContainerUnwrapData       = 0x01,
+};
+
+
+bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags);
+bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags);
+bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags);
+bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags);
+
+
 OPENMPT_NAMESPACE_END

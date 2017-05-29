@@ -17,8 +17,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//-----------------------------------------------------------------------------------------------------------------
+bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
+//-----------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();
@@ -43,7 +43,7 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 		return false;
 	}
 
-	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
 	}

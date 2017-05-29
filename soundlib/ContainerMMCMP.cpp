@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+
 #include "../common/FileReader.h"
 #include "Container.h"
 
@@ -144,8 +144,8 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const M
 }
 
 
-bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------------------------------
+bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();
@@ -159,7 +159,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 	if(mmh.nblocks == 0) return false;
 	if(mmh.filesize == 0) return false;
 	if(mmh.filesize > 0x80000000) return false;
-	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
 	}

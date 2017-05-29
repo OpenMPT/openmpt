@@ -43,14 +43,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Module decompression
-bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
-bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
-bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
-bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags);
-
-
-
 mpt::ustring FileHistory::AsISO8601() const
 //-----------------------------------------
 {
@@ -263,11 +255,12 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 			std::vector<ContainerItem> containerItems;
 			MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
+			ContainerLoadingFlags containerLoadFlags = (loadFlags == onlyVerifyHeader) ? ContainerOnlyVerifyHeader : ContainerUnwrapData;
 
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, loadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
 
 			if(packedContainerType != MOD_CONTAINERTYPE_NONE && !containerItems.empty())
 			{
