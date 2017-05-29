@@ -31,25 +31,8 @@ protected:
 
 	struct UndoInfo
 	{
-		// Additional undo information, as required
-		struct ChannelInfo
-		{
-			ModChannelSettings *settings;
-			CHANNELINDEX oldNumChannels;
-
-			ChannelInfo(CHANNELINDEX numChannels) : oldNumChannels(numChannels)
-			{
-				settings = new ModChannelSettings[numChannels];
-			}
-
-			~ChannelInfo()
-			{
-				delete[] settings;
-			}
-		};
-
+		std::vector<ModChannelSettings> channelInfo;	// Optional old channel information (pan / volume / etc.)
 		ModCommand *pbuffer;			// Rescued pattern content
-		ChannelInfo *channelInfo;		// Optional old channel information (pan / volume / etc.)
 		const char *description;		// Name of this undo action
 		ROWINDEX numPatternRows;		// Original number of pattern rows (in case of resize)
 		ROWINDEX firstRow, numRows;
@@ -135,7 +118,7 @@ protected:
 		sampleUndoTypes changeType;
 	};
 
-	typedef std::vector<std::vector<UndoInfo> > undobuf_t;
+	typedef std::vector<std::vector<UndoInfo>> undobuf_t;
 	undobuf_t UndoBuffer;
 	undobuf_t RedoBuffer;
 
@@ -195,7 +178,7 @@ protected:
 		EnvelopeType editedEnvelope;
 	};
 
-	typedef std::vector<std::vector<UndoInfo> > undobuf_t;
+	typedef std::vector<std::vector<UndoInfo>> undobuf_t;
 	undobuf_t UndoBuffer;
 	undobuf_t RedoBuffer;
 

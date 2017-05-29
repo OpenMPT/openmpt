@@ -97,11 +97,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	if(storeChannelInfo)
 	{
-		undo.channelInfo = new UndoInfo::ChannelInfo(sndFile.GetNumChannels());
-		memcpy(undo.channelInfo->settings, sndFile.ChnSettings, sizeof(ModChannelSettings) * sndFile.GetNumChannels());
-	} else
-	{
-		undo.channelInfo = nullptr;
+		undo.channelInfo.assign(sndFile.ChnSettings, sndFile.ChnSettings + sndFile.GetNumChannels());
 	}
 
 	buffer.push_back(undo);
@@ -141,22 +137,22 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	// Select most recent undo slot
 	const UndoInfo &undo = fromBuf.back();
 
-	PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, undo.channelInfo != nullptr);
+	PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
-	if(undo.channelInfo != nullptr)
+	if(!undo.channelInfo.empty())
 	{
-		if(undo.channelInfo->oldNumChannels != sndFile.GetNumChannels())
+		if(undo.channelInfo.size() != sndFile.GetNumChannels())
 		{
 			// Add or remove channels
-			std::vector<CHANNELINDEX> channels(undo.channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
-			const CHANNELINDEX copyCount = std::min(sndFile.GetNumChannels(), undo.channelInfo->oldNumChannels);
+			std::vector<CHANNELINDEX> channels(undo.channelInfo.size(), CHANNELINDEX_INVALID);
+			const CHANNELINDEX copyCount = std::min(sndFile.GetNumChannels(), static_cast<CHANNELINDEX>(undo.channelInfo.size()));
 			for(CHANNELINDEX i = 0; i < copyCount; i++)
 			{
 				channels[i] = i;
 			}
 			modDoc.ReArrangeChannels(channels, false);
 		}
-		memcpy(sndFile.ChnSettings, undo.channelInfo->settings, sizeof(ModChannelSettings) * undo.channelInfo->oldNumChannels);
+		std::copy(undo.channelInfo.cbegin(), undo.channelInfo.cend(), sndFile.ChnSettings);
 
 		// Channel mute status might have changed...
 		for(CHANNELINDEX i = 0; i < sndFile.GetNumChannels(); i++)
@@ -224,7 +220,6 @@ void CPatternUndo::DeleteStep(undobuf_t &buffer, size_t step)
 {
 	if(step >= buffer.size()) return;
 	delete[] buffer[step].pbuffer;
-	delete buffer[step].channelInfo;
 	buffer.erase(buffer.begin() + step);
 }
 
