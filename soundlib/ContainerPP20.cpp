@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+
 #include "../common/FileReader.h"
 #include "Container.h"
 
@@ -115,8 +115,8 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 }
 
 
-bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------------------------
+bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();
@@ -130,7 +130,7 @@ bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, CS
 		|| efficiency[2] < 9 || efficiency[2] > 15
 		|| efficiency[3] < 9 || efficiency[3] > 15)
 		return false;
-	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
 	}

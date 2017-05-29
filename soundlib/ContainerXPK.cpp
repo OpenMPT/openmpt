@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+
 #include "../common/FileReader.h"
 #include "Container.h"
 
@@ -329,8 +329,8 @@ l7ca:
 }
 
 
-bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, CSoundFile::ModLoadingFlags loadFlags)
-//-----------------------------------------------------------------------------------------------------------------
+bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
+//-----------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();
@@ -343,7 +343,7 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, CSo
 	if(header.DstLen == 0) return false;
 	STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
 	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8)) return false;
-	if(loadFlags == CSoundFile::onlyVerifyHeader)
+	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
 	}
