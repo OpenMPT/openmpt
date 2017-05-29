@@ -552,14 +552,15 @@ public:
 
 	enum ModLoadingFlags
 	{
-		onlyVerifyHeader	= 0x00,
-		loadPatternData		= 0x01,	// If unset, advise loaders to not process any pattern data (if possible)
-		loadSampleData		= 0x02,	// If unset, advise loaders to not process any sample data (if possible)
-		loadPluginData		= 0x04,	// If unset, plugin data is not loaded (and as a consequence, plugins are not instanciated).
-		loadPluginInstance	= 0x08,	// If unset, plugins are not instanciated.
+		onlyVerifyHeader   = 0x00,
+		loadPatternData    = 0x01,	// If unset, advise loaders to not process any pattern data (if possible)
+		loadSampleData     = 0x02,	// If unset, advise loaders to not process any sample data (if possible)
+		loadPluginData     = 0x04,	// If unset, plugin data is not loaded (and as a consequence, plugins are not instanciated).
+		loadPluginInstance = 0x08,	// If unset, plugins are not instanciated.
+		skipContainer      = 0x10,
 
 		// Shortcuts
-		loadCompleteModule	= loadSampleData | loadPatternData | loadPluginData | loadPluginInstance,
+		loadCompleteModule = loadSampleData | loadPatternData | loadPluginData | loadPluginInstance,
 		loadNoPatternOrPluginData	= loadSampleData,
 		loadNoPluginInstance = loadSampleData | loadPatternData | loadPluginData,
 	};

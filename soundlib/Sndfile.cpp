@@ -245,30 +245,35 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		try
 		{
+
 #ifndef NO_ARCHIVE_SUPPORT
 			CUnarchiver unarchiver(file);
-			if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
+			if(!(loadFlags & skipContainer))
 			{
-				file = unarchiver.GetOutputFile();
+				if (unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
+				{
+					file = unarchiver.GetOutputFile();
+				}
 			}
 #endif
 
 			std::vector<ContainerItem> containerItems;
 			MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
-			ContainerLoadingFlags containerLoadFlags = (loadFlags == onlyVerifyHeader) ? ContainerOnlyVerifyHeader : ContainerUnwrapData;
-
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
-
-			if(packedContainerType != MOD_CONTAINERTYPE_NONE && !containerItems.empty())
+			if(!(loadFlags & skipContainer))
 			{
-				if(loadFlags == onlyVerifyHeader)
+				ContainerLoadingFlags containerLoadFlags = (loadFlags == onlyVerifyHeader) ? ContainerOnlyVerifyHeader : ContainerUnwrapData;
+				if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
+				if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
+				if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+				if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
+				if(packedContainerType != MOD_CONTAINERTYPE_NONE && !containerItems.empty())
 				{
-					return true;
+					if(loadFlags == onlyVerifyHeader)
+					{
+						return true;
+					}
+					file = containerItems[0].file;
 				}
-				file = containerItems[0].file;
 			}
 
 			if(!ReadXM(file, loadFlags)
