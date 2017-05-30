@@ -2053,9 +2053,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				// (and if it is playing a note, we know that would be the last note played on this chan).
 				ModCommand::NOTE note = pChn->nNote;
 				// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-				if(m_playBehaviour[kITRealNoteMapping] && note < CountOf(pChn->pModInstrument->NoteMap))
+				if(m_playBehaviour[kITRealNoteMapping] && note < CountOf(p->pModInstrument->NoteMap))
 				{
-					note = pChn->pModInstrument->NoteMap[note - 1];
+					note = p->pModInstrument->NoteMap[note - 1];
 				}
 				applyNNAtoPlug = pPlugin->IsNotePlaying(note, GetBestMidiChannel(nChn), nChn);
 			}
