@@ -241,9 +241,9 @@ CString CPatternUndo::GetName(const undobuf_t &buffer) const
 	
 	const UndoInfo &info = buffer.back();
 	if(info.linkToPrevious)
-		return UndoBuffer.back().description + CString(_T(" (Multiple Patterns)"));
+		return info.description + CString(_T(" (Multiple Patterns)"));
 	else
-		return (UndoBuffer.back().description + mpt::String::Print(" (Pat %1 Row %2 Chn %3)", info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
+		return (info.description + mpt::String::Print(" (Pat %1 Row %2 Chn %3)", info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
 }
 
 
