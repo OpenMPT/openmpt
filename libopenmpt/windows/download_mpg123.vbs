@@ -100,42 +100,42 @@ CreateFolder "download.tmp"
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-Download httpprotocol & "://mpg123.de/download/win32/mpg123-1.24.0-x86.zip", 484764, "d45aa907e22091a476159162152f8074", "4f128c2a0045e02a408b9ee4ad8f94e6d1b16827", "download.tmp\mpg123-1.24.0-x86.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win32/1.25.0/mpg123-1.25.0-x86.zip", 489022, "6c8f6b434b41a0a8b5572c6807a6b78f", "98c02971a26b1378ca0b836c7b2a066db581dccb", "download.tmp\mpg123-1.25.0-x86.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.0-x86")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.0-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
-Download httpprotocol & "://mpg123.de/download/win64/1.24.0/mpg123-1.24.0-x86-64.zip", 533671, "f72721c06c122a4cface218943bb43ea", "e37d127f58874f18b9b3b53b7d88decb7d52a82a", "download.tmp\mpg123-1.24.0-x86-64.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86-64")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.24.0-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win64/1.25.0/mpg123-1.25.0-x86-64.zip", 535405, "f67c194b45fd16cf3537b7a6cb820447", "dba642d1f2a39e9ef8e33de3d04ae8f9c8f65cfd", "download.tmp\mpg123-1.25.0-x86-64.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.0-x86-64")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.0-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
 CreateFolder "Licenses"
 
-fso.CopyFile "download.tmp\mpg123-1.24.0-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
+fso.CopyFile "download.tmp\mpg123-1.25.0-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
 
 If fso.FolderExists("bin") Then
 	CreateFolder "bin\x86"
 	CreateFolder "bin\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("openmpt123") Then
 	CreateFolder "openmpt123\x86"
 	CreateFolder "openmpt123\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("XMPlay") Then
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("foobar2000") Then
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("Winamp") Then
-	fso.CopyFile "download.tmp\mpg123-1.24.0-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.0-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
 End If
 
 DeleteFolder "download.tmp"
