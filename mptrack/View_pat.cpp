@@ -2974,8 +2974,7 @@ void CViewPattern::OnUpdateUndo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetPatternUndo().CanUndo());
-		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetPatternUndo().GetUndoName())
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + pModDoc->GetPatternUndo().GetUndoName()));
 	}
 }
 
@@ -2987,8 +2986,7 @@ void CViewPattern::OnUpdateRedo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetPatternUndo().CanRedo());
-		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetPatternUndo().GetRedoName())
-			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + pModDoc->GetPatternUndo().GetRedoName()));
 	}
 }
 

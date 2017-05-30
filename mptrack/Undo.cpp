@@ -233,25 +233,17 @@ void CPatternUndo::RemoveLastUndoStep()
 }
 
 
-const char *CPatternUndo::GetUndoName() const
-//-------------------------------------------
+CString CPatternUndo::GetName(const undobuf_t &buffer) const
+//----------------------------------------------------------
 {
-	if(!CanUndo())
-	{
-		return "";
-	}
-	return UndoBuffer.back().description;
-}
-
-
-const char *CPatternUndo::GetRedoName() const
-//-------------------------------------------
-{
-	if(!CanRedo())
-	{
-		return "";
-	}
-	return RedoBuffer.back().description;
+	if(buffer.empty())
+		return CString();
+	
+	const UndoInfo &info = buffer.back();
+	if(info.linkToPrevious)
+		return UndoBuffer.back().description + CString(_T(" (Multiple Patterns)"));
+	else
+		return (UndoBuffer.back().description + mpt::String::Print(" (Pat %1 Row %2 Chn %3)", info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
 }
 
 
