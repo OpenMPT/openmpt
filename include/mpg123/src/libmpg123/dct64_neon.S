@@ -8,7 +8,9 @@
 
 #include "mangle.h"
 
+#ifndef _M_ARM
 	.code 32
+#endif
 #ifndef __APPLE__
 	.fpu neon
 #endif
@@ -49,7 +51,7 @@ costab_arm:
 	.word 1060439283
 	.word 1060439283
 	ALIGN4
-	.globl ASM_NAME(dct64_neon)
+	GLOBAL_SYMBOL ASM_NAME(dct64_neon)
 #ifdef __ELF__
 	.type ASM_NAME(dct64_neon), %function
 #endif

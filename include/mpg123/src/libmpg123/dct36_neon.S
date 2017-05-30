@@ -9,7 +9,9 @@
 
 #include "mangle.h"
 
+#ifndef _M_ARM
 	.code 32
+#endif
 #ifndef __APPLE__
 	.fpu neon
 #endif
@@ -45,7 +47,7 @@ dct36_neon_COS9:
 	.word 0x3f3504f3
 	
 	ALIGN4
-	.globl ASM_NAME(dct36_neon)
+	GLOBAL_SYMBOL ASM_NAME(dct36_neon)
 #ifdef __ELF__
 	.type ASM_NAME(dct36_neon), %function
 #endif

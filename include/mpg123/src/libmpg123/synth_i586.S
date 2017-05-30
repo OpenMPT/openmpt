@@ -96,7 +96,7 @@ ASM_NAME(synth_1to1_i586_asm):
 	leal (%ecx,%ebp,4),%eax
 .L74:
 	pushl %eax
-	call ASM_NAME(dct64_i386)
+	call FUNC(dct64_i386)
 	addl $12,%esp
 /* stack now back on track */
 	movl 16(%esp),%edx
@@ -332,5 +332,12 @@ ASM_NAME(synth_1to1_i586_asm):
 	popl %ebp
 	addl $12,%esp
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section __IMPORT,__jump_table,symbol_stubs,self_modifying_code+pure_instructions,5
+L_dct64_i386:
+	.indirect_symbol ASM_NAME(dct64_i386)
+	hlt ; hlt ; hlt ; hlt ; hlt
+#endif
 
 NONEXEC_STACK

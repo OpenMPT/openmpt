@@ -13,15 +13,24 @@
 
 extern void check_neon(void);
 
+#ifndef _M_ARM
 static sigjmp_buf jmpbuf;
+#else
+static jmp_buf jmpbuf;
+#endif
 
 static void mpg123_arm_catch_sigill(int sig)
 {
+#ifndef _M_ARM
 	siglongjmp(jmpbuf, 1);
+#else
+	longjmp(jmpbuf, 1);
+#endif
 }
 
 unsigned int getcpuflags(struct cpuflags* cf)
 {
+#ifndef _M_ARM
 	struct sigaction act, act_old;
 	act.sa_handler = mpg123_arm_catch_sigill;
 	act.sa_flags = SA_RESTART;
@@ -36,6 +45,17 @@ unsigned int getcpuflags(struct cpuflags* cf)
 	}
 	
 	sigaction(SIGILL, &act_old, NULL);
+#else
+	cf->has_neon = 0;
+
+	if (!setjmp(jmpbuf)) {
+		signal(SIGILL, mpg123_arm_catch_sigill);
+		check_neon();
+		cf->has_neon = 1;
+	}
+
+	signal(SIGILL, SIG_DFL);
+#endif
 	
 	return 0;
 }

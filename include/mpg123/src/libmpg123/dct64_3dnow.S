@@ -22,6 +22,11 @@ ASM_NAME(dct64_3dnow):
 	pushl %edi
 	pushl %esi
 	pushl %ebx
+
+	#undef _EBX_
+	#define _EBX_ %ecx
+	GET_GOT
+
 	leal 16(%esp),%ebx
 	movl 284(%esp),%edi
 	movl 276(%esp),%ebp
@@ -31,7 +36,12 @@ ASM_NAME(dct64_3dnow):
 	/* femms */
 
 	/* 1 */
-	movl ASM_NAME(pnts),%eax
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(pnts),%eax
+	movl (%eax),%eax
+#else
+	movl GLOBAL_VAR(pnts),%eax
+#endif
 	movq 0(%edi),%mm0
         movq %mm0,%mm1
 	movd 124(%edi),%mm2
@@ -130,7 +140,12 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,64(%ebx)
 	
 	/* 2 */
-	movl ASM_NAME(pnts)+4,%eax
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(pnts),%eax
+	movl 4(%eax),%eax
+#else
+	movl 4+GLOBAL_VAR(pnts),%eax
+#endif
 	/* 0,14 */
 	movq 0(%ebx),%mm0
 	movq %mm0,%mm1
@@ -233,7 +248,12 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,96(%esi)
 
 	/* 3 */
-	movl ASM_NAME(pnts)+8,%eax
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(pnts),%eax
+	movl 8(%eax),%eax
+#else
+	movl 8+GLOBAL_VAR(pnts),%eax
+#endif
 	movq 0(%eax),%mm0
 	movq 8(%eax),%mm1
 	/* 0,6 */
@@ -334,7 +354,12 @@ ASM_NAME(dct64_3dnow):
 	movd %mm6,112(%ebx)
 	
 	/*  4 */
-	movl ASM_NAME(pnts)+12,%eax
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(pnts),%eax
+	movl 12(%eax),%eax
+#else
+	movl 12+GLOBAL_VAR(pnts),%eax
+#endif
 	movq 0(%eax),%mm0
 	/*  0 */
 	movq 0(%ebx),%mm1
@@ -444,7 +469,12 @@ ASM_NAME(dct64_3dnow):
 	pi2fd %mm0,%mm0	
 	movd %eax,%mm1
 	pi2fd %mm1,%mm1
-	movl ASM_NAME(pnts)+16,%eax
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(pnts),%eax
+	movl 16(%eax),%eax
+#else
+	movl 16+GLOBAL_VAR(pnts),%eax
+#endif
 	movd 0(%eax),%mm2
 	/*  1.0 | cos0 */
 	punpckldq %mm2,%mm1
@@ -708,5 +738,12 @@ ASM_NAME(dct64_3dnow):
 	addl $256,%esp
 	
         ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_pnts:
+	.indirect_symbol	ASM_NAME(pnts)
+	.long	0
+#endif
 
 NONEXEC_STACK

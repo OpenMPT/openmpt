@@ -21,6 +21,9 @@ ASM_NAME(dct64_MMX):
 	pushl %esi
 	pushl %edi
 	subl $256,%esp
+
+	GET_GOT
+
 	movl 280(%esp),%eax
 	flds     (%eax)
 	leal 128(%esp),%edx
@@ -29,7 +32,11 @@ ASM_NAME(dct64_MMX):
 	fstps    (%edx)
 	movl 276(%esp),%edi
 	flds    4(%eax)
-	movl ASM_VALUE(costab_mmxsse),%ebx
+#if defined(PIC) && defined(__APPLE__)
+	movl GLOBAL_VAR_PTR(costab_mmxsse),%ebx
+#else
+	leal GLOBAL_VAR(costab_mmxsse),%ebx
+#endif
 	fadds 120(%eax)
 	orl %ecx,%ecx
 	fstps   4(%edx)
@@ -807,5 +814,12 @@ ASM_NAME(dct64_MMX):
 	popl %esi
 	popl %ebx
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_costab_mmxsse:
+	.indirect_symbol	ASM_NAME(costab_mmxsse)
+	.long	0
+#endif
 
 NONEXEC_STACK

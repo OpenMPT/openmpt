@@ -369,7 +369,7 @@ int attribute_align_arg mpg123_getstate(mpg123_handle *mh, enum mpg123_state key
 		{
 			size_t sval = bc_fill(&mh->rdat.buffer);
 			theval = (long)sval;
-			if((size_t)theval != sval)
+			if(theval < 0 || (size_t)theval != sval)
 			{
 				mh->err = MPG123_INT_OVERFLOW;
 				ret = MPG123_ERR;
@@ -1047,7 +1047,8 @@ int attribute_align_arg mpg123_info(mpg123_handle *mh, struct mpg123_frameinfo *
 	return MPG123_OK;
 }
 
-int attribute_align_arg mpg123_getformat(mpg123_handle *mh, long *rate, int *channels, int *encoding)
+int attribute_align_arg mpg123_getformat2( mpg123_handle *mh
+,	long *rate, int *channels, int *encoding, int clear_flag )
 {
 	int b;
 
@@ -1058,8 +1059,13 @@ int attribute_align_arg mpg123_getformat(mpg123_handle *mh, long *rate, int *cha
 	if(rate != NULL) *rate = mh->af.rate;
 	if(channels != NULL) *channels = mh->af.channels;
 	if(encoding != NULL) *encoding = mh->af.encoding;
-	mh->new_format = 0;
+	if(clear_flag) mh->new_format = 0;
 	return MPG123_OK;
+}
+
+int attribute_align_arg mpg123_getformat(mpg123_handle *mh, long *rate, int *channels, int *encoding)
+{
+	return mpg123_getformat2(mh, rate, channels, encoding, 1);
 }
 
 off_t attribute_align_arg mpg123_timeframe(mpg123_handle *mh, double seconds)
