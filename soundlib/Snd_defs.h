@@ -481,6 +481,7 @@ protected:
 
 public:
 	static const size_t fractFact = FFact;
+	typedef T store_t;
 
 	FPInt() : v(0) { }
 	FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
