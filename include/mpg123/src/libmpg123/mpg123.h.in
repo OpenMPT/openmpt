@@ -493,6 +493,10 @@ MPG123_EXPORT int mpg123_format_support( mpg123_handle *mh
 ,	long rate, int encoding );
 
 /** Get the current output format written to the addresses given.
+ *  If the stream is freshly loaded, this will try to parse enough
+ *  of it to give you the format to come. This clears the flag that
+ *  would otherwise make the first decoding call return
+ *  MPG123_NEW_FORMAT.
  *  \param mh handle
  *  \param rate sampling rate return address
  *  \param channels channel count return address
@@ -501,6 +505,20 @@ MPG123_EXPORT int mpg123_format_support( mpg123_handle *mh
  */
 MPG123_EXPORT int mpg123_getformat( mpg123_handle *mh
 ,	long *rate, int *channels, int *encoding );
+
+/** Get the current output format written to the addresses given.
+ *  This differs from plain mpg123_getformat() in that you can choose
+ *  _not_ to clear the flag that would trigger the next decoding call
+ *  to return MPG123_NEW_FORMAT in case of a new format arriving.
+ *  \param mh handle
+ *  \param rate sampling rate return address
+ *  \param channels channel count return address
+ *  \param encoding encoding return address
+ *  \param clear_flag if true, clear internal format flag
+ *  \return MPG123_OK on success
+ */
+MPG123_EXPORT int mpg123_getformat2( mpg123_handle *mh
+,	long *rate, int *channels, int *encoding, int clear_flag );
 
 /*@}*/
 

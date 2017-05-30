@@ -7,9 +7,16 @@
 
 #define HAVE_STRDUP
 #define HAVE_STDLIB_H
+#define HAVE_STDINT_H
+#define HAVE_INTTYPES_H
 #define HAVE_STRING_H
 
+#ifdef _M_ARM
+#define ASMALIGN_ARMASM 1
+#else
 #define ASMALIGN_BALIGN 1
+#endif
+
 
 /* We want some frame index, eh? */
 #define FRAME_INDEX 1

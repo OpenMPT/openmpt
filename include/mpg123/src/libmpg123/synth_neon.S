@@ -17,13 +17,15 @@
 	return value: number of clipped samples
 */
 
+#ifndef _M_ARM
 	.code 32
+#endif
 #ifndef __APPLE__
 	.fpu neon
 #endif
 
 	.text
-	.globl ASM_NAME(synth_1to1_neon_asm)
+	GLOBAL_SYMBOL ASM_NAME(synth_1to1_neon_asm)
 #ifdef __ELF__
 	.type ASM_NAME(synth_1to1_neon_asm), %function
 #endif

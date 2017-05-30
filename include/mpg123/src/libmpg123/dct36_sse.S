@@ -13,8 +13,6 @@
 #define out2 %edx
 #define w  %ecx
 #define ts %eax
-#define COS9_ %eax
-#define tfcos36_ %edx
 #define tmp %esi
 
 /*
@@ -72,14 +70,14 @@ ASM_NAME(dct36_sse):
 	push		%ebx
 	push		%esi
 	push		%edi
-	call		1f
-1:
-	pop			%ebx
-	lea			dct36_sse_COS9-1b(%ebx), COS9_
-	lea			dct36_sse_tfcos36-1b(%ebx), tfcos36_
 	lea			12(%esp), tmp
 	movl		8(%ebp), in
+
+	GET_GOT
 	
+	lea			LOCAL_VAR(dct36_sse_COS9), %eax
+	lea			LOCAL_VAR(dct36_sse_tfcos36), %edx
+
 	xorps		%xmm0, %xmm0
 	xorps		%xmm5, %xmm5
 	movlps		64(in), %xmm5
@@ -108,7 +106,7 @@ ASM_NAME(dct36_sse):
 	movss		%xmm0, %xmm6
 	addps		%xmm6, %xmm1
 	
-	movaps		dct36_sse_mask-1b(%ebx), %xmm0
+	movaps		LOCAL_VAR(dct36_sse_mask), %xmm0
 	movaps		%xmm4, %xmm6
 	shufps		$0x4e, %xmm5, %xmm4
 	movaps		%xmm3, %xmm7
@@ -149,7 +147,7 @@ xmm3 in[10,11,16,17]
 xmm4 in[14,15,8,9]
 */
 
-	mulps		(COS9_), %xmm5
+	mulps		(%eax), %xmm5
 	addps		%xmm0, %xmm5
 	
 	movaps		%xmm0, (tmp)
@@ -165,19 +163,19 @@ xmm5 [ta33,tb33,ta66,tb66]
 	subps		%xmm4, %xmm6
 	xorps		%xmm7, %xmm7
 	shufps		$0xe0, %xmm2, %xmm7
-	mulps		(COS9_), %xmm6
+	mulps		(%eax), %xmm6
 	subps		%xmm7, %xmm0
 	addps		%xmm0, %xmm6
 	movaps		%xmm6, 48(tmp)
 	
-	movaps		16(COS9_), %xmm2
+	movaps		16(%eax), %xmm2
 
 	movaps		%xmm1, %xmm0
 	movaps		%xmm3, %xmm6
 	movaps		%xmm4, %xmm7
 	mulps		%xmm2, %xmm0
-	mulps		32(COS9_), %xmm6
-	mulps		48(COS9_), %xmm7
+	mulps		32(%eax), %xmm6
+	mulps		48(%eax), %xmm7
 	addps		%xmm5, %xmm0
 	addps		%xmm7, %xmm6
 	addps		%xmm6, %xmm0
@@ -186,8 +184,8 @@ xmm5 [ta33,tb33,ta66,tb66]
 	movaps		%xmm1, %xmm0
 	movaps		%xmm3, %xmm6
 	movaps		%xmm4, %xmm7
-	mulps		32(COS9_), %xmm0
-	mulps		48(COS9_), %xmm6
+	mulps		32(%eax), %xmm0
+	mulps		48(%eax), %xmm6
 	mulps		%xmm2, %xmm7
 	subps		%xmm5, %xmm0
 	subps		%xmm6, %xmm7
@@ -196,15 +194,15 @@ xmm5 [ta33,tb33,ta66,tb66]
 	
 	movaps		%xmm1, %xmm6
 	movaps		%xmm4, %xmm7
-	mulps		48(COS9_), %xmm6
+	mulps		48(%eax), %xmm6
 	mulps		%xmm3, %xmm2
-	mulps		32(COS9_), %xmm7
+	mulps		32(%eax), %xmm7
 	subps		%xmm5, %xmm6
 	subps		%xmm7, %xmm2
 	addps		%xmm2, %xmm6
 	
 	movaps		(tmp), %xmm0
-	movss		32(tfcos36_), %xmm5
+	movss		32(%edx), %xmm5
 	subps		%xmm1, %xmm0
 	subps		16(tmp), %xmm4
 	addps		%xmm3, %xmm0
@@ -230,7 +228,7 @@ xmm6 [1a-3,1b-3,-2a-3,-2b-3]
 	movaps		%xmm2, %xmm5
 	unpcklps	%xmm6, %xmm2
 	unpckhps	%xmm6, %xmm5
-	xorps		dct36_sse_sign-1b(%ebx), %xmm5
+	xorps		LOCAL_VAR(dct36_sse_sign), %xmm5
 
 /*
 xmm0 [1a-0,1a-1,1b-0,1b-1]
@@ -253,8 +251,8 @@ xmm2 tmp1b
 xmm5 tmp2b
 */
 
-	movaps		(tfcos36_), %xmm6
-	movaps		16(tfcos36_), %xmm7
+	movaps		(%edx), %xmm6
+	movaps		16(%edx), %xmm7
 	movaps		%xmm5, %xmm1
 	addps		%xmm2, %xmm5
 	subps		%xmm2, %xmm1

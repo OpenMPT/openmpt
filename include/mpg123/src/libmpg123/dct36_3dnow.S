@@ -35,15 +35,32 @@
 ASM_NAME(dct36_3dnow):
 	pushl %ebp
 	movl %esp,%ebp
-	subl $120,%esp
+#if defined(PIC) && defined(__APPLE__)
+	sub $4,%esp
+#endif
 	pushl %esi
 	pushl %ebx
+
+	#undef _EBX_
+	#define _EBX_ %edi
+	PREPARE_GOT
+	GET_GOT
+#if defined(PIC) && defined(__APPLE__)
+	#define _COS9_ 0(%edi)
+	#define _tfcos36_ 0(%eax)
+	mov GLOBAL_VAR_PTR(tfcos36), %eax
+	mov GLOBAL_VAR_PTR(COS9), %edi
+	mov %eax, -4(%ebp)
+#else
+	#define _COS9_ GLOBAL_VAR(COS9)
+	#define _tfcos36_ GLOBAL_VAR(tfcos36)
+#endif
+
 	movl 8(%ebp),%eax
 	movl 12(%ebp),%esi
 	movl 16(%ebp),%ecx
 	movl 20(%ebp),%edx
 	movl 24(%ebp),%ebx
-	leal -128(%ebp),%esp
 
 	femms
 	movq (%eax),%mm0
@@ -124,9 +141,9 @@ ASM_NAME(dct36_3dnow):
 
 	movq 24(%eax),%mm0
 	movq 48(%eax),%mm1
-	movd ASM_NAME(COS9)+12,%mm2
+	movd 12+_COS9_,%mm2
 	punpckldq %mm2,%mm2
-	movd ASM_NAME(COS9)+24,%mm3
+	movd 24+_COS9_,%mm3
 	punpckldq %mm3,%mm3
 	pfmul %mm2,%mm0
 	pfmul %mm3,%mm1
@@ -136,41 +153,44 @@ ASM_NAME(dct36_3dnow):
 	pi2fd %mm7,%mm7
 	popl %eax
 	movq 8(%eax),%mm2
-	movd ASM_NAME(COS9)+4,%mm3
+	movd 4+_COS9_,%mm3
 	punpckldq %mm3,%mm3
 	pfmul %mm3,%mm2
 	pfadd %mm0,%mm2
 	movq 40(%eax),%mm3
-	movd ASM_NAME(COS9)+20,%mm4
+	movd 20+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfadd %mm3,%mm2
 	movq 56(%eax),%mm3
-	movd ASM_NAME(COS9)+28,%mm4
+	movd 28+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfadd %mm3,%mm2
 	movq (%eax),%mm3
 	movq 16(%eax),%mm4
-	movd ASM_NAME(COS9)+8,%mm5
+	movd 8+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfadd %mm4,%mm3
 	movq 32(%eax),%mm4
-	movd ASM_NAME(COS9)+16,%mm5
+	movd 16+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfadd %mm4,%mm3
 	pfadd %mm1,%mm3
 	movq 64(%eax),%mm4
-	movd ASM_NAME(COS9)+32,%mm5
+	movd 32+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfadd %mm4,%mm3
 	movq %mm2,%mm4
 	pfadd %mm3,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+0,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov -4(%ebp),%eax
+#endif
+	punpckldq 0+_tfcos36_,%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -196,7 +216,10 @@ ASM_NAME(dct36_3dnow):
 	movq %mm3,%mm4
 	pfsub %mm2,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+32,%mm5
+	punpckldq 32+_tfcos36_,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov 8(%ebp),%eax
+#endif
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -224,7 +247,7 @@ ASM_NAME(dct36_3dnow):
 	pfsub %mm3,%mm2
 	movq 56(%eax),%mm3
 	pfsub %mm3,%mm2
-	movd ASM_NAME(COS9)+12,%mm3
+	movd 12+_COS9_,%mm3
 	punpckldq %mm3,%mm3
 	pfmul %mm3,%mm2
 	movq 16(%eax),%mm3
@@ -232,7 +255,7 @@ ASM_NAME(dct36_3dnow):
 	pfsub %mm4,%mm3
 	movq 64(%eax),%mm4
 	pfsub %mm4,%mm3
-	movd ASM_NAME(COS9)+24,%mm4
+	movd 24+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	movq 48(%eax),%mm4
@@ -242,7 +265,10 @@ ASM_NAME(dct36_3dnow):
 	movq %mm2,%mm4
 	pfadd %mm3,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+4,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov -4(%ebp),%eax
+#endif
+	punpckldq 4+_tfcos36_,%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -268,7 +294,10 @@ ASM_NAME(dct36_3dnow):
 	movq %mm3,%mm4
 	pfsub %mm2,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+28,%mm5
+	punpckldq 28+_tfcos36_,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov 8(%ebp),%eax
+#endif
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -293,41 +322,44 @@ ASM_NAME(dct36_3dnow):
 	movd %mm5,2048(%ebx)
 
 	movq 8(%eax),%mm2
-	movd ASM_NAME(COS9)+20,%mm3
+	movd 20+_COS9_,%mm3
 	punpckldq %mm3,%mm3
 	pfmul %mm3,%mm2
 	pfsub %mm0,%mm2
 	movq 40(%eax),%mm3
-	movd ASM_NAME(COS9)+28,%mm4
+	movd 28+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfsub %mm3,%mm2
 	movq 56(%eax),%mm3
-	movd ASM_NAME(COS9)+4,%mm4
+	movd 4+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfadd %mm3,%mm2
 	movq (%eax),%mm3
 	movq 16(%eax),%mm4
-	movd ASM_NAME(COS9)+32,%mm5
+	movd 32+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfsub %mm4,%mm3
 	movq 32(%eax),%mm4
-	movd ASM_NAME(COS9)+8,%mm5
+	movd 8+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfsub %mm4,%mm3
 	pfadd %mm1,%mm3
 	movq 64(%eax),%mm4
-	movd ASM_NAME(COS9)+16,%mm5
+	movd 16+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfadd %mm4,%mm3
 	movq %mm2,%mm4
 	pfadd %mm3,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+8,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov -4(%ebp),%eax
+#endif
+	punpckldq 8+_tfcos36_,%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -353,7 +385,10 @@ ASM_NAME(dct36_3dnow):
 	movq %mm3,%mm4
 	pfsub %mm2,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+24,%mm5
+	punpckldq 24+_tfcos36_,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov 8(%ebp),%eax
+#endif
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -377,41 +412,44 @@ ASM_NAME(dct36_3dnow):
 	psrlq $32,%mm5
 	movd %mm5,1920(%ebx)
 	movq 8(%eax),%mm2
-	movd ASM_NAME(COS9)+28,%mm3
+	movd 28+_COS9_,%mm3
 	punpckldq %mm3,%mm3
 	pfmul %mm3,%mm2
 	pfsub %mm0,%mm2
 	movq 40(%eax),%mm3
-	movd ASM_NAME(COS9)+4,%mm4
+	movd 4+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfadd %mm3,%mm2
 	movq 56(%eax),%mm3
-	movd ASM_NAME(COS9)+20,%mm4
+	movd 20+_COS9_,%mm4
 	punpckldq %mm4,%mm4
 	pfmul %mm4,%mm3
 	pfsub %mm3,%mm2
 	movq (%eax),%mm3
 	movq 16(%eax),%mm4
-	movd ASM_NAME(COS9)+16,%mm5
+	movd 16+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfsub %mm4,%mm3
 	movq 32(%eax),%mm4
-	movd ASM_NAME(COS9)+32,%mm5
+	movd 32+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfadd %mm4,%mm3
 	pfadd %mm1,%mm3
 	movq 64(%eax),%mm4
-	movd ASM_NAME(COS9)+8,%mm5
+	movd 8+_COS9_,%mm5
 	punpckldq %mm5,%mm5
 	pfmul %mm5,%mm4
 	pfsub %mm4,%mm3
 	movq %mm2,%mm4
 	pfadd %mm3,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+12,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov -4(%ebp),%eax
+#endif
+	punpckldq 12+_tfcos36_,%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -437,7 +475,10 @@ ASM_NAME(dct36_3dnow):
 	movq %mm3,%mm4
 	pfsub %mm2,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+20,%mm5
+	punpckldq 20+_tfcos36_,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov 8(%ebp),%eax
+#endif
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -471,7 +512,10 @@ ASM_NAME(dct36_3dnow):
 	movq 64(%eax),%mm3
 	pfadd %mm3,%mm4
 	movq %mm7,%mm5
-	punpckldq ASM_NAME(tfcos36)+16,%mm5
+#if defined(PIC) && defined(__APPLE__)
+	mov -4(%ebp),%eax
+#endif
+	punpckldq 16+_tfcos36_,%mm5
 	pfmul %mm5,%mm4
 	movq %mm4,%mm5
 	pfacc %mm5,%mm5
@@ -496,10 +540,21 @@ ASM_NAME(dct36_3dnow):
 	movd %mm5,1664(%ebx)
 
 	femms
+	RESTORE_GOT
 	popl %ebx
 	popl %esi
 	movl %ebp,%esp
 	popl %ebp
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_tfcos36:
+	.indirect_symbol	ASM_NAME(tfcos36)
+	.long	0
+L_COS9:
+	.indirect_symbol	ASM_NAME(COS9)
+	.long	0
+#endif
 
 NONEXEC_STACK

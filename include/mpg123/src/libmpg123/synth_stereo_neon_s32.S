@@ -18,13 +18,15 @@
 	return value: number of clipped samples
 */
 
+#ifndef _M_ARM
 	.code 32
+#endif
 #ifndef __APPLE__
 	.fpu neon
 #endif
 
 	.text
-	.globl ASM_NAME(synth_1to1_s32_s_neon_asm)
+	GLOBAL_SYMBOL ASM_NAME(synth_1to1_s32_s_neon_asm)
 #ifdef __ELF__
 	.type ASM_NAME(synth_1to1_s32_s_neon_asm), %function
 #endif
@@ -35,7 +37,9 @@ ASM_NAME(synth_1to1_s32_s_neon_asm):
 	ldr			r4, [sp, #84]
 	mov			r7, sp
 	sub			sp, sp, #16
-	bic			sp, #0xff
+	mov			r5, sp
+	and			r5, r5, #0xf
+	sub			sp, sp, r5
 	
 	add			WINDOW, WINDOW, #64
 	sub			WINDOW, WINDOW, r4, lsl #2

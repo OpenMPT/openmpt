@@ -9,14 +9,16 @@
 #include "mangle.h"
 
 #ifndef __aarch64__
+#ifndef _M_ARM
 	.code 32
+#endif
 #ifndef __APPLE__
 	.fpu neon
 #endif
 #endif
 
 	.text
-	.globl ASM_NAME(check_neon)
+	GLOBAL_SYMBOL ASM_NAME(check_neon)
 #ifdef __ELF__
 	.type ASM_NAME(check_neon), %function
 #endif

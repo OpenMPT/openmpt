@@ -44,9 +44,9 @@ ASM_NAME(dct64_sse):
 	andl		$-16, %esp /* align the stack at 16 bytes */
 	subl		$128, %esp /* reserve space for temporal store */
 	pushl		%ebx
-	
-	movl		ARG(0), %ecx
-	movl		ARG(1), %ebx
+
+	GET_GOT
+
 	movl		ARG(2), %eax
 	
 	MOVUAPS 	(%eax), %xmm7
@@ -77,10 +77,15 @@ ASM_NAME(dct64_sse):
 	subps 		%xmm0, %xmm5
 	subps 		%xmm1, %xmm4
 	
-	mulps		ASM_NAME(costab_mmxsse), %xmm7
-	mulps		ASM_NAME(costab_mmxsse)+16, %xmm6
-	mulps		ASM_NAME(costab_mmxsse)+32, %xmm5
-	mulps		ASM_NAME(costab_mmxsse)+48, %xmm4
+#if defined(PIC) && defined(__APPLE__)
+	mov			GLOBAL_VAR_PTR(costab_mmxsse), %ecx
+#else
+	lea			GLOBAL_VAR(costab_mmxsse), %ecx
+#endif
+	mulps		(%ecx), %xmm7
+	mulps		16(%ecx), %xmm6
+	mulps		32(%ecx), %xmm5
+	mulps		48(%ecx), %xmm4
 	
 	shufps		$0x1b, %xmm2, %xmm2
 	shufps		$0x1b, %xmm3, %xmm3
@@ -100,10 +105,10 @@ ASM_NAME(dct64_sse):
 	subps		%xmm4, %xmm7
 	addps		%xmm3, %xmm4
 	addps		%xmm2, %xmm5
-	mulps		ASM_NAME(costab_mmxsse)+64, %xmm0
-	mulps		ASM_NAME(costab_mmxsse)+80, %xmm1
-	mulps		ASM_NAME(costab_mmxsse)+80, %xmm6
-	mulps		ASM_NAME(costab_mmxsse)+64, %xmm7
+	mulps		64(%ecx), %xmm0
+	mulps		80(%ecx), %xmm1
+	mulps		80(%ecx), %xmm6
+	mulps		64(%ecx), %xmm7
 	
 	movaps		TEMP(0), %xmm2
 	movaps		TEMP(1), %xmm3
@@ -125,10 +130,10 @@ ASM_NAME(dct64_sse):
 	subps		%xmm6, %xmm7
 	addps		%xmm1, %xmm4
 	addps		%xmm3, %xmm6
-	mulps		ASM_NAME(costab_mmxsse)+96, %xmm2
-	mulps		ASM_NAME(costab_mmxsse)+96, %xmm0
-	mulps		ASM_NAME(costab_mmxsse)+96, %xmm5
-	mulps		ASM_NAME(costab_mmxsse)+96, %xmm7
+	mulps		96(%ecx), %xmm2
+	mulps		96(%ecx), %xmm0
+	mulps		96(%ecx), %xmm5
+	mulps		96(%ecx), %xmm7
 	movaps		%xmm2, TEMP(1)
 	movaps		%xmm0, TEMP(3)
 	
@@ -144,7 +149,7 @@ ASM_NAME(dct64_sse):
 	subps		%xmm5, %xmm3
 	addps		%xmm6, %xmm4
 	addps		%xmm7, %xmm5
-	movaps		ASM_NAME(costab_mmxsse)+112, %xmm0
+	movaps		112(%ecx), %xmm0
 	movlhps		%xmm0, %xmm0
 	mulps		%xmm0, %xmm2
 	mulps		%xmm0, %xmm3
@@ -186,9 +191,9 @@ ASM_NAME(dct64_sse):
 	movaps		%xmm5, TEMP(2)
 	movaps		%xmm7, TEMP(3)
 	
-	movss		ASM_NAME(costab_mmxsse)+120, %xmm5
+	movss		120(%ecx), %xmm5
 	shufps		$0x00, %xmm5, %xmm5
-	xorps		pnpn, %xmm5
+	xorps		LOCAL_VAR(pnpn), %xmm5
 	
 	movaps		%xmm4, %xmm0
 	movaps		%xmm6, %xmm1
@@ -294,10 +299,11 @@ ASM_NAME(dct64_sse):
 	shufps		$0x1e, %xmm2, %xmm2
 	shufps		$0x1e, %xmm4, %xmm4
 	shufps		$0x1e, %xmm6, %xmm6
-	andps		mask, %xmm0
-	andps		mask, %xmm2
-	andps		mask, %xmm4
-	andps		mask, %xmm6
+	leal		LOCAL_VAR(mask), %ecx
+	andps		(%ecx), %xmm0
+	andps		(%ecx), %xmm2
+	andps		(%ecx), %xmm4
+	andps		(%ecx), %xmm6
 	addps		%xmm0, %xmm1
 	addps		%xmm2, %xmm3
 	addps		%xmm4, %xmm5
@@ -309,8 +315,8 @@ ASM_NAME(dct64_sse):
 	movaps		%xmm6, %xmm4
 	shufps		$0x1e, %xmm0, %xmm0
 	shufps		$0x1e, %xmm4, %xmm4
-	andps		mask, %xmm0
-	andps		mask, %xmm4
+	andps		(%ecx), %xmm0
+	andps		(%ecx), %xmm4
 	addps		%xmm3, %xmm2
 	addps		%xmm0, %xmm3
 	addps		%xmm7, %xmm6
@@ -336,6 +342,10 @@ ASM_NAME(dct64_sse):
 	cvtps2pi	%xmm3, %mm5
 	packssdw	%mm4, %mm2
 	packssdw	%mm5, %mm3
+	
+	mov			%ecx, TEMP_BYTE(0)
+	movl		ARG(0), %ecx
+	movl		ARG(1), %ebx
 	
 	movd		%mm0, %eax
 	movd		%mm1, %edx
@@ -378,10 +388,11 @@ ASM_NAME(dct64_sse):
 	movw		%ax, 320(%ebx)
 	movw		%dx, 448(%ebx)
 	
+	mov			TEMP_BYTE(0), %eax
 	movaps		%xmm4, %xmm0
 	shufps		$0x1e, %xmm0, %xmm0
 	movaps		%xmm5, %xmm1
-	andps		mask, %xmm0
+	andps		(%eax), %xmm0
 	
 	addps		%xmm6, %xmm4
 	addps		%xmm7, %xmm5
@@ -445,10 +456,17 @@ ASM_NAME(dct64_sse):
 	shrl		$16, %edx
 	movw		%ax, 416(%ebx)
 	movw		%dx, 480(%ebx)
-	
+
 	popl		%ebx
 	movl		%ebp, %esp
 	popl		%ebp
 	ret
+
+#if defined(PIC) && defined(__APPLE__)
+	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
+L_costab_mmxsse:
+	.indirect_symbol	ASM_NAME(costab_mmxsse)
+	.long	0
+#endif
 
 NONEXEC_STACK
