@@ -1526,7 +1526,7 @@ int get_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel ) {
 int set_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument, int mute ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
-		mod_ext->impl->set_instrument_mute_status( instrument, mute != 0 );
+		mod_ext->impl->set_instrument_mute_status( instrument, mute ? true : false );
 		return 1;
 	} catch ( ... ) {
 		openmpt::report_exception( __FUNCTION__, mod_ext ? &mod_ext->mod : NULL );
