@@ -390,6 +390,7 @@ CString PrintImplTemplate<CString>(const CString & format
 {
 	CString result;
 	const int len = format.GetLength();
+	result.Preallocate(len);
 	for(int pos = 0; pos != len; ++pos)
 	{
 		CString::XCHAR c = format[pos];
@@ -414,10 +415,10 @@ CString PrintImplTemplate<CString>(const CString & format
 				continue;
 			} else if(c != _T('%'))
 			{
-				result += CString(_T('%'));
+				result.AppendChar(_T('%'));
 			}
 		}
-		result += CString(c);
+		result.AppendChar(c);
 	}
 	return result;
 }
