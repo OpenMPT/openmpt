@@ -97,7 +97,7 @@ public:
 	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
 	void ForceRefresh();
 	void SavePosition(BOOL bExit=FALSE);
-	CHAR* GetCurrentViewClassName();
+	const char *GetCurrentViewClassName() const;
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;
 	LRESULT ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
 	HWND GetHwndCtrl() const { return m_hWndCtrl; }
@@ -143,8 +143,6 @@ protected:
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnSetFocus(CWnd* pOldWnd); //rewbs.customKeysAutoEffects
 };
 
 /////////////////////////////////////////////////////////////////////////////

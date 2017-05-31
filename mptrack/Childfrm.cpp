@@ -56,7 +56,6 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	//}}AFX_MSG_MAP
-	ON_WM_SETFOCUS() //rewbs.customKeysAutoEffects
 END_MESSAGE_MAP()
 
 int CChildFrame::glMdiOpenCount = 0;
@@ -137,15 +136,20 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 {
 	CMDIChildWnd::OnMDIActivate(bActivate, pActivateWnd, pDeactivateWnd);
 
+	if(bActivate)
+	{
+		MPT_ASSERT(pActivateWnd == this);
+		CMainFrame::GetMainFrame()->UpdateEffectKeys(static_cast<CModDoc *>(GetActiveDocument()));
+	}
+	
 	// Update channel manager according to active document
 	auto instance = CChannelManagerDlg::sharedInstance();
 	if(instance != nullptr)
 	{
-		auto view = GetActiveView();
 		if(!bActivate && pActivateWnd == nullptr)
 			instance->SetDocument(nullptr);
-		else if(bActivate && view != nullptr)
-			instance->SetDocument(dynamic_cast<CModDoc *>(view->GetDocument()));
+		else if(bActivate)
+			instance->SetDocument(static_cast<CModDoc *>(GetActiveDocument()));
 	}
 }
 
@@ -200,7 +204,7 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 		{
 			szText.Preallocate(pDocument->GetTitle().GetLength() + 10);
 			szText = pDocument->GetTitle();
-			if (pDocument->IsModified()) szText += "*";
+			if (pDocument->IsModified()) szText += _T("*");
 		}
 		if (m_nWindow > 0)
 			szText.AppendFormat(_T(":%d"), m_nWindow);
@@ -327,7 +331,7 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		UINT nIns = lParam;
 
-		if ((!wParam) && (pSndFile->m_nInstruments > 0))
+		if ((!wParam) && (pSndFile->GetNumInstruments() > 0))
 		{
 			nIns = pModDoc->FindSampleParent(static_cast<SAMPLEINDEX>(nIns));
 			if(nIns == INSTRUMENTINDEX_INVALID)
@@ -437,26 +441,12 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
-//rewbs.varWindowSize
-CHAR* CChildFrame::GetCurrentViewClassName()
+
+const char *CChildFrame::GetCurrentViewClassName() const
+//------------------------------------------------------
 {
 	return m_szCurrentViewClassName;
 }
-//end rewbs.varWindowSize
-
-//rewbs.customKeysAutoEffects
-//We use this to update effect keys when user changes document, if necessary.
-void CChildFrame::OnSetFocus(CWnd* pOldWnd)
-{
-	CMDIChildWnd::OnSetFocus(pOldWnd);
-
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm)
-	{
-		pMainFrm->UpdateEffectKeys();
-	}
-}
-//end rewbs.customKeysAutoEffects
 
 
 std::string CChildFrame::SerializeView() const
@@ -466,18 +456,18 @@ std::string CChildFrame::SerializeView() const
 	// Version
 	mpt::IO::WriteVarInt(f, 0u);
 	// Current page
-	mpt::IO::WriteVarInt(f, static_cast<uint8_t>(GetModControlView()->GetActivePage()));
+	mpt::IO::WriteVarInt(f, static_cast<uint8>(GetModControlView()->GetActivePage()));
 
 	CModControlView *view = GetModControlView();
 	if (strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
 	{
-		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTORDER));	// Order number
+		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTORDER));	// Order number
 	} else if (strcmp(CViewSample::classCViewSample.m_lpszClassName, m_szCurrentViewClassName) == 0)
 	{
-		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Sample number
+		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Sample number
 	} else if (strcmp(CViewInstrument::classCViewInstrument.m_lpszClassName, m_szCurrentViewClassName) == 0)
 	{
-		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Instrument number
+		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Instrument number
 	}
 	return f.str();
 }
@@ -486,7 +476,7 @@ std::string CChildFrame::SerializeView() const
 void CChildFrame::DeserializeView(FileReader &file)
 //-------------------------------------------------
 {
-	uint32_t version, page;
+	uint32 version, page;
 	if(file.ReadVarInt(version) && version == 0 &&
 		file.ReadVarInt(page) && page >= 0 && page < CModControlView::MAX_PAGES)
 	{

@@ -248,6 +248,15 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 	if(TrackerSettings::Instance().rememberSongWindows) DeserializeViews();
 
+	// This is only needed when opening a module with stored window positions.
+	// The MDI child is activated before it has an active view and thus there is no CModDoc associated with it.
+	CMainFrame::GetMainFrame()->UpdateEffectKeys(this);
+	auto instance = CChannelManagerDlg::sharedInstance();
+	if(instance != nullptr)
+	{
+		instance->SetDocument(this);
+	}
+
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
 	{
