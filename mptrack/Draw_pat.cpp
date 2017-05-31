@@ -1643,7 +1643,7 @@ void CViewPattern::UpdateIndicator()
 										{
 											if (pSndFile->m_szNames[nsmp][0])
 											{
-												s.AppendFormat(_T(" (%d: "));
+												s.AppendFormat(_T(" (%d: "), nsmp);
 												s += pSndFile->m_szNames[nsmp];
 												s.AppendChar(_T(')'));
 											}
