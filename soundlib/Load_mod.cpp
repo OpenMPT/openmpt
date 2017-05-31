@@ -1724,7 +1724,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	
 	bool ok = false, infoOk = false;
-	std::string message;
+	FileReader commentChunk;
 	std::string version = "3.6";
 	PT36InfoChunk info;
 	MemsetZero(info);
@@ -1768,7 +1768,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		
 		case PT36IffChunk::idCMNT:
-			chunk.ReadString<mpt::String::maybeNullTerminated>(message, iffHead.chunksize);
+			commentChunk = chunk;
 			break;
 		
 		case PT36IffChunk::idPTDT:
@@ -1780,29 +1780,43 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 	// both an info chunk and a module are required
 	if(ok && infoOk)
 	{
+		bool vblank = (info.flags & 0x100) == 0;
+		m_playBehaviour.set(kMODVBlankTiming, vblank);
 		if(info.volume != 0)
 			m_nSamplePreAmp = std::min<uint16>(64, info.volume);
-		if(info.tempo != 0)
+		if(info.tempo != 0 && !vblank)
 			m_nDefaultTempo.Set(info.tempo);
 	
 		if(info.name[0])
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, info.name);
 	
-		FileHistory mptHistory;
-		MemsetZero(mptHistory.loadDate);
-		mptHistory.loadDate.tm_year = info.dateYear;
-		mptHistory.loadDate.tm_mon = Clamp<uint16, uint16>(info.dateMonth, 1, 12) - 1;
-		mptHistory.loadDate.tm_mday = Clamp<uint16, uint16>(info.dateDay, 1, 31);
-		mptHistory.loadDate.tm_hour = Clamp<uint16, uint16>(info.dateHour, 0, 23);
-		mptHistory.loadDate.tm_min = Clamp<uint16, uint16>(info.dateMinute, 0, 59);
-		mptHistory.loadDate.tm_sec = Clamp<uint16, uint16>(info.dateSecond, 0, 59);
-		m_FileHistory.push_back(mptHistory);
+		if(IsInRange(info.dateMonth, 1, 12) && IsInRange(info.dateDay, 1, 31) && IsInRange(info.dateHour, 0, 23)
+			&& IsInRange(info.dateMinute, 0, 59) && IsInRange(info.dateSecond, 0, 59))
+		{
+			FileHistory mptHistory;
+			MemsetZero(mptHistory.loadDate);
+			mptHistory.loadDate.tm_year = info.dateYear;
+			mptHistory.loadDate.tm_mon = info.dateMonth - 1;
+			mptHistory.loadDate.tm_mday = info.dateDay;
+			mptHistory.loadDate.tm_hour = info.dateHour;
+			mptHistory.loadDate.tm_min = info.dateMinute;
+			mptHistory.loadDate.tm_sec = info.dateSecond;
+			m_FileHistory.push_back(mptHistory);
+		}
 	}
 	if(ok)
 	{
-		// "message" chunk seems to only be used to store the artist name, despite being pretty long
-		if(message != "UNNAMED AUTHOR")
-			m_songArtist = mpt::ToUnicode(mpt::CharsetISO8859_1, message);
+		if(commentChunk.IsValid())
+		{
+			std::string author;
+			commentChunk.ReadString<mpt::String::maybeNullTerminated>(author, 32);
+			if(author != "UNNAMED AUTHOR")
+				m_songArtist = mpt::ToUnicode(mpt::CharsetISO8859_1, author);
+			if(!commentChunk.NoBytesLeft())
+			{
+				m_songMessage.ReadFixedLineLength(commentChunk, commentChunk.BytesLeft(), 40, 0);
+			}
+		}
 		
 		m_madeWithTracker = "ProTracker " + version;
 	}
