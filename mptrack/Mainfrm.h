@@ -534,7 +534,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	bool UpdateEffectKeys();
+	bool UpdateEffectKeys(const CModDoc *modDoc);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
