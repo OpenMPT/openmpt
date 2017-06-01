@@ -69,9 +69,9 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 	if (firstChn + numChns >= sndFile.GetNumChannels()) numChns = sndFile.GetNumChannels() - firstChn;
 
 	// Remove an undo step if there are too many.
-	while(buffer.size() >= MAX_UNDO_LEVEL)
+	if(buffer.size() >= MAX_UNDO_LEVEL)
 	{
-		DeleteStep(buffer, 0);
+		buffer.erase(buffer.begin(), buffer.begin() + (buffer.size() - MAX_UNDO_LEVEL + 1));
 	}
 
 	UndoInfo undo;
@@ -212,10 +212,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 void CPatternUndo::ClearBuffer(undobuf_t &buffer)
 //-----------------------------------------------
 {
-	while(!buffer.empty())
-	{
-		DeleteStep(buffer, buffer.size() - 1);
-	}
+	buffer.clear();
 }
 
 
@@ -717,11 +714,12 @@ bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins
 	{
 		buffer.resize(ins);
 	}
+	auto &insBuffer = buffer[ins - 1];
 
 	// Remove undo steps if there are too many.
-	if(buffer[ins - 1].size() >= MAX_UNDO_LEVEL)
+	if(insBuffer.size() >= MAX_UNDO_LEVEL)
 	{
-		buffer.erase(buffer.begin(), buffer.begin() + (buffer[ins - 1].size() - MAX_UNDO_LEVEL + 1));
+		insBuffer.erase(insBuffer.begin(), insBuffer.begin() + (insBuffer.size() - MAX_UNDO_LEVEL + 1));
 	}
 	
 	// Create new undo slot
@@ -737,7 +735,7 @@ bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins
 	{
 		undo.instr = *sndFile.Instruments[ins];
 	}
-	buffer[ins - 1].push_back(std::move(undo));
+	insBuffer.push_back(std::move(undo));
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
