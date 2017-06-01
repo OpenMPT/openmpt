@@ -1142,26 +1142,27 @@ std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 }
 
 std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
-	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
 	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return 0;
 	}
-	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
+	const CPattern &pattern = m_sndFile->Patterns[p];
+	if ( r < 0 || r >= static_cast<std::int32_t>( pattern.GetNumRows() ) ) {
 		return 0;
 	}
-	if ( c < 0 || c >= numchannels ) {
+	if ( c < 0 || c >= m_sndFile->GetNumChannels() ) {
 		return 0;
 	}
 	if ( cmd < module::command_note || cmd > module::command_parameter ) {
 		return 0;
 	}
+	const ModCommand & cell = *pattern.GetpModCommand( static_cast<ROWINDEX>( r ), static_cast<CHANNELINDEX>( c ) );
 	switch ( cmd ) {
-		case module::command_note: return m_sndFile->Patterns[p][r*numchannels+c].note; break;
-		case module::command_instrument: return m_sndFile->Patterns[p][r*numchannels+c].instr; break;
-		case module::command_volumeffect: return m_sndFile->Patterns[p][r*numchannels+c].volcmd; break;
-		case module::command_effect: return m_sndFile->Patterns[p][r*numchannels+c].command; break;
-		case module::command_volume: return m_sndFile->Patterns[p][r*numchannels+c].vol; break;
-		case module::command_parameter: return m_sndFile->Patterns[p][r*numchannels+c].param; break;
+		case module::command_note: return cell.note; break;
+		case module::command_instrument: return cell.instr; break;
+		case module::command_volumeffect: return cell.volcmd; break;
+		case module::command_effect: return cell.command; break;
+		case module::command_volume: return cell.vol; break;
+		case module::command_parameter: return cell.param; break;
 	}
 	return 0;
 }
@@ -1183,20 +1184,20 @@ f : generic effect column parameter
 */
 
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
-	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
 	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return std::make_pair( std::string(), std::string() );
 	}
-	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
+	const CPattern &pattern = m_sndFile->Patterns[p];
+	if ( r < 0 || r >= static_cast<std::int32_t>( pattern.GetNumRows() ) ) {
 		return std::make_pair( std::string(), std::string() );
 	}
-	if ( c < 0 || c >= numchannels ) {
+	if ( c < 0 || c >= m_sndFile->GetNumChannels() ) {
 		return std::make_pair( std::string(), std::string() );
 	}
 	if ( cmd < module::command_note || cmd > module::command_parameter ) {
 		return std::make_pair( std::string(), std::string() );
 	}
-	const ModCommand & cell = m_sndFile->Patterns[p][r*numchannels+c];
+	const ModCommand & cell = *pattern.GetpModCommand( static_cast<ROWINDEX>( r ), static_cast<CHANNELINDEX>( c ) );
 	switch ( cmd ) {
 		case module::command_note:
 			return std::make_pair(
@@ -1253,20 +1254,20 @@ std::string module_impl::highlight_pattern_row_channel_command( std::int32_t p, 
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
 	std::string text = pad ? std::string( width, ' ' ) : std::string();
 	std::string high = pad ? std::string( width, ' ' ) : std::string();
-	const CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
 	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return std::make_pair( text, high );
 	}
-	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
+	const CPattern &pattern = m_sndFile->Patterns[p];
+	if ( r < 0 || r >= static_cast<std::int32_t>( pattern.GetNumRows() ) ) {
 		return std::make_pair( text, high );
 	}
-	if ( c < 0 || c >= numchannels ) {
+	if ( c < 0 || c >= m_sndFile->GetNumChannels() ) {
 		return std::make_pair( text, high );
 	}
 	//  0000000001111
 	//  1234567890123
 	// "NNN IIvVV EFF"
-	const ModCommand cell = m_sndFile->Patterns[p][r*numchannels+c];
+	const ModCommand & cell = *pattern.GetpModCommand( static_cast<ROWINDEX>( r ), static_cast<CHANNELINDEX>( c ) );
 	text.clear();
 	high.clear();
 	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
