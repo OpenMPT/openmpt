@@ -36,7 +36,7 @@ CHANNELINDEX CPattern::GetNumChannels() const
 bool CPattern::IsEmptyRow(ROWINDEX row) const
 //-------------------------------------------
 {
-	if(m_ModCommands == nullptr || !IsValidRow(row))
+	if(m_ModCommands.empty() || !IsValidRow(row))
 	{
 		return true;
 	}
@@ -74,9 +74,11 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 //-------------------------------------------------------------------------------------------
 {
 	CSoundFile &sndFile = GetSoundFile();
-	ModCommand *newPattern;
 
-	if(enforceFormatLimits)
+	if(newRowCount == m_Rows)
+	{
+		return false;
+	} if(enforceFormatLimits)
 	{
 		const CModSpecifications &specs = sndFile.GetModSpecifications();
 		if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin) return false;
@@ -85,28 +87,23 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 		if(newRowCount > MAX_PATTERN_ROWS || newRowCount < 1) return false;
 	}
 
-	if(m_ModCommands == nullptr
-		|| newRowCount == m_Rows
-		|| (newPattern = AllocatePattern(newRowCount, GetNumChannels())) == nullptr)
+	try
 	{
+		size_t count = ((newRowCount > m_Rows) ? (newRowCount - m_Rows) : (m_Rows - newRowCount)) * GetNumChannels();
+
+		if(newRowCount > m_Rows)
+			m_ModCommands.insert(resizeAtEnd ? m_ModCommands.end() : m_ModCommands.begin(), count, ModCommand::Empty());
+		else if(resizeAtEnd)
+			m_ModCommands.erase(m_ModCommands.end() - count, m_ModCommands.end());
+		else
+			m_ModCommands.erase(m_ModCommands.begin(), m_ModCommands.begin() + count);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		return false;
 	}
 
-	// Copy over pattern data
-	size_t insertOffset = 0, copyOffset = 0;
-	if(!resizeAtEnd)
-	{
-		if(newRowCount > m_Rows)
-			insertOffset = GetNumChannels() * (newRowCount - m_Rows);
-		else
-			copyOffset = GetNumChannels() * (m_Rows - newRowCount);
-	}
-	std::memcpy(newPattern + insertOffset, m_ModCommands + copyOffset, GetNumChannels() * std::min(m_Rows, newRowCount) * sizeof(ModCommand));
-
-	FreePattern(m_ModCommands);
-	m_ModCommands = newPattern;
 	m_Rows = newRowCount;
-
 	return true;
 }
 
@@ -114,30 +111,30 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 void CPattern::ClearCommands()
 //----------------------------
 {
-	if(m_ModCommands != nullptr)
-		memset(m_ModCommands, 0, GetNumRows() * GetNumChannels() * sizeof(ModCommand));
+	std::fill(m_ModCommands.begin(), m_ModCommands.end(), ModCommand::Empty());
 }
 
 
 bool CPattern::AllocatePattern(ROWINDEX rows)
 //-------------------------------------------
 {
-	ModCommand *m = m_ModCommands;
-	if(m != nullptr && rows == GetNumRows())
+	if(!m_ModCommands.empty() && rows == GetNumRows())
 	{
 		// Re-use allocated memory
 		ClearCommands();
-		m_ModCommands = nullptr;
+		return true;
 	} else
 	{
-		m = AllocatePattern(rows, GetNumChannels());
-		if(m == nullptr)
+		try
 		{
+			decltype(m_ModCommands) newPattern(GetNumChannels() * rows, ModCommand::Empty());
+			m_ModCommands = std::move(newPattern);
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			return false;
 		}
 	}
-	Deallocate();
-	m_ModCommands = m;
 	m_Rows = rows;
 	return true;
 }
@@ -147,8 +144,7 @@ void CPattern::Deallocate()
 //-------------------------
 {
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
-	FreePattern(m_ModCommands);
-	m_ModCommands = nullptr;
+	m_ModCommands.clear();
 	m_PatternName.clear();
 }
 
@@ -164,19 +160,13 @@ bool CPattern::operator== (const CPattern &other) const
 		|| GetRowsPerBeat() != other.GetRowsPerBeat()
 		|| GetRowsPerMeasure() != other.GetRowsPerMeasure())
 		return false;
-	if(m_ModCommands == nullptr || other.m_ModCommands == nullptr)
-		return m_ModCommands == other.m_ModCommands;
 
-	auto i = GetNumRows() * GetNumChannels();
-	auto m1 = m_ModCommands, m2 = other.m_ModCommands;
-	while(i--)
+	for(auto m1 = cbegin(), m2 = other.cbegin(); m1 != cend(); m1++, m2++)
 	{
 		if(*m1 != *m2)
 		{
 			return false;
 		}
-		m1++;
-		m2++;
 	}
 	return true;
 }
@@ -187,22 +177,29 @@ bool CPattern::Expand()
 {
 	const ROWINDEX newRows = m_Rows * 2;
 	const CHANNELINDEX nChns = GetNumChannels();
-	ModCommand *newPattern;
 
-	if(!m_ModCommands
-		|| newRows > GetSoundFile().GetModSpecifications().patternRowsMax
-		|| (newPattern = AllocatePattern(newRows, nChns)) == nullptr)
+	if(m_ModCommands.empty()
+		|| newRows > GetSoundFile().GetModSpecifications().patternRowsMax)
 	{
 		return false;
 	}
 
-	for(ROWINDEX y = 0; y < m_Rows; y++)
+	decltype(m_ModCommands) newPattern;
+	try
 	{
-		memcpy(newPattern + y * 2 * nChns, m_ModCommands + y * nChns, nChns * sizeof(ModCommand));
+		newPattern.assign(m_ModCommands.size() * 2, ModCommand::Empty());
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		return false;
 	}
 
-	FreePattern(m_ModCommands);
-	m_ModCommands = newPattern;
+	for(auto mSrc = m_ModCommands.begin(), mDst = newPattern.begin(); mSrc != m_ModCommands.end(); mSrc += nChns, mDst += 2 * nChns)
+	{
+		std::copy(mSrc, mSrc + nChns, mDst);
+	}
+
+	m_ModCommands = std::move(newPattern);
 	m_Rows = newRows;
 
 	return true;
@@ -212,7 +209,7 @@ bool CPattern::Expand()
 bool CPattern::Shrink()
 //---------------------
 {
-	if (!m_ModCommands
+	if (m_ModCommands.empty()
 		|| m_Rows < GetSoundFile().GetModSpecifications().patternRowsMin * 2)
 	{
 		return false;
@@ -252,6 +249,7 @@ bool CPattern::Shrink()
 			}
 		}
 	}
+	m_ModCommands.resize(m_ModCommands.size() / 2);
 
 	return true;
 }
@@ -285,7 +283,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 //------------------------------------------------
 {
 	// First, reject invalid parameters.
-	if(!m_ModCommands
+	if(m_ModCommands.empty()
 		|| settings.m_row >= GetNumRows()
 		|| (settings.m_channel >= GetNumChannels() && settings.m_channel != CHANNELINDEX_INVALID))
 	{
@@ -454,48 +452,6 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 
 ////////////////////////////////////////////////////////////////////////
 //
-//	Static allocation / deallocation methods
-//
-////////////////////////////////////////////////////////////////////////
-
-
-ModCommand *CPattern::AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns)
-//----------------------------------------------------------------------
-{
-	size_t patSize = rows * nchns;
-	ModCommand *p = new (std::nothrow) ModCommand[patSize];
-	if(p != nullptr)
-	{
-		memset(p, 0, patSize * sizeof(ModCommand));
-	}
-	return p;
-}
-
-
-void CPattern::FreePattern(ModCommand *pat)
-//-----------------------------------------
-{
-	delete[] pat;
-}
-
-
-////////////////////////////////////////////////////////////////////////
-//
-//	ITP functions
-//
-////////////////////////////////////////////////////////////////////////
-
-
-bool CPattern::WriteITPdata(FILE* f) const
-//----------------------------------------
-{
-	fwrite(m_ModCommands, sizeof(ModCommand), GetNumRows() * GetNumChannels(), f);
-	return false;
-}
-
-
-////////////////////////////////////////////////////////////////////////
-//
 //	Pattern serialization functions
 //
 ////////////////////////////////////////////////////////////////////////
@@ -579,7 +535,7 @@ static uint8 CreateDiffMask(const ModCommand &chnMC, const ModCommand &newMC)
 void WriteData(std::ostream& oStrm, const CPattern& pat)
 //------------------------------------------------------
 {
-	if(!pat)
+	if(!pat.IsValid())
 		return;
 
 	const ROWINDEX rows = pat.GetNumRows();
@@ -633,7 +589,7 @@ if(ch < chns)						\
 void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 //-------------------------------------------------------------
 {
-	if (!pat) // Expecting patterns to be allocated and resized properly.
+	if (!pat.IsValid()) // Expecting patterns to be allocated and resized properly.
 		return;
 
 	const CHANNELINDEX chns = pat.GetNumChannels();

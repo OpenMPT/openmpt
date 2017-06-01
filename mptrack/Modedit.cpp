@@ -163,42 +163,42 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	{
 		CString str;
 		str.Format(_T("Can't apply change: Number of channels should be between %u and %u."), specs.channelsMin, specs.channelsMax);
-		Reporting::Error(str, "Rearrange Channels");
+		Reporting::Error(str, _T("Rearrange Channels"));
 		return CHANNELINDEX_INVALID;
 	}
 
-	CriticalSection cs;
 	if(createUndoPoint)
 	{
 		PrepareUndoForAllPatterns(true, "Rearrange Channels");
 	}
 
+	std::vector<ModCommand> oldRow;
+	try
+	{
+		oldRow.reserve(GetNumChannels());
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		Reporting::Error("Out of memory!", "Rearrange Channels");
+		return CHANNELINDEX_INVALID;
+	}
+	CriticalSection cs;
 	for(auto &pat : m_SndFile.Patterns)
 	{
-		if(pat)
+		if(pat.IsValid())
 		{
-			ModCommand *oldPatData = pat;
-			ModCommand *newPatData = CPattern::AllocatePattern(pat.GetNumRows(), newNumChannels);
-			if(!newPatData)
-			{
-				cs.Leave();
-				Reporting::Error("ERROR: Pattern allocation failed in ReArrangeChannels(...)");
-				return CHANNELINDEX_INVALID;
-			}
-			ModCommand *m = newPatData;
+			auto m = pat.begin();
 			for(ROWINDEX row = 0; row < pat.GetNumRows(); row++)
 			{
+				oldRow.assign(m, m + GetNumChannels());
 				for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, m++)
 				{
 					if(newOrder[chn] < GetNumChannels()) //Case: getting old channel to the new channel order.
-						*m = *pat.GetpModCommand(row, newOrder[chn]);
+						*m = oldRow[newOrder[chn]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
 						*m = ModCommand::Empty();
-
 				}
 			}
-			pat.SetData(newPatData, pat.GetNumRows());
-			CPattern::FreePattern(oldPatData);
 		}
 	}
 
@@ -803,7 +803,7 @@ bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 //--------------------------------------------
 {
-	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
+	if(m_SndFile.Patterns.IsValidPat(nPat))
 	{
 		CriticalSection cs;
 		GetPatternUndo().PrepareUndo(nPat, 0, 0, GetNumChannels(), m_SndFile.Patterns[nPat].GetNumRows(), "Remove Pattern");
@@ -1183,7 +1183,7 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 	}
 	for(auto &pat : m_SndFile.Patterns)
 	{
-		if(pat)
+		if(pat.IsValid())
 		{
 			const ModCommand *p = pat.GetpModCommand(0, nChn);
 			for(ROWINDEX nRow = pat.GetNumRows(); nRow > 0; nRow--, p += nChannels)
@@ -1217,7 +1217,7 @@ bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns.IsValidPat(i))
 		{
 			const CPattern &pattern = m_SndFile.Patterns[i];
-			const ModCommand *m = pattern.Begin();
+			auto m = pattern.cbegin();
 			for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 			{
 				for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels(); chn++, m++)
@@ -1241,7 +1241,7 @@ bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels
 	for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns.IsValidPat(i))
 	{
 		const CPattern &pattern = m_SndFile.Patterns[i];
-		const ModCommand *m = pattern.Begin();
+		auto m = pattern.cbegin();
 		for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 		{
 			for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels(); chn++, m++)

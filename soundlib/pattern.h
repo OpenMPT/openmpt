@@ -33,11 +33,7 @@ class CPattern
 	
 public:
 //BEGIN: OPERATORS
-	//To mimic ModCommand*
-	operator ModCommand*() { return m_ModCommands; }
-	operator const ModCommand*() const { return m_ModCommands; }
-	CPattern& operator=(ModCommand* const p) { m_ModCommands = p; return *this; }
-	CPattern& operator=(const CPattern& pat)
+	CPattern& operator= (const CPattern &pat)
 	{
 		m_ModCommands = pat.m_ModCommands;
 		m_Rows = pat.m_Rows;
@@ -60,8 +56,10 @@ public:
 	ROWINDEX GetRowsPerMeasure() const { return m_RowsPerMeasure; }		// pattern-specific rows per measure
 	bool GetOverrideSignature() const { return (m_RowsPerBeat + m_RowsPerMeasure > 0); }	// override song time signature?
 
-	// Return true if modcommand can be accessed from given row, false otherwise.
+	// Returns true if pattern data can be accessed at given row, false otherwise.
 	bool IsValidRow(const ROWINDEX row) const { return (row < GetNumRows()); }
+	// Returns true if any pattern data is present.
+	bool IsValid() const { return !m_ModCommands.empty(); }
 
 	// Return PatternRow object which has operator[] defined so that ModCommand
 	// at (iRow, iChn) can be accessed with GetRow(iRow)[iChn].
@@ -88,7 +86,7 @@ public:
 	CSoundFile& GetSoundFile();
 	const CSoundFile& GetSoundFile() const;
 
-	bool SetData(ModCommand* p, const ROWINDEX rows) { m_ModCommands = p; m_Rows = rows; return false; }
+	const std::vector<ModCommand> &GetData() const { return m_ModCommands; }
 
 	// Set pattern signature (rows per beat, rows per measure). Returns true on success.
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);
@@ -121,24 +119,22 @@ public:
 	// Write some kind of effect data to the pattern
 	bool WriteEffect(EffectWriter &settings);
 
-	bool WriteITPdata(FILE* f) const;
-
-	// Static allocation / deallocation helpers
-	static ModCommand *AllocatePattern(ROWINDEX rows, CHANNELINDEX nchns);
-	static void FreePattern(ModCommand *pat);
-
 //END: INTERFACE METHODS
 
-	typedef ModCommand* iterator;
-	typedef const ModCommand *const_iterator;
+	typedef std::vector<ModCommand>::iterator iterator;
+	typedef std::vector<ModCommand>::const_iterator const_iterator;
 
-	iterator Begin() { return m_ModCommands; }
-	const_iterator Begin() const { return m_ModCommands; }
+	iterator begin() { return m_ModCommands.begin(); }
+	const_iterator begin() const { return m_ModCommands.begin(); }
+	const_iterator cbegin() const { return m_ModCommands.cbegin(); }
 
-	iterator End() { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
-	const_iterator End() const { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
+	iterator end() { return m_ModCommands.end(); }
+	const_iterator end() const { return m_ModCommands.end(); }
+	const_iterator cend() const { return m_ModCommands.cend(); }
 
 	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_RowsPerBeat(0), m_RowsPerMeasure(0), m_rPatternContainer(patCont) {};
+	CPattern(const CPattern &) = default;
+	CPattern(CPattern &&) = default;
 
 protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }
@@ -150,7 +146,7 @@ protected:
 
 //BEGIN: DATA
 protected:
-	ModCommand* m_ModCommands;
+	std::vector<ModCommand> m_ModCommands;
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
 	ROWINDEX m_RowsPerMeasure;	// ditto

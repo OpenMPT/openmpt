@@ -1936,7 +1936,7 @@ void CViewPattern::InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax)
 	for(ROWINDEX r = maxrow; r > row; )
 	{
 		r--;
-		ModCommand *m = pSndFile->Patterns[m_nPattern] + r * pSndFile->GetNumChannels() + colmin;
+		ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(r, colmin);
 		for(CHANNELINDEX c = colmin; c <= colmax; c++, m++)
 		{
 			if(r <= row)
@@ -2737,11 +2737,9 @@ void CViewPattern::OnDropSelection()
 	}
 
 	// Allocate replacement pattern
-	ModCommand *pNewPattern = CPattern::AllocatePattern(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
-	if(pNewPattern == nullptr)
-	{
-		return;
-	}
+	CPattern &pattern = sndFile.Patterns[m_nPattern];
+	auto origPattern = pattern.GetData();
+
 	// Compute destination rect
 	PatternCursor begin(m_Selection.GetUpperLeft()), end(m_Selection.GetLowerRight());
 	begin.Move(dy, dx, 0);
@@ -2765,7 +2763,8 @@ void CViewPattern::OnDropSelection()
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
-	ModCommand *p = pNewPattern;
+	static const ModCommand empty = ModCommand::Empty();
+	auto p = pattern.begin();
 	for(ROWINDEX row = 0; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
 	{
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++, p++)
@@ -2787,38 +2786,33 @@ void CViewPattern::OnDropSelection()
 					{
 						xsrc = -1;
 					}
+				} else
+				{
+					continue;
 				}
 
-				if(xsrc >= 0 && xsrc < (int)sndFile.GetNumChannels() && ysrc >= 0 && ysrc < (int)sndFile.Patterns[m_nPattern].GetNumRows())
+				// Copy the data
+				const ModCommand &src = (xsrc >= 0 && xsrc < (int)sndFile.GetNumChannels() && ysrc >= 0 && ysrc < (int)sndFile.Patterns[m_nPattern].GetNumRows()) ? origPattern[ysrc * sndFile.GetNumChannels() + xsrc] : empty;
+				switch(c)
 				{
-					// Copy the data
-					const ModCommand &src = *sndFile.Patterns[m_nPattern].GetpModCommand(static_cast<ROWINDEX>(ysrc), static_cast<CHANNELINDEX>(xsrc));
-					switch(c)
-					{
-					case PatternCursor::noteColumn:
-						p->note = src.note;
-						break;
-					case PatternCursor::instrColumn:
-						p->instr = src.instr;
-						break;
-					case PatternCursor::volumeColumn:
-						p->vol = src.vol;
-						p->volcmd = src.volcmd;
-						break;
-					case PatternCursor::effectColumn:
-						p->command = src.command;
-						p->param = src.param;
-						break;
-					}
+				case PatternCursor::noteColumn:
+					p->note = src.note;
+					break;
+				case PatternCursor::instrColumn:
+					p->instr = src.instr;
+					break;
+				case PatternCursor::volumeColumn:
+					p->vol = src.vol;
+					p->volcmd = src.volcmd;
+					break;
+				case PatternCursor::effectColumn:
+					p->command = src.command;
+					p->param = src.param;
+					break;
 				}
 			}
 		}
 	}
-	
-	CriticalSection cs;
-	CPattern::FreePattern(sndFile.Patterns[m_nPattern]);
-	sndFile.Patterns[m_nPattern] = pNewPattern;
-	cs.Leave();
 
 	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
 	SetCursorPosition(begin);

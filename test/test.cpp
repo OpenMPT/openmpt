@@ -3279,23 +3279,22 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 //--------------------------------------------------------------------------------------
 {
 	const double dPcxProb = dProbPcs + dProbPc;
-	const CPattern::const_iterator end = pat.End();
-	for(CPattern::iterator i = pat.Begin(); i != end; i++)
+	for(auto &m : pat)
 	{
 		const double rand = Rand01();
 		if(rand < dPcxProb)
 		{
 			if(rand < dProbPcs)
-				i->note = NOTE_PCS;
+				m.note = NOTE_PCS;
 			else
-				i->note = NOTE_PC;
+				m.note = NOTE_PC;
 
-			i->instr = Rand<ModCommand::INSTR>(0, MAX_MIXPLUGINS);
-			i->SetValueVolCol(Rand<uint16>(0, ModCommand::maxColumnValue));
-			i->SetValueEffectCol(Rand<uint16>(0, ModCommand::maxColumnValue));
+			m.instr = Rand<ModCommand::INSTR>(0, MAX_MIXPLUGINS);
+			m.SetValueVolCol(Rand<uint16>(0, ModCommand::maxColumnValue));
+			m.SetValueEffectCol(Rand<uint16>(0, ModCommand::maxColumnValue));
 		}
 		else
-			i->Clear();
+			m.Clear();
 	}
 }
 
@@ -3329,7 +3328,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 
 	for(int i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
-		auto iter = sndFile.Patterns[i].Begin();
+		auto iter = sndFile.Patterns[i].begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
 	}
 
@@ -3353,7 +3352,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	for(int i = 0; i < 3; i++)
 	{
 		bool bPatternDataMatch = true;
-		auto iter = sndFile.Patterns[i].Begin();
+		auto iter = sndFile.Patterns[i].begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++)
 		{
 			if(pat[i][j] != *iter)

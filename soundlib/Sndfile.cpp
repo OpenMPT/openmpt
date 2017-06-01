@@ -1189,11 +1189,11 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	SAMPLEINDEX nExt = 0;
 	std::vector<ModCommand::INSTR> lastIns;
 
-	for (PATTERNINDEX pat = 0; pat < Patterns.Size(); pat++) if(Patterns.IsValidPat(pat))
+	for(const auto &pat : Patterns) if(pat.IsValid())
 	{
 		lastIns.assign(GetNumChannels(), 0);
-		const ModCommand *p = Patterns[pat];
-		for(ROWINDEX row = 0; row < Patterns[pat].GetNumRows(); row++)
+		auto p = pat.cbegin();
+		for(ROWINDEX row = 0; row < pat.GetNumRows(); row++)
 		{
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++, p++)
 			{

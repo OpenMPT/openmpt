@@ -644,7 +644,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				}
 				pattern = order[nextOrder];
 				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
-				patData = sndFile.Patterns[pattern];
+				patData = sndFile.Patterns[pattern].GetpModCommand(0, 0);
 				curOrder = nextOrder;
 				prepareUndo = true;
 				startRow = 0;

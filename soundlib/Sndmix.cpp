@@ -423,7 +423,7 @@ bool CSoundFile::ProcessRow()
 		if(!m_SongFlags[SONG_PATTERNLOOP])
 		{
 			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : Order.GetInvalidPatIndex();
-			if ((m_PlayState.m_nPattern < Patterns.Size()) && (!Patterns[m_PlayState.m_nPattern])) m_PlayState.m_nPattern = Order.GetIgnoreIndex();
+			if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid()) m_PlayState.m_nPattern = Order.GetIgnoreIndex();
 			while (m_PlayState.m_nPattern >= Patterns.Size())
 			{
 				// End of song?
@@ -519,7 +519,7 @@ bool CSoundFile::ProcessRow()
 				else
 					m_PlayState.m_nPattern = Order.GetInvalidPatIndex();
 
-				if ((m_PlayState.m_nPattern < Patterns.Size()) && (!Patterns[m_PlayState.m_nPattern]))
+				if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid())
 					m_PlayState.m_nPattern = Order.GetIgnoreIndex();
 			}
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;

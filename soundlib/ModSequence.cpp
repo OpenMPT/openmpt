@@ -383,12 +383,11 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 					// is this a valid pattern? adjust pattern jump commands, if necessary.
 					if(m_sndFile.Patterns.IsValidPat(copyPat))
 					{
-						ModCommand *m = m_sndFile.Patterns[copyPat];
-						for(size_t len = m_sndFile.Patterns[copyPat].GetNumRows() * m_sndFile.m_nChannels; len; m++, len--)
+						for(auto &m : m_sndFile.Patterns[copyPat])
 						{
-							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
+							if(m.command == CMD_POSITIONJUMP && m.param >= startOrd)
 							{
-								m->param = static_cast<ModCommand::PARAM>(m->param - startOrd);
+								m.param = static_cast<ModCommand::PARAM>(m.param - startOrd);
 							}
 						}
 					}
@@ -465,7 +464,7 @@ bool ModSequenceSet::MergeSequences()
 			// Try to fix pattern jump commands
 			if(!m_sndFile.Patterns.IsValidPat(pat)) continue;
 
-			ModCommand *m = m_sndFile.Patterns[pat];
+			auto m = m_sndFile.Patterns[pat].begin();
 			for(size_t len = 0; len < m_sndFile.Patterns[pat].GetNumRows() * m_sndFile.m_nChannels; m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
@@ -478,7 +477,7 @@ bool ModSequenceSet::MergeSequences()
 						{
 							// Could create new pattern - copy data over and continue from here.
 							firstSeq[firstOrder + ord] = newPat;
-							m = m_sndFile.Patterns[newPat] + len;
+							m = m_sndFile.Patterns[newPat].begin() + len;
 							if(newPat >= patternsFixed.size())
 								patternsFixed.resize(newPat + 1, SEQUENCEINDEX_INVALID);
 							pat = newPat;

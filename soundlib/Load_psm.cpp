@@ -881,8 +881,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				endPattern = order.EnsureUnique(subsong.endOrder);
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
-				ModCommand *m;
-				m = Patterns[endPattern];
+				auto m = Patterns[endPattern].cbegin();
 				for(uint32 cell = 0; cell < m_nChannels * Patterns[endPattern].GetNumRows(); cell++, m++)
 				{
 					if(m->command == CMD_PATTERNBREAK || m->command == CMD_POSITIONJUMP)

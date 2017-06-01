@@ -285,11 +285,11 @@ MPT_BINARY_STRUCT(MMD0EXP, 80)
 
 static const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
-static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
+static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 //---------------------------------------------------------------
 {
-	ModCommand::COMMAND command = p->command;
-	uint32 param = p->param;
+	ModCommand::COMMAND command = p.command;
+	uint32 param = p.param;
 	switch(command)
 	{
 	case 0x00:	if (param) command = CMD_ARPEGGIO; else command = 0; break;
@@ -487,8 +487,8 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 		command = 0;
 		param = 0;
 	}
-	p->command = command;
-	p->param = static_cast<ModCommand::PARAM>(param);
+	p.command = command;
+	p.param = static_cast<ModCommand::PARAM>(param);
 }
 
 
@@ -791,7 +791,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			tracks = pmb->numtracks;
 			if (!tracks) tracks = m_nChannels;
 			if(!Patterns.Insert(iBlk, lines)) continue;
-			ModCommand *p = Patterns[iBlk];
+			auto p = Patterns[iBlk].begin();
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 2);
 			uint32 maxlen = tracks*lines*3;
 			if (maxlen + dwPos > dwMemLength - 2) break;
@@ -808,7 +808,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 					p->command = s[1] & 0x0F;
 					p->param = s[2];
 					// if (!iBlk) Log("%02X.%02X.%02X | ", s[0], s[1], s[2]);
-					MedConvert(p, pmsh);
+					MedConvert(*p, pmsh);
 					p++;
 				}
 				//if (!iBlk) Log("\n");
@@ -856,10 +856,10 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 			}
-			ModCommand *p = Patterns[iBlk];
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 8);
 			uint32 maxlen = tracks*lines*4;
-			if (maxlen + dwPos > dwMemLength - 8 || p == nullptr) break;
+			if (maxlen + dwPos > dwMemLength - 8 || !Patterns.IsValidPat(iBlk)) break;
+			auto p = Patterns[iBlk].begin();
 			for (uint32 y=0; y<lines; y++)
 			{
 				for (uint32 x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
@@ -876,7 +876,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 					p->command = s[2];
 					p->param = s[3];
 					if (pcmdext) p->vol = pcmdext[x];
-					MedConvert(p, pmsh);
+					MedConvert(*p, pmsh);
 					p++;
 				}
 				if (pcmdext) pcmdext += tracks;
