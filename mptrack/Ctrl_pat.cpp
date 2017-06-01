@@ -329,8 +329,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			if(m_sndFile.Patterns.IsValidIndex(nPat))
 			{
-				m_sndFile.Patterns[nPat].GetName(s);
-				m_EditPatName.SetWindowText(s);
+				m_EditPatName.SetWindowText(m_sndFile.Patterns[nPat].GetName().c_str());
 			}
 
 			BOOL bXMIT = (m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
