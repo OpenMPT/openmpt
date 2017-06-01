@@ -447,7 +447,7 @@ void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCo
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS, ModCommand::NOTE noteStart = 0, ModCommand::NOTE noteEnd = 0);
 
 // Get window text (e.g. edit box conent) as a wide string
-std::wstring GetWindowTextW(CWnd &wnd);
+std::wstring GetWindowTextUnicode(HWND hwnd);
 
 ///////////////////////////////////////////////////
 // Tables

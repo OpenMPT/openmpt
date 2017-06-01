@@ -270,7 +270,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	{
 		m_cbnCommand.SetRedraw(FALSE);
 		m_cbnCommand.InitStorage(m_effectInfo.GetNumEffects(), 20);
-		m_cbnCommand.SetItemData(m_cbnCommand.AddString(" None"), (DWORD_PTR)-1);
+		m_cbnCommand.SetItemData(m_cbnCommand.AddString(_T(" None")), (DWORD_PTR)-1);
 		count = m_effectInfo.GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{

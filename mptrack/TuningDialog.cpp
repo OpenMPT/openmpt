@@ -172,7 +172,7 @@ BOOL CTuningDialog::OnInitDialog()
 
 	m_RatioMapWnd.Init(this, 0);
 
-	SetDlgItemText(IDC_TUNINGTYPE_DESC, "");
+	SetDlgItemText(IDC_TUNINGTYPE_DESC, _T(""));
 
 	//-->Creating treeview
 	m_TreeItemTuningItemMap.ClearMapping();

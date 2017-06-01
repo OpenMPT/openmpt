@@ -952,9 +952,13 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			{
 				// more than one sequence -> add folder
 				if(sndFile.Order(nSeq).GetName().empty())
+				{
 					seqName.Format(_T("Sequence %u"), nSeq);
-				else
-					seqName.Format("%u: %s", nSeq, sndFile.Order(nSeq).GetName().c_str());
+				} else
+				{
+					seqName.Format(_T("%u: "), nSeq);
+					seqName += sndFile.Order(nSeq).GetName().c_str();
+				}
 
 				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
@@ -963,7 +967,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					info.tiSequences[nSeq] = InsertItem(seqName, IMAGE_FOLDER, IMAGE_FOLDER, info.hOrders, TVI_LAST);
 				}
 				// Update bold item
-				strcpy(stmp, seqName);
+				_tcscpy(stmp, seqName);
 				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE | TVIF_PARAM;
 				tvi.state = 0;
 				tvi.stateMask = TVIS_BOLD;

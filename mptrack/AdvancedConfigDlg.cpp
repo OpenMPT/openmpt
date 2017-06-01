@@ -114,12 +114,7 @@ void COptionsAdvanced::ReInit()
 	m_groups.clear();
 	int numGroups = 0;
 
-	CStringW findStr;
-	HWND findWnd = ::GetDlgItem(m_hWnd, IDC_EDIT1);
-	int findLen = ::GetWindowTextLengthW(findWnd);
-	::GetWindowTextW(findWnd, findStr.GetBufferSetLength(findLen), findLen + 1);
-	findStr.ReleaseBuffer();
-	findStr.MakeLower();
+	mpt::ustring findStr = mpt::ToLowerCase(GetWindowTextUnicode(*GetDlgItem(IDC_EDIT1)));
 
 	LVITEMW lvi;
 	lvi.mask = LVIF_TEXT | LVIF_PARAM;
@@ -147,22 +142,14 @@ void COptionsAdvanced::ReInit()
 		const SettingValue &value = state.GetRefValue();
 		const SettingValue &defaultValue = state.GetRefDefault();
 
-		if(!findStr.IsEmpty())
+		if(!findStr.empty())
 		{
 			mpt::ustring str = path.FormatAsString() + MPT_USTRING("=") + value.FormatValueAsString();
-#if MPT_USTRING_MODE_WIDE
-			CStringW::StrTraits::StringLowercase(&str[0], str.size() + 1);
+			str = mpt::ToLowerCase(str);
 			if(str.find(findStr) == mpt::ustring::npos)
 			{
 				continue;
 			}
-#else
-			str = mpt::ToLowerCase(str);
-			if(str.find(mpt::ToUnicode(findStr)) == mpt::ustring::npos)
-			{
-				continue;
-			}
-#endif
 		}
 
 		int index;
