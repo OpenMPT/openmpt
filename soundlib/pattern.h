@@ -108,12 +108,6 @@ public:
 		return SetName(buffer, bufferSize);
 	}
 
-	template<size_t bufferSize>
-	void GetName(char (&buffer)[bufferSize]) const
-	{
-		strncpy(buffer, m_PatternName.c_str(), bufferSize - 1);
-		buffer[bufferSize - 1] = '\0';
-	}
 	std::string GetName() const { return m_PatternName; };
 
 #ifdef MODPLUG_TRACKER

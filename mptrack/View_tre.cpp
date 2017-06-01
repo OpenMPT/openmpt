@@ -844,7 +844,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || tvi.lParam != i || strcmp(s, tvi.pszText))
+					if(tvi.iImage != nImage || tvi.lParam != i || _tcscmp(s, tvi.pszText))
 					{
 						SetItem(hItem, TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i);
 					}
@@ -989,6 +989,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			const bool patNamesOnly = patternHint.GetType()[HINT_PATNAMES];
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order().GetLength())) imin = imax = dwHintParam;
+			std::string patName;
 			for (ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
 				if(patNamesOnly && sndFile.Order(nSeq)[iOrd] != nPat)
@@ -996,12 +997,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				UINT state = (iOrd == info.nOrdSel && nSeq == info.nSeqSel) ? TVIS_BOLD : 0;
 				if (sndFile.Order(nSeq)[iOrd] < sndFile.Patterns.Size())
 				{
-					stmp[0] = 0;
-					sndFile.Patterns[sndFile.Order(nSeq)[iOrd]].GetName(stmp);
-					if (stmp[0])
+					patName = sndFile.Patterns[sndFile.Order(nSeq)[iOrd]].GetName();
+					if(!patName.empty())
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %u: %s" : "[%02u] %u: %s",
-							iOrd, sndFile.Order(nSeq)[iOrd], stmp);
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %u: " : "[%02u] %u: ",
+							iOrd, sndFile.Order(nSeq)[iOrd]);
+						_tcscat(s, patName.c_str());
 					} else
 					{
 						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
@@ -1030,7 +1031,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if(tvi.state != state || strcmp(s, stmp))
+					if(tvi.state != state || _tcscmp(s, stmp))
 						SetItem(info.tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
 				} else
 				{
@@ -1049,6 +1050,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		bool bDelPat = false;
 
 		ASSERT(info.tiPatterns.size() == sndFile.Patterns.Size());
+		std::string patName;
 		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
 		{
 			if ((bDelPat) && (info.tiPatterns[iPat]))
@@ -1058,14 +1060,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			}
 			if (sndFile.Patterns[iPat])
 			{
-				stmp[0] = 0;
-				sndFile.Patterns[iPat].GetName(stmp);
-				if (stmp[0])
+				patName = sndFile.Patterns[iPat].GetName();
+				wsprintf(s, _T("%u"), iPat);
+				if(!patName.empty())
 				{
-					wsprintf(s, _T("%u: %s"), iPat, stmp);
-				} else
-				{
-					wsprintf(s, _T("%u"), iPat);
+					_tcscat(s, _T(": "));
+					_tcscat(s, patName.c_str());
 				}
 				if (info.tiPatterns[iPat])
 				{
@@ -1074,7 +1074,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if (strcmp(s, stmp)) SetItem(info.tiPatterns[iPat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
+					if (_tcscmp(s, stmp)) SetItem(info.tiPatterns[iPat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
 				} else
 				{
 					info.tiPatterns[iPat] = InsertItem(s, IMAGE_PATTERNS, IMAGE_PATTERNS, info.hPatterns, TVI_LAST);
@@ -1137,7 +1137,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || strcmp(s, stmp) || GetItemData(hChild) != nSmp)
+					if(tvi.iImage != nImage || _tcscmp(s, stmp) || GetItemData(hChild) != nSmp)
 					{
 						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nSmp);
 					}
@@ -1185,7 +1185,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || strcmp(s, stmp) || GetItemData(hChild) != nIns)
+					if(tvi.iImage != nImage || _tcscmp(s, stmp) || GetItemData(hChild) != nIns)
 					{
 						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nIns);
 					}
