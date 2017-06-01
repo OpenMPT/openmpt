@@ -32,9 +32,9 @@ protected:
 	struct UndoInfo
 	{
 		std::vector<ModChannelSettings> channelInfo;	// Optional old channel information (pan / volume / etc.)
-		ModCommand *pbuffer;			// Rescued pattern content
-		const char *description;		// Name of this undo action
-		ROWINDEX numPatternRows;		// Original number of pattern rows (in case of resize)
+		std::vector<ModCommand> content;	// Rescued pattern content
+		const char *description;			// Name of this undo action
+		ROWINDEX numPatternRows;			// Original number of pattern rows (in case of resize)
 		ROWINDEX firstRow, numRows;
 		PATTERNINDEX pattern;
 		CHANNELINDEX firstChannel, numChannels;
