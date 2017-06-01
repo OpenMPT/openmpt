@@ -1440,7 +1440,7 @@ bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
 //---------------------------------------------------
 {
-	if(nPat < m_SndFile.Patterns.Size() && m_SndFile.Patterns[nPat]) return m_SndFile.Patterns[nPat].GetNumRows();
+	if(m_SndFile.Patterns.IsValidIndex(nPat)) return m_SndFile.Patterns[nPat].GetNumRows();
 	return 0;
 }
 

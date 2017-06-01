@@ -180,12 +180,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
-	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if (m_SndFile.Patterns[pat])
+	for(auto &pat : m_SndFile.Patterns) if(pat.IsValid())
 	{
-		ModCommand *m = m_SndFile.Patterns[pat];
-
 		// This is used for -> MOD/XM conversion
-		std::vector<std::vector<ModCommand::PARAM> > effMemory(GetNumChannels());
+		std::vector<std::vector<ModCommand::PARAM>> effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
 		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
 		for(size_t i = 0; i < GetNumChannels(); i++)
@@ -197,7 +195,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANNELINDEX chn = 0;
 		ROWINDEX row = 0;
 
-		for(size_t len = m_SndFile.Patterns[pat].GetNumRows() * m_SndFile.GetNumChannels(); len; m++, len--, chn++)
+		for(auto m = pat.begin(); m != pat.end(); m++, chn++)
 		{
 			if(chn >= GetNumChannels())
 			{
@@ -305,7 +303,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 					// If the leftmost row delay command is SE0, ST3 ignores it, IT doesn't.
 
 					// Delete all commands right of the first command
-					ModCommand *p = m + 1;
+					auto p = m + 1;
 					for(CHANNELINDEX c = chn + 1; c < m_SndFile.GetNumChannels(); c++, p++)
 					{
 						if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
@@ -318,7 +316,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				&& m->command == CMD_S3MCMDEX && (m->param & 0xF0) == 0xE0)
 			{
 				// Delete all commands left of the last command
-				ModCommand *p = m - 1;
+				auto p = m - 1;
 				for(CHANNELINDEX c = 0; c < chn; c++, p--)
 				{
 					if(p->command == CMD_S3MCMDEX && (p->param & 0xF0) == 0xE0)
@@ -331,7 +329,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if(addBreak)
 		{
-			m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(m_SndFile.Patterns[pat].GetNumRows() - 1));
+			pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(pat.GetNumRows() - 1));
 		}
 	}
 

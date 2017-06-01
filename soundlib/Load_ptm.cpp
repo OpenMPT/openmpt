@@ -178,7 +178,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		ModCommand *rowBase = Patterns[pat];
+		ModCommand *rowBase = Patterns[pat].GetpModCommand(0, 0);
 		ROWINDEX row = 0;
 		while(row < 64 && file.CanRead(1))
 		{

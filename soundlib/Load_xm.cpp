@@ -171,8 +171,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 			paramPresent	= 0x10,
 		};
 
-		ModCommand *m = sndFile.Patterns[pat];
-		for(size_t numCommands = numRows * fileHeader.channels; numCommands != 0; numCommands--, m++)
+		for(auto &m : sndFile.Patterns[pat])
 		{
 			uint8 info = patternChunk.ReadUint8();
 
@@ -180,47 +179,47 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 			if(info & isPackByte)
 			{
 				// Interpret byte as flag set.
-				if(info & notePresent) m->note = patternChunk.ReadUint8();
+				if(info & notePresent) m.note = patternChunk.ReadUint8();
 			} else
 			{
 				// Interpret byte as note, read all other pattern fields as well.
-				m->note = info;
+				m.note = info;
 				info = allFlags;
 			}
 
-			if(info & instrPresent) m->instr = patternChunk.ReadUint8();
+			if(info & instrPresent) m.instr = patternChunk.ReadUint8();
 			if(info & volPresent) vol = patternChunk.ReadUint8();
-			if(info & commandPresent) m->command = patternChunk.ReadUint8();
-			if(info & paramPresent) m->param = patternChunk.ReadUint8();
+			if(info & commandPresent) m.command = patternChunk.ReadUint8();
+			if(info & paramPresent) m.param = patternChunk.ReadUint8();
 
-			if(m->note == 97)
+			if(m.note == 97)
 			{
-				m->note = NOTE_KEYOFF;
-			} else if(m->note > 0 && m->note < 97)
+				m.note = NOTE_KEYOFF;
+			} else if(m.note > 0 && m.note < 97)
 			{
-				m->note += 12;
+				m.note += 12;
 			} else
 			{
-				m->note = NOTE_NONE;
+				m.note = NOTE_NONE;
 			}
 
-			if(m->command | m->param)
+			if(m.command | m.param)
 			{
-				CSoundFile::ConvertModCommand(*m);
+				CSoundFile::ConvertModCommand(m);
 			} else
 			{
-				m->command = CMD_NONE;
+				m.command = CMD_NONE;
 			}
 
-			if(m->instr == 0xFF)
+			if(m.instr == 0xFF)
 			{
-				m->instr = 0;
+				m.instr = 0;
 			}
 
 			if(vol >= 0x10 && vol <= 0x50)
 			{
-				m->volcmd = VOLCMD_VOLUME;
-				m->vol = vol - 0x10;
+				m.volcmd = VOLCMD_VOLUME;
+				m.vol = vol - 0x10;
 			} else if (vol >= 0x60)
 			{
 				// Volume commands 6-F translation.
@@ -231,12 +230,12 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 					VOLCMD_PANSLIDERIGHT, VOLCMD_TONEPORTAMENTO,
 				};
 
-				m->volcmd = volEffTrans[(vol - 0x60) >> 4];
-				m->vol = vol & 0x0F;
+				m.volcmd = volEffTrans[(vol - 0x60) >> 4];
+				m.vol = vol & 0x0F;
 
-				if(m->volcmd == VOLCMD_PANNING)
+				if(m.volcmd == VOLCMD_PANNING)
 				{
-					m->vol *= 4;	// FT2 does indeed not scale panning symmetrically.
+					m.vol *= 4;	// FT2 does indeed not scale panning symmetrically.
 				}
 			}
 		}
@@ -817,7 +816,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		patHead[5] = static_cast<uint8>(numRows & 0xFF);
 		patHead[6] = static_cast<uint8>(numRows >> 8);
 
-		const ModCommand *p = Patterns[pat];
+		auto p = Patterns[pat].cbegin();
 		size_t len = 0;
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPattern = true;

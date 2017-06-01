@@ -1058,7 +1058,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				DeleteItem(info.tiPatterns[iPat]);
 				info.tiPatterns[iPat] = NULL;
 			}
-			if (sndFile.Patterns[iPat])
+			if (sndFile.Patterns.IsValidPat(iPat))
 			{
 				patName = sndFile.Patterns[iPat].GetName();
 				wsprintf(s, _T("%u"), iPat);

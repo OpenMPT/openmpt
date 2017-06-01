@@ -73,12 +73,11 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	}
 
 	// Check which samples / instruments are actually referenced.
-	for(PATTERNINDEX i = 0; i < source.Patterns.Size(); i++) if(source.Patterns.IsValidPat(i))
+	for(const auto &pat : source.Patterns) if(pat.IsValid())
 	{
-		const ModCommand *m = source.Patterns[i];
-		for(size_t j = source.GetNumChannels() * source.Patterns[i].GetNumRows(); j; m++, j--)
+		for(const auto &m : pat)
 		{
-			if(!m->IsPcNote() && m->instr < instrMapping.size()) instrMapping[m->instr] = 0;
+			if(!m.IsPcNote() && m.instr < instrMapping.size()) instrMapping[m.instr] = 0;
 		}
 	}
 

@@ -759,10 +759,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	{
 		return;
 	}
+	const CPattern &pattern = sndFile.Patterns[nPattern];
 
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
-	const ModCommand m0 = ModCommand::Empty();
-	const ModCommand *pPattern = sndFile.Patterns[nPattern];
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
 	UINT nColumnWidth;
@@ -794,7 +793,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	
 	bool bRowSel = false;
 	int row_col = -1, row_bkcol = -1;
-	for (UINT row=startRow; row<numRows; row++)
+	for (ROWINDEX row=startRow; row<numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
 		const int compRow = row + TrackerSettings::Instance().rowDisplayOffset;
@@ -891,13 +890,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		{
 			int x, bk_col, tx_col, col_sel, fx_col;
 
-			const ModCommand *m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
+			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
-			if (useSpeedUpMask && (selectedCols[col] & COLUMN_BITS_SKIP) && (pPattern) && (row))
+			if (useSpeedUpMask && (selectedCols[col] & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);

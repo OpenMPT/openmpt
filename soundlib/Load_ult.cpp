@@ -421,7 +421,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 		{
-			note = Patterns[pat] + chn;
+			note = Patterns[pat].GetpModCommand(0, chn);
 			ROWINDEX row = 0;
 			while(row < 64)
 			{

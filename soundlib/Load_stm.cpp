@@ -184,7 +184,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		ModCommand *m = Patterns[pat];
+		auto m = Patterns[pat].begin();
 		ORDERINDEX breakPos = ORDERINDEX_INVALID;
 		ROWINDEX breakRow = 63;	// Candidate row for inserting pattern break
 	

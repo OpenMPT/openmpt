@@ -928,7 +928,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<uint8> chnMask(GetNumChannels());
 		std::vector<ModCommand> lastValue(GetNumChannels(), ModCommand::Empty());
 
-		ModCommand *patData = Patterns[pat];
+		auto patData = Patterns[pat].begin();
 		ROWINDEX row = 0;
 		while(row < numRows && patternData.CanRead(1))
 		{
@@ -1519,7 +1519,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	for(PATTERNINDEX pat = 0; pat < itHeader.patnum; pat++)
 	{
 		uint32 dwPatPos = static_cast<uint32>(dwPos);
-		if (!Patterns[pat]) continue;
+		if (!Patterns.IsValidPat(pat)) continue;
 
 		if(Patterns[pat].GetOverrideSignature())
 			bNeedsMptPatSave = true;

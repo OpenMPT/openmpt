@@ -375,7 +375,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		// Skip non-existing patterns
-		if((memory.state.m_nPattern >= Patterns.Size()) || (!Patterns[memory.state.m_nPattern]))
+		if(!Patterns.IsValidPat(memory.state.m_nPattern))
 		{
 			// If there isn't even a tune, we should probably stop here.
 			if(memory.state.m_nCurrentOrder == orderList.GetRestartPos())

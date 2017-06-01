@@ -134,21 +134,19 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		ModCommand *p = Patterns[pat];
-		for(size_t i = 0; i < 8 * 64; i++, p++)
+		for(auto &m : Patterns[pat])
 		{
 			uint8 data[4];
 			file.ReadArray(data);
 
-			p->note = NOTE_NONE;
 			if(data[0] && data[0] + 12 + NOTE_MIN <= NOTE_MAX)
 			{
-				p->note = data[0] + 12 + NOTE_MIN;
+				m.note = data[0] + 12 + NOTE_MIN;
 			}
-			p->instr = data[1];
-			p->command = data[2];
-			p->param = data[3];
-			ConvertModCommand(*p);
+			m.instr = data[1];
+			m.command = data[2];
+			m.param = data[3];
+			ConvertModCommand(m);
 		}
 	}
 

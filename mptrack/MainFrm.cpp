@@ -1686,9 +1686,9 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 	m_WaveFile.SetRepeatCount(-1);
 	m_WaveFile.ResetPlayPos();
 
-	ModCommand *m = m_WaveFile.Patterns[0];
-	if(m)
+	if(m_WaveFile.Patterns.IsValidPat(0))
 	{
+		auto m = m_WaveFile.Patterns[0].GetRow(0);
 		if(m_WaveFile.GetNumSamples() > 0)
 		{
 			m[0].note = note;

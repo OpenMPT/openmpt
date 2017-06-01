@@ -1658,7 +1658,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Handle speed command with both nibbles set - this enables auto-swing (alternates between the two nibbles)
-		ModCommand *m = Patterns[pat];
+		auto m = Patterns[pat].begin();
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			for(CHANNELINDEX chn = 0; chn < 4; chn++, m++)
