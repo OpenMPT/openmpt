@@ -68,9 +68,6 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
 	if (firstChn + numChns >= sndFile.GetNumChannels()) numChns = sndFile.GetNumChannels() - firstChn;
 
-	ModCommand *pUndoData = CPattern::AllocatePattern(numRows, numChns);
-	if (!pUndoData) return false;
-
 	// Remove an undo step if there are too many.
 	while(buffer.size() >= MAX_UNDO_LEVEL)
 	{
@@ -84,13 +81,21 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 	undo.firstRow = firstRow;
 	undo.numChannels = numChns;
 	undo.numRows = numRows;
-	undo.pbuffer = pUndoData;
+	try
+	{
+		undo.content.resize(numRows * numChns);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		return false;
+	}
 	undo.linkToPrevious = linkToPrevious;
 	undo.description = description;
 	const ModCommand *pPattern = sndFile.Patterns[pattern].GetpModCommand(firstRow, firstChn);
+	ModCommand *pUndoData = undo.content.data();
 	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
-		memcpy(pUndoData, pPattern, numChns * sizeof(ModCommand));
+		std::copy(pPattern, pPattern + numChns, pUndoData);
 		pUndoData += numChns;
 		pPattern += sndFile.GetNumChannels();
 	}
@@ -100,7 +105,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 		undo.channelInfo.assign(sndFile.ChnSettings, sndFile.ChnSettings + sndFile.GetNumChannels());
 	}
 
-	buffer.push_back(undo);
+	buffer.push_back(std::move(undo));
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	return true;
@@ -178,13 +183,13 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		}
 
 		linkToPrevious = undo.linkToPrevious;
-		const ModCommand *pUndoData = undo.pbuffer;
+		const ModCommand *pUndoData = undo.content.data();
 		CPattern &pattern = sndFile.Patterns[nPattern];
 		ModCommand *m = pattern.GetpModCommand(undo.firstRow, undo.firstChannel);
 		const ROWINDEX numRows = std::min(undo.numRows, pattern.GetNumRows());
 		for(ROWINDEX iy = 0; iy < numRows; iy++)
 		{
-			memcpy(m, pUndoData, undo.numChannels * sizeof(ModCommand));
+			std::copy(pUndoData, pUndoData + undo.numChannels, m);
 			m += sndFile.GetNumChannels();
 			pUndoData += undo.numChannels;
 		}
@@ -219,7 +224,6 @@ void CPatternUndo::DeleteStep(undobuf_t &buffer, size_t step)
 //-----------------------------------------------------------
 {
 	if(step >= buffer.size()) return;
-	delete[] buffer[step].pbuffer;
 	buffer.erase(buffer.begin() + step);
 }
 
@@ -386,7 +390,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 		return false;
 	}
 
-	buffer[smp - 1].push_back(undo);
+	buffer[smp - 1].push_back(std::move(undo));
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
@@ -517,7 +521,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 		sample.uFlags.reset(SMP_KEEPONDISK);
 	}
 
-	fromBuf[smp - 1].push_back(undo);
+	fromBuf[smp - 1].push_back(std::move(undo));
 	DeleteStep(fromBuf, smp, fromBuf[smp - 1].size() - 1);
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
@@ -733,7 +737,7 @@ bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins
 	{
 		undo.instr = *sndFile.Instruments[ins];
 	}
-	buffer[ins - 1].push_back(undo);
+	buffer[ins - 1].push_back(std::move(undo));
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
