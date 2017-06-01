@@ -132,7 +132,7 @@ BOOL COptionsGeneral::OnInitDialog()
 
 	for(const auto &opt : generalOptionsList)
 	{
-		auto idx = m_CheckList.AddString(opt.name);
+		auto idx = m_CheckList.AddString(mpt::ToCString(mpt::CharsetASCII, opt.name));
 		const int check = (TrackerSettings::Instance().m_dwPatternSetup & opt.flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
 		m_CheckList.SetCheck(idx, check);
 	}
@@ -146,9 +146,9 @@ BOOL COptionsGeneral::OnInitDialog()
 void COptionsGeneral::OnOK()
 //--------------------------
 {
-	TrackerSettings::Instance().defaultArtist = mpt::ToUnicode(GetWindowTextW(m_defaultArtist));
+	TrackerSettings::Instance().defaultArtist = GetWindowTextUnicode(m_defaultArtist);
 	TrackerSettings::Instance().defaultModType = static_cast<MODTYPE>(m_defaultFormat.GetItemData(m_defaultFormat.GetCurSel()));
-	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromNative(GetWindowTextW(m_defaultTemplate));
+	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromUnicode(GetWindowTextUnicode(m_defaultTemplate));
 
 	NewFileAction action = nfDefaultFormat;
 	if(IsDlgButtonChecked(IDC_RADIO2)) action = nfSameAsCurrent;
@@ -199,7 +199,7 @@ void COptionsGeneral::OnBrowseTemplate()
 //--------------------------------------
 {
 	mpt::PathString basePath = theApp.GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\");
-	mpt::PathString defaultFile = mpt::PathString::FromNative(GetWindowTextW(m_defaultTemplate));
+	mpt::PathString defaultFile = mpt::PathString::FromUnicode(GetWindowTextUnicode(m_defaultTemplate));
 	if(defaultFile.empty()) defaultFile = TrackerSettings::Instance().defaultTemplateFile;
 
 	OpenFileDialog dlg;

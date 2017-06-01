@@ -293,7 +293,7 @@ void CSelectPluginDlg::OnNameFilterChanged()
 //------------------------------------------
 {
 	// Update name filter text
-	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(::GetWindowTextW(*GetDlgItem(IDC_NAMEFILTER))));
+	m_nameFilter = mpt::ToLowerCase(GetWindowTextUnicode(*GetDlgItem(IDC_NAMEFILTER)));
 
 	UpdatePluginsList();
 }
@@ -875,14 +875,7 @@ void CSelectPluginDlg::OnPluginTagsChanged()
 	VSTPluginLib *plug = GetSelectedPlugin();
 	if (plug)
 	{
-		HWND hwnd = ::GetDlgItem(m_hWnd, IDC_PLUGINTAGS);
-		int len = ::GetWindowTextLengthW(hwnd);
-		std::wstring tags(len, L' ');
-		if(len)
-		{
-			::GetWindowTextW(hwnd, &tags[0], len + 1);
-		}
-		plug->tags = mpt::ToUnicode(tags);
+		plug->tags = GetWindowTextUnicode(*GetDlgItem(IDC_PLUGINTAGS));
 	}
 }
 

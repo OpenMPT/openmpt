@@ -1104,7 +1104,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 
 	CDialog::OnInitDialog();
 
-	CHAR s[64];
+	CString s;
 
 	// Split Notes
 	AppendNotesToControl(m_CbnSplitNote, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
@@ -1113,7 +1113,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	// Octave modifier
 	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
 	{
-		wsprintf(s, i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", mpt::abs(i));
+		s.Format(i < 0 ? _T("Octave -%d") : i > 0 ? _T("Octave +%d") : _T("No Change"), mpt::abs(i));
 		int n = m_CbnOctaveModifier.AddString(s);
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}
@@ -1122,11 +1122,11 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? BST_CHECKED : BST_UNCHECKED);
 
 	// Volume
-	m_CbnSplitVolume.AddString("No Change");
+	m_CbnSplitVolume.AddString(_T("No Change"));
 	m_CbnSplitVolume.SetItemData(0, 0);
 	for(int i = 1; i <= 64 ; i++)
 	{
-		wsprintf(s, "%d", i);
+		s.Format(_T("%d"), i);
 		int n = m_CbnSplitVolume.AddString(s);
 		m_CbnSplitVolume.SetItemData(n, i);
 	}
@@ -1134,7 +1134,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 
 	// Instruments
 	m_CbnSplitInstrument.ResetContent();
-	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString("No Change"), 0);
+	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(_T("No Change")), 0);
 
 	if(sndFile.GetNumInstruments())
 	{
@@ -1153,7 +1153,8 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 		{
 			if(sndFile.GetSample(nSmp).pSample)
 			{
-				wsprintf(s, "%02d: %s", nSmp, sndFile.m_szNames[nSmp]);
+				s.Format(_T("%02d: "), nSmp);
+				s += sndFile.m_szNames[nSmp];
 				int n = m_CbnSplitInstrument.AddString(s);
 				m_CbnSplitInstrument.SetItemData(n, nSmp);
 			}
