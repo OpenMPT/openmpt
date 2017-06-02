@@ -147,7 +147,7 @@ void CModCleanupDlg::OnOK()
 	if(m_CheckBoxes[kRearrangePatterns]) modified |= RearrangePatterns();
 
 	// Instruments
-	if(modDoc.GetSoundFile()->m_nInstruments > 0)
+	if(modDoc.GetNumInstruments() > 0)
 	{
 		if(m_CheckBoxes[kRemoveAllInstruments]) modified |= RemoveAllInstruments();
 		if(m_CheckBoxes[kCleanupInstruments]) modified |= RemoveUnusedInstruments();
@@ -157,7 +157,7 @@ void CModCleanupDlg::OnOK()
 	if(m_CheckBoxes[kRemoveSamples]) modified |= RemoveAllSamples();
 	if(m_CheckBoxes[kCleanupSamples]) modified |= RemoveUnusedSamples();
 	if(m_CheckBoxes[kOptimizeSamples]) modified |= OptimizeSamples();
-	if(modDoc.GetSoundFile()->m_nSamples > 1)
+	if(modDoc.GetNumSamples() > 1)
 	{
 		if(m_CheckBoxes[kRearrangeSamples]) modified |= RearrangeSamples();
 	}
@@ -458,7 +458,7 @@ bool CModCleanupDlg::RearrangePatterns()
 	PATTERNINDEX patOrder = 0;
 	for(auto &order : sndFile.Order)
 	{
-		for(auto &pat :order)
+		for(auto &pat : order)
 		{
 			if(pat < numPatterns)
 			{
@@ -488,12 +488,16 @@ bool CModCleanupDlg::RearrangePatterns()
 		}
 	}
 
+	modDoc.GetPatternUndo().RearrangePatterns(newIndex);
+
 	// Now rearrange the pattern indices
 	for(size_t i = 0; i < newIndex.size(); i++)
 	{
-		auto current = static_cast<PATTERNINDEX>(i), next = newIndex[current];
-		while(i != next)
+		auto current = static_cast<PATTERNINDEX>(i);
+		while(i != newIndex[current])
 		{
+			PATTERNINDEX next = newIndex[current];
+			modified = true;
 			std::swap(sndFile.Patterns[current], sndFile.Patterns[next]);
 			newIndex[current] = current;
 			current = next;
@@ -503,12 +507,7 @@ bool CModCleanupDlg::RearrangePatterns()
 
 	EndWaitCursor();
 
-	if(modified)
-	{
-		modDoc.GetPatternUndo().ClearUndo();
-		return true;
-	}
-	return false;
+	return modified;
 }
 
 
@@ -851,7 +850,7 @@ bool CModCleanupDlg::ResetVariables()
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	if(Reporting::Confirm(_T("OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables"), false, false, this) == cnfNo)
+	if(Reporting::Confirm(_T("OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), _T("Resetting variables"), false, false, this) == cnfNo)
 		return false;
 
 	// Stop play.
@@ -997,7 +996,7 @@ bool CModCleanupDlg::RemoveAllPlugins()
 bool CModCleanupDlg::MergeSequences()
 //-----------------------------------
 {
-	return modDoc.GetSoundFile()->Order.MergeSequences();
+	return modDoc.GetrSoundFile().Order.MergeSequences();
 }
 
 
