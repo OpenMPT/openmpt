@@ -30,8 +30,8 @@ OPENMPT_NAMESPACE_BEGIN
 void CPatternUndo::ClearUndo()
 //----------------------------
 {
-	ClearBuffer(UndoBuffer);
-	ClearBuffer(RedoBuffer);
+	UndoBuffer.clear();
+	RedoBuffer.clear();
 }
 
 
@@ -50,15 +50,15 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 {
 	if(PrepareBuffer(UndoBuffer, pattern, firstChn, firstRow, numChns, numRows, description, linkToPrevious, storeChannelInfo))
 	{
-		ClearBuffer(RedoBuffer);
+		RedoBuffer.clear();
 		return true;
 	}
 	return false;
 }
 
 
-bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo) const
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -92,7 +92,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 	undo.linkToPrevious = linkToPrevious;
 	undo.description = description;
 	const ModCommand *pPattern = sndFile.Patterns[pattern].GetpModCommand(firstRow, firstChn);
-	ModCommand *pUndoData = undo.content.data();
+	auto pUndoData = undo.content.begin();
 	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
 		std::copy(pPattern, pPattern + numChns, pUndoData);
@@ -174,7 +174,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		{
 			if(!sndFile.Patterns.Insert(nPattern, undo.numPatternRows))
 			{
-				DeleteStep(fromBuf, fromBuf.size() - 1);
+				fromBuf.pop_back();
 				return PATTERNINDEX_INVALID;
 			}
 		} else if(sndFile.Patterns[nPattern].GetNumRows() != undo.numPatternRows)
@@ -183,7 +183,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		}
 
 		linkToPrevious = undo.linkToPrevious;
-		const ModCommand *pUndoData = undo.content.data();
+		auto pUndoData = undo.content.cbegin();
 		CPattern &pattern = sndFile.Patterns[nPattern];
 		ModCommand *m = pattern.GetpModCommand(undo.firstRow, undo.firstChannel);
 		const ROWINDEX numRows = std::min(undo.numRows, pattern.GetNumRows());
@@ -195,7 +195,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		}
 	}
 
-	DeleteStep(fromBuf, fromBuf.size() - 1);
+	fromBuf.pop_back();
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
@@ -208,34 +208,17 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 }
 
 
-// Remove all undo or redo steps
-void CPatternUndo::ClearBuffer(undobuf_t &buffer)
-//-----------------------------------------------
-{
-	buffer.clear();
-}
-
-
-// Delete a given undo / redo step.
-void CPatternUndo::DeleteStep(undobuf_t &buffer, size_t step)
-//-----------------------------------------------------------
-{
-	if(step >= buffer.size()) return;
-	buffer.erase(buffer.begin() + step);
-}
-
-
 // Public helper function to remove the most recent undo point.
 void CPatternUndo::RemoveLastUndoStep()
 //-------------------------------------
 {
-	if(!CanUndo()) return;
-	DeleteStep(UndoBuffer, UndoBuffer.size() - 1);
+	if(!UndoBuffer.empty())
+		UndoBuffer.pop_back();
 }
 
 
-CString CPatternUndo::GetName(const undobuf_t &buffer) const
-//----------------------------------------------------------
+CString CPatternUndo::GetName(const undobuf_t &buffer)
+//----------------------------------------------------
 {
 	if(buffer.empty())
 		return CString();
@@ -245,6 +228,25 @@ CString CPatternUndo::GetName(const undobuf_t &buffer) const
 		return info.description + CString(_T(" (Multiple Patterns)"));
 	else
 		return (info.description + mpt::String::Print(" (Pat %1 Row %2 Chn %3)", info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
+}
+
+
+void CPatternUndo::RearrangePatterns(undobuf_t &buffer, const std::vector<PATTERNINDEX> &newIndex)
+//------------------------------------------------------------------------------------------------
+{
+	for(auto &step : buffer)
+	{
+		if(step.pattern < newIndex.size())
+			step.pattern = newIndex[step.pattern];
+	}
+}
+
+
+void CPatternUndo::RearrangePatterns(const std::vector<PATTERNINDEX> &newIndex)
+//-----------------------------------------------------------------------------
+{
+	RearrangePatterns(UndoBuffer, newIndex);
+	RearrangePatterns(RedoBuffer, newIndex);
 }
 
 
