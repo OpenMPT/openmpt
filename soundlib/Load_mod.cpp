@@ -602,7 +602,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
-		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
+		|| IsMagic(magic, "M!K!")	// ProTracker (>64 patterns)
 		|| IsMagic(magic, "PATT")	// ProTracker 3.6
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
@@ -886,7 +886,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = 0x91;
 					} else
 					{
-						m.param = MIN(m.param * 2, 0xFF);
+						m.param = mpt::saturate_cast<ModCommand::PARAM>(m.param * 2);
 					}
 				}
 				if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
@@ -1741,7 +1741,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	CHANNELINDEX writeChannels = std::min(CHANNELINDEX(99), GetNumChannels());
 	if(writeChannels == 4)
 	{
-		if(writePatterns < 64)
+		if(writePatterns <= 64)
 		{
 			memcpy(modMagic, "M.K.", 4);
 		} else
