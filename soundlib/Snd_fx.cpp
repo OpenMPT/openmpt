@@ -54,7 +54,7 @@ protected:
 	const CSoundFile &sndFile;
 
 public:
-	CSoundFile::PlayState state;
+	std::unique_ptr<CSoundFile::PlayState> state;
 	struct ChnSettings
 	{
 		double patLoop;
@@ -64,13 +64,14 @@ public:
 		bool incChanged;		// When using sample sync, note frequency has changed
 		uint8 vol;
 
-		void Reset()
-		{
-			patLoop = 0.0;
-			patLoopSmp = 0;
-			patLoopStart = 0;
-			vol = 0xFF;
-		}
+		ChnSettings()
+			: patLoop(0.0)
+			, patLoopSmp(0)
+			, patLoopStart(0)
+			, ticksToRender(0)
+			, incChanged(false)
+			, vol(0xFF)
+		{ }
 	};
 
 #ifndef NO_PLUGINS
@@ -83,8 +84,7 @@ public:
 
 	GetLengthMemory(const CSoundFile &sf)
 		: sndFile(sf)
-		, state(sf.m_PlayState)
-		, chnSettings(sf.GetNumChannels())
+		, state(mpt::make_unique<CSoundFile::PlayState>(sf.m_PlayState))
 	{
 		Reset();
 	}
@@ -93,24 +93,24 @@ public:
 	{
 		plugParams.clear();
 		elapsedTime = 0.0;
-		state.m_lTotalSampleCount = 0;
-		state.m_nMusicSpeed = sndFile.m_nDefaultSpeed;
-		state.m_nMusicTempo = sndFile.m_nDefaultTempo;
-		state.m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
+		state->m_lTotalSampleCount = 0;
+		state->m_nMusicSpeed = sndFile.m_nDefaultSpeed;
+		state->m_nMusicTempo = sndFile.m_nDefaultTempo;
+		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
+		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 		{
-			chnSettings[chn].Reset();
-			state.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
-			state.Chn[chn].nOldGlobalVolSlide = 0;
-			state.Chn[chn].nOldChnVolSlide = 0;
-			state.Chn[chn].nNote = state.Chn[chn].nNewNote = state.Chn[chn].nLastNote = NOTE_NONE;
+			state->Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
+			state->Chn[chn].nOldGlobalVolSlide = 0;
+			state->Chn[chn].nOldChnVolSlide = 0;
+			state->Chn[chn].nNote = state->Chn[chn].nNewNote = state->Chn[chn].nLastNote = NOTE_NONE;
 		}
 	}
 
 	// Increment playback position of sample and envelopes on a channel
 	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = uint32_max)
 	{
-		ModChannel &chn = state.Chn[channel];
+		ModChannel &chn = state->Chn[channel];
 		uint32 numTicks = chnSettings[channel].ticksToRender;
 		if(numTicks == IGNORE_CHANNEL || numTicks == 0 || (chn.increment.IsZero() && !chnSettings[channel].incChanged) || chn.pModSample == nullptr)
 		{
@@ -131,7 +131,7 @@ public:
 			bool updateInc = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
 			if(i >= portaStart)
 			{
-				const ModCommand *p = sndFile.Patterns[state.m_nPattern].GetpModCommand(state.m_nRow, channel);
+				const ModCommand *p = sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
 				if(p->command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(&chn, p->param);
 				else if(p->command == CMD_TONEPORTAVOL) sndFile.TonePortamento(&chn, 0);
 				if(p->volcmd == VOLCMD_TONEPORTAMENTO)
@@ -252,11 +252,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	const ModSequence &orderList = Order(sequence);
 
 	GetLengthMemory memory(*this);
+	CSoundFile::PlayState &playState = *memory.state;
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this, sequence);
 
-	memory.state.m_nNextRow = memory.state.m_nRow = target.startRow;
-	memory.state.m_nNextOrder = memory.state.m_nCurrentOrder = target.startOrder;
+	playState.m_nNextRow = playState.m_nRow = target.startRow;
+	playState.m_nNextOrder = playState.m_nCurrentOrder = target.startOrder;
 
 	// Fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
 	std::bitset<MAX_EFFECTS> forbiddenCommands;
@@ -309,46 +310,46 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		uint32 rowDelay = 0, tickDelay = 0;
-		memory.state.m_nRow = memory.state.m_nNextRow;
-		memory.state.m_nCurrentOrder = memory.state.m_nNextOrder;
+		playState.m_nRow = playState.m_nNextRow;
+		playState.m_nCurrentOrder = playState.m_nNextOrder;
 
-		if(memory.state.m_nCurrentOrder >= orderList.size())
+		if(playState.m_nCurrentOrder >= orderList.size())
 		{
-			memory.state.m_nCurrentOrder = orderList.GetRestartPos();
+			playState.m_nCurrentOrder = orderList.GetRestartPos();
 			break;
 		}
 
 		// Check if pattern is valid
-		memory.state.m_nPattern = orderList[memory.state.m_nCurrentOrder];
+		playState.m_nPattern = orderList[playState.m_nCurrentOrder];
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
-		if(memory.state.m_nPattern == orderList.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && memory.state.m_nCurrentOrder == target.pos.order)
+		if(playState.m_nPattern == orderList.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && playState.m_nCurrentOrder == target.pos.order)
 		{
 			// Early test: Target is inside +++ pattern
 			retval.targetReached = true;
 			break;
 		}
 
-		while(memory.state.m_nPattern >= Patterns.Size())
+		while(playState.m_nPattern >= Patterns.Size())
 		{
 			// End of song?
-			if((memory.state.m_nPattern == orderList.GetInvalidPatIndex()) || (memory.state.m_nCurrentOrder >= orderList.size()))
+			if((playState.m_nPattern == orderList.GetInvalidPatIndex()) || (playState.m_nCurrentOrder >= orderList.size()))
 			{
-				if(memory.state.m_nCurrentOrder == orderList.GetRestartPos())
+				if(playState.m_nCurrentOrder == orderList.GetRestartPos())
 					break;
 				else
-					memory.state.m_nCurrentOrder = orderList.GetRestartPos();
+					playState.m_nCurrentOrder = orderList.GetRestartPos();
 			} else
 			{
-				memory.state.m_nCurrentOrder++;
+				playState.m_nCurrentOrder++;
 			}
-			memory.state.m_nPattern = (memory.state.m_nCurrentOrder < orderList.size()) ? orderList[memory.state.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
-			memory.state.m_nNextOrder = memory.state.m_nCurrentOrder;
-			if((!Patterns.IsValidPat(memory.state.m_nPattern)) && visitedRows.IsVisited(memory.state.m_nCurrentOrder, 0, true))
+			playState.m_nPattern = (playState.m_nCurrentOrder < orderList.size()) ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
+			playState.m_nNextOrder = playState.m_nCurrentOrder;
+			if((!Patterns.IsValidPat(playState.m_nPattern)) && visitedRows.IsVisited(playState.m_nCurrentOrder, 0, true))
 			{
-				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(memory.state.m_nNextOrder, memory.state.m_nNextRow, true))
+				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nNextRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -357,30 +358,30 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
 					retval.duration = memory.elapsedTime;
 					results.push_back(retval);
-					retval.startRow = memory.state.m_nNextRow;
-					retval.startOrder = memory.state.m_nNextOrder;
+					retval.startRow = playState.m_nNextRow;
+					retval.startOrder = playState.m_nNextOrder;
 					memory.Reset();
 
-					memory.state.m_nRow = memory.state.m_nNextRow;
-					memory.state.m_nCurrentOrder = memory.state.m_nNextOrder;
-					memory.state.m_nPattern = orderList[memory.state.m_nCurrentOrder];
+					playState.m_nRow = playState.m_nNextRow;
+					playState.m_nCurrentOrder = playState.m_nNextOrder;
+					playState.m_nPattern = orderList[playState.m_nCurrentOrder];
 					break;
 				}
 			}
 		}
-		if(memory.state.m_nNextOrder == ORDERINDEX_INVALID)
+		if(playState.m_nNextOrder == ORDERINDEX_INVALID)
 		{
 			// GetFirstUnvisitedRow failed, so there is nothing more to play
 			break;
 		}
 
 		// Skip non-existing patterns
-		if(!Patterns.IsValidPat(memory.state.m_nPattern))
+		if(!Patterns.IsValidPat(playState.m_nPattern))
 		{
 			// If there isn't even a tune, we should probably stop here.
-			if(memory.state.m_nCurrentOrder == orderList.GetRestartPos())
+			if(playState.m_nCurrentOrder == orderList.GetRestartPos())
 			{
-				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(memory.state.m_nNextOrder, memory.state.m_nNextRow, true))
+				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nNextRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -389,29 +390,29 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
 					retval.duration = memory.elapsedTime;
 					results.push_back(retval);
-					retval.startRow = memory.state.m_nNextRow;
-					retval.startOrder = memory.state.m_nNextOrder;
+					retval.startRow = playState.m_nNextRow;
+					retval.startOrder = playState.m_nNextOrder;
 					memory.Reset();
 					continue;
 				}
 			}
-			memory.state.m_nNextOrder = memory.state.m_nCurrentOrder + 1;
+			playState.m_nNextOrder = playState.m_nCurrentOrder + 1;
 			continue;
 		}
 		// Should never happen
-		if(memory.state.m_nRow >= Patterns[memory.state.m_nPattern].GetNumRows())
-			memory.state.m_nRow = 0;
+		if(playState.m_nRow >= Patterns[playState.m_nPattern].GetNumRows())
+			playState.m_nRow = 0;
 
 		// Check whether target was reached.
-		if(target.mode == GetLengthTarget::SeekPosition && memory.state.m_nCurrentOrder == target.pos.order && memory.state.m_nRow == target.pos.row)
+		if(target.mode == GetLengthTarget::SeekPosition && playState.m_nCurrentOrder == target.pos.order && playState.m_nRow == target.pos.row)
 		{
 			retval.targetReached = true;
 			break;
 		}
 
-		if(visitedRows.IsVisited(memory.state.m_nCurrentOrder, memory.state.m_nRow, true))
+		if(visitedRows.IsVisited(playState.m_nCurrentOrder, playState.m_nRow, true))
 		{
-			if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(memory.state.m_nNextOrder, memory.state.m_nNextRow, true))
+			if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nNextRow, true))
 			{
 				// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 				break;
@@ -420,43 +421,43 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
 				retval.duration = memory.elapsedTime;
 				results.push_back(retval);
-				retval.startRow = memory.state.m_nNextRow;
-				retval.startOrder = memory.state.m_nNextOrder;
+				retval.startRow = playState.m_nNextRow;
+				retval.startOrder = playState.m_nNextOrder;
 				memory.Reset();
 				continue;
 			}
 		}
 
-		retval.endOrder = memory.state.m_nCurrentOrder;
-		retval.endRow = memory.state.m_nRow;
+		retval.endOrder = playState.m_nCurrentOrder;
+		retval.endRow = playState.m_nRow;
 
 		// Update next position
-		memory.state.m_nNextRow = memory.state.m_nRow + 1;
-		if(memory.state.m_nNextRow >= Patterns[memory.state.m_nPattern].GetNumRows())
+		playState.m_nNextRow = playState.m_nRow + 1;
+		if(playState.m_nNextRow >= Patterns[playState.m_nPattern].GetNumRows())
 		{
-			memory.state.m_nNextRow = 0;
-			memory.state.m_nNextOrder++;
+			playState.m_nNextRow = 0;
+			playState.m_nNextOrder++;
 		}
 
 		// Jumped to invalid pattern row?
-		if(memory.state.m_nRow >= Patterns[memory.state.m_nPattern].GetNumRows())
+		if(playState.m_nRow >= Patterns[playState.m_nPattern].GetNumRows())
 		{
-			memory.state.m_nRow = 0;
+			playState.m_nRow = 0;
 		}
 		// New pattern?
-		if(!memory.state.m_nRow)
+		if(!playState.m_nRow)
 		{
 			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
 				memory.chnSettings[chn].patLoop = memory.elapsedTime;
-				memory.chnSettings[chn].patLoopSmp = memory.state.m_lTotalSampleCount;
+				memory.chnSettings[chn].patLoopSmp = playState.m_lTotalSampleCount;
 			}
 		}
 
-		ModChannel *pChn = memory.state.Chn;
+		ModChannel *pChn = playState.Chn;
 		
 		// For various effects, we need to know first how many ticks there are in this row.
-		const ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
+		const ModCommand *p = Patterns[playState.m_nPattern].GetpModCommand(playState.m_nRow, 0);
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
 			if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
@@ -481,17 +482,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
 				if(GetType() == MOD_TYPE_XM && !p->param)
 				{
-					memory.state.m_nMusicSpeed = uint16_max;
+					playState.m_nMusicSpeed = uint16_max;
 				}
 #endif	// MODPLUG_TRACKER
-				if(p->param > 0) memory.state.m_nMusicSpeed = p->param;
+				if(p->param > 0) playState.m_nMusicSpeed = p->param;
 				break;
 
 			case CMD_TEMPO:
 				if(m_playBehaviour[kMODVBlankTiming])
 				{
 					// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
-					if(p->param != 0) memory.state.m_nMusicSpeed = p->param;
+					if(p->param != 0) playState.m_nMusicSpeed = p->param;
 				}
 				break;
 
@@ -522,7 +523,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			}
 		}
 		if(rowDelay == 0) rowDelay = 1;
-		const uint32 numTicks = (memory.state.m_nMusicSpeed + tickDelay) * rowDelay;
+		const uint32 numTicks = (playState.m_nMusicSpeed + tickDelay) * rowDelay;
 		const uint32 nonRowTicks = numTicks - rowDelay;
 
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); pChn++, nChn++) if(!pChn->rowCommand.IsEmpty())
@@ -572,12 +573,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// Position Jump
 			case CMD_POSITIONJUMP:
 				positionJumpOnThisRow = true;
-				memory.state.m_nNextOrder = static_cast<ORDERINDEX>(CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn));
-				memory.state.m_nNextPatStartRow = 0;  // FT2 E60 bug
+				playState.m_nNextOrder = static_cast<ORDERINDEX>(CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn));
+				playState.m_nNextPatStartRow = 0;  // FT2 E60 bug
 				// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				// Test case: PatternJump.mod
 				if(!patternBreakOnThisRow || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-					memory.state.m_nNextRow = 0;
+					playState.m_nNextRow = 0;
 
 				if (adjustMode & eAdjust)
 				{
@@ -588,15 +589,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// Pattern Break
 			case CMD_PATTERNBREAK:
 				{
-					ROWINDEX row = PatternBreak(memory.state, nChn, param);
+					ROWINDEX row = PatternBreak(playState, nChn, param);
 					if(row != ROWINDEX_INVALID)
 					{
 						patternBreakOnThisRow = true;
-						memory.state.m_nNextRow = row;
+						playState.m_nNextRow = row;
 
 						if(!positionJumpOnThisRow)
 						{
-							memory.state.m_nNextOrder = memory.state.m_nCurrentOrder + 1;
+							playState.m_nNextOrder = playState.m_nCurrentOrder + 1;
 						}
 						if(adjustMode & eAdjust)
 						{
@@ -610,26 +611,26 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_TEMPO:
 				if(!m_playBehaviour[kMODVBlankTiming])
 				{
-					TEMPO tempo(CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn), 0);
+					TEMPO tempo(CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn), 0);
 					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
 						if (tempo.GetInt()) pChn->nOldTempo = static_cast<uint8>(tempo.GetInt()); else tempo.Set(pChn->nOldTempo);
 					}
 
-					if (tempo.GetInt() >= 0x20) memory.state.m_nMusicTempo = tempo;
+					if (tempo.GetInt() >= 0x20) playState.m_nMusicTempo = tempo;
 					else
 					{
 						// Tempo Slide
 						TEMPO tempoDiff((tempo.GetInt() & 0x0F) * nonRowTicks, 0);
 						if ((tempo.GetInt() & 0xF0) == 0x10)
 						{
-							memory.state.m_nMusicTempo += tempoDiff;
+							playState.m_nMusicTempo += tempoDiff;
 						} else
 						{
-							if(tempoDiff < memory.state.m_nMusicTempo)
-								memory.state.m_nMusicTempo -= tempoDiff;
+							if(tempoDiff < playState.m_nMusicTempo)
+								playState.m_nMusicTempo -= tempoDiff;
 							else
-								memory.state.m_nMusicTempo.Set(0);
+								playState.m_nMusicTempo.Set(0);
 						}
 					}
 
@@ -638,7 +639,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						tempoMax.Set(255);
 					}
-					Limit(memory.state.m_nMusicTempo, tempoMin, tempoMax);
+					Limit(playState.m_nMusicTempo, tempoMin, tempoMax);
 				}
 				break;
 
@@ -674,8 +675,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
 						{
 							memory.chnSettings[c].patLoop = memory.elapsedTime;
-							memory.chnSettings[c].patLoopSmp = memory.state.m_lTotalSampleCount;
-							memory.chnSettings[c].patLoopStart = memory.state.m_nRow;
+							memory.chnSettings[c].patLoopSmp = playState.m_lTotalSampleCount;
+							memory.chnSettings[c].patLoopStart = playState.m_nRow;
 						}
 						patternLoopStartedOnThisRow = true;
 					}
@@ -689,14 +690,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					// Pattern Loop
 					if (param & 0x0F)
 					{
-						memory.state.m_nNextPatStartRow = memory.chnSettings[nChn].patLoopStart; // FT2 E60 bug
+						playState.m_nNextPatStartRow = memory.chnSettings[nChn].patLoopStart; // FT2 E60 bug
 						patternLoopEndedOnThisRow = true;
 					} else
 					{
 						patternLoopStartedOnThisRow = true;
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-						memory.chnSettings[nChn].patLoopSmp = memory.state.m_lTotalSampleCount;
-						memory.chnSettings[nChn].patLoopStart = memory.state.m_nRow;
+						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
+						memory.chnSettings[nChn].patLoopStart = playState.m_nRow;
 					}
 				}
 				break;
@@ -755,10 +756,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				// IT compatibility 16. ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
-					memory.state.m_nGlobalVolume = param * 2;
+					playState.m_nGlobalVolume = param * 2;
 				} else if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)))
 				{
-					memory.state.m_nGlobalVolume = 256;
+					playState.m_nGlobalVolume = 256;
 				}
 				break;
 			// Global Volume Slide
@@ -769,31 +770,31 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if (param) pChn->nOldGlobalVolSlide = param; else param = pChn->nOldGlobalVolSlide;
 				} else
 				{
-					if (param) memory.state.Chn[0].nOldGlobalVolSlide = param; else param = memory.state.Chn[0].nOldGlobalVolSlide;
+					if (param) playState.Chn[0].nOldGlobalVolSlide = param; else param = playState.Chn[0].nOldGlobalVolSlide;
 				}
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume += param << 1;
+					playState.m_nGlobalVolume += param << 1;
 				} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume -= param;
+					playState.m_nGlobalVolume -= param;
 				} else if (param & 0xF0)
 				{
 					param >>= 4;
 					param <<= 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume += param * nonRowTicks;
+					playState.m_nGlobalVolume += param * nonRowTicks;
 				} else
 				{
 					param = (param & 0x0F) << 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume -= param * nonRowTicks;
+					playState.m_nGlobalVolume -= param * nonRowTicks;
 				}
-				Limit(memory.state.m_nGlobalVolume, 0, 256);
+				Limit(playState.m_nGlobalVolume, 0, 256);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) pChn->nGlobalVol = param;
@@ -900,26 +901,26 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		// Interpret F00 effect in XM files as "stop song"
-		if(GetType() == MOD_TYPE_XM && memory.state.m_nMusicSpeed == uint16_max)
+		if(GetType() == MOD_TYPE_XM && playState.m_nMusicSpeed == uint16_max)
 		{
 			break;
 		}
 
-		memory.state.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
-		if(Patterns[memory.state.m_nPattern].GetOverrideSignature())
+		playState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
+		if(Patterns[playState.m_nPattern].GetOverrideSignature())
 		{
-			memory.state.m_nCurrentRowsPerBeat = Patterns[memory.state.m_nPattern].GetRowsPerBeat();
+			playState.m_nCurrentRowsPerBeat = Patterns[playState.m_nPattern].GetRowsPerBeat();
 		}
 
-		const uint32 tickDuration = GetTickDuration(memory.state);
+		const uint32 tickDuration = GetTickDuration(playState);
 		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
-		memory.state.m_lTotalSampleCount += rowDuration;
+		playState.m_lTotalSampleCount += rowDuration;
 
 		if(adjustSamplePos)
 		{
 			// Super experimental and dirty sample seeking
-			pChn = memory.state.Chn;
+			pChn = playState.Chn;
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); pChn++, nChn++)
 			{
 				if(memory.chnSettings[nChn].ticksToRender == GetLengthMemory::IGNORE_CHANNEL)
@@ -954,7 +955,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					}
 					if(rowDelay > 1 && startTick != 0 && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						startTick += (memory.state.m_nMusicSpeed + tickDelay) * (rowDelay - 1);
+						startTick += (playState.m_nMusicSpeed + tickDelay) * (rowDelay - 1);
 					}
 					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
 
@@ -969,7 +970,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(m.command == CMD_OFFSET)
 					{
 						bool isExtended = false;
-						SmpLength offset = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn, &isExtended);
+						SmpLength offset = CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn, &isExtended);
 						if(!isExtended)
 						{
 							offset <<= 8;
@@ -984,7 +985,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
 						ReverseSampleOffset(*pChn, m.param);
-						startTick = memory.state.m_nMusicSpeed - 1;
+						startTick = playState.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
 						if(m.vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
@@ -1118,7 +1119,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
 			// If one of them starts or ends "in between", it will most likely calculate a wrong duration.
 			// For S3M files, it's also way off.
-			pChn = memory.state.Chn;
+			pChn = playState.Chn;
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 			{
 				ModCommand::COMMAND command = pChn->rowCommand.command;
@@ -1138,7 +1139,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					if(memory.chnSettings[nChn].patLoop == i.first)
 					{
-						memory.state.m_lTotalSampleCount += (memory.state.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i.second - 1);
+						playState.m_lTotalSampleCount += (playState.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i.second - 1);
 						break;
 					}
 				}
@@ -1151,7 +1152,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if((pChn->rowCommand.command == CMD_S3MCMDEX && pChn->rowCommand.param >= 0xB1 && pChn->rowCommand.param <= 0xBF))
 					{
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-						memory.chnSettings[nChn].patLoopSmp = memory.state.m_lTotalSampleCount;
+						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
 					}
 				}
 			}
@@ -1172,8 +1173,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
 	{
-		retval.lastOrder = memory.state.m_nCurrentOrder;
-		retval.lastRow = memory.state.m_nRow;
+		retval.lastOrder = playState.m_nCurrentOrder;
+		retval.lastRow = playState.m_nRow;
 	}
 	retval.duration = memory.elapsedTime;
 	results.push_back(retval);
@@ -1184,20 +1185,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
 		{
 			// Target found, or there is no target (i.e. play whole song)...
-			m_PlayState = memory.state;
+			m_PlayState = std::move(playState);
 			m_PlayState.m_nFrameDelay = m_PlayState.m_nPatternDelay = 0;
 			m_PlayState.m_nTickCount = Util::MaxValueOfType(m_PlayState.m_nTickCount) - 1;
 			m_PlayState.m_bPositionChanged = true;
 			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
-				if(memory.state.Chn[n].nLastNote != NOTE_NONE)
+				if(m_PlayState.Chn[n].nLastNote != NOTE_NONE)
 				{
-					m_PlayState.Chn[n].nNewNote = memory.state.Chn[n].nLastNote;
+					m_PlayState.Chn[n].nNewNote = m_PlayState.Chn[n].nLastNote;
 				}
 				if(memory.chnSettings[n].vol != 0xFF && !adjustSamplePos)
 				{
-					if(memory.chnSettings[n].vol > 64) memory.chnSettings[n].vol = 64;
-					m_PlayState.Chn[n].nVolume = memory.chnSettings[n].vol * 4;
+					m_PlayState.Chn[n].nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
 				}
 			}
 
