@@ -1129,14 +1129,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read sample groups
-	for(INSTRUMENTINDEX ins = 0; ins < 255; ins++)
+	for(INSTRUMENTINDEX ins = 0; ins < fileHeader.numInstruments; ins++)
 	{
-		ModInstrument *mptIns = Instruments[ins + 1];
-
-		// Instruments with plugin assignments never play samples at the same time!
-		if(mptIns == nullptr || mptIns->nMixPlug != 0)
-			continue;
-
 		if(instrChunks[ins].GetLength())
 		{
 			FileReader &chunk = instrChunks[ins];
@@ -1149,6 +1143,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				file.ReadConvertEndianness(groups[grp]);
 			}
+
+			ModInstrument *mptIns = Instruments[ins + 1];
+			// Instruments with plugin assignments never play samples at the same time!
+			if(mptIns == nullptr || mptIns->nMixPlug != 0)
+				continue;
 
 			mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
 			mptIns->AssignSample(0);
