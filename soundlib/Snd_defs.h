@@ -444,12 +444,6 @@ enum PlayBehaviour
 	kFT2PanWithDelayedNoteOff,		// Pan command with delayed note-off
 	kFT2VolColDelay,				// FT2-style volume column handling if there is a note delay
 	kFT2FinetunePrecision,			// Only take the upper 4 bits of sample finetune.
-	kFT2NoteOffFlags,				// Set and reset the correct fade/key-off flags with note-off and instrument number after note-off
-
-	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
-	kRowDelayWithNoteDelay,			// Retrigger note delays on every reptition of a row
-	kFT2TremoloRampWaveform,		// FT2-compatible tremolo ramp down / triangle waveform
-	kFT2PortaUpDownMemory,			// Portamento up and down have separate memory
 
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3
@@ -461,6 +455,12 @@ enum PlayBehaviour
 	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
 	kMODIgnorePanning,				// Do not process any panning commands
 	kMODSampleSwap,					// On-the-fly sample swapping
+
+	kFT2NoteOffFlags,				// Set and reset the correct fade/key-off flags with note-off and instrument number after note-off
+	kITMultiSampleInstrumentNumber,	// After portamento to different sample within multi-sampled instrument, lone instrument numbers in patterns always recall the new sample's default settings
+	kRowDelayWithNoteDelay,			// Retrigger note delays on every reptition of a row
+	kFT2TremoloRampWaveform,		// FT2-compatible tremolo ramp down / triangle waveform
+	kFT2PortaUpDownMemory,			// Portamento up and down have separate memory
 
 	// Add new play behaviours here.
 
@@ -496,11 +496,10 @@ public:
 	static MPT_FORCEINLINE uint32 GetFractMax() { return fractMax; }
 
 	SamplePosition() : v(0) { }
-	explicit SamplePosition(value_t v) : v(v) { }
+	explicit SamplePosition(value_t pos) : v(pos) { }
 	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) << 32) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
 
-#if 1
 	// Set integer and fractional part
 	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
 	// Set integer part, keep fractional part
@@ -511,18 +510,6 @@ public:
 	MPT_FORCEINLINE int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get fractional part
 	MPT_FORCEINLINE uint32 GetFract() const { return static_cast<uint32>(v); }
-#else
-	// Set integer and fractional part
-	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { hi = intPart; lo = fractPart; return *this; }
-	// Set integer part, keep fractional part
-	MPT_FORCEINLINE SamplePosition &SetInt(int32 intPart) { hi = intPart; return *this; }
-	// Get integer part (as sample length / position)
-	MPT_FORCEINLINE SmpLength GetUInt() const { return static_cast<SmpLength>(hi); }
-	// Get integer part
-	MPT_FORCEINLINE int32 GetInt() const { return hi; }
-	// Get fractional part
-	MPT_FORCEINLINE uint32 GetFract() const { return lo; }
-#endif
 	// Get the inverted fractional part
 	MPT_FORCEINLINE SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
 	// Get the raw fixed-point value

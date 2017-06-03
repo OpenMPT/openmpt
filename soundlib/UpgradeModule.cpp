@@ -38,21 +38,23 @@ struct UpgradePatternData
 		{
 			return;
 		}
+		const auto version = sndFile.m_dwLastSavedWithVersion;
+		const auto modType = sndFile.GetType();
 
-		if(sndFile.GetType() == MOD_TYPE_S3M)
+		if(modType == MOD_TYPE_S3M)
 		{
 			// Out-of-range global volume commands should be ignored in S3M. Fixed in OpenMPT 1.19 (r831).
 			// So for tracks made with older versions of OpenMPT, we limit invalid global volume commands.
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00) && m.command == CMD_GLOBALVOLUME)
+			if(version < MAKE_VERSION_NUMERIC(1, 19, 00, 00) && m.command == CMD_GLOBALVOLUME)
 			{
 				LimitMax(m.param, ModCommand::PARAM(64));
 			}
 		}
 
-		else if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		else if(modType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 		{
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
-				(!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(version < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
+				(!compatPlay && version < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_GLOBALVOLUME)
 				{
@@ -80,14 +82,14 @@ struct UpgradePatternData
 			// In the IT format, slide commands with both nibbles set should be ignored.
 			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
 			const bool noteVolSlide =
-				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
-				(!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(version < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
+				(!compatPlay && version < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&&
 				(m.command == CMD_VOLUMESLIDE || m.command == CMD_VIBRATOVOL || m.command == CMD_TONEPORTAVOL || m.command == CMD_PANNINGSLIDE);
 
 			// OpenMPT 1.20 also fixes this for global volume and channel volume slides.
 			const bool chanVolSlide =
-				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+				(version < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 				&&
 				(m.command == CMD_GLOBALVOLSLIDE || m.command == CMD_CHANNELVOLSLIDE);
 
@@ -99,8 +101,8 @@ struct UpgradePatternData
 				}
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 04)
-				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))	// Ignore compatibility export
+			if(version < MAKE_VERSION_NUMERIC(1, 22, 01, 04)
+				&& version != MAKE_VERSION_NUMERIC(1, 22, 00, 00))	// Ignore compatibility export
 			{
 				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
 				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !compatPlay)
@@ -111,20 +113,20 @@ struct UpgradePatternData
 			}
 		}
 
-		else if(sndFile.GetType() == MOD_TYPE_XM)
+		else if(modType == MOD_TYPE_XM)
 		{
 			// Something made be believe that out-of-range global volume commands are ignored in XM
 			// just like they are ignored in IT, but apparently they are not. Aaaaaargh!
-			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && compatPlay) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
-				&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 02, 02)
+			if(((version >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && compatPlay) || (version >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				&& version < MAKE_VERSION_NUMERIC(1, 24, 02, 02)
 				&& m.command == CMD_GLOBALVOLUME
 				&& m.param > 64)
 			{
 				m.command = CMD_NONE;
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
-				|| (!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(version < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
+				|| (!compatPlay && version < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
@@ -134,7 +136,7 @@ struct UpgradePatternData
 				}
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
+			if(version < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
 				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
 				&& (m.vol != 0 || compatPlay) && m.param != 0)
 			{
@@ -145,7 +147,7 @@ struct UpgradePatternData
 				m.param = mpt::saturate_cast<ModCommand::PARAM>(param);
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
+			if(version < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
 				&& m.command == CMD_SPEED && m.param == 0)
 			{
 				// OpenMPT can emulate FT2's F00 behaviour now.
@@ -153,7 +155,7 @@ struct UpgradePatternData
 			}
 		}
 
-		if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+		if(version < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 		{
 			// Pattern Delay fixes
 
@@ -161,7 +163,7 @@ struct UpgradePatternData
 			// We also fix X6x commands in hacked XM files, since they are treated identically to the S6x command in IT/S3M files.
 			// We don't treat them in files made with OpenMPT 1.18+ that have compatible play enabled, though, since they are ignored there anyway.
 			const bool fixX6x = (m.command == CMD_XFINEPORTAUPDOWN && (m.param & 0xF0) == 0x60
-				&& (!(compatPlay && sndFile.GetType() == MOD_TYPE_XM) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
+				&& (!(compatPlay && modType == MOD_TYPE_XM) || version < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
 
 			if(fixS6x || fixX6x)
 			{
@@ -192,8 +194,8 @@ struct UpgradePatternData
 		}
 
 		if(m.volcmd == VOLCMD_VIBRATODEPTH
-			&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 37)
-			&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 27, 00, 00))
+			&& version < MAKE_VERSION_NUMERIC(1, 27, 00, 37)
+			&& version != MAKE_VERSION_NUMERIC(1, 27, 00, 00))
 		{
 			// Fix handling of double vibrato commands - previously only one of them was applied at a time
 			if(m.command == CMD_VIBRATOVOL && m.vol > 0)
@@ -211,7 +213,7 @@ struct UpgradePatternData
 		}
 
 		// Volume column offset in IT/XM is bad, mkay?
-		if(sndFile.GetType() != MOD_TYPE_MPT && m.volcmd == VOLCMD_OFFSET && m.command == CMD_NONE)
+		if(modType != MOD_TYPE_MPT && m.volcmd == VOLCMD_OFFSET && m.command == CMD_NONE)
 		{
 			m.command = CMD_OFFSET;
 			m.param = m.vol << 3;
@@ -417,7 +419,7 @@ void CSoundFile::UpgradeModule()
 	if(compatModeIT && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
 		// Pre-1.26: Detailed compatibility flags did not exist.
-		static const PlayBehaviourVersion behaviours[] =
+		static constexpr PlayBehaviourVersion behaviours[] =
 		{
 			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
 			{ kPerChannelGlobalVolSlide,		MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
@@ -464,14 +466,14 @@ void CSoundFile::UpgradeModule()
 			{ kITPatternLoopWithJumps,			MAKE_VERSION_NUMERIC(1, 25, 00, 19) },
 		};
 
-		for(size_t i = 0; i < CountOf(behaviours); i++)
+		for(const auto &b : behaviours)
 		{
-			m_playBehaviour.set(behaviours[i].behaviour, (m_dwLastSavedWithVersion >= behaviours[i].version || m_dwLastSavedWithVersion == (behaviours[i].version & 0xFFFF0000)));
+			m_playBehaviour.set(b.behaviour, (m_dwLastSavedWithVersion >= b.version || m_dwLastSavedWithVersion == (b.version & 0xFFFF0000)));
 		}
 	} else if(compatModeXM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
 		// Pre-1.26: Detailed compatibility flags did not exist.
-		static const PlayBehaviourVersion behaviours[] =
+		static constexpr PlayBehaviourVersion behaviours[] =
 		{
 			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
 			{ kPerChannelGlobalVolSlide,		MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
@@ -505,33 +507,33 @@ void CSoundFile::UpgradeModule()
 			{ kFT2FinetunePrecision,			MAKE_VERSION_NUMERIC(1, 22, 07, 19) },
 		};
 
-		for(size_t i = 0; i < CountOf(behaviours); i++)
+		for(const auto &b : behaviours)
 		{
-			m_playBehaviour.set(behaviours[i].behaviour, m_dwLastSavedWithVersion >= behaviours[i].version);
+			m_playBehaviour.set(b.behaviour, m_dwLastSavedWithVersion >= b.version);
 		}
 	}
 	
 	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
 		// The following behaviours were added in/after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
-		static const PlayBehaviourVersion behaviours[] =
+		static constexpr PlayBehaviourVersion behaviours[] =
 		{
 			{ kITInstrWithNoteOff,				MAKE_VERSION_NUMERIC(1, 26, 00, 01) },
 			{ kITMultiSampleInstrumentNumber,	MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
 		};
 
-		for(size_t i = 0; i < CountOf(behaviours); i++)
+		for(const auto &b : behaviours)
 		{
-			if(m_dwLastSavedWithVersion < (behaviours[i].version & 0xFFFF0000))
-				m_playBehaviour.reset(behaviours[i].behaviour);
+			if(m_dwLastSavedWithVersion < (b.version & 0xFFFF0000))
+				m_playBehaviour.reset(b.behaviour);
 			// Full version information available, i.e. not compatibility-exported.
-			else if(m_dwLastSavedWithVersion > (behaviours[i].version & 0xFFFF0000) && m_dwLastSavedWithVersion < behaviours[i].version)
-				m_playBehaviour.reset(behaviours[i].behaviour);
+			else if(m_dwLastSavedWithVersion > (b.version & 0xFFFF0000) && m_dwLastSavedWithVersion < b.version)
+				m_playBehaviour.reset(b.behaviour);
 		}
 	} else if(GetType() == MOD_TYPE_XM)
 	{
 		// The following behaviours were added after OpenMPT 1.26, so are not affected by the upgrade mechanism above.
-		static const PlayBehaviourVersion behaviours[] =
+		static constexpr PlayBehaviourVersion behaviours[] =
 		{
 			{ kFT2NoteOffFlags,					MAKE_VERSION_NUMERIC(1, 27, 00, 27) },
 			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
@@ -539,15 +541,15 @@ void CSoundFile::UpgradeModule()
 			{ kFT2PortaUpDownMemory,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 		};
 
-		for(size_t i = 0; i < CountOf(behaviours); i++)
+		for(const auto &b : behaviours)
 		{
-			if(m_dwLastSavedWithVersion < behaviours[i].version)
-				m_playBehaviour.reset(behaviours[i].behaviour);
+			if(m_dwLastSavedWithVersion < b.version)
+				m_playBehaviour.reset(b.behaviour);
 		}
 	} else if(GetType() == MOD_TYPE_S3M)
 	{
 		// We do not store any of these flags in S3M files.
-		static const PlayBehaviourVersion behaviours[] =
+		static constexpr PlayBehaviourVersion behaviours[] =
 		{
 			{ kST3NoMutedChannels,		MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
 			{ kST3EffectMemory,			MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
@@ -558,10 +560,23 @@ void CSoundFile::UpgradeModule()
 			{ KST3PortaAfterArpeggio,	MAKE_VERSION_NUMERIC(1, 27, 00, 00) },
 		};
 
-		for(size_t i = 0; i < CountOf(behaviours); i++)
+		for(const auto &b : behaviours)
 		{
-			if(m_dwLastSavedWithVersion < behaviours[i].version)
-				m_playBehaviour.reset(behaviours[i].behaviour);
+			if(m_dwLastSavedWithVersion < b.version)
+				m_playBehaviour.reset(b.behaviour);
+		}
+	}
+
+	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 27, 00, 27) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 49))
+	{
+		// OpenMPT 1.27 inserted some IT/FT2 flags before the S3M flags that are never saved to files anyway, to keep the flag IDs a bit more compact.
+		// However, it was overlooked that these flags would still be read by OpenMPT 1.26 and thus S3M-specific behaviour would be enabled in IT/XM files.
+		// Hence, in OpenMPT 1.27.00.49 the flag IDs got remapped to no longer conflict with OpenMPT 1.26.
+		// Files made with the affected pre-release versions of OpenMPT 1.27 are upgraded here to use the new IDs.
+		for(int i = 0; i < 5; i++)
+		{
+			m_playBehaviour.set(kFT2NoteOffFlags + i, m_playBehaviour[kST3NoMutedChannels + i]);
+			m_playBehaviour.reset(kST3NoMutedChannels + i);
 		}
 	}
 
