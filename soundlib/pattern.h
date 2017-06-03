@@ -39,6 +39,7 @@ public:
 		m_Rows = pat.m_Rows;
 		m_RowsPerBeat = pat.m_RowsPerBeat;
 		m_RowsPerMeasure = pat.m_RowsPerMeasure;
+		m_tempoSwing = pat.m_tempoSwing;
 		m_PatternName = pat.m_PatternName;
 		return *this;
 	}
@@ -134,7 +135,7 @@ public:
 
 	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_RowsPerBeat(0), m_RowsPerMeasure(0), m_rPatternContainer(patCont) {};
 	CPattern(const CPattern &) = default;
-	CPattern(CPattern &&) = default;
+	CPattern(CPattern &&) noexcept = default;
 
 protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }

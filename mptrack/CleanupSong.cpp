@@ -490,19 +490,15 @@ bool CModCleanupDlg::RearrangePatterns()
 
 	modDoc.GetPatternUndo().RearrangePatterns(newIndex);
 
-	// Now rearrange the pattern indices
+	// Now rearrange the actual patterns
 	for(size_t i = 0; i < newIndex.size(); i++)
 	{
-		auto current = static_cast<PATTERNINDEX>(i);
-		while(i != newIndex[current])
-		{
-			PATTERNINDEX next = newIndex[current];
-			modified = true;
-			std::swap(sndFile.Patterns[current], sndFile.Patterns[next]);
-			newIndex[current] = current;
-			current = next;
-		}
-		newIndex[current] = current;
+		PATTERNINDEX j = newIndex[i];
+		if(i == j)
+			continue;
+		while(i < j)
+			j = newIndex[j];
+		std::swap(sndFile.Patterns[i], sndFile.Patterns[j]);
 	}
 
 	EndWaitCursor();
