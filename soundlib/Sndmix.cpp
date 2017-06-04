@@ -194,9 +194,9 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 	bool mixPlugins = false;
 #ifndef NO_PLUGINS
-	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
+	for(const auto &plug : m_MixPlugins)
 	{
-		if(m_MixPlugins[i].pMixPlugin)
+		if(plug.pMixPlugin)
 		{
 			mixPlugins = true;
 			break;
@@ -384,9 +384,9 @@ bool CSoundFile::ProcessRow()
 		const bool ignoreRow = m_PlayState.m_nPatternDelay != 0 && m_SongFlags[SONG_BREAKTOROW] && GetType() == MOD_TYPE_MOD;
 
 		// Done with the last row of the pattern or jumping somewhere else
-		if(m_PlayState.m_nNextRow == 0 || m_SongFlags[SONG_BREAKTOROW])
+		const bool patternTransition = m_PlayState.m_nNextRow == 0 || m_SongFlags[SONG_BREAKTOROW];
+		if(patternTransition)
 		{
-			m_PlayState.m_bPatternTransitionOccurred = true;
 			if(GetType() == MOD_TYPE_S3M)
 			{
 				// Reset pattern loop start
@@ -398,7 +398,6 @@ bool CSoundFile::ProcessRow()
 			}
 		}
 
-		HandlePatternTransitionEvents();
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
 		m_PlayState.m_nTickCount = 0;
@@ -407,6 +406,10 @@ bool CSoundFile::ProcessRow()
 		m_PlayState.m_nCurrentOrder = m_PlayState.m_nNextOrder;
 
 #ifdef MODPLUG_TRACKER
+		if(patternTransition)
+		{
+			HandlePatternTransitionEvents();
+		}
 		// "Lock row" editing feature
 		if(m_lockRowStart != ROWINDEX_INVALID && (m_PlayState.m_nRow < m_lockRowStart || m_PlayState.m_nRow > m_lockRowEnd) && !IsRenderingToDisc())
 		{

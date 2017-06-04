@@ -472,17 +472,21 @@ public:
 		bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
 
 	public:
-		CHANNELINDEX ChnMix[MAX_CHANNELS];					// Channels to be mixed
-		ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
-
-	protected:
-		bool m_bPatternTransitionOccurred;
+		CHANNELINDEX ChnMix[MAX_CHANNELS];	// Channels to be mixed
+		ModChannel Chn[MAX_CHANNELS];		// Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
 
 	public:
-		PlayState &operator= (const PlayState &other) { memcpy(this, &other, sizeof(PlayState)); return *this; }
+		PlayState()
+			: m_nSeqOverride(ORDERINDEX_INVALID)
+			, m_lTotalSampleCount(0)
+			, m_bPositionChanged(true)
+		{
+			std::fill(std::begin(Chn), std::end(Chn), ModChannel());
+		}
 	};
 
 	PlayState m_PlayState;
+
 protected:
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 	RowVisitor visitedSongRows;

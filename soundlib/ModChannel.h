@@ -74,11 +74,11 @@ struct ModChannel
 	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
 	int32 nFineTune, nTranspose;
 	int32 nPortamentoSlide, nAutoVibDepth;
-	int32 nVolSwing, nPanSwing;
-	int32 nCutSwing, nResSwing;
-	int32 nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	uint32 nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
-	int32 nRetrigCount, nRetrigParam;
+	int16 nVolSwing, nPanSwing;
+	int16 nCutSwing, nResSwing;
+	int16 nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
+	int16 nRetrigCount, nRetrigParam;
 	ROWINDEX nPatternLoop;
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
@@ -172,8 +172,7 @@ struct ModChannel
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
 	void Stop();
 
-	typedef uint32 volume_t;
-	volume_t GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
+	uint32 GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
 	ModCommand::NOTE GetPluginNote(bool realNoteMapping) const;
 
@@ -184,12 +183,6 @@ struct ModChannel
 	bool InSustainLoop() const { return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP]; }
 
 	void UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins);
-
-	ModChannel()
-	{
-		memset(this, 0, sizeof(*this));
-	}
-
 };
 
 

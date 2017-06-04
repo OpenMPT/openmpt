@@ -1891,7 +1891,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 			uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(mode);
 			if(sample.uFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
 			if(sample.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
-			ModChannel chn;
+			ModChannel chn{ ModChannel() };
 			chn.pCurrentSample = sample.pSample;
 			chn.increment = SamplePosition::Ratio(oldRate, newRate);
 			chn.position.Set(selection.nStart);
