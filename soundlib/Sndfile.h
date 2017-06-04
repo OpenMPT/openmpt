@@ -477,8 +477,8 @@ public:
 
 	public:
 		PlayState()
-			: m_nSeqOverride(ORDERINDEX_INVALID)
-			, m_lTotalSampleCount(0)
+			: m_lTotalSampleCount(0)
+			, m_nSeqOverride(ORDERINDEX_INVALID)
 			, m_bPositionChanged(true)
 		{
 			std::fill(std::begin(Chn), std::end(Chn), ModChannel());
