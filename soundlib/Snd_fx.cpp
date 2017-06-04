@@ -313,14 +313,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		playState.m_nRow = playState.m_nNextRow;
 		playState.m_nCurrentOrder = playState.m_nNextOrder;
 
-		if(playState.m_nCurrentOrder >= orderList.size())
-		{
-			playState.m_nCurrentOrder = orderList.GetRestartPos();
-			break;
-		}
-
 		// Check if pattern is valid
-		playState.m_nPattern = orderList[playState.m_nCurrentOrder];
+		playState.m_nPattern = playState.m_nCurrentOrder < orderList.size() ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
