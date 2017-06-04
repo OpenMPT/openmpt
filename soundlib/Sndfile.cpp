@@ -107,8 +107,6 @@ CSoundFile::CSoundFile() :
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
 	m_nRepeatCount = 0;
-	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
-	m_PlayState.m_bPatternTransitionOccurred = false;
 	m_nTempoMode = tempoModeClassic;
 	m_bIsRendering = false;
 
@@ -124,11 +122,8 @@ CSoundFile::CSoundFile() :
 	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = 16;
 #endif // MODPLUG_TRACKER
 
-	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
-	m_PlayState.m_lTotalSampleCount = 0;
-	m_PlayState.m_bPositionChanged = true;
 
 	LoadBuiltInTunings();
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
@@ -460,7 +455,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 
 	m_nMaxOrderPosition = 0;
-	MemsetZero(m_PlayState.ChnMix);
 
 	RecalculateSamplesPerTick();
 	visitedSongRows.Initialize(true);

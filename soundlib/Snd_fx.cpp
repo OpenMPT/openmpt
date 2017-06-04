@@ -1731,29 +1731,29 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Volume Swing
 			if(pIns->nVolSwing)
 			{
-				pChn->nVolSwing = ((mpt::random<int8>(AccessPRNG()) * pIns->nVolSwing) / 64 + 1) * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) / 199;
+				pChn->nVolSwing = static_cast<int16>(((mpt::random<int8>(AccessPRNG()) * pIns->nVolSwing) / 64 + 1) * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) / 199);
 			}
 			// Pan Swing
 			if(pIns->nPanSwing)
 			{
-				pChn->nPanSwing = ((mpt::random<int8>(AccessPRNG()) * pIns->nPanSwing * 4) / 128);
+				pChn->nPanSwing = static_cast<int16>(((mpt::random<int8>(AccessPRNG()) * pIns->nPanSwing * 4) / 128));
 				if(!m_playBehaviour[kITSwingBehaviour])
 				{
-					pChn->nRestorePanOnNewNote = pChn->nPan + 1;
+					pChn->nRestorePanOnNewNote = static_cast<int16>(pChn->nPan + 1);
 				}
 			}
 			// Cutoff Swing
 			if(pIns->nCutSwing)
 			{
 				int32 d = ((int32)pIns->nCutSwing * (int32)(static_cast<int32>(mpt::random<int8>(AccessPRNG())) + 1)) / 128;
-				pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
+				pChn->nCutSwing = static_cast<int16>((d * pChn->nCutOff + 1) / 128);
 				pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 			}
 			// Resonance Swing
 			if(pIns->nResSwing)
 			{
 				int32 d = ((int32)pIns->nResSwing * (int32)(static_cast<int32>(mpt::random<int8>(AccessPRNG())) + 1)) / 128;
-				pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
+				pChn->nResSwing = static_cast<int16>((d * pChn->nResonance + 1) / 128);
 				pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 			}
 		}
@@ -5162,7 +5162,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 	// Retrig: bit 8 is set if it's the new XM retrig
 	ModChannel &chn = m_PlayState.Chn[nChn];
 	int retrigSpeed = param & 0x0F;
-	int retrigCount = chn.nRetrigCount;
+	int16 retrigCount = chn.nRetrigCount;
 	bool doRetrig = false;
 
 	// IT compatibility 15. Retrigger
@@ -5916,12 +5916,10 @@ uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
 }
 
 
+#ifdef MODPLUG_TRACKER
 void CSoundFile::HandlePatternTransitionEvents()
 //----------------------------------------------
 {
-	if (!m_PlayState.m_bPatternTransitionOccurred)
-		return;
-
 	// MPT sequence override
 	if(m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID && m_PlayState.m_nSeqOverride < Order().size())
 	{
@@ -5929,12 +5927,11 @@ void CSoundFile::HandlePatternTransitionEvents()
 		{
 			m_PlayState.m_nPattern = Order()[m_PlayState.m_nSeqOverride];
 		}
-		m_PlayState.m_nNextOrder = m_PlayState.m_nSeqOverride;
+		m_PlayState.m_nCurrentOrder = m_PlayState.m_nSeqOverride;
 		m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 	}
 
 	// Channel mutes
-#ifdef MODPLUG_TRACKER
 	for (CHANNELINDEX chan = 0; chan < GetNumChannels(); chan++)
 	{
 		if (m_bChannelMuteTogglePending[chan])
@@ -5946,10 +5943,8 @@ void CSoundFile::HandlePatternTransitionEvents()
 			m_bChannelMuteTogglePending[chan] = false;
 		}
 	}
-#endif // MODPLUG_TRACKER
-
-	m_PlayState.m_bPatternTransitionOccurred = false;
 }
+#endif // MODPLUG_TRACKER
 
 
 // Update time signatures (global or pattern-specific). Don't forget to call this when changing the RPB/RPM settings anywhere!
