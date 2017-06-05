@@ -198,13 +198,32 @@ void CRawSampleDlg::UpdateDialog()
 
 
 /////////////////////////////////////////////////////////////////////////
-// Add silence dialog - add silence to a sample
+// Add silence / resize sample dialog
 
 BEGIN_MESSAGE_MAP(CAddSilenceDlg, CDialog)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		OnEditModeChanged)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		OnEditModeChanged)
 	ON_COMMAND(IDC_RADIO_RESIZETO,				OnEditModeChanged)
 END_MESSAGE_MAP()
+
+SmpLength CAddSilenceDlg::m_addSamples = 32;
+SmpLength CAddSilenceDlg::m_createSamples = 64;
+
+CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength)
+	: CDialog(IDD_ADDSILENCE, parent)
+//----------------------------------------------------------------
+{
+	m_nSamples = m_addSamples;
+	if(origLength > 0)
+	{
+		m_nLength = origLength;
+		m_nEditOption = kSilenceAtEnd;
+	} else
+	{
+		m_nLength = m_createSamples;
+		m_nEditOption = kResize;
+	}
+}
 
 
 BOOL CAddSilenceDlg::OnInitDialog()
@@ -219,23 +238,16 @@ BOOL CAddSilenceDlg::OnInitDialog()
 		spin->SetPos32(m_nSamples);
 	}
 
-	int iRadioButton = IDC_RADIO_ADDSILENCE_END;
+	int buttonID = IDC_RADIO_ADDSILENCE_END;
 	switch(m_nEditOption)
 	{
-	case addsilence_at_beginning:
-		iRadioButton = IDC_RADIO_ADDSILENCE_BEGIN;
-		break;
-	case addsilence_at_end:
-		iRadioButton = IDC_RADIO_ADDSILENCE_END;
-		break;
-	case addsilence_resize:
-		iRadioButton = IDC_RADIO_RESIZETO;
-		break;
+	case kSilenceAtBeginning: buttonID = IDC_RADIO_ADDSILENCE_BEGIN; break;
+	case kSilenceAtEnd:       buttonID = IDC_RADIO_ADDSILENCE_END; break;
+	case kResize:             buttonID = IDC_RADIO_RESIZETO; break;
 	}
-	CButton *radioEnd = (CButton *)GetDlgItem(iRadioButton);
-	radioEnd->SetCheck(true);
+	CheckDlgButton(buttonID, BST_CHECKED);
 
-	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == addsilence_resize) ? m_nLength : m_nSamples, FALSE);
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == kResize) ? m_nLength : m_nSamples, FALSE);
 
 	return TRUE;
 }
@@ -245,7 +257,16 @@ void CAddSilenceDlg::OnOK()
 //-------------------------
 {
 	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
-	m_nEditOption = GetEditMode();
+	switch(m_nEditOption = GetEditMode())
+	{
+	case kSilenceAtBeginning:
+	case kSilenceAtEnd:
+		m_addSamples = m_nSamples;
+		break;
+	case kResize:
+		m_createSamples = m_nSamples;
+		break;
+	}
 	CDialog::OnOK();
 }
 
@@ -253,29 +274,29 @@ void CAddSilenceDlg::OnOK()
 void CAddSilenceDlg::OnEditModeChanged()
 //--------------------------------------
 {
-	enmAddSilenceOptions cNewEditOption = GetEditMode();
-	if(cNewEditOption != addsilence_resize && m_nEditOption == addsilence_resize)
+	AddSilenceOptions newEditOption = GetEditMode();
+	if(newEditOption != kResize && m_nEditOption == kResize)
 	{
-		// switch to "add silenece"
+		// Switch to "add silence"
 		m_nLength = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nSamples);
-	} else if(cNewEditOption == addsilence_resize && m_nEditOption != addsilence_resize)
+	} else if(newEditOption == kResize && m_nEditOption != kResize)
 	{
-		// switch to "resize"
+		// Switch to "resize"
 		m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
 	}
-	m_nEditOption = cNewEditOption;
+	m_nEditOption = newEditOption;
 }
 
 
-enmAddSilenceOptions CAddSilenceDlg::GetEditMode()
-//------------------------------------------------
+CAddSilenceDlg::AddSilenceOptions CAddSilenceDlg::GetEditMode() const
+//-------------------------------------------------------------------
 {
-	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return addsilence_at_beginning;
-	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return addsilence_at_end;
-	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return addsilence_resize;
-	return addsilence_at_end;
+	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return kSilenceAtBeginning;
+	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return kSilenceAtEnd;
+	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return kResize;
+	return kSilenceAtEnd;
 }
 
 

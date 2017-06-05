@@ -85,44 +85,36 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Add silence dialog - add silence to a sample
 
-enum enmAddSilenceOptions
-{
-	addsilence_at_beginning,	// Add at beginning of sample
-	addsilence_at_end,			// Add at end of sample
-	addsilence_resize,			// Resize sample
-};
-
 //==================================
 class CAddSilenceDlg: public CDialog
 //==================================
 {
-protected:
-	enmAddSilenceOptions GetEditMode();
-	afx_msg void OnEditModeChanged();
-	DECLARE_MESSAGE_MAP()
-
 public:
-	UINT m_nSamples;	// Add x samples (also containes the return value in all cases)
-	UINT m_nLength;		// Set size to x samples (init value: current sample size)
-	enmAddSilenceOptions m_nEditOption;	// See above
-
-public:
-	CAddSilenceDlg(CWnd *parent, UINT nSamples = 32, UINT nOrigLength = 64) : CDialog(IDD_ADDSILENCE, parent)
+	enum AddSilenceOptions
 	{
-		m_nSamples = nSamples;
-		if(nOrigLength > 0)
-		{
-			m_nLength = nOrigLength;
-			m_nEditOption = addsilence_at_end;
-		} else
-		{
-			m_nLength = 64;
-			m_nEditOption = addsilence_resize;
-		}
-	}
+		kSilenceAtBeginning,	// Add at beginning of sample
+		kSilenceAtEnd,			// Add at end of sample
+		kResize,			// Resize sample
+	};
+
+	SmpLength m_nSamples;	// Add x samples (also containes the return value in all cases)
+	SmpLength m_nLength;	// Set size to x samples (init value: current sample size)
+	AddSilenceOptions m_nEditOption;	// See above
+
+protected:
+	static SmpLength m_addSamples;
+	static SmpLength m_createSamples;
+
+public:
+	CAddSilenceDlg(CWnd *parent, SmpLength origLength);
 
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	
+protected:
+	AddSilenceOptions GetEditMode() const;
+	afx_msg void OnEditModeChanged();
+	DECLARE_MESSAGE_MAP()
 };
 
 
