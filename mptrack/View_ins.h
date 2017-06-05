@@ -45,7 +45,7 @@ protected:
 	CBitmap *oldBitmap;
 
 	EnvelopeType m_nEnv;
-	UINT m_nDragItem, m_nBtnMouseOver;
+	uint32 m_nDragItem, m_nBtnMouseOver;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 
@@ -83,16 +83,16 @@ protected:
 	bool EnvGetCarry() const { return EnvGetFlag(ENV_CARRY); };
 
 	// Misc.
-	UINT EnvGetTick(int nPoint) const;
-	UINT EnvGetValue(int nPoint) const;
-	UINT EnvGetLastPoint() const;
-	UINT EnvGetNumPoints() const;
+	uint32 EnvGetTick(int nPoint) const;
+	uint32 EnvGetValue(int nPoint) const;
+	uint32 EnvGetLastPoint() const;
+	uint32 EnvGetNumPoints() const;
 
 	// Get loop points
-	UINT EnvGetLoopStart() const;
-	UINT EnvGetLoopEnd() const;
-	UINT EnvGetSustainStart() const;
-	UINT EnvGetSustainEnd() const;
+	uint32 EnvGetLoopStart() const;
+	uint32 EnvGetLoopEnd() const;
+	uint32 EnvGetSustainStart() const;
+	uint32 EnvGetSustainEnd() const;
 
 	// Get envelope status
 	bool EnvGetVolEnv() const;
@@ -111,7 +111,7 @@ protected:
 
 	// Misc.
 	bool EnvSetValue(int nPoint, int32 nTick = int32_min, int32 nValue = int32_min, bool moveTail = false);
-	bool CanMovePoint(UINT envPoint, int step);
+	bool CanMovePoint(uint32 envPoint, int step);
 
 	// Set loop points
 	bool EnvSetLoopStart(int nPoint);
@@ -150,8 +150,9 @@ protected:
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;
 	bool InsertAtPoint(CPoint pt);
-	UINT EnvInsertPoint(int nTick, int nValue);
-	bool EnvRemovePoint(UINT nPoint);
+	uint32 EnvInsertPoint(int nTick, int nValue);
+	bool EnvRemovePoint(uint32 nPoint);
+	uint32 DragItemToEnvPoint() const;
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;
@@ -164,7 +165,7 @@ protected:
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
 	void PlayNote(ModCommand::NOTE note);
-	void DrawGrid(CDC *memDC, UINT speed);
+	void DrawGrid(CDC *memDC, uint32 speed);
 	void UpdateIndicator();
 	void UpdateIndicator(int tick, int val);
 

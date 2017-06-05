@@ -191,7 +191,7 @@ void CViewInstrument::UpdateScrollSize()
 	if (pModDoc)
 	{
 		SIZE sizeTotal, sizePage, sizeLine;
-		UINT ntickmax = EnvGetTick(EnvGetLastPoint());
+		uint32 ntickmax = EnvGetTick(EnvGetLastPoint());
 
 		sizeTotal.cx = (int)((ntickmax + 2) * m_fZoom);
 		sizeTotal.cy = 1;
@@ -301,8 +301,8 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-UINT CViewInstrument::EnvGetTick(int nPoint) const
-//------------------------------------------------
+uint32 CViewInstrument::EnvGetTick(int nPoint) const
+//--------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -313,8 +313,8 @@ UINT CViewInstrument::EnvGetTick(int nPoint) const
 }
 
 
-UINT CViewInstrument::EnvGetValue(int nPoint) const
-//-------------------------------------------------
+uint32 CViewInstrument::EnvGetValue(int nPoint) const
+//---------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -392,8 +392,8 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 }
 
 
-UINT CViewInstrument::EnvGetNumPoints() const
-//-------------------------------------------
+uint32 CViewInstrument::EnvGetNumPoints() const
+//---------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -401,10 +401,10 @@ UINT CViewInstrument::EnvGetNumPoints() const
 }
 
 
-UINT CViewInstrument::EnvGetLastPoint() const
-//-------------------------------------------
+uint32 CViewInstrument::EnvGetLastPoint() const
+//---------------------------------------------
 {
-	UINT nPoints = EnvGetNumPoints();
+	uint32 nPoints = EnvGetNumPoints();
 	if (nPoints > 0) return nPoints - 1;
 	return 0;
 }
@@ -420,8 +420,8 @@ bool CViewInstrument::EnvGetFlag(const EnvelopeFlags dwFlag) const
 }
 
 
-UINT CViewInstrument::EnvGetLoopStart() const
-//-------------------------------------------
+uint32 CViewInstrument::EnvGetLoopStart() const
+//---------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -429,8 +429,8 @@ UINT CViewInstrument::EnvGetLoopStart() const
 }
 
 
-UINT CViewInstrument::EnvGetLoopEnd() const
-//-----------------------------------------
+uint32 CViewInstrument::EnvGetLoopEnd() const
+//-------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -438,8 +438,8 @@ UINT CViewInstrument::EnvGetLoopEnd() const
 }
 
 
-UINT CViewInstrument::EnvGetSustainStart() const
-//----------------------------------------------
+uint32 CViewInstrument::EnvGetSustainStart() const
+//------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -447,8 +447,8 @@ UINT CViewInstrument::EnvGetSustainStart() const
 }
 
 
-UINT CViewInstrument::EnvGetSustainEnd() const
-//--------------------------------------------
+uint32 CViewInstrument::EnvGetSustainEnd() const
+//----------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
@@ -686,6 +686,24 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 }
 
 
+uint32 CViewInstrument::DragItemToEnvPoint() const
+//------------------------------------------------
+{
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || !m_nDragItem) return 0;
+
+	switch(m_nDragItem)
+	{
+	case ENV_DRAGLOOPSTART: return pEnv->nLoopStart;
+	case ENV_DRAGLOOPEND: return pEnv->nLoopEnd;
+	case ENV_DRAGSUSTAINSTART: return pEnv->nSustainStart;
+	case ENV_DRAGSUSTAINEND: return pEnv->nSustainEnd;
+	default: return m_nDragItem - 1;
+	}
+
+}
+
+
 int CViewInstrument::TickToScreen(int tick) const
 //-----------------------------------------------
 {
@@ -848,8 +866,8 @@ void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
 }
 
 
-void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
-//--------------------------------------------------
+void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
+//----------------------------------------------------
 {
 	bool windowResized = false;
 
@@ -987,9 +1005,9 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	{
 		maxpoint--;
 		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
-		UINT releaseNode = EnvGetReleaseNode();
+		uint32 releaseNode = EnvGetReleaseNode();
 		RECT rect;
-		for (UINT i = 0; i <= maxpoint; i++)
+		for (uint32 i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
@@ -1032,8 +1050,8 @@ uint8 CViewInstrument::EnvGetReleaseNode()
 }
 
 
-bool CViewInstrument::EnvRemovePoint(UINT nPoint)
-//---------------------------------------------
+bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
+//-------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
@@ -1072,8 +1090,8 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 
 
 // Insert point. Returns 0 if error occurred, else point ID + 1.
-UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
-//---------------------------------------------------------
+uint32 CViewInstrument::EnvInsertPoint(int nTick, int nValue)
+//-----------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && nTick >= 0)
@@ -1109,8 +1127,14 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			PrepareUndo("Insert Envelope Point");
 			if(envelope->empty())
 			{
+				envelope->reserve(2);
 				envelope->push_back(EnvelopeNode(0, defaultValue));
 				envelope->dwFlags.set(ENV_ENABLED);
+				if(nTick == 0)
+				{
+					// Can't insert two points on the same tick!
+					nTick = 16;
+				}
 			}
 			uint32 i = 0;
 			for(i = 0; i < envelope->size(); i++) if(nTick <= envelope->at(i).tick) break;
@@ -1568,13 +1592,7 @@ void CViewInstrument::UpdateIndicator()
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !m_nDragItem) return;
 
-	uint32 point;
-	if(m_nDragItem == ENV_DRAGLOOPSTART) point = pEnv->nLoopStart;
-	else if(m_nDragItem == ENV_DRAGLOOPEND) point = pEnv->nLoopEnd;
-	else if(m_nDragItem == ENV_DRAGSUSTAINSTART) point = pEnv->nSustainStart;
-	else if(m_nDragItem == ENV_DRAGSUSTAINEND) point = pEnv->nSustainEnd;
-	else point = m_nDragItem - 1;
-
+	uint32 point = DragItemToEnvPoint();
 	if(point < pEnv->size())
 	{
 		UpdateIndicator(pEnv->at(point).tick, pEnv->at(point).value);
@@ -1622,11 +1640,11 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 	{
 		CRect rect;
 		// Look if dragging a point
-		UINT maxpoint = EnvGetLastPoint();
-		UINT oldDragItem = m_nDragItem;
+		uint32 maxpoint = EnvGetLastPoint();
+		uint32 oldDragItem = m_nDragItem;
 		m_nDragItem = 0;
 		const int hitboxSize = static_cast<int>((6 * m_nDPIx) / 96.0f);
-		for (UINT i = 0; i <= maxpoint; i++)
+		for (uint32 i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
@@ -2249,6 +2267,18 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 
 			if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
+
+			// Handle Application (menu) key
+			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			{
+				CPoint pt(0, 0);
+				if(m_nDragItem > 0)
+				{
+					uint32 point = DragItemToEnvPoint();
+					pt.SetPoint(PointToScreen(point), ValueToScreen(EnvGetValue(point)));
+				}
+				OnRButtonDown(0, pt);
+			}
 		}
 
 	}
@@ -2651,8 +2681,8 @@ InstrumentEnvelope *CViewInstrument::GetEnvelopePtr() const
 }
 
 
-bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
-//---------------------------------------------------------
+bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
+//-----------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return false;

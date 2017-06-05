@@ -245,6 +245,7 @@ protected:
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
 
 	void InsertOrDupItem(bool insert);
+	void OnItemRightClick(HTREEITEM hItem, CPoint pt);
 
 // Generated message map functions
 protected:

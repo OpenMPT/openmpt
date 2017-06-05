@@ -336,6 +336,17 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		case VK_INSERT:
 			InsertOrDupItem(!CMainFrame::GetInputHandler()->ShiftPressed());
 			return TRUE;
+
+		case VK_APPS:
+			// Handle Application (menu) key
+			if(HTREEITEM item = GetSelectedItem())
+			{
+				CRect rect;
+				GetItemRect(item, &rect, FALSE);
+				ClientToScreen(rect);
+				OnItemRightClick(item, rect.TopLeft());
+			}
+			return TRUE;
 		}
 	} else if(pMsg->message == WM_CHAR)
 	{
@@ -2619,15 +2630,21 @@ void CModTree::OnItemReturn(LPNMHDR, LRESULT *pResult)
 void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 //--------------------------------------------------------
 {
-	HTREEITEM hItem;
-	HMENU hMenu;
-	POINT pt, ptClient;
+	CPoint pt, ptClient;
 	UINT flags;
 
 	GetCursorPos(&pt);
 	ptClient = pt;
 	ScreenToClient(&ptClient);
-	hItem = HitTest(ptClient, &flags);
+	OnItemRightClick(HitTest(ptClient, &flags), pt);
+	if(pResult) *pResult = 0;
+}
+
+
+void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
+//---------------------------------------------------------
+{
+	HMENU hMenu;
 	if (m_dwStatus & TREESTATUS_LDRAG)
 	{
 		if (ItemHasChildren(hItem))
@@ -2881,7 +2898,6 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			DestroyMenu(hMenu);
 		}
 	}
-	if (pResult) *pResult = 0;
 }
 
 

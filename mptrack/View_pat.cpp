@@ -715,6 +715,12 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				}
 			}
 			//end HACK.
+
+			// Handle Application (menu) key
+			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			{
+				OnRButtonDown(0, GetPointFromPosition(m_Cursor));
+			}
 		} else if(pMsg->message == WM_MBUTTONDOWN)
 		{
 			// Open quick channel properties dialog if we're middle-clicking a channel header.
