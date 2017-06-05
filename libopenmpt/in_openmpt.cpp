@@ -16,6 +16,7 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
+#define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
 #define NOMINMAX
 #include <afxwin.h>
 #include <afxcmn.h>
