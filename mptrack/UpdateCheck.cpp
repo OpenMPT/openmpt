@@ -53,10 +53,10 @@ public:
 		m_boldFont.CreateFontIndirect(&lf);
 		GetDlgItem(IDC_VERSION2)->SetFont(&m_boldFont);
 
-		GetDlgItem(IDC_VERSION1)->SetWindowText(mpt::ToCString(mpt::CharsetASCII, MptVersion::str));
-		GetDlgItem(IDC_VERSION2)->SetWindowText(m_releaseVersion);
-		GetDlgItem(IDC_DATE)->SetWindowText(m_releaseDate);
-		GetDlgItem(IDC_SYSLINK1)->SetWindowText(_T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));
+		SetDlgItemText(IDC_VERSION1, mpt::ToCString(mpt::CharsetASCII, MptVersion::str));
+		SetDlgItemText(IDC_VERSION2, m_releaseVersion);
+		SetDlgItemText(IDC_DATE, m_releaseDate);
+		SetDlgItemText(IDC_SYSLINK1, _T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));
 		CheckDlgButton(IDC_CHECK1, (TrackerSettings::Instance().UpdateIgnoreVersion == m_releaseVersion) ? BST_CHECKED : BST_UNCHECKED);
 		return FALSE;
 	}
@@ -116,7 +116,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 			TrackerSettings::Instance().UpdateShowUpdateHint = false;
 			CString msg;
 			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %u days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateUpdateCheckPeriod.Get());
-			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
+			if(Reporting::Confirm(msg, _T("OpenMPT Internet Update")) == cnfNo)
 			{
 				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
 				return;
@@ -226,17 +226,6 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	if(requestHandle == NULL)
 	{
 		throw CUpdateCheck::Error(_T("Preparing HTTP request failed:\n"), GetLastError());
-	}
-
-	// StartSSL certificates are available since 2009 as an optional update for Windows XP / Vista,
-	// so ignore unknown CA issues for system which are not guaranteed to have the root certificate.
-	if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::Win7))
-	{
-		DWORD dwFlags = 0;
-		DWORD dwBuffLen = sizeof(dwFlags);
-		InternetQueryOption(requestHandle, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, &dwBuffLen);
-		dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;
-		InternetSetOption(requestHandle, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof(dwFlags));
 	}
 
 	if(!HttpSendRequest(requestHandle, NULL, 0, NULL, 0))
