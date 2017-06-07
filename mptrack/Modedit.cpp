@@ -173,29 +173,60 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 
 	CriticalSection cs;
-	m_SndFile.m_nChannels = newNumChannels;
-	for(auto &pat : m_SndFile.Patterns)
+	if(oldNumChannels == newNumChannels)
 	{
-		if(pat.IsValid())
+		// Optimization with no pattern re-allocation
+		std::vector<ModCommand> oldRow(oldNumChannels);
+		for(auto &pat : m_SndFile.Patterns)
 		{
-			CPattern newPattern(m_SndFile.Patterns);
-			if(!newPattern.AllocatePattern(pat.GetNumRows()))
+			auto m = pat.begin();
+			for(ROWINDEX row = 0; row < pat.GetNumRows(); row++)
 			{
-				Reporting::Error("Out of memory!", "Rearrange Channels");
-				return newNumChannels;
-			}
-			auto mNew = newPattern.begin(), mOld = pat.begin();
-			for(ROWINDEX row = 0; row < pat.GetNumRows(); row++, mOld += oldNumChannels)
-			{
-				for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, mNew++)
+				oldRow.assign(m, m + oldNumChannels);
+				for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, m++)
 				{
 					if(newOrder[chn] < oldNumChannels)	// Case: getting old channel to the new channel order.
-						*mNew = mOld[newOrder[chn]];
-					else	// Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*mNew = ModCommand::Empty();
+						*m = oldRow[newOrder[chn]];
+					else
+						*m = ModCommand::Empty();
 				}
 			}
-			pat = std::move(newPattern);
+		}
+	} else
+	{
+		// Create all patterns first so that we can exit cleanly in case of OOM
+		std::vector<std::vector<ModCommand>> newPatterns;
+		try
+		{
+			newPatterns.resize(m_SndFile.Patterns.Size());
+			for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
+			{
+				newPatterns[i].resize(m_SndFile.Patterns[i].GetNumRows() * newNumChannels);
+			}
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		{
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			Reporting::Error("Out of memory!", "Rearrange Channels");
+			return oldNumChannels;
+		}
+
+		m_SndFile.m_nChannels = newNumChannels;
+		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
+		{
+			CPattern &pat = m_SndFile.Patterns[i];
+			if(pat.IsValid())
+			{
+				auto mNew = newPatterns[i].begin(), mOld = pat.begin();
+				for(ROWINDEX row = 0; row < pat.GetNumRows(); row++, mOld += oldNumChannels)
+				{
+					for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, mNew++)
+					{
+						if(newOrder[chn] < oldNumChannels)	// Case: getting old channel to the new channel order.
+							*mNew = mOld[newOrder[chn]];
+					}
+				}
+				pat.SetData(std::move(newPatterns[i]));
+			}
 		}
 	}
 
@@ -209,14 +240,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		}
 	}
 
-	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn, m_SndFile.m_PlayState.Chn + oldNumChannels);
-	std::vector<ModChannelSettings> settings(m_SndFile.ChnSettings, m_SndFile.ChnSettings + oldNumChannels);
-	std::vector<BYTE> recordStates(oldNumChannels, 0);
-	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
-	for(CHANNELINDEX chn = 0; chn < oldNumChannels; chn++)
-	{
-		recordStates[chn] = IsChannelRecord(chn);
-	}
 	// Reassign NNA channels (note: if we increase the number of channels, the lowest-indexed NNA channels will still be lost)
 	for(CHANNELINDEX chn = oldNumChannels; chn < MAX_CHANNELS; chn++)
 	{
@@ -228,6 +251,14 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			channel.Reset(ModChannel::resetTotal, m_SndFile, chn);
 	}
 
+	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn, m_SndFile.m_PlayState.Chn + oldNumChannels);
+	std::vector<ModChannelSettings> settings(m_SndFile.ChnSettings, m_SndFile.ChnSettings + oldNumChannels);
+	std::vector<BYTE> recordStates(oldNumChannels, 0);
+	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
+	for(CHANNELINDEX chn = 0; chn < oldNumChannels; chn++)
+	{
+		recordStates[chn] = IsChannelRecord(chn);
+	}
 	ReinitRecordState();
 
 	for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++)

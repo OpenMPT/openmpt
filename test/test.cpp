@@ -99,6 +99,7 @@ static MPT_NOINLINE void TestITCompression();
 static MPT_NOINLINE void TestTunings();
 static MPT_NOINLINE void TestPCnoteSerialization();
 static MPT_NOINLINE void TestLoadSaveFile();
+static MPT_NOINLINE void TestEditing();
 
 
 
@@ -181,6 +182,7 @@ void DoTests()
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestLoadSaveFile);
+	DO_TEST(TestEditing);
 
 	delete s_PRNG;
 	s_PRNG = nullptr;
@@ -3106,6 +3108,77 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 #ifdef MODPLUG_TRACKER
 	TrackerSettings::Instance().MiscSaveChannelMuteStatus = saveMutedChannels;
+#endif
+}
+
+
+// Test various editing features
+static MPT_NOINLINE void TestEditing()
+//------------------------------------
+{
+#ifdef MODPLUG_TRACKER
+	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
+	auto &sndFile = modDoc->GetrSoundFile();
+	sndFile.Create(FileReader(), CSoundFile::loadCompleteModule, modDoc);
+	sndFile.m_nChannels = 4;
+	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
+
+	// Rearrange patterns
+	sndFile.Patterns.ResizeArray(2);
+	sndFile.Patterns.Insert(0, 32);
+	sndFile.Patterns.Insert(1, 48);
+	sndFile.Patterns[1].SetName("Pattern");
+	sndFile.Patterns[1].SetSignature(2, 4);
+	TempoSwing swing;
+	swing.resize(2);
+	sndFile.Patterns[1].SetTempoSwing(swing);
+	sndFile.Patterns[1].GetpModCommand(37, 0)->instr = 1;
+	sndFile.Patterns[1].GetpModCommand(37, 1)->instr = 2;
+	sndFile.Patterns[1].GetpModCommand(37, 2)->instr = 3;
+	sndFile.Patterns[1].GetpModCommand(37, 3)->instr = 4;
+	modDoc->ReArrangeChannels({ 3, 2, CHANNELINDEX_INVALID, 0 });
+	modDoc->ReArrangeChannels({ 0, 1, 1, CHANNELINDEX_INVALID, 3 });
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetName(), "Pattern");
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerBeat(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerMeasure(), 4);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetTempoSwing(), swing);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 0)->instr, 4);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 1)->instr, 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 2)->instr, 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 3)->instr, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 4)->instr, 1);
+
+	// Rearrange samples
+	sndFile.m_nSamples = 2;
+	mpt::String::Copy(sndFile.GetSample(1).filename, "1");
+	mpt::String::Copy(sndFile.m_szNames[1], "1");
+	mpt::String::Copy(sndFile.GetSample(2).filename, "2");
+	mpt::String::Copy(sndFile.m_szNames[2], "2");
+	sndFile.GetSample(2).nLength = 16;
+	sndFile.GetSample(2).AllocateSample();
+	modDoc->ReArrangeSamples({ 2, SAMPLEINDEX_INVALID, 1 });
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).pSample != nullptr, true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).filename, std::string("2"));
+	VERIFY_EQUAL_NONCONT(sndFile.m_szNames[1], std::string("2"));
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(2).filename, std::string());
+	VERIFY_EQUAL_NONCONT(sndFile.m_szNames[2], std::string());
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(3).filename, std::string("1"));
+	VERIFY_EQUAL_NONCONT(sndFile.m_szNames[3], std::string("1"));
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 4)->instr, 3);
+
+	// Convert / rearrange instruments
+	modDoc->ConvertSamplesToInstruments();
+	modDoc->ReArrangeInstruments({ INSTRUMENTINDEX_INVALID, 2, 1, 3 });
+	VERIFY_EQUAL_NONCONT(sndFile.Instruments[1]->name, std::string());
+	VERIFY_EQUAL_NONCONT(sndFile.Instruments[2]->name, std::string());
+	VERIFY_EQUAL_NONCONT(sndFile.Instruments[3]->name, std::string("2"));
+	VERIFY_EQUAL_NONCONT(sndFile.Instruments[4]->name, std::string("1"));
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 4)->instr, 4);
+	modDoc->ConvertInstrumentsToSamples();
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 4)->instr, 3);
+
+	sndFile.Destroy();
+	modDoc->OnCloseDocument();
 #endif
 }
 
