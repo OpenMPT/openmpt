@@ -1153,6 +1153,10 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	} else if(point.x >= m_szHeader.cx && point.y > m_szHeader.cy)
 	{
 		// Click on pattern data
+		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOFOLLOWONCLICK)
+		{
+			SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
+		}
 
 		if(CMainFrame::GetInputHandler()->SelectionPressed()
 			&& (m_Status[psShiftSelect]

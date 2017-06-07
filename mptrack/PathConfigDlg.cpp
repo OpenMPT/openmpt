@@ -67,7 +67,7 @@ BOOL PathConfigDlg::OnInitDialog()
 	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().AsNative().c_str());
 
 	// Autosave
-	CheckDlgButton(IDC_CHECK1, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP) != 0);
+	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().CreateBackupFiles ? BST_CHECKED : BST_UNCHECKED);
 
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, int32_max);
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, int32_max);
@@ -104,8 +104,7 @@ void PathConfigDlg::OnOK()
 		GetPath(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS));
 
 	// Autosave
-	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_CREATEBACKUP;
-	else TrackerSettings::Instance().m_dwPatternSetup &= ~PATTERN_CREATEBACKUP;
+	TrackerSettings::Instance().CreateBackupFiles = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
 	WCHAR tempPath[MAX_PATH];
 	TrackerSettings::Instance().AutosaveEnabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
