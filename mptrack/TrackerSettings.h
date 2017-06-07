@@ -82,13 +82,13 @@ enum ModColor
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
 #define PATTERN_SMOOTHSCROLL		0x02		// scroll tick by tick, not row by row
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
-//#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
+#define PATTERN_NOFOLLOWONCLICK		0x08		// disable song follow when clicking into pattern
 #define PATTERN_CENTERROW			0x10		// always center active row
 #define PATTERN_WRAP				0x20		// wrap around cursor in editor
 #define PATTERN_EFFECTHILIGHT		0x40		// effect syntax highlighting
 #define PATTERN_HEXDISPLAY			0x80		// display row number in hex
 #define PATTERN_FLATBUTTONS			0x100		// flat toolbar buttons
-#define PATTERN_CREATEBACKUP		0x200		// create .bak files when saving
+//#define PATTERN_CREATEBACKUP		0x200		// create .bak files when saving
 #define PATTERN_SINGLEEXPAND		0x400		// single click to expand tree
 #define PATTERN_PLAYEDITROW			0x800		// play all notes on the current row while entering notes
 #define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor
@@ -753,7 +753,7 @@ public:
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
 	// AutoSave
-
+	CachedSetting<bool> CreateBackupFiles;
 	CachedSetting<bool> AutosaveEnabled;
 	CachedSetting<uint32> AutosaveIntervalMinutes;
 	CachedSetting<uint32> AutosaveHistoryDepth;

@@ -307,6 +307,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ComponentsLoadOnStartup(conf, "Components", "LoadOnStartup", ComponentManagerSettingsDefault().LoadOnStartup())
 	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
 	// AutoSave
+	, CreateBackupFiles(conf, "AutoSave", "CreateBackupFiles", true)
 	, AutosaveEnabled(conf, "AutoSave", "Enabled", true)
 	, AutosaveIntervalMinutes(conf, "AutoSave", "IntervalMinutes", 10)
 	, AutosaveHistoryDepth(conf, "AutoSave", "BackupHistory", 3)
@@ -641,6 +642,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		// Move MIDI recording to MIDI setup
 		m_dwPatternSetup &= ~0x100000;
 		m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 51) && (m_dwPatternSetup & 0x200))
+	{
+		m_dwPatternSetup &= ~0x200;
+		CreateBackupFiles = true;
 	}
 
 	// Effects
