@@ -201,6 +201,7 @@ void CRawSampleDlg::UpdateDialog()
 // Add silence / resize sample dialog
 
 BEGIN_MESSAGE_MAP(CAddSilenceDlg, CDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO1,				OnUnitChanged)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		OnEditModeChanged)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		OnEditModeChanged)
 	ON_COMMAND(IDC_RADIO_RESIZETO,				OnEditModeChanged)
@@ -209,11 +210,13 @@ END_MESSAGE_MAP()
 SmpLength CAddSilenceDlg::m_addSamples = 32;
 SmpLength CAddSilenceDlg::m_createSamples = 64;
 
-CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength)
+CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate)
 	: CDialog(IDD_ADDSILENCE, parent)
-//----------------------------------------------------------------
+	, m_nSamples(m_addSamples)
+	, m_sampleRate(sampleRate)
+	, m_unit(kSamples)
+//-----------------------------------------------------------------------------------
 {
-	m_nSamples = m_addSamples;
 	if(origLength > 0)
 	{
 		m_nLength = origLength;
@@ -232,10 +235,23 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN_ADDSILENCE);
-	if (spin)
+	if(spin)
 	{
 		spin->SetRange32(0, int32_max);
 		spin->SetPos32(m_nSamples);
+	}
+
+	CComboBox *box = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	if(box)
+	{
+		box->AddString(_T("samples"));
+		box->AddString(_T("ms"));
+		box->SetCurSel(m_unit);
+		if(m_sampleRate == 0)
+		{
+			// Can't do any conversions if samplerate is unknown
+			box->EnableWindow(FALSE);
+		}
 	}
 
 	int buttonID = IDC_RADIO_ADDSILENCE_END;
@@ -257,6 +273,10 @@ void CAddSilenceDlg::OnOK()
 //-------------------------
 {
 	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
+	if(m_unit == kMilliseconds)
+	{
+		m_nSamples = Util::muldivr_unsigned(m_nSamples, m_sampleRate, 1000);
+	}
 	switch(m_nEditOption = GetEditMode())
 	{
 	case kSilenceAtBeginning:
@@ -287,6 +307,24 @@ void CAddSilenceDlg::OnEditModeChanged()
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
 	}
 	m_nEditOption = newEditOption;
+}
+
+
+void CAddSilenceDlg::OnUnitChanged()
+//----------------------------------
+{
+	m_unit = static_cast<Unit>(static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1))->GetCurSel());
+	SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+	if(m_unit == kSamples)
+	{
+		// Convert from milliseconds
+		duration = Util::muldivr_unsigned(duration, m_sampleRate, 1000);
+	} else
+	{
+		// Convert from samples
+		duration = Util::muldivr_unsigned(duration, 1000, m_sampleRate);
+	}
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, duration);
 }
 
 

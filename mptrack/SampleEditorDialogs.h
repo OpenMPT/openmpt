@@ -97,6 +97,12 @@ public:
 		kResize,			// Resize sample
 	};
 
+	enum Unit
+	{
+		kSamples = 0,
+		kMilliseconds,
+	};
+
 	SmpLength m_nSamples;	// Add x samples (also containes the return value in all cases)
 	SmpLength m_nLength;	// Set size to x samples (init value: current sample size)
 	AddSilenceOptions m_nEditOption;	// See above
@@ -104,9 +110,11 @@ public:
 protected:
 	static SmpLength m_addSamples;
 	static SmpLength m_createSamples;
+	uint32 m_sampleRate;
+	Unit m_unit;
 
 public:
-	CAddSilenceDlg(CWnd *parent, SmpLength origLength);
+	CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate);
 
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
@@ -114,6 +122,7 @@ public:
 protected:
 	AddSilenceOptions GetEditMode() const;
 	afx_msg void OnEditModeChanged();
+	afx_msg void OnUnitChanged();
 	DECLARE_MESSAGE_MAP()
 };
 

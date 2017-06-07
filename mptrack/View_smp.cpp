@@ -2960,7 +2960,7 @@ void CViewSample::OnAddSilence()
 
 	ModSample &sample = sndFile.GetSample(m_nSample);
 
-	CAddSilenceDlg dlg(this, sample.nLength);
+	CAddSilenceDlg dlg(this, sample.nLength, sample.GetSampleRate(sndFile.GetType()));
 	if (dlg.DoModal() != IDOK) return;
 
 	const SmpLength nOldLength = sample.nLength;
