@@ -77,22 +77,20 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	if(IsValidPat(index))
 		return false;
 
-	if(index >= m_Patterns.size())
+	try
 	{
-		try
+		if(index >= m_Patterns.size())
 		{
 			m_Patterns.resize(index + 1, CPattern(*this));
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			return false;
 		}
+		m_Patterns[index].AllocatePattern(rows);
+		m_Patterns[index].RemoveSignature();
+		m_Patterns[index].SetName("");
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		return false;
 	}
-
-	m_Patterns[index].AllocatePattern(rows);
-	m_Patterns[index].RemoveSignature();
-	m_Patterns[index].SetName("");
-
 	return m_Patterns[index].IsValid();
 }
 

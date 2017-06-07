@@ -88,6 +88,7 @@ public:
 	const CSoundFile& GetSoundFile() const;
 
 	const std::vector<ModCommand> &GetData() const { return m_ModCommands; }
+	void SetData(std::vector<ModCommand> &&data) { MPT_ASSERT(data.size() == GetNumRows() * GetNumChannels()); m_ModCommands = std::move(data); }
 
 	// Set pattern signature (rows per beat, rows per measure). Returns true on success.
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);

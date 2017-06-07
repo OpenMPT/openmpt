@@ -78,7 +78,8 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 	if(newRowCount == m_Rows || newRowCount < 1 || newRowCount > MAX_PATTERN_ROWS)
 	{
 		return false;
-	} if(enforceFormatLimits)
+	}
+	if(enforceFormatLimits)
 	{
 		auto &specs = sndFile.GetModSpecifications();
 		if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin) return false;
@@ -115,25 +116,20 @@ void CPattern::ClearCommands()
 bool CPattern::AllocatePattern(ROWINDEX rows)
 //-------------------------------------------
 {
+	size_t newSize = GetNumChannels() * rows;
 	if(rows == 0)
 	{
 		return false;
-	} else if(!m_ModCommands.empty() && rows == GetNumRows())
+	} else if(rows == GetNumRows() && m_ModCommands.size() == newSize)
 	{
 		// Re-use allocated memory
 		ClearCommands();
 		return true;
 	} else
 	{
-		try
-		{
-			decltype(m_ModCommands) newPattern(GetNumChannels() * rows, ModCommand::Empty());
-			m_ModCommands = std::move(newPattern);
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			return false;
-		}
+		// Do this in two steps in order to keep the old pattern data in case of OOM
+		decltype(m_ModCommands) newPattern(newSize, ModCommand::Empty());
+		m_ModCommands = std::move(newPattern);
 	}
 	m_Rows = rows;
 	return true;
