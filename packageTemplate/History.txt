@@ -30,6 +30,25 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.26.12.00 (* June 2017, revision 8270)
+----------------------------------------
+Pattern tab
+   [Imp] <js> When right-clicking outside of the pattern, show a context menu for adding more channels.
+
+MOD
+   [Fix] <js> Use M.K. signature instead of M!K! when writing exactly 64 (http://bugs.openmpt.org/view.php?id=958).
+
+Other formats
+   [Imp] <js> PT36: Enable VBlank timing as specified in file and read song comment (http://bugs.openmpt.org/view.php?id=962).
+   [Fix] <js> MT2: If there were instruments with both sample and plugin assignments, sample data was not read correctly.
+
+Module cleanup
+   [Fix] <js> Remove Duplicates: Patterns with identical contents but different tempo swing settings were merged.
+
+Third-Party Libraries
+   [Mod] Update opus (v1.1.5)
+
+
 v1.26.11.00 (21 May 2017, revision 8187)
 ----------------------------------------
 Pattern tab

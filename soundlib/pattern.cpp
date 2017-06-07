@@ -56,7 +56,7 @@ bool CPattern::IsEmptyRow(ROWINDEX row) const
 bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure)
 //------------------------------------------------------------------------------------
 {
-	if(rowsPerBeat < GetSoundFile().GetModSpecifications().patternRowsMin
+	if(rowsPerBeat < 1
 		|| rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
 		|| rowsPerMeasure < rowsPerBeat
 		|| rowsPerMeasure > GetSoundFile().GetModSpecifications().patternRowsMax)
@@ -76,17 +76,17 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits)
 	CSoundFile &sndFile = GetSoundFile();
 	ModCommand *newPattern;
 
+	if(newRowCount == m_Rows || newRowCount < 1 || newRowCount > MAX_PATTERN_ROWS)
+	{
+		return false;
+	}
 	if(enforceFormatLimits)
 	{
 		const CModSpecifications& specs = sndFile.GetModSpecifications();
 		if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin) return false;
-	} else
-	{
-		if(newRowCount > MAX_PATTERN_ROWS || newRowCount < 1) return false;
 	}
 
 	if(m_ModCommands == nullptr
-		|| newRowCount == m_Rows
 		|| (newPattern = AllocatePattern(newRowCount, GetNumChannels())) == nullptr)
 	{
 		return false;
@@ -154,7 +154,8 @@ bool CPattern::operator== (const CPattern &other) const
 		|| GetNumChannels() != other.GetNumChannels()
 		|| GetOverrideSignature() != other.GetOverrideSignature()
 		|| GetRowsPerBeat() != other.GetRowsPerBeat()
-		|| GetRowsPerMeasure() != other.GetRowsPerMeasure())
+		|| GetRowsPerMeasure() != other.GetRowsPerMeasure()
+		|| GetTempoSwing() != other.GetTempoSwing())
 		return false;
 	if(m_ModCommands == nullptr || other.m_ModCommands == nullptr)
 		return m_ModCommands == other.m_ModCommands;
@@ -255,7 +256,7 @@ bool CPattern::Shrink()
 bool CPattern::SetName(const std::string &newName)
 //------------------------------------------------
 {
-	m_PatternName.assign(newName);
+	m_PatternName = newName;
 	return true;
 }
 
