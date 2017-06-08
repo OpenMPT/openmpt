@@ -1506,7 +1506,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
-	} else if(nChn >= sndFile.GetNumChannels() && !(flags & (MK_CONTROL | MK_SHIFT)))
+	} else if(nChn >= pSndFile->GetNumChannels() && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		// Click outside of pattern: Offer easy way to add more channels
 		m_MenuCursor.Set(0, sndFile.GetNumChannels() - 1);

@@ -30,10 +30,10 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.12.00 (* June 2017, revision 8270)
+v1.26.12.00 (* June 2017, revision 8288)
 ----------------------------------------
 Pattern tab
-   [Imp] <js> When right-clicking outside of the pattern, show a context menu for adding more channels.
+   [Imp] <js> Right-clicking outside of the pattern shows a context menu for adding more channels.
 
 MOD
    [Fix] <js> Use M.K. signature instead of M!K! when writing exactly 64 (http://bugs.openmpt.org/view.php?id=958).
