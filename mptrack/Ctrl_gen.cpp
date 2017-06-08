@@ -208,8 +208,14 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
+		const TCHAR *defaultResampler;
+		if(m_sndFile.m_SongFlags[SONG_ISAMIGA] && TrackerSettings::Instance().ResamplerEmulateAmiga)
+			defaultResampler = _T("Amiga Resampler");
+		else
+			defaultResampler = CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, false);
+
 		m_CbnResampling.ResetContent();
-		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, false)) + _T(")")), SRCMODE_DEFAULT);
+		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(defaultResampler) + _T(")")), SRCMODE_DEFAULT);
 		for(auto mode : resamplingModes)
 		{
 			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, false)), mode);

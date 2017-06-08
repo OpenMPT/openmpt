@@ -813,6 +813,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				Panning(pChn, param, Pan8bit);
 				break;
 			case CMD_MODCMDEX:
+				if(param < 0x10)
+				{
+					// LED filter
+					for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+					{
+						playState.Chn[chn].dwFlags.set(CHN_AMIGAFILTER, !(param & 1));
+					}
+				}
+				MPT_FALLTHROUGH;
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x80)
 				{
@@ -1931,6 +1940,12 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		|| (pChn->pModInstrument != nullptr && pChn->pModInstrument->dwFlags[INS_MUTE] && !bManual))
 	{
 		if (!bManual) pChn->nPeriod = 0;
+	}
+
+	// Reset the Amiga resampler for this channel
+	if(!bPorta)
+	{
+		pChn->paulaState.Reset();
 	}
 }
 
@@ -4338,6 +4353,12 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	switch(command)
 	{
 	// E0x: Set Filter
+	case 0x00:
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+		{
+			m_PlayState.Chn[chn].dwFlags.set(CHN_AMIGAFILTER, !(param & 1));
+		}
+		break;
 	// E1x: Fine Portamento Up
 	case 0x10:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoUp(pChn, param); break;
 	// E2x: Fine Portamento Down

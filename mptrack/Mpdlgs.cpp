@@ -87,7 +87,6 @@ static CString PrintTime(double seconds)
 
 BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_WM_HSCROLL()
-	ON_WM_VSCROLL()
 	ON_COMMAND(IDC_CHECK4,	OnExclusiveModeChanged)
 	ON_COMMAND(IDC_CHECK5,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,	OnSettingsChanged)
@@ -418,10 +417,8 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it.apiName + MPT_USTRING(" - ") + name;
 				}
-				TCHAR tmp[1024];
-				MemsetZero(tmp);
-				lstrcpyn(tmp, mpt::ToCString(name), 1023);
-				cbi.pszText = tmp;
+				CString tmp = mpt::ToCString(name);
+				cbi.pszText = const_cast<TCHAR *>(tmp.GetString());
 				cbi.iIndent = 0;
 				int pos = m_CbnDevice.InsertItem(&cbi);
 				if(static_cast<SoundDevice::Manager::GlobalID>(cbi.lParam) == theApp.GetSoundDevicesManager()->GetGlobalID(m_CurrentDeviceInfo.GetIdentifier()))
@@ -947,6 +944,7 @@ BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_EN_UPDATE(IDC_RAMPING_IN,				OnRampingChanged)
 	ON_EN_UPDATE(IDC_RAMPING_OUT,				OnRampingChanged)
 	ON_COMMAND(IDC_CHECK_SOFTPAN,				OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,						OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -977,8 +975,7 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Resampling type
 	{
-		const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER };
-		for(auto mode : resamplingModes)
+		for(auto mode : { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER })
 		{
 			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, true));
 			m_CbnResampling.SetItemData(index, mode);
@@ -997,6 +994,9 @@ BOOL COptionsMixer::OnInitDialog()
 	{
 		// done in OnResamplerChanged()
 	}
+
+	// Amiga Resampler
+	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().ResamplerEmulateAmiga ? BST_CHECKED : BST_UNCHECKED);
 
 	// volume ramping
 	{
@@ -1068,10 +1068,10 @@ void COptionsMixer::OnResamplerChanged()
 //--------------------------------------
 {
 	ResamplingMode srcMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
+	m_CbnWFIRType.ResetContent();
 	switch(srcMode)
 	{
 		case SRCMODE_FIRFILTER:
-			m_CbnWFIRType.ResetContent();
 			m_CbnWFIRType.AddString(_T("Hann"));
 			m_CbnWFIRType.AddString(_T("Hamming"));
 			m_CbnWFIRType.AddString(_T("Blackman Exact"));
@@ -1080,10 +1080,8 @@ void COptionsMixer::OnResamplerChanged()
 			m_CbnWFIRType.AddString(_T("Blackman Harris"));
 			m_CbnWFIRType.AddString(_T("Blackman 4 Tap 74"));
 			m_CbnWFIRType.AddString(_T("Kaiser a=7.5"));
-			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 		case SRCMODE_POLYPHASE:
-			m_CbnWFIRType.ResetContent();
 			m_CbnWFIRType.AddString(_T("Auto"));
 			m_CbnWFIRType.AddString(_T("Auto"));
 			m_CbnWFIRType.AddString(_T("Auto"));
@@ -1092,10 +1090,8 @@ void COptionsMixer::OnResamplerChanged()
 			m_CbnWFIRType.AddString(_T("Auto"));
 			m_CbnWFIRType.AddString(_T("Auto"));
 			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 		default:
-			m_CbnWFIRType.ResetContent();
 			m_CbnWFIRType.AddString(_T("none"));
 			m_CbnWFIRType.AddString(_T("none"));
 			m_CbnWFIRType.AddString(_T("none"));
@@ -1104,9 +1100,9 @@ void COptionsMixer::OnResamplerChanged()
 			m_CbnWFIRType.AddString(_T("none"));
 			m_CbnWFIRType.AddString(_T("none"));
 			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 	}
+	m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 	CSpinButtonCtrl *spinWFIRCutoff = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	switch(srcMode)
 	{
@@ -1140,12 +1136,10 @@ void COptionsMixer::OnRampingChanged()
 }
 
 
-void COptionsMixer::OnScroll(UINT n, UINT pos, CScrollBar *p)
-//-----------------------------------------------------------
+void COptionsMixer::OnHScroll(UINT n, UINT pos, CScrollBar *p)
+//------------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(n);
-	MPT_UNREFERENCED_PARAMETER(pos);
-	// stereo sep
+	CPropertyPage::OnHScroll(n, pos, p);
 	if(p == (CScrollBar *)&m_SliderStereoSep)
 	{
 		UpdateStereoSep();
@@ -1208,6 +1202,9 @@ void COptionsMixer::OnOK()
 		TrackerSettings::Instance().ResamplerSubMode = (uint8)m_CbnWFIRType.GetCurSel();
 	}
 
+	// Amiga Resampler
+	TrackerSettings::Instance().ResamplerEmulateAmiga = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+
 	// volume ramping
 	{
 		MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
@@ -1254,6 +1251,7 @@ void COptionsMixer::OnOK()
 	}
 
 	CMainFrame::GetMainFrame()->SetupPlayer();
+	CMainFrame::GetMainFrame()->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 
 	CPropertyPage::OnOK();
 }

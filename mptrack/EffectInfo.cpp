@@ -79,6 +79,7 @@ static const MPTEFFECTINFO gFXInfo[] =
 	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"MIDI Macro"},
 	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_XMITMPT,	"Smooth MIDI Macro"},	//rewbs.smoothVST
 	// Extended MOD/XM effects
+	{CMD_MODCMDEX,		0xF0,0x00,	0,	MOD_TYPE_MOD,	"Set Filter"},
 	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine Porta Up"},
 	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine Porta Down"},
 	{CMD_MODCMDEX,		0xF0,0x30,	0,	MOD_TYPE_MODXM,	"Glissando Control"},
@@ -309,6 +310,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *p
 		case CMD_MODCMDEX:
 			// adjust waveform types for XM/MOD
 			if(gFXInfo[ndx].paramValue == 0x40 || gFXInfo[ndx].paramValue == 0x70) nmax = gFXInfo[ndx].paramValue | 0x07;
+			if(gFXInfo[ndx].paramValue == 0x00) nmax = 1;
 			break;
 		case CMD_S3MCMDEX:
 			// adjust waveform types for IT/S3M
@@ -777,9 +779,9 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 						case 0x00:
 							// Filter
 							if(param & 1)
-								s = _T("off");
+								s = _T("LED Filter Off");
 							else
-								s = _T("on");
+								s = _T("LED Filter On");
 							break;
 
 						case 0x30: // glissando control

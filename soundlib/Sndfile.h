@@ -651,6 +651,7 @@ public:
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 
 	bool InitChannel(CHANNELINDEX nChn);
+	void InitAmigaResampler();
 
 	// Module Loaders
 	bool Read669(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

@@ -57,13 +57,14 @@ namespace MixFuncTable
 	BuildMixFuncTableFilter(resampling, NoFilter), \
 	BuildMixFuncTableFilter(resampling, ResonantFilter)
 
-const MixFuncInterface Functions[5 * 16] =
+const MixFuncInterface Functions[6 * 16] =
 {
 	BuildMixFuncTable(NoInterpolation),			// No SRC
 	BuildMixFuncTable(LinearInterpolation),		// Linear SRC
 	BuildMixFuncTable(FastSincInterpolation),	// Fast Sinc (Cubic Spline) SRC
 	BuildMixFuncTable(PolyphaseInterpolation),	// Kaiser SRC
 	BuildMixFuncTable(FIRFilterInterpolation),	// FIR SRC
+	BuildMixFuncTable(AmigaBlepInterpolation),	// Amiga emulation
 };
 
 
@@ -82,6 +83,7 @@ ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode)
 	case SRCMODE_SPLINE:    return ndxFastSinc;
 	case SRCMODE_POLYPHASE: return ndxKaiser;
 	case SRCMODE_FIRFILTER: return ndxFIRFilter;
+	case SRCMODE_AMIGA:     return ndxAmigaBlep;
 	default:                MPT_ASSERT_NOTREACHED();
 	}
 	return ndxNoInterpolation;

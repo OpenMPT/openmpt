@@ -24,6 +24,13 @@ is just a high-level summary.
     extension APIs also for the C interface.
  *  [**New**] The Reverb effect (S99 in S3M/IT/MPTM, and X99 in XM) is now
     implemented in libopenmpt.
+ *  [**New**] For Amiga modules, a new resampler based on the Amiga's sound
+    characteristics has been added. It can be activated by passing the
+    `render.resampler.emulate_amiga` ctl with a value of 1. Non-Amiga modules
+    are not affected by this, and setting the ctl overrides the resampler choice
+    specified by (OPENMPT_MODULE_)RENDER_INTERPOLATIONFILTER_LENGTH.
+    Support for the MOD command E0x (Set LED Filter) is also available when the
+    Amiga resampler is enabled. 
 
  *  [**Change**] libopenmpt versioning changed and follows the more conventional
     major.minor.patch as well as the recommendations of the
@@ -123,6 +130,9 @@ is just a high-level summary.
     sanitization behaviour based on the module channel count.
  *  Both normal and percentage offset in PLM files were handled as percentage
     offset.
+ *  MT2 files with instruments that had both sample and plugin assignments were
+    not read correctly.
+ *  Support for VBlank timing flag and comment field in PT36 files.
  *  STM: Add support for "WUZAMOD!" magic bytes and allow some slightly
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
@@ -148,9 +158,9 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
  *  [**Bug**] PSM loader was broken on big-endian platforms since forever.
- *  [**Bug**] load.skip_samples ctl did not work for PSM16 modules.
+ *  [**Bug**] `load.skip_samples` ctl did not work for PSM16 modules.
 
- *  There is a new `"subsong"` ctl, which can return the currently selected
+ *  There is a new `subsong` ctl, which can return the currently selected
     subsong.
  *  More accurate ProTracker arpeggio wrap-around emulation.
  *  More accurate sample tuning in PSM16 files.

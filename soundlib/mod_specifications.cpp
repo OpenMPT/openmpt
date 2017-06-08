@@ -105,7 +105,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 	31,											// SamplesMax
 	0,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
-	SongFlag(0) | SONG_PT_MODE | SONG_AMIGALIMITS,	// Supported song flags
+	SongFlag(0) | SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	false,										// No notecut.

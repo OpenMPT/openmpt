@@ -39,9 +39,10 @@ namespace MixFuncTable
 		ndxFastSinc			= 0x20,
 		ndxKaiser			= 0x30,
 		ndxFIRFilter		= 0x40,
+		ndxAmigaBlep		= 0x50,
 	};
 
-	extern const MixFuncInterface Functions[5 * 16];
+	extern const MixFuncInterface Functions[6 * 16];
 
 	ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode);
 }

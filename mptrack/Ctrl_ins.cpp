@@ -2954,11 +2954,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 
 	//Case: Chosen tuning editor to be displayed.
 	//Creating vector for the CTuningDialog.
-	std::vector<CTuningCollection*> v;
-	v.push_back(&m_sndFile.GetBuiltInTunings());
-	v.push_back(&m_sndFile.GetLocalTunings());
-	v.push_back(&m_sndFile.GetTuneSpecificTunings());
-	CTuningDialog td(this, v, pInstH->pTuning);
+	CTuningDialog td(this, { &m_sndFile.GetBuiltInTunings(), &m_sndFile.GetLocalTunings(), &m_sndFile.GetTuneSpecificTunings() }, pInstH->pTuning);
 	td.DoModal();
 	if(td.GetModifiedStatus(&m_sndFile.GetLocalTunings()))
 	{

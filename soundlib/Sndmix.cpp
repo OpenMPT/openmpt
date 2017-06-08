@@ -79,6 +79,7 @@ void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersetting
 {
 	m_Resampler.m_Settings = resamplersettings;
 	m_Resampler.UpdateTables();
+	InitAmigaResampler();
 }
 
 
@@ -90,6 +91,7 @@ void CSoundFile::InitPlayer(bool bReset)
 		ResetMixStat();
 		gnDryLOfsVol = 0;
 		gnDryROfsVol = 0;
+		InitAmigaResampler();
 	}
 	m_Resampler.UpdateTables();
 #ifndef NO_REVERB
@@ -2295,24 +2297,30 @@ bool CSoundFile::ReadNote()
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 
-			if(pChn->increment.IsUnity() && !(pChn->dwFlags[CHN_VIBRATO] || pChn->nAutoVibDepth))
+			if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
 			{
-				// Exact sample rate match, do not resample at all, regardless of selected resampler
-				// - unless vibrato is applied, because in this case the constant enabling and disabling
-				// of resampling can introduce clicks (this is easily observable with a sine sample
-				// played at the mix rate).
-				pChn->resamplingMode = SRCMODE_NEAREST;
-			} else if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
-			{
-				// for defined resampling modes, use per-instrument resampling mode if set
+				// For defined resampling modes, use per-instrument resampling mode if set
 				pChn->resamplingMode = static_cast<uint8>(pChn->pModInstrument->nResampling);
 			} else if(IsKnownResamplingMode(m_nResampling))
 			{
 				pChn->resamplingMode = static_cast<uint8>(m_nResampling);
+			} else if(m_SongFlags[SONG_ISAMIGA] && m_Resampler.m_Settings.emulateAmiga)
+			{
+				// Enforce Amiga resampler for Amiga modules
+				pChn->resamplingMode = SRCMODE_AMIGA;
 			} else
 			{
-				// default to global mixer settings
+				// Default to global mixer settings
 				pChn->resamplingMode = static_cast<uint8>(m_Resampler.m_Settings.SrcMode);
+			}
+
+			if(pChn->increment.IsUnity() && !(pChn->dwFlags[CHN_VIBRATO] || pChn->nAutoVibDepth || pChn->resamplingMode == SRCMODE_AMIGA))
+			{
+				// Exact sample rate match, do not interpolate at all
+				// - unless vibrato is applied, because in this case the constant enabling and disabling
+				// of resampling can introduce clicks (this is easily observable with a sine sample
+				// played at the mix rate).
+				pChn->resamplingMode = SRCMODE_NEAREST;
 			}
 
 			const int extraAttenuation = m_PlayConfig.getExtraSampleAttenuation();
@@ -2339,20 +2347,11 @@ bool CSoundFile::ReadNote()
 		pChn->dwOldFlags = pChn->dwFlags;
 	}
 
-	// Checking Max Mix Channels reached: ordering by volume
+	// If there are more channels being mixed than allowed, order them by volume and discard the most quiet ones
 	if(m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels)
 	{
-		for(CHANNELINDEX i=0; i<m_nMixChannels; i++)
-		{
-			CHANNELINDEX j=i;
-			while ((j+1<m_nMixChannels) && (m_PlayState.Chn[m_PlayState.ChnMix[j]].nRealVolume < m_PlayState.Chn[m_PlayState.ChnMix[j+1]].nRealVolume))
-			{
-				CHANNELINDEX n = m_PlayState.ChnMix[j];
-				m_PlayState.ChnMix[j] = m_PlayState.ChnMix[j+1];
-				m_PlayState.ChnMix[j+1] = n;
-				j++;
-			}
-		}
+		std::partial_sort(std::begin(m_PlayState.ChnMix), std::begin(m_PlayState.ChnMix) + m_MixerSettings.m_nMaxMixChannels, std::begin(m_PlayState.ChnMix) + m_nMixChannels,
+			[this](CHANNELINDEX i, CHANNELINDEX j) { return (m_PlayState.Chn[i].nRealVolume > m_PlayState.Chn[j].nRealVolume); });
 	}
 	return true;
 }

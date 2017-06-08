@@ -715,6 +715,7 @@
     <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\pattern.h" />
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
+    <ClInclude Include="..\..\soundlib\Paula.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
@@ -1010,6 +1011,9 @@
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Paula.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
