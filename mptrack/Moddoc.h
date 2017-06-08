@@ -201,7 +201,7 @@ public:
 	void AppendModule(const CSoundFile &source);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
-	SAMPLEINDEX InsertSample(bool bLimit = false);
+	SAMPLEINDEX InsertSample();
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
 	INSTRUMENTINDEX InsertInstrumentForPlugin(PLUGINDEX plug);
 	INSTRUMENTINDEX HasInstrumentForPlugin(PLUGINDEX plug) const;
