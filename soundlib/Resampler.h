@@ -59,16 +59,18 @@ public:
 	ResamplingMode SrcMode;
 	double gdWFIRCutoff;
 	uint8 gbWFIRType;
+	bool emulateAmiga;
 public:
 	CResamplerSettings()
 	{
 		SrcMode = SRCMODE_POLYPHASE;
 		gdWFIRCutoff = 0.97;
 		gbWFIRType = WFIR_KAISER4T;
+		emulateAmiga = false;
 	}
 	bool operator == (const CResamplerSettings &cmp) const
 	{
-		return SrcMode == cmp.SrcMode && gdWFIRCutoff == cmp.gdWFIRCutoff && gbWFIRType == cmp.gbWFIRType;
+		return SrcMode == cmp.SrcMode && gdWFIRCutoff == cmp.gdWFIRCutoff && gbWFIRType == cmp.gbWFIRType && emulateAmiga == cmp.emulateAmiga;
 	}
 	bool operator != (const CResamplerSettings &cmp) const { return !(*this == cmp); }
 };

@@ -256,6 +256,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ResamplerMode(conf, "Sound Settings", "SrcMode", GetDefaultResamplerMode())
 	, ResamplerSubMode(conf, "Sound Settings", "XMMSModplugResamplerWFIRType", CResamplerSettings().gbWFIRType)
 	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
+	, ResamplerEmulateAmiga(conf, "Sound Settings", "ResamplerEmulateAmiga", false)
 	, SoundBoostedThreadPriority(conf, "Sound Settings", "BoostedThreadPriority", SoundDevice::AppInfo().BoostedThreadPriorityXP)
 	, SoundBoostedThreadMMCSSClass(conf, "Sound Settings", "BoostedThreadMMCSSClass", SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
 	, SoundBoostedThreadRealtimePosix(conf, "Sound Settings", "BoostedThreadRealtimeLinux", SoundDevice::AppInfo().BoostedThreadRealtimePosix)
@@ -933,6 +934,7 @@ CResamplerSettings TrackerSettings::GetResamplerSettings() const
 	settings.SrcMode = ResamplerMode;
 	settings.gbWFIRType = ResamplerSubMode;
 	settings.gdWFIRCutoff = ResamplerCutoffPercent * 0.01;
+	settings.emulateAmiga = ResamplerEmulateAmiga;
 	return settings;
 }
 
@@ -942,6 +944,7 @@ void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
 	ResamplerMode = settings.SrcMode;
 	ResamplerSubMode = settings.gbWFIRType;
 	ResamplerCutoffPercent = Util::Round<int32>(settings.gdWFIRCutoff * 100.0);
+	ResamplerEmulateAmiga = settings.emulateAmiga;
 }
 
 

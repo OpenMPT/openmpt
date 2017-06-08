@@ -55,6 +55,10 @@ static const GUID guid_openmpt_repeat =
 static const GUID guid_openmpt_filter = 
 { 0xeaad5e60, 0xf75b, 0x4071, { 0xb3, 0x8, 0x99, 0x56, 0x36, 0x2e, 0xcb, 0x69 } };
 
+// {0CF7E156-44E3-4587-A727-864B045BEDDD}
+static const GUID guid_openmpt_amiga =
+{ 0x0cf7e156, 0x44e3, 0x4587,{ 0xa7, 027, 0x86, 0x4b, 0x04, 0x5b, 0xed, 0xdd } };
+
 // {497BF503-D825-4A02-BE5C-02DB8911B1DC}
 static const GUID guid_openmpt_ramping = 
 { 0x497bf503, 0xd825, 0x4a02, { 0xbe, 0x5c, 0x2, 0xdb, 0x89, 0x11, 0xb1, 0xdc } };
@@ -68,6 +72,7 @@ static advconfig_string_factory_MT cfg_gain      ("Gain [-12...12] (dB)"        
 static advconfig_integer_factory   cfg_stereo    ("Stereo separation [0...200] (%)"                                   , guid_openmpt_stereo    , guid_openmpt_root, 0,   100,    0,   200);
 static advconfig_string_factory_MT cfg_repeat    ("Repeat [0=never, -1=forever, 1..] (#)"                             , guid_openmpt_repeat    , guid_openmpt_root, 0,   "0");
 static advconfig_integer_factory   cfg_filter    ("Interpolation filter length [1=nearest, 2=linear, 4=cubic, 8=sinc]", guid_openmpt_filter    , guid_openmpt_root, 0,     8,    1,     8);
+static advconfig_checkbox_factory  cfg_amiga     ("Use Amiga Resampler for Amiga modules"                             , guid_openmpt_amiga,      guid_openmpt_root, 0, false);
 static advconfig_string_factory_MT cfg_ramping   ("Volume ramping [-1=default, 0=off, 1..10] (ms)"                    , guid_openmpt_ramping   , guid_openmpt_root, 0,  "-1");
 
 struct foo_openmpt_settings {
@@ -78,6 +83,7 @@ struct foo_openmpt_settings {
 	int repeatcount;
 	int interpolationfilterlength;
 	int ramping;
+	bool use_amiga_resampler;
 	foo_openmpt_settings() {
 
 		/*
@@ -87,6 +93,7 @@ struct foo_openmpt_settings {
 		stereoseparation = 100;
 		repeatcount = 0;
 		interpolationfilterlength = 8;
+		use_amiga_resampler = false;
 		ramping = -1;
 		*/
 
@@ -111,6 +118,8 @@ struct foo_openmpt_settings {
 		}
 		
 		interpolationfilterlength = static_cast<int>( cfg_filter.get() );
+
+		use_amiga_resampler = cfg_amiga.get();
 		
 		cfg_ramping.get( tmp );
 		ramping = static_cast<int>( pfc::atoi64_ex( tmp, ~0 ) );
@@ -166,6 +175,7 @@ public:
 		mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, settings.stereoseparation );
 		mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, settings.interpolationfilterlength );
 		mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, settings.ramping );
+		mod->ctl_set( "render.resampler.emulate_amiga", settings.use_amiga_resampler ? "1" : "0" );
 	}
 	void get_info(file_info & p_info,abort_callback & p_abort) {
 		p_info.set_length( mod->get_duration_seconds() );

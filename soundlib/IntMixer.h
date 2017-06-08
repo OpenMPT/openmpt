@@ -13,6 +13,7 @@
 
 #include "Resampler.h"
 #include "MixerInterface.h"
+#include "Paula.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -41,6 +42,62 @@ typedef IntToIntTraits<2, 2, mixsample_t, int16, 16> Int16SToIntS;
 
 //////////////////////////////////////////////////////////////////////////
 // Interpolation templates
+
+
+template<class Traits>
+struct AmigaBlepInterpolation
+{
+	SamplePosition subIncrement;
+	Paula::State *paula;
+	int numSteps;
+	bool filter;
+
+	MPT_FORCEINLINE void Start(ModChannel &chn, const CResampler &)
+	{
+		paula = &chn.paulaState;
+		numSteps = paula->numSteps;
+		filter = chn.dwFlags[CHN_AMIGAFILTER];
+		if(numSteps)
+			subIncrement = chn.increment / paula->numSteps;
+	}
+
+	MPT_FORCEINLINE void End(const ModChannel &) { }
+
+	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const MPT_RESTRICT inBuffer, const uint32 posLo)
+	{
+		SamplePosition pos(0, posLo);
+		// First, process steps of full length (one Amiga clock interval)
+		for(int step = numSteps; step > 0; step--)
+		{
+			typename Traits::output_t inSample = 0;
+			uint32 posInt = pos.GetInt() * Traits::numChannelsIn;
+			for(unsigned int i = 0; i < Traits::numChannelsIn; i++)
+				inSample += Traits::Convert(inBuffer[posInt + i]);
+			paula->InputSample(static_cast<int16>(inSample / (4 * Traits::numChannelsIn)));
+			paula->Clock(Paula::MINIMUM_INTERVAL);
+			pos += subIncrement;
+		}
+		paula->remainder += paula->stepRemainder;
+
+		// Now, process any remaining integer clock amount < MINIMUM_INTERVAL
+		uint32 remainClocks = paula->remainder.GetInt();
+		if(remainClocks)
+		{
+			typename Traits::output_t inSample = 0;
+			uint32 posInt = pos.GetInt() * Traits::numChannelsIn;
+			for(unsigned int i = 0; i < Traits::numChannelsIn; i++)
+				inSample += Traits::Convert(inBuffer[posInt + i]);
+			paula->InputSample(static_cast<int16>(inSample / (4 * Traits::numChannelsIn)));
+			paula->Clock(remainClocks);
+			paula->remainder.RemoveInt();
+		}
+
+		auto out = paula->OutputSample(filter);
+		for(unsigned int i = 0; i < Traits::numChannelsOut; i++)
+			outSample[i] = out;
+	}
+};
+
 
 template<class Traits>
 struct LinearInterpolation

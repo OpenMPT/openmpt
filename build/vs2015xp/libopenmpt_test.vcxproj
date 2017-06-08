@@ -267,6 +267,7 @@
     <ClInclude Include="..\..\soundlib\ModSampleCopy.h" />
     <ClInclude Include="..\..\soundlib\ModSequence.h" />
     <ClInclude Include="..\..\soundlib\OggStream.h" />
+    <ClInclude Include="..\..\soundlib\Paula.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
@@ -396,6 +397,7 @@
     <ClCompile Include="..\..\soundlib\ModSample.cpp" />
     <ClCompile Include="..\..\soundlib\ModSequence.cpp" />
     <ClCompile Include="..\..\soundlib\OggStream.cpp" />
+    <ClCompile Include="..\..\soundlib\Paula.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp" />

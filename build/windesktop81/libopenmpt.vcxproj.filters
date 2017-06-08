@@ -231,6 +231,9 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\Paula.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\Resampler.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -624,6 +627,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Paula.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp">

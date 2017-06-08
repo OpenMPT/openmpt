@@ -136,7 +136,7 @@ enum ChannelFlags
 	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
 	CHN_SURROUND		= 0x800,		// use surround channel
 	CHN_WRAPPED_LOOP	= 0x1000,		// loop just wrapped around to loop start (required for correct interpolation around loop points)
-	// UNUSED			= 0x2000,
+	CHN_AMIGAFILTER		= 0x2000,		// Apply Amiga low-pass filter
 	CHN_FILTER			= 0x4000,		// Apply resonant filter on sample
 	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
 	CHN_VIBRATO			= 0x10000,		// Apply vibrato
@@ -255,10 +255,11 @@ enum SongFlags
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
 	SONG_PT_MODE		= 0x200000,		// ProTracker 1/2 playback mode
 	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
+	SONG_ISAMIGA		= 0x800000,		// Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE)
+#define SONG_FILE_FLAGS (SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE|SONG_ISAMIGA)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
@@ -296,6 +297,8 @@ enum ResamplingMode
 	SRCMODE_POLYPHASE = 3,
 	SRCMODE_FIRFILTER = 4,
 	SRCMODE_DEFAULT   = 5,
+
+	SRCMODE_AMIGA = 0xFF,	// Not explicitely user-selectable
 };
 
 static inline bool IsKnownResamplingMode(int mode)
@@ -499,6 +502,7 @@ public:
 	explicit SamplePosition(value_t pos) : v(pos) { }
 	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) << 32) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
+	static SamplePosition FromDouble(double pos) { return SamplePosition(static_cast<value_t>(pos * 4294967296.0)); }
 
 	// Set integer and fractional part
 	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
@@ -518,6 +522,8 @@ public:
 	MPT_FORCEINLINE SamplePosition &Negate() { v = -v; return *this; }
 	// Multiply and divide by given integer scalars
 	MPT_FORCEINLINE SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
+	// Removes the integer part, only keeping fractions
+	MPT_FORCEINLINE SamplePosition &RemoveInt() { v &= fractMax; return *this; }
 	// Check if value is 1.0
 	MPT_FORCEINLINE bool IsUnity() const { return v == 0x100000000ll; }
 	// Check if value is 0
@@ -541,6 +547,8 @@ public:
 
 	// Division by other fractional point number; returns scalar
 	value_t operator/ (SamplePosition other) const { return v / other.v; }
+	// Division by scalar; returns fractional point number
+	SamplePosition operator/ (int div) const { return SamplePosition(v / div); }
 
 	bool operator== (const SamplePosition &other) const { return v == other.v; }
 	bool operator!= (const SamplePosition &other) const { return v != other.v; }

@@ -663,6 +663,7 @@ public:
 	Setting<ResamplingMode> ResamplerMode;
 	Setting<uint8> ResamplerSubMode;
 	Setting<int32> ResamplerCutoffPercent;
+	Setting<bool> ResamplerEmulateAmiga;
 	CResamplerSettings GetResamplerSettings() const;
 	void SetResamplerSettings(const CResamplerSettings &settings);
 

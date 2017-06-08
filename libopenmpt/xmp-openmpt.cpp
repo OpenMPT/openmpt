@@ -262,6 +262,7 @@ static void save_settings_to_map( std::map<std::string,int> & result, const libo
 	result[ "StereoSeparation_Percent" ] = s.stereoseparation;
 	result[ "RepeatCount" ] = s.repeatcount;
 	result[ "InterpolationFilterLength" ] = s.interpolationfilterlength;
+	result[ "UseAmigaResampler" ] = s.use_amiga_resampler;
 	result[ "VolumeRampingStrength" ] = s.ramping;
 }
 
@@ -279,6 +280,7 @@ static void load_settings_from_map( libopenmpt::plugin::settings & s, const std:
 	load_map_setting( map, "StereoSeparation_Percent", s.stereoseparation );
 	load_map_setting( map, "RepeatCount", s.repeatcount );
 	load_map_setting( map, "InterpolationFilterLength", s.interpolationfilterlength );
+	load_map_setting( map, "UseAmigaResampler", s.use_amiga_resampler );
 	load_map_setting( map, "VolumeRampingStrength", s.ramping );
 }
 
@@ -298,8 +300,8 @@ static void save_settings_to_xml( std::string & xml, const libopenmpt::plugin::s
 	save_settings_to_map( map, s );
 	pugi::xml_document doc;
 	pugi::xml_node settings_node = doc.append_child( "settings" );
-	for ( std::map<std::string,int>::const_iterator it = map.begin(); it != map.end(); ++it ) {
-		settings_node.append_attribute( it->first.c_str() ).set_value( it->second );
+	for ( const auto &setting : map ) {
+		settings_node.append_attribute( setting.first.c_str() ).set_value( setting.second );
 	}
 	std::ostringstream buf;
 	doc.save( buf );
@@ -313,6 +315,7 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, self->settings.ramping );
+		self->mod->ctl_set( "render.resampler.emulate_amiga", self->settings.use_amiga_resampler ? "1" : "0" );
 	}
 }
 

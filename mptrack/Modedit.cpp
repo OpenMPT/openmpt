@@ -278,6 +278,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 	// Reset MOD panning (won't affect other module formats)
 	m_SndFile.SetupMODPanning();
+	m_SndFile.InitAmigaResampler();
 	return newNumChannels;
 }
 

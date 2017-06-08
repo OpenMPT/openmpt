@@ -129,9 +129,7 @@ protected:
 	afx_msg void OnResamplerChanged();
 	afx_msg void OnRampingChanged();
 
-	afx_msg void OnHScroll(UINT n, UINT pos, CScrollBar *p) { CPropertyPage::OnHScroll(n, pos, p); OnScroll(n, pos, p); }
-	afx_msg void OnVScroll(UINT n, UINT pos, CScrollBar *p) { CPropertyPage::OnVScroll(n, pos, p); OnScroll(n, pos, p); }
-	void OnScroll(UINT n, UINT pos, CScrollBar *p);
+	afx_msg void OnHScroll(UINT n, UINT pos, CScrollBar *p);
 
 	DECLARE_MESSAGE_MAP()
 

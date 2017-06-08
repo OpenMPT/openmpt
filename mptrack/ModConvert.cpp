@@ -186,9 +186,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		std::vector<std::vector<ModCommand::PARAM>> effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
 		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
-		for(size_t i = 0; i < GetNumChannels(); i++)
+		for(auto &effChn : effMemory)
 		{
-			effMemory[i].resize(MAX_EFFECTS, 0);
+			effChn.resize(MAX_EFFECTS, 0);
 		}
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
@@ -224,7 +224,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				}
 			}
 
-			// Deal with effect memory for MOD/XM arpeggio
+			// Deal with MOD/XM commands without effect memory
 			if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 			{
 				switch(m->command)
@@ -440,6 +440,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsMOD)
 	{
 		// Not supported in MOD format
+		bool lossy = false;
 		if(m_SndFile.m_nDefaultSpeed != 6)
 		{
 			if(!m_SndFile.Order().empty())
@@ -447,6 +448,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultSpeed = 6;
+			lossy = true;
 		}
 		if(m_SndFile.m_nDefaultTempo != TEMPO(125, 0))
 		{
@@ -455,11 +457,19 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultTempo.Set(125);
+			lossy = true;
 		}
-		m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-		m_SndFile.m_nSamplePreAmp = 48;
-		m_SndFile.m_nVSTiVolume = 48;
-		CHANGEMODTYPE_WARNING(wMODGlobalVars);
+		if(m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME || m_SndFile.m_nSamplePreAmp != 48 || m_SndFile.m_nVSTiVolume != 48)
+		{
+			m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+			m_SndFile.m_nSamplePreAmp = 48;
+			m_SndFile.m_nVSTiVolume = 48;
+			lossy = true;
+		}
+		if(lossy)
+		{
+			CHANGEMODTYPE_WARNING(wMODGlobalVars);
+		}
 	}
 
 	// Is the "restart position" value allowed in this format?
@@ -533,7 +543,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		CHANGEMODTYPE_WARNING(wLinearSlides);
 	}
-	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
+	if(oldTypeIsXM && newTypeIsIT_MPT)
+	{
+		m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
+	} else if(newTypeIsMOD)
+	{
+		m_SndFile.m_SongFlags.set(SONG_ISAMIGA);
+		m_SndFile.InitAmigaResampler();
+	}
 	m_SndFile.m_SongFlags &= (specs.GetSongFlags() | SONG_PLAY_FLAGS);
 
 	// Adjust mix levels
@@ -552,7 +569,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wFractionalTempo);
 	}
 
-	cs.Leave();
 	ChangeFileExtension(nNewType);
 
 	// Check mod specifications
@@ -587,7 +603,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wResamplingMode);
 		m_SndFile.m_nResampling = SRCMODE_DEFAULT;
 	}
-		
+
+	cs.Leave();
+
 	if(warnings[wResizedPatterns])
 	{
 		AddToLog(LogInformation, mpt::String::Print(MPT_USTRING("%1 patterns have been resized to 64 rows"), nResizedPatterns));
@@ -595,7 +613,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	static constexpr struct
 	{
 		enmWarnings warning;
-		char *mesage;
+		const char *mesage;
 	} messages[] =
 	{
 	// Pattern warnings
@@ -639,10 +657,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	UpdateAllViews(NULL, GeneralHint().General().ModType());
 	EndWaitCursor();
 
-	//rewbs.customKeys: update effect key commands
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	ih->SetEffectLetters(m_SndFile.GetModSpecifications());
-	//end rewbs.customKeys
+	// Update effect key commands
+	CMainFrame::GetInputHandler()->SetEffectLetters(m_SndFile.GetModSpecifications());
 
 	return true;
 }

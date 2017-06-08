@@ -77,6 +77,7 @@ protected:
 	CComboBox m_ComboBoxChannels;
 	CSliderCtrl m_SliderCtrlGain;
 	CComboBox m_ComboBoxInterpolation;
+	CButton m_CheckBoxAmigaResampler;
 	CComboBox m_ComboBoxRepeat;
 	CSliderCtrl m_SliderCtrlStereoSeparation;
 	CComboBox m_ComboBoxRamping;
@@ -100,6 +101,7 @@ protected:
 		DDX_Control( pDX, IDC_COMBO_CHANNELS, m_ComboBoxChannels );
 		DDX_Control( pDX, IDC_SLIDER_GAIN, m_SliderCtrlGain );
 		DDX_Control( pDX, IDC_COMBO_INTERPOLATION, m_ComboBoxInterpolation );
+		DDX_Control( pDX, IDC_CHECK_AMIGA_RESAMPLER, m_CheckBoxAmigaResampler );
 		DDX_Control( pDX, IDC_COMBO_REPEAT, m_ComboBoxRepeat );
 		DDX_Control( pDX, IDC_SLIDER_STEREOSEPARATION, m_SliderCtrlStereoSeparation );
 		DDX_Control( pDX, IDC_COMBO_RAMPING, m_ComboBoxRamping );
@@ -182,6 +184,8 @@ protected:
 		if ( !selected ) {
 			m_ComboBoxInterpolation.SelectString( 0, L"8 tap (polyphase fir)" );
 		}
+		
+		m_CheckBoxAmigaResampler.SetCheck( s->use_amiga_resampler ? BST_CHECKED : BST_UNCHECKED );
 
 		selected = false;
 		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"forever" ), -1 );
@@ -234,6 +238,8 @@ protected:
 		s->mastergain_millibel = m_SliderCtrlGain.GetPos();
 
 		s->interpolationfilterlength = m_ComboBoxInterpolation.GetItemData( m_ComboBoxInterpolation.GetCurSel() );
+
+		s->use_amiga_resampler = ( m_CheckBoxAmigaResampler.GetCheck() != BST_UNCHECKED ) ? 1 : 0;
 
 		s->repeatcount = m_ComboBoxRepeat.GetItemData( m_ComboBoxRepeat.GetCurSel() );
 

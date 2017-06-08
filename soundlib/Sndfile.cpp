@@ -364,6 +364,12 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
+	// Note: we do not use the Amiga resampler for DBM as it's a multichannel format and can make use of higher-quality Amiga soundcards instead of Paula.
+	if(GetType() & (/*MOD_TYPE_DBM | */MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP))
+	{
+		m_SongFlags.set(SONG_ISAMIGA);
+	}
+	
 	// Adjust channels
 	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
 	{
@@ -1169,6 +1175,20 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 }
 
 
+void CSoundFile::InitAmigaResampler()
+//-----------------------------------
+{
+	if(m_SongFlags[SONG_ISAMIGA] && m_Resampler.m_Settings.emulateAmiga)
+	{
+		Paula::State defaultState{ Paula::State(GetSampleRate()) };
+		for(auto &chn : m_PlayState.Chn)
+		{
+			chn.paulaState = defaultState;
+		}
+	}
+}
+
+
 // Detect samples that are referenced by an instrument, but actually not used in a song.
 // Only works in instrument mode. Unused samples are marked as false in the vector.
 SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
@@ -1180,7 +1200,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	{
 		return 0;
 	}
-	SAMPLEINDEX nExt = 0;
+	SAMPLEINDEX unused = 0;
 	std::vector<ModCommand::INSTR> lastIns;
 
 	for(const auto &pat : Patterns) if(pat.IsValid())
@@ -1226,10 +1246,10 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	}
 	for (SAMPLEINDEX ichk = GetNumSamples(); ichk >= 1; ichk--)
 	{
-		if ((!sampleUsed[ichk]) && (Samples[ichk].pSample)) nExt++;
+		if ((!sampleUsed[ichk]) && (Samples[ichk].pSample)) unused++;
 	}
 
-	return nExt;
+	return unused;
 }
 
 

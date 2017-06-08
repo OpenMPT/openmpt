@@ -711,7 +711,7 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 			}
 		} break;
 		case module::RENDER_INTERPOLATIONFILTER_LENGTH: {
-			CResamplerSettings newsettings;
+			CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
 			newsettings.SrcMode = filterlength_to_resamplingmode( value );
 			if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
 				m_sndFile->SetResamplerSettings( newsettings );
@@ -1317,6 +1317,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 	retval.push_back( "subsong" );
 	retval.push_back( "play.tempo_factor" );
 	retval.push_back( "play.pitch_factor" );
+	retval.push_back( "render.resampler.emulate_amiga" );
 	retval.push_back( "dither" );
 	return retval;
 }
@@ -1356,6 +1357,8 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 			return "1.0";
 		}
 		return mpt::ToString( m_sndFile->m_nFreqFactor / 65536.0 );
+	} else if ( ctl == "render.resampler.emulate_amiga" ) {
+		return mpt::ToString( m_sndFile->m_Resampler.m_Settings.emulateAmiga );
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
 	} else {
@@ -1412,6 +1415,12 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		}
 		m_sndFile->m_nFreqFactor = Util::Round<uint32_t>( 65536.0 * factor );
 		m_sndFile->RecalculateSamplesPerTick();
+	} else if ( ctl == "render.resampler.emulate_amiga" ) {
+		CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
+		newsettings.emulateAmiga = ConvertStrTo<bool>( value );
+		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
+			m_sndFile->SetResamplerSettings( newsettings );
+		}
 	} else if ( ctl == "dither" ) {
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
 	} else {

@@ -28,6 +28,7 @@ struct libopenmpt_settings {
 	int channels;
 	int mastergain_millibel;
 	int stereoseparation;
+	int use_amiga_resampler;
 	int repeatcount;
 	int interpolationfilterlength;
 	int ramping;
@@ -79,6 +80,7 @@ public:
 		stereoseparation = 100;
 		repeatcount = 0;
 		interpolationfilterlength = 8;
+		use_amiga_resampler = 0;
 		ramping = -1;
 		vis_allow_scroll = 1;
 		changed = 0;
@@ -92,6 +94,7 @@ public:
 			read_setting( subkey, "StereoSeparation_Percent", stereoseparation );
 			read_setting( subkey, "RepeatCount", repeatcount );
 			read_setting( subkey, "InterpolationFilterLength", interpolationfilterlength );
+			read_setting( subkey, "UseAmigaResampler", use_amiga_resampler);
 			read_setting( subkey, "VolumeRampingStrength", ramping );
 			read_setting( subkey, "VisAllowScroll", vis_allow_scroll );
 		#undef read_setting
@@ -105,6 +108,7 @@ public:
 			write_setting( subkey, "StereoSeparation_Percent", stereoseparation );
 			write_setting( subkey, "RepeatCount", repeatcount );
 			write_setting( subkey, "InterpolationFilterLength", interpolationfilterlength );
+			write_setting( subkey, "UseAmigaResampler", use_amiga_resampler);
 			write_setting( subkey, "VolumeRampingStrength", ramping );
 			write_setting( subkey, "VisAllowScroll", vis_allow_scroll );
 		#undef write_setting

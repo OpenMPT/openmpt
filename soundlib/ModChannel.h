@@ -13,6 +13,7 @@
 #include "ModSample.h"
 #include "ModInstrument.h"
 #include "modcommand.h"
+#include "Paula.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -57,6 +58,7 @@ struct ModChannel
 	uint32 nRampLength;
 
 	const ModSample *pModSample;			// Currently assigned sample slot (may already be stopped)
+	Paula::State paulaState;
 
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
