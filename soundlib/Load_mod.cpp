@@ -532,10 +532,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 	}
 
 	// Fill order tail with stop patterns, now that we don't need the garbage in there anymore.
-	for(ORDERINDEX ord = numOrders; ord < 128; ord++)
-	{
-		Order[ord] = Order.GetInvalidPatIndex();
-	}
+	Order.resize(numOrders);
 
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
