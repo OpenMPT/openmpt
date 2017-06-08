@@ -1153,7 +1153,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	} else if(point.x >= m_szHeader.cx && point.y > m_szHeader.cy)
 	{
 		// Click on pattern data
-		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOFOLLOWONCLICK)
+		if(IsLiveRecord() && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOFOLLOWONCLICK))
 		{
 			SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 		}
@@ -1501,7 +1501,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
-	} else if(nChn >= sndFile.GetNumChannels() && !(flags & (MK_CONTROL | MK_SHIFT)))
+	} else if(nChn >= sndFile.GetNumChannels() && sndFile.GetNumChannels() < sndFile.GetModSpecifications().channelsMax && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		// Click outside of pattern: Offer easy way to add more channels
 		m_MenuCursor.Set(0, sndFile.GetNumChannels() - 1);
