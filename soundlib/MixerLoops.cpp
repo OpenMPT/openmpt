@@ -847,8 +847,8 @@ static void C_EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSampl
 		pBuffer[i*2+1] += x_l;
 	}
 #ifndef MPT_INTMIXER
-	if(fabs(rofs) < OFSTHRESHOLD) rofs = 0;
-	if(fabs(lofs) < OFSTHRESHOLD) lofs = 0;
+	if(mpt::abs(rofs) < OFSTHRESHOLD) rofs = 0;
+	if(mpt::abs(lofs) < OFSTHRESHOLD) lofs = 0;
 #endif
 
 	chn.nROfs = rofs;

@@ -86,7 +86,7 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	while(samples--)
 	{
 		typename Traits::outbuf_t outSample;
-		interpolate(outSample, inSample + smpPos.GetInt() * Traits::numChannelsIn, static_cast<uint16>(smpPos.GetFract() >> 16));
+		interpolate(outSample, inSample + smpPos.GetInt() * Traits::numChannelsIn, smpPos.GetFract());
 		filter(outSample, c);
 		mix(outSample, c, outBuffer);
 		outBuffer += Traits::numChannelsOut;
