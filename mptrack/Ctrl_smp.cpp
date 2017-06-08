@@ -1108,7 +1108,7 @@ void CCtrlSamples::OnSampleNew()
 bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 //------------------------------------------------------------
 {
-	SAMPLEINDEX smp = m_modDoc.InsertSample(true);
+	SAMPLEINDEX smp = m_modDoc.InsertSample();
 	if(smp != SAMPLEINDEX_INVALID)
 	{
 		SAMPLEINDEX nOldSmp = m_nSample;
