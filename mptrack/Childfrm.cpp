@@ -71,12 +71,6 @@ CChildFrame::CChildFrame()
 	m_hWndCtrl = m_hWndView = NULL;
 	m_bMaxWhenClosed = false;
 	glMdiOpenCount++;
-	RtlZeroMemory(&m_ViewGeneral, sizeof(m_ViewGeneral));
-	RtlZeroMemory(&m_ViewPatterns, sizeof(m_ViewPatterns));
-	RtlZeroMemory(&m_ViewSamples, sizeof(m_ViewSamples));
-	RtlZeroMemory(&m_ViewInstruments, sizeof(m_ViewInstruments));
-	RtlZeroMemory(&m_ViewComments, sizeof(m_ViewComments));
-	m_ViewPatterns.initialOrder = ORDERINDEX_INVALID;
 }
 
 
@@ -141,7 +135,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 		MPT_ASSERT(pActivateWnd == this);
 		CMainFrame::GetMainFrame()->UpdateEffectKeys(static_cast<CModDoc *>(GetActiveDocument()));
 	}
-	
+
 	// Update channel manager according to active document
 	auto instance = CChannelManagerDlg::sharedInstance();
 	if(instance != nullptr)
@@ -328,10 +322,9 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
 	if ((m_hWndCtrl) && (pModDoc))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		UINT nIns = lParam;
 
-		if ((!wParam) && (pSndFile->GetNumInstruments() > 0))
+		if ((!wParam) && (pModDoc->GetNumInstruments() > 0))
 		{
 			nIns = pModDoc->FindSampleParent(static_cast<SAMPLEINDEX>(nIns));
 			if(nIns == INSTRUMENTINDEX_INVALID)
