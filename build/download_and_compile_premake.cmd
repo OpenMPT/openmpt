@@ -71,7 +71,7 @@ if not exist "build\externals" mkdir "build\externals"
 
 
 
-call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/83efdca3c3c63cb47bd1b4daa8b73d526841f900.zip" "genie-83efdca3c3c63cb47bd1b4daa8b73d526841f900.zip" "GENie-83efdca3c3c63cb47bd1b4daa8b73d526841f900" "-" || goto error
+call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
 
 xcopy /E /I /Y build\genie\genie\build\vs2015 include\genie\build\vs2015 || goto error
 xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
