@@ -109,7 +109,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// std::make_unique is C++14
+#if MPT_CXX_AT_LEAST(14)
+namespace mpt {
+using std::make_unique;
+} // namespace mpt
+#else
 namespace mpt {
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args)
@@ -117,6 +121,7 @@ std::unique_ptr<T> make_unique(Args&&... args)
 	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 } // namespace mpt
+#endif
 
 
 
