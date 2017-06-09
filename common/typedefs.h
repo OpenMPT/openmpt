@@ -33,10 +33,13 @@ OPENMPT_NAMESPACE_BEGIN
 // constexpr
 #define MPT_CONSTEXPR11_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR11_VAR constexpr
-// no support for c++14 yet, however when making types constexpr, there are a
-//  couple of situations where it's only possible in c++14
+#if MPT_CXX_AT_LEAST(14)
+#define MPT_CONSTEXPR14_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR14_VAR constexpr
+#else
 #define MPT_CONSTEXPR14_FUN MPT_FORCEINLINE
 #define MPT_CONSTEXPR14_VAR const
+#endif
 
 
 
