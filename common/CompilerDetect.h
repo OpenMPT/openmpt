@@ -123,6 +123,44 @@
 
 
 
+#if MPT_COMPILER_GENERIC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+#if (__cplusplus >= 201703)
+#define MPT_CXX 17
+#elif (__cplusplus >= 201402)
+#define MPT_CXX 14
+#else
+#define MPT_CXX 11
+#endif
+
+#elif MPT_COMPILER_MAVC
+
+#if MPT_MSVC_AT_LEAST(2017,0)
+#if (_MSVC_LANG >= 201402)
+#define MPT_CXX 14
+#else
+#define MPT_CXX 11
+#endif
+#else
+#define MPT_CXX 11
+#endif
+
+#else
+
+#define MPT_CXX 11
+
+#endif
+
+// MPT_CXX is stricter than just using __cplusplus directly.
+// We will only claim a language version as supported IFF all core language and
+// library fatures that we need are actually supported AND working correctly
+// (to our needs).
+
+#define MPT_CXX_AT_LEAST(version) (MPT_CXX >= (version))
+#define MPT_CXX_BEFORE(version)   (MPT_CXX <  (version))
+
+
+
 #if MPT_COMPILER_MSVC
 	#define MPT_PLATFORM_LITTLE_ENDIAN
 #elif MPT_COMPILER_GCC
