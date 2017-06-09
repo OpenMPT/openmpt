@@ -1509,7 +1509,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	} else if(nChn >= pSndFile->GetNumChannels() && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		// Click outside of pattern: Offer easy way to add more channels
-		m_MenuCursor.Set(0, sndFile.GetNumChannels() - 1);
+		m_MenuCursor.Set(0, pSndFile->GetNumChannels() - 1);
 		AppendMenu(hMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, _T("&Add Channel"));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
