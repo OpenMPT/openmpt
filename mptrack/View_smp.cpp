@@ -2464,7 +2464,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 			if(convert == ctrlSmp::splitSample)
 			{
 				// Split sample into two slots
-				rightSmp = pModDoc->InsertSample(true);
+				rightSmp = pModDoc->InsertSample();
 				if(rightSmp != SAMPLEINDEX_INVALID)
 				{
 					sndFile.ReadSampleFromSong(rightSmp, sndFile, m_nSample);
@@ -3278,7 +3278,7 @@ void CViewSample::OnSampleSlice()
 		const SmpLength cue  = cues[i];
 		if(cue > cues[i - 1] && cue < cues[i + 1])
 		{
-			SAMPLEINDEX nextSmp = pModDoc->InsertSample(true);
+			SAMPLEINDEX nextSmp = pModDoc->InsertSample();
 			if(nextSmp == SAMPLEINDEX_INVALID)
 				break;
 
