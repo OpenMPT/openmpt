@@ -1530,7 +1530,8 @@ void CViewGlobals::OnClonePlug()
 			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
 
 			GetDocument()->ClonePlugin(newPlugin, curPlugin);
-			if(GetDocument()->HasInstrumentForPlugin(emptySlots[toIndex]) == INSTRUMENTINDEX_INVALID)
+			IMixPlugin *mixPlug = newPlugin.pMixPlugin;
+			if(mixPlug != nullptr && mixPlug->IsInstrument() && GetDocument()->HasInstrumentForPlugin(emptySlots[toIndex]) == INSTRUMENTINDEX_INVALID)
 			{
 				GetDocument()->InsertInstrumentForPlugin(emptySlots[toIndex]);
 			}
