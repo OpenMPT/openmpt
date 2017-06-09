@@ -276,7 +276,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if (lParam)
 		{
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
-			if (pState->cbStruct == sizeof(INSTRUMENTVIEWSTATE))
+			if (pState->initialized)
 			{
 				SetCurrentInstrument(m_nInstrument, pState->nEnv);
 				m_bGrid = pState->bGrid;
@@ -288,7 +288,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if (lParam)
 		{
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
-			pState->cbStruct = sizeof(INSTRUMENTVIEWSTATE);
+			pState->initialized = true;
 			pState->nEnv = m_nEnv;
 			pState->bGrid = m_bGrid;
 		}

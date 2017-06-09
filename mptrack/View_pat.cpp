@@ -3835,7 +3835,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
 			if (pState->nDetailLevel != PatternCursor::firstColumn) m_nDetailLevel = pState->nDetailLevel;
-			if (/*(pState->nPattern == m_nPattern) && */(pState->cbStruct == sizeof(PATTERNVIEWSTATE)))
+			if (pState->initialized)
 			{
 				SetCurrentPattern(pState->nPattern);
 				// Fix: Horizontal scrollbar pos screwed when selecting with mouse
@@ -3849,7 +3849,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if (lParam)
 		{
 			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
-			pState->cbStruct = sizeof(PATTERNVIEWSTATE);
+			pState->initialized = true;
 			pState->nPattern = m_nPattern;
 			pState->cursor = m_Cursor;
 			pState->selection = m_Selection;

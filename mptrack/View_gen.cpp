@@ -170,7 +170,7 @@ void CViewGlobals::OnInitialUpdate()
 	if (pFrame)
 	{
 		GENERALVIEWSTATE &generalState = pFrame->GetGeneralViewState();
-		if (generalState.cbStruct == sizeof(GENERALVIEWSTATE))
+		if (generalState.initialized)
 		{
 			m_TabCtrl.SetCurSel(generalState.nTab);
 			m_nActiveTab = generalState.nTab;
@@ -227,7 +227,7 @@ void CViewGlobals::OnDestroy()
 	if (pFrame)
 	{
 		GENERALVIEWSTATE &generalState = pFrame->GetGeneralViewState();
-		generalState.cbStruct = sizeof(GENERALVIEWSTATE);
+		generalState.initialized = true;
 		generalState.nTab = m_nActiveTab;
 		generalState.nPlugin = m_nCurrentPlugin;
 		generalState.nParam = m_nCurrentParam;

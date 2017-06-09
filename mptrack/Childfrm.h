@@ -20,49 +20,49 @@ class CModControlView;
 class CModControlDlg;
 class CChildFrame;
 
-typedef struct _GENERALVIEWSTATE
+struct GENERALVIEWSTATE
 {
-	DWORD cbStruct;
-	PlugParamIndex nParam;
-	CHANNELINDEX nTab;
-	PLUGINDEX nPlugin;
-} GENERALVIEWSTATE;
+	PlugParamIndex nParam = 0;
+	CHANNELINDEX nTab = 0;
+	PLUGINDEX nPlugin = 0;
+	bool initialized = false;
+};
 
 
-typedef struct PATTERNVIEWSTATE
+struct PATTERNVIEWSTATE
 {
-	DWORD cbStruct;
-	PATTERNINDEX nPattern;
-	PatternCursor cursor;
+	PATTERNINDEX nPattern = 0;
+	PatternCursor cursor = 0;
 	PatternRect selection;
-	PatternCursor::Columns nDetailLevel;
-	ORDERINDEX nOrder;
-	ORDERINDEX initialOrder;
-} PATTERNVIEWSTATE;
+	PatternCursor::Columns nDetailLevel = PatternCursor::firstColumn;
+	ORDERINDEX nOrder = 0;
+	ORDERINDEX initialOrder = ORDERINDEX_INVALID;
+	bool initialized = false;
+};
 
-typedef struct SAMPLEVIEWSTATE
+struct SAMPLEVIEWSTATE
 {
-	SmpLength dwScrollPos;
-	SmpLength dwBeginSel;
-	SmpLength dwEndSel;
-	SAMPLEINDEX nSample;
-	SAMPLEINDEX initialSample;
-} SAMPLEVIEWSTATE;
+	SmpLength dwScrollPos = 0;
+	SmpLength dwBeginSel = 0;
+	SmpLength dwEndSel = 0;
+	SAMPLEINDEX nSample = 0;
+	SAMPLEINDEX initialSample = 0;
+};
 
 
-typedef struct INSTRUMENTVIEWSTATE
+struct INSTRUMENTVIEWSTATE
 {
-	DWORD cbStruct;
-	EnvelopeType nEnv;
-	INSTRUMENTINDEX initialInstrument;
-	bool bGrid;
-} INSTRUMENTVIEWSTATE;
+	EnvelopeType nEnv = ENV_VOLUME;
+	INSTRUMENTINDEX initialInstrument = 0;
+	bool bGrid = false;
+	bool initialized = false;
+};
 
-typedef struct COMMENTVIEWSTATE
+struct COMMENTVIEWSTATE
 {
-	DWORD cbStruct;
-	UINT nId;
-} COMMENTVIEWSTATE;
+	UINT nId = 0;
+	bool initialized = false;
+};
 
 
 

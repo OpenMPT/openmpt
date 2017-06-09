@@ -129,7 +129,7 @@ void CViewComments::OnInitialUpdate()
 	if (pFrame)
 	{
 		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
-		if (commentState.cbStruct == sizeof(COMMENTVIEWSTATE))
+		if (commentState.initialized)
 		{
 			m_nListId = commentState.nId;
 		}
@@ -156,7 +156,7 @@ void CViewComments::OnDestroy()
 	if (pFrame)
 	{
 		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
-		commentState.cbStruct = sizeof(COMMENTVIEWSTATE);
+		commentState.initialized = true;
 		commentState.nId = m_nListId;
 	}
 	CView::OnDestroy();
@@ -450,7 +450,7 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 	CEdit *editCtrl = m_ItemList.GetEditControl();
 	if(editCtrl)
 	{
-		const CModSpecifications &specs = GetDocument()->GetSoundFile()->GetModSpecifications();
+		const CModSpecifications &specs = GetDocument()->GetrSoundFile().GetModSpecifications();
 		const size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
 		editCtrl->LimitText(maxStrLen);
 	}
