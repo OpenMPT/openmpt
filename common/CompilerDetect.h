@@ -133,7 +133,7 @@
 #define MPT_CXX 11
 #endif
 
-#elif MPT_COMPILER_MAVC
+#elif MPT_COMPILER_MSVC
 
 #if MPT_MSVC_AT_LEAST(2017,0)
 #if (_MSVC_LANG >= 201402)
