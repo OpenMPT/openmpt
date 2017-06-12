@@ -73,7 +73,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 	true,										// Has default resampling
 	true,										// Fixed point tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#???????",	// Supported Effects
-	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
+	" vpcdabuh??gfe?o",							// Supported Volume Column commands
 };
 
 
@@ -219,7 +219,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#???????",	// Supported Effects
-	" vpcdabuhlrgfe??",							// Supported Volume Column commands
+	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
 MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
@@ -434,7 +434,7 @@ MODTYPE CModSpecifications::ExtensionToType(std::string ext)
 	}
 	if(ext.length() > 0 && ext[0] == '.')
 	{
-		ext = ext.substr(1);
+		ext.erase(0, 1);
 	}
 	ext = mpt::ToLowerCaseAscii(ext);
 	for(std::size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
