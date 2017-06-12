@@ -70,8 +70,8 @@ struct AmigaBlepInterpolation
 		for(int step = numSteps; step > 0; step--)
 		{
 			typename Traits::output_t inSample = 0;
-			uint32 posInt = pos.GetInt() * Traits::numChannelsIn;
-			for(unsigned int i = 0; i < Traits::numChannelsIn; i++)
+			int32 posInt = pos.GetInt() * Traits::numChannelsIn;
+			for(int32 i = 0; i < Traits::numChannelsIn; i++)
 				inSample += Traits::Convert(inBuffer[posInt + i]);
 			paula->InputSample(static_cast<int16>(inSample / (4 * Traits::numChannelsIn)));
 			paula->Clock(Paula::MINIMUM_INTERVAL);
@@ -84,8 +84,8 @@ struct AmigaBlepInterpolation
 		if(remainClocks)
 		{
 			typename Traits::output_t inSample = 0;
-			uint32 posInt = pos.GetInt() * Traits::numChannelsIn;
-			for(unsigned int i = 0; i < Traits::numChannelsIn; i++)
+			int32 posInt = pos.GetInt() * Traits::numChannelsIn;
+			for(int32 i = 0; i < Traits::numChannelsIn; i++)
 				inSample += Traits::Convert(inBuffer[posInt + i]);
 			paula->InputSample(static_cast<int16>(inSample / (4 * Traits::numChannelsIn)));
 			paula->Clock(remainClocks);
