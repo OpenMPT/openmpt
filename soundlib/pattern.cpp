@@ -145,8 +145,6 @@ void CPattern::Deallocate()
 }
 
 
-#ifdef MODPLUG_TRACKER
-
 bool CPattern::operator== (const CPattern &other) const
 //-----------------------------------------------------
 {
@@ -159,6 +157,8 @@ bool CPattern::operator== (const CPattern &other) const
 		&& m_ModCommands == other.m_ModCommands;
 }
 
+
+#ifdef MODPLUG_TRACKER
 
 bool CPattern::Expand()
 //---------------------
