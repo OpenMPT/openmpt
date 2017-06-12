@@ -1091,7 +1091,7 @@ bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &e
 {
 	for(uint8 n = 0; n < 4; n++)
 	{
-		if(ModCommand::ConvertVolEffect(effect1, param1, (n > 1))
+		if(ModCommand::ConvertVolEffect(effect1, param1, (n > 1)))
 		{
 			return true;
 		}
