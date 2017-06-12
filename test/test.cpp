@@ -1072,10 +1072,10 @@ static MPT_NOINLINE void TestMisc()
 	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );
 
 	// Check for completeness of supported effect list in mod specifications
-	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
+	for(const auto &spec : ModSpecs::Collection)
 	{
-		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), (size_t)MAX_EFFECTS);
-		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), (size_t)MAX_VOLCMDS);
+		VERIFY_EQUAL(strlen(spec->commands), (size_t)MAX_EFFECTS);
+		VERIFY_EQUAL(strlen(spec->volcommands), (size_t)MAX_VOLCMDS);
 	}
 
 	// UUID
@@ -3098,12 +3098,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		data[0] = 0x1234;
 		data[1] = 0x5678;
 		mpt::IO::Write(f, data);
-		std::string expected;
-		expected += std::string(1, 0x12);
-		expected += std::string(1, 0x34);
-		expected += std::string(1, 0x56);
-		expected += std::string(1, 0x78);
-		VERIFY_EQUAL(f.str(), expected);
+		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78"));
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -3123,7 +3118,7 @@ static MPT_NOINLINE void TestEditing()
 	sndFile.m_nChannels = 4;
 	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
 
-	// Rearrange patterns
+	// Rearrange channels
 	sndFile.Patterns.ResizeArray(2);
 	sndFile.Patterns.Insert(0, 32);
 	sndFile.Patterns.Insert(1, 48);
@@ -3278,7 +3273,7 @@ static MPT_NOINLINE void TestTunings()
 {
 
 	// check that the generated builtin tunings match the old resource data
-	std::shared_ptr<CSoundFile> emptyFile = std::make_shared<CSoundFile>();
+	std::unique_ptr<CSoundFile> emptyFile = mpt::make_unique<CSoundFile>();
 	emptyFile->Create(FileReader(), CSoundFile::loadCompleteModule);
 
 	static const size_t built_inTunings_tc_size = 244;
@@ -3308,7 +3303,7 @@ static MPT_NOINLINE void TestTunings()
 		0x02,0x30,0x58,0x44,0x02,0x31,0x9C,0x08,0x02,0x32,0xA4,
 		0xF9,0x02
 	};
-	CTuningCollection *oldBuiltin = new CTuningCollection();
+	std::unique_ptr<CTuningCollection> oldBuiltin = mpt::make_unique<CTuningCollection>();
 	std::string builtindata(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size);
 	mpt::istringstream iStrm(builtindata);
 	oldBuiltin->Deserialize(iStrm);
@@ -3329,10 +3324,6 @@ static MPT_NOINLINE void TestTunings()
 	VERIFY_EQUAL(data, std::vector<char>(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size));
 
 #endif
-
-	delete oldBuiltin;
-
-	emptyFile->Destroy();
 }
 
 
@@ -3377,7 +3368,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 //------------------------------------------------
 {
 	FileReader file;
-	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
+	std::unique_ptr<CSoundFile> pSndFile = mpt::make_unique<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
 	sndFile.m_nType = MOD_TYPE_MPT;
 	sndFile.Patterns.DestroyPatterns();
@@ -3389,21 +3380,8 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	sndFile.Patterns.Insert(2, ModSpecs::mptm.patternRowsMax);
 	GenerateCommands(sndFile.Patterns[2], 0.5, 0.5);
 
-	//
-	std::vector<ModCommand> pat[3];
-	const size_t numCommands[] = {	sndFile.GetNumChannels() * sndFile.Patterns[0].GetNumRows(),
-									sndFile.GetNumChannels() * sndFile.Patterns[1].GetNumRows(),
-									sndFile.GetNumChannels() * sndFile.Patterns[2].GetNumRows()
-								 };
-	pat[0].resize(numCommands[0]);
-	pat[1].resize(numCommands[1]);
-	pat[2].resize(numCommands[2]);
-
-	for(int i = 0; i < 3; i++) // Copy pattern data for comparison.
-	{
-		auto iter = sndFile.Patterns[i].begin();
-		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
-	}
+	// Copy pattern data for comparison.
+	auto patterns{ sndFile.Patterns };
 
 	mpt::stringstream mem;
 	WriteModPatterns(mem, sndFile.Patterns);
@@ -3424,17 +3402,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[2].GetNumRows(), ModSpecs::mptm.patternRowsMax);
 	for(int i = 0; i < 3; i++)
 	{
-		bool bPatternDataMatch = true;
-		auto iter = sndFile.Patterns[i].begin();
-		for(size_t j = 0; j < numCommands[i]; j++, iter++)
-		{
-			if(pat[i][j] != *iter)
-			{
-				bPatternDataMatch = false;
-				break;
-			}
-		}
-		VERIFY_EQUAL( bPatternDataMatch, true);
+		VERIFY_EQUAL(sndFile.Patterns[i], patterns[i]);
 	}
 }
 
