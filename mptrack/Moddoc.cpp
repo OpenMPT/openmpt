@@ -544,6 +544,19 @@ void CModDoc::OnAppendModule()
 	try
 	{
 		source = mpt::make_unique<CSoundFile>();
+		for(const auto &file : files)
+		{
+			InputFile f;
+			if(f.Open(file) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
+			{
+				AppendModule(*source);
+				source->Destroy();
+				SetModified();
+			} else
+			{
+				AddToLog("Unable to open source file!");
+			}
+		}
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -551,19 +564,6 @@ void CModDoc::OnAppendModule()
 		return;
 	}
 	
-	for(size_t counter = 0; counter < files.size(); counter++)
-	{
-		InputFile f;
-		if(f.Open(files[counter]) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
-		{
-			AppendModule(*source);
-			source->Destroy();
-			SetModified();
-		} else
-		{
-			AddToLog("Unable to open source file!");
-		}
-	}
 	UpdateAllViews(nullptr, SequenceHint().Data().ModType());
 }
 
