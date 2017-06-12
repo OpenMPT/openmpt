@@ -113,9 +113,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	const CModSpecifications &specs = m_SndFile.GetModSpecifications(nNewType);
 
 	// Check if conversion to 64 rows is necessary
-	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
+	for(const auto &pat : m_SndFile.Patterns)
 	{
-		if(m_SndFile.Patterns.IsValidPat(pat) && (m_SndFile.Patterns[pat].GetNumRows() != 64))
+		if(pat.IsValid() && pat.GetNumRows() != 64)
 			nResizedPatterns++;
 	}
 
@@ -136,15 +136,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		// Resizing all patterns to 64 rows
-		for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if(m_SndFile.Patterns.IsValidPat(pat) && m_SndFile.Patterns[pat].GetNumRows() != 64)
+		for(auto &pat : m_SndFile.Patterns) if(pat.IsValid() && pat.GetNumRows() != 64)
 		{
-			ROWINDEX origRows = m_SndFile.Patterns[pat].GetNumRows();
-			m_SndFile.Patterns[pat].Resize(64);
+			ROWINDEX origRows = pat.GetNumRows();
+			pat.Resize(64);
 
 			if(origRows < 64)
 			{
 				// Try to save short patterns by inserting a pattern break.
-				m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).Retry(EffectWriter::rmTryNextRow));
+				pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).Retry(EffectWriter::rmTryNextRow));
 			}
 
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
@@ -511,9 +511,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Check for patterns with custom time signatures (fixing will be applied in the pattern container)
 	if(!specs.hasPatternSignatures)
 	{
-		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
+		for(const auto &pat: m_SndFile.Patterns)
 		{
-			if(m_SndFile.Patterns[nPat].GetOverrideSignature())
+			if(pat.GetOverrideSignature())
 			{
 				CHANGEMODTYPE_WARNING(wPatternSignatures);
 				break;
