@@ -45,6 +45,7 @@ public:
 	}
 
 	bool operator== (const CPattern &other) const;
+	bool operator!= (const CPattern &other) const { return !(*this == other); }
 //END: OPERATORS
 
 //BEGIN: INTERFACE METHODS
