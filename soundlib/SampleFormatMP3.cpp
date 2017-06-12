@@ -31,7 +31,7 @@ extern "C" {
 }
 #endif // MPT_WITH_MINIMP3
 
-// mpg123 must be last because of mpg123 largfile support insanity
+// mpg123 must be last because of mpg123 large file support insanity
 #if defined(MPT_WITH_MPG123)
 
 #include <stddef.h>

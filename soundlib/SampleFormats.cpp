@@ -1854,8 +1854,6 @@ struct AIFFChunk
 		idNAME	= MAGIC4BE('N','A','M','E'),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32be id;		// See ChunkIdentifiers
 	uint32be length;	// Chunk size without header
 
@@ -1864,9 +1862,9 @@ struct AIFFChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 
@@ -2469,8 +2467,6 @@ struct IFFChunk
 		idNAME	= MAGIC4BE('N','A','M','E'),
 	};
 
-	typedef ChunkIdentifiers id_type;
-
 	uint32be id;		// See ChunkIdentifiers
 	uint32be length;	// Chunk size without header
 
@@ -2481,9 +2477,9 @@ struct IFFChunk
 		return length;
 	}
 
-	id_type GetID() const
+	ChunkIdentifiers GetID() const
 	{
-		return static_cast<id_type>(id.get());
+		return static_cast<ChunkIdentifiers>(id.get());
 	}
 };
 
