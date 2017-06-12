@@ -3381,7 +3381,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	GenerateCommands(sndFile.Patterns[2], 0.5, 0.5);
 
 	// Copy pattern data for comparison.
-	auto patterns{ sndFile.Patterns };
+	CPatternContainer patterns{ sndFile.Patterns };
 
 	mpt::stringstream mem;
 	WriteModPatterns(mem, sndFile.Patterns);
