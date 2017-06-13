@@ -714,7 +714,7 @@ LIBOPENMPT_API void openmpt_module_error_clear( openmpt_module * mod );
  * \param mod The module handle to work on.
  * \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
  * \return 1 on success, 0 on failure.
- * \sa openmpt_module_get_num_subsongs, openmpt_module_get_selected_subsong, openmpt_module_get_subsong_names
+ * \sa openmpt_module_get_num_subsongs, openmpt_module_get_selected_subsong, openmpt_module_get_subsong_name
  * \remarks Whether subsong -1 (all subsongs consecutively), subsong 0 or some other subsong is selected by default, is an implementation detail and subject to change. If you do not want to care about subsongs, it is recommended to just not call openmpt_module_select_subsong() at all.
  */
 LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong );
@@ -722,7 +722,7 @@ LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t 
  *
  * \param mod The module handle to work on.
  * \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
- * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_names
+ * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_name
  * \since 0.3.0
  */
 LIBOPENMPT_API int32_t openmpt_module_get_selected_subsong( openmpt_module * mod );
@@ -1071,7 +1071,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_m
  *
  * \param mod The module handle to work on.
  * \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
- * \sa openmpt_module_get_subsong_names, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
+ * \sa openmpt_module_get_subsong_name, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
  */
 LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod );
 /*! \brief Get the number of pattern channels
