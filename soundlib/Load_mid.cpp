@@ -821,7 +821,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					} else if(newTempo != tempo)
 					{
 						patRow[tempoChannel].command = CMD_TEMPO;
-						patRow[tempoChannel].param = std::max(ModCommand::PARAM(32), Util::Round<ModCommand::PARAM>(newTempo.ToDouble()));
+						patRow[tempoChannel].param = mpt::saturate_cast<ModCommand::PARAM>(std::max(32.0, Util::Round(newTempo.ToDouble())));
 					}
 					tempo = newTempo;
 				}
@@ -1020,10 +1020,16 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 					case MIDIEvents::MIDICC_MonoOperation:
-						midiChnStatus[midiCh].monoMode = true;
+						if(data2 == 0)
+						{
+							midiChnStatus[midiCh].monoMode = true;
+						}
 						break;
 					case MIDIEvents::MIDICC_PolyOperation:
-						midiChnStatus[midiCh].monoMode = false;
+						if(data2 == 0)
+						{
+							midiChnStatus[midiCh].monoMode = false;
+						}
 						break;
 					}
 				}
@@ -1303,7 +1309,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				if (pEmbeddedBank->ExtractInstrument(*this, nIns, nDlsIns, nDrumRgn))
 				{
 					pIns = Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
-					if ((dwKey >= 24) && (dwKey < 100))
+					if ((dwKey >= 24) && (dwKey < 24 + MPT_ARRAY_COUNT(szMidiPercussionNames)))
 					{
 						mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
 					}
@@ -1346,7 +1352,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						pIns = Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 						if ((dwKey >= 24) && (dwKey < 24 + MPT_ARRAY_COUNT(szMidiPercussionNames)))
 						{
-							mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey-24]);
+							mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
 						}
 					}
 				}
