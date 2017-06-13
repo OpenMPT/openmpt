@@ -440,41 +440,24 @@ endif
 
 if ENABLE_OPENMPT123
 
-bin_PROGRAMS += openmpt123
-openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
-openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
-openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
-openmpt123_SOURCES = 
-openmpt123_SOURCES += src/openmpt123/openmpt123_config.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123.cpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_flac.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_mmio.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_portaudio.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_pulseaudio.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_raw.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_sdl.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_sdl2.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_sndfile.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_stdout.hpp
-openmpt123_SOURCES += src/openmpt123/openmpt123_waveout.hpp
-#bin_PROGRAMS += openmpt123
-#openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
-#openmpt123_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS)
-#openmpt123_SOURCES = 
-#openmpt123_SOURCES += openmpt123/openmpt123_config.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123.cpp
-#openmpt123_SOURCES += openmpt123/openmpt123_flac.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_mmio.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_portaudio.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_pulseaudio.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_raw.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_sdl.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_sdl2.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_sndfile.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_stdout.hpp
-#openmpt123_SOURCES += openmpt123/openmpt123_waveout.hpp
+bin_PROGRAMS += bin/openmpt123
+bin_openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
+bin_openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
+bin_openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
+bin_openmpt123_SOURCES = 
+bin_openmpt123_SOURCES += openmpt123/openmpt123_config.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123.cpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_flac.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_mmio.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_portaudio.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_pulseaudio.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_raw.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_sdl.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_sdl2.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_sndfile.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_stdout.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_waveout.hpp
 
 man1_MANS = man/openmpt123.1
 
