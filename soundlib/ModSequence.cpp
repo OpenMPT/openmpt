@@ -344,8 +344,8 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	if(GetNumSequences() != 1 || m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		return false;
 
-	ORDERINDEX length = m_Sequences[0].GetLengthTailTrimmed();
-	bool hasSepPatterns = std::find_if(m_Sequences[0].begin(), m_Sequences[0].begin() + length,
+	m_Sequences[0].Shrink();
+	bool hasSepPatterns = std::find_if(m_Sequences[0].begin(), m_Sequences[0].end(),
 		[&] (PATTERNINDEX pat) { return pat != GetIgnoreIndex() && !m_sndFile.Patterns.IsValidPat(pat); }) != m_Sequences[0].end();
 	bool modified = false;
 
@@ -353,6 +353,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
 		"Order list conversion", false, true) == cnfYes)
 	{
+		ORDERINDEX length = m_Sequences[0].GetLengthTailTrimmed();
 		for(ORDERINDEX ord = 0; ord < length; ord++)
 		{
 			// End of subsong?
