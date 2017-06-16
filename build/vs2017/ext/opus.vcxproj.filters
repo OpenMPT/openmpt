@@ -120,6 +120,9 @@
     <ClInclude Include="..\..\..\include\opus\celt\x86\pitch_sse.h">
       <Filter>celt\x86</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\x86\vq_sse.h">
+      <Filter>celt\x86</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\x86\x86cpu.h">
       <Filter>celt\x86</Filter>
     </ClInclude>
@@ -296,6 +299,9 @@
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse4_1.c">
       <Filter>celt\x86</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\celt\x86\vq_sse2.c">
+      <Filter>celt\x86</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\x86\x86_celt_map.c">
       <Filter>celt\x86</Filter>
     </ClCompile>
@@ -312,6 +318,9 @@
       <Filter>silk</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\LPC_analysis_filter.c">
+      <Filter>silk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\LPC_fit.c">
       <Filter>silk</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\LPC_inv_pred_gain.c">
@@ -473,16 +482,10 @@
     <ClCompile Include="..\..\..\include\opus\silk\float\k2a_FLP.c">
       <Filter>silk\float</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\opus\silk\float\levinsondurbin_FLP.c">
-      <Filter>silk\float</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\float\noise_shape_analysis_FLP.c">
       <Filter>silk\float</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\float\pitch_analysis_core_FLP.c">
-      <Filter>silk\float</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\opus\silk\float\prefilter_FLP.c">
       <Filter>silk\float</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\float\process_gains_FLP.c">
@@ -501,9 +504,6 @@
       <Filter>silk\float</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\float\schur_FLP.c">
-      <Filter>silk\float</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\opus\silk\float\solve_LS_FLP.c">
       <Filter>silk\float</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\float\sort_FLP.c">
