@@ -40,6 +40,11 @@ static MPT_CONSTEXPR11_VAR uint32 opus_samplerates [] = {
 	24000,           16000,
 	12000,            8000
 };
+static MPT_CONSTEXPR11_VAR uint32 opus_all_samplerates [] = {
+	48000,  44100,  32000,
+	24000,  22050,  16000,
+	12000,  11025,   8000
+};
 static MPT_CONSTEXPR11_VAR uint32 vorbis_samplerates [] = {
 	 48000,  44100,  32000,
 	 24000,  22050,  16000,

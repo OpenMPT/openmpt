@@ -1,6 +1,6 @@
 /*
- * StreamEncoder.cpp
- * -----------------
+ * StreamEncoderOpus.cpp
+ * ---------------------
  * Purpose: Exporting streamed music files.
  * Notes  : none
  * Authors: Joern Heusipp
@@ -22,12 +22,8 @@
 
 #include <deque>
 
-#ifdef MPT_WITH_OGG
-#include <ogg/ogg.h>
-#endif
-#ifdef MPT_WITH_OPUS
-#include <opus.h>
-#include <opus_multistream.h>
+#if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
+#include <opusenc.h>
 #endif
 
 
@@ -38,18 +34,17 @@ OPENMPT_NAMESPACE_BEGIN
 static Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+#if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 		traits.fileExtension = MPT_PATHSTRING("opus");
 		traits.fileShortDescription = MPT_USTRING("Opus");
 		traits.fileDescription = MPT_USTRING("Opus");
 		traits.encoderSettingsName = MPT_USTRING("Opus");
-		traits.encoderName = MPT_USTRING("libOpus");
-		traits.description += MPT_USTRING("Version: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, opus_get_version_string() ? opus_get_version_string() : "");
-		traits.description += MPT_USTRING("\n");
+		traits.encoderName = MPT_USTRING("libopusenc");
+		traits.description += mpt::format(MPT_USTRING("Version: %1\n"))(mpt::ToUnicode(mpt::CharsetASCII, ope_get_version_string() ? ope_get_version_string() : ""));
+		traits.description += mpt::format(MPT_USTRING("ABI Version: %1\n"))(ope_get_abi_version());
 		traits.canTags = true;
 		traits.maxChannels = 4;
-		traits.samplerates = mpt::make_vector(opus_samplerates);
+		traits.samplerates = mpt::make_vector(opus_all_samplerates);
 		traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
 		traits.bitrates = mpt::make_vector(opus_bitrates);
 		traits.defaultSamplerate = 48000;
@@ -62,88 +57,93 @@ static Encoder::Traits BuildTraits()
 
 
 
-#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+#if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 
 class OpusStreamWriter : public StreamWriterBase
 {
 private:
-  ogg_stream_state os;
-  ogg_page         og;
-  ogg_packet       op;
-	OpusMSEncoder*   st;
+	OpusEncCallbacks ope_callbacks;
+	OggOpusComments *ope_comments;
+	OggOpusEnc *ope_encoder;
 	bool inited;
 	bool started;
+	bool opus_cbr;
 	int opus_bitrate;
 	int opus_samplerate;
 	int opus_channels;
 	bool opus_tags;
-
-	std::vector<std::string> opus_comments;
-
-	int opus_extrasamples;
-
-	ogg_int64_t packetno;
-	ogg_int64_t last_granulepos;
-	ogg_int64_t enc_granulepos;
-	ogg_int64_t original_samples;
-
-	std::deque<float> opus_sampleBuf;
-	std::vector<float> opus_frameBuf;
-	std::vector<unsigned char> opus_frameData;
+	std::vector<std::pair<std::string, std::string> > opus_comments;
 private:
-	static void PushUint32LE(std::vector<unsigned char> &buf, uint32 val)
+	static int CallbackWrite(void *user_data, const unsigned char *ptr, opus_int32 len)
 	{
-		buf.push_back((val>> 0)&0xff);
-		buf.push_back((val>> 8)&0xff);
-		buf.push_back((val>>16)&0xff);
-		buf.push_back((val>>24)&0xff);
+		return reinterpret_cast<OpusStreamWriter*>(user_data)->CallbackWriteImpl(ptr, len);
 	}
+	static int CallbackClose(void *user_data)
+	{
+		return reinterpret_cast<OpusStreamWriter*>(user_data)->CallbackCloseImpl();
+	}
+	int CallbackWriteImpl(const unsigned char *ptr, opus_int32 len)
+	{
+		if(len < 0)
+		{
+			return 0;
+		}
+		if(!ptr)
+		{
+			return 0;
+		}
+		buf.assign(ptr, ptr + len);
+		WriteBuffer();
+		return len;
+	}
+	int CallbackCloseImpl()
+	{
+		return 0;
+	}
+private:
 	void StartStream()
 	{
 		ASSERT(inited && !started);
 
-		std::vector<unsigned char> opus_comments_buf;
-		for(const char *it = "OpusTags"; *it; ++it)
+		int ope_error = 0;
+
+		ope_comments = ope_comments_create();
+		if(opus_tags && ope_comments)
 		{
-			opus_comments_buf.push_back(*it);
-		}
-		const char *version_string = opus_get_version_string();
-		if(version_string)
-		{
-			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(std::strlen(version_string)));
-			for(/*nothing*/; *version_string; ++version_string)
+			for(const auto & comment : opus_comments)
 			{
-				opus_comments_buf.push_back(*version_string);
+				ope_comments_add(ope_comments, comment.first.c_str(), comment.second.c_str());
 			}
+		}
+
+		ope_encoder = ope_encoder_create_callbacks(&ope_callbacks, this, ope_comments, opus_samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &ope_error);
+		
+		opus_int32 ctl_serial = mpt::random<uint32>(theApp.PRNG());
+		ope_encoder_ctl(ope_encoder, OPE_SET_SERIALNO(ctl_serial));
+
+		opus_int32 ctl_bitrate = opus_bitrate;
+		ope_encoder_ctl(ope_encoder, OPUS_SET_BITRATE(ctl_bitrate));
+
+		if(opus_cbr)
+		{
+			opus_int32 ctl_vbr = 0;
+			ope_encoder_ctl(ope_encoder, OPUS_SET_VBR(ctl_vbr));
 		} else
 		{
-			PushUint32LE(opus_comments_buf, 0);
+			opus_int32 ctl_vbr = 1;
+			ope_encoder_ctl(ope_encoder, OPUS_SET_VBR(ctl_vbr));
+			opus_int32 ctl_vbrcontraint = 0;
+			ope_encoder_ctl(ope_encoder, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
 		}
-		PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(opus_comments.size()));
-		for(const auto &it : opus_comments)
-		{
-			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(it.length()));
-			for(std::size_t i = 0; i < it.length(); ++i)
-			{
-				opus_comments_buf.push_back(it[i]);
-			}
-		}
-		op.packet = opus_comments_buf.data();
-		op.bytes = mpt::saturate_cast<long>(opus_comments_buf.size());
-		op.b_o_s = 0;
-		op.e_o_s = 0;
-		op.granulepos = 0;
-		op.packetno = 1;
-		ogg_stream_packetin(&os, &op);
-		while(ogg_stream_flush(&os, &og))
-		{
-			WritePage();
-		}
-		packetno = 2;
 
-		last_granulepos = 0;
-		enc_granulepos = 0;
-		original_samples = 0;
+		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
+		if(complexity >= 0)
+		{
+			ope_encoder_ctl(ope_encoder, OPUS_SET_COMPLEXITY(complexity));
+		}
+
+		ope_encoder_flush_header(ope_encoder);
+		
 		started = true;
 		ASSERT(inited && started);
 	}
@@ -157,80 +157,37 @@ private:
 			}
 			ASSERT(inited && started);
 
-			std::vector<float> extraBuf(opus_extrasamples * opus_channels);
-			WriteInterleaved(opus_extrasamples, extraBuf.data());
+			ope_encoder_drain(ope_encoder);
 
-			int cur_frame_size = 960 * opus_samplerate / 48000;
-			int last_frame_size = (static_cast<int>(opus_sampleBuf.size()) / opus_channels) * opus_samplerate / 48000;
+			ope_encoder_destroy(ope_encoder);
+			ope_encoder = NULL;
 
-			opus_frameBuf.resize(opus_channels * cur_frame_size);
-			for(size_t sample = 0; sample < opus_frameBuf.size(); ++sample)
-			{
-				opus_frameBuf[sample] = 0.0f;
-			}
-
-			for(size_t sample = 0; sample < opus_sampleBuf.size(); ++sample)
-			{
-				opus_frameBuf[sample] = opus_sampleBuf[sample];
-			}
-			opus_sampleBuf.clear();
-
-			opus_frameData.resize(65536);
-			opus_frameData.resize(opus_multistream_encode_float(st, opus_frameBuf.data(), cur_frame_size, opus_frameData.data(), static_cast<opus_int32>(opus_frameData.size())));
-			enc_granulepos += last_frame_size * 48000 / opus_samplerate;
-
-			op.b_o_s = 0;
-			op.e_o_s = 1;
-			op.granulepos = enc_granulepos;
-			op.packetno = packetno;
-			op.packet = opus_frameData.data();
-			op.bytes = static_cast<long>(opus_frameData.size());
-			ogg_stream_packetin(&os, &op);
-
-			packetno++;
-
-			while(ogg_stream_flush(&os, &og))
-			{
-				WritePage();
-			}
-
-			ogg_stream_clear(&os);
-
-			opus_multistream_encoder_destroy(st);
-			st = nullptr;
+			ope_comments_destroy(ope_comments);
+			ope_comments = NULL;
 
 			started = false;
 			inited = false;
 		}
 		ASSERT(!inited && !started);
 	}
-	void WritePage()
-	{
-		ASSERT(inited);
-		buf.resize(og.header_len);
-		std::memcpy(buf.data(), og.header, og.header_len);
-		WriteBuffer();
-		buf.resize(og.body_len);
-		std::memcpy(buf.data(), og.body, og.body_len);
-		WriteBuffer();
-	}
 	void AddCommentField(const std::string &field, const mpt::ustring &data)
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(field + "=" + mpt::ToCharset(mpt::CharsetUTF8, data));
+			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::CharsetUTF8, data)));
 		}
 	}
 public:
 	OpusStreamWriter(std::ostream &stream)
 		: StreamWriterBase(stream)
 	{
+		ope_callbacks.write = &CallbackWrite;
+		ope_callbacks.close = &CallbackClose;
 		inited = false;
 		started = false;
 		opus_channels = 0;
 		opus_tags = true;
 		opus_comments.clear();
-		opus_extrasamples = 0;
 	}
 	virtual ~OpusStreamWriter()
 	{
@@ -247,88 +204,13 @@ public:
 		uint32 samplerate = settings.Samplerate;
 		uint16 channels = settings.Channels;
 
+		opus_cbr = (settings.Mode == Encoder::ModeCBR);
 		opus_bitrate = settings.Bitrate * 1000;
 		opus_samplerate = samplerate;
 		opus_channels = channels;
 		opus_tags = settings.Tags;
 
-		int opus_error = 0;
-
-		int num_streams = 0;
-		int num_coupled = 0;
-		unsigned char mapping[4] = { 0, 0, 0, 0 };
-
-		st = opus_multistream_surround_encoder_create(samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &num_streams, &num_coupled, mapping, OPUS_APPLICATION_AUDIO, &opus_error);
-
-		opus_int32 ctl_lookahead = 0;
-		opus_multistream_encoder_ctl(st, OPUS_GET_LOOKAHEAD(&ctl_lookahead));
-
-		opus_int32 ctl_bitrate = opus_bitrate;
-		opus_multistream_encoder_ctl(st, OPUS_SET_BITRATE(ctl_bitrate));
-
-		if(settings.Mode == Encoder::ModeCBR)
-		{
-			opus_int32 ctl_vbr = 0;
-			opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
-		} else
-		{
-			opus_int32 ctl_vbr = 1;
-			opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
-			opus_int32 ctl_vbrcontraint = 0;
-			opus_multistream_encoder_ctl(st, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
-		}
-
-		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
-		if(complexity >= 0)
-		{
-			opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
-		}
-
-		opus_extrasamples = ctl_lookahead;
-
-		opus_comments.clear();
-
-		ogg_stream_init(&os, mpt::random<uint32>(theApp.PRNG()));
-
 		inited = true;
-
-		mpt::ostringstream tmpbuf(std::ios::binary);
-		tmpbuf.imbue(std::locale::classic());
-
-		mpt::IO::WriteRaw(tmpbuf, "Opus", 4);
-		mpt::IO::WriteRaw(tmpbuf, "Head", 4);
-		mpt::IO::WriteIntLE<uint8>(tmpbuf, 1); // version
-		mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(opus_channels)); // channels
-		mpt::IO::WriteIntLE<uint16>(tmpbuf, static_cast<uint16>(ctl_lookahead * (48000/samplerate))); // preskip
-		mpt::IO::WriteIntLE<uint32>(tmpbuf, samplerate); // samplerate
-		mpt::IO::WriteIntLE<uint16>(tmpbuf, 0); // gain
-		mpt::IO::WriteIntLE<uint8>(tmpbuf, (opus_channels > 2) ? 1 : 0); //chanmap
-
-		if(opus_channels > 2)
-		{
-			mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(num_streams));
-			mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(num_coupled));
-			for(int channel=0; channel<opus_channels; ++channel)
-			{
-				mpt::IO::WriteIntLE<uint8>(tmpbuf, mapping[channel]);
-			}
-		}
-
-		std::string header_str = tmpbuf.str();
-		std::vector<unsigned char> header_buf(header_str.data(), header_str.data() + header_str.size());
-
-		op.packet = &(header_buf[0]);
-		op.bytes = static_cast<long>(header_buf.size());
-		op.b_o_s = 1;
-		op.e_o_s = 0;
-		op.granulepos = 0;
-		op.packetno = 0;
-		ogg_stream_packetin(&os, &op);
-
-		while(ogg_stream_flush(&os, &og))
-		{
-			WritePage();
-		}
 
 		ASSERT(inited && !started);
 	}
@@ -358,44 +240,9 @@ public:
 			StartStream();
 		}
 		ASSERT(inited && started);
-		original_samples += count;
-		for(size_t frame = 0; frame < count; ++frame)
-		{
-			for(int channel = 0; channel < opus_channels; ++channel)
-			{
-				opus_sampleBuf.push_back(interleaved[frame*opus_channels+channel]);
-			}
-		}
-		int cur_frame_size = 960 * opus_samplerate / 48000;
-		opus_frameBuf.resize(opus_channels * cur_frame_size);
-		while(opus_sampleBuf.size() > opus_frameBuf.size())
-		{
-			for(size_t sample = 0; sample < opus_frameBuf.size(); ++sample)
-			{
-				opus_frameBuf[sample] = opus_sampleBuf.front();
-				opus_sampleBuf.pop_front();
-			}
 
-			opus_frameData.resize(65536);
-			opus_frameData.resize(opus_multistream_encode_float(st, opus_frameBuf.data(), cur_frame_size, opus_frameData.data(), static_cast<opus_int32>(opus_frameData.size())));
-			enc_granulepos += cur_frame_size * 48000 / opus_samplerate;
+		ope_encoder_write_float(ope_encoder, interleaved, count);
 
-			op.b_o_s = 0;
-			op.e_o_s = 0;
-			op.granulepos = enc_granulepos;
-			op.packetno = packetno;
-			op.packet = opus_frameData.data();
-			op.bytes = static_cast<long>(opus_frameData.size());
-			ogg_stream_packetin(&os, &op);
-
-			packetno++;
-
-			while(ogg_stream_pageout(&os, &og))
-			{
-				WritePage();
-			}
-
-		}
 	}
 	virtual void Finalize()
 	{
@@ -419,7 +266,7 @@ OggOpusEncoder::OggOpusEncoder()
 bool OggOpusEncoder::IsAvailable() const
 //--------------------------------------
 {
-#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+#if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 	return true;
 #else
 	return false;
@@ -441,7 +288,7 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	{
 		return nullptr;
 	}
-#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+#if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 	return new OpusStreamWriter(file);
 #else
 	return nullptr;
