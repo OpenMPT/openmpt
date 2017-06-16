@@ -48,6 +48,8 @@ copy /y ..\..\include\mpg123\COPYING                         .\Licenses\License.
 copy /y ..\..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
 copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
+rem copy /y ..\..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error
+rem copy /y ..\..\include\opusenc\AUTHORS                        .\Licenses\License.Opusenc.Authors.txt || goto error
 rem copy /y ..\..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
 copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
 copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
@@ -131,6 +133,8 @@ copy /y ..\..\include\mpg123\COPYING                         .\Licenses\License.
 copy /y ..\..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
 copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
+rem copy /y ..\..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error
+rem copy /y ..\..\include\opusenc\AUTHORS                        .\Licenses\License.Opusenc.Authors.txt || goto error
 rem copy /y ..\..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
 rem copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
