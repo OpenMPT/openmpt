@@ -56,7 +56,7 @@
    "../../include/opus/src/opus_demo.c",
    "../../include/opus/src/repacketizer_demo.c",
   }
-  defines { "HAVE_CONFIG_H" }
+  defines { "HAVE_CONFIG_H", "ENABLE_UPDATE_DRAFT" }
   links { }
   filter { "action:vs*" }
     buildoptions { "/wd4244", "/wd4334" }
