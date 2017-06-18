@@ -281,7 +281,7 @@ OggOpusEncoder::~OggOpusEncoder()
 }
 
 
-IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) const
+std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) const
 //-----------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
@@ -289,7 +289,7 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 		return nullptr;
 	}
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-	return new OpusStreamWriter(file);
+	return mpt::make_unique<OpusStreamWriter>(file);
 #else
 	return nullptr;
 #endif

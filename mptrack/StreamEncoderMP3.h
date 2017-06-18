@@ -54,7 +54,7 @@ private:
 
 public:
 
-	IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const;
+	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file) const;
 	mpt::ustring DescribeQuality(float quality) const;
 	mpt::ustring DescribeBitrateABR(int bitrate) const;
 	bool IsAvailable() const;

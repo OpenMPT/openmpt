@@ -312,14 +312,14 @@ FLACEncoder::~FLACEncoder()
 }
 
 
-IAudioStreamEncoder *FLACEncoder::ConstructStreamEncoder(std::ostream &file) const
+std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file) const
 //--------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	return new FLACStreamWriter(*this, file);
+	return mpt::make_unique<FLACStreamWriter>(*this, file);
 }
 
 
