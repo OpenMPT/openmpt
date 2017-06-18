@@ -987,7 +987,7 @@ void CDoWaveConvert::Run()
 	const uint16 channels = encSettings.Channels;
 
 	ASSERT(m_Settings.GetEncoderFactory() && m_Settings.GetEncoderFactory()->IsAvailable());
-	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
+	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
 #ifndef NO_PLUGINS
@@ -1340,7 +1340,6 @@ void CDoWaveConvert::Run()
 	}
 
 	fileEnc->Finalize();
-	delete fileEnc;
 	fileEnc = nullptr;
 
 	fileStream.flush();

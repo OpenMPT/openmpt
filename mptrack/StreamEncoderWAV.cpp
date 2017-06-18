@@ -219,15 +219,14 @@ WAVEncoder::~WAVEncoder()
 }
 
 
-IAudioStreamEncoder *WAVEncoder::ConstructStreamEncoder(std::ostream &file) const
+std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file) const
 //-------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	WavStreamWriter *result = new WavStreamWriter(*this, file);
-	return result;
+	return mpt::make_unique<WavStreamWriter>(*this, file);
 }
 
 

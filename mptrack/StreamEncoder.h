@@ -269,7 +269,7 @@ protected:
 	virtual ~EncoderFactoryBase() { }
 	void SetTraits(const Encoder::Traits &traits);
 public:
-	virtual IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const = 0;
+	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file) const = 0;
 	const Encoder::Traits &GetTraits() const
 	{
 		return m_Traits;

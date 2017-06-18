@@ -1516,25 +1516,25 @@ MP3Encoder::~MP3Encoder()
 }
 
 
-IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) const
+std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file) const
 //-------------------------------------------------------------------------------
 {
-	StreamWriterBase *result = nullptr;
+	std::unique_ptr<IAudioStreamEncoder> result = nullptr;
 	if(false)
 	{
 		// nothing
 #ifdef MPT_MP3ENCODER_LAME
 	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
-		result = new MP3LameStreamWriter(*m_Lame, file, (m_Type == MP3EncoderLameCompatible));
+		result = mpt::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible));
 #endif // MPT_MP3ENCODER_LAME
 #ifdef MPT_MP3ENCODER_ACM
 	} else if(m_Type == MP3EncoderACM)
 	{
-		result = new MP3AcmStreamWriter(*m_Acm, file);
+		result = mpt::make_unique<MP3AcmStreamWriter>(*m_Acm, file);
 #endif // MPT_MP3ENCODER_ACM
 	}
-	return result;
+	return std::move(result);
 }
 
 

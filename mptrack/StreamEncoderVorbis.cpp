@@ -290,11 +290,11 @@ VorbisEncoder::~VorbisEncoder()
 }
 
 
-IAudioStreamEncoder *VorbisEncoder::ConstructStreamEncoder(std::ostream &file) const
+std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::ostream &file) const
 //----------------------------------------------------------------------------------
 {
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-	return new VorbisStreamWriter(file);
+	return mpt::make_unique<VorbisStreamWriter>(file);
 #else
 	return nullptr;
 #endif
