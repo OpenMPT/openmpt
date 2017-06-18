@@ -37,11 +37,7 @@ static Encoder::Traits BuildTraits()
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 		traits.fileExtension = MPT_PATHSTRING("opus");
 		traits.fileShortDescription = MPT_USTRING("Opus");
-		traits.fileDescription = MPT_USTRING("Opus");
 		traits.encoderSettingsName = MPT_USTRING("Opus");
-		traits.encoderName = MPT_USTRING("libopusenc");
-		traits.description += mpt::format(MPT_USTRING("Version: %1\n"))(mpt::ToUnicode(mpt::CharsetASCII, ope_get_version_string() ? ope_get_version_string() : ""));
-		traits.description += mpt::format(MPT_USTRING("ABI Version: %1\n"))(ope_get_abi_version());
 		traits.canTags = true;
 		traits.maxChannels = 4;
 		traits.samplerates = mpt::make_vector(opus_all_samplerates);
