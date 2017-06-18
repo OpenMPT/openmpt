@@ -776,6 +776,7 @@
     <ClInclude Include="..\..\mptrack\StreamEncoderFLAC.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderMP3.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderOpus.h" />
+    <ClInclude Include="..\..\mptrack\StreamEncoderRAW.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderVorbis.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderWAV.h" />
     <ClInclude Include="..\..\mptrack\TempoSwingDialog.h" />
@@ -1006,6 +1007,7 @@
     <ClCompile Include="..\..\mptrack\StreamEncoderFLAC.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderMP3.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp" />
+    <ClCompile Include="..\..\mptrack\StreamEncoderRAW.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderVorbis.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderWAV.cpp" />
     <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp" />

@@ -375,6 +375,9 @@
     <ClInclude Include="..\..\mptrack\StreamEncoderOpus.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\StreamEncoderRAW.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\StreamEncoderVorbis.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1020,6 +1023,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\StreamEncoderRAW.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderVorbis.cpp">
