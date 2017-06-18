@@ -164,10 +164,7 @@ WAVEncoder::WAVEncoder()
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("wav");
 	traits.fileShortDescription = MPT_USTRING("Wave");
-	traits.fileDescription = MPT_USTRING("Wave");
 	traits.encoderSettingsName = MPT_USTRING("Wave");
-	traits.encoderName = MPT_USTRING("OpenMPT");
-	traits.description = MPT_USTRING("Microsoft RIFF WAVE");
 	traits.canTags = true;
 	traits.canCues = true;
 	traits.maxChannels = 4;

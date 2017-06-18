@@ -115,9 +115,11 @@ namespace Encoder
 	{
 		
 		mpt::PathString fileExtension;
-		mpt::ustring fileDescription;
 		mpt::ustring fileShortDescription;
 		mpt::ustring encoderSettingsName;
+
+		bool showEncoderInfo;
+		mpt::ustring fileDescription;
 		mpt::ustring encoderName;
 		mpt::ustring description;
 
@@ -144,8 +146,9 @@ namespace Encoder
 		int defaultDitherType;
 
 		Traits()
-			: canCues(false)
+			: showEncoderInfo(false)
 			, canTags(false)
+			, canCues(false)
 			, modesWithFixedGenres(0)
 			, maxChannels(0)
 			, modes(Encoder::ModeInvalid)

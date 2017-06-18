@@ -155,6 +155,8 @@ BOOL CWaveConvert::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange(1, int16_max);
 
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(encTraits->showEncoderInfo ? TRUE : FALSE);
+
 	FillFileTypes();
 	FillSamplerates();
 	FillChannels();
@@ -541,6 +543,7 @@ void CWaveConvert::OnFileTypeChanged()
 	DWORD_PTR dwFileType = m_CbnFileType.GetItemData(m_CbnFileType.GetCurSel());
 	m_Settings.SelectEncoder(dwFileType);
 	encTraits = m_Settings.GetTraits();
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(encTraits->showEncoderInfo ? TRUE : FALSE);
 	FillSamplerates();
 	FillChannels();
 	FillFormats();
