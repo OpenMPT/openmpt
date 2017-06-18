@@ -259,6 +259,8 @@ void CWaveConvert::FillTags()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT8), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags?TRUE:FALSE);
+	m_CbnGenre.EnableWindow(canTags?TRUE:FALSE);
+	m_EditGenre.EnableWindow(canTags?TRUE:FALSE);
 
 	if((encTraits->modesWithFixedGenres & mode) && !encTraits->genres.empty())
 	{
