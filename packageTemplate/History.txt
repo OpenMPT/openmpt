@@ -30,10 +30,24 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.12.00 (* June 2017, revision 8288)
+v1.26.12.00 (* June 2017, revision 8332)
 ----------------------------------------
+General tab
+   [Fix] <js> Cloning effect plugins no longer creates an instrument for them (http://bugs.openmpt.org/view.php?id=970).
+
 Pattern tab
    [Imp] <js> Right-clicking outside of the pattern shows a context menu for adding more channels.
+   [Fix] <js> It was possible to use (but not save) l / r / u volume commands in MPTM and e / f volume commands in XM (http://bugs.openmpt.org/view.php?id=975).
+
+Pattern tab::Find/Replace
+   [Fix] <js> Replacing with an extended command (Exx / Sxx) overwrote the parameter to be found.
+   [Fix] <js> When re-opening the dialog, the replace parameter was not restored correctly for extended commands.
+
+Sample tab
+   [Mod] <js> Lifted the sample limit in sample mode from 199 to 255 (http://bugs.openmpt.org/view.php?id=969).
+
+Mod Conversion
+   [Imp] <js> When converting note cuts to XM, rewrite them as a v00 command if the effect column already occupied.
 
 MOD
    [Fix] <js> Use M.K. signature instead of M!K! when writing exactly 64 (http://bugs.openmpt.org/view.php?id=958).

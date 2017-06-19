@@ -129,12 +129,13 @@ bool SongMessage::ReadFixedLineLength(const mpt::byte *data, const size_t length
 	if(lineLength == 0)
 		return false;
 
-	const size_t numLines = (length / (lineLength + lineEndingLength));
+	const size_t totalLineLength = lineLength + lineEndingLength;
+	const size_t numLines = (length + totalLineLength - 1) / totalLineLength;
 	const size_t finalLength = numLines * (lineLength + 1);
 	clear();
 	reserve(finalLength);
 
-	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += (lineLength + lineEndingLength), cpos += (lineLength + 1))
+	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += totalLineLength, cpos += (lineLength + 1))
 	{
 		append(str + fpos, std::min(lineLength, length - fpos));
 		append(1, InternalLineEnding);
@@ -174,11 +175,6 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 //----------------------------------------------------------------------
 {
 	std::string comments;
-
-	if(empty())
-	{
-		return comments;
-	}
 
 	const size_t len = length();
 	comments.reserve(len);
