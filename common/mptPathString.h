@@ -17,8 +17,11 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+
 #define MPT_DEPRECATED_PATH
 //#define MPT_DEPRECATED_PATH MPT_DEPRECATED
+
+
 
 namespace mpt
 {
@@ -29,17 +32,25 @@ typedef std::wstring RawPathString;
 typedef std::string RawPathString;
 #endif // if MPT_OS_WINDOWS
 
+
+
 class PathString
 {
+
 private:
+
 	RawPathString path;
+
 private:
+
 	PathString(const RawPathString & path)
 		: path(path)
 	{
 		return;
 	}
+
 public:
+
 	PathString()
 	{
 		return;
@@ -67,10 +78,12 @@ public:
 	{
 		return append(other);
 	}
+
 	friend PathString operator + (const PathString & a, const PathString & b)
 	{
 		return PathString(a).append(b);
 	}
+
 	friend bool operator < (const PathString & a, const PathString & b)
 	{
 		return a.AsNative() < b.AsNative();
@@ -83,17 +96,20 @@ public:
 	{
 		return a.AsNative() != b.AsNative();
 	}
+
 	bool empty() const { return path.empty(); }
+
+	std::size_t Length() const { return path.size(); }
+
+
+
+public:
 
 #if MPT_OS_WINDOWS
 #if !MPT_OS_WINDOWS_WINRT
 	static int CompareNoCase(const PathString & a, const PathString & b);
 #endif // !MPT_OS_WINDOWS_WINRT
 #endif
-
-public:
-
-	size_t Length() const { return path.size(); }
 
 #if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
 
@@ -271,6 +287,8 @@ public:
 
 };
 
+
+
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
 #endif
@@ -294,12 +312,11 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 namespace mpt
 {
 
-
-
 bool IsPathSeparator(mpt::RawPathString::value_type c);
 
-bool PathIsAbsolute(const mpt::PathString &path);
 
+
+bool PathIsAbsolute(const mpt::PathString &path);
 
 #if MPT_OS_WINDOWS
 
@@ -316,7 +333,6 @@ bool DeleteWholeDirectoryTree(mpt::PathString path);
 #endif // MODPLUG_TRACKER
 
 #endif // MPT_OS_WINDOWS
-
 
 #if MPT_OS_WINDOWS
 
@@ -338,7 +354,6 @@ mpt::PathString GetSystemPath();
 
 #endif // MPT_OS_WINDOWS
 
-
 #if defined(MPT_ENABLE_TEMPFILE)
 #if MPT_OS_WINDOWS
 
@@ -347,6 +362,8 @@ mpt::PathString GetTempDirectory();
 
 // Returns a new unique absolute path.
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+
+
 
 // Scoped temporary file guard. Deletes the file when going out of scope.
 // The file itself is not created automatically.
@@ -380,6 +397,8 @@ public:
 #endif // MPT_ENABLE_TEMPFILE
 
 } // namespace mpt
+
+
 
 #if defined(MODPLUG_TRACKER)
 
