@@ -595,7 +595,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2Periods: desc = _T("Use FT2's broken period handling"); break;
 		case kFT2PanWithDelayedNoteOff: desc = _T("Panning command with delayed note-off is ignored"); break;
 		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
-		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 16"); break;
+		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 8"); break;
 		case kFT2NoteOffFlags: desc = _T("Fade instrument on note-off when there is no volume envelope; instrument numbers reset note-off status."); break;
 		case kITMultiSampleInstrumentNumber: desc = _T("Lone instrument number after portamento within multi-sampled instrument sets the target sample's settings."); break;
 		case kRowDelayWithNoteDelay: desc = _T("Note delays next to a row delay are repeated on every row repetition."); break;
