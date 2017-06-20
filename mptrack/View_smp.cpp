@@ -420,16 +420,20 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 			if(m_dwEndSel > m_dwBeginSel)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
-				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
+
+				auto fmt = &mpt::fmt::dec<SmpLength>;
+				if(TrackerSettings::Instance().cursorPositionInHex)
+					fmt = &mpt::fmt::HEX<SmpLength>;
+				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? "" : "s");
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
-				if (!sampleRate) sampleRate = 8363;
-				uint64 msec = (uint64(selLength) * 1000) / sampleRate;
-				if(msec < 1000)
-					s += mpt::String::Print("%1ms", msec);
+				if(sampleRate <= 0) sampleRate = 8363;
+				double sec = selLength / static_cast<double>(sampleRate);
+				if(sec < 1)
+					s += mpt::String::Print("%1ms", mpt::fmt::flt(sec * 1000.0, 0, 3));
 				else
-					s += mpt::String::Print("%1.%2s", msec / 1000, mpt::fmt::dec0<2>((msec / 10) % 100));
+					s += mpt::String::Print("%1s", mpt::fmt::flt(sec, 0, 3));
 
 				// Length in beats
 				double beats = selLength;
@@ -1556,7 +1560,6 @@ void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLe
 void CViewSample::OnMouseMove(UINT, CPoint point)
 //-----------------------------------------------
 {
-	TCHAR s[64];
 	CModDoc *pModDoc = GetDocument();
 
 	if(m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS || m_dwStatus[SMPSTATUS_NCLBTNDOWN])
@@ -1571,8 +1574,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
+		CString s;
 		const SmpLength x = ScreenToSample(point.x);
-		wsprintf(s, _T("Cursor: %u"), x);
+		s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Cusor: %IX") : _T("Cursor: %Iu"), x);
 		UpdateIndicator(s);
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -1589,11 +1593,11 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				if(xHigh == 0)
-					wsprintf(s, _T("Offset: %c%02X"), cOffsetChar, xLow);
+					s.Format(_T("Offset: %c%02X"), cOffsetChar, xLow);
 				else if(bHasHighOffset && xHigh < 0x10)
-					wsprintf(s, _T("Offset: %c%02X, %cA%X"), cOffsetChar, xLow, cHighOffsetChar, xHigh);
+					s.Format(_T("Offset: %c%02X, %cA%X"), cOffsetChar, xLow, cHighOffsetChar, xHigh);
 				else
-					_tcscpy(s, _T("Beyond offset range"));
+					s = _T("Beyond offset range");
 				pMainFrm->SetInfoText(s);
 			} else
 			{

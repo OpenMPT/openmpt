@@ -704,6 +704,7 @@
 #define IDC_CHORDDETECTWAITTIME         2206
 #define IDC_STATIC1                     2208
 #define IDC_TEXT_PREVIEW                2208
+#define IDC_STATIC2                     2209
 #define IDC_MACROPLUG                   2209
 #define IDC_MACROPARAM                  2210
 #define IDC_SAMPLE_LENGTH_NEW           2211
@@ -943,7 +944,7 @@
 #define IDC_STATIC_BUFFERLENGTH         2457
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
-#define IDC_STATIC2                     2460
+#define IDC_CURSORINHEX                 2460
 #define IDC_STATIC_BASECHANNEL          2461
 #define IDC_COMBO_FILTER                2462
 #define IDC_COMBO_POLYPHONY             2463
