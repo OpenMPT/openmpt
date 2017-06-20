@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(COptionsSampleEditor, CPropertyPage)
 	ON_COMMAND(IDC_COMPRESS_ITI,			OnSettingsChanged)
 	ON_COMMAND(IDC_PREVIEW_SAMPLES,			OnSettingsChanged)
 	ON_COMMAND(IDC_NORMALIZE,				OnSettingsChanged)
+	ON_COMMAND(IDC_CURSORINHEX,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -74,6 +75,7 @@ BOOL COptionsSampleEditor::OnInitDialog()
 
 	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_NORMALIZE, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CURSORINHEX, TrackerSettings::Instance().cursorPositionInHex ? BST_CHECKED : BST_UNCHECKED);
 
 	return TRUE;
 }
@@ -93,6 +95,7 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().DefaultPlugVolumeHandling = static_cast<PLUGVOLUMEHANDLING>(m_cbnDefaultVolumeHandling.GetItemData(m_cbnDefaultVolumeHandling.GetCurSel()));
 	TrackerSettings::Instance().previewInFileDialogs = IsDlgButtonChecked(IDC_PREVIEW_SAMPLES) != BST_UNCHECKED;
 	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != BST_UNCHECKED;
+	TrackerSettings::Instance().cursorPositionInHex = IsDlgButtonChecked(IDC_CURSORINHEX) != BST_UNCHECKED;
 
 	auto docs = theApp.GetOpenDocuments();
 	for(auto modDoc : docs)

@@ -301,6 +301,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, compressITI(conf, "Sample Editor", "CompressITI", true)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
 	, previewInFileDialogs(conf, "Sample Editor", "PreviewInFileDialogs", false)
+	, cursorPositionInHex(conf, "Sample Editor", "CursorPositionInHex", false)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
 	, ExportStreamEncoderSettings(conf, MPT_USTRING("Export"))

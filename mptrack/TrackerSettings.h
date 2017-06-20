@@ -721,6 +721,7 @@ public:
 	Setting<bool> compressITI;
 	Setting<bool> m_MayNormalizeSamplesOnLoad;
 	Setting<bool> previewInFileDialogs;
+	CachedSetting<bool> cursorPositionInHex;
 
 	// Export
 

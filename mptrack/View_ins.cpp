@@ -1605,7 +1605,6 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns == nullptr) return;
-	TCHAR s[64];
 	const bool hasReleaseNode = EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET;
 	EnvelopeNode releaseNode;
 	if(hasReleaseNode)
@@ -1613,20 +1612,23 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 		releaseNode = pIns->GetEnvelope(m_nEnv)[EnvGetReleaseNode()];
 	}
 
+	CString s;
+	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, ") : _T("Tick %d, "), tick);
+
 	if (!hasReleaseNode || tick <= releaseNode.tick + 1)
 	{
 		// ticks before release node (or no release node)
 		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? val - 32 : val;
 		if(m_nEnv != ENV_PANNING)
-			wsprintf(s, _T("Tick %d, [%d]"), tick, displayVal);
+			s.AppendFormat(_T("[%d]"), displayVal);
 		else	// panning envelope: display right/center/left chars
-			wsprintf(s, _T("Tick %d, [%d %c]"), tick, mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
+			s.AppendFormat(_T("[%d %c]"), mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
 	} else
 	{
 		// ticks after release node
 		int displayVal = (val - releaseNode.value) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
-		wsprintf(s, _T("Tick %d, [Rel%c%d]"),  tick, displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
+		s.AppendFormat(_T("[Rel%c%d]"), displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
 	}
 	CModScrollView::UpdateIndicator(s);
 }

@@ -159,39 +159,40 @@ BEGIN
     LTEXT           "samples",IDC_STATIC,150,45,42,8
 END
 
-IDD_OPTIONS_SAMPLEEDITOR DIALOGEX 0, 0, 286, 269
+IDD_OPTIONS_SAMPLEEDITOR DIALOGEX 0, 0, 287, 273
 STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Samples"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Sample Undo Buffer:",IDC_STATIC,12,20,102,8
+    GROUPBOX        "Sample Editor",IDC_STATIC,6,6,276,138
+    LTEXT           "Sample &Undo Buffer:",IDC_STATIC,12,20,102,8
     EDITTEXT        IDC_EDIT_UNDOSIZE,114,18,42,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,144,24,12,12
     LTEXT           "%",IDC_UNDOSIZE,162,20,114,16
-    LTEXT           "Frequency Finetune Steps:",IDC_STATIC,12,38,102,8
+    LTEXT           "&Frequency Finetune Steps:",IDC_STATIC,12,38,102,8
     EDITTEXT        IDC_EDIT_FINETUNE,114,36,42,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,144,41,11,12
     LTEXT           "Cents",IDC_STATIC,162,38,20,8
-    LTEXT           "Default Sample Format:",IDC_STATIC,12,56,102,8
+    LTEXT           "&Default Sample Format:",IDC_STATIC,12,56,102,8
     COMBOBOX        IDC_DEFAULT_FORMAT,114,54,42,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "FLAC Compression Level:",IDC_STATIC,12,74,90,8
+    LTEXT           "FLAC Compression &Level:",IDC_STATIC,12,74,90,8
     LTEXT           "Faster Encoding",IDC_STATIC,114,74,54,8
     CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,168,72,48,12
     LTEXT           "Smaller Files",IDC_STATIC,222,74,54,8
     LTEXT           "Note Cuts:",IDC_STATIC,12,90,264,12
-    CONTROL         "On New Note",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,18,102,258,12
-    CONTROL         "On Key Release",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,18,114,258,12
-    CONTROL         "Press Again",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,18,126,258,12
-    CONTROL         "Compress ITI Files",IDC_COMPRESS_ITI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,162,264,12
-    LTEXT           "Default Plugin Volume Command Handling:",IDC_STATIC,12,182,150,8
-    COMBOBOX        IDC_VOLUME_HANDLING,162,180,78,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Preview Samples / Instruments in File Browser",IDC_PREVIEW_SAMPLES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,217,264,12
-    CONTROL         "Normalize 24-/32-bit Samples on Load",IDC_NORMALIZE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,234,264,12
-    GROUPBOX        "Sample Editor",IDC_STATIC,6,6,276,138
+    CONTROL         "On New &Note",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,18,102,258,12
+    CONTROL         "On Key &Release",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,18,114,258,12
+    CONTROL         "Press &Again",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,18,126,258,12
     GROUPBOX        "Instrument Editor",IDC_STATIC,6,150,276,48
-    GROUPBOX        "Common",IDC_STATIC,6,204,276,48
+    CONTROL         "&Compress ITI Files",IDC_COMPRESS_ITI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,162,264,12
+    LTEXT           "Default &Plugin Volume Command Handling:",IDC_STATIC,12,182,150,8
+    COMBOBOX        IDC_VOLUME_HANDLING,162,180,78,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Common",IDC_STATIC,6,204,276,66
+    CONTROL         "Pre&view Samples / Instruments in File Browser",IDC_PREVIEW_SAMPLES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,217,264,12
+    CONTROL         "N&ormalize 24-/32-bit Samples on Load",IDC_NORMALIZE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,235,264,12
+    CONTROL         "Show Cursor Position in He&x",IDC_CURSORINHEX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,252,264,12
 END
 
 IDD_EDITHISTORY DIALOGEX 0, 0, 316, 185
@@ -544,9 +545,9 @@ BEGIN
     IDD_OPTIONS_SAMPLEEDITOR, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 279
+        RIGHTMARGIN, 280
         TOPMARGIN, 7
-        BOTTOMMARGIN, 262
+        BOTTOMMARGIN, 266
     END
 
     IDD_EDITHISTORY, DIALOG
@@ -740,6 +741,11 @@ IDB_MPTRACK             PNG                     "res\\mptrack.png"
 //
 
 IDD_MIDI_IO_PLUGIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPTIONS_SAMPLEEDITOR AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
