@@ -393,7 +393,8 @@ static void init_stream(OggOpusEnc *enc) {
 static void shift_buffer(OggOpusEnc *enc) {
   /* Leaving enough in the buffer to do LPC extension if needed. */
   if (enc->buffer_start > LPC_INPUT) {
-    memmove(&enc->buffer[enc->channels*LPC_INPUT], &enc->buffer[enc->channels*enc->buffer_start], enc->channels*(enc->buffer_end-enc->buffer_start)*sizeof(*enc->buffer));
+    memmove(&enc->buffer[0], &enc->buffer[enc->channels*(enc->buffer_start-LPC_INPUT)],
+            enc->channels*(enc->buffer_end-enc->buffer_start+LPC_INPUT)*sizeof(*enc->buffer));
     enc->buffer_end -= enc->buffer_start-LPC_INPUT;
     enc->buffer_start = LPC_INPUT;
   }
