@@ -176,6 +176,7 @@ struct OggOpusEnc {
   opus_int64 curr_granule;
   opus_int64 write_granule;
   opus_int64 last_page_granule;
+  float *lpc_buffer;
   unsigned char *chaining_keyframe;
   int chaining_keyframe_length;
   OpusEncCallbacks callbacks;
@@ -328,6 +329,13 @@ OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void
   enc->write_granule = 0;
   enc->last_page_granule = 0;
   if ( (enc->buffer = malloc(sizeof(*enc->buffer)*BUFFER_SAMPLES*channels)) == NULL) goto fail;
+  if (rate != 48000) {
+    /* Allocate an extra LPC_PADDING samples so we can do the padding in-place. */
+    if ( (enc->lpc_buffer = malloc(sizeof(*enc->lpc_buffer)*(LPC_INPUT+LPC_PADDING)*channels)) == NULL) goto fail;
+    memset(enc->lpc_buffer, 0, sizeof(*enc->lpc_buffer)*LPC_INPUT*channels);
+  } else {
+    enc->lpc_buffer = NULL;
+  }
   enc->buffer_start = enc->buffer_end = 0;
   enc->st = st;
   enc->callbacks = *callbacks;
@@ -339,6 +347,7 @@ fail:
     free(enc);
     if (enc->buffer) free(enc->buffer);
     if (enc->streams) stream_destroy(enc->streams);
+    if (enc->lpc_buffer) free(enc->lpc_buffer);
   }
   if (st) {
     opus_multistream_encoder_destroy(st);
@@ -515,6 +524,15 @@ int ope_encoder_write_float(OggOpusEnc *enc, const float *pcm, int samples_per_c
   if (samples_per_channel < 0) return OPE_BAD_ARG;
   enc->write_granule += samples_per_channel;
   enc->last_stream->end_granule = enc->write_granule;
+  if (enc->lpc_buffer) {
+    int i;
+    if (samples_per_channel < LPC_INPUT) {
+      for (i=0;i<(LPC_INPUT-samples_per_channel)*channels;i++) enc->lpc_buffer[i] = enc->lpc_buffer[samples_per_channel*channels + i];
+      for (i=0;i<samples_per_channel*channels;i++) enc->lpc_buffer[(LPC_INPUT-samples_per_channel)*channels] = pcm[i];
+    } else {
+      for (i=0;i<LPC_INPUT*channels;i++) enc->lpc_buffer[i] = pcm[(samples_per_channel-LPC_INPUT)*channels + i];
+    }
+  }
   do {
     int i;
     spx_uint32_t in_samples, out_samples;
@@ -550,6 +568,15 @@ int ope_encoder_write(OggOpusEnc *enc, const opus_int16 *pcm, int samples_per_ch
   if (samples_per_channel < 0) return OPE_BAD_ARG;
   enc->write_granule += samples_per_channel;
   enc->last_stream->end_granule = enc->write_granule;
+  if (enc->lpc_buffer) {
+    int i;
+    if (samples_per_channel < LPC_INPUT) {
+      for (i=0;i<(LPC_INPUT-samples_per_channel)*channels;i++) enc->lpc_buffer[i] = enc->lpc_buffer[samples_per_channel*channels + i];
+      for (i=0;i<samples_per_channel*channels;i++) enc->lpc_buffer[(LPC_INPUT-samples_per_channel)*channels + i] = (1.f/32768)*pcm[i];
+    } else {
+      for (i=0;i<LPC_INPUT*channels;i++) enc->lpc_buffer[i] = (1.f/32768)*pcm[(samples_per_channel-LPC_INPUT)*channels + i];
+    }
+  }
   do {
     int i;
     spx_uint32_t in_samples, out_samples;
@@ -592,17 +619,33 @@ static void extend_signal(float *x, int before, int after, int channels);
 
 int ope_encoder_drain(OggOpusEnc *enc) {
   int pad_samples;
+  int resampler_drain = 0;
   if (enc->unrecoverable) return OPE_UNRECOVERABLE;
   /* Check if it's already been drained. */
   if (enc->streams == NULL) return OPE_TOO_LATE;
-  pad_samples = MAX(LPC_PADDING, enc->global_granule_offset + enc->frame_size);
+  if (enc->re) resampler_drain = speex_resampler_get_output_latency(enc->re);
+  pad_samples = MAX(LPC_PADDING, enc->global_granule_offset + enc->frame_size + resampler_drain);
   if (!enc->streams->stream_is_init) init_stream(enc);
   shift_buffer(enc);
   assert(enc->buffer_end + pad_samples <= BUFFER_SAMPLES);
   memset(&enc->buffer[enc->channels*enc->buffer_end], 0, pad_samples*enc->channels*sizeof(enc->buffer[0]));
-  extend_signal(&enc->buffer[enc->channels*enc->buffer_end], enc->buffer_end, LPC_PADDING, enc->channels);
+  if (enc->re) {
+    spx_uint32_t in_samples, out_samples;
+    extend_signal(&enc->lpc_buffer[LPC_INPUT*enc->channels], LPC_INPUT, LPC_PADDING, enc->channels);
+    do {
+      in_samples = LPC_PADDING;
+      out_samples = pad_samples;
+      speex_resampler_process_interleaved_float(enc->re, &enc->lpc_buffer[LPC_INPUT*enc->channels], &in_samples, &enc->buffer[enc->channels*enc->buffer_end], &out_samples);
+      enc->buffer_end += out_samples;
+      pad_samples -= out_samples;
+      /* If we don't have enough padding, zero all zeros and repeat. */
+      memset(&enc->lpc_buffer[LPC_INPUT*enc->channels], 0, LPC_PADDING*enc->channels*sizeof(enc->lpc_buffer[0]));
+    } while (pad_samples > 0);
+  } else {
+    extend_signal(&enc->buffer[enc->channels*enc->buffer_end], enc->buffer_end, LPC_PADDING, enc->channels);
+    enc->buffer_end += pad_samples;
+  }
   enc->decision_delay = 0;
-  enc->buffer_end += pad_samples;
   assert(enc->buffer_end <= BUFFER_SAMPLES);
   encode_buffer(enc);
   if (enc->unrecoverable) return OPE_UNRECOVERABLE;
@@ -625,6 +668,7 @@ void ope_encoder_destroy(OggOpusEnc *enc) {
   if (enc->oggp) oggp_destroy(enc->oggp);
   opus_multistream_encoder_destroy(enc->st);
   if (enc->re) speex_resampler_destroy(enc->re);
+  if (enc->lpc_buffer) free(enc->lpc_buffer);
   free(enc);
 }
 
