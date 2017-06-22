@@ -77,7 +77,7 @@ static const MPTEFFECTINFO gFXInfo[] =
 	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning Slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
 	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"MIDI Macro"},
-	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_XMITMPT,	"Smooth MIDI Macro"},	//rewbs.smoothVST
+	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_XMITMPT,	"Smooth MIDI Macro"},
 	// Extended MOD/XM effects
 	{CMD_MODCMDEX,		0xF0,0x00,	0,	MOD_TYPE_MOD,	"Set Filter"},
 	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine Porta Up"},
@@ -121,17 +121,14 @@ static const MPTEFFECTINFO gFXInfo[] =
 	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MITMPT,	"Sound Control"},
 	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. Control"},
 	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	"Note Delay and Cut"},
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0,0,	0,	MOD_TYPE_XMITMPT,	"Parameter Extension"},
-	// -! NEW_FEATURE#0010
 	{CMD_NOTESLIDEUP,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Up"}, // IMF / PTM effect
 	{CMD_NOTESLIDEDOWN,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Down"}, // IMF / PTM effect
 	{CMD_NOTESLIDEUPRETRIG,	0,0,	0,	MOD_TYPE_PTM,	"Note Slide Up + Retrigger Note"}, // PTM effect
 	{CMD_NOTESLIDEDOWNRETRIG,0,0,	0,	MOD_TYPE_PTM,	"Note Slide Down + Retrigger Note"}, // PTM effect
 	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	"Revert Sample + Offset"}, // PTM effect
 	{CMD_DBMECHO,			0,0,	0,	MOD_TYPE_DBM,	"Echo Enable"}, // DBM effect
-	{CMD_OFFSETPERCENTAGE,	0,0,	0,	MOD_TYPE_DBM,	"Offset (Percentage)" }, // PLM effect
+	{CMD_OFFSETPERCENTAGE,	0,0,	0,	MOD_TYPE_PLM,	"Offset (Percentage)" }, // PLM effect
 };
 
 
@@ -542,6 +539,12 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 		break;
 
 	case CMD_VOLUMESLIDE:
+		if(sndFile.GetType() == MOD_TYPE_MOD && !param)
+		{
+			s = continueOrIgnore;
+			break;
+		}
+		MPT_FALLTHROUGH;
 	case CMD_TONEPORTAVOL:
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
