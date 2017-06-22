@@ -1209,7 +1209,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		Order().SetRestartPos(0);
 	}
 
-	if(!Order().empty() && Patterns.IsValidPat(Order()[lastOrd]))
+	if(Order().IsValidPat(lastOrd))
 	{
 		PATTERNINDEX lastPat = Order()[lastOrd];
 		Patterns[lastPat].Resize(lastRow + 1);
