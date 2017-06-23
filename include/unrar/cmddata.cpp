@@ -764,7 +764,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
               };
               if (!AlreadyBad)
                 if (Switch[3]==0)
-                  CommentCharset=FilelistCharset=ErrlogCharset=rch;
+                  CommentCharset=FilelistCharset=ErrlogCharset=RedirectCharset=rch;
                 else
                   for (uint I=3;Switch[I]!=0 && !AlreadyBad;I++)
                     switch(toupperw(Switch[I]))
@@ -947,25 +947,7 @@ void CommandData::OutTitle()
     mprintf(L"%s",Version);
     exit(0);
   }
-#ifdef UNRAR
   mprintf(St(MUCopyright),Version,RARVER_YEAR);
-#else
-#ifndef FREE_UNRAR // To remove this code from unrar source.
-  mprintf(St(MCopyright),Version,RARVER_YEAR,RARVER_DAY,GetMonthName(RARVER_MONTH-1),RARVER_YEAR);
-
-  wchar RegName[ASIZE(Reg.RegName)];
-  ConvertUtfRegString(Reg.RegName,NULL,RegName,ASIZE(RegName));
-
-  if (RegVer)
-    mprintf(St(MRegTo),RegName);
-  else
-  {
-    mprintf(St(MShare));
-    if (*Reg.ErrInfo!=0)
-      mprintf(Reg.ErrInfo);
-  }
-#endif
-#endif
 #endif
 #endif
 }
@@ -1240,11 +1222,7 @@ void CommandData::ProcessCommand()
 {
 #ifndef SFX_MODULE
 
-#if defined(ALLOW_UNLOCK) && !defined(UNRAR)
-  const wchar *SingleCharCommands=L"FUADPXET";
-#else
   const wchar *SingleCharCommands=L"FUADPXETK";
-#endif
   if (Command[0]!=0 && Command[1]!=0 && wcschr(SingleCharCommands,Command[0])!=NULL || *ArcName==0)
     OutHelp(*Command==0 ? RARX_SUCCESS:RARX_USERERROR); // Return 'success' for 'rar' without parameters.
 
@@ -1285,100 +1263,6 @@ void CommandData::ProcessCommand()
 
   switch(Command[0])
   {
-#ifndef UNRAR
-    case 'A':
-    case 'F':
-    case 'U':
-    case 'M':
-      {
-        if (*Command=='F')
-          FreshFiles=true;
-        if (*Command=='U')
-          UpdateFiles=true;
-        CmdAdd Add(this);
-        Add.DoAdd();
-      }
-      break;
-    case 'D':
-      {
-        CmdAdd Delete(this);
-        Delete.DoDelete();
-      }
-      break;
-    case 'S':
-      CmdSFX(this);
-      break;
-    case 'C':
-      switch(Command[1])
-      {
-        case 0:
-#ifndef GUI // stdin is not supported by WinRAR.
-          if (*CommentFile==0)
-            wcscpy(CommentFile,L"stdin");
-#endif
-          ProcessArchive(this);
-          break;
-/*
-        case 'F':
-          AddFileComment(this);
-          break;
-*/
-        case 'W':
-          WriteComment(this);
-          break;
-        case 'H':
-          ProcessArchive(this);
-          break;
-        default:
-          OutHelp(RARX_USERERROR);
-      }
-      break;
-    case 'R':
-      switch(Command[1])
-      {
-        case 'R':
-          Recovery=GetRecoverySize(Command+2,DEFAULT_RECOVERY);
-          ProcessArchive(this);
-          break;
-        case 'V':
-          {
-            RecVolNumber=GetRecoverySize(Command+2,DEFAULT_RECVOLUMES);
-            wchar ArcName[NM];
-            if (GetArcName(ArcName,ASIZE(ArcName)))
-              RecVolumesMake(this,ArcName);
-          }
-          break;
-        case 'C':
-          {
-            wchar ArcName[NM];
-            if (GetArcName(ArcName,ASIZE(ArcName)))
-              RecVolumesRestore(this,ArcName,false);
-          }
-          break;
-        case 'N':
-          PrepareRenameArgs(this);
-          CmdRename(this);
-          break;
-        case 0:
-          CmdRepair(this);
-          break;
-        default:
-          OutHelp(RARX_USERERROR);
-          break;
-      }
-      break;
-    case 'K':
-#ifdef ALLOW_UNLOCK
-      if (Command[1]=='-')
-        Unlock=true;
-      else
-        Lock=true;
-#else
-      Lock=true;
-#endif
-      ProcessArchive(this);
-      break;
-#endif
     case 'P':
     case 'X':
     case 'E':
