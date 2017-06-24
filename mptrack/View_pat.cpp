@@ -3484,7 +3484,7 @@ ModCommand &CViewPattern::GetModCommand(PatternCursor cursor)
 //-----------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern() && pSndFile->Patterns[GetCurrentPattern()].IsValidRow(cursor.GetRow())))
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()) && pSndFile->Patterns[GetCurrentPattern()].IsValidRow(cursor.GetRow()))
 	{
 		return *pSndFile->Patterns[GetCurrentPattern()].GetpModCommand(cursor.GetRow(), cursor.GetChannel());
 	}
