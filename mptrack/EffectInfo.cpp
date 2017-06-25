@@ -543,7 +543,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 	case CMD_VOLUMESLIDE:
 		if(sndFile.GetType() == MOD_TYPE_MOD && !param)
 		{
-			s = continueOrIgnore;
+			_tcscpy(s, continueOrIgnore);
 			break;
 		}
 		MPT_FALLTHROUGH;
