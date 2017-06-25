@@ -478,13 +478,13 @@ void CModTree::AddDocument(CModDoc &modDoc)
 //-----------------------------------------
 {
 	// Check if document is already in the list
-	if(std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; }) != DocInfo.end())
+	if(std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; }) != DocInfo.end())
 		return;
 
 	try
 	{
-		auto pInfo = std::make_shared<ModTreeDocInfo>(modDoc);
-		DocInfo.push_back(pInfo);
+		DocInfo.push_back(std::make_unique<ModTreeDocInfo>(modDoc));
+		auto & pInfo = DocInfo.back();
 
 		UpdateView(*pInfo, UpdateHint().ModType());
 		if(pInfo->hSong)
@@ -503,7 +503,7 @@ void CModTree::AddDocument(CModDoc &modDoc)
 void CModTree::RemoveDocument(CModDoc &modDoc)
 //--------------------------------------------
 {
-	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
+	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
 	if(doc != DocInfo.end())
 	{
 		DeleteItem((**doc).hSong);
@@ -539,7 +539,7 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 //------------------------------------------------------------------
 {
-	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](std::shared_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
+	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
 	if(doc != DocInfo.end())
 		return doc->get();
 	else
@@ -1269,7 +1269,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	if(rootItemData < DocInfo.size())
 	{
 		m_nDocNdx = rootItemData;
-		auto pInfo = DocInfo[rootItemData];
+		auto &pInfo = DocInfo[rootItemData];
 
 		if(hItem == pInfo->hSong) return ModItem(MODITEM_HDR_SONG);
 		if(hRootParent == pInfo->hSong)
