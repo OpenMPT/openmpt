@@ -80,7 +80,7 @@ protected:
 	RtMidiOut m_midiOut;
 	MidiDevice m_inputDevice;
 	MidiDevice m_outputDevice;
-	bool m_latencyCompensation;
+	bool m_sendTimingInfo;
 
 #ifdef MODPLUG_TRACKER
 	CString m_programName;

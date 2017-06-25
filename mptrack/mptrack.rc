@@ -469,7 +469,8 @@ BEGIN
     LTEXT           "Output Latency:",IDC_STATIC,6,68,60,8
     EDITTEXT        IDC_EDIT1,66,66,36,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,90,60,11,12
-    LTEXT           "ms",IDC_STATIC,108,68,132,8
+    LTEXT           "ms",IDC_STATIC,108,68,24,8
+    CONTROL         "Send timing messages",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,126,66,120,12
 END
 
 IDD_OPTIONS_WINE DIALOGEX 0, 0, 286, 278
@@ -2486,7 +2487,7 @@ BEGIN
     IDR_MAINFRAME           "OpenMPT"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
     ID_PATTERN_CHANNELMANAGER 
-                            "Display channel manager window\nChannel manager"
+                            "Display Channel Manager window\nChannel Manager"
     ID_INDICATOR_CPU        "-"
     ID_FILE_EXPORTCOMPAT    "Export file to standard IT/XM."
     ID_ENVELOPE_SETRELEASENODE "Set release node"

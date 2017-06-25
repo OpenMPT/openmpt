@@ -38,8 +38,10 @@ MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	, m_latency(0.0)
 	, m_inputDevice(m_midiIn)
 	, m_outputDevice(m_midiOut)
-	, m_latencyCompensation(true)
+	, m_sendTimingInfo(true)
+#ifdef MODPLUG_TRACKER
 	, m_programName(_T("Default"))
+#endif // MODPLUG_TRACKER
 //---------------------------------------------------------------------------------------
 {
 	m_mixBuffer.Initialize(2, 2);
@@ -83,6 +85,13 @@ void MidiInOut::RestoreAllParameters(int32 program)
 }
 
 
+enum ChunkFlags
+{
+	//kLatencyCompensation = 0x01,	// implicit in current plugin version
+	kLatencyPresent	= 0x02,	// Latency value is present as double-precision float
+	kIgnoreTiming	= 0x04,	// Do not send timing and sequencing information
+};
+
 size_t MidiInOut::GetChunk(mpt::byte *(&chunk), bool /*isBank*/)
 //--------------------------------------------------------------
 {
@@ -97,10 +106,11 @@ size_t MidiInOut::GetChunk(mpt::byte *(&chunk), bool /*isBank*/)
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_inputDevice.name.size()));
 	mpt::IO::WriteIntLE<uint32>(s, m_outputDevice.index);
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_outputDevice.name.size()));
-	mpt::IO::WriteIntLE<uint32>(s, m_latencyCompensation);
+	mpt::IO::WriteIntLE<uint32>(s, kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming));
 	mpt::IO::WriteRaw(s, programName8.c_str(), programName8.size());
 	mpt::IO::WriteRaw(s, m_inputDevice.name.c_str(), m_inputDevice.name.size());
 	mpt::IO::WriteRaw(s, m_outputDevice.name.c_str(), m_outputDevice.name.size());
+	mpt::IO::WriteIntLE<uint64>(s, IEEE754binary64LE(m_latency).GetInt64());
 	m_chunkData = s.str();
 	chunk = const_cast<mpt::byte *>(mpt::byte_cast<const mpt::byte *>(m_chunkData.c_str()));
 	return m_chunkData.size();
@@ -122,7 +132,7 @@ void MidiInOut::SetChunk(size_t size, mpt::byte *chunk, bool /*isBank*/)
 	uint32 inStrSize = file.ReadUint32LE();
 	MidiDevice::ID outID = file.ReadUint32LE();
 	uint32 outStrSize = file.ReadUint32LE();
-	m_latencyCompensation = file.ReadUint32LE() != 0;
+	uint32 flags = file.ReadUint32LE();
 
 	std::string s;
 	file.ReadString<mpt::String::maybeNullTerminated>(s, nameStrSize);
@@ -167,6 +177,13 @@ void MidiInOut::SetChunk(size_t size, mpt::byte *chunk, bool /*isBank*/)
 			}
 		}
 	}
+
+	if(flags & kLatencyPresent)
+		m_latency = file.ReadDoubleLE();
+	else
+		m_latency = 0.0f;
+
+	m_sendTimingInfo = !(flags & kIgnoreTiming);
 
 	SetParameter(MidiInOut::kInputParameter, DeviceIDToParameter(inID));
 	SetParameter(MidiInOut::kOutputParameter, DeviceIDToParameter(outID));
@@ -242,10 +259,13 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		// Send MIDI clock
 		if(m_nextClock < 1)
 		{
-			Message message;
-			message.time = GetOutputTimestamp();
-			message.msg.assign(1, 0xF8);
-			m_outQueue.push_back(message);
+			if(m_sendTimingInfo)
+			{
+				Message message;
+				message.time = GetOutputTimestamp();
+				message.msg.assign(1, 0xF8);
+				m_outQueue.push_back(message);
+			}
 
 			double bpm = m_SndFile.GetCurrentBPM();
 			if(bpm != 0.0)
@@ -315,7 +335,7 @@ void MidiInOut::Resume()
 	m_clock.SetResolution(1);
 	OpenDevice(m_inputDevice.index, true);
 	OpenDevice(m_outputDevice.index, false);
-	if(m_midiOut.isPortOpen())
+	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
 	{
 		std::vector<unsigned char> message(1, 0xFA);	// Start
 		m_midiOut.sendMessage(&message);
@@ -328,7 +348,7 @@ void MidiInOut::Suspend()
 //-----------------------
 {
 	// Suspend MIDI I/O
-	if(m_midiOut.isPortOpen())
+	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
 	{
 		std::vector<unsigned char> message(1, 0xFC);	// Stop
 		m_midiOut.sendMessage(&message);
@@ -344,8 +364,11 @@ void MidiInOut::Suspend()
 void MidiInOut::PositionChanged()
 //-------------------------------
 {
-	MidiSend(0xFC);	// Stop
-	MidiSend(0xFA);	// Start
+	if(m_sendTimingInfo)
+	{
+		MidiSend(0xFC);	// Stop
+		MidiSend(0xFA);	// Start
+	}
 }
 
 
@@ -462,9 +485,6 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
 	device.name = device.GetPortName(newDevice);
 	//if(m_isResumed)
 	{
-		// Don't open MIDI devices if we're not processing.
-		// This has to be done since we receive MIDI events in processReplacing(),
-		// so if no processing is happening, some irrelevant events might be queued until the next processing happens...
 		MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
 		
 		try
@@ -504,10 +524,7 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 double MidiInOut::GetOutputTimestamp() const
 //------------------------------------------
 {
-	if(m_latencyCompensation)
-		return m_clock.Now() * (1.0 / 1000.0) + GetOutputLatency() + m_latency;
-	else
-		return 0.0;
+	return m_clock.Now() * (1.0 / 1000.0) + GetOutputLatency() + m_latency;
 }
 
 
