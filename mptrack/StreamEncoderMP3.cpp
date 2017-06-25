@@ -665,7 +665,7 @@ private:
 	std::streamoff id3v2Size;
 	FileTags Tags;
 public:
-	MP3LameStreamWriter(const ComponentLame &lame_, std::ostream &stream, bool compatible)
+	MP3LameStreamWriter(const ComponentLame &lame_, std::ostream &stream, bool compatible, const Encoder::Settings &settings, const FileTags &tags)
 		: StreamWriterBase(stream)
 		, lame(lame_)
 		, compatible(compatible)
@@ -675,13 +675,7 @@ public:
 		gfp = lame_t();
 		id3type = ID3v2Lame;
 		id3v2Size = 0;
-	}
-	virtual ~MP3LameStreamWriter()
-	{
-		Finalize();
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
+
 		if(!gfp)
 		{
 			gfp = lame.lame_init();
@@ -847,7 +841,7 @@ public:
 		}
 		WriteBuffer();
 	}
-	virtual void Finalize()
+	virtual ~MP3LameStreamWriter()
 	{
 		if(!gfp)
 		{
@@ -1268,20 +1262,14 @@ private:
 
 	std::vector<int16> samples;
 public:
-	MP3AcmStreamWriter(const ComponentAcmMP3 &acm_, std::ostream &stream)
+	MP3AcmStreamWriter(const ComponentAcmMP3 &acm_, std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags)
 		: StreamWriterBase(stream)
 		, acm(acm_)
 	{
 		acmDriver = NULL;
 		acmStream = NULL;
 		MemsetZero(acmHeader);
-	}
-	virtual ~MP3AcmStreamWriter()
-	{
-		Finalize();
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
+
 		uint32 samplerate = settings.Samplerate;
 		uint16 channels = settings.Channels;
 
@@ -1409,7 +1397,7 @@ public:
 			}
 		}
 	}
-	virtual void Finalize()
+	virtual ~MP3AcmStreamWriter()
 	{
 		if(!acmStream)
 		{
@@ -1529,8 +1517,8 @@ MP3Encoder::~MP3Encoder()
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file) const
-//-------------------------------------------------------------------------------
+std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	std::unique_ptr<IAudioStreamEncoder> result = nullptr;
 	if(false)
@@ -1539,12 +1527,12 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 #ifdef MPT_MP3ENCODER_LAME
 	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
-		result = mpt::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible));
+		result = mpt::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible), settings, tags);
 #endif // MPT_MP3ENCODER_LAME
 #ifdef MPT_MP3ENCODER_ACM
 	} else if(m_Type == MP3EncoderACM)
 	{
-		result = mpt::make_unique<MP3AcmStreamWriter>(*m_Acm, file);
+		result = mpt::make_unique<MP3AcmStreamWriter>(*m_Acm, file, settings, tags);
 #endif // MPT_MP3ENCODER_ACM
 	}
 	return std::move(result);

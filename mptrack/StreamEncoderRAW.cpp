@@ -26,63 +26,19 @@ OPENMPT_NAMESPACE_BEGIN
 class RawStreamWriter : public IAudioStreamEncoder
 {
 private:
-	bool inited;
-	bool started;
 	const RAWEncoder &enc;
 	std::ostream &f;
 	Encoder::Format formatInfo;
 
-private:
-	void StartStream()
-	{
-		ASSERT(inited && !started);
-
-		started = true;
-		ASSERT(inited && started);
-	}
-	void FinishStream()
-	{
-		if(inited)
-		{
-			if(!started)
-			{
-				StartStream();
-			}
-			ASSERT(inited && started);
-
-			started = false;
-			inited = false;
-		}
-		ASSERT(!inited && !started);
-	}
 public:
-	RawStreamWriter(const RAWEncoder &enc_, std::ostream &file)
+	RawStreamWriter(const RAWEncoder &enc_, std::ostream &file, const Encoder::Settings &settings, const FileTags &tags)
 		: enc(enc_)
 		, f(file)
 	{
-		inited = false;
-		started = false;
-	}
-	virtual ~RawStreamWriter()
-	{
-		FinishStream();
-		ASSERT(!inited && !started);
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
-
-		FinishStream();
-
-		ASSERT(!inited && !started);
-
 		formatInfo = enc.GetTraits().formats[settings.Format];
 		ASSERT(formatInfo.Sampleformat.IsValid());
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
-
-		inited = true;
-
-		ASSERT(inited && !started);
 
 		MPT_UNREFERENCED_PARAMETER(tags);
 	}
@@ -93,26 +49,15 @@ public:
 	}
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
 	{
-		ASSERT(inited);
-		if(!started)
-		{
-			StartStream();
-		}
-		ASSERT(inited && started);
-
 		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample() / 8));
-
 	}
 	virtual void WriteCues(const std::vector<uint64> &cues)
 	{
-		ASSERT(inited);
 		MPT_UNREFERENCED_PARAMETER(cues);
 	}
-	virtual void Finalize()
+	virtual ~RawStreamWriter()
 	{
-		ASSERT(inited);
-		FinishStream();
-		ASSERT(!inited && !started);
+		// nothing
 	}
 };
 
@@ -176,14 +121,14 @@ RAWEncoder::~RAWEncoder()
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ostream &file) const
-//-----------------------------------------------------------------------------------------------
+std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<RawStreamWriter>(*this, file);
+	return mpt::make_unique<RawStreamWriter>(*this, file, settings, tags);
 }
 
 

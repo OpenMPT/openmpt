@@ -26,7 +26,7 @@ class WAVEncoder : public EncoderFactoryBase
 
 public:
 
-	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file) const;
+	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const;
 	bool IsAvailable() const;
 
 public:

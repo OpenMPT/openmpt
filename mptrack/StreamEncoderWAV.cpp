@@ -26,81 +26,34 @@ OPENMPT_NAMESPACE_BEGIN
 class WavStreamWriter : public IAudioStreamEncoder
 {
 private:
-	bool inited;
-	bool started;
+
 	const WAVEncoder &enc;
 	std::ostream &f;
 	WAVWriter *fileWAV;
 	Encoder::Format formatInfo;
-	bool writeTags;
 
-private:
-	void StartStream()
-	{
-		ASSERT(inited && !started);
-
-		fileWAV->StartChunk(RIFFChunk::iddata);
-
-		started = true;
-		ASSERT(inited && started);
-	}
-	void FinishStream()
-	{
-		if(inited)
-		{
-			if(!started)
-			{
-				StartStream();
-			}
-			ASSERT(inited && started);
-
-			fileWAV->Finalize();
-			delete fileWAV;
-			
-			started = false;
-			inited = false;
-		}
-		ASSERT(!inited && !started);
-	}
 public:
-	WavStreamWriter(const WAVEncoder &enc_, std::ostream &file)
+	WavStreamWriter(const WAVEncoder &enc_, std::ostream &file, const Encoder::Settings &settings, const FileTags &tags)
 		: enc(enc_)
 		, f(file)
 		, fileWAV(nullptr)
 	{
-		inited = false;
-		started = false;
-	}
-	virtual ~WavStreamWriter()
-	{
-		FinishStream();
-		ASSERT(!inited && !started);
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
-
-		FinishStream();
-
-		ASSERT(!inited && !started);
 
 		formatInfo = enc.GetTraits().formats[settings.Format];
 		ASSERT(formatInfo.Sampleformat.IsValid());
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
 
-		writeTags = settings.Tags;
-
 		fileWAV = new WAVWriter(&f);
 		fileWAV->WriteFormat(formatInfo.Samplerate, formatInfo.Sampleformat.GetBitsPerSample(), (uint16)formatInfo.Channels, formatInfo.Sampleformat.IsFloat() ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
 
-		inited = true;
-
-		ASSERT(inited && !started);
-
-		if(writeTags)
+		if(settings.Tags)
 		{
 			fileWAV->WriteMetatags(tags);
 		}
+
+		fileWAV->StartChunk(RIFFChunk::iddata);
+
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
@@ -109,19 +62,10 @@ public:
 	}
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
 	{
-		ASSERT(inited);
-		if(!started)
-		{
-			StartStream();
-		}
-		ASSERT(inited && started);
-
 		fileWAV->WriteBuffer(data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
-
 	}
 	virtual void WriteCues(const std::vector<uint64> &cues)
 	{
-		ASSERT(inited);
 		if(!cues.empty())
 		{
 			// Cue point header
@@ -145,11 +89,10 @@ public:
 			}
 		}
 	}
-	virtual void Finalize()
+	virtual ~WavStreamWriter()
 	{
-		ASSERT(inited);
-		FinishStream();
-		ASSERT(!inited && !started);
+		fileWAV->Finalize();
+		delete fileWAV;
 	}
 };
 
@@ -213,14 +156,14 @@ WAVEncoder::~WAVEncoder()
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file) const
-//-------------------------------------------------------------------------------
+std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<WavStreamWriter>(*this, file);
+	return mpt::make_unique<WavStreamWriter>(*this, file, settings, tags);
 }
 
 

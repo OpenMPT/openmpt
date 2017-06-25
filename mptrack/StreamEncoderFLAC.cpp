@@ -27,11 +27,8 @@ OPENMPT_NAMESPACE_BEGIN
 class FLACStreamWriter : public StreamWriterBase
 {
 private:
-	bool inited;
-	bool started;
 	const FLACEncoder &enc;
 	Encoder::Format formatInfo;
-	bool writeTags;
 	FLAC__StreamMetadata *flac_metadata[1];
 	FLAC__StreamEncoder *encoder;
 	std::vector<FLAC__int32> sampleBuf;
@@ -75,40 +72,6 @@ private:
 		return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
 	}
 private:
-	void StartStream()
-	{
-		ASSERT(inited && !started);
-
-		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
-
-		started = true;
-		ASSERT(inited && started);
-	}
-	void FinishStream()
-	{
-		if(inited)
-		{
-			if(!started)
-			{
-				StartStream();
-			}
-			ASSERT(inited && started);
-
-			FLAC__stream_encoder_finish(encoder);
-			FLAC__stream_encoder_delete(encoder);
-			encoder = nullptr;
-
-			if(flac_metadata[0])
-			{
-				FLAC__metadata_object_delete(flac_metadata[0]);
-				flac_metadata[0] = nullptr;
-			}
-
-			started = false;
-			inited = false;
-		}
-		ASSERT(!inited && !started);
-	}
 	void AddCommentField(const std::string &field, const mpt::ustring &data)
 	{
 		if(!field.empty() && !data.empty())
@@ -119,35 +82,17 @@ private:
 		}
 	}
 public:
-	FLACStreamWriter(const FLACEncoder &enc_, std::ostream &stream)
+	FLACStreamWriter(const FLACEncoder &enc_, std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags)
 		: StreamWriterBase(stream)
 		, enc(enc_)
 	{
-		inited = false;
-		started = false;
-
-		writeTags = false;
 		flac_metadata[0] = nullptr;
 		encoder = nullptr;
-
-	}
-	virtual ~FLACStreamWriter()
-	{
-		FinishStream();
-		ASSERT(!inited && !started);
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
-		FinishStream();
-
-		ASSERT(!inited && !started);
 
 		formatInfo = enc.GetTraits().formats[settings.Format];
 		ASSERT(formatInfo.Sampleformat.IsValid());
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
-
-		writeTags = settings.Tags;
 
 		encoder = FLAC__stream_encoder_new();
 
@@ -158,11 +103,7 @@ public:
 		int compressionLevel = StreamEncoderSettings::Instance().FLACCompressionLevel;
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
 		
-		inited = true;
-
-		ASSERT(inited && !started);
-
-		if(writeTags)
+		if(settings.Tags)
 		{
 			flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
 			AddCommentField("ENCODER",     tags.encoder);
@@ -178,6 +119,9 @@ public:
 			AddCommentField("TRACKNUMBER", tags.trackno        );
 			FLAC__stream_encoder_set_metadata(encoder, flac_metadata, 1);
 		}
+
+		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
+
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
@@ -186,12 +130,6 @@ public:
 	}
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
 	{
-		ASSERT(inited);
-		if(!started)
-		{
-			StartStream();
-		}
-		ASSERT(inited && started);
 		sampleBuf.resize(frameCount * formatInfo.Channels);
 		switch(formatInfo.Sampleformat.GetBitsPerSample()/8)
 		{
@@ -242,11 +180,17 @@ public:
 			frameCount -= frameCountChunk;
 		}
 	}
-	virtual void Finalize()
+	virtual ~FLACStreamWriter()
 	{
-		ASSERT(inited);
-		FinishStream();
-		ASSERT(!inited && !started);
+		FLAC__stream_encoder_finish(encoder);
+		FLAC__stream_encoder_delete(encoder);
+		encoder = nullptr;
+
+		if(flac_metadata[0])
+		{
+			FLAC__metadata_object_delete(flac_metadata[0]);
+			flac_metadata[0] = nullptr;
+		}
 	}
 };
 
@@ -302,14 +246,14 @@ FLACEncoder::~FLACEncoder()
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file) const
-//--------------------------------------------------------------------------------
+std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<FLACStreamWriter>(*this, file);
+	return mpt::make_unique<FLACStreamWriter>(*this, file, settings, tags);
 }
 
 

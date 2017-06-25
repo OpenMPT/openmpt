@@ -21,7 +21,7 @@ class VorbisEncoder : public EncoderFactoryBase
 
 public:
 
-	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file) const;
+	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const;
 	mpt::ustring DescribeQuality(float quality) const;
 	bool IsAvailable() const;
 
