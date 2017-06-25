@@ -1731,17 +1731,23 @@ void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
 }
 
 
-size_t CVstPlugin::GetChunk(mpt::byte *(&chunk), bool isBank)
-//-----------------------------------------------------------
+IMixPlugin::ChunkData CVstPlugin::GetChunk(bool isBank)
+//-----------------------------------------------------
 {
-	return Dispatch(effGetChunk, isBank ? 0 : 1, 0, &chunk, 0);
+	mpt::byte *chunk = nullptr;
+	auto size = Dispatch(effGetChunk, isBank ? 0 : 1, 0, &chunk, 0);
+	if(chunk == nullptr)
+	{
+		size = 0;
+	}
+	return ChunkData(chunk, size);
 }
 
 
-void CVstPlugin::SetChunk(size_t size, mpt::byte *chunk, bool isBank)
-//-------------------------------------------------------------------
+void CVstPlugin::SetChunk(const ChunkData &chunk, bool isBank)
+//------------------------------------------------------------
 {
-	Dispatch(effSetChunk, isBank ? 0 : 1, size, chunk, 0);
+	Dispatch(effSetChunk, isBank ? 0 : 1, chunk.size(), const_cast<mpt::byte *>(chunk.data()), 0);
 }
 
 

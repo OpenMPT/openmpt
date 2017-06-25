@@ -59,7 +59,7 @@ protected:
 	float m_NCrossPBack, m_NCrossNBack;
 
 	// Settings chunk for file I/O
-	PluginChunk chunk;
+	PluginChunk m_chunk;
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
@@ -111,8 +111,8 @@ public:
 	virtual int GetNumOutputChannels() const { return 2; }
 
 	virtual bool ProgramsAreChunks() const { return true; }
-	virtual size_t GetChunk(mpt::byte *(&data), bool);
-	virtual void SetChunk(size_t size, mpt::byte *data, bool);
+	virtual ChunkData GetChunk(bool);
+	virtual void SetChunk(const ChunkData &chunk, bool);
 
 protected:
 	void RecalculateEchoParams();

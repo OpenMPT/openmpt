@@ -97,7 +97,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
-				plugin.SetChunk(chunkSize, chunkData, false);
+				plugin.SetChunk(mpt::as_span(chunkData, chunkSize), false);
 				delete[] chunkData;
 			} else
 			{
@@ -148,7 +148,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
-				plugin.SetChunk(chunkSize, chunkData, true);
+				plugin.SetChunk(mpt::as_span(chunkData, chunkSize), true);
 				delete[] chunkData;
 			} else
 			{
@@ -193,12 +193,12 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 
 		if(writeChunk)
 		{
-			mpt::byte *chunk = nullptr;
-			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, true));
-			if(chunkSize && chunk)
+			auto chunk = plugin.GetChunk(true);
+			uint32 chunkSize = mpt::saturate_cast<uint32>(chunk.size());
+			if(chunkSize)
 			{
 				mpt::IO::WriteIntBE(f, chunkSize);
-				mpt::IO::WriteRaw(f, chunk, chunkSize);
+				mpt::IO::WriteRaw(f, chunk.data(), chunkSize);
 			} else
 			{
 				// The plugin returned no chunk! Gracefully go back and save parameters instead...
@@ -251,12 +251,12 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 
 	if(writeChunk)
 	{
-		mpt::byte *chunk = nullptr;
-		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, false));
-		if(chunkSize && chunk)
+		auto chunk = plugin.GetChunk(false);
+		uint32 chunkSize = mpt::saturate_cast<uint32>(chunk.size());
+		if(chunkSize)
 		{
 			mpt::IO::WriteIntBE(f, chunkSize);
-			mpt::IO::WriteRaw(f, chunk, chunkSize);
+			mpt::IO::WriteRaw(f, chunk.data(), chunkSize);
 		} else
 		{
 			// The plugin returned no chunk! Gracefully go back and save parameters instead...

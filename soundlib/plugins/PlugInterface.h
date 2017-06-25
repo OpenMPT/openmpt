@@ -216,9 +216,10 @@ public:
 	virtual int GetNumInputChannels() const = 0;
 	virtual int GetNumOutputChannels() const = 0;
 
+	typedef mpt::const_byte_span ChunkData;
 	virtual bool ProgramsAreChunks() const { return false; }
-	virtual size_t GetChunk(mpt::byte *(&/*chunk*/), bool /*isBank*/) { return 0; }
-	virtual void SetChunk(size_t /*size*/, mpt::byte * /*chunk*/, bool /*isBank*/) { }
+	virtual ChunkData GetChunk(bool /*isBank*/) { return ChunkData(); }
+	virtual void SetChunk(const ChunkData &/*chunk*/, bool /*isBank*/) { }
 };
 
 

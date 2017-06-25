@@ -90,8 +90,8 @@ void DigiBoosterEcho::SaveAllParameters()
 	m_pMixStruct->defaultProgram = -1;
 	try
 	{
-		m_pMixStruct->pluginData.resize(sizeof(chunk));
-		memcpy(m_pMixStruct->pluginData.data(), &chunk, sizeof(chunk));
+		m_pMixStruct->pluginData.resize(sizeof(m_chunk));
+		memcpy(m_pMixStruct->pluginData.data(), &m_chunk, sizeof(m_chunk));
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -103,9 +103,9 @@ void DigiBoosterEcho::SaveAllParameters()
 void DigiBoosterEcho::RestoreAllParameters(int32 program)
 //-------------------------------------------------------
 {
-	if(m_pMixStruct->pluginData.size() == sizeof(chunk) && !memcmp(m_pMixStruct->pluginData.data(), "Echo", 4))
+	if(m_pMixStruct->pluginData.size() == sizeof(m_chunk) && !memcmp(m_pMixStruct->pluginData.data(), "Echo", 4))
 	{
-		memcpy(&chunk, m_pMixStruct->pluginData.data(), sizeof(chunk));
+		memcpy(&m_chunk, m_pMixStruct->pluginData.data(), sizeof(m_chunk));
 	} else
 	{
 		IMixPlugin::RestoreAllParameters(program);
@@ -119,7 +119,7 @@ PlugParamValue DigiBoosterEcho::GetParameter(PlugParamIndex index)
 {
 	if(index < kEchoNumParameters)
 	{
-		return chunk.param[index] / 255.0f;
+		return m_chunk.param[index] / 255.0f;
 	}
 	return 0;
 }
@@ -130,7 +130,7 @@ void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
 	if(index < kEchoNumParameters)
 	{
-		chunk.param[index] = Util::Round<uint8>(value * 255.0f);
+		m_chunk.param[index] = Util::Round<uint8>(value * 255.0f);
 		RecalculateEchoParams();
 	}
 }
@@ -186,11 +186,11 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 	CString s;
 	if(param == kEchoMix)
 	{
-		int wet = (chunk.param[kEchoMix] * 100) / 255;
+		int wet = (m_chunk.param[kEchoMix] * 100) / 255;
 		s.Format(_T("%d%% / %d%%"), wet, 100 - wet);
 	} else if(param < kEchoNumParameters)
 	{
-		int val = chunk.param[param];
+		int val = m_chunk.param[param];
 		if(param == kEchoDelay)
 			val *= 2;
 		s.Format(_T("%d"), val);
@@ -201,20 +201,21 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 #endif // MODPLUG_TRACKER
 
 
-size_t DigiBoosterEcho::GetChunk(mpt::byte *(&data), bool)
-//--------------------------------------------------------
+IMixPlugin::ChunkData DigiBoosterEcho::GetChunk(bool)
+//---------------------------------------------------
 {
-	data = reinterpret_cast<mpt::byte *>(&chunk);
-	return sizeof(chunk);
+	auto data = reinterpret_cast<const mpt::byte *>(&m_chunk);
+	return ChunkData(data, sizeof(m_chunk));
 }
 
 
-void DigiBoosterEcho::SetChunk(size_t size, mpt::byte *data, bool)
-//----------------------------------------------------------------
+void DigiBoosterEcho::SetChunk(const ChunkData &chunk, bool)
+//----------------------------------------------------------
 {
-	if(size == sizeof(chunk) && !memcmp(data, "Echo", 4))
+	auto data = chunk.data();
+	if(chunk.size() == sizeof(chunk) && !memcmp(data, "Echo", 4))
 	{
-		memcpy(&chunk, data, size);
+		memcpy(&m_chunk, data, chunk.size());
 		RecalculateEchoParams();
 	}
 }
@@ -223,13 +224,13 @@ void DigiBoosterEcho::SetChunk(size_t size, mpt::byte *data, bool)
 void DigiBoosterEcho::RecalculateEchoParams()
 //-------------------------------------------
 {
-	m_delayTime = (chunk.param[kEchoDelay] * m_sampleRate + 250) / 500;
-	m_PMix = (chunk.param[kEchoMix]) * (1.0f / 256.0f);
-	m_NMix = (256 - chunk.param[kEchoMix]) * (1.0f / 256.0f);
-	m_PCrossPBack = (chunk.param[kEchoCross] * chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
-	m_PCrossNBack = (chunk.param[kEchoCross] * (256 - chunk.param[kEchoFeedback])) * (1.0f / 65536.0f);
-	m_NCrossPBack = ((chunk.param[kEchoCross] - 256) * chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
-	m_NCrossNBack = ((chunk.param[kEchoCross] - 256) * (chunk.param[kEchoFeedback] - 256)) * (1.0f / 65536.0f);
+	m_delayTime = (m_chunk.param[kEchoDelay] * m_sampleRate + 250) / 500;
+	m_PMix = (m_chunk.param[kEchoMix]) * (1.0f / 256.0f);
+	m_NMix = (256 - m_chunk.param[kEchoMix]) * (1.0f / 256.0f);
+	m_PCrossPBack = (m_chunk.param[kEchoCross] * m_chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
+	m_PCrossNBack = (m_chunk.param[kEchoCross] * (256 - m_chunk.param[kEchoFeedback])) * (1.0f / 65536.0f);
+	m_NCrossPBack = ((m_chunk.param[kEchoCross] - 256) * m_chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
+	m_NCrossNBack = ((m_chunk.param[kEchoCross] - 256) * (m_chunk.param[kEchoFeedback] - 256)) * (1.0f / 65536.0f);
 }
 
 OPENMPT_NAMESPACE_END
