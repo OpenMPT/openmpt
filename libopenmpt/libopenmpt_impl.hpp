@@ -81,7 +81,7 @@ protected:
 	}; // struct subsong_data
 	typedef std::vector<subsong_data> subsongs_type;
 	static const std::int32_t all_subsongs = -1;
-	std::shared_ptr<log_interface> m_Log;
+	std::unique_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	std::int32_t m_current_subsong;
 	double m_currentPositionSeconds;
@@ -115,19 +115,19 @@ protected:
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
-	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log );
+	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log );
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
-	static double could_open_probability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log );
-	static double could_open_probability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
-	module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
-	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	static double could_open_probability( callback_stream_wrapper stream, double effort, std::unique_ptr<log_interface> log );
+	static double could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log );
+	module_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::vector<char> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::uint8_t * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const char * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const void * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	~module_impl();
 public:
 	void select_subsong( std::int32_t subsong );
@@ -186,6 +186,14 @@ public:
 	std::string ctl_get( std::string ctl, bool throw_if_unknown = true ) const;
 	void ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown = true );
 }; // class module_impl
+
+namespace helper {
+
+template<typename T, typename... Args> std::unique_ptr<T> make_unique(Args&&... args) {
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+} // namespace helper
 
 } // namespace openmpt
 

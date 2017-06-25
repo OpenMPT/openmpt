@@ -80,10 +80,10 @@ bool is_extension_supported( const std::string & extension ) {
 }
 
 double could_open_probability( std::istream & stream, double effort, std::ostream & log ) {
-	return openmpt::module_impl::could_open_probability( stream, effort, std::make_shared<std_ostream_log>( log ) );
+	return openmpt::module_impl::could_open_probability( stream, effort, openmpt::helper::make_unique<std_ostream_log>( log ) );
 }
 double could_open_propability( std::istream & stream, double effort, std::ostream & log ) {
-	return openmpt::module_impl::could_open_probability( stream, effort, std::make_shared<std_ostream_log>( log ) );
+	return openmpt::module_impl::could_open_probability( stream, effort, openmpt::helper::make_unique<std_ostream_log>( log ) );
 }
 
 #if defined(_MSC_VER)
@@ -112,35 +112,35 @@ void module::set_impl( module_impl * i ) {
 }
 
 module::module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( stream, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const std::vector<std::uint8_t> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( data, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( beg, end - beg, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const std::uint8_t * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( data, size, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( data, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const char * beg, const char * end, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( beg, end - beg, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( data, size, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
-	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	impl = new module_impl( data, size, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 }
 
 module::~module() {
@@ -331,19 +331,19 @@ void module::ctl_set( const std::string & ctl, const std::string & value ) {
 }
 
 module_ext::module_ext( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( stream, std::make_shared<std_ostream_log>( log ), ctls );
+	ext_impl = new module_ext_impl( stream, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 	set_impl( ext_impl );
 }
 module_ext::module_ext( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+	ext_impl = new module_ext_impl( data, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 	set_impl( ext_impl );
 }
 module_ext::module_ext( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	ext_impl = new module_ext_impl( data, size, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 	set_impl( ext_impl );
 }
 module_ext::module_ext( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {
-	ext_impl = new module_ext_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+	ext_impl = new module_ext_impl( data, size, openmpt::helper::make_unique<std_ostream_log>( log ), ctls );
 	set_impl( ext_impl );
 }
 module_ext::~module_ext() {

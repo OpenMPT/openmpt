@@ -465,7 +465,7 @@ double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks
 double openmpt_could_open_probability2( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
 	try {
 		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-		return openmpt::module_impl::could_open_probability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, loguser ) );
+		return openmpt::module_impl::could_open_probability( istream, effort, openmpt::helper::make_unique<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, loguser ) );
 	} catch ( ... ) {
 		openmpt::report_exception( __FUNCTION__, logfunc, loguser, errfunc, erruser, error, error_message );
 	}
@@ -502,7 +502,7 @@ openmpt_module * openmpt_module_create2( openmpt_stream_callbacks stream_callbac
 				}
 			}
 			openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
+			mod->impl = new openmpt::module_impl( istream, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
 			openmpt::report_exception( __FUNCTION__, mod, error, error_message );
@@ -550,7 +550,7 @@ openmpt_module * openmpt_module_create_from_memory2( const void * filedata, size
 					}
 				}
 			}
-			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
+			mod->impl = new openmpt::module_impl( filedata, filesize, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
 			openmpt::report_exception( __FUNCTION__, mod, error, error_message );
@@ -1284,7 +1284,7 @@ openmpt_module_ext * openmpt_module_ext_create( openmpt_stream_callbacks stream_
 				}
 			}
 			openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
-			mod_ext->impl = new openmpt::module_ext_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
+			mod_ext->impl = new openmpt::module_ext_impl( istream, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			mod->impl = mod_ext->impl;
 			return mod_ext;
 		} catch ( ... ) {
@@ -1333,7 +1333,7 @@ openmpt_module_ext * openmpt_module_ext_create_from_memory( const void * filedat
 					}
 				}
 			}
-			mod_ext->impl = new openmpt::module_ext_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
+			mod_ext->impl = new openmpt::module_ext_impl( filedata, filesize, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			mod->impl = mod_ext->impl;
 			return mod_ext;
 		} catch ( ... ) {

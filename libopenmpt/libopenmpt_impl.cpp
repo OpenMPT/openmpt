@@ -294,9 +294,9 @@ void std_ostream_log::log( const std::string & message ) const {
 
 class log_forwarder : public ILog {
 private:
-	std::shared_ptr<log_interface> destination;
+	log_interface & destination;
 public:
-	log_forwarder( std::shared_ptr<log_interface> dest ) : destination(dest) {
+	log_forwarder( log_interface & dest ) : destination(dest) {
 		return;
 	}
 	virtual ~log_forwarder() {
@@ -304,7 +304,7 @@ public:
 	}
 private:
 	void AddToLog( LogLevel level, const mpt::ustring & text ) const {
-		destination->log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
+		destination.log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
 	}
 }; // class log_forwarder
 
@@ -449,7 +449,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = mpt::make_unique<CSoundFile>();
 	m_loaded = false;
 	m_Dither = mpt::make_unique<Dither>(mpt::global_prng());
-	m_LogForwarder = mpt::make_unique<log_forwarder>(m_Log);
+	m_LogForwarder = mpt::make_unique<log_forwarder>( *m_Log );
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
@@ -586,9 +586,9 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), &tolower_char);
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
-double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
+double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log ) {
 	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-	std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( log );
+	std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
 	sndFile->SetCustomLog( logForwarder.get() );
 
 	try {
@@ -620,19 +620,19 @@ double module_impl::could_open_probability( const OpenMPT::FileReader & file, do
 	}
 
 }
-double module_impl::could_open_probability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log ) {
+double module_impl::could_open_probability( callback_stream_wrapper stream, double effort, std::unique_ptr<log_interface> log ) {
 	CallbackStream fstream;
 	fstream.stream = stream.stream;
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	return could_open_probability( make_FileReader( fstream ), effort, log );
+	return could_open_probability( make_FileReader( fstream ), effort, std::move(log) );
 }
-double module_impl::could_open_probability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
-	return could_open_probability( make_FileReader( &stream ), effort, log );
+double module_impl::could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log ) {
+	return could_open_probability( make_FileReader( &stream ), effort, std::move(log) );
 }
 
-module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	CallbackStream fstream;
 	fstream.stream = stream.stream;
@@ -642,32 +642,32 @@ module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_in
 	load( make_FileReader( fstream ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( const std::vector<char> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( const char * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data, size ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+module_impl::module_impl( const void * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::as_span( mpt::void_cast< const mpt::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();

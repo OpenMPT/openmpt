@@ -22,25 +22,25 @@ using namespace OpenMPT;
 
 namespace openmpt {
 
-	module_ext_impl::module_ext_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, log, ctls ) {
+	module_ext_impl::module_ext_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, log, ctls ) {
+	module_ext_impl::module_ext_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, log, ctls ) {
+	module_ext_impl::module_ext_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, log, ctls ) {
+	module_ext_impl::module_ext_impl( const std::vector<char> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
+	module_ext_impl::module_ext_impl( const std::uint8_t * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
+	module_ext_impl::module_ext_impl( const char * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::move(log), ctls ) {
 		ctor();
 	}
-	module_ext_impl::module_ext_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, log, ctls ) {
+	module_ext_impl::module_ext_impl( const void * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::move(log), ctls ) {
 		ctor();
 	}
 
