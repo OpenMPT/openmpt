@@ -60,13 +60,6 @@ StreamWriterBase::~StreamWriterBase()
 }
 
 
-void StreamWriterBase::WriteMetatags(const FileTags &tags)
-//--------------------------------------------------------
-{
-	MPT_UNREFERENCED_PARAMETER(tags);
-}
-
-
 void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const char *data)
 //-----------------------------------------------------------------------------------
 {

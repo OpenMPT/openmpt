@@ -1047,14 +1047,10 @@ void CDoWaveConvert::Run()
 	if(!m_dwFileLimit) m_dwFileLimit = Util::MaxValueOfType(m_dwFileLimit) >> 10;
 	m_dwFileLimit <<= 10;
 
-	fileEnc->SetFormat(encSettings);
-	if(encSettings.Tags)
-	{
-		// Tags must be written before audio data,
-		// so that the encoder class could write them before audio data if mandated by the format,
-		// otherwise they should just be cached by the encoder.
-		fileEnc->WriteMetatags(m_Settings.Tags);
-	}
+	// Tags must be known at the stream start,
+	// so that the encoder class could write them before audio data if mandated by the format,
+	// otherwise they should just be cached by the encoder.
+	fileEnc->Start(encSettings, m_Settings.Tags);
 
 	ullMaxSamples = m_dwFileLimit / (channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
 	if (m_dwSongLimit)

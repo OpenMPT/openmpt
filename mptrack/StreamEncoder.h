@@ -228,8 +228,7 @@ public:
 	virtual ~IAudioStreamEncoder() { }
 public:
 	// Call the following functions exactly in this order.
-	virtual void SetFormat(const Encoder::Settings &settings) = 0;
-	virtual void WriteMetatags(const FileTags &tags) = 0; // optional
+	virtual void Start(const Encoder::Settings &settings, const FileTags &tags) = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
@@ -250,8 +249,7 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual void SetFormat(const Encoder::Settings &settings) = 0;
-	virtual void WriteMetatags(const FileTags &tags);
+	virtual void Start(const Encoder::Settings &settings, const FileTags &tags) = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);
 	virtual void WriteCues(const std::vector<uint64> &cues);
