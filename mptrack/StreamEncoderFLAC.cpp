@@ -136,7 +136,7 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(const Encoder::Settings &settings)
+	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
 	{
 		FinishStream();
 
@@ -161,14 +161,11 @@ public:
 		inited = true;
 
 		ASSERT(inited && !started);
-	}
-	virtual void WriteMetatags(const FileTags &tags)
-	{
-		ASSERT(inited && !started);
-		flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
-		AddCommentField("ENCODER", tags.encoder);
+
 		if(writeTags)
 		{
+			flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
+			AddCommentField("ENCODER",     tags.encoder);
 			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
@@ -179,8 +176,8 @@ public:
 			AddCommentField("CONTACT",     tags.url            );
 			AddCommentField("BPM",         tags.bpm            ); // non-standard
 			AddCommentField("TRACKNUMBER", tags.trackno        );
+			FLAC__stream_encoder_set_metadata(encoder, flac_metadata, 1);
 		}
-		FLAC__stream_encoder_set_metadata(encoder, flac_metadata, 1);
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{

@@ -76,7 +76,7 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(const Encoder::Settings &settings)
+	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
 	{
 
 		FinishStream();
@@ -96,10 +96,7 @@ public:
 		inited = true;
 
 		ASSERT(inited && !started);
-	}
-	virtual void WriteMetatags(const FileTags &tags)
-	{
-		ASSERT(inited && !started);
+
 		if(writeTags)
 		{
 			fileWAV->WriteMetatags(tags);
