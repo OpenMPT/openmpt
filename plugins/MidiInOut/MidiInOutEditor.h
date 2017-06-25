@@ -46,7 +46,7 @@ public:
 protected:
 
 	// Update lists of available input / output devices
-	void PopulateLists();
+	static void PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput);
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
 
@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnInputChanged();
 	afx_msg void OnOutputChanged();
 	afx_msg void OnLatencyChanged();
+	afx_msg void OnTimingMessagesChanged();
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -25,6 +25,7 @@ BEGIN_MESSAGE_MAP(MidiInOutEditor, CAbstractVstEditor)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnInputChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnOutputChanged)
 	ON_EN_CHANGE(IDC_EDIT1,			OnLatencyChanged)
+	ON_COMMAND(IDC_CHECK1,			OnTimingMessagesChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -54,72 +55,48 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
 	Create(IDD_MIDI_IO_PLUGIN, parent);
-	SetDlgItemInt(IDC_EDIT1, Util::Round<int>(static_cast<MidiInOut &>(m_VstPlugin).m_latency * 1000.0), TRUE);
-	m_latencySpin.SetRange32(Util::Round<int>(m_VstPlugin.GetOutputLatency() * -1000.0), int32_max);
-	PopulateLists();
+	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+	SetDlgItemInt(IDC_EDIT1, Util::Round<int>(plugin.m_latency * 1000.0), TRUE);
+	m_latencySpin.SetRange32(Util::Round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
+	PopulateList(m_inputCombo, plugin.m_midiIn,  plugin.m_inputDevice, true);
+	PopulateList(m_outputCombo, plugin.m_midiOut, plugin.m_outputDevice, false);
+	CheckDlgButton(IDC_CHECK1, plugin.m_sendTimingInfo ? BST_CHECKED : BST_UNCHECKED);
 	m_locked = false;
 	return CAbstractVstEditor::OpenEditor(parent);
 }
 
 
 // Update lists of available input / output devices
-void MidiInOutEditor::PopulateLists()
-//-----------------------------------
+void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput)
+//----------------------------------------------------------------------------------------------------------
 {
-	// Clear lists
-	m_inputCombo.SetRedraw(FALSE);
-	m_outputCombo.SetRedraw(FALSE);
-	m_inputCombo.ResetContent();
-	m_outputCombo.ResetContent();
+	combo.SetRedraw(FALSE);
+	combo.ResetContent();
 
-	// Add dummy devices
-	m_inputCombo.SetItemData(m_inputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
-	m_outputCombo.SetItemData(m_outputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
-
-	int selectInputItem = 0;
-	int selectOutputItem = 0;
-	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+	// Add dummy device
+	combo.SetItemData(combo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
 
 	// Go through all RtMidi devices
-	unsigned int ports = plugin.m_midiIn.getPortCount();
+	auto ports = rtDevice.getPortCount();
+	int selectedItem = 0;
 	CString portName;
 	for(unsigned int i = 0; i < ports; i++)
 	{
 		try
 		{
-			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_inputDevice.GetPortName(i)), true);
-			int result = m_inputCombo.AddString(portName);
-			m_inputCombo.SetItemData(result, i);
+			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, midiDevice.GetPortName(i)), isInput);
+			int result = combo.AddString(portName);
+			combo.SetItemData(result, i);
 
-			if(result != CB_ERR && i == plugin.m_inputDevice.index)
-				selectInputItem = result;
-		}
-		catch(RtMidiError &)
-		{
-		}
-	}
-
-	ports = plugin.m_midiOut.getPortCount();
-	for(unsigned int i = 0; i < ports; i++)
-	{
-		try
-		{
-			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, plugin.m_outputDevice.GetPortName(i)), false);
-			int result = m_outputCombo.AddString(portName);
-			m_outputCombo.SetItemData(result, i);
-
-			if(result != CB_ERR && i == plugin.m_outputDevice.index)
-				selectOutputItem = result;
+			if(result != CB_ERR && i == midiDevice.index)
+				selectedItem = result;
 		} catch(RtMidiError &)
 		{
 		}
 	}
 
-	// Set selections to current devices
-	m_inputCombo.SetCurSel(selectInputItem);
-	m_outputCombo.SetCurSel(selectOutputItem);
-	m_inputCombo.SetRedraw(TRUE);
-	m_outputCombo.SetRedraw(TRUE);
+	combo.SetCurSel(selectedItem);
+	combo.SetRedraw(TRUE);
 }
 
 
@@ -172,6 +149,18 @@ void MidiInOutEditor::OnLatencyChanged()
 	if(success && !m_locked)
 	{
 		plugin.m_latency = value * (1.0 / 1000.0);
+		plugin.SetModified();
+	}
+}
+
+
+void MidiInOutEditor::OnTimingMessagesChanged()
+//---------------------------------------------
+{
+	if(!m_locked)
+	{
+		MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+		plugin.m_sendTimingInfo = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 		plugin.SetModified();
 	}
 }
