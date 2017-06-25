@@ -36,7 +36,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2015 || goto err
 %PREMAKE% --group=openmpt123 vs2015 || goto err
 %PREMAKE% --group=PluginBridge vs2015 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2015 || goto err
 %PREMAKE% --group=OpenMPT vs2015 || goto err
 %PREMAKE% --group=all-externals vs2015 || goto err
 
@@ -49,7 +48,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2017 || goto err
 %PREMAKE% --group=openmpt123 vs2017 || goto err
 %PREMAKE% --group=PluginBridge vs2017 || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2017 || goto err
 %PREMAKE% --group=OpenMPT vs2017 || goto err
 %PREMAKE% --group=all-externals vs2017 || goto err
 
@@ -62,7 +60,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2015 --xp || goto err
 %PREMAKE% --group=openmpt123 vs2015 --xp || goto err
 %PREMAKE% --group=PluginBridge vs2015 --xp || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2015 --xp || goto err
 %PREMAKE% --group=OpenMPT vs2015 --xp || goto err
 %PREMAKE% --group=all-externals vs2015 --xp || goto err
 
@@ -75,7 +72,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2017 --xp || goto err
 %PREMAKE% --group=openmpt123 vs2017 --xp || goto err
 %PREMAKE% --group=PluginBridge vs2017 --xp || goto err
-%PREMAKE% --group=OpenMPT-VSTi vs2017 --xp || goto err
 %PREMAKE% --group=OpenMPT vs2017 --xp || goto err
 %PREMAKE% --group=all-externals vs2017 --xp || goto err
 
