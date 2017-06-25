@@ -922,24 +922,22 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, silencePlugBuffers(false)
 	, outputToSample(false)
 {
-	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
+	for(const auto & factory : EncoderFactories)
 	{
-		const Encoder::Traits &encTraits = EncoderFactories[i]->GetTraits();
+		const Encoder::Traits &encTraits = factory->GetTraits();
 		EncoderSettings.push_back(
-			std::shared_ptr<Encoder::Settings>(
-				new Encoder::Settings(
-					conf,
-					encTraits.encoderSettingsName,
-					encTraits.canCues,
-					encTraits.canTags,
-					encTraits.defaultSamplerate,
-					encTraits.defaultChannels,
-					encTraits.defaultMode,
-					encTraits.defaultBitrate,
-					encTraits.defaultQuality,
-					encTraits.defaultFormat,
-					encTraits.defaultDitherType
-				)
+			mpt::make_unique<Encoder::Settings>(
+				conf,
+				encTraits.encoderSettingsName,
+				encTraits.canCues,
+				encTraits.canTags,
+				encTraits.defaultSamplerate,
+				encTraits.defaultChannels,
+				encTraits.defaultMode,
+				encTraits.defaultBitrate,
+				encTraits.defaultQuality,
+				encTraits.defaultFormat,
+				encTraits.defaultDitherType
 			)
 		);
 	}
