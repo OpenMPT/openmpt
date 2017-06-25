@@ -1367,14 +1367,16 @@ void CViewPattern::OnPatternProperties()
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc && pModDoc->GetrSoundFile().Patterns.IsValidPat(m_nPattern))
+	PATTERNINDEX pat = m_nPattern;
+	if(pModDoc && pModDoc->GetrSoundFile().Patterns.IsValidPat(pat))
 	{
-		CPatternPropertiesDlg dlg(*pModDoc, m_nPattern, this);
+		CPatternPropertiesDlg dlg(*pModDoc, pat, this);
 		if(dlg.DoModal() == IDOK)
 		{
 			UpdateScrollSize();
 			InvalidatePattern(true);
 			SanitizeCursor();
+			pModDoc->UpdateAllViews(this, PatternHint(pat).Data(), this);
 		}
 	}
 }
