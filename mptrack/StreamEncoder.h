@@ -227,12 +227,9 @@ protected:
 public:
 	virtual ~IAudioStreamEncoder() { }
 public:
-	// Call the following functions exactly in this order.
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags) = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
-	virtual void Finalize() = 0;
 };
 
 
@@ -249,11 +246,9 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags) = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);
 	virtual void WriteCues(const std::vector<uint64> &cues);
-	virtual void Finalize() = 0;
 protected:
 	void WriteBuffer();
 };
@@ -270,7 +265,7 @@ protected:
 	virtual ~EncoderFactoryBase() { }
 	void SetTraits(const Encoder::Traits &traits);
 public:
-	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file) const = 0;
+	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const = 0;
 	const Encoder::Traits &GetTraits() const
 	{
 		return m_Traits;

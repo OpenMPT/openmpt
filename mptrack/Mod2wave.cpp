@@ -992,7 +992,6 @@ void CDoWaveConvert::Run()
 	const uint16 channels = encSettings.Channels;
 
 	ASSERT(m_Settings.GetEncoderFactory() && m_Settings.GetEncoderFactory()->IsAvailable());
-	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
 #ifndef NO_PLUGINS
@@ -1050,7 +1049,7 @@ void CDoWaveConvert::Run()
 	// Tags must be known at the stream start,
 	// so that the encoder class could write them before audio data if mandated by the format,
 	// otherwise they should just be cached by the encoder.
-	fileEnc->Start(encSettings, m_Settings.Tags);
+	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream, encSettings, m_Settings.Tags);
 
 	ullMaxSamples = m_dwFileLimit / (channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
 	if (m_dwSongLimit)
@@ -1340,7 +1339,6 @@ void CDoWaveConvert::Run()
 		m_SndFile.m_PatternCuePoints.clear();
 	}
 
-	fileEnc->Finalize();
 	fileEnc = nullptr;
 
 	fileStream.flush();

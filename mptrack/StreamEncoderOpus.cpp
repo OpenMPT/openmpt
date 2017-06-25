@@ -61,13 +61,6 @@ private:
 	OpusEncCallbacks ope_callbacks;
 	OggOpusComments *ope_comments;
 	OggOpusEnc *ope_encoder;
-	bool inited;
-	bool started;
-	bool opus_cbr;
-	int opus_bitrate;
-	int opus_samplerate;
-	int opus_channels;
-	bool opus_tags;
 	std::vector<std::pair<std::string, std::string> > opus_comments;
 private:
 	static int CallbackWrite(void *user_data, const unsigned char *ptr, opus_int32 len)
@@ -97,14 +90,43 @@ private:
 		return 0;
 	}
 private:
-	void StartStream()
+	void AddCommentField(const std::string &field, const mpt::ustring &data)
 	{
-		ASSERT(inited && !started);
+		if(!field.empty() && !data.empty())
+		{
+			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::CharsetUTF8, data)));
+		}
+	}
+public:
+	OpusStreamWriter(std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags)
+		: StreamWriterBase(stream)
+	{
+		ope_callbacks.write = &CallbackWrite;
+		ope_callbacks.close = &CallbackClose;
+		opus_comments.clear();
+
+		bool opus_cbr = (settings.Mode == Encoder::ModeCBR);
+		int opus_bitrate = settings.Bitrate * 1000;
+
+		if(settings.Tags)
+		{
+			AddCommentField("ENCODER",     tags.encoder);
+			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
+			AddCommentField("TITLE",       tags.title          );
+			AddCommentField("ARTIST",      tags.artist         );
+			AddCommentField("ALBUM",       tags.album          );
+			AddCommentField("DATE",        tags.year           );
+			AddCommentField("COMMENT",     tags.comments       );
+			AddCommentField("GENRE",       tags.genre          );
+			AddCommentField("CONTACT",     tags.url            );
+			AddCommentField("BPM",         tags.bpm            ); // non-standard
+			AddCommentField("TRACKNUMBER", tags.trackno        );
+		}
 
 		int ope_error = 0;
 
 		ope_comments = ope_comments_create();
-		if(opus_tags && ope_comments)
+		if(settings.Tags && ope_comments)
 		{
 			for(const auto & comment : opus_comments)
 			{
@@ -112,7 +134,7 @@ private:
 			}
 		}
 
-		ope_encoder = ope_encoder_create_callbacks(&ope_callbacks, this, ope_comments, opus_samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &ope_error);
+		ope_encoder = ope_encoder_create_callbacks(&ope_callbacks, this, ope_comments, settings.Samplerate, settings.Channels, settings.Channels > 2 ? 1 : 0, &ope_error);
 		
 		opus_int32 ctl_serial = mpt::random<uint32>(theApp.PRNG());
 		ope_encoder_ctl(ope_encoder, OPE_SET_SERIALNO(ctl_serial));
@@ -140,108 +162,20 @@ private:
 
 		ope_encoder_flush_header(ope_encoder);
 		
-		started = true;
-		ASSERT(inited && started);
-	}
-	void FinishStream()
-	{
-		if(inited)
-		{
-			if(!started)
-			{
-				StartStream();
-			}
-			ASSERT(inited && started);
-
-			ope_encoder_drain(ope_encoder);
-
-			ope_encoder_destroy(ope_encoder);
-			ope_encoder = NULL;
-
-			ope_comments_destroy(ope_comments);
-			ope_comments = NULL;
-
-			started = false;
-			inited = false;
-		}
-		ASSERT(!inited && !started);
-	}
-	void AddCommentField(const std::string &field, const mpt::ustring &data)
-	{
-		if(!field.empty() && !data.empty())
-		{
-			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::CharsetUTF8, data)));
-		}
-	}
-public:
-	OpusStreamWriter(std::ostream &stream)
-		: StreamWriterBase(stream)
-	{
-		ope_callbacks.write = &CallbackWrite;
-		ope_callbacks.close = &CallbackClose;
-		inited = false;
-		started = false;
-		opus_channels = 0;
-		opus_tags = true;
-		opus_comments.clear();
-	}
-	virtual ~OpusStreamWriter()
-	{
-		FinishStream();
-		ASSERT(!inited && !started);
-	}
-	virtual void Start(const Encoder::Settings &settings, const FileTags &tags)
-	{
-
-		FinishStream();
-
-		ASSERT(!inited && !started);
-
-		uint32 samplerate = settings.Samplerate;
-		uint16 channels = settings.Channels;
-
-		opus_cbr = (settings.Mode == Encoder::ModeCBR);
-		opus_bitrate = settings.Bitrate * 1000;
-		opus_samplerate = samplerate;
-		opus_channels = channels;
-		opus_tags = settings.Tags;
-
-		inited = true;
-
-		ASSERT(inited && !started);
-
-		if(opus_tags)
-		{
-			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
-			AddCommentField("TITLE",       tags.title          );
-			AddCommentField("ARTIST",      tags.artist         );
-			AddCommentField("ALBUM",       tags.album          );
-			AddCommentField("DATE",        tags.year           );
-			AddCommentField("COMMENT",     tags.comments       );
-			AddCommentField("GENRE",       tags.genre          );
-			AddCommentField("CONTACT",     tags.url            );
-			AddCommentField("BPM",         tags.bpm            ); // non-standard
-			AddCommentField("TRACKNUMBER", tags.trackno        );
-		}
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
-		ASSERT(inited);
-		if(!started)
-		{
-			StartStream();
-		}
-		ASSERT(inited && started);
-
 		ope_encoder_write_float(ope_encoder, interleaved, count);
-
 	}
-	virtual void Finalize()
+	virtual ~OpusStreamWriter()
 	{
-		ASSERT(inited);
-		FinishStream();
-		ASSERT(!inited && !started);
+		ope_encoder_drain(ope_encoder);
+
+		ope_encoder_destroy(ope_encoder);
+		ope_encoder = NULL;
+
+		ope_comments_destroy(ope_comments);
+		ope_comments = NULL;
 	}
 };
 
@@ -274,15 +208,15 @@ OggOpusEncoder::~OggOpusEncoder()
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) const
-//-----------------------------------------------------------------------------------
+std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-	return mpt::make_unique<OpusStreamWriter>(file);
+	return mpt::make_unique<OpusStreamWriter>(file, settings, tags);
 #else
 	return nullptr;
 #endif
