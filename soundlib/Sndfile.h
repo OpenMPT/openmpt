@@ -501,7 +501,7 @@ public:
 public:
 #ifdef LIBOPENMPT_BUILD
 #ifndef NO_PLUGINS
-	std::shared_ptr<CVstPluginManager> m_PluginManager;
+	std::unique_ptr<CVstPluginManager> m_PluginManager;
 #endif
 #endif
 
