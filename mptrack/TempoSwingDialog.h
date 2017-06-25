@@ -42,7 +42,7 @@ protected:
 		void SetValue(TempoSwing::value_type v);
 		TempoSwing::value_type GetValue() const;
 	};
-	std::vector<std::shared_ptr<RowCtls>> m_controls;
+	std::vector<std::unique_ptr<RowCtls>> m_controls;
 
 	CButton m_checkGroup;
 	CScrollBar m_scrollBar;

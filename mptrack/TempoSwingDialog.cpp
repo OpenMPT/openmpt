@@ -155,7 +155,8 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	m_controls.resize(m_tempoSwing.size());
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
-		auto r = m_controls[i] = std::make_shared<RowCtls>();
+		m_controls[i] = mpt::make_unique<RowCtls>();
+		auto &r = m_controls[i];
 		// Row label
 		TCHAR s[16];
 		wsprintf(s, _T("Row %u:"), i + 1);
