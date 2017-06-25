@@ -29,7 +29,7 @@ private:
 
 	const WAVEncoder &enc;
 	std::ostream &f;
-	WAVWriter *fileWAV;
+	std::unique_ptr<WAVWriter> fileWAV;
 	Encoder::Format formatInfo;
 
 public:
@@ -44,7 +44,7 @@ public:
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
 
-		fileWAV = new WAVWriter(&f);
+		fileWAV = mpt::make_unique<WAVWriter>(&f);
 		fileWAV->WriteFormat(formatInfo.Samplerate, formatInfo.Sampleformat.GetBitsPerSample(), (uint16)formatInfo.Channels, formatInfo.Sampleformat.IsFloat() ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
 
 		if(settings.Tags)
@@ -92,7 +92,7 @@ public:
 	virtual ~WavStreamWriter()
 	{
 		fileWAV->Finalize();
-		delete fileWAV;
+		fileWAV = nullptr;
 	}
 };
 
