@@ -446,8 +446,8 @@ void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCo
 // If they are left out, only notes that are available in the module type, plus any supported "special notes" are added.
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS, ModCommand::NOTE noteStart = 0, ModCommand::NOTE noteEnd = 0);
 
-// Get window text (e.g. edit box conent) as a wide string
-std::wstring GetWindowTextUnicode(HWND hwnd);
+// Get window text (e.g. edit box conent) as a unicode string
+mpt::ustring GetWindowTextUnicode(HWND hwnd);
 
 ///////////////////////////////////////////////////
 // Tables
