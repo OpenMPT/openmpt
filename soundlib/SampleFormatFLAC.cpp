@@ -170,7 +170,7 @@ struct FLACDecoder
 			sample.Initialize();
 			sample.uFlags.set(CHN_16BIT, metadata->data.stream_info.bits_per_sample > 8);
 			sample.uFlags.set(CHN_STEREO, metadata->data.stream_info.channels > 1);
-			sample.nLength = static_cast<SmpLength>(metadata->data.stream_info.total_samples);
+			sample.nLength = mpt::saturate_cast<SmpLength>(metadata->data.stream_info.total_samples);
 			sample.nC5Speed = metadata->data.stream_info.sample_rate;
 			client.ready = (sample.AllocateSample() != 0);
 		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
@@ -655,9 +655,9 @@ fail:
 	FLAC__stream_encoder_finish(encoder);
 
 	delete[] sampleData;
-	for(size_t i = 0; i < CountOf(metadata); i++)
+	for(auto m : metadata)
 	{
-		FLAC__metadata_object_delete(metadata[i]);
+		FLAC__metadata_object_delete(m);
 	}
 
 	return result;
