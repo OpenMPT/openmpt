@@ -430,17 +430,20 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	// build unix command line
 	std::string unixcommand;
-	if(flags[ExecFlagSilent])
-	{
-		unixcommand = "/usr/bin/env sh \"" + EscapePosixShell(dirPosix) + "wrapper.sh\"";
-	} else
-	{
-		unixcommand = "/usr/bin/env sh \"" + EscapePosixShell(dirPosix) + "terminal.sh\"";
-	}
+	bool createProcessSuccess = false;
 
-	progress(userdata);
-
+	if(!createProcessSuccess)
 	{
+
+		if(flags[ExecFlagSilent])
+		{
+			unixcommand = "/usr/bin/env sh \"" + EscapePosixShell(dirPosix) + "wrapper.sh\"";
+		} else
+		{
+			unixcommand = "/usr/bin/env sh \"" + EscapePosixShell(dirPosix) + "terminal.sh\"";
+		}
+
+		progress(userdata);
 
 		std::wstring unixcommandW = mpt::ToWide(mpt::CharsetUTF8, unixcommand);
 		std::vector<WCHAR> commandline = std::vector<WCHAR>(unixcommandW.data(), unixcommandW.data() + unixcommandW.length() + 1);
@@ -466,33 +469,114 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 		progress(userdata);
 
-		if(!success)
-		{
-			throw mpt::Wine::Exception("CreateProcess failed.");
-		}
+		createProcessSuccess = (success ? true : false);
 
 		progress(userdata);
 
-		if(!flags[ExecFlagAsync])
+		if(success)
 		{
-			// note: execution is not syncronous with all Wine versions,
-			// we additionally explicitly wait for "done" later
-			while(WaitForSingleObject(processInformation.hProcess, 0) == WAIT_TIMEOUT)
-			{ // wait
-				if(progressCancel(userdata) != ExecuteProgressContinueWaiting)
-				{
-					CloseHandle(processInformation.hThread);
-					CloseHandle(processInformation.hProcess);
-					throw mpt::Wine::Exception("Canceled.");
+
+			if(!flags[ExecFlagAsync])
+			{
+				// note: execution is not syncronous with all Wine versions,
+				// we additionally explicitly wait for "done" later
+				while(WaitForSingleObject(processInformation.hProcess, 0) == WAIT_TIMEOUT)
+				{ // wait
+					if(progressCancel(userdata) != ExecuteProgressContinueWaiting)
+					{
+						CloseHandle(processInformation.hThread);
+						CloseHandle(processInformation.hProcess);
+						throw mpt::Wine::Exception("Canceled.");
+					}
 				}
 			}
+
+			progress(userdata);
+
+			CloseHandle(processInformation.hThread);
+			CloseHandle(processInformation.hProcess);
+
+		}
+
+	}
+
+	progress(userdata);
+
+	// Work around Wine being able to execute PIE binaries on Debian 9.
+	// Luckily, /bin/bash is still non-PIE on Debian 9.
+
+	if(!createProcessSuccess)
+	{
+
+		if(flags[ExecFlagSilent]) {
+			unixcommand = "/bin/bash \"" + EscapePosixShell(dirPosix) + "wrapper.sh\"";
+		} else
+		{
+			unixcommand = "/bin/bash \"" + EscapePosixShell(dirPosix) + "terminal.sh\"";
 		}
 
 		progress(userdata);
 
-		CloseHandle(processInformation.hThread);
-		CloseHandle(processInformation.hProcess);
+		std::wstring unixcommandW = mpt::ToWide(mpt::CharsetUTF8, unixcommand);
+		std::vector<WCHAR> commandline = std::vector<WCHAR>(unixcommandW.data(), unixcommandW.data() + unixcommandW.length() + 1);
+		std::wstring titleW = mpt::ToWide(mpt::CharsetUTF8, title);
+		std::vector<WCHAR> titleWv = std::vector<WCHAR>(titleW.data(), titleW.data() + titleW.length() + 1);
+		STARTUPINFOW startupInfo;
+		MemsetZero(startupInfo);
+		startupInfo.lpTitle = &titleWv[0];
+		startupInfo.cb = sizeof(startupInfo);
+		PROCESS_INFORMATION processInformation;
+		MemsetZero(processInformation);
 
+		progress(userdata);
+
+		BOOL success = FALSE;
+		if(flags[ExecFlagSilent])
+		{
+			success = CreateProcessW(NULL, &commandline[0], NULL, NULL, FALSE, DETACHED_PROCESS, NULL, NULL, &startupInfo, &processInformation);
+		} else
+		{
+			success = CreateProcessW(NULL, &commandline[0], NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInformation);
+		}
+
+		progress(userdata);
+
+		createProcessSuccess = (success ? true : false);
+
+		progress(userdata);
+
+		if(success)
+		{
+
+			if(!flags[ExecFlagAsync])
+			{
+				// note: execution is not syncronous with all Wine versions,
+				// we additionally explicitly wait for "done" later
+				while(WaitForSingleObject(processInformation.hProcess, 0) == WAIT_TIMEOUT)
+				{ // wait
+					if(progressCancel(userdata) != ExecuteProgressContinueWaiting)
+					{
+						CloseHandle(processInformation.hThread);
+						CloseHandle(processInformation.hProcess);
+						throw mpt::Wine::Exception("Canceled.");
+					}
+				}
+			}
+
+			progress(userdata);
+
+			CloseHandle(processInformation.hThread);
+			CloseHandle(processInformation.hProcess);
+
+		}
+
+	}
+
+	progress(userdata);
+
+	if(!createProcessSuccess)
+	{
+		throw mpt::Wine::Exception("CreateProcess failed.");
 	}
 
 	progress(userdata);
