@@ -12,7 +12,7 @@
 
 #ifdef MODPLUG_TRACKER
 
-#include "../../mptrack/AbstractVstEditor.h"
+#include "../AbstractVstEditor.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

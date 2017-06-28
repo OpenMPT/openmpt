@@ -76,13 +76,13 @@ end
    "../../unarchiver/*.h",
    "../../mptrack/*.cpp",
    "../../mptrack/*.h",
+   "../../mptrack/plugins/*.cpp",
+   "../../mptrack/plugins/*.h",
    "../../test/*.cpp",
    "../../test/*.h",
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeWrapper.cpp",
    "../../pluginBridge/BridgeWrapper.h",
-   "../../plugins/MidiInOut/*.cpp",
-   "../../plugins/MidiInOut/*.h",
   }
   files {
    "../../mptrack/mptrack.rc",
