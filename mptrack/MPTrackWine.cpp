@@ -61,6 +61,33 @@ static mpt::PathString WineGetSupportZipFilename()
 }
 
 
+static char SanitizeBuildIdChar(char c)
+{
+	if (c == '\0') c = '_';
+	else if (c >= 'a' && c <= 'z') c = c;
+	else if (c >= 'A' && c <= 'Z') c = c;
+	else if (c >= '0' && c <= '9') c = c;
+	else if (c == '!') c = c;
+	else if (c == '+') c = c;
+	else if (c == '-') c = c;
+	else if (c == '.') c = c;
+	else if (c == '~') c = c;
+	else if (c == '_') c = c;
+	else c = '_';
+	return c;
+}
+
+
+static std::string SanitizeBuildID(std::string id)
+{
+	for(auto & c : id)
+	{
+		c = SanitizeBuildIdChar(c);
+	}
+	return id;
+}
+
+
 namespace WineIntegration {
 
 
@@ -310,7 +337,7 @@ void Initialize()
 			{
 				AppData = theApp.GetConfigPath().WithoutTrailingSlash();
 				AppData_Wine = AppData.WithTrailingSlash() + MPT_PATHSTRING("Wine");
-				AppData_Wine_WineVersion = AppData_Wine.WithTrailingSlash() + mpt::PathString::FromUTF8(wine.VersionContext().RawBuildID());
+				AppData_Wine_WineVersion = AppData_Wine.WithTrailingSlash() + mpt::PathString::FromUTF8(SanitizeBuildID(wine.VersionContext().RawBuildID()));
 				AppData_Wine_WineVersion_OpenMPTVersion = AppData_Wine_WineVersion.WithTrailingSlash() + mpt::PathString::FromUTF8(GetOpenMPTVersion());
 				CreatePath(AppData);
 				CreatePath(AppData_Wine);
@@ -320,7 +347,7 @@ void Initialize()
 				Host_AppData_Wine = wine.PathToPosixCanonical(AppData_Wine);
 				Host_AppData_Wine_WineVersion = wine.PathToPosixCanonical(AppData_Wine_WineVersion);
 				Host_AppData_Wine_WineVersion_OpenMPTVersion = wine.PathToPosixCanonical(AppData_Wine_WineVersion_OpenMPTVersion);
-				Host_Native_OpenMPT_Wine_WineVersion_OpenMPTVersion = wine.XDG_DATA_HOME() + "/OpenMPT/Wine/" + wine.VersionContext().RawBuildID() + "/" + GetOpenMPTVersion();
+				Host_Native_OpenMPT_Wine_WineVersion_OpenMPTVersion = wine.XDG_DATA_HOME() + "/OpenMPT/Wine/" + SanitizeBuildID(wine.VersionContext().RawBuildID()) + "/" + GetOpenMPTVersion();
 			}
 		};
 
