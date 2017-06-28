@@ -59,7 +59,7 @@ MidiInOut::~MidiInOut()
 uint32 MidiInOut::GetLatency() const
 //----------------------------------
 {
-	// There is only a latency if the user-provided latency value is less than the negative output latency.
+	// There is only a latency if the user-provided latency value is greater than the negative output latency.
 	return Util::Round<uint32>(std::min(0.0, m_latency + GetOutputLatency()) * m_SndFile.GetSampleRate());
 }
 
@@ -68,7 +68,7 @@ void MidiInOut::SaveAllParameters()
 //---------------------------------
 {
 	auto chunk = GetChunk(false);
-	if(chunk.size() == 0)
+	if(chunk.empty())
 		return;
 
 	m_pMixStruct->defaultProgram = -1;
@@ -86,9 +86,9 @@ void MidiInOut::RestoreAllParameters(int32 program)
 
 enum ChunkFlags
 {
-	//kLatencyCompensation = 0x01,	// implicit in current plugin version
-	kLatencyPresent	= 0x02,	// Latency value is present as double-precision float
-	kIgnoreTiming	= 0x04,	// Do not send timing and sequencing information
+	kLatencyCompensation = 0x01,	// Implicit in current plugin version
+	kLatencyPresent	= 0x02,			// Latency value is present as double-precision float
+	kIgnoreTiming	= 0x04,			// Do not send timing and sequencing information
 };
 
 IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
@@ -105,7 +105,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_inputDevice.name.size()));
 	mpt::IO::WriteIntLE<uint32>(s, m_outputDevice.index);
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_outputDevice.name.size()));
-	mpt::IO::WriteIntLE<uint32>(s, kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming));
+	mpt::IO::WriteIntLE<uint32>(s, kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming));
 	mpt::IO::WriteRaw(s, programName8.c_str(), programName8.size());
 	mpt::IO::WriteRaw(s, m_inputDevice.name.c_str(), m_inputDevice.name.size());
 	mpt::IO::WriteRaw(s, m_outputDevice.name.c_str(), m_outputDevice.name.size());
@@ -259,14 +259,11 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		{
 			if(m_sendTimingInfo)
 			{
-				Message message;
-				message.time = GetOutputTimestamp();
-				message.msg.assign(1, 0xF8);
-				m_outQueue.push_back(message);
+				m_outQueue.push_back({ GetOutputTimestamp(), { 0xF8 } });
 			}
 
 			double bpm = m_SndFile.GetCurrentBPM();
-			if(bpm != 0.0)
+			if(bpm > 0.0)
 			{
 				m_nextClock += 2.5 * m_SndFile.GetSampleRate() / bpm;
 			}
@@ -396,7 +393,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	message.time = GetOutputTimestamp();
 	message.msg.resize(3, 0);
 	memcpy(message.msg.data(), &midiCode, 3);
-	m_outQueue.push_back(message);
+	m_outQueue.push_back(std::move(message));
 	return true;
 }
 
@@ -414,7 +411,7 @@ bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
 	Message message;
 	message.time = GetOutputTimestamp();
 	message.msg.assign(static_cast<const unsigned char *>(sysex), static_cast<const unsigned char *>(sysex) + length);
-	m_outQueue.push_back(message);
+	m_outQueue.push_back(std::move(message));
 	return true;
 }
 
