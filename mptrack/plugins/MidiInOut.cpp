@@ -11,8 +11,8 @@
 #include "MidiInOut.h"
 #include "MidiInOutEditor.h"
 #include "../../common/FileReader.h"
-#include "../../mptrack/Reporting.h"
 #include "../../soundlib/Sndfile.h"
+#include "../Reporting.h"
 #include <algorithm>
 #include <sstream>
 

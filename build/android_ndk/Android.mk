@@ -207,6 +207,7 @@ LOCAL_SRC_FILES += \
 	soundlib/plugins/dmo/I3DL2Reverb.cpp \
 	soundlib/plugins/dmo/ParamEq.cpp \
 	soundlib/plugins/dmo/WavesReverb.cpp \
+	soundlib/plugins/LFOPlugin.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \
 	sounddsp/AGC.cpp \

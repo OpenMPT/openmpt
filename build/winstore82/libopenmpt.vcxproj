@@ -738,6 +738,7 @@
     <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\..\soundlib\XMTools.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\plugins\LFOPlugin.h" />
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
@@ -1094,6 +1095,9 @@
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
+      <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\LFOPlugin.cpp">
       <ObjectFileName>$(IntDir)soundlib\plugins\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">

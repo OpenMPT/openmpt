@@ -12,8 +12,8 @@
 #ifdef MODPLUG_TRACKER
 #include "MidiInOut.h"
 #include "MidiInOutEditor.h"
-#include "../../mptrack/Mptrack.h"
-#include "../../mptrack/resource.h"
+#include "../Mptrack.h"
+#include "../resource.h"
 #include <rtmidi/RtMidi.h>
 
 

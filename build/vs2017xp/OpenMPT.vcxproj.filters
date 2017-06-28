@@ -16,17 +16,14 @@
     <Filter Include="mptrack">
       <UniqueIdentifier>{778900D8-E368-7F73-EC80-0A4A58DFE5D4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mptrack\plugins">
+      <UniqueIdentifier>{68594FA8-D4E4-BC6C-DDF5-3F614900196D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="mptrack\res">
       <UniqueIdentifier>{3025A28F-9CDA-1A85-25CF-145C91831189}</UniqueIdentifier>
     </Filter>
     <Filter Include="pluginBridge">
       <UniqueIdentifier>{E1FAE259-CD5D-72FE-76E3-AAB462253E81}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="plugins">
-      <UniqueIdentifier>{07D1A6B5-73B0-2551-7CC8-B027E8268CB2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="plugins\MidiInOut">
-      <UniqueIdentifier>{E80B1C8D-5422-1A23-9D99-A54409EFEAAA}</UniqueIdentifier>
     </Filter>
     <Filter Include="soundbase">
       <UniqueIdentifier>{69D0CCEC-D53A-8163-1E79-32098A225FB8}</UniqueIdentifier>
@@ -438,6 +435,15 @@
     <ClInclude Include="..\..\mptrack\mod2wave.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\LFOPluginEditor.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\MidiInOut.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\MidiInOutEditor.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\resource.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -452,12 +458,6 @@
     </ClInclude>
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h">
       <Filter>pluginBridge</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOut.h">
-      <Filter>plugins\MidiInOut</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOutEditor.h">
-      <Filter>plugins\MidiInOut</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormat.h">
       <Filter>soundbase</Filter>
@@ -649,6 +649,9 @@
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\LFOPlugin.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
@@ -1082,6 +1085,15 @@
     <ClCompile Include="..\..\mptrack\mod2midi.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\plugins\LFOPluginEditor.cpp">
+      <Filter>mptrack\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\plugins\MidiInOut.cpp">
+      <Filter>mptrack\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\plugins\MidiInOutEditor.cpp">
+      <Filter>mptrack\plugins</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\tuningRatioMapWnd.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -1090,12 +1102,6 @@
     </ClCompile>
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp">
       <Filter>pluginBridge</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOut.cpp">
-      <Filter>plugins\MidiInOut</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOutEditor.cpp">
-      <Filter>plugins\MidiInOut</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp">
       <Filter>sounddev</Filter>
@@ -1389,6 +1395,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\LFOPlugin.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">

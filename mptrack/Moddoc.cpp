@@ -39,6 +39,9 @@
 #include "FileDialog.h"
 #include "ExternalSamples.h"
 #include "Globals.h"
+#ifndef NO_PLUGINS
+#include "AbstractVstEditor.h"
+#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -541,10 +544,9 @@ void CModDoc::OnAppendModule()
 	CTrackApp::OpenModulesDialog(files);
 
 	ScopedLogCapturer logcapture(*this, "Append Failures");
-	std::unique_ptr<CSoundFile> source;
 	try
 	{
-		source = mpt::make_unique<CSoundFile>();
+		auto source = mpt::make_unique<CSoundFile>();
 		for(const auto &file : files)
 		{
 			InputFile f;
@@ -1557,6 +1559,19 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 		if(instance != nullptr && pHint != instance && instance->GetDocument() == this)
 			instance->Update();
 	}
+#ifndef NO_PLUGINS
+	if(hint.GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES])
+	{
+		for(auto &plug : m_SndFile.m_MixPlugins)
+		{
+			auto mixPlug = plug.pMixPlugin;
+			if(mixPlug != nullptr && mixPlug->GetEditor())
+			{
+				mixPlug->GetEditor()->UpdateView(hint);
+			}
+		}
+	}
+#endif
 }
 
 

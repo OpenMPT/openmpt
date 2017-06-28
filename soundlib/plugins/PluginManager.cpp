@@ -20,6 +20,7 @@
 
 // Built-in plugins
 #include "DigiBoosterEcho.h"
+#include "LFOPlugin.h"
 #include "dmo/DMOPlugin.h"
 #include "dmo/Chorus.h"
 #include "dmo/Compressor.h"
@@ -31,7 +32,7 @@
 #include "dmo/ParamEq.h"
 #include "dmo/WavesReverb.h"
 #ifdef MODPLUG_TRACKER
-#include "../../plugins/MidiInOut/MidiInOut.h"
+#include "../../mptrack/plugins/MidiInOut.h"
 #endif // MODPLUG_TRACKER
 
 #include "../../common/StringFixer.h"
@@ -155,23 +156,25 @@ CVstPluginManager::CVstPluginManager()
 		const char *filename, *name;
 		uint32 pluginId1, pluginId2;
 		VSTPluginLib::PluginCategory category;
-		bool isInstrument;
+		bool isInstrument, isOurs;
 	} BuiltInPlugins[] =
 	{
 		// DirectX Media Objects Emulation
-		{ DMO::Chorus::Create,		"{EFE6629C-81F7-4281-BD91-C9D604A95AF6}", "Chorus",			kDmoMagic, 0xEFE6629C, VSTPluginLib::catDMO, false },
-		{ DMO::Compressor::Create,	"{EF011F79-4000-406D-87AF-BFFB3FC39D57}", "Compressor",		kDmoMagic, 0xEF011F79, VSTPluginLib::catDMO, false },
-		{ DMO::Distortion::Create,	"{EF114C90-CD1D-484E-96E5-09CFAF912A21}", "Distortion",		kDmoMagic, 0xEF114C90, VSTPluginLib::catDMO, false },
-		{ DMO::Echo::Create,		"{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}", "Echo",			kDmoMagic, 0xEF3E932C, VSTPluginLib::catDMO, false },
-		{ DMO::Flanger::Create,		"{EFCA3D92-DFD8-4672-A603-7420894BAD98}", "Flanger",		kDmoMagic, 0xEFCA3D92, VSTPluginLib::catDMO, false },
-		{ DMO::Gargle::Create,		"{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}", "Gargle",			kDmoMagic, 0xDAFD8210, VSTPluginLib::catDMO, false },
-		{ DMO::I3DL2Reverb::Create,	"{EF985E71-D5C7-42D4-BA4D-2D073E2E96F4}", "I3DL2Reverb",	kDmoMagic, 0xEF985E71, VSTPluginLib::catDMO, false },
-		{ DMO::ParamEq::Create,		"{120CED89-3BF4-4173-A132-3CB406CF3231}", "ParamEq",		kDmoMagic, 0x120CED89, VSTPluginLib::catDMO, false },
-		{ DMO::WavesReverb::Create,	"{87FC0268-9A55-4360-95AA-004A1D9DE26C}", "WavesReverb",	kDmoMagic, 0x87FC0268, VSTPluginLib::catDMO, false },
+		{ DMO::Chorus::Create,		"{EFE6629C-81F7-4281-BD91-C9D604A95AF6}", "Chorus",			kDmoMagic, 0xEFE6629C, VSTPluginLib::catDMO, false, false },
+		{ DMO::Compressor::Create,	"{EF011F79-4000-406D-87AF-BFFB3FC39D57}", "Compressor",		kDmoMagic, 0xEF011F79, VSTPluginLib::catDMO, false, false },
+		{ DMO::Distortion::Create,	"{EF114C90-CD1D-484E-96E5-09CFAF912A21}", "Distortion",		kDmoMagic, 0xEF114C90, VSTPluginLib::catDMO, false, false },
+		{ DMO::Echo::Create,		"{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}", "Echo",			kDmoMagic, 0xEF3E932C, VSTPluginLib::catDMO, false, false },
+		{ DMO::Flanger::Create,		"{EFCA3D92-DFD8-4672-A603-7420894BAD98}", "Flanger",		kDmoMagic, 0xEFCA3D92, VSTPluginLib::catDMO, false, false },
+		{ DMO::Gargle::Create,		"{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}", "Gargle",			kDmoMagic, 0xDAFD8210, VSTPluginLib::catDMO, false, false },
+		{ DMO::I3DL2Reverb::Create,	"{EF985E71-D5C7-42D4-BA4D-2D073E2E96F4}", "I3DL2Reverb",	kDmoMagic, 0xEF985E71, VSTPluginLib::catDMO, false, false },
+		{ DMO::ParamEq::Create,		"{120CED89-3BF4-4173-A132-3CB406CF3231}", "ParamEq",		kDmoMagic, 0x120CED89, VSTPluginLib::catDMO, false, false },
+		{ DMO::WavesReverb::Create,	"{87FC0268-9A55-4360-95AA-004A1D9DE26C}", "WavesReverb",	kDmoMagic, 0x87FC0268, VSTPluginLib::catDMO, false, false },
 		// DigiBooster Pro Echo DSP
-		{ DigiBoosterEcho::Create, "", "DigiBooster Pro Echo", MAGIC4LE('D','B','M','0'), MAGIC4LE('E','c','h','o'), VSTPluginLib::catRoomFx, false },
+		{ DigiBoosterEcho::Create, "", "DigiBooster Pro Echo", MAGIC4LE('D','B','M','0'), MAGIC4LE('E','c','h','o'), VSTPluginLib::catRoomFx, false, true },
+		// LFO
+		{ LFOPlugin::Create, "", "LFO", MAGIC4LE('O','M','P','T'), MAGIC4LE('L','F','O',' '), VSTPluginLib::catGenerator, false, true },
 #ifdef MODPLUG_TRACKER
-		{ MidiInOut::Create, "", "MIDI Input Output", PLUGMAGIC('V','s','t','P'), PLUGMAGIC('M','M','I','D'), VSTPluginLib::catSynth, true },
+		{ MidiInOut::Create, "", "MIDI Input Output", PLUGMAGIC('V','s','t','P'), PLUGMAGIC('M','M','I','D'), VSTPluginLib::catSynth, true, true },
 #endif // MODPLUG_TRACKER
 	};
 
@@ -186,6 +189,10 @@ CVstPluginManager::CVstPluginManager()
 			plug->pluginId2 = plugin.pluginId2;
 			plug->category = plugin.category;
 			plug->isInstrument = plugin.isInstrument;
+#ifdef MODPLUG_TRACKER
+			if(plugin.isOurs)
+				plug->vendor = _T("OpenMPT Project");
+#endif // MODPLUG_TRACKER
 		}
 	}
 

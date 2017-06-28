@@ -94,7 +94,7 @@
 #define IDD_SELECTMIXPLUGIN             423
 #define IDD_PLUGINEDITOR                424
 #define IDD_EFFECTVISUALIZER            426
-#define IDB_SPLASHTEST                  432
+#define IDD_LFOPLUGIN                   427
 #define IDB_SPLASHNOFOLDFIN             435
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438
@@ -706,6 +706,7 @@
 #define IDC_TEXT_PREVIEW                2208
 #define IDC_STATIC2                     2209
 #define IDC_MACROPLUG                   2209
+#define IDC_STATIC3                     2210
 #define IDC_MACROPARAM                  2210
 #define IDC_SAMPLE_LENGTH_NEW           2211
 #define IDC_SAMPLE_LENGTH_ORIGINAL      2212

@@ -18,6 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class IMixPlugin;
+struct UpdateHint;
 
 class CAbstractVstEditor: public CDialog
 {
@@ -69,7 +70,7 @@ public:
 	afx_msg void OnVSTPresetRename();
 	afx_msg void OnCreateInstrument();
 	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMove(int x, int y);
@@ -82,6 +83,8 @@ public:
 	virtual bool OpenEditor(CWnd *parent);
 	virtual void DoClose();
 	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
+	virtual void UpdateParam(int32 /*param*/) { }
+	virtual void UpdateView(UpdateHint &/*hint*/) { }
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 	virtual void PostNcDestroy();
 
