@@ -29,6 +29,13 @@ How to compile
     If you don't want this, uncomment `#define NO_VST` and comment out
     `#define MPT_WITH_ASIO` in the file `common/BuildSettings.h`.
 
+    The ASIO and VST SDKs can be downloaded automatically on Windows 7 or later
+    with 7-Zip installed by just running the `build/download_externals.cmd`
+    script.
+
+    If you do not want to or cannot use this script, you may follow these manual
+    steps instead:
+
      -  ASIO:
 
         If you use `#define MPT_WITH_ASIO`, you will need to put the ASIO SDK in
@@ -56,13 +63,8 @@ How to compile
         [steinberg.net](http://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
-    Alternatively, both, the ASIO and the VST SDK, can be downloaded
-    automatically on Windows 7 or later with 7-Zip installed by just running the
-    `build/download_externals.cmd` script (works when run from either the
-    project root or directly from the build directory).
-
     If you need further help with the VST and ASIO SDKs, get in touch with the
-    main developers. 
+    main OpenMPT developers. 
 
  -  7-Zip is required to be installed in the default path in order to build the
     required files for OpenMPT Wine integration.
@@ -97,7 +99,12 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
          -  xmp-openmpt: Requires Visual Studio with MFC.
 
      -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
-        compile the plugins for these 2 players:
+        compile the plugins for these 2 players. They can be downloaded
+        automatically on Windows 7 or later with 7-Zip installed by just running
+        the `build/download_externals.cmd` script.
+
+        If you do not want to or cannot use this script, you may follow these
+        manual steps instead:
 
          -  Winamp 5 SDK:
 
@@ -117,11 +124,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
             Please visit [un4seen.com](http://www.un4seen.com/xmplay.html) to
             download the SDK.
             You can disable xmp-openmpt in the solution configuration.
-
-        Alternatively, both, the Winamp and the XMPlay SDK, can be downloaded
-        automatically on Windows 7 or later with 7-Zip installed by just running
-        the `build/download_externals.cmd` script (works when run from either
-        the project root or directly from the build directory).
 
  -  Makefile
 
@@ -169,7 +171,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  emscripten (on Unix-like systems):
 
-        libopenmpt has been tested and verified to work with emscripten 1.21 or
+        libopenmpt has been tested and verified to work with emscripten 1.31 or
         later (earlier versions might or might not work).
 
         Run:
