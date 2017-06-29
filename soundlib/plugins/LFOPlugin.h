@@ -98,6 +98,8 @@ public:
 	bool CanRecieveMidiEvents() override { return false; }
 	bool ShouldProcessSilence() override { return true; }
 
+	void MidiCommand(uint8, uint8, uint16, uint16, uint16, CHANNELINDEX) { SetParameter(kCurrentPhase, 0); }
+
 #ifdef MODPLUG_TRACKER
 	CString GetDefaultEffectName() override { return _T("LFO"); }
 
