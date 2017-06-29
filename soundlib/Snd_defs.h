@@ -39,7 +39,7 @@ typedef uint8 SEQUENCEINDEX;
 typedef uintptr_t SmpLength;
 
 
-const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
+const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *frames*
 													// Note: Sample size in bytes can be more than this (= 256 MB).
 
 const ROWINDEX MAX_PATTERN_ROWS			= 1024;
