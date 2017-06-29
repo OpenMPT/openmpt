@@ -108,11 +108,9 @@ void LFOPluginEditor::UpdateParamDisplays()
 	m_locked = true;
 	CheckRadioButton(IDC_RADIO7, IDC_RADIO8, m_lfoPlugin.m_outputToCC ? IDC_RADIO8 : IDC_RADIO7);
 	m_plugParam.SetRedraw(FALSE);
-	const auto &mixPlugs = m_lfoPlugin.GetSoundFile().m_MixPlugins;
-	PLUGINDEX outPlugin = m_lfoPlugin.GetOutputPlugin();
-	if(outPlugin != PLUGINDEX_INVALID && mixPlugs[outPlugin].pMixPlugin != nullptr)
+	IMixPlugin *outPlug = m_lfoPlugin.GetOutputPlugin();
+	if(outPlug != nullptr)
 	{
-		IMixPlugin *outPlug = mixPlugs[outPlugin].pMixPlugin;
 		if(LONG_PTR(outPlug) != GetWindowLongPtr(m_plugParam, GWLP_USERDATA))
 		{
 			m_plugParam.ResetContent();
@@ -182,7 +180,7 @@ void LFOPluginEditor::UpdateView(UpdateHint &hint)
 		}
 
 		CString s;
-		PLUGINDEX outPlugin = m_lfoPlugin.GetOutputPlugin();
+		IMixPlugin *outPlugin = m_lfoPlugin.GetOutputPlugin();
 		m_outPlug.SetRedraw(FALSE);
 		m_outPlug.ResetContent();
 		for(PLUGINDEX out = m_lfoPlugin.GetSlot() + 1; out < MAX_MIXPLUGINS; out++)
@@ -202,7 +200,7 @@ void LFOPluginEditor::UpdateView(UpdateHint &hint)
 
 				int n = m_outPlug.AddString(s);
 				m_outPlug.SetItemData(n, out);
-				if(outPlugin == out)
+				if(outPlugin == outPlug.pMixPlugin)
 				{
 					m_outPlug.SetCurSel(n);
 				}
