@@ -17,7 +17,7 @@ class CSoundFile;
 // Sample Struct
 struct ModSample
 {
-	SmpLength nLength;						// In samples, not bytes
+	SmpLength nLength;						// In frames
 	SmpLength nLoopStart, nLoopEnd;			// Ditto
 	SmpLength nSustainStart, nSustainEnd;	// Ditto
 	union
@@ -57,7 +57,7 @@ struct ModSample
 	// Return the number of channels in the sample.
 	uint8 GetNumChannels() const { return (uFlags & CHN_STEREO) ? 2 : 1; }
 
-	// Return the number of bytes per sampling point. (Channels * Elementary Sample Size)
+	// Return the number of bytes per frame (Channels * Elementary Sample Size)
 	uint8 GetBytesPerSample() const { return GetElementarySampleSize() * GetNumChannels(); }
 
 	// Return the size which pSample is at least.
