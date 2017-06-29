@@ -82,6 +82,16 @@ public:
 
 	float RenderSilence(uint32) override { return 0.0f; }
 
+	// MIDI event handling (mostly passing it through to the follow-up plugin)
+	bool MidiSend(uint32 midiCode) override;
+	bool MidiSysexSend(const void *message, uint32 length) override;
+	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
+	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) override;
+	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) override;
+	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
+	void HardAllNotesOff() override;
+	bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) override;
+
 	int32 GetNumPrograms() const override { return 0; }
 	int32 GetCurrentProgram() override { return 0; }
 	void SetCurrentProgram(int32) override { }
@@ -97,8 +107,6 @@ public:
 	bool IsInstrument() const override { return false; }
 	bool CanRecieveMidiEvents() override { return false; }
 	bool ShouldProcessSilence() override { return true; }
-
-	void MidiCommand(uint8, uint8, uint16, uint16, uint16, CHANNELINDEX) { SetParameter(kCurrentPhase, 0); }
 
 #ifdef MODPLUG_TRACKER
 	CString GetDefaultEffectName() override { return _T("LFO"); }
@@ -132,7 +140,7 @@ protected:
 	void NextRandom();
 	void RecalculateFrequency();
 	void RecalculateIncrement();
-	PLUGINDEX GetOutputPlugin() const;
+	IMixPlugin *GetOutputPlugin() const;
 
 public:
 	static LFOWaveform ParamToWaveform(float param) { return static_cast<LFOWaveform>(Util::Round<int>(param * 32.0f)); }

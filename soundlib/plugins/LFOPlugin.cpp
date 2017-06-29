@@ -108,9 +108,8 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		value *= m_amplitude;
 		Limit(value, 0.0, 1.0);
 
-		PLUGINDEX outPlug = GetOutputPlugin();
-		IMixPlugin *plugin;
-		if(outPlug > m_nSlot && outPlug < MAX_MIXPLUGINS && (plugin = m_SndFile.m_MixPlugins[outPlug].pMixPlugin) != nullptr)
+		IMixPlugin *plugin = GetOutputPlugin();
+		if(plugin != nullptr)
 		{
 			if(m_outputToCC)
 			{
@@ -204,6 +203,87 @@ void LFOPlugin::PositionChanged()
 	// TODO Changing tempo (with tempo sync enabled), parameter automation over time and setting the LFO phase manually is not considered here.
 	m_phase = m_increment * m_SndFile.GetTotalSampleCount();
 	m_phase -= static_cast<int64>(m_phase);
+}
+
+
+bool LFOPlugin::MidiSend(uint32 midiCode)
+//---------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+		return plugin->MidiSend(midiCode);
+	else
+		return true;
+}
+
+
+bool LFOPlugin::MidiSysexSend(const void *message, uint32 length)
+//---------------------------------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+		return plugin->MidiSysexSend(message, length);
+	else
+		return true;
+}
+
+
+void LFOPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel)
+//------------------------------------------------------------------------------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->MidiCC(nMidiCh, nController, nParam, trackChannel);
+	}
+}
+
+
+void LFOPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
+//---------------------------------------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->MidiPitchBend(nMidiCh, increment, pwd);
+	}
+}
+
+
+void LFOPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
+//---------------------------------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->MidiVibrato(nMidiCh, depth, pwd);
+	}
+}
+
+
+void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
+//-------------------------------------------------------------------------------------------------------------------------------
+{
+	SetParameter(kCurrentPhase, 0);
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->MidiCommand(nMidiCh, nMidiProg, wMidiBank, note, vol, trackChannel);
+	}
+}
+
+
+void LFOPlugin::HardAllNotesOff()
+//-------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->HardAllNotesOff();
+	}
+}
+
+
+bool LFOPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
+//---------------------------------------------------------------------------
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+		return plugin->IsNotePlaying(note, midiChn, trackerChn);
+	else
+		return false;
 }
 
 
@@ -430,10 +510,14 @@ void LFOPlugin::RecalculateIncrement()
 }
 
 
-PLUGINDEX LFOPlugin::GetOutputPlugin() const
-//------------------------------------------
+IMixPlugin *LFOPlugin::GetOutputPlugin() const
+//--------------------------------------------
 {
-	return m_pMixStruct->GetOutputPlugin();
+	PLUGINDEX outPlug = m_pMixStruct->GetOutputPlugin();
+	if(outPlug > m_nSlot && outPlug < MAX_MIXPLUGINS)
+		return m_SndFile.m_MixPlugins[outPlug].pMixPlugin;
+	else
+		return nullptr;
 }
 
 
