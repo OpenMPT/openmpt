@@ -57,6 +57,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 {
 	if(!m_bypassed)
 	{
+		ResetSilence();
 		if(m_tempoSync)
 		{
 			double tempo = m_SndFile.GetCurrentBPM();
@@ -123,7 +124,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		m_phase += m_increment * numFrames;
 	}
 
-	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
+	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), numFrames);
 }
 
 
@@ -147,6 +148,7 @@ PlugParamValue LFOPlugin::GetParameter(PlugParamIndex index)
 void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 //----------------------------------------------------------------------
 {
+	ResetSilence();
 	Limit(value, 0.0f, 1.0f);
 	switch(index)
 	{
