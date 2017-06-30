@@ -569,11 +569,11 @@ public:
 	mpt::Charset GetCharset() const { return GetCharsetFromModType(GetType()); }
 	mpt::Charset GetCharsetLocaleOrModule() const
 	{
-		#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		#if defined(MODPLUG_TRACKER)
 			return mpt::CharsetLocale;
-		#else // MPT_ENABLE_CHARSET_LOCALE
+		#else // MODPLUG_TRACKER
 			return GetCharset();
-		#endif // MPT_ENABLE_CHARSET_LOCALE
+		#endif // MODPLUG_TRACKER
 	}
 
 	void SetPreAmp(uint32 vol);
