@@ -22,6 +22,7 @@ class COwnerVstEditor: public CAbstractVstEditor
 {
 protected:
 	CStatic m_plugWindow;
+	int m_width, m_height;
 
 public:
 	COwnerVstEditor(CVstPlugin &plugin);

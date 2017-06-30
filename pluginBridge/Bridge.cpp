@@ -131,7 +131,13 @@ void PluginBridge::InitializeStaticVariables()
 
 
 PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
-	: window(NULL), isProcessing(0), nativeEffect(nullptr), needIdle(false), closeInstance(false)
+	: window(NULL)
+	, windowWidth(0)
+	, windowHeight(0)
+	, isProcessing(0)
+	, nativeEffect(nullptr)
+	, needIdle(false)
+	, closeInstance(false)
 {
 	PluginBridge::latestInstance = this;
 	InterlockedIncrement(&instanceCount);
@@ -728,12 +734,13 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 			{
 				assert(static_cast<size_t>(msg->ptr) >= sizeof(ERect));
 				memcpy(origPtr, rectPtr, std::min<size_t>(sizeof(ERect), static_cast<size_t>(msg->ptr)));
-				windowSize = *rectPtr;
+				windowWidth = rectPtr->right - rectPtr->left;
+				windowHeight = rectPtr->bottom - rectPtr->top;
 
 				// For plugins that don't know their size until after effEditOpen is done.
 				if(window)
 				{
-					SetWindowPos(window, NULL, 0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+					SetWindowPos(window, NULL, 0, 0, windowWidth, windowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 				}
 			}
 		}
@@ -1439,6 +1446,21 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 	case WM_ERASEBKGND:
 		// Pretend that we erased the background
 		return 1;
+
+	case WM_PAINT:
+		{
+			// For plugins that change their size but do not notify the host, e.g. Roland D-50
+			ERect *pRect = nullptr;
+			that->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+			if(pRect != nullptr && ((pRect->right - pRect->left) != that->windowWidth || (pRect->bottom - pRect->top) != that->windowHeight))
+			{
+				that->windowWidth = pRect->right - pRect->left;
+				that->windowHeight = pRect->bottom - pRect->top;
+				SetWindowPos(that->window, NULL, 0, 0, that->windowWidth, that->windowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+				that->DispatchToHost(audioMasterSizeWindow, that->windowWidth, that->windowHeight, nullptr, 0.0f);
+			}
+		}
+		break;
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);

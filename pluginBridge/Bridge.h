@@ -29,8 +29,8 @@ protected:
 	// Plugin
 	AEffect *nativeEffect;
 	HMODULE library;
-	ERect windowSize;
 	HWND window, windowParent;
+	int windowWidth, windowHeight;
 	LONG isProcessing;
 
 	// Static memory for host-to-plugin pointers
