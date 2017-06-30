@@ -2549,9 +2549,9 @@ bool CViewPattern::TransposeSelection(int transp)
 				{
 					const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
 					if(pIns != nullptr && pIns->pTuning != nullptr)
-					{
 						lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
-					}
+					else
+						lastGroupSize[chn] = 12;
 				}
 				int transpose = transp;
 				if(transpose == 12000 || transpose == -12000)
