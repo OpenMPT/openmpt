@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "VstPlug.h"
+#include "Vstplug.h"
 #include "VSTEditor.h"
 
 
@@ -25,8 +25,11 @@ BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 END_MESSAGE_MAP()
 
 
-COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin)
-//-------------------------------------------------------------------------------
+COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin)
+	: CAbstractVstEditor(plugin)
+	, m_width(0)
+	, m_height(0)
+//--------------------------------------------------
 {
 
 }
@@ -36,7 +39,8 @@ void COwnerVstEditor::OnPaint()
 //-----------------------------
 {
 	CAbstractVstEditor::OnPaint();
-	if(static_cast<CVstPlugin &>(m_VstPlugin).isBridged)
+	CVstPlugin &plugin = static_cast<CVstPlugin &>(m_VstPlugin);
+	if(plugin.isBridged)
 	{
 		// Force redrawing for the plugin window in the bridged process.
 		// Otherwise, bridged plugin GUIs will not always be refreshed properly.
@@ -45,6 +49,15 @@ void COwnerVstEditor::OnPaint()
 		{
 			CWnd *child = m_plugWindow.GetWindow(GW_CHILD | GW_HWNDFIRST);
 			if(child) child->RedrawWindow(&rect, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		}
+	} else
+	{
+		// For plugins that change their size without telling the host through audioMasterSizeWindow, e.g. Roland D-50
+		ERect *pRect = nullptr;
+		plugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+		if(pRect != nullptr && ((pRect->right - pRect->left) != m_width || (pRect->bottom - pRect->top) != m_height))
+		{
+			SetSize(pRect->right - pRect->left, pRect->bottom - pRect->top);
 		}
 	}
 }
@@ -102,6 +115,8 @@ bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 	{
 		return false;
 	}
+	m_width = contentWidth;
+	m_height = contentHeight;
 
 	CRect rcWnd, rcClient;
 
