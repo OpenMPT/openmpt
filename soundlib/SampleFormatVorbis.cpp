@@ -140,6 +140,8 @@ static FileTags GetVorbisFileTags(OggVorbis_File &vf)
 		tags.year = UStringFromVorbis(vorbis_comment_query(vc, "DATE", 0));
 		tags.url = UStringFromVorbis(vorbis_comment_query(vc, "CONTACT", 0));
 		tags.genre = UStringFromVorbis(vorbis_comment_query(vc, "GENRE", 0));
+	#else // !MPT_WITH_VORBIS
+		MPT_UNREFERENCED_PARAMETER(vf);
 	#endif // MPT_WITH_VORBIS
 	return tags;
 }
