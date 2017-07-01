@@ -365,7 +365,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 				info.useNameAsIdentifier = false;
 				info.isDefault = false;
 				info.extraData[MPT_USTRING("Key")] = mpt::ToUnicode(keyname);
-				info.extraData[MPT_USTRING("Description")] = mpt::ToUnicode(descriptionBuf);
+				info.extraData[MPT_USTRING("Description")] = description;
 				info.extraData[MPT_USTRING("CLSID")] = mpt::ToUnicode(internalID);
 				devices.push_back(info);
 			}
