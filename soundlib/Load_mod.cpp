@@ -1318,7 +1318,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 emptyCmds = 0;
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			bool firstInPattern = true;
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				uint8 data[4];
@@ -1397,8 +1396,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 					minVersion = std::max(minVersion, ST_III);
 					break;
 				}
-
-				firstInPattern = false;
 			}
 		}
 
