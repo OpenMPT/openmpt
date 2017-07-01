@@ -494,11 +494,11 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
 	uint32 invalidChars = 0;
-	for(uint32 i = 0; i < CountOf(sampleName); i++)
+	for(auto &c : sampleName)
 	{
-		if(sampleName[i] > 0 && sampleName[i] < ' ')
+		if(c > 0 && c < ' ')
 		{
-			sampleName[i] = ' ';
+			c = ' ';
 			invalidChars++;
 		}
 	}
@@ -1147,11 +1147,10 @@ static uint32 CountInvalidChars(char (&name)[N])
 //----------------------------------------------
 {
 	uint32 invalidChars = 0;
-	for(size_t i = 0; i < N; i++)
+	for(auto c : name)
 	{
-		int8 c = name[i];
 		// Check for any Extended ASCII and control characters
-		if(c != 0 && c < 32)
+		if(c != 0 && c < ' ')
 			invalidChars++;
 	}
 	return invalidChars;
@@ -1254,10 +1253,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.numOrders > 128 || fileHeader.restartPos > 220)
 		return false;
 
-	for(ORDERINDEX ord = 0; ord < CountOf(fileHeader.orderList); ord++)
+	for(uint8 ord : fileHeader.orderList)
 	{
 		// Sanity check: 64 patterns max.
-		if(fileHeader.orderList[ord] > 63)
+		if(ord > 63)
 			return false;
 	}
 
@@ -1311,95 +1310,102 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader::off_t patOffset = file.GetPosition();
 
 	// Scan patterns to identify Ultimate Soundtracker modules.
-	uint8 emptyCmds = 0;
-	uint8 numDxx = 0;
 	uint32 illegalBytes = 0;
-	for(uint32 i = 0; i < numPatterns * 64u * 4u; i++)
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		uint8 data[4];
-		file.ReadArray(data);
-		const ROWINDEX row = (i / 4u) % 64u;
-		const bool firstInPattern = (i % (64u * 4u)) == 0;
-		const uint8 eff = data[2] & 0x0F, param = data[3];
-		if(data[0] & 0xF0)
+		bool patternInUse = std::find(Order().cbegin(), Order().cend(), pat) != Order().cend();
+		uint8 numDxx = 0;
+		uint8 emptyCmds = 0;
+		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			illegalBytes++;
-			// Reject files that contain a lot of illegal pattern data.
-			// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
-			// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
-			// This also allows to play some rather damaged files like
-			// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
-			// but naturally we cannot recover the broken data.
-			if(illegalBytes > 1024)
-				return false;
-		}
-		// Check for empty space between the last Dxx command and the beginning of another pattern
-		if(emptyCmds != 0 && !firstInPattern && !memcmp(data, "\0\0\0\0", 4))
-		{
-			emptyCmds++;
-			if(emptyCmds > 32)
+			bool firstInPattern = true;
+			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
-				// Since there is a lot of empty space after the last Dxx command,
-				// we assume it's supposed to be a pattern break effect.
-				minVersion = ST2_00;
-			}
-		} else
-		{
-			emptyCmds = 0;
-		}
-
-		// Check for a large number of Dxx commands in the previous pattern
-		if(numDxx != 0 && firstInPattern)
-		{
-			if(numDxx < 3)
-			{
-				// not many Dxx commands in one pattern means they were probably pattern breaks
-				minVersion = ST2_00;
-			}
-			
-			numDxx = 0;
-		}
-
-		switch(eff)
-		{
-		case 1:
-		case 2:
-			if(param > 0x1F && minVersion == UST1_80)
-			{
-				// If a 1xx / 2xx effect has a parameter greater than 0x20, it is assumed to be UST.
-				minVersion = hasDiskNames ? UST1_80 : UST1_00;
-			} else if(eff == 1 && param > 0 && param < 0x03)
-			{
-				// This doesn't look like an arpeggio.
-				minVersion = std::max(minVersion, ST2_00_Exterminator);
-			} else if(eff == 1 && (param == 0x37 || param == 0x47) && minVersion <= ST2_00_Exterminator)
-			{
-				// This suspiciously looks like an arpeggio.
-				// Catch sleepwalk.mod by Karsten Obarski, which has a default tempo of 125 rather than 120 in the header, so gets mis-identified as a later tracker version.
-				minVersion = hasDiskNames ? UST1_80 : UST1_00;
-			}
-			break;
-		case 0x0B:
-			minVersion = ST2_00;
-			break;
-		case 0x0C:
-		case 0x0D:
-		case 0x0E:
-			minVersion = std::max(minVersion, ST2_00_Exterminator);
-			if(eff == 0x0D)
-			{
-				emptyCmds = 1;
-				if(param == 0 && row == 0)
+				uint8 data[4];
+				file.ReadArray(data);
+				const uint8 eff = data[2] & 0x0F, param = data[3];
+				if((data[0] & 0xF0) && patternInUse)
 				{
-					// Fix a possible tracking mistake in Blood Money title - who wants to do a pattern break on the first row anyway?
+					illegalBytes++;
+					// Reject files that contain a lot of illegal pattern data.
+					// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
+					// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
+					// This also allows to play some rather damaged files like
+					// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
+					// but naturally we cannot recover the broken data.
+
+					// We only check patterns that are actually being used in the order list, because some bad rips of the
+					// "operation wolf" soundtrack have 15 patterns for several songs, but the last few patterns are just garbage.
+					// Apart from those hidden patterns, the files play fine.
+					// Example: operation wolf - wolf1.mod (MD5 739acdbdacd247fbefcac7bc2d8abe6b, SHA1 e6b4813daacbf95f41ce9ec3b22520a2ae07eed8)
+					if(illegalBytes > 512)
+						return false;
+				}
+				// Check for empty space between the last Dxx command and the beginning of another pattern
+				if(emptyCmds != 0 && !memcmp(data, "\0\0\0\0", 4))
+				{
+					emptyCmds++;
+					if(emptyCmds > 32)
+					{
+						// Since there is a lot of empty space after the last Dxx command,
+						// we assume it's supposed to be a pattern break effect.
+						minVersion = ST2_00;
+					}
+				} else
+				{
+					emptyCmds = 0;
+				}
+
+				switch(eff)
+				{
+				case 1:
+				case 2:
+					if(param > 0x1F && minVersion == UST1_80)
+					{
+						// If a 1xx / 2xx effect has a parameter greater than 0x20, it is assumed to be UST.
+						minVersion = hasDiskNames ? UST1_80 : UST1_00;
+					} else if(eff == 1 && param > 0 && param < 0x03)
+					{
+						// This doesn't look like an arpeggio.
+						minVersion = std::max(minVersion, ST2_00_Exterminator);
+					} else if(eff == 1 && (param == 0x37 || param == 0x47) && minVersion <= ST2_00_Exterminator)
+					{
+						// This suspiciously looks like an arpeggio.
+						// Catch sleepwalk.mod by Karsten Obarski, which has a default tempo of 125 rather than 120 in the header, so gets mis-identified as a later tracker version.
+						minVersion = hasDiskNames ? UST1_80 : UST1_00;
+					}
+					break;
+				case 0x0B:
+					minVersion = ST2_00;
+					break;
+				case 0x0C:
+				case 0x0D:
+				case 0x0E:
+					minVersion = std::max(minVersion, ST2_00_Exterminator);
+					if(eff == 0x0D)
+					{
+						emptyCmds = 1;
+						if(param == 0 && row == 0)
+						{
+							// Fix a possible tracking mistake in Blood Money title - who wants to do a pattern break on the first row anyway?
+							break;
+						}
+						numDxx++;
+					}
+					break;
+				case 0x0F:
+					minVersion = std::max(minVersion, ST_III);
 					break;
 				}
-				numDxx++;
+
+				firstInPattern = false;
 			}
-			break;
-		case 0x0F:
-			minVersion = std::max(minVersion, ST_III);
-			break;
+		}
+
+		if(numDxx > 0 && numDxx < 3)
+		{
+			// Not many Dxx commands in one pattern means they were probably pattern breaks
+			minVersion = ST2_00;
 		}
 	}
 
