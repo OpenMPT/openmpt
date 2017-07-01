@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.12.00 (* June 2017, revision 8380)
+v1.26.12.00 (* June 2017, revision 8384)
 ----------------------------------------
 General tab
    [Fix] <js> Cloning effect plugins no longer creates an instrument for them (http://bugs.openmpt.org/view.php?id=970).
@@ -58,6 +58,7 @@ MOD
 
 Other formats
    [Imp] <js> PT36: Enable VBlank timing as specified in file and read song comment (http://bugs.openmpt.org/view.php?id=962).
+   [Imp] <js> M15: Loosen heuristics to allow a few more semi-damaged files to play.
    [Fix] <js> MT2: If there were instruments with both sample and plugin assignments, sample data was not read correctly.
 
 Module cleanup
