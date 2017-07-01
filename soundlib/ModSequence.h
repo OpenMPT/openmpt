@@ -136,7 +136,7 @@ public:
 	inline ORDERINDEX GetRestartPos() const { return m_restartPos; }
 
 
-protected:
+public:
 	iterator begin() {return m_pArray;}
 	const_iterator begin() const {return m_pArray;}
 	iterator end() {return m_pArray + m_nSize;}
