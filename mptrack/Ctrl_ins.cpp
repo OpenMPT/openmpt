@@ -1799,15 +1799,9 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 
 		case IDC_SLIDER2:
 			if(isEnabled)
-			{
-				uint16 swing = pIns->nPanSwing;
-				if(m_sndFile.GetType() == MOD_TYPE_IT)
-					swing /= 4u;
-				wsprintf(pszText, "±%d panning variation", swing);
-			} else
-			{
+				wsprintf(pszText, "±%d panning variation", pIns->nPanSwing);
+			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			}
 			return TRUE;
 
 		case IDC_SLIDER3:
