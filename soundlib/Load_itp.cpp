@@ -294,7 +294,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
 #else
-		AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."), ins, instrPaths[ins].ToUnicode()));
+		AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."))(ins, instrPaths[ins].ToUnicode()));
 #endif // MPT_EXTERNAL_SAMPLES
 	}
 

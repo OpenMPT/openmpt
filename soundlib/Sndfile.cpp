@@ -401,7 +401,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			{
 #ifndef MODPLUG_TRACKER
 				// OpenMPT has its own way of reporting this error in CModDoc.
-				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, filename.ToUnicode()));
+				AddToLog(LogError, mpt::format(MPT_USTRING("Unable to load sample %1: %2"))(i, filename.ToUnicode()));
 #endif // MODPLUG_TRACKER
 			}
 		} else

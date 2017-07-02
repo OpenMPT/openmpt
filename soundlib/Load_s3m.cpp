@@ -727,7 +727,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		long patOffset = ftell(f);
 		if(patOffset > 0xFFFF0)
 		{
-			AddToLog(LogError, mpt::String::Print(MPT_USTRING("Too much pattern data! Writing patterns failed starting from pattern %1."), pat));
+			AddToLog(LogError, mpt::format(MPT_USTRING("Too much pattern data! Writing patterns failed starting from pattern %1."))(pat));
 			break;
 		}
 		MPT_ASSERT((patOffset % 16) == 0);
@@ -887,7 +887,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			// Write sample data
 			if(sampleDataOffset > 0xFFFFFF0)
 			{
-				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Too much sample data! Writing samples failed starting from sample %1."), realSmp));
+				AddToLog(LogError, mpt::format(MPT_USTRING("Too much sample data! Writing samples failed starting from sample %1."))(realSmp));
 				break;
 			}
 

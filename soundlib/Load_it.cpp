@@ -746,7 +746,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MPT_EXTERNAL_SAMPLES
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #else
-					AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+					AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES
 				} else
 				{
@@ -789,7 +789,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		AddToLog(mpt::String::Print(str_PatternSetTruncationNote, patPos.size(), numPats));
+		AddToLog(mpt::format(str_PatternSetTruncationNote)(patPos.size(), numPats));
 	}
 
 	if(!(loadFlags & loadPatternData))
@@ -905,7 +905,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty 64-row pattern
 			if(!Patterns.Insert(pat, 64))
 			{
-				AddToLog(mpt::String::Print("Allocating patterns failed starting from pattern %1", pat));
+				AddToLog(mpt::format("Allocating patterns failed starting from pattern %1")(pat));
 				break;
 			}
 			// Now (after the Insert() call), we can read the pattern name.
@@ -1688,7 +1688,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			buf[len++] = 0;
 			if(writeSize > uint16_max - len)
 			{
-				AddToLog(mpt::String::Print("%1 (%2 %3)", str_tooMuchPatternData, str_pattern, pat));
+				AddToLog(mpt::format("%1 (%2 %3)")(str_tooMuchPatternData, str_pattern, pat));
 				break;
 			} else
 			{
@@ -1724,7 +1724,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		if(dwPos > uint32_max)
 		{
 			// Sample position does not fit into sample pointer!
-			AddToLog(mpt::String::Print("Cannot save sample %1: File size exceeds 4 GB.", smp));
+			AddToLog(mpt::format("Cannot save sample %1: File size exceeds 4 GB.")(smp));
 			itss.samplepointer = 0;
 			itss.length = 0;
 		}
@@ -1742,7 +1742,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			if(Samples[smp].nLength != smpLength)
 			{
 				// Sample length does not fit into IT header!
-				AddToLog(mpt::String::Print("Truncating sample %1: Length exceeds exceeds 4 gigasamples.", smp));
+				AddToLog(mpt::format("Truncating sample %1: Length exceeds exceeds 4 gigasamples.")(smp));
 			}
 			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[smp], smpLength);
 		} else
