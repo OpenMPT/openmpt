@@ -402,7 +402,7 @@ static void mixersettings_to_ramping( int & ramping, const MixerSettings & setti
 }
 
 std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const {
-	return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->GetCharset(), encoded );
+	return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->GetCharsetInternal(), encoded );
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	bool samplerate_changed = static_cast<std::int32_t>( m_sndFile->m_MixerSettings.gdwMixingFreq ) != samplerate;
