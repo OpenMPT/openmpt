@@ -222,7 +222,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 	logcapturer.ShowLog(std::wstring()
 		+ L"File: " + filename.ToWide() + L"\n"
-		+ L"Last saved with: " + mpt::ToWide(mpt::CharsetLocale, m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
+		+ L"Last saved with: " + mpt::ToWide(m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
 		+ L"\n"
 		);
 

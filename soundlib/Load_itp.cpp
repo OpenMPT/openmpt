@@ -341,7 +341,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.Reset();
 	}
 
-	m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+	m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
 
 	return true;
 #endif // MPT_EXTERNAL_SAMPLES

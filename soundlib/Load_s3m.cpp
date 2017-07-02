@@ -198,7 +198,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
-	std::string trackerStr;
+	mpt::ustring trackerStr;
 	bool nonCompatTracker = false;
 	bool isST3 = false;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
@@ -208,35 +208,35 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			m_madeWithTracker = "ModPlug Tracker / OpenMPT";
+			m_madeWithTracker = MPT_USTRING("ModPlug Tracker / OpenMPT");
 			keepMidiMacros = true;
 			nonCompatTracker = true;
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
-			m_madeWithTracker = "Velvet Studio";
+			m_madeWithTracker = MPT_USTRING("Velvet Studio");
 		} else
 		{
-			trackerStr = "Scream Tracker";
+			trackerStr = MPT_USTRING("Scream Tracker");
 			isST3 = true;
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
-		trackerStr = "Imago Orpheus";
+		trackerStr = MPT_USTRING("Imago Orpheus");
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
-			trackerStr = "Impulse Tracker";
+			trackerStr = MPT_USTRING("Impulse Tracker");
 		else
-			m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			m_madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		nonCompatTracker = true;
 		m_nMinPeriod = 1;
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
 		{
-			m_madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = MPT_USTRING("BeRoTracker");
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else
 		{
@@ -246,20 +246,20 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		trackerStr = "OpenMPT";
+		trackerStr = MPT_USTRING("OpenMPT");
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
-		m_madeWithTracker = "BeRoTracker";
+		m_madeWithTracker = MPT_USTRING("BeRoTracker");
 		m_playBehaviour.set(kST3LimitPeriod);
 		break;
 	case S3MFileHeader::trkCreamTracker:
-		m_madeWithTracker = "CreamTracker";
+		m_madeWithTracker = MPT_USTRING("CreamTracker");
 		break;
 	}
 	if(!trackerStr.empty())
 	{
-		m_madeWithTracker = mpt::String::Print("%1 %2.%3", trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::fmt::hex0<2>(fileHeader.cwtv & 0xFF));
+		m_madeWithTracker = mpt::format(MPT_USTRING("%1 %2.%3"))(trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 	if(nonCompatTracker)
 	{

@@ -41,6 +41,7 @@ namespace MptVersion
 
 	// Returns version string from given numerical version value.
 	std::string ToStr(const VersionNum v);
+	mpt::ustring ToUString(const VersionNum v);
 
 	// Return a version without build number (the last number in the version).
 	// The current versioning scheme uses this number only for test builds, and it should be 00 for official builds,

@@ -1719,12 +1719,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				cwtv = chunk.ReadUint16LE();
 				break;
 			case MOD_TYPE_XM:
-				chunk.ReadString<mpt::String::spacePadded>(m_madeWithTracker, std::min(FileReader::off_t(32), chunk.GetLength()));
+				chunk.ReadString<mpt::String::spacePadded>(m_madeWithTracker, mpt::CharsetCP437, std::min(FileReader::off_t(32), chunk.GetLength()));
 				break;
 			case MOD_TYPE_MTM:
 				{
 					uint8 mtmVersion = chunk.ReadUint8();
-					m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", mtmVersion >> 4, mtmVersion & 0x0F);
+					m_madeWithTracker = mpt::format(MPT_USTRING("MultiTracker %1.%2"))(mtmVersion >> 4, mtmVersion & 0x0F);
 				}
 				break;
 			default:
@@ -1772,7 +1772,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(m_dwLastSavedWithVersion)
 			{
-				m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+				m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
 			}
 			break;
 		}
@@ -1787,9 +1787,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(m_madeWithTracker.empty())
-		m_madeWithTracker = mpt::String::Print("MO3 v%1", version);
+		m_madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1"))(version);
 	else
-		m_madeWithTracker = mpt::String::Print("MO3 v%1 (%2)", version, m_madeWithTracker);
+		m_madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1 (%2)"))(version, m_madeWithTracker);
 
 	if(unsupportedSamples)
 	{

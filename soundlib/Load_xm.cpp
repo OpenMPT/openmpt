@@ -304,14 +304,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// ???
 			madeWith.set(verConfirmed);
-			m_madeWithTracker = "FastTracker Clone";
+			m_madeWithTracker = MPT_USTRING("FastTracker Clone");
 		}
 	} else
 	{
 		// Something else!
 		madeWith = verUnknown | verConfirmed;
 
-		mpt::String::Read<mpt::String::spacePadded>(m_madeWithTracker, fileHeader.trackerName);
+		mpt::String::Read<mpt::String::spacePadded>(m_madeWithTracker, mpt::CharsetCP437, fileHeader.trackerName);
 
 		if(!memcmp(fileHeader.trackerName, "MilkyTracker ", 12))
 		{
@@ -398,12 +398,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				m_madeWithTracker = "ModPlug Tracker 1.0 alpha";
+				m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 alpha");
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
-				m_madeWithTracker = "ModPlug Tracker 1.0 beta";
+				m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 beta");
 			} else
 			{
 				// WTF?
@@ -599,11 +599,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(madeWith[verModPlug1_09])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-			m_madeWithTracker = "ModPlug Tracker 1.09";
+			m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.09");
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			m_madeWithTracker = "ModPlug Tracker 1.10 - 1.16";
+			m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.10 - 1.16");
 		}
 	}
 
@@ -652,13 +652,13 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(madeWith[verDigiTrakker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
 		{
-			m_madeWithTracker = "DigiTrakker";
+			m_madeWithTracker = MPT_USTRING("DigiTrakker");
 		} else if(madeWith[verFT2Generic])
 		{
-			m_madeWithTracker = "FastTracker 2 or compatible";
+			m_madeWithTracker = MPT_USTRING("FastTracker 2 or compatible");
 		} else
 		{
-			m_madeWithTracker = "Unknown";
+			m_madeWithTracker = MPT_USTRING("Unknown");
 		}
 	}
 
@@ -682,7 +682,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
-		m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+		m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.

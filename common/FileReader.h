@@ -785,6 +785,18 @@ public:
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
+	// Read a charset encoded string of length srcSize into a mpt::ustring dest using a given read mode.
+	// The file cursor is advanced by "srcSize" bytes.
+	// Returns true if at least one character could be read or 0 characters were requested.
+	template<mpt::String::ReadWriteMode mode>
+	bool ReadString(mpt::ustring &dest, mpt::Charset charset, const off_t srcSize)
+	{
+		FileReader::PinnedRawDataView source = ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
+		off_t realSrcSize = source.size();	// In case fewer bytes are available
+		mpt::String::Read<mode>(dest, charset, mpt::byte_cast<const char*>(source.data()), realSrcSize);
+		return (realSrcSize > 0 || srcSize == 0);
+	}
+
 	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a std::string dest using a given read mode.
 	// The file cursor is advanced by the string length.
 	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.

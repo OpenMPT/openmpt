@@ -653,7 +653,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 
 	m_songArtist = MPT_USTRING("MIDI Conversion");
-	m_madeWithTracker = "Standard MIDI File";
+	m_madeWithTracker = MPT_USTRING("Standard MIDI File");
 	SetMixLevels(mixLevels1_17RC3);
 	m_nTempoMode = tempoModeModern;
 	m_SongFlags = SONG_LINEARSLIDES;

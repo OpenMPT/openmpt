@@ -454,11 +454,11 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	m_playBehaviour.reset(kITSCxStopsSample);	// Gate effect in underbeat.mdl
 
-	m_madeWithTracker = std::string("Digitrakker ") + (
-		(fileHeader.version == 0x11) ? "3" // really could be 2.99b - close enough
-		: (fileHeader.version == 0x10) ? "2.3"
-		: (fileHeader.version == 0x00) ? "2.0 - 2.2b" // there was no 1.x release
-		: "");
+	m_madeWithTracker = MPT_USTRING("Digitrakker ") + (
+		(fileHeader.version == 0x11) ? MPT_USTRING("3") // really could be 2.99b - close enough
+		: (fileHeader.version == 0x10) ? MPT_USTRING("2.3")
+		: (fileHeader.version == 0x00) ? MPT_USTRING("2.0 - 2.2b") // there was no 1.x release
+		: MPT_USTRING(""));
 
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, info.title);
 	{

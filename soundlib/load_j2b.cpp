@@ -676,11 +676,11 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(mainChunk.tempo);
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 
-	m_madeWithTracker = "Galaxy Sound System (";
+	m_madeWithTracker = MPT_USTRING("Galaxy Sound System (");
 	if(isAM)
-		m_madeWithTracker += "new version)";
+		m_madeWithTracker += MPT_USTRING("new version)");
 	else
-		m_madeWithTracker += "old version)";
+		m_madeWithTracker += MPT_USTRING("old version)");
 
 	if(mainChunk.minPeriod < mainChunk.maxPeriod)
 	{
