@@ -389,7 +389,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	GetDefaultColourScheme(rgbCustomColors);
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		const std::string colorName = mpt::String::Print("Color%1", mpt::fmt::dec0<2>(ncol));
+		const std::string colorName = mpt::format("Color%1")(mpt::fmt::dec0<2>(ncol));
 		rgbCustomColors[ncol] = conf.Read<uint32>("Display", colorName, rgbCustomColors[ncol]);
 	}
 	// Paths
@@ -435,11 +435,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>("Zxx Macros", mpt::String::Print("SF%1", mpt::fmt::HEX(isfx)), macros.szMidiSFXExt[isfx]));
+		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>("Zxx Macros", mpt::format("SF%1")(mpt::fmt::HEX(isfx)), macros.szMidiSFXExt[isfx]));
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>("Zxx Macros", mpt::String::Print("Z%1", mpt::fmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]));
+		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>("Zxx Macros", mpt::format("Z%1")(mpt::fmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]));
 	}
 
 
@@ -1041,7 +1041,7 @@ void TrackerSettings::SaveSettings()
 	// Display (Colors)
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		conf.Write<uint32>("Display", mpt::String::Print("Color%1", mpt::fmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
+		conf.Write<uint32>("Display", mpt::format("Color%1")(mpt::fmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
 	}
 
 	// Paths
@@ -1057,11 +1057,11 @@ void TrackerSettings::SaveSettings()
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		conf.Write<std::string>("Zxx Macros", mpt::String::Print("SF%1", mpt::fmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		conf.Write<std::string>("Zxx Macros", mpt::format("SF%1")(mpt::fmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		conf.Write<std::string>("Zxx Macros", mpt::String::Print("Z%1", mpt::fmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		conf.Write<std::string>("Zxx Macros", mpt::format("Z%1")(mpt::fmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
 	}
 
 	// MRU list
