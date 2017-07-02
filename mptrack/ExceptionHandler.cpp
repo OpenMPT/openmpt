@@ -243,13 +243,13 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			errorMessage += MPT_ULITERAL("1 modified file has been rescued, but it cannot be guaranteed that it is still intact.");
 		} else
 		{
-			errorMessage += mpt::String::Print(MPT_USTRING("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."), rescuedFiles);
+			errorMessage += mpt::format(MPT_USTRING("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."))(rescuedFiles);
 		}
 	}
 
 	errorMessage += MPT_ULITERAL("\n\n");
-	errorMessage += mpt::String::Print(MPT_USTRING("OpenMPT %1 (%2 (%3))\n")
-		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
+	errorMessage += mpt::format(MPT_USTRING("OpenMPT %1 (%2 (%3))\n"))
+		( mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
 		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision())
 		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetStateString())
 		);
