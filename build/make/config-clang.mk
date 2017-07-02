@@ -4,12 +4,25 @@ CXX = clang++
 LD  = clang++
 AR  = ar 
 
+ifneq ($(STDCXX),)
+
 CPPFLAGS +=
-CXXFLAGS += -std=c++11 -fPIC 
+CXXFLAGS += -std=$(STDCXX) -fPIC
 CFLAGS   += -std=c99   -fPIC
 LDFLAGS  += 
 LDLIBS   += -lm
 ARFLAGS  := rcs
+
+else
+
+CPPFLAGS +=
+CXXFLAGS += -std=c++11 -fPIC
+CFLAGS   += -std=c99   -fPIC
+LDFLAGS  += 
+LDLIBS   += -lm
+ARFLAGS  := rcs
+
+endif
 
 CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
