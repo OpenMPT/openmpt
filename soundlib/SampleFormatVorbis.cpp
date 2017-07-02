@@ -183,7 +183,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 			vorbis_info *vi = ov_info(&vf, -1);
 			if(vi && vi->rate > 0 && vi->channels > 0)
 			{
-				sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(GetVorbisFileTags(vf)));
+				sampleName = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(GetVorbisFileTags(vf)));
 				rate = vi->rate;
 				channels = vi->channels;
 				std::size_t offset = 0;

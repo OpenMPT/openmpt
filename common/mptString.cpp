@@ -169,7 +169,7 @@ Encoding of 8bit strings
 ------------------------
 
 8bit strings have an unspecified encoding. When the string is contained within a
-CSoundFile object, the encoding is most likely CSoundFile::GetCharset(),
+CSoundFile object, the encoding is most likely CSoundFile::GetCharsetInternal(),
 otherwise, try to gather the most probable encoding from surrounding or related
 code sections.
 

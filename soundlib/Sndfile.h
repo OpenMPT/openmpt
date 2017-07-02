@@ -584,13 +584,16 @@ public:
 	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
 
 	// rough heuristic, could be improved
-	mpt::Charset GetCharset() const { return GetCharsetFromModType(GetType()); }
-	mpt::Charset GetCharsetLocaleOrModule() const
+	mpt::Charset GetCharsetFile() const // 8bit string encoding of strings in the on-disk file
+	{
+		return GetCharsetFromModType(GetType());
+	}
+	mpt::Charset GetCharsetInternal() const // 8bit string encoding of strings internal in CSoundFile
 	{
 		#if defined(MODPLUG_TRACKER)
 			return mpt::CharsetLocale;
 		#else // MODPLUG_TRACKER
-			return GetCharset();
+			return GetCharsetFile();
 		#endif // MODPLUG_TRACKER
 	}
 

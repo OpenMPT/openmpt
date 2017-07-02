@@ -404,7 +404,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	mptMFSafeRelease(&partialType);
 	mptMFSafeRelease(&sourceReader);
 
-	sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(tags));
+	sampleName = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags));
 
 	length = rawData.size() / numChannels / (bitsPerSample/8);
 
