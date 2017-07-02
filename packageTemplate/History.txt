@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.12.00 (* June 2017, revision 8384)
+v1.26.12.00 (2 July 2017, revision 8412)
 ----------------------------------------
 General tab
    [Fix] <js> Cloning effect plugins no longer creates an instrument for them (http://bugs.openmpt.org/view.php?id=970).
