@@ -12,7 +12,7 @@ typedef struct _mp3_info {
 typedef void* mp3_decoder_t;
 
 #if 1 // OpenMPT
-extern mp3_decoder_t *mp3_create(void);
+extern mp3_decoder_t *mp3_create(void); // OpenMPT
 #else // OpenMPT
 extern mp3_decoder_t mp3_create(void);
 #endif // OpenMPT
