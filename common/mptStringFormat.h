@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 //     the same way as '%nd' would do. Appending a '0' to the function name causes zero-filling as print-like '%0nd' would do. Spelling 'HEX'
 //     in upper-case generates upper-case hex digits. If these are not known at compile-time, a more verbose FormatVal(int, format) can be
 //     used.
-//  3. mpt::String::Print(format, ...) provides simplified and type-safe message and localization string formatting.
+//  3. mpt::format(format)(...) provides simplified and type-safe message and localization string formatting.
 //     The only specifier allowed is '%' followed by a single digit n. It references to n-th parameter after the format string (1-based).
 //     This mimics the behaviour of QString::arg() in QT4/5 or MFC AfxFormatString2(). C printf-like functions offer similar functionality
 //     with a '%n$TYPE' syntax. In .NET, the syntax is '{n}'. This is useful to support localization strings that can change the parameter
@@ -66,7 +66,7 @@ namespace mpt
 {
 
 // ToString() converts various built-in types to a well-defined, locale-independent string representation.
-// This is also used as a type-tunnel pattern for mpt::String::Print.
+// This is also used as a type-tunnel pattern for mpt::format.
 // Custom types that need to be converted to strings are encouraged to overload ToString() and ToWString().
 
 // fallback to member function ToString()
