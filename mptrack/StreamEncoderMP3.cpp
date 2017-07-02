@@ -1000,25 +1000,25 @@ private:
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
 	{
-		ACMLOG("ACM format found:");
-		ACMLOG(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
+		ACMLOG(MPT_USTRING("ACM format found:"));
+		ACMLOG(mpt::format(MPT_USTRING(" fdwSupport = 0x%1"))(mpt::ufmt::hex0<8>(fdwSupport)));
 
 		if(pafd)
 		{
-			ACMLOG(" ACMFORMATDETAILS:");
-			ACMLOG(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
-			ACMLOG(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
-			ACMLOG(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
-			ACMLOG(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
-			ACMLOG(mpt::String::Print("  Format = %1", mpt::FromTcharBuf(pafd->szFormat)));
+			ACMLOG(MPT_USTRING(" ACMFORMATDETAILS:"));
+			ACMLOG(mpt::format(MPT_USTRING("  cbStruct = %1"))(pafd->cbStruct));
+			ACMLOG(mpt::format(MPT_USTRING("  dwFormatIndex = %1"))(pafd->dwFormatIndex));
+			ACMLOG(mpt::format(MPT_USTRING("  dwFormatTag = %1"))(pafd->dwFormatTag));
+			ACMLOG(mpt::format(MPT_USTRING("  fdwSupport = 0x%1"))(mpt::ufmt::hex0<8>(pafd->fdwSupport)));
+			ACMLOG(mpt::format(MPT_USTRING("  Format = %1"))(mpt::FromTcharBuf(pafd->szFormat)));
 		} else
 		{
-			ACMLOG(" ACMFORMATDETAILS = NULL");
+			ACMLOG(MPT_USTRING(" ACMFORMATDETAILS = NULL"));
 		}
 
 		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
 		{
-			ACMLOG(" MP3 format found!");
+			ACMLOG(MPT_USTRING(" MP3 format found!"));
 
 			ACMDRIVERDETAILS add;
 			MemsetZero(add);
@@ -1027,29 +1027,29 @@ private:
 			{
 				if(acmDriverDetailsSafe(driver, &add, 0) != MMSYSERR_NOERROR)
 				{
-					ACMLOG(" acmDriverDetails = ERROR");
+					ACMLOG(MPT_USTRING(" acmDriverDetails = ERROR"));
 					// No driver details? Skip it.
 					return TRUE;
 				}
-				ACMLOG(" ACMDRIVERDETAILS:");
-				ACMLOG(mpt::String::Print("  cbStruct = %1", add.cbStruct));
-				ACMLOG(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
-				ACMLOG(mpt::String::Print("  fccComp = 0x%1", mpt::fmt::hex0<4>(add.fccComp)));
-				ACMLOG(mpt::String::Print("  wMid = %1", add.wMid));
-				ACMLOG(mpt::String::Print("  wPid = %1", add.wPid));
-				ACMLOG(mpt::String::Print("  vdwACM = 0x%1", mpt::fmt::hex0<8>(add.vdwACM)));
-				ACMLOG(mpt::String::Print("  vdwDriver = 0x%1", mpt::fmt::hex0<8>(add.vdwDriver)));
-				ACMLOG(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
-				ACMLOG(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
-				ACMLOG(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
-				ACMLOG(mpt::String::Print("  ShortName = %1", mpt::FromTcharBuf(add.szShortName)));
-				ACMLOG(mpt::String::Print("  LongName = %1", mpt::FromTcharBuf(add.szLongName)));
-				ACMLOG(mpt::String::Print("  Copyright = %1", mpt::FromTcharBuf(add.szCopyright)));
-				ACMLOG(mpt::String::Print("  Licensing = %1", mpt::FromTcharBuf(add.szLicensing)));
-				ACMLOG(mpt::String::Print("  Features = %1", mpt::FromTcharBuf(add.szFeatures)));
+				ACMLOG(MPT_USTRING(" ACMDRIVERDETAILS:"));
+				ACMLOG(mpt::format(MPT_USTRING("  cbStruct = %1"))(add.cbStruct));
+				ACMLOG(mpt::format(MPT_USTRING("  fccType = 0x%1"))(mpt::ufmt::hex0<4>(add.fccType)));
+				ACMLOG(mpt::format(MPT_USTRING("  fccComp = 0x%1"))(mpt::ufmt::hex0<4>(add.fccComp)));
+				ACMLOG(mpt::format(MPT_USTRING("  wMid = %1"))(add.wMid));
+				ACMLOG(mpt::format(MPT_USTRING("  wPid = %1"))(add.wPid));
+				ACMLOG(mpt::format(MPT_USTRING("  vdwACM = 0x%1"))(mpt::ufmt::hex0<8>(add.vdwACM)));
+				ACMLOG(mpt::format(MPT_USTRING("  vdwDriver = 0x%1"))(mpt::ufmt::hex0<8>(add.vdwDriver)));
+				ACMLOG(mpt::format(MPT_USTRING("  fdwSupport = %1"))(mpt::ufmt::hex0<8>(add.fdwSupport)));
+				ACMLOG(mpt::format(MPT_USTRING("  cFormatTags = %1"))(add.cFormatTags));
+				ACMLOG(mpt::format(MPT_USTRING("  cFilterTags = %1"))(add.cFilterTags));
+				ACMLOG(mpt::format(MPT_USTRING("  ShortName = %1"))(mpt::FromTcharBuf(add.szShortName)));
+				ACMLOG(mpt::format(MPT_USTRING("  LongName = %1"))(mpt::FromTcharBuf(add.szLongName)));
+				ACMLOG(mpt::format(MPT_USTRING("  Copyright = %1"))(mpt::FromTcharBuf(add.szCopyright)));
+				ACMLOG(mpt::format(MPT_USTRING("  Licensing = %1"))(mpt::FromTcharBuf(add.szLicensing)));
+				ACMLOG(mpt::format(MPT_USTRING("  Features = %1"))(mpt::FromTcharBuf(add.szFeatures)));
 			} catch(const Crash &)
 			{
-				ACMLOG(" acmDriverDetails = EXCEPTION");
+				ACMLOG(MPT_USTRING(" acmDriverDetails = EXCEPTION"));
 				// Driver crashed? Skip it.
 				return TRUE;
 			}
