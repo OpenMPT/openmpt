@@ -338,7 +338,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 			if(m_madeWithTracker.empty())
 			{
-				m_madeWithTracker = ModTypeToTracker(GetType());
+				m_madeWithTracker = mpt::ToCharset(GetCharsetInternal(), ModTypeToTracker(GetType()));
 			}
 
 #ifndef NO_ARCHIVE_SUPPORT
