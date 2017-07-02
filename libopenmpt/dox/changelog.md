@@ -5,9 +5,9 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta25
+### libopenmpt 0.2-beta25 (2017-07-02)
 
- *  PT36: Enable VBlank timing as specified in file and read song comment
+ *  PT36: Enable VBlank timing as specified in file and read song comment.
  *  M15: Loosen heuristics to allow a few more semi-damaged files to play.
  *  MT2: If there were instruments with both sample and plugin assignments,
     sample data was not read correctly.
