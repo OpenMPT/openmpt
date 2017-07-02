@@ -654,12 +654,16 @@ LIBOPENMPT_CXX_SOURCES += \
  libopenmpt/libopenmpt_impl.cpp \
  libopenmpt/libopenmpt_ext_impl.cpp \
  
+include/miniz/miniz.o : CFLAGS+=$(CFLAGS_SILENT)
+include/miniz/miniz.test.o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
 endif
 
+include/minimp3/minimp3.o : CFLAGS+=$(CFLAGS_SILENT)
+include/minimp3/minimp3.test.o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(NO_MPG123),1)
 ifeq ($(USE_MINIMP3),1)
 LIBOPENMPT_C_SOURCES += include/minimp3/minimp3.c
@@ -668,6 +672,8 @@ CPPFLAGS += -DMPT_WITH_MINIMP3
 endif
 endif
 
+include/stb_vorbis/stb_vorbis.o : CFLAGS+=$(CFLAGS_SILENT)
+include/stb_vorbis/stb_vorbis.test.o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(NO_OGG),1)
 ifeq ($(NO_STBVORBIS),1)
 else

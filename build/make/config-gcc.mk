@@ -24,5 +24,7 @@ ARFLAGS  := rcs
 
 endif
 
+CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function
+
 EXESUFFIX=
 
