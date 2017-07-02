@@ -908,6 +908,7 @@ static INLINE void align_get_bits(bitstream_t *s)
     if(n) skip_bits(s, n);
 }
 
+#if 0 // OpenMPT
 #define GET_DATA(v, table, i, wrap, size) \
 {\
     const uint8_t *ptr = (const uint8_t *)table + i * wrap;\
@@ -923,6 +924,29 @@ static INLINE void align_get_bits(bitstream_t *s)
         break;\
     }\
 }
+#else // OpenMPT
+#define GET_DATA(v, table, i, wrap, size) \
+{\
+    const uint8_t *ptr = (const uint8_t *)table + i * wrap;\
+    switch(size) {\
+    case 1: {\
+        uint8_t result = 0;\
+        memcpy(&result, ptr, 1);\
+        v = result;\
+        } break;\
+    case 2: {\
+        uint16_t result = 0;\
+        memcpy(&result, ptr, 2);\
+        v = result;\
+        } break;\
+    default: {\
+        uint32_t result = 0;\
+        memcpy(&result, ptr, 4);\
+        v = result;\
+        } break;\
+    }\
+} // OpenMPT
+#endif // OpenMPT
 
 static INLINE int alloc_table(vlc_t *vlc, int size) {
     int index;
@@ -966,7 +990,11 @@ static int build_table(
             continue;
         n -= n_prefix;
         code_prefix2= code >> n;
+#if 0 // OpenMPT
         if (n > 0 && code_prefix2 == code_prefix) {
+#else // OpenMPT
+        if (n > 0 && (uint32_t)code_prefix2 == code_prefix) {
+#endif // OpenMPT
             if (n <= table_nb_bits) {
                 j = (code << (table_nb_bits - n)) & (table_size - 1);
                 nb = 1 << (table_nb_bits - n);
