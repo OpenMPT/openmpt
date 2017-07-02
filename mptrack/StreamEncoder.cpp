@@ -101,25 +101,25 @@ void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits)
 mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
 //-------------------------------------------------------------------
 {
-	return mpt::String::Print(MPT_USTRING("VBR %1%%"), static_cast<int>(quality * 100.0f));
+	return mpt::format(MPT_USTRING("VBR %1%%"))(static_cast<int>(quality * 100.0f));
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
 //--------------------------------------------------------------------
 {
-	return mpt::String::Print(MPT_USTRING("VBR %1 kbit"), bitrate);
+	return mpt::format(MPT_USTRING("VBR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
 //--------------------------------------------------------------------
 {
-	return mpt::String::Print(MPT_USTRING("ABR %1 kbit"), bitrate);
+	return mpt::format(MPT_USTRING("ABR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
 //--------------------------------------------------------------------
 {
-	return mpt::String::Print(MPT_USTRING("CBR %1 kbit"), bitrate);
+	return mpt::format(MPT_USTRING("CBR %1 kbit"))(bitrate);
 }
 
 
