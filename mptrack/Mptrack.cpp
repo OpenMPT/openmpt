@@ -126,11 +126,11 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 			else //Case: Valid path but opening fails.
 			{
 				const int numDocs = theApp.GetOpenDocumentCount();
-				Reporting::Notification(mpt::String::Print(L"Opening \"%1\" failed. This can happen if "
+				Reporting::Notification(mpt::format(L"Opening \"%1\" failed. This can happen if "
 					L"no more modules can be opened or if the file type was not "
 					L"recognised. If the former is true, it is "
 					L"recommended to close some modules as otherwise a crash is likely"
-					L" (currently there %2 %3 document%4 open).",
+					L" (currently there %2 %3 document%4 open).")(
 					filename, (numDocs == 1) ? L"is" : L"are", numDocs, (numDocs == 1) ? L"" : L"s"));
 			}
 		}
@@ -2149,7 +2149,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			} else if(pluginScanDlg.m_hWnd)
 			{
 				CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-				std::wstring scanStr = mpt::String::Print(L"Scanning Plugin %1 / %2...\n%3", plug + 1, numPlugins + 1, plugPath);
+				std::wstring scanStr = mpt::format(L"Scanning Plugin %1 / %2...\n%3")(plug + 1, numPlugins + 1, plugPath);
 				SetWindowTextW(text->m_hWnd, scanStr.c_str());
 				MSG msg;
 				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

@@ -265,7 +265,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
 	{
-		Reporting::Notification(mpt::String::Print("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n",
+		Reporting::Notification(mpt::format("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n")(
 			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
 			MptVersion::str));
 	}

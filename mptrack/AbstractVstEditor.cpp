@@ -500,7 +500,7 @@ void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
 	{
-		std::wstring title = mpt::String::Print(L"FX %1: ", mpt::wfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
+		std::wstring title = mpt::format(L"FX %1: ")(mpt::wfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
 
 		bool hasCustomName = strcmp(m_VstPlugin.m_pMixStruct->GetName(), "") != 0 && strcmp(m_VstPlugin.m_pMixStruct->GetName(), m_VstPlugin.m_pMixStruct->GetLibraryName()) != 0;
 		if(hasCustomName)
@@ -512,7 +512,7 @@ void CAbstractVstEditor::SetTitle()
 #ifndef NO_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
-			title += mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits());
+			title += mpt::format(L" (%1-Bit Bridged)")(m_VstPlugin.GetPluginFactory().GetDllBits());
 #endif // NO_VST
 
 		::SetWindowTextW(m_hWnd, title.c_str());
