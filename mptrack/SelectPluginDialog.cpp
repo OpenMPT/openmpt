@@ -391,7 +391,7 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 			std::wstring title = plug.libraryName.AsNative();
 			if(!plug.IsNativeFromCache())
 			{
-				title += mpt::String::Print(L" (%1-Bit)", plug.GetDllBits());
+				title += mpt::format(L" (%1-Bit)")(plug.GetDllBits());
 			}
 			HTREEITEM h = AddTreeItem(title.c_str(), plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;
@@ -600,7 +600,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
-			std::string s = mpt::String::Print("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?", p.name, p.problem);
+			std::string s = mpt::format("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?")(p.name, p.problem);
 			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
@@ -742,7 +742,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	if(update)
 	{
 		// Force selection to last added plug.
-		Reporting::Information(mpt::String::Print("Found %1 plugin%2.", files, files == 1 ? "" : "s").c_str(), parent);
+		Reporting::Information(mpt::format("Found %1 plugin%2.")(files, files == 1 ? "" : "s").c_str(), parent);
 		return plugLib;
 	} else
 	{

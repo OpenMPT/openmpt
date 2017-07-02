@@ -424,16 +424,16 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				auto fmt = &mpt::fmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
 					fmt = &mpt::fmt::HEX<SmpLength>;
-				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? "" : "s");
+				s = mpt::format("[%1,%2] (%3 sample%4, ")(fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? "" : "s");
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
 				if(sampleRate <= 0) sampleRate = 8363;
 				double sec = selLength / static_cast<double>(sampleRate);
 				if(sec < 1)
-					s += mpt::String::Print("%1ms", mpt::fmt::flt(sec * 1000.0, 0, 3));
+					s += mpt::format("%1ms")(mpt::fmt::flt(sec * 1000.0, 0, 3));
 				else
-					s += mpt::String::Print("%1s", mpt::fmt::flt(sec, 0, 3));
+					s += mpt::format("%1s")(mpt::fmt::flt(sec, 0, 3));
 
 				// Length in beats
 				double beats = selLength;
@@ -445,7 +445,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 					sndFile.RecalculateSamplesPerTick();
 					beats *= sndFile.GetSampleRate() / static_cast<double>(Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
 				}
-				s += mpt::String::Print(", %1 beats)", mpt::fmt::flt(beats, 0, 5));
+				s += mpt::format(", %1 beats)")(mpt::fmt::flt(beats, 0, 5));
 			}
 			pMainFrm->SetInfoText(s.c_str());
 		}
@@ -2618,7 +2618,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 			ModSample &sample = sndFile.GetSample(m_nSample);
 			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-			const std::string s = mpt::String::Print("%1 (%2.%3 Hz)",
+			const std::string s = mpt::format("%1 (%2.%3 Hz)")(
 				sndFile.GetNoteName((ModCommand::NOTE)note),
 				freq >> FREQ_FRACBITS,
 				mpt::fmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS)));

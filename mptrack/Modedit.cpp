@@ -777,7 +777,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	if(ins == nullptr) return INSTRUMENTINDEX_INVALID;
 	InitializeInstrument(ins);
 
-	mpt::String::Copy(ins->name, mpt::String::Print("%1: %2", plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
+	mpt::String::Copy(ins->name, mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
 	mpt::String::Copy(ins->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
 	ins->nMixPlug = plug + 1;
 	ins->nMidiChannel = 1;

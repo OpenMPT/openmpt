@@ -863,7 +863,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 	if(outOfPatterns)
 	{
 		auto &specs = m_sndFile.GetModSpecifications();
-		Reporting::Error(mpt::String::Print("Pattern limit of the %1 format (%2 patterns) has been reached!", mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Duplicate Patterns");
+		Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Duplicate Patterns");
 	}
 	SwitchToView();
 }

@@ -81,7 +81,7 @@ static CString PrintTime(double seconds)
 	{
 		precision = 0;
 	}
-	return mpt::ToCString(mpt::CharsetASCII, mpt::String::Print("%1 ms", mpt::fmt::fix(seconds * 1000.0, 0, precision)));
+	return mpt::ToCString(mpt::format(MPT_USTRING("%1 ms"))(mpt::ufmt::fix(seconds * 1000.0, 0, precision)));
 }
 
 
@@ -509,7 +509,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Bit"), bits)));
+				UINT ndx = m_CbnSampleFormat.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 Bit"))(bits)));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
 				if((SampleFormat)bits == m_Settings.sampleFormat)
 				{
@@ -749,7 +749,7 @@ void COptionsSoundcard::UpdateSampleRates()
 	int n = 0;
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		int pos = m_CbnMixingFreq.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Hz"), samplerates[i])));
+		int pos = m_CbnMixingFreq.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 Hz"))(samplerates[i])));
 		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
 		if(m_Settings.Samplerate == samplerates[i])
 		{
@@ -909,13 +909,13 @@ void COptionsSoundcard::UpdateStatistics()
 		mpt::ustring s;
 		if(bufferAttributes.NumBuffers > 2)
 		{
-			s += mpt::String::Print(MPT_USTRING("Buffer: %1%% (%2/%3)\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? Util::Round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
+			s += mpt::format(MPT_USTRING("Buffer: %1%% (%2/%3)\r\n"))((bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? Util::Round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
 		} else
 		{
-			s += mpt::String::Print(MPT_USTRING("Buffer: %1%%\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
+			s += mpt::format(MPT_USTRING("Buffer: %1%%\r\n"))((bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
-		s += mpt::String::Print(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.Latency * 1000.0), mpt::ufmt::f("%4.1f", stats.InstantaneousLatency * 1000.0), Util::Round<int64>(stats.InstantaneousLatency * samplerate));
-		s += mpt::String::Print(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.UpdateInterval * 1000.0), mpt::ufmt::f("%4.1f", stats.LastUpdateInterval * 1000.0), Util::Round<int64>(stats.LastUpdateInterval * samplerate));
+		s += mpt::format(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::f("%4.1f", bufferAttributes.Latency * 1000.0), mpt::ufmt::f("%4.1f", stats.InstantaneousLatency * 1000.0), Util::Round<int64>(stats.InstantaneousLatency * samplerate));
+		s += mpt::format(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::f("%4.1f", bufferAttributes.UpdateInterval * 1000.0), mpt::ufmt::f("%4.1f", stats.LastUpdateInterval * 1000.0), Util::Round<int64>(stats.LastUpdateInterval * samplerate));
 		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else
@@ -1012,7 +1012,7 @@ BOOL COptionsMixer::OnInitDialog()
 		m_CbnPolyphony.ResetContent();
 		for(int n = 0; n < CountOf(PolyphonyChannels); ++n)
 		{
-			m_CbnPolyphony.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 (%2)"), PolyphonyChannels[n], mpt::ToUnicode(CString(PolyphonyNames[n])))));
+			m_CbnPolyphony.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 (%2)"))(PolyphonyChannels[n], mpt::ToUnicode(CString(PolyphonyNames[n])))));
 			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
 			{
 				m_CbnPolyphony.SetCurSel(n);

@@ -2992,7 +2992,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
-		str = mpt::String::Print(MPT_USTRING("FX%1: "), iPlug + 1);
+		str = mpt::format(MPT_USTRING("FX%1: "))(iPlug + 1);
 		const size_t size0 = str.size();
 		str += (librarynames) ? mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::CharsetLocale, plugin.GetName());
 		if(str.size() <= size0) str += MPT_USTRING("undefined");
@@ -3001,7 +3001,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += mpt::String::Print(MPT_USTRING(" (%1-Bit Bridged)"), lib.GetDllBits());
+			str += mpt::format(MPT_USTRING(" (%1-Bit Bridged)"))(lib.GetDllBits());
 		}
 
 		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);

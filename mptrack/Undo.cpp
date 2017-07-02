@@ -227,7 +227,7 @@ CString CPatternUndo::GetName(const undobuf_t &buffer)
 	if(info.linkToPrevious)
 		return info.description + CString(_T(" (Multiple Patterns)"));
 	else
-		return (info.description + mpt::String::Print(" (Pat %1 Row %2 Chn %3)", info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
+		return (info.description + mpt::format(" (Pat %1 Row %2 Chn %3)")(info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
 }
 
 

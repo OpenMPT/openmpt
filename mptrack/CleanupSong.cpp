@@ -375,7 +375,7 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 
 	if(foundDupes != 0)
 	{
-		modDoc.AddToLog(mpt::String::Print("%1 duplicate pattern%2 merged.", foundDupes, foundDupes == 1 ? "" : "s"));
+		modDoc.AddToLog(mpt::format("%1 duplicate pattern%2 merged.")(foundDupes, foundDupes == 1 ? "" : "s"));
 
 		// Fix order list
 		for(auto &order : sndFile.Order)
@@ -433,7 +433,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 
 	if(numRemovedPatterns)
 	{
-		modDoc.AddToLog(mpt::String::Print("%1 pattern%2 removed.", numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
+		modDoc.AddToLog(mpt::format("%1 pattern%2 removed.")(numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
 		return true;
 	}
 	return false;
@@ -618,9 +618,9 @@ bool CModCleanupDlg::OptimizeSamples()
 
 	std::string s;
 	if(numLoopOpt)
-		s = mpt::String::Print("%1 sample%2 unused data after the loop end point.\n", numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
+		s = mpt::format("%1 sample%2 unused data after the loop end point.\n")(numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
 	if(numStereoOpt)
-		s += mpt::String::Print("%1 stereo sample%2 actually mono.\n", numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
+		s += mpt::format("%1 stereo sample%2 actually mono.\n")(numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
 	if(numLoopOpt + numStereoOpt == 1)
 		s += "Do you want to optimize it and remove this unused data?";
 	else
@@ -663,12 +663,12 @@ bool CModCleanupDlg::OptimizeSamples()
 	}
 	if(numLoopOpt)
 	{
-		s = mpt::String::Print("%1 sample loop%2 optimized", numLoopOpt, (numLoopOpt == 1) ? "" : "s");
+		s = mpt::format("%1 sample loop%2 optimized")(numLoopOpt, (numLoopOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	if(numStereoOpt)
 	{
-		s = mpt::String::Print("%1 sample%2 converted to mono", numStereoOpt, (numStereoOpt == 1) ? "" : "s");
+		s = mpt::format("%1 sample%2 converted to mono")(numStereoOpt, (numStereoOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	return true;
@@ -833,7 +833,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
 	if(numRemoved != 0)
 	{
-		modDoc.AddToLog(LogInformation, mpt::String::Print(MPT_USTRING("%1 unused plugin%2 removed"), numRemoved, (numRemoved == 1) ? MPT_USTRING("") : MPT_USTRING("s")));
+		modDoc.AddToLog(LogInformation, mpt::format(MPT_USTRING("%1 unused plugin%2 removed"))(numRemoved, (numRemoved == 1) ? MPT_USTRING("") : MPT_USTRING("s")));
 		return true;
 	}
 	return false;

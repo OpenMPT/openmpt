@@ -281,7 +281,7 @@ void CPatternPropertiesDlg::OnOK()
 		{
 			if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
 			{
-				resize = (Reporting::Confirm(mpt::String::Print("Data at the %1 of the pattern will be lost.\nDo you want to continue?", resizeAtEnd ? "end" : "start"), "Shrink Pattern") == cnfYes);
+				resize = (Reporting::Confirm(mpt::format("Data at the %1 of the pattern will be lost.\nDo you want to continue?")(resizeAtEnd ? "end" : "start"), "Shrink Pattern") == cnfYes);
 				break;
 			}
 		}
