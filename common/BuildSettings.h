@@ -391,7 +391,7 @@
 
 	// mpt::ToWString, mpt::wfmt, ConvertStrTo<std::wstring>
 	// Required by the tracker to ease interfacing with WinAPI.
-	// Required by MPT_USTRING_MODE_WIDE to ease type tunneling in mpt::String::Print.
+	// Required by MPT_USTRING_MODE_WIDE to ease type tunneling in mpt::format.
 	#define MPT_WSTRING_FORMAT 1
 
 #else

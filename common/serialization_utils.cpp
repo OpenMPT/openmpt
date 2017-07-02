@@ -197,22 +197,21 @@ void SsbWrite::AddWriteNote(const SsbStatus s)
 //--------------------------------------------
 {
 	m_Status |= s;
-	SSB_LOG(mpt::String::Print(MPT_USTRING("%1: 0x%2\n"), strWriteNote, mpt::ufmt::hex(s)));
+	SSB_LOG(mpt::format(MPT_USTRING("%1: 0x%2\n"))(strWriteNote, mpt::ufmt::hex(s)));
 }
 
 void SsbRead::AddReadNote(const SsbStatus s)
 //------------------------------------------
 {
 	m_Status |= s;
-	SSB_LOG(mpt::String::Print(MPT_USTRING("%1: 0x%2\n"), strReadNote, mpt::ufmt::hex(s)));
+	SSB_LOG(mpt::format(MPT_USTRING("%1: 0x%2\n"))(strReadNote, mpt::ufmt::hex(s)));
 }
 
 void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 //-----------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
-	SSB_LOG(mpt::String::Print<mpt::ustring>(
-				 tstrReadProgress,
+	SSB_LOG(mpt::format(mpt::ustring(tstrReadProgress))(
 				 nNum,
 				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : MPT_USTRING(""),
 				 (pRe) ? pRe->rposStart : 0,
@@ -229,7 +228,7 @@ void SsbWrite::AddWriteNote(const ID &id, const NumType nEntryNum, const DataSiz
 //---------------------------------------------------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrWriteProgress, nEntryNum, id.AsString(), rposStart, nBytecount));
+	SSB_LOG(mpt::format(mpt::ustring(tstrWriteProgress))(nEntryNum, id.AsString(), rposStart, nBytecount));
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(id);
 	MPT_UNREFERENCED_PARAMETER(nEntryNum);
@@ -254,7 +253,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 						const char* pszDesc)
 //----------------------------------------
 {
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrMapEntryWrite,
+	SSB_LOG(mpt::format(mpt::ustring(tstrMapEntryWrite))(
 					(id.GetSize() > 0) ? id.AsString() : MPT_USTRING(""),
 					rposDataStart,
 					nDatasize));
@@ -302,7 +301,7 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 {
 	std::ostream& oStrm = *m_pOstrm;
 
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrWriteHeader, id.AsString()));
+	SSB_LOG(mpt::format(mpt::ustring(tstrWriteHeader))(id.AsString()));
 
 	ResetWritestatus();
 
@@ -389,7 +388,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	}
 	else // Entry not found.
 	{
-		SSB_LOG(mpt::String::Print<mpt::ustring>(tstrNoEntryFound, id.AsString()));
+		SSB_LOG(mpt::format(mpt::ustring(tstrNoEntryFound))(id.AsString()));
 #ifndef SSB_LOGGING
 		MPT_UNREFERENCED_PARAMETER(id);
 #endif
@@ -438,7 +437,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 {
 	std::istream& iStrm = *m_pIstrm;
 
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrReadingHeader, id.AsString()));
+	SSB_LOG(mpt::format(mpt::ustring(tstrReadingHeader))(id.AsString()));
 
 	ResetReadstatus();
 
@@ -601,7 +600,7 @@ void SsbRead::CacheMap()
 		if(iStrm.fail())
 			{ AddReadNote(SNR_BADSTREAM_AFTER_MAPHEADERSEEK); return; }
 
-		SSB_LOG(mpt::String::Print<mpt::ustring>(tstrReadingMap, m_rposMapBegin));
+		SSB_LOG(mpt::format(mpt::ustring(tstrReadingMap))(m_rposMapBegin));
 
 		mapData.resize(m_nReadEntrycount);
 		m_Idarray.reserve(m_nReadEntrycount * 4);
@@ -663,7 +662,7 @@ void SsbRead::CacheMap()
 			}
 		}
 		m_posMapEnd = iStrm.tellg();
-		SSB_LOG(mpt::String::Print<mpt::ustring>(tstrEndOfMap, m_posMapEnd - m_posStart));
+		SSB_LOG(mpt::format(mpt::ustring(tstrEndOfMap))(m_posMapEnd - m_posStart));
 	}
 
 	SetFlag(RwfRMapCached, true);
@@ -719,7 +718,7 @@ void SsbWrite::FinishWrite()
 		
 	Postype posMapStart = oStrm.tellp();
 
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrWritingMap, posMapStart - m_posStart));
+	SSB_LOG(mpt::format(mpt::ustring(tstrWritingMap))(posMapStart - m_posStart));
 
 	if (GetFlag(RwfRwHasMap)) //Write map
 	{
@@ -747,7 +746,7 @@ void SsbWrite::FinishWrite()
 	// Seek to end.
 	oStrm.seekp(std::max<Postype>(posMapEnd, posDataEnd)); 
 
-	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrEndOfStream, oStrm.tellp() - m_posStart));
+	SSB_LOG(mpt::format(mpt::ustring(tstrEndOfStream))(oStrm.tellp() - m_posStart));
 }
 
 } // namespace srlztn 
