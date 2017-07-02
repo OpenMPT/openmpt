@@ -357,8 +357,8 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_ULT);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 
-	const char *versions[] = {"<1.4", "1.4", "1.5", "1.6"};
-	m_madeWithTracker = "UltraTracker ";
+	const MPT_UCHAR_TYPE *versions[] = {MPT_ULITERAL("<1.4"), MPT_ULITERAL("1.4"), MPT_ULITERAL("1.5"), MPT_ULITERAL("1.6")};
+	m_madeWithTracker = MPT_USTRING("UltraTracker ");
 	m_madeWithTracker += versions[fileHeader.version - '1'];
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.

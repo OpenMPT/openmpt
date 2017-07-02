@@ -317,8 +317,8 @@ struct SchismVersionFromDate
 
 
 // Get version of Schism Tracker that was used to create an IT/S3M file.
-std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
-//----------------------------------------------------------
+mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
+//-----------------------------------------------------------
 {
 	// Schism Tracker version information in a nutshell:
 	// < 0x020: a proper version (files saved by such versions are likely very rare)
@@ -327,7 +327,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 	// > 0x050: the number of days since 2009-10-31
 
 	cwtv &= 0xFFF;
-	std::string version;
+	mpt::ustring version;
 	if(cwtv > 0x050)
 	{
 		int32 date = SchismVersionFromDate<2009, 10, 31>::date + cwtv - 0x050;
@@ -339,13 +339,13 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 			ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		}
 		int32 mi = (100 * ddd + 52) / 3060;
-		version = mpt::String::Print("Schism Tracker %1-%2-%3",
-			mpt::fmt::dec0<4>(y + (mi + 2) / 12),
-			mpt::fmt::dec0<2>((mi + 2) % 12 + 1),
-			mpt::fmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
+		version = mpt::format(MPT_USTRING("Schism Tracker %1-%2-%3"))(
+			mpt::ufmt::dec0<4>(y + (mi + 2) / 12),
+			mpt::ufmt::dec0<2>((mi + 2) % 12 + 1),
+			mpt::ufmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
-		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv));
+		version = mpt::format(MPT_USTRING("Schism Tracker 0.%1"))(mpt::ufmt::hex(cwtv));
 	}
 	return version;
 }
@@ -428,20 +428,20 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format) or BeRoTracker (will be determined later)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-					m_madeWithTracker = "ModPlug Tracker 1.09 - 1.16";
+					m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.09 - 1.16");
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
 					// but never writes 0xFF in the pan map for unused channels (which is an invalid value).
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-					m_madeWithTracker = "OpenMPT 1.17 (compatibility export)";
+					m_madeWithTracker = MPT_USTRING("OpenMPT 1.17 (compatibility export)");
 				}
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
+				m_madeWithTracker = MPT_USTRING("ModPlug Tracker b3.3 - 1.09");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && fileHeader.reserved == 0 && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
 			{
@@ -565,7 +565,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(oldUNMO3)
 		{
-			m_madeWithTracker = "UNMO3 <= 2.4";
+			m_madeWithTracker = MPT_USTRING("UNMO3 <= 2.4");
 		}
 	}
 
@@ -592,9 +592,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(possiblyUNMO3 && nflt == 0)
 			{
 				if(fileHeader.special & ITFileHeader::embedPatternHighlights)
-					m_madeWithTracker = "UNMO3 <= 2.4.0.1";	// Set together with MIDI macro embed flag
+					m_madeWithTracker = MPT_USTRING("UNMO3 <= 2.4.0.1");	// Set together with MIDI macro embed flag
 				else
-					m_madeWithTracker = "UNMO3";	// Either 2.4.0.2+ or no MIDI macros embedded
+					m_madeWithTracker = MPT_USTRING("UNMO3");	// Either 2.4.0.2+ or no MIDI macros embedded
 			}
 		} else
 		{
@@ -609,7 +609,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		// Otherwise we end up here and might have to read the edit history length.
 		if(file.ReadUint16LE() == 0)
 		{
-			m_madeWithTracker = "UNMO3 <= 2.4";
+			m_madeWithTracker = MPT_USTRING("UNMO3 <= 2.4");
 		} else
 		{
 			// These were not zero bytes, but potentially belong to the upcoming MIDI config - need to skip back.
@@ -778,7 +778,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				possibleXMconversion = false;
 		}
 		if(possibleXMconversion)
-			m_madeWithTracker = "XM Conversion";
+			m_madeWithTracker = MPT_USTRING("XM Conversion");
 	}
 
 	m_nMinPeriod = 0;
@@ -888,7 +888,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load instrument and song extensions.
 	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
-	if(interpretModPlugMade && m_madeWithTracker != "BeRoTracker")
+	if(interpretModPlugMade && m_madeWithTracker != MPT_USTRING("BeRoTracker"))
 	{
 		m_playBehaviour.reset();
 		m_nMixLevels = mixLevelsOriginal;
@@ -1058,13 +1058,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion && m_madeWithTracker.empty())
 	{
-		m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+		m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
 		if(memcmp(&fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
-			m_madeWithTracker += " (compatibility export)";
+			m_madeWithTracker += MPT_USTRING(" (compatibility export)");
 		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
 		{
-			m_madeWithTracker += " (test build)";
+			m_madeWithTracker += MPT_USTRING(" (test build)");
 		}
 	} else
 	{
@@ -1080,35 +1080,35 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
-				m_madeWithTracker = "OpenSPC conversion";
+				m_madeWithTracker = MPT_USTRING("OpenSPC conversion");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				m_madeWithTracker = "ModPlug Tracker 1.00a5";
+				m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.00a5");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(&fileHeader.reserved, "CHBI", 4))
 			{
-				m_madeWithTracker = "ChibiTracker";
+				m_madeWithTracker = MPT_USTRING("ChibiTracker");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && fileHeader.reserved == 0
 				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
 				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
-				m_madeWithTracker = "CheeseTracker";
+				m_madeWithTracker = MPT_USTRING("CheeseTracker");
 			} else if(fileHeader.cmwt < 0x0300)
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
-					m_madeWithTracker = "Impulse Tracker 2.15";
+					m_madeWithTracker = MPT_USTRING("Impulse Tracker 2.15");
 				} else if(fileHeader.cwtv > 0x0214)
 				{
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - 0x0214);
+					m_madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - 0x0214);
 				} else
 				{
-					m_madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+					m_madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
 				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{
@@ -1140,16 +1140,16 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
-			m_madeWithTracker = mpt::format("pyIT %1.%2")((fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+			m_madeWithTracker = mpt::format(MPT_USTRING("pyIT %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 			break;
 		case 6:
-			m_madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = MPT_USTRING("BeRoTracker");
 			break;
 		case 7:
-			m_madeWithTracker = mpt::format("ITMCK %1.%2.%3")((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			m_madeWithTracker = mpt::format(MPT_USTRING("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
-			m_madeWithTracker = "spc2it";
+			m_madeWithTracker = MPT_USTRING("spc2it");
 			break;
 		}
 	}
@@ -1998,7 +1998,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 #endif // NO_PLUGINS
 		} else if(!memcmp(code, "MODU", 4))
 		{
-			m_madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = MPT_USTRING("BeRoTracker");
 			m_dwLastSavedWithVersion = 0;	// Reset MPT detection for old files that have a similar fingerprint
 		}
 	}

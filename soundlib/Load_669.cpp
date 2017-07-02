@@ -107,9 +107,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 
 	if(!memcmp(fileHeader.magic, "if", 2))
-		m_madeWithTracker = "Composer 669";
+		m_madeWithTracker = MPT_USTRING("Composer 669");
 	else
-		m_madeWithTracker = "UNIS 669";
+		m_madeWithTracker = MPT_USTRING("UNIS 669");
 
 	m_nSamples = fileHeader.samples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)

@@ -512,7 +512,7 @@ public:
 
 	// Song message
 	SongMessage m_songMessage;
-	std::string m_madeWithTracker;
+	mpt::ustring m_madeWithTracker;
 
 protected:
 	std::vector<FileHistory> m_FileHistory;	// File edit history
@@ -720,7 +720,7 @@ public:
 	void LoadExtendedSongProperties(FileReader &file, bool* pInterpretMptMade = nullptr);
 	void LoadMPTMProperties(FileReader &file, uint16 cwtv);
 
-	std::string GetSchismTrackerVersion(uint16 cwtv);
+	mpt::ustring GetSchismTrackerVersion(uint16 cwtv);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
 	// If no errors occur and song extension tag is found, returns pointer to the beginning

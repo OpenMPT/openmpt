@@ -127,7 +127,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
 
 	// Read STM header
-	m_madeWithTracker = mpt::String::Print("Scream Tracker %1.%2", fileHeader.verMajor, mpt::fmt::dec0<2>(fileHeader.verMinor));
+	m_madeWithTracker = mpt::format(MPT_USTRING("Scream Tracker %1.%2"))(fileHeader.verMajor, mpt::ufmt::dec0<2>(fileHeader.verMinor));
 	m_nSamples = 31;
 	m_nChannels = 4;
 	m_nMinPeriod = 64;

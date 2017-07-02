@@ -929,7 +929,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("container_long") ) {
 		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("tracker") ) {
-		return m_sndFile->m_madeWithTracker;
+		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->m_madeWithTracker );
 	} else if ( key == std::string("artist") ) {
 		return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->m_songArtist );
 	} else if ( key == std::string("title") ) {

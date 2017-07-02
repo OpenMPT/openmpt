@@ -673,54 +673,54 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
 		m_nChannels = 4;
-		m_madeWithTracker = "Generic ProTracker or compatible";
+		m_madeWithTracker = MPT_USTRING("Generic ProTracker or compatible");
 	} else if(IsMagic(magic, "M&K!")	// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "FEST")		// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "N.T."))
 	{
 		m_nChannels = 4;
-		m_madeWithTracker = "NoiseTracker";
+		m_madeWithTracker = MPT_USTRING("NoiseTracker");
 		isNoiseTracker = true;
 	} else if(IsMagic(magic, "OKTA")
 		|| IsMagic(magic, "OCTA"))
 	{
 		// Oktalyzer
 		m_nChannels = 8;
-		m_madeWithTracker = "Oktalyzer";
+		m_madeWithTracker = MPT_USTRING("Oktalyzer");
 	} else if(IsMagic(magic, "CD81")
 		|| IsMagic(magic, "CD61"))
 	{
 		// Octalyser on Atari STe/Falcon
 		m_nChannels = magic[2] - '0';
-		m_madeWithTracker = "Octalyser (Atari)";
+		m_madeWithTracker = MPT_USTRING("Octalyser (Atari)");
 	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
 	{
 		// Digital Tracker on Atari Falcon
 		m_nChannels = magic[3] - '0';
-		m_madeWithTracker = "Digital Tracker";
+		m_madeWithTracker = MPT_USTRING("Digital Tracker");
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
 		m_nChannels = magic[3] - '0';
-		m_madeWithTracker = "Startrekker";
+		m_madeWithTracker = MPT_USTRING("Startrekker");
 		isStartrekker = true;
 		m_playBehaviour.set(kMODVBlankTiming);
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
 		m_nChannels = magic[0] - '0';
-		m_madeWithTracker = "Generic MOD-compatible Tracker";
+		m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
 	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1]>='0' && magic[1] <= '9'
 		&& (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
 		m_nChannels = (magic[0] - '0') * 10 + magic[1] - '0';
-		m_madeWithTracker = "Generic MOD-compatible Tracker";
+		m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
 	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker
 		m_nChannels = magic[3] - '0';
-		m_madeWithTracker = "TakeTracker";
+		m_madeWithTracker = MPT_USTRING("TakeTracker");
 	} else
 	{
 		return false;
@@ -794,7 +794,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	if(isMdKd && GetNumChannels() == 8)
 	{
 		// M.K. with 8 channels = Grave Composer
-		m_madeWithTracker = "Mod's Grave";
+		m_madeWithTracker = MPT_USTRING("Mod's Grave");
 	}
 
 	if(isFLT8)
@@ -1009,7 +1009,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
 	{
-		m_madeWithTracker = "ScreamTracker";
+		m_madeWithTracker = MPT_USTRING("ScreamTracker");
 	}
 
 	// Reading samples
@@ -1063,11 +1063,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				if(infoName.IsFile() && amFile.Open(infoName) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
 				{
 					if(!memcmp(stMagic, "ST1.2 ModuleINFO", 16))
-						m_madeWithTracker = "Startrekker 1.2";
+						m_madeWithTracker = MPT_USTRING("Startrekker 1.2");
 					else if(!memcmp(stMagic, "ST1.3 ModuleINFO", 16))
-						m_madeWithTracker = "Startrekker 1.3";
+						m_madeWithTracker = MPT_USTRING("Startrekker 1.3");
 					else if(!memcmp(stMagic, "AudioSculpture10", 16))
-						m_madeWithTracker = "AudioSculpture 1.0";
+						m_madeWithTracker = MPT_USTRING("AudioSculpture 1.0");
 					else
 						continue;
 
@@ -1132,7 +1132,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kMODVBlankTiming);
 			} else
 			{
-				m_madeWithTracker = "ProTracker (VBlank)";
+				m_madeWithTracker = MPT_USTRING("ProTracker (VBlank)");
 			}
 		}
 	}
@@ -1515,25 +1515,25 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	switch(minVersion)
 	{
 	case UST1_00:
-		m_madeWithTracker = "Ultimate Soundtracker 1.0-1.21";
+		m_madeWithTracker = MPT_USTRING("Ultimate Soundtracker 1.0-1.21");
 		break;
 	case UST1_80:
-		m_madeWithTracker = "Ultimate Soundtracker 1.8-2.0";
+		m_madeWithTracker = MPT_USTRING("Ultimate Soundtracker 1.8-2.0");
 		break;
 	case ST2_00_Exterminator:
-		m_madeWithTracker = "SoundTracker 2.0 / D.O.C. SoundTracker II";
+		m_madeWithTracker = MPT_USTRING("SoundTracker 2.0 / D.O.C. SoundTracker II");
 		break;
 	case ST_III:
-		m_madeWithTracker = "Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI";
+		m_madeWithTracker = MPT_USTRING("Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI");
 		break;
 	case ST_IX:
-		m_madeWithTracker = "D.O.C. SoundTracker IX";
+		m_madeWithTracker = MPT_USTRING("D.O.C. SoundTracker IX");
 		break;
 	case MST1_00:
-		m_madeWithTracker = "Master Soundtracker 1.0";
+		m_madeWithTracker = MPT_USTRING("Master Soundtracker 1.0");
 		break;
 	case ST2_00:
-		m_madeWithTracker = "SoundTracker 2.0 / 2.1 / 2.2";
+		m_madeWithTracker = MPT_USTRING("SoundTracker 2.0 / 2.1 / 2.2");
 		break;
 	}
 
@@ -1574,9 +1574,9 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kMODSampleSwap);	// untested
 
 	if(IsMagic(magic, "MTN\0"))
-		m_madeWithTracker = "SoundTracker 2.6";
+		m_madeWithTracker = MPT_USTRING("SoundTracker 2.6");
 	else if(IsMagic(magic, "IT10"))
-		m_madeWithTracker = "Ice Tracker 1.0 / 1.1";
+		m_madeWithTracker = MPT_USTRING("Ice Tracker 1.0 / 1.1");
 	else
 		return false;
 
@@ -1725,7 +1725,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 	
 	bool ok = false, infoOk = false;
 	FileReader commentChunk;
-	std::string version = "3.6";
+	mpt::ustring version = MPT_USTRING("3.6");
 	PT36InfoChunk info;
 	MemsetZero(info);
 
@@ -1759,7 +1759,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			chunk.Skip(4);
 			if(chunk.ReadMagic("PT") && iffHead.chunksize > 6)
 			{
-				chunk.ReadString<mpt::String::maybeNullTerminated>(version, iffHead.chunksize - 6);
+				chunk.ReadString<mpt::String::maybeNullTerminated>(version, mpt::CharsetISO8859_1, iffHead.chunksize - 6);
 			}
 			break;
 		
@@ -1818,7 +1818,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 		
-		m_madeWithTracker = "ProTracker " + version;
+		m_madeWithTracker = MPT_USTRING("ProTracker ") + version;
 	}
 	m_SongFlags.set(SONG_PT_MODE);
 	m_playBehaviour.set(kMODIgnorePanning);

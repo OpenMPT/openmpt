@@ -174,6 +174,18 @@ namespace mpt { namespace String
 		}
 	}
 
+	// Copy a charset encoded string from srcBuffer to destBuffer using a given read mode.
+	// Used for reading strings from files.
+	// Only use this version of the function if the size of the source buffer is variable.
+	template <ReadWriteMode mode, typename Tbyte>
+	void Read(mpt::ustring &dest, mpt::Charset charset, const Tbyte *srcBuffer, size_t srcSize)
+	//-----------------------------------------------------------------------------------------
+	{
+		std::string tmp;
+		Read<mode>(tmp, srcBuffer, srcSize);
+		dest = mpt::ToUnicode(charset, tmp);
+	}
+
 	// Used for reading strings from files.
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t srcSize, typename Tbyte>
@@ -184,6 +196,16 @@ namespace mpt { namespace String
 		Read<mode>(dest, srcBuffer, srcSize);
 	}
 
+	// Used for reading charset encoded strings from files.
+	// Preferrably use this version of the function, it is safer.
+	template <ReadWriteMode mode, size_t srcSize, typename Tbyte>
+	void Read(mpt::ustring &dest, mpt::Charset charset, const Tbyte(&srcBuffer)[srcSize])
+	//-----------------------------------------------------------------------------------
+	{
+		std::string tmp;
+		Read<mode>(tmp, srcBuffer);
+		dest = mpt::ToUnicode(charset, tmp);
+	}
 
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.

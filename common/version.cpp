@@ -61,6 +61,23 @@ std::string ToStr(const VersionNum v)
 	}
 }
 
+mpt::ustring ToUString(const VersionNum v)
+{
+	if(v == 0)
+	{
+		// Unknown version
+		return MPT_USTRING("Unknown");
+	} else if((v & 0xFFFF) == 0)
+	{
+		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
+		return mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF));
+	} else
+	{
+		// Full version info available
+		return mpt::format(MPT_USTRING("%1.%2.%3.%4"))(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF), mpt::ufmt::HEX0<2>((v >> 8) & 0xFF), mpt::ufmt::HEX0<2>((v) & 0xFF));
+	}
+}
+
 VersionNum RemoveBuildNumber(const VersionNum num_)
 {
 	return (num_ & 0xFFFFFF00);
