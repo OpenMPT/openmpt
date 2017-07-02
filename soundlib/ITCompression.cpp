@@ -27,7 +27,7 @@ struct IT16BitParams
 	static const int16 lowerTab[];
 	static const int16 upperTab[];
 	static const int8 fetchA = 4, lowerB = -8, upperB = 7, defWidth = 17;
-	static int Clamp(sample_t v) { return int(v) & 0xFFFF; }
+	static const int mask = 0xFFFF;
 };
 
 const int16 IT16BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -56, -120, -248, -504, -1016, -2040, -4088, -8184, -16376, -32760, -32768 };
@@ -40,7 +40,7 @@ struct IT8BitParams
 	static const int8 lowerTab[];
 	static const int8 upperTab[];
 	static const int8 fetchA = 3, lowerB = -4, upperB = 3, defWidth = 9;
-	static int Clamp(sample_t v) { return int(v) & 0xFF; }
+	static const int mask = 0xFF;
 };
 
 const int8 IT8BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -60, -124, -128 };
@@ -176,13 +176,13 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 
 			width = bwt[i];
 		}
-		WriteBits(width, Properties::Clamp(p[i]));
+		WriteBits(width, static_cast<int>(p[i]) & Properties::mask);
 	}
 
 	// Write last byte and update block length
 	WriteByte(byteVal);
-	packedData[0] = uint8((packedLength - 2) & 0xFF);
-	packedData[1] = uint8((packedLength - 2) >> 8);
+	packedData[0] = static_cast<uint8>((packedLength - 2) & 0xFF);
+	packedData[1] = static_cast<uint8>((packedLength - 2) >> 8);
 }
 
 
@@ -439,7 +439,7 @@ void ITDecompression::Write(int v, int topBit, typename Properties::sample_t *ta
 		v -= (topBit << 1);
 	mem1 += v;
 	mem2 += mem1;
-	target[writePos] = static_cast<typename Properties::sample_t>(is215 ? (int)mem2 : (int)mem1);
+	target[writePos] = static_cast<typename Properties::sample_t>(static_cast<int>(is215 ? mem2 : mem1));
 	writtenSamples++;
 	writePos += mptSample.GetNumChannels();
 	curLength--;
