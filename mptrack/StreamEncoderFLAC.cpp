@@ -218,7 +218,7 @@ FLACEncoder::FLACEncoder()
 				format.Samplerate = samplerate;
 				format.Channels = channels;
 				format.Sampleformat = (SampleFormat)(bytes * 8);
-				format.Description = mpt::String::Print(MPT_USTRING("%1 Bit"), bytes * 8);
+				format.Description = mpt::format(MPT_USTRING("%1 Bit"))(bytes * 8);
 				format.Bitrate = 0;
 				traits.formats.push_back(format);
 			}

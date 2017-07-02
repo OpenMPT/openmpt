@@ -1215,10 +1215,10 @@ public:
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
 		{
-			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3.%4"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff), mpt::ufmt::hex0<4>((ver>>0)&0xffff));
+			traits.encoderName = mpt::format(MPT_USTRING("%1 %2.%3.%4"))(MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff), mpt::ufmt::hex0<4>((ver>>0)&0xffff));
 		} else
 		{
-			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
+			traits.encoderName = mpt::format(MPT_USTRING("%1 %2.%3"))(MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
 		}
 		for(const auto &i : drivers)
 		{
@@ -1550,10 +1550,10 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return mpt::String::Print(MPT_USTRING("VBR -V%1 (~%2 kbit)"), MPT_USTRING("9.999"), q_table[q]);
+			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(MPT_USTRING("9.999"), q_table[q]);
 		} else
 		{
-			return mpt::String::Print(MPT_USTRING("VBR -V%1 (~%2 kbit)"), Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
+			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME

@@ -243,7 +243,7 @@ mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
 	static const int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
 	int q = Clamp(Util::Round<int>(quality * 10.0f), 0, 10);
-	return mpt::String::Print(MPT_USTRING("Q%1 (~%2 kbit)"), mpt::ufmt::f("%3.1f", quality * 10.0f), q_table[q]);
+	return mpt::format(MPT_USTRING("Q%1 (~%2 kbit)"))(mpt::ufmt::f("%3.1f", quality * 10.0f), q_table[q]);
 }
 
 
