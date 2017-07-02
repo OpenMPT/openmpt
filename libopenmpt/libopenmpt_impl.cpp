@@ -921,13 +921,13 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 }
 std::string module_impl::get_metadata( const std::string & key ) const {
 	if ( key == std::string("type") ) {
-		return CSoundFile::ModTypeToString( m_sndFile->GetType() );
+		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModTypeToString( m_sndFile->GetType() ) );
 	} else if ( key == std::string("type_long") ) {
-		return CSoundFile::ModTypeToTracker( m_sndFile->GetType() );
+		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModTypeToTracker( m_sndFile->GetType() ) );
 	} else if ( key == std::string("container") ) {
-		return CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() );
+		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("container_long") ) {
-		return CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() );
+		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("tracker") ) {
 		return m_sndFile->m_madeWithTracker;
 	} else if ( key == std::string("artist") ) {

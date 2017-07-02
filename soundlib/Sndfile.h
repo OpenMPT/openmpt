@@ -699,10 +699,10 @@ public:
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static mpt::Charset GetCharsetFromModType(MODTYPE modtype);
-	static const char * ModTypeToString(MODTYPE modtype);
-	static std::string ModContainerTypeToString(MODCONTAINERTYPE containertype);
-	static std::string ModTypeToTracker(MODTYPE modtype);
-	static std::string ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
+	static mpt::ustring ModTypeToString(MODTYPE modtype);
+	static mpt::ustring ModContainerTypeToString(MODCONTAINERTYPE containertype);
+	static mpt::ustring ModTypeToTracker(MODTYPE modtype);
+	static mpt::ustring ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
 	void UpgradeModule();
 

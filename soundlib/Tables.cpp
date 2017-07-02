@@ -42,89 +42,89 @@ const char NoteNamesFlat[12][4] =
 
 struct ModFormatInfo
 {
-	MODTYPE format;			// MOD_TYPE_XXXX
-	const char *name;		// "ProTracker"
-	const char *extension;	// "mod"
+	MODTYPE format;              // MOD_TYPE_XXXX
+	const MPT_UCHAR_TYPE *name;  // "ProTracker"
+	const char *extension;       // "mod"
 };
 
 // remember to also update libopenmpt/foo_openmpt.cpp (all other plugins read these dynamically)
 static const ModFormatInfo modFormatInfo[] =
 {
-	{ MOD_TYPE_MOD,		"ProTracker",				"mod" },
-	{ MOD_TYPE_S3M,		"ScreamTracker 3",			"s3m" },
-	{ MOD_TYPE_XM,		"FastTracker II",			"xm" },
-	{ MOD_TYPE_IT,		"Impulse Tracker",			"it" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "mod" },
+	{ MOD_TYPE_S3M,  MPT_ULITERAL("ScreamTracker 3"),         "s3m" },
+	{ MOD_TYPE_XM,   MPT_ULITERAL("FastTracker II"),          "xm" },
+	{ MOD_TYPE_IT,   MPT_ULITERAL("Impulse Tracker"),         "it" },
 #ifdef MPT_EXTERNAL_SAMPLES
-	{ MOD_TYPE_IT,		"Impulse Tracker Project",	"itp" },
+	{ MOD_TYPE_IT,   MPT_ULITERAL("Impulse Tracker Project"), "itp" },
 #endif
-	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },
-	{ MOD_TYPE_STM,		"ScreamTracker 2",			"stm" },
-	{ MOD_TYPE_MOD,		"ProTracker",				"pt36" },
-	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
-	{ MOD_TYPE_MOD,		"Soundtracker",				"m15" },
-	{ MOD_TYPE_MOD,		"Soundtracker",				"stk" },
-	{ MOD_TYPE_MOD,		"SoundTracker 2.6",			"st26" },
-	{ MOD_TYPE_MOD,		"Ice Tracker",				"ice" },
-	{ MOD_TYPE_MOD,		"Mod's Grave",				"wow" },
-	{ MOD_TYPE_ULT,		"UltraTracker",				"ult" },
-	{ MOD_TYPE_669,		"Composer 669 / UNIS 669",	"669" },
-	{ MOD_TYPE_MTM,		"MultiTracker",				"mtm" },
-	{ MOD_TYPE_MED,		"OctaMed",					"med" },
-	{ MOD_TYPE_FAR,		"Farandole Composer",		"far" },
-	{ MOD_TYPE_MDL,		"Digitrakker",				"mdl" },
-	{ MOD_TYPE_AMS,		"Extreme's Tracker",		"ams" },
-	{ MOD_TYPE_AMS2,	"Velvet Studio",			"ams" },
-	{ MOD_TYPE_DSM,		"DSIK Format",				"dsm" },
-	{ MOD_TYPE_AMF,		"DSMI",						"amf" },
-	{ MOD_TYPE_AMF0,	"ASYLUM",					"amf" },
-	{ MOD_TYPE_OKT,		"Oktalyzer",				"okt" },
-	{ MOD_TYPE_DMF,		"X-Tracker",				"dmf" },
-	{ MOD_TYPE_PTM,		"PolyTracker",				"ptm" },
-	{ MOD_TYPE_PSM,		"Epic Megagames MASI",		"psm" },
-	{ MOD_TYPE_MT2,		"MadTracker 2",				"mt2" },
-	{ MOD_TYPE_DBM,		"DigiBooster Pro",			"dbm" },
-	{ MOD_TYPE_DIGI,	"DigiBooster",				"digi" },
-	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
-	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
-	{ MOD_TYPE_PLM,		"Disorder Tracker 2",		"plm" },
-	{ MOD_TYPE_SFX,		"SoundFX",					"sfx" },
-	{ MOD_TYPE_SFX,		"SoundFX",					"sfx2" },
-	{ MOD_TYPE_SFX,		"MultiMedia Sound",			"mms" },
-	{ MOD_TYPE_STP,		"Soundtracker Pro II",		"stp" },
+	{ MOD_TYPE_MPT,  MPT_ULITERAL("OpenMPT"),                 "mptm" },
+	{ MOD_TYPE_STM,  MPT_ULITERAL("ScreamTracker 2"),         "stm" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "pt36" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("NoiseTracker"),            "nst" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("Soundtracker"),            "m15" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("Soundtracker"),            "stk" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("SoundTracker 2.6"),        "st26" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("Ice Tracker"),             "ice" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("Mod's Grave"),             "wow" },
+	{ MOD_TYPE_ULT,  MPT_ULITERAL("UltraTracker"),            "ult" },
+	{ MOD_TYPE_669,  MPT_ULITERAL("Composer 669 / UNIS 669"), "669" },
+	{ MOD_TYPE_MTM,  MPT_ULITERAL("MultiTracker"),            "mtm" },
+	{ MOD_TYPE_MED,  MPT_ULITERAL("OctaMed"),                 "med" },
+	{ MOD_TYPE_FAR,  MPT_ULITERAL("Farandole Composer"),      "far" },
+	{ MOD_TYPE_MDL,  MPT_ULITERAL("Digitrakker"),             "mdl" },
+	{ MOD_TYPE_AMS,  MPT_ULITERAL("Extreme's Tracker"),       "ams" },
+	{ MOD_TYPE_AMS2, MPT_ULITERAL("Velvet Studio"),           "ams" },
+	{ MOD_TYPE_DSM,  MPT_ULITERAL("DSIK Format"),             "dsm" },
+	{ MOD_TYPE_AMF,  MPT_ULITERAL("DSMI"),                    "amf" },
+	{ MOD_TYPE_AMF0, MPT_ULITERAL("ASYLUM"),                  "amf" },
+	{ MOD_TYPE_OKT,  MPT_ULITERAL("Oktalyzer"),               "okt" },
+	{ MOD_TYPE_DMF,  MPT_ULITERAL("X-Tracker"),               "dmf" },
+	{ MOD_TYPE_PTM,  MPT_ULITERAL("PolyTracker"),             "ptm" },
+	{ MOD_TYPE_PSM,  MPT_ULITERAL("Epic Megagames MASI"),     "psm" },
+	{ MOD_TYPE_MT2,  MPT_ULITERAL("MadTracker 2"),            "mt2" },
+	{ MOD_TYPE_DBM,  MPT_ULITERAL("DigiBooster Pro"),         "dbm" },
+	{ MOD_TYPE_DIGI, MPT_ULITERAL("DigiBooster"),             "digi" },
+	{ MOD_TYPE_IMF,  MPT_ULITERAL("Imago Orpheus"),           "imf" },
+	{ MOD_TYPE_J2B,  MPT_ULITERAL("Galaxy Sound System"),     "j2b" },
+	{ MOD_TYPE_PLM,  MPT_ULITERAL("Disorder Tracker 2"),      "plm" },
+	{ MOD_TYPE_SFX,  MPT_ULITERAL("SoundFX"),                 "sfx" },
+	{ MOD_TYPE_SFX,  MPT_ULITERAL("SoundFX"),                 "sfx2" },
+	{ MOD_TYPE_SFX,  MPT_ULITERAL("MultiMedia Sound"),        "mms" },
+	{ MOD_TYPE_STP,  MPT_ULITERAL("Soundtracker Pro II"),     "stp" },
 
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
-	{ MOD_TYPE_MOD,		"ProTracker",				"mdz" },
-	{ MOD_TYPE_MOD,		"ProTracker",				"mdr" },
-	{ MOD_TYPE_S3M,		"ScreamTracker 3",			"s3z" },
-	{ MOD_TYPE_XM,		"FastTracker II",			"xmz" },
-	{ MOD_TYPE_IT,		"Impulse Tracker",			"itz" },
-	{ MOD_TYPE_MPT,		"OpenMPT",					"mptmz" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "mdz" },
+	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "mdr" },
+	{ MOD_TYPE_S3M,  MPT_ULITERAL("ScreamTracker 3"),         "s3z" },
+	{ MOD_TYPE_XM,   MPT_ULITERAL("FastTracker II"),          "xmz" },
+	{ MOD_TYPE_IT,   MPT_ULITERAL("Impulse Tracker"),         "itz" },
+	{ MOD_TYPE_MPT,  MPT_ULITERAL("OpenMPT"),                 "mptmz" },
 #endif
 };
 
 
 struct ModContainerInfo
 {
-	MODCONTAINERTYPE format; // MOD_CONTAINERTYPE_XXXX
-	const char *name;        // "Unreal Music"
-	const char *extension;   // "umx"
+	MODCONTAINERTYPE format;     // MOD_CONTAINERTYPE_XXXX
+	const MPT_UCHAR_TYPE *name;  // "Unreal Music"
+	const char *extension;       // "umx"
 };
 
 // remember to also update libopenmpt/libopenmpt_foobar2000.cpp (all other plugins read these dynamically)
 static const ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
-	{ MOD_CONTAINERTYPE_GDM,   "General Digital Music",    "gdm"   },
-	{ MOD_CONTAINERTYPE_UMX,   "Unreal Music",             "umx"   },
-	{ MOD_CONTAINERTYPE_MO3,   "Un4seen MO3",              "mo3"   },
-	{ MOD_CONTAINERTYPE_XPK,   "XPK packed",               "xpk"   },
-	{ MOD_CONTAINERTYPE_PP20,  "PowerPack PP20",           "ppm"   },
-	{ MOD_CONTAINERTYPE_MMCMP, "Music Module Compressor",  "mmcmp" }
+	{ MOD_CONTAINERTYPE_GDM,   MPT_ULITERAL("General Digital Music"),    "gdm"   },
+	{ MOD_CONTAINERTYPE_UMX,   MPT_ULITERAL("Unreal Music"),             "umx"   },
+	{ MOD_CONTAINERTYPE_MO3,   MPT_ULITERAL("Un4seen MO3"),              "mo3"   },
+	{ MOD_CONTAINERTYPE_XPK,   MPT_ULITERAL("XPK packed"),               "xpk"   },
+	{ MOD_CONTAINERTYPE_PP20,  MPT_ULITERAL("PowerPack PP20"),           "ppm"   },
+	{ MOD_CONTAINERTYPE_MMCMP, MPT_ULITERAL("Music Module Compressor"),  "mmcmp" }
 #ifdef MODPLUG_TRACKER
 	,
-	{ MOD_CONTAINERTYPE_WAV,   "Wave",                     "wav"   },
-	{ MOD_CONTAINERTYPE_UAX,   "Unreal Sounds",            "uax"   }
+	{ MOD_CONTAINERTYPE_WAV,   MPT_ULITERAL("Wave"),                     "wav"   },
+	{ MOD_CONTAINERTYPE_UAX,   MPT_ULITERAL("Unreal Sounds"),            "uax"   }
 #endif
 };
 
@@ -132,9 +132,9 @@ static const ModContainerInfo modContainerInfo[] =
 #ifdef MODPLUG_TRACKER
 static const ModFormatInfo otherFormatInfo[] =
 {
-	{ MOD_TYPE_MID,		"MIDI",						"mid" },
-	{ MOD_TYPE_MID,		"MIDI",						"rmi" },
-	{ MOD_TYPE_MID,		"MIDI",						"smf" },
+	{ MOD_TYPE_MID,  MPT_ULITERAL("MIDI"), "mid" },
+	{ MOD_TYPE_MID,  MPT_ULITERAL("MIDI"), "rmi" },
+	{ MOD_TYPE_MID,  MPT_ULITERAL("MIDI"), "smf" }
 };
 #endif
 
@@ -238,54 +238,54 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 }
 
 
-const char * CSoundFile::ModTypeToString(MODTYPE modtype)
+mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
 //-------------------------------------------------------
 {
 	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
 	{
 		if(modFormatInfo[i].format & modtype)
 		{
-			return modFormatInfo[i].extension;
+			return mpt::ToUnicode(mpt::CharsetUTF8, modFormatInfo[i].extension);
 		}
 	}
-	return "";
+	return mpt::ustring();
 }
 
 
-std::string CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
-//------------------------------------------------------------------------------
+mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
+//-------------------------------------------------------------------------------
 {
 	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
 	{
 		if(modContainerInfo[i].format == containertype)
 		{
-			return modContainerInfo[i].extension;
+			return mpt::ToUnicode(mpt::CharsetUTF8, modContainerInfo[i].extension);
 		}
 	}
-	return "";
+	return mpt::ustring();
 }
 
 
-std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
-//-------------------------------------------------------
+mpt::ustring CSoundFile::ModTypeToTracker(MODTYPE modtype)
+//--------------------------------------------------------
 {
-	std::set<std::string> retvals;
-	std::string retval;
+	std::set<mpt::ustring> retvals;
+	mpt::ustring retval;
 	if(modtype == MOD_TYPE_MOD)
 	{ // special case MOD
-		return "Generic Amiga / PC MOD file";
+		return MPT_USTRING("Generic Amiga / PC MOD file");
 	}
 	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
 	{
 		if(modFormatInfo[i].format & modtype)
 		{
-			std::string name = modFormatInfo[i].name;
+			mpt::ustring name = modFormatInfo[i].name;
 			if(retvals.find(name) == retvals.end())
 			{
 				retvals.insert(name);
 				if(!retval.empty())
 				{
-					retval += " / ";
+					retval += MPT_USTRING(" / ");
 				}
 				retval += name;
 			}
@@ -295,22 +295,22 @@ std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
 }
 
 
-std::string CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype)
-//-------------------------------------------------------------------------------
+mpt::ustring CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype)
+//--------------------------------------------------------------------------------
 {
-	std::set<std::string> retvals;
-	std::string retval;
+	std::set<mpt::ustring> retvals;
+	mpt::ustring retval;
 	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
 	{
 		if(modContainerInfo[i].format == containertype)
 		{
-			std::string name = modContainerInfo[i].name;
+			mpt::ustring name = modContainerInfo[i].name;
 			if(retvals.find(name) == retvals.end())
 			{
 				retvals.insert(name);
 				if(!retval.empty())
 				{
-					retval += " / ";
+					retval += MPT_USTRING(" / ");
 				}
 				retval += name;
 			}
