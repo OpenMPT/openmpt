@@ -31,7 +31,7 @@ mpt::ustring GetSampleNameFromTags(const FileTags &tags)
 		result = tags.title;
 	} else
 	{
-		result = mpt::String::Print(MPT_USTRING("%1 (by %2)"), tags.title, tags.artist);
+		result = mpt::format(MPT_USTRING("%1 (by %2)"))(tags.title, tags.artist);
 	}
 	return result;
 }

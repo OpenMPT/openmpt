@@ -536,7 +536,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 				} else
 				{
 #ifdef DEBUG
-					Log(mpt::String::Print("J2B: Unknown command: 0x%1, param 0x%2", mpt::fmt::HEX0<2>(m.command), mpt::fmt::HEX0<2>(m.param)));
+					Log(mpt::format("J2B: Unknown command: 0x%1, param 0x%2")(mpt::fmt::HEX0<2>(m.command), mpt::fmt::HEX0<2>(m.param)));
 #endif // DEBUG
 					m.command = CMD_NONE;
 				}
