@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta26
+
 ### libopenmpt 0.2-beta25 (2017-07-02)
 
  *  PT36: Enable VBlank timing as specified in file and read song comment.
