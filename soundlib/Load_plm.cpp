@@ -372,13 +372,10 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	// Module ends with the last row of the last order item
 	ROWINDEX endPatSize = maxPos % rowsPerPat;
-	if(endPatSize > 0)
+	ORDERINDEX endOrder = static_cast<ORDERINDEX>(maxPos / rowsPerPat);
+	if(endPatSize > 0 && Order.IsValidPat(endOrder))
 	{
-		PATTERNINDEX endPat = Order[maxPos / rowsPerPat];
-		if(Patterns.IsValidPat(endPat))
-		{
-			Patterns[endPat].Resize(endPatSize, false);
-		}
+		Patterns[Order[endOrder]].Resize(endPatSize, false);
 	}
 	// If there are still any non-existent patterns in our order list, insert some blank patterns.
 	PATTERNINDEX blankPat = PATTERNINDEX_INVALID;
