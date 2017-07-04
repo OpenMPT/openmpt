@@ -53,11 +53,11 @@ void COwnerVstEditor::OnPaint()
 	} else
 	{
 		// For plugins that change their size without telling the host through audioMasterSizeWindow, e.g. Roland D-50
-		ERect *pRect = nullptr;
-		plugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-		if(pRect != nullptr && ((pRect->right - pRect->left) != m_width || (pRect->bottom - pRect->top) != m_height))
+		CRect rect;
+		m_plugWindow.GetClientRect(rect);
+		if(rect.Width() != m_width || rect.Height() != m_height)
 		{
-			SetSize(pRect->right - pRect->left, pRect->bottom - pRect->top);
+			SetSize(rect.Width(), rect.Height());
 		}
 	}
 }
