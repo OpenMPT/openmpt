@@ -530,7 +530,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	UINT ncols = sndFile.GetNumChannels();
 	int xpaint = m_szHeader.cx;
 	int ypaint = rcClient.top + m_szHeader.cy - GetSmoothScrollOffset();
-	
+	const ORDERINDEX ordCount = sndFile.Order().GetLength();
+
 	if (m_nMidRow)
 	{
 		if (yofs >= m_nMidRow)
@@ -544,7 +545,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			// Display previous pattern
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
-				if(m_nOrder > 0)
+				if(m_nOrder > 0 && m_nOrder < ordCount)
 				{
 					ORDERINDEX prevOrder = sndFile.Order().GetPreviousOrderIgnoringSkips(m_nOrder);
 					//Skip +++ items
@@ -595,9 +596,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 			ORDERINDEX nNextOrder = sndFile.Order().GetNextOrderIgnoringSkips(m_nOrder);
 			if(nNextOrder == m_nOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
-			const ORDERINDEX ordCount = sndFile.Order().GetLength();
 
-			if(nNextOrder < ordCount && sndFile.Order()[m_nOrder] == m_nPattern)
+			if(m_nOrder < ordCount && nNextOrder < ordCount && sndFile.Order()[m_nOrder] == m_nPattern)
 			{
 				nNextPat = sndFile.Order()[nNextOrder];
 			}
