@@ -1447,17 +1447,17 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 		// Pretend that we erased the background
 		return 1;
 
-	case WM_PAINT:
+	case WM_SIZE:
 		{
 			// For plugins that change their size but do not notify the host, e.g. Roland D-50
-			ERect *pRect = nullptr;
-			that->Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-			if(pRect != nullptr && ((pRect->right - pRect->left) != that->windowWidth || (pRect->bottom - pRect->top) != that->windowHeight))
+			RECT rect{0, 0, 0, 0};
+			GetClientRect(hwnd, &rect);
+			int width = rect.right - rect.left, height = rect.bottom - rect.top;
+			if(width > 0 && height > 0 && (width != that->windowWidth || height != that->windowHeight))
 			{
-				that->windowWidth = pRect->right - pRect->left;
-				that->windowHeight = pRect->bottom - pRect->top;
-				SetWindowPos(that->window, NULL, 0, 0, that->windowWidth, that->windowHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-				that->DispatchToHost(audioMasterSizeWindow, that->windowWidth, that->windowHeight, nullptr, 0.0f);
+				that->windowWidth = width;
+				that->windowHeight = height;
+				that->DispatchToHost(audioMasterSizeWindow, width, height, nullptr, 0.0f);
 			}
 		}
 		break;
