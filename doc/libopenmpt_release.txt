@@ -11,8 +11,10 @@ Steps to make a libopenmpt 0.2 release
  *  copy `bin/dist-autotools.tar`, `bin/dist-doc.tar`, `bin/dist-tar.tar` and `bin/dist-zip.tar` from the Debian box to `build/release/` on a Linux machine
  *  run `cd build/release && ./release.sh $REV $NAME` on the Linux machine
  *  have a checkout of `https://source.openmpt.org/svn/libopenmpt-website/trunk` available as `website`
+ *  add release announcment to website (add `website/announcement-YYYY-mm-dd.md`, and add it to `website/Doxfyile`)
  *  update `website/index.md`
  *  copy `build/release/bin`, `build/release/dev`, `build/release/doc` and `build/release/src` to `website/public/files/libopenmpt/`
  *  extract `build/release/doc/*.tar.gz` to `website/public/doc/`
  *  commit `website`
+ *  post announcement to mailing list
  *  update `libopenmpt/dox/changelog.md`, `common/versionNumber.h` and `-version-info` in `build/autotools/Makefile.am` for new version
