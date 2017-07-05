@@ -475,19 +475,24 @@ inline bool ToTcharBuf(Tchar (&buf)[size], const mpt::ustring &str)
 	return mpt::String::detail::StringToBuffer<mpt::CharsetLocale>(buf, str);
 }
 
-// mpt::FromTcharStr
+// mpt::ToTcharStr
 // Converts mpt::ustring to std::basic_stringy<TCHAR>,
 // which is usable in both ANSI and UNICODE builds.
 // Useful when going through CString is not appropriate.
 
-template <typename Tchar> std::basic_string<Tchar> ToTcharStr(const mpt::ustring &str);
-template <> inline std::string ToTcharStr<char>(const mpt::ustring &str)
+template <typename Tchar> std::basic_string<Tchar> ToTcharStrImpl(const mpt::ustring &str);
+template <> inline std::string ToTcharStrImpl<char>(const mpt::ustring &str)
 {
 	return mpt::ToCharset(mpt::CharsetLocale, str);
 }
-template <> inline std::wstring ToTcharStr<wchar_t>(const mpt::ustring &str)
+template <> inline std::wstring ToTcharStrImpl<wchar_t>(const mpt::ustring &str)
 {
 	return mpt::ToWide(str);
+}
+
+inline std::basic_string<TCHAR> ToTcharStr(const mpt::ustring &str)
+{
+	return ToTcharStrImpl<TCHAR>(str);
 }
 
 #endif // MPT_OS_WINDOWS
