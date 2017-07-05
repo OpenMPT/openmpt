@@ -57,17 +57,10 @@ mpt::ustring FileHistory::AsISO8601() const
 		// Calculate the date when editing finished.
 		double openSeconds = (double)openTime / (double)HISTORY_TIMER_PRECISION;
 		tm tmpLoadDate = loadDate;
-		time_t loadDateSinceEpoch = mpt::Date::Unix::FromUTC(tmpLoadDate);
-		double timeScaleFactor = difftime(2, 1);
-		time_t saveDateSinceEpoch = loadDateSinceEpoch + Util::Round<time_t>(openSeconds / timeScaleFactor);
-		const tm * tmpSaveDate = gmtime(&saveDateSinceEpoch);
-		if(tmpSaveDate)
-		{
-			date = *tmpSaveDate;
-		}
+		int64 loadDateSinceEpoch = mpt::Date::Unix::FromUTC(tmpLoadDate);
+		int64 saveDateSinceEpoch = loadDateSinceEpoch + Util::Round<int64>(openSeconds);
+		date = mpt::Date::Unix(saveDateSinceEpoch).AsUTC();
 	}
-	// We assume date in UTC here.
-	// This is not 100% correct because FileHistory does not contain complete timezone information.
 	return mpt::Date::ToShortenedISO8601(date);
 }
 
