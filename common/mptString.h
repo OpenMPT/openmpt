@@ -411,7 +411,7 @@ namespace String { namespace detail
 		STATIC_ASSERT(size > 0);
 		MemsetZero(buf);
 		std::string encoded = mpt::ToCharset(charset, str);
-		std::copy(encoded.data(), std::min(encoded.length(), size - 1), buf);
+		std::copy(encoded.data(), encoded.data() + std::min(encoded.length(), size - 1), buf);
 		buf[size - 1] = '\0';
 		return (encoded.length() <= size - 1);
 	}
@@ -422,7 +422,7 @@ namespace String { namespace detail
 		STATIC_ASSERT(size > 0);
 		MemsetZero(buf);
 		std::wstring encoded = mpt::ToWide(str);
-		std::copy(encoded.data(), std::min(encoded.length(), size - 1), buf);
+		std::copy(encoded.data(), encoded.data() + std::min(encoded.length(), size - 1), buf);
 		buf[size - 1] = L'\0';
 		return (encoded.length() <= size - 1);
 	}
@@ -510,7 +510,7 @@ inline void CopyCStringToBuffer(TCHAR (&buf)[size], const CString &str)
 {
 	MPT_STATIC_ASSERT(size > 0);
 	MemsetZero(buf);
-	std::copy(str.GetString(), std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
+	std::copy(str.GetString(), str.GetString() + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
 	buf[size - 1] = _T('\0');
 }
 
