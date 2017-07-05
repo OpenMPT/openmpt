@@ -88,48 +88,77 @@ Unix::Unix()
 	return;
 }
 
-Unix::Unix(time_t unixtime)
-//-------------------------
+Unix::Unix(int64 unixtime)
+//------------------------
 	: Value(unixtime)
 {
 	return;
 }
 
-Unix::operator time_t () const
-//----------------------------
+Unix::operator int64 () const
+//---------------------------
 {
 	return Value;
+}
+
+static int32 ToDaynum(int32 year, int32 month, int32 day)
+//-------------------------------------------------------
+{
+	month = (month + 9) % 12;
+	year = year - (month / 10);
+	int32 daynum = year*365 + year/4 - year/100 + year/400 + (month*306 + 5)/10 + (day - 1);
+	return daynum;
+}
+
+static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
+//-----------------------------------------------------------------------
+{
+	int64 g = d;
+	int64 y,ddd,mi,mm,dd;
+
+	y = (10000*g + 14780)/3652425;
+	ddd = g - (365*y + y/4 - y/100 + y/400);
+	if(ddd < 0)
+	{
+		y = y - 1;
+		ddd = g - (365*y + y/4 - y/100 + y/400);
+	}
+	mi = (100*ddd + 52)/3060;
+	mm = (mi + 2)%12 + 1;
+	y = y + (mi + 2)/12;
+	dd = ddd - (mi*306 + 5)/10 + 1;
+
+	year = static_cast<int32>(y);
+	month = static_cast<int32>(mm);
+	day = static_cast<int32>(dd);
 }
 
 mpt::Date::Unix Unix::FromUTC(tm timeUtc)
 //---------------------------------------
 {
-	#if MPT_COMPILER_MSVC
-		return mpt::Date::Unix(_mkgmtime(&timeUtc));
-	#else // !MPT_COMPILER_MSVC
-		// There is no portable way in C/C++ to convert between time_t and struct tm in UTC.
-		// Approximate it as good as possible without implementing full date handling logic.
-		// NOTE:
-		// This can be wrong for dates during DST switch.
-		tm t = timeUtc;
-		time_t localSinceEpoch = mktime(&t);
-		const tm * tmpLocal = localtime(&localSinceEpoch);
-		if(!tmpLocal)
-		{
-			return mpt::Date::Unix(localSinceEpoch);
-		}
-		tm localTM = *tmpLocal;
-		const tm * tmpUTC = gmtime(&localSinceEpoch);
-		if(!tmpUTC)
-		{
-			return mpt::Date::Unix(localSinceEpoch);
-		}
-		tm utcTM = *tmpUTC;
-		double offset = difftime(mktime(&localTM), mktime(&utcTM));
-		double timeScaleFactor = difftime(2, 1);
-		time_t utcSinceEpoch = localSinceEpoch + Util::Round<time_t>(offset / timeScaleFactor);
-		return mpt::Date::Unix(utcSinceEpoch);
-	#endif // MPT_COMPILER_MSVC
+	int32 daynum = ToDaynum(timeUtc.tm_year+1900, timeUtc.tm_mon+1, timeUtc.tm_mday);
+	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970,1,1))*24*60*60 + timeUtc.tm_hour*60*60 + timeUtc.tm_min*60 + timeUtc.tm_sec;
+	return mpt::Date::Unix(seconds);
+}
+
+tm Unix::AsUTC() const 
+//--------------------
+{
+	int64 tmp = Value;
+	int64 seconds = tmp % 60; tmp /= 60;
+	int64 minutes = tmp % 60; tmp /= 60;
+	int64 hours   = tmp % 24; tmp /= 24;
+	int32 year = 0, month = 0, day = 0;
+	FromDaynum(static_cast<int32>(tmp) + ToDaynum(1970,1,1), year, month, day);
+	tm result;
+	MemsetZero(result);
+	result.tm_year = year - 1900;
+	result.tm_mon = month - 1;
+	result.tm_mday = day;
+	result.tm_hour = static_cast<int32>(hours);
+	result.tm_min = static_cast<int32>(minutes);
+	result.tm_sec = static_cast<int32>(seconds);
+	return result;
 }
 
 mpt::ustring ToShortenedISO8601(tm date)
