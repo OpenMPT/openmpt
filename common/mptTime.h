@@ -44,15 +44,16 @@ mpt::ustring ToString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
 
 class Unix
 {
-// time_t counts 1s since 1970-01-01T00:00Z
+// int64 counts 1s since 1970-01-01T00:00Z
 private:
-	time_t Value;
+	int64 Value;
 public:
 	Unix();
-	explicit Unix(time_t unixtime);
-	operator time_t () const;
+	explicit Unix(int64 unixtime);
+	operator int64 () const;
 public:
 	static mpt::Date::Unix FromUTC(tm timeUtc);
+	tm AsUTC() const;
 };
 
 mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
