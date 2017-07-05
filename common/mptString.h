@@ -495,6 +495,27 @@ inline std::basic_string<TCHAR> ToTcharStr(const mpt::ustring &str)
 	return ToTcharStrImpl<TCHAR>(str);
 }
 
+#if defined(_MFC_VER)
+
+template <std::size_t size>
+inline CString CStringFromBuffer(const TCHAR (&buf)[size])
+{
+	MPT_STATIC_ASSERT(size > 0);
+	std::size_t len = std::find(buf, buf + size, _T('\0')) - buf; // terminate at \0
+	return CString(buf, len);
+}
+
+template <std::size_t size>
+inline void CopyCStringToBuffer(TCHAR (&buf)[size], const CString &str)
+{
+	MPT_STATIC_ASSERT(size > 0);
+	MemsetZero(buf);
+	std::copy(str.GetString(), std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
+	buf[size - 1] = _T('\0');
+}
+
+#endif // _MFC_VER
+
 #endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
