@@ -2337,7 +2337,12 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		ord = patternViewState.nOrder;
 	}
 
-	if(ord >= m_SndFile.Order().size())
+	if(m_SndFile.Order().empty())
+	{
+		ord = ORDERINDEX_INVALID;
+		pat = 0;
+		row = 0;
+	} else if(ord >= m_SndFile.Order().size())
 	{
 		ord = 0;
 		pat = m_SndFile.Order()[ord];
