@@ -115,7 +115,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	strm.avail_in = inFileView.size();
+	strm.avail_in = trailer.isize;
 	strm.next_in = const_cast<Bytef*>(mpt::byte_cast<const Bytef*>(inFileView.data()));
 	if(inflateInit2(&strm, -15) != Z_OK)
 	{
