@@ -1569,6 +1569,18 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					charsRead = s.find_first_of(" \t", valueStart);
 					macros[key] = s.substr(valueStart, charsRead - valueStart);
 				}
+			} else if(s.substr(0, 9) == "#include " || s.substr(0, 9) == "#include\t")
+			{
+				AddToLog(LogWarning, MPT_USTRING("#include directive is not supported."));
+				auto fileStart = s.find("\"", 9);	// Yes, there can be arbitrary characters before the opening quote, at least that's how sforzando does it.
+				auto fileEnd = s.find("\"", fileStart + 1);
+				if(fileStart != std::string::npos && fileEnd != std::string::npos)
+				{
+					charsRead = fileEnd + 1;
+				} else
+				{
+					return false;
+				}
 			} else if(section == kNone)
 			{
 				// Garbage before any section, probably not an sfz file
@@ -1579,9 +1591,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				auto keyEnd = s.find_first_of(" \t=");
 				auto valueStart = s.find_first_not_of(" \t=", keyEnd);
 				std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
-				if(key == "sample" || key == "default_path")
+				if(key == "sample" || key == "default_path" || key.substr(0, 8) == "label_cc")
 				{
-					// Sample name may contain spaces...
+					// Sample / CC name may contain spaces...
 					charsRead = s.find_first_of("=\t<", valueStart);
 					if(charsRead != std::string::npos && s[charsRead] == '=')
 					{
@@ -1932,7 +1944,7 @@ struct AIFFInstrumentLoop
 
 	uint16be playMode;
 	uint16be beginLoop;	// Marker index
-	uint16be endLoop;		// Marker index
+	uint16be endLoop;	// Marker index
 };
 
 MPT_BINARY_STRUCT(AIFFInstrumentLoop, 6)
@@ -1969,7 +1981,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		return false;
 	}
 
-	ChunkReader::ChunkList<AIFFChunk> chunks = chunkFile.ReadChunks<AIFFChunk>(2);
+	auto chunks = chunkFile.ReadChunks<AIFFChunk>(2);
 
 	// Read COMM chunk
 	FileReader commChunk(chunks.GetChunk(AIFFChunk::idCOMM));
@@ -2088,7 +2100,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		}
 
 		// Read markers
-		for(auto &m : markers)
+		for(const auto &m : markers)
 		{
 			if(m.id == instrHeader.sustainLoop.beginLoop)
 				mptSample.nSustainStart = m.position;
@@ -2363,7 +2375,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	if((!pIns) || filename.empty()) return false;
 	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
-	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
+	auto instSize = iti.ConvertToIT(*pIns, false, *this);
 
 	// Create sample assignment table
 	std::vector<SAMPLEINDEX> smptable;
