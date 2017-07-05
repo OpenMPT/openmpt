@@ -88,15 +88,15 @@ Unix::Unix()
 	return;
 }
 
-Unix::Unix(time_t unixtime)
-//-------------------------
+Unix::Unix(int64 unixtime)
+//------------------------
 	: Value(unixtime)
 {
 	return;
 }
 
-Unix::operator time_t () const
-//----------------------------
+Unix::operator int64 () const
+//---------------------------
 {
 	return Value;
 }
