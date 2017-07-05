@@ -30,6 +30,15 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.26.13.00 (* July 2017, revision 8439)
+----------------------------------------
+Playback
+   [Fix] <js> Loops shorter than four sample points at the end of a sample could cause the sample data before the loop to become corrupted.
+
+Other formats
+   [Fix] <js> Possible crashes with malformed PLM and PSM files.
+
+
 v1.26.12.00 (2 July 2017, revision 8412)
 ----------------------------------------
 General tab

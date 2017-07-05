@@ -6,6 +6,15 @@ For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
 ### libopenmpt 0.2-beta26
+ *  [**Bug**] Possible crashes with malformed PLM and PSM files.
+ *  [**Bug**] mktime() and localtime() were used for song date parsing.
+    These functions are not guaranteed to be thread-safe by the standard.
+    Furthermore, some standard library implementations are buggy and may cause
+    the program to abort in out-of-memory situations. These functions are now no
+    longer used.
+
+ *  Loops shorter than four sample points at the end of a sample could cause the
+    sample data before the loop to become corrupted.
 
 ### libopenmpt 0.2-beta25 (2017-07-02)
 
