@@ -1049,6 +1049,7 @@ struct PACKED PSM16SampleHeader
 	// Convert sample header to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
+		mptSmp.Initialize();
 		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 
 		mptSmp.nLength = length;
@@ -1058,7 +1059,7 @@ struct PACKED PSM16SampleHeader
 		// Why on earth would you want to use both systems at the same time?
 		mptSmp.nC5Speed = Util::Round<uint32>(c2freq * std::pow(2.0, ((finetune ^ 0x08) - 0x78) / (12.0 * 16.0))); // ModSample::TransposeToFrequency(mptSmp.RelativeTone + (finetune >> 4) - 7, MOD2XMFineTune(finetune & 0x0F));
 
-		mptSmp.nVolume = volume << 2;
+		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
 
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
@@ -1187,15 +1188,16 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			if(smp < MAX_SAMPLES)
+			if(smp > 0 && smp < MAX_SAMPLES)
 			{
 				m_nSamples = std::max(m_nSamples, smp);
 
-				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 				sampleHeader.ConvertToMPT(Samples[smp]);
+				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 
-				if((loadFlags & loadSampleData) && file.Seek(sampleHeader.offset))
+				if(loadFlags & loadSampleData)
 				{
+					file.Seek(sampleHeader.offset);
 					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
 				}
 			}
