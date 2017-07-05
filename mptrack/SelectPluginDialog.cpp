@@ -180,7 +180,7 @@ void CSelectPluginDlg::OnOK()
 					const CString name = p->GetDefaultEffectName();
 					if(!name.IsEmpty())
 					{
-						mpt::String::Copy(m_pPlugin->Info.szName, name.GetString());
+						mpt::String::Copy(m_pPlugin->Info.szName, mpt::ToCharset(mpt::CharsetLocale, name));
 					}
 					// Check if plugin slot is already assigned to any instrument, and if not, create one.
 					if(p->IsInstrument() && m_pModDoc->HasInstrumentForPlugin(m_nPlugSlot) == INSTRUMENTINDEX_INVALID)

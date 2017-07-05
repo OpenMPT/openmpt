@@ -1211,10 +1211,10 @@ UINT TrackerSettings::GetCurrentMIDIDevice()
 }
 
 
-std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
-//-------------------------------------------------------------------
+mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
+//--------------------------------------------------------------------
 {
-	std::string cc;
+	mpt::ustring cc;
 	bool first = true;
 	for(int i = 0; i < 128; i++)
 	{
@@ -1222,9 +1222,9 @@ std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 		{
 			if(!first)
 			{
-				cc += ",";
+				cc += MPT_USTRING(",");
 			}
-			cc += mpt::ToString(i);
+			cc += mpt::ToUString(i);
 			first = false;
 		}
 	}
@@ -1232,10 +1232,10 @@ std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 }
 
 
-std::bitset<128> StringToIgnoredCCs(const std::string &in)
-//--------------------------------------------------------
+std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in)
+//---------------------------------------------------------
 {
-	CString cc = in.c_str();
+	CString cc = mpt::ToCString(in);
 	std::bitset<128> midiIgnoreCCs;
 	midiIgnoreCCs.reset();
 	int curPos = 0;
