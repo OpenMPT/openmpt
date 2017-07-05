@@ -240,8 +240,8 @@ template<> inline SettingValue ToSettingValue(const SampleUndoBufferSize &val) {
 template<> inline SampleUndoBufferSize FromSettingValue(const SettingValue &val) { return SampleUndoBufferSize(val.as<int32>()); }
 
 
-std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
-std::bitset<128> StringToIgnoredCCs(const std::string &in);
+mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
+std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in);
 
 std::string SettingsModTypeToString(MODTYPE modtype);
 MODTYPE SettingsStringToModType(const std::string &str);
@@ -292,7 +292,7 @@ template<> inline SettingValue ToSettingValue(const std::bitset<128> &val)
 template<> inline std::bitset<128> FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "IgnoredCCs");
-	return StringToIgnoredCCs(val.as<std::string>());
+	return StringToIgnoredCCs(val.as<mpt::ustring>());
 }
 
 template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &val)

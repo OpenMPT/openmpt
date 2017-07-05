@@ -1672,7 +1672,7 @@ void COptionsPlayer::UpdateDialog()
 	}
 	for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
 	{
-		SetDlgItemText(IDC_BUTTON1 + i, TrackerSettings::Instance().m_EqUserPresets[i].szName);
+		SetDlgItemText(IDC_BUTTON1 + i, mpt::ToCString(mpt::CharsetLocale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
 	}
 }
 
@@ -1819,7 +1819,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT3, TrackerSettings::Instance().midiVelocityAmp);
 	m_SpinAmp.SetRange(1, 10000);
 
-	SetDlgItemText(IDC_EDIT4, IgnoredCCsToString(TrackerSettings::Instance().midiIgnoreCCs).c_str());
+	SetDlgItemText(IDC_EDIT4, mpt::ToCString(IgnoredCCsToString(TrackerSettings::Instance().midiIgnoreCCs)));
 
 	// Midi Import settings
 	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportTicks);
@@ -1867,7 +1867,7 @@ void CMidiSetupDlg::OnOK()
 
 	CString cc;
 	GetDlgItemText(IDC_EDIT4, cc);
-	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(cc.GetString());
+	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(mpt::ToUnicode(cc));
 
 	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(GetDlgItemInt(IDC_EDIT1), uint8(2), uint8(16)));
 	TrackerSettings::Instance().midiImportPatternLen = Clamp(GetDlgItemInt(IDC_EDIT2), ROWINDEX(1), MAX_PATTERN_ROWS);
