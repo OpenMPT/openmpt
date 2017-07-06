@@ -26,6 +26,13 @@ CriticalSection::CriticalSection()
 	Enter();
 }
 
+CriticalSection::CriticalSection(CriticalSection &&other)
+	: m_refGlobalMutex(other.m_refGlobalMutex)
+	, inSection(other.inSection)
+{
+	other.inSection = false;
+}
+
 CriticalSection::CriticalSection(InitialState state)
 	: m_refGlobalMutex(Tracker::GetGlobalMutexRef())
 	, inSection(false)

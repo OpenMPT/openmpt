@@ -40,6 +40,7 @@ public:
 	};
 public:
 	CriticalSection();
+	CriticalSection(CriticalSection &&other);
 	explicit CriticalSection(InitialState state);
 	void Enter();
 	void Leave();
