@@ -773,7 +773,7 @@ namespace Util
 {
 
 	// Returns maximum value of given integer type.
-	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
+	template <class T> constexpr T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
 	// The following MPT_MAX_* macros are useful as std::numeric_limits is not
 	// usable in constexpr-like contexts like static_assert in pre-C++11

@@ -153,11 +153,7 @@ CModDoc::CModDoc()
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
 
-#ifdef _DEBUG
-	ModChannel *p = m_SndFile.m_PlayState.Chn;
-	if (((DWORD)p) & 7) Log("ModChannel struct is not aligned (0x%08X)\n", p);
-#endif
-// Fix: save pattern scrollbar position when switching to other tab
+	// Fix: save pattern scrollbar position when switching to other tab
 	m_szOldPatternScrollbarsPos = CSize(-10,-10);
 	ReinitRecordState();
 	m_ShowSavedialog = false;
@@ -176,9 +172,9 @@ CModDoc::~CModDoc()
 void CModDoc::SetModifiedFlag(BOOL bModified)
 //-------------------------------------------
 {
-	BOOL bChanged = (bModified != IsModified());
+	bool changed = (!!bModified != IsModified());
 	CDocument::SetModifiedFlag(bModified);
-	if (bChanged) UpdateFrameCounts();
+	if (changed) UpdateFrameCounts();
 }
 
 
