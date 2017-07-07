@@ -95,11 +95,11 @@ class CShowLogDlg: public CDialog
 //===============================
 {
 public:
-	LPCSTR m_lpszLog, m_lpszTitle;
+	LPCTSTR m_lpszLog, m_lpszTitle;
 
 public:
 	CShowLogDlg(CWnd *parent = nullptr):CDialog(IDD_SHOWLOG, parent) { m_lpszLog = NULL; m_lpszTitle = NULL; }
-	UINT ShowLog(LPCSTR pszLog, LPCSTR lpszTitle=NULL);
+	UINT ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle=NULL);
 
 protected:
 	virtual BOOL OnInitDialog();

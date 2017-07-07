@@ -684,8 +684,8 @@ BOOL CShowLogDlg::OnInitDialog()
 }
 
 
-UINT CShowLogDlg::ShowLog(LPCSTR pszLog, LPCSTR lpszTitle)
-//--------------------------------------------------------
+UINT CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
+//----------------------------------------------------------
 {
 	m_lpszLog = pszLog;
 	m_lpszTitle = lpszTitle;
@@ -838,9 +838,9 @@ void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
 	// Point size to pixels
 	int fontSize = -MulDiv(60, Util::GetDPIy(m_hWnd), 720);
 #if _WIN32_WINNT >= 0x0501
-	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, "MS Shell Dlg");
+	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
 #else
-	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, "MS Shell Dlg");
+	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
 #endif
 }
 
@@ -1131,7 +1131,7 @@ void CSampleMapDlg::OnUpdateSamples()
 	showAll = (IsDlgButtonChecked(IDC_CHECK1) != FALSE);
 	
 	UINT nInsertPos;
-	nInsertPos = m_CbnSample.AddString("0: No sample");
+	nInsertPos = m_CbnSample.AddString(_T("0: No sample"));
 	m_CbnSample.SetItemData(nInsertPos, 0);
 
 	for (SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
@@ -1152,7 +1152,7 @@ void CSampleMapDlg::OnUpdateSamples()
 		if (isUsed)
 		{
 			CString sampleName;
-			sampleName.Format("%d: %s", i, sndFile.GetSampleName(i));
+			sampleName.Format(_T("%d: %s"), i, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetSampleName(i)).GetString());
 			nInsertPos = m_CbnSample.AddString(sampleName);
 			
 			m_CbnSample.SetItemData(nInsertPos, i);
@@ -1204,18 +1204,18 @@ void CSampleMapDlg::OnUpdateKeyboard()
 LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------
 {
-	CHAR s[32] = "--";
+	TCHAR s[32] = _T("--");
 
 	if ((lParam >= 0) && (lParam < 3*12))
 	{
 		SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 		uint32 nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument).c_str();
-		if(temp.size() >= CountOf(s))
-			wsprintf(s, "%s", "...");
+		const CString temp = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument));
+		if(temp.GetLength() >= CountOf(s))
+			wsprintf(s, _T("%s"), _T("..."));
 		else
-			wsprintf(s, "%s", temp.c_str());
+			wsprintf(s, _T("%s"), temp.GetString());
 
 		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
@@ -1556,7 +1556,7 @@ void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCo
 {
 	const ModCommand::NOTE upperLimit = std::min(ModCommand::NOTE(NOTE_MAX), noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; note++)
-		combobox.SetItemData(combobox.AddString(CSoundFile::GetNoteName(note, CSoundFile::GetDefaultNoteNames()).c_str()), note);
+		combobox.SetItemData(combobox.AddString(mpt::ToCString(mpt::CharsetLocale, CSoundFile::GetNoteName(note, CSoundFile::GetDefaultNoteNames()))), note);
 }
 
 
@@ -1571,7 +1571,7 @@ void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INST
 	}
 	for(ModCommand::NOTE note = noteStart; note <= noteEnd; note++)
 	{
-		combobox.SetItemData(combobox.AddString(sndFile.GetNoteName(note, nInstr).c_str()), note);
+		combobox.SetItemData(combobox.AddString(mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(note, nInstr))), note);
 	}
 	if(addSpecial)
 	{
