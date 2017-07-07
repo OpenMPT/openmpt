@@ -425,6 +425,7 @@ RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
+void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
 
 // Misc functions
 UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
