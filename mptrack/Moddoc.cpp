@@ -60,8 +60,8 @@ const TCHAR FileFilterIT[]	= _T("Impulse Tracker Modules (*.it)|*.it||");
 const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 const TCHAR FileFilterNone[] = _T("");
 
-const TCHAR* ModTypeToFilter(const CSoundFile& sndFile)
-//-----------------------------------------------------
+const CString ModTypeToFilter(const CSoundFile& sndFile)
+//------------------------------------------------------
 {
 	const MODTYPE modtype = sndFile.GetType();
 	switch(modtype)
