@@ -76,7 +76,7 @@ protected:
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
 	void ResizeWindow();
 
-	void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags);
+	void DrawChannelButton(HDC hdc, LPRECT lpRect, const CString &text, bool activate, bool enable, DWORD dwFlags);
 
 	//{{AFX_VIRTUAL(CChannelManagerDlg)
 	BOOL OnInitDialog();

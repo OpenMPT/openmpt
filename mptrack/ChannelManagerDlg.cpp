@@ -536,7 +536,7 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 }
 
 
-void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, bool activate, bool enable, DWORD dwFlags)
+void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, const CString &text, bool activate, bool enable, DWORD dwFlags)
 {
 	CRect rect = (*lpRect);
 
@@ -554,7 +554,7 @@ void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszTe
 	HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
 
 	::SetTextColor(hdc, GetSysColor(enable || activate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-	::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
+	::DrawText(hdc, text, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
 	::SelectObject(hdc, oldfont);
 }
 
@@ -696,13 +696,13 @@ void CChannelManagerDlg::OnPaint()
 
 	UINT c = 0, l = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
-	std::string s;
+	CString s;
 	for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
-		auto fmt = (sndFile.ChnSettings[nThisChn].szName[0] != '\0') ? "%1: %2" : "Channel %1";
-		s = mpt::format(fmt)(nThisChn + 1, sndFile.ChnSettings[nThisChn].szName);
+		CString fmt = (sndFile.ChnSettings[nThisChn].szName[0] != '\0') ? _T("%1: %2") : _T("Channel %1");
+		s = mpt::format(fmt)(nThisChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[nThisChn].szName));
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
 		CRect btn;
@@ -713,7 +713,7 @@ void CChannelManagerDlg::OnPaint()
 
 		CRect intersection;
 		if(intersection.IntersectRect(&pDC.rcPaint, &btn))
-			DrawChannelButton(dc, btn, s.c_str(), select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
+			DrawChannelButton(dc, btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
 
 		btn.right = btn.left + chnSizeX / 7;
 
@@ -950,10 +950,10 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 		// Rename channel
 		TCHAR s[64];
 		wsprintf(s, _T("New name for channel %u:"), chn + 1);
-		CInputDlg dlg(this, s, m_ModDoc->GetrSoundFile().ChnSettings[chn].szName);
+		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetrSoundFile().GetCharsetInternal(), m_ModDoc->GetrSoundFile().ChnSettings[chn].szName));
 		if(dlg.DoModal() == IDOK)
 		{
-			mpt::String::Copy(m_ModDoc->GetrSoundFile().ChnSettings[chn].szName, dlg.resultAsString.GetString());
+			mpt::String::Copy(m_ModDoc->GetrSoundFile().ChnSettings[chn].szName, mpt::ToCharset(m_ModDoc->GetrSoundFile().GetCharsetInternal(), dlg.resultAsString));
 			InvalidateRect(rect, FALSE);
 			m_ModDoc->SetModified();
 			m_ModDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels(), this);
