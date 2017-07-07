@@ -1187,15 +1187,16 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			if(smp < MAX_SAMPLES)
+			if(smp > 0 && smp < MAX_SAMPLES)
 			{
 				m_nSamples = std::max(m_nSamples, smp);
 
-				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 				sampleHeader.ConvertToMPT(Samples[smp]);
+				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 
-				if((loadFlags & loadSampleData) && file.Seek(sampleHeader.offset))
+				if(loadFlags & loadSampleData)
 				{
+					file.Seek(sampleHeader.offset);
 					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
 				}
 			}
