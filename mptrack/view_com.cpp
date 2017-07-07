@@ -473,7 +473,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		{
 			if(iItem < sndFile.GetNumSamples())
 			{
-				mpt::String::CopyN(sndFile.m_szNames[iItem + 1], lvItem.pszText);
+				mpt::String::Copy(sndFile.m_szNames[iItem + 1], mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText)));
 				pModDoc->UpdateAllViews(this, SampleHint(static_cast<SAMPLEINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
@@ -482,7 +482,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			if((iItem < sndFile.GetNumInstruments()) && (sndFile.Instruments[iItem + 1]))
 			{
 				ModInstrument *pIns = sndFile.Instruments[iItem + 1];
-				mpt::String::CopyN(pIns->name, lvItem.pszText);
+				mpt::String::Copy(pIns->name, mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText)));
 				pModDoc->UpdateAllViews(this, InstrumentHint(static_cast<INSTRUMENTINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
