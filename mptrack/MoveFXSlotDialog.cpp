@@ -64,7 +64,7 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	bool foundDefault = false;
 	for(size_t nSlot = 0; nSlot < m_EmptySlots.size(); nSlot++)
 	{
-		slotText.Format("FX%d", m_EmptySlots[nSlot] + 1);
+		slotText.Format(_T("FX%d"), m_EmptySlots[nSlot] + 1);
 		m_CbnEmptySlots.SetItemData(m_CbnEmptySlots.AddString(slotText), nSlot);
 		if(m_EmptySlots[nSlot] >= m_nDefaultSlot && !foundDefault)
 		{
