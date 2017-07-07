@@ -800,9 +800,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 
 		CHAR s[32];
 		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY))
-			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", mpt::abs(compRow));
+			wsprintfA(s, "%s%02X", compRow < 0 ? "-" : "", mpt::abs(compRow));
 		else
-			wsprintf(s, "%d", compRow);
+			wsprintfA(s, "%d", compRow);
 
 		rect.left = 0;
 		rect.top = ypaint;
