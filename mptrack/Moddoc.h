@@ -142,7 +142,9 @@ public:
 
 	// Logging for general progress and error events.
 	void AddToLog(LogLevel level, const mpt::ustring &text) const;
+	/*MPT_DEPRECATED*/ void AddToLog(const CString &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
 	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text)); }
+	/*MPT_DEPRECATED*/ void AddToLog(const char *text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text?text:"")); }
 
 	const std::vector<LogEntry> & GetLog() const { return m_Log; }
 	mpt::ustring GetLogString() const;
