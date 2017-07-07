@@ -219,7 +219,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, accidentalFlats(conf, "Display", "AccidentalFlats", false)
 	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
 	, showDirsInSampleBrowser(conf, "Display", "ShowDirsInSampleBrowser", false)
-	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
+	, commentsFont(conf, "Display", "Comments Font", FontSetting(MPT_USTRING("Courier New"), 120))
 	// Misc
 	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
 	, defaultModType(conf, "Misc", "DefaultModType", MOD_TYPE_IT)
@@ -631,7 +631,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,04))
 	{
-		commentsFont = FontSetting("Courier New", (m_dwPatternSetup & 0x02) ? 120 : 90);
+		commentsFont = FontSetting(MPT_USTRING("Courier New"), (m_dwPatternSetup & 0x02) ? 120 : 90);
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}

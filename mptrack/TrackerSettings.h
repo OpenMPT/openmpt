@@ -112,8 +112,8 @@ enum ModColor
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 #define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
 
-#define PATTERNFONT_SMALL "@1"
-#define PATTERNFONT_LARGE "@2"
+#define PATTERNFONT_SMALL MPT_ULITERAL("@1")
+#define PATTERNFONT_LARGE MPT_ULITERAL("@2")
 
 // MIDI Setup
 #define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
@@ -450,12 +450,12 @@ struct FontSetting
 		Italic = 2,
 	};
 
-	std::string name;
-	int32_t size;
+	mpt::ustring name;
+	int32 size;
 	FlagSet<FontFlags> flags;
 
 	FontSetting(const FontSetting &other) : name(other.name), size(other.size), flags(other.flags) { }
-	FontSetting(const std::string &name = "", int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
+	FontSetting(const mpt::ustring &name = MPT_USTRING(""), int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
 
 	bool operator== (const FontSetting &other) const
 	{
@@ -472,23 +472,25 @@ MPT_DECLARE_ENUM(FontSetting::FontFlags)
 
 template<> inline SettingValue ToSettingValue(const FontSetting &val)
 {
-	return SettingValue(val.name + "," + mpt::ToString(val.size) + "|" + mpt::ToString(val.flags.GetRaw()));
+	return SettingValue(mpt::ToUnicode(val.name) + MPT_USTRING(",") + mpt::ToUString(val.size) + MPT_USTRING("|") + mpt::ToUString(val.flags.GetRaw()));
 }
 template<> inline FontSetting FromSettingValue(const SettingValue &val)
 {
-	FontSetting setting(val.as<std::string>());
-	size_t sizeStart = setting.name.rfind(',');
+	FontSetting setting(val.as<mpt::ustring>());
+	std::size_t sizeStart = setting.name.rfind(MPT_UCHAR(','));
 	if(sizeStart != std::string::npos)
 	{
-		setting.size = atoi(&setting.name[sizeStart + 1]);
-		size_t flagsStart = setting.name.find('|', sizeStart + 1);
-		if(flagsStart != std::string::npos)
+		const std::vector<mpt::ustring> fields = mpt::String::Split<mpt::ustring>(setting.name.substr(sizeStart + 1), MPT_USTRING("|"));
+		if(fields.size() >= 1)
 		{
-			setting.flags = static_cast<FontSetting::FontFlags>(atoi(&setting.name[flagsStart + 1]));
+			setting.size = ConvertStrTo<int32>(fields[0]);
+		}
+		if(fields.size() >= 2)
+		{
+			setting.flags = static_cast<FontSetting::FontFlags>(ConvertStrTo<int32>(fields[1]));
 		}
 		setting.name.resize(sizeStart);
 	}
-
 	return setting;
 }
 

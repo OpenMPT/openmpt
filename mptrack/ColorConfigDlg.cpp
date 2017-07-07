@@ -92,10 +92,10 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 }
 
 
-static std::string FormatFontName(const FontSetting &font)
-//--------------------------------------------------------
+static CString FormatFontName(const FontSetting &font)
+//----------------------------------------------------
 {
-	return font.name + ", " + mpt::ToString(font.size / 10);
+	return mpt::ToCString(font.name + MPT_USTRING(", ") + mpt::ToUString(font.size / 10));
 }
 
 
@@ -138,13 +138,13 @@ BOOL COptionsColors::OnInitDialog()
 		sel = patternFont.size * 2 + 1;
 	} else
 	{
-		m_ComboFont.AddString(FormatFontName(patternFont).c_str());
+		m_ComboFont.AddString(FormatFontName(patternFont));
 		sel = 6;
 	}
 	m_ComboFont.SetCurSel(sel);
 
 	commentFont = TrackerSettings::Instance().commentsFont;
-	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont).c_str());
+	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont));
 
 	m_ComboPreset.SetRedraw(FALSE);
 	m_ComboPreset.InitStorage(2 + mpt::size(ColorSchemes), 20 * sizeof(TCHAR));
@@ -244,7 +244,7 @@ void COptionsColors::OnChoosePatternFont()
 	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::String::Copy(lf.lfFaceName, patternFont.name);
+	mpt::String::Copy(lf.lfFaceName, mpt::ToCString(patternFont.name).GetString());
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	if(patternFont.name != PATTERNFONT_SMALL && patternFont.name != PATTERNFONT_LARGE)
@@ -259,12 +259,12 @@ void COptionsColors::OnChoosePatternFont()
 		{
 			m_ComboFont.DeleteString(6);
 		}
-		patternFont.name = dlg.GetFaceName();
+		patternFont.name = mpt::ToUnicode(dlg.GetFaceName());
 		patternFont.size = dlg.GetSize();
 		patternFont.flags = FontSetting::None;
 		if(dlg.IsBold()) patternFont.flags |= FontSetting::Bold;
 		if(dlg.IsItalic()) patternFont.flags |= FontSetting::Italic;
-		m_ComboFont.AddString(FormatFontName(patternFont).c_str());
+		m_ComboFont.AddString(FormatFontName(patternFont));
 		m_ComboFont.SetCurSel(6);
 		OnSettingsChanged();
 	}
@@ -280,7 +280,7 @@ void COptionsColors::OnChooseCommentFont()
 	lf.lfHeight = -MulDiv(commentFont.size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::String::Copy(lf.lfFaceName, commentFont.name);
+	mpt::String::Copy(lf.lfFaceName, mpt::ToCString(commentFont.name).GetString());
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	dlg.m_cf.lpLogFont = &lf;
@@ -288,12 +288,12 @@ void COptionsColors::OnChooseCommentFont()
 	dlg.m_cf.Flags |= CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
 	if(dlg.DoModal() == IDOK)
 	{
-		commentFont.name = dlg.GetFaceName();
+		commentFont.name = mpt::ToUnicode(dlg.GetFaceName());
 		commentFont.size = dlg.GetSize();
 		commentFont.flags = FontSetting::None;
 		if(dlg.IsBold()) commentFont.flags |= FontSetting::Bold;
 		if(dlg.IsItalic()) commentFont.flags |= FontSetting::Italic;
-		SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont).c_str());
+		SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont));
 		OnSettingsChanged();
 	}
 }
