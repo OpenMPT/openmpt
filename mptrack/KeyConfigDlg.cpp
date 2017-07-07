@@ -185,7 +185,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText(_T(""));
 
-	m_eChordWaitTime.SetWindowText(mpt::ToString(TrackerSettings::Instance().gnAutoChordWaitTime).c_str());
+	m_eChordWaitTime.SetWindowText(mpt::ToStringT<CString>(TrackerSettings::Instance().gnAutoChordWaitTime));
 	return TRUE;
 }
 
@@ -575,7 +575,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 
 		m_nCurHotKey = nCmd;
 		m_nCurCategory = GetCategoryFromCommandID(nCmd);
-		char s[20];
+		TCHAR s[20];
 
 		m_cmbKeyChoice.ResetContent();
 		int numChoices=plocalCmdSet->GetKeyListSize(nCmd);
@@ -638,7 +638,7 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 	CString s;
 	UINT val;
 	m_eChordWaitTime.GetWindowText(s);
-	val = atoi(s);
+	val = _tstoi(s);
 	if (val>5000)
 	{
 		val = 5000;
@@ -779,7 +779,7 @@ void COptionsKeyboard::OnOK()
 
 	CString cs;
 	m_eChordWaitTime.GetWindowText(cs);
-	TrackerSettings::Instance().gnAutoChordWaitTime = atoi(cs);
+	TrackerSettings::Instance().gnAutoChordWaitTime = _tstoi(cs);
 
 	CPropertyPage::OnOK();
 }
