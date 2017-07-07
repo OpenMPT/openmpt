@@ -324,7 +324,7 @@ void CCtrlComments::OnCommentsChanged()
 	CString text;
 	m_EditComments.GetWindowText(text);
 	m_EditComments.SetModify(FALSE);
-	if(m_sndFile.m_songMessage.SetFormatted(text.GetString(), SongMessage::leCRLF))
+	if(m_sndFile.m_songMessage.SetFormatted(mpt::ToCharset(m_sndFile.GetCharsetInternal(), text), SongMessage::leCRLF))
 	{
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, CommentHint(), this);
