@@ -247,7 +247,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 	font.size = -MulDiv(font.size, Util::GetDPIy(hwnd), 720);
 
 	CFont gdiFont;
-	gdiFont.CreateFont(font.size, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL, font.flags[FontSetting::Italic] ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, font.name.c_str());
+	gdiFont.CreateFont(font.size, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL, font.flags[FontSetting::Italic] ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, mpt::ToCString(font.name));
 	CFont *oldFont = hDC.SelectObject(&gdiFont);
 
 	CPoint pt = hDC.GetTextExtent(_T("W"));
