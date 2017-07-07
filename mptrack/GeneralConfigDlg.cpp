@@ -192,7 +192,7 @@ void COptionsGeneral::OnOptionSelChanged()
 	{
 		pszDesc = generalOptionsList[sel].description;
 	}
-	SetDlgItemText(IDC_TEXT1, (pszDesc) ? pszDesc : "");
+	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetASCII, (pszDesc) ? pszDesc : ""));
 }
 
 
