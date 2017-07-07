@@ -2038,12 +2038,12 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
 				pModDoc->PlayNote(note, m_nInstrument, 0);
 			}
-			std::string noteName;
+			CString noteName;
 			if(ModCommand::IsNote(note))
 			{
-				noteName = sndFile.GetNoteName(note, m_nInstrument);
+				noteName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(note, m_nInstrument));
 			}
-			pMainFrm->SetInfoText(noteName.c_str());
+			pMainFrm->SetInfoText(noteName);
 		}
 	} else
 	{
@@ -2240,7 +2240,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 		if(event == MIDIEvents::evNoteOn)
 		{
-			CMainFrame::GetMainFrame()->SetInfoText(modDoc->GetrSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument).c_str());
+			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetrSoundFile().GetCharsetInternal(), modDoc->GetrSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
 		}
 
 		return 1;
