@@ -77,7 +77,7 @@ ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, con
 	valueEdit.SetFont(parent->GetFont());
 
 	// "Per mil" label
-	perMilLabel.Create("‰", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + m.editWidth + m.spacing, rect.bottom - m.lineHeight, rect.right, rect.bottom), parent);
+	perMilLabel.Create(_T("‰"), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + m.editWidth + m.spacing, rect.bottom - m.lineHeight, rect.right, rect.bottom), parent);
 	perMilLabel.SetFont(parent->GetFont());
 }
 
@@ -110,10 +110,10 @@ void ParamControlSet::EnableControls(bool enable)
 void ParamControlSet::ResetContent()
 //----------------------------------
 {
-	nameLabel.SetWindowText("");
-	valueLabel.SetWindowText("");
+	nameLabel.SetWindowText(_T(""));
+	valueLabel.SetWindowText(_T(""));
 	valueSlider.SetPos(0);
-	valueEdit.SetWindowText("");
+	valueEdit.SetWindowText(_T(""));
 }
 
 
@@ -132,7 +132,7 @@ void ParamControlSet::SetParamValue(int value, const CString &text)
 	{
 		// Don't update textbox when it has focus, else this will prevent user from changing the content.
 		CString paramValue;
-		paramValue.Format("%0000d", value);
+		paramValue.Format(_T("%0000d"), value);
 		valueEdit.SetWindowText(paramValue);
 	}
 	valueLabel.SetWindowText(text);
@@ -149,9 +149,9 @@ int ParamControlSet::GetParamValueFromSlider() const
 int ParamControlSet::GetParamValueFromEdit() const
 //------------------------------------------------
 {
-	char s[16];
+	TCHAR s[16];
 	valueEdit.GetWindowText(s, 16);
-	int val = atoi(s);
+	int val = _tstoi(s);
 	Limit(val, int(0), int(PARAM_RESOLUTION));
 	return val;
 }
