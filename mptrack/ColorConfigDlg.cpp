@@ -21,25 +21,25 @@ OPENMPT_NAMESPACE_BEGIN
 
 static const struct ColorDescriptions
 {
-	const char *name;
+	const TCHAR *name;
 	int previewImage;
 	uint32 colorIndex1, colorIndex2, colorIndex3;
-	const char *descText1, *descText2, *descText3;
+	const TCHAR *descText1, *descText2, *descText3;
 } colorDefs[] =
 {
-	{"Pattern Editor",		0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
-	{"Active Row",			0,	MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, "Background:", "Foreground:", nullptr },
-	{"Pattern Selection",	0,	MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0, "Background:", "Foreground:", nullptr },
-	{"Play Cursor",			0,	MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, "Background:", "Foreground:", nullptr },
-	{"Note Highlight",		0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
-	{"Effect Highlight",	0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
-	{"Invalid Commands",	0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
-	{"Channel Separator",	0,	MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, "Highlight:", "Face:", "Shadow:"},
-	{"Next/Prev Pattern",	0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend Colour:", NULL, NULL},
-	{"Sample Editor",		1,	MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, "Sample Data:", "Background:", "Selection:"},
-	{"Instrument Editor",	2,	MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, "Envelopes:", "Background:", nullptr },
-	{"VU-Meters",			0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"},
-	{"VU-Meters (Plugins)",	0,	MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST, "Hi:", "Med:", "Lo:"}
+	{ _T("Pattern Editor"),      0, MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, _T("Background:"), _T("Foreground:"), _T("Highlighted:") },
+	{ _T("Active Row"),          0, MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, _T("Background:"), _T("Foreground:"), nullptr },
+	{ _T("Pattern Selection"),   0, MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0, _T("Background:"), _T("Foreground:"), nullptr },
+	{ _T("Play Cursor"),         0, MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, _T("Background:"), _T("Foreground:"), nullptr },
+	{ _T("Note Highlight"),      0, MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, _T("Note:"), _T("Instrument:"), _T("Volume:") },
+	{ _T("Effect Highlight"),    0, MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, _T("Panning Effects:"), _T("Pitch Effects:"), _T("Global Effects:") },
+	{ _T("Invalid Commands"),    0, MODCOLOR_DODGY_COMMANDS, 0, 0, _T("Invalid Note:"), nullptr, nullptr },
+	{ _T("Channel Separator"),   0, MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, _T("Highlight:"), _T("Face:"), _T("Shadow:") },
+	{ _T("Next/Prev Pattern"),   0, MODCOLOR_BLENDCOLOR, 0, 0, _T("Blend Colour:"), nullptr, nullptr },
+	{ _T("Sample Editor"),       1, MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, _T("Sample Data:"), _T("Background:"), _T("Selection:") },
+	{ _T("Instrument Editor"),   2, MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, _T("Envelopes:"), _T("Background:"), nullptr },
+	{ _T("VU-Meters"),           0, MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, _T("Hi:"), _T("Med:"), _T("Lo:") },
+	{ _T("VU-Meters (Plugins)"), 0, MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST, _T("Hi:"), _T("Med:"), _T("Lo:") }
 };
 
 #define PREVIEWBMP_WIDTH	88
@@ -107,7 +107,7 @@ BOOL COptionsColors::OnInitDialog()
 	MemCopy(CustomColors, TrackerSettings::Instance().rgbCustomColors);
 	for (size_t i = 0; i < mpt::size(colorDefs); i++)
 	{
-		m_ComboItem.SetItemData(m_ComboItem.AddString(mpt::ToCString(mpt::CharsetASCII, colorDefs[i].name)), i);
+		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
 	m_ComboItem.SetCurSel(0);
 	m_BtnPreview.SetWindowPos(NULL,
@@ -244,7 +244,7 @@ void COptionsColors::OnChoosePatternFont()
 	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::String::Copy(lf.lfFaceName, mpt::ToCString(patternFont.name).GetString());
+	mpt::CopyCStringToBuffer(lf.lfFaceName, mpt::ToCString(patternFont.name));
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	if(patternFont.name != PATTERNFONT_SMALL && patternFont.name != PATTERNFONT_LARGE)
@@ -280,7 +280,7 @@ void COptionsColors::OnChooseCommentFont()
 	lf.lfHeight = -MulDiv(commentFont.size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::String::Copy(lf.lfFaceName, mpt::ToCString(commentFont.name).GetString());
+	mpt::CopyCStringToBuffer(lf.lfFaceName, mpt::ToCString(commentFont.name));
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	dlg.m_cf.lpLogFont = &lf;
