@@ -78,6 +78,20 @@ template<> inline double ConvertStrTo(const std::wstring &str) { return ConvertS
 template<> inline long double ConvertStrTo(const std::wstring &str) { return ConvertStrToLongDouble(str); }
 #endif
 
+#if defined(_MFC_VER)
+template<typename T>
+inline T ConvertStrTo(const CString &str)
+{
+	#if defined(UNICODE) && MPT_WSTRING_FORMAT
+		return ConvertStrTo<T>(mpt::ToWide(str));
+	#elif defined(UNICODE)
+		return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
+	#else // !UNICODE
+		return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetLocale, str));
+	#endif // UNICODE
+}
+#endif // _MFC_VER
+
 template<typename T>
 inline T ConvertStrTo(const char *str)
 {
