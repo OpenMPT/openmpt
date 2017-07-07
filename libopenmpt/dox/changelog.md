@@ -5,7 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta26
+### libopenmpt 0.2-beta26 (2017-07-07)
+
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.
  *  [**Bug**] mktime() and localtime() were used for song date parsing.
     These functions are not guaranteed to be thread-safe by the standard.
