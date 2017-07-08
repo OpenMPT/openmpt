@@ -805,14 +805,14 @@ BOOL CEffectVis::OnInitDialog()
 	}
 
 	m_cmbActionList.ResetContent();
-	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite with effect:"), kAction_OverwriteFX);
-	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with effect:"), kAction_FillFX);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Overwrite with effect:")), kAction_OverwriteFX);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Fill blanks with effect:")), kAction_FillFX);
 	if (m_pModDoc->GetModType() == MOD_TYPE_MPT)
 	{
-		m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite with PC note"), kAction_OverwritePC);
-		m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with PC note"), kAction_FillPC);
+		m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Overwrite with PC note")), kAction_OverwritePC);
+		m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Fill blanks with PC note")), kAction_FillPC);
 	}
-	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Never change effect type"), kAction_Preserve);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Never change effect type")), kAction_Preserve);
 
 	m_cmbActionList.SetCurSel(m_nAction);
 	return true;
