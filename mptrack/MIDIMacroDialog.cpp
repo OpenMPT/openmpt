@@ -179,7 +179,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:
-		m_EditMacroValue[m].SetWindowText(m_MidiCfg.szMidiSFXExt[m]);
+		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[m]));
 		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
 		// Macro Type:
@@ -213,13 +213,13 @@ void CMidiMacroSetup::UpdateDialog()
 	if(sfx < 16)
 	{
 		ToggleBoxes(sfx_preset, sfx);
-		m_EditSFx.SetWindowTextA(m_MidiCfg.szMidiSFXExt[sfx]);
+		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[sfx]));
 	}
 
 	zxx = m_CbnZxx.GetCurSel();
 	if(zxx < 0x80)
 	{
-		m_EditZxx.SetWindowTextA(m_MidiCfg.szMidiZXXExt[zxx]);
+		m_EditZxx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiZXXExt[zxx]));
 	}
 	UpdateMacroList();
 }
@@ -312,10 +312,9 @@ void CMidiMacroSetup::OnSFxEditChanged()
 	{
 		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
-			char s[MACRO_LENGTH];
-			MemsetZero(s);
-			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
-			mpt::String::Copy(m_MidiCfg.szMidiSFXExt[sfx], s);
+			CString s;
+			m_EditSFx.GetWindowText(s);
+			mpt::String::Copy(m_MidiCfg.szMidiSFXExt[sfx], mpt::ToCharset(mpt::CharsetASCII, s));
 
 			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
@@ -334,11 +333,9 @@ void CMidiMacroSetup::OnZxxEditChanged()
 	{
 		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
 		{
-			char s[MACRO_LENGTH];
-			MemsetZero(s);
-			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
-			mpt::String::SetNullTerminator(s);
-			memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
+			CString s;
+			m_EditZxx.GetWindowText(s);
+			mpt::String::Copy(m_MidiCfg.szMidiZXXExt[zxx], mpt::ToCharset(mpt::CharsetASCII, s));
 			m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 		}
 	}
@@ -407,7 +404,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 	if(param < 384)
 	{
 		const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_plug, param);
-		m_EditSFx.SetWindowText(macroText.c_str());
+		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
 	} else
 	{
 		Reporting::Notification("Only parameters 0 to 383 can be controlled using MIDI Macros. Use Parameter Control Events to automate higher parameters.");
@@ -419,7 +416,7 @@ void CMidiMacroSetup::OnCCChanged()
 {
 	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
 	const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_cc, cc);
-	m_EditSFx.SetWindowText(macroText.c_str());
+	m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
 }
 
 void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
@@ -459,25 +456,26 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric)
 //---------------------------------------------------------------------------------------
 {
-	CString macroStr;
-	wnd.GetWindowText(macroStr);
+	CString macroStrT;
+	wnd.GetWindowText(macroStrT);
+	std::string macroStr = mpt::ToCharset(mpt::CharsetASCII, macroStrT);
 
 	bool allowed = true, caseChange = false;
-	for(int i = 0; i < macroStr.GetLength(); i++)
+	for(std::size_t i = 0; i < macroStr.length(); i++)
 	{
-		char c = macroStr.GetAt(i);
+		char c = macroStr[i];
 		if(c == 'k' || c == 'K')			// Previously, 'K' was used for MIDI channel
 		{
 			caseChange = true;
-			macroStr.SetAt(i, 'c');
+			macroStr[i] = 'c';
 		} else if(c >= 'd' && c <= 'f')	// abc have special meanings, but def can be fixed
 		{
 			caseChange = true;
-			macroStr.SetAt(i, c - 'a' + 'A');
+			macroStr[i] = c - 'a' + 'A';
 		} else if(c == 'N' || c == 'V' || c == 'U' || c == 'X' || c == 'Y' || c == 'Z' || c == 'P')
 		{
 			caseChange = true;
-			macroStr.SetAt(i, c - 'A' + 'a');
+			macroStr[i] = c - 'A' + 'a';
 		} else if(!(
 			(c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'c') ||
 			(c == 'v' || c == 'u' || c == 'x' || c == 'y' || c == 'p' || c == 'n' || c == ' ') ||
@@ -493,7 +491,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		// Replace text and keep cursor position if we just typed in an invalid character
 		int start, end;
 		wnd.GetSel(start, end);
-		wnd.SetWindowText(lastMacro);
+		wnd.SetWindowText(mpt::ToCString(mpt::CharsetASCII, lastMacro));
 		wnd.SetSel(start - 1, end - 1, true);
 		MessageBeep(MB_OK);
 		return false;
@@ -504,7 +502,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 			// Replace text and keep cursor position if there was a case conversion
 			int start, end;
 			wnd.GetSel(start, end);
-			wnd.SetWindowText(macroStr);
+			wnd.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroStr));
 			wnd.SetSel(start, end, true);
 		}
 		return true;
