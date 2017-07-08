@@ -76,9 +76,10 @@ enum
 
 struct MIDIMacroConfigData
 {
-	char szMidiGlb[9][MACRO_LENGTH];		// Global MIDI macros
-	char szMidiSFXExt[16][MACRO_LENGTH];	// Parametric MIDI macros
-	char szMidiZXXExt[128][MACRO_LENGTH];	// Fixed MIDI macros
+	// encoding is ASCII
+	char szMidiGlb[9][MACRO_LENGTH];       // Global MIDI macros
+	char szMidiSFXExt[16][MACRO_LENGTH];   // Parametric MIDI macros
+	char szMidiZXXExt[128][MACRO_LENGTH];  // Fixed MIDI macros
 };
 
 MPT_BINARY_STRUCT(MIDIMacroConfigData, 4896) // this is directly written to files, so the size must be correct!
