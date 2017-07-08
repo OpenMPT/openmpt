@@ -1467,96 +1467,42 @@ int CTrackApp::ExitInstanceImpl()
 // App Messages
 
 
-void CTrackApp::OnFileNew()
-//-------------------------
+CModDoc *CTrackApp::NewDocument(MODTYPE newType)
+//----------------------------------------------
 {
-
 	// Build from template
-	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
-	if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
+	if(newType == MOD_TYPE_NONE)
 	{
-		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
-		for(const auto &dir : dirs)
+		const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
+		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
-			if((dir + templateFile).IsFile())
+			const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
+			for(const auto &dir : dirs)
 			{
-				if(m_pModTemplate->OpenTemplateFile(dir + templateFile) != nullptr)
+				if((dir + templateFile).IsFile())
 				{
-					return;
+					if(CModDoc *modDoc = static_cast<CModDoc *>(m_pModTemplate->OpenTemplateFile(dir + templateFile)))
+					{
+						return modDoc;
+					}
 				}
 			}
 		}
+
+
+		// Default module type
+		newType = TrackerSettings::Instance().defaultModType;
+
+		// Get active document to make the new module of the same type
+		CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
+		if(pModDoc != nullptr && TrackerSettings::Instance().defaultNewFileAction == nfSameAsCurrent)
+		{
+			newType = pModDoc->GetrSoundFile().GetBestSaveFormat();
+		}
 	}
 
-
-	// Default module type
-	MODTYPE newType = TrackerSettings::Instance().defaultModType;
-
-	// Get active document to make the new module of the same type
-	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
-	if(pModDoc != nullptr && TrackerSettings::Instance().defaultNewFileAction == nfSameAsCurrent)
-	{
-		newType = pModDoc->GetrSoundFile().GetBestSaveFormat();
-	}
-
-	switch(newType)
-	{
-	case MOD_TYPE_MOD:
-		OnFileNewMOD();
-		break;
-	case MOD_TYPE_S3M:
-		OnFileNewS3M();
-		break;
-	case MOD_TYPE_XM:
-		OnFileNewXM();
-		break;
-	case MOD_TYPE_IT:
-		OnFileNewIT();
-		break;
-	case MOD_TYPE_MPT:
-	default:
-		OnFileNewMPT();
-		break;
-	}
-}
-
-
-void CTrackApp::OnFileNewMOD()
-//----------------------------
-{
-	SetDefaultDocType(MOD_TYPE_MOD);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
-}
-
-
-void CTrackApp::OnFileNewS3M()
-//----------------------------
-{
-	SetDefaultDocType(MOD_TYPE_S3M);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
-}
-
-
-void CTrackApp::OnFileNewXM()
-//---------------------------
-{
-	SetDefaultDocType(MOD_TYPE_XM);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
-}
-
-
-void CTrackApp::OnFileNewIT()
-//---------------------------
-{
-	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
-}
-
-void CTrackApp::OnFileNewMPT()
-//---------------------------
-{
-	SetDefaultDocType(MOD_TYPE_MPT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
+	SetDefaultDocType(newType);
+	return static_cast<CModDoc *>(m_pModTemplate->OpenDocumentFile(mpt::PathString()));
 }
 
 
@@ -2262,7 +2208,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			theApp.GetSettings().Write("VST Plugins", tmp, plug->tags);
 		}
 	}
-	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plugIndex);
+	theApp.GetSettings().Write("VST Plugins", "NumPlugins", static_cast<uint32>(plugIndex));
 #endif // NO_PLUGINS
 
 	delete m_pPluginManager;
