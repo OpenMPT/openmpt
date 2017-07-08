@@ -471,7 +471,7 @@ void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResu
 BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 //-----------------------------------------------------------------------
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	const TCHAR *text = _T("");
 	UINT_PTR nID = pNMHDR->idFrom;
 	if(pTTT->uFlags & TTF_IDISHWND)
@@ -499,7 +499,7 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 		break;
 	}
 
-	mpt::String::CopyN(pTTT->szText, text);
+	mpt::CopyCStringToBuffer(pTTT->szText, text);
 	return TRUE;
 }
 
