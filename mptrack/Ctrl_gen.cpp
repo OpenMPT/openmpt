@@ -637,8 +637,8 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
-BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
-//--------------------------------------------------------
+BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
+//---------------------------------------------------------
 {
 	const TCHAR moreRecentMixModeNote[] = _T("Use a more recent mixmode to see dB offsets.");
 	if ((pszText) && (uId))

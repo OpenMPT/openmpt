@@ -1696,8 +1696,8 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 }
 
 
-BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
-//------------------------------------------------------------
+BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
+//-------------------------------------------------------------
 {
 	//Note: pszText seems to point to char array of length 256 (Noverber 2006).
 	//Note2: If there's problems in getting tooltips showing for certain tools,

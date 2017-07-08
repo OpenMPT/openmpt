@@ -86,7 +86,7 @@ public:
 	virtual CRuntimeClass *GetAssociatedViewClass();
 	virtual void OnActivatePage(LPARAM);
 	virtual void OnDeactivatePage();
-	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
+	virtual BOOL GetToolTipText(UINT uId, LPTSTR pszText);
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlGeneral)
