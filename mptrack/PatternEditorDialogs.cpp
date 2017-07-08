@@ -18,6 +18,7 @@
 #include "PatternEditorDialogs.h"
 #include "TempoSwingDialog.h"
 #include "../soundlib/mod_specifications.h"
+#include "../common/StringFixer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -468,15 +469,15 @@ void CEditCommand::InitNote()
 		const uint32 nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
 		for(uint32 i = 1; i <= nmax; i++)
 		{
-			std::string s = mpt::ToString(i) + ": ";
+			CString s = mpt::ToStringT<CString>(i) + _T(": ");
 			// instrument / sample
 			if(sndFile.GetNumInstruments())
 			{
 				if(sndFile.Instruments[i])
-					s += sndFile.Instruments[i]->name;
+					s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Instruments[i]->name);
 			} else
-				s += sndFile.m_szNames[i];
-			cbnInstr.SetItemData(cbnInstr.AddString(s.c_str()), i);
+				s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[i]);
+			cbnInstr.SetItemData(cbnInstr.AddString(s), i);
 		}
 	}
 	cbnInstr.SetCurSel(m->instr);
@@ -499,7 +500,7 @@ void CEditCommand::InitVolume()
 		cbnVolCmd.EnableWindow(TRUE);
 		sldVolParam.EnableWindow(TRUE);
 		uint32 count = effectInfo.GetNumVolCmds();
-		cbnVolCmd.SetItemData(cbnVolCmd.AddString(" None"), (DWORD_PTR)-1);
+		cbnVolCmd.SetItemData(cbnVolCmd.AddString(_T(" None")), (DWORD_PTR)-1);
 		cbnVolCmd.SetCurSel(0);
 		UINT fxndx = effectInfo.GetIndexFromVolCmd(m->volcmd);
 		for(uint32 i = 0; i < count; i++)
@@ -535,7 +536,7 @@ void CEditCommand::InitEffect()
 	cbnCommand.ResetContent();
 	uint32 numfx = effectInfo.GetNumEffects();
 	uint32 fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
-	cbnCommand.SetItemData(cbnCommand.AddString(" None"), (DWORD_PTR)-1);
+	cbnCommand.SetItemData(cbnCommand.AddString(_T(" None")), (DWORD_PTR)-1);
 	if(m->command == CMD_NONE) cbnCommand.SetCurSel(0);
 
 	CString s;
@@ -1317,11 +1318,11 @@ void QuickChannelProperties::UpdateDisplay()
 	CheckDlgButton(IDC_CHECK1, (settings.dwFlags[CHN_MUTE]) ? TRUE : FALSE);
 	CheckDlgButton(IDC_CHECK2, (settings.dwFlags[CHN_SURROUND]) ? TRUE : FALSE);
 
-	char description[16];
-	sprintf(description, "Channel %d:", channel + 1);
+	TCHAR description[16];
+	wsprintf(description, _T("Channel %d:"), channel + 1);
 	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, description);
 	nameEdit.LimitText(MAX_CHANNELNAME - 1);
-	nameEdit.SetWindowText(settings.szName);
+	nameEdit.SetWindowText(mpt::ToCString(document->GetSoundFile()->GetCharsetInternal(), settings.szName));
 
 	settingsChanged = false;
 	visible = true;
@@ -1460,13 +1461,14 @@ void QuickChannelProperties::OnNameChanged()
 	}
 	
 	ModChannelSettings &settings = document->GetrSoundFile().ChnSettings[channel];
-	char newName[MAX_CHANNELNAME];
-	nameEdit.GetWindowText(newName, MAX_CHANNELNAME);
+	CString newNameTmp;
+	nameEdit.GetWindowText(newNameTmp);
+	std::string newName = mpt::ToCharset(document->GetrSoundFile().GetCharsetInternal(), newNameTmp);
 
-	if(strcmp(newName, settings.szName))
+	if(newName != settings.szName)
 	{
 		PrepareUndo();
-		strcpy(settings.szName, newName);
+		mpt::String::Copy(settings.szName, newName);
 		document->SetModified();
 		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}
