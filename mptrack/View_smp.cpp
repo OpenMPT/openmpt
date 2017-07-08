@@ -416,24 +416,24 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if(pMainFrm)
 		{
-			std::string s;
+			mpt::ustring s;
 			if(m_dwEndSel > m_dwBeginSel)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 
-				auto fmt = &mpt::fmt::dec<SmpLength>;
+				auto fmt = &mpt::ufmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
-					fmt = &mpt::fmt::HEX<SmpLength>;
-				s = mpt::format("[%1,%2] (%3 sample%4, ")(fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? "" : "s");
+					fmt = &mpt::ufmt::HEX<SmpLength>;
+				s = mpt::format(MPT_USTRING("[%1,%2] (%3 sample%4, "))(fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? MPT_USTRING("") : MPT_USTRING("s"));
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
 				if(sampleRate <= 0) sampleRate = 8363;
 				double sec = selLength / static_cast<double>(sampleRate);
 				if(sec < 1)
-					s += mpt::format("%1ms")(mpt::fmt::flt(sec * 1000.0, 0, 3));
+					s += mpt::format(MPT_USTRING("%1ms"))(mpt::ufmt::flt(sec * 1000.0, 0, 3));
 				else
-					s += mpt::format("%1s")(mpt::fmt::flt(sec, 0, 3));
+					s += mpt::format(MPT_USTRING("%1s"))(mpt::ufmt::flt(sec, 0, 3));
 
 				// Length in beats
 				double beats = selLength;
@@ -445,9 +445,9 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 					sndFile.RecalculateSamplesPerTick();
 					beats *= sndFile.GetSampleRate() / static_cast<double>(Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
 				}
-				s += mpt::format(", %1 beats)")(mpt::fmt::flt(beats, 0, 5));
+				s += mpt::format(MPT_USTRING(", %1 beats)"))(mpt::ufmt::flt(beats, 0, 5));
 			}
-			pMainFrm->SetInfoText(s.c_str());
+			pMainFrm->SetInfoText(mpt::ToCString(s));
 		}
 	}
 }
@@ -1771,7 +1771,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As Loop"));
 				if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As Sustain Loop"));
-				::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			} else
 			{
 				TCHAR s[256];
@@ -1791,7 +1791,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					{
 						//Set sustain loop points
 						SmpLength sustainEnd = (sample.nSustainEnd > 0) ? sample.nSustainEnd : sample.nLength;
-						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 						wsprintf(s, _T("Set &Sustain Start to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sustainEnd ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINSTART, s);
@@ -2618,11 +2618,11 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 			ModSample &sample = sndFile.GetSample(m_nSample);
 			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-			const std::string s = mpt::format("%1 (%2.%3 Hz)")(
-				sndFile.GetNoteName((ModCommand::NOTE)note),
+			const mpt::ustring s = mpt::format(MPT_USTRING("%1 (%2.%3 Hz)"))(
+				mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.GetNoteName((ModCommand::NOTE)note)),
 				freq >> FREQ_FRACBITS,
-				mpt::fmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS)));
-			pMainFrm->SetInfoText(s.c_str());
+				mpt::ufmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS)));
+			pMainFrm->SetInfoText(mpt::ToCString(s));
 		}
 	}
 }
