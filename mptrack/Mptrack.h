@@ -346,12 +346,14 @@ public:
 // Implementation
 
 	//{{AFX_MSG(CTrackApp)
-	afx_msg void OnFileNew();
-	afx_msg void OnFileNewMOD();
-	afx_msg void OnFileNewS3M();
-	afx_msg void OnFileNewXM();
-	afx_msg void OnFileNewIT();
-	afx_msg void OnFileNewMPT();
+	CModDoc *NewDocument(MODTYPE newType = MOD_TYPE_NONE);
+
+	afx_msg void OnFileNew() { NewDocument(); }
+	afx_msg void OnFileNewMOD() { NewDocument(MOD_TYPE_MOD); }
+	afx_msg void OnFileNewS3M() { NewDocument(MOD_TYPE_S3M); }
+	afx_msg void OnFileNewXM() { NewDocument(MOD_TYPE_XM); }
+	afx_msg void OnFileNewIT() { NewDocument(MOD_TYPE_IT); }
+	afx_msg void OnFileNewMPT() { NewDocument(MOD_TYPE_MPT); }
 
 	afx_msg void OnFileOpen();
 	afx_msg void OnAppAbout();
