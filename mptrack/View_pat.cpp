@@ -2876,7 +2876,7 @@ void CViewPattern::OnRemoveChannel()
 	const bool isEmpty = pModDoc->IsChannelUnused(nChn);
 
 	CString str;
-	str.Format("Remove channel %d? This channel still contains note data!", nChn + 1);
+	str.Format(_T("Remove channel %d? This channel still contains note data!"), nChn + 1);
 	if(isEmpty || Reporting::Confirm(str , "Remove channel") == cnfYes)
 	{
 		std::vector<bool> keepMask(pModDoc->GetNumChannels(), true);

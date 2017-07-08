@@ -175,7 +175,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order().GetName().c_str());
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
 
 	m_OrderList.SetFocus();
 
@@ -229,7 +229,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(updateAll || updateSeq)
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order().GetName().c_str());
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
 
 		m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
@@ -267,14 +267,14 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 	if(updateAll || updatePatNames || updateSmpNames || updateInsNames)
 	{
 		LockControls();
-		CHAR s[256];
+		CString s;
 		if(updateAll || updateSmpNames || updateInsNames)
 		{
 			static const TCHAR szSplitFormat[] = _T("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();
-			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" No Instrument"), 0);
+			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(_T(" No Instrument")), 0);
 			const INSTRUMENTINDEX nSplitIns = m_modDoc.GetSplitKeyboardSettings().splitInstrument;
 			const ModCommand::NOTE noteSplit = 1 + m_modDoc.GetSplitKeyboardSettings().splitNote;
 			const CString sSplitInsName = m_modDoc.GetPatternViewInstrumentName(nSplitIns, true, false);
@@ -289,8 +289,12 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 					CString sDisplayName;
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
 					{
-						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i,
-								 (LPCTSTR)sSplitInsName, (LPCTSTR)m_modDoc.GetPatternViewInstrumentName(i, true, false));
+						s.Format(szSplitFormat,
+							nSplitIns,
+							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
+							i,
+							sSplitInsName.GetString(),
+							m_modDoc.GetPatternViewInstrumentName(i, true, false).GetString());
 						sDisplayName = s;
 					}
 					else
@@ -307,9 +311,16 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_sndFile.GetSample(i).pSample)
 				{
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
-						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i, m_sndFile.m_szNames[nSplitIns], m_sndFile.m_szNames[i]);
+						s.Format(szSplitFormat,
+							nSplitIns,
+							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
+							i,
+							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[nSplitIns]).GetString(),
+							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[i]).GetString());
 					else
-						wsprintf(s, "%02u: %s", i, m_sndFile.m_szNames[i]);
+						s.Format(_T("%02u: %s"),
+							i,
+							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[i]).GetString());
 
 					UINT n = m_CbnInstrument.AddString(s);
 					if(n == m_nInstrument) nPos = n;
@@ -329,7 +340,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			if(m_sndFile.Patterns.IsValidIndex(nPat))
 			{
-				m_EditPatName.SetWindowText(m_sndFile.Patterns[nPat].GetName().c_str());
+				m_EditPatName.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Patterns[nPat].GetName()));
 			}
 
 			BOOL bXMIT = (m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
@@ -1037,9 +1048,9 @@ void CCtrlPatterns::OnPatternNameChanged()
 	{
 		const PATTERNINDEX nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 
-		CHAR s[MAX_PATTERNNAME];
-		m_EditPatName.GetWindowText(s, CountOf(s));
-		mpt::String::SetNullTerminator(s);
+		CString tmp;
+		m_EditPatName.GetWindowText(tmp);
+		const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
 
 		if(m_sndFile.Patterns[nPat].GetName() != s)
 		{
@@ -1056,11 +1067,12 @@ void CCtrlPatterns::OnPatternNameChanged()
 void CCtrlPatterns::OnSequenceNameChanged()
 //-----------------------------------------
 {
-	CString str;
-	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
-	if(str != m_sndFile.Order().GetName().c_str())
+	CString tmp;
+	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, tmp);
+	const std::string str = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
+	if(str != m_sndFile.Order().GetName())
 	{
-		m_sndFile.Order().SetName(str.GetString());
+		m_sndFile.Order().SetName(str);
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
 	}
