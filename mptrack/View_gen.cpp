@@ -401,7 +401,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	if (genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
 		PopulateChannelPlugins();
-		SetDlgItemText(IDC_EDIT13, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName());
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::CharsetLocale, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
 	}
 	// Update plugin info
 	const bool updatePlug = (plugHint.GetPlugin() == 0 || plugHint.GetPlugin() == m_nCurrentPlugin + 1);
@@ -414,7 +414,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
 		const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
-		SetDlgItemText(IDC_EDIT13, plugin.GetName());
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::CharsetLocale, plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
@@ -831,11 +831,11 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 	if ((pModDoc) && (!m_nLockCount))
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
-		TCHAR s[MAX_CHANNELNAME + 2] = _T("");
 		const UINT nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
-
-		GetDlgItemText(itemID, s, CountOf(s));
-		if ((sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < sndFile.GetNumChannels()) && (strncmp(s, sndFile.ChnSettings[nChn].szName, MAX_CHANNELNAME)))
+		CString tmp;
+		GetDlgItemText(itemID, tmp);
+		const std::string s = mpt::ToCharset(sndFile.GetCharsetInternal(), tmp);
+		if ((sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < sndFile.GetNumChannels()) && (s != sndFile.ChnSettings[nChn].szName))
 		{
 			mpt::String::Copy(sndFile.ChnSettings[nChn].szName, s);
 			pModDoc->SetModified();
@@ -891,7 +891,7 @@ void CViewGlobals::OnPluginNameChanged()
 		GetDlgItemText(IDC_EDIT13, s);
 		if (s != plugin.GetName())
 		{
-			mpt::String::Copy(plugin.Info.szName, s.GetString());
+			mpt::String::Copy(plugin.Info.szName, mpt::ToCharset(mpt::CharsetLocale, s));
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);
