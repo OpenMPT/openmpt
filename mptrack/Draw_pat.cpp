@@ -1674,10 +1674,12 @@ void CViewPattern::UpdateIndicator()
 					} else if(m->volcmd != VOLCMD_NONE)
 					{
 						// "normal" volume command
-						CHAR sztmp[64] = "";
-						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), sztmp);
-						strcat(sztmp, ": ");
-						effectInfo.GetVolCmdParamInfo(*m, sztmp + strlen(sztmp));
+						CString sztmp;
+						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), &sztmp);
+						sztmp += _T(": ");
+						CString tmp2;
+						effectInfo.GetVolCmdParamInfo(*m, &tmp2);
+						sztmp += tmp2;
 						s = sztmp;
 					}
 					break;
