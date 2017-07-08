@@ -297,7 +297,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	{
 		if (!m_bEditsLocked)
 		{
-			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
+			m_EditTitle.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetTitle()));
 			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.m_songArtist).c_str());
 			m_EditTempo.SetTempoValue(m_sndFile.m_nDefaultTempo);
 			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
@@ -432,7 +432,7 @@ void CCtrlGeneral::OnTitleChanged()
 
 	CString title;
 	m_EditTitle.GetWindowText(title);
-	if(m_sndFile.SetTitle(title.GetString()))
+	if(m_sndFile.SetTitle(mpt::ToCharset(m_sndFile.GetCharsetInternal(), title)))
 	{
 		m_EditTitle.SetModify(FALSE);
 		m_modDoc.SetModified();
@@ -673,7 +673,7 @@ void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAt
 {
 	if (value == 0)
 	{
-		wsprintf(stringToSet, "-inf");
+		wsprintfA(stringToSet, "-inf");
 		return;
 	}
 	
