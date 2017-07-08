@@ -20,6 +20,14 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+// Tunings exist even outside of CSoundFile objects. We thus cannot use the
+// GetCharsetInternal() encoding consistently. For now, just always treat
+// tuning strings as CharsetLocale. As of OpenMPT 1.27, this distinction does
+// not yet matter, because GetCharsetInteral() is always mpt::CharsetLocale if
+// MODPLUG_TRACKER anyway.
+extern const mpt::Charset TuningCharset;
+
 //==========================
 template<class T1, class T2>
 class CBijectiveMap
@@ -233,7 +241,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 private:
-	CTuning::TUNINGTYPE GetTuningTypeFromStr(const std::string& str) const;
+	CTuning::TUNINGTYPE GetTuningTypeFromStr(const CString &str) const;
 
 	void UpdateTuningDescription();
 
