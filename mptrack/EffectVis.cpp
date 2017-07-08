@@ -710,24 +710,24 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		m_nLastDrawnY = point.y;
 	}
 	//update status bar
-	CHAR status[256];
-	CHAR effectName[128];
+	CString status;
+	CString effectName;
 	uint16 paramValue;
 
 
 	if (IsPcNote(row))
 	{
 		paramValue = ScreenYToPCParam(point.y);
-		wsprintf(effectName, "%s", "Param Control"); // TODO - show smooth & plug+param
+		effectName.Format(_T("%s"), _T("Param Control")); // TODO - show smooth & plug+param
 	}
 	else
 	{
 		paramValue = ScreenYToFXParam(point.y);
-		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), ModCommand::PARAM(GetParam(row))), effectName, true);
+		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), ModCommand::PARAM(GetParam(row))), &effectName, true);
 	}
 
-	wsprintf(status, "Pat: %d\tChn: %d\tRow: %d\tVal: %02X (%03d) [%s]",
-				m_nPattern, m_nChan+1, row, paramValue, paramValue, effectName);
+	status.Format(_T("Pat: %d\tChn: %d\tRow: %d\tVal: %02X (%03d) [%s]"),
+				m_nPattern, m_nChan+1, row, paramValue, paramValue, effectName.GetString());
 	m_edVisStatus.SetWindowText(status);
 }
 
@@ -789,13 +789,13 @@ BOOL CEffectVis::OnInitDialog()
 	}
 
 
-	CHAR s[128];
+	CString s;
 	UINT numfx = effectInfo.GetNumEffects();
 	m_cmbEffectList.ResetContent();
 	int k;
 	for (UINT i=0; i<numfx; i++)
 	{
-		if (effectInfo.GetEffectInfo(i, s, true))
+		if (effectInfo.GetEffectInfo(i, &s, true))
 		{
 			k =m_cmbEffectList.AddString(s);
 			m_cmbEffectList.SetItemData(k, i);

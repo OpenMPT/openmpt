@@ -504,8 +504,8 @@ void CEditCommand::InitVolume()
 		UINT fxndx = effectInfo.GetIndexFromVolCmd(m->volcmd);
 		for(uint32 i = 0; i < count; i++)
 		{
-			CHAR s[64];
-			if(effectInfo.GetVolCmdInfo(i, s))
+			CString s;
+			if(effectInfo.GetVolCmdInfo(i, &s))
 			{
 				int k = cbnVolCmd.AddString(s);
 				cbnVolCmd.SetItemData(k, i);
@@ -538,10 +538,10 @@ void CEditCommand::InitEffect()
 	cbnCommand.SetItemData(cbnCommand.AddString(" None"), (DWORD_PTR)-1);
 	if(m->command == CMD_NONE) cbnCommand.SetCurSel(0);
 
-	CHAR s[128];
+	CString s;
 	for(uint32 i = 0; i < numfx; i++)
 	{
-		if(effectInfo.GetEffectInfo(i, s, true))
+		if(effectInfo.GetEffectInfo(i, &s, true))
 		{
 			int k = cbnCommand.AddString(s);
 			cbnCommand.SetItemData(k, i);
@@ -777,16 +777,16 @@ void CEditCommand::OnPlugParamChanged()
 void CEditCommand::UpdateVolCmdValue()
 //------------------------------------
 {
-	CHAR s[64] = "";
+	CString s;
 	if(m->IsPcNote())
 	{
 		// plugin param control note
 		uint16 plugParam = static_cast<uint16>(sldVolParam.GetPos());
-		wsprintf(s, "Value: %u", plugParam);
+		s.Format(_T("Value: %u"), plugParam);
 	} else
 	{
 		// process as effect
-		effectInfo.GetVolCmdParamInfo(*m, s);
+		effectInfo.GetVolCmdParamInfo(*m, &s);
 	}
 	SetDlgItemText(IDC_TEXT2, s);
 }

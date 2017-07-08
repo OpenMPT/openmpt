@@ -147,7 +147,7 @@ void CFindReplaceTab::DoDataExchange(CDataExchange* pDX)
 BOOL CFindReplaceTab::OnInitDialog()
 //----------------------------------
 {
-	TCHAR s[256];
+	CString s;
 
 	CPropertyPage::OnInitDialog();
 	// Search flags
@@ -250,7 +250,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	UINT count = m_effectInfo.GetNumVolCmds();
 	for (UINT n=0; n<count; n++)
 	{
-		if(m_effectInfo.GetVolCmdInfo(n, s) && s[0])
+		if(m_effectInfo.GetVolCmdInfo(n, &s) && !s.IsEmpty())
 		{
 			m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(s), n);
 		}
@@ -274,7 +274,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		count = m_effectInfo.GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{
-			if(m_effectInfo.GetEffectInfo(n, s, true) && s[0])
+			if(m_effectInfo.GetEffectInfo(n, &s, true) && !s.IsEmpty())
 			{
 				m_cbnCommand.SetItemData(m_cbnCommand.AddString(s), n);
 			}
