@@ -682,16 +682,16 @@ void COrderList::UpdateInfoText()
 	if(pMainFrm != nullptr && ::GetFocus() == m_hWnd)
 	{
 		CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
-		TCHAR s[128] = _T("");
+		CString s;
 
 		const ORDERINDEX nLength = sndFile.Order().GetLengthTailTrimmed();
 
 		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
-			wsprintf(s, _T("Position %02Xh of %02Xh"), m_nScrollPos, nLength);
+			s.Format(_T("Position %02Xh of %02Xh"), m_nScrollPos, nLength);
 		} else
 		{
-			wsprintf(s, _T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, nLength, m_nScrollPos, nLength);
+			s.Format(_T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, nLength, m_nScrollPos, nLength);
 		}
 		
 		if (m_nScrollPos < sndFile.Order().size())
@@ -699,11 +699,11 @@ void COrderList::UpdateInfoText()
 			PATTERNINDEX nPat = sndFile.Order()[m_nScrollPos];
 			if (nPat < sndFile.Patterns.Size())
 			{
-				std::string patName = sndFile.Patterns[nPat].GetName();
-				if (!patName.empty())
+				CString patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[nPat].GetName());
+				if(!patName.IsEmpty())
 				{
-					_tcscat(s, _T(": "));
-					_tcscat(s, patName.c_str());
+					s += _T(": ");
+					s += patName;
 				}
 			}
 		}
@@ -718,7 +718,7 @@ void COrderList::UpdateInfoText()
 void COrderList::OnPaint()
 //------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
 	CPaintDC dc(this);
 	HGDIOBJ oldfont = ::SelectObject(dc.m_hDC, m_hFont);
 	HGDIOBJ oldpen = ::SelectObject(dc.m_hDC, CMainFrame::penSeparator);
@@ -797,11 +797,11 @@ void COrderList::OnPaint()
 				LineTo(dc.m_hDC, rect.right - 4, rect.top + 2);
 			}
 
-			s[0] = '\0';
+			s[0] = _T('\0');
 			if(nIndex < maxEntries && (rect.left + m_cxFont - 4) <= rcClient.right)
 			{
-				if(nPat == sndFile.Order.GetInvalidPatIndex()) strcpy(s, "---");
-				else if(nPat == sndFile.Order.GetIgnoreIndex()) strcpy(s, "+++");
+				if(nPat == sndFile.Order.GetInvalidPatIndex()) _tcscpy(s, _T("---"));
+				else if(nPat == sndFile.Order.GetIgnoreIndex()) _tcscpy(s, _T("+++"));
 				else wsprintf(s, _T("%u"), nPat);
 			}
 
