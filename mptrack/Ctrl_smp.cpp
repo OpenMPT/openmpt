@@ -537,7 +537,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
+BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 //---------------------------------------------------------
 {
 	if ((pszText) && (uId))

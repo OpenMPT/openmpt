@@ -91,7 +91,7 @@ protected:
 	virtual void OnDeactivatePage() {}
 	virtual BOOL OnInitDialog();
 	virtual INT_PTR OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
-	virtual BOOL GetToolTipText(UINT, LPSTR) { return FALSE; }
+	virtual BOOL GetToolTipText(UINT, LPTSTR) { return FALSE; }
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModControlDlg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);

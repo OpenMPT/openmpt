@@ -155,7 +155,7 @@ public:
 	virtual void OnDeactivatePage();
 	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
+	virtual BOOL GetToolTipText(UINT uId, LPTSTR pszText);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 protected:

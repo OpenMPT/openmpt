@@ -554,7 +554,7 @@ LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
 	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
 	{
 		CModControlDlg *pActiveDlg = m_Pages[m_nActiveDlg];
-		if (pActiveDlg) return (LRESULT)pActiveDlg->GetToolTipText(uId, (LPSTR)pszText);
+		if (pActiveDlg) return (LRESULT)pActiveDlg->GetToolTipText(uId, (LPTSTR)pszText);
 	}
 	return 0;
 }
