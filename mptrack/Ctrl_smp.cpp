@@ -246,8 +246,8 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	for (ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
-		std::string noteName = CSoundFile::m_NoteNames[i % 12] + mpt::ToString(i / 12);
-		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(noteName.c_str()), i - (NOTE_MIDDLEC - NOTE_MIN));
+		CString noteName = mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[i % 12] + mpt::ToString(i / 12));
+		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(noteName), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
 
 	m_ComboFFT.ShowWindow(SW_SHOW);
@@ -656,19 +656,19 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 		// Loop Type
 		m_ComboLoopType.ResetContent();
-		m_ComboLoopType.AddString("Off");
-		m_ComboLoopType.AddString("On");
+		m_ComboLoopType.AddString(_T("Off"));
+		m_ComboLoopType.AddString(_T("On"));
 
 		// Sustain Loop Type
 		m_ComboSustainType.ResetContent();
-		m_ComboSustainType.AddString("Off");
-		m_ComboSustainType.AddString("On");
+		m_ComboSustainType.AddString(_T("Off"));
+		m_ComboSustainType.AddString(_T("On"));
 
 		// Bidirectional Loops
 		if (m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			m_ComboLoopType.AddString("Bidi");
-			m_ComboSustainType.AddString("Bidi");
+			m_ComboLoopType.AddString(_T("Bidi"));
+			m_ComboSustainType.AddString(_T("Bidi"));
 		}
 
 		// Loop Start
@@ -745,21 +745,21 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			SetCurrentSample(m_sndFile.GetNumSamples());
 		}
 		const ModSample &sample = m_sndFile.GetSample(m_nSample);
-		TCHAR s[128];
+		CString s;
 		DWORD d;
 
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
 
 		// Length / Type
-		wsprintf(s, _T("%u-bit %s, len: %lu"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
+		s.Format(_T("%u-bit %s, len: %lu"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
-		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
+		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]);
 		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
-		mpt::String::Copy(s, sample.filename);
-		if (specs.sampleFilenameLengthMax == 0) s[0] = 0;
+		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), sample.filename);
+		if (specs.sampleFilenameLengthMax == 0) s.Empty();
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
 		if(sample.uFlags[SMP_NODEFAULTVOLUME])
@@ -778,7 +778,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		int transp = 0;
 		if (m_sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
 		{
-			wsprintf(s, _T("%lu"), sample.nC5Speed);
+			s.Format(_T("%lu"), sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
 				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
@@ -825,17 +825,17 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
 		if (sample.uFlags[CHN_REVERSE]) d |= 4;
 		m_ComboLoopType.SetCurSel(d);
-		wsprintf(s, _T("%lu"), sample.nLoopStart);
+		s.Format(_T("%lu"), sample.nLoopStart);
 		m_EditLoopStart.SetWindowText(s);
-		wsprintf(s, _T("%lu"), sample.nLoopEnd);
+		s.Format(_T("%lu"), sample.nLoopEnd);
 		m_EditLoopEnd.SetWindowText(s);
 		// Sustain Loop
 		d = 0;
 		if (sample.uFlags[CHN_SUSTAINLOOP]) d = sample.uFlags[CHN_PINGPONGSUSTAIN] ? 2 : 1;
 		m_ComboSustainType.SetCurSel(d);
-		wsprintf(s, _T("%lu"), sample.nSustainStart);
+		s.Format(_T("%lu"), sample.nSustainStart);
 		m_EditSustainStart.SetWindowText(s);
-		wsprintf(s, _T("%lu"), sample.nSustainEnd);
+		s.Format(_T("%lu"), sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
 	if (hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
@@ -2004,7 +2004,7 @@ void CCtrlSamples::OnEnableStretchToSize()
 	GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
 	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_COMBO4)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	SetDlgItemText(IDC_BUTTON1, timeStretch ? "Time Stretch" : "Pitch Shift");
+	SetDlgItemText(IDC_BUTTON1, timeStretch ? _T("Time Stretch") : _T("Pitch Shift"));
 	if(timeStretch) UpdateTimeStretchParameterString();
 }
 
@@ -2416,7 +2416,7 @@ public:
 				{
 					TCHAR progress[32];
 					uint32 percent = static_cast<uint32>((float)i * 50.0f + (100.0f / nChn) * (pos + len) / sample.nLength);
-					wsprintf(progress,"Pitch Shift... %u%%", percent);
+					wsprintf(progress, _T("Pitch Shift... %u%%"), percent);
 					SetText(progress);
 					SetProgress(percent);
 					ProcessMessages();
@@ -2670,11 +2670,11 @@ void CCtrlSamples::OnNextInstrument()
 void CCtrlSamples::OnNameChanged()
 //--------------------------------
 {
-	TCHAR s[MAX_SAMPLENAME] = _T("");
-
 	if(IsLocked() || !m_nSample) return;
-	m_EditName.GetWindowText(s, CountOf(s));
-	if (_tcscmp(s, m_sndFile.m_szNames[m_nSample]))
+	CString tmp;
+	m_EditName.GetWindowText(tmp);
+	const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
+	if(s != m_sndFile.m_szNames[m_nSample])
 	{
 		mpt::String::Copy(m_sndFile.m_szNames[m_nSample], s);
 		SetModified(SampleHint().Info().Names(), false, false);
@@ -2685,12 +2685,11 @@ void CCtrlSamples::OnNameChanged()
 void CCtrlSamples::OnFileNameChanged()
 //------------------------------------
 {
-	TCHAR s[MAX_SAMPLEFILENAME] = _T("");
-
 	if(IsLocked()) return;
-	m_EditFileName.GetWindowText(s, CountOf(s));
-
-	if (_tcscmp(s, m_sndFile.GetSample(m_nSample).filename))
+	CString tmp;
+	m_EditFileName.GetWindowText(tmp);
+	const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
+	if(s != m_sndFile.GetSample(m_nSample).filename)
 	{
 		mpt::String::Copy(m_sndFile.GetSample(m_nSample).filename, s);
 		SetModified(SampleHint().Info(), false, false);
@@ -3095,7 +3094,7 @@ bool MPT_BidiStartCheck(int spos0, int spos1, int spos2)
 void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 //----------------------------------------------------------
 {
-	CHAR s[256];
+	TCHAR s[256];
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
@@ -3146,7 +3145,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		}
 		if (bOk)
 		{
-			wsprintf(s, "%u", sample.nLoopStart);
+			wsprintf(s, _T("%u"), sample.nLoopStart);
 			m_EditLoopStart.SetWindowText(s);
 			redraw = true;
 			sample.PrecomputeLoops(m_sndFile);
@@ -3190,7 +3189,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		}
 		if (bOk)
 		{
-			wsprintf(s, "%u", sample.nLoopEnd);
+			wsprintf(s, _T("%u"), sample.nLoopEnd);
 			m_EditLoopEnd.SetWindowText(s);
 			redraw = true;
 			sample.PrecomputeLoops(m_sndFile);
@@ -3235,7 +3234,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		}
 		if (bOk)
 		{
-			wsprintf(s, "%u", sample.nSustainStart);
+			wsprintf(s, _T("%u"), sample.nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
 			redraw = true;
 			sample.PrecomputeLoops(m_sndFile);
@@ -3279,7 +3278,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		}
 		if (bOk)
 		{
-			wsprintf(s, "%u", sample.nSustainEnd);
+			wsprintf(s, _T("%u"), sample.nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
 			redraw = true;
 			sample.PrecomputeLoops(m_sndFile);
