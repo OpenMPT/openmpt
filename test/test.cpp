@@ -397,8 +397,8 @@ static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, s
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
 #endif
-	std::string str_iostreams = mpt::Format().SetFlags(f).SetWidth(width).SetPrecision(precision).ToString(x);
-	std::string str_parsed = mpt::Format().ParsePrintf(format).ToString(x);
+	std::string str_iostreams = mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision).ToString(x);
+	std::string str_parsed = mpt::FormatSpec().ParsePrintf(format).ToString(x);
 	//Log("%s", str_sprintf.c_str());
 	//Log("%s", str_iostreams.c_str());
 	//Log("%s", str_iostreams.c_str());
@@ -498,7 +498,7 @@ static MPT_NOINLINE void TestStringFormatting()
 		VERIFY_EQUAL(true, false);
 	}
 	VERIFY_EQUAL(mpt::ToString(58.65403492763), "58.654");
-	VERIFY_EQUAL(mpt::Format("%3.1f").ToString(23.42), "23.4");
+	VERIFY_EQUAL(mpt::FormatSpec("%3.1f").ToString(23.42), "23.4");
 
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
@@ -541,7 +541,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(1234567890000000.0);
 	TestFloatFormats(0.0000001234567890);
 
-	VERIFY_EQUAL(mpt::Format().ParsePrintf("%7.3f").ToString(6.12345), "  6.123");
+	VERIFY_EQUAL(mpt::FormatSpec().ParsePrintf("%7.3f").ToString(6.12345), "  6.123");
 	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 7, 3), "  6.123");
 	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 7, 3), "  6.123");
 	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 0, 4), "6.123");

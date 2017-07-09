@@ -112,7 +112,7 @@ std::string Profiler::DumpProfiles()
 			case Profiler::Audio: cat = "Audio"; break;
 			case Profiler::Notify: cat = "Notify"; break;
 			}
-			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::Format("%6.3f").ToString(stats.usage * 100.0) + "%\r\n";
+			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::FormatSpec("%6.3f").ToString(stats.usage * 100.0) + "%\r\n";
 		}
 	}
 	ret += "\r\n";

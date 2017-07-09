@@ -1371,7 +1371,7 @@ void CCtrlSamples::OnSampleSave()
 		minSmp = 1;
 		maxSmp = m_sndFile.GetNumSamples();
 	}
-	auto numberFmt = mpt::Format().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
+	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
 
 	bool ok = false;
 	CString sSampleName, sSampleFilename;
