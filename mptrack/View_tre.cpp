@@ -849,7 +849,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					info.hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hInstruments ? info.hInstruments : info.hSamples);
 				}
 
-				wsprintf(s, _T("FX%u: %s"), i + 1, mpt::ToCString(mpt::CharsetLocale, plugin.GetName()).GetString());
+				wsprintf(s, _T("FX%u: %s"), i + 1, mpt::ToCString(m_SongFile->GetCharsetInternal(), plugin.GetName()).GetString());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
 				
@@ -1793,7 +1793,7 @@ void CModTree::FillInstrumentLibrary()
 			if(pIns)
 			{
 				WCHAR s[MAX_INSTRUMENTNAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", ins, mpt::ToWide(mpt::CharsetLocale, pIns->name).c_str());
+				swprintf(s, CountOf(s), L"%3d: %s", ins, mpt::ToWide(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
 				ModTreeInsert(s, IMAGE_INSTRUMENTS);
 			}
 		}
@@ -1803,7 +1803,7 @@ void CModTree::FillInstrumentLibrary()
 			if(sample.pSample)
 			{
 				WCHAR s[MAX_SAMPLENAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", smp, mpt::ToWide(mpt::CharsetLocale, m_SongFile->m_szNames[smp]).c_str());
+				swprintf(s, CountOf(s), L"%3d: %s", smp, mpt::ToWide(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
 				ModTreeInsert(s, IMAGE_SAMPLES);
 			}
 		}

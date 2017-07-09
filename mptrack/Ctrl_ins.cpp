@@ -3008,9 +3008,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		}
 	}
 
-	CString str;
-	str.Format(_T("Tuning %s was not found. Setting to default tuning."), m_sndFile.Instruments[m_nInstrument]->pTuning->GetName().c_str());
-	Reporting::Notification(str);
+	Reporting::Notification(mpt::format(_T("Tuning %1 was not found. Setting to default tuning."))(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
 
 	CriticalSection cs;
 	pIns->SetTuning(m_sndFile.GetDefaultTuning());
