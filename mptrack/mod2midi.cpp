@@ -598,16 +598,21 @@ void CModToMidi::FillProgramBox(bool percussion)
 		for (ModCommand::NOTE i = 0; i < 61; i++)
 		{
 			ModCommand::NOTE note = i + 24;
-			auto s = mpt::format(_T("%1 (%2): %3"))(note, m_sndFile.GetNoteName(note + NOTE_MIN), szMidiPercussionNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s.c_str()), note);
+			auto s = mpt::format(CString(_T("%1 (%2): %3")))(
+				note,
+				mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(note + NOTE_MIN)),
+				mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[i]));
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note);
 		}
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 128);
 	} else
 	{
 		for (int i = 0; i < 128; i++)
 		{
-			auto s = mpt::format(_T("%1: %2"))(mpt::fmt::dec0<3>(i + 1), szMidiProgramNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s.c_str()), i);
+			auto s = mpt::format(CString(_T("%1: %2")))(
+				mpt::fmtT<CString>::dec0<3>(i + 1),
+				mpt::ToCString(mpt::CharsetASCII, szMidiProgramNames[i]));
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
 		}
 	}
 	m_bPerc = percussion;
