@@ -564,7 +564,7 @@ void CModTree::RefreshMidiLibrary()
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_INSTRMUTE;
-		s = mpt::ToWString(iMidi) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
+		s = mpt::wfmt::val(iMidi) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
 		{
@@ -3842,7 +3842,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				else if(pat == sndFile.Order.GetIgnoreIndex())
 					text = "+++";
 				else
-					text = mpt::ToString(pat);
+					text = mpt::fmt::val(pat);
 				doLabelEdit = true;
 			}
 			break;

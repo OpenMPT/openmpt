@@ -120,7 +120,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				patternData += CreateClipboardString(sndFile, pattern, PatternRect(PatternCursor(), PatternCursor(sndFile.Patterns[pattern].GetNumRows() - 1, sndFile.GetNumChannels() - 1, PatternCursor::lastColumn)));
 			}
 
-			data += mpt::ToString(patList[pattern]);
+			data += mpt::fmt::val(patList[pattern]);
 		}
 	}
 	if(!onlyOrders)

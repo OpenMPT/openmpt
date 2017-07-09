@@ -986,7 +986,7 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Resampler bandwidth
 	{
-		m_CEditWFIRCutoff.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().ResamplerCutoffPercent)));
+		m_CEditWFIRCutoff.SetWindowText(mpt::ToCString(mpt::ufmt::val(TrackerSettings::Instance().ResamplerCutoffPercent)));
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, 99);
 	}
 
@@ -1000,8 +1000,8 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// volume ramping
 	{
-		m_CEditRampUp.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds())));
-		m_CEditRampDown.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds())));
+		m_CEditRampUp.SetWindowText(mpt::ToCString(mpt::ufmt::val(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds())));
+		m_CEditRampDown.SetWindowText(mpt::ToCString(mpt::ufmt::val(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds())));
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(0, int32_max);
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN3))->SetRange32(0, int32_max);
 		UpdateRamping();

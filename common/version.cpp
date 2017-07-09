@@ -421,7 +421,7 @@ static std::string GetRevisionString()
 	{
 		return result;
 	}
-	result = std::string("-r") + mpt::ToString(GetRevision());
+	result = std::string("-r") + mpt::fmt::val(GetRevision());
 	if(HasMixedRevisions())
 	{
 		result += "!";
@@ -543,7 +543,7 @@ std::string SourceInfo::GetUrlWithRevision() const
 	{
 		return std::string();
 	}
-	return Url + "@" + mpt::ToString(Revision);
+	return Url + "@" + mpt::fmt::val(Revision);
 }
 
 mpt::ustring GetURL(std::string key)

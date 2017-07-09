@@ -2951,7 +2951,7 @@ void CModDoc::OnSaveTemplateModule()
 	mpt::PathString sName;
 	for(size_t i = 0; i < 1000; ++i)
 	{
-		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromUnicode(mpt::ToUString(i));
+		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
 		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
 		if (!(templateFolder + sName).FileOrDirectoryExists())
 			break;

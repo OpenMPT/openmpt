@@ -518,7 +518,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		{
 			// FLAC only supports a sample rate of up to 655350 Hz.
 			// Store the real sample rate in a custom Vorbis comment.
-			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "SAMPLERATE", mpt::ToString(sampleRate).c_str());
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "SAMPLERATE", mpt::fmt::val(sampleRate).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		}
 	}

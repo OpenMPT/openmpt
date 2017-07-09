@@ -95,7 +95,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 static CString FormatFontName(const FontSetting &font)
 //----------------------------------------------------
 {
-	return mpt::ToCString(font.name + MPT_USTRING(", ") + mpt::ToUString(font.size / 10));
+	return mpt::ToCString(font.name + MPT_USTRING(", ") + mpt::ufmt::val(font.size / 10));
 }
 
 

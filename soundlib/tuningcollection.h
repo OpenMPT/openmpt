@@ -104,7 +104,7 @@ public:
 	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
 #endif // MODPLUG_NO_FILESAVE
 
-	std::string GetVersionString() const {return mpt::ToString(static_cast<int>(s_SerializationVersion));}
+	std::string GetVersionString() const {return mpt::fmt::val(static_cast<int>(s_SerializationVersion));}
 
 	size_t GetNameLengthMax() const {return 256;}
 

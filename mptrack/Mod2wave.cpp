@@ -805,7 +805,7 @@ void CWaveConvert::OnOK()
 			m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.m_songMessage.GetFormatted(SongMessage::leLF));
 		}
 
-		m_Settings.Tags.bpm = mpt::ToUString(m_SndFile.GetCurrentBPM());
+		m_Settings.Tags.bpm = mpt::ufmt::val(m_SndFile.GetCurrentBPM());
 
 		SaveTags();
 

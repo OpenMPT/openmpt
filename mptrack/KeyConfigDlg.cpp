@@ -185,7 +185,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText(_T(""));
 
-	m_eChordWaitTime.SetWindowText(mpt::ToStringT<CString>(TrackerSettings::Instance().gnAutoChordWaitTime));
+	m_eChordWaitTime.SetWindowText(mpt::tfmt::val(TrackerSettings::Instance().gnAutoChordWaitTime));
 	return TRUE;
 }
 

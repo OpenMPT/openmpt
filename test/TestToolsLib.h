@@ -74,7 +74,7 @@ struct ToStringHelper
 {
 	std::string operator () (const T &x)
 	{
-		return mpt::ToString(x);
+		return mpt::fmt::val(x);
 	}
 };
 
@@ -85,7 +85,7 @@ struct ToStringHelper<mpt::endian_type>
 {
 	std::string operator () (const mpt::endian_type &x)
 	{
-		return mpt::ToString(x.value);
+		return mpt::fmt::val(x.value);
 	}
 };
 
@@ -94,7 +94,7 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 {
 	std::string operator () (const FlagSet<enum_t, store_t> &x)
 	{
-		return mpt::ToString(x.GetRaw());
+		return mpt::fmt::val(x.GetRaw());
 	}
 };
 
@@ -103,7 +103,7 @@ struct ToStringHelper<enum_value_type<enum_t> >
 {
 	std::string operator () (const enum_value_type<enum_t> &x)
 	{
-		return mpt::ToString(x.as_bits());
+		return mpt::fmt::val(x.as_bits());
 	}
 };
 
@@ -112,7 +112,7 @@ struct ToStringHelper<std::pair<Ta, Tb> >
 {
 	std::string operator () (const std::pair<Ta, Tb> &x)
 	{
-		return std::string("{") + mpt::ToString(x.first) + std::string(",") + mpt::ToString(x.second) + std::string("}");
+		return std::string("{") + mpt::fmt::val(x.first) + std::string(",") + mpt::fmt::val(x.second) + std::string("}");
 	}
 };
 
@@ -121,7 +121,7 @@ struct ToStringHelper<FPInt<FRACT, T> >
 {
 	std::string operator () (const FPInt<FRACT, T> &x)
 	{
-		return std::string("FPInt<") + mpt::ToString(FRACT) + std::string(",") + mpt::ToString(typeid(T).name()) + std::string(">{") + mpt::ToString(x.GetInt()) + std::string(".") + mpt::ToString(x.GetFract()) + std::string("}");
+		return std::string("FPInt<") + mpt::fmt::val(FRACT) + std::string(",") + mpt::fmt::val(typeid(T).name()) + std::string(">{") + mpt::fmt::val(x.GetInt()) + std::string(".") + mpt::fmt::val(x.GetFract()) + std::string("}");
 	}
 };
 
@@ -130,7 +130,7 @@ struct ToStringHelper<SamplePosition>
 {
 	std::string operator () (const SamplePosition &x)
 	{
-		return mpt::ToString(x.GetInt()) + std::string(".") + std::string("0x") + mpt::fmt::hex0<8>(x.GetFract());
+		return mpt::fmt::val(x.GetInt()) + std::string(".") + std::string("0x") + mpt::fmt::hex0<8>(x.GetFract());
 	}
 };
 

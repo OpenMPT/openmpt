@@ -472,7 +472,7 @@ MPT_DECLARE_ENUM(FontSetting::FontFlags)
 
 template<> inline SettingValue ToSettingValue(const FontSetting &val)
 {
-	return SettingValue(mpt::ToUnicode(val.name) + MPT_USTRING(",") + mpt::ToUString(val.size) + MPT_USTRING("|") + mpt::ToUString(val.flags.GetRaw()));
+	return SettingValue(mpt::ToUnicode(val.name) + MPT_USTRING(",") + mpt::ufmt::val(val.size) + MPT_USTRING("|") + mpt::ufmt::val(val.flags.GetRaw()));
 }
 template<> inline FontSetting FromSettingValue(const SettingValue &val)
 {

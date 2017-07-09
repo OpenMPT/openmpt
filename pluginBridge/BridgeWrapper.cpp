@@ -178,7 +178,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
 
-	const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
+	const std::wstring mapName = L"Local\\openmpt-" + mpt::wfmt::val(procId) + L"-" + mpt::wfmt::val(plugId);
 
 	// Create our shared memory object.
 	if(!queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout))
@@ -620,7 +620,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		// void** in [ptr] for chunk data address
 		{
 			static uint32 chunkId = 0;
-			const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-chunkdata-" + mpt::ToWString(chunkId++);
+			const std::wstring mapName = L"Local\\openmpt-" + mpt::wfmt::val(GetCurrentProcessId()) + L"-chunkdata-" + mpt::wfmt::val(chunkId++);
 			ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 			PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
 		}
@@ -644,7 +644,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 			{
 				// Resize memory
 				static uint32 chunkId = 0;
-				const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-events-" + mpt::ToWString(chunkId++);
+				const std::wstring mapName = L"Local\\openmpt-" + mpt::wfmt::val(GetCurrentProcessId()) + L"-events-" + mpt::wfmt::val(chunkId++);
 				ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 				PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
 				eventMem.Create(mapName.c_str(), static_cast<uint32>(events.size() + 1024));

@@ -469,7 +469,7 @@ void CEditCommand::InitNote()
 		const uint32 nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
 		for(uint32 i = 1; i <= nmax; i++)
 		{
-			CString s = mpt::ToStringT<CString>(i) + _T(": ");
+			CString s = mpt::tfmt::val(i) + _T(": ");
 			// instrument / sample
 			if(sndFile.GetNumInstruments())
 			{

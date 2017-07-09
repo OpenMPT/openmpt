@@ -166,8 +166,8 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 {
 #ifdef VST_LOG
 	Log(mpt::format("VST plugin to host: Eff: %1, Opcode = %2, Index = %3, Value = %4, PTR = %5, OPT = %6\n")(
-		mpt::fmt::Ptr(effect), mpt::ToString(opcode),
-		mpt::ToString(index), mpt::fmt::HEX0<sizeof(VstIntPtr) * 2>(value), mpt::fmt::Ptr(ptr), mpt::fmt::flt(opt, 0, 3)));
+		mpt::fmt::Ptr(effect), mpt::fmt::val(opcode),
+		mpt::fmt::val(index), mpt::fmt::HEX0<sizeof(VstIntPtr) * 2>(value), mpt::fmt::Ptr(ptr), mpt::fmt::flt(opt, 0, 3)));
 	MPT_TRACE();
 #else
 	MPT_UNREFERENCED_PARAMETER(opt);
@@ -1064,7 +1064,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		if(opCode < CountOf(VstOpCodes))
 			codeStr = mpt::ToWide(mpt::CharsetASCII, VstOpCodes[opCode]);
 		else
-			codeStr = mpt::ToWString(opCode);
+			codeStr = mpt::wfmt::val(opCode);
 		Log(mpt::format(L"About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n")(codeStr, m_Factory.libraryName, index, mpt::wfmt::HEX0<sizeof(VstIntPtr) * 2>(value), mpt::wfmt::Ptr(ptr), mpt::wfmt::flt(opt, 0, 3)));
 	}
 #endif
@@ -1076,7 +1076,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		if(opCode < CountOf(VstOpCodes))
 			codeStr = mpt::ToWide(mpt::CharsetASCII, VstOpCodes[opCode]);
 		else
-			codeStr = mpt::ToWString(opCode);
+			codeStr = mpt::wfmt::val(opCode);
 		ReportPlugException(mpt::format(L"Exception %1 in Dispatch(%2)")(mpt::wfmt::HEX<8>(exception), codeStr));
 	}
 
