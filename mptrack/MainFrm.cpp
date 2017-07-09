@@ -1989,11 +1989,11 @@ void CMainFrame::OnPluginManager()
 
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		//Find empty plugin slot
 		for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 		{
-			if (pSndFile->m_MixPlugins[nPlug].pMixPlugin == nullptr)
+			if (sndFile.m_MixPlugins[nPlug].pMixPlugin == nullptr)
 			{
 				nPlugslot = nPlug;
 				break;
@@ -2151,16 +2151,15 @@ void CMainFrame::OnTimerGUI()
 			cwnd->GetClientRect(&rect);
 			rect.left += width;
 			rect.top += i * height;
-			char dummy[1024];
-			sprintf(dummy, "%6.3f%% %s", cats[i] * 100.0, catnames[i].c_str());
-			dc.DrawText(dummy, strlen(dummy), &rect, DT_LEFT);
+			auto s = mpt::ToCString(mpt::CharsetASCII, mpt::fmt::f("%6.3f", cats[i] * 100.0) + "% " + catnames[i]);
+			dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 		}
 
-		std::string dummy = Profiler::DumpProfiles();
 		RECT rect;
 		cwnd->GetClientRect(&rect);
 		rect.top += Profiler::CategoriesCount * height;
-		dc.DrawText(dummy.c_str(), dummy.length(), &rect, DT_LEFT);
+		auto s = mpt::ToCString(mpt::CharsetASCII, Profiler::DumpProfiles());
+		dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 
 		cwnd->Detach();
 	}
@@ -2178,7 +2177,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 		CView *pView = pMDIActive->GetActiveView();
 		if (pView) return (CModDoc *)pView->GetDocument();
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -2582,7 +2581,6 @@ bool CMainFrame::UpdateEffectKeys(const CModDoc *modDoc)
 	{
 		return m_InputHandler->SetEffectLetters(modDoc->GetrSoundFile().GetModSpecifications());
 	}
-
 	return false;
 }
 
