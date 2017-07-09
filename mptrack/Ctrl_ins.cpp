@@ -239,7 +239,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor(highlight ? colorTextSel : colorText);
-			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			// Sample
 			highlight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
 			rect.left = rcClient.left + m_cxFont*2+3;
@@ -257,7 +257,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((highlight) ? colorTextSel : colorText);
-			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
 		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
@@ -352,7 +352,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 					if(sample <= sndFile.GetNumSamples())
 					{
 						wsprintf(s, _T("%u: "), sample);
-						_tcscat(s, sndFile.m_szNames[sample]);
+						_tcscat(s, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[sample]).GetString());
 						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, s);
 					}
 				}
@@ -368,7 +368,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
 					_tcscpy(s, _T("Map all &notes to "));
-					_tcscat(s, sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+					_tcscat(s, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)).GetString());
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, s));
 				}
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
@@ -1383,8 +1383,8 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 		if (pIns)
 		{
-			m_EditName.SetWindowText(pIns->name);
-			m_EditFileName.SetWindowText(pIns->filename);
+			m_EditName.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->name));
+			m_EditFileName.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->filename));
 			// Fade Out Volume
 			SetDlgItemInt(IDC_EDIT7, pIns->nFadeOut);
 			// Global Volume
@@ -1494,8 +1494,8 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			}
 		} else
 		{
-			m_EditName.SetWindowText("");
-			m_EditFileName.SetWindowText("");
+			m_EditName.SetWindowText(_T(""));
+			m_EditFileName.SetWindowText(_T(""));
 			velocityStyle.EnableWindow(FALSE);
 			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
 			if(m_nInstrument > m_sndFile.GetNumInstruments())
@@ -1792,14 +1792,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER1:
 			if(isEnabled)
-				wsprintf(pszText, "±%d%% volume variation", pIns->nVolSwing);
+				wsprintf(pszText, _T("±%d%% volume variation"), pIns->nVolSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER2:
 			if(isEnabled)
-				wsprintf(pszText, "±%d panning variation", pIns->nPanSwing);
+				wsprintf(pszText, _T("±%d panning variation"), pIns->nPanSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
@@ -1820,14 +1820,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER6:
 			if(isEnabled)
-				wsprintf(pszText, "±%d cutoff variation", pIns->nCutSwing);
+				wsprintf(pszText, _T("±%d cutoff variation"), pIns->nCutSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER7:
 			if(isEnabled)
-				wsprintf(pszText, "±%d resonance variation", pIns->nResSwing);
+				wsprintf(pszText, _T("±%d resonance variation"), pIns->nResSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
@@ -2113,11 +2113,11 @@ void CCtrlInstruments::OnNameChanged()
 {
 	if (!IsLocked())
 	{
-		TCHAR s[64];
-		s[0] = 0;
-		m_EditName.GetWindowText(s, sizeof(s));
+		CString tmp;
+		m_EditName.GetWindowText(tmp);
+		const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-		if ((pIns) && (strncmp(s, pIns->name, MAX_INSTRUMENTNAME)))
+		if ((pIns) && (s != pIns->name))
 		{
 			if(!m_startedEdit) PrepareUndo("Set Name");
 			mpt::String::Copy(pIns->name, s);
@@ -2132,11 +2132,11 @@ void CCtrlInstruments::OnFileNameChanged()
 {
 	if (!IsLocked())
 	{
-		TCHAR s[64];
-		s[0] = 0;
-		m_EditFileName.GetWindowText(s, sizeof(s));
+		CString tmp;
+		m_EditFileName.GetWindowText(tmp);
+		const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-		if ((pIns) && (strncmp(s, pIns->filename, 12)))
+		if ((pIns) && (s != pIns->filename))
 		{
 			if(!m_startedEdit) PrepareUndo("Set Filename");
 			mpt::String::Copy(pIns->filename, s);
@@ -2574,7 +2574,7 @@ void CCtrlInstruments::OnAttackChanged()
 		m_SliderAttack.SetPos(n);
 		if( CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1) ) spin->SetPos(n);
 		LockControls();
-		if (n == 0) SetDlgItemText(IDC_EDIT2,"default");
+		if (n == 0) SetDlgItemText(IDC_EDIT2, _T("default"));
 		UnlockControls();
 	}
 }
@@ -3201,15 +3201,15 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.AddString(_T("OpenMPT IT behaviour")); //<-> Instrument pTuning pointer == NULL
 	for(size_t i = 0; i<m_sndFile.GetBuiltInTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(m_sndFile.GetBuiltInTunings().GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, m_sndFile.GetBuiltInTunings().GetTuning(i).GetName()));
 	}
 	for(size_t i = 0; i<CSoundFile::GetLocalTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(CSoundFile::GetLocalTunings().GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, CSoundFile::GetLocalTunings().GetTuning(i).GetName()));
 	}
 	for(size_t i = 0; i<m_sndFile.GetTuneSpecificTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName()));
 	}
 	m_ComboTuning.AddString(_T("Control Tunings..."));
 	m_ComboTuning.SetCurSel(0);
