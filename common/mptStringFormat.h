@@ -244,7 +244,9 @@ std::wstring FormatValW(const long double & x, const Format & f);
 
 template <typename Tstring> struct FormatValTFunctor {};
 template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const Format & f) { return FormatVal(x, f); } };
+#if MPT_WSTRING_FORMAT
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const Format & f) { return FormatValW(x, f); } };
+#endif
 #if MPT_USTRING_MODE_UTF8
 template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const Format & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatVal(x, f)); } };
 #endif
