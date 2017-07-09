@@ -347,6 +347,12 @@ struct fmtT : fmt_base
 {
 
 template<typename T>
+static inline Tstring val(const T& x)
+{
+	return ToStringTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff());
+}
+
+template<typename T>
 static inline Tstring dec(const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
