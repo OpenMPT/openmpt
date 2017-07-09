@@ -843,7 +843,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					info.hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hInstruments ? info.hInstruments : info.hSamples);
 				}
 
-				wsprintf(s, "FX%u: %s", i + 1, plugin.GetName());
+				wsprintf(s, _T("FX%u: %s"), i + 1, mpt::ToCString(mpt::CharsetLocale, plugin.GetName()).GetString());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
 				
