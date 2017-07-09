@@ -630,7 +630,8 @@ void CModTree::RefreshMidiLibrary()
 void CModTree::RefreshDlsBanks()
 //------------------------------
 {
-	CHAR s[256];
+	const mpt::Charset charset = mpt::CharsetLocale;
+	TCHAR s[256];
 	HTREEITEM hDlsRoot = m_hMidiLib;
 
 	if (IsSampleBrowser()) return;
@@ -664,8 +665,8 @@ void CModTree::RefreshDlsBanks()
 					DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
 					if (pDlsIns)
 					{
-						CHAR szName[256];
-						wsprintf(szName, "%u: %s", pDlsIns->ulInstrument & 0x7F, pDlsIns->szName);
+						TCHAR szName[256];
+						wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, mpt::ToCString(charset, pDlsIns->szName).GetString());
 						// Drum Kit
 						if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
@@ -687,13 +688,18 @@ void CModTree::RefreshDlsBanks()
 
 								if (keymin >= keymax)
 								{
-									wsprintf(szName, "%s%u: %s", CSoundFile::m_NoteNames[keymin % 12], keymin / 12, regionName);
+									wsprintf(szName, _T("%s%u: %s"),
+										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymin % 12]).GetString(),
+										keymin / 12,
+										mpt::ToCString(charset, regionName).GetString());
 								} else
 								{
-									wsprintf(szName, "%s%u-%s%u: %s",
-										CSoundFile::m_NoteNames[keymin % 12], keymin / 12,
-										CSoundFile::m_NoteNames[keymax % 12], keymax / 12,
-										regionName);
+									wsprintf(szName, _T("%s%u-%s%u: %s"),
+										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymin % 12]).GetString(),
+										keymin / 12,
+										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymax % 12]).GetString(),
+										keymax / 12,
+										mpt::ToCString(charset, regionName).GetString());
 								}
 								LPARAM lParam = DlsItem::EncodeValuePerc((uint8)(iRgn), (uint16)iIns);
 								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
