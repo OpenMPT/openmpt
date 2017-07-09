@@ -198,7 +198,7 @@ CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x, bool /*
 	if(i != m_NoteNameMap.end())
 		return i->second;
 	else
-		return mpt::ToString(x);
+		return mpt::fmt::val(x);
 }
 
 

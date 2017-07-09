@@ -131,7 +131,7 @@ mpt::ustring ID::AsString() const
 	uint64le val;
 	val.set(0);
 	std::memcpy(&val, m_ID.data(), m_ID.length());
-	return mpt::ToUString(val);
+	return mpt::ufmt::val(val);
 }
 
 
@@ -215,7 +215,7 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 				 nNum,
 				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : MPT_USTRING(""),
 				 (pRe) ? pRe->rposStart : 0,
-				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ToUString(pRe->nSize) : MPT_USTRING(""),
+				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ufmt::val(pRe->nSize) : MPT_USTRING(""),
 				 MPT_USTRING("")));
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(pRe);

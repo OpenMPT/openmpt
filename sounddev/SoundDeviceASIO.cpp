@@ -82,7 +82,7 @@ class ASIOCallError
 {
 public:
 	ASIOCallError(const std::string &call, ASIOError err)
-		: ASIOException(call + std::string(" failed: ") + mpt::ToString(err))
+		: ASIOException(call + std::string(" failed: ") + mpt::fmt::val(err))
 	{
 		return;
 	}
@@ -94,7 +94,7 @@ class ASIOCallBoolResult
 {
 public:
 	ASIOCallBoolResult(const std::string &call, ASIOBool err)
-		: ASIOException(call + std::string(" failed: ") + mpt::ToString(err))
+		: ASIOException(call + std::string(" failed: ") + mpt::fmt::val(err))
 	{
 		return;
 	}
@@ -1728,7 +1728,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		( selector
 		, value
 		, reinterpret_cast<std::size_t>(message)
-		, opt ? mpt::ToUString(*opt) : MPT_USTRING("NULL")
+		, opt ? mpt::ufmt::val(*opt) : MPT_USTRING("NULL")
 		, result
 		));
 	return result;

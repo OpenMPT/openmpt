@@ -2846,7 +2846,7 @@ void CMainFrame::UpdateMRUList()
 
 		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
 		{
-			std::wstring s = mpt::ToWString(i + 1) + L" ";
+			std::wstring s = mpt::wfmt::val(i + 1) + L" ";
 			// Add mnemonics
 			if(i < 9)
 			{

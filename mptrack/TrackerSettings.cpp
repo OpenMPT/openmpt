@@ -1224,7 +1224,7 @@ mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 			{
 				cc += MPT_USTRING(",");
 			}
-			cc += mpt::ToUString(i);
+			cc += mpt::ufmt::val(i);
 			first = false;
 		}
 	}

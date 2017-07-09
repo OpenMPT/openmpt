@@ -79,7 +79,7 @@ void CTuningRatioMapWnd::OnPaint()
 			std::string temp;
 			if(isValidNote)
 			{
-				temp = "(" + mpt::ToString(noteToDraw) + ")   " + m_pTuning->GetNoteName(noteToDraw);
+				temp = "(" + mpt::fmt::val(noteToDraw) + ")   " + m_pTuning->GetNoteName(noteToDraw);
 			}
 
 			if(isValidNote)
@@ -103,7 +103,7 @@ void CTuningRatioMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			s = mpt::ToString(m_pTuning->GetRatio(noteToDraw)).c_str();
+			s = mpt::fmt::val(m_pTuning->GetRatio(noteToDraw)).c_str();
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);

@@ -61,7 +61,7 @@ mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_UST
 		{
 			str += sep;
 		}
-		str += mpt::ToUString(vals[i]);
+		str += mpt::ufmt::val(vals[i]);
 	}
 	return str;
 }
@@ -76,7 +76,7 @@ std::string Combine(const std::vector<T> &vals, const std::string &sep=std::stri
 		{
 			str += sep;
 		}
-		str += mpt::ToString(vals[i]);
+		str += mpt::fmt::val(vals[i]);
 	}
 	return str;
 }

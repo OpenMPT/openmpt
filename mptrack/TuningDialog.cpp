@@ -249,7 +249,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditTuningCollectionName.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetName()));
 		//m_EditTuningCollectionVersion.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetVersionString()));
 		//m_EditTuningCollectionEditMask.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetEditMaskString()));
-		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToCString(TuningCharset, mpt::ToString(m_pActiveTuningCollection->GetNumTunings())));
+		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToCString(TuningCharset, mpt::fmt::val(m_pActiveTuningCollection->GetNumTunings())));
 		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}
 	//<-- Updating tuning collection part
@@ -263,7 +263,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditName.Invalidate();
 
 		//Finetunesteps-edit
-		m_EditFineTuneSteps.SetWindowText(mpt::ToStringT<CString>(m_pActiveTuning->GetFineStepCount()));
+		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->GetFineStepCount()));
 		m_EditFineTuneSteps.Invalidate();
 
 		//Making sure that ratiomap window is showing and
@@ -279,10 +279,10 @@ void CTuningDialog::UpdateView(const int updateMask)
 		if(period > 0)
 		{
 			m_EditSteps.EnableWindow();
-			m_EditSteps.SetWindowText(mpt::ToStringT<CString>(period));
+			m_EditSteps.SetWindowText(mpt::tfmt::val(period));
 
 			m_EditRatioPeriod.EnableWindow();
-			m_EditRatioPeriod.SetWindowText(mpt::ToStringT<CString>(GroupRatio));
+			m_EditRatioPeriod.SetWindowText(mpt::tfmt::val(GroupRatio));
 		}
 		else //case: m_pActiveTuning is of type general.
 		{
@@ -595,7 +595,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 		return;
 
 	m_RatioEditApply = false;
-	m_EditRatio.SetWindowText(mpt::ToStringT<CString>(m_pActiveTuning->GetRatio(note)));
+	m_EditRatio.SetWindowText(mpt::tfmt::val(m_pActiveTuning->GetRatio(note)));
 	m_NoteEditApply = false;
 	m_EditNotename.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuning->GetNoteName(note, false)));
 
@@ -783,7 +783,7 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 	{
 		CString buffer;
 		m_EditFineTuneSteps.GetWindowText(buffer);
-		m_EditFineTuneSteps.SetWindowText(mpt::ToStringT<CString>(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))));
+		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
 	}
@@ -1424,7 +1424,7 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 	switch(id)
 	{
 		case enSclImportFailTooManyNotes:
-			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, mpt::ToStringT<CString>(s_nSclImportMaxNoteCount).GetString());
+			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, mpt::tfmt::val(s_nSclImportMaxNoteCount).GetString());
 			return sMsg;
 
 		case enSclImportFailTooLargeNumDenomIntegers:

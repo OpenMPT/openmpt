@@ -19,9 +19,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // The following section demands a rationale.
-//  1. ToString(), ToWString() an ToUString() mimic the semantics of c++11 std::to_string() and std::to_wstring().
+//  1. mpt::fmt::val(), mpt::wfmt::val() and mpt::ufmt::val() mimic the semantics of c++11 std::to_string() and std::to_wstring().
 //     There is an important difference though. The c++11 versions are specified in terms of sprintf formatting which in turn
-//     depend on the current C locale. This renders these functions unusable in a library context because the current
+//     depends on the current C locale. This renders these functions unusable in a library context because the current
 //     C locale is set by the library-using application and could be anything. There is no way a library can get reliable semantics
 //     out of these functions. It is thus better to just avoid them.
 //     ToString() and ToWString() are based on iostream internally, but the the locale of the stream is forced to std::locale::classic(),
@@ -44,7 +44,7 @@ OPENMPT_NAMESPACE_BEGIN
 //  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
 //     std::string        std::wstring       mpt::ustring                           CString
-//     mpt::ToString      mpt::ToWString     mpt::ToUString                         mpt::ToStringT<Cstring>
+//     mpt::fmt::val      mpt::wfmt::val     mpt::ufmt::val                         mpt::tfmt::val
 //     mpt::FormatVal     mpt::FormatValW    mpt::FormatValTFunctor<mpt::ustring>() mpt::FormatValTFunctor<Cstring>()
 //     mpt::fmt           mpt::wfmt          mpt::ufmt                              mpt::tfmt
 //     mpt::format        mpt::format        mpt::format                            mpt::format
@@ -55,7 +55,7 @@ OPENMPT_NAMESPACE_BEGIN
 //      - Faster compile times because <sstream> and <locale> (2 very complex headers) are not included everywhere.
 //     Disadvantages:
 //      - Slightly more c++ code is required for delegating work.
-//      - As the header does not use iostreams, custom types need to overload mpt::ToString, mpt::ToWstring and mpt::ToUString instead of
+//      - As the header does not use iostreams, custom types need to overload mpt::String, mpt::ToWstring and mpt::UString instead of
 //        iostream operator << to allow for custom type formatting.
 //      - std::string, std::wstring and mpt::ustring are returned from somewhat deep cascades of helper functions. Where possible, code is
 //        written in such a way that return-value-optimization (RVO) or named-return-value-optimization (NRVO) should be able to eliminate

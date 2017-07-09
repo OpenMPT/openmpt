@@ -139,17 +139,17 @@ std::uint32_t get_core_version() {
 static std::string get_library_version_string() {
 	std::string str;
 	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
-	str += mpt::ToString(OPENMPT_API_VERSION_MAJOR);
+	str += mpt::fmt::val(OPENMPT_API_VERSION_MAJOR);
 	str += ".";
-	str += mpt::ToString(OPENMPT_API_VERSION_MINOR);
+	str += mpt::fmt::val(OPENMPT_API_VERSION_MINOR);
 	str += ".";
-	str += mpt::ToString(OPENMPT_API_VERSION_PATCH);
+	str += mpt::fmt::val(OPENMPT_API_VERSION_PATCH);
 	if ( std::string(OPENMPT_API_VERSION_PREREL).length() > 0 ) {
 		str += OPENMPT_API_VERSION_PREREL;
 	}
 	std::vector<std::string> fields;
 	if ( sourceInfo.Revision ) {
-		fields.push_back( "r" + mpt::ToString( sourceInfo.Revision ) );
+		fields.push_back( "r" + mpt::fmt::val( sourceInfo.Revision ) );
 	}
 	if ( sourceInfo.IsDirty ) {
 		fields.push_back( "modified" );
@@ -184,7 +184,7 @@ static std::string get_source_date_string() {
 
 static std::string get_source_revision_string() {
 	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
-	return sourceInfo.Revision ? mpt::ToString(sourceInfo.Revision) : std::string();
+	return sourceInfo.Revision ? mpt::fmt::val(sourceInfo.Revision) : std::string();
 }
 
 static std::string get_build_string() {
@@ -225,13 +225,13 @@ std::string get_string( const std::string & key ) {
 	} else if ( key == "library_version" ) {
 		return get_library_version_string();
 	} else if ( key == "library_version_major" ) {
-		return mpt::ToString(OPENMPT_API_VERSION_MAJOR);
+		return mpt::fmt::val(OPENMPT_API_VERSION_MAJOR);
 	} else if ( key == "library_version_minor" ) {
-		return mpt::ToString(OPENMPT_API_VERSION_MINOR);
+		return mpt::fmt::val(OPENMPT_API_VERSION_MINOR);
 	} else if ( key == "library_version_patch" ) {
-		return mpt::ToString(OPENMPT_API_VERSION_PATCH);
+		return mpt::fmt::val(OPENMPT_API_VERSION_PATCH);
 	} else if ( key == "library_version_prerel" ) {
-		return mpt::ToString(OPENMPT_API_VERSION_PREREL);
+		return mpt::fmt::val(OPENMPT_API_VERSION_PREREL);
 	} else if ( key == "library_version_is_release" ) {
 		return ( std::string(OPENMPT_API_VERSION_PREREL).length() == 0 ) ? "1" : "0";
 	} else if ( key == "library_features" ) {
@@ -1336,31 +1336,31 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 	if ( ctl == "" ) {
 		throw openmpt::exception("empty ctl");
 	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
-		return mpt::ToString( m_ctl_load_skip_samples );
+		return mpt::fmt::val( m_ctl_load_skip_samples );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
-		return mpt::ToString( m_ctl_load_skip_patterns );
+		return mpt::fmt::val( m_ctl_load_skip_patterns );
 	} else if ( ctl == "load.skip_plugins" ) {
-		return mpt::ToString( m_ctl_load_skip_plugins );
+		return mpt::fmt::val( m_ctl_load_skip_plugins );
 	} else if ( ctl == "load.skip_subsongs_init" ) {
-		return mpt::ToString( m_ctl_load_skip_subsongs_init );
+		return mpt::fmt::val( m_ctl_load_skip_subsongs_init );
 	} else if ( ctl == "seek.sync_samples" ) {
-		return mpt::ToString( m_ctl_seek_sync_samples );
+		return mpt::fmt::val( m_ctl_seek_sync_samples );
 	} else if ( ctl == "subsong" ) {
-		return mpt::ToString( get_selected_subsong() );
+		return mpt::fmt::val( get_selected_subsong() );
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return "1.0";
 		}
-		return mpt::ToString( 65536.0 / m_sndFile->m_nTempoFactor );
+		return mpt::fmt::val( 65536.0 / m_sndFile->m_nTempoFactor );
 	} else if ( ctl == "play.pitch_factor" ) {
 		if ( !is_loaded() ) {
 			return "1.0";
 		}
-		return mpt::ToString( m_sndFile->m_nFreqFactor / 65536.0 );
+		return mpt::fmt::val( m_sndFile->m_nFreqFactor / 65536.0 );
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
-		return mpt::ToString( m_sndFile->m_Resampler.m_Settings.emulateAmiga );
+		return mpt::fmt::val( m_sndFile->m_Resampler.m_Settings.emulateAmiga );
 	} else if ( ctl == "dither" ) {
-		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
+		return mpt::fmt::val( static_cast<int>( m_Dither->GetMode() ) );
 	} else {
 		if ( throw_if_unknown ) {
 			throw openmpt::exception("unknown ctl: " + ctl);

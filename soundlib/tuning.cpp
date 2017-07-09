@@ -169,9 +169,9 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addO
 			if(addOctave)
 			{
 				if(x >= 0)
-					rValue += mpt::ToString(middlePeriodNumber + x / m_GroupSize);
+					rValue += mpt::fmt::val(middlePeriodNumber + x / m_GroupSize);
 				else
-					rValue += mpt::ToString(middlePeriodNumber + (x + 1) / m_GroupSize - 1);
+					rValue += mpt::fmt::val(middlePeriodNumber + (x + 1) / m_GroupSize - 1);
 			}
 		}
 		else
@@ -186,9 +186,9 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addO
 			if(addOctave)
 			{
 				if(x >= 0)
-					rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize);
+					rValue += mpt::fmt::val(middlePeriodNumber + x/m_GroupSize);
 				else
-					rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+					rValue += mpt::fmt::val(middlePeriodNumber + (x+1)/m_GroupSize - 1);
 			}
 		}
 		return rValue;

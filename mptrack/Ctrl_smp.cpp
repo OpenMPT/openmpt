@@ -246,7 +246,7 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	for (ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
-		CString noteName = mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[i % 12] + mpt::ToString(i / 12));
+		CString noteName = mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[i % 12] + mpt::fmt::val(i / 12));
 		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(noteName), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
 
