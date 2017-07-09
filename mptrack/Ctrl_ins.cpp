@@ -2050,7 +2050,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		minIns = 1;
 		maxIns = m_sndFile.GetNumInstruments();
 	}
-	auto numberFmt = mpt::Format().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxIns)));
+	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxIns)));
 	CString instrName, instrFilename;
 
 	bool ok = false;
