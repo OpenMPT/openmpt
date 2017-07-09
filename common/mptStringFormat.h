@@ -349,7 +349,7 @@ struct fmtT : fmt_base
 template<typename T>
 static inline Tstring val(const T& x)
 {
-	return ToStringTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff());
+	return ToStringTFunctor<Tstring>()(x);
 }
 
 template<typename T>
