@@ -1574,11 +1574,7 @@ void CViewGlobals::OnFillParamCombo()
 	m_CbnParam.SetRedraw(FALSE);
 	m_CbnParam.ResetContent();
 
-	pPlugin->CacheParameterNames(0, nParams);
-	for(PlugParamIndex i = 0; i < nParams; i++)
-	{
-		m_CbnParam.SetItemData(m_CbnParam.AddString(pPlugin->GetFormattedParamName(i)), i);
-	}
+	AddPluginParameternamesToCombobox(m_CbnParam, *pPlugin);
 
 	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
 	m_CbnParam.SetCurSel(m_nCurrentParam);
