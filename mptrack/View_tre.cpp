@@ -1141,10 +1141,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					{
 						status = sampleExists ? _T(" [external]") : _T(" [MISSING]");
 					}
-					wsprintf(s, _T("%3d: %s%s%s"), nSmp, sample.uFlags.test_all(SMP_MODIFIED | SMP_KEEPONDISK) ? _T("* ") : _T(""), sndFile.m_szNames[nSmp], status);
+					wsprintf(s, _T("%3d: %s%s%s"), nSmp, sample.uFlags.test_all(SMP_MODIFIED | SMP_KEEPONDISK) ? _T("* ") : _T(""), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[nSmp]).GetString(), status);
 				} else
 				{
-					wsprintf(s, _T("%3d: %s"), nSmp, sndFile.m_szNames[nSmp]);
+					wsprintf(s, _T("%3d: %s"), nSmp, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[nSmp]).GetString());
 				}
 
 				if (!hChild)
@@ -1189,7 +1189,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
 			if (nIns <= sndFile.GetNumInstruments())
 			{
-				wsprintf(s, _T("%3u: %s"), nIns, sndFile.GetInstrumentName(nIns));
+				wsprintf(s, _T("%3u: %s"), nIns, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(nIns)).GetString());
 
 				int nImage = IMAGE_INSTRUMENTS;
 				if(info.instrumentsPlaying[nIns]) nImage = IMAGE_INSTRACTIVE;
