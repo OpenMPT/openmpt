@@ -610,7 +610,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 		for (int i = 0; i < 128; i++)
 		{
 			auto s = mpt::format(CString(_T("%1: %2")))(
-				mpt::fmtT<CString>::dec0<3>(i + 1),
+				mpt::tfmt::dec0<3>(i + 1),
 				mpt::ToCString(mpt::CharsetASCII, szMidiProgramNames[i]));
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
 		}
