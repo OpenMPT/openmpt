@@ -3017,8 +3017,9 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug)
 //-----------------------------------------------------------------------
 {
 #ifndef NO_PLUGINS
-	const PlugParamIndex nParams = plug.GetNumParameters();
-	for (PlugParamIndex i = 0; i < nParams; i++)
+	const PlugParamIndex numParams = plug.GetNumParameters();
+	plug.CacheParameterNames(0, numParams);
+	for(PlugParamIndex i = 0; i < numParams; i++)
 	{
 		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
