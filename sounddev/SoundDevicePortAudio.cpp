@@ -302,7 +302,10 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	{
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
-		caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency;
+		if(deviceInfo)
+		{
+			caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency;
+		}
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else if(m_HostApiType == paWDMKS)
 	{
