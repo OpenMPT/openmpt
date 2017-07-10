@@ -6521,7 +6521,7 @@ void CViewPattern::OnShowTimeAtRow()
 		{
 			const uint32 minutes = static_cast<uint32>(t / 60.0);
 			const double seconds = t - (minutes * 60);
-			msg.Format(_T("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds."), currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? "" : "s", seconds);
+			msg.Format(_T("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds."), currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? _T("") : _T("s"), seconds);
 		}
 	} else
 	{
