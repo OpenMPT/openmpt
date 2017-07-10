@@ -259,6 +259,9 @@ BOOL CAboutDlg::OnInitDialog()
 
 	mpt::ustring app;
 	app += mpt::format(MPT_USTRING("OpenMPT %1 bit"))(sizeof(void*) * 8)
+		#if defined(UNICODE)
+			+ MPT_USTRING(" Unicode")
+		#endif // UNICODE
 		+ (!BuildVariants().CurrentBuildIsModern() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
 		+ MPT_USTRING("\n");
 	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
