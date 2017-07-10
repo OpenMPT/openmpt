@@ -52,18 +52,17 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
-	uint32 delay0 = (m_delay[0] + m_state.combPos + 4) & 0x3FFF;
-	uint32 delay1 = (m_delay[1] + m_state.combPos + 4) & 0x3FFF;
-	uint32 delay2 = (m_delay[2] + m_state.combPos + 4) & 0x3FFF;
-	uint32 delay3 = (m_delay[3] + m_state.combPos + 4) & 0x3FFF;
-	MPT_CHECKER_ASSUME((delay0 & 3) == 0);
-	MPT_CHECKER_ASSUME((delay1 & 3) == 0);
-	MPT_CHECKER_ASSUME((delay2 & 3) == 0);
-	MPT_CHECKER_ASSUME((delay3 & 3) == 0);
-	float delay0old = m_state.comb[delay0    ];
-	float delay1old = m_state.comb[delay1 + 1];
-	float delay2old = m_state.comb[delay2 + 2];
-	float delay3old = m_state.comb[delay3 + 3];
+	uint32 combPos = m_state.combPos, allpassPos = m_state.allpassPos;
+	uint32 delay0 = (m_delay[0] + combPos + 1) & 0xFFF;
+	uint32 delay1 = (m_delay[1] + combPos + 1) & 0xFFF;
+	uint32 delay2 = (m_delay[2] + combPos + 1) & 0xFFF;
+	uint32 delay3 = (m_delay[3] + combPos + 1) & 0xFFF;
+	uint32 delay4 = (m_delay[4] + allpassPos) & 0x3FF;
+	uint32 delay5 = (m_delay[5] + allpassPos) & 0x3FF;
+	float delay0old = m_state.comb[delay0][0];
+	float delay1old = m_state.comb[delay1][1];
+	float delay2old = m_state.comb[delay2][2];
+	float delay3old = m_state.comb[delay3][3];
 
 	for(uint32 i = numFrames; i != 0; i--)
 	{
@@ -71,31 +70,28 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		const float rightIn = *(in[1])++ + 1e-30f;	// Prevent denormals
 
 		// Advance buffer index for the four comb filters
-		delay0 = (delay0 - 4) & 0x3FFF;
-		delay1 = (delay1 - 4) & 0x3FFF;
-		delay2 = (delay2 - 4) & 0x3FFF;
-		delay3 = (delay3 - 4) & 0x3FFF;
-		float &delay0new = m_state.comb[delay0    ];
-		float &delay1new = m_state.comb[delay1 + 1];
-		float &delay2new = m_state.comb[delay2 + 2];
-		float &delay3new = m_state.comb[delay3 + 3];
+		delay0 = (delay0 - 1) & 0xFFF;
+		delay1 = (delay1 - 1) & 0xFFF;
+		delay2 = (delay2 - 1) & 0xFFF;
+		delay3 = (delay3 - 1) & 0xFFF;
+		float &delay0new = m_state.comb[delay0][0];
+		float &delay1new = m_state.comb[delay1][1];
+		float &delay2new = m_state.comb[delay2][2];
+		float &delay3new = m_state.comb[delay3][3];
 
-		uint32 pos;
 		float r1, r2;
 		
-		pos = (m_state.allpassPos + m_delay[4]) & 0x7FF;
-		r1 = delay1new * 0.61803401f + m_state.allpass1[pos] * m_coeffs[0];
-		r2 = m_state.allpass1[pos + 1] * m_coeffs[0] - delay0new * 0.61803401f;
-		m_state.allpass1[m_state.allpassPos    ] = r2 * 0.61803401f + delay0new;
-		m_state.allpass1[m_state.allpassPos + 1] = delay1new - r1 * 0.61803401f;
+		r1 = delay1new * 0.61803401f + m_state.allpass1[delay4][0] * m_coeffs[0];
+		r2 = m_state.allpass1[delay4][1] * m_coeffs[0] - delay0new * 0.61803401f;
+		m_state.allpass1[allpassPos][0] = r2 * 0.61803401f + delay0new;
+		m_state.allpass1[allpassPos][1] = delay1new - r1 * 0.61803401f;
 		delay0new = r1;
 		delay1new = r2;
 
-		pos = (m_state.allpassPos + m_delay[5]) & 0x7FF;
-		r1 = delay3new * 0.61803401f + m_state.allpass2[pos] * m_coeffs[1];
-		r2 = m_state.allpass2[pos + 1] * m_coeffs[1] - delay2new * 0.61803401f;
-		m_state.allpass2[m_state.allpassPos    ] = r2 * 0.61803401f + delay2new;
-		m_state.allpass2[m_state.allpassPos + 1] = delay3new - r1 * 0.61803401f;
+		r1 = delay3new * 0.61803401f + m_state.allpass2[delay5][0] * m_coeffs[1];
+		r2 = m_state.allpass2[delay5][1] * m_coeffs[1] - delay2new * 0.61803401f;
+		m_state.allpass2[allpassPos][0] = r2 * 0.61803401f + delay2new;
+		m_state.allpass2[allpassPos][1] = delay3new - r1 * 0.61803401f;
 		delay2new = r1;
 		delay3new = r2;
 
@@ -104,10 +100,10 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 		const float leftWet  = leftIn  * m_wetFactor;
 		const float rightWet = rightIn * m_wetFactor;
-		m_state.comb[m_state.combPos    ] = (delay0new * m_coeffs[2]) + (delay0old * m_coeffs[3]) + leftWet;
-		m_state.comb[m_state.combPos + 1] = (delay1new * m_coeffs[4]) + (delay1old * m_coeffs[5]) + rightWet;
-		m_state.comb[m_state.combPos + 2] = (delay2new * m_coeffs[6]) + (delay2old * m_coeffs[7]) - rightWet;
-		m_state.comb[m_state.combPos + 3] = (delay3new * m_coeffs[8]) + (delay3old * m_coeffs[9]) + leftWet;
+		m_state.comb[combPos][0] = (delay0new * m_coeffs[2]) + (delay0old * m_coeffs[3]) + leftWet;
+		m_state.comb[combPos][1] = (delay1new * m_coeffs[4]) + (delay1old * m_coeffs[5]) + rightWet;
+		m_state.comb[combPos][2] = (delay2new * m_coeffs[6]) + (delay2old * m_coeffs[7]) - rightWet;
+		m_state.comb[combPos][3] = (delay3new * m_coeffs[8]) + (delay3old * m_coeffs[9]) + leftWet;
 
 		delay0old = delay0new;
 		delay1old = delay1new;
@@ -115,9 +111,13 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		delay3old = delay3new;
 
 		// Advance buffer index
-		m_state.combPos = (m_state.combPos - 4) & 0x3FFF;
-		m_state.allpassPos = (m_state.allpassPos - 2) & 0x7FF;
+		combPos = (combPos - 1) & 0xFFF;
+		allpassPos = (allpassPos - 1) & 0x3FF;
+		delay4 = (delay4 - 1) & 0x3FF;
+		delay5 = (delay5 - 1) & 0x3FF;
 	}
+	m_state.combPos = combPos;
+	m_state.allpassPos = allpassPos;
 
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
@@ -158,13 +158,13 @@ void WavesReverb::Resume()
 	uint32 delay4 = Util::Round<uint32>((delay0 + delay2) * 0.11546667f);
 	uint32 delay5 = Util::Round<uint32>((delay1 + delay3) * 0.11546667f);
 	// Comb delays
-	m_delay[0] = (delay0 - delay4) * 4;
-	m_delay[1] = (delay2 - delay4) * 4;
-	m_delay[2] = (delay1 - delay5) * 4;
-	m_delay[3] = (delay3 - delay5) * 4;
+	m_delay[0] = delay0 - delay4;
+	m_delay[1] = delay2 - delay4;
+	m_delay[2] = delay1 - delay5;
+	m_delay[3] = delay3 - delay5;
 	// Allpass delays
-	m_delay[4] = delay4 * 2;
-	m_delay[5] = delay5 * 2;
+	m_delay[4] = delay4;
+	m_delay[5] = delay5;
 
 	RecalculateWavesReverbParams();
 	MemsetZero(m_state);
@@ -234,14 +234,14 @@ void WavesReverb::RecalculateWavesReverbParams()
 	const double ReverbTimeSmp = -3000.0 / (m_SndFile.GetSampleRate() * ReverbTime());
 	const double ReverbTimeSmpHF = ReverbTimeSmp * (1.0 / HighFreqRTRatio() - 1.0);
 
-	m_coeffs[0] = static_cast<float>(std::pow(10.0, (m_delay[4] / 2) * ReverbTimeSmp));
-	m_coeffs[1] = static_cast<float>(std::pow(10.0, (m_delay[5] / 2) * ReverbTimeSmp));
+	m_coeffs[0] = static_cast<float>(std::pow(10.0, m_delay[4] * ReverbTimeSmp));
+	m_coeffs[1] = static_cast<float>(std::pow(10.0, m_delay[5] * ReverbTimeSmp));
 
 	double sum = 0.0;
 	for(uint32 pair = 0; pair < 4; pair++)
 	{
-		double gain1 = std::pow(10.0, (m_delay[pair] / 4) * ReverbTimeSmp);
-		double gain2 = (1.0 - std::pow(10.0, ((m_delay[pair] / 4) + (m_delay[4 + pair / 2] / 2)) * ReverbTimeSmpHF)) * 0.5;
+		double gain1 = std::pow(10.0, m_delay[pair] * ReverbTimeSmp);
+		double gain2 = (1.0 - std::pow(10.0, (m_delay[pair] + m_delay[4 + pair / 2]) * ReverbTimeSmpHF)) * 0.5;
 		double gain3 = gain1 * m_coeffs[pair / 2];
 		double gain4 = gain3 * (((gain3 + 1.0) * gain3 + 1.0) * gain3 + 1.0) + 1.0;
 		m_coeffs[2 + pair * 2] = static_cast<float>(gain1 * (1.0 - gain2));

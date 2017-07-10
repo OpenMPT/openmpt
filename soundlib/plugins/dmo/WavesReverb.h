@@ -43,9 +43,9 @@ protected:
 	struct ReverbState
 	{
 		uint32 combPos, allpassPos;
-		float comb[16384];
-		float allpass1[2048];
-		float allpass2[2048];
+		float comb[4096][4];
+		float allpass1[1024][2];
+		float allpass2[1024][2];
 	} m_state;
 
 public:
