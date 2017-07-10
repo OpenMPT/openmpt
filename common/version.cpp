@@ -367,6 +367,11 @@ std::string GetBuildFeaturesString()
 				retval += " WIN32OLD";
 			}
 		#endif
+		#if defined(UNICODE)
+			retval += " UNICODE";
+		#else
+			retval += " ANSI";
+		#endif
 		#ifdef NO_VST
 			retval += " NO_VST";
 		#endif
