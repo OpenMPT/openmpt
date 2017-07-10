@@ -414,12 +414,17 @@ void CAbstractVstEditor::SetPreset(int32 preset)
 void CAbstractVstEditor::OnVSTPresetRename()
 //------------------------------------------
 {
-	CInputDlg dlg(this, _T("New program name:"), m_VstPlugin.GetCurrentProgramName());
+	auto currentName = m_VstPlugin.GetCurrentProgramName();
+	CInputDlg dlg(this, _T("New program name:"), currentName);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_VstPlugin.SetCurrentProgramName(dlg.resultAsString);
-		UpdatePresetField();
-		UpdatePresetMenu(true);
+		if(m_VstPlugin.GetCurrentProgramName() != currentName)
+		{
+			m_VstPlugin.SetModified();
+			UpdatePresetField();
+			UpdatePresetMenu(true);
+		}
 	}
 }
 
