@@ -155,6 +155,15 @@
 		filter { "configurations:ReleaseLTCG", "action:vs2015", "architecture:x86" }
 			buildoptions { "/arch:IA32" }
 
+		filter { "configurations:Release", "action:vs2017", "architecture:x86" }
+			buildoptions { "/arch:IA32" }
+
+		filter { "configurations:ReleaseShared", "action:vs2017", "architecture:x86" }
+			buildoptions { "/arch:IA32" }
+
+		filter { "configurations:ReleaseLTCG", "action:vs2017", "architecture:x86" }
+			buildoptions { "/arch:IA32" }
+
 		filter {}
 
 	else

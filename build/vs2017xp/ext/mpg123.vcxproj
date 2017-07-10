@@ -308,7 +308,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -398,7 +398,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -487,7 +487,7 @@
       <StringPooling>true</StringPooling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/arch:IA32 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
