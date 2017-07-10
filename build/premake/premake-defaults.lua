@@ -18,6 +18,8 @@
 				toolset "v120_xp"
 			elseif _ACTION == "vs2015" then
 				toolset "v140_xp"
+			elseif _ACTION == "vs2017" then
+				toolset "v141_xp"
 			end
 			defines { "MPT_BUILD_TARGET_XP" }
 		end
