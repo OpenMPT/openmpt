@@ -475,7 +475,7 @@ SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Leg
 		return SoundDevice::Info();
 	}
 	SoundDevice::Type type = SoundDevice::Type();
-	switch(id & SoundDevice::Legacy::MaskType)
+	switch((id & SoundDevice::Legacy::MaskType) >> SoundDevice::Legacy::ShiftType)
 	{
 		case SoundDevice::Legacy::TypeWAVEOUT:
 			type = SoundDevice::TypeWAVEOUT;
@@ -503,7 +503,7 @@ SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Leg
 	{	// fallback to first device
 		return *manager.begin();
 	}
-	std::size_t index = static_cast<uint8>(id & SoundDevice::Legacy::MaskIndex);
+	std::size_t index = static_cast<uint8>((id & SoundDevice::Legacy::MaskIndex) >> SoundDevice::Legacy::ShiftIndex);
 	std::size_t seenDevicesOfDesiredType = 0;
 	for(const auto &info : manager)
 	{

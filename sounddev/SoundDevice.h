@@ -539,6 +539,8 @@ namespace Legacy
 typedef uint16 ID;
 static const SoundDevice::Legacy::ID MaskType = 0xff00;
 static const SoundDevice::Legacy::ID MaskIndex = 0x00ff;
+static const int ShiftType = 8;
+static const int ShiftIndex = 0;
 static const SoundDevice::Legacy::ID TypeWAVEOUT          = 0;
 static const SoundDevice::Legacy::ID TypeDSOUND           = 1;
 static const SoundDevice::Legacy::ID TypeASIO             = 2;
