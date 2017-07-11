@@ -36,10 +36,6 @@
 #include "FileDialog.h"
 #include "ProgressDialog.h"
 #include "../common/ComponentManager.h"
-#ifdef _DEBUG
-#include <cmath>
-#endif
-
 #include "../include/r8brain/CDSPResampler.h"
 #include "../soundlib/MixFuncTable.h"
 
@@ -51,10 +47,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-template<unsigned int v>
-struct PowerOf2Exponent { enum { value = 1 + PowerOf2Exponent<v / 2>::value }; };
-template<>
-struct PowerOf2Exponent<1> { enum { value = 0 }; };
+constexpr int PowerOf2Exponent(int val) { return (val <= 1) ? 0 : 1 + PowerOf2Exponent(val / 2); };
 
 
 #define	BASENOTE_MIN	(1*12)		// C-1
@@ -301,7 +294,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-		const int exponent = PowerOf2Exponent<MAX_FRAME_LENGTH>::value;
+		const int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
 		for(int i = 8 ; i <= exponent ; i++)
 		{
