@@ -1386,6 +1386,7 @@ void CSoundFile::LoadBuiltInTunings()
 	pT->SetEditMask(CTuningBase::EM_CONST_STRICT);
 	// Note: Tuning collection class handles deleting.
 	m_pTuningsBuiltIn->AddTuning(pT);
+	m_pTuningsBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
 }
 
 
