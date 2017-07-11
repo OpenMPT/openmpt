@@ -247,7 +247,7 @@ void CNoteMapWnd::OnPaint()
 			s = " ..";
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->Keyboard[nPos]))
 			{
-				s = mpt::format("%1")(mpt::fmt::dec<3>(pIns->Keyboard[nPos]));
+				s = mpt::fmt::dec<3>(pIns->Keyboard[nPos]);
 			}
 			FillRect(hdc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (m_bIns))
@@ -779,6 +779,12 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	case VK_NEXT:
 		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; bRedraw = true; } else
 		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
+		break;
+	case VK_HOME:
+		if(m_nNote > 0) { m_nNote = 0; bRedraw = true; }
+		break;
+	case VK_END:
+		if(m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
 		break;
 // 	case VK_TAB:
 // 		return true;
