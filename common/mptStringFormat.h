@@ -164,11 +164,9 @@ std::wstring ToWString(const long double & x);
 
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
-#if MPT_WSTRING_FORMAT
-template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
-#endif
-#if MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return ToUString(x); } };
+#if MPT_WSTRING_FORMAT && MPT_USTRING_MODE_UTF8
+template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
 #endif
 #if defined(_MFC_VER)
 #ifdef UNICODE
