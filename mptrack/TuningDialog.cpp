@@ -656,6 +656,25 @@ void CTuningDialog::OnBnClickedButtonExport()
 }
 
 
+template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::IO::Offset offset, const uint8(&magic)[N])
+//-----------------------------------------------------------------------------------------------------------------------
+{
+	if(!mpt::IO::SeekAbsolute(f, offset))
+	{
+		return false;
+	}
+	uint8 buffer[N];
+	MemsetZero(buffer);
+	if(mpt::IO::ReadRaw(f, buffer, N) != N)
+	{
+		return false;
+	}
+	bool result = (std::memcmp(magic, buffer, N) == 0);
+	mpt::IO::SeekBegin(f);
+	return result;
+}
+
+
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
@@ -686,84 +705,125 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
 		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
+		const bool bIsTc = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0);
 
-		if (bIsTun || bIsScl)
+		mpt::ifstream fin(file, std::ios::binary);
+
+		// "HSCT", 0x01, 0x00, 0x00, 0x00
+		const uint8 magicTColdV1 [] = {  'H', 'S', 'C', 'T',0x01,0x00,0x00,0x00                          };
+		// "HSCT", 0x02, 0x00, 0x00, 0x00
+		const uint8 magicTColdV2 [] = {  'H', 'S', 'C', 'T',0x02,0x00,0x00,0x00                          };
+		// "CTRTI_B.", 0x03, 0x00
+		const uint8 magicTUNoldV3[] = {  'C', 'T', 'R', 'T', 'I', '_', 'B', ',',0x03,0x00                };
+		// "228", 0x02, "TC"
+		const uint8 magicTC      [] = {  '2', '2', '8',0x02, 'T', 'C'                                    };
+		// "228", 0x09, "CTB244RTI"
+		const uint8 magicTUN     [] = {  '2', '2', '8',0x09, 'C', 'T', 'B', '2', '4', '4', 'R', 'T', 'I' };
+
+		CTuningCollection *pTC = nullptr;
+		CTuning *pT = nullptr;
+
+		if(bIsTun && CheckMagic(fin, 0, magicTC))
 		{
-			CTuning* pT = nullptr;
-
-			if (bIsTun)
-			{
-				mpt::ifstream fin(file, std::ios::binary);
-				pT = CTuningRTI::DeserializeOLD(fin);
-				if(pT == 0)
-					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
-				fin.close();
-				if (pT)
+			// OpenMPT since r3115 wrongly wrote .tc files instead of .tun files when exporting.
+			// If such a file is detected and only contains a single Tuning, we can work-around that.
+			// For .tc files containing multiple Tunings, we sadly cannot decide which one the user wanted.
+			// In that case, we import as a Collection (an alternative might be to display a dialog in this case).
+			pTC = new CTuningCollection();
+			if(pTC->Deserialize(fin) == false)
+			{ // success
+				if(pTC->GetNumTunings() == 1)
 				{
-					if (m_TempTunings.AddTuning(pT))
-					{
-						delete pT; pT = nullptr;
-						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
-						{
-							sLoadReport += mpt::format(L"-Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
-						}
-						else // Case: Can't add tuning to tuning collection for unknown reason.
-						{
-							sLoadReport += mpt::format(L"-Unable to import file \"%1\": unknown reason.\n")(fileNameExt);
-						}
-					}
-				} else // pT == nullptr
+					Reporting::Message(LogInformation, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
+					pT = new CTuningRTI();
+					CTuningBase::TuningCopy(*pT, pTC->GetTuning(0), true);
+					delete pTC;
+					pTC = nullptr;
+					// ok
+				} else
 				{
-					sLoadReport += mpt::format(L"-Unable to import file \"%1\": unrecognized file.\n")(fileNameExt);
+					Reporting::Message(LogNotification, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains multiple Tunings, importing the file as a Tuning Collection.\n"), this);
+					// ok
 				}
-			} else // scl import.
+			} else
 			{
-				EnSclImport a = ImportScl(file, fileName.ToUnicode());
-				if (a != enSclImportOk)
-				{
-					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
-					{
-						sLoadReport += mpt::format(L"-Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
-					}
-					else
-					{
-						sLoadReport += mpt::format(L"-Unable to import \"%1\": %2.\n")(fileNameExt, GetSclImportFailureMsg(a));
-					}
-				}
-				else // scl import successful.
-					pT = &m_TempTunings.GetTuning(m_TempTunings.GetNumTunings() - 1);
+				delete pTC;
+				pTC = nullptr;
+				// fail
 			}
 
-			if (pT)
+		} else if(CheckMagic(fin, 0, magicTC) || CheckMagic(fin, 0, magicTColdV2) || CheckMagic(fin, 0, magicTColdV1))
+		{
+
+			pTC = new CTuningCollection();
+			if(pTC->Deserialize(fin) != false)
+			{ // failure
+				delete pTC;
+				pTC = nullptr;
+				// fail
+			} else
+			{
+				// ok
+			}
+
+		} else if(CheckMagic(fin, 0, magicTUNoldV3))
+		{
+
+			pT = CTuningRTI::DeserializeOLD(fin);
+
+		} else if(CheckMagic(fin, 0, magicTUN))
+		{
+
+			pT = CTuningRTI::Deserialize(fin);
+
+		} else if(bIsScl)
+		{
+
+			EnSclImport a = ImportScl(file, fileName.ToUnicode(), pT);
+			if(a != enSclImportOk)
+			{ // failure
+				if(pT)
+				{
+					delete pT;
+					pT = nullptr;
+				}
+			}
+
+		}
+
+		if(pT)
+		{
+			if(m_TempTunings.AddTuning(pT))
+			{
+				delete pT;
+				pT = nullptr;
+				if(m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
+				{
+					sLoadReport += mpt::format(L"- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
+				} else 
+				{
+					sLoadReport += mpt::format(L"- Unable to import file \"%1\": unknown reason.\n")(fileNameExt);
+				}
+			} else
 			{
 				m_pActiveTuning = pT;
 				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
 			}
 		}
-		else if(mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0)
+
+		if(pTC)
 		{
-			// For now only loading tuning collection as
-			// a separate collection - no possibility to
-			// directly replace some collection.
-			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(file);
-			if (pNewTCol->Deserialize())
-			{
-				delete pNewTCol; pNewTCol = nullptr;
-				sLoadReport += mpt::format(L"-Unable to import tuning collection \"%1\": unrecognized file.\n")(fileNameExt);
-			}
-			else
-			{
-				m_TuningCollections.push_back(pNewTCol);
-				m_DeletableTuningCollections.push_back(pNewTCol);
-				AddTreeItem(pNewTCol, NULL, NULL);
-			}
+			m_TuningCollections.push_back(pTC);
+			m_DeletableTuningCollections.push_back(pTC);
+			AddTreeItem(pTC, NULL, NULL);
 		}
-		else // Case: Unknown extension (should not happen).
+
+		if(!pT && !pTC)
 		{
-			sLoadReport += mpt::format(L"-Unable to load \"%1\": unrecognized file extension.\n")(fileNameExt);
+			sLoadReport += mpt::format(L"- Unable to load \"%1\": unrecognized file format.\n")(fileNameExt);
 		}
 	}
+
 	if(sLoadReport.length() > 0)
 		Reporting::Information(sLoadReport);
 	UpdateView();
@@ -1475,21 +1535,25 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name)
-//------------------------------------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name, CTuning * & result)
+//--------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_ASSERT(result == nullptr);
+	result = nullptr;
 	mpt::ifstream iStrm(filename, std::ios::in | std::ios::binary);
 	if(!iStrm)
 	{
 		return enSclImportFailUnableToOpenFile;
 	}
-	return ImportScl(iStrm, name);
+	return ImportScl(iStrm, name, result);
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name)
-//------------------------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name, CTuning * & result)
+//--------------------------------------------------------------------------------------------------------------------
 {
+	MPT_ASSERT(result == nullptr);
+	result = nullptr;
 	std::string str;
 	SkipCommentLines(iStrm, str);
 	// str should now contain description text.
@@ -1567,13 +1631,9 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		return enSclImportTuningCreationFailure;
 	}
 
-	if (m_TempTunings.AddTuning(pT) != false)
-	{
-		delete pT;
-		return enSclImportAddTuningFailure;
-	}
-
 	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, name));
+
+	result = pT;
 
 	return enSclImportOk;
 }
