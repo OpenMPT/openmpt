@@ -637,11 +637,11 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
 
-	if(filterIndex == 0)
+	if(filterIndex == 1)
 	{
 		if(pT != NULL)
 			failure = pT->Serialize(fout);
-	} else //Case: Saving tuning collection.
+	} else if(filterIndex == 2)
 	{
 		if(pTC != NULL)
 			failure = pTC->Serialize(fout);
