@@ -236,6 +236,7 @@ public:
 	static bool OpenDirectory(const mpt::PathString &directory) { return OpenURL(directory); };
 
 	// Retrieve the user-supplied MIDI port name for a MIDI input or output port.
+	mpt::ustring GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort);
 	CString GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort);
 
 	int GetOpenDocumentCount() const;

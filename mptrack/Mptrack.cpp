@@ -2287,10 +2287,17 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 }
 
 
+mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort)
+//-----------------------------------------------------------------------------------------------
+{
+	return GetSettings().Read<mpt::ustring>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
+}
+
+
 CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort)
 //-------------------------------------------------------------------------------------
 {
-	return GetSettings().Read<CString>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
+	return mpt::ToCString(GetFriendlyMIDIPortName(mpt::ToUnicode(deviceName), isInputPort));
 }
 
 
