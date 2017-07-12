@@ -33,7 +33,7 @@ protected:
 	static const uintptr_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
 
 	// Return pointer to an aligned buffer
-	buffer_t *GetBuffer(uint32 index) const
+	buffer_t *GetBuffer(size_t index) const
 	//-------------------------------------
 	{
 		MPT_ASSERT(index < inputs.size() + outputs.size());
