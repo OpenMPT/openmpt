@@ -19,12 +19,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MODPLUG_TRACKER) && defined(UNICODE)
-
-#pragma message("warning: OpenMPT UNICODE builds are not production-ready yet and may still contain serious bugs. Use at your own risk.")
-
-#endif
-
 namespace MptVersion {
 
 static_assert((MPT_VERSION_NUMERIC & 0xffff) != 0x0000, "Version numbers ending in .00.00 shall never exist again, as they make interpreting the version number ambiguous for file formats which can only store the two major parts of the version number (e.g. IT and S3M).");
