@@ -131,7 +131,6 @@ end
     "/DELAYLOAD:openmpt-mpg123.dll",
     "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
    }
-   targetname "mptrack"
   filter {}
 	if not _OPTIONS["xp"] then
   linkoptions {
