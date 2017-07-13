@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -51,97 +51,97 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9}</ProjectGuid>
+    <ProjectGuid>{BA66DB50-E2F0-4C9E-B650-0CCA6C66E1C1}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>OpenMPT</RootNamespace>
+    <RootNamespace>OpenMPT-ANSI</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -185,86 +185,86 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\Debug\</IntDir>
+    <OutDir>..\..\bin\debug\vs2015-static\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\Debug\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\Debug\</IntDir>
+    <OutDir>..\..\bin\debug\vs2015-static\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\Debug\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\Release\</IntDir>
+    <OutDir>..\..\bin\release\vs2015-static\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\Release\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\Release\</IntDir>
+    <OutDir>..\..\bin\release\vs2015-static\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\Release\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\DebugMDd\</IntDir>
+    <OutDir>..\..\bin\debug-MDd\vs2015-static\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\DebugMDd\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\DebugMDd\</IntDir>
+    <OutDir>..\..\bin\debug-MDd\vs2015-static\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\DebugMDd\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\ReleaseLTCG\</IntDir>
+    <OutDir>..\..\bin\release-LTCG\vs2015-static\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
+    <OutDir>..\..\bin\release-LTCG\vs2015-static\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\DebugShared\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <OutDir>..\..\bin\debug\vs2015-shared\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\DebugShared\</IntDir>
+    <TargetName>OpenMPT-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\DebugShared\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <OutDir>..\..\bin\debug\vs2015-shared\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\DebugShared\</IntDir>
+    <TargetName>OpenMPT-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-32-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86\ReleaseShared\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <OutDir>..\..\bin\release\vs2015-shared\x86-32-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86\ReleaseShared\</IntDir>
+    <TargetName>OpenMPT-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-64-win7\</OutDir>
-    <IntDir>..\obj\vs2017\OpenMPT\x86_64\ReleaseShared\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <OutDir>..\..\bin\release\vs2015-shared\x86-64-win7\</OutDir>
+    <IntDir>..\obj\vs2015\OpenMPT-ANSI\x86_64\ReleaseShared\</IntDir>
+    <TargetName>OpenMPT-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

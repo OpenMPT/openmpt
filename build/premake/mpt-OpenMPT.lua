@@ -4,9 +4,15 @@ if layout == "custom" then
   mpt_projectname = "OpenMPT-custom"
    uuid "6b9af880-af37-4268-bb91-2b982ff6499a"
 else
+if charset == "Unicode" then
   project "OpenMPT"
   mpt_projectname = "OpenMPT"
    uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
+else
+	project "OpenMPT-ANSI"
+	mpt_projectname = "OpenMPT-ANSI"
+	uuid "ba66db50-e2f0-4c9e-b650-0cca6c66e1c1"
+end
 end
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
@@ -21,10 +27,17 @@ else
 end
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
+if charset == "MBCS" then
+  filter { "configurations:*Shared" }
+   targetname "OpenMPT-ANSI"
+  filter { "not configurations:*Shared" }
+   targetname "mptrack-ANSI"
+else
   filter { "configurations:*Shared" }
    targetname "OpenMPT"
   filter { "not configurations:*Shared" }
    targetname "mptrack"
+end
   filter {}
   local extincludedirs = {
    "../../include",
@@ -92,7 +105,7 @@ end
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
   largeaddressaware ( true )
-  characterset "MBCS"
+  characterset(charset)
   flags { "MFC", "ExtraWarnings", "WinMain" }
   links {
    "UnRAR",
