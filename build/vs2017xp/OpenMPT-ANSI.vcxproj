@@ -187,56 +187,56 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug\vs2017-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86\Debug\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug\vs2017-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86_64\Debug\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release\vs2017-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86\Release\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release\vs2017-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86_64\Release\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86\DebugMDd\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86_64\DebugMDd\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-32-winxp\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86\ReleaseLTCG\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-64-winxp64\</OutDir>
     <IntDir>..\obj\vs2017xp\OpenMPT-ANSI\x86_64\ReleaseLTCG\</IntDir>
-    <TargetName>mptrack</TargetName>
+    <TargetName>mptrack-ANSI</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
