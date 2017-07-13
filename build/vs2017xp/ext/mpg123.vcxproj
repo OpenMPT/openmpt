@@ -363,7 +363,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\debug-MDd\vs2017-static\x86-32-winxp\openmpt-mpg123.lib</ImportLibrary>
     </Link>
@@ -381,7 +382,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\debug-MDd\vs2017-static\x86-64-winxp64\openmpt-mpg123.lib</ImportLibrary>
     </Link>
@@ -449,7 +451,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
@@ -468,6 +472,8 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>

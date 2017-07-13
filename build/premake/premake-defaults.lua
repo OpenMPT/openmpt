@@ -79,18 +79,22 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
    flags { "StaticRuntime" }
+	 runtime "Debug"
    optimize "Debug"
 
   filter { "configurations:DebugShared" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
+   flags { "MultiProcessorCompile" }
    symbols "On"
+	 runtime "Debug"
    optimize "Debug"
 
   filter { "configurations:DebugMDd" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
-   symbols "On"
+   symbols "FastLink"
+	 runtime "Debug"
    optimize "Debug"
 
   filter { "configurations:Release" }
@@ -99,6 +103,7 @@
    symbols "On"
    flags { "MultiProcessorCompile" }
    flags { "StaticRuntime" }
+	 runtime "Release"
    optimize "Speed"
    floatingpoint "Fast"
 
@@ -107,6 +112,7 @@
    defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
    flags { "MultiProcessorCompile" }
+	 runtime "Release"
    optimize "Speed"
    floatingpoint "Fast"
 
@@ -116,6 +122,7 @@
    symbols "On"
    flags { "MultiProcessorCompile", "LinkTimeOptimization" }
    flags { "StaticRuntime" }
+	 runtime "Release"
    optimize "Full"
    floatingpoint "Fast"
 
