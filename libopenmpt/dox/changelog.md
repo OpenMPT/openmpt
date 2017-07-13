@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta27
 
+ *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
+    libmodplug C++ API returned the wrong value, causing qmmp (and possibly
+    other software) to crash.
+
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.
