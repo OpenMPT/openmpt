@@ -400,8 +400,6 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 	width++;
 	if(width >= curWidth)
 		width++;
-
-	MPT_ASSERT(curWidth != width);
 	curWidth = width;
 }
 
