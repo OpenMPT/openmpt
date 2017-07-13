@@ -42,5 +42,6 @@ ul
 
 div#content a.external
 {
-    background-image: url(external.png) !important;
+    background: center right no-repeat url(external.png);
+    padding-right: 13px;
 }

@@ -97,6 +97,8 @@ for p in pages:
     # Remove templates that shouldn't turn up in the manual
     content = re.sub(r'<div class="todo".+?</div>', '', content, flags = re.DOTALL);
     content = re.sub(r'<p class="newversion".+?</p>', '', content, flags = re.DOTALL);
+    # Don't need this attribute in our CHM
+    content = re.sub(r' rel="nofollow"', '', content);
     
     section = re.match(r'(.+)/', title(p))
     section_str = ''
