@@ -98,6 +98,9 @@ is just a high-level summary.
  *  [**Bug**] localtime() was used to determine the version of Schism Tracker
     used to save IT and S3M files. This function is not guaranteed to be
     thread-safe by the standard and is now no longer used.
+ *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
+    libmodplug C++ API returned the wrong value, causing qmmp (and possibly
+    other software) to crash.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.

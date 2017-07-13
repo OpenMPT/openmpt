@@ -734,7 +734,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 			dst[sample] = tmpbuf[sample] << (32-16-1-MIXING_ATTENUATION);
 		}
 	}
-	return static_cast<UINT>( frames_rendered * get_frame_size() );
+	return static_cast<UINT>( frames_rendered );
 }
 
 
