@@ -16,7 +16,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 shutil.rmtree('html', ignore_errors=True)
 shutil.copytree('source', 'html')
 
-style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles|site.styles&only=styles&skin=vector&*').read().decode('UTF-8')
+style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.page.gallery.styles%7Cmediawiki.skinning.interface%7Cskins.vector.styles&only=styles&skin=vector').read().decode('UTF-8')
+
 # Remove a few unused CSS classes
 style = re.sub(r'\}(\w+)?[\.#]vector([\w >]+)\{.+?\}', '}', style)
 style_file = open('html/style.css', 'w')
