@@ -167,6 +167,13 @@ void WavesReverb::Resume()
 	m_delay[5] = delay5;
 
 	RecalculateWavesReverbParams();
+	PositionChanged();
+}
+
+
+void WavesReverb::PositionChanged()
+//---------------------------------
+{
 	MemsetZero(m_state);
 }
 

@@ -141,8 +141,15 @@ void DigiBoosterEcho::Resume()
 {
 	m_isResumed = true;
 	m_sampleRate = m_SndFile.GetSampleRate();
-	m_bufferSize = (m_sampleRate >> 1) + (m_sampleRate >> 6);
 	RecalculateEchoParams();
+	PositionChanged();
+}
+
+
+void DigiBoosterEcho::PositionChanged()
+//-------------------------------------
+{
+	m_bufferSize = (m_sampleRate >> 1) + (m_sampleRate >> 6);
 	try
 	{
 		m_delayLine.assign(m_bufferSize * 2, 0);

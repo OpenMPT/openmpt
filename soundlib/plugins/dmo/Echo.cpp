@@ -120,8 +120,15 @@ void Echo::Resume()
 {
 	m_isResumed = true;
 	m_sampleRate = m_SndFile.GetSampleRate();
-	m_bufferSize = m_sampleRate * 2u;
 	RecalculateEchoParams();
+	PositionChanged();
+}
+
+
+void Echo::PositionChanged()
+//--------------------------
+{
+	m_bufferSize = m_sampleRate * 2u;
 	try
 	{
 		m_delayLine.assign(m_bufferSize * 2, 0);

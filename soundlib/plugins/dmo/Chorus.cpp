@@ -158,6 +158,20 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 void Chorus::Resume()
 //-------------------
 {
+	PositionChanged();
+	RecalculateChorusParams();
+
+	m_isResumed = true;
+	m_waveShapeMin = 0.0f;
+	m_waveShapeMax = IsTriangle() ? 0.5f : 1.0f;
+	m_delayL1 = m_delayL2 = m_delayR1 = m_delayR2 = m_delayOffset;
+	m_bufPos = 0;
+}
+
+
+void Chorus::PositionChanged()
+//----------------------------
+{
 	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 3840, 1000);
 	try
 	{
@@ -167,14 +181,6 @@ void Chorus::Resume()
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		m_bufSize = 0;
 	}
-
-	RecalculateChorusParams();
-
-	m_isResumed = true;
-	m_waveShapeMin = 0.0f;
-	m_waveShapeMax = IsTriangle() ? 0.5f : 1.0f;
-	m_delayL1 = m_delayL2 = m_delayR1 = m_delayR2 = m_delayOffset;
-	m_bufPos = 0;
 }
 
 

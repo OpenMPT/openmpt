@@ -140,7 +140,13 @@ void Distortion::Resume()
 {
 	m_isResumed = true;
 	RecalculateDistortionParams();
+	PositionChanged();
+}
 
+
+void Distortion::PositionChanged()
+//--------------------------------
+{
 	// Reset filter state
 	m_preEQz1[0] = m_preEQz1[1] = 0;
 	m_postEQz1[0] = m_postEQz2[0] = 0;

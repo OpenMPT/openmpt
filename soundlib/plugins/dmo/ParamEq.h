@@ -42,48 +42,48 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	virtual void Release() { delete this; }
-	virtual int32 GetUID() const { return 0x120CED89; }
-	virtual int32 GetVersion() const { return 0; }
-	virtual void Idle() { }
-	virtual uint32 GetLatency() const { return 0; }
+	void Release() override { delete this; }
+	int32 GetUID() const override { return 0x120CED89; }
+	int32 GetVersion() const override { return 0; }
+	void Idle() override { }
+	uint32 GetLatency() const override { return 0; }
 
-	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
+	void Process(float *pOutL, float *pOutR, uint32 numFrames) override;
 
-	virtual float RenderSilence(uint32) { return 0.0f; }
+	float RenderSilence(uint32) override { return 0.0f; }
 
-	virtual int32 GetNumPrograms() const { return 0; }
-	virtual int32 GetCurrentProgram() { return 0; }
-	virtual void SetCurrentProgram(int32) { }
+	int32 GetNumPrograms() const override { return 0; }
+	int32 GetCurrentProgram() override { return 0; }
+	void SetCurrentProgram(int32) override { }
 
-	virtual PlugParamIndex GetNumParameters() const { return kEqNumParameters; }
-	virtual PlugParamValue GetParameter(PlugParamIndex index);
-	virtual void SetParameter(PlugParamIndex index, PlugParamValue value);
+	PlugParamIndex GetNumParameters() const override { return kEqNumParameters; }
+	PlugParamValue GetParameter(PlugParamIndex index) override;
+	void SetParameter(PlugParamIndex index, PlugParamValue value) override;
 
-	virtual void Resume();
-	virtual void Suspend() { m_isResumed = false; }
-	virtual void PositionChanged() { }
+	void Resume() override;
+	void Suspend() override { m_isResumed = false; }
+	void PositionChanged() override;
 
-	virtual bool IsInstrument() const { return false; }
-	virtual bool CanRecieveMidiEvents() { return false; }
-	virtual bool ShouldProcessSilence() { return true; }
+	bool IsInstrument() const override { return false; }
+	bool CanRecieveMidiEvents() override { return false; }
+	bool ShouldProcessSilence() override { return true; }
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return _T("ParamEq"); }
+	CString GetDefaultEffectName() override { return _T("ParamEq"); }
 
-	virtual CString GetParamName(PlugParamIndex param);
-	virtual CString GetParamLabel(PlugParamIndex);
-	virtual CString GetParamDisplay(PlugParamIndex param);
+	CString GetParamName(PlugParamIndex param) override;
+	CString GetParamLabel(PlugParamIndex) override;
+	CString GetParamDisplay(PlugParamIndex param) override;
 
-	virtual CString GetCurrentProgramName() { return CString(); }
-	virtual void SetCurrentProgramName(const CString &) { }
-	virtual CString GetProgramName(int32) { return CString(); }
+	CString GetCurrentProgramName() override { return CString(); }
+	void SetCurrentProgramName(const CString &) override { }
+	CString GetProgramName(int32) override { return CString(); }
 
-	virtual bool HasEditor() const { return false; }
+	bool HasEditor() const override { return false; }
 #endif
 
-	virtual int GetNumInputChannels() const { return 2; }
-	virtual int GetNumOutputChannels() const { return 2; }
+	int GetNumInputChannels() const override { return 2; }
+	int GetNumOutputChannels() const override { return 2; }
 
 protected:
 	float BandwidthInSemitones() const { return 1.0f + m_param[kEqBandwidth] * 35.0f; }
