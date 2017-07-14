@@ -41,7 +41,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
- mptrack.exe ^
+ mptrack-ANSI.exe ^
  OpenMPT_SoundTouch_f32.dll ^
  openmpt-mpg123.dll ^
  PluginBridge32.exe ^
@@ -49,7 +49,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  openmpt-wine-support.zip ^
  extraKeymaps ^
  || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack.pdb || goto error
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack-ANSI.pdb || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-%MPT_DIST_VARIANT%.tar openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z || goto error
 del /f /q openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z
