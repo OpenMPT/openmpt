@@ -134,6 +134,15 @@ void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
 void Compressor::Resume()
 //-----------------------
 {
+	m_isResumed = true;
+	PositionChanged();
+	RecalculateCompressorParams();
+}
+
+
+void Compressor::PositionChanged()
+//--------------------------------
+{
 	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 200, 1000);
 	try
 	{
@@ -143,11 +152,8 @@ void Compressor::Resume()
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		m_bufSize = 0;
 	}
-
-	m_isResumed = true;
 	m_bufPos = 0;
 	m_peak = 0.0f;
-	RecalculateCompressorParams();
 }
 
 

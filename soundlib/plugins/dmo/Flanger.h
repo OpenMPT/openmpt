@@ -40,28 +40,28 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	virtual void Release() { delete this; }
-	virtual int32 GetUID() const { return 0xEFCA3D92; }
+	void Release() override { delete this; }
+	int32 GetUID() const override { return 0xEFCA3D92; }
 
-	virtual PlugParamIndex GetNumParameters() const { return kFlangerNumParameters; }
-	virtual void SetParameter(PlugParamIndex index, PlugParamValue value);
+	PlugParamIndex GetNumParameters() const override { return kFlangerNumParameters; }
+	void SetParameter(PlugParamIndex index, PlugParamValue value) override;
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return _T("Flanger"); }
+	CString GetDefaultEffectName() override { return _T("Flanger"); }
 
-	virtual CString GetParamName(PlugParamIndex param);
-	virtual CString GetParamLabel(PlugParamIndex);
-	virtual CString GetParamDisplay(PlugParamIndex param);
+	CString GetParamName(PlugParamIndex param) override;
+	CString GetParamLabel(PlugParamIndex) override;
+	CString GetParamDisplay(PlugParamIndex param) override;
 #endif
 
 protected:
-	virtual float WetDryMix() const { return m_param[kFlangerWetDryMix]; }
-	virtual bool IsTriangle() const { return m_param[kFlangerWaveShape] < 1; }
-	virtual float Depth() const { return m_param[kFlangerDepth]; }
-	virtual float Feedback() const { return -99.0f + m_param[kFlangerFeedback] * 198.0f; }
-	virtual float Delay() const { return m_param[kFlangerDelay] * 4.0f; }
-	virtual float FrequencyInHertz() const { return m_param[kFlangerFrequency] * 10.0f; }
-	virtual int Phase() const { return Util::Round<uint32>(m_param[kFlangerPhase] * 4.0f); }
+	float WetDryMix() const override { return m_param[kFlangerWetDryMix]; }
+	bool IsTriangle() const override { return m_param[kFlangerWaveShape] < 1; }
+	float Depth() const override { return m_param[kFlangerDepth]; }
+	float Feedback() const override { return -99.0f + m_param[kFlangerFeedback] * 198.0f; }
+	float Delay() const override { return m_param[kFlangerDelay] * 4.0f; }
+	float FrequencyInHertz() const override { return m_param[kFlangerFrequency] * 10.0f; }
+	int Phase() const override { return Util::Round<uint32>(m_param[kFlangerPhase] * 4.0f); }
 };
 
 } // namespace DMO
