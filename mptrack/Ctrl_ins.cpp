@@ -1715,6 +1715,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 	{
 		CWnd *wnd = GetDlgItem(uId);
 		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
+		const CString plusMinus = mpt::ToCString(mpt::CharsetUTF8, "\xC2\xB1");
 		switch(uId)
 		{
 		case IDC_EDIT_PITCHTEMPOLOCK:
@@ -1798,14 +1799,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER1:
 			if(isEnabled)
-				wsprintf(pszText, _T("±%d%% volume variation"), pIns->nVolSwing);
+				wsprintf(pszText, _T("%s%d%% volume variation"), plusMinus.GetString(), pIns->nVolSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER2:
 			if(isEnabled)
-				wsprintf(pszText, _T("±%d panning variation"), pIns->nPanSwing);
+				wsprintf(pszText, _T("%s%d panning variation"), plusMinus.GetString(), pIns->nPanSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
@@ -1826,14 +1827,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER6:
 			if(isEnabled)
-				wsprintf(pszText, _T("±%d cutoff variation"), pIns->nCutSwing);
+				wsprintf(pszText, _T("%s%d cutoff variation"), plusMinus.GetString(), pIns->nCutSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER7:
 			if(isEnabled)
-				wsprintf(pszText, _T("±%d resonance variation"), pIns->nResSwing);
+				wsprintf(pszText, _T("%s%d resonance variation"), plusMinus.GetString(), pIns->nResSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
