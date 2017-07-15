@@ -363,7 +363,7 @@ protected:
 	virtual BOOL DoFileSave();
 #endif
 
-#ifndef UNICIDE
+#ifndef UNICoDE
 	MPT_DEPRECATED_PATH
 #endif
 	virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE)
