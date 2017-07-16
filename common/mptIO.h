@@ -493,6 +493,36 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 	return true;
 }
 
+template <typename Tfile>
+inline bool WriteText(Tfile &f, const std::string &s)
+{
+	return mpt::IO::WriteRaw(f, s.data(), s.size());
+}
+
+template <typename Tfile>
+inline bool WriteTextCRLF(Tfile &f)
+{
+	return mpt::IO::WriteText(f, "\r\n");
+}
+
+template <typename Tfile>
+inline bool WriteTextLF(Tfile &f)
+{
+	return mpt::IO::WriteText(f, "\n");
+}
+
+template <typename Tfile>
+inline bool WriteTextCRLF(Tfile &f, const std::string &s)
+{
+	return mpt::IO::WriteText(f, s) && mpt::IO::WriteTextCRLF(f);
+}
+
+template <typename Tfile>
+inline bool WriteTextLF(Tfile &f, const std::string &s)
+{
+	return mpt::IO::WriteText(f, s) && mpt::IO::WriteTextLF(f);
+}
+
 } // namespace IO
 
 
