@@ -1572,6 +1572,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	if (nNotes > s_nSclImportMaxNoteCount)
 		return enSclImportFailTooManyNotes;
 
+	std::vector<std::string> names;
 	std::vector<CTuningRTI::RATIOTYPE> fRatios;
 	fRatios.reserve(nNotes);
 	fRatios.push_back(1);
@@ -1622,6 +1623,31 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		}
 		else // Plain numbers.
 			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(ConvertStrTo<int32>(psz)));
+
+		std::string remainder = psz;
+		remainder = mpt::String::Trim(remainder, std::string("\r\n"));
+		if(remainder.find_first_of(" \t") != std::string::npos)
+		{
+			remainder = remainder.substr(remainder.find_first_of(" \t"));
+		} else
+		{
+			remainder = std::string();
+		}
+		remainder = mpt::String::Trim(remainder, std::string(" \t"));
+		if(!remainder.empty())
+		{
+			if(remainder[0] == '!')
+			{
+				remainder = remainder.substr(1);
+				remainder = mpt::String::Trim(remainder, std::string(" \t"));
+			}
+		}
+		if(mpt::ToLowerCaseAscii(remainder) == "cents" || mpt::ToLowerCaseAscii(remainder) == "cent")
+		{
+			remainder = std::string();
+		}
+		names.push_back(remainder);
+		
 	}
 
 	if (nNotes != fRatios.size())
@@ -1643,6 +1669,36 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	}
 
 	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, name));
+
+	bool allNamesEmpty = true;
+	bool allNamesValid = true;
+	for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
+	{
+		if(names[note].empty())
+		{
+			allNamesValid = false;
+		} else
+		{
+			allNamesEmpty = false;
+		}
+	}
+
+	if(nNotes - 1 == 12 && !allNamesValid)
+	{
+		for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
+		{
+			pT->SetNoteName(note, CSoundFile::GetDefaultNoteNames()[note]);
+		}
+	} else
+	{
+		for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
+		{
+			if(!names[note].empty())
+			{
+				pT->SetNoteName(note, names[note]);
+			}
+		}
+	}
 
 	result = pT;
 
