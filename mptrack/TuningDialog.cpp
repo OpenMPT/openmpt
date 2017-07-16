@@ -618,10 +618,21 @@ void CTuningDialog::OnBnClickedButtonExport()
 	}
 
 	std::string filter;
+	int filters = 0;
+	int tuningFilter = -1;
+	int collectionFilter = -1;
 	if(pT != NULL)
-		filter = std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
+	{
+		filters++;
+		filter += std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
+		tuningFilter = filters;
+	}
 	if(pTC != NULL)
+	{
+		filters++;
 		filter += std::string("Tuning collection files (") + CTuningCollection::s_FileExtension + std::string(")|*") + CTuningCollection::s_FileExtension + std::string("|");
+		collectionFilter = filters;
+	}
 
 	int filterIndex = 0;
 	FileDialog dlg = SaveFileDialog()
@@ -637,14 +648,12 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
 
-	if(filterIndex == 1)
+	if(tuningFilter != -1 && filterIndex == tuningFilter)
 	{
-		if(pT != NULL)
-			failure = pT->Serialize(fout);
-	} else if(filterIndex == 2)
+		failure = pT->Serialize(fout);
+	} else if(collectionFilter != -1 && filterIndex == collectionFilter)
 	{
-		if(pTC != NULL)
-			failure = pTC->Serialize(fout);
+		failure = pTC->Serialize(fout);
 	}
 
 	fout.close();
