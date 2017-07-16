@@ -1634,7 +1634,9 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	}
 
 	CTuning* pT = new CTuningRTI;
-	if (pT->CreateGroupGeometric(fRatios, 1, pT->GetValidityRange(), 0) != false)
+	CTuningRTI::RATIOTYPE groupRatio = fRatios.back();
+	fRatios.pop_back();
+	if(pT->CreateGroupGeometric(fRatios, groupRatio, pT->GetValidityRange(), 0) != false)
 	{
 		delete pT;
 		return enSclImportTuningCreationFailure;
