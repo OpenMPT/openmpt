@@ -620,12 +620,19 @@ void CTuningDialog::OnBnClickedButtonExport()
 	std::string filter;
 	int filters = 0;
 	int tuningFilter = -1;
+	int sclFilter = -1;
 	int collectionFilter = -1;
 	if(pT != NULL)
 	{
 		filters++;
 		filter += std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
 		tuningFilter = filters;
+	}
+	if(pT && dynamic_cast<const CTuningRTI*>(pT))
+	{
+		filters++;
+		filter += std::string("Scala scale (*.scl)|*") + std::string(".scl")+ std::string("|");
+		sclFilter = filters;
 	}
 	if(pTC != NULL)
 	{
@@ -651,6 +658,9 @@ void CTuningDialog::OnBnClickedButtonExport()
 	if(tuningFilter != -1 && filterIndex == tuningFilter)
 	{
 		failure = pT->Serialize(fout);
+	} else if(sclFilter != -1 && filterIndex == sclFilter)
+	{
+		failure = !dynamic_cast<const CTuningRTI*>(pT)->WriteSCL(fout, dlg.GetFirstFile());
 	} else if(collectionFilter != -1 && filterIndex == collectionFilter)
 	{
 		failure = pTC->Serialize(fout);

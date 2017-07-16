@@ -615,6 +615,76 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 }
 
 
+#ifdef MODPLUG_TRACKER
+
+bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
+//-------------------------------------------------------------------------------
+{
+	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::CharsetISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
+	mpt::IO::WriteTextCRLF(f, "!");
+	std::string name = mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetName());
+	for(auto & c : name) { if(c < 32) c = ' '; } // remove control characters
+	if(name.length() >= 1 && name[0] == '!') name[0] = '?'; // do not confuse description with comment
+	mpt::IO::WriteTextCRLF(f, name);
+	if(GetType() == TT_GEOMETRIC)
+	{
+		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_GroupSize));
+		mpt::IO::WriteTextCRLF(f, "!");
+		for(NOTEINDEXTYPE n = 0; n < m_GroupSize; ++n)
+		{
+			double ratio = std::pow(static_cast<double>(m_GroupRatio), static_cast<double>(n + 1) / static_cast<double>(m_GroupSize));
+			double cents = std::log2(ratio) * 1200.0;
+			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
+				mpt::fmt::fix(cents),
+				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n, false))
+				));
+		}
+	} else if(GetType() == TT_GROUPGEOMETRIC)
+	{
+		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_GroupSize));
+		mpt::IO::WriteTextCRLF(f, "!");
+		for(NOTEINDEXTYPE n = 0; n < m_GroupSize; ++n)
+		{
+			double baseratio = static_cast<double>(GetRatio(0));
+			double ratio = static_cast<double>(GetRatio(n + 1)) / baseratio;
+			double cents = std::log2(ratio) * 1200.0;
+			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
+				mpt::fmt::fix(cents),
+				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n, false))
+				));
+		}
+	} else if(GetType() == TT_GENERAL)
+	{
+		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_RatioTable.size()));
+		mpt::IO::WriteTextCRLF(f, "!");
+		double baseratio = 1.0;
+		for(NOTEINDEXTYPE n = 0; n < mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
+		{
+			baseratio = std::min(baseratio, static_cast<double>(m_RatioTable[n]));
+		}
+		for(NOTEINDEXTYPE n = 0; n < mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
+		{
+			double ratio = static_cast<double>(m_RatioTable[n]) / baseratio;
+			double cents = std::log2(ratio) * 1200.0;
+			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
+				mpt::fmt::fix(cents),
+				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n + m_StepMin, false))
+				));
+		}
+		mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
+			mpt::fmt::val(1),
+			std::string()
+			));
+	} else
+	{
+		return false;
+	}
+	return true;
+}
+
+#endif
+
+
 namespace CTuningS11n
 {
 
