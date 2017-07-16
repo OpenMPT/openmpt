@@ -66,6 +66,9 @@ public:
 
 	SERIALIZATION_RETURN_TYPE Serialize(std::ostream& out) const;
 
+#ifdef MODPLUG_TRACKER
+	bool WriteSCL(std::ostream &f, const mpt::PathString &filename) const;
+#endif
 
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
