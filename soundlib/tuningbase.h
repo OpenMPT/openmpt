@@ -46,7 +46,6 @@ public:
 	typedef int32 STEPINDEXTYPE;
 	typedef uint32 USTEPINDEXTYPE;
 
-	typedef int16 SERIALIZATION_VERSION;
 	typedef bool SERIALIZATION_RETURN_TYPE;
 
 	//Validity Range PAIR.
@@ -65,7 +64,6 @@ public:
 
 
 //BEGIN PUBLIC STATICS
-	static const SERIALIZATION_VERSION s_SerializationVersion;
 
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_SUCCESS;
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
@@ -151,8 +149,6 @@ public:
 	bool ChangeGroupsize(const NOTEINDEXTYPE&);
 	bool ChangeGroupRatio(const RATIOTYPE&);
 
-	static uint32 GetVersion() {return s_SerializationVersion;}
-
 	virtual UNOTEINDEXTYPE GetGroupSize() const = 0;
 	virtual RATIOTYPE GetGroupRatio() const = 0;
 
@@ -204,8 +200,6 @@ protected:
 
 	virtual NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE&) = 0;
 	virtual RATIOTYPE ProSetGroupRatio(const RATIOTYPE&) = 0;
-
-	virtual uint32 GetClassVersion() const = 0;
 
 //END PROTECTED VIRTUALS
 
