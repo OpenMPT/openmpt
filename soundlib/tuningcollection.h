@@ -43,8 +43,6 @@ public:
 	typedef TUNINGVECTOR::iterator TITER; //Tuning ITERator.
 	typedef TUNINGVECTOR::const_iterator CTITER;
 
-	typedef uint16 SERIALIZATION_VERSION;
-
 	typedef bool SERIALIZATION_RETURN_TYPE;
 
 //END TYPEDEFS
@@ -53,8 +51,6 @@ public:
 public:
 	enum 
 	{
-	    s_SerializationVersion = 3,
-
 		SERIALIZATION_SUCCESS = false,
 		SERIALIZATION_FAILURE = true
 	};
@@ -101,8 +97,6 @@ public:
 	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
 	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
 #endif // MODPLUG_NO_FILESAVE
-
-	std::string GetVersionString() const {return mpt::fmt::val(static_cast<int>(s_SerializationVersion));}
 
 	size_t GetNameLengthMax() const {return 256;}
 

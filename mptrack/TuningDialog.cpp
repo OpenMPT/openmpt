@@ -245,7 +245,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 	if(updateMask == 0 || updateMask & UM_TUNINGCOLLECTION)
 	{
 		m_EditTuningCollectionName.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetName()));
-		//m_EditTuningCollectionVersion.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetVersionString()));
 		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToCString(TuningCharset, mpt::fmt::val(m_pActiveTuningCollection->GetNumTunings())));
 		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}

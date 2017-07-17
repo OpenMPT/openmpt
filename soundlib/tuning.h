@@ -31,7 +31,6 @@ public:
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
 	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
 	static const USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
-	static const SERIALIZATION_VERSION s_SerializationVersion = 4;
 //END STATIC CONST MEMBERS
 
 
@@ -58,8 +57,6 @@ public:
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 
 	static CTuning* Deserialize(std::istream& inStrm);
-
-	static uint32 GetVersion() {return s_SerializationVersion;}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
 	static CTuningRTI* DeserializeOLD(std::istream&);
@@ -112,8 +109,6 @@ protected:
 	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]
 	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
 	RATIOTYPE ProSetGroupRatio(const RATIOTYPE& pr) {return m_GroupRatio = (pr >= 0) ? pr : -pr;}
-
-	virtual uint32 GetClassVersion() const {return GetVersion();}
 
 	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
 

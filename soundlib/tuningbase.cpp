@@ -21,7 +21,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-const CTuningBase::SERIALIZATION_VERSION CTuningBase::s_SerializationVersion(5);
 /*
 Version history:
 	4->5: Lots of changes, finestep interpretation revamp, fileformat revamp.

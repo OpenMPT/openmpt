@@ -388,13 +388,17 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 //---------------------------------------------------
 {
+	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
+	// reads version number (5<<24)+4 or earlier.
+	// We keep this behaviour.
+
 	if(iStrm.fail())
 		return nullptr;
 
 	CTuningRTI* pTuning = new CTuningRTI;
 
 	srlztn::SsbRead ssb(iStrm);
-	ssb.BeginRead("CTB244RTI", (CTuning::GetVersion() << 24) + GetVersion());
+	ssb.BeginRead("CTB244RTI", (5 << 24) + 4); // version
 	ssb.ReadItem(pTuning->m_TuningName, "0", ReadStr);
 	ssb.ReadItem(pTuning->m_EditMask, "1");
 	ssb.ReadItem(pTuning->m_TuningType, "2");
@@ -579,8 +583,11 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //-----------------------------------------------------------------------------------
 {
+	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
+	// reads version number (5<<24)+4.
+	// We keep this behaviour.
 	srlztn::SsbWrite ssb(outStrm);
-	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
+	ssb.BeginWrite("CTB244RTI", (4 << 24) + 4); // version
 	if (m_TuningName.length() > 0)
 		ssb.WriteItem(m_TuningName, "0", WriteStr);
 	ssb.WriteItem(m_EditMask, "1");

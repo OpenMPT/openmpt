@@ -107,7 +107,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 //--------------------------------------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
-	ssb.BeginWrite("TC", s_SerializationVersion);
+	ssb.BeginWrite("TC", 3); // version
 	ssb.WriteItem(m_Name, "0", &WriteStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.WriteItem(dummyEditMask, "1");
@@ -170,7 +170,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 		iStrm.clear();
 		iStrm.seekg(startpos);
 		srlztn::SsbRead ssb(iStrm);
-		ssb.BeginRead("TC", s_SerializationVersion);
+		ssb.BeginRead("TC", 3); // version
 
 		const srlztn::SsbRead::ReadIterator iterBeg = ssb.GetReadBegin();
 		const srlztn::SsbRead::ReadIterator iterEnd = ssb.GetReadEnd();
