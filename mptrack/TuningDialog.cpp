@@ -239,15 +239,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 		return;
 	}
 
-	//Updating tuning collection part-->
-	if(updateMask == 0 || updateMask & UM_TUNINGCOLLECTION)
-	{
-		m_EditTuningCollectionName.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetName()));
-		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToCString(TuningCharset, mpt::fmt::val(m_pActiveTuningCollection->GetNumTunings())));
-		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
-	}
-	//<-- Updating tuning collection part
-
 	//Updating tuning part-->
 	if(m_pActiveTuning != NULL && (updateMask & UM_TUNINGDATA || updateMask == 0))
 	{
@@ -345,8 +336,6 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_FINETUNESTEPS, m_EditFineTuneSteps);
 	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
 	DDX_Control(pDX, IDC_TREE_TUNING, m_TreeCtrlTuning);
-	DDX_Control(pDX, IDC_EDIT_TUNINGCOLLECTION_NAME, m_EditTuningCollectionName);
-	DDX_Control(pDX, IDC_EDIT_TUNINGCOLLECTION_PATH, m_EditTuningCollectionPath);
 }
 
 

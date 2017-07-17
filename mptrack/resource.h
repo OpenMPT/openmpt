@@ -760,8 +760,6 @@
 #define IDC_COMBOTUNINGNAME             2282
 #define IDC_EDIT_NAME                   2283
 #define IDC_EDIT_MISC_ACTIONS           2284
-#define IDC_EDIT_TUNINGCOLLECTION_PATH  2286
-#define IDC_EDIT_TUNINGCOLLECTION_NAME  2291
 #define IDC_TREE_TUNING                 2292
 #define IDC_PATTERN_FOLLOWSONG          2293
 #define IDC_TEXT_BPM                    2300

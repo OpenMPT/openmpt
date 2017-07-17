@@ -291,11 +291,6 @@ private:
 	CEdit m_EditName;
 	//<--Tuning Edits
 
-	//-->Tuning collection edits
-	CEdit m_EditTuningCollectionName;
-	CEdit m_EditTuningCollectionPath;
-	//<--Tuningcollection edits
-
 	CButton m_ButtonSet;
 	CButton m_ButtonExport;
 	CButton m_ButtonImport;
