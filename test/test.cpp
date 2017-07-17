@@ -3326,6 +3326,8 @@ static MPT_NOINLINE void TestITCompression()
 
 
 
+#if 0
+
 static bool RatioEqual(CTuningBase::RATIOTYPE a, CTuningBase::RATIOTYPE b)
 //------------------------------------------------------------------------
 {
@@ -3361,6 +3363,8 @@ static void CheckEqualTuningCollections(const CTuningCollection &a, const CTunin
 		}
 	}
 }
+
+#endif
 
 
 static MPT_NOINLINE void TestTunings()
