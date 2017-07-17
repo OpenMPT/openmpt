@@ -330,8 +330,10 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_RATIOVALUE, m_EditRatio);
 	DDX_Control(pDX, IDC_EDIT_NOTENAME, m_EditNotename);
 	DDX_Control(pDX, IDC_BUTTON_SETVALUES, m_ButtonSet);
-	DDX_Control(pDX, IDC_BUTTON_EXPORT, m_ButtonExport);
+	DDX_Control(pDX, IDC_BUTTON_TUNING_NEW, m_ButtonNew);
 	DDX_Control(pDX, IDC_BUTTON_IMPORT, m_ButtonImport);
+	DDX_Control(pDX, IDC_BUTTON_EXPORT, m_ButtonExport);
+	DDX_Control(pDX, IDC_BUTTON_TUNING_REMOVE, m_ButtonRemove);
 	DDX_Control(pDX, IDC_EDIT_MISC_ACTIONS, m_EditMiscActions);
 	DDX_Control(pDX, IDC_EDIT_FINETUNESTEPS, m_EditFineTuneSteps);
 	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
@@ -347,8 +349,10 @@ BEGIN_MESSAGE_MAP(CTuningDialog, CDialog)
 	ON_EN_CHANGE(IDC_EDIT_NOTENAME, OnEnChangeEditNotename)
 	ON_BN_CLICKED(IDC_BUTTON_SETVALUES, OnBnClickedButtonSetvalues)
 	ON_EN_CHANGE(IDC_EDIT_RATIOVALUE, OnEnChangeEditRatiovalue)
-	ON_BN_CLICKED(IDC_BUTTON_EXPORT, OnBnClickedButtonExport)
+	ON_BN_CLICKED(IDC_BUTTON_TUNING_NEW, OnBnClickedButtonNew)
 	ON_BN_CLICKED(IDC_BUTTON_IMPORT, OnBnClickedButtonImport)
+	ON_BN_CLICKED(IDC_BUTTON_EXPORT, OnBnClickedButtonExport)
+	ON_BN_CLICKED(IDC_BUTTON_TUNING_REMOVE, OnBnClickedButtonRemove)
 	ON_EN_CHANGE(IDC_EDIT_FINETUNESTEPS, OnEnChangeEditFinetunesteps)
 	ON_EN_KILLFOCUS(IDC_EDIT_FINETUNESTEPS, OnEnKillfocusEditFinetunesteps)
 	ON_EN_KILLFOCUS(IDC_EDIT_NAME, OnEnKillfocusEditName)
@@ -558,6 +562,16 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 }
 
 
+void CTuningDialog::OnBnClickedButtonNew()
+//----------------------------------------
+{
+	if(m_pActiveTuningCollection)
+	{
+		m_CommandItemDest.Set(m_pActiveTuningCollection);
+		OnAddTuning();
+	}
+}
+
 
 void CTuningDialog::OnBnClickedButtonExport()
 //-------------------------------------------
@@ -682,6 +696,24 @@ void CTuningDialog::OnBnClickedButtonExport()
 	if (failure)
 		Reporting::Message(LogError, _T("Export failed"), _T("Error!"), this);
 
+}
+
+
+void CTuningDialog::OnBnClickedButtonRemove()
+//-------------------------------------------
+{
+	if(m_pActiveTuning)
+	{
+		m_CommandItemDest.Set(m_pActiveTuning);
+		OnRemoveTuning();
+	} else if(m_pActiveTuningCollection)
+	{
+		if(IsDeletable(m_pActiveTuningCollection))
+		{
+			m_CommandItemDest.Set(m_pActiveTuningCollection);
+			OnRemoveTuningCollection();
+		}
+	}
 }
 
 

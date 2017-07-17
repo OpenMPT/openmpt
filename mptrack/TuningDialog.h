@@ -292,8 +292,10 @@ private:
 	//<--Tuning Edits
 
 	CButton m_ButtonSet;
+	CButton m_ButtonNew;
 	CButton m_ButtonExport;
 	CButton m_ButtonImport;
+	CButton m_ButtonRemove;
 
 	CTuningTreeCtrl m_TreeCtrlTuning;
 
@@ -364,8 +366,10 @@ public:
 	afx_msg void OnEnChangeEditNotename();
 	afx_msg void OnBnClickedButtonSetvalues();
 	afx_msg void OnEnChangeEditRatiovalue();
+	afx_msg void OnBnClickedButtonNew();
 	afx_msg void OnBnClickedButtonExport();
 	afx_msg void OnBnClickedButtonImport();
+	afx_msg void OnBnClickedButtonRemove();
 	afx_msg void OnEnChangeEditFinetunesteps();
 	afx_msg void OnEnKillfocusEditFinetunesteps();
 	afx_msg void OnEnKillfocusEditName();
