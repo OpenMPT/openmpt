@@ -378,7 +378,7 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 //------------------------------------------------------------------------------
 {
-	if(!IsOfType(TT_GROUPGEOMETRIC)) return 0;
+	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
 
 	if(note >= 0) return note % GetGroupSize();
 	else return (GetGroupSize() - (mpt::abs(static_cast<int>(note)) % GetGroupSize())) % GetGroupSize();
@@ -442,7 +442,7 @@ bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
 {
 	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
 	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
-	if (IsOfType(TT_GROUPGEOMETRIC))
+	if((GetType() == TT_GROUPGEOMETRIC) || (GetType() == TT_GEOMETRIC))
 	{
 		if (ratiotableSize < 1 || ratiotableSize > NOTEINDEXTYPE_MAX) return true;
 		if (GetType() == TT_GEOMETRIC)
