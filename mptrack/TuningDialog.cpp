@@ -186,9 +186,9 @@ BOOL CTuningDialog::OnInitDialog()
 	m_pActiveTuningCollection = GetpTuningCollection(m_pActiveTuning);
 
 	//Adding tuning type names to corresponding combobox.
-	m_CombobTuningType.AddString(mpt::ToCString(mpt::CharsetASCII, CTuning::s_TuningTypeStrGeneral));
-	m_CombobTuningType.AddString(mpt::ToCString(mpt::CharsetASCII, CTuning::s_TuningTypeStrGroupGeometric));
-	m_CombobTuningType.AddString(mpt::ToCString(mpt::CharsetASCII, CTuning::s_TuningTypeStrGeometric));
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("General")), TT_GENERAL);
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("GroupGeometric")), TT_GROUPGEOMETRIC);
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("Geometric")), TT_GEOMETRIC);
 
 	m_ButtonSet.EnableWindow(FALSE);
 
@@ -412,7 +412,7 @@ void CTuningDialog::DoErrorExit()
 	m_DoErrorExit = false;
 	m_pActiveTuning = NULL;
 	m_pActiveTuningCollection = NULL;
-	MsgBox(IDS_ERR_DIALOG, this, NULL, MB_ICONINFORMATION);
+	Reporting::Message(LogInformation, _T("Dialog encountered an error and needs to close"), this);
 	OnOK();
 }
 
@@ -438,22 +438,13 @@ void CTuningDialog::UpdateTuningType()
 }
 
 
-TUNINGTYPE CTuningDialog::GetTuningTypeFromStr(const CString& str) const
-//----------------------------------------------------------------------
-{
-	return CTuning::GetTuningType(mpt::ToCharset(TuningCharset, str).c_str());
-}
-
 void CTuningDialog::OnCbnSelchangeComboTtype()
 //--------------------------------------------
 {
 	if(m_pActiveTuning != NULL)
 	{
 		const TUNINGTYPE oldType = m_pActiveTuning->GetType();
-		TCHAR buffer[20];
-		m_CombobTuningType.GetWindowText(buffer, CountOf(buffer));
-		const CString strNewType = buffer;
-		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
+		TUNINGTYPE newType = static_cast<TUNINGTYPE>(m_CombobTuningType.GetItemData(m_CombobTuningType.GetCurSel()));
 		if(m_pActiveTuning->GetType() != newType)
 		{
 			bool changed = false;
@@ -464,10 +455,12 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 			{
 				m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 
-				m_EditSteps.GetWindowText(buffer, CountOf(buffer));
+				CString buffer;
+
+				m_EditSteps.GetWindowText(buffer);
 				NOTEINDEXTYPE steps = ConvertStrTo<NOTEINDEXTYPE>(buffer);
 
-				m_EditRatioPeriod.GetWindowText(buffer, CountOf(buffer));
+				m_EditRatioPeriod.GetWindowText(buffer);
 				RATIOTYPE pr = ConvertStrTo<RATIOTYPE>(buffer);
 
 				if(steps <= 0)
@@ -612,7 +605,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	if(m_pActiveTuning == NULL && m_pActiveTuningCollection == NULL)
 	{
-		MsgBox(IDS_ERR_NO_TUNING_SELECTION, this, NULL, MB_ICONINFORMATION);
+		Reporting::Message(LogInformation, _T("Operation failed - No tuning file selected."), this);
 		return;
 	}
 
@@ -726,8 +719,8 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	}
 
-	if(failure)
-		ErrorBox(IDS_ERR_EXPORT_TUNING, this);
+	if (failure)
+		Reporting::Message(LogError, _T("Export failed"), _T("Error!"), this);
 
 }
 
@@ -1201,7 +1194,7 @@ void CTuningDialog::OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if(tunitem.GetT() == NULL)
 	{
-		MsgBox(IDS_UNSUPPORTED_TUNING_DnD, this);
+		Reporting::Message(LogNotification, _T("For the time being Drag and Drop is only supported for tuning instances."), this);
 		return;
 	}
 
@@ -1394,7 +1387,7 @@ void CTuningDialog::OnMoveTuning()
 	m_ModifiedTCs[pTCdest] = true;
 	if(CTuningCollection::TransferTuning(pTCsrc, pTCdest, pT))
 	{
-		MsgBox(IDS_OPERATION_FAIL, this);
+		Reporting::Message(LogNotification, _T("Operation failed."), this);
 		AddTreeItem(pT, treeItemSrcTC, NULL);
 	}
 	else
@@ -1456,27 +1449,15 @@ void CTuningDialog::OnRemoveTuningCollection()
 void CTuningDialog::UpdateTuningDescription()
 //-------------------------------------------
 {
-	switch(m_CombobTuningType.GetCurSel())
-	{
-		case 0:
-			SetDlgItemText(IDC_TUNINGTYPE_DESC, mpt::ToCString(mpt::CharsetASCII, CTuning::GetTuningTypeDescription(TT_GENERAL)));
-		break;
-
-		case 1:
-			SetDlgItemText(IDC_TUNINGTYPE_DESC, mpt::ToCString(mpt::CharsetASCII, CTuning::GetTuningTypeDescription(TT_GROUPGEOMETRIC)));
-		break;
-
-		case 2:
-			SetDlgItemText(IDC_TUNINGTYPE_DESC, mpt::ToCString(mpt::CharsetASCII, CTuning::GetTuningTypeDescription(TT_GEOMETRIC)));
-		break;
-
-		default:
-			if(m_pActiveTuning)
-				SetDlgItemText(IDC_TUNINGTYPE_DESC, mpt::ToCString(TuningCharset, m_pActiveTuning->GetTuningTypeDescription()));
-			else
-				SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Unknown type"));
-		break;
-	}
+	TUNINGTYPE type = static_cast<TUNINGTYPE>(m_CombobTuningType.GetItemData(m_CombobTuningType.GetCurSel()));
+	if(type == TT_GENERAL)
+		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("No ratio restrictions"));
+	else if(type == TT_GROUPGEOMETRIC)
+		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Ratio of ratios with distance of 'groupsize' is constant."));
+	else if(type == TT_GEOMETRIC)
+		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Ratio of successive ratios is constant."));
+	else
+		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Unknown type"));
 }
 
 
@@ -1540,36 +1521,34 @@ typedef double SclFloat;
 CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 //----------------------------------------------------------
 {
-	CString sMsg;
 	switch(id)
 	{
 		case enSclImportFailTooManyNotes:
-			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, mpt::tfmt::val(s_nSclImportMaxNoteCount).GetString());
-			return sMsg;
+			return mpt::tformat(_T("OpenMPT supports importing scl-files with at most %1 notes"))(mpt::tfmt::val(s_nSclImportMaxNoteCount));
 
 		case enSclImportFailTooLargeNumDenomIntegers:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_1); return sMsg;
+			return _T("Invalid numerator or denominator");
 
 		case enSclImportFailZeroDenominator:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_2); return sMsg;
+			return _T("Zero denominator");
 
 		case enSclImportFailNegativeRatio:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_3); return sMsg;
+			return _T("Negative ratio");
 
 		case enSclImportFailUnableToOpenFile:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_4); return sMsg;
+			return _T("Unable to open file");
 
 		case enSclImportLineCountMismatch:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_5); return sMsg;
+			return _T("Note count error");
 
 		case enSclImportTuningCreationFailure:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_6); return sMsg;
+			return _T("Unknown tuning creation error");
 
 		case enSclImportAddTuningFailure:
-			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_7); return sMsg;
+			return _T("Can't add tuning to tuning collection");
 
 		default:
-			return sMsg;
+			return _T("");
 	}
 }
 
