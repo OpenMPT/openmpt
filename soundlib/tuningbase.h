@@ -98,19 +98,19 @@ public:
 //BEGIN TUNING INTERFACE
 
 	//To return ratio of certain note.
-	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE&) const {return 0;}
+	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE&) const = 0;
 
 	//To return ratio from a 'step'(noteindex + stepindex)
-	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& s, const STEPINDEXTYPE&) const {return GetRatio(s);}
+	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& s, const STEPINDEXTYPE&) const = 0;
 
 	//To return (fine)stepcount between two consecutive mainsteps.
 	virtual USTEPINDEXTYPE GetFineStepCount() const {return m_FineStepCount;}
 
 	//To return 'directed distance' between given notes.
-	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& /*from*/, const NOTEINDEXTYPE& /*to*/) const {return 0;}
+	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& /*from*/, const NOTEINDEXTYPE& /*to*/) const = 0;
 
 	//To return 'directed distance' between given steps.
-	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE&, const STEPINDEXTYPE&, const NOTEINDEXTYPE&, const STEPINDEXTYPE&) const {return 0;}
+	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE&, const STEPINDEXTYPE&, const NOTEINDEXTYPE&, const STEPINDEXTYPE&) const = 0;
 
 
 	//To set finestepcount between two consecutive mainsteps and
@@ -133,7 +133,7 @@ public:
 	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
 	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
 
-	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const {return false;}
+	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const = 0;
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
@@ -154,14 +154,14 @@ public:
 
 	static uint32 GetVersion() {return s_SerializationVersion;}
 
-	virtual UNOTEINDEXTYPE GetGroupSize() const {return 0;}
-	virtual RATIOTYPE GetGroupRatio() const {return 0;}
+	virtual UNOTEINDEXTYPE GetGroupSize() const = 0;
+	virtual RATIOTYPE GetGroupRatio() const = 0;
 
 
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
-	virtual VRPAIR GetValidityRange() const {return VRPAIR(NOTEINDEXTYPE(0),NOTEINDEXTYPE(0));}
+	virtual VRPAIR GetValidityRange() const = 0;
 
 
 	//To try to set validity range to given range; returns
@@ -191,20 +191,20 @@ public:
 protected:
 	//Return value: true if change was not done, and false otherwise, in case which
 	//tuningtype is automatically changed to general.
-	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&) {return true;}
+	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&) = 0;
 
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE&, bool) const;
 
 	//The two methods below return false if action was done, true otherwise.
-	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) {return true;}
-	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) {return true;}
+	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) = 0;
+	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) = 0;
 
-	virtual VRPAIR ProSetValidityRange(const VRPAIR&) {return GetValidityRange();}
+	virtual VRPAIR ProSetValidityRange(const VRPAIR&) = 0;
+	
+	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&) = 0;
 
-	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&) {}
-
-	virtual NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE&) {return 0;}
-	virtual RATIOTYPE ProSetGroupRatio(const RATIOTYPE&) {return 0;}
+	virtual NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE&) = 0;
+	virtual RATIOTYPE ProSetGroupRatio(const RATIOTYPE&) = 0;
 
 	virtual uint32 GetClassVersion() const = 0;
 

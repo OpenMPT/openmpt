@@ -47,9 +47,9 @@ public:
 
 	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));}
 
-	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
+	virtual UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
 
-	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
+	virtual RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
 
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
 		{return (to - from)*(static_cast<NOTEINDEXTYPE>(GetFineStepCount())+1);}
@@ -99,10 +99,10 @@ public:
 
 //BEGIN PROTECTED VIRTUALS:
 protected:
-	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
-	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
-	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
-	void ProSetFineStepCount(const USTEPINDEXTYPE&);
+	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
+	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
+	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
+	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
