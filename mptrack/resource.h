@@ -769,7 +769,6 @@
 #define IDC_SPIN_RPB                    2302
 #define IDC_EDIT_RPB                    2303
 #define IDC_NAMEFILTER                  2304
-#define IDC_TUNINGTYPE_DESC             2305
 #define IDC_MIDIVOL_TO_NOTEVOL          2306
 #define IDC_PLUGIN_VELOCITYSTYLE        2307
 #define IDC_PLUGIN_VOLUMESTYLE          2308
