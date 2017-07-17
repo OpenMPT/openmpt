@@ -149,9 +149,6 @@ public:
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
 
-	static std::string GetTuningTypeStr(const TUNINGTYPE& tt);
-	static TUNINGTYPE GetTuningType(const char* str);
-
 	bool ChangeGroupsize(const NOTEINDEXTYPE&);
 	bool ChangeGroupRatio(const RATIOTYPE&);
 
@@ -177,10 +174,6 @@ public:
 	//Checking that step distances can be presented with
 	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
 	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
-
-	virtual const char* GetTuningTypeDescription() const;
-
-	static const char* GetTuningTypeDescription(const TUNINGTYPE&);
 
 	bool MayEdit(const EDITMASK& em) const {return (em & m_EditMask) != 0;}
 
@@ -261,14 +254,6 @@ private:
 	static void ReadNotenamemapPair(std::istream& iStrm, NOTENAMEMAP::value_type& val, const size_t);
 	static void WriteNotenamemappair(std::ostream& oStrm, const NOTENAMEMAP::value_type& val, const size_t);
 
-public:
-	static const char* s_TuningDescriptionGeneral;
-	static const char* s_TuningDescriptionGroupGeometric;
-	static const char* s_TuningDescriptionGeometric;
-	static const char* s_TuningTypeStrGeneral;
-	static const char* s_TuningTypeStrGroupGeometric;
-	static const char* s_TuningTypeStrGeometric;
-
 private:
 	static void DefaultMessageHandler(const char*, const char*) {}
 };
@@ -280,13 +265,6 @@ private:
 #define STEPINDEXTYPE_MAX (std::numeric_limits<STEPINDEXTYPE>::max)()
 #define USTEPINDEXTYPE_MAX (std::numeric_limits<USTEPINDEXTYPE>::max)()
 
-
-
-inline const char* CTuningBase::GetTuningTypeDescription() const
-//----------------------------------------------------------------------
-{
-	return GetTuningTypeDescription(GetType());
-}
 
 
 inline void CTuningBase::SetName(const std::string& s)

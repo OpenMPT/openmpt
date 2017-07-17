@@ -20,23 +20,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-const char* CTuningBase::s_TuningDescriptionGeneral = "No ratio restrictions";
-
-
-const char* CTuningBase::s_TuningDescriptionGroupGeometric = "Ratio of ratios with distance of 'groupsize' is constant.";
-
-
-const char* CTuningBase::s_TuningDescriptionGeometric = "Ratio of successive ratios is constant.";
-
-
-const char* CTuningBase::s_TuningTypeStrGeneral = "\"General\"";
-
-
-const char* CTuningBase::s_TuningTypeStrGroupGeometric = "\"GroupGeometric\"";
-
-
-const char* CTuningBase::s_TuningTypeStrGeometric = "\"Geometric\"";
-
 
 const CTuningBase::SERIALIZATION_VERSION CTuningBase::s_SerializationVersion(5);
 /*
@@ -154,32 +137,6 @@ CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& 
 		return GetFineStepCount();
 	}
 }
-
-
-CTuningBase::TUNINGTYPE CTuningBase::GetTuningType(const char* str)
-//-----------------------------------------------------------------
-{
-	if(!strcmp(str, s_TuningTypeStrGroupGeometric))
-		return TT_GROUPGEOMETRIC;
-	if(!strcmp(str, s_TuningTypeStrGeometric))
-		return TT_GEOMETRIC;
-
-	return TT_GENERAL;
-}
-
-
-std::string CTuningBase::GetTuningTypeStr(const TUNINGTYPE& tt)
-//-------------------------------------------------------------
-{
-	if(tt == TT_GENERAL)
-		return s_TuningTypeStrGeneral;
-	if(tt == TT_GROUPGEOMETRIC)
-		return s_TuningTypeStrGroupGeometric;
-	if(tt == TT_GEOMETRIC)
-		return s_TuningTypeStrGeometric;
-	return "Unknown";
-}
-
 
 
 
@@ -355,19 +312,6 @@ bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
 	return true;
 }
 
-
-
-const char* CTuningBase::GetTuningTypeDescription(const TUNINGTYPE& type)
-//-----------------------------------------------------------------------
-{
-	if(type == TT_GENERAL)
-		return s_TuningDescriptionGeneral;
-	if(type == TT_GROUPGEOMETRIC)
-		return s_TuningDescriptionGroupGeometric;
-	if(type == TT_GEOMETRIC)
-		return s_TuningDescriptionGeometric;
-	return "Unknown";
-}
 
 
 CTuningBase::VRPAIR CTuningBase::SetValidityRange(const VRPAIR& vrp)

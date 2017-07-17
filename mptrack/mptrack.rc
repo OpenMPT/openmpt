@@ -2537,15 +2537,12 @@ BEGIN
     ID_INDICATOR_CPU        "-"
     ID_FILE_EXPORTCOMPAT    "Export file to standard IT/XM."
     ID_ENVELOPE_SETRELEASENODE "Set release node"
-    IDS_ERR_EXPORT_TUNING   "Export failed"
-    IDS_APPLY_TUNING_MODIFICATIONS "Apply local tuning modifications to file?"
 END
 
 STRINGTABLE
 BEGIN
     ID_ENVELOPE_VIEWGRID    "Show/hide row guidelines"
     ID_REPORT_BUG           "Report a bug!\nReport a bug!"
-    IDS_ERR_DIALOG          "Dialog encountered an error and needs to close"
 END
 
 STRINGTABLE
@@ -2845,23 +2842,11 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_ERR_NO_TUNING_SELECTION "Operation failed - No tuning file selected."
-    IDS_UNSUPPORTED_TUNING_DnD 
-                            "For the time being Drag and Drop is only supported for tuning instances."
-    IDS_OPERATION_FAIL      "Operation failed."
     IDS_UNABLE_TO_LOAD_KEYBINDINGS 
                             "Loading keybindings failed. The keyboard won't work properly."
     IDS_CANT_OPEN_FILE_FOR_WRITING "Can't open keybindings file for writing."
     IDS_PATTERN_CLEANUP_UNAVAILABLE 
                             "Removing unused patterns is not available when using multiple sequences."
-    IDS_SCL_IMPORT_FAIL_1   "Invalid numerator or denominator"
-    IDS_SCL_IMPORT_FAIL_2   "Zero denominator"
-    IDS_SCL_IMPORT_FAIL_3   "Negative ratio"
-    IDS_SCL_IMPORT_FAIL_4   "Unable to open file"
-    IDS_SCL_IMPORT_FAIL_5   "Note count error"
-    IDS_SCL_IMPORT_FAIL_6   "Unknown tuning creation error"
-    IDS_SCL_IMPORT_FAIL_7   "Can't add tuning to tuning collection"
-    IDS_SCL_IMPORT_FAIL_8   "OpenMPT supports importing scl-files with at most %1 notes"
 END
 
 STRINGTABLE

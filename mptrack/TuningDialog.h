@@ -241,7 +241,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 private:
-	CTuning::TUNINGTYPE GetTuningTypeFromStr(const CString &str) const;
 
 	void UpdateTuningDescription();
 
