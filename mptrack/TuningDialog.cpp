@@ -291,23 +291,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 		bool enableControls = true;
 
-		if(m_pActiveTuning->GetEditMask() == EM_CONST ||
-		m_pActiveTuning->GetEditMask() == EM_CONST_STRICT)
-		{
-			CheckDlgButton(IDC_CHECK_READONLY, BST_CHECKED);
-			if(m_pActiveTuning->GetEditMask() == EM_CONST_STRICT)
-				m_ButtonReadOnly.EnableWindow(FALSE);
-			else
-				m_ButtonReadOnly.EnableWindow(TRUE);
-
-			enableControls = false;
-		}
-		else
-		{
-			CheckDlgButton(IDC_CHECK_READONLY, BST_UNCHECKED);
-			m_ButtonReadOnly.EnableWindow();
-		}
-
 		m_CombobTuningType.EnableWindow(enableControls);
 		m_EditSteps.SetReadOnly(!enableControls);
 		m_EditRatioPeriod.SetReadOnly(!enableControls);
@@ -340,8 +323,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 			m_CombobTuningType.SetCurSel(-1);
 
-			m_ButtonReadOnly.EnableWindow(FALSE);
-
 			m_RatioMapWnd.ShowWindow(SW_HIDE);
 			m_RatioMapWnd.m_pTuning = NULL;
 			m_RatioMapWnd.Invalidate();
@@ -366,7 +347,6 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_IMPORT, m_ButtonImport);
 	DDX_Control(pDX, IDC_EDIT_MISC_ACTIONS, m_EditMiscActions);
 	DDX_Control(pDX, IDC_EDIT_FINETUNESTEPS, m_EditFineTuneSteps);
-	DDX_Control(pDX, IDC_CHECK_READONLY, m_ButtonReadOnly);
 	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
 	DDX_Control(pDX, IDC_TREE_TUNING, m_TreeCtrlTuning);
 	DDX_Control(pDX, IDC_EDIT_TUNINGCOLLECTION_NAME, m_EditTuningCollectionName);
@@ -386,7 +366,6 @@ BEGIN_MESSAGE_MAP(CTuningDialog, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_IMPORT, OnBnClickedButtonImport)
 	ON_EN_CHANGE(IDC_EDIT_FINETUNESTEPS, OnEnChangeEditFinetunesteps)
 	ON_EN_KILLFOCUS(IDC_EDIT_FINETUNESTEPS, OnEnKillfocusEditFinetunesteps)
-	ON_BN_CLICKED(IDC_CHECK_READONLY, OnBnClickedCheckReadonly)
 	ON_EN_KILLFOCUS(IDC_EDIT_NAME, OnEnKillfocusEditName)
 	ON_EN_KILLFOCUS(IDC_EDIT_STEPS, OnEnKillfocusEditSteps)
 	ON_EN_KILLFOCUS(IDC_EDIT_RATIOPERIOD, OnEnKillfocusEditRatioperiod)
@@ -915,30 +894,6 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
 	}
-}
-
-
-void CTuningDialog::OnBnClickedCheckReadonly()
-//--------------------------------------------
-{
-	if(m_pActiveTuning == NULL)
-		return;
-
-	if(IsDlgButtonChecked(IDC_CHECK_READONLY))
-	{
-		if(m_pActiveTuning->SetEditMask(EM_CONST))
-			CheckDlgButton(IDC_CHECK_READONLY, BST_UNCHECKED);
-		else
-			UpdateView(UM_TUNINGDATA);
-	}
-	else
-	{
-		if(m_pActiveTuning->SetEditMask(EM_ALLOWALL))
-			CheckDlgButton(IDC_CHECK_READONLY, BST_CHECKED);
-		else
-			UpdateView(UM_TUNINGDATA);
-	}
-	m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 }
 
 

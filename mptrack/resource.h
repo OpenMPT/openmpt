@@ -747,7 +747,6 @@
 #define IDC_EDIT_FINETUNESTEPS          2268
 #define IDC_ADD_TUNING                  2269
 #define IDC_REMOVE_TUNING               2270
-#define IDC_CHECK_READONLY              2271
 #define IDC_EDIT_RATIOVALUE             2272
 #define IDC_EDIT_NOTENAME               2273
 #define IDC_BUTTON_SETVALUES            2274
