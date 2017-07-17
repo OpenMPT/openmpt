@@ -152,8 +152,6 @@ public:
 	static std::string GetTuningTypeStr(const TUNINGTYPE& tt);
 	static TUNINGTYPE GetTuningType(const char* str);
 
-	bool IsOfType(const TUNINGTYPE& type) const;
-
 	bool ChangeGroupsize(const NOTEINDEXTYPE&);
 	bool ChangeGroupRatio(const RATIOTYPE&);
 

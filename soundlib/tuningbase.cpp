@@ -203,26 +203,6 @@ CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x, bool /*
 
 
 
-bool CTuningBase::IsOfType(const TUNINGTYPE& type) const
-//------------------------------------------------------
-{
-	if(type == TT_GENERAL)
-		return true;
-	//Using interpretation that every tuning is also
-	//a general tuning.
-
-	//Note: Here type != TT_GENERAL
-	if(m_TuningType == TT_GENERAL)
-		return false;
-	//Every non-general tuning should not include all tunings.
-
-	if( (m_TuningType & type) == type)
-		return true;
-	else
-		return false;
-}
-
-
 bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 //---------------------------------------------------------------------------
 {
