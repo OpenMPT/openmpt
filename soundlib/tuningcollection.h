@@ -35,7 +35,7 @@ class CTuningCollection //To contain tuning objects.
 public:
 
 //BEGIN TYPEDEFS
-	typedef uint16 EDITMASK;
+
 	//If changing this, see whether serialization should be 
 	//modified as well.
 
@@ -53,11 +53,6 @@ public:
 public:
 	enum 
 	{
-		EM_ADD = 1, //true <~> allowed
-		EM_REMOVE = 2,
-		EM_ALLOWALL = 0xffff,
-		EM_CONST = 0,
-
 	    s_SerializationVersion = 3,
 
 		SERIALIZATION_SUCCESS = false,
@@ -88,18 +83,10 @@ public:
 	//Note: Given pointer is deleted by CTuningCollection
 	//at some point.
 	bool AddTuning(CTuning* const pT);
-	bool AddTuning(std::istream& inStrm) {return AddTuning(inStrm, false);}
+	bool AddTuning(std::istream& inStrm);
 	
 	bool Remove(const size_t i);
 	bool Remove(const CTuning*);
-
-	bool CanEdit(const EDITMASK& em) const {return (m_EditMask & em) != 0;}
-
-	void SetConstStatus(const EDITMASK& em) {m_EditMask = em;}
-
-	const EDITMASK& GetEditMask() const {return m_EditMask;}
-
-	std::string GetEditMaskString() const;
 
 	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i);}
 	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i);}
@@ -139,7 +126,6 @@ private:
 	//BEGIN: SERIALIZABLE DATA MEMBERS
 	TUNINGVECTOR m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
 	std::string m_Name;
-	EDITMASK m_EditMask;
 	//END: SERIALIZABLE DATA MEMBERS
 
 	//BEGIN: NONSERIALIZABLE DATA MEMBERS
@@ -157,8 +143,6 @@ private:
 private:
 	CTuning* FindTuning(const std::string& name) const;
 	size_t FindTuning(const CTuning* const) const;
-
-	bool AddTuning(std::istream& inStrm, const bool ignoreEditmask);
 
 	bool Remove(TITER removable, bool moveToTrashBin = true);
 

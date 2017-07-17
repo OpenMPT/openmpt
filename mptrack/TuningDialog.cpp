@@ -246,7 +246,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 	{
 		m_EditTuningCollectionName.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetName()));
 		//m_EditTuningCollectionVersion.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetVersionString()));
-		//m_EditTuningCollectionEditMask.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetEditMaskString()));
 		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToCString(TuningCharset, mpt::fmt::val(m_pActiveTuningCollection->GetNumTunings())));
 		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}
@@ -1136,8 +1135,6 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 		if(pTC != NULL)
 		{
 			UINT mask = MF_STRING;
-			if(!pTC->CanEdit(CTuningCollection::EM_REMOVE))
-				mask |= MF_GRAYED;
 
 			AppendMenu(popUpMenu, mask, ID_REMOVETUNING, _T("Remove"));
 
@@ -1149,9 +1146,6 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 		if(pTC != NULL)
 		{
 			UINT mask = MF_STRING;
-
-			if(!pTC->CanEdit(CTuningCollection::EM_ADD))
-				mask |= MF_GRAYED;
 
 			AppendMenu(popUpMenu, mask, ID_ADDTUNING, _T("Add tuning"));
 
@@ -1270,13 +1264,7 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
 		POINT point;
 		GetCursorPos(&point);
 
-		if(!pTCdest->CanEdit(CTuningCollection::EM_ADD))
-			mask |= MF_GRAYED;
 		AppendMenu(popUpMenu, mask, ID_COPYTUNING, _T("Copy here"));
-
-		if(!pTCsrc->CanEdit(CTuningCollection::EM_REMOVE) ||
-			!pTCdest->CanEdit(CTuningCollection::EM_ADD))
-			mask = MF_STRING | MF_GRAYED;
 
 		AppendMenu(popUpMenu, mask, ID_MOVETUNING, _T("Move here"));
 
