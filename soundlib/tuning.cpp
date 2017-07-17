@@ -79,7 +79,6 @@ CTuningRTI::CTuningRTI(const CTuning* const pTun)
 void CTuningRTI::SetDummyValues()
 //-------------------------------
 {
-	if(MayEdit(EM_RATIOS))
 	{
 		m_RatioTable.clear();
 		m_StepMin = s_StepMinDefault;
@@ -400,7 +399,8 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (5 << 24) + 4); // version
 	ssb.ReadItem(pTuning->m_TuningName, "0", ReadStr);
-	ssb.ReadItem(pTuning->m_EditMask, "1");
+	uint16 dummyEditMask = 0xffff;
+	ssb.ReadItem(dummyEditMask, "1");
 	ssb.ReadItem(pTuning->m_TuningType, "2");
 	ssb.ReadItem(pTuning->m_NoteNameMap, "3", ReadNoteMap);
 	ssb.ReadItem(pTuning->m_FineStepCount, "4");
@@ -416,8 +416,6 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
 	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300)
 	{
-		EDITMASK temp = pTuning->GetEditMask();
-		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
 		if (pTuning->ProProcessUnserializationdata(ratiotableSize))
 		{
 #ifdef MODPLUG_TRACKER
@@ -432,7 +430,6 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 			USTEPINDEXTYPE fsTemp = pTuning->m_FineStepCount;
 			pTuning->m_FineStepCount = 0;
 			pTuning->SetFineStepCount(fsTemp);
-			pTuning->SetEditMask(temp);
 		}
 	}
 	else
@@ -590,7 +587,8 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 	ssb.BeginWrite("CTB244RTI", (4 << 24) + 4); // version
 	if (m_TuningName.length() > 0)
 		ssb.WriteItem(m_TuningName, "0", WriteStr);
-	ssb.WriteItem(m_EditMask, "1");
+	uint16 dummyEditMask = 0xffff;
+	ssb.WriteItem(dummyEditMask, "1");
 	ssb.WriteItem(m_TuningType, "2");
 	if (m_NoteNameMap.size() > 0)
 		ssb.WriteItem(m_NoteNameMap, "3", WriteNoteMap);

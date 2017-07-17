@@ -51,8 +51,6 @@ public:
 	//Validity Range PAIR.
 	typedef std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE> VRPAIR;
 
-	typedef uint16 EDITMASK;
-
 	typedef uint16 TUNINGTYPE;
 
 	typedef std::string NOTESTR;
@@ -69,20 +67,6 @@ public:
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
 
 	static const char s_FileExtension[5];
-
-	static const EDITMASK EM_RATIOS;
-	static const EDITMASK EM_NOTENAME;
-	static const EDITMASK EM_TYPE;
-	static const EDITMASK EM_NAME;
-	static const EDITMASK EM_FINETUNE;
-	static const EDITMASK EM_EDITMASK;
-	static const EDITMASK EM_VALIDITYRANGE;
-
-	static const EDITMASK EM_ALLOWALL;
-	static const EDITMASK EM_CONST;
-	static const EDITMASK EM_CONST_STRICT; //This won't allow even changing const status
-	//NOTE: When adding editmasks, check definition of EDITMASK -
-	//might need to be modified.
 
 	static const TUNINGTYPE TT_GENERAL;
 	static const TUNINGTYPE TT_GROUPGEOMETRIC;
@@ -170,12 +154,6 @@ public:
 	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
 	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
 
-	bool MayEdit(const EDITMASK& em) const {return (em & m_EditMask) != 0;}
-
-	bool SetEditMask(const EDITMASK& em);
-
-	EDITMASK GetEditMask() const {return m_EditMask;}
-
 	bool DeserializeOLD(std::istream&);
 
 	virtual ~CTuningBase() {};
@@ -226,7 +204,6 @@ private:
 //BEGIN: DATA MEMBERS
 protected:
 	std::string m_TuningName;
-	EDITMASK m_EditMask; //Behavior: true <~> allow modification
 	TUNINGTYPE m_TuningType;
 	NOTENAMEMAP m_NoteNameMap;
 	USTEPINDEXTYPE m_FineStepCount;
@@ -237,7 +214,6 @@ protected:
 protected:
 	CTuningBase(const std::string name = "Unnamed") :
 		m_TuningName(name),
-		m_EditMask(uint16_max), //All bits to true - allow all by default.
 		m_TuningType(TT_GENERAL), //Unspecific tuning by default.
 		m_FineStepCount(0)
 		{}
@@ -261,7 +237,7 @@ private:
 inline void CTuningBase::SetName(const std::string& s)
 //-----------------------------------------------
 {
-	if(MayEdit(EM_NAME)) m_TuningName = s;
+	m_TuningName = s;
 }
 
 
@@ -275,16 +251,6 @@ inline bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vr
 	}
 	if(fs > static_cast<USTEPINDEXTYPE>(STEPINDEXTYPE_MAX) / (vrp.second - vrp.first + 1)) return false;
 	else return true;
-}
-
-
-inline bool CTuningBase::SetEditMask(const EDITMASK& em)
-//------------------------------------------------------
-{
-	if(MayEdit(EM_EDITMASK))
-		{m_EditMask = em; return false;}
-	else
-		return true;
 }
 
 

@@ -301,7 +301,6 @@ private:
 	CButton m_ButtonSet;
 	CButton m_ButtonExport;
 	CButton m_ButtonImport;
-	CButton m_ButtonReadOnly;
 
 	CTuningTreeCtrl m_TreeCtrlTuning;
 
@@ -376,7 +375,6 @@ public:
 	afx_msg void OnBnClickedButtonImport();
 	afx_msg void OnEnChangeEditFinetunesteps();
 	afx_msg void OnEnKillfocusEditFinetunesteps();
-	afx_msg void OnBnClickedCheckReadonly();
 	afx_msg void OnEnKillfocusEditName();
 	afx_msg void OnEnKillfocusEditSteps();
 	afx_msg void OnEnKillfocusEditRatioperiod();
