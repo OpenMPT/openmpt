@@ -27,6 +27,8 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../common/mptUUID.h"
+#include "../common/mptFileIO.h"
+#include "../soundlib/tuningCollection.h"
 
 
 #include <algorithm>
@@ -690,6 +692,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		sampleEditorDefaultResampler = SRCMODE_DEFAULT;
 	}
 
+	// Migrate Tuning data
+	MigrateTunings(storedVersion);
+
 	// Sanitize MIDI import data
 	if(midiImportPatternLen < 1 || midiImportPatternLen > MAX_PATTERN_ROWS)
 		midiImportPatternLen = 128;
@@ -704,6 +709,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Write updated settings
 	conf.Flush();
 
+}
+
+
+TrackerSettings::~TrackerSettings()
+//---------------------------------
+{
+	return;
 }
 
 
@@ -764,6 +776,68 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 		}
 	}
 #endif // MPT_WITH_DSOUND
+}
+
+
+void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
+//------------------------------------------------------------------------------
+{
+	
+	if(!PathTunings.GetDefaultDir().IsDirectory())
+	{
+		CreateDirectoryW(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
+	}
+	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).IsDirectory())
+	{
+		CreateDirectoryW((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).AsNative().c_str(), 0);
+	}
+	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Locale\\")).IsDirectory())
+	{
+		CreateDirectoryW((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\")).AsNative().c_str(), 0);
+	}
+	{
+		mpt::PathString fn = PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\12TET.tun");
+		if(!fn.FileOrDirectoryExists())
+		{
+			CTuning * pT = CSoundFile::CreateTuning12TET("12TET");
+			mpt::ofstream f(fn, std::ios::binary);
+			pT->Serialize(f);
+			f.close();
+			delete pT;
+			pT = nullptr;
+		}
+	}
+	{
+		mpt::PathString fn = PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\12TET [[fs15 1.17.02.49]].tun");
+		if(!fn.FileOrDirectoryExists())
+		{
+			CTuning * pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
+			mpt::ofstream f(fn, std::ios::binary);
+			pT->Serialize(f);
+			f.close();
+			delete pT;
+			pT = nullptr;
+		}
+	}
+	oldLocalTunings = LoadLocalTunings();
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,27,00,56))
+	{
+		UnpackTuningCollection(*oldLocalTunings, PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\"));
+	}
+}
+
+
+std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
+//--------------------------------------------------------------------
+{
+	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>("Local tunings");
+	s_pTuningsSharedLocal->SetSavefilePath(
+		PathTunings.GetDefaultDir()
+		+ MPT_PATHSTRING("local_tunings")
+		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
+		);
+	s_pTuningsSharedLocal->Deserialize();
+	return s_pTuningsSharedLocal;
 }
 
 

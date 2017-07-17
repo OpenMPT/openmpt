@@ -65,7 +65,6 @@ mpt::ustring FileHistory::AsISO8601() const
 // CSoundFile
 
 #ifdef MODPLUG_TRACKER
-CTuningCollection* CSoundFile::s_pTuningsSharedLocal(nullptr);
 const NoteName *CSoundFile::m_NoteNames = NoteNamesFlat;
 #endif
 
@@ -119,7 +118,6 @@ CSoundFile::CSoundFile() :
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 
-	LoadBuiltInTunings();
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
 }
 
@@ -130,7 +128,6 @@ CSoundFile::~CSoundFile()
 	Destroy();
 	delete m_pTuningsTuneSpecific;
 	m_pTuningsTuneSpecific = nullptr;
-	UnloadBuiltInTunings();
 }
 
 
@@ -1325,76 +1322,18 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 }
 
 
-#ifdef MODPLUG_TRACKER
-void CSoundFile::DeleteStaticdata()
-//---------------------------------
+CTuning* CSoundFile::CreateTuning12TET(const std::string &name)
+//-------------------------------------------------------------
 {
-	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = nullptr;
-}
-#endif
-
-
-#ifdef MODPLUG_TRACKER
-bool CSoundFile::SaveStaticTunings()
-//----------------------------------
-{
-	if(s_pTuningsSharedLocal->Serialize() != CTuningCollection::SERIALIZATION_SUCCESS)
-	{
-		AddToLog(LogError, MPT_USTRING("Static tuning serialisation failed"));
-		return false;
-	}
-	return true;
-}
-#endif
-
-
-#ifdef MODPLUG_TRACKER
-bool CSoundFile::LoadStaticTunings()
-//----------------------------------
-{
-	if(s_pTuningsSharedLocal) return true;
-	//For now not allowing to reload tunings(one should be careful when reloading them
-	//since various parts may use addresses of the tuningobjects).
-
-	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");
-
-	// Load local tunings.
-	s_pTuningsSharedLocal->SetSavefilePath(
-		TrackerSettings::Instance().PathTunings.GetDefaultDir()
-		+ MPT_PATHSTRING("local_tunings")
-		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
-		);
-	s_pTuningsSharedLocal->Deserialize();
-
-	return false;
-}
-#endif
-
-
-void CSoundFile::LoadBuiltInTunings()
-//-----------------------------------
-{
-	m_pTuningsBuiltIn = new CTuningCollection("Built-in tunings");
 	CTuningRTI* pT = new CTuningRTI;
-	pT->SetName("12TET [[fs15 1.17.02.49]]");
+	pT->SetName(name);
 	pT->CreateGeometric(12, 2);
 	pT->SetFineStepCount(15);
 	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
 		pT->SetNoteName(note, NoteNamesSharp[note]);
 	}
-	pT->SetEditMask(CTuningBase::EM_CONST_STRICT);
-	// Note: Tuning collection class handles deleting.
-	m_pTuningsBuiltIn->AddTuning(pT);
-	m_pTuningsBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
-}
-
-
-void CSoundFile::UnloadBuiltInTunings()
-//-------------------------------------
-{
-	delete m_pTuningsBuiltIn;
-	m_pTuningsBuiltIn = nullptr;
+	return pT;
 }
 
 

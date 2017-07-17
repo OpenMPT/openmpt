@@ -270,12 +270,10 @@ void CMainFrame::Initialize()
 CMainFrame::~CMainFrame()
 //-----------------------
 {
-
 	delete m_InputHandler;
-
 	CChannelManagerDlg::DestroySharedInstance();
-	CSoundFile::DeleteStaticdata();
 }
+
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //-----------------------------------------------------

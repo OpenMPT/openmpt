@@ -34,6 +34,9 @@ class Manager;
 } // namespace SoundDevice
 
 
+class CTuningCollection;
+
+
 // User-defined colors
 enum ModColor
 {
@@ -788,6 +791,10 @@ public:
 
 	MPTChords Chords;
 
+	// Tunings
+
+	std::unique_ptr<CTuningCollection> oldLocalTunings;
+
 	// Plugins
 
 	Setting<bool> bridgeAllPlugins;
@@ -824,7 +831,14 @@ public:
 
 	TrackerSettings(SettingsContainer &conf);
 
+	~TrackerSettings();
+
 	void MigrateOldSoundDeviceSettings(SoundDevice::Manager &manager);
+
+private:
+	void MigrateTunings(const MptVersion::VersionNum storedVersion);
+	std::unique_ptr<CTuningCollection> LoadLocalTunings();
+public:
 
 	void SaveSettings();
 
