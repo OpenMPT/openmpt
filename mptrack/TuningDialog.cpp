@@ -426,10 +426,10 @@ void CTuningDialog::UpdateTuningType()
 	{
 		if(m_CombobTuningType.GetCount() < 3) m_DoErrorExit = true;
 
-		if(m_pActiveTuning->GetTuningType() == TT_GEOMETRIC)
+		if(m_pActiveTuning->GetType() == TT_GEOMETRIC)
 			m_CombobTuningType.SetCurSel(2);
 		else
-			if(m_pActiveTuning->GetTuningType() == TT_GROUPGEOMETRIC)
+			if(m_pActiveTuning->GetType() == TT_GROUPGEOMETRIC)
 				m_CombobTuningType.SetCurSel(1);
 			else
 				m_CombobTuningType.SetCurSel(0);
@@ -449,12 +449,12 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 {
 	if(m_pActiveTuning != NULL)
 	{
-		const TUNINGTYPE oldType = m_pActiveTuning->GetTuningType();
+		const TUNINGTYPE oldType = m_pActiveTuning->GetType();
 		TCHAR buffer[20];
 		m_CombobTuningType.GetWindowText(buffer, CountOf(buffer));
 		const CString strNewType = buffer;
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
-		if(m_pActiveTuning->GetTuningType() != newType)
+		if(m_pActiveTuning->GetType() != newType)
 		{
 			bool changed = false;
 			if(newType == TT_GENERAL)
