@@ -282,15 +282,7 @@ public: //Misc
 
 	//Tuning-->
 public:
-#ifdef MODPLUG_TRACKER
-	static bool LoadStaticTunings();
-	bool SaveStaticTunings();
-	static void DeleteStaticdata();
-	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
-#endif
-	void LoadBuiltInTunings();
-	void UnloadBuiltInTunings();
-	CTuningCollection& GetBuiltInTunings() {return *m_pTuningsBuiltIn;}
+	static CTuning* CreateTuning12TET(const std::string &name);
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
@@ -307,10 +299,6 @@ public:
 
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
-#ifdef MODPLUG_TRACKER
-	static CTuningCollection* s_pTuningsSharedLocal;
-#endif
-	CTuningCollection* m_pTuningsBuiltIn;
 	//<--Tuning
 
 #ifdef MODPLUG_TRACKER

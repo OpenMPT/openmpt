@@ -366,4 +366,70 @@ std::string CTuningCollection::GetEditMaskString() const
 }
 
 
+#ifdef MODPLUG_TRACKER
+
+
+bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString dest)
+//--------------------------------------------------------------------------------
+{
+	CTuningCollection tc;
+	tc.SetSavefilePath(filename);
+	if(tc.Deserialize() != CTuningCollection::SERIALIZATION_SUCCESS)
+	{
+		return false;
+	}
+	return UnpackTuningCollection(tc, dest);
+}
+
+
+bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest)
+//----------------------------------------------------------------------------
+{
+	bool error = false;
+	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(tc.GetNumTunings())));
+	for(std::size_t i = 0; i < tc.GetNumTunings(); ++i)
+	{
+		const CTuning & tuning = tc.GetTuning(i);
+		mpt::PathString fn;
+		if(dest.empty())
+		{
+			fn = tc.GetSaveFilePath() + MPT_PATHSTRING(" - ");
+			if(!tc.GetName().empty())
+			{
+				mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, tc.GetName()));
+				SanitizeFilename(name);
+				fn += name + MPT_PATHSTRING(" - ");
+			}
+		} else
+		{
+			fn = dest;
+		}
+		mpt::ustring tuningName = mpt::ToUnicode(mpt::CharsetLocale, tuning.GetName());
+		if(tuningName.empty())
+		{
+			tuningName = MPT_USTRING("untitled");
+		}
+		SanitizeFilename(tuningName);
+		fn += mpt::PathString::FromUnicode(mpt::format(MPT_USTRING("%1 - %2"))(numberFmt.ToWString(i + 1), tuningName));
+		fn += mpt::PathString::FromUTF8(CTuning::s_FileExtension);
+		if(fn.FileOrDirectoryExists())
+		{
+			error = true;
+		} else
+		{
+			mpt::ofstream fout(fn, std::ios::binary);
+			if(tuning.Serialize(fout))
+			{
+				error = true;
+			}
+			fout.close();
+		}
+	}
+	return !error;
+}
+
+
+#endif
+
+
 OPENMPT_NAMESPACE_END

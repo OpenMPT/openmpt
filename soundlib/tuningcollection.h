@@ -65,7 +65,18 @@ public:
 	};
 
 	static const char s_FileExtension[4];
-	static const size_t s_nMaxTuningCount = 255;
+
+	// OpenMPT <= 1.26 had to following limits:
+	//  *  255 built-in tunings (only 2 were ever actually provided)
+	//  *  255 local tunings
+	//  *  255 tune-specific tunings
+	// As 1.27 copies all used tunings into the module, the limit of 255 is no
+	// longer sufficient. In the worst case scenario, the module contains 255
+	// unused tunings and uses 255 local ones. In addition to that, allow the
+	// user to additionally import both built-in tunings.
+	// Older OpenMPT versions will silently skip loading tunings beyond index
+	// 255.
+	static const size_t s_nMaxTuningCount = 255 + 255 + 2;
 
 //END PUBLIC STATIC CONSTS
 
@@ -160,5 +171,10 @@ private:
 //END PRIVATE METHODS.
 };
 
+
+#ifdef MODPLUG_TRACKER
+bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString dest = mpt::PathString());
+bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest = mpt::PathString());
+#endif
 
 OPENMPT_NAMESPACE_END

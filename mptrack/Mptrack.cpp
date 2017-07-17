@@ -1105,12 +1105,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::ConfigureSystemHandler();
 	}
 
-	// Create missing diretories
-	if(!TrackerSettings::Instance().PathTunings.GetDefaultDir().IsDirectory())
-	{
-		CreateDirectoryW(TrackerSettings::Instance().PathTunings.GetDefaultDir().AsNative().c_str(), 0);
-	}
-
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
@@ -1213,8 +1207,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, appInfo);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
-	// Load static tunings
-	CSoundFile::LoadStaticTunings();
+	// Set default note names
 	CSoundFile::SetDefaultNoteNames();
 
 	// Load DLS Banks

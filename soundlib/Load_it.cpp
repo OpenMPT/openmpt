@@ -197,26 +197,55 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 				continue;
 
 #ifdef MODPLUG_TRACKER
-			csf.Instruments[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
-			if(csf.Instruments[i]->pTuning)
-				continue;
+			CTuning *localTuning = TrackerSettings::Instance().oldLocalTunings->GetTuning(str);
+			if(localTuning)
+			{
+				CTuning* pNewTuning = new CTuningRTI(localTuning);
+				if(!csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				{
+					csf.AddToLog("Local tunings are deprecated and no longer supported. Tuning '" + str + "' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file.");
+					csf.Instruments[i]->pTuning = pNewTuning;
+					if(csf.GetpModDoc() != nullptr)
+					{
+						csf.GetpModDoc()->SetModified();
+					}
+					continue;
+				} else
+				{
+					delete pNewTuning;
+					csf.AddToLog("Copying Local tuning '" + str + "' to Tune-specific tunings failed.");
+				}
+			}
 #endif
 
-			csf.Instruments[i]->pTuning = csf.GetBuiltInTunings().GetTuning(str);
-			if(csf.Instruments[i]->pTuning)
-				continue;
-
-			if(str == "TET12" && csf.GetBuiltInTunings().GetNumTunings() > 0)
-				csf.Instruments[i]->pTuning = &csf.GetBuiltInTunings().GetTuning(0);
-
-			if(csf.Instruments[i]->pTuning)
-				continue;
+			if(str == "12TET [[fs15 1.17.02.49]]" || str == "12TET")
+			{
+				CTuning* pNewTuning = csf.CreateTuning12TET(str);
+				if(!csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				{
+					#ifdef MODPLUG_TRACKER
+						csf.AddToLog("Built-in tunings will no longer be used. Tuning '" + str + "' has been copied to Tune-specific tunings and will be saved in the module file.");
+						csf.Instruments[i]->pTuning = pNewTuning;
+						if(csf.GetpModDoc() != nullptr)
+						{
+							csf.GetpModDoc()->SetModified();
+						}
+					#endif
+					continue;
+				} else
+				{
+					delete pNewTuning;
+					#ifdef MODPLUG_TRACKER
+						csf.AddToLog("Copying Built-in tuning '" + str + "' to Tune-specific tunings failed.");
+					#endif
+				}
+			}
 
 			// Checking if not found tuning already noticed.
 			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
-				csf.AddToLog("Tuning " + str + " used by the module was not found.");
+				csf.AddToLog("Tuning '" + str + "' used by the module was not found.");
 #ifdef MODPLUG_TRACKER
 				if(csf.GetpModDoc() != nullptr)
 				{

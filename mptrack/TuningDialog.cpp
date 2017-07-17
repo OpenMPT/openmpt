@@ -54,7 +54,6 @@ IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
 CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun)
 	: CDialog(CTuningDialog::IDD, pParent),
 	m_TuningCollections(rVec),
-	m_TempTunings("Sandbox"),
 	m_NoteEditApply(true),
 	m_RatioEditApply(true),
 	m_pActiveTuningCollection(NULL),
@@ -63,10 +62,9 @@ CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* p
 	m_DoErrorExit(false)
 //----------------------------------------
 {
+	MPT_ASSERT(m_TuningCollections.size() == 1);
 	m_pActiveTuning = pTun;
 	m_RatioMapWnd.m_pTuning = pTun; //pTun is the tuning to show when dialog opens.
-
-	m_TuningCollections.push_back(&m_TempTunings);
 }
 
 CTuningDialog::~CTuningDialog()
@@ -405,7 +403,6 @@ BEGIN_MESSAGE_MAP(CTuningDialog, CDialog)
 	ON_COMMAND(ID_MOVETUNING, OnMoveTuning)
 	ON_COMMAND(ID_COPYTUNING, OnCopyTuning)
 	ON_COMMAND(ID_REMOVETUNINGCOLLECTION, OnRemoveTuningCollection)
-	ON_BN_CLICKED(IDC_BUTTON_TUNINGCOLLECTION_SAVE, OnBnClickedButtonTuningcollectionSave)
 END_MESSAGE_MAP()
 
 
@@ -608,70 +605,126 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 void CTuningDialog::OnBnClickedButtonExport()
 //-------------------------------------------
 {
-	const CTuning* pT = m_pActiveTuning;
-	const CTuningCollection* pTC = m_pActiveTuningCollection;
 
-	if(pT == NULL && pTC == NULL)
+	if(m_pActiveTuning == NULL && m_pActiveTuningCollection == NULL)
 	{
 		MsgBox(IDS_ERR_NO_TUNING_SELECTION, this, NULL, MB_ICONINFORMATION);
 		return;
 	}
 
-	std::string filter;
-	int filters = 0;
-	int tuningFilter = -1;
-	int sclFilter = -1;
-	int collectionFilter = -1;
-	if(pT != NULL)
-	{
-		filters++;
-		filter += std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
-		tuningFilter = filters;
-	}
-	if(pT && dynamic_cast<const CTuningRTI*>(pT))
-	{
-		filters++;
-		filter += std::string("Scala scale (*.scl)|*") + std::string(".scl")+ std::string("|");
-		sclFilter = filters;
-	}
-	if(pTC != NULL)
-	{
-		filters++;
-		filter += std::string("Tuning collection files (") + CTuningCollection::s_FileExtension + std::string(")|*") + CTuningCollection::s_FileExtension + std::string("|");
-		collectionFilter = filters;
-	}
-
-	int filterIndex = 0;
-	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(CTuning::s_FileExtension)
-		.ExtensionFilter(filter)
-		.WorkingDirectory(TrackerSettings::Instance().PathTunings.GetWorkingDir())
-		.FilterIndex(&filterIndex);
-	if(!dlg.Show(this)) return;
-
-	BeginWaitCursor();
-
 	bool failure = true;
 
-	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
+	if(m_pActiveTuning)
+	{
 
-	if(tuningFilter != -1 && filterIndex == tuningFilter)
+		const CTuning* pT = m_pActiveTuning;
+
+		std::string filter;
+		int filters = 0;
+		int tuningFilter = -1;
+		int sclFilter = -1;
+		{
+			filters++;
+			filter += std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
+			tuningFilter = filters;
+		}
+		if(dynamic_cast<const CTuningRTI*>(pT))
+		{
+			filters++;
+			filter += std::string("Scala scale (*.scl)|*") + std::string(".scl")+ std::string("|");
+			sclFilter = filters;
+		}
+
+		int filterIndex = 0;
+		FileDialog dlg = SaveFileDialog()
+			.DefaultExtension(CTuning::s_FileExtension)
+			.ExtensionFilter(filter)
+			.WorkingDirectory(TrackerSettings::Instance().PathTunings.GetWorkingDir())
+			.FilterIndex(&filterIndex);
+
+		if (!dlg.Show(this)) return;
+
+		BeginWaitCursor();
+
+		mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
+
+		if(tuningFilter != -1 && filterIndex == tuningFilter)
+		{
+			failure = pT->Serialize(fout);
+		} else if(sclFilter != -1 && filterIndex == sclFilter)
+		{
+			failure = !dynamic_cast<const CTuningRTI*>(pT)->WriteSCL(fout, dlg.GetFirstFile());
+		}
+
+		fout.close();
+
+		EndWaitCursor();
+
+	} else
 	{
-		failure = pT->Serialize(fout);
-	} else if(sclFilter != -1 && filterIndex == sclFilter)
-	{
-		failure = !dynamic_cast<const CTuningRTI*>(pT)->WriteSCL(fout, dlg.GetFirstFile());
-	} else if(collectionFilter != -1 && filterIndex == collectionFilter)
-	{
-		failure = pTC->Serialize(fout);
+
+		const CTuningCollection* pTC = m_pActiveTuningCollection;
+
+		std::string filter = std::string("multiple Tuning files (") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
+
+		mpt::PathString fileName;
+		if(!pTC->GetSaveFilePath().empty())
+		{
+			fileName = pTC->GetSaveFilePath() + MPT_PATHSTRING(" - ");
+		}
+		if(!pTC->GetName().empty())
+		{
+			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(TuningCharset, pTC->GetName()));
+			SanitizeFilename(name);
+			fileName += name + MPT_PATHSTRING(" - ");
+		}
+		fileName += MPT_PATHSTRING("%tuning_number% - %tuning_name%");
+
+		int filterIndex = 0;
+		FileDialog dlg = SaveFileDialog()
+			.DefaultExtension(CTuning::s_FileExtension)
+			.ExtensionFilter(filter)
+			.WorkingDirectory(TrackerSettings::Instance().PathTunings.GetWorkingDir())
+			.FilterIndex(&filterIndex);
+		dlg.DefaultFilename(fileName);
+
+		if (!dlg.Show(this)) return;
+
+		BeginWaitCursor();
+
+		failure = false;
+
+		auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(pTC->GetNumTunings())));
+
+		for(std::size_t i = 0; i < pTC->GetNumTunings(); ++i)
+		{
+			const CTuning & tuning = pTC->GetTuning(i);
+			fileName = dlg.GetFirstFile();
+			mpt::ustring tuningName = mpt::ToUnicode(TuningCharset, tuning.GetName());
+			if(tuningName.empty())
+			{
+				tuningName = MPT_USTRING("untitled");
+			}
+			std::wstring fileNameW = fileName.ToWide();
+			SanitizeFilename(fileNameW);
+			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_number%", numberFmt.ToWString(i + 1));
+			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", mpt::ToWide(tuningName));
+			fileName = mpt::PathString::FromWide(fileNameW);
+			mpt::ofstream fout(fileName, std::ios::binary);
+			if(tuning.Serialize(fout))
+			{
+				failure = true;
+			}
+			fout.close();
+		}
+
+		EndWaitCursor();
+
 	}
-
-	fout.close();
-	EndWaitCursor();
-
 
 	if(failure)
 		ErrorBox(IDS_ERR_EXPORT_TUNING, this);
+
 }
 
 
@@ -812,11 +865,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		if(pT)
 		{
-			if(m_TempTunings.AddTuning(pT))
+			CTuningCollection &tc = *m_TuningCollections.front();
+			if(tc.AddTuning(pT))
 			{
 				delete pT;
 				pT = nullptr;
-				if(m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
+				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
 					sLoadReport += mpt::format(L"- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
 				} else 
@@ -826,7 +880,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			} else
 			{
 				m_pActiveTuning = pT;
-				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
+				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&tc)), NULL);
 			}
 		}
 
@@ -1394,23 +1448,6 @@ void CTuningDialog::OnRemoveTuningCollection()
 	UpdateView();
 }
 
-
-void CTuningDialog::OnBnClickedButtonTuningcollectionSave()
-//---------------------------------------------------------
-{
-	if(!m_pActiveTuningCollection)
-		return;
-
-	if(m_pActiveTuningCollection->Serialize())
-	{
-		MsgBox(IDS_OPERATION_FAIL, this, NULL, MB_ICONINFORMATION);
-	}
-	else
-	{
-		Reporting::Notification("Saving succesful.");
-		m_ModifiedTCs[m_pActiveTuningCollection] = false;
-	}
-}
 
 void CTuningDialog::UpdateTuningDescription()
 //-------------------------------------------
