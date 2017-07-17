@@ -147,7 +147,7 @@ public:
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
-	TUNINGTYPE GetTuningType() const {return m_TuningType;}
+	TUNINGTYPE GetType() const {return m_TuningType;}
 
 	static std::string GetTuningTypeStr(const TUNINGTYPE& tt);
 	static TUNINGTYPE GetTuningType(const char* str);
@@ -223,7 +223,6 @@ protected:
 public:
 	static void TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy = false);
 protected:
-	TUNINGTYPE GetType() const {return m_TuningType;}
 
 	//Return true if data loading failed, false otherwise.
 	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
