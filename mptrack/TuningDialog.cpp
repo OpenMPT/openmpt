@@ -1705,7 +1705,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		{
 			if(!names[note].empty())
 			{
-				pT->SetNoteName(note, names[note]);
+				pT->SetNoteName(note, names[(note - 1 + names.size()) % names.size()]);
 			}
 		}
 	}

@@ -636,7 +636,7 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n, false))
+				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == TT_GROUPGEOMETRIC)
@@ -650,12 +650,12 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n, false))
+				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == TT_GENERAL)
 	{
-		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_RatioTable.size()));
+		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_RatioTable.size() + 1));
 		mpt::IO::WriteTextCRLF(f, "!");
 		double baseratio = 1.0;
 		for(NOTEINDEXTYPE n = 0; n < mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
