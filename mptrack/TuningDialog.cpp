@@ -454,9 +454,13 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 		m_CombobTuningType.GetWindowText(buffer, CountOf(buffer));
 		const std::string strNewType = buffer;
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
-		if(!m_pActiveTuning->IsOfType(newType))
+		if(m_pActiveTuning->GetTuningType() != newType)
 		{
-			if(Reporting::Confirm("This action may change the ratio values; continue?") == cnfYes)
+			bool changed = false;
+			if(newType == TT_GENERAL)
+			{
+				Reporting::Message(LogError, "Cannot change Tuning back to General type.", this);
+			} else if(Reporting::Confirm("This action may change the ratio values; continue?") == cnfYes)
 			{
 				m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 
@@ -478,9 +482,9 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 						m_pActiveTuning->CreateGeometric(steps, pr);
 
 				UpdateView(UM_TUNINGDATA);
+				changed = true;
 			}
-			else //Not wanting to discard current values.
-			{
+			if(!changed){
 				//Restoring tuning type combobox.
 				if(oldType == TT_GEOMETRIC)
 					m_CombobTuningType.SetCurSel(2);
