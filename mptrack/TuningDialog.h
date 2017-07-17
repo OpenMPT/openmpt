@@ -242,8 +242,6 @@ protected:
 
 private:
 
-	void UpdateTuningDescription();
-
 	void UpdateView(const int UpdateMask = 0);
 	void UpdateTuningType();
 

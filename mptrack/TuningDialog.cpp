@@ -173,8 +173,6 @@ BOOL CTuningDialog::OnInitDialog()
 
 	m_RatioMapWnd.Init(this, 0);
 
-	SetDlgItemText(IDC_TUNINGTYPE_DESC, _T(""));
-
 	//-->Creating treeview
 	m_TreeItemTuningItemMap.ClearMapping();
 	for(const auto &tuningCol : m_TuningCollections)
@@ -319,8 +317,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 			m_EditFineTuneSteps.SetWindowText(_T(""));
 			m_EditName.SetWindowText(_T(""));
 
-			SetDlgItemText(IDC_TUNINGTYPE_DESC, _T(""));
-
 			m_CombobTuningType.SetCurSel(-1);
 
 			m_RatioMapWnd.ShowWindow(SW_HIDE);
@@ -411,7 +407,6 @@ void CTuningDialog::UpdateTuningType()
 			else
 				m_CombobTuningType.SetCurSel(0);
 	}
-	UpdateTuningDescription();
 }
 
 
@@ -468,7 +463,6 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 			}
 		}
 	}
-	UpdateTuningDescription();
 }
 
 
@@ -1385,21 +1379,6 @@ void CTuningDialog::OnRemoveTuningCollection()
 	delete deletableTC; deletableTC = 0;
 
 	UpdateView();
-}
-
-
-void CTuningDialog::UpdateTuningDescription()
-//-------------------------------------------
-{
-	TUNINGTYPE type = static_cast<TUNINGTYPE>(m_CombobTuningType.GetItemData(m_CombobTuningType.GetCurSel()));
-	if(type == TT_GENERAL)
-		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("No ratio restrictions"));
-	else if(type == TT_GROUPGEOMETRIC)
-		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Ratio of ratios with distance of 'groupsize' is constant."));
-	else if(type == TT_GEOMETRIC)
-		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Ratio of successive ratios is constant."));
-	else
-		SetDlgItemText(IDC_TUNINGTYPE_DESC, _T("Unknown type"));
 }
 
 
