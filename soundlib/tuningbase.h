@@ -45,7 +45,6 @@ public:
 	typedef float32 RATIOTYPE; //If changing RATIOTYPE, serialization methods may need modifications.
 	typedef int32 STEPINDEXTYPE;
 	typedef uint32 USTEPINDEXTYPE;
-	typedef void (*MESSAGEHANDLER)(const char*, const char*);
 
 	typedef int16 SERIALIZATION_VERSION;
 	typedef bool SERIALIZATION_RETURN_TYPE;
@@ -254,8 +253,6 @@ private:
 	static void ReadNotenamemapPair(std::istream& iStrm, NOTENAMEMAP::value_type& val, const size_t);
 	static void WriteNotenamemappair(std::ostream& oStrm, const NOTENAMEMAP::value_type& val, const size_t);
 
-private:
-	static void DefaultMessageHandler(const char*, const char*) {}
 };
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
