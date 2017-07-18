@@ -187,12 +187,6 @@ protected:
 //END PROTECTED INTERFACE
 
 
-//BEGIN PRIVATE METHODS
-private:
-	bool SetType(const TUNINGTYPE& tt);
-//END PRIVATE METHODS
-
-
 //BEGIN: DATA MEMBERS
 protected:
 	std::string m_TuningName;
