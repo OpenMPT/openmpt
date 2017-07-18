@@ -749,12 +749,10 @@ static inline message_formatter<std::wstring> wformat(const std::wstring &format
 }
 #endif
 
-#if MPT_USTRING_MODE_UTF8
 static inline message_formatter<mpt::ustring> uformat(const mpt::ustring &format)
 {
 	return message_formatter<mpt::ustring>(format);
 }
-#endif
 
 #if defined(_MFC_VER)
 static inline message_formatter<CString> tformat(const CString &format)
