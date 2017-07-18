@@ -50,6 +50,7 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 CTuningRTI::CTuningRTI(const CTuningRTI &other)
 //---------------------------------------------
+	: CTuningBase()
 {
 	SetDummyValues();
 	CTuningRTI& to = *this;
