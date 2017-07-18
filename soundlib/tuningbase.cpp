@@ -48,35 +48,6 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 
 
-CTuningRTI::CTuningRTI(const CTuningRTI &other)
-//---------------------------------------------
-	: CTuningBase()
-{
-	SetDummyValues();
-	CTuningRTI& to = *this;
-	const CTuningRTI& from = other;
-
-	to.m_TuningName = from.m_TuningName;
-
-	to.m_NoteNameMap = from.m_NoteNameMap;
-
-	to.m_TuningType = from.m_TuningType;
-
-	//Copying ratios.
-	const VRPAIR rp = to.ProSetValidityRange(from.GetValidityRange());
-
-	//Copying ratios
-	for(NOTEINDEXTYPE i = rp.first; i<=rp.second; i++)
-	{
-		to.ProSetRatio(i, from.GetRatio(i));
-	}
-	to.ProSetGroupSize(from.GetGroupSize());
-	to.ProSetGroupRatio(from.GetGroupRatio());
-	to.ProSetFineStepCount(from.GetFineStepCount());
-}
-
-
-
 bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 //--------------------------------------------------------------------
 {

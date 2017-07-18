@@ -68,9 +68,6 @@ public:
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
-	//Copy tuning.
-	CTuningRTI(const CTuningRTI &other);
-
 	CTuningRTI() {SetDummyValues();}
 
 	virtual ~CTuningRTI() {}

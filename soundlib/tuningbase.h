@@ -215,8 +215,6 @@ protected:
 		m_FineStepCount(0)
 		{}
 private:
-	CTuningBase(CTuningBase&) {}
-	CTuningBase& operator=(const CTuningBase&) {return *this;}
 	static void ReadNotenamemapPair(std::istream& iStrm, NOTENAMEMAP::value_type& val, const size_t);
 	static void WriteNotenamemappair(std::ostream& oStrm, const NOTENAMEMAP::value_type& val, const size_t);
 
