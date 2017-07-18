@@ -181,7 +181,7 @@ bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RA
 			return true;
 		else
 		{
-			SetType(TT_GROUPGEOMETRIC);
+			m_TuningType = TT_GROUPGEOMETRIC;
 			ProSetFineStepCount(GetFineStepCount());
 			return false;
 		}
@@ -200,7 +200,7 @@ bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, c
 			return true;
 		else
 		{
-			SetType(TT_GEOMETRIC);
+			m_TuningType = TT_GEOMETRIC;
 			ProSetFineStepCount(GetFineStepCount());
 			return false;
 		}
@@ -240,26 +240,6 @@ bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
 		return CreateGeometric(GetGroupSize(), r);
 
 	return true;
-}
-
-
-
-bool CTuningBase::SetType(const TUNINGTYPE& tt)
-//---------------------------------------------
-{
-	//Note: This doesn't check whether the tuning ratios
-	//are consistent with given type.
-	{
-		m_TuningType = tt;
-
-		if(m_TuningType == TT_GENERAL)
-		{
-			ProSetGroupSize(0);
-			ProSetGroupRatio(0);
-		}
-
-		return false;
-	}
 }
 
 
