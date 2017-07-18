@@ -63,6 +63,8 @@ public:
 	bool WriteSCL(std::ostream &f, const mpt::PathString &filename) const;
 #endif
 
+	bool UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r);
+
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
