@@ -16,13 +16,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-typedef CTuningBase CTuning;
-
-
-
-//================================
-class CTuningRTI : public CTuning //RTI <-> Ratio Table Implementation
-//================================
+//===================================
+class CTuningRTI : public CTuningBase //RTI <-> Ratio Table Implementation
+//===================================
 {
 
 public:
@@ -56,7 +52,7 @@ public:
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 
-	static CTuning* Deserialize(std::istream& inStrm);
+	static CTuningRTI* Deserialize(std::istream& inStrm);
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
 	static CTuningRTI* DeserializeOLD(std::istream&);
@@ -71,7 +67,7 @@ public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
 	//Copy tuning.
-	CTuningRTI(const CTuning* const pTun);
+	CTuningRTI(const CTuningRTI* const pTun);
 
 	CTuningRTI() {SetDummyValues();}
 
@@ -146,6 +142,9 @@ private:
 	//<----Actual data members
 
 }; //End: CTuningRTI declaration.
+
+
+typedef CTuningRTI CTuning;
 
 
 OPENMPT_NAMESPACE_END
