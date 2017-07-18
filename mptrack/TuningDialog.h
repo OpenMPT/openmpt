@@ -344,7 +344,8 @@ private:
 	static const TUNINGTREEITEM s_notFoundItemTuning;
 	static const HTREEITEM s_notFoundItemTree;
 
-	bool AddTuning(CTuningCollection*, CTuning* pT = NULL);
+	bool AddTuning(CTuningCollection*, CTuning* pT);
+	bool AddTuning(CTuningCollection*, CTuning::TUNINGTYPE type);
 
 	//Flag to prevent multiple exit error-messages.
 	bool m_DoErrorExit;
@@ -356,13 +357,14 @@ private:
 //Treectrl context menu functions.
 public:
 	afx_msg void OnRemoveTuning();
-	afx_msg void OnAddTuning();
+	afx_msg void OnAddTuningGeneral();
+	afx_msg void OnAddTuningGroupGeometric();
+	afx_msg void OnAddTuningGeometric();
 	afx_msg void OnCopyTuning();
 	afx_msg void OnRemoveTuningCollection();
 
 //Event-functions
 public:
-	afx_msg void OnCbnSelchangeComboTtype();
 	afx_msg void OnEnChangeEditSteps();
 	afx_msg void OnEnChangeEditRatioperiod();
 	afx_msg void OnEnChangeEditNotename();
