@@ -1325,7 +1325,7 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 CTuning* CSoundFile::CreateTuning12TET(const std::string &name)
 //-------------------------------------------------------------
 {
-	CTuningRTI* pT = new CTuningRTI;
+	CTuningRTI* pT = new CTuningRTI();
 	pT->SetName(name);
 	pT->CreateGeometric(12, 2);
 	pT->SetFineStepCount(15);

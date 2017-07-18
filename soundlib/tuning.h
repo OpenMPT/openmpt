@@ -69,28 +69,11 @@ public:
 
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
-	CTuningRTI(const std::vector<RATIOTYPE>& ratios,
-				const NOTEINDEXTYPE& stepMin = s_StepMinDefault,
-				const std::string& name = "")
-				: CTuning(name)
-	{
-		SetDummyValues();
-		m_StepMin = stepMin;
-		m_RatioTable = ratios;
-	}
 
 	//Copy tuning.
 	CTuningRTI(const CTuning* const pTun);
 
 	CTuningRTI() {SetDummyValues();}
-
-	CTuningRTI(const std::string& name) : CTuning(name) {SetDummyValues();}
-
-	CTuningRTI(const NOTEINDEXTYPE& stepMin, const std::string& name) : CTuning(name)
-	{
-		SetDummyValues();
-		m_StepMin = stepMin;
-	}
 
 	virtual ~CTuningRTI() {}
 
