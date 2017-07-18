@@ -69,13 +69,6 @@ static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
 }
 
 
-CTuningRTI::CTuningRTI(const CTuningRTI* const pTun)
-//--------------------------------------------------
-{
-	SetDummyValues();
-	if(pTun) TuningCopy(*this, *pTun);
-}
-
 void CTuningRTI::SetDummyValues()
 //-------------------------------
 {

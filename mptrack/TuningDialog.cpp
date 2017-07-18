@@ -819,7 +819,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				if(pTC->GetNumTunings() == 1)
 				{
 					Reporting::Message(LogInformation, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
-					pT = new CTuningRTI(&(pTC->GetTuning(0)));
+					pT = new CTuningRTI(pTC->GetTuning(0));
 					delete pTC;
 					pTC = nullptr;
 					// ok
@@ -1299,7 +1299,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 	CTuning* pNewTuning = nullptr;
 	if(pT)
 	{
-		pNewTuning = new CTuningRTI(pT);
+		pNewTuning = new CTuningRTI(*pT);
 	} else
 	{
 		pNewTuning = new CTuningRTI();

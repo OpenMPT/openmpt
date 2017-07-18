@@ -187,8 +187,6 @@ protected:
 
 protected:
 
-	static void TuningCopy(CTuningBase& to, const CTuningBase& from);
-
 	//Return true if data loading failed, false otherwise.
 	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
 
@@ -207,7 +205,6 @@ protected:
 	TUNINGTYPE m_TuningType;
 	NOTENAMEMAP m_NoteNameMap;
 	USTEPINDEXTYPE m_FineStepCount;
-	//NOTE: If adding new members, TuningCopy might need to be modified.
 
 //END DATA MEMBERS
 
