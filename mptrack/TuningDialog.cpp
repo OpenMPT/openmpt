@@ -201,6 +201,38 @@ BOOL CTuningDialog::OnInitDialog()
 }
 
 
+bool CTuningDialog::CanEdit(CTuning * pT, CTuningCollection * pTC) const
+{
+	if(!pT)
+	{
+		return false;
+	}
+	if(!pTC)
+	{
+		return false;
+	}
+	if(pTC != m_TuningCollections[0])
+	{
+		return false;
+	}
+	return true;
+}
+
+
+bool CTuningDialog::CanEdit(CTuningCollection * pTC) const
+{
+	if(!pTC)
+	{
+		return false;
+	}
+	if(pTC != m_TuningCollections[0])
+	{
+		return false;
+	}
+	return true;
+}
+
+
 void CTuningDialog::UpdateView(const int updateMask)
 //--------------------------------------------------
 {
@@ -278,7 +310,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditRatioPeriod.Invalidate();
 		m_EditSteps.Invalidate();
 
-		bool enableControls = true;
+		bool enableControls = CanEdit(m_pActiveTuning, m_pActiveTuningCollection);
 
 		m_CombobTuningType.EnableWindow(enableControls);
 		m_EditSteps.SetReadOnly(!enableControls);
@@ -366,7 +398,6 @@ BEGIN_MESSAGE_MAP(CTuningDialog, CDialog)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_TREE_TUNING, OnTvnBegindragTreeTuning)
 	ON_COMMAND(ID_REMOVETUNING, OnRemoveTuning)
 	ON_COMMAND(ID_ADDTUNING, OnAddTuning)
-	ON_COMMAND(ID_MOVETUNING, OnMoveTuning)
 	ON_COMMAND(ID_COPYTUNING, OnCopyTuning)
 	ON_COMMAND(ID_REMOVETUNINGCOLLECTION, OnRemoveTuningCollection)
 END_MESSAGE_MAP()
@@ -565,11 +596,8 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 void CTuningDialog::OnBnClickedButtonNew()
 //----------------------------------------
 {
-	if(m_pActiveTuningCollection)
-	{
-		m_CommandItemDest.Set(m_pActiveTuningCollection);
-		OnAddTuning();
-	}
+	m_CommandItemDest.Set(m_TuningCollections[0]);
+	OnAddTuning();
 }
 
 
@@ -704,8 +732,11 @@ void CTuningDialog::OnBnClickedButtonRemove()
 {
 	if(m_pActiveTuning)
 	{
-		m_CommandItemDest.Set(m_pActiveTuning);
-		OnRemoveTuning();
+		if(CanEdit(m_pActiveTuning, m_pActiveTuningCollection))
+		{
+			m_CommandItemDest.Set(m_pActiveTuning);
+			OnRemoveTuning();
+		}
 	} else if(m_pActiveTuningCollection)
 	{
 		if(IsDeletable(m_pActiveTuningCollection))
@@ -797,7 +828,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				{
 					Reporting::Message(LogInformation, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
 					pT = new CTuningRTI();
-					CTuningBase::TuningCopy(*pT, pTC->GetTuning(0), true);
+					CTuningBase::TuningCopy(*pT, pTC->GetTuning(0));
 					delete pTC;
 					pTC = nullptr;
 					// ok
@@ -824,6 +855,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				// fail
 			} else
 			{
+				pTC->SetName("loaded: " + pTC->GetName());
 				// ok
 			}
 
@@ -1104,7 +1136,10 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 		if(pTC != NULL)
 		{
 			UINT mask = MF_STRING;
-
+			if(!CanEdit(pT, pTC))
+			{
+				mask |= MF_GRAYED;
+			}
 			AppendMenu(popUpMenu, mask, ID_REMOVETUNING, _T("Remove"));
 
 			m_CommandItemDest.Set(pT);
@@ -1115,14 +1150,14 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 		if(pTC != NULL)
 		{
 			UINT mask = MF_STRING;
-
+			if(!CanEdit(pTC))
+				mask |= MF_GRAYED;
 			AppendMenu(popUpMenu, mask, ID_ADDTUNING, _T("Add tuning"));
 
 			mask = MF_STRING;
 			if(!IsDeletable(pTC))
 				mask |= MF_GRAYED;
-
-			AppendMenu(popUpMenu, mask, ID_REMOVETUNINGCOLLECTION, _T("Delete tuning collection"));
+			AppendMenu(popUpMenu, mask, ID_REMOVETUNINGCOLLECTION, _T("Unload tuning collection"));
 
 			m_CommandItemDest.Set(pTC);
 		}
@@ -1233,9 +1268,11 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
 		POINT point;
 		GetCursorPos(&point);
 
+		if(!CanEdit(pTCdest))
+		{
+			mask |= MF_GRAYED;
+		}
 		AppendMenu(popUpMenu, mask, ID_COPYTUNING, _T("Copy here"));
-
-		AppendMenu(popUpMenu, mask, ID_MOVETUNING, _T("Move here"));
 
 		GetCursorPos(&point);
 		TrackPopupMenu(popUpMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, 0, m_hWnd, NULL);
@@ -1313,44 +1350,6 @@ void CTuningDialog::OnRemoveTuning()
 	}
 
 	m_CommandItemDest = s_notFoundItemTuning;
-}
-
-void CTuningDialog::OnMoveTuning()
-//--------------------------------
-{
-	if(!m_CommandItemDest)
-		return;
-
-	CTuning* pT = m_CommandItemSrc.GetT();
-	CTuningCollection* pTCsrc = GetpTuningCollection(pT);
-
-	if(pT == NULL)
-	{
-		m_CommandItemDest = s_notFoundItemTuning;
-		return;
-	}
-
-	CTuningCollection* pTCdest = NULL;
-	if(m_CommandItemDest.GetT())
-		pTCdest = GetpTuningCollection(m_CommandItemDest.GetT());
-	else
-		pTCdest = m_CommandItemDest.GetTC();
-
-
-	HTREEITEM treeItemSrcTC = m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTCsrc));
-	HTREEITEM treeItemDestTC = m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTCdest));
-	DeleteTreeItem(pT);
-	m_ModifiedTCs[pTCsrc] = true;
-	m_ModifiedTCs[pTCdest] = true;
-	if(CTuningCollection::TransferTuning(pTCsrc, pTCdest, pT))
-	{
-		Reporting::Message(LogNotification, _T("Operation failed."), this);
-		AddTreeItem(pT, treeItemSrcTC, NULL);
-	}
-	else
-		AddTreeItem(pT, treeItemDestTC, NULL);
-
-	UpdateView();
 }
 
 

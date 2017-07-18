@@ -185,7 +185,7 @@ protected:
 
 //PROTECTED INTERFACE
 public:
-	static void TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy = false);
+	static void TuningCopy(CTuningBase& to, const CTuningBase& from);
 protected:
 
 	//Return true if data loading failed, false otherwise.

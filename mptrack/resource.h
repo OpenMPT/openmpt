@@ -1138,7 +1138,6 @@
 #define ID_PATTERN_TRANSITION_UNMUTEALL 36022
 #define ID_REMOVETUNING                 36023
 #define ID_ADDTUNING                    36024
-#define ID_MOVETUNING                   36025
 #define ID_COPYTUNING                   36026
 #define ID_REMOVETUNINGCOLLECTION       36027
 #define ID_SHOWTIMEATROW                36028

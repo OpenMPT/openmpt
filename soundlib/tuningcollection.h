@@ -91,7 +91,8 @@ public:
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	std::string GetName() const {return m_Name;}
+	std::string GetName() const { return m_Name; }
+	void SetName(const std::string name) { m_Name = name; }
 
 #ifndef MODPLUG_NO_FILESAVE
 	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
@@ -107,10 +108,6 @@ public:
 	bool Serialize() const;
 	bool Deserialize();
 #endif // MODPLUG_NO_FILESAVE
-
-	//Transfer tuning pT from pTCsrc to pTCdest
-	static bool TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT);
-	
 
 //END INTERFACE
 	
