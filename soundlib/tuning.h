@@ -67,7 +67,7 @@ public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
 	//Copy tuning.
-	CTuningRTI(const CTuningRTI* const pTun);
+	CTuningRTI(const CTuningRTI &other);
 
 	CTuningRTI() {SetDummyValues();}
 

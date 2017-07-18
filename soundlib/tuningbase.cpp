@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "tuningbase.h"
+#include "tuning.h"
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 
@@ -47,9 +48,12 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 
 
-void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from)
-//--------------------------------------------------------------------
+CTuningRTI::CTuningRTI(const CTuningRTI &other)
+//---------------------------------------------
 {
+	SetDummyValues();
+	CTuningRTI& to = *this;
+	const CTuningRTI& from = other;
 
 	to.m_TuningName = from.m_TuningName;
 
