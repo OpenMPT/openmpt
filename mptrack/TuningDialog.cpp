@@ -290,18 +290,18 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 		const UNOTEINDEXTYPE period = m_pActiveTuning->GetGroupSize();
 		const RATIOTYPE GroupRatio = m_pActiveTuning->GetGroupRatio();
-		if(period > 0)
+		if(m_pActiveTuning->GetType() == TT_GROUPGEOMETRIC || m_pActiveTuning->GetType() == TT_GEOMETRIC)
 		{
-			m_EditSteps.EnableWindow();
+			m_EditSteps.EnableWindow(TRUE);
+			m_EditRatioPeriod.EnableWindow(TRUE);
 			m_EditSteps.SetWindowText(mpt::tfmt::val(period));
-
-			m_EditRatioPeriod.EnableWindow();
 			m_EditRatioPeriod.SetWindowText(mpt::tfmt::val(GroupRatio));
-		}
-		else //case: m_pActiveTuning is of type general.
+		} else
 		{
-			//m_EditSteps.EnableWindow(false);
-			//m_EditRatioPeriod.EnableWindow(false);
+			m_EditSteps.EnableWindow(FALSE);
+			m_EditRatioPeriod.EnableWindow(FALSE);
+			m_EditSteps.SetWindowText(_T(""));
+			m_EditRatioPeriod.SetWindowText(_T(""));
 		}
 
 		m_EditRatioPeriod.Invalidate();
