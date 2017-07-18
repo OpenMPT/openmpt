@@ -81,9 +81,6 @@ protected:
 
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
-	//Not implemented.
-	VRPAIR ProSetValidityRange(const VRPAIR&);
-
 	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]
 	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
 	RATIOTYPE ProSetGroupRatio(const RATIOTYPE& pr) {return m_GroupRatio = (pr >= 0) ? pr : -pr;}

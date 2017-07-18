@@ -143,10 +143,6 @@ public:
 	virtual VRPAIR GetValidityRange() const = 0;
 
 
-	//To try to set validity range to given range; returns
-	//the range valid after trying to set the new range.
-	VRPAIR SetValidityRange(const VRPAIR& vrp);
-
 	//Return true if note is within validity range - false otherwise.
 	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
 
@@ -171,8 +167,6 @@ protected:
 	//The two methods below return false if action was done, true otherwise.
 	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) = 0;
 	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) = 0;
-
-	virtual VRPAIR ProSetValidityRange(const VRPAIR&) = 0;
 	
 	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&) = 0;
 
