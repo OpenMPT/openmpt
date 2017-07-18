@@ -242,6 +242,9 @@ protected:
 
 private:
 
+	bool CanEdit(CTuningCollection * pTC) const;
+	bool CanEdit(CTuning * pT, CTuningCollection * pTC) const;
+
 	void UpdateView(const int UpdateMask = 0);
 	void UpdateTuningType();
 
@@ -354,7 +357,6 @@ private:
 public:
 	afx_msg void OnRemoveTuning();
 	afx_msg void OnAddTuning();
-	afx_msg void OnMoveTuning();
 	afx_msg void OnCopyTuning();
 	afx_msg void OnRemoveTuningCollection();
 

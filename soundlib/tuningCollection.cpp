@@ -330,30 +330,6 @@ bool CTuningCollection::AddTuning(std::istream& inStrm)
 	}
 }
 
-//Static
-bool CTuningCollection::TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT)
-//--------------------------------------------------------------------------------------------------------
-{
-	if(pTCsrc == NULL || pTCdest == NULL || pT == NULL)
-		return true;
-
-	if(pTCsrc == pTCdest)
-		return true;
-
-	size_t i = pTCsrc->FindTuning(pT);
-	if(i >= pTCsrc->m_Tunings.size()) //Tuning not found?
-		return true;
-
-	if(pTCdest->AddTuning(pTCsrc->m_Tunings[i]))
-		return true;
-
-	if(pTCsrc->Remove(pTCsrc->m_Tunings.begin()+i, false))
-		return true;
-
-	return false;
-
-}
-
 
 #ifdef MODPLUG_TRACKER
 

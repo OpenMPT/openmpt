@@ -47,14 +47,11 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 
 
-void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy)
-//---------------------------------------------------------------------------------------------------
+void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from)
+//--------------------------------------------------------------------
 {
 
-	if(allowExactnamecopy)
-		to.m_TuningName = from.m_TuningName;
-	else
-		to.m_TuningName = std::string("Copy of ") + from.m_TuningName;
+	to.m_TuningName = from.m_TuningName;
 
 	to.m_NoteNameMap = from.m_NoteNameMap;
 
