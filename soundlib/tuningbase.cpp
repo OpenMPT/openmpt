@@ -244,19 +244,6 @@ bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
 
 
 
-CTuningBase::VRPAIR CTuningBase::SetValidityRange(const VRPAIR& vrp)
-//------------------------------------------------------------------
-{
-	if(vrp.second < vrp.first) return GetValidityRange();
-	if(IsStepCountRangeSufficient(GetFineStepCount(), vrp)
-	   )
-		return ProSetValidityRange(vrp);
-	else
-		return GetValidityRange();
-}
-
-
-
 bool CTuningBase::SetType(const TUNINGTYPE& tt)
 //---------------------------------------------
 {

@@ -321,16 +321,6 @@ bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
 }
 
 
-CTuningRTI::VRPAIR CTuningRTI::ProSetValidityRange(const VRPAIR&)
-//---------------------------------------------------------------
-{
-	//TODO: Implementation. Things to note:
-	//		-If validity range is smaller than period, various methods such as ProSetFinestepcount
-	//			might create wrong ratios.
-	return GetValidityRange();
-}
-
-
 void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 //------------------------------------------------------------
 {
