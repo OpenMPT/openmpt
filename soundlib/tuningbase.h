@@ -184,13 +184,13 @@ protected:
 
 
 //PROTECTED INTERFACE
-public:
-	static void TuningCopy(CTuningBase& to, const CTuningBase& from);
+
 protected:
+
+	static void TuningCopy(CTuningBase& to, const CTuningBase& from);
 
 	//Return true if data loading failed, false otherwise.
 	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
-
 
 //END PROTECTED INTERFACE
 
