@@ -1703,23 +1703,18 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	}
 
 	mpt::ustring tuningName;
-	bool hasFilename = false;
-	if(!filename.empty())
-	{
-		tuningName += mpt::ToUnicode(mpt::CharsetISO8859_1, filename);
-		hasFilename = true;
-	} else if(!name.empty())
-	{
-		tuningName += name;
-		hasFilename = true;
-	}
-	if(hasFilename && !description.empty())
-	{
-		tuningName += MPT_USTRING(": ");
-	}
 	if(!description.empty())
 	{
-		tuningName += mpt::ToUnicode(mpt::CharsetISO8859_1, description);
+		tuningName = mpt::ToUnicode(mpt::CharsetISO8859_1, description);
+	} else if(!filename.empty())
+	{
+		tuningName = mpt::ToUnicode(mpt::CharsetISO8859_1, filename);
+	} else if(!name.empty())
+	{
+		tuningName = name;
+	} else
+	{
+		tuningName = mpt::format(MPT_USTRING("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, tuningName));
 
