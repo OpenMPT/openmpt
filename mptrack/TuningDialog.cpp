@@ -1581,8 +1581,24 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;
 	std::string str;
-	SkipCommentLines(iStrm, str);
-	// str should now contain description text.
+
+	std::string filename;
+	bool first = true;
+	std::string whitespace(" \t");
+	while(std::getline(iStrm, str))
+	{
+		auto start = str.find_first_not_of(whitespace);
+		// Lines starting with a ! are comments
+		if(start != std::string::npos && str[start] != '!')
+			break;
+		if(first)
+		{
+			filename = mpt::String::Trim(str.substr(start + 1), std::string(" \t\r\n"));
+		}
+		first = false;
+	}
+	std::string description = mpt::String::Trim(str, std::string(" \t\r\n"));
+
 	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
 	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
@@ -1685,7 +1701,26 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		return enSclImportTuningCreationFailure;
 	}
 
-	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, name));
+	mpt::ustring tuningName;
+	bool hasFilename = false;
+	if(!filename.empty())
+	{
+		tuningName += mpt::ToUnicode(mpt::CharsetISO8859_1, filename);
+		hasFilename = true;
+	} else if(!name.empty())
+	{
+		tuningName += name;
+		hasFilename = true;
+	}
+	if(hasFilename && !description.empty())
+	{
+		tuningName += MPT_USTRING(": ");
+	}
+	if(!description.empty())
+	{
+		tuningName += mpt::ToUnicode(mpt::CharsetISO8859_1, description);
+	}
+	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, tuningName));
 
 	bool allNamesEmpty = true;
 	bool allNamesValid = true;
