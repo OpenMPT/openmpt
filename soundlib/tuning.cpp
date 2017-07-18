@@ -290,6 +290,37 @@ bool CTuningRTI::ProSetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 }
 
 
+bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
+//----------------------------------------------------------------------
+{
+	if(GetType() != TT_GROUPGEOMETRIC)
+	{
+		return false;
+	}
+	if(m_RatioTable.empty())
+	{
+		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
+		m_StepMin = s_StepMinDefault;
+	}
+	if(!IsNoteInTable(s))
+	{
+		return false;
+	}
+	m_RatioTable[s - m_StepMin] = std::fabs(r);
+	for(NOTEINDEXTYPE n = m_StepMin; n < m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
+	{
+		if(n == s)
+		{
+			// nothing
+		} else if(mpt::abs(n - s) % m_GroupSize == 0)
+		{
+			m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
+		}
+	}
+	return true;
+}
+
+
 CTuningRTI::VRPAIR CTuningRTI::ProSetValidityRange(const VRPAIR&)
 //---------------------------------------------------------------
 {

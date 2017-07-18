@@ -80,11 +80,13 @@ CTuningRTI::CTuningRTI(const CTuningRTI &other)
 bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 //--------------------------------------------------------------------
 {
+	if(GetType() != TT_GENERAL)
+	{
+		return true;
+	}
 	{
 		if(ProSetRatio(s, r))
 			return true;
-		else
-			SetType(TT_GENERAL);
 
 		return false;
 	}

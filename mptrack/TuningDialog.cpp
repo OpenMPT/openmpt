@@ -530,7 +530,13 @@ void CTuningDialog::OnEnChangeEditRatiovalue()
 	std::string str = mpt::ToCharset(TuningCharset, buffer);
 	if(str.length() > 0)
 	{
-		m_pActiveTuning->SetRatio(currentNote, ConvertStrTo<RATIOTYPE>(buffer));
+		if(m_pActiveTuning->GetType() == TT_GROUPGEOMETRIC)
+		{
+			m_pActiveTuning->UpdateRatioGroupGeometric(currentNote, ConvertStrTo<RATIOTYPE>(buffer));
+		} else
+		{
+			m_pActiveTuning->SetRatio(currentNote, ConvertStrTo<RATIOTYPE>(buffer));
+		}
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateTuningType();
 		m_RatioMapWnd.Invalidate();
