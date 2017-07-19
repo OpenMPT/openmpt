@@ -440,6 +440,11 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
 //---------------------------------------------------------------------------
 {
+	// reject unknown types
+	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
+	{
+		return true;
+	}
 	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
 	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
 	if (IsOfType(TT_GROUPGEOMETRIC))
