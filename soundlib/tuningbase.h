@@ -150,8 +150,6 @@ public:
 	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
 	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
 
-	bool DeserializeOLD(std::istream&);
-
 	virtual ~CTuningBase() {};
 
 //END TUNING INTERFACE
