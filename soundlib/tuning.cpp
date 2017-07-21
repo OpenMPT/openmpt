@@ -847,4 +847,19 @@ void WriteStr(std::ostream& oStrm, const std::string& str)
 } // namespace CTuningS11n.
 
 
+
+bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
+//-------------------------------------------------------------------------
+{
+	{ // avoid integer overload
+		//if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
+		MPT_ASSERT(NOTEINDEXTYPE_MIN / 2 < vrp.first && vrp.second < NOTEINDEXTYPE_MAX / 2);
+		if(NOTEINDEXTYPE_MIN / 2 >= vrp.first || vrp.second >= NOTEINDEXTYPE_MAX / 2) return true;
+	}
+	if(fs > static_cast<USTEPINDEXTYPE>(STEPINDEXTYPE_MAX) / (vrp.second - vrp.first + 1)) return false;
+	else return true;
+}
+
+
+
 OPENMPT_NAMESPACE_END

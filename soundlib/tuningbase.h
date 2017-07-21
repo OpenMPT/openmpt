@@ -107,7 +107,7 @@ public:
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
-	void SetName(const std::string& s);
+	void SetName(const std::string& s) { m_TuningName = s; }
 
 	std::string GetName() const {return m_TuningName;}
 
@@ -181,27 +181,6 @@ private:
 #define STEPINDEXTYPE_MIN (std::numeric_limits<STEPINDEXTYPE>::min)()
 #define STEPINDEXTYPE_MAX (std::numeric_limits<STEPINDEXTYPE>::max)()
 #define USTEPINDEXTYPE_MAX (std::numeric_limits<USTEPINDEXTYPE>::max)()
-
-
-
-inline void CTuningBase::SetName(const std::string& s)
-//-----------------------------------------------
-{
-	m_TuningName = s;
-}
-
-
-inline bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
-//--------------------------------------------------------------------------------
-{
-	{ // avoid integer overload
-		//if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
-		MPT_ASSERT(NOTEINDEXTYPE_MIN / 2 < vrp.first && vrp.second < NOTEINDEXTYPE_MAX / 2);
-		if(NOTEINDEXTYPE_MIN / 2 >= vrp.first || vrp.second >= NOTEINDEXTYPE_MAX / 2) return true;
-	}
-	if(fs > static_cast<USTEPINDEXTYPE>(STEPINDEXTYPE_MAX) / (vrp.second - vrp.first + 1)) return false;
-	else return true;
-}
 
 
 OPENMPT_NAMESPACE_END
