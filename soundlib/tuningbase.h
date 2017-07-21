@@ -154,16 +154,6 @@ protected:
 
 
 
-//PROTECTED INTERFACE
-
-protected:
-
-	//Return true if data loading failed, false otherwise.
-	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
-
-//END PROTECTED INTERFACE
-
-
 //BEGIN: DATA MEMBERS
 protected:
 	std::string m_TuningName;
