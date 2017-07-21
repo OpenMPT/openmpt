@@ -37,14 +37,6 @@ typedef CTuning::RATIOTYPE RATIOTYPE;
 #define NOTEINDEXTYPE CTuning::NOTEINDEXTYPE
 
 
-/*
-TODOS:
--Clear tuning
--Tooltips.
--Create own dialogs for Tuning collection part, and Tuning part.
-*/
-
-
 // CTuningDialog dialog
 IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
 CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun)
