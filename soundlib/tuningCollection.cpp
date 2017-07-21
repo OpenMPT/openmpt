@@ -27,10 +27,6 @@ Version history:
 		  to uint8. (March 2007)
 */
 
-/*
-TODOS:
--Handle const-status better(e.g. status check in unserialization)
-*/
 
 const char CTuningCollection::s_FileExtension[4] = ".tc";
 
