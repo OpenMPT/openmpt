@@ -169,9 +169,6 @@ protected:
 		m_TuningType(TT_GENERAL), //Unspecific tuning by default.
 		m_FineStepCount(0)
 		{}
-private:
-	static void ReadNotenamemapPair(std::istream& iStrm, NOTENAMEMAP::value_type& val, const size_t);
-	static void WriteNotenamemappair(std::ostream& oStrm, const NOTENAMEMAP::value_type& val, const size_t);
 
 };
 
