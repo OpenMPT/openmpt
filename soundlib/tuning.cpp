@@ -58,17 +58,6 @@ Version changes:
 */
 
 
-static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
-//------------------------------------------------------------
-{
-	if(s == 0) return 1;
-	RATIOTYPE result = r;
-	STEPINDEXTYPE absS = mpt::abs(s);
-	for(STEPINDEXTYPE i = 1; i < absS; i++) result *= r;
-	return (s > 0) ? result : 1/result;
-}
-
-
 CTuningRTI::CTuningRTI()
 //----------------------
 	: m_TuningName("Unnamed")
@@ -145,7 +134,7 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	m_RatioTable.resize(vr.second - vr.first + 1);
 	for(int32 i = vr.first; i<=vr.second; i++)
 	{
-		m_RatioTable[i-m_StepMin] = Pow(stepRatio, i);
+		m_RatioTable[i-m_StepMin] = std::pow(stepRatio, static_cast<RATIOTYPE>(i));
 	}
 	return false;
 }
@@ -356,7 +345,7 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 		const RATIOTYPE q = GetRatio(GetValidityRange().first + 1) / GetRatio(GetValidityRange().first);
 		const RATIOTYPE rFineStep = pow(q, static_cast<RATIOTYPE>(1)/(m_FineStepCount+1));
 		for(USTEPINDEXTYPE i = 1; i<=m_FineStepCount; i++)
-			m_RatioTableFine[i-1] = Pow(rFineStep, i);
+			m_RatioTableFine[i-1] = std::pow(rFineStep, static_cast<RATIOTYPE>(i));
 		return;
 	}
 	if(GetType() == TT_GROUPGEOMETRIC)
