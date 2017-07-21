@@ -104,7 +104,8 @@ protected:
 	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
 	RATIOTYPE ProSetGroupRatio(const RATIOTYPE& pr) {return m_GroupRatio = (pr >= 0) ? pr : -pr;}
 
-	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
+	//Return true if data loading failed, false otherwise.
+	bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
 
 
 //END PROTECTED VIRTUALS
