@@ -22,9 +22,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace srlztn {class Ssb;}
-
-
 //Tuning baseclass; basic functionality is to map note to ratio.
 class CTuningBase
 //===============
