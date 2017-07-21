@@ -69,8 +69,8 @@ static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
 }
 
 
-void CTuningRTI::SetDummyValues()
-//-------------------------------
+CTuningRTI::CTuningRTI()
+//----------------------
 {
 	{
 		m_RatioTable.clear();
@@ -128,7 +128,14 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 {
 	if(vr.second - vr.first + 1 > NOTEINDEXTYPE_MAX) return true;
 	//Note: Setting finestep is handled by base class when CreateGeometric is called.
-	SetDummyValues();
+	{
+		m_RatioTable.clear();
+		m_StepMin = s_StepMinDefault;
+		m_RatioTable.resize(s_RatioTableSizeDefault, static_cast<RATIOTYPE>(1.0));
+		m_GroupSize = 0;
+		m_GroupRatio = 0;
+		m_RatioTableFine.clear();
+	}
 	m_StepMin = vr.first;
 	ProSetGroupSize(s);
 	ProSetGroupRatio(r);
