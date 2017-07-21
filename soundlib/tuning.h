@@ -94,7 +94,7 @@ public:
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
-	CTuningRTI() {SetDummyValues();}
+	CTuningRTI();
 
 	virtual ~CTuningRTI() {}
 
@@ -136,9 +136,6 @@ protected:
 private:
 	//PRIVATE METHODS:
 
-	//Sets dummy values for *this.
-	void SetDummyValues();
-
 	bool IsNoteInTable(const NOTEINDEXTYPE& s) const
 	{
 		if(s < m_StepMin || s >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
@@ -149,7 +146,6 @@ private:
 
 private:
 	//ACTUAL DATA MEMBERS
-	//NOTE: Update SetDummyValues when adding members.
 
 	//Noteratios
 	std::vector<RATIOTYPE> m_RatioTable;
