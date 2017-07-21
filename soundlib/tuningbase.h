@@ -99,10 +99,6 @@ public:
 
 	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const = 0;
 
-	void SetName(const std::string& s) { m_TuningName = s; }
-
-	std::string GetName() const {return m_TuningName;}
-
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
@@ -142,15 +138,13 @@ protected:
 
 //BEGIN: DATA MEMBERS
 protected:
-	std::string m_TuningName;
 	TUNINGTYPE m_TuningType;
 	USTEPINDEXTYPE m_FineStepCount;
 
 //END DATA MEMBERS
 
 protected:
-	CTuningBase(const std::string name = "Unnamed") :
-		m_TuningName(name),
+	CTuningBase() :
 		m_TuningType(TT_GENERAL), //Unspecific tuning by default.
 		m_FineStepCount(0)
 		{}
