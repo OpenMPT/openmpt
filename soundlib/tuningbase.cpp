@@ -155,8 +155,8 @@ bool CTuningBase::Multiply(const RATIOTYPE& r)
 }
 
 
-bool CTuningBase::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
-//-----------------------------------------------------------------------------------------------------------------
+bool CTuningRTI::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
+//----------------------------------------------------------------------------------------------------------------
 {
 	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
 		return true;
@@ -169,8 +169,8 @@ bool CTuningBase::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& 
 }
 
 
-bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+bool CTuningRTI::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
+//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	{
 		if(vr.first > vr.second || v.size() == 0) return true;
@@ -190,8 +190,8 @@ bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RA
 
 
 
-bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
-//---------------------------------------------------------------------------------------------
+bool CTuningRTI::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
+//--------------------------------------------------------------------------------------------
 {
 	{
 		if(vr.first > vr.second) return true;
@@ -210,8 +210,8 @@ bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, c
 
 
 
-bool CTuningBase::ChangeGroupsize(const NOTEINDEXTYPE& s)
-//-------------------------------------------------------
+bool CTuningRTI::ChangeGroupsize(const NOTEINDEXTYPE& s)
+//------------------------------------------------------
 {
 	if(s < 1)
 		return true;
@@ -227,8 +227,8 @@ bool CTuningBase::ChangeGroupsize(const NOTEINDEXTYPE& s)
 
 
 
-bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
-//----------------------------------------------------
+bool CTuningRTI::ChangeGroupRatio(const RATIOTYPE& r)
+//---------------------------------------------------
 {
 	if(r <= 0)
 		return true;
