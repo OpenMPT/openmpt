@@ -31,17 +31,10 @@ namespace CTuningS11n
 class CTuningCollection //To contain tuning objects.
 //=====================
 {
-	friend class CTuningstreamer;
+
 public:
 
 //BEGIN TYPEDEFS
-
-	//If changing this, see whether serialization should be 
-	//modified as well.
-
-	typedef std::vector<CTuning*> TUNINGVECTOR;
-	typedef TUNINGVECTOR::iterator TITER; //Tuning ITERator.
-	typedef TUNINGVECTOR::const_iterator CTITER;
 
 	typedef bool SERIALIZATION_RETURN_TYPE;
 
@@ -115,12 +108,12 @@ public:
 //BEGIN: DATA MEMBERS
 private:
 	//BEGIN: SERIALIZABLE DATA MEMBERS
-	TUNINGVECTOR m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
+	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
 	std::string m_Name;
 	//END: SERIALIZABLE DATA MEMBERS
 
 	//BEGIN: NONSERIALIZABLE DATA MEMBERS
-	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
+	std::vector<CTuning*> m_DeletedTunings; //See Remove()-method for explanation of this.
 #ifndef MODPLUG_NO_FILESAVE
 	mpt::PathString m_SavefilePath;
 #endif // MODPLUG_NO_FILESAVE
@@ -135,7 +128,7 @@ private:
 	CTuning* FindTuning(const std::string& name) const;
 	size_t FindTuning(const CTuning* const) const;
 
-	bool Remove(TITER removable, bool moveToTrashBin = true);
+	bool Remove(std::vector<CTuning*>::iterator removable, bool moveToTrashBin = true);
 
 	//Hiding default operators because default meaning might not work right.
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
