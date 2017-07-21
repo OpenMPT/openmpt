@@ -837,6 +837,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		{
 
 			pTC = new CTuningCollection();
+			pTC->SetSavefilePath(file);
 			if(pTC->Deserialize(fin) != false)
 			{ // failure
 				delete pTC;
