@@ -30,10 +30,10 @@ typedef CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
-	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m, const size_t);
 	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 
-	void WriteNoteMap(std::ostream& oStrm, const CTuningBase::NOTENAMEMAP& m);
+	void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	struct RatioWriter
@@ -142,19 +142,23 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	return false;
 }
 
-CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
-//------------------------------------------------------------------------------------------
+std::string CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+//----------------------------------------------------------------------------------
 {
 	if(GetGroupSize() < 1)
 	{
-		return CTuningBase::ProGetNoteName(x, addOctave);
+		const auto i = m_NoteNameMap.find(x);
+		if(i != m_NoteNameMap.end())
+			return i->second;
+		else
+			return mpt::fmt::val(x);
 	}
 	else
 	{
 		const NOTEINDEXTYPE pos = ((x % m_GroupSize) + m_GroupSize) % m_GroupSize;
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
 		std::string rValue;
-		NNM_CITER nmi = m_NoteNameMap.find(pos);
+		const auto nmi = m_NoteNameMap.find(pos);
 		if(nmi != m_NoteNameMap.end())
 		{
 			rValue = nmi->second;
@@ -781,8 +785,8 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 }
 
 
-void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
-//------------------------------------------------------------------------------
+void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE,std::string>& m, const size_t)
+//------------------------------------------------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -825,8 +829,8 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 }
 
 
-void WriteNoteMap(std::ostream& oStrm, const CTuningBase::NOTENAMEMAP& m)
-//-----------------------------------------------------------------------
+void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m)
+//------------------------------------------------------------------------------------------------
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
 	for(auto &mi : m)
