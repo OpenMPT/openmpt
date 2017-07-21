@@ -71,6 +71,7 @@ static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
 
 CTuningRTI::CTuningRTI()
 //----------------------
+	: m_TuningName("Unnamed")
 {
 	{
 		m_RatioTable.clear();

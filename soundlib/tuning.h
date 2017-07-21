@@ -91,6 +91,9 @@ public:
 	bool ChangeGroupsize(const NOTEINDEXTYPE&);
 	bool ChangeGroupRatio(const RATIOTYPE&);
 
+	void SetName(const std::string& s) { m_TuningName = s; }
+	std::string GetName() const {return m_TuningName;}
+
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
@@ -162,6 +165,8 @@ private:
 	RATIOTYPE m_GroupRatio;
 
 	//<----Actual data members
+
+	std::string m_TuningName;
 
 	std::map<NOTEINDEXTYPE, std::string> m_NoteNameMap;
 
