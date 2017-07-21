@@ -82,28 +82,17 @@ CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& 
 
 
 
-CTuningBase::NOTESTR CTuningBase::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
-//-----------------------------------------------------------------------------------------
+std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+//-------------------------------------------------------------------------------
 {
 	if(!IsValidNote(x)) return "";
 	else return ProGetNoteName(x, addOctave);
 }
 
 
-CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x, bool /*addOctave*/) const
-//------------------------------------------------------------------------------------------------
-{
-	NNM_CITER i = m_NoteNameMap.find(x);
-	if(i != m_NoteNameMap.end())
-		return i->second;
-	else
-		return mpt::fmt::val(x);
-}
 
-
-
-bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
-//---------------------------------------------------------------------------
+bool CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
+//--------------------------------------------------------------------------
 {
 	{
 		m_NoteNameMap[n] = str;
@@ -114,8 +103,8 @@ bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 
 
 
-bool CTuningBase::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
-//--------------------------------------------------------------------------
+bool CTuningRTI::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
+//-------------------------------------------------------------------------
 {
 	{
 		if(eraseAll)
@@ -124,7 +113,7 @@ bool CTuningBase::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
 			return false;
 		}
 
-		NNM_ITER iter = m_NoteNameMap.find(n);
+		const auto iter = m_NoteNameMap.find(n);
 		if(iter != m_NoteNameMap.end())
 		{
 			m_NoteNameMap.erase(iter);

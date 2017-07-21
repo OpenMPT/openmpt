@@ -15,7 +15,6 @@
 #include <vector>
 #include <cmath>
 #include <iosfwd>
-#include <map>
 #include <limits>
 #include "../common/typedefs.h"
 
@@ -52,11 +51,6 @@ public:
 	typedef std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE> VRPAIR;
 
 	typedef uint16 TUNINGTYPE;
-
-	typedef std::string NOTESTR;
-	typedef std::map<NOTEINDEXTYPE, NOTESTR> NOTENAMEMAP;
-	typedef NOTENAMEMAP::iterator NNM_ITER;
-	typedef NOTENAMEMAP::const_iterator NNM_CITER;
 
 //END TYPEDEFS
 
@@ -105,15 +99,9 @@ public:
 
 	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const = 0;
 
-	NOTESTR GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
-
 	void SetName(const std::string& s) { m_TuningName = s; }
 
 	std::string GetName() const {return m_TuningName;}
-
-	bool SetNoteName(const NOTEINDEXTYPE&, const std::string&);
-
-	bool ClearNoteName(const NOTEINDEXTYPE& n, const bool clearAll = false);
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
@@ -146,8 +134,6 @@ protected:
 	//tuningtype is automatically changed to general.
 	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&) = 0;
 
-	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE&, bool) const;
-	
 	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&) = 0;
 
 //END PROTECTED VIRTUALS
@@ -158,7 +144,6 @@ protected:
 protected:
 	std::string m_TuningName;
 	TUNINGTYPE m_TuningType;
-	NOTENAMEMAP m_NoteNameMap;
 	USTEPINDEXTYPE m_FineStepCount;
 
 //END DATA MEMBERS

@@ -36,10 +36,10 @@ const char CTuningCollection::s_FileExtension[4] = ".tc";
 
 namespace CTuningS11n
 {
-	void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m);
+	void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m);
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 
-	void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t);
+	void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE,std::string>& m, const size_t);
 	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 

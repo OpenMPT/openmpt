@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "tuningbase.h"
 
 
@@ -51,6 +53,14 @@ public:
 
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
+
+public:
+
+	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
+
+	bool SetNoteName(const NOTEINDEXTYPE&, const std::string&);
+
+	bool ClearNoteName(const NOTEINDEXTYPE& n, const bool clearAll = false);
 
 	static CTuningRTI* Deserialize(std::istream& inStrm);
 
@@ -98,7 +108,7 @@ protected:
 
 	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
-	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
+	virtual std::string ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
 	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]
 	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
@@ -156,6 +166,8 @@ private:
 	RATIOTYPE m_GroupRatio;
 
 	//<----Actual data members
+
+	std::map<NOTEINDEXTYPE, std::string> m_NoteNameMap;
 
 }; //End: CTuningRTI declaration.
 
