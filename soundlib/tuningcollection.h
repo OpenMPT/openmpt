@@ -97,10 +97,6 @@ public:
 	//Serialization/unserialisation
 	bool Serialize(std::ostream&) const;
 	bool Deserialize(std::istream&);
-#ifndef MODPLUG_NO_FILESAVE
-	bool Serialize() const;
-	bool Deserialize();
-#endif // MODPLUG_NO_FILESAVE
 
 //END INTERFACE
 	

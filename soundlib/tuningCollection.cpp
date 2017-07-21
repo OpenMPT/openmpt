@@ -120,41 +120,6 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 }
 
 
-#ifndef MODPLUG_NO_FILESAVE
-
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() const
-//-------------------------------------------------------------------------------
-{
-	if(m_SavefilePath.empty())
-		return SERIALIZATION_FAILURE;
-	mpt::ofstream fout(m_SavefilePath, std::ios::binary);
-	if(!fout.good())
-		return SERIALIZATION_FAILURE;
-
-	if(Serialize(fout) == SERIALIZATION_FAILURE)
-		return SERIALIZATION_FAILURE;
-
-	return SERIALIZATION_SUCCESS;
-}
-
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
-//---------------------------------------------------------------------------
-{
-	if(m_SavefilePath.empty())
-		return SERIALIZATION_FAILURE;
-	mpt::ifstream fin(m_SavefilePath, std::ios::binary);
-	if(!fin.good())
-		return SERIALIZATION_FAILURE;
-
-	if(Deserialize(fin) == SERIALIZATION_FAILURE)
-		return SERIALIZATION_FAILURE;
-
-	return SERIALIZATION_SUCCESS;
-}
-
-#endif // MODPLUG_NO_FILESAVE
-
-
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std::istream& iStrm)
 //----------------------------------------------------------------------------------------------
 {
@@ -335,7 +300,12 @@ bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString des
 {
 	CTuningCollection tc;
 	tc.SetSavefilePath(filename);
-	if(tc.Deserialize() != CTuningCollection::SERIALIZATION_SUCCESS)
+	mpt::ifstream f(filename, std::ios::binary);
+	if(!f.good())
+	{
+		return false;
+	}
+	if(tc.Deserialize(f) != CTuningCollection::SERIALIZATION_SUCCESS)
 	{
 		return false;
 	}

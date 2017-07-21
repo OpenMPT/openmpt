@@ -836,7 +836,11 @@ std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 		+ MPT_PATHSTRING("local_tunings")
 		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
 		);
-	s_pTuningsSharedLocal->Deserialize();
+	mpt::ifstream f(s_pTuningsSharedLocal->GetSaveFilePath(), std::ios::binary);
+	if(f.good())
+	{
+		s_pTuningsSharedLocal->Deserialize(f);
+	}
 	return s_pTuningsSharedLocal;
 }
 
