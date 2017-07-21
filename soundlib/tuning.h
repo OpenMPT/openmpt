@@ -66,6 +66,22 @@ public:
 	bool UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r);
 
 public:
+
+	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
+	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
+
+	//Create GroupGeometric of *this using ratios from 'itself' and ratios starting from
+	//position given as third argument.
+	bool CreateGroupGeometric(const NOTEINDEXTYPE&, const RATIOTYPE&, const NOTEINDEXTYPE&);
+
+	//Create geometric tuning of *this using ratio(0) = 1.
+	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
+	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
+
+	bool ChangeGroupsize(const NOTEINDEXTYPE&);
+	bool ChangeGroupRatio(const RATIOTYPE&);
+
+public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
 	CTuningRTI() {SetDummyValues();}
@@ -75,8 +91,11 @@ public:
 //BEGIN PROTECTED VIRTUALS:
 protected:
 	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
-	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
-	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
+
+	//The two methods below return false if action was done, true otherwise.
+	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
+	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
+
 	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;

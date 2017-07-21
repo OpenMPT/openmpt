@@ -103,17 +103,6 @@ public:
 	//Multiply all ratios by given number.
 	virtual bool Multiply(const RATIOTYPE&);
 
-	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
-	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
-
-	//Create GroupGeometric of *this using ratios from 'itself' and ratios starting from
-	//position given as third argument.
-	bool CreateGroupGeometric(const NOTEINDEXTYPE&, const RATIOTYPE&, const NOTEINDEXTYPE&);
-
-	//Create geometric tuning of *this using ratio(0) = 1.
-	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
-	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
-
 	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const = 0;
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
@@ -129,9 +118,6 @@ public:
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
-
-	bool ChangeGroupsize(const NOTEINDEXTYPE&);
-	bool ChangeGroupRatio(const RATIOTYPE&);
 
 	virtual UNOTEINDEXTYPE GetGroupSize() const = 0;
 	virtual RATIOTYPE GetGroupRatio() const = 0;
@@ -161,15 +147,8 @@ protected:
 	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&) = 0;
 
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE&, bool) const;
-
-	//The two methods below return false if action was done, true otherwise.
-	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) = 0;
-	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) = 0;
 	
 	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&) = 0;
-
-	virtual NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE&) = 0;
-	virtual RATIOTYPE ProSetGroupRatio(const RATIOTYPE&) = 0;
 
 //END PROTECTED VIRTUALS
 
