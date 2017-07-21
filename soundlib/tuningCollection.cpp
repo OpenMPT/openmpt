@@ -262,15 +262,15 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 bool CTuningCollection::Remove(const CTuning* pT)
 //-----------------------------------------------
 {
-	TITER iter = find(m_Tunings.begin(), m_Tunings.end(), pT);
+	const auto iter = find(m_Tunings.begin(), m_Tunings.end(), pT);
 	if(iter != m_Tunings.end())
 		return Remove(iter);
 	else
 		return true;
 }
 
-bool CTuningCollection::Remove(TITER removable, bool moveToTrashBin)
-//------------------------------------------------------------------
+bool CTuningCollection::Remove(std::vector<CTuning*>::iterator removable, bool moveToTrashBin)
+//--------------------------------------------------------------------------------------------
 {
 	//Behavior:
 	//By default, moves tuning to carbage bin(m_DeletedTunings) so that
