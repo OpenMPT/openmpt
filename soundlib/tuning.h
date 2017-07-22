@@ -34,25 +34,56 @@ public:
 
 public:
 //BEGIN TUNING INTERFACE METHODS:
-	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const;
 
-	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre, const STEPINDEXTYPE& fineSteps) const;
+	//To return ratio of certain note.
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const;
 
-	virtual UNOTEINDEXTYPE GetRatioTableSize() const {return static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());}
+	//To return ratio from a 'step'(noteindex + stepindex)
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre, const STEPINDEXTYPE& fineSteps) const;
 
-	virtual NOTEINDEXTYPE GetRatioTableBeginNote() const {return m_StepMin;}
+	UNOTEINDEXTYPE GetRatioTableSize() const {return static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());}
 
+	NOTEINDEXTYPE GetRatioTableBeginNote() const {return m_StepMin;}
+
+	//Tuning might not be valid for arbitrarily large range,
+	//so this can be used to ask where it is valid. Tells the lowest and highest
+	//note that are valid.
 	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));}
 
-	virtual UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
+	//Return true if note is within validity range - false otherwise.
+	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
 
-	virtual RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
+	//Checking that step distances can be presented with
+	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
+	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
 
-	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
+	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
+
+	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
+
+	//To return (fine)stepcount between two consecutive mainsteps.
+	USTEPINDEXTYPE GetFineStepCount() const {return m_FineStepCount;}
+
+	//To return 'directed distance' between given notes.
+	STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
 		{return (to - from)*(static_cast<NOTEINDEXTYPE>(GetFineStepCount())+1);}
 
-	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
+	//To return 'directed distance' between given steps.
+	STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
+
+	//To set finestepcount between two consecutive mainsteps and
+	//return GetFineStepCount(). This might not be the same as
+	//parameter fs if something fails. Finestep count == 0 means that
+	//stepdistances become the same as note distances.
+	USTEPINDEXTYPE SetFineStepCount(const USTEPINDEXTYPE& fs);
+
+	//Multiply all ratios by given number.
+	bool Multiply(const RATIOTYPE&);
+
+	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
+
+	TUNINGTYPE GetType() const {return m_TuningType;}
 
 public:
 
@@ -99,19 +130,20 @@ public:
 
 	CTuningRTI();
 
-	virtual ~CTuningRTI() {}
-
 //BEGIN PROTECTED VIRTUALS:
 protected:
-	virtual bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
+
+	//Return value: true if change was not done, and false otherwise, in case which
+	//tuningtype is automatically changed to general.
+	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
 
 	//The two methods below return false if action was done, true otherwise.
 	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
 	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
 
-	virtual void ProSetFineStepCount(const USTEPINDEXTYPE&);
+	void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
-	virtual std::string ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
+	std::string ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
 	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]
 	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
@@ -129,7 +161,7 @@ protected:
 	bool CreateRatioTableGG(const std::vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
 
 	//Note: Stepdiff should be in range [1, finestepcount]
-	virtual RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
+	RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
 
 	//GroupPeriodic-specific.
 	//Get the corresponding note in [0, period-1].
@@ -150,6 +182,8 @@ private:
 private:
 	//ACTUAL DATA MEMBERS
 
+	TUNINGTYPE m_TuningType;
+
 	//Noteratios
 	std::vector<RATIOTYPE> m_RatioTable;
 
@@ -163,6 +197,8 @@ private:
 	//m_GroupSize should always be >= 0.
 	NOTEINDEXTYPE m_GroupSize;
 	RATIOTYPE m_GroupRatio;
+
+	USTEPINDEXTYPE m_FineStepCount;
 
 	//<----Actual data members
 

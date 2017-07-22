@@ -42,8 +42,8 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 
 
-bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
-//--------------------------------------------------------------------
+bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
+//-------------------------------------------------------------------
 {
 	if(GetType() != TT_GENERAL)
 	{
@@ -58,8 +58,8 @@ bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 }
 
 
-CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& fs)
-//---------------------------------------------------------------------------------
+CTuningBase::USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
+//--------------------------------------------------------------------------------
 {
 	VRPAIR vrp = GetValidityRange();
 
@@ -120,8 +120,8 @@ bool CTuningRTI::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
 
 
 
-bool CTuningBase::Multiply(const RATIOTYPE& r)
-//--------------------------------------------
+bool CTuningRTI::Multiply(const RATIOTYPE& r)
+//-------------------------------------------
 {
 	if(r <= 0)
 		return true;
