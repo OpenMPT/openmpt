@@ -31,12 +31,6 @@ Version history:
 
 
 
-const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_SUCCESS = false;
-
-
-const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_FAILURE = true;
-
-
 const char CTuningBase::s_FileExtension[5] = ".tun";
 
 

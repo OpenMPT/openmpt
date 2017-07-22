@@ -34,19 +34,8 @@ class CTuningCollection //To contain tuning objects.
 
 public:
 
-//BEGIN TYPEDEFS
-
-	typedef bool SERIALIZATION_RETURN_TYPE;
-
-//END TYPEDEFS
-
 //BEGIN PUBLIC STATIC CONSTS
 public:
-	enum 
-	{
-		SERIALIZATION_SUCCESS = false,
-		SERIALIZATION_FAILURE = true
-	};
 
 	static const char s_FileExtension[4];
 
@@ -95,8 +84,8 @@ public:
 	size_t GetNameLengthMax() const {return 256;}
 
 	//Serialization/unserialisation
-	bool Serialize(std::ostream&) const;
-	bool Deserialize(std::istream&);
+	TuningSerializationResult Serialize(std::ostream&) const;
+	TuningSerializationResult Deserialize(std::istream&);
 
 //END INTERFACE
 	
@@ -130,7 +119,7 @@ private:
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
 	CTuningCollection(const CTuningCollection&) {}
 
-	bool DeserializeOLD(std::istream&, bool& loadingSuccessful);
+	TuningSerializationResult DeserializeOLD(std::istream&);
 
 //END PRIVATE METHODS.
 };
