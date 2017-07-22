@@ -27,7 +27,6 @@ class CTuningRTI
 {
 
 public:
-//BEGIN STATIC CONST MEMBERS:
 
 	static const char s_FileExtension[5];
 
@@ -39,11 +38,8 @@ public:
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
 	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
 	static const USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
-//END STATIC CONST MEMBERS
-
 
 public:
-//BEGIN TUNING INTERFACE METHODS:
 
 	//To return ratio of certain note.
 	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const;
@@ -95,8 +91,6 @@ public:
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
 
-public:
-
 	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
 	bool SetNoteName(const NOTEINDEXTYPE&, const std::string&);
@@ -116,8 +110,6 @@ public:
 
 	bool UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r);
 
-public:
-
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
 	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
 
@@ -136,12 +128,10 @@ public:
 	std::string GetName() const {return m_TuningName;}
 
 public:
-	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 
 	CTuningRTI();
 
-//BEGIN PROTECTED VIRTUALS:
-protected:
+private:
 
 	//Return value: true if change was not done, and false otherwise, in case which
 	//tuningtype is automatically changed to general.
@@ -162,11 +152,6 @@ protected:
 	//Return true if data loading failed, false otherwise.
 	bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
 
-
-//END PROTECTED VIRTUALS
-
-protected:
-//BEGIN PROTECTED CLASS SPECIFIC METHODS:
 	//GroupGeometric.
 	bool CreateRatioTableGG(const std::vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
 
@@ -178,9 +163,6 @@ protected:
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
 
-private:
-	//PRIVATE METHODS:
-
 	bool IsNoteInTable(const NOTEINDEXTYPE& s) const
 	{
 		if(s < m_StepMin || s >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
@@ -190,7 +172,6 @@ private:
 	}
 
 private:
-	//ACTUAL DATA MEMBERS
 
 	TUNINGTYPE m_TuningType;
 
@@ -210,13 +191,11 @@ private:
 
 	USTEPINDEXTYPE m_FineStepCount;
 
-	//<----Actual data members
-
 	std::string m_TuningName;
 
 	std::map<NOTEINDEXTYPE, std::string> m_NoteNameMap;
 
-}; //End: CTuningRTI declaration.
+}; // class CTuningRTI
 
 
 typedef CTuningRTI CTuning;
