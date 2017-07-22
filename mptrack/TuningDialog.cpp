@@ -29,12 +29,12 @@ const mpt::Charset TuningCharset = mpt::CharsetLocale;
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
 
-typedef CTuning::UNOTEINDEXTYPE UNOTEINDEXTYPE;
-typedef CTuning::RATIOTYPE RATIOTYPE;
+typedef Tuning::UNOTEINDEXTYPE UNOTEINDEXTYPE;
+typedef Tuning::RATIOTYPE RATIOTYPE;
+typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 #define TT_GENERAL CTuning::TT_GENERAL
 #define TT_GROUPGEOMETRIC CTuning::TT_GROUPGEOMETRIC
 #define TT_GEOMETRIC CTuning::TT_GEOMETRIC
-#define NOTEINDEXTYPE CTuning::NOTEINDEXTYPE
 
 
 // CTuningDialog dialog
@@ -425,8 +425,8 @@ void CTuningDialog::UpdateTuningType()
 
 
 
-bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning::TUNINGTYPE type)
-//-----------------------------------------------------------------------------
+bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
+//----------------------------------------------------------------------------
 {
 	if(!pTC)
 	{
@@ -434,7 +434,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning::TUNINGTYPE type)
 		return true;
 	}
 
-	CTuning* pNewTuning = new CTuningRTI();
+	CTuning* pNewTuning = new CTuning();
 	if(type == TT_GROUPGEOMETRIC)
 	{
 		pNewTuning->SetFineStepCount(15);
@@ -617,7 +617,6 @@ void CTuningDialog::OnBnClickedButtonExport()
 			filter += std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
 			tuningFilter = filters;
 		}
-		if(dynamic_cast<const CTuningRTI*>(pT))
 		{
 			filters++;
 			filter += std::string("Scala scale (*.scl)|*") + std::string(".scl")+ std::string("|");
@@ -639,10 +638,10 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		if(tuningFilter != -1 && filterIndex == tuningFilter)
 		{
-			failure = (pT->Serialize(fout) != TuningSerializationResult::Success);
+			failure = (pT->Serialize(fout) != Tuning::SerializationResult::Success);
 		} else if(sclFilter != -1 && filterIndex == sclFilter)
 		{
-			failure = !dynamic_cast<const CTuningRTI*>(pT)->WriteSCL(fout, dlg.GetFirstFile());
+			failure = !pT->WriteSCL(fout, dlg.GetFirstFile());
 		}
 
 		fout.close();
@@ -700,7 +699,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", mpt::ToWide(tuningName));
 			fileName = mpt::PathString::FromWide(fileNameW);
 			mpt::ofstream fout(fileName, std::ios::binary);
-			if(tuning.Serialize(fout) != TuningSerializationResult::Success)
+			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
 				failure = true;
 			}
@@ -812,12 +811,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// For .tc files containing multiple Tunings, we sadly cannot decide which one the user wanted.
 			// In that case, we import as a Collection (an alternative might be to display a dialog in this case).
 			pTC = new CTuningCollection();
-			if(pTC->Deserialize(fin) == TuningSerializationResult::Success)
+			if(pTC->Deserialize(fin) == Tuning::SerializationResult::Success)
 			{ // success
 				if(pTC->GetNumTunings() == 1)
 				{
 					Reporting::Message(LogInformation, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
-					pT = new CTuningRTI(pTC->GetTuning(0));
+					pT = new CTuning(pTC->GetTuning(0));
 					delete pTC;
 					pTC = nullptr;
 					// ok
@@ -838,7 +837,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			pTC = new CTuningCollection();
 			pTC->SetSavefilePath(file);
-			if(pTC->Deserialize(fin) != TuningSerializationResult::Success)
+			if(pTC->Deserialize(fin) != Tuning::SerializationResult::Success)
 			{ // failure
 				delete pTC;
 				pTC = nullptr;
@@ -852,12 +851,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 		} else if(CheckMagic(fin, 0, magicTUNoldV3))
 		{
 
-			pT = CTuningRTI::DeserializeOLD(fin);
+			pT = CTuning::DeserializeOLD(fin);
 
 		} else if(CheckMagic(fin, 0, magicTUN))
 		{
 
-			pT = CTuningRTI::Deserialize(fin);
+			pT = CTuning::Deserialize(fin);
 
 		} else if(bIsScl)
 		{
@@ -927,7 +926,7 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 	{
 		CString buffer;
 		m_EditFineTuneSteps.GetWindowText(buffer);
-		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))));
+		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->SetFineStepCount(ConvertStrTo<Tuning::USTEPINDEXTYPE>(buffer))));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
 	}
@@ -1298,10 +1297,10 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 	CTuning* pNewTuning = nullptr;
 	if(pT)
 	{
-		pNewTuning = new CTuningRTI(*pT);
+		pNewTuning = new CTuning(*pT);
 	} else
 	{
-		pNewTuning = new CTuningRTI();
+		pNewTuning = new CTuning();
 	}
 	if(pTC->AddTuning(pNewTuning))
 	{
@@ -1599,7 +1598,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		return enSclImportFailTooManyNotes;
 
 	std::vector<std::string> names;
-	std::vector<CTuningRTI::RATIOTYPE> fRatios;
+	std::vector<Tuning::RATIOTYPE> fRatios;
 	fRatios.reserve(nNotes);
 	fRatios.push_back(1);
 
@@ -1631,7 +1630,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		if (*pNonDigit == '.') // Reading cents
 		{
 			SclFloat fCent = ConvertStrTo<SclFloat>(psz);
-			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(CentToRatio(fCent)));
+			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(CentToRatio(fCent)));
 		}
 		else if (*pNonDigit == '/') // Reading ratios
 		{
@@ -1645,10 +1644,10 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			if (nDenom == 0)
 				return enSclImportFailZeroDenominator;
 
-			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
+			fRatios.push_back(static_cast<Tuning::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
 		}
 		else // Plain numbers.
-			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(ConvertStrTo<int32>(psz)));
+			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(ConvertStrTo<int32>(psz)));
 
 		std::string remainder = psz;
 		remainder = mpt::String::Trim(remainder, std::string("\r\n"));
@@ -1685,8 +1684,8 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			return enSclImportFailNegativeRatio;
 	}
 
-	CTuning* pT = new CTuningRTI();
-	CTuningRTI::RATIOTYPE groupRatio = fRatios.back();
+	CTuning* pT = new CTuning();
+	Tuning::RATIOTYPE groupRatio = fRatios.back();
 	fRatios.pop_back();
 	pT->SetFineStepCount(15);
 	if(pT->CreateGroupGeometric(fRatios, groupRatio, pT->GetValidityRange(), 0) != false)

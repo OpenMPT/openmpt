@@ -34,7 +34,10 @@ class Manager;
 } // namespace SoundDevice
 
 
+namespace Tuning {
 class CTuningCollection;
+} // namespace Tuning
+typedef Tuning::CTuningCollection CTuningCollection;
 
 
 // User-defined colors

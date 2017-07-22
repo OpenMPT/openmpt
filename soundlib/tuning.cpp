@@ -23,19 +23,17 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-typedef CTuningRTI::RATIOTYPE RATIOTYPE;
-typedef CTuningRTI::NOTEINDEXTYPE NOTEINDEXTYPE;
-typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
-typedef CTuningRTI::STEPINDEXTYPE STEPINDEXTYPE;
-typedef CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
+
+namespace Tuning {
+
 
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
-	void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m, const size_t);
-	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE, std::string>& m, const size_t);
+	void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t);
 
-	void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m);
+	void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	struct RatioWriter
@@ -197,8 +195,8 @@ const RATIOTYPE CTuningRTI::s_DefaultFallbackRatio = 1.0f;
 
 
 //Without finetune
-CTuningBase::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
-//-------------------------------------------------------------------------------------
+RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
+//------------------------------------------------------------------------
 {
 	if(stepsFromCentre < m_StepMin) return s_DefaultFallbackRatio;
 	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
@@ -207,8 +205,8 @@ CTuningBase::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre
 
 
 //With finetune
-CTuningBase::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
-//-----------------------------------------------------------------------------------------------------------------
+RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
+//----------------------------------------------------------------------------------------------------
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
 	if(fsCount == 0 || baseStepDiff == 0)
@@ -243,8 +241,8 @@ CTuningBase::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const
 }
 
 
-CTuningBase::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
-//-------------------------------------------------------------------------------------------------
+RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
+//------------------------------------------------------------------------------------
 {
 	if(GetFineStepCount() <= 0)
 		return 1;
@@ -393,8 +391,8 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 }
 
 
-CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
-//------------------------------------------------------------------------------
+NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
+//------------------------------------------------------------------
 {
 	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
 
@@ -660,7 +658,7 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 }
 
 
-TuningSerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
+Tuning::SerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
 //--------------------------------------------------------------------------
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
@@ -699,7 +697,7 @@ TuningSerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
 
 	ssb.FinishWrite();
 
-	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? TuningSerializationResult::Failure : TuningSerializationResult::Success;
+	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? Tuning::SerializationResult::Failure : Tuning::SerializationResult::Success;
 }
 
 
@@ -786,8 +784,8 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 }
 
 
-void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE,std::string>& m, const size_t)
-//------------------------------------------------------------------------------------------------------
+void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE,std::string>& m, const size_t)
+//-----------------------------------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -803,8 +801,8 @@ void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE,std::s
 }
 
 
-void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t)
-//-------------------------------------------------------------------------------------------
+void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t)
+//-------------------------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -830,8 +828,8 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 }
 
 
-void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m)
-//------------------------------------------------------------------------------------------------
+void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m)
+//-----------------------------------------------------------------------------------
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
 	for(auto &mi : m)
@@ -865,6 +863,8 @@ bool CTuningRTI::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
 	else return true;
 }
 
+
+} // namespace Tuning
 
 
 OPENMPT_NAMESPACE_END
