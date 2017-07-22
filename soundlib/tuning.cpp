@@ -18,6 +18,8 @@
 #endif
 #include "../common/misc_util.h"
 #include <string>
+#include <cmath>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
