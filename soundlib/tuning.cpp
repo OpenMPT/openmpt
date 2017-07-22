@@ -75,8 +75,8 @@ CTuningRTI::CTuningRTI()
 }
 
 
-bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIOTYPE r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
-//------------------------------------------------------------------------------------------------------------------------------------------
+bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE& ratiostartpos)
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(v.size() == 0
 		|| r <= 0
@@ -103,15 +103,6 @@ bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIO
 	}
 
 	return false;
-}
-
-
-bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
-//------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	//Note: Setting finestep is handled by base class when CreateGroupGeometric is called.
-	if(CreateRatioTableGG(v, r, vr, ratiostartpos)) return true;
-	else return false;
 }
 
 

@@ -138,7 +138,7 @@ private:
 	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
 
 	//The two methods below return false if action was done, true otherwise.
-	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
+	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);
 	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
 
 	void ProSetFineStepCount(const USTEPINDEXTYPE&);
@@ -151,9 +151,6 @@ private:
 
 	//Return true if data loading failed, false otherwise.
 	bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
-
-	//GroupGeometric.
-	bool CreateRatioTableGG(const std::vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
 
 	//Note: Stepdiff should be in range [1, finestepcount]
 	RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
