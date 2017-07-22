@@ -20,6 +20,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace Tuning {
+
+
 /*
 Version history:
 	2->3: Serialization revamp(August 2007)
@@ -32,11 +35,11 @@ const char CTuningCollection::s_FileExtension[4] = ".tc";
 
 namespace CTuningS11n
 {
-	void WriteNoteMap(std::ostream& oStrm, const std::map<CTuningBase::NOTEINDEXTYPE, std::string>& m);
+	void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m);
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 
-	void ReadNoteMap(std::istream& iStrm, std::map<CTuningBase::NOTEINDEXTYPE,std::string>& m, const size_t);
-	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE,std::string>& m, const size_t);
+	void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm);}
@@ -99,7 +102,7 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 }
 
 
-TuningSerializationResult CTuningCollection::Serialize(std::ostream& oStrm) const
+Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm) const
 //-------------------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
@@ -114,20 +117,20 @@ TuningSerializationResult CTuningCollection::Serialize(std::ostream& oStrm) cons
 	ssb.FinishWrite();
 		
 	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
-		return TuningSerializationResult::Failure;
+		return Tuning::SerializationResult::Failure;
 	else
-		return TuningSerializationResult::Success;
+		return Tuning::SerializationResult::Success;
 }
 
 
-TuningSerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
+Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
 //---------------------------------------------------------------------------
 {
 	std::istream::pos_type startpos = iStrm.tellg();
 	
-	const TuningSerializationResult oldLoadingResult = DeserializeOLD(iStrm);
+	const Tuning::SerializationResult oldLoadingResult = DeserializeOLD(iStrm);
 
-	if(oldLoadingResult == TuningSerializationResult::NoMagic)
+	if(oldLoadingResult == Tuning::SerializationResult::NoMagic)
 	{	// An old version was not recognised - trying new version.
 		iStrm.clear();
 		iStrm.seekg(startpos);
@@ -148,9 +151,9 @@ TuningSerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
 		}
 
 		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
-			return TuningSerializationResult::Failure;
+			return Tuning::SerializationResult::Failure;
 		else
-			return TuningSerializationResult::Success;
+			return Tuning::SerializationResult::Success;
 	}
 	else
 	{
@@ -159,7 +162,7 @@ TuningSerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
 }
 
 
-TuningSerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm)
+Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm)
 //-------------------------------------------------------------------------------
 {
 
@@ -167,24 +170,24 @@ TuningSerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm
 	int32 beginMarker = 0;
 	mpt::IO::ReadIntLE<int32>(inStrm, beginMarker);
 	if(beginMarker != MAGIC4BE('T','C','S','H'))
-		return TuningSerializationResult::NoMagic;
+		return Tuning::SerializationResult::NoMagic;
 
 	//2. version
 	int32 version = 0;
 	mpt::IO::ReadIntLE<int32>(inStrm, version);
 	if(version > 2 || version < 1)
-		return TuningSerializationResult::Failure;
+		return Tuning::SerializationResult::Failure;
 
 	//3. Name
 	if(version < 2)
 	{
 		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, m_Name, 256))
-			return TuningSerializationResult::Failure;
+			return Tuning::SerializationResult::Failure;
 	}
 	else
 	{
 		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_Name))
-			return TuningSerializationResult::Failure;
+			return Tuning::SerializationResult::Failure;
 	}
 
 	//4. Editmask
@@ -198,11 +201,11 @@ TuningSerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm
 		uint32 s = 0;
 		mpt::IO::ReadIntLE<uint32>(inStrm, s);
 		if(s > 50)
-			return TuningSerializationResult::Failure;
+			return Tuning::SerializationResult::Failure;
 		for(size_t i = 0; i<s; i++)
 		{
 			if(AddTuning(inStrm))
-				return TuningSerializationResult::Failure;
+				return Tuning::SerializationResult::Failure;
 		}
 	}
 
@@ -210,9 +213,9 @@ TuningSerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm
 	int32 endMarker = 0;
 	mpt::IO::ReadIntLE<int32>(inStrm, endMarker);
 	if(endMarker != MAGIC4BE('T','C','S','F'))
-		return TuningSerializationResult::Failure;
+		return Tuning::SerializationResult::Failure;
 	
-	return TuningSerializationResult::Success;
+	return Tuning::SerializationResult::Success;
 }
 
 
@@ -302,7 +305,7 @@ bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString des
 	{
 		return false;
 	}
-	if(tc.Deserialize(f) != TuningSerializationResult::Success)
+	if(tc.Deserialize(f) != Tuning::SerializationResult::Success)
 	{
 		return false;
 	}
@@ -346,7 +349,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest)
 		} else
 		{
 			mpt::ofstream fout(fn, std::ios::binary);
-			if(tuning.Serialize(fout) != TuningSerializationResult::Success)
+			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
 				error = true;
 			}
@@ -358,6 +361,9 @@ bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest)
 
 
 #endif
+
+
+} // namespace Tuning
 
 
 OPENMPT_NAMESPACE_END

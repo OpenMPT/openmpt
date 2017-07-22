@@ -230,7 +230,7 @@ public:
 	BOOL OnInitDialog();
 
 	void AddTuningCollection(CTuningCollection* pTC) {if(pTC) m_TuningCollections.push_back(pTC);}
-	void UpdateRatioMapEdits(const CTuning::NOTEINDEXTYPE&);
+	void UpdateRatioMapEdits(const Tuning::NOTEINDEXTYPE&);
 
 	bool GetModifiedStatus(const CTuningCollection* const pTc) const;
 
@@ -345,7 +345,7 @@ private:
 	static const HTREEITEM s_notFoundItemTree;
 
 	bool AddTuning(CTuningCollection*, CTuning* pT);
-	bool AddTuning(CTuningCollection*, CTuning::TUNINGTYPE type);
+	bool AddTuning(CTuningCollection*, Tuning::TUNINGTYPE type);
 
 	//Flag to prevent multiple exit error-messages.
 	bool m_DoErrorExit;

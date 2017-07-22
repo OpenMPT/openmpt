@@ -16,7 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CTuningDialog;
 
-typedef CTuning::NOTEINDEXTYPE NOTEINDEXTYPE;
+typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 //Copied from CNoteMapWnd.
 //===============================

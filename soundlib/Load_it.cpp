@@ -200,7 +200,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 			CTuning *localTuning = TrackerSettings::Instance().oldLocalTunings->GetTuning(str);
 			if(localTuning)
 			{
-				CTuning* pNewTuning = new CTuningRTI(*localTuning);
+				CTuning* pNewTuning = new CTuning(*localTuning);
 				if(!csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
 				{
 					csf.AddToLog("Local tunings are deprecated and no longer supported. Tuning '" + str + "' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file.");
@@ -1218,7 +1218,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	} else
 	{
 		// Loading for older files.
-		if(GetTuneSpecificTunings().Deserialize(iStrm) != TuningSerializationResult::Success)
+		if(GetTuneSpecificTunings().Deserialize(iStrm) != Tuning::SerializationResult::Success)
 		{
 			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
 		} else

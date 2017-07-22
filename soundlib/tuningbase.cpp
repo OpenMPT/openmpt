@@ -23,6 +23,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace Tuning {
+
 
 /*
 Version history:
@@ -33,14 +35,14 @@ Version history:
 
 
 
-const char CTuningBase::s_FileExtension[5] = ".tun";
+const char CTuningRTI::s_FileExtension[5] = ".tun";
 
 
-const CTuningBase::TUNINGTYPE CTuningBase::TT_GENERAL = 0; //0...00b
+const TUNINGTYPE CTuningRTI::TT_GENERAL = 0; //0...00b
 
-const CTuningBase::TUNINGTYPE CTuningBase::TT_GROUPGEOMETRIC = 1; //0...10b
+const TUNINGTYPE CTuningRTI::TT_GROUPGEOMETRIC = 1; //0...10b
 
-const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
+const TUNINGTYPE CTuningRTI::TT_GEOMETRIC = 3; //0...11b
 
 
 
@@ -60,8 +62,8 @@ bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 }
 
 
-CTuningBase::USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
-//--------------------------------------------------------------------------------
+USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
+//-------------------------------------------------------------------
 {
 	VRPAIR vrp = GetValidityRange();
 
@@ -227,6 +229,8 @@ bool CTuningRTI::ChangeGroupRatio(const RATIOTYPE& r)
 	return true;
 }
 
+
+} // namespace Tuning
 
 
 OPENMPT_NAMESPACE_END

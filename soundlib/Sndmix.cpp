@@ -1320,8 +1320,8 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 }
 
 
-void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuningBase::NOTEINDEXTYPE &arpeggioSteps)
-//---------------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEINDEXTYPE &arpeggioSteps)
+//----------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
@@ -1490,8 +1490,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuningBase::NO
 }
 
 
-void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuningBase::RATIOTYPE &vibratoFactor)
-//----------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYPE &vibratoFactor)
+//-----------------------------------------------------------------------------------------------
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -1627,8 +1627,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuningBase::RAT
 }
 
 
-void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuningBase::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
-//-------------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
+//--------------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
@@ -1995,8 +1995,8 @@ bool CSoundFile::ReadNote()
 		pChn->nRampLength = 0;
 
 		//Aux variables
-		CTuning::RATIOTYPE vibratoFactor = 1;
-		CTuning::NOTEINDEXTYPE arpeggioSteps = 0;
+		Tuning::RATIOTYPE vibratoFactor = 1;
+		Tuning::NOTEINDEXTYPE arpeggioSteps = 0;
 
 		const ModInstrument *pIns = pChn->pModInstrument;
 

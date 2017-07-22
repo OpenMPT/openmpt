@@ -18,6 +18,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace Tuning {
+
+
 class CTuningCollection;
 
 namespace CTuningS11n
@@ -84,8 +87,8 @@ public:
 	size_t GetNameLengthMax() const {return 256;}
 
 	//Serialization/unserialisation
-	TuningSerializationResult Serialize(std::ostream&) const;
-	TuningSerializationResult Deserialize(std::istream&);
+	Tuning::SerializationResult Serialize(std::ostream&) const;
+	Tuning::SerializationResult Deserialize(std::istream&);
 
 //END INTERFACE
 	
@@ -119,7 +122,7 @@ private:
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
 	CTuningCollection(const CTuningCollection&) {}
 
-	TuningSerializationResult DeserializeOLD(std::istream&);
+	Tuning::SerializationResult DeserializeOLD(std::istream&);
 
 //END PRIVATE METHODS.
 };
@@ -129,5 +132,12 @@ private:
 bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString dest = mpt::PathString());
 bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest = mpt::PathString());
 #endif
+
+
+} // namespace Tuning
+
+
+typedef Tuning::CTuningCollection CTuningCollection;
+
 
 OPENMPT_NAMESPACE_END

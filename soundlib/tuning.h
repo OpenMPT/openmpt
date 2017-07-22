@@ -18,13 +18,23 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//===================================
-class CTuningRTI : public CTuningBase //RTI <-> Ratio Table Implementation
-//===================================
+namespace Tuning {
+
+
+//==============
+class CTuningRTI
+//==============
 {
 
 public:
 //BEGIN STATIC CONST MEMBERS:
+
+	static const char s_FileExtension[5];
+
+	static const TUNINGTYPE TT_GENERAL;
+	static const TUNINGTYPE TT_GROUPGEOMETRIC;
+	static const TUNINGTYPE TT_GEOMETRIC;
+
 	static const RATIOTYPE s_DefaultFallbackRatio;
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
 	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
@@ -98,7 +108,7 @@ public:
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
 	static CTuningRTI* DeserializeOLD(std::istream&);
 
-	TuningSerializationResult Serialize(std::ostream& out) const;
+	Tuning::SerializationResult Serialize(std::ostream& out) const;
 
 #ifdef MODPLUG_TRACKER
 	bool WriteSCL(std::ostream &f, const mpt::PathString &filename) const;
@@ -210,6 +220,9 @@ private:
 
 
 typedef CTuningRTI CTuning;
+
+
+} // namespace Tuning
 
 
 OPENMPT_NAMESPACE_END

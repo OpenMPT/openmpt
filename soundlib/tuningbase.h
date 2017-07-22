@@ -18,16 +18,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-enum class TuningSerializationResult : int {
+namespace Tuning {
+
+
+enum class SerializationResult : int {
 	Success = 1,
 	NoMagic = 0,
 	Failure = -1
 };
 
 
-class CTuningBase
-//===============
-{
 	//NOTEINDEXTYPE: Some signed integer-type.
 	//UNOTEINDEXTYPE: Unsigned NOTEINDEXTYPE
 	//RATIOTYPE: Some 'real figure' type able to present ratios.
@@ -35,8 +35,6 @@ class CTuningBase
 			//then 'step difference' between notes is the
 			//same as differences in NOTEINDEXTYPE. In a way similar to ticks and rows in pattern -
 			//ticks <-> STEPINDEX, rows <-> NOTEINDEX
-
-public:
 
 	typedef int16 NOTEINDEXTYPE;
 	typedef uint16 UNOTEINDEXTYPE;
@@ -47,14 +45,6 @@ public:
 	typedef std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE> VRPAIR;
 
 	typedef uint16 TUNINGTYPE;
-
-	static const char s_FileExtension[5];
-
-	static const TUNINGTYPE TT_GENERAL;
-	static const TUNINGTYPE TT_GROUPGEOMETRIC;
-	static const TUNINGTYPE TT_GEOMETRIC;
-
-};
 
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
@@ -67,6 +57,12 @@ public:
 
 class CTuningRTI;
 typedef CTuningRTI CTuning;
+
+
+} // namespace Tuning
+
+
+typedef Tuning::CTuning CTuning;
 
 
 OPENMPT_NAMESPACE_END

@@ -1660,7 +1660,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			pChn->nPortamentoDest = 0;
 		else
 		{
-			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, static_cast<CTuningBase::NOTEINDEXTYPE>(note), 0);
+			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, static_cast<Tuning::NOTEINDEXTYPE>(note), 0);
 			//Here pChn->nPortamentoDest means 'steps to slide'.
 			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
 		}
