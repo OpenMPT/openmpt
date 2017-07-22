@@ -31,13 +31,10 @@ namespace CTuningS11n
 
 
 //=====================
-class CTuningCollection //To contain tuning objects.
+class CTuningCollection
 //=====================
 {
 
-public:
-
-//BEGIN PUBLIC STATIC CONSTS
 public:
 
 	static const char s_FileExtension[4];
@@ -54,10 +51,8 @@ public:
 	// 255.
 	static const size_t s_nMaxTuningCount = 255 + 255 + 2;
 
-//END PUBLIC STATIC CONSTS
-
-//BEGIN INTERFACE:
 public:
+
 	CTuningCollection(const std::string& name = "");
 	~CTuningCollection();
 	
@@ -86,33 +81,22 @@ public:
 
 	size_t GetNameLengthMax() const {return 256;}
 
-	//Serialization/unserialisation
 	Tuning::SerializationResult Serialize(std::ostream&) const;
 	Tuning::SerializationResult Deserialize(std::istream&);
 
-//END INTERFACE
-	
-
-//BEGIN: DATA MEMBERS
 private:
-	//BEGIN: SERIALIZABLE DATA MEMBERS
-	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
-	std::string m_Name;
-	//END: SERIALIZABLE DATA MEMBERS
 
-	//BEGIN: NONSERIALIZABLE DATA MEMBERS
+	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
+
+	std::string m_Name;
+
 	std::vector<CTuning*> m_DeletedTunings; //See Remove()-method for explanation of this.
 #ifndef MODPLUG_NO_FILESAVE
 	mpt::PathString m_SavefilePath;
 #endif // MODPLUG_NO_FILESAVE
-	//END: NONSERIALIZABLE DATA MEMBERS
-	
-//END: DATA MEMBERS
 
-	friend void CTuningS11n::ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t);
-
-//BEGIN PRIVATE METHODS
 private:
+
 	CTuning* FindTuning(const std::string& name) const;
 	size_t FindTuning(const CTuning* const) const;
 
@@ -124,7 +108,6 @@ private:
 
 	Tuning::SerializationResult DeserializeOLD(std::istream&);
 
-//END PRIVATE METHODS.
 };
 
 
