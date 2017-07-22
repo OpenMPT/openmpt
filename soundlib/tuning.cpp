@@ -60,7 +60,9 @@ Version changes:
 
 CTuningRTI::CTuningRTI()
 //----------------------
-	: m_TuningName("Unnamed")
+	: m_TuningType(TT_GENERAL)
+	, m_FineStepCount(0)
+	, m_TuningName("Unnamed")
 {
 	{
 		m_RatioTable.clear();
@@ -849,8 +851,8 @@ void WriteStr(std::ostream& oStrm, const std::string& str)
 
 
 
-bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
-//-------------------------------------------------------------------------
+bool CTuningRTI::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
+//------------------------------------------------------------------------
 {
 	{ // avoid integer overload
 		//if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
