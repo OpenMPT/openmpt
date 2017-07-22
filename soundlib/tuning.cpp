@@ -656,8 +656,8 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 }
 
 
-CTuningBase::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
-//---------------------------------------------------------------------------------------
+TuningSerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
+//--------------------------------------------------------------------------
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
 	// reads version number (5<<24)+4.
@@ -695,7 +695,7 @@ CTuningBase::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outSt
 
 	ssb.FinishWrite();
 
-	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
+	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? TuningSerializationResult::Failure : TuningSerializationResult::Success;
 }
 
 

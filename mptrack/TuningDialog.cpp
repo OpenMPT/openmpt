@@ -639,7 +639,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		if(tuningFilter != -1 && filterIndex == tuningFilter)
 		{
-			failure = pT->Serialize(fout);
+			failure = (pT->Serialize(fout) != TuningSerializationResult::Success);
 		} else if(sclFilter != -1 && filterIndex == sclFilter)
 		{
 			failure = !dynamic_cast<const CTuningRTI*>(pT)->WriteSCL(fout, dlg.GetFirstFile());
@@ -700,7 +700,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", mpt::ToWide(tuningName));
 			fileName = mpt::PathString::FromWide(fileNameW);
 			mpt::ofstream fout(fileName, std::ios::binary);
-			if(tuning.Serialize(fout))
+			if(tuning.Serialize(fout) != TuningSerializationResult::Success)
 			{
 				failure = true;
 			}
@@ -812,7 +812,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// For .tc files containing multiple Tunings, we sadly cannot decide which one the user wanted.
 			// In that case, we import as a Collection (an alternative might be to display a dialog in this case).
 			pTC = new CTuningCollection();
-			if(pTC->Deserialize(fin) == false)
+			if(pTC->Deserialize(fin) == TuningSerializationResult::Success)
 			{ // success
 				if(pTC->GetNumTunings() == 1)
 				{
@@ -838,7 +838,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			pTC = new CTuningCollection();
 			pTC->SetSavefilePath(file);
-			if(pTC->Deserialize(fin) != false)
+			if(pTC->Deserialize(fin) != TuningSerializationResult::Success)
 			{ // failure
 				delete pTC;
 				pTC = nullptr;

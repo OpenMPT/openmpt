@@ -1218,7 +1218,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	} else
 	{
 		// Loading for older files.
-		if(GetTuneSpecificTunings().Deserialize(iStrm))
+		if(GetTuneSpecificTunings().Deserialize(iStrm) != TuningSerializationResult::Success)
 		{
 			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
 		} else

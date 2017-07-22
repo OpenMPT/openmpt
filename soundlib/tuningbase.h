@@ -22,6 +22,13 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+enum class TuningSerializationResult : int {
+	Success = 1,
+	NoMagic = 0,
+	Failure = -1
+};
+
+
 //Tuning baseclass; basic functionality is to map note to ratio.
 class CTuningBase
 //===============
@@ -42,8 +49,6 @@ public:
 	typedef int32 STEPINDEXTYPE;
 	typedef uint32 USTEPINDEXTYPE;
 
-	typedef bool SERIALIZATION_RETURN_TYPE;
-
 	//Validity Range PAIR.
 	typedef std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE> VRPAIR;
 
@@ -53,9 +58,6 @@ public:
 
 
 //BEGIN PUBLIC STATICS
-
-	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_SUCCESS;
-	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
 
 	static const char s_FileExtension[5];
 
@@ -93,8 +95,6 @@ public:
 
 	//Multiply all ratios by given number.
 	virtual bool Multiply(const RATIOTYPE&);
-
-	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const = 0;
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
