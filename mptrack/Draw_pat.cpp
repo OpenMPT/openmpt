@@ -18,7 +18,7 @@
 #include "View_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
-#include "../soundlib/tuningbase.h"
+#include "../soundlib/tuning.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../soundlib/plugins/PlugInterface.h"

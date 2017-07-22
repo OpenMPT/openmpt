@@ -11,10 +11,6 @@
 #pragma once
 
 
-#include <string>
-#include <vector>
-#include <cmath>
-#include <iosfwd>
 #include <limits>
 #include "../common/typedefs.h"
 
@@ -29,7 +25,6 @@ enum class TuningSerializationResult : int {
 };
 
 
-//Tuning baseclass; basic functionality is to map note to ratio.
 class CTuningBase
 //===============
 {
@@ -42,22 +37,16 @@ class CTuningBase
 			//ticks <-> STEPINDEX, rows <-> NOTEINDEX
 
 public:
-//BEGIN TYPEDEFS:
+
 	typedef int16 NOTEINDEXTYPE;
 	typedef uint16 UNOTEINDEXTYPE;
 	typedef float32 RATIOTYPE; //If changing RATIOTYPE, serialization methods may need modifications.
 	typedef int32 STEPINDEXTYPE;
 	typedef uint32 USTEPINDEXTYPE;
 
-	//Validity Range PAIR.
 	typedef std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE> VRPAIR;
 
 	typedef uint16 TUNINGTYPE;
-
-//END TYPEDEFS
-
-
-//BEGIN PUBLIC STATICS
 
 	static const char s_FileExtension[5];
 
@@ -65,9 +54,8 @@ public:
 	static const TUNINGTYPE TT_GROUPGEOMETRIC;
 	static const TUNINGTYPE TT_GEOMETRIC;
 
-//END PUBLIC STATICS
-
 };
+
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
 #define NOTEINDEXTYPE_MAX (std::numeric_limits<NOTEINDEXTYPE>::max)()
@@ -75,6 +63,10 @@ public:
 #define STEPINDEXTYPE_MIN (std::numeric_limits<STEPINDEXTYPE>::min)()
 #define STEPINDEXTYPE_MAX (std::numeric_limits<STEPINDEXTYPE>::max)()
 #define USTEPINDEXTYPE_MAX (std::numeric_limits<USTEPINDEXTYPE>::max)()
+
+
+class CTuningRTI;
+typedef CTuningRTI CTuning;
 
 
 OPENMPT_NAMESPACE_END

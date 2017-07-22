@@ -1320,8 +1320,8 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 }
 
 
-void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
-//-----------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuningBase::NOTEINDEXTYPE &arpeggioSteps)
+//---------------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
@@ -1490,8 +1490,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 }
 
 
-void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
-//------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuningBase::RATIOTYPE &vibratoFactor)
+//----------------------------------------------------------------------------------------------------
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -1627,8 +1627,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 }
 
 
-void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
-//---------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuningBase::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
+//-------------------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))

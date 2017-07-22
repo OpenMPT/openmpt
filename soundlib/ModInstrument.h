@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "tuning.h"
+#include "tuningbase.h"
 #include "Snd_defs.h"
 #include "../common/FlagSet.h"
 #include "../common/misc_util.h"

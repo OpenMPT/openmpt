@@ -14,6 +14,8 @@
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 
+#include <cmath>
+
 #include <istream>
 #include <ostream>
 

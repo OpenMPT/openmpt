@@ -30,6 +30,7 @@
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "../soundlib/tuning.h"
 #include <algorithm>
 
 
