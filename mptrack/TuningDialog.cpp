@@ -39,10 +39,9 @@ typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 // CTuningDialog dialog
 IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
-CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun, CSoundFile &csf)
+CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf)
 	: CDialog(CTuningDialog::IDD, pParent),
 	m_sndFile(csf),
-	m_TuningCollections(rVec),
 	m_NoteEditApply(true),
 	m_RatioEditApply(true),
 	m_pActiveTuningCollection(NULL),
@@ -51,9 +50,9 @@ CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* p
 	m_DoErrorExit(false)
 //----------------------------------------
 {
-	MPT_ASSERT(m_TuningCollections.size() == 1);
-	m_pActiveTuning = pTun;
-	m_RatioMapWnd.m_pTuning = pTun; //pTun is the tuning to show when dialog opens.
+	m_TuningCollections.push_back(&(m_sndFile.GetTuneSpecificTunings()));
+	m_pActiveTuning = m_sndFile.Instruments[inst]->pTuning;
+	m_RatioMapWnd.m_pTuning = m_pActiveTuning; //pTun is the tuning to show when dialog opens.
 }
 
 CTuningDialog::~CTuningDialog()
