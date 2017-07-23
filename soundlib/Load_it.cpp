@@ -148,7 +148,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 //-------------------------------------------------------------------------------------------------------------------------------
 {
 	TUNNUMTYPE numTuning = 0;
-	mpt::IO::ReadIntLE<uint16>(iStrm, numTuning);
+	mpt::IO::ReadIntLE<TUNNUMTYPE>(iStrm, numTuning);
 	if(numTuning > maxNum)
 		return true;
 
@@ -169,11 +169,17 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 }
 
 
-static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0)
-//-------------------------------------------------------------------------------
+static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t = 0, bool old = false)
+//-----------------------------------------------------------------------------------------------------
 {
 	std::map<uint16, std::string> shortToTNameMap;
-	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
+	if(old)
+	{
+		ReadTuningMapTemplate<uint32, uint32>(iStrm, shortToTNameMap);
+	} else
+	{
+		ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
+	}
 
 	// Read & set tunings for instruments
 	std::vector<std::string> notFoundTunings;
@@ -267,6 +273,12 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 	//End read&set instrument tunings
 }
 
+
+static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t dummy = 0)
+//-------------------------------------------------------------------------------------
+{
+	ReadTuningMapImpl(iStrm, csf, dummy, false);
+}
 
 
 //////////////////////////////////////////////////////////
@@ -1223,7 +1235,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
 		} else
 		{
-			ReadTuningMap(iStrm, *this);
+			ReadTuningMapImpl(iStrm, *this, 0, cwtv < 0x88C);
 		}
 	}
 }

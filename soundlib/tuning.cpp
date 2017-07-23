@@ -518,7 +518,7 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	//Version
 	int16 version = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, version);
-	if(version != 3)
+	if(version != 2 && version != 3)
 		return 0;
 
 	CTuningRTI* pT = new CTuningRTI;
@@ -534,17 +534,27 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 
 	int16 version2 = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, version2);
-	if(version2 != 4)
+	if(version2 != 3 && version2 != 4)
 	{
 		delete pT;
 		return 0;
 	}
 
 	//Tuning name
-	if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, pT->m_TuningName))
+	if(version2 <= 3)
 	{
-		delete pT;
-		return 0;
+		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, pT->m_TuningName, 0xffff))
+		{
+			delete pT;
+			return 0;
+		}
+	} else
+	{
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, pT->m_TuningName))
+		{
+			delete pT;
+			return 0;
+		}
 	}
 
 	//Const mask
@@ -558,16 +568,39 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 
 	//Notemap
 	uint16 size = 0;
-	mpt::IO::ReadIntLE<uint16>(inStrm, size);
+	if(version2 <= 3)
+	{
+		uint32 tempsize = 0;
+		mpt::IO::ReadIntLE<uint32>(inStrm, tempsize);
+		if(tempsize > 0xffff)
+		{
+			delete pT;
+			return 0;
+		}
+		size = mpt::saturate_cast<uint16>(tempsize);
+	} else
+	{
+		mpt::IO::ReadIntLE<uint16>(inStrm, size);
+	}
 	for(UNOTEINDEXTYPE i = 0; i<size; i++)
 	{
 		std::string str;
 		int16 n = 0;
 		mpt::IO::ReadIntLE<int16>(inStrm, n);
-		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, str))
+		if(version2 <= 3)
 		{
-			delete pT;
-			return 0;
+			if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, str, 0xffff))
+			{
+				delete pT;
+				return 0;
+			}
+		} else
+		{
+			if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, str))
+			{
+				delete pT;
+				return 0;
+			}
 		}
 		pT->m_NoteNameMap[n] = str;
 	}
@@ -590,17 +623,37 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	}
 
 	//Ratiotable
-	if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTable))
+	if(version <= 2)
 	{
-		delete pT;
-		return 0;
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, pT->m_RatioTable, 0xffff))
+		{
+			delete pT;
+			return 0;
+		}
+	} else
+	{
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTable))
+		{
+			delete pT;
+			return 0;
+		}
 	}
 
 	//Fineratios
-	if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTableFine))
+	if(version <= 2)
 	{
-		delete pT;
-		return 0;
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, pT->m_RatioTableFine, 0xffff))
+		{
+			delete pT;
+			return 0;
+		}
+	} else
+	{
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTableFine))
+		{
+			delete pT;
+			return 0;
+		}
 	}
 	pT->m_FineStepCount = pT->m_RatioTableFine.size();
 
