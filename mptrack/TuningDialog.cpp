@@ -1401,32 +1401,21 @@ void CTuningDialog::OnRemoveTuning()
 							m_sndFile.Instruments[i]->SetTuning(nullptr);
 						}
 					}
-					if(!pTC->Remove(pT))
-					{
-						cs.Leave();
-						m_ModifiedTCs[pTC] = true;
-						DeleteTreeItem(pT);
-						UpdateView();
-					} else
-					{
-						cs.Leave();
-						Reporting::Notification("Tuning removal failed");
-					}
+					pTC->Remove(pT);
+					cs.Leave();
+					m_ModifiedTCs[pTC] = true;
+					DeleteTreeItem(pT);
+					UpdateView();
 				}
 			} else
 			{
 				CString s = _T("Remove tuning '") + mpt::ToCString(TuningCharset, pT->GetName()) + _T("'?");
 				if(Reporting::Confirm(s) == cnfYes)
 				{
-					if(!pTC->Remove(pT))
-					{
-						m_ModifiedTCs[pTC] = true;
-						DeleteTreeItem(pT);
-						UpdateView();
-					} else
-					{
-						Reporting::Notification("Tuning removal failed");
-					}
+					pTC->Remove(pT);
+					m_ModifiedTCs[pTC] = true;
+					DeleteTreeItem(pT);
+					UpdateView();
 				}
 			}
 		}

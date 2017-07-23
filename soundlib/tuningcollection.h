@@ -61,7 +61,7 @@ public:
 	bool AddTuning(CTuning* const pT);
 	bool AddTuning(std::istream& inStrm);
 	
-	bool Remove(const size_t i);
+	bool Remove(const std::size_t i);
 	bool Remove(const CTuning*);
 
 	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i);}
@@ -79,11 +79,6 @@ private:
 	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
 
 private:
-
-	CTuning* FindTuning(const std::string& name) const;
-	size_t FindTuning(const CTuning* const) const;
-
-	bool Remove(std::vector<CTuning*>::iterator removable);
 
 	//Hiding default operators because default meaning might not work right.
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
