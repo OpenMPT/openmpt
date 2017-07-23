@@ -39,8 +39,9 @@ typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 // CTuningDialog dialog
 IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
-CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun)
+CTuningDialog::CTuningDialog(CWnd* pParent, const TUNINGVECTOR& rVec, CTuning* pTun, CSoundFile &csf)
 	: CDialog(CTuningDialog::IDD, pParent),
+	m_sndFile(csf),
 	m_TuningCollections(rVec),
 	m_NoteEditApply(true),
 	m_RatioEditApply(true),
@@ -1370,18 +1371,53 @@ void CTuningDialog::OnRemoveTuning()
 		CTuningCollection* pTC = GetpTuningCollection(pT);
 		if(pTC)
 		{
-			std::string str = std::string("Remove tuning '") + pT->GetName() + std::string("' from ' ") + pTC->GetName() + std::string("'?");
-			if(Reporting::Confirm(str.c_str()) == cnfYes)
+			bool used = false;
+			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
-				if(!pTC->Remove(pT))
+				if(m_sndFile.Instruments[i]->pTuning == pT)
 				{
-					m_ModifiedTCs[pTC] = true;
-					DeleteTreeItem(pT);
-					UpdateView();
+					used = true;
 				}
-				else
+			}
+			if(used)
+			{
+				CString s = _T("Tuning '") + mpt::ToCString(TuningCharset, pT->GetName()) + _T("' is used by instruments. Remove anyway?");
+				if(Reporting::Confirm(s, false, true) == cnfYes)
 				{
-					Reporting::Notification("Tuning removal failed");
+					CriticalSection cs;
+					for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
+					{
+						if(m_sndFile.Instruments[i]->pTuning == pT)
+						{
+							m_sndFile.Instruments[i]->SetTuning(nullptr);
+						}
+					}
+					if(!pTC->Remove(pT))
+					{
+						cs.Leave();
+						m_ModifiedTCs[pTC] = true;
+						DeleteTreeItem(pT);
+						UpdateView();
+					} else
+					{
+						cs.Leave();
+						Reporting::Notification("Tuning removal failed");
+					}
+				}
+			} else
+			{
+				CString s = _T("Remove tuning '") + mpt::ToCString(TuningCharset, pT->GetName()) + _T("'?");
+				if(Reporting::Confirm(s) == cnfYes)
+				{
+					if(!pTC->Remove(pT))
+					{
+						m_ModifiedTCs[pTC] = true;
+						DeleteTreeItem(pT);
+						UpdateView();
+					} else
+					{
+						Reporting::Notification("Tuning removal failed");
+					}
 				}
 			}
 		}
