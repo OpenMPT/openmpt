@@ -224,7 +224,7 @@ public:
 	typedef std::vector<CTuningCollection*> TUNINGVECTOR;
 
 public:
-	CTuningDialog(CWnd* pParent = NULL, const TUNINGVECTOR& = TUNINGVECTOR(), CTuning* pTun = NULL);   // standard constructor
+	CTuningDialog(CWnd* pParent, const TUNINGVECTOR&, CTuning* pTun, CSoundFile &csf);
 	virtual ~CTuningDialog();
 
 	BOOL OnInitDialog();
@@ -275,6 +275,9 @@ private:
 
 
 private:
+
+	CSoundFile & m_sndFile;
+
 	CTuningRatioMapWnd m_RatioMapWnd;
 	TUNINGVECTOR m_TuningCollections;
 	std::vector<CTuningCollection*> m_DeletableTuningCollections;
