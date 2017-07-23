@@ -118,7 +118,7 @@ CSoundFile::CSoundFile() :
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 
-	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
+	m_pTuningsTuneSpecific = new CTuningCollection();
 }
 
 

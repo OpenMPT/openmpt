@@ -229,7 +229,6 @@ public:
 
 	BOOL OnInitDialog();
 
-	void AddTuningCollection(CTuningCollection* pTC) {if(pTC) m_TuningCollections.push_back(pTC);}
 	void UpdateRatioMapEdits(const Tuning::NOTEINDEXTYPE&);
 
 	bool GetModifiedStatus(const CTuningCollection* const pTc) const;
@@ -281,6 +280,9 @@ private:
 	CTuningRatioMapWnd m_RatioMapWnd;
 	TUNINGVECTOR m_TuningCollections;
 	std::vector<CTuningCollection*> m_DeletableTuningCollections;
+
+	std::map<const CTuningCollection*, CString> m_TuningCollectionsNames;
+	std::map<const CTuningCollection*, mpt::PathString> m_TuningCollectionsFilenames;
 
 	CTuning* m_pActiveTuning;
 	CTuningCollection* m_pActiveTuningCollection;

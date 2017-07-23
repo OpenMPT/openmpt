@@ -49,10 +49,10 @@ namespace CTuningS11n
 using namespace CTuningS11n;
 
 
-CTuningCollection::CTuningCollection(const std::string& name) : m_Name(name)
-//--------------------------------------------------------------------------
+CTuningCollection::CTuningCollection()
+//------------------------------------
 {
-	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
+	return;
 }
 
 
@@ -96,12 +96,12 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 }
 
 
-Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm) const
-//-------------------------------------------------------------------------------
+Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm, const std::string &name) const
+//----------------------------------------------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite("TC", 3); // version
-	ssb.WriteItem(m_Name, "0", &WriteStr);
+	ssb.WriteItem(name, "0", &WriteStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.WriteItem(dummyEditMask, "1");
 
@@ -117,12 +117,12 @@ Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm) co
 }
 
 
-Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
-//---------------------------------------------------------------------------
+Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm, std::string &name)
+//------------------------------------------------------------------------------------------------
 {
 	std::istream::pos_type startpos = iStrm.tellg();
 	
-	const Tuning::SerializationResult oldLoadingResult = DeserializeOLD(iStrm);
+	const Tuning::SerializationResult oldLoadingResult = DeserializeOLD(iStrm, name);
 
 	if(oldLoadingResult == Tuning::SerializationResult::NoMagic)
 	{	// An old version was not recognised - trying new version.
@@ -137,7 +137,7 @@ Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
 		{
 			uint16 dummyEditMask = 0xffff;
 			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
-				ssb.ReadIterItem(iter, m_Name, &ReadStr);
+				ssb.ReadIterItem(iter, name, &ReadStr);
 			else if (ssb.CompareId(iter, "1") == srlztn::SsbRead::IdMatch)
 				ssb.ReadIterItem(iter, dummyEditMask);
 			else if (ssb.CompareId(iter, "2") == srlztn::SsbRead::IdMatch)
@@ -156,8 +156,8 @@ Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm)
 }
 
 
-Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm)
-//-------------------------------------------------------------------------------
+Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm, std::string &name)
+//----------------------------------------------------------------------------------------------------
 {
 
 	//1. begin marker:
@@ -175,12 +175,12 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 	//3. Name
 	if(version < 2)
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, m_Name, 256))
+		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, name, 256))
 			return Tuning::SerializationResult::Failure;
 	}
 	else
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_Name))
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, name))
 			return Tuning::SerializationResult::Failure;
 	}
 
@@ -284,26 +284,8 @@ bool CTuningCollection::AddTuning(std::istream& inStrm)
 #ifdef MODPLUG_TRACKER
 
 
-bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString dest)
-//--------------------------------------------------------------------------------
-{
-	CTuningCollection tc;
-	tc.SetSavefilePath(filename);
-	mpt::ifstream f(filename, std::ios::binary);
-	if(!f.good())
-	{
-		return false;
-	}
-	if(tc.Deserialize(f) != Tuning::SerializationResult::Success)
-	{
-		return false;
-	}
-	return UnpackTuningCollection(tc, dest);
-}
-
-
-bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest)
-//----------------------------------------------------------------------------
+bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &prefix)
+//-------------------------------------------------------------------------------------
 {
 	bool error = false;
 	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(tc.GetNumTunings())));
@@ -311,19 +293,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest)
 	{
 		const CTuning & tuning = tc.GetTuning(i);
 		mpt::PathString fn;
-		if(dest.empty())
-		{
-			fn = tc.GetSaveFilePath() + MPT_PATHSTRING(" - ");
-			if(!tc.GetName().empty())
-			{
-				mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, tc.GetName()));
-				SanitizeFilename(name);
-				fn += name + MPT_PATHSTRING(" - ");
-			}
-		} else
-		{
-			fn = dest;
-		}
+		fn += prefix;
 		mpt::ustring tuningName = mpt::ToUnicode(mpt::CharsetLocale, tuning.GetName());
 		if(tuningName.empty())
 		{

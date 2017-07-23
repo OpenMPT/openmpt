@@ -53,7 +53,7 @@ public:
 
 public:
 
-	CTuningCollection(const std::string& name = "");
+	CTuningCollection();
 	~CTuningCollection();
 	
 	//Note: Given pointer is deleted by CTuningCollection
@@ -71,28 +71,12 @@ public:
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	std::string GetName() const { return m_Name; }
-	void SetName(const std::string name) { m_Name = name; }
-
-#ifndef MODPLUG_NO_FILESAVE
-	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
-	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
-#endif // MODPLUG_NO_FILESAVE
-
-	size_t GetNameLengthMax() const {return 256;}
-
-	Tuning::SerializationResult Serialize(std::ostream&) const;
-	Tuning::SerializationResult Deserialize(std::istream&);
+	Tuning::SerializationResult Serialize(std::ostream&, const std::string &name) const;
+	Tuning::SerializationResult Deserialize(std::istream&, std::string &name);
 
 private:
 
 	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
-
-	std::string m_Name;
-
-#ifndef MODPLUG_NO_FILESAVE
-	mpt::PathString m_SavefilePath;
-#endif // MODPLUG_NO_FILESAVE
 
 private:
 
@@ -105,14 +89,13 @@ private:
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
 	CTuningCollection(const CTuningCollection&) {}
 
-	Tuning::SerializationResult DeserializeOLD(std::istream&);
+	Tuning::SerializationResult DeserializeOLD(std::istream&, std::string &name);
 
 };
 
 
 #ifdef MODPLUG_TRACKER
-bool UnpackTuningCollection(const mpt::PathString &filename, mpt::PathString dest = mpt::PathString());
-bool UnpackTuningCollection(const CTuningCollection &tc, mpt::PathString dest = mpt::PathString());
+bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &prefix);
 #endif
 
 

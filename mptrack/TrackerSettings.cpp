@@ -830,16 +830,16 @@ void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
 std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 //--------------------------------------------------------------------
 {
-	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>("Local tunings");
-	s_pTuningsSharedLocal->SetSavefilePath(
-		PathTunings.GetDefaultDir()
-		+ MPT_PATHSTRING("local_tunings")
-		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
-		);
-	mpt::ifstream f(s_pTuningsSharedLocal->GetSaveFilePath(), std::ios::binary);
+	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>();
+	mpt::ifstream f(
+			PathTunings.GetDefaultDir()
+			+ MPT_PATHSTRING("local_tunings")
+			+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
+		, std::ios::binary);
 	if(f.good())
 	{
-		s_pTuningsSharedLocal->Deserialize(f);
+		std::string dummyName;
+		s_pTuningsSharedLocal->Deserialize(f, dummyName);
 	}
 	return s_pTuningsSharedLocal;
 }

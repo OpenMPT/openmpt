@@ -71,7 +71,11 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	return false;
 }
 
-static void WriteTuningCollection(std::ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
+static void WriteTuningCollection(std::ostream& oStrm, const CTuningCollection& tc)
+//---------------------------------------------------------------------------------
+{
+	tc.Serialize(oStrm, "Tune specific tunings");
+}
 
 static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 //-------------------------------------------------------------------
@@ -141,7 +145,13 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 #endif // MODPLUG_NO_FILESAVE
 
 
-static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
+static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, const size_t)
+//----------------------------------------------------------------------------------------
+{
+	std::string name;
+	tc.Deserialize(iStrm, name);
+}
+
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
 static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::string>& shortToTNameMap, const size_t maxNum = 500)
@@ -1230,7 +1240,8 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	} else
 	{
 		// Loading for older files.
-		if(GetTuneSpecificTunings().Deserialize(iStrm) != Tuning::SerializationResult::Success)
+		std::string name;
+		if(GetTuneSpecificTunings().Deserialize(iStrm, name) != Tuning::SerializationResult::Success)
 		{
 			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
 		} else
