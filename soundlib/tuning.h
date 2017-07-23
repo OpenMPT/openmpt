@@ -59,10 +59,6 @@ public:
 	//Return true if note is within validity range - false otherwise.
 	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
 
-	//Checking that step distances can be presented with
-	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
-	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
-
 	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
 
 	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}

@@ -47,6 +47,11 @@ enum class SerializationResult : int {
 	typedef uint16 TUNINGTYPE;
 
 
+// Derived from old IsStepCountRangeSufficient(), this is actually a more
+// sensible value than what was calculated in earlier versions.
+static MPT_CONSTEXPR11_VAR STEPINDEXTYPE FINESTEPCOUNT_MAX = 0xffff;
+
+
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
 #define NOTEINDEXTYPE_MAX (std::numeric_limits<NOTEINDEXTYPE>::max)()
 #define UNOTEINDEXTYPE_MAX (std::numeric_limits<UNOTEINDEXTYPE>::max)()
