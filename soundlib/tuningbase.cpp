@@ -69,7 +69,7 @@ USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
 
 	if( (vrp.first > vrp.second)
 		||
-		(!IsStepCountRangeSufficient(fs, vrp))
+		(fs > FINESTEPCOUNT_MAX)
 	  ) return GetFineStepCount();
 	else
 	{
@@ -162,7 +162,7 @@ bool CTuningRTI::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RAT
 	{
 		if(vr.first > vr.second || v.size() == 0) return true;
 		if(ratiostartpos < vr.first || vr.second < ratiostartpos || static_cast<UNOTEINDEXTYPE>(vr.second - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1)) return true;
-		if(!IsStepCountRangeSufficient(GetFineStepCount(), vr)) return true;
+		if(GetFineStepCount() > FINESTEPCOUNT_MAX) return true;
 		for(size_t i = 0; i<v.size(); i++) {if(v[i] < 0) return true;}
 		if(ProCreateGroupGeometric(v,r, vr, ratiostartpos))
 			return true;
