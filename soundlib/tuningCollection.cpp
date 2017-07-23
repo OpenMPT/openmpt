@@ -64,12 +64,6 @@ CTuningCollection::~CTuningCollection()
 		delete i;
 	}
 	m_Tunings.clear();
-
-	for(auto i : m_DeletedTunings)
-	{
-		delete i;
-	}
-	m_DeletedTunings.clear();
 }
 
 CTuning* CTuningCollection::FindTuning(const std::string& name) const
@@ -230,17 +224,12 @@ bool CTuningCollection::Remove(const CTuning* pT)
 		return true;
 }
 
-bool CTuningCollection::Remove(std::vector<CTuning*>::iterator removable, bool moveToTrashBin)
-//--------------------------------------------------------------------------------------------
+bool CTuningCollection::Remove(std::vector<CTuning*>::iterator removable)
+//-----------------------------------------------------------------------
 {
-	//Behavior:
-	//By default, moves tuning to carbage bin(m_DeletedTunings) so that
-	//it gets deleted in destructor. This way
-	//the tuning address remains valid until the destruction of the collection.
-	//Optinally only removing the pointer without deleting or moving
-	//it to trashbin(e.g. when transferring tuning to other collection)
 	{
-		if(moveToTrashBin) m_DeletedTunings.push_back(*removable);
+		CTuning * pT = *removable;
+		delete pT;
 		m_Tunings.erase(removable);
 		return false;
 	}

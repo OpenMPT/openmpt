@@ -90,7 +90,6 @@ private:
 
 	std::string m_Name;
 
-	std::vector<CTuning*> m_DeletedTunings; //See Remove()-method for explanation of this.
 #ifndef MODPLUG_NO_FILESAVE
 	mpt::PathString m_SavefilePath;
 #endif // MODPLUG_NO_FILESAVE
@@ -100,7 +99,7 @@ private:
 	CTuning* FindTuning(const std::string& name) const;
 	size_t FindTuning(const CTuning* const) const;
 
-	bool Remove(std::vector<CTuning*>::iterator removable, bool moveToTrashBin = true);
+	bool Remove(std::vector<CTuning*>::iterator removable);
 
 	//Hiding default operators because default meaning might not work right.
 	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
