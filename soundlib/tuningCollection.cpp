@@ -49,24 +49,6 @@ namespace CTuningS11n
 using namespace CTuningS11n;
 
 
-CTuningCollection::CTuningCollection()
-//------------------------------------
-{
-	return;
-}
-
-
-CTuningCollection::~CTuningCollection()
-//-------------------------------------
-{
-	for(auto i : m_Tunings)
-	{
-		delete i;
-	}
-	m_Tunings.clear();
-}
-
-
 CTuning* CTuningCollection::GetTuning(const std::string& name)
 //------------------------------------------------------------
 {
@@ -74,7 +56,7 @@ CTuning* CTuningCollection::GetTuning(const std::string& name)
 	{
 		if(m_Tunings[i]->GetName() == name)
 		{
-			return m_Tunings[i];
+			return m_Tunings[i].get();
 		}
 	}
 	return nullptr;
@@ -87,7 +69,7 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 	{
 		if(m_Tunings[i]->GetName() == name)
 		{
-			return m_Tunings[i];
+			return m_Tunings[i].get();
 		}
 	}
 	return nullptr;
@@ -212,15 +194,19 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 
 
 
-bool CTuningCollection::Remove(const CTuning* pT)
+bool CTuningCollection::Remove(const CTuning *pT)
 //-----------------------------------------------
 {
-	const auto it = find(m_Tunings.begin(), m_Tunings.end(), pT);
+	const auto it = std::find_if(m_Tunings.begin(), m_Tunings.end(),
+		[&] (const std::unique_ptr<CTuning> & upT) -> bool
+		{
+			return upT.get() == pT;
+		}
+		);
 	if(it == m_Tunings.end())
 	{
 		return false;
 	}
-	delete pT;
 	m_Tunings.erase(it);
 	return true;
 }
@@ -233,14 +219,13 @@ bool CTuningCollection::Remove(const std::size_t i)
 	{
 		return false;
 	}
-	delete m_Tunings[i];
 	m_Tunings.erase(m_Tunings.begin() + i);
 	return true;
 }
 
 
-bool CTuningCollection::AddTuning(CTuning* const pT)
-//--------------------------------------------------
+bool CTuningCollection::AddTuning(CTuning *pT)
+//--------------------------------------------
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
@@ -248,7 +233,7 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 	if(pT == NULL)
 		return true;
 
-	m_Tunings.push_back(pT);
+	m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
 
 	return false;
 }
@@ -269,7 +254,7 @@ bool CTuningCollection::AddTuning(std::istream& inStrm)
 		return true;
 	else
 	{
-		m_Tunings.push_back(pT);
+		m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
 		return false;
 	}
 }
