@@ -66,33 +66,31 @@ CTuningCollection::~CTuningCollection()
 	m_Tunings.clear();
 }
 
-CTuning* CTuningCollection::FindTuning(const std::string& name) const
-//-------------------------------------------------------------------
-{
-	for(size_t i = 0; i<m_Tunings.size(); i++)
-	{
-		if(m_Tunings[i]->GetName() == name) return m_Tunings[i];
-	}
-	return NULL;
-}
-
-size_t CTuningCollection::FindTuning(const CTuning* const pT) const
-//-----------------------------------------------------------------
-{
-	return std::find(m_Tunings.cbegin(), m_Tunings.cend(), pT) - m_Tunings.begin();
-}
-
 
 CTuning* CTuningCollection::GetTuning(const std::string& name)
 //------------------------------------------------------------
 {
-	return FindTuning(name);
+	for(std::size_t i = 0; i<m_Tunings.size(); i++)
+	{
+		if(m_Tunings[i]->GetName() == name)
+		{
+			return m_Tunings[i];
+		}
+	}
+	return nullptr;
 }
 
 const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 //------------------------------------------------------------------------
 {
-	return FindTuning(name);
+	for(std::size_t i = 0; i<m_Tunings.size(); i++)
+	{
+		if(m_Tunings[i]->GetName() == name)
+		{
+			return m_Tunings[i];
+		}
+	}
+	return nullptr;
 }
 
 
@@ -217,31 +215,27 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 bool CTuningCollection::Remove(const CTuning* pT)
 //-----------------------------------------------
 {
-	const auto iter = find(m_Tunings.begin(), m_Tunings.end(), pT);
-	if(iter != m_Tunings.end())
-		return Remove(iter);
-	else
-		return true;
-}
-
-bool CTuningCollection::Remove(std::vector<CTuning*>::iterator removable)
-//-----------------------------------------------------------------------
-{
+	const auto it = find(m_Tunings.begin(), m_Tunings.end(), pT);
+	if(it == m_Tunings.end())
 	{
-		CTuning * pT = *removable;
-		delete pT;
-		m_Tunings.erase(removable);
 		return false;
 	}
+	delete pT;
+	m_Tunings.erase(it);
+	return true;
 }
 
-bool CTuningCollection::Remove(const size_t i)
-//--------------------------------------------
+
+bool CTuningCollection::Remove(const std::size_t i)
+//-------------------------------------------------
 {
 	if(i >= m_Tunings.size())
-			return true;
-
-	return Remove(m_Tunings.begin()+i);
+	{
+		return false;
+	}
+	delete m_Tunings[i];
+	m_Tunings.erase(m_Tunings.begin() + i);
+	return true;
 }
 
 
