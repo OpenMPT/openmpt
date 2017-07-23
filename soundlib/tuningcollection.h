@@ -53,19 +53,16 @@ public:
 
 public:
 
-	CTuningCollection();
-	~CTuningCollection();
-	
 	//Note: Given pointer is deleted by CTuningCollection
 	//at some point.
-	bool AddTuning(CTuning* const pT);
+	bool AddTuning(CTuning *pT);
 	bool AddTuning(std::istream& inStrm);
 	
 	bool Remove(const std::size_t i);
-	bool Remove(const CTuning*);
+	bool Remove(const CTuning *pT);
 
-	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i);}
-	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i);}
+	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i).get();}
+	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i).get();}
 	CTuning* GetTuning(const std::string& name);
 	const CTuning* GetTuning(const std::string& name) const;
 
@@ -76,13 +73,9 @@ public:
 
 private:
 
-	std::vector<CTuning*> m_Tunings; //The actual tuningobjects are stored as deletable pointers here.
+	std::vector<std::unique_ptr<CTuning> > m_Tunings;
 
 private:
-
-	//Hiding default operators because default meaning might not work right.
-	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
-	CTuningCollection(const CTuningCollection&) {}
 
 	Tuning::SerializationResult DeserializeOLD(std::istream&, std::string &name);
 
