@@ -224,7 +224,7 @@ public:
 	typedef std::vector<CTuningCollection*> TUNINGVECTOR;
 
 public:
-	CTuningDialog(CWnd* pParent, const TUNINGVECTOR&, CTuning* pTun, CSoundFile &csf);
+	CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf);
 	virtual ~CTuningDialog();
 
 	BOOL OnInitDialog();
