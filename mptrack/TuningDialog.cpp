@@ -51,6 +51,7 @@ CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &cs
 //----------------------------------------
 {
 	m_TuningCollections.push_back(&(m_sndFile.GetTuneSpecificTunings()));
+	m_TuningCollectionsNames[&(m_sndFile.GetTuneSpecificTunings())] = _T("Tunings");
 	m_pActiveTuning = m_sndFile.Instruments[inst]->pTuning;
 	m_RatioMapWnd.m_pTuning = m_pActiveTuning; //pTun is the tuning to show when dialog opens.
 }
@@ -73,7 +74,7 @@ CTuningDialog::~CTuningDialog()
 HTREEITEM CTuningDialog::AddTreeItem(CTuningCollection* pTC, HTREEITEM parent, HTREEITEM insertAfter)
 //---------------------------------------------------------------------------------------------------
 {
-	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem(mpt::ToCString(TuningCharset, pTC->GetName()), parent, insertAfter);
+	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem((IsDeletable(pTC) ? CString(_T("loaded: ")) : CString()) +  m_TuningCollectionsNames[pTC], parent, insertAfter);
 	HTREEITEM temp2 = NULL;
 	m_TreeItemTuningItemMap.AddPair(temp, TUNINGTREEITEM(pTC));
 	for(size_t i = 0; i<pTC->GetNumTunings(); i++)
@@ -249,7 +250,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 			if(m_pActiveTuning)
 				m_TreeCtrlTuning.SetItemText(treeitem, mpt::ToCString(TuningCharset, m_pActiveTuning->GetName()));
 			else
-				m_TreeCtrlTuning.SetItemText(treeitem, mpt::ToCString(TuningCharset, m_pActiveTuningCollection->GetName()));
+				m_TreeCtrlTuning.SetItemText(treeitem, (IsDeletable(m_pActiveTuningCollection) ? CString(_T("loaded: ")) : CString()) + m_TuningCollectionsNames[m_pActiveTuningCollection]);
 		}
 	}
 	//<--Updating treeview
@@ -656,13 +657,13 @@ void CTuningDialog::OnBnClickedButtonExport()
 		std::string filter = std::string("multiple Tuning files (") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
 
 		mpt::PathString fileName;
-		if(!pTC->GetSaveFilePath().empty())
+		if(!m_TuningCollectionsFilenames[pTC].empty())
 		{
-			fileName = pTC->GetSaveFilePath() + MPT_PATHSTRING(" - ");
+			fileName = m_TuningCollectionsFilenames[pTC] + MPT_PATHSTRING(" - ");
 		}
-		if(!pTC->GetName().empty())
+		if(!m_TuningCollectionsNames[pTC].IsEmpty())
 		{
-			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(TuningCharset, pTC->GetName()));
+			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(m_TuningCollectionsNames[pTC]));
 			SanitizeFilename(name);
 			fileName += name + MPT_PATHSTRING(" - ");
 		}
@@ -694,9 +695,12 @@ void CTuningDialog::OnBnClickedButtonExport()
 				tuningName = MPT_USTRING("untitled");
 			}
 			std::wstring fileNameW = fileName.ToWide();
-			SanitizeFilename(fileNameW);
-			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_number%", numberFmt.ToWString(i + 1));
-			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", mpt::ToWide(tuningName));
+			std::wstring numberW = numberFmt.ToWString(i + 1);
+			SanitizeFilename(numberW);
+			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_number%", numberW);
+			std::wstring nameW = mpt::ToWide(tuningName);
+			SanitizeFilename(nameW);
+			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", nameW);
 			fileName = mpt::PathString::FromWide(fileNameW);
 			mpt::ofstream fout(fileName, std::ios::binary);
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
@@ -802,6 +806,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 		const uint8 magicTUN     [] = {  '2', '2', '8',0x09, 'C', 'T', 'B', '2', '4', '4', 'R', 'T', 'I' };
 
 		CTuningCollection *pTC = nullptr;
+		CString tcName;
+		mpt::PathString tcFilename;
 		CTuning *pT = nullptr;
 
 		if(bIsTun && CheckMagic(fin, 0, magicTC))
@@ -811,7 +817,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// For .tc files containing multiple Tunings, we sadly cannot decide which one the user wanted.
 			// In that case, we import as a Collection (an alternative might be to display a dialog in this case).
 			pTC = new CTuningCollection();
-			if(pTC->Deserialize(fin) == Tuning::SerializationResult::Success)
+			std::string name;
+			if(pTC->Deserialize(fin, name) == Tuning::SerializationResult::Success)
 			{ // success
 				if(pTC->GetNumTunings() == 1)
 				{
@@ -836,15 +843,16 @@ void CTuningDialog::OnBnClickedButtonImport()
 		{
 
 			pTC = new CTuningCollection();
-			pTC->SetSavefilePath(file);
-			if(pTC->Deserialize(fin) != Tuning::SerializationResult::Success)
+			std::string name;
+			if(pTC->Deserialize(fin, name) != Tuning::SerializationResult::Success)
 			{ // failure
 				delete pTC;
 				pTC = nullptr;
 				// fail
 			} else
 			{
-				pTC->SetName("loaded: " + pTC->GetName());
+				tcName = mpt::ToCString(TuningCharset, name);
+				tcFilename = file;
 				// ok
 			}
 
@@ -897,6 +905,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 		if(pTC)
 		{
 			m_TuningCollections.push_back(pTC);
+			m_TuningCollectionsNames[pTC] = tcName;
+			m_TuningCollectionsFilenames[pTC] = tcFilename;
 			m_DeletableTuningCollections.push_back(pTC);
 			AddTreeItem(pTC, NULL, NULL);
 		}
@@ -1469,6 +1479,8 @@ void CTuningDialog::OnRemoveTuningCollection()
 	m_DeletableTuningCollections.erase(DTCiter);
 	m_TuningCollections.erase(iter);
 	DeleteTreeItem(m_pActiveTuningCollection);
+	m_TuningCollectionsNames.erase(deletableTC);
+	m_TuningCollectionsFilenames.erase(deletableTC);
 	delete deletableTC; deletableTC = 0;
 
 	UpdateView();
