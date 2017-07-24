@@ -16,9 +16,13 @@ Current maintainers with various sorts of contributions:
 	Thomas Orgis <thomas@orgis.org>
 	Patrick Dehne <patrick@steidle.net>
 	Jonathan Yong <10walls@gmail.com>
+	Taihei Momma <tmkk@mac.com>
 
 Co-initiator of the revived mpg123 project, but not that involved anymore:
 	Nicholas J Humfrey <njh@ecs.soton.ac.uk>
+
+Special thanks go to Taihei, the person who keeps the assembly optimisations alive
+and takes care of portability to OSX/iOS platforms.
 
 Generic address pointing to the current maintainer (hopefully still works in future in case maintainership will change again): <maintainer@mpg123.org>
 
@@ -26,6 +30,7 @@ The creator: Michael Hipp (email: hippm@informatik.uni-tuebingen.de - please bot
 
 Contributions/ideas Thomas Orgis era (includes backports from mhipp trunk):
 
+Won-Kyu Park <wkpark@gmail.com>: patch to get rid of asm textrels (x86 PIC)
 Michael Weiser <michaelweiser@users.sf.net>: update of coreaudio output to AudioComponents API
 Bent Bisballe Nyeng <bbn@dynastrom.com>: patch for MPG123_NO_PEEK_END and MPG123_FORCE_SEEKABLE
 Eric S. Raymond <esr@thyrsus.com>: man page fixes
