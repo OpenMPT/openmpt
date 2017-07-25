@@ -13,9 +13,6 @@
 #include "tuning.h"
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Reporting.h"
-#endif
 #include "../common/misc_util.h"
 #include <string>
 #include <cmath>
@@ -420,11 +417,6 @@ CTuningRTI* CTuningRTI::Deserialize(std::istream& iStrm)
 	{
 		if (pTuning->ProProcessUnserializationdata(ratiotableSize))
 		{
-#ifdef MODPLUG_TRACKER
-			Reporting::Error(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
-#else
-			MPT_LOG(LogError, "tuning", MPT_USTRING("Processing loaded data for tuning \"") + mpt::ToUnicode(mpt::CharsetISO8859_1, pTuning->GetName()) + MPT_USTRING("\" failed."));
-#endif
 			delete pTuning; pTuning = nullptr;
 		}
 		else
