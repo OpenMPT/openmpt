@@ -206,9 +206,8 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 	}
 #endif // NO_PLUGINS
 
-	const samplecount_t countGoal = count;
 	samplecount_t countRendered = 0;
-	samplecount_t countToRender = countGoal;
+	samplecount_t countToRender = count;
 
 	while(!m_SongFlags[SONG_ENDREACHED] && countToRender > 0)
 	{
@@ -2177,6 +2176,8 @@ bool CSoundFile::ReadNote()
 				{
 					ModCommand::NOTE note = pChn->nNote;
 					if(!ModCommand::IsNote(note)) note = pChn->nLastNote;
+					if(m_playBehaviour[kITRealNoteMapping] && note >= NOTE_MIN && note <= NOTE_MAX)
+						note = pIns->NoteMap[note - NOTE_MIN];
 					pChn->m_Freq = Util::Round<uint32>((pChn->nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
