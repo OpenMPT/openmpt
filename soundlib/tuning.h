@@ -83,6 +83,8 @@ public:
 	//Multiply all ratios by given number.
 	bool Multiply(const RATIOTYPE&);
 
+	//Return value: true if change was not done, and false otherwise, in case which
+	//tuningtype is automatically changed to general.
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
@@ -128,10 +130,6 @@ public:
 	CTuningRTI();
 
 private:
-
-	//Return value: true if change was not done, and false otherwise, in case which
-	//tuningtype is automatically changed to general.
-	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
 
 	//The two methods below return false if action was done, true otherwise.
 	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);
