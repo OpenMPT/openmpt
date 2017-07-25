@@ -323,15 +323,7 @@ bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
 void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 //------------------------------------------------------------
 {
-	if(fs <= 0)
-	{
-		m_FineStepCount = 0;
-		m_RatioTableFine.clear();
-		return;
-	}
-
-	m_FineStepCount = (fs > static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX) : fs;
-
+	m_FineStepCount = mpt::clamp(mpt::saturate_cast<STEPINDEXTYPE>(fs), 0, FINESTEPCOUNT_MAX);
 	UpdateFineStepTable();
 }
 
@@ -339,6 +331,11 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 void CTuningRTI::UpdateFineStepTable()
 //------------------------------------
 {
+	if(m_FineStepCount <= 0)
+	{
+		m_RatioTableFine.clear();
+		return;
+	}
 	if(GetType() == TT_GEOMETRIC)
 	{
 		if(m_FineStepCount > s_RatioTableFineSizeMaxDefault)
