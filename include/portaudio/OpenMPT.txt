@@ -18,3 +18,4 @@
     > configuration, PA_WDMKS_NO_KSGUID_LIB is defined in the premake projects
     > to always use PortAudio's workaround, regardless of the compiler version
     > used.
+ *  Unnecssary files have been removed.
