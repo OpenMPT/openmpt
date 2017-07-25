@@ -267,34 +267,11 @@ RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd)
 bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 //-------------------------------------------------------------------
 {
-	if(GetType() != TT_GENERAL)
-	{
-		return true;
-	}
-	//Creating ratio table if doesn't exist.
-	if(m_RatioTable.empty())
-	{
-		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
-		m_StepMin = s_StepMinDefault;
-	}
-
-	//If note is not within the table, at least for now
-	//simply don't change anything.
-	if(!IsNoteInTable(s))
-		return true;
-
-	m_RatioTable[s - m_StepMin] = fabs(r);
-	return false;
-}
-
-
-bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
-//----------------------------------------------------------------------
-{
-	if(GetType() != TT_GROUPGEOMETRIC)
+	if(GetType() != TT_GROUPGEOMETRIC && GetType() != TT_GENERAL)
 	{
 		return false;
 	}
+	//Creating ratio table if doesn't exist.
 	if(m_RatioTable.empty())
 	{
 		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
@@ -305,17 +282,20 @@ bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
 		return false;
 	}
 	m_RatioTable[s - m_StepMin] = std::fabs(r);
-	for(NOTEINDEXTYPE n = m_StepMin; n < m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
-	{
-		if(n == s)
+	if(GetType() == TT_GROUPGEOMETRIC)
+	{ // update other groups
+		for(NOTEINDEXTYPE n = m_StepMin; n < m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
 		{
-			// nothing
-		} else if(mpt::abs(n - s) % m_GroupSize == 0)
-		{
-			m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
+			if(n == s)
+			{
+				// nothing
+			} else if(mpt::abs(n - s) % m_GroupSize == 0)
+			{
+				m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
+			}
 		}
+		UpdateFineStepTable();
 	}
-	UpdateFineStepTable();
 	return true;
 }
 
