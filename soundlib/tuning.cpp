@@ -411,45 +411,48 @@ SerializationResult CTuningRTI::InitDeserialize(std::istream& iStrm)
 	ssb.ReadItem(ratiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_StepMin >= -300 && m_StepMin <= 300)
-	{
-		if (ProProcessUnserializationdata(ratiotableSize))
-		{
-			return SerializationResult::Failure;
-		}
-		else
-		{
-			UpdateFineStepTable();
-		}
-	} else
+	if(!((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_StepMin >= -300 && m_StepMin <= 300))
 	{
 		return SerializationResult::Failure;
 	}
-	return SerializationResult::Success;
-}
 
-
-bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
-//---------------------------------------------------------------------------
-{
 	// reject unknown types
 	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
 	{
-		return true;
+		return SerializationResult::Failure;
 	}
-	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
-	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
+	if(m_GroupSize < 0)
+	{
+		return SerializationResult::Failure;
+	}
+	if(m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX))
+	{
+		return SerializationResult::Failure;
+	}
 	if((GetType() == TT_GROUPGEOMETRIC) || (GetType() == TT_GEOMETRIC))
 	{
-		if (ratiotableSize < 1 || ratiotableSize > NOTEINDEXTYPE_MAX) return true;
-		if (GetType() == TT_GEOMETRIC)
-			return CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin+ratiotableSize-1)));
-		else
+		if(ratiotableSize < 1 || ratiotableSize > NOTEINDEXTYPE_MAX)
 		{
-			return CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin+ratiotableSize-1)), m_StepMin);
+			return SerializationResult::Failure;
 		}
+		if(GetType() == TT_GEOMETRIC)
+		{
+			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + ratiotableSize - 1))) != false)
+			{
+				return SerializationResult::Failure;
+			}
+		} else
+		{
+			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin+ratiotableSize-1)), m_StepMin) != false)
+			{
+				return SerializationResult::Failure;
+			}
+		}
+	} else
+	{
+		UpdateFineStepTable();
 	}
-	return false;
+	return SerializationResult::Success;
 }
 
 

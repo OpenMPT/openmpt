@@ -156,9 +156,6 @@ private:
 
 	void UpdateFineStepTable();
 
-	//Return true if data loading failed, false otherwise.
-	bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
-
 	//Note: Stepdiff should be in range [1, finestepcount]
 	RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
 
