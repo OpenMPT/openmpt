@@ -383,50 +383,49 @@ NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 }
 
 
-CTuningRTI* CTuningRTI::Deserialize(std::istream& iStrm)
-//------------------------------------------------------
+SerializationResult CTuningRTI::InitDeserialize(std::istream& iStrm)
+//------------------------------------------------------------------
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
 	// reads version number (5<<24)+4 or earlier.
 	// We keep this behaviour.
 
 	if(iStrm.fail())
-		return nullptr;
-
-	CTuningRTI* pTuning = new CTuningRTI;
+		return SerializationResult::Failure;
 
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (5 << 24) + 4); // version
-	ssb.ReadItem(pTuning->m_TuningName, "0", ReadStr);
+	ssb.ReadItem(m_TuningName, "0", ReadStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.ReadItem(dummyEditMask, "1");
-	ssb.ReadItem(pTuning->m_TuningType, "2");
-	ssb.ReadItem(pTuning->m_NoteNameMap, "3", ReadNoteMap);
-	ssb.ReadItem(pTuning->m_FineStepCount, "4");
+	ssb.ReadItem(m_TuningType, "2");
+	ssb.ReadItem(m_NoteNameMap, "3", ReadNoteMap);
+	ssb.ReadItem(m_FineStepCount, "4");
 
 	// RTI entries.
-	ssb.ReadItem(pTuning->m_RatioTable, "RTI0", ReadRatioTable);
-	ssb.ReadItem(pTuning->m_StepMin, "RTI1");
-	ssb.ReadItem(pTuning->m_GroupSize, "RTI2");
-	ssb.ReadItem(pTuning->m_GroupRatio, "RTI3");
+	ssb.ReadItem(m_RatioTable, "RTI0", ReadRatioTable);
+	ssb.ReadItem(m_StepMin, "RTI1");
+	ssb.ReadItem(m_GroupSize, "RTI2");
+	ssb.ReadItem(m_GroupRatio, "RTI3");
 	UNOTEINDEXTYPE ratiotableSize = 0;
 	ssb.ReadItem(ratiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_StepMin >= -300 && m_StepMin <= 300)
 	{
-		if (pTuning->ProProcessUnserializationdata(ratiotableSize))
+		if (ProProcessUnserializationdata(ratiotableSize))
 		{
-			delete pTuning; pTuning = nullptr;
+			return SerializationResult::Failure;
 		}
 		else
 		{
-			pTuning->UpdateFineStepTable();
+			UpdateFineStepTable();
 		}
+	} else
+	{
+		return SerializationResult::Failure;
 	}
-	else
-		{delete pTuning; pTuning = nullptr;}
-	return pTuning;
+	return SerializationResult::Success;
 }
 
 
@@ -480,11 +479,11 @@ static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, c
 }
 
 
-CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
-//----------------------------------------------------------
+SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
+//----------------------------------------------------------------------
 {
 	if(!inStrm.good())
-		return 0;
+		return SerializationResult::Failure;
 
 	const std::streamoff startPos = inStrm.tellg();
 
@@ -496,48 +495,42 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	{
 		//Returning stream position if beginmarker was not found.
 		inStrm.seekg(startPos);
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	//Version
 	int16 version = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, version);
 	if(version != 2 && version != 3)
-		return 0;
-
-	CTuningRTI* pT = new CTuningRTI;
+		return SerializationResult::Failure;
 
 	char begin2[8];
 	MemsetZero(begin2);
 	inStrm.read(begin2, sizeof(begin2));
 	if(std::memcmp(begin2, "CT<sfs>B", 8))
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	int16 version2 = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, version2);
 	if(version2 != 3 && version2 != 4)
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	//Tuning name
 	if(version2 <= 3)
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, pT->m_TuningName, 0xffff))
+		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, m_TuningName, 0xffff))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	} else
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, pT->m_TuningName))
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_TuningName))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	}
 
@@ -548,7 +541,7 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	//Tuning type
 	int16 tt = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, tt);
-	pT->m_TuningType = tt;
+	m_TuningType = tt;
 
 	//Notemap
 	uint16 size = 0;
@@ -558,8 +551,7 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 		mpt::IO::ReadIntLE<uint32>(inStrm, tempsize);
 		if(tempsize > 0xffff)
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 		size = mpt::saturate_cast<uint16>(tempsize);
 	} else
@@ -575,18 +567,16 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 		{
 			if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, str, 0xffff))
 			{
-				delete pT;
-				return 0;
+				return SerializationResult::Failure;
 			}
 		} else
 		{
 			if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, str))
 			{
-				delete pT;
-				return 0;
+				return SerializationResult::Failure;
 			}
 		}
-		pT->m_NoteNameMap[n] = str;
+		m_NoteNameMap[n] = str;
 	}
 
 	//End marker
@@ -595,98 +585,88 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 	inStrm.read(end2, sizeof(end2));
 	if(std::memcmp(end2, "CT<sfs>E", 8))
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	// reject unknown types
-	if(pT->m_TuningType != TT_GENERAL && pT->m_TuningType != TT_GROUPGEOMETRIC && pT->m_TuningType != TT_GEOMETRIC)
+	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	//Ratiotable
 	if(version <= 2)
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, pT->m_RatioTable, 0xffff))
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTable, 0xffff))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	} else
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTable))
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTable))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	}
 
 	//Fineratios
 	if(version <= 2)
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, pT->m_RatioTableFine, 0xffff))
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTableFine, 0xffff))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	} else
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, pT->m_RatioTableFine))
+		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTableFine))
 		{
-			delete pT;
-			return 0;
+			return SerializationResult::Failure;
 		}
 	}
-	pT->m_FineStepCount = pT->m_RatioTableFine.size();
+	m_FineStepCount = m_RatioTableFine.size();
 
 	//m_StepMin
 	int16 stepmin = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, stepmin);
-	pT->m_StepMin = stepmin;
-	if(pT->m_StepMin < -200 || pT->m_StepMin > 200)
+	m_StepMin = stepmin;
+	if(m_StepMin < -200 || m_StepMin > 200)
 	{
-		delete pT;
-		return nullptr;
+		return SerializationResult::Failure;
 	}
 
 	//m_GroupSize
 	int16 groupsize = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, groupsize);
-	pT->m_GroupSize = groupsize;
-	if(pT->m_GroupSize < 0)
+	m_GroupSize = groupsize;
+	if(m_GroupSize < 0)
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
 	//m_GroupRatio
 	IEEE754binary32LE groupratio = IEEE754binary32LE(0.0f);
 	mpt::IO::Read(inStrm, groupratio);
-	pT->m_GroupRatio = groupratio;
-	if(pT->m_GroupRatio < 0)
+	m_GroupRatio = groupratio;
+	if(m_GroupRatio < 0)
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
-	if(pT->m_FineStepCount > 0)
+	if(m_FineStepCount > 0)
 	{
-		pT->m_FineStepCount -= 1;
+		m_FineStepCount -= 1;
 	}
-	pT->UpdateFineStepTable();
+	UpdateFineStepTable();
 
 	char end[8];
 	MemsetZero(end);
 	inStrm.read(reinterpret_cast<char*>(&end), sizeof(end));
 	if(std::memcmp(end, "CTRTI_E.", 8))
 	{
-		delete pT;
-		return 0;
+		return SerializationResult::Failure;
 	}
 
-	return pT;
+	return SerializationResult::Success;
 }
 
 
