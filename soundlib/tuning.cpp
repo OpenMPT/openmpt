@@ -671,6 +671,10 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 		return 0;
 	}
 
+	if(pT->m_FineStepCount > 0)
+	{
+		pT->m_FineStepCount -= 1;
+	}
 	pT->UpdateFineStepTable();
 
 	char end[8];
