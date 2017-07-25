@@ -133,9 +133,13 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	return false;
 }
 
-std::string CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
-//----------------------------------------------------------------------------------
+std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+//-------------------------------------------------------------------------------
 {
+	if(!IsValidNote(x))
+	{
+		return std::string();
+	}
 	if(GetGroupSize() < 1)
 	{
 		const auto i = m_NoteNameMap.find(x);

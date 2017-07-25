@@ -88,9 +88,7 @@ public:
 
 	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
-	bool SetNoteName(const NOTEINDEXTYPE&, const std::string&);
-
-	bool ClearNoteName(const NOTEINDEXTYPE& n, const bool clearAll = false);
+	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
 	static CTuningRTI* Deserialize(std::istream& inStrm);
 
@@ -131,8 +129,6 @@ private:
 	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
 
 	void UpdateFineStepTable();
-
-	std::string ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
 	//Return true if data loading failed, false otherwise.
 	bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);

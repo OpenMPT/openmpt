@@ -489,14 +489,11 @@ void CTuningDialog::OnEnChangeEditNotename()
 	CString buffer;
 	m_EditNotename.GetWindowText(buffer);
 	std::string str = mpt::ToCharset(TuningCharset, buffer);
-	if(str.length() > 0)
 	{
 		if(str.size() > 3)
 			str.resize(3);
 		m_pActiveTuning->SetNoteName(currentNote, str);
 	}
-	else
-		m_pActiveTuning->ClearNoteName(currentNote);
 
 	m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 	m_RatioMapWnd.Invalidate();

@@ -46,45 +46,19 @@ const TUNINGTYPE CTuningRTI::TT_GEOMETRIC = 3; //0...11b
 
 
 
-std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
-//-------------------------------------------------------------------------------
-{
-	if(!IsValidNote(x)) return "";
-	else return ProGetNoteName(x, addOctave);
-}
-
-
-
-bool CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
+void CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 //--------------------------------------------------------------------------
 {
+	if(!str.empty())
 	{
 		m_NoteNameMap[n] = str;
-		return false;
-	}
-}
-
-
-
-
-bool CTuningRTI::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
-//-------------------------------------------------------------------------
-{
+	} else
 	{
-		if(eraseAll)
-		{
-			m_NoteNameMap.clear();
-			return false;
-		}
-
 		const auto iter = m_NoteNameMap.find(n);
 		if(iter != m_NoteNameMap.end())
 		{
 			m_NoteNameMap.erase(iter);
-			return false;
 		}
-		else
-			return true;
 	}
 }
 
