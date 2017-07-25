@@ -98,7 +98,6 @@ bool CTuningRTI::Multiply(const RATIOTYPE& r)
 
 	//Note: Multiplying ratios by constant doesn't
 	//change, e.g. 'geometricness' status.
-	VRPAIR vrp = GetValidityRange();
 	for(auto & ratio : m_RatioTable)
 	{
 		ratio *= r;
