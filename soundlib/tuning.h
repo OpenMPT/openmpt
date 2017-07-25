@@ -93,7 +93,7 @@ public:
 
 	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
-	static CTuningRTI* Deserialize(std::istream & f)
+	static CTuningRTI* CreateDeserialize(std::istream & f)
 	{
 		CTuningRTI *pT = new CTuningRTI();
 		if(pT->InitDeserialize(f) != SerializationResult::Success)
@@ -105,7 +105,7 @@ public:
 	}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuningRTI* DeserializeOLD(std::istream & f)
+	static CTuningRTI* CreateDeserializeOLD(std::istream & f)
 	{
 		CTuningRTI *pT = new CTuningRTI();
 		if(pT->InitDeserializeOLD(f) != SerializationResult::Success)
@@ -116,11 +116,72 @@ public:
 		return pT;
 	}
 
+	static CTuningRTI* CreateGeneral(const std::string &name)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		pT->SetName(name);
+		return pT;
+	}
+
+	static CTuningRTI* CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		pT->SetName(name);
+		if(pT->CreateGroupGeometric(groupsize, groupratio, 0) != false)
+		{
+			delete pT;
+			return nullptr;
+		}
+		pT->SetFineStepCount(finestepcount);
+		return pT;
+	}
+
+	static CTuningRTI* CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		pT->SetName(name);
+		if(pT->CreateGroupGeometric(ratios, groupratio, pT->GetValidityRange(), 0) != false)
+		{
+			delete pT;
+			return nullptr;
+		}
+		pT->SetFineStepCount(finestepcount);
+		return pT;
+	}
+
+	static CTuningRTI* CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		pT->SetName(name);
+		if(pT->CreateGeometric(groupsize, groupratio) != false)
+		{
+			delete pT;
+			return nullptr;
+		}
+		pT->SetFineStepCount(finestepcount);
+		return pT;
+	}
+
 	Tuning::SerializationResult Serialize(std::ostream& out) const;
 
 #ifdef MODPLUG_TRACKER
 	bool WriteSCL(std::ostream &f, const mpt::PathString &filename) const;
 #endif
+
+	bool ChangeGroupsize(const NOTEINDEXTYPE&);
+	bool ChangeGroupRatio(const RATIOTYPE&);
+
+	void SetName(const std::string& s) { m_TuningName = s; }
+	std::string GetName() const {return m_TuningName;}
+
+private:
+
+	CTuningRTI();
+
+	SerializationResult InitDeserialize(std::istream& inStrm);
+
+	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
+	SerializationResult InitDeserializeOLD(std::istream&);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
 	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
@@ -132,23 +193,6 @@ public:
 	//Create geometric tuning of *this using ratio(0) = 1.
 	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
 	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
-
-	bool ChangeGroupsize(const NOTEINDEXTYPE&);
-	bool ChangeGroupRatio(const RATIOTYPE&);
-
-	void SetName(const std::string& s) { m_TuningName = s; }
-	std::string GetName() const {return m_TuningName;}
-
-public:
-
-	CTuningRTI();
-
-private:
-
-	SerializationResult InitDeserialize(std::istream& inStrm);
-
-	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	SerializationResult InitDeserializeOLD(std::istream&);
 
 	//The two methods below return false if action was done, true otherwise.
 	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);

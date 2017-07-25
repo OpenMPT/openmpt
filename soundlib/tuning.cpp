@@ -59,7 +59,6 @@ CTuningRTI::CTuningRTI()
 //----------------------
 	: m_TuningType(TT_GENERAL)
 	, m_FineStepCount(0)
-	, m_TuningName("Unnamed")
 {
 	{
 		m_RatioTable.clear();
