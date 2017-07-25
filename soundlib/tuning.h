@@ -82,8 +82,6 @@ public:
 	//Multiply all ratios by given number.
 	bool Multiply(const RATIOTYPE&);
 
-	//Return value: true if change was not done, and false otherwise, in case which
-	//tuningtype is automatically changed to general.
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
@@ -104,8 +102,6 @@ public:
 #ifdef MODPLUG_TRACKER
 	bool WriteSCL(std::ostream &f, const mpt::PathString &filename) const;
 #endif
-
-	bool UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
 	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
