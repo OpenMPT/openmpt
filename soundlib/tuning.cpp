@@ -87,8 +87,8 @@ bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const 
 	}
 
 	m_StepMin = vr.first;
-	ProSetGroupSize(static_cast<UNOTEINDEXTYPE>(v.size()));
-	ProSetGroupRatio(r);
+	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(v.size());
+	m_GroupRatio = std::fabs(r);
 
 	m_RatioTable.resize(vr.second-vr.first+1);
 	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
@@ -120,9 +120,10 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 		m_RatioTableFine.clear();
 	}
 	m_StepMin = vr.first;
-	ProSetGroupSize(s);
-	ProSetGroupRatio(r);
-	const RATIOTYPE stepRatio = pow(r, static_cast<RATIOTYPE>(1)/s);
+	
+	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(s);
+	m_GroupRatio = std::fabs(r);
+	const RATIOTYPE stepRatio = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(1.0)/ static_cast<RATIOTYPE>(m_GroupSize));
 
 	m_RatioTable.resize(vr.second - vr.first + 1);
 	for(int32 i = vr.first; i<=vr.second; i++)
