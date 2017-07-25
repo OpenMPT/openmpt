@@ -46,22 +46,6 @@ const TUNINGTYPE CTuningRTI::TT_GEOMETRIC = 3; //0...11b
 
 
 
-bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
-//-------------------------------------------------------------------
-{
-	if(GetType() != TT_GENERAL)
-	{
-		return true;
-	}
-	{
-		if(ProSetRatio(s, r))
-			return true;
-
-		return false;
-	}
-}
-
-
 USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
 //-------------------------------------------------------------------
 {
@@ -133,10 +117,9 @@ bool CTuningRTI::Multiply(const RATIOTYPE& r)
 	//Note: Multiplying ratios by constant doesn't
 	//change, e.g. 'geometricness' status.
 	VRPAIR vrp = GetValidityRange();
-	for(NOTEINDEXTYPE i = vrp.first; i<vrp.second; i++)
+	for(auto & ratio : m_RatioTable)
 	{
-		if(ProSetRatio(i, r*GetRatio(i)))
-			return true;
+		ratio *= r;
 	}
 	return false;
 }

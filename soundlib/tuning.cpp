@@ -264,9 +264,13 @@ RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd)
 }
 
 
-bool CTuningRTI::ProSetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
-//----------------------------------------------------------------------
+bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
+//-------------------------------------------------------------------
 {
+	if(GetType() != TT_GENERAL)
+	{
+		return true;
+	}
 	//Creating ratio table if doesn't exist.
 	if(m_RatioTable.empty())
 	{
