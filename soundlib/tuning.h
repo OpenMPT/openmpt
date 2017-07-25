@@ -137,6 +137,8 @@ private:
 
 	void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
+	void UpdateFineStepTable();
+
 	std::string ProGetNoteName(const NOTEINDEXTYPE& xi, bool addOctave) const;
 
 	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]

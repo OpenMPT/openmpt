@@ -331,6 +331,13 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 
 	m_FineStepCount = (fs > static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX) : fs;
 
+	UpdateFineStepTable();
+}
+
+
+void CTuningRTI::UpdateFineStepTable()
+//------------------------------------
+{
 	if(GetType() == TT_GEOMETRIC)
 	{
 		if(m_FineStepCount > s_RatioTableFineSizeMaxDefault)
