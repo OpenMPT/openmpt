@@ -435,15 +435,16 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 		return true;
 	}
 
-	CTuning* pNewTuning = new CTuning();
+	CTuning* pNewTuning = nullptr;
 	if(type == TT_GROUPGEOMETRIC)
 	{
-		pNewTuning->SetFineStepCount(15);
-		pNewTuning->CreateGroupGeometric(12, 2, 0);
+		pNewTuning = CTuning::CreateGroupGeometric("Unnamed", 12, 2, 15);
 	} else if(type == TT_GEOMETRIC)
 	{
-		pNewTuning->SetFineStepCount(15);
-		pNewTuning->CreateGeometric(12, 2);
+		pNewTuning = CTuning::CreateGeometric("Unnamed", 12, 2, 15);
+	} else
+	{
+		pNewTuning = CTuning::CreateGeneral("Unnamed");
 	}
 
 	if(pTC->AddTuning(pNewTuning))
@@ -850,12 +851,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 		} else if(CheckMagic(fin, 0, magicTUNoldV3))
 		{
 
-			pT = CTuning::DeserializeOLD(fin);
+			pT = CTuning::CreateDeserializeOLD(fin);
 
 		} else if(CheckMagic(fin, 0, magicTUN))
 		{
 
-			pT = CTuning::Deserialize(fin);
+			pT = CTuning::CreateDeserialize(fin);
 
 		} else if(bIsScl)
 		{
@@ -1302,7 +1303,8 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 		pNewTuning = new CTuning(*pT);
 	} else
 	{
-		pNewTuning = new CTuning();
+		Reporting::Notification("Add tuning failed");
+		return true;
 	}
 	if(pTC->AddTuning(pNewTuning))
 	{
@@ -1712,15 +1714,8 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			return enSclImportFailNegativeRatio;
 	}
 
-	CTuning* pT = new CTuning();
 	Tuning::RATIOTYPE groupRatio = fRatios.back();
 	fRatios.pop_back();
-	pT->SetFineStepCount(15);
-	if(pT->CreateGroupGeometric(fRatios, groupRatio, pT->GetValidityRange(), 0) != false)
-	{
-		delete pT;
-		return enSclImportTuningCreationFailure;
-	}
 
 	mpt::ustring tuningName;
 	if(!description.empty())
@@ -1736,7 +1731,12 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	{
 		tuningName = mpt::format(MPT_USTRING("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
-	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, tuningName));
+
+	CTuning* pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::CharsetLocale, tuningName), fRatios, groupRatio, 15);
+	if(!pT)
+	{
+		return enSclImportTuningCreationFailure;
+	}
 
 	bool allNamesEmpty = true;
 	bool allNamesValid = true;

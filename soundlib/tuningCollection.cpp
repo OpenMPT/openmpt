@@ -247,8 +247,8 @@ bool CTuningCollection::AddTuning(std::istream& inStrm)
 
 	if(!inStrm.good()) return true;
 
-	CTuning* pT = CTuningRTI::DeserializeOLD(inStrm);
-	if(pT == 0) pT = CTuningRTI::Deserialize(inStrm);
+	CTuning* pT = CTuning::CreateDeserializeOLD(inStrm);
+	if(pT == 0) pT = CTuning::CreateDeserialize(inStrm);
 
 	if(pT == 0)
 		return true;
