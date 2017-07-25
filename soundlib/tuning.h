@@ -30,9 +30,12 @@ public:
 
 	static const char s_FileExtension[5];
 
-	static const TUNINGTYPE TT_GENERAL;
-	static const TUNINGTYPE TT_GROUPGEOMETRIC;
-	static const TUNINGTYPE TT_GEOMETRIC;
+	enum
+	{
+		TT_GENERAL        = 0,
+		TT_GROUPGEOMETRIC = 1,
+		TT_GEOMETRIC      = 3,
+	};
 
 	static const RATIOTYPE s_DefaultFallbackRatio;
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
