@@ -17,6 +17,7 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 #include "resource.h"
+#include "CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -291,8 +292,8 @@ private:
 
 	//Tuning Edits-->
 	CEdit m_EditSteps;
-	CEdit m_EditRatioPeriod;
-	CEdit m_EditRatio;
+	CNumberEdit m_EditRatioPeriod;
+	CNumberEdit m_EditRatio;
 	CEdit m_EditNotename;
 	CEdit m_EditMiscActions;
 	CEdit m_EditFineTuneSteps;

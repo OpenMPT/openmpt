@@ -160,6 +160,13 @@ BOOL CTuningDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	m_EditRatioPeriod.SubclassDlgItem(IDC_EDIT_RATIOPERIOD, this);
+	m_EditRatio.SubclassDlgItem(IDC_EDIT_RATIOVALUE, this);
+	m_EditRatioPeriod.AllowNegative(false);
+	m_EditRatioPeriod.AllowFractions(true);
+	m_EditRatio.AllowNegative(false);
+	m_EditRatio.AllowFractions(true);
+
 	m_RatioMapWnd.Init(this, 0);
 
 	//-->Creating treeview
@@ -348,8 +355,6 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATICRATIOMAP, m_RatioMapWnd);
 	DDX_Control(pDX, IDC_COMBO_TTYPE, m_CombobTuningType);
 	DDX_Control(pDX, IDC_EDIT_STEPS, m_EditSteps);
-	DDX_Control(pDX, IDC_EDIT_RATIOPERIOD, m_EditRatioPeriod);
-	DDX_Control(pDX, IDC_EDIT_RATIOVALUE, m_EditRatio);
 	DDX_Control(pDX, IDC_EDIT_NOTENAME, m_EditNotename);
 	DDX_Control(pDX, IDC_BUTTON_SETVALUES, m_ButtonSet);
 	DDX_Control(pDX, IDC_BUTTON_TUNING_NEW, m_ButtonNew);
@@ -516,12 +521,10 @@ void CTuningDialog::OnEnChangeEditRatiovalue()
 
 	const NOTEINDEXTYPE currentNote = m_RatioMapWnd.GetShownCentre();
 
-	CString buffer;
-	m_EditRatio.GetWindowText(buffer);
-	std::string str = mpt::ToCharset(TuningCharset, buffer);
-	if(str.length() > 0)
+	double ratio = 0.0;
+	if(m_EditRatio.GetDecimalValue(ratio))
 	{
-		m_pActiveTuning->SetRatio(currentNote, ConvertStrTo<RATIOTYPE>(buffer));
+		m_pActiveTuning->SetRatio(currentNote, static_cast<RATIOTYPE>(ratio));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateTuningType();
 		m_RatioMapWnd.Invalidate();
@@ -966,13 +969,12 @@ void CTuningDialog::OnEnKillfocusEditSteps()
 
 
 void CTuningDialog::OnEnKillfocusEditRatioperiod()
-//--------------------------------------------
+//------------------------------------------------
 {
-	if(m_pActiveTuning)
+	double ratio = 0.0;
+	if(m_pActiveTuning && m_EditRatioPeriod.GetDecimalValue(ratio))
 	{
-		CString buffer;
-		m_EditRatioPeriod.GetWindowText(buffer);
-		m_pActiveTuning->ChangeGroupRatio(ConvertStrTo<RATIOTYPE>(buffer));
+		m_pActiveTuning->ChangeGroupRatio(static_cast<RATIOTYPE>(ratio));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateView(UM_TUNINGDATA);
 	}
