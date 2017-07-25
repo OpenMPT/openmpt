@@ -25,7 +25,7 @@ and run
 As the build system retains no state between make invocations, you have to
 provide your make options on every make invocation.
 
-### Autotools-based build system
+#### Autotools-based build system
 
     ./configure
     make check
