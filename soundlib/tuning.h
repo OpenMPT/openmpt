@@ -74,11 +74,10 @@ public:
 	STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 
-	//To set finestepcount between two consecutive mainsteps and
-	//return GetFineStepCount(). This might not be the same as
-	//parameter fs if something fails. Finestep count == 0 means that
+	//To set finestepcount between two consecutive mainsteps.
+	//Finestep count == 0 means that
 	//stepdistances become the same as note distances.
-	USTEPINDEXTYPE SetFineStepCount(const USTEPINDEXTYPE& fs);
+	void SetFineStepCount(const USTEPINDEXTYPE& fs);
 
 	//Multiply all ratios by given number.
 	bool Multiply(const RATIOTYPE&);
@@ -134,8 +133,6 @@ private:
 	//The two methods below return false if action was done, true otherwise.
 	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);
 	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
-
-	void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
 	void UpdateFineStepTable();
 

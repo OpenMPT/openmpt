@@ -320,8 +320,8 @@ bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
 }
 
 
-void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
-//------------------------------------------------------------
+void CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
+//---------------------------------------------------------
 {
 	m_FineStepCount = mpt::clamp(mpt::saturate_cast<STEPINDEXTYPE>(fs), 0, FINESTEPCOUNT_MAX);
 	UpdateFineStepTable();
@@ -444,9 +444,7 @@ CTuningRTI* CTuningRTI::Deserialize(std::istream& iStrm)
 		}
 		else
 		{
-			USTEPINDEXTYPE fsTemp = pTuning->m_FineStepCount;
-			pTuning->m_FineStepCount = 0;
-			pTuning->SetFineStepCount(fsTemp);
+			pTuning->UpdateFineStepTable();
 		}
 	}
 	else
@@ -696,7 +694,7 @@ CTuningRTI* CTuningRTI::DeserializeOLD(std::istream& inStrm)
 		return 0;
 	}
 
-	if(pT->GetFineStepCount() > 0) pT->ProSetFineStepCount(pT->GetFineStepCount() - 1);
+	pT->UpdateFineStepTable();
 
 	char end[8];
 	MemsetZero(end);

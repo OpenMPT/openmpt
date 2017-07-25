@@ -46,24 +46,6 @@ const TUNINGTYPE CTuningRTI::TT_GEOMETRIC = 3; //0...11b
 
 
 
-USTEPINDEXTYPE CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
-//-------------------------------------------------------------------
-{
-	VRPAIR vrp = GetValidityRange();
-
-	if( (vrp.first > vrp.second)
-		||
-		(fs > FINESTEPCOUNT_MAX)
-	  ) return GetFineStepCount();
-	else
-	{
-		ProSetFineStepCount(fs);
-		return GetFineStepCount();
-	}
-}
-
-
-
 std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 //-------------------------------------------------------------------------------
 {
@@ -152,7 +134,7 @@ bool CTuningRTI::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RAT
 		else
 		{
 			m_TuningType = TT_GROUPGEOMETRIC;
-			ProSetFineStepCount(GetFineStepCount());
+			UpdateFineStepTable();
 			return false;
 		}
 	}
@@ -171,7 +153,7 @@ bool CTuningRTI::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, co
 		else
 		{
 			m_TuningType = TT_GEOMETRIC;
-			ProSetFineStepCount(GetFineStepCount());
+			UpdateFineStepTable();
 			return false;
 		}
 	}
