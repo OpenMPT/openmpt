@@ -38,13 +38,6 @@ Version history:
 const char CTuningRTI::s_FileExtension[5] = ".tun";
 
 
-const TUNINGTYPE CTuningRTI::TT_GENERAL = 0; //0...00b
-
-const TUNINGTYPE CTuningRTI::TT_GROUPGEOMETRIC = 1; //0...10b
-
-const TUNINGTYPE CTuningRTI::TT_GEOMETRIC = 3; //0...11b
-
-
 
 void CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 //--------------------------------------------------------------------------
