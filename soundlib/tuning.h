@@ -93,10 +93,28 @@ public:
 
 	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
-	static CTuningRTI* Deserialize(std::istream& inStrm);
+	static CTuningRTI* Deserialize(std::istream & f)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		if(pT->InitDeserialize(f) != SerializationResult::Success)
+		{
+			delete pT;
+			return nullptr;
+		}
+		return pT;
+	}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuningRTI* DeserializeOLD(std::istream&);
+	static CTuningRTI* DeserializeOLD(std::istream & f)
+	{
+		CTuningRTI *pT = new CTuningRTI();
+		if(pT->InitDeserializeOLD(f) != SerializationResult::Success)
+		{
+			delete pT;
+			return nullptr;
+		}
+		return pT;
+	}
 
 	Tuning::SerializationResult Serialize(std::ostream& out) const;
 
@@ -126,6 +144,11 @@ public:
 	CTuningRTI();
 
 private:
+
+	SerializationResult InitDeserialize(std::istream& inStrm);
+
+	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
+	SerializationResult InitDeserializeOLD(std::istream&);
 
 	//The two methods below return false if action was done, true otherwise.
 	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);
