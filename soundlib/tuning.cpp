@@ -315,6 +315,7 @@ bool CTuningRTI::UpdateRatioGroupGeometric(NOTEINDEXTYPE s, RATIOTYPE r)
 			m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
 		}
 	}
+	UpdateFineStepTable();
 	return true;
 }
 
