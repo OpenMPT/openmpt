@@ -794,7 +794,9 @@ void CTuningDialog::OnBnClickedButtonImport()
 		// "HSCT", 0x02, 0x00, 0x00, 0x00
 		const uint8 magicTColdV2 [] = {  'H', 'S', 'C', 'T',0x02,0x00,0x00,0x00                          };
 		// "CTRTI_B.", 0x03, 0x00
-		const uint8 magicTUNoldV3[] = {  'C', 'T', 'R', 'T', 'I', '_', 'B', ',',0x03,0x00                };
+		const uint8 magicTUNoldV2[] = {  'C', 'T', 'R', 'T', 'I', '_', 'B', '.',0x02,0x00                };
+		// "CTRTI_B.", 0x03, 0x00
+		const uint8 magicTUNoldV3[] = {  'C', 'T', 'R', 'T', 'I', '_', 'B', '.',0x03,0x00                };
 		// "228", 0x02, "TC"
 		const uint8 magicTC      [] = {  '2', '2', '8',0x02, 'T', 'C'                                    };
 		// "228", 0x09, "CTB244RTI"
@@ -851,7 +853,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				// ok
 			}
 
-		} else if(CheckMagic(fin, 0, magicTUNoldV3))
+		} else if(CheckMagic(fin, 0, magicTUNoldV3) || CheckMagic(fin, 0, magicTUNoldV2))
 		{
 
 			pT = CTuning::CreateDeserializeOLD(fin);
