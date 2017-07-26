@@ -314,11 +314,11 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditRatioPeriod.SetReadOnly(!enableControls);
 		m_EditRatio.SetReadOnly((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? TRUE : !enableControls);
 		m_EditNotename.SetReadOnly(!enableControls);
-		m_EditMiscActions.SetReadOnly(!enableControls);
+		m_EditMiscActions.SetReadOnly((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? TRUE : !enableControls);
 		m_EditFineTuneSteps.SetReadOnly(!enableControls);
 		m_EditName.SetReadOnly(!enableControls);
 
-		m_ButtonSet.EnableWindow(enableControls);
+		m_ButtonSet.EnableWindow((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? FALSE : enableControls);
 
 		m_CombobTuningType.Invalidate();
 		m_EditSteps.Invalidate();
