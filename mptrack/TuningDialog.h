@@ -332,7 +332,7 @@ private:
 	};
 
 	static CString GetSclImportFailureMsg(EnSclImport);
-	static const size_t s_nSclImportMaxNoteCount = 64;
+	static const size_t s_nSclImportMaxNoteCount = 256;
 
 	//To indicate whether to apply changes made to
 	//those edit boxes(they are modified by certain activities
