@@ -654,12 +654,6 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 		return SerializationResult::Failure;
 	}
 
-	if(m_FineStepCount > 0)
-	{
-		m_FineStepCount -= 1;
-	}
-	UpdateFineStepTable();
-
 	char end[8];
 	MemsetZero(end);
 	inStrm.read(reinterpret_cast<char*>(&end), sizeof(end));
@@ -667,6 +661,30 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 	{
 		return SerializationResult::Failure;
 	}
+
+	// reject corrupt tunings
+	if(m_RatioTable.size() > static_cast<std::size_t>(NOTEINDEXTYPE_MAX))
+	{
+		return SerializationResult::Failure;
+	}
+	if((m_GroupSize <= 0 || m_GroupRatio <= 0) && m_TuningType != TT_GENERAL)
+	{
+		return SerializationResult::Failure;
+	}
+	if(m_TuningType == TT_GROUPGEOMETRIC || m_TuningType == TT_GEOMETRIC)
+	{
+		if(m_RatioTable.size() < static_cast<std::size_t>(m_GroupSize))
+		{
+			return SerializationResult::Failure;
+		}
+	}
+
+	// convert old finestepcount
+	if(m_FineStepCount > 0)
+	{
+		m_FineStepCount -= 1;
+	}
+	UpdateFineStepTable();
 
 	if(m_TuningType == TT_GEOMETRIC)
 	{
