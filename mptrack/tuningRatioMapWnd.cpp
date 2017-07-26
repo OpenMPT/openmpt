@@ -54,13 +54,12 @@ void CTuningRatioMapWnd::OnPaint()
 		CSize sz;
 		sz = dc.GetTextExtent(CString("123456789"));
 		m_cyFont = sz.cy + 2;
-		m_cxFont = rcClient.right / 2;
+		m_cxFont = rcClient.right / 4;
 	}
 	dc.IntersectClipRect(&rcClient);
 	if ((m_cxFont > 0) && (m_cyFont > 0))
 	{
 		BOOL bFocus = (::GetFocus() == m_hWnd) ? TRUE : FALSE;
-		CString s;
 		CRect rect;
 
 		NOTEINDEXTYPE nNotes = static_cast<NOTEINDEXTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
@@ -73,40 +72,35 @@ void CTuningRatioMapWnd::OnPaint()
 			BOOL bHighLight;
 			// Note
 			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
-			s.Empty();
-
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
-			std::string temp;
-			if(isValidNote)
-			{
-				temp = "(" + mpt::fmt::val(noteToDraw) + ")   " + m_pTuning->GetNoteName(noteToDraw);
-			}
-
-			if(isValidNote)
-				s = temp.c_str();
-			else
-				s = _T("...");
-
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
+			DrawButtonRect(hdc, &rect, isValidNote ? mpt::tfmt::val(noteToDraw) : _T("..."), FALSE, FALSE);
+
 			// Mapped Note
 			bHighLight = ((bFocus) && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
 			rect.left = rect.right;
-			rect.right = m_cxFont*2-1;
-			s = _T("...");
+			rect.right = m_cxFont*4-1;
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
-			if (nPos == (int)m_nNote)
+			if(nPos == (int)m_nNote)
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			s = mpt::fmt::val(m_pTuning->GetRatio(noteToDraw)).c_str();
-			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+			rect.SetRect(m_cxFont * 1, ypaint, m_cxFont * 2 - 1, ypaint + m_cyFont);
+			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+			rect.SetRect(m_cxFont * 2, ypaint, m_cxFont * 3 - 1, ypaint + m_cyFont);
+			dc.DrawText(mpt::tfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+			rect.SetRect(m_cxFont * 3, ypaint, m_cxFont * 4 - 1, ypaint + m_cyFont);
+			dc.DrawText(mpt::tfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
 		}
-		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
+		rect.SetRect(rcClient.left+m_cxFont*4-1, rcClient.top, rcClient.left+m_cxFont*4+3, ypaint);
 		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
