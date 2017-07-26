@@ -443,7 +443,12 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 	CTuning* pNewTuning = nullptr;
 	if(type == TT_GROUPGEOMETRIC)
 	{
-		pNewTuning = CTuning::CreateGroupGeometric("Unnamed", 12, 2, 15);
+		std::vector<Tuning::RATIOTYPE> ratios;
+		for(Tuning::NOTEINDEXTYPE n = 0; n < 12; ++n)
+		{
+			ratios.push_back(std::pow(static_cast<Tuning::RATIOTYPE>(2.0), static_cast<Tuning::RATIOTYPE>(n) / static_cast<Tuning::RATIOTYPE>(12)));
+		}
+		pNewTuning = CTuning::CreateGroupGeometric("Unnamed", ratios, 2, 15);
 	} else if(type == TT_GEOMETRIC)
 	{
 		pNewTuning = CTuning::CreateGeometric("Unnamed", 12, 2, 15);
