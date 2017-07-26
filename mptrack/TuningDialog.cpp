@@ -1628,7 +1628,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
 	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
-	if (nNotes > s_nSclImportMaxNoteCount)
+	if (nNotes - 1 > s_nSclImportMaxNoteCount)
 		return enSclImportFailTooManyNotes;
 
 	std::vector<std::string> names;
