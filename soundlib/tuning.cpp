@@ -146,7 +146,14 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 	}
 	else
 	{
-		const NOTEINDEXTYPE pos = ((x % m_GroupSize) + m_GroupSize) % m_GroupSize;
+		NOTEINDEXTYPE pos = 0;
+		if(x >= 0)
+		{
+			pos = x % m_GroupSize;
+		} else
+		{
+			pos = m_GroupSize - ((0 - x - 1 + m_GroupSize) % m_GroupSize) - 1;
+		}
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
 		std::string rValue;
 		const auto nmi = m_NoteNameMap.find(pos);
@@ -166,9 +173,18 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 			//By default, using notation nnP for notes; nn <-> note character starting
 			//from 'A' with char ':' as fill char, and P is period integer. For example:
 			//C:5, D:3, R:7
-			rValue = std::string(1, static_cast<char>(pos + 'A'));
-
-			rValue += ":";
+			if(m_GroupSize <= 26)
+			{
+				rValue = std::string(1, static_cast<char>(pos + 'A'));
+				rValue += ":";
+			} else
+			{
+				rValue = mpt::fmt::HEX0<1>(pos % 16) + mpt::fmt::HEX0<1>((pos / 16) % 16);
+				if(pos > 0xff)
+				{
+					rValue = mpt::ToLowerCaseAscii(rValue);
+				}
+			}
 
 			if(addOctave)
 			{
