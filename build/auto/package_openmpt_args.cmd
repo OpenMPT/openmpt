@@ -18,6 +18,12 @@ set MPT_REVISION=%OPENMPT_VERSION%-%SVNVERSION%
 
 
 cd bin || goto error
+rmdir /s /q openmpt
+mkdir openmpt || goto error
+mkdir openmpt\bin.%MPT_DIST_VARIANT%
+mkdir openmpt\bin.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%
+mkdir openmpt\dbg.%MPT_DIST_VARIANT%
+mkdir openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%
 rmdir /s /q openmpt-%MPT_DIST_VARIANT%
 del /f /q openmpt-%MPT_DIST_VARIANT%.tar
 del /f /q openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z
@@ -38,7 +44,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\PluginBridge32.exe .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\PluginBridge64.exe .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\openmpt-wine-support.zip .\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z ^
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt\bin.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
  mptrack.exe ^
@@ -49,9 +55,9 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  openmpt-wine-support.zip ^
  extraKeymaps ^
  || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack.pdb || goto error
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z mptrack.pdb || goto error
 cd .. || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-%MPT_DIST_VARIANT%.tar openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z || goto error
+"C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-%MPT_DIST_VARIANT%.tar openmpt || goto error
 del /f /q openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.7z
 del /f /q openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols.7z
 rmdir /s /q openmpt-%MPT_DIST_VARIANT%
