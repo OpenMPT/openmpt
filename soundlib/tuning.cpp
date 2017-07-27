@@ -641,7 +641,7 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 			return SerializationResult::Failure;
 		}
 	}
-	m_FineStepCount = m_RatioTableFine.size();
+	m_FineStepCount = mpt::saturate_cast<USTEPINDEXTYPE>(m_RatioTableFine.size());
 
 	//m_StepMin
 	int16 stepmin = 0;
