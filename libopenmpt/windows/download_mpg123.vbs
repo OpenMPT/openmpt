@@ -100,42 +100,42 @@ CreateFolder "download.tmp"
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-Download httpprotocol & "://mpg123.de/download/win32/1.25.2/mpg123-1.25.2-x86.zip", 489943, "fd7379feed47176acc6d046633dc780c", "57bdc14972456e1c5a142c0d97532746a8ecc6d7", "download.tmp\mpg123-1.25.2-x86.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.2-x86")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.2-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win32/1.25.4/mpg123-1.25.4-x86.zip", 489443, "2e5eeb476aa2e6d61c6bc934abc11095", "bbbf7e2e0446a9796807267c8676d0aca6829378", "download.tmp\mpg123-1.25.4-x86.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.4-x86")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.4-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
-Download httpprotocol & "://mpg123.de/download/win64/1.25.2/mpg123-1.25.2-x86-64.zip", 536278, "588789d13911d60b4c91cd2c225ac742", "8cd817e51339d930aba5bf95e7ba9b898f4074bf", "download.tmp\mpg123-1.25.2-x86-64.zip"
-DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.2-x86-64")
-UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.2-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
+Download httpprotocol & "://mpg123.de/download/win64/1.25.4/mpg123-1.25.4-x86-64.zip", 535538, "29bfd0791707ba59262b5d7591af6a0d", "d64811de48380fb7d73dd8880537f706caedab29", "download.tmp\mpg123-1.25.4-x86-64.zip"
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.4-x86-64")
+UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-1.25.4-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
 CreateFolder "Licenses"
 
-fso.CopyFile "download.tmp\mpg123-1.25.2-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
+fso.CopyFile "download.tmp\mpg123-1.25.4-x86\COPYING.txt", "Licenses\License.mpg123.txt", True
 
 If fso.FolderExists("bin") Then
 	CreateFolder "bin\x86"
 	CreateFolder "bin\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86\libmpg123-0.dll",        "bin\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86-64\libmpg123-0.dll",     "bin\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("openmpt123") Then
 	CreateFolder "openmpt123\x86"
 	CreateFolder "openmpt123\x86_64"
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("XMPlay") Then
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86\libmpg123-0.dll",        "XMPlay\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("foobar2000") Then
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86\libmpg123-0.dll",        "foobar2000\libmpg123-0.dll", True
 End If
 
 If fso.FolderExists("Winamp") Then
-	fso.CopyFile "download.tmp\mpg123-1.25.2-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
+	fso.CopyFile "download.tmp\mpg123-1.25.4-x86\libmpg123-0.dll",        "Winamp\libmpg123-0.dll", True
 End If
 
 DeleteFolder "download.tmp"
