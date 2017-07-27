@@ -8,6 +8,22 @@ build\auto\helper_get_openmpt_version.exe openmpt > openmpt_version.txt
 set /p OPENMPT_VERSION=<openmpt_version.txt
 del /f openmpt_version.txt
 
+build\auto\helper_get_openmpt_version.exe openmpt-version-majormajor > openmpt_version.txt
+set /p OPENMPT_VERSION_MAJORMAJOR=<openmpt_version.txt
+del /f openmpt_version.txt
+
+build\auto\helper_get_openmpt_version.exe openmpt-version-major > openmpt_version.txt
+set /p OPENMPT_VERSION_MAJOR=<openmpt_version.txt
+del /f openmpt_version.txt
+
+build\auto\helper_get_openmpt_version.exe openmpt-version-minor > openmpt_version.txt
+set /p OPENMPT_VERSION_MINOR=<openmpt_version.txt
+del /f openmpt_version.txt
+
+build\auto\helper_get_openmpt_version.exe openmpt-version-minorminor > openmpt_version.txt
+set /p OPENMPT_VERSION_MINORMINOR=<openmpt_version.txt
+del /f openmpt_version.txt
+
 build\auto\helper_get_openmpt_version.exe libopenmpt-version-major > openmpt_version.txt
 set /p LIBOPENMPT_VERSION_MAJOR=<openmpt_version.txt
 del /f openmpt_version.txt

@@ -23,6 +23,18 @@ int main( int argc, char * argv [] ) {
 		} else if ( arg == "openmpt" ) {
 			std::cout << MPT_VERSION_STR << std::endl;
 
+		} else if ( arg == "openmpt-version-majormajor" ) {
+			std::cout << VER_STRINGIZE(VER_MAJORMAJOR) << std::endl;
+
+		} else if ( arg == "openmpt-version-major" ) {
+			std::cout << VER_STRINGIZE(VER_MAJOR) << std::endl;
+
+		} else if ( arg == "openmpt-version-minor" ) {
+			std::cout << VER_STRINGIZE(VER_MINOR) << std::endl;
+
+		} else if ( arg == "openmpt-version-minorminor" ) {
+			std::cout << VER_STRINGIZE(VER_MINORMINOR) << std::endl;
+
 #ifdef OPENMPT_API_VERSION_MAJOR
 		} else if ( arg == "libopenmpt-version-major" ) {
 			std::cout << OPENMPT_API_VERSION_MAJOR << std::endl;
