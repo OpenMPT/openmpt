@@ -384,7 +384,7 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 
 #ifdef MODPLUG_TRACKER
 
-#if defined(MPT_OS_WINDOWS)
+#if MPT_OS_WINDOWS
 
 namespace String { namespace detail
 {
