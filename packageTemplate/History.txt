@@ -47,7 +47,7 @@ General tab
 Pattern tab
    [Imp] <js> Right-clicking outside of the pattern shows a context menu for adding more channels.
    [Fix] <js> It was possible to use (but not save) l / r / u volume commands in MPTM and e / f volume commands in XM (http://bugs.openmpt.org/view.php?id=975).
-   [Fix] <js> Most pattern editing funcationality in pattern 2 and higher was broken after deleting pattern 1.
+   [Fix] <js> Most pattern editing functionality in pattern 2 and higher was broken after deleting pattern 1.
 
 Pattern tab::Find/Replace
    [Fix] <js> Replacing with an extended command (Exx / Sxx) overwrote the parameter to be found.
