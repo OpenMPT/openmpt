@@ -2470,9 +2470,9 @@ bool CSoundFile::ProcessEffects()
 			pChn->proTrackerOffset = 0;
 			// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
 			// Test case: InstrDelay.mod
-			if(!triggerNote)
+			if(!triggerNote && !pChn->increment.IsZero())
 			{
-				InstrumentChange(pChn, instr, true, true, false);
+				InstrumentChange(pChn, instr, false, true, false);
 			}
 		}
 
