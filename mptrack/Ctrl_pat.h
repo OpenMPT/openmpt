@@ -39,7 +39,7 @@ protected:
 	//m_nScrollPos: The same as order
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
 	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
-	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos, m_nMouseDownPos;
+	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos, m_nMouseDownPos, m_playPos;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
@@ -54,7 +54,7 @@ public:
 
 public:
 	BOOL Init(const CRect&, HFONT hFont);
-	void InvalidateSelection() const;
+	void InvalidateSelection();
 	PATTERNINDEX GetCurrentPattern() const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)

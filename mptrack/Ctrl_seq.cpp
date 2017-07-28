@@ -185,16 +185,21 @@ bool COrderList::IsPlaying() const
 }
 
 
-COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document) : m_pParent(parent), m_pModDoc(document)
-//-------------------------------------------------------------------------------------------------------
+COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document)
+	: m_pParent(parent)
+	, m_pModDoc(document)
+	, m_hFont(nullptr)
+	, m_cxFont(0)
+	, m_cyFont(0)
+	, m_nScrollPos(0)
+	, m_nXScroll(0)
+	, m_nScrollPos2nd(ORDERINDEX_INVALID)
+	, m_playPos(ORDERINDEX_INVALID)
+	, m_nOrderlistMargins(TrackerSettings::Instance().orderlistMargins)
+	, m_bScrolling(false)
+	, m_bDragging(false)
+//---------------------------------------------------------------------
 {
-	m_hFont = nullptr;
-	m_cxFont = m_cyFont = 0;
-	m_nScrollPos = m_nXScroll = 0;
-	m_nScrollPos2nd = ORDERINDEX_INVALID;
-	m_nOrderlistMargins = TrackerSettings::Instance().orderlistMargins;
-	m_bScrolling = false;
-	m_bDragging = false;
 }
 
 
@@ -269,8 +274,8 @@ int COrderList::GetFontWidth()
 }
 
 
-void COrderList::InvalidateSelection() const
-//------------------------------------------
+void COrderList::InvalidateSelection()
+//------------------------------------
 {
 	ORDERINDEX nOrdLo = m_nScrollPos, nCount = 1;
 	static ORDERINDEX m_nScrollPos2Old = m_nScrollPos2nd;
@@ -294,9 +299,17 @@ void COrderList::InvalidateSelection() const
 	rect.top = rcClient.top;
 	rect.right = rect.left + m_cxFont * nCount;
 	rect.bottom = rcClient.bottom;
-	if (rect.right > rcClient.right) rect.right = rcClient.right;
-	if (rect.left < rcClient.left) rect.left = rcClient.left;
-	if (rect.right > rect.left) ::InvalidateRect(m_hWnd, &rect, FALSE);
+	rect &= rcClient;
+	if (rect.right > rect.left) InvalidateRect(rect, FALSE);
+	if(m_playPos != ORDERINDEX_INVALID)
+	{
+		rect.left = rcClient.left + (m_playPos - m_nXScroll) * m_cxFont;
+		rect.top = rcClient.top;
+		rect.right = rect.left + m_cxFont;
+		rect &= rcClient;
+		if(rect.right > rect.left) InvalidateRect(rect, FALSE);
+		m_playPos = ORDERINDEX_INVALID;
+	}
 }
 
 
@@ -751,7 +764,7 @@ void COrderList::OnPaint()
 		}
 
 		// Scrolling the shown orders(the showns rectangles)?
-		while (rect.left < rcClient.right)
+		while(rect.left < rcClient.right)
 		{
 			dc.SetTextColor(colorText);
 			bool bHighLight = ((bFocus) && (nIndex >= selection.firstOrd && nIndex <= selection.lastOrd));
@@ -795,6 +808,7 @@ void COrderList::OnPaint()
 			{
 				MoveToEx(dc.m_hDC, rect.left + 4, rect.top + 2, NULL);
 				LineTo(dc.m_hDC, rect.right - 4, rect.top + 2);
+				m_playPos = nIndex;
 			}
 
 			s[0] = _T('\0');
