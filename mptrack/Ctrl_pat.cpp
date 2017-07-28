@@ -403,7 +403,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		MPT_FALLTHROUGH;
 	case CTRLMSG_SETCURRENTORDER:
 		//Set orderlist selection and refresh GUI if change successful
-		m_OrderList.SetCurSel((ORDERINDEX)lParam, false);
+		m_OrderList.SetCurSel(static_cast<ORDERINDEX>(lParam), false, false, true);
 		break;
 
 	case CTRLMSG_FORCEREFRESH:
