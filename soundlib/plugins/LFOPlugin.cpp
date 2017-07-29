@@ -104,8 +104,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		if(m_polarity)
 			value = -value;
 		// Transform value from -1...+1 to 0...1 range and apply offset/amplitude
-		value += 2.0 * m_offset;
-		value *= m_amplitude;
+		value = value * m_amplitude + m_offset;
 		Limit(value, 0.0, 1.0);
 
 		IMixPlugin *plugin = GetOutputPlugin();
