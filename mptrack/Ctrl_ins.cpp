@@ -735,6 +735,12 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; bRedraw = true; } else
 		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
 		break;
+	case VK_HOME:
+		if(m_nNote > 0) { m_nNote = 0; bRedraw = true; }
+		break;
+	case VK_END:
+		if(m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
+		break;
 // 	case VK_TAB:
 // 		return true;
 	case VK_RETURN:
