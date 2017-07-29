@@ -33,20 +33,27 @@ Version history:
 
 const char CTuningCollection::s_FileExtension[4] = ".tc";
 
+
 namespace CTuningS11n
 {
-	void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m);
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
-
-	void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE,std::string>& m, const size_t);
-	void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
-
-	void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm);}
-	void WriteTuning(std::ostream& oStrm, const CTuning& t) {t.Serialize(oStrm);}
 } // namespace CTuningS11n
 
 using namespace CTuningS11n;
+
+
+static void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t)
+//------------------------------------------------------------------------------
+{
+	Tc.AddTuning(iStrm);
+}
+
+static void WriteTuning(std::ostream& oStrm, const CTuning& t)
+//------------------------------------------------------------
+{
+	t.Serialize(oStrm);
+}
 
 
 CTuning* CTuningCollection::GetTuning(const std::string& name)

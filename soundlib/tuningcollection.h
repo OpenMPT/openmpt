@@ -21,15 +21,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Tuning {
 
 
-class CTuningCollection;
-
-namespace CTuningS11n
-{
-	void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t);
-	void WriteTuning(std::ostream& oStrm, const CTuning& t);
-}
-
-
 //=====================
 class CTuningCollection
 //=====================
