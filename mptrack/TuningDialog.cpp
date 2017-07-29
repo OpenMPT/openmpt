@@ -268,6 +268,11 @@ void CTuningDialog::UpdateView(const int updateMask)
 		return;
 	}
 
+	m_ButtonNew.EnableWindow(TRUE);
+	m_ButtonImport.EnableWindow(TRUE);
+	m_ButtonExport.EnableWindow((m_pActiveTuning || m_pActiveTuningCollection) ? TRUE : FALSE);
+	m_ButtonRemove.EnableWindow(((m_pActiveTuning && (m_pActiveTuningCollection == m_TuningCollections[0])) || (!m_pActiveTuning && m_pActiveTuningCollection && m_pActiveTuningCollection != m_TuningCollections[0])) ? TRUE : FALSE);
+
 	//Updating tuning part-->
 	if(m_pActiveTuning != NULL && (updateMask & UM_TUNINGDATA || updateMask == 0))
 	{
