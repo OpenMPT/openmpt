@@ -81,7 +81,7 @@ static CString PrintTime(double seconds)
 	{
 		precision = 0;
 	}
-	return mpt::ToCString(mpt::format(MPT_USTRING("%1 ms"))(mpt::ufmt::fix(seconds * 1000.0, 0, precision)));
+	return mpt::tformat(_T("%1 ms"))(mpt::tfmt::fix(seconds * 1000.0, 0, precision));
 }
 
 
@@ -509,7 +509,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 Bit"))(bits)));
+				UINT ndx = m_CbnSampleFormat.AddString(mpt::tformat(_T("%1 Bit"))(bits));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
 				if((SampleFormat)bits == m_Settings.sampleFormat)
 				{
@@ -749,7 +749,7 @@ void COptionsSoundcard::UpdateSampleRates()
 	int n = 0;
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		int pos = m_CbnMixingFreq.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 Hz"))(samplerates[i])));
+		int pos = m_CbnMixingFreq.AddString(mpt::tformat(_T("%1 Hz"))(samplerates[i]));
 		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
 		if(m_Settings.Samplerate == samplerates[i])
 		{
@@ -1012,7 +1012,7 @@ BOOL COptionsMixer::OnInitDialog()
 		m_CbnPolyphony.ResetContent();
 		for(int n = 0; n < CountOf(PolyphonyChannels); ++n)
 		{
-			m_CbnPolyphony.AddString(mpt::ToCString(mpt::format(MPT_USTRING("%1 (%2)"))(PolyphonyChannels[n], mpt::ToUnicode(CString(PolyphonyNames[n])))));
+			m_CbnPolyphony.AddString(mpt::tformat(_T("%1 (%2)"))(PolyphonyChannels[n], CString(PolyphonyNames[n])));
 			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
 			{
 				m_CbnPolyphony.SetCurSel(n);

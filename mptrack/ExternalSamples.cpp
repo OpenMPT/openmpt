@@ -184,7 +184,7 @@ void ExternalSamplesDlg::OnScanFolder()
 
 		if(foundFiles)
 		{
-			SetDlgItemText(IDC_STATIC1, mpt::ToCString(mpt::format(MPT_USTRING("%1 sample paths were relocated."))(foundFiles)));
+			SetDlgItemText(IDC_STATIC1, mpt::tformat(_T("%1 sample paths were relocated."))(foundFiles));
 		} else
 		{
 			SetDlgItemText(IDC_STATIC1, _T("No matching sample names found."));
