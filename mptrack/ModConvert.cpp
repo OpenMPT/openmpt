@@ -440,21 +440,24 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsMOD)
 	{
 		// Not supported in MOD format
+		auto firstPat = std::find_if(m_SndFile.Order().cbegin(), m_SndFile.Order().cend(), [this](PATTERNINDEX pat) { return m_SndFile.Patterns.IsValidPat(pat); });
+		bool firstPatValid = firstPat != m_SndFile.Order().cend();
 		bool lossy = false;
+
 		if(m_SndFile.m_nDefaultSpeed != 6)
 		{
-			if(!m_SndFile.Order().empty())
+			if(firstPatValid)
 			{
-				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultSpeed = 6;
 			lossy = true;
 		}
 		if(m_SndFile.m_nDefaultTempo != TEMPO(125, 0))
 		{
-			if(!m_SndFile.Order().empty())
+			if(firstPatValid)
 			{
-				m_SndFile.Patterns[m_SndFile.Order()[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
 			}
 			m_SndFile.m_nDefaultTempo.Set(125);
 			lossy = true;
