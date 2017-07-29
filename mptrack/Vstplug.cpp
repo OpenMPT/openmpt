@@ -701,7 +701,7 @@ VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 			{
 				// Multiple paths
 				const FileDialog::PathList &files = dlg.GetFilenames();
-				fileSel->nbReturnPath = files.size();
+				fileSel->nbReturnPath = mpt::saturate_cast<VstInt32>(files.size());
 				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
 				for(size_t i = 0; i < files.size(); i++)
 				{
@@ -723,7 +723,7 @@ VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = dlg.GetFirstFile().ToLocale().length() + 1;
+					fileSel->sizeReturnPath = mpt::saturate_cast<VstInt32>(dlg.GetFirstFile().ToLocale().length() + 1);
 					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
@@ -949,7 +949,7 @@ bool CVstPlugin::InitializeIOBuffers()
 {
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	// In case of a bridged plugin, the AEffect struct has been updated before calling this opcode, so we don't have to worry about it being up-to-date.
-	return m_mixBuffer.Initialize(std::max<size_t>(m_Effect.numInputs, 2), m_Effect.numOutputs);
+	return m_mixBuffer.Initialize(std::max<uint32>(m_Effect.numInputs, 2), m_Effect.numOutputs);
 }
 
 
@@ -1089,7 +1089,7 @@ int32 CVstPlugin::GetCurrentProgram()
 {
 	if(m_Effect.numPrograms > 0)
 	{
-		return Dispatch(effGetProgram, 0, 0, nullptr, 0);
+		return static_cast<int32>(Dispatch(effGetProgram, 0, 0, nullptr, 0));
 	}
 	return 0;
 }
