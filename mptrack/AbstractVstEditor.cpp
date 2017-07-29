@@ -548,7 +548,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0);
+			pModDoc->PlayNote(static_cast<UINT>(wParam) - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0);
 		}
 		return wParam;
 	}
@@ -558,7 +558,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->NoteOff(wParam - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, false, m_nInstrument);
+			pModDoc->NoteOff(static_cast<UINT>(wParam) - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, false, m_nInstrument);
 		}
 		return wParam;
 	}
