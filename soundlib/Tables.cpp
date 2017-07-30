@@ -48,7 +48,7 @@ struct ModFormatInfo
 };
 
 // remember to also update libopenmpt/foo_openmpt.cpp (all other plugins read these dynamically)
-static const ModFormatInfo modFormatInfo[] =
+static constexpr ModFormatInfo modFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "mod" },
 	{ MOD_TYPE_S3M,  MPT_ULITERAL("ScreamTracker 3"),         "s3m" },
@@ -112,7 +112,7 @@ struct ModContainerInfo
 };
 
 // remember to also update libopenmpt/libopenmpt_foobar2000.cpp (all other plugins read these dynamically)
-static const ModContainerInfo modContainerInfo[] =
+static constexpr ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
 	{ MOD_CONTAINERTYPE_GDM,   MPT_ULITERAL("General Digital Music"),    "gdm"   },
@@ -130,7 +130,7 @@ static const ModContainerInfo modContainerInfo[] =
 
 
 #ifdef MODPLUG_TRACKER
-static const ModFormatInfo otherFormatInfo[] =
+static constexpr ModFormatInfo otherFormatInfo[] =
 {
 	{ MOD_TYPE_MID,  MPT_ULITERAL("MIDI"), "mid" },
 	{ MOD_TYPE_MID,  MPT_ULITERAL("MIDI"), "rmi" },
@@ -145,7 +145,7 @@ struct ModCharsetInfo
 	mpt::Charset charset;
 };
 
-static const ModCharsetInfo ModCharsetInfos[] =
+static constexpr ModCharsetInfo ModCharsetInfos[] =
 {
 	// Amiga
 	{ MOD_TYPE_OKT , mpt::CharsetISO8859_1  },
@@ -181,21 +181,19 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_MPT , mpt::CharsetWindows1252},
 	// random stuff
 	{ MOD_TYPE_MID , mpt::CharsetASCII      },
-	// end
-	{ MOD_TYPE_NONE, mpt::CharsetASCII      }
 };
 
 
-mpt::Charset CSoundFile::GetCharsetFromModType(MODTYPE modtype)
+mpt::Charset CSoundFile::GetCharsetFromModType(MODTYPE modType)
 //-------------------------------------------------------------
 {
 	// This is just a rough heuristic.
 	// It could be improved by adjusting the charset according to the tracker that had been used to save the file.
-	for(const ModCharsetInfo *charsetInfoIt = ModCharsetInfos; charsetInfoIt->type != MOD_TYPE_NONE; ++charsetInfoIt)
+	for(const auto &charsetInfo : ModCharsetInfos)
 	{
-		if(charsetInfoIt->type == modtype)
+		if(charsetInfo.type == modType)
 		{
-			return charsetInfoIt->charset;
+			return charsetInfo.charset;
 		}
 	}
 	// fallback
@@ -207,7 +205,7 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 //-----------------------------------------------------------------------------
 {
 	std::vector<const char *> exts;
-	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	for(size_t i = 0; i < mpt::size(modFormatInfo); i++)
 	{
 		// Avoid dupes in list
 		if(i == 0 || strcmp(modFormatInfo[i].extension, modFormatInfo[i - 1].extension))
@@ -215,7 +213,7 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 			exts.push_back(modFormatInfo[i].extension);
 		}
 	}
-	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	for(size_t i = 0; i < mpt::size(modContainerInfo); i++)
 	{
 		// Avoid dupes in list
 		if(i == 0 || strcmp(modContainerInfo[i].extension, modContainerInfo[i - 1].extension))
@@ -226,7 +224,7 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 #ifdef MODPLUG_TRACKER
 	if(otherFormats)
 	{
-		for(size_t i = 0; i < CountOf(otherFormatInfo); i++)
+		for(size_t i = 0; i < mpt::size(otherFormatInfo); i++)
 		{
 			exts.push_back(otherFormatInfo[i].extension);
 		}
@@ -241,11 +239,11 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
 //-------------------------------------------------------
 {
-	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	for(const auto &formatInfo : modFormatInfo)
 	{
-		if(modFormatInfo[i].format & modtype)
+		if(formatInfo.format & modtype)
 		{
-			return mpt::ToUnicode(mpt::CharsetUTF8, modFormatInfo[i].extension);
+			return mpt::ToUnicode(mpt::CharsetUTF8, formatInfo.extension);
 		}
 	}
 	return mpt::ustring();
@@ -255,11 +253,11 @@ mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
 mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
 //-------------------------------------------------------------------------------
 {
-	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	for(const auto &containerInfo : modContainerInfo)
 	{
-		if(modContainerInfo[i].format == containertype)
+		if(containerInfo.format == containertype)
 		{
-			return mpt::ToUnicode(mpt::CharsetUTF8, modContainerInfo[i].extension);
+			return mpt::ToUnicode(mpt::CharsetUTF8, containerInfo.extension);
 		}
 	}
 	return mpt::ustring();
@@ -275,11 +273,11 @@ mpt::ustring CSoundFile::ModTypeToTracker(MODTYPE modtype)
 	{ // special case MOD
 		return MPT_USTRING("Generic Amiga / PC MOD file");
 	}
-	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
+	for(const auto &formatInfo : modFormatInfo)
 	{
-		if(modFormatInfo[i].format & modtype)
+		if(formatInfo.format & modtype)
 		{
-			mpt::ustring name = modFormatInfo[i].name;
+			mpt::ustring name = formatInfo.name;
 			if(retvals.find(name) == retvals.end())
 			{
 				retvals.insert(name);
@@ -300,11 +298,11 @@ mpt::ustring CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertyp
 {
 	std::set<mpt::ustring> retvals;
 	mpt::ustring retval;
-	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	for(const auto &containerInfo : modContainerInfo)
 	{
-		if(modContainerInfo[i].format == containertype)
+		if(containerInfo.format == containertype)
 		{
-			mpt::ustring name = modContainerInfo[i].name;
+			mpt::ustring name = containerInfo.name;
 			if(retvals.find(name) == retvals.end())
 			{
 				retvals.insert(name);
@@ -585,7 +583,7 @@ const uint32 FineLinearSlideUpTable[16] =
 // round(65536 * 2**(-n/768))
 // 768 = 64 extra-fine finetune steps for 12 notes
 // Table content is in 16.16 format
-// Note that there are a few errors in this table (typos?), but well, this table comes straight from ITTECH.TXT...
+// Note that there are a few errors in this table (typos?), but well, this table comes straight from Impulse Tracker's source...
 // Entry 0 (65535) should be 65536 (this value is unused and most likely stored this way so that it fits in a 16-bit integer)
 // Entry 11 (64888) should be 64889 - rounding error?
 // Entry 15 (64645) should be 64655 - typo?
@@ -596,83 +594,83 @@ const uint32 FineLinearSlideDownTable[16] =
 };
 
 
-// floor(65536 * 2**(n/192))
+// round(65536 * 2**(n/192))
 // 192 = 16 finetune steps for 12 notes
 // Table content is in 16.16 format
 const uint32 LinearSlideUpTable[256] =
 {
-	65536, 65773, 66010, 66249, 66489, 66729, 66971, 67213,
-	67456, 67700, 67945, 68190, 68437, 68685, 68933, 69182,
-	69432, 69684, 69936, 70189, 70442, 70697, 70953, 71209,
-	71467, 71725, 71985, 72245, 72507, 72769, 73032, 73296,
-	73561, 73827, 74094, 74362, 74631, 74901, 75172, 75444,
-	75717, 75991, 76265, 76541, 76818, 77096, 77375, 77655,
-	77935, 78217, 78500, 78784, 79069, 79355, 79642, 79930,
-	80219, 80509, 80800, 81093, 81386, 81680, 81976, 82272,
-	82570, 82868, 83168, 83469, 83771, 84074, 84378, 84683,
-	84989, 85297, 85605, 85915, 86225, 86537, 86850, 87164,
-	87480, 87796, 88113, 88432, 88752, 89073, 89395, 89718,
-	90043, 90369, 90695, 91023, 91353, 91683, 92015, 92347,
-	92681, 93017, 93353, 93691, 94029, 94370, 94711, 95053,
-	95397, 95742, 96088, 96436, 96785, 97135, 97486, 97839,
-	98193, 98548, 98904, 99262, 99621, 99981, 100343, 100706,
-	101070, 101435, 101802, 102170, 102540, 102911, 103283, 103657,
-	104031, 104408, 104785, 105164, 105545, 105926, 106309, 106694,
-	107080, 107467, 107856, 108246, 108637, 109030, 109425, 109820,
-	110217, 110616, 111016, 111418, 111821, 112225, 112631, 113038,
-	113447, 113857, 114269, 114682, 115097, 115514, 115931, 116351,
-	116771, 117194, 117618, 118043, 118470, 118898, 119328, 119760,
-	120193, 120628, 121064, 121502, 121941, 122382, 122825, 123269,
-	123715, 124162, 124611, 125062, 125514, 125968, 126424, 126881,
-	127340, 127801, 128263, 128727, 129192, 129660, 130129, 130599,
-	131072, 131546, 132021, 132499, 132978, 133459, 133942, 134426,
-	134912, 135400, 135890, 136381, 136875, 137370, 137866, 138365,
-	138865, 139368, 139872, 140378, 140885, 141395, 141906, 142419,
-	142935, 143451, 143970, 144491, 145014, 145538, 146064, 146593,
-	147123, 147655, 148189, 148725, 149263, 149803, 150344, 150888,
-	151434, 151982, 152531, 153083, 153637, 154192, 154750, 155310,
-	155871, 156435, 157001, 157569, 158138, 158710, 159284, 159860,
-	160439, 161019, 161601, 162186, 162772, 163361, 163952, 164545,
+	65536, 65773, 66011, 66250, 66489, 66730, 66971, 67213,
+	67456, 67700, 67945, 68191, 68438, 68685, 68933, 69183,
+	69433, 69684, 69936, 70189, 70443, 70698, 70953, 71210,
+	71468, 71726, 71985, 72246, 72507, 72769, 73032, 73297,
+	73562, 73828, 74095, 74363, 74632, 74902, 75172, 75444,
+	75717, 75991, 76266, 76542, 76819, 77096, 77375, 77655,
+	77936, 78218, 78501, 78785, 79069, 79355, 79642, 79930,
+	80220, 80510, 80801, 81093, 81386, 81681, 81976, 82273,
+	82570, 82869, 83169, 83469, 83771, 84074, 84378, 84683,
+	84990, 85297, 85606, 85915, 86226, 86538, 86851, 87165,
+	87480, 87796, 88114, 88433, 88752, 89073, 89396, 89719,
+	90043, 90369, 90696, 91024, 91353, 91684, 92015, 92348,
+	92682, 93017, 93354, 93691, 94030, 94370, 94711, 95054,
+	95398, 95743, 96089, 96436, 96785, 97135, 97487, 97839,
+	98193, 98548, 98905, 99262, 99621, 99982, 100343, 100706,
+	101070, 101436, 101803, 102171, 102540, 102911, 103283, 103657,
+	104032, 104408, 104786, 105165, 105545, 105927, 106310, 106694,
+	107080, 107468, 107856, 108246, 108638, 109031, 109425, 109821,
+	110218, 110617, 111017, 111418, 111821, 112226, 112631, 113039,
+	113448, 113858, 114270, 114683, 115098, 115514, 115932, 116351,
+	116772, 117194, 117618, 118043, 118470, 118899, 119329, 119760,
+	120194, 120628, 121065, 121502, 121942, 122383, 122825, 123270,
+	123715, 124163, 124612, 125063, 125515, 125969, 126425, 126882,
+	127341, 127801, 128263, 128727, 129193, 129660, 130129, 130600,
+	131072, 131546, 132022, 132499, 132978, 133459, 133942, 134427,
+	134913, 135401, 135890, 136382, 136875, 137370, 137867, 138366,
+	138866, 139368, 139872, 140378, 140886, 141395, 141907, 142420,
+	142935, 143452, 143971, 144491, 145014, 145539, 146065, 146593,
+	147123, 147655, 148189, 148725, 149263, 149803, 150345, 150889,
+	151434, 151982, 152532, 153083, 153637, 154193, 154750, 155310,
+	155872, 156435, 157001, 157569, 158139, 158711, 159285, 159861,
+	160439, 161019, 161602, 162186, 162773, 163361, 163952, 164545
 };
 
 
-// floor(65536 * 2**(-n/192))
+// round(65536 * 2**(-n/192))
 // 192 = 16 finetune steps for 12 notes
 // Table content is in 16.16 format
 const uint32 LinearSlideDownTable[256] =
 {
-	65536, 65299, 65064, 64830, 64596, 64363, 64131, 63900,
-	63670, 63440, 63212, 62984, 62757, 62531, 62305, 62081,
-	61857, 61634, 61412, 61191, 60970, 60751, 60532, 60314,
-	60096, 59880, 59664, 59449, 59235, 59021, 58809, 58597,
-	58385, 58175, 57965, 57757, 57548, 57341, 57134, 56928,
-	56723, 56519, 56315, 56112, 55910, 55709, 55508, 55308,
-	55108, 54910, 54712, 54515, 54318, 54123, 53928, 53733,
-	53540, 53347, 53154, 52963, 52772, 52582, 52392, 52204,
-	52015, 51828, 51641, 51455, 51270, 51085, 50901, 50717,
-	50535, 50353, 50171, 49990, 49810, 49631, 49452, 49274,
-	49096, 48919, 48743, 48567, 48392, 48218, 48044, 47871,
-	47698, 47526, 47355, 47185, 47014, 46845, 46676, 46508,
-	46340, 46173, 46007, 45841, 45676, 45511, 45347, 45184,
-	45021, 44859, 44697, 44536, 44376, 44216, 44056, 43898,
-	43740, 43582, 43425, 43268, 43112, 42957, 42802, 42648,
-	42494, 42341, 42189, 42037, 41885, 41734, 41584, 41434,
-	41285, 41136, 40988, 40840, 40693, 40546, 40400, 40254,
-	40109, 39965, 39821, 39677, 39534, 39392, 39250, 39108,
-	38967, 38827, 38687, 38548, 38409, 38270, 38132, 37995,
-	37858, 37722, 37586, 37450, 37315, 37181, 37047, 36913,
-	36780, 36648, 36516, 36384, 36253, 36122, 35992, 35862,
-	35733, 35604, 35476, 35348, 35221, 35094, 34968, 34842,
-	34716, 34591, 34466, 34342, 34218, 34095, 33972, 33850,
-	33728, 33606, 33485, 33364, 33244, 33124, 33005, 32886,
-	32768, 32649, 32532, 32415, 32298, 32181, 32065, 31950,
-	31835, 31720, 31606, 31492, 31378, 31265, 31152, 31040,
-	30928, 30817, 30706, 30595, 30485, 30375, 30266, 30157,
-	30048, 29940, 29832, 29724, 29617, 29510, 29404, 29298,
-	29192, 29087, 28982, 28878, 28774, 28670, 28567, 28464,
-	28361, 28259, 28157, 28056, 27955, 27854, 27754, 27654,
-	27554, 27455, 27356, 27257, 27159, 27061, 26964, 26866,
-	26770, 26673, 26577, 26481, 26386, 26291, 26196, 26102,
+	65536, 65300, 65065, 64830, 64596, 64364, 64132, 63901,
+	63670, 63441, 63212, 62984, 62757, 62531, 62306, 62081,
+	61858, 61635, 61413, 61191, 60971, 60751, 60532, 60314,
+	60097, 59880, 59664, 59449, 59235, 59022, 58809, 58597,
+	58386, 58176, 57966, 57757, 57549, 57341, 57135, 56929,
+	56724, 56519, 56316, 56113, 55911, 55709, 55508, 55308,
+	55109, 54910, 54713, 54515, 54319, 54123, 53928, 53734,
+	53540, 53347, 53155, 52963, 52773, 52582, 52393, 52204,
+	52016, 51829, 51642, 51456, 51270, 51085, 50901, 50718,
+	50535, 50353, 50172, 49991, 49811, 49631, 49452, 49274,
+	49097, 48920, 48743, 48568, 48393, 48218, 48044, 47871,
+	47699, 47527, 47356, 47185, 47015, 46846, 46677, 46509,
+	46341, 46174, 46008, 45842, 45677, 45512, 45348, 45185,
+	45022, 44859, 44698, 44537, 44376, 44216, 44057, 43898,
+	43740, 43582, 43425, 43269, 43113, 42958, 42803, 42649,
+	42495, 42342, 42189, 42037, 41886, 41735, 41584, 41434,
+	41285, 41136, 40988, 40840, 40693, 40547, 40400, 40255,
+	40110, 39965, 39821, 39678, 39535, 39392, 39250, 39109,
+	38968, 38828, 38688, 38548, 38409, 38271, 38133, 37996,
+	37859, 37722, 37586, 37451, 37316, 37181, 37047, 36914,
+	36781, 36648, 36516, 36385, 36254, 36123, 35993, 35863,
+	35734, 35605, 35477, 35349, 35221, 35095, 34968, 34842,
+	34716, 34591, 34467, 34343, 34219, 34095, 33973, 33850,
+	33728, 33607, 33486, 33365, 33245, 33125, 33005, 32887,
+	32768, 32650, 32532, 32415, 32298, 32182, 32066, 31950,
+	31835, 31720, 31606, 31492, 31379, 31266, 31153, 31041,
+	30929, 30817, 30706, 30596, 30485, 30376, 30266, 30157,
+	30048, 29940, 29832, 29725, 29618, 29511, 29405, 29299,
+	29193, 29088, 28983, 28879, 28774, 28671, 28567, 28464,
+	28362, 28260, 28158, 28056, 27955, 27855, 27754, 27654,
+	27554, 27455, 27356, 27258, 27159, 27062, 26964, 26867,
+	26770, 26674, 26577, 26482, 26386, 26291, 26196, 26102
 };
 
 
@@ -867,7 +865,6 @@ SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
 SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #ifndef MPT_INTMIXER
 mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
-mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
 #endif // !defined(MPT_INTMIXER)
 #endif // MODPLUG_TRACKER
 
@@ -885,12 +882,6 @@ void CResampler::InitFloatmixerTables()
 	for(size_t i = 0; i < CountOf(FastSincTable); i++)
 	{
 		FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
-	}
-
-	// Prepare linear interpolation coefficients for floating point mixer
-	for(size_t i = 0; i < CountOf(LinearTablef); i++)
-	{
-		LinearTablef[i] = static_cast<mixsample_t>(i * mixsample_t(1.0f / CountOf(LinearTablef)));
 	}
 #endif // !defined(MPT_INTMIXER)
 }
