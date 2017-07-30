@@ -531,7 +531,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		}
 	}
 
-	// Fill order tail with stop patterns, now that we don't need the garbage in there anymore.
+	// Remove the garbage patterns past the official order end now that we don't need them anymore.
 	Order.resize(numOrders);
 
 	const size_t patternStartOffset = file.GetPosition();
@@ -663,7 +663,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = 4;
-	bool isNoiseTracker = false, isStartrekker = false;
+	bool isNoiseTracker = false, isStartrekker = false, isGenericMultiChannel = false;
 
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
@@ -710,12 +710,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// xCHN - Many trackers
 		m_nChannels = magic[0] - '0';
 		m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
+		isGenericMultiChannel = true;
 	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1]>='0' && magic[1] <= '9'
 		&& (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
 		m_nChannels = (magic[0] - '0') * 10 + magic[1] - '0';
 		m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
+		isGenericMultiChannel = true;
 	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker
@@ -856,7 +858,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ModCommand m;
 				ReadMODPatternEntry(file, m);
-				if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note >= NOTE_MIDDLEC + 24))
+				if(!m.IsAmigaNote())
 				{
 					isNoiseTracker = onlyAmigaNotes = false;
 				}
@@ -1010,6 +1012,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
 	{
 		m_madeWithTracker = MPT_USTRING("ScreamTracker");
+	}
+
+	if(onlyAmigaNotes && !isGenericMultiChannel)
+	{
+		m_SongFlags.set(SONG_ISAMIGA);
 	}
 
 	// Reading samples
@@ -1301,7 +1308,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags = SONG_PT_MODE;
+	m_SongFlags.set(SONG_PT_MODE);
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, songname);
 
 	// Setup channel pan positions and volume
@@ -1621,7 +1628,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags = SONG_PT_MODE;
+	m_SongFlags.set(SONG_PT_MODE);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();

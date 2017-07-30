@@ -941,6 +941,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		noteOffset = 13 + NOTE_MIN;
 	else if(m_nType != MOD_TYPE_IT)
 		noteOffset = 12 + NOTE_MIN;
+	bool onlyAmigaNotes = true;
 
 	if(loadFlags & loadPatternData)
 		Patterns.ResizeArray(fileHeader.numPatterns);
@@ -982,6 +983,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						else if(m.note == 0xFF) m.note = NOTE_KEYOFF;
 						else if(m.note == 0xFE) m.note = NOTE_NOTECUT;
 						else m.note = NOTE_FADE;
+						if(!m.IsAmigaNote()) onlyAmigaNotes = false;
 						break;
 					case 0x02:
 						// Instrument
@@ -1170,6 +1172,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
+	}
+
+	if(GetType() == MOD_TYPE_MOD && GetNumChannels() == 4 && onlyAmigaNotes)
+	{
+		m_SongFlags.set(SONG_AMIGALIMITS | SONG_ISAMIGA);
 	}
 
 	const bool isSampleMode = (m_nType != MOD_TYPE_XM && !(fileHeader.flags & MO3FileHeader::instrumentMode));

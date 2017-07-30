@@ -192,6 +192,12 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_madeWithTracker.clear();
 	m_FileHistory.clear();
 	m_tempoSwing.clear();
+
+	// Note: we do not use the Amiga resampler for DBM as it's a multichannel format and can make use of higher-quality Amiga soundcards instead of Paula.
+	if(GetType() & (/*MOD_TYPE_DBM | */MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP))
+	{
+		m_SongFlags.set(SONG_ISAMIGA);
+	}
 }
 
 
@@ -355,12 +361,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
-	// Note: we do not use the Amiga resampler for DBM as it's a multichannel format and can make use of higher-quality Amiga soundcards instead of Paula.
-	if(GetType() & (/*MOD_TYPE_DBM | */MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP))
-	{
-		m_SongFlags.set(SONG_ISAMIGA);
-	}
-	
 	// Adjust channels
 	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
 	{
@@ -1071,9 +1071,9 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_MED:
 		if(m_nDefaultTempo == TEMPO(125, 0) && m_nDefaultSpeed == 6 && !m_nInstruments)
 		{
-			for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
+			for(const auto &pat : Patterns)
 			{
-				if(Patterns.IsValidPat(i) && Patterns[i].GetNumRows() != 64)
+				if(pat.IsValid() && pat.GetNumRows() != 64)
 					return MOD_TYPE_XM;
 			}
 			return MOD_TYPE_MOD;

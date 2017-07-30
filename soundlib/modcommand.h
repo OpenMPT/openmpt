@@ -182,6 +182,10 @@ public:
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
 
+	// Returns true if the note is inside the Amiga frequency range
+	bool IsAmigaNote() const { return IsAmigaNote(note); }
+	static bool IsAmigaNote(NOTE note) { return !IsNote(note) || (note >= NOTE_MIDDLEC - 12 && note < NOTE_MIDDLEC + 24); }
+
 	static EffectType GetEffectType(COMMAND cmd);
 	EffectType GetEffectType() const { return GetEffectType(command); }
 	static EffectType GetVolumeEffectType(VOLCMD volcmd);

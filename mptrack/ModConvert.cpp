@@ -180,6 +180,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
+	bool onlyAmigaNotes = true;
 	for(auto &pat : m_SndFile.Patterns) if(pat.IsValid())
 	{
 		// This is used for -> MOD/XM conversion
@@ -249,6 +250,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Adjust effect memory for MOD files
 			if(newTypeIsMOD)
 			{
+				if(!m->IsAmigaNote())
+				{
+					onlyAmigaNotes = false;
+				}
 				switch(m->command)
 				{
 				case CMD_PORTAMENTOUP:
@@ -549,7 +554,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(oldTypeIsXM && newTypeIsIT_MPT)
 	{
 		m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
-	} else if(newTypeIsMOD)
+	} else if(newTypeIsMOD && GetNumChannels() == 4 && onlyAmigaNotes)
 	{
 		m_SndFile.m_SongFlags.set(SONG_ISAMIGA);
 		m_SndFile.InitAmigaResampler();
@@ -649,7 +654,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{ wResamplingMode, "Song-specific resampling mode is not supported by the new format." },
 	{ wFractionalTempo, "Fractional tempo is not supported by the new format." },
 	};
-	for(auto &msg : messages)
+	for(const auto &msg : messages)
 	{
 		if(warnings[msg.warning])
 			AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetUTF8, msg.mesage));
@@ -657,7 +662,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	SetModified();
 	GetPatternUndo().ClearUndo();
-	UpdateAllViews(NULL, GeneralHint().General().ModType());
+	UpdateAllViews(nullptr, GeneralHint().General().ModType());
 	EndWaitCursor();
 
 	// Update effect key commands
