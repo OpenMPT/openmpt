@@ -112,7 +112,7 @@ public:
 	{
 		ModChannel &chn = state->Chn[channel];
 		uint32 numTicks = chnSettings[channel].ticksToRender;
-		if(numTicks == IGNORE_CHANNEL || numTicks == 0 || (chn.increment.IsZero() && !chnSettings[channel].incChanged) || chn.pModSample == nullptr)
+		if(numTicks == IGNORE_CHANNEL || numTicks == 0 || (!chn.IsSamplePlaying() && !chnSettings[channel].incChanged) || chn.pModSample == nullptr)
 		{
 			return;
 		}
@@ -1320,7 +1320,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
 		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
-			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_PLM))
+			|| (GetType() == MOD_TYPE_PLM)
+			|| (GetType() == MOD_TYPE_MOD && pChn->IsSamplePlaying())
 			|| m_playBehaviour[kST3PortaSampleChange])
 		{
 			// FT2 doesn't change the sample in this case,
@@ -1342,7 +1343,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 
 	// IT Compatibility: Envelope pickup after SCx cut (but don't do this when working with plugins, or else envelope carry stops working)
 	// Test case: cut-carry.it
-	if(pChn->increment.IsZero() && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!pIns || !pIns->HasValidMIDIChannel()))
+	if(!pChn->IsSamplePlaying() && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!pIns || !pIns->HasValidMIDIChannel()))
 	{
 		instrumentChanged = true;
 	}
@@ -1679,7 +1680,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	if(!bPorta && pSmp && m_playBehaviour[kITMultiSampleBehaviour])
 		pChn->nC5Speed = pSmp->nC5Speed;
 
-	if(bPorta && pChn->increment.IsZero())
+	if(bPorta && !pChn->IsSamplePlaying())
 	{
 		if(m_playBehaviour[kFT2PortaNoNote])
 		{
@@ -2470,7 +2471,7 @@ bool CSoundFile::ProcessEffects()
 			pChn->proTrackerOffset = 0;
 			// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
 			// Test case: InstrDelay.mod
-			if(!triggerNote && !pChn->increment.IsZero())
+			if(!triggerNote && pChn->IsSamplePlaying())
 			{
 				InstrumentChange(pChn, instr, false, true, false);
 			}
@@ -2541,7 +2542,7 @@ bool CSoundFile::ProcessEffects()
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
 			// Test case: PTSwapEmpty.mod
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_playBehaviour[kMODSampleSwap] && pChn->increment.IsZero() && pChn->pModSample != nullptr && pChn->pModSample->pSample == nullptr);
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_playBehaviour[kMODSampleSwap] && !pChn->IsSamplePlaying() && pChn->pModSample != nullptr && pChn->pModSample->pSample == nullptr);
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -2635,7 +2636,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					// IT compatibility: Completely retrigger note after sample end to also reset portamento.
 					// Test case: PortaResetAfterRetrigger.it
-					bool triggerAfterSmpEnd = m_playBehaviour[kITMultiSampleInstrumentNumber] && pChn->increment.IsZero();
+					bool triggerAfterSmpEnd = m_playBehaviour[kITMultiSampleInstrumentNumber] && !pChn->IsSamplePlaying();
 					if(GetNumInstruments())
 					{
 						// Instrument mode
