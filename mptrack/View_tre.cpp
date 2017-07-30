@@ -1888,6 +1888,13 @@ void CModTree::FillInstrumentLibrary()
 						ext = mpt::ToLowerCaseAscii(ext);
 						extPS = mpt::PathString::FromUTF8(ext);
 					}
+					// Amiga-style extensions (i.e. mod.songname)
+					std::string prefixExt = mpt::ToCharset(mpt::CharsetUTF8, wfd.cFileName);
+					auto dotPos = prefixExt.find('.');
+					if(dotPos != std::string::npos)
+						prefixExt.erase(dotPos);
+					else
+						prefixExt.clear();
 
 					if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
 					{
@@ -1903,7 +1910,7 @@ void CModTree::FillInstrumentLibrary()
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES);
 						}
-					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end())
+					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end() || std::find(modExts.begin(), modExts.end(), prefixExt) != modExts.end())
 					{
 						// Songs
 						if(showDirs)
@@ -2468,7 +2475,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 	for(const auto &chn : sndFile.m_PlayState.Chn)
 	{
-		if(chn.pCurrentSample != nullptr && chn.nLength != 0 && !chn.increment.IsZero())
+		if(chn.pCurrentSample != nullptr && chn.nLength != 0 && chn.IsSamplePlaying())
 		{
 			if(updateSamples)
 			{
