@@ -56,6 +56,7 @@ MPTM::Custom Tuning
 
 MOD
    [Fix] <js> The ProTracker note delay quirk should not retrigger already stopped samples (fixes "Subi loses the Cops" by Subi, tx h0ffman).
+   [Fix] <js> Portamento between already stopped sample and another sample kept playing the old sample (fixes "anarchy-main" by Jester).
 
 Other formats
    [Fix] <js> Possible crashes with malformed PLM and PSM files.

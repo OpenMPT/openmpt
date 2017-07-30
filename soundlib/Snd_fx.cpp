@@ -1237,7 +1237,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
 		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
-			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_PLM))
+			|| (GetType() == MOD_TYPE_PLM)
+			|| (GetType() == MOD_TYPE_MOD && pChn->nInc != 0)
 			|| m_playBehaviour[kST3PortaSampleChange])
 		{
 			// FT2 doesn't change the sample in this case,

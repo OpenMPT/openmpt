@@ -13,6 +13,8 @@ is just a high-level summary.
 
  *  The ProTracker note delay quirk should not retrigger already stopped samples
     (fixes "Subi loses the Cops" by Subi).
+ *  ProTracker portamento between already stopped sample and another sample kept
+    playing the old sample (fixes "anarchy-main" by Jester).
  *  Playback fix for instruments with custom tunings and transposed note maps
     in MPTM format.
 
