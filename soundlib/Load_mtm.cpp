@@ -123,7 +123,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromArray(Order(), orders, fileHeader.lastOrder + 1, 0xFF, 0xFE);
 
 	// Reading Patterns
-	const ROWINDEX rowsPerPat = fileHeader.beatsPerTrack ? beatsPerTrack : 64;
+	const ROWINDEX rowsPerPat = fileHeader.beatsPerTrack ? fileHeader.beatsPerTrack : 64;
 	FileReader tracks = file.ReadChunk(192 * fileHeader.numTracks);
 
 	if(loadFlags & loadPatternData)
