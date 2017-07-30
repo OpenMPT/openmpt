@@ -478,10 +478,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(GetType() == MOD_TYPE_MOD && GetNumChannels() == 4 && onlyAmigaNotes)
-	{
-		m_SongFlags.set(SONG_AMIGALIMITS | SONG_ISAMIGA);
-	}
+	m_SongFlags.set(SONG_AMIGALIMITS | SONG_ISAMIGA, GetType() == MOD_TYPE_MOD && GetNumChannels() == 4 && onlyAmigaNotes);
 
 	// Read song comments
 	if(fileHeader.messageTextLength > 0 && file.Seek(fileHeader.messageTextOffset))
