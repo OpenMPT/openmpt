@@ -152,7 +152,7 @@ struct ModChannel
 
 	EnvInfo &GetEnvelope(EnvelopeType envType)
 	{
-		return const_cast<EnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
+		return const_cast<EnvInfo &>(static_cast<const ModChannel *>(this)->GetEnvelope(envType));
 	}
 
 	void ResetEnvelopes()
@@ -173,6 +173,8 @@ struct ModChannel
 
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
 	void Stop();
+
+	bool IsSamplePlaying() const { return !increment.IsZero(); }
 
 	uint32 GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
