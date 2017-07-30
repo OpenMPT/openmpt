@@ -156,7 +156,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			chn.pModInstrument = nullptr;
 		}
 
-		for(INSTRUMENTINDEX nIns = 0; nIns <= m_SndFile.GetNumInstruments(); nIns++) if (m_SndFile.Instruments[nIns])
+		for(INSTRUMENTINDEX nIns = 0; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 		{
 			delete m_SndFile.Instruments[nIns];
 			m_SndFile.Instruments[nIns] = nullptr;
@@ -184,13 +184,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(auto &pat : m_SndFile.Patterns) if(pat.IsValid())
 	{
 		// This is used for -> MOD/XM conversion
-		std::vector<std::vector<ModCommand::PARAM>> effMemory(GetNumChannels());
+		std::vector<ModCommand::PARAM[MAX_EFFECTS]> effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
 		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
-		for(auto &effChn : effMemory)
-		{
-			effChn.resize(MAX_EFFECTS, 0);
-		}
 
 		bool addBreak = false;	// When converting to XM, avoid the E60 bug.
 		CHANNELINDEX chn = 0;
@@ -250,10 +246,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Adjust effect memory for MOD files
 			if(newTypeIsMOD)
 			{
-				if(!m->IsAmigaNote())
-				{
-					onlyAmigaNotes = false;
-				}
 				switch(m->command)
 				{
 				case CMD_PORTAMENTOUP:
@@ -275,6 +267,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				{
 					const int newNote = m->note + m_SndFile.GetSample(instr).RelativeTone;
 					m->note = static_cast<ModCommand::NOTE>(Clamp(newNote, specs.noteMin, specs.noteMax));
+				}
+				if(!m->IsAmigaNote())
+				{
+					onlyAmigaNotes = false;
 				}
 			}
 
@@ -380,7 +376,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			}
 		}
 
-		// TODO: Pattern notes could be transposed based on the previous relative tone?
 		if(newTypeIsMOD && sample.RelativeTone != 0)
 		{
 			CHANGEMODTYPE_WARNING(wMODSampleFrequency);
@@ -400,9 +395,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Convert IT/MPT to XM (fix instruments)
 		if(newTypeIsXM)
 		{
-			for(size_t i = 0; i < CountOf(pIns->NoteMap); i++)
+			for(size_t i = 0; i < mpt::size(pIns->NoteMap); i++)
 			{
-				if (pIns->NoteMap[i] && pIns->NoteMap[i] != static_cast<uint8>(i + 1))
+				if (pIns->NoteMap[i] && pIns->NoteMap[i] != (i + 1))
 				{
 					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
 					break;
@@ -427,12 +422,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				CHANGEMODTYPE_WARNING(wInstrumentTuning);
 			}
-
 			if(pIns->pitchToTempoLock.GetRaw() != 0)
 			{
 				CHANGEMODTYPE_WARNING(wPitchToTempoLock);
 			}
-
 			if((pIns->nCutSwing | pIns->nResSwing) != 0)
 			{
 				CHANGEMODTYPE_WARNING(wFilterVariation);
