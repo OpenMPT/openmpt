@@ -259,6 +259,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	Patterns.ResizeArray(fileHeader.lastPattern + 1);
 
 	const CModSpecifications &modSpecs = GetModSpecifications(GetBestSaveFormat());
+	bool onlyAmigaNotes = true;
 
 	// We'll start at position patternsOffset and decode all patterns
 	file.Seek(fileHeader.patternOffset);
@@ -313,6 +314,10 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						noteByte = (noteByte & 0x7F) - 1; // This format doesn't have note cuts
 						if(noteByte < 0xF0) noteByte = (noteByte & 0x0F) + 12 * (noteByte >> 4) + 12 + NOTE_MIN;
 						m.note = noteByte;
+						if(!m.IsAmigaNote())
+						{
+							onlyAmigaNotes = false;
+						}
 					}
 					m.instr = noteSample;
 				}
@@ -471,6 +476,11 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 			}
 		}
+	}
+
+	if(GetType() == MOD_TYPE_MOD && GetNumChannels() == 4 && onlyAmigaNotes)
+	{
+		m_SongFlags.set(SONG_AMIGALIMITS | SONG_ISAMIGA);
 	}
 
 	// Read song comments

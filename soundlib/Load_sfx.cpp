@@ -128,7 +128,6 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.reset();
 
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
