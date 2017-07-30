@@ -2404,11 +2404,16 @@ bool CSoundFile::ProcessEffects()
 			// Instrument number resets the stacked ProTracker offset.
 			// Test case: ptoffset.mod
 			pChn->proTrackerOffset = 0;
-			// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
+			// ProTracker compatibility: Sample properties are always loaded on the first tick, even when there is a note delay.
 			// Test case: InstrDelay.mod
 			if(!triggerNote && pChn->nInc != 0)
 			{
-				InstrumentChange(pChn, instr, false, true, false);
+				pChn->nNewIns = static_cast<ModCommand::INSTR>(instr);
+				if(instr <= GetNumSamples())
+				{
+					pChn->nVolume = Samples[instr].nVolume;
+					pChn->nFineTune = Samples[instr].nFineTune;
+				}
 			}
 		}
 
