@@ -30,13 +30,39 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* July 2017, revision 8439)
+v1.26.13.00 (* July 2017, revision 8664)
 ----------------------------------------
+Pattern tab
+   [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
+
+Instrument tab
+   [Imp] <js> Can now use Home / End keys for sample map navigation (http://bugs.openmpt.org/view.php?id=984).
+
+Mod Conversion
+   [Fix] <js> Converting to MOD could crash if the first order list item was not a valid pattern (http://bugs.openmpt.org/view.php?id=996).
+   [Fix] <js> Removing unsupported patterns (+++ / --- in MOD / XM) did not work as intended at all.
+
+VST / DMO Plugins
+   [Fix] <js> Mark module as modified if renaming a preset through the plugin editor was successful.
+
+VST::Plugin Bridge
+   [Imp] <js> Speed up filling of parameter lists.
+
 Playback
    [Fix] <js> Loops shorter than four sample points at the end of a sample could cause the sample data before the loop to become corrupted.
 
+MPTM::Custom Tuning
+   [Fix] <js> Transpositions in the instrument note map were not applied correctly when the "Use triggered note rather than translated note for PPS and DNA note check" compatibility setting was enabled.
+
+MOD
+   [Fix] <js> The ProTracker note delay quirk should not retrigger already stopped samples (fixes "Subi loses the Cops" by Subi, tx h0ffman).
+
 Other formats
    [Fix] <js> Possible crashes with malformed PLM and PSM files.
+
+Misc
+   [Fix] <jh> Saving single tuning .tun files actually resulted in a tuning collection being saved, which prevented the tuning from being loaded unless its file extension was changed to .tc.
+   [Fix] <jh> Prevent changing the type of an existing tuning to General.
 
 
 v1.26.12.00 (2 July 2017, revision 8412)

@@ -11,6 +11,12 @@ is just a high-level summary.
     libmodplug C++ API returned the wrong value, causing qmmp (and possibly
     other software) to crash.
 
+ *  The ProTracker note delay quirk should not retrigger already stopped samples
+    (fixes "Subi loses the Cops" by Subi).
+ *  Playback fix for instruments with custom tunings and transposed note maps
+    in MPTM format.
+
+
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.

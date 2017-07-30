@@ -208,7 +208,7 @@ struct FixJumpCommands
 	{
 		if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
 		{
-			m.param = ModCommand::PARAM(int(m.param) - jumpOffset[m.param]);
+			m.param = static_cast<ModCommand::PARAM>(jumpOffset[m.param]);
 		}
 	}
 
@@ -220,32 +220,42 @@ struct FixJumpCommands
 void ModSequence::RemovePattern(PATTERNINDEX which)
 //-------------------------------------------------
 {
-	const ORDERINDEX orderLength = GetLengthTailTrimmed();
-	ORDERINDEX currentLength = orderLength;
-
-	// Associate order item index with jump offset (i.e. how much it moved forwards)
+	// First, calculate the offset that needs to be applied to jump commands
+	ORDERINDEX orderLength = GetLengthTailTrimmed();
 	std::vector<ORDERINDEX> jumpOffset(orderLength, 0);
 	ORDERINDEX maxJump = 0;
-
-	for(ORDERINDEX i = 0; i < currentLength; i++)
+	for(ORDERINDEX i = 0; i < orderLength; i++)
 	{
+		jumpOffset[i] = i - maxJump;
 		if(At(i) == which)
 		{
 			maxJump++;
-			// Move order list forwards, update jump counters
+		}
+	}
+	if(!maxJump)
+	{
+		return;
+	}
+
+	for(ORDERINDEX i = 0; i < orderLength;)
+	{
+		if(At(i) == which)
+		{
 			for(ORDERINDEX j = i + 1; j < orderLength; j++)
 			{
 				At(j - 1) = At(j);
-				jumpOffset[j] = maxJump;
 			}
-			At(--currentLength) = GetInvalidPatIndex();
+			At(--orderLength) = GetInvalidPatIndex();
+		} else
+		{
+			i++;
 		}
 	}
 
 	m_sndFile.Patterns.ForEachModCommand(FixJumpCommands(jumpOffset));
 	if(m_restartPos < jumpOffset.size())
 	{
-		m_restartPos -= jumpOffset[m_restartPos];
+		m_restartPos = jumpOffset[m_restartPos];
 	}
 }
 

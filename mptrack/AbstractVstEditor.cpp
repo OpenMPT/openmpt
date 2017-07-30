@@ -427,7 +427,10 @@ void CAbstractVstEditor::OnVSTPresetRename()
 		m_VstPlugin.SetCurrentProgramName(dlg.resultAsString);
 		if(m_VstPlugin.GetCurrentProgramName() != currentName)
 		{
-			m_VstPlugin.SetModified();
+			if(m_VstPlugin.GetSoundFile().GetModSpecifications().supportsPlugins)
+			{
+				m_VstPlugin.GetModDoc()->SetModified();
+			}
 			UpdatePresetField();
 			UpdatePresetMenu(true);
 		}
