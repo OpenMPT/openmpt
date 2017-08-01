@@ -1449,8 +1449,8 @@ void CViewPattern::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 
-void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor &endSel)
-//--------------------------------------------------------------------------------------
+void CViewPattern::SetCurSel(PatternCursor beginSel, PatternCursor endSel)
+//------------------------------------------------------------------------
 {
 	RECT rect1, rect2, rect, rcInt, rcUni;
 	POINT pt;
@@ -1588,137 +1588,144 @@ void CViewPattern::UpdateIndicator()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		EffectInfo effectInfo(*pSndFile);
-
 		CString s;
 		CHANNELINDEX nChn;
 		s.Format(_T("Row %u, Col %u"), GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
-		if (::GetFocus() == m_hWnd)
+		if(::GetFocus() == m_hWnd)
 		{
 			nChn = m_Cursor.GetChannel();
-			s.Empty();
 			if(!m_Status[psKeyboardDragSelect]
 				&& m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
 				&& GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && nChn < pSndFile->GetNumChannels())
 			{
-				const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
-
-				switch(m_Cursor.GetColumnType())
-				{
-				case PatternCursor::noteColumn:
-					// display note
-					if(m->IsSpecialNote())
-						s = szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL];
-					else if(m->IsNote())
-						s = pSndFile->GetNoteName(m->note, m->instr).c_str();
-					break;
-
-				case PatternCursor::instrColumn:
-					// display instrument
-					if (m->instr)
-					{
-						s.Format(_T("%u: "), m->instr);
-						if(m->IsPcNote())
-						{
-							// display plugin name.
-							if(m->instr <= MAX_MIXPLUGINS)
-							{
-								s += pSndFile->m_MixPlugins[m->instr - 1].GetName();
-							}
-						} else
-						{
-							// "normal" instrument
-							if (pSndFile->GetNumInstruments())
-							{
-								if ((m->instr <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[m->instr]))
-								{
-									ModInstrument *pIns = pSndFile->Instruments[m->instr];
-									s += pIns->name;
-									if ((m->note) && (m->note <= NOTE_MAX))
-									{
-										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
-										if ((nsmp) && (nsmp <= pSndFile->GetNumSamples()))
-										{
-											if (pSndFile->m_szNames[nsmp][0])
-											{
-												s.AppendFormat(_T(" (%d: "), nsmp);
-												s += pSndFile->m_szNames[nsmp];
-												s.AppendChar(_T(')'));
-											}
-										}
-									}
-								}
-							} else if (m->instr <= pSndFile->GetNumSamples())
-							{
-								s += pSndFile->m_szNames[m->instr];
-							}
-
-						}
-					}
-					break;
-
-				case PatternCursor::volumeColumn:
-					// display volume command
-					if(m->IsPcNote())
-					{
-						// display plugin param name.
-						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
-						{
-							const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[m->instr - 1];
-							if(plug.pMixPlugin != nullptr)
-							{
-								s = plug.pMixPlugin->GetFormattedParamName(m->GetValueVolCol());
-							}
-						}
-					} else if(m->volcmd != VOLCMD_NONE)
-					{
-						// "normal" volume command
-						CString sztmp;
-						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), &sztmp);
-						sztmp += _T(": ");
-						CString tmp2;
-						effectInfo.GetVolCmdParamInfo(*m, &tmp2);
-						sztmp += tmp2;
-						s = sztmp;
-					}
-					break;
-
-				case PatternCursor::effectColumn:
-				case PatternCursor::paramColumn:
-					// display effect command
-					if(m->IsPcNote())
-					{
-						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
-					} else if(m->command != CMD_NONE)
-					{
-						CString sztmp;
-						LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
-						if(fxndx >= 0)
-						{
-							UINT xParam = 0, xMultiplier = 1;
-							getXParam(m->command, m_nPattern, GetCurrentRow(), nChn, *pSndFile, xParam, xMultiplier);
-
-							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param * xMultiplier + xParam, nChn);
-						}
-						//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
-						if(!sztmp.IsEmpty())
-						{
-							s.Format(_T("%c%02X: "), pSndFile->GetModSpecifications().GetEffectLetter(m->command), m->param);
-							s += sztmp;
-						}
-					}
-					break;
-				}
+				pMainFrm->SetInfoText(GetCursorDescription());
+				UpdateXInfoText();
 			}
-			pMainFrm->SetInfoText(s);
-			UpdateXInfoText();
 		}
 	}
 }
 
 
-//rewbs.xinfo
+CString CViewPattern::GetCursorDescription() const
+//------------------------------------------------
+{
+	const CSoundFile &sndFile = *GetSoundFile();
+	CString s;
+	ROWINDEX row = m_Cursor.GetRow();
+	CHANNELINDEX channel = m_Cursor.GetChannel();
+	const ModCommand *m = sndFile.Patterns[m_nPattern].GetpModCommand(row, channel);
+
+	switch(m_Cursor.GetColumnType())
+	{
+	case PatternCursor::noteColumn:
+		// display note
+		if(m->IsSpecialNote())
+			s = szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL];
+		else if(m->IsNote())
+			s = sndFile.GetNoteName(m->note, m->instr).c_str();
+		break;
+
+	case PatternCursor::instrColumn:
+		// display instrument
+		if(m->instr)
+		{
+			s.Format(_T("%u: "), m->instr);
+			if(m->IsPcNote())
+			{
+				// display plugin name.
+				if(m->instr <= MAX_MIXPLUGINS)
+				{
+					s += sndFile.m_MixPlugins[m->instr - 1].GetName();
+				}
+			} else
+			{
+				// "normal" instrument
+				if(sndFile.GetNumInstruments())
+				{
+					if((m->instr <= sndFile.GetNumInstruments()) && (sndFile.Instruments[m->instr]))
+					{
+						ModInstrument *pIns = sndFile.Instruments[m->instr];
+						s += pIns->name;
+						if((m->note) && (m->note <= NOTE_MAX))
+						{
+							const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
+							if((nsmp) && (nsmp <= sndFile.GetNumSamples()))
+							{
+								if(sndFile.m_szNames[nsmp][0])
+								{
+									s.AppendFormat(_T(" (%d: "), nsmp);
+									s += sndFile.m_szNames[nsmp];
+									s.AppendChar(_T(')'));
+								}
+							}
+						}
+					}
+				} else if(m->instr <= sndFile.GetNumSamples())
+				{
+					s += sndFile.m_szNames[m->instr];
+				}
+
+			}
+		}
+		break;
+
+	case PatternCursor::volumeColumn:
+		// display volume command
+		if(m->IsPcNote())
+		{
+			// display plugin param name.
+			if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
+			{
+				const SNDMIXPLUGIN &plug = sndFile.m_MixPlugins[m->instr - 1];
+				if(plug.pMixPlugin != nullptr)
+				{
+					s = plug.pMixPlugin->GetFormattedParamName(m->GetValueVolCol());
+				}
+			}
+		} else if(m->volcmd != VOLCMD_NONE)
+		{
+			// "normal" volume command
+			EffectInfo effectInfo(sndFile);
+			effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), &s);
+			s += _T(": ");
+			CString tmp;
+			effectInfo.GetVolCmdParamInfo(*m, &tmp);
+			s += tmp;
+		}
+		break;
+
+	case PatternCursor::effectColumn:
+	case PatternCursor::paramColumn:
+		// display effect command
+		if(m->IsPcNote())
+		{
+			s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
+		} else if(m->command != CMD_NONE)
+		{
+			EffectInfo effectInfo(sndFile);
+			CString sztmp;
+			LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+			if(fxndx >= 0)
+			{
+				UINT xParam = 0, xMultiplier = 1;
+				getXParam(m->command, m_nPattern, row, channel, sndFile, xParam, xMultiplier);
+
+				effectInfo.GetEffectNameEx(sztmp, fxndx, m->param * xMultiplier + xParam, channel);
+			}
+			//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
+			if(!sztmp.IsEmpty())
+			{
+				s.Format(_T("%c%02X: "), sndFile.GetModSpecifications().GetEffectLetter(m->command), m->param);
+				s += sztmp;
+			}
+		}
+		break;
+	}
+	return s;
+}
+
+
 void CViewPattern::UpdateXInfoText()
 //----------------------------------
 {
@@ -1744,7 +1751,6 @@ void CViewPattern::UpdateXInfoText()
 
 	return;
 }
-//end rewbs.xinfo
 
 
 void CViewPattern::UpdateAllVUMeters(Notification *pnotify)

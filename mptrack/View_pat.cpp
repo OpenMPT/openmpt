@@ -173,6 +173,7 @@ void CViewPattern::OnInitialUpdate()
 //----------------------------------
 {
 	CModScrollView::OnInitialUpdate();
+	EnableActiveAccessibility();
 	MemsetZero(ChnVUMeters);
 	MemsetZero(OldVUMeters);
 	memset(previousNote, NOTE_NONE, sizeof(previousNote));
@@ -6893,6 +6894,36 @@ void CViewPattern::ApplyToSelection(Func func)
 			func(*m, row, chn);
 		}
 	}
+}
+
+
+HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
+//----------------------------------------------------------------
+{
+	CString str = mpt::tformat(_T("Row %1, Channel %2, "))(m_Cursor.GetRow(), m_Cursor.GetChannel() + 1);
+	switch(m_Cursor.GetColumnType())
+	{
+	case PatternCursor::noteColumn:
+		str += _T("Note: ");
+		break;
+	case PatternCursor::instrColumn:
+		str += _T("Instrument: ");
+		break;
+	case PatternCursor::volumeColumn:
+		str += _T("Volume: ");
+		break;
+	case PatternCursor::effectColumn:
+		str += _T("Effect: ");
+		break;
+	case PatternCursor::paramColumn:
+		str += _T("Parameter: ");
+		break;
+	default:
+		return CModScrollView::get_accName(varChild, pszName);
+	}
+	str += GetCursorDescription();
+	*pszName = str.AllocSysString();
+	return S_OK;
 }
 
 OPENMPT_NAMESPACE_END
