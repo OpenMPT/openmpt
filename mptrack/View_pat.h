@@ -201,6 +201,8 @@ public:
 	void UpdateXInfoText(); //rewbs.xinfo
 	void UpdateColors();
 
+	CString GetCursorDescription() const;
+
 	int GetXScrollPos() const { return m_nXScroll; }
 	int GetYScrollPos() const { return m_nYScroll; }
 	int GetColumnWidth() const { return m_szCell.cx; }
@@ -237,7 +239,7 @@ public:
 	// Selection functions
 	void SetCurSel(const PatternRect &rect) { SetCurSel(rect.GetUpperLeft(), rect.GetLowerRight()); };
 	void SetCurSel(const PatternCursor &point) { SetCurSel(point, point); };
-	void SetCurSel(const PatternCursor &beginSel, const PatternCursor &endSel);
+	void SetCurSel(PatternCursor beginSel, PatternCursor endSel);
 	void SetSelToCursor() { SetCurSel(m_Cursor); };
 
 	bool SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row = ROWINDEX_INVALID);
@@ -320,13 +322,13 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
-	virtual void OnDraw(CDC *);
-	virtual void OnInitialUpdate();
-	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual LRESULT OnPlayerNotify(Notification *);
+	void OnDraw(CDC *) override;
+	void OnInitialUpdate() override;
+	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
+	LRESULT OnPlayerNotify(Notification *) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -405,8 +407,8 @@ protected:
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
 	afx_msg void OnPatternProperties();
-	afx_msg void OnCursorCopy();
-	afx_msg void OnCursorPaste();
+	void OnCursorCopy();
+	void OnCursorPaste();
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
@@ -523,6 +525,8 @@ private:
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 };
 
 DECLARE_FLAGSET(CViewPattern::PatternStatus);
