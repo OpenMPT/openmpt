@@ -14,7 +14,7 @@ set -e
 export PATH="/usr/lib/ccache:$PATH"
 
 # Clean dist
-make clean-dist
+make NO_SDL=1 NO_SDL2=1 clean-dist
 
 # Clean
-make clean
+make NO_SDL=1 NO_SDL2=1 clean
