@@ -30,13 +30,16 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8682)
+v1.26.13.00 (* August 2017, revision 8693)
 ------------------------------------------
 Pattern tab
    [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
 
 Instrument tab
    [Imp] <js> Can now use Home / End keys for sample map navigation (http://bugs.openmpt.org/view.php?id=984).
+
+Tree view
+   [Mod] <js> Switching to another module or updating the module's sample volume now updates sample preview volume on every note, not just when previewing a new sample or instrument.
 
 Mod Conversion
    [Fix] <js> Converting to MOD could crash if the first order list item was not a valid pattern (http://bugs.openmpt.org/view.php?id=996).
