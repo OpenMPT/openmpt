@@ -11,6 +11,8 @@ LDFLAGS  +=
 LDLIBS   += -lm -lrpcrt4 -lwinmm
 ARFLAGS  := rcs
 
+CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
+
 EXESUFFIX=.exe
 SOSUFFIX=.dll
 SOSUFFIXWINDOWS=1
