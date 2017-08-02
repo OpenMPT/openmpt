@@ -27,7 +27,7 @@ endif
 CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function
+CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
 
 ifeq ($(CHECKED_ADDRESS),1)
 CXXFLAGS += -fsanitize=address
