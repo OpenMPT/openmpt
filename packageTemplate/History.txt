@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* July 2017, revision 8664)
-----------------------------------------
+v1.26.13.00 (* August 2017, revision 8682)
+------------------------------------------
 Pattern tab
    [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
 

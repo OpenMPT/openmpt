@@ -448,6 +448,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(m_SndFile.Patterns.IsValidPat(m_SndFile.Order[i]))
 			{
 				firstPat = m_SndFile.Order[i];
+				break;
 			}
 		}
 		bool firstPatValid = firstPat != PATTERNINDEX_INVALID;
