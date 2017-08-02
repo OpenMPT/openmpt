@@ -3924,7 +3924,12 @@ static int start_decoder(vorb *f)
             g->sorted_order[j] = (uint8) p[j].id;
          // precompute the neighbors
          for (j=2; j < g->values; ++j) {
+#if 0 // OpenMPT
             int low,hi;
+#else // OpenMPT
+            int low=0; // OpenMPT
+            int hi=0; // OpenMPT
+#endif // OpenMPT
             neighbors(g->Xlist, j, &low,&hi);
             g->neighbors[j][0] = low;
             g->neighbors[j][1] = hi;
