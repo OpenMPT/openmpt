@@ -579,7 +579,9 @@ enum STBVorbisError
    #undef __forceinline
    #endif
    #define __forceinline
+#if 0 // OpenMPT
    #define alloca __builtin_alloca
+#endif // OpenMPT
 #elif !defined(_MSC_VER)
    #if __GNUC__
       #define __forceinline inline
