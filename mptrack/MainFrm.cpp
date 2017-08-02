@@ -1650,21 +1650,10 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 void CMainFrame::InitPreview()
 //----------------------------
 {
-	const CModDoc *activeDoc = GetActiveDoc();
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(FileReader());
 	// Avoid global volume ramping when trying samples in the treeview.
 	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
-	if(activeDoc != nullptr && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD))
-	{
-		m_WaveFile.SetMixLevels(activeDoc->GetrSoundFile().GetMixLevels());
-		m_WaveFile.m_nSamplePreAmp = activeDoc->GetrSoundFile().m_nSamplePreAmp;
-	} else
-	{
-		// Preview at 0dB
-		m_WaveFile.SetMixLevels(mixLevels1_17RC3);
-		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
-	}
 	m_WaveFile.m_nDefaultTempo.Set(125);
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
@@ -1683,6 +1672,18 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
 	m_WaveFile.SetRepeatCount(-1);
 	m_WaveFile.ResetPlayPos();
+
+	const CModDoc *activeDoc = GetActiveDoc();
+	if(activeDoc != nullptr && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD))
+	{
+		m_WaveFile.SetMixLevels(activeDoc->GetrSoundFile().GetMixLevels());
+		m_WaveFile.m_nSamplePreAmp = activeDoc->GetrSoundFile().m_nSamplePreAmp;
+	} else
+	{
+		// Preview at 0dB
+		m_WaveFile.SetMixLevels(mixLevels1_17RC3);
+		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
+	}
 
 	if(m_WaveFile.Patterns.IsValidPat(0))
 	{
