@@ -171,7 +171,7 @@ static blob_t * load_file( const char * filename ) {
 	if ( tell_result < 0 ) {
 		goto fail;
 	}
-	if ( (unsigned long)tell_result > SIZE_MAX ) {
+	if ( (unsigned long long)tell_result > SIZE_MAX ) {
 		goto fail;
 	}
 	blob->size = (size_t)tell_result;
