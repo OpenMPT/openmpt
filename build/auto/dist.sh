@@ -85,21 +85,21 @@ rm bin/empty.*.out
 rm bin/empty.cpp
 
 # Clean dist
-make clean-dist
+make NO_SDL=1 NO_SDL2=1 clean-dist
 
 # Check the build
-make STRICT=1 clean
-make STRICT=1
-make STRICT=1 check
-make STRICT=1 clean
+make NO_SDL=1 NO_SDL2=1 STRICT=1 clean
+make NO_SDL=1 NO_SDL2=1 STRICT=1
+make NO_SDL=1 NO_SDL2=1 STRICT=1 check
+make NO_SDL=1 NO_SDL2=1 STRICT=1 clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
 if `svn info . > /dev/null 2>&1` ; then
-make dist
+make NO_SDL=1 NO_SDL2=1 dist
 fi
 
 # Clean
-make clean
+make NO_SDL=1 NO_SDL2=1 clean
 
 # Build autoconfiscated tarball
 ./build/autotools/autoconfiscate.sh
