@@ -794,9 +794,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					std::string filenameU8;
 					file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
-#ifdef MPT_EXTERNAL_SAMPLES
+#if defined(MPT_EXTERNAL_SAMPLES)
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
-#else
+#elif !defined(LIBOPENMPT_BUILD_TEST)
 					AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES
 				} else
