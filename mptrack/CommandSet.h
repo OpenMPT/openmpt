@@ -134,6 +134,7 @@ enum CommandID
 	kcViewChannelManager,
 	kcViewAddPlugin,
 	kcViewSongProperties,
+	kcViewTempoSwing,
 	kcShowMacroConfig,
 	kcViewMIDImapping,
 	kcViewEditHistory,

@@ -2485,6 +2485,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewComments:
 		case kcViewGraph: //rewbs.graph
 		case kcViewSongProperties:
+		case kcViewTempoSwing:
 		case kcViewMIDImapping:
 		case kcViewEditHistory:
 		case kcViewChannelManager:
