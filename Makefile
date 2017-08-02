@@ -367,6 +367,8 @@ PC_REQUIRES_ZLIB := zlib
 else
 ifeq ($(FORCE_DEPS),1)
 $(error zlib not found)
+else
+$(warning warning: zlib not found)
 endif
 NO_ZLIB:=1
 endif
@@ -383,6 +385,8 @@ PC_REQUIRES_MPG123 := libmpg123
 else
 ifeq ($(FORCE_DEPS),1)
 $(error mpg123 not found)
+else
+$(warning warning: mpg123 not found)
 endif
 NO_MPG123:=1
 endif
@@ -399,6 +403,8 @@ PC_REQUIRES_OGG := ogg
 else
 ifeq ($(FORCE_DEPS),1)
 $(error ogg not found)
+else
+$(warning warning: ogg not found)
 endif
 NO_OGG:=1
 endif
@@ -415,6 +421,8 @@ PC_REQUIRES_VORBIS := vorbis
 else
 ifeq ($(FORCE_DEPS),1)
 $(error vorbis not found)
+else
+$(warning warning: vorbis not found)
 endif
 NO_VORBIS:=1
 endif
@@ -431,6 +439,8 @@ PC_REQUIRES_VORBISFILE := vorbisfile
 else
 ifeq ($(FORCE_DEPS),1)
 $(error vorbisfile not found)
+else
+$(warning warning: vorbisfile not found)
 endif
 NO_VORBISFILE:=1
 endif
@@ -447,6 +457,8 @@ NO_SDL:=1
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sdl2 not found)
+else
+$(warning warning: sdl2 not found)
 endif
 NO_SDL2:=1
 endif
@@ -462,6 +474,8 @@ LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sdl not found)
+else
+$(warning warning: sdl not found)
 endif
 NO_SDL:=1
 endif
@@ -477,6 +491,8 @@ LDLIBS_PORTAUDIO   := $(shell pkg-config --libs-only-l   portaudio-2.0 )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error portaudio not found)
+else
+$(warning warning: portaudio not found)
 endif
 NO_PORTAUDIO:=1
 endif
@@ -492,6 +508,8 @@ LDLIBS_PORTAUDIOCPP   := $(shell pkg-config --libs-only-l   portaudiocpp )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error portaudiocpp not found)
+else
+$(warning warning: portaudiocpp not found)
 endif
 NO_PORTAUDIOCPP:=1
 endif
@@ -507,6 +525,8 @@ LDLIBS_PULSEAUDIO   := $(shell pkg-config --libs-only-l   libpulse libpulse-simp
 else
 ifeq ($(FORCE_DEPS),1)
 $(error pulseaudio not found)
+else
+$(warning warning: pulseaudio not found)
 endif
 NO_PULSEAUDIO:=1
 endif
@@ -522,6 +542,8 @@ LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   'flac >= 1.3.0' )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error flac not found)
+else
+$(warning warning: flac not found)
 endif
 NO_FLAC:=1
 endif
@@ -537,6 +559,8 @@ LDLIBS_SNDFILE   := $(shell pkg-config --libs-only-l     sndfile )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sndfile not found)
+else
+$(warning warning: sndfile not found)
 endif
 NO_SNDFILE:=1
 endif
