@@ -430,6 +430,7 @@ public:
 	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnViewMPTHacks();
+	afx_msg void OnViewTempoSwingSettings();
 	afx_msg void OnSaveTemplateModule();
 	afx_msg void OnAppendModule();
 	afx_msg void OnViewMIDIMapping() { ViewMIDIMapping(); }

@@ -18,6 +18,7 @@
 #include "Childfrm.h"
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
+#include "TempoSwingDialog.h"
 #include "mod2wave.h"
 #include "ChannelManagerDlg.h"
 #include "MIDIMacroDialog.h"
@@ -30,7 +31,7 @@
 #include "StreamEncoderWAV.h"
 #include "mod2midi.h"
 #include "../common/version.h"
-#include "modsmp_ctrl.h"
+#include "../soundlib/modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
@@ -2558,6 +2559,27 @@ void CModDoc::OnViewMPTHacks()
 }
 
 
+void CModDoc::OnViewTempoSwingSettings()
+//--------------------------------------
+{
+	if(m_SndFile.m_nDefaultRowsPerBeat > 0 && m_SndFile.m_nTempoMode == tempoModeModern)
+	{
+		TempoSwing tempoSwing = m_SndFile.m_tempoSwing;
+		tempoSwing.resize(m_SndFile.m_nDefaultRowsPerBeat, TempoSwing::Unity);
+		CTempoSwingDlg dlg(CMainFrame::GetMainFrame(), tempoSwing, m_SndFile);
+		if(dlg.DoModal() == IDOK)
+		{
+			SetModified();
+			m_SndFile.m_tempoSwing = dlg.m_tempoSwing;
+		}
+	} else if(GetModType() == MOD_TYPE_MPT)
+	{
+		Reporting::Error(_T("Modern tempo mode needs to be enabled in order to edit tempo swing settings."));
+		OnSongProperties();
+	}
+}
+
+
 LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //---------------------------------------------------------------
 {
@@ -2572,6 +2594,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcViewInstruments: OnEditInstruments(); break;
 		case kcViewComments: OnEditComments(); break;
 		case kcViewSongProperties: OnSongProperties(); break;
+		case kcViewTempoSwing: OnViewTempoSwingSettings(); break;
 		case kcShowMacroConfig:	OnSetupZxxMacros(); break;
 		case kcViewMIDImapping: OnViewMIDIMapping(); break;
 		case kcViewEditHistory:	OnViewEditHistory(); break;

@@ -708,6 +708,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcTransposeCustomQuick, 1970, _T("Transpose Custom (Quick)"));
 	DefineKeyCommand(kcPrevEntryInColumn, 1971, _T("Jump to previous entry in column"));
 	DefineKeyCommand(kcNextEntryInColumn, 1972, _T("Jump to next entry in column"));
+	DefineKeyCommand(kcViewTempoSwing, 1973, _T("View Global Tempo Swing Settings"));
 
 	// Add new key commands here.
 
