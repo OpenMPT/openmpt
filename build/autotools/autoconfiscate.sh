@@ -144,7 +144,7 @@ make check
 
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
-MPT_LIBOPENMPT_VERSION=$(make distversion-tarball)
+MPT_LIBOPENMPT_VERSION=$(make NO_SDL=1 NO_SDL2=1 distversion-tarball)
 cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
