@@ -304,22 +304,36 @@ void CSoundFile::SetCurrentOrder( UINT nOrder ) {
 }
 
 UINT CSoundFile::GetSampleName( UINT nSample, LPSTR s ) const {
-	UNUSED(nSample);
 	mpcpplog();
 	if ( !s ) {
 		return 0;
 	}
-	// todo
-	return 0;
+	char buf[32];
+	std::memset( buf, 0, 32 );
+	if ( mod ) {
+		std::vector<std::string> names = mod->get_sample_names();
+		if ( 1 <= nSample && nSample <= names.size() ) {
+			std::strncpy( buf, names[ nSample - 1 ].c_str(), 31 );
+		}
+	}
+	std::memcpy( s, buf, 32 );
+	return std::strlen( buf );
 }
 
 UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
-	UNUSED(nInstr);
 	mpcpplog();
 	if ( !s ) {
 		return 0;
 	}
-	// todo
+	char buf[32];
+	std::memset( buf, 0, 32 );
+	if ( mod ) {
+		std::vector<std::string> names = mod->get_instrument_names();
+		if ( 1 <= nInstr && nInstr <= names.size() ) {
+			std::strncpy( buf, names[ nInstr - 1 ].c_str(), 31 );
+		}
+	}
+	std::memcpy( s, buf, 32 );
 	return 0;
 }
 
