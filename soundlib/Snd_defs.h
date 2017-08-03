@@ -36,7 +36,7 @@ typedef uint16 INSTRUMENTINDEX;
 typedef uint8 SEQUENCEINDEX;
 	const SEQUENCEINDEX SEQUENCEINDEX_INVALID = uint8_max;
 
-typedef uintptr_t SmpLength;
+typedef uint32 SmpLength;
 
 
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *frames*
