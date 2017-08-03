@@ -168,6 +168,7 @@ protected:
 	void DrawGrid(CDC *memDC, uint32 speed);
 	void UpdateIndicator();
 	void UpdateIndicator(int tick, int val);
+	CString EnvValueToString(int tick, int val) const;
 
 	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
 	void OnEnvZoomOut() { EnvSetZoom(m_fZoom - 1); };
@@ -175,12 +176,13 @@ protected:
 
 public:
 	//{{AFX_VIRTUAL(CViewInstrument)
-	virtual void OnDraw(CDC *);
-	virtual void OnInitialUpdate();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
-	virtual LRESULT OnPlayerNotify(Notification *);
+	void OnDraw(CDC *) override;
+	void OnInitialUpdate() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
+	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
+	LRESULT OnPlayerNotify(Notification *) override;
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 	//}}AFX_VIRTUAL
 
 protected:

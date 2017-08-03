@@ -157,6 +157,7 @@ CViewInstrument::CViewInstrument()
 	, m_envPointSize(4)
 //--------------------------------
 {
+	EnableActiveAccessibility();
 	m_rcClient.bottom = 2;
 	for(auto &pos : m_dwNotifyPos)
 	{
@@ -1605,32 +1606,41 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns == nullptr) return;
-	const bool hasReleaseNode = EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET;
+
+	CString s;
+	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, [%s]") : _T("Tick %d, [%s]"), tick, EnvValueToString(tick, val));
+	CModScrollView::UpdateIndicator(s);
+}
+
+
+CString CViewInstrument::EnvValueToString(int tick, int val) const
+//----------------------------------------------------------------
+{
+	const InstrumentEnvelope *env = GetEnvelopePtr();
+	const bool hasReleaseNode = env->nReleaseNode != ENV_RELEASE_NODE_UNSET;
 	EnvelopeNode releaseNode;
 	if(hasReleaseNode)
 	{
-		releaseNode = pIns->GetEnvelope(m_nEnv)[EnvGetReleaseNode()];
+		releaseNode = env->at(env->nReleaseNode);
 	}
 
 	CString s;
-	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, ") : _T("Tick %d, "), tick);
-
-	if (!hasReleaseNode || tick <= releaseNode.tick + 1)
+	if(!hasReleaseNode || tick <= releaseNode.tick + 1)
 	{
 		// ticks before release node (or no release node)
-		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? val - 32 : val;
+		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && env->dwFlags[ENV_FILTER])) ? val - 32 : val;
 		if(m_nEnv != ENV_PANNING)
-			s.AppendFormat(_T("[%d]"), displayVal);
+			s.Format(_T("%d"), displayVal);
 		else	// panning envelope: display right/center/left chars
-			s.AppendFormat(_T("[%d %c]"), mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
+			s.Format(_T("%d %c"), mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
 	} else
 	{
 		// ticks after release node
 		int displayVal = (val - releaseNode.value) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
-		s.AppendFormat(_T("[Rel%c%d]"), displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
+		s.Format(_T("Rel%c%d"), displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
 	}
-	CModScrollView::UpdateIndicator(s);
+	return s;
 }
 
 
@@ -2686,8 +2696,8 @@ InstrumentEnvelope *CViewInstrument::GetEnvelopePtr() const
 bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
 //-----------------------------------------------------------
 {
-	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return false;
+	const InstrumentEnvelope *env = GetEnvelopePtr();
+	if(env == nullptr) return false;
 
 	// Can't move first point
 	if(envPoint == 0)
@@ -2695,12 +2705,12 @@ bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
 		return false;
 	}
 	// Can't move left of previous point
-	if((step < 0) && (pEnv->at(envPoint).tick - pEnv->at(envPoint - 1).tick <= -step))
+	if((step < 0) && (env->at(envPoint).tick - env->at(envPoint - 1).tick <= -step))
 	{
 		return false;
 	}
 	// Can't move right of next point
-	if((step > 0) && (envPoint < pEnv->size() - 1) && (pEnv->at(envPoint + 1).tick - pEnv->at(envPoint).tick <= step))
+	if((step > 0) && (envPoint < env->size() - 1) && (env->at(envPoint + 1).tick - env->at(envPoint).tick <= step))
 	{
 		return false;
 	}
@@ -2758,7 +2768,7 @@ void CViewInstrument::OnEnvLoad()
 void CViewInstrument::OnEnvSave()
 //-------------------------------
 {
-	InstrumentEnvelope *env = GetEnvelopePtr();
+	const InstrumentEnvelope *env = GetEnvelopePtr();
 	if(env == nullptr || env->empty())
 	{
 		MessageBeep(MB_ICONWARNING);
@@ -2826,5 +2836,73 @@ void CViewInstrument::OnEditRedo()
 	}
 }
 
+
+// Accessible description for screen readers
+HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
+//-------------------------------------------------------------------
+{
+	const InstrumentEnvelope *env = GetEnvelopePtr();
+	if(env == nullptr)
+	{
+		return CModScrollView::get_accName(varChild, pszName);
+	}
+
+	const TCHAR *typeStr = _T("");
+	switch(m_nEnv)
+	{
+	case ENV_VOLUME: typeStr = _T("Volume"); break;
+	case ENV_PANNING: typeStr = _T("Panning"); break;
+	case ENV_PITCH: typeStr = env->dwFlags[ENV_FILTER] ? _T("Filter") : _T("Pitch"); break;
+	}
+
+	CString str;
+	if(env->empty() || m_nDragItem == 0)
+	{
+		str = typeStr;
+		if(env->empty())
+			str += _T(" envelope has no points");
+		else
+			str += mpt::tformat(_T(" envelope, %1 point%2"))(env->size(), env->size() == 1 ? _T("") : _T("s"));
+	} else
+	{
+		bool isEnvPoint = false;
+		auto point = DragItemToEnvPoint();
+		auto tick = EnvGetTick(point);
+		switch(m_nDragItem)
+		{
+		case ENV_DRAGLOOPSTART: str = _T("Loop start"); break;
+		case ENV_DRAGLOOPEND: str = _T("Loop end"); break;
+		case ENV_DRAGSUSTAINSTART: str = _T("Sustain loop start"); break;
+		case ENV_DRAGSUSTAINEND: str = _T("Sustain loop end"); break;
+		default: isEnvPoint = true;
+		}
+		if(!isEnvPoint)
+		{
+			str += mpt::tformat(_T(" at point %1, tick %2"))(point + 1, tick);
+		} else
+		{
+			str = mpt::tformat(_T("Point %1, tick %2, %3 %4"))(point + 1, tick, typeStr, EnvValueToString(EnvGetTick(point), EnvGetValue(point)));
+			if(env->dwFlags[ENV_LOOP])
+			{
+				if(point == env->nLoopStart)
+					str += _T(", loop start");
+				if(point == env->nLoopEnd)
+					str += _T(", loop end");
+			}
+			if(env->dwFlags[ENV_SUSTAIN])
+			{
+				if(point == env->nLoopStart)
+					str += _T(", sustain loop start");
+				if(point == env->nLoopEnd)
+					str += _T(", sustain loop end");
+			}
+			if(env->nReleaseNode == point)
+				str += _T(", release node");
+		}
+	}
+
+	*pszName = str.AllocSysString();
+	return S_OK;
+}
 
 OPENMPT_NAMESPACE_END
