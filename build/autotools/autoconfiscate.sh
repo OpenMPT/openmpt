@@ -137,7 +137,7 @@ make dist
 echo "Running 'make distcheck' ..."
 #make distcheck
 (
- make distcheck 3>&1 1>&2 2>&3 | grep -v 'libtool: install: warning:'
+ make distcheck 3>&1 1>&2 2>&3 | ( grep -v 'libtool: install: warning:' || true )
  exit ${PIPESTATUS[0]}
 ) 3>&1 1>&2 2>&3
 
