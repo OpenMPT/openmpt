@@ -4,7 +4,7 @@ CXX = i686-w64-mingw32-g++
 LD  = i686-w64-mingw32-g++
 AR  = i686-w64-mingw32-ar
 
-CPPFLAGS += -DWIN32 -D_WIN32 -DWINAPI_FAMILY=0x2 -D_WINNT_WIN32=0x0602
+CPPFLAGS += -DWIN32 -D_WIN32 -DWINAPI_FAMILY=0x2 -D_WIN32_WINNT=0x0602
 CXXFLAGS += -std=c++11 -municode -mconsole
 CFLAGS   += -std=c99   -municode -mconsole
 LDFLAGS  +=
