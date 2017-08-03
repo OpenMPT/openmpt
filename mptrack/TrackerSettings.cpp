@@ -293,6 +293,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, patternFontDot(conf, "Pattern Editor", "FontDot", MPT_USTRING("."))
 	, effectVisWidth(conf, "Pattern Editor", "EffectVisWidth", -1)
 	, effectVisHeight(conf, "Pattern Editor", "EffectVisHeight", -1)
+	, patternAccessibilityFormat(conf, "Pattern Editor", "AccessibilityFormat", _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
@@ -647,10 +648,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_dwPatternSetup &= ~0x100000;
 		m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 51) && (m_dwPatternSetup & 0x200))
+	if(storedVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 51))
 	{
+		// Moving option out of pattern config
+		CreateBackupFiles = (m_dwPatternSetup & 0x200) != 0;
 		m_dwPatternSetup &= ~0x200;
-		CreateBackupFiles = true;
 	}
 
 	// Effects
