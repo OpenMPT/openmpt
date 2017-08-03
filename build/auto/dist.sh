@@ -95,7 +95,7 @@ make NO_SDL=1 NO_SDL2=1 STRICT=1 clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
 if `svn info . > /dev/null 2>&1` ; then
-make NO_SDL=1 NO_SDL2=1 dist
+make NO_SDL=1 NO_SDL2=1 SILENT_DOCS=1 dist
 fi
 
 # Clean

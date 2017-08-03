@@ -905,7 +905,11 @@ doc: bin/made.docs
 bin/made.docs:
 	$(VERYSILENT)mkdir -p bin/docs
 	$(INFO) [DOXYGEN] libopenmpt
+ifeq ($(SILENT_DOCS),1)
+	$(SILENT) ( cat libopenmpt/Doxyfile ; echo 'PROJECT_NUMBER = "$(DIST_LIBOPENMPT_VERSION)"' ; echo 'WARN_IF_DOC_ERROR = NO' ) | doxygen -
+else
 	$(SILENT) ( cat libopenmpt/Doxyfile ; echo 'PROJECT_NUMBER = "$(DIST_LIBOPENMPT_VERSION)"' ) | doxygen -
+endif
 	$(VERYSILENT)touch $@
 
 .PHONY: check
