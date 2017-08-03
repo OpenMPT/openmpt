@@ -135,8 +135,7 @@ echo "Running 'make dist' ..."
 make dist
 
 echo "Running 'make distcheck' ..."
-#make distcheck
-(exit `( (( ( make distcheck ; echo $? >&4 ) | cat ) 3>&1 1>&2 2>&3 | grep -v 'libtool: install: warning:' ) 3>&1 1>&2 2>&3 ) 4>&1`)
+make distcheck
 
 echo "Running 'make' ..."
 make
