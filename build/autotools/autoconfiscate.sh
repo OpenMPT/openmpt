@@ -123,6 +123,7 @@ cat configure.ac | sed "s/!!MPT_PACKAGE!!/true/g" > configure.ac.tmp && mv confi
 echo "Generating 'Doxyfile.in' ..."
 ( cat libopenmpt/Doxyfile | grep -v '^PROJECT_NUMBER' | sed 's/INPUT                 += /INPUT += @top_srcdir@\//g' > Doxyfile.in ) && ( echo "PROJECT_NUMBER = @PACKAGE_VERSION@" >> Doxyfile.in ) && rm libopenmpt/Doxyfile
 echo "OUTPUT_DIRECTORY = doxygen-doc" >> Doxyfile.in
+echo "WARN_IF_DOC_ERROR = NO" >> Doxyfile.in
 
 echo "Running 'autoreconf -i' ..."
 autoreconf -i
