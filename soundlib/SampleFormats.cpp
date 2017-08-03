@@ -2992,14 +2992,18 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
-	Samples[sample].AllocateSample();
+
+	if(!Samples[sample].AllocateSample())
+	{
+		return false;
+	}
 
 	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
 
 	Samples[sample].Convert(MOD_TYPE_IT, GetType());
 	Samples[sample].PrecomputeLoops(*this, false);
 
-	return Samples[sample].pSample != nullptr;
+	return true;
 
 #else // !MPT_WITH_OPUSFILE
 
@@ -3273,14 +3277,18 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
-	Samples[sample].AllocateSample();
+
+	if(!Samples[sample].AllocateSample())
+	{
+		return false;
+	}
 
 	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
 
 	Samples[sample].Convert(MOD_TYPE_IT, GetType());
 	Samples[sample].PrecomputeLoops(*this, false);
 
-	return Samples[sample].pSample != nullptr;
+	return true;
 
 #else // !VORBIS
 
