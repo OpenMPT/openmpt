@@ -717,6 +717,7 @@ public:
 	Setting<mpt::ustring> patternFontDot;
 	Setting<int32> effectVisWidth;
 	Setting<int32> effectVisHeight;
+	Setting<CString> patternAccessibilityFormat;
 
 	// Sample Editor
 
