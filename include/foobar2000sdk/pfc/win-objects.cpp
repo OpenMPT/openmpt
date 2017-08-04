@@ -1,4 +1,8 @@
 #include "pfc.h"
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4996) // OpenMPT
+#endif // OpenMPT
 
 #include "pp-winapi.h"
 
@@ -328,3 +332,7 @@ namespace pfc {
 #endif // #ifdef PFC_WINDOWS_DESKTOP_APP
 
 #endif
+
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT

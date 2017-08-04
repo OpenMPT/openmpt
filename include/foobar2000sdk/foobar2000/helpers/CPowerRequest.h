@@ -1,3 +1,7 @@
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4996) // OpenMPT
+#endif // OpenMPT
 #ifdef _WIN32
 
 typedef HANDLE (WINAPI * pPowerCreateRequest_t) (
@@ -99,3 +103,6 @@ private:
 };
 
 #endif
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT

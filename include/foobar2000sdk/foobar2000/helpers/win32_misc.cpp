@@ -1,4 +1,8 @@
 #include "stdafx.h"
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4996) // OpenMPT
+#endif // OpenMPT
 
 void registerclass_scope_delayed::toggle_on(UINT p_style,WNDPROC p_wndproc,int p_clsextra,int p_wndextra,HICON p_icon,HCURSOR p_cursor,HBRUSH p_background,const TCHAR * p_class_name,const TCHAR * p_menu_name) {
 	toggle_off();
@@ -286,3 +290,6 @@ CMutexScope::CMutexScope(CMutex & mutex, abort_callback & aborter) : m_mutex(mut
 CMutexScope::~CMutexScope() {
 	ReleaseMutex(m_mutex.Handle());
 }
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT
