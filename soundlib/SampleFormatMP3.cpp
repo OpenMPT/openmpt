@@ -82,10 +82,16 @@ public:
 	static mpg123_off_t FileReaderLSeek(void *fp, mpg123_off_t offset, int whence)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
+		FileReader::off_t oldpos = file.GetPosition();
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
 		else if(whence == SEEK_END) file.Seek(file.GetLength() + offset);
 		else file.Seek(offset);
-		return file.GetPosition();
+		MPT_MAYBE_CONSTANT_IF(!Util::TypeCanHoldValue<mpg123_off_t>(file.GetPosition()))
+		{
+			file.Seek(oldpos);
+			return static_cast<mpg123_off_t>(-1);
+		}
+		return static_cast<mpg123_off_t>(file.GetPosition());
 	}
 
 public:

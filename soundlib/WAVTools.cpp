@@ -210,7 +210,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	if(cueChunk.IsValid())
 	{
 		uint32 numPoints = cueChunk.ReadUint32LE();
-		LimitMax(numPoints, CountOf(sample.cues));
+		LimitMax(numPoints, mpt::saturate_cast<uint32>(MPT_ARRAY_COUNT(sample.cues)));
 		for(uint32 i = 0; i < numPoints; i++)
 		{
 			WAVCuePoint cuePoint;

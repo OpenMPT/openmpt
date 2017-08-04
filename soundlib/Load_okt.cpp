@@ -406,7 +406,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 
 		// Weird stuff?
-		LimitMax(mptSample.nLength, sampleChunks[fileSmp].GetLength());
+		LimitMax(mptSample.nLength, mpt::saturate_cast<SmpLength>(sampleChunks[fileSmp].GetLength()));
 
 		SampleIO(
 			SampleIO::_8bit,

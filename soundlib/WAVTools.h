@@ -315,7 +315,7 @@ public:
 	uint16 GetSampleSize() const { return ((GetNumChannels() * GetBitsPerSample()) + 7) / 8; }
 
 	// Get sample length (in samples)
-	SmpLength GetSampleLength() const { return sampleLength; }
+	SmpLength GetSampleLength() const { return mpt::saturate_cast<SmpLength>(sampleLength); }
 
 	// Apply sample settings from file (loop points, MPT extra settings, ...) to a sample.
 	void ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SAMPLENAME]);
