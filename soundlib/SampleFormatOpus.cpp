@@ -144,11 +144,16 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+	{
+		return false;
+	}
+
 	DestroySampleThreadsafe(sample);
 	strcpy(m_szNames[sample], "");
 	Samples[sample].Initialize();
 	Samples[sample].nC5Speed = rate;
-	Samples[sample].nLength = raw_sample_data.size() / channels;
+	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);

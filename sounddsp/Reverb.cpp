@@ -67,7 +67,7 @@ CReverb::CReverb()
 //----------------
 {
 	// Shared reverb state
-	InitMixBuffer(MixReverbBuffer, mpt::size(MixReverbBuffer));
+	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(mpt::size(MixReverbBuffer)));
 	gnRvbROfsVol = 0;
 	gnRvbLOfsVol = 0;
 

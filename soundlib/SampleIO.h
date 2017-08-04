@@ -161,9 +161,9 @@ public:
 	}
 
 	// Return 0 in case of variable-length encoded samples.
-	std::size_t GetEncodedBitsPerSample() const
+	uint8 GetEncodedBitsPerSample() const
 	{
-		std::size_t result = 0;
+		uint8 result = 0;
 		switch(GetEncoding())
 		{
 			case signedPCM:// Integer PCM, signed

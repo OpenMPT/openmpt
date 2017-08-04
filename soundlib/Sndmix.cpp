@@ -139,8 +139,8 @@ bool CSoundFile::FadeSong(uint32 msec)
 // Apply stereo separation factor on an interleaved stereo/quad stream.
 // count = Number of stereo sample pairs to process
 // separation = -256...256 (negative values = swap L/R, 0 = mono, 128 = normal)
-static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t count, int32 separation)
-//-------------------------------------------------------------------------------------------------------
+static void ApplyStereoSeparation(mixsample_t *mixBuf, std::size_t count, int32 separation)
+//-----------------------------------------------------------------------------------------
 {
 #ifdef MPT_INTMIXER
 	const mixsample_t factor_num = separation; // 128 =^= 1.0f
@@ -155,7 +155,7 @@ static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t
 	const float mid_factor = normalize_factor;
 	const float side_factor = factor * normalize_factor;
 #endif
-	for(CSoundFile::samplecount_t i = 0; i < count; i++)
+	for(std::size_t i = 0; i < count; i++)
 	{
 		mixsample_t l = mixBuf[0];
 		mixsample_t r = mixBuf[1];

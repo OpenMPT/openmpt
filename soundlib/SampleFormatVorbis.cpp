@@ -109,7 +109,11 @@ static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int wh
 static long VorbisfileFilereaderTell(void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
-	return file.GetPosition();
+	MPT_MAYBE_CONSTANT_IF(!Util::TypeCanHoldValue<long>(file.GetPosition()))
+	{
+		return -1;
+	}
+	return static_cast<long>(file.GetPosition());
 }
 
 #if defined(MPT_WITH_VORBIS)
@@ -294,11 +298,16 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+	{
+		return false;
+	}
+
 	DestroySampleThreadsafe(sample);
 	mpt::String::Copy(m_szNames[sample], sampleName);
 	Samples[sample].Initialize();
 	Samples[sample].nC5Speed = rate;
-	Samples[sample].nLength = raw_sample_data.size() / channels;
+	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);

@@ -391,7 +391,7 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 	while(numFrames > 0)
 	{
 		uint32 renderSamples = numFrames;
-		LimitMax(renderSamples, CountOf(out[0]));
+		LimitMax(renderSamples, mpt::saturate_cast<uint32>(MPT_ARRAY_COUNT(out[0])));
 		MemsetZero(out);
 
 		Process(out[0], out[1], renderSamples);
