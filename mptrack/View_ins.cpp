@@ -1608,7 +1608,7 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 	if (pIns == nullptr) return;
 
 	CString s;
-	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, [%s]") : _T("Tick %d, [%s]"), tick, EnvValueToString(tick, val));
+	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, [%s]") : _T("Tick %d, [%s]"), tick, EnvValueToString(tick, val).GetString());
 	CModScrollView::UpdateIndicator(s);
 }
 
