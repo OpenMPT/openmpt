@@ -317,7 +317,7 @@ UINT CSoundFile::GetSampleName( UINT nSample, LPSTR s ) const {
 		}
 	}
 	std::memcpy( s, buf, 32 );
-	return std::strlen( buf );
+	return static_cast<UINT>( std::strlen( buf ) );
 }
 
 UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
@@ -334,7 +334,7 @@ UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
 		}
 	}
 	std::memcpy( s, buf, 32 );
-	return std::strlen( buf );
+	return static_cast<UINT>( std::strlen( buf ) );
 }
 
 void CSoundFile::LoopPattern( int nPat, int nRow ) {
