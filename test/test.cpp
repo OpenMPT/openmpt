@@ -3280,7 +3280,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 	ModSample smp;
 	smp.uFlags = smpFormat;
 	smp.pSample = const_cast<int8 *>(sampleData.data());
-	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
+	smp.nLength = mpt::saturate_cast<SmpLength>(sampleData.size() / smp.GetBytesPerSample());
 
 	std::string data;
 
