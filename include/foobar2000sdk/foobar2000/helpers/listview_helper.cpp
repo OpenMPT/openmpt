@@ -1,4 +1,8 @@
 #include "stdafx.h"
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4838) // OpenMPT
+#endif // OpenMPT
 
 #ifdef _WIN32
 
@@ -189,3 +193,6 @@ int ListView_GetColumnCount(HWND listView) {
 #endif
 
 #endif // _WIN32
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT

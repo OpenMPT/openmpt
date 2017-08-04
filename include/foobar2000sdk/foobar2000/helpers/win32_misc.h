@@ -1,3 +1,8 @@
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4302) // OpenMPT
+#pragma warning(disable:4996) // OpenMPT
+#endif // OpenMPT
 PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL();
 PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL_CRITICAL(const char * what);
 
@@ -372,3 +377,6 @@ private:
 	CMutexScope(const CMutexScope &); void operator=(const CMutexScope&);
 	CMutex & m_mutex;
 };
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT

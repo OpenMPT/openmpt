@@ -1,3 +1,7 @@
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(push) // OpenMPT
+#pragma warning(disable:4838) // OpenMPT
+#endif // OpenMPT
 extern "C"
 {
 	LPCSTR SHARED_EXPORT uGetCallStackPath();
@@ -103,3 +107,6 @@ static void OverrideCrtAbort() {
 	_set_purecall_handler(_PureCallHandler);
 	_set_invalid_parameter_handler(_InvalidParameter);
 }
+#ifdef _MSC_VER // OpenMPT
+#pragma warning(pop) // OpenMPT
+#endif // OpenMPT
