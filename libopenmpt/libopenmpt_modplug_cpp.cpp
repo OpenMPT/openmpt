@@ -334,7 +334,7 @@ UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
 		}
 	}
 	std::memcpy( s, buf, 32 );
-	return 0;
+	return std::strlen( buf );
 }
 
 void CSoundFile::LoopPattern( int nPat, int nRow ) {
