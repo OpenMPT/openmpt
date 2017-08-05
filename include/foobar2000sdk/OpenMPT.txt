@@ -4,3 +4,5 @@ This directory contains the contents of the foobar2000 SDK 1.3. (SDK-2015-08-03.
 - Various VS2017 warning have been disabled.
 - Project files have been converted to VS2015 by opening and resaving them once
   in VS2015.
+- Instruction set extensions have been disabled in all project files in order to
+  support running foo_openmpt on systems without SSE2.
