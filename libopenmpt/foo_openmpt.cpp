@@ -1,4 +1,8 @@
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4091)
+#endif
+
 #include "foobar2000/SDK/foobar2000.h"
 #include "foobar2000/helpers/helpers.h"
 
