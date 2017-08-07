@@ -264,13 +264,13 @@ LIBOPENMPT_ATTR_DEPRECATED LIBOPENMPT_CXX_API LIBOPENMPT_DEPRECATED double could
 
 LIBOPENMPT_CXX_API std::size_t probe_file_header_get_recommended_size();
 
-static const std::uint64_t probe_file_header_flags_modules    = 0x1ull;
+static const std::uint64_t probe_file_header_flags_modules    = 0x1ul;
 
-static const std::uint64_t probe_file_header_flags_containers = 0x2ull;
+static const std::uint64_t probe_file_header_flags_containers = 0x2ul;
 
 static const std::uint64_t probe_file_header_flags_default    = probe_file_header_flags_modules | probe_file_header_flags_containers;
 
-static const std::uint64_t probe_file_header_flags_none       = 0x0ull;
+static const std::uint64_t probe_file_header_flags_none       = 0x0ul;
 
 enum probe_file_header_result {
 	probe_file_header_result_success      =  1,
