@@ -110,7 +110,7 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 		// WTF, no PropVariantToString() in WinRT 
 		for(;;)
 		{
-			HRESULT hrToString = PropVariantToString(propVal, wcharVal.data(), wcharVal.size());
+			HRESULT hrToString = PropVariantToString(propVal, wcharVal.data(), mpt::saturate_cast<UINT>(wcharVal.size()));
 			if(hrToString == S_OK)
 			{
 				stringVal = wcharVal.data();
@@ -406,7 +406,13 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 
 	sampleName = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags));
 
-	length = rawData.size() / numChannels / (bitsPerSample/8);
+	if(rawData.size() / numChannels / (bitsPerSample / 8) > MAX_SAMPLE_LENGTH)
+	{
+		result = false;
+		goto fail;
+	}
+
+	length = static_cast<SmpLength>(rawData.size() / numChannels / (bitsPerSample/8));
 
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
