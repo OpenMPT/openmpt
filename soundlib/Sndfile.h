@@ -560,6 +560,28 @@ public:
 		loadNoPluginInstance = loadSampleData | loadPatternData | loadPluginData,
 	};
 
+	static const std::size_t ProbeRecommendedSize = 2048;
+
+	enum ProbeFlags
+	{
+		ProbeModules    = 0x1,
+		ProbeContainers = 0x2,
+
+		ProbeFlagsDefault = ProbeModules | ProbeContainers,
+		ProbeFlagsNone = 0
+	};
+
+	enum ProbeResult
+	{
+		ProbeSuccess      =  1,
+		ProbeFailure      =  0,
+		ProbeWantMoreData = -1
+	};
+
+	static ProbeResult Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize);
+
+public:
+
 #ifdef MODPLUG_TRACKER
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const { return m_pModDoc; }

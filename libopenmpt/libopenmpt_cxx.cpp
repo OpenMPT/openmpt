@@ -86,6 +86,16 @@ double could_open_propability( std::istream & stream, double effort, std::ostrea
 	return openmpt::module_impl::could_open_probability( stream, effort, openmpt::helper::make_unique<std_ostream_log>( log ) );
 }
 
+std::size_t probe_file_header_get_recommended_size() {
+	return openmpt::module_impl::probe_file_header_get_recommended_size();
+}
+int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size, std::uint64_t filesize ) {
+	return openmpt::module_impl::probe_file_header( flags, data, size, filesize );
+}
+int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size ) {
+	return openmpt::module_impl::probe_file_header( flags, data, size );
+}
+
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4702) // unreachable code

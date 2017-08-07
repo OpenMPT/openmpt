@@ -509,9 +509,27 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_propability( open
  * \remarks openmpt_could_open_probability2() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability2() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability2() returned 0.5. \include libopenmpt_example_c_probe.c
  * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
+ * \sa openmpt_probe_file_header
  * \since 0.3.0
  */
 LIBOPENMPT_API double openmpt_could_open_probability2( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
+LIBOPENMPT_API size_t openmpt_probe_file_header_get_recommended_size(void);
+
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES    0x1ull
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS 0x2ull
+
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT    ( OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES | OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS )
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_NONE       0x0ull
+
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS      1
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE      0
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA (-1)
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR        (-255)
+
+LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data, size_t size, uint64_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
+LIBOPENMPT_API int openmpt_probe_file_header_without_filesize( uint64_t flags, const void * data, size_t size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
 
 /*! \brief Opaque type representing a libopenmpt module
  */

@@ -12,6 +12,11 @@ is just a high-level summary.
     errors during module loading. 
  *  [**New**] New API `openmpt::module::get_selected_subsong()` (C++) and
     `openmpt_module_get_selected_subsong()` (C).
+ *  [**New**] Faster file header probing API `openmpt::probe_file_header()` and
+    `openmpt::probe_file_header_get_recommended_size` (C++), and
+    `openmpt_probe_file_header()`,
+    `openmpt_probe_file_header_without_filesize()` and
+    `openmpt_probe_file_header_get_recommended_size()` (C).
  *  [**New**] New API `openmpt::could_open_probability()` (C++) and
     `openmpt_could_open_probability()` (C). This fixes a spelling error in the
     old 0.2 API.

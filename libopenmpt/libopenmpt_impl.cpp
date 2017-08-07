@@ -587,38 +587,59 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
 double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log ) {
-	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-	std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
-	sndFile->SetCustomLog( logForwarder.get() );
-
 	try {
-
 		if ( effort >= 0.8 ) {
+			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::loadCompleteModule ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
 			return 1.0;
 		} else if ( effort >= 0.6 ) {
+			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::loadNoPatternOrPluginData ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
 			return 0.8;
 		} else if ( effort >= 0.2 ) {
+			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::onlyVerifyHeader ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
 			return 0.6;
+		} else if ( effort >= 0.1 ) {
+			FileReader::PinnedRawDataView view = file.GetPinnedRawDataView( probe_file_header_get_recommended_size() );
+			int probe_file_header_result = probe_file_header( probe_file_header_flags_default, view.data(), view.size(), file.GetLength() );
+			double result = 0.0;
+			switch ( probe_file_header_result ) {
+				case probe_file_header_result_success:
+					result = 0.6;
+					break;
+				case probe_file_header_result_failure:
+					result = 0.0;
+					break;
+				case probe_file_header_result_wantmoredata:
+					result = 0.3;
+					break;
+				default:
+					throw openmpt::exception("");
+					break;
+			}
+			return result;
 		} else {
 			return 0.2;
 		}
-
 	} catch ( ... ) {
 		return 0.0;
 	}
-
 }
 double module_impl::could_open_probability( callback_stream_wrapper stream, double effort, std::unique_ptr<log_interface> log ) {
 	CallbackStream fstream;
@@ -632,6 +653,77 @@ double module_impl::could_open_probability( std::istream & stream, double effort
 	return could_open_probability( make_FileReader( &stream ), effort, std::move(log) );
 }
 
+std::size_t module_impl::probe_file_header_get_recommended_size() {
+	return CSoundFile::ProbeRecommendedSize;
+}
+int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size, std::uint64_t filesize ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::byte_cast<const mpt::byte*>( data ), size ), &filesize ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+int module_impl::probe_file_header( std::uint64_t flags, const void * data, std::size_t size, std::uint64_t filesize ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::void_cast<const mpt::byte*>( data ), size ), &filesize ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::byte_cast<const mpt::byte*>( data ), size ), nullptr ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+int module_impl::probe_file_header( std::uint64_t flags, const void * data, std::size_t size ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::void_cast<const mpt::byte*>( data ), size ), nullptr ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			break;
+	}
+	return result;
+}
 module_impl::module_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	CallbackStream fstream;
