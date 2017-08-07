@@ -24,9 +24,6 @@
 
 #define LIBOPENMPT_EXAMPLE_PROBE_RESULT LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT
 
-/* Use something between 1024 and 65536. 4096 is a sane default. */
-#define LIBOPENMPT_EXAMPLE_PROBE_PREFIX_BYTES (4096)
-
 #include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -37,59 +34,6 @@
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 #include <libopenmpt/libopenmpt_stream_callbacks_file.h>
-#endif
-
-#if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
-
-#if defined( LIBOPENMPT_STREAM_CALLBACKS_BUFFER )
-#include <libopenmpt/libopenmpt_stream_callbacks_buffer.h>
-#else
-#error "libopenmpt too old."
-#endif
-
-static double libopenmpt_example_could_open_probability_prefix( const void * prefix_data, size_t prefix_size_, int64_t file_size, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
-	double ret = 0.0;
-	int64_t prefix_size = prefix_size_;
-	openmpt_stream_callbacks openmpt_stream_callbacks_prefix_probe;
-	openmpt_stream_buffer stream;
-	memset( &openmpt_stream_callbacks_prefix_probe, 0, sizeof( openmpt_stream_callbacks ) );
-	memset( &stream, 0, sizeof( openmpt_stream_buffer ) );
-	if ( !prefix_data ) {
-		return 0.0;
-	}
-	if ( prefix_size < 0 ) {
-		return 0.0;
-	}
-	if ( file_size < 0 ) {
-		return 0.0;
-	}
-	if ( prefix_size > file_size ) {
-		prefix_size = file_size;
-	}
-	openmpt_stream_callbacks_prefix_probe = openmpt_stream_get_buffer_callbacks();
-	openmpt_stream_buffer_init_prefix_only( &stream, prefix_data, prefix_size, file_size );
-	ret = openmpt_could_open_probability2( openmpt_stream_callbacks_prefix_probe, &stream, effort, logfunc, loguser, errfunc, erruser, error, error_message );
-	if ( openmpt_stream_buffer_overflowed( &stream ) ) {
-		ret = 0.5;
-	}
-	return ret;
-}
-
-#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-
-static int libopenmpt_example_probe_file_header_prefix( const void * prefix_data, size_t prefix_size, int64_t file_size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
-	double ret = libopenmpt_example_could_open_probability_prefix( prefix_data, prefix_size, file_size, 0.25, logfunc, loguser, errfunc, erruser, error, error_message );
-	if ( ret >= 0.5 ) {
-		return 1;
-	}
-	if ( ret < 0.25 ) {
-		return 0;
-	}
-	return 1;
-}
-
-#endif
-
 #endif
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
@@ -138,9 +82,9 @@ static void free_blob( blob_t * blob ) {
 }
 
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-static blob_t * load_file( const wchar_t * filename ) {
+static blob_t * load_file( const wchar_t * filename, size_t prefix_size ) {
 #else
-static blob_t * load_file( const char * filename ) {
+static blob_t * load_file( const char * filename, size_t prefix_size ) {
 #endif
 	blob_t * result = 0;
 
@@ -180,13 +124,21 @@ static blob_t * load_file( const char * filename ) {
 		goto fail;
 	}
 
-	blob->data = malloc( blob->size );
+	if ( prefix_size > 0 ) {
+		if ( prefix_size > blob->size ) {
+			prefix_size = blob->size;
+		}
+	} else {
+		prefix_size = blob->size;
+	}
+
+	blob->data = malloc( prefix_size );
 	if ( !blob->data ) {
 		goto fail;
 	}
-	memset( blob->data, 0, blob->size );
+	memset( blob->data, 0, prefix_size );
 
-	if ( fread( blob->data, 1, blob->size, file ) != blob->size ) {
+	if ( fread( blob->data, 1, prefix_size, file ) != prefix_size ) {
 		goto fail;
 	}
 
@@ -230,7 +182,8 @@ int main( int argc, char * argv[] ) {
 #endif
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
-	size_t prefix_size = LIBOPENMPT_EXAMPLE_PROBE_PREFIX_BYTES;
+	size_t prefix_size = openmpt_probe_file_header_get_recommended_size();
+	int probe_file_header_result = OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE;
 #endif
 #if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
 	double probability = 0.0;
@@ -257,7 +210,7 @@ int main( int argc, char * argv[] ) {
 #endif
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
-	blob = load_file( argv[1] );
+	blob = load_file( argv[1], prefix_size );
 	if ( !blob ) {
 		fprintf( stderr, "Error: %s\n", "load_file() failed." );
 		goto fail;
@@ -288,7 +241,29 @@ int main( int argc, char * argv[] ) {
 			prefix_size = blob->size;
 		}
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-			result_binary = ( libopenmpt_example_probe_file_header_prefix( blob->data, prefix_size, blob->size, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
+			probe_file_header_result = openmpt_probe_file_header( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, blob->data, prefix_size, blob->size, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+			result_binary = 0;
+			switch ( probe_file_header_result ) {
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS:
+					result_binary = 1;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE:
+					result_binary = 0;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA:
+					result_binary = 0;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR:
+					result_binary = 0;
+					fprintf( stderr, "Error: %s\n", "openmpt_probe_file_header() failed." );
+					goto fail;
+					break;
+				default:
+					result_binary = 0;
+					fprintf( stderr, "Error: %s\n", "openmpt_probe_file_header() failed." );
+					goto fail;
+					break;
+			}
 			fprintf( stdout, "%s\n", result_binary ? "Success." : "Failure." );
 			if ( result_binary ) {
 				result = 0;
@@ -296,7 +271,29 @@ int main( int argc, char * argv[] ) {
 				result = 1;
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
-			probability = libopenmpt_example_could_open_probability_prefix( blob->data, prefix_size, blob->size, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+			probe_file_header_result = openmpt_probe_file_header( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, blob->data, prefix_size, blob->size, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+			probability = 0.0;
+			switch ( probe_file_header_result ) {
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS:
+					probability = 1.0;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE:
+					probability = 0.0;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA:
+					probability = 0.5;
+					break;
+				case OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR:
+					probability = 0.6;
+					fprintf( stderr, "Error: %s\n", "openmpt_probe_file_header() failed." );
+					goto fail;
+					break;
+				default:
+					probability = 0.6;
+					fprintf( stderr, "Error: %s\n", "openmpt_probe_file_header() failed." );
+					goto fail;
+					break;
+			}
 			fprintf( stdout, "%s: %f\n", "Result", probability );
 			if ( probability >= 0.5 ) {
 				result = 0;

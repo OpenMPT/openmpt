@@ -472,6 +472,33 @@ double openmpt_could_open_probability2( openmpt_stream_callbacks stream_callback
 	return 0.0;
 }
 
+size_t openmpt_probe_file_header_get_recommended_size(void) {
+	try {
+		return openmpt::module_impl::probe_file_header_get_recommended_size();
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__ );
+	}
+	return 0;
+}
+
+int openmpt_probe_file_header( uint64_t flags, const void * data, size_t size, uint64_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
+	try {
+		return openmpt::module_impl::probe_file_header( flags, data, size, filesize );
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, logfunc, loguser, errfunc, erruser, error, error_message );
+	}
+	return OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR;
+}
+
+int openmpt_probe_file_header_without_filesize( uint64_t flags, const void * data, size_t size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
+	try {
+		return openmpt::module_impl::probe_file_header( flags, data, size );
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, logfunc, loguser, errfunc, erruser, error, error_message );
+	}
+	return OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR;
+}
+
 openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	return openmpt_module_create2( stream_callbacks, stream, logfunc, user, NULL, NULL, NULL, NULL, ctls );
 }

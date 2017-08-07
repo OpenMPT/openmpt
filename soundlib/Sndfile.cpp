@@ -211,6 +211,52 @@ void CSoundFile::InitializeChannels()
 }
 
 
+CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize)
+//-------------------------------------------------------------------------------------------------------------------
+{
+	uint64 filesize = 0;
+	if(pfilesize)
+	{
+		filesize = *pfilesize;
+		if(data.size() < std::min<uint64>(filesize, ProbeRecommendedSize))
+		{
+			return ProbeWantMoreData;
+		}
+	} else
+	{
+		filesize = data.size();
+	}
+	std::vector<mpt::byte> filedata(mpt::saturate_cast<std::size_t>(filesize));
+	std::copy(data.data(), data.data() + data.size(), filedata.data());
+	FileReader file(mpt::as_span(filedata));
+	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
+	if((flags & ProbeModules) && (flags & ProbeContainers))
+	{
+		if(!sndFile->Create(file, CSoundFile::onlyVerifyHeader))
+		{
+			return ProbeFailure;
+		}
+	} else if(flags & ProbeModules)
+	{
+		if(!sndFile->Create(file, static_cast<CSoundFile::ModLoadingFlags>(CSoundFile::onlyVerifyHeader | CSoundFile::skipContainer)))
+		{
+			return ProbeFailure;
+		}
+	} else if(flags & ProbeContainers)
+	{
+		if(!sndFile->Create(file, CSoundFile::onlyVerifyHeader))
+		{
+			return ProbeFailure;
+		}
+	} else
+	{
+		return ProbeFailure;
+	}
+	sndFile->Destroy();
+	return ProbeSuccess;
+}
+
+
 #ifdef MODPLUG_TRACKER
 bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pModDoc)
 //-----------------------------------------------------------------------------------
