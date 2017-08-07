@@ -211,6 +211,9 @@ void CSoundFile::InitializeChannels()
 }
 
 
+const std::size_t CSoundFile::ProbeRecommendedSize = 2048;
+
+
 CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize)
 //-------------------------------------------------------------------------------------------------------------------
 {
