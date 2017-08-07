@@ -560,8 +560,8 @@ public:
 		loadNoPluginInstance = loadSampleData | loadPatternData | loadPluginData,
 	};
 
-	static const std::size_t ProbeRecommendedSize = 2048;
-
+	static const std::size_t ProbeRecommendedSize;
+	
 	enum ProbeFlags
 	{
 		ProbeModules    = 0x1,
