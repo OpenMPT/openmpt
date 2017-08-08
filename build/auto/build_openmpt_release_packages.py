@@ -20,15 +20,17 @@ def get_version_number(filename):
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir("../..")
 
-(openmpt_version, openmpt_version_short) =  get_version_number("bin/release/vs2010-static/x86-32-win7/mptrack.exe")
+(openmpt_version, openmpt_version_short) =  get_version_number("bin/release-LTCG/vs2015-static/x86-32-win7/mptrack.exe")
 
 openmpt_version_name = "OpenMPT-" + openmpt_version
 openmpt_zip_32bit_basepath = "installer/OpenMPT-" + openmpt_version + "/"
 openmpt_zip_32bitold_basepath = "installer/OpenMPT-" + openmpt_version + "-legacy/"
 openmpt_zip_64bit_basepath = "installer/OpenMPT-" + openmpt_version + "-x64/"
+openmpt_zip_64bitold_basepath = "installer/OpenMPT-" + openmpt_version + "-x64-legacy/"
 openmpt_zip_32bit_path = openmpt_zip_32bit_basepath + openmpt_version_name + "/"
 openmpt_zip_32bitold_path = openmpt_zip_32bitold_basepath + openmpt_version_name + "/"
 openmpt_zip_64bit_path = openmpt_zip_64bit_basepath + openmpt_version_name + "/"
+openmpt_zip_64bitold_path = openmpt_zip_64bitold_basepath + openmpt_version_name + "/"
 
 def copy_file(from_path, to_path, filename):
     shutil.copyfile(from_path + filename, to_path + filename)
@@ -38,14 +40,12 @@ def copy_tree(from_path, to_path, pathname):
 
 def copy_binaries(from_path, to_path):
     os.makedirs(to_path)
-    #os.makedirs(to_path + "Plugins/MIDI")
     copy_file(from_path, to_path, "mptrack.exe")
     copy_file(from_path, to_path, "PluginBridge32.exe")
     copy_file(from_path, to_path, "PluginBridge64.exe")
     copy_file(from_path, to_path, "OpenMPT_SoundTouch_f32.dll")
     copy_file(from_path, to_path, "openmpt-mpg123.dll")
     copy_file(from_path, to_path, "openmpt-wine-support.zip")
-    #copy_file(from_path, to_path + "Plugins/MIDI/", "MIDI Input Output.dll")
 
 def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "ExampleSongs")
@@ -67,13 +67,16 @@ pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
 
 print("Copying 32-bit binaries...")
 shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2010-static/x86-32-win7/", openmpt_zip_32bit_path)
+copy_binaries("bin/release-LTCG/vs2015-static/x86-32-win7/", openmpt_zip_32bit_path)
 print("Copying 32-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_32bitold_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2008-static/x86-32-win2000/", openmpt_zip_32bitold_path)
+copy_binaries("bin/release-LTCG/vs2015-static/x86-32-winxp/", openmpt_zip_32bitold_path)
 print("Copying 64-bit binaries...")
 shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2010-static/x86-64-win7/", openmpt_zip_64bit_path)
+copy_binaries("bin/release-LTCG/vs2015-static/x86-64-win7/", openmpt_zip_64bit_path)
+print("Copying 64-bit legacy binaries...")
+shutil.rmtree(openmpt_zip_64bitold_basepath, ignore_errors=True)
+copy_binaries("bin/release-LTCG/vs2015-static/x86-64-winxp/", openmpt_zip_64bitold_path)
 
 pManual.communicate()
 if(pManual.returncode != 0):
@@ -83,20 +86,23 @@ print("Other package contents...")
 copy_other(openmpt_zip_32bit_path,    openmpt_version_short)
 copy_other(openmpt_zip_32bitold_path, openmpt_version_short)
 copy_other(openmpt_zip_64bit_path,    openmpt_version_short)
+copy_other(openmpt_zip_64bitold_path,    openmpt_version_short)
 
 print("Creating zip files and installers...")
-p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + ".zip",        openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
-p7z32old = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-legacy.zip", openmpt_version_name + "/"], cwd=openmpt_zip_32bitold_basepath)
-p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64.zip",    openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
+p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + ".zip",            openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
+p7z32old = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-legacy.zip",     openmpt_version_name + "/"], cwd=openmpt_zip_32bitold_basepath)
+p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64.zip",        openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
+p7z64old = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64-legacy.zip", openmpt_version_name + "/"], cwd=openmpt_zip_64bitold_basepath)
 pInno32  = Popen([pathISCC, "win32.iss"], cwd="installer/")
 pInno64  = Popen([pathISCC, "win64.iss"], cwd="installer/")
 p7z32.communicate()
 p7z32old.communicate()
 p7z64.communicate()
+p7z64old.communicate()
 pInno32.communicate()
 pInno64.communicate()
 
-if(p7z32.returncode != 0 or p7z32old.returncode != 0 or p7z64.returncode != 0 or pInno32.returncode != 0 or pInno64.returncode != 0):
+if(p7z32.returncode != 0 or p7z32old.returncode != 0 or p7z64.returncode != 0 or p7z64old.returncode != 0 or pInno32.returncode != 0 or pInno64.returncode != 0):
     raise Exception("Something went wrong during packaging!")
 
 def hash_file(filename):
@@ -115,9 +121,11 @@ hash_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
 hash_file("installer/" + openmpt_version_name + ".zip")
 hash_file("installer/" + openmpt_version_name + "-legacy.zip")
 hash_file("installer/" + openmpt_version_name + "-x64.zip")
+hash_file("installer/" + openmpt_version_name + "-x64-legacy.zip")
 
 shutil.rmtree(openmpt_zip_32bit_basepath)
 shutil.rmtree(openmpt_zip_32bitold_basepath)
 shutil.rmtree(openmpt_zip_64bit_basepath)
+shutil.rmtree(openmpt_zip_64bitold_basepath)
 
 input(openmpt_version_name + " has been packaged successfully.")
