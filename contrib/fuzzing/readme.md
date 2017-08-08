@@ -29,8 +29,8 @@ Prerequisites
 
 How to use
 ==========
-* Run `get-afl.sh`, or manually extract afl to `contrib/fuzzing/build.sh`, use
-  `make` to build afl-fuzz, `cd llvm_mode`, `make` to build afl-clang-fast.
+* Run `get-afl.sh`, or manually extract afl to `contrib/fuzzing/afl`, use `make`
+  to build afl-fuzz, `cd llvm_mode`, `make` to build afl-clang-fast.
   If building with either option fails because `llvm-config` cannot be found,
   try prepending `LLVM_CONFIG=/usr/bin/llvm-config-3.8` or similar, and read the
   afl manual.

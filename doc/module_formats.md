@@ -50,7 +50,7 @@ General hints
   `MODTYPE`.
 * Do not rely on hard-coded magic numbers. For example, when comparing if an
   index is valid for a given array, do not hard-code the array size but rather
-  use `MPT_ARRAY_COUNT` or, for ensuring that char arrays are null-terminated,
+  use `mpt::size` or, for ensuring that char arrays are null-terminated,
   `mpt::String::SetNullTerminator`. Similarly, do not assume any specific
   quantities for OpenMPT's constants like MAX_SAMPLES, MAX_PATTERN_ROWS, etc.
   These may change at any time.
