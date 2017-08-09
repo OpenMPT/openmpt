@@ -1011,6 +1011,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_PT_MODE);
 		m_playBehaviour.set(kMODSampleSwap);
 		m_playBehaviour.set(kMODOutOfRangeNoteDelay);
+		m_playBehaviour.set(kMODTempoOnSecondTick);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
 		if(maxPanning < 0x20)
 		{

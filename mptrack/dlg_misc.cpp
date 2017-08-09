@@ -611,6 +611,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
 		case kMODOutOfRangeNoteDelay: desc = _T("Out-of-range note delay is played on next row."); break;
+		case kMODTempoOnSecondTick: desc = _T("Tempo changes are handled on second tick instead of first."); break;
 
 		default: MPT_ASSERT(0);
 		}

@@ -466,6 +466,7 @@ enum PlayBehaviour
 	kFT2PortaUpDownMemory,			// Portamento up and down have separate memory
 
 	kMODOutOfRangeNoteDelay,		// ProTracker behaviour for out-of-range note delays
+	kMODTempoOnSecondTick,			// ProTracker sets tempo after the first tick
 
 	// Add new play behaviours here.
 

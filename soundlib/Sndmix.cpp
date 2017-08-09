@@ -635,6 +635,7 @@ bool CSoundFile::ProcessRow()
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
 		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
 		{
+			// First, handle some quirks that happen after the last tick of the previous row...
 			if(m_playBehaviour[KST3PortaAfterArpeggio]
 				&& pChn->nCommand == CMD_ARPEGGIO	// Previous row state!
 				&& (m->command == CMD_PORTAMENTOUP || m->command == CMD_PORTAMENTODOWN))
@@ -654,6 +655,12 @@ bool CSoundFile::ProcessRow()
 				// if there is no new note on that row.
 				// Test case: NoteDelay-NextRow.mod
 				pChn->nPeriod = GetPeriodFromNote(pChn->rowCommand.note, pChn->nFineTune, 0);
+			}
+			if(m_playBehaviour[kMODTempoOnSecondTick] && m_PlayState.m_nMusicSpeed == 1 && pChn->rowCommand.command == CMD_TEMPO)
+			{
+				// ProTracker sets the tempo after the first tick. This block handles the case of one tick per row.
+				// Test case: TempoChange.mod
+				m_PlayState.m_nMusicTempo = TEMPO(pChn->rowCommand.param, 0);
 			}
 
 			pChn->rowCommand = *m;
