@@ -43,7 +43,7 @@ Dependencies
 
 ### openmpt123
 
- *  Supported compilers for building openmpt:
+ *  Supported compilers for building openmpt123:
      *  **Microsoft Visual Studio 2008** or higher
      *  **GCC 4.3** or higher (4.1 to 4.2 are partially supported)
      *  **Clang 3.0** or higher
