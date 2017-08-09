@@ -222,6 +222,14 @@ public:
 		return streamPos;
 	}
 
+	// Return true IFF seeking and GetLength() is fast.
+	// In particular, it returns false for unseekable stream where GetLength()
+	// requires pre-caching.
+	bool HasFastGetLength() const
+	{
+		return DataContainer().HasFastGetLength();
+	}
+
 	// Returns size of the mapped file in bytes.
 	FILEREADER_DEPRECATED off_t GetLength() const
 	{

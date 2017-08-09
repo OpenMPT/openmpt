@@ -370,6 +370,11 @@ bool FileDataContainerSeekable::IsValid() const
 	return true;
 }
 
+bool FileDataContainerSeekable::HasFastGetLength() const
+{
+	return true;
+}
+
 bool FileDataContainerSeekable::HasPinnedView() const
 {
 	return cached;
@@ -554,6 +559,11 @@ void FileDataContainerUnseekable::ReadCached(mpt::byte *dst, IFileDataContainer:
 bool FileDataContainerUnseekable::IsValid() const
 {
 	return true;
+}
+
+bool FileDataContainerUnseekable::HasFastGetLength() const
+{
+	return false;
 }
 
 bool FileDataContainerUnseekable::HasPinnedView() const
