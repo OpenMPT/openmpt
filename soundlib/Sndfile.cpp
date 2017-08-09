@@ -1055,6 +1055,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kMODOneShotLoops);
 		playBehaviour.set(kMODIgnorePanning);
 		playBehaviour.set(kMODSampleSwap);
+		playBehaviour.set(kMODOutOfRangeNoteDelay);
 		break;
 
 	default:
@@ -1220,7 +1221,7 @@ void CSoundFile::InitAmigaResampler()
 {
 	if(m_SongFlags[SONG_ISAMIGA] && m_Resampler.m_Settings.emulateAmiga)
 	{
-		Paula::State defaultState{ Paula::State(GetSampleRate()) };
+		const Paula::State defaultState(GetSampleRate());
 		for(auto &chn : m_PlayState.Chn)
 		{
 			chn.paulaState = defaultState;
