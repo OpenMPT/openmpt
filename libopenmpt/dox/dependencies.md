@@ -69,7 +69,7 @@ Dependencies
 
 ### openmpt123
 
- *  Supported compilers for building openmpt:
+ *  Supported compilers for building openmpt123:
      *  **Microsoft Visual Studio 2015** or higher
      *  **GCC 4.8** or higher
      *  **Clang 3.4** or higher
