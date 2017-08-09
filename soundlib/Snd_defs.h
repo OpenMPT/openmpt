@@ -465,6 +465,8 @@ enum PlayBehaviour
 	kFT2TremoloRampWaveform,		// FT2-compatible tremolo ramp down / triangle waveform
 	kFT2PortaUpDownMemory,			// Portamento up and down have separate memory
 
+	kMODOutOfRangeNoteDelay,		// ProTracker behaviour for out-of-range note delays
+
 	// Add new play behaviours here.
 
 	kMaxPlayBehaviours,

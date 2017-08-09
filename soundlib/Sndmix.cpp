@@ -644,6 +644,18 @@ bool CSoundFile::ProcessRow()
 				pChn->nPeriod = GetPeriodFromNote(pChn->nArpeggioLastNote, pChn->nFineTune, pChn->nC5Speed);
 			}
 
+			if(m_playBehaviour[kMODOutOfRangeNoteDelay]
+				&& !m->IsNote()
+				&& pChn->rowCommand.IsNote()
+				&& pChn->rowCommand.command == CMD_MODCMDEX && (pChn->rowCommand.param & 0xF0) == 0xD0
+				&& (pChn->rowCommand.param & 0x0Fu) >= m_PlayState.m_nMusicSpeed)
+			{
+				// In ProTracker, a note triggered by an out-of-range note delay can be heard on the next row
+				// if there is no new note on that row.
+				// Test case: NoteDelay-NextRow.mod
+				pChn->nPeriod = GetPeriodFromNote(pChn->rowCommand.note, pChn->nFineTune, 0);
+			}
+
 			pChn->rowCommand = *m;
 
 			pChn->rightVol = pChn->newRightVol;

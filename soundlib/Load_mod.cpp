@@ -1010,6 +1010,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// Need this for professionaltracker.mod by h0ffman (SHA1: 9a7c52cbad73ed2a198ee3fa18d3704ea9f546ff)
 		m_SongFlags.set(SONG_PT_MODE);
 		m_playBehaviour.set(kMODSampleSwap);
+		m_playBehaviour.set(kMODOutOfRangeNoteDelay);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
 		if(maxPanning < 0x20)
 		{
@@ -1623,9 +1624,9 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	uint8 tracks[128 * 4];
 	file.ReadArray(tracks);
-	for(size_t i = 0; i < CountOf(tracks); i++)
+	for(auto track : tracks)
 	{
-		if(tracks[i] > numTracks)
+		if(track > numTracks)
 			return false;
 	}
 
