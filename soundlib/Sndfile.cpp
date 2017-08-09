@@ -1056,6 +1056,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kMODIgnorePanning);
 		playBehaviour.set(kMODSampleSwap);
 		playBehaviour.set(kMODOutOfRangeNoteDelay);
+		playBehaviour.set(kMODTempoOnSecondTick);
 		break;
 
 	default:
