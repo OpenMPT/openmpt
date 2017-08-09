@@ -610,6 +610,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
+		case kMODOutOfRangeNoteDelay: desc = _T("Out-of-range note delay is played on next row."); break;
 
 		default: MPT_ASSERT(0);
 		}
