@@ -541,6 +541,7 @@ public:
 	virtual ~IFileDataContainer() { }
 public:
 	virtual bool IsValid() const = 0;
+	virtual bool HasFastGetLength() const = 0;
 	virtual bool HasPinnedView() const = 0;
 	virtual const mpt::byte *GetRawData() const = 0;
 	virtual off_t GetLength() const = 0;
@@ -582,6 +583,11 @@ public:
 		return false;
 	}
 
+	bool HasFastGetLength() const
+	{
+		return true;
+	}
+
 	bool HasPinnedView() const
 	{
 		return true;
@@ -616,6 +622,10 @@ public:
 	bool IsValid() const
 	{
 		return data->IsValid();
+	}
+	bool HasFastGetLength() const
+	{
+		return data->HasFastGetLength();
 	}
 	bool HasPinnedView() const
 	{
@@ -678,6 +688,7 @@ private:
 public:
 
 	bool IsValid() const;
+	bool HasFastGetLength() const;
 	bool HasPinnedView() const;
 	const mpt::byte *GetRawData() const;
 	off_t GetLength() const;
@@ -740,6 +751,7 @@ private:
 public:
 
 	bool IsValid() const;
+	bool HasFastGetLength() const;
 	bool HasPinnedView() const;
 	const mpt::byte *GetRawData() const;
 	off_t GetLength() const;
@@ -852,6 +864,11 @@ public:
 	bool IsValid() const
 	{
 		return streamData != nullptr;
+	}
+
+	bool HasFastGetLength() const
+	{
+		return true;
 	}
 
 	bool HasPinnedView() const
