@@ -16,8 +16,6 @@
 #include "Undo.h"
 #include "../common/StringFixer.h"
 
-#define new DEBUG_NEW
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -140,7 +138,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	if(fromBuf.empty()) return PATTERNINDEX_INVALID;
 
 	// Select most recent undo slot
-	const UndoInfo &undo = fromBuf.back();
+	UndoInfo &undo = fromBuf.back();
 
 	PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
@@ -157,7 +155,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 			}
 			modDoc.ReArrangeChannels(channels, false);
 		}
-		std::copy(undo.channelInfo.cbegin(), undo.channelInfo.cend(), sndFile.ChnSettings);
+		std::move(undo.channelInfo.cbegin(), undo.channelInfo.cend(), sndFile.ChnSettings);
 
 		// Channel mute status might have changed...
 		for(CHANNELINDEX i = 0; i < sndFile.GetNumChannels(); i++)
@@ -189,7 +187,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		const ROWINDEX numRows = std::min(undo.numRows, pattern.GetNumRows());
 		for(ROWINDEX iy = 0; iy < numRows; iy++)
 		{
-			std::copy(pUndoData, pUndoData + undo.numChannels, m);
+			std::move(pUndoData, pUndoData + undo.numChannels, m);
 			m += sndFile.GetNumChannels();
 			pUndoData += undo.numChannels;
 		}
