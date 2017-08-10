@@ -589,57 +589,63 @@ void COrderList::EnterPatternNum(int enterNum)
 	if(!EnsureEditable(m_nScrollPos))
 		return;
 
-	PATTERNINDEX nCurNdx = (m_nScrollPos < sndFile.Order().size()) ? sndFile.Order()[m_nScrollPos] : sndFile.Order.GetInvalidPatIndex();
-	PATTERNINDEX nMaxNdx = 0;
-	for(PATTERNINDEX nPat = 0; nPat < sndFile.Patterns.Size(); nPat++)
-		if (sndFile.Patterns.IsValidPat(nPat)) nMaxNdx = nPat;
+	PATTERNINDEX curIndex = sndFile.Order()[m_nScrollPos];
+	const PATTERNINDEX maxIndex = std::max(PATTERNINDEX(1), sndFile.Patterns.GetNumPatterns()) - 1;
+	const PATTERNINDEX firstInvalid = sndFile.GetModSpecifications().hasIgnoreIndex ? sndFile.Order.GetIgnoreIndex() : sndFile.Order.GetInvalidPatIndex();
 
-	if (enterNum >= 0 && enterNum <= 9) // enter 0...9
+	if(enterNum >= 0 && enterNum <= 9) // enter 0...9
 	{
-		if (nCurNdx >= sndFile.Patterns.Size()) nCurNdx = 0;
+		if (curIndex >= sndFile.Patterns.Size()) curIndex = 0;
 
-		nCurNdx = nCurNdx * 10 + static_cast<PATTERNINDEX>(enterNum);
+		curIndex = curIndex * 10 + static_cast<PATTERNINDEX>(enterNum);
 		STATIC_ASSERT(MAX_PATTERNS < 10000);
-		if ((nCurNdx >= 1000) && (nCurNdx > nMaxNdx)) nCurNdx %= 1000;
-		if ((nCurNdx >= 100) && (nCurNdx > nMaxNdx)) nCurNdx %= 100;
-		if ((nCurNdx >= 10) && (nCurNdx > nMaxNdx)) nCurNdx %= 10;
-	} else if (enterNum == 10) // decrease pattern index
+		if((curIndex >= 1000) && (curIndex > maxIndex)) curIndex %= 1000;
+		if((curIndex >= 100) && (curIndex > maxIndex)) curIndex %= 100;
+		if((curIndex >= 10) && (curIndex > maxIndex)) curIndex %= 10;
+	} else if(enterNum == 10) // decrease pattern index
 	{
-		const PATTERNINDEX nFirstInvalid = sndFile.GetModSpecifications().hasIgnoreIndex ? sndFile.Order.GetIgnoreIndex() : sndFile.Order.GetInvalidPatIndex();
-		if (nCurNdx == 0)
-			nCurNdx = sndFile.Order.GetInvalidPatIndex();
-		else
+		if(curIndex == 0)
 		{
-			nCurNdx--;
-			if ((nCurNdx > nMaxNdx) && (nCurNdx < nFirstInvalid)) nCurNdx = nMaxNdx;
+			curIndex = sndFile.Order.GetInvalidPatIndex();
+		} else if(curIndex > maxIndex && curIndex <= firstInvalid)
+		{
+			curIndex = maxIndex;
+		} else
+		{
+			do
+			{
+				curIndex--;
+			} while(curIndex > 0 && curIndex < firstInvalid && !sndFile.Patterns.IsValidPat(curIndex));
 		}
-	} else if (enterNum == 11) // increase pattern index
+	} else if(enterNum == 11) // increase pattern index
 	{
-		if(nCurNdx >= sndFile.Order.GetInvalidPatIndex())
+		if(curIndex >= sndFile.Order.GetInvalidPatIndex())
 		{
-			nCurNdx = 0;
-		}
-		else
+			curIndex = 0;
+		} else if(curIndex >= maxIndex && curIndex < firstInvalid)
 		{
-			nCurNdx++;
-			const PATTERNINDEX nFirstInvalid = sndFile.GetModSpecifications().hasIgnoreIndex ? sndFile.Order.GetIgnoreIndex() : sndFile.Order.GetInvalidPatIndex();
-			if(nCurNdx > nMaxNdx && nCurNdx < nFirstInvalid)
-				nCurNdx = nFirstInvalid;
+			curIndex = firstInvalid;
+		} else
+		{
+			do
+			{
+				curIndex++;
+			} while(curIndex <= maxIndex && !sndFile.Patterns.IsValidPat(curIndex));
 		}
-	} else if (enterNum == 12) // ignore index (+++)
+	} else if(enterNum == 12) // ignore index (+++)
 	{
-		if (sndFile.GetModSpecifications().hasIgnoreIndex)
+		if(sndFile.GetModSpecifications().hasIgnoreIndex)
 		{
-			nCurNdx = sndFile.Order.GetIgnoreIndex();
+			curIndex = sndFile.Order.GetIgnoreIndex();
 		}
-	} else if (enterNum == 13) // invalid index (---)
+	} else if(enterNum == 13) // invalid index (---)
 	{
-		nCurNdx = sndFile.Order.GetInvalidPatIndex();
+		curIndex = sndFile.Order.GetInvalidPatIndex();
 	}
 	// apply
-	if (nCurNdx != sndFile.Order()[m_nScrollPos])
+	if (curIndex != sndFile.Order()[m_nScrollPos])
 	{
-		sndFile.Order()[m_nScrollPos] = nCurNdx;
+		sndFile.Order()[m_nScrollPos] = curIndex;
 		m_pModDoc.SetModified();
 		m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 		InvalidateSelection();
