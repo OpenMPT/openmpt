@@ -30,10 +30,14 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8693)
+v1.26.13.00 (* August 2017, revision 8734)
 ------------------------------------------
 Pattern tab
    [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
+   [Fix] <js> Amplification now works correctly for plugin-based instruments with a global volume other than 64 (http://bugs.openmpt.org/view.php?id=1002).
+
+Sample tab
+   [Fix] <jh> Possible crash when loading too big Vorbis or Opus samples.
 
 Instrument tab
    [Imp] <js> Can now use Home / End keys for sample map navigation (http://bugs.openmpt.org/view.php?id=984).
@@ -56,6 +60,8 @@ Playback
 
 MPTM::Custom Tuning
    [Fix] <js> Transpositions in the instrument note map were not applied correctly when the "Use triggered note rather than translated note for PPS and DNA note check" compatibility setting was enabled.
+   [Fix] <jh> Saving single tuning .tun files actually resulted in a tuning collection being saved, which prevented the tuning from being loaded unless its file extension was changed to .tc.
+   [Fix] <jh> Prevent changing the type of an existing tuning to General.
 
 MOD
    [Fix] <js> The ProTracker note delay quirk should not retrigger already stopped samples (fixes "Subi loses the Cops" by Subi, tx h0ffman).
@@ -63,10 +69,6 @@ MOD
 
 Other formats
    [Fix] <js> Possible crashes with malformed PLM and PSM files.
-
-Misc
-   [Fix] <jh> Saving single tuning .tun files actually resulted in a tuning collection being saved, which prevented the tuning from being loaded unless its file extension was changed to .tc.
-   [Fix] <jh> Prevent changing the type of an existing tuning to General.
 
 
 v1.26.12.00 (2 July 2017, revision 8412)
