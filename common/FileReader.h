@@ -865,7 +865,7 @@ public:
 	}
 
 private:
-	MPT_FORCEINLINE static bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
+	static MPT_FORCEINLINE bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
 public:
 	// Read a string up to the next line terminator into a std::string
 	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())

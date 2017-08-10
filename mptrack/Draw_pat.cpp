@@ -341,7 +341,7 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 }
 
 
-MPT_FORCEINLINE static void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
+static MPT_FORCEINLINE void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
 {
 	if(pfnt->padding[col])
 		dib.TextBlt(x + pfnt->nEltWidths[col] - pfnt->padding[col], y, pfnt->padding[col], pfnt->spacingY, pfnt->nClrX + pfnt->nEltWidths[col] - pfnt->padding[col], pfnt->nClrY, pfnt->dib);
