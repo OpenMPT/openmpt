@@ -3143,55 +3143,17 @@ void CViewPattern::OnPatternAmplify()
 	}
 
 	// Volume memory for each channel.
-	std::vector<uint8> chvol(lastChannel + 1, 64);
+	std::vector<ModCommand::VOL> chvol(lastChannel + 1, 64);
 
-	// In the first step, we fill the volume memory and put volume commands in all places with non-existent samples
+	// First, fill the volume memory in case we start the selection before some note
 	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX nChn)
 	{
-		if(m.command == CMD_VOLUME && m.param <= 64)
-		{
-			chvol[nChn] = m.param;
-			return;
-		}
-		if(m.volcmd == VOLCMD_VOLUME)
-		{
+		if(m.command == CMD_VOLUME)
+			chvol[nChn] = std::min(m.param, ModCommand::PARAM(64));
+		else if(m.volcmd == VOLCMD_VOLUME)
 			chvol[nChn] = m.vol;
-			return;
-		}
-		if(m.IsNote() && m.instr != 0)
-		{
-			SAMPLEINDEX nSmp = m.instr;
-			if(sndFile.GetNumInstruments())
-			{
-				if(nSmp <= sndFile.GetNumInstruments() && sndFile.Instruments[nSmp] != nullptr)
-				{
-					nSmp = sndFile.Instruments[nSmp]->Keyboard[m.note];
-					if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
-				} else
-				{
-					nSmp = 0;
-				}
-			}
-			if(nSmp > 0 && nSmp <= sndFile.GetNumSamples())
-			{
-				chvol[nChn] = (uint8)(sndFile.GetSample(nSmp).nVolume / 4);
-				return;
-			} else
-			{
-				// Nonexistant sample and no volume present in patten? assume volume=64.
-				if(useVolCol)
-				{
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = 64;
-				} else
-				{
-					m.command = CMD_VOLUME;
-					m.param = 64;
-				}
-				chvol[nChn] = 64;
-				return;
-			}
-		}
+		else if(m.instr != 0)
+			chvol[nChn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
 	});
 
 	Fade::Func fadeFunc = GetFadeFunc(settings.fadeLaw);
@@ -3200,49 +3162,21 @@ void CViewPattern::OnPatternAmplify()
 	const int cy = lastRow - firstRow + 1; // total rows (for fading)
 	ApplyToSelection([&] (ModCommand &m, ROWINDEX nRow, CHANNELINDEX nChn)
 	{
-		if(m.volcmd == VOLCMD_NONE && m.command != CMD_VOLUME && m.IsNote() && m.instr)
-		{
-			SAMPLEINDEX nSmp = m.instr;
-			bool overrideSampleVol = false;
-			if(sndFile.GetNumInstruments())
-			{
-				if(nSmp <= sndFile.GetNumInstruments() && sndFile.Instruments[nSmp] != nullptr)
-				{
-					nSmp = sndFile.Instruments[nSmp]->Keyboard[m.note];
-					// hack for instruments without samples
-					if(!nSmp)
-					{
-						nSmp = 1;
-						overrideSampleVol = true;
-					}
-				} else
-				{
-					nSmp = 0;
-				}
-			}
-			if(nSmp > 0 && (nSmp <= sndFile.GetNumSamples()))
-			{
-				if(useVolCol)
-				{
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<ModCommand::VOL>((overrideSampleVol) ? 64 : sndFile.GetSample(nSmp).nVolume / 4u);
-				} else
-				{
-					m.command = CMD_VOLUME;
-					m.param = static_cast<ModCommand::PARAM>((overrideSampleVol) ? 64 : sndFile.GetSample(nSmp).nVolume / 4u);
-				}
-			}
-		}
+		if(m.command == CMD_VOLUME)
+			chvol[nChn] = std::min(m.param, ModCommand::PARAM(64));
+		else if(m.volcmd == VOLCMD_VOLUME)
+			chvol[nChn] = m.vol;
+		else if(m.instr != 0)
+			chvol[nChn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
 
-		if(m.volcmd == VOLCMD_VOLUME) chvol[nChn] = m.vol;
-
-		if((settings.fadeIn || settings.fadeOut) && m.command != CMD_VOLUME && m.volcmd == VOLCMD_NONE)
+		if(settings.fadeIn || settings.fadeOut || (m.IsNote() && m.instr != 0))
 		{
-			if(useVolCol)
+			// Insert new volume commands where necessary
+			if(useVolCol && m.volcmd == VOLCMD_NONE)
 			{
 				m.volcmd = VOLCMD_VOLUME;
 				m.vol = chvol[nChn];
-			} else
+			} else if(!useVolCol && m.command == CMD_NONE)
 			{
 				m.command = CMD_VOLUME;
 				m.param = chvol[nChn];
@@ -6897,6 +6831,7 @@ void CViewPattern::ApplyToSelection(Func func)
 }
 
 
+// Accessible description for screen readers
 HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 //----------------------------------------------------------------
 {
