@@ -217,7 +217,7 @@ void CViewInstrument::SetModified(InstrumentHint hint, bool updateAll)
 
 
 BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	Notification::Type type;
@@ -2170,6 +2170,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	if (bUpdate)
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
+		GetDocument()->UpdateAllViews(nullptr, SampleHint().Info().Names().Data(), this);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)

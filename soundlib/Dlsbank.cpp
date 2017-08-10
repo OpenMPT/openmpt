@@ -1294,7 +1294,7 @@ bool CDLSBank::Open(FileReader file)
 		#endif
 			if (!m_pWaveForms)
 			{
-				m_nWaveForms = ((PTBLCHUNK *)pchunk)->cCues;
+				m_nWaveForms = std::min<uint32>(((PTBLCHUNK *)pchunk)->cCues, pchunk->len / sizeof(uint32));
 				if (m_nWaveForms)
 				{
 					m_pWaveForms = new uint32[m_nWaveForms];
