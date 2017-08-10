@@ -30,13 +30,15 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8740)
+v1.26.13.00 (* August 2017, revision 8744)
 ------------------------------------------
 Pattern tab
    [New] <jh> Add hidden setting "Pattern Editor.AlwaysDrawWholePatternOnScrollSlow" for graphics drivers with scrolling issues (http://bugs.openmpt.org/view.php?id=1003).
    [Imp] <js> Increasing / decreasing an order list item now skips non-existing patterns.
-   [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
+   [Fix] <js> Crash when trying to change the octave of a note associated with a general tuning (http://bugs.openmpt.org/view.php?id=1004).
+   [Fix] <js> Changing the octave did not work as intended with all tuning group sizes.
    [Fix] <js> Amplification now works correctly for plugin-based instruments with a global volume other than 64 (http://bugs.openmpt.org/view.php?id=1002).
+   [Fix] <js> Properly erase playback position marker in order list after right-clicking another order item.
 
 Sample tab
    [Fix] <jh> Possible crash when loading too big Vorbis or Opus samples.
@@ -69,7 +71,7 @@ MPTM::Custom Tuning
 MOD
    [Fix] <js> The ProTracker note delay quirk should not retrigger already stopped samples (fixes "Subi loses the Cops" by Subi, tx h0ffman).
    [Fix] <js> Portamento between already stopped sample and another sample kept playing the old sample (fixes "anarchy-main" by Jester).
-   [Fix] <js> ProTracker quirk: If there is a note with a out-of-range note delay, it is played on the next row (with an instant portamento), unless there is a new note on that row.
+   [Fix] <js> ProTracker quirk: If there is a note with an out-of-range note delay, it is played on the next row (with an instant portamento), unless there is a new note on that row.
    [Fix] <js> ProTracker quirk: Apply tempo changes after the first tick of the row.
 
 Other formats
@@ -1792,7 +1794,7 @@ Audio I/O
 Misc
    [New] <js> Added command-line option /fullMemDump to write a minidump with heap when OpenMPT crashes.
    [Imp] <jh> Limit WFIR cutoff setting to a sensible range.
-   [Mod] <jh> Calculate mixer channel statistics over the interval as maximum used channels instead of a approximation of average used channels.
+   [Mod] <jh> Calculate mixer channel statistics over the interval as maximum used channels instead of an approximation of average used channels.
 
 
 v1.22.05.00 (31 August 2013, revision 2622)

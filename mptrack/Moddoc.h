@@ -120,7 +120,7 @@ protected:
 
 protected: // create from serialization only
 	CModDoc();
-	DECLARE_SERIAL(CModDoc)
+	DECLARE_DYNCREATE(CModDoc)
 
 // public members
 public:
@@ -369,6 +369,8 @@ protected:
 
 	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)
 	SAMPLEINDEX GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
+	// Get group (octave) size from given instrument (or sample in sample mode)
+	int GetInstrumentGroupSize(INSTRUMENTINDEX instr) const;
 
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);
@@ -384,10 +386,6 @@ protected:
 // Implementation
 public:
 	virtual ~CModDoc();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
 
 // Generated message map functions
 public:

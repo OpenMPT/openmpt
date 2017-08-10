@@ -16,6 +16,7 @@
 #include "Dlsbank.h"
 #include "../soundlib/modsmp_ctrl.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/tuning.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
@@ -50,7 +51,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 	if (nNewChannels > maxChans)
 	{
 		CString error;
-		error.Format("Error: Max number of channels for this file type is %d", maxChans);
+		error.Format(_T("Error: Max number of channels for this file type is %u"), maxChans);
 		Reporting::Warning(error);
 		return false;
 	}
@@ -1391,5 +1392,20 @@ SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastI
 	else
 		return 0;
 }
+
+
+int CModDoc::GetInstrumentGroupSize(INSTRUMENTINDEX instr) const
+//--------------------------------------------------------------
+{
+	const ModInstrument *ins;
+	if(instr > 0 && instr <= GetNumInstruments()
+		&& (ins = m_SndFile.Instruments[instr]) != nullptr && ins->pTuning != nullptr
+		&& ins->pTuning->GetGroupSize() != 0)
+	{
+		return ins->pTuning->GetGroupSize();
+	}
+	return 12;
+}
+
 
 OPENMPT_NAMESPACE_END
