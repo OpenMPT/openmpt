@@ -280,6 +280,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, patternFont(conf, "Pattern Editor", "Font", FontSetting(PATTERNFONT_SMALL, 0))
 	, effectVisWidth(conf, "Pattern Editor", "EffectVisWidth", -1)
 	, effectVisHeight(conf, "Pattern Editor", "EffectVisHeight", -1)
+	, patternAlwaysDrawWholePatternOnScrollSlow(conf, "Pattern Editor", "AlwaysDrawWholePatternOnScrollSlow", false)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)

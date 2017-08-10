@@ -686,6 +686,7 @@ public:
 	Setting<FontSetting> patternFont;
 	Setting<int32> effectVisWidth;
 	Setting<int32> effectVisHeight;
+	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
 
 	// Sample Editor
 
