@@ -294,6 +294,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, effectVisWidth(conf, "Pattern Editor", "EffectVisWidth", -1)
 	, effectVisHeight(conf, "Pattern Editor", "EffectVisHeight", -1)
 	, patternAccessibilityFormat(conf, "Pattern Editor", "AccessibilityFormat", _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
+	, patternAlwaysDrawWholePatternOnScrollSlow(conf, "Pattern Editor", "AlwaysDrawWholePatternOnScrollSlow", false)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)

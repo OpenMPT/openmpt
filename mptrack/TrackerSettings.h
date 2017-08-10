@@ -718,6 +718,7 @@ public:
 	Setting<int32> effectVisWidth;
 	Setting<int32> effectVisHeight;
 	Setting<CString> patternAccessibilityFormat;
+	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
 
 	// Sample Editor
 
