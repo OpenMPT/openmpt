@@ -140,7 +140,7 @@ protected:
 	void EnvKbdSetSustainEnd();
 	void EnvKbdToggleReleaseNode();
 
-	bool IsDragItemEnvPoint() const { return !(m_nDragItem < 1 || m_nDragItem > EnvGetLastPoint() + 1); }
+	bool IsDragItemEnvPoint() const { return m_nDragItem >= 1 && m_nDragItem <= EnvGetNumPoints(); }
 
 	////////////////////////
 	// Misc stuff
