@@ -919,6 +919,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// Need this for professionaltracker.mod by h0ffman (SHA1: 9a7c52cbad73ed2a198ee3fa18d3704ea9f546ff)
 		m_SongFlags.set(SONG_PT_MODE);
 		m_playBehaviour.set(kMODSampleSwap);
+		m_playBehaviour.set(kMODOutOfRangeNoteDelay);
+		m_playBehaviour.set(kMODTempoOnSecondTick);
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
 		// Don't enable these hacks for ScreamTracker modules (restart position = 0x7F), to fix e.g. sample 10 in BASIC001.MOD (SHA1: 11298a5620e677beaa50bd4ed00c3710b75c81af)
 		// Note: restart position = 0x7F can also be found in ProTracker modules, e.g. professionaltracker.mod by h0ffman

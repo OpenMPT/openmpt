@@ -448,6 +448,8 @@ enum PlayBehaviour
 	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
 	kMODIgnorePanning,				// Do not process any panning commands
 	kMODSampleSwap,					// On-the-fly sample swapping
+	kMODOutOfRangeNoteDelay,		// ProTracker behaviour for out-of-range note delays
+	kMODTempoOnSecondTick,			// ProTracker sets tempo after the first tick
 
 	// Add new play behaviours here.
 
