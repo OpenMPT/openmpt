@@ -326,11 +326,7 @@ void CViewPattern::OnEditFindNext()
 						{
 							if(noteReplace == FindReplace::ReplaceOctaveUp || noteReplace == FindReplace::ReplaceOctaveDown)
 							{
-								INSTRUMENTINDEX instr = lastInstr[chn];
-								if(instr <= sndFile.GetNumInstruments() && sndFile.Instruments[instr] != nullptr && sndFile.Instruments[instr]->pTuning != nullptr)
-									noteReplace = sndFile.Instruments[instr]->pTuning->GetGroupSize() * sgn(noteReplace);
-								else
-									noteReplace = (noteReplace == FindReplace::ReplaceOctaveUp) ? 12 : -12;
+								noteReplace = GetDocument()->GetInstrumentGroupSize(lastInstr[chn]) * sgn(noteReplace);
 							}
 							int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
 							m->note = static_cast<ModCommand::NOTE>(note);

@@ -520,10 +520,10 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 	if(nAmount == 0 || m_modDoc.GetModType() == MOD_TYPE_XM) return;
 
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
-	if((nAmount == 12 || nAmount == -12) && pIns->pTuning != nullptr)
+	if((nAmount == 12 || nAmount == -12))
 	{
 		// Special case for instrument-specific tunings
-		nAmount = pIns->pTuning->GetGroupSize() * sgn(nAmount);
+		nAmount = m_modDoc.GetInstrumentGroupSize(m_nInstrument) * sgn(nAmount);
 	}
 
 	m_undo = true;
@@ -1161,6 +1161,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 //--------------------------------------------------
 {
+	CModControlDlg::OnActivatePage(lParam);
 	if (lParam < 0)
 	{
 		int nIns = m_parent.GetInstrumentChange();
@@ -1201,6 +1202,7 @@ void CCtrlInstruments::OnDeactivatePage()
 	m_modDoc.NoteOff(0, true);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&pFrame->GetInstrumentViewState());
+	CModControlDlg::OnDeactivatePage();
 }
 
 

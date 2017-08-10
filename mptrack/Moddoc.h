@@ -121,7 +121,7 @@ protected:
 
 protected: // create from serialization only
 	CModDoc();
-	DECLARE_SERIAL(CModDoc)
+	DECLARE_DYNCREATE(CModDoc)
 
 // public members
 public:
@@ -309,13 +309,13 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModDoc)
 	public:
-	virtual BOOL OnNewDocument();
-	MPT_DEPRECATED_PATH virtual BOOL OnOpenDocument(LPCTSTR lpszPathName)
+	BOOL OnNewDocument() override;
+	MPT_DEPRECATED_PATH BOOL OnOpenDocument(LPCTSTR lpszPathName) override
 	{
 		return OnOpenDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString());
 	}
-	virtual BOOL OnOpenDocument(const mpt::PathString &filename);
-	MPT_DEPRECATED_PATH virtual BOOL OnSaveDocument(LPCTSTR lpszPathName)
+	BOOL OnOpenDocument(const mpt::PathString &filename);
+	MPT_DEPRECATED_PATH BOOL OnSaveDocument(LPCTSTR lpszPathName) override
 	{
 		return OnSaveDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), false);
 	}
@@ -323,15 +323,15 @@ protected:
 	{
 		return OnSaveDocument(filename, false);
 	}
-	virtual void OnCloseDocument();
+	void OnCloseDocument() override;
 	void SafeFileClose();
 	BOOL OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile);
 
-	MPT_DEPRECATED_PATH virtual void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE)
+	MPT_DEPRECATED_PATH void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE) override
 	{
 		return SetPathName(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bAddToMRU);
 	}
-	virtual void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
 	{
 		CDocument::SetPathName(mpt::PathString::TunnelIntoCString(filename), bAddToMRU);
 		#ifndef UNICODE
@@ -353,32 +353,34 @@ protected:
 		return mpt::PathString::TunnelOutofCString(CDocument::GetPathName());
 	}
 
-	virtual BOOL SaveModified();
+	BOOL SaveModified() override;
 	bool SaveAllSamples();
 	bool SaveSample(SAMPLEINDEX smp);
 
 #ifndef UNICODE
 	// MFC checks for writeable filename in there and issues SaveAs dialog if not.
 	// This fails for our utf8-in-CString hack.
-	virtual BOOL DoFileSave();
+	BOOL DoFileSave() override;
 #endif
 
 #ifndef UNICODE
 	MPT_DEPRECATED_PATH
 #endif
-	virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE)
+	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE) override
 	{
 		return DoSave(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bSaveAs);
 	}
-	virtual BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
-	virtual void DeleteContents();
-	virtual void SetModifiedFlag(BOOL bModified=TRUE);
+	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
+	void DeleteContents() override;
+	void SetModifiedFlag(BOOL bModified=TRUE) override;
 	//}}AFX_VIRTUAL
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
 	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)
 	SAMPLEINDEX GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
+	// Get group (octave) size from given instrument (or sample in sample mode)
+	int GetInstrumentGroupSize(INSTRUMENTINDEX instr) const;
 
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);
@@ -394,10 +396,6 @@ protected:
 // Implementation
 public:
 	virtual ~CModDoc();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
 
 // Generated message map functions
 public:

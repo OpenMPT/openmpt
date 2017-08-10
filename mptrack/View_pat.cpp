@@ -2542,13 +2542,9 @@ bool CViewPattern::TransposeSelection(int transp)
 
 		if (m.IsNote())
 		{
-			if(m.instr > 0 && m.instr <= pSndFile->GetNumInstruments())
+			if(m.instr > 0)
 			{
-				const ModInstrument *pIns = pSndFile->Instruments[m.instr];
-				if(pIns != nullptr && pIns->pTuning != nullptr)
-					lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
-				else
-					lastGroupSize[chn] = 12;
+				lastGroupSize[chn] = GetDocument()->GetInstrumentGroupSize(m.instr);
 			}
 			int transpose = transp;
 			if(transpose == 12000 || transpose == -12000)
@@ -2616,14 +2612,9 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 			// Increase / decrease note
 			if(m.IsNote())
 			{
-				if(m.instr > 0 && m.instr <= pSndFile->GetNumInstruments())
+				if(m.instr > 0)
 				{
-					lastGroupSize[chn] = 12;
-					const ModInstrument *pIns = pSndFile->Instruments[m.instr];
-					if(pIns != nullptr && pIns->pTuning != nullptr)
-					{
-						lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
-					}
+					lastGroupSize[chn] = GetDocument()->GetInstrumentGroupSize(m.instr);
 				}
 				int note = m.note + offset * (coarse ? lastGroupSize[chn] : 1);
 				Limit(note, noteMin, noteMax);
@@ -4719,20 +4710,11 @@ void CViewPattern::TempEnterOctave(int val)
 	const ModCommand &target = GetCursorCommand();
 	if(target.IsNote())
 	{
-		int groupSize = 12;
-		if(target.instr > 0 && target.instr <= pSndFile->GetNumInstruments())
-		{
-			const ModInstrument *pIns = pSndFile->Instruments[target.instr];
-			if(pIns != nullptr && pIns->pTuning != nullptr)
-			{
-				groupSize = pIns->pTuning->GetGroupSize();
-			}
-		}
-
+		int groupSize = GetDocument()->GetInstrumentGroupSize(target.instr);
 		PrepareUndo(m_Cursor, m_Cursor, "Octave Entry");
 		// The following might look a bit convoluted... This is mostly because the "middle-C" in
 		// custom tunings always has octave 5, no matter how many octaves the tuning actually has.
-		int note = ((target.note - NOTE_MIN) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC;
+		int note = ((target.note - NOTE_MIDDLEC) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC;
 		Limit(note, NOTE_MIN, NOTE_MAX);
 		TempEnterNote(static_cast<ModCommand::NOTE>(note));
 		// Memorize note for key-up

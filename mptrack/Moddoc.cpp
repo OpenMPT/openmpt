@@ -79,7 +79,7 @@ const CString ModTypeToFilter(const CSoundFile& sndFile)
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc
 
-IMPLEMENT_SERIAL(CModDoc, CDocument, 0 /* schema number*/ )
+IMPLEMENT_DYNCREATE(CModDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	//{{AFX_MSG_MAP(CModDoc)
@@ -118,22 +118,6 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		OnUpdateCompatExportableOnly)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-
-////////////////////////////////////////////////////////////////////////////
-// CModDoc diagnostics
-
-#ifdef _DEBUG
-void CModDoc::AssertValid() const
-{
-	CDocument::AssertValid();
-}
-
-void CModDoc::Dump(CDumpContext& dc) const
-{
-	CDocument::Dump(dc);
-}
-#endif //_DEBUG
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -934,7 +918,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		{
 			// All notes off when resuming paused playback
 			m_SndFile.ResetChannels();
-		
+
 			m_SndFile.m_SongFlags.set(SONG_PAUSED);
 			pMainFrm->PlayMod(this);
 		}
