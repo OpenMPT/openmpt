@@ -155,7 +155,13 @@ public:
 		return *fileName;
 	}
 
-	// Returns true if the object points to a valid stream.
+	// Returns true if the object points to a valid (non-empty) stream.
+	operator bool() const
+	{
+		return IsValid();
+	}
+
+	// Returns true if the object points to a valid (non-empty) stream.
 	bool IsValid() const
 	{
 		return DataContainer().IsValid();
@@ -859,7 +865,7 @@ public:
 	}
 
 private:
-	static bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
+	MPT_FORCEINLINE static bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
 public:
 	// Read a string up to the next line terminator into a std::string
 	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
@@ -992,7 +998,7 @@ public:
 		}
 	}
 
-	// Read variable-length integer (as found in MIDI files).
+	// Read variable-length unsigned integer (as found in MIDI files).
 	// If successful, the file cursor is advanced by the size of the integer and true is returned.
 	// False is returned if not enough bytes were left to finish reading of the integer or if an overflow happened (source doesn't fit into target integer).
 	// In case of an overflow, the target is also set to the maximum value supported by its data type.
@@ -1001,7 +1007,7 @@ public:
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true
 			&& std::numeric_limits<T>::is_signed == false,
-			"Target type is a not an unsigned integer");
+			"Target type is not an unsigned integer");
 
 		if(NoBytesLeft())
 		{
@@ -1009,28 +1015,38 @@ public:
 			return false;
 		}
 
+		mpt::byte bytes[16];	// More than enough for any valid VarInt
+		off_t avail = DataContainer().Read(bytes, streamPos, sizeof(bytes)), readPos = 1;
+		
 		size_t writtenBits = 0;
-		uint8 b = ReadUint8();
+		uint8 b = bytes[0];
 		target = (b & 0x7F);
 
 		// Count actual bits used in most significant byte (i.e. this one)
 		for(size_t bit = 0; bit < 7; bit++)
 		{
-			if((b & (1 << bit)) != 0)
+			if((b & (1u << bit)) != 0)
 			{
 				writtenBits = bit + 1;
 			}
 		}
 
-		while(CanRead(1) && (b & 0x80) != 0)
+		while(readPos < avail && (b & 0x80) != 0)
 		{
-			b = ReadUint8();
+			b = bytes[readPos++];
 			target <<= 7;
 			target |= (b & 0x7F);
 			writtenBits += 7;
-		};
+			if(readPos == avail)
+			{
+				streamPos += readPos;
+				avail = DataContainer().Read(bytes, streamPos, sizeof(bytes));
+				readPos = 0;
+			}
+		}
+		streamPos += readPos;
 
-		if(writtenBits > sizeof(target) * 8)
+		if(writtenBits > sizeof(target) * 8u)
 		{
 			// Overflow
 			target = Util::MaxValueOfType<T>(target);
