@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8749)
+v1.26.13.00 (* August 2017, revision 8750)
 ------------------------------------------
 Pattern tab
    [New] <jh> Add hidden setting "Pattern Editor.AlwaysDrawWholePatternOnScrollSlow" for graphics drivers with scrolling issues (http://bugs.openmpt.org/view.php?id=1003).
@@ -44,6 +44,7 @@ Sample tab
    [Fix] <jh> Possible crash when loading too big Vorbis or Opus samples.
 
 Instrument tab
+   [New] <js> Envelope points can now also be inserted by double-clicking.
    [Imp] <js> Can now use Home / End keys for sample map navigation (http://bugs.openmpt.org/view.php?id=984).
    [Fix] <js> Drag & Dropping a soundfont instrument did not update the sample editor for replaced samples.
    [Fix] <js> Possible crash with some keyboard shortcuts if there was no envelope (tx Jiyoshi).
