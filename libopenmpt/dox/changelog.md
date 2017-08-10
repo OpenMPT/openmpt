@@ -17,7 +17,10 @@ is just a high-level summary.
     playing the old sample (fixes "anarchy-main" by Jester).
  *  Playback fix for instruments with custom tunings and transposed note maps
     in MPTM format.
-
+ *  ProTracker quirk: If there is a note with a out-of-range note delay, it is
+    played on the next row (with an instant portamento), unless there is a new
+    note on that row.
+ *  ProTracker quirk: Apply tempo changes after the first tick of the row.
 
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
