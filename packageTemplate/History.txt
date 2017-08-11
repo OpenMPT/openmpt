@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8750)
+v1.26.13.00 (* August 2017, revision 8756)
 ------------------------------------------
 Pattern tab
    [New] <jh> Add hidden setting "Pattern Editor.AlwaysDrawWholePatternOnScrollSlow" for graphics drivers with scrolling issues (http://bugs.openmpt.org/view.php?id=1003).
@@ -42,6 +42,7 @@ Pattern tab
 
 Sample tab
    [Fix] <jh> Possible crash when loading too big Vorbis or Opus samples.
+   [Fix] <js> Editing various sample properties did not create an undo point.
 
 Instrument tab
    [New] <js> Envelope points can now also be inserted by double-clicking.

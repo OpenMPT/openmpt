@@ -2712,7 +2712,8 @@ void CCtrlSamples::OnVolumeChanged()
 	int nVol = GetDlgItemInt(IDC_EDIT7);
 	Limit(nVol, 0, 64);
 	nVol *= 4;
-	if (nVol != m_sndFile.GetSample(m_nSample).nVolume)
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if (nVol != sample.nVolume)
 	{
 		if(!m_startedEdit) PrepareUndo("Set Default Volume");
 		sample.nVolume = static_cast<uint16>(nVol);
@@ -2728,7 +2729,8 @@ void CCtrlSamples::OnGlobalVolChanged()
 	if (IsLocked()) return;
 	int nVol = GetDlgItemInt(IDC_EDIT8);
 	Limit(nVol, 0, 64);
-	if (nVol != m_sndFile.GetSample(m_nSample).nGlobalVol)
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if (nVol != sample.nGlobalVol)
 	{
 		if(!m_startedEdit) PrepareUndo("Set Global Volume");
 		sample.nGlobalVol = static_cast<uint16>(nVol);
@@ -2748,7 +2750,6 @@ void CCtrlSamples::OnSetPanningChanged()
 	}
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-
 	if(b != sample.uFlags[CHN_PANNING])
 	{
 		PrepareUndo("Toggle Panning");
@@ -2774,10 +2775,11 @@ void CCtrlSamples::OnPanningChanged()
 		nPan = nPan * 4;			// so we x4 to get MPT's internal 0-256 range.
 	}
 
-	if (nPan != m_sndFile.GetSample(m_nSample).nPan)
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if (nPan != sample.nPan)
 	{
 		if(!m_startedEdit) PrepareUndo("Set Panning");
-		m_sndFile.GetSample(m_nSample).nPan = (uint16)nPan;
+		sample.nPan = (uint16)nPan;
 		SetModified(SampleHint().Info(), false, false);
 	}
 }
