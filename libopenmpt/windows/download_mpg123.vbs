@@ -100,13 +100,13 @@ CreateFolder "download.tmp"
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-mpg123version = "1.25.4"
-mpg123x86size = 489443
-mpg123x86md5  = "2e5eeb476aa2e6d61c6bc934abc11095"
-mpg123x86sha1 = "bbbf7e2e0446a9796807267c8676d0aca6829378"
-mpg123x64size = 535538
-mpg123x64md5  = "29bfd0791707ba59262b5d7591af6a0d"
-mpg123x64sha1 = "d64811de48380fb7d73dd8880537f706caedab29"
+mpg123version = "1.25.5"
+mpg123x86size = 489486
+mpg123x86md5  = "f6b56e35280d5b39c7df67e9d1145849"
+mpg123x86sha1 = "888bcebf65c7ec2f199c169050a9c6ef0d3ad777"
+mpg123x64size = 535583
+mpg123x64md5  = "7045540a1c7e8c39dca76c2af91cfc1f"
+mpg123x64sha1 = "4704df392ef3bd2a20a69097deace08d0864f259"
 
 Download httpprotocol & "://mpg123.de/download/win32/" & mpg123version & "/mpg123-" & mpg123version & "-x86.zip", mpg123x86size, mpg123x86md5, mpg123x86sha1, "download.tmp\mpg123-" & mpg123version & "-x86.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-" & mpg123version & "-x86")
