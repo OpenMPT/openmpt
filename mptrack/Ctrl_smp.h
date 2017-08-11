@@ -53,8 +53,8 @@ protected:
 	uint32 m_nSeekWindowMs;
 	uint32 m_nOverlapMs;
 	SampleIO m_nPreviousRawFormat;
-	bool finetuneBoxActive : 1;
-	bool rememberRawFormat : 1;
+	bool m_rememberRawFormat : 1;
+	bool m_startedEdit : 1;
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
@@ -96,6 +96,7 @@ public:
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlSamples)
+	afx_msg void OnEditFocus();
 	afx_msg void OnSampleChanged();
 	afx_msg void OnZoomChanged();
 	afx_msg void OnPrevInstrument();
@@ -146,6 +147,7 @@ protected:
 	afx_msg void OnEstimateSampleSize();
 
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
+	void PrepareUndo(const char *description, sampleUndoTypes type = sundo_none, SmpLength start = 0, SmpLength end = 0);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
