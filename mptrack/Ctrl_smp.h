@@ -53,8 +53,8 @@ protected:
 	uint32 m_nSeekWindowMs;
 	uint32 m_nOverlapMs;
 	SampleIO m_nPreviousRawFormat;
-	bool finetuneBoxActive : 1;
-	bool rememberRawFormat : 1;
+	bool m_rememberRawFormat : 1;
+	bool m_startedEdit : 1;
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
@@ -84,19 +84,20 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CCtrlSamples)
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual CRuntimeClass *GetAssociatedViewClass();
-	virtual void RecalcLayout();
-	virtual void OnActivatePage(LPARAM);
-	virtual void OnDeactivatePage();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL GetToolTipText(UINT uId, LPTSTR pszText);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
+	CRuntimeClass *GetAssociatedViewClass() override;
+	void RecalcLayout() override;
+	void OnActivatePage(LPARAM) override;
+	void OnDeactivatePage() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
+	BOOL GetToolTipText(UINT uId, LPTSTR pszText) override;
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlSamples)
+	afx_msg void OnEditFocus();
 	afx_msg void OnSampleChanged();
 	afx_msg void OnZoomChanged();
 	afx_msg void OnPrevInstrument();
@@ -148,6 +149,7 @@ protected:
 	afx_msg void OnEstimateSampleSize();
 
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
+	void PrepareUndo(const char *description, sampleUndoTypes type = sundo_none, SmpLength start = 0, SmpLength end = 0);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
