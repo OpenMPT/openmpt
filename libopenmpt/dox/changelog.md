@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta27
+### libopenmpt 0.2-beta27 (2017-08-12)
 
  *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
     libmodplug C++ API returned the wrong value, causing qmmp (and possibly
