@@ -2717,7 +2717,6 @@ void CCtrlSamples::OnVolumeChanged()
 	{
 		if(!m_startedEdit) PrepareUndo("Set Default Volume");
 		sample.nVolume = static_cast<uint16>(nVol);
-		sample.uFlags.reset(SMP_NODEFAULTVOLUME);
 		SetModified(SampleHint().Info(), false, false);
 	}
 }
