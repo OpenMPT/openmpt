@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.26.13.00 (* August 2017, revision 8756)
-------------------------------------------
+v1.26.13.00 (12 August 2017, revision 8759)
+-------------------------------------------
 Pattern tab
    [New] <jh> Add hidden setting "Pattern Editor.AlwaysDrawWholePatternOnScrollSlow" for graphics drivers with scrolling issues (http://bugs.openmpt.org/view.php?id=1003).
    [Imp] <js> Increasing / decreasing an order list item now skips non-existing patterns.
