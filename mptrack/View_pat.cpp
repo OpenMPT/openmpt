@@ -30,7 +30,6 @@
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "../soundlib/tuning.h"
 #include <algorithm>
 
 
@@ -4711,10 +4710,9 @@ void CViewPattern::TempEnterOctave(int val)
 	if(target.IsNote())
 	{
 		int groupSize = GetDocument()->GetInstrumentGroupSize(target.instr);
-		PrepareUndo(m_Cursor, m_Cursor, "Octave Entry");
 		// The following might look a bit convoluted... This is mostly because the "middle-C" in
 		// custom tunings always has octave 5, no matter how many octaves the tuning actually has.
-		int note = ((target.note - NOTE_MIDDLEC) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC;
+		int note = ((target.note + groupSize * NOTE_MIDDLEC - NOTE_MIDDLEC) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC;
 		Limit(note, NOTE_MIN, NOTE_MAX);
 		TempEnterNote(static_cast<ModCommand::NOTE>(note));
 		// Memorize note for key-up
