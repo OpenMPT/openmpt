@@ -1,6 +1,5 @@
-libopusfile library version 0.8.
+libopusfile library version 0.9.
 The following changes have been made:
-- Commit 529bd01294c13a62f13fc4fe882eec175fc0bebc has been applied.
 - Obviously unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
