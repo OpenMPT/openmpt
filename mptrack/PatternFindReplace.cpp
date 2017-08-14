@@ -17,7 +17,6 @@
 #include "PatternFindReplace.h"
 #include "PatternFindReplaceDlg.h"
 #include "../soundlib/mod_specifications.h"
-#include "../soundlib/tuning.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

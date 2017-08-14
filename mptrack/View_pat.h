@@ -228,7 +228,7 @@ public:
 	ROWINDEX GetRowsPerMeasure() const;
 
 	// Invalidate functions (for redrawing areas of the pattern)
-	void InvalidatePattern(bool invalidateHeader = false);
+	void InvalidatePattern(bool invalidateChannelHeaders = false, bool invalidateRowHeaders = false);
 	void InvalidateRow(ROWINDEX n = ROWINDEX_INVALID);
 	void InvalidateArea(const PatternRect &rect) { InvalidateArea(rect.GetUpperLeft(), rect.GetLowerRight()); };
 	void InvalidateArea(PatternCursor begin, PatternCursor end);
