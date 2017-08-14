@@ -125,7 +125,6 @@ struct ModChannel
 	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
 
 	uint32 m_Freq;
-	float m_VibratoDepth;
 	//<----
 
 	//NOTE_PCs memory.

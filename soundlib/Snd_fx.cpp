@@ -4019,9 +4019,6 @@ void CSoundFile::TonePortamento(ModChannel *pChn, uint32 param) const
 void CSoundFile::Vibrato(ModChannel *p, uint32 param) const
 //---------------------------------------------------------
 {
-	p->m_VibratoDepth = (param & 0x0F) / 15.0F;
-	//'New tuning'-thing: 0 - 1 <-> No depth - Full depth.
-
 	if (param & 0x0F) p->nVibratoDepth = (param & 0x0F) * 4;
 	if (param & 0xF0) p->nVibratoSpeed = (param >> 4) & 0x0F;
 	p->dwFlags.set(CHN_VIBRATO);
