@@ -246,7 +246,7 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 		SetScrollPos(SB_VERT, (int)GetCurrentRow() * GetColumnHeight());
 
 	UpdateScrollPos();
-	InvalidatePattern(true);
+	InvalidatePattern(true, true);
 	SendCtrlMessage(CTRLMSG_PATTERNCHANGED, m_nPattern);
 
 	return true;
@@ -622,7 +622,7 @@ bool CViewPattern::SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick)
 	m_nPlayTick = tick;
 
 	if(m_nPlayTick != oldTick && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL))
-		InvalidatePattern(true);
+		InvalidatePattern(true, true);
 	else if (oldPat == m_nPattern)
 		InvalidateRow(oldRow);
 	else if (m_nPlayPat == m_nPattern)
@@ -878,7 +878,7 @@ void CViewPattern::OnGrowSelection()
 	// Adjust selection
 	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
 
-	InvalidatePattern(false);
+	InvalidatePattern();
 	SetModified();
 	EndWaitCursor();
 	SetFocus();
@@ -979,7 +979,7 @@ void CViewPattern::OnShrinkSelection()
 	// Adjust selection
 	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
 
-	InvalidatePattern(false);
+	InvalidatePattern();
 	SetModified();
 	EndWaitCursor();
 	SetFocus();
@@ -1346,7 +1346,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 					// Number of channels changed: Update channel headers and other information.
 					SetCurrentPattern(m_nPattern);
 				}
-				InvalidatePattern(true);
+				InvalidatePattern(true, false);
 				SetModified(false);
 			}
 		}
@@ -1377,7 +1377,7 @@ void CViewPattern::OnPatternProperties()
 		if(dlg.DoModal() == IDOK)
 		{
 			UpdateScrollSize();
-			InvalidatePattern(true);
+			InvalidatePattern(true, true);
 			SanitizeCursor();
 			pModDoc->UpdateAllViews(this, PatternHint(pat).Data(), this);
 		}
@@ -2040,7 +2040,7 @@ void CViewPattern::PatternStep(ROWINDEX row)
 
 		// In case we were previously in smooth scrolling mode during live playback, the pattern might be misaligned.
 		if(GetSmoothScrollOffset() != 0)
-			InvalidatePattern(true);
+			InvalidatePattern(true, true);
 
 		// Cut instruments/samples in virtual channels
 		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
@@ -3014,7 +3014,7 @@ void CViewPattern::UndoRedo(bool undo)
 				SetCurrentPattern(pat);
 			} else
 			{
-				InvalidatePattern(true);
+				InvalidatePattern(true, true);
 			}
 			SetModified(false);
 			SanitizeCursor();
@@ -3248,7 +3248,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 						if(nPat != m_nPattern)
 							SetCurrentPattern(nPat, nRow);
 						else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
-							InvalidatePattern(true);	// Redraw previous / next pattern
+							InvalidatePattern(true, true);	// Redraw previous / next pattern
 
 						if (nOrd < pSndFile->Order.size())
 						{
@@ -3712,14 +3712,14 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		m_Status.set(psShowVUMeters, !!lParam);
 		UpdateSizes();
 		UpdateScrollSize();
-		InvalidatePattern(true);
+		InvalidatePattern(true, true);
 		break;
 
 	case VIEWMSG_SETPLUGINNAMES:
 		m_Status.set(psShowPluginNames, !!lParam);
 		UpdateSizes();
 		UpdateScrollSize();
-		InvalidatePattern(true);
+		InvalidatePattern(true, true);
 		break;
 
 	case VIEWMSG_DOMIDISPACING:
@@ -3823,7 +3823,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			UpdateSizes();
 			UpdateScrollSize();
 			SetCurrentColumn(m_Cursor);
-			InvalidatePattern(true);
+			InvalidatePattern(true, true);
 		}
 		break;
 	case VIEWMSG_DOSCROLL:

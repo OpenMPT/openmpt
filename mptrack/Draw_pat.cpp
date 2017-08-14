@@ -190,7 +190,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		UpdateColors();
 		UpdateSizes();
 		UpdateScrollSize();
-		InvalidatePattern(true);
+		InvalidatePattern(true, true);
 		return;
 	}
 	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE | HINT_MODCHANNELS])
@@ -210,7 +210,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(patternHint.GetType()[HINT_MODTYPE | HINT_PATTERNDATA])
 	{
-		InvalidatePattern(false);
+		InvalidatePattern(false, true);
 	} else if(patternHint.GetType()[HINT_PATTERNROW])
 	{
 		InvalidateRow(static_cast<const RowHint &>(hint).GetRow());
@@ -1509,15 +1509,18 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 }
 
 
-void CViewPattern::InvalidatePattern(bool invalidateHeader)
-//---------------------------------------------------------
+void CViewPattern::InvalidatePattern(bool invalidateChannelHeaders, bool invalidateRowHeaders)
+//--------------------------------------------------------------------------------------------
 {
 	CRect rect;
 	GetClientRect(&rect);
-	if(!invalidateHeader)
+	if(!invalidateChannelHeaders)
+	{
+		rect.top += m_szHeader.cy;
+	}
+	if(!invalidateRowHeaders)
 	{
 		rect.left += m_szHeader.cx;
-		rect.top += m_szHeader.cy;
 	}
 	InvalidateRect(&rect, FALSE);
 	SanitizeCursor();

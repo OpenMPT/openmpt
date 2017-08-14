@@ -70,7 +70,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		m_PortamentoFineSteps = 0;
 		m_PortamentoTickSlide = 0;
 		m_Freq = 0;
-		m_VibratoDepth = 0;
 		//<--Custom tuning related.
 	}
 
