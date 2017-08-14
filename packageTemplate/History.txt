@@ -30,6 +30,13 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.26.14.00 (14 August 2017, revision 8772)
+-------------------------------------------
+Pattern tab
+   [Fix] <js> Changing the octave of notes below middle-C was broken in OpenMPT 1.26.13.00.
+   [Fix] <js> Resizing a pattern did not properly redraw the row numbers in other pattern windows.
+
+
 v1.26.13.00 (12 August 2017, revision 8759)
 -------------------------------------------
 Pattern tab
