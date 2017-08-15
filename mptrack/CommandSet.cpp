@@ -1755,8 +1755,8 @@ int CCommandSet::FindCmd(int uid) const
 }
 
 
-const TCHAR *KeyCombination::GetContextText(InputTargetContext ctx)
-//-----------------------------------------------------------------
+CString KeyCombination::GetContextText(InputTargetContext ctx)
+//------------------------------------------------------------
 {
 	switch(ctx)
 	{
