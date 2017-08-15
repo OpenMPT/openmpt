@@ -3,6 +3,10 @@ ifeq ($(MPT_PROGRESS_FILE),)
 MPT_PROGRESS_FILE:=/dev/null
 endif
 
+ifeq ($(MPT_WINEGCC_LANG),)
+MPT_WINEGCC_LANG:=CPLUSPLUS
+endif
+
 ifneq ($(words $(MAKECMDGOALS)),1)
 .DEFAULT_GOAL = all
 %:
@@ -99,6 +103,8 @@ openmpt_wine_wrapper.dll: openmpt_wine_wrapper.dll.so
 	$(INFO) Copying $@ ...
 	$(VERYSILENT)cp openmpt_wine_wrapper.dll.so openmpt_wine_wrapper.dll
 
+ifeq ($(MPT_WINEGCC_LANG),CPLUSPLUS)
+
 openmpt_wine_wrapper.dll.so: openmpt_wine_wrapper.o build/wine/wine_wrapper.spec libopenmpt_native_support.so
 	$(PROGRESS)
 	$(INFO) Linking $@ ...
@@ -108,5 +114,21 @@ openmpt_wine_wrapper.o: mptrack/wine/WineWrapper.cpp
 	$(PROGRESS)
 	$(INFO) Compiling $@ ...
 	$(SILENT)$(CCACHE) $(WINEGXX) -c $(CPPFLAGS) -DMPT_BUILD_WINESUPPORT_WRAPPER $(CXXFLAGS) mptrack/wine/WineWrapper.cpp -o openmpt_wine_wrapper.o
+
+endif
+
+ifeq ($(MPT_WINEGCC_LANG),C)
+
+openmpt_wine_wrapper.dll.so: openmpt_wine_wrapper.o build/wine/wine_wrapper.spec libopenmpt_native_support.so
+	$(PROGRESS)
+	$(INFO) Linking $@ ...
+	$(SILENT)$(WINEGXX) -shared $(CPPFLAGS) -DMPT_BUILD_WINESUPPORT_WRAPPER $(CFLAGS) $(LDFLAGS) "-Wl,-rpath,$(MPT_WINE_SEARCHPATH)" build/wine/wine_wrapper.spec openmpt_wine_wrapper.o -L. -lopenmpt_native_support $(LOADLIBS) $(LDLIBS) -o openmpt_wine_wrapper.dll.so
+
+openmpt_wine_wrapper.o: mptrack/wine/WineWrapper.c
+	$(PROGRESS)
+	$(INFO) Compiling $@ ...
+	$(SILENT)$(CCACHE) $(WINEGXX) -c $(CPPFLAGS) -DMPT_BUILD_WINESUPPORT_WRAPPER $(CFLAGS) mptrack/wine/WineWrapper.c -o openmpt_wine_wrapper.o
+
+endif
 
 endif

@@ -138,6 +138,7 @@ protected:
 	std::string m_RawHostRelease;
 	mpt::Wine::Version m_Version;
 	bool m_HostIsLinux;
+	bool m_HostIsBSD;
 public:
 	VersionContext();
 public:
@@ -149,6 +150,7 @@ public:
 	std::string RawHostRelease() const { return m_RawHostRelease; }
 	mpt::Wine::Version Version() const { return m_Version; }
 	bool HostIsLinux() const { return m_HostIsLinux; }
+	bool HostIsBSD() const { return m_HostIsBSD; }
 };
 
 } // namespace Wine

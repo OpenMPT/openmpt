@@ -431,11 +431,7 @@ void Initialize()
 
 		script += std::string() + "\n";
 
-		std::string make = "make";
-		if(wineVersion.RawHostSysName() == "FreeBSD" || wineVersion.RawHostSysName() == "DragonFly" || wineVersion.RawHostSysName() == "NetBSD" || wineVersion.RawHostSysName() == "OpenBSD")
-		{
-			make = "gmake";
-		}
+		const std::string make = (wineVersion.HostIsBSD() ? "gmake" : "make");
 
 		std::vector<std::string> commands;
 		commands.push_back(make);
@@ -500,15 +496,18 @@ void Initialize()
 			winegcc.push_back("winegcc64-development");
 		}
 		winegcc.push_back("winegcc-development");
-		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
-		{ // 32bit winegcc probably cannot compile to 64bit
-			winegcc.push_back("wineg++32-development");
+		if(!wineVersion.HostIsBSD())
+		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
+			MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+			{ // 32bit winegcc probably cannot compile to 64bit
+				winegcc.push_back("wineg++32-development");
+			}
+			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+			{
+				winegcc.push_back("wineg++64-development");
+			}
+			winegcc.push_back("wineg++-development");
 		}
-		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
-		{
-			winegcc.push_back("wineg++64-development");
-		}
-		winegcc.push_back("wineg++-development");
 		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
 		{ // 32bit winegcc probably cannot compile to 64bit
 			winegcc.push_back("winegcc32");
@@ -518,15 +517,18 @@ void Initialize()
 			winegcc.push_back("winegcc64");
 		}
 		winegcc.push_back("winegcc");
-		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
-		{ // 32bit winegcc probably cannot compile to 64bit
-			winegcc.push_back("wineg++32");
+		if(!wineVersion.HostIsBSD())
+		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
+			MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+			{ // 32bit winegcc probably cannot compile to 64bit
+				winegcc.push_back("wineg++32");
+			}
+			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+			{
+				winegcc.push_back("wineg++64");
+			}
+			winegcc.push_back("wineg++");
 		}
-		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
-		{
-			winegcc.push_back("wineg++64");
-		}
-		winegcc.push_back("wineg++");
 		for(const auto &c : winegcc)
 		{
 			script += std::string() + "if command -v " + c + " 2>/dev/null 1>/dev/null ; then" + "\n";
@@ -604,7 +606,7 @@ void Initialize()
 
 			script += std::string() + "{" + "\n";
 			script += std::string() + " echo 0" + "\n";
-			script += std::string() + " " + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
+			script += std::string() + " " + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + (wineVersion.HostIsBSD() ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
 			script += std::string() + " echo -n $? > stdexit.txt" + "\n";
 			script += std::string() + " echo 100" + "\n";
 			script += std::string() + "} | " + dialog.Progress("[OK] Prepare OpenMPT Wine Integration\\n[OK] Compile native support\\n[>>] Compile Wine wrapper\\n\\n[3/3] Compiling Wine wrapper ...") + "\n";
@@ -637,7 +639,7 @@ void Initialize()
 			script += std::string() + " " + dialog.TextBox("stderr.txt") + "\n";
 			script += std::string() + "fi" + "\n";
 		
-			script += std::string() + "" + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
+			script += std::string() + "" + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + (wineVersion.HostIsBSD() ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 1)
 			{

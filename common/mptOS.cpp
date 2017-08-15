@@ -536,6 +536,7 @@ VersionContext::VersionContext()
 //------------------------------
 	: m_IsWine(false)
 	, m_HostIsLinux(false)
+	, m_HostIsBSD(false)
 {
 	#if MPT_OS_WINDOWS
 		m_IsWine = mpt::Windows::IsWine();
@@ -569,6 +570,7 @@ VersionContext::VersionContext()
 		}
 		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, m_RawVersion));
 		m_HostIsLinux = (m_RawHostSysName == "Linux");
+		m_HostIsBSD = (m_RawHostSysName == "FreeBSD" || m_RawHostSysName == "DragonFly" || m_RawHostSysName == "NetBSD" || m_RawHostSysName == "OpenBSD");
 	#endif // MPT_OS_WINDOWS
 }
 
