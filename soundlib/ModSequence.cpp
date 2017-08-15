@@ -43,6 +43,15 @@ ModSequence& ModSequence::operator=(const ModSequence &other)
 }
 
 
+bool ModSequence::operator== (const ModSequence &other) const
+//-----------------------------------------------------------
+{
+	return static_cast<const std::vector<PATTERNINDEX> &>(*this) == other
+		&& m_name == other.m_name
+		&& m_restartPos == other.m_restartPos;
+}
+
+
 bool ModSequence::NeedsExtraDatafield() const
 //-------------------------------------------
 {

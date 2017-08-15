@@ -36,6 +36,9 @@ public:
 	ModSequence(const ModSequence &) = default;
 	ModSequence& operator=(const ModSequence &other);
 
+	bool operator==(const ModSequence &other) const;
+	bool operator!=(const ModSequence &other) const { return !(*this == other); }
+
 	ORDERINDEX GetLength() const { return mpt::saturate_cast<ORDERINDEX>(size()); }
 	// Returns last accessible index, i.e. GetLength() - 1, or 0 if the order list is empty.
 	ORDERINDEX GetLastIndex() const { return std::max(ORDERINDEX(1), GetLength()) - 1u; }
