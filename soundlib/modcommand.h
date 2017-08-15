@@ -32,7 +32,7 @@ class CSoundFile;
 
 
 // Volume Column commands
-enum VolumeCommands
+enum VolumeCommands : uint8
 {
 	VOLCMD_NONE				= 0,
 	VOLCMD_VOLUME			= 1,
@@ -55,7 +55,7 @@ enum VolumeCommands
 
 
 // Effect column commands
-enum EffectCommands
+enum EffectCommands : uint8
 {
 	CMD_NONE				= 0,
 	CMD_ARPEGGIO			= 1,
@@ -103,7 +103,7 @@ enum EffectCommands
 };
 
 
-enum EffectType
+enum EffectType : uint8
 {
 	EFFECT_TYPE_NORMAL  = 0,
 	EFFECT_TYPE_GLOBAL  = 1,
@@ -148,11 +148,11 @@ public:
 
 	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
 	static uint16 GetValueVolCol(uint8 volcmd, uint8 vol) { return (volcmd << 8) + vol; }
-	void SetValueVolCol(const uint16 val) { volcmd = static_cast<uint8>(val >> 8); vol = static_cast<uint8>(val & 0xFF); }
+	void SetValueVolCol(const uint16 val) { volcmd = static_cast<VOLCMD>(val >> 8); vol = static_cast<uint8>(val & 0xFF); }
 
 	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
 	static uint16 GetValueEffectCol(uint8 command, uint8 param) { return (command << 8) + param; }
-	void SetValueEffectCol(const uint16 val) { command = static_cast<uint8>(val >> 8); param = static_cast<uint8>(val & 0xFF); }
+	void SetValueEffectCol(const uint16 val) { command = static_cast<COMMAND>(val >> 8); param = static_cast<uint8>(val & 0xFF); }
 
 	// Clears modcommand.
 	void Clear() { memset(this, 0, sizeof(ModCommand)); }
@@ -181,6 +181,8 @@ public:
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
+	// Returns true if the cell contains an effect command that may affect the global state of the module.
+	bool IsGlobalCommand() const;
 
 	// Returns true if the note is inside the Amiga frequency range
 	bool IsAmigaNote() const { return IsAmigaNote(note); }
@@ -207,13 +209,6 @@ public:
 	static bool TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2);
 	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
 	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
-
-	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
-	void SwapEffects()
-	{
-		std::swap(volcmd, command);
-		std::swap(vol, param);
-	}
 
 public:
 	uint8 note;

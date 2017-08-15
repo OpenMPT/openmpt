@@ -1199,7 +1199,7 @@ void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRem
 }
 
 
-// Check if a given channel contains note data.
+// Check if a given channel contains note data or global effects.
 bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 //----------------------------------------------------
 {
@@ -1213,12 +1213,10 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 		if(pat.IsValid())
 		{
 			const ModCommand *p = pat.GetpModCommand(0, nChn);
-			for(ROWINDEX nRow = pat.GetNumRows(); nRow > 0; nRow--, p += nChannels)
+			for(ROWINDEX row = pat.GetNumRows(); row > 0; row--, p += nChannels)
 			{
-				if(!p->IsEmpty())
-				{
+				if(p->IsNote() || p->IsInstrPlug() || p->IsGlobalCommand())
 					return false;
-				}
 			}
 		}
 	}
