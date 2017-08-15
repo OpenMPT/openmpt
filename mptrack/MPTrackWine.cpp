@@ -431,8 +431,14 @@ void Initialize()
 
 		script += std::string() + "\n";
 
+		std::string make = "make";
+		if(wineVersion.RawHostSysName() == "FreeBSD" || wineVersion.RawHostSysName() == "DragonFly" || wineVersion.RawHostSysName() == "NetBSD" || wineVersion.RawHostSysName() == "OpenBSD")
+		{
+			make = "gmake";
+		}
+
 		std::vector<std::string> commands;
-		commands.push_back("make");
+		commands.push_back(make);
 		commands.push_back("pkg-config");
 		commands.push_back("cpp");
 		commands.push_back("cc");
@@ -579,7 +585,7 @@ void Initialize()
 			
 			script += std::string() + "{" + "\n";
 			script += std::string() + " echo 0" + "\n";
-			script += std::string() + " make -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
+			script += std::string() + " " + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
 			script += std::string() + " echo -n $? > stdexit.txt" + "\n";
 			script += std::string() + " echo 100" + "\n";
 			script += std::string() + "} | " + dialog.Progress("[OK] Prepare OpenMPT Wine Integration\\n[>>] Compile native support\\n[  ] Compile Wine wrapper\\n\\n[2/3] Compiling native support ...") + "\n";
@@ -598,7 +604,7 @@ void Initialize()
 
 			script += std::string() + "{" + "\n";
 			script += std::string() + " echo 0" + "\n";
-			script += std::string() + " make -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
+			script += std::string() + " " + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
 			script += std::string() + " echo -n $? > stdexit.txt" + "\n";
 			script += std::string() + " echo 100" + "\n";
 			script += std::string() + "} | " + dialog.Progress("[OK] Prepare OpenMPT Wine Integration\\n[OK] Compile native support\\n[>>] Compile Wine wrapper\\n\\n[3/3] Compiling Wine wrapper ...") + "\n";
@@ -618,7 +624,7 @@ void Initialize()
 		} else
 		{
 
-			script += std::string() + "make -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all" + "\n";
+			script += std::string() + "" + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 1)
 			{
@@ -631,7 +637,7 @@ void Initialize()
 			script += std::string() + " " + dialog.TextBox("stderr.txt") + "\n";
 			script += std::string() + "fi" + "\n";
 		
-			script += std::string() + "make -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
+			script += std::string() + "" + make + " -j " + mpt::fmt::dec(mpt::thread::hardware_concurrency()) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 1)
 			{
