@@ -272,6 +272,7 @@ void Initialize()
 		mpt::ustring msg;
 		msg += MPT_USTRING("OpenMPT does not support Wine integration on your current Wine setup.") + lf;
 		Reporting::Notification(msg, WineGetWindowTitle());
+		return;
 	}
 
 	try
@@ -288,7 +289,7 @@ void Initialize()
 	} catch(const std::exception & e)
 	{
 		mpt::ustring msg;
-		msg += MPT_USTRING("OpenMPT was not enable to determine Wine configuration details on your current Wine setup:") + lf;
+		msg += MPT_USTRING("OpenMPT was not able to determine Wine configuration details on your current Wine setup:") + lf;
 		msg += mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, e.what() ? e.what() : "");
 		msg += lf;
 		msg += MPT_USTRING("OpenMPT native Wine Integration will not be available.") + lf;
