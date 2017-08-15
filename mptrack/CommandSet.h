@@ -1240,8 +1240,8 @@ public:
 	MPT_CONSTEXPR11_FUN FlagSet<KeyEventType> EventType() const { return event; }
 
 	// Key combination to string
-	static const TCHAR *GetContextText(InputTargetContext ctx);
-	const TCHAR *GetContextText() const { return GetContextText(Context()); }
+	static CString GetContextText(InputTargetContext ctx);
+	CString GetContextText() const { return GetContextText(Context()); }
 
 	static CString GetModifierText(FlagSet<Modifiers> mod);
 	CString GetModifierText() const { return GetModifierText(Modifier()); }
