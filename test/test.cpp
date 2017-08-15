@@ -1097,6 +1097,14 @@ static MPT_NOINLINE void TestMisc()
 
 #endif
 
+	VERIFY_EQUAL(mpt::wrapping_modulo(-25, 12), 11);
+	VERIFY_EQUAL(mpt::wrapping_modulo(-24, 12), 0);
+	VERIFY_EQUAL(mpt::wrapping_modulo(-23, 12), 1);
+	VERIFY_EQUAL(mpt::wrapping_modulo(0, 12), 0);
+	VERIFY_EQUAL(mpt::wrapping_modulo(23, 12), 11);
+	VERIFY_EQUAL(mpt::wrapping_modulo(24, 12), 0);
+	VERIFY_EQUAL(mpt::wrapping_modulo(25, 12), 1);
+
 	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
 	VERIFY_EQUAL( mpt::String::RTrim(std::string(" ")), "" );
 	VERIFY_EQUAL( mpt::String::Trim(std::string(" ")), "" );
@@ -2245,6 +2253,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 {
 #ifdef MODPLUG_TRACKER
 	const CModDoc *pModDoc = sndFile.GetpModDoc();
+	VERIFY_EQUAL_NONCONT(pModDoc->IsChannelUnused(0), true);
+	VERIFY_EQUAL_NONCONT(pModDoc->IsChannelUnused(1), false);
 #endif // MODPLUG_TRACKER
 
 	// Global Variables

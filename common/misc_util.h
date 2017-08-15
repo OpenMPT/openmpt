@@ -128,7 +128,7 @@ namespace mpt {
 // integer type narrower than int to double.
 //  As this is apparently valid by the current standard, Library Working Group
 // Issue #2735 has been filed (see
-// <https://cplusplus.github.io/LWG/lwg-active.html#2735>).
+// <https://cplusplus.github.io/LWG/lwg-defects.html#2735>).
 //  In any case, avoid this insanity and provide our own mpt::abs implementation
 // for signed integer and floating point types.
 //  Note: We stick to a C++98-style implementation only overloading int and
@@ -164,6 +164,16 @@ inline long double abs(long double x)
 //-----------------------------------
 {
 	return std::fabs(x);
+}
+
+// Modulo with more intuitive behaviour for some contexts:
+// Instead of being symmetrical around 0, the pattern for positive numbers is repeated in the negative range.
+// For example, wrapping_modulo(-1, m) == (m - 1).
+template<typename N, typename M>
+constexpr typename std::common_type<N, M>::type wrapping_modulo(N n, M m)
+//-----------------------------------------------------------------------
+{
+	return (m + (n % m)) % m;
 }
 
 } // namespace mpt
@@ -602,7 +612,7 @@ inline T ExponentialGrow(const T &x)
 {
 	return Util::ExponentialGrow(x, std::numeric_limits<T>::max());
 }
-									
+
 } //namespace Util
 
 
