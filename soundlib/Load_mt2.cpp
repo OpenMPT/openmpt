@@ -337,7 +337,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			break;
 
 		case 0x9D:	// Offset + delay
-			m.volcmd = CMD_OFFSET;
+			m.volcmd = VOLCMD_OFFSET;
 			m.vol = p.fxparam2 >> 3;
 			m.command = CMD_S3MCMDEX;
 			m.param = 0xD0 | std::min(p.fxparam1, uint8(0x0F));
