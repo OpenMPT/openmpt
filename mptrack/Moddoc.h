@@ -203,7 +203,8 @@ public:
 	void ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source);
 	void AppendModule(const CSoundFile &source);
 
-	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
+	// Create a new pattern and, if order position is specified, inserts it into the order list.
+	PATTERNINDEX InsertPattern(ROWINDEX rows, ORDERINDEX ord = ORDERINDEX_INVALID);
 	SAMPLEINDEX InsertSample();
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
 	INSTRUMENTINDEX InsertInstrumentForPlugin(PLUGINDEX plug);

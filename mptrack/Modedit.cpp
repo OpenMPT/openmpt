@@ -641,13 +641,16 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 }
 
 
-PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
-//------------------------------------------------------------------
+PATTERNINDEX CModDoc::InsertPattern(ROWINDEX rows, ORDERINDEX ord)
+//----------------------------------------------------------------
 {
-	PATTERNINDEX pat = m_SndFile.Patterns.InsertAny(nRows, true);
+	PATTERNINDEX pat = m_SndFile.Patterns.InsertAny(rows, true);
 	if(pat != PATTERNINDEX_INVALID)
 	{
-		m_SndFile.Order().insert(nOrd, 1, pat);
+		if(ord != ORDERINDEX_INVALID)
+		{
+			m_SndFile.Order().insert(ord, 1, pat);
+		}
 		SetModified();
 	}
 	return pat;

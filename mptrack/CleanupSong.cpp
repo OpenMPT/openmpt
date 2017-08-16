@@ -874,7 +874,7 @@ bool CModCleanupDlg::ResetVariables()
 
 	if(sndFile.Order().empty())
 	{
-		sndFile.Order().push_back(sndFile.Patterns.InsertAny(64));
+		modDoc.InsertPattern(64, 0);
 	}
 
 	// Reset instruments (if there are any)
