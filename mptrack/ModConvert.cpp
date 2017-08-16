@@ -144,7 +144,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(origRows < 64)
 			{
 				// Try to save short patterns by inserting a pattern break.
-				pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).Retry(EffectWriter::rmTryNextRow));
+				pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).RetryNextRow());
 			}
 
 			CHANGEMODTYPE_WARNING(wResizedPatterns);
@@ -446,7 +446,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			if(firstPatValid)
 			{
-				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).RetryNextRow());
 			}
 			m_SndFile.m_nDefaultSpeed = 6;
 			lossy = true;
@@ -455,7 +455,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			if(firstPatValid)
 			{
-				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).Retry(EffectWriter::rmTryNextRow));
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).RetryNextRow());
 			}
 			m_SndFile.m_nDefaultTempo.Set(125);
 			lossy = true;

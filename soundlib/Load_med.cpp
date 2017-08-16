@@ -292,7 +292,7 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 	uint32 param = p.param;
 	switch(command)
 	{
-	case 0x00:	if (param) command = CMD_ARPEGGIO; else command = 0; break;
+	case 0x00:	if (param) command = CMD_ARPEGGIO; else command = CMD_NONE; break;
 	case 0x01:	command = CMD_PORTAMENTOUP; break;
 	case 0x02:	command = CMD_PORTAMENTODOWN; break;
 	case 0x03:	command = CMD_TONEPORTAMENTO; break;
@@ -300,7 +300,7 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 	case 0x05:	command = CMD_TONEPORTAVOL; break;
 	case 0x06:	command = CMD_VIBRATOVOL; break;
 	case 0x07:	command = CMD_TREMOLO; break;
-	case 0x0A:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = 0; break;
+	case 0x0A:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = CMD_NONE; break;
 	case 0x0B:	command = CMD_POSITIONJUMP; break;
 	case 0x0C:	command = CMD_VOLUME;
 				if (pmsh->flags & MMD_FLAG_VOLHEX)
@@ -308,18 +308,18 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 					if (param < 0x80)
 					{
 						param = (param+1) / 2;
-					} else command = 0;
+					} else command = CMD_NONE;
 				} else
 				{
 					if (param <= 0x99)
 					{
 						param = (param >> 4)*10+((param & 0x0F) % 10);
 						if (param > 64) param = 64;
-					} else command = 0;
+					} else command = CMD_NONE;
 				}
 				break;
 	case 0x09:	command = static_cast<ModCommand::COMMAND>((param <= 0x20) ? CMD_SPEED : CMD_TEMPO); break;
-	case 0x0D:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = 0; break;
+	case 0x0D:	if (param & 0xF0) param &= 0xF0; command = CMD_VOLUMESLIDE; if (!param) command = CMD_NONE; break;
 	case 0x0F:	// Set Tempo / Special
 		// F.00 = Pattern Break
 		if (!param)	command = CMD_PATTERNBREAK;	else
@@ -404,7 +404,8 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 #ifdef MED_LOG
 			Log("Unknown Fxx command: cmd=0x%02X param=0x%02X\n", command, param);
 #endif
-			param = command = 0;
+			command = CMD_NONE;
+			param = 0;
 		}
 		break;
 	// 11.0x: Fine Slide Up
@@ -484,7 +485,7 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 		// 0x2E ?
 		Log("Unknown command: cmd=0x%02X param=0x%02X\n", command, param);
 #endif
-		command = 0;
+		command = CMD_NONE;
 		param = 0;
 	}
 	p.command = command;

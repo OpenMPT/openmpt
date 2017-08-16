@@ -174,7 +174,6 @@ class EffectWriter
 {
 	friend class CPattern;
 	
-public:
 	// Row advance mode
 	enum RetryMode
 	{
@@ -183,9 +182,10 @@ public:
 		rmTryPreviousRow,	// If effect can't be written, try previous row.
 	};
 
+public:
 	// Constructors with effect commands
-	EffectWriter(EffectCommands cmd, ModCommand::PARAM param) : m_command(static_cast<uint8>(cmd)), m_param(param), m_isVolEffect(false) { Init(); }
-	EffectWriter(VolumeCommands cmd, ModCommand::VOL param) : m_command(static_cast<uint8>(cmd)), m_param(param), m_isVolEffect(true) { Init(); }
+	EffectWriter(EffectCommand cmd, ModCommand::PARAM param) : m_command(cmd), m_param(param), m_isVolEffect(false) { Init(); }
+	EffectWriter(VolumeCommand cmd, ModCommand::VOL param) : m_volcmd(cmd), m_vol(param), m_isVolEffect(true) { Init(); }
 
 	// Additional constructors:
 	// Set row in which writing should start
@@ -195,14 +195,25 @@ public:
 	// Allow multiple effects of the same kind to be written in the same row.
 	EffectWriter &AllowMultiple() { m_allowMultiple = true; return *this; }
 	// Set retry mode.
-	EffectWriter &Retry(RetryMode retryMode) { m_retryMode = retryMode; return *this; }
+	EffectWriter &RetryNextRow() { m_retryMode = rmTryNextRow; return *this; }
+	EffectWriter &RetryPreviousRow() { m_retryMode = rmTryPreviousRow; return *this; }
 
 protected:
-	uint8 m_command, m_param;
-	
+	RetryMode m_retryMode;
 	ROWINDEX m_row;
 	CHANNELINDEX m_channel;
-	RetryMode m_retryMode;
+
+	union
+	{
+		EffectCommand m_command;
+		VolumeCommand m_volcmd;
+	};
+	union
+	{
+		ModCommand::PARAM m_param;
+		ModCommand::VOL m_vol;
+	};
+
 	bool m_retry : 1;
 	bool m_allowMultiple : 1;
 	bool m_isVolEffect : 1;

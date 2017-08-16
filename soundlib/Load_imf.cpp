@@ -202,7 +202,7 @@ struct IMFSample
 MPT_BINARY_STRUCT(IMFSample, 64)
 
 
-static const uint8 imfEffects[] =
+static const EffectCommand imfEffects[] =
 {
 	CMD_NONE,
 	CMD_SPEED,			// 0x01 1xx Set Tempo
@@ -341,7 +341,7 @@ static void ImportIMFEffect(ModCommand &m)
 			m.param = n | (m.param & 0x0F);
 		break;
 	}
-	m.command = (m.command < CountOf(imfEffects)) ? imfEffects[m.command] : (int)CMD_NONE;
+	m.command = (m.command < CountOf(imfEffects)) ? imfEffects[m.command] : CMD_NONE;
 	if(m.command == CMD_VOLUME && m.volcmd == VOLCMD_NONE)
 	{
 		m.volcmd = VOLCMD_VOLUME;

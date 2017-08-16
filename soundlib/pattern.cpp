@@ -298,7 +298,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 		{
 			if(!settings.m_isVolEffect && m->command == settings.m_command)
 				return true;
-			if(settings.m_isVolEffect && m->volcmd == settings.m_command)
+			if(settings.m_isVolEffect && m->volcmd == settings.m_volcmd)
 				return true;
 		}
 	}
@@ -315,8 +315,8 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 		}
 		if(settings.m_isVolEffect && m->volcmd == VOLCMD_NONE)
 		{
-			m->volcmd = settings.m_command;
-			m->vol = settings.m_param;
+			m->volcmd = settings.m_volcmd;
+			m->vol = settings.m_vol;
 			return true;
 		}
 	}
@@ -335,6 +335,10 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 				switch(m->command)
 				{
 				case CMD_VOLUME:
+					if(!GetSoundFile().GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
+					{
+						break;
+					}
 					m->volcmd = VOLCMD_VOLUME;
 					m->vol = m->param;
 					m->command = settings.m_command;
@@ -342,7 +346,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 					return true;
 
 				case CMD_PANNING8:
-					if(isS3M && settings.m_param > 0x80)
+					if(isS3M && m->param > 0x80)
 					{
 						break;
 					}
@@ -351,12 +355,9 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 					m->command = settings.m_command;
 
 					if(isS3M)
-					{
-						m->vol = m->param >> 1;
-					} else
-					{
-						m->vol = (m->param >> 2) + 1;
-					}
+						m->vol = (m->param + 1u) / 2u;
+					else
+						m->vol = (m->param + 2u) / 4u;
 
 					m->param = settings.m_param;
 					return true;
@@ -365,54 +366,62 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 		}
 
 		// Let's try it again by writing into the "other" effect column.
-		uint8 newCommand = CMD_NONE, newParam = settings.m_param;
 		if(settings.m_isVolEffect)
 		{
 			// Convert volume effect to normal effect
-			switch(settings.m_command)
+			ModCommand::COMMAND newCommand = CMD_NONE;
+			ModCommand::PARAM newParam = settings.m_vol;
+			switch(settings.m_volcmd)
 			{
 			case VOLCMD_PANNING:
 				newCommand = CMD_PANNING8;
-				if(isS3M)
-				{
-					newParam <<= 1;
-				} else
-				{
-					newParam = MIN(settings.m_param << 2, 0xFF);
-				}
+				newParam = mpt::saturate_cast<ModCommand::PARAM>(settings.m_vol * (isS3M ? 2u : 4u));
 				break;
 			case VOLCMD_VOLUME:
 				newCommand = CMD_VOLUME;
 				break;
 			}
+
+			if(newCommand != CMD_NONE)
+			{
+				settings.m_command = static_cast<EffectCommand>(newCommand);
+				settings.m_param = newParam;
+				settings.m_retry = false;
+			}
 		} else
 		{
 			// Convert normal effect to volume effect
+			ModCommand::VOLCMD newVolCmd = VOLCMD_NONE;
+			ModCommand::VOL newVol = settings.m_param;
 			if(settings.m_command == CMD_PANNING8 && isS3M)
 			{
 				// This needs some manual fixing.
 				if(settings.m_param <= 0x80)
 				{
 					// Can't have surround in volume column, only normal panning
-					newCommand = VOLCMD_PANNING;
-					newParam >>= 1;
+					newVolCmd = VOLCMD_PANNING;
+					newVol /= 2u;
 				}
 			} else
 			{
-				newCommand = settings.m_command;
-				if(!ModCommand::ConvertVolEffect(newCommand, newParam, true))
+				newVolCmd = settings.m_command;
+				if(!ModCommand::ConvertVolEffect(newVolCmd, newVol, true))
 				{
 					// No Success :(
-					newCommand = CMD_NONE;
+					newVolCmd = VOLCMD_NONE;
 				}
+			}
+
+			if(newVolCmd != CMD_NONE)
+			{
+				settings.m_volcmd = static_cast<VolumeCommand>(newVolCmd);
+				settings.m_vol = newVol;
+				settings.m_retry = false;
 			}
 		}
 
-		if(newCommand != CMD_NONE)
+		if(!settings.m_retry)
 		{
-			settings.m_command = newCommand;
-			settings.m_param = newParam;
-			settings.m_retry = false;
 			settings.m_isVolEffect = !settings.m_isVolEffect;
 			if(WriteEffect(settings))
 			{

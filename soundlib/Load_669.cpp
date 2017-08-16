@@ -266,10 +266,10 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		// Write pattern break
 		if(fileHeader.breaks[pat] < 63)
 		{
-			Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(fileHeader.breaks[pat]).Retry(EffectWriter::rmTryNextRow));
+			Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(fileHeader.breaks[pat]).RetryNextRow());
 		}
 		// And of course the speed...
-		Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, fileHeader.tempoList[pat]).Retry(EffectWriter::rmTryNextRow));
+		Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, fileHeader.tempoList[pat]).RetryNextRow());
 	}
 
 	if(loadFlags & loadSampleData)

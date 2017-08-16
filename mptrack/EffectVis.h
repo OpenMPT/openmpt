@@ -89,9 +89,9 @@ protected:
 	int PCParamToScreenY(uint16 param) const;
 	int FXParamToScreenY(uint16 param) const;
 	uint16 GetParam(ROWINDEX row) const;
-	BYTE GetCommand(ROWINDEX row) const;
+	EffectCommand GetCommand(ROWINDEX row) const;
 	void SetParamFromY(ROWINDEX row, int y);
-	void SetCommand(ROWINDEX row, BYTE cmd);
+	void SetCommand(ROWINDEX row, EffectCommand cmd);
 	ModCommand::PARAM ScreenYToFXParam(int y) const;
 	uint16 ScreenYToPCParam(int y) const;
 	ROWINDEX ScreenXToRow(int x) const;

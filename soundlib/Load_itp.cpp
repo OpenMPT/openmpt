@@ -36,7 +36,7 @@ OPENMPT_NAMESPACE_BEGIN
 // v1.01: Added option to embed instrument headers
 
 
-struct MODCOMMAND_ORIGINAL
+struct ITPModCommand
 {
 	uint8le note;
 	uint8le instr;
@@ -47,17 +47,17 @@ struct MODCOMMAND_ORIGINAL
 	operator ModCommand() const
 	{
 		ModCommand result;
-		result.note = note;
+		result.note = (ModCommand::IsNote(note) || ModCommand::IsSpecialNote(note)) ? note : NOTE_NONE;
 		result.instr = instr;
-		result.volcmd = volcmd;
-		result.command = command;
+		result.command = (command < MAX_EFFECTS) ? static_cast<EffectCommand>(command.get()) : CMD_NONE;
+		result.volcmd = (volcmd < MAX_VOLCMDS) ? static_cast<VolumeCommand>(volcmd.get()) : VOLCMD_NONE;
 		result.vol = vol;
 		result.param = param;
 		return result;
 	}
 };
 
-MPT_BINARY_STRUCT(MODCOMMAND_ORIGINAL, 6)
+MPT_BINARY_STRUCT(ITPModCommand, 6)
 
 
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
@@ -234,16 +234,13 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		// Pattern data
 		size_t numCommands = GetNumChannels() * numRows;
 
-		if(patternChunk.CanRead(sizeof(MODCOMMAND_ORIGINAL) * numCommands))
+		if(patternChunk.CanRead(sizeof(ITPModCommand) * numCommands))
 		{
 			ModCommand *target = Patterns[pat].GetpModCommand(0, 0);
 			while(numCommands-- != 0)
 			{
-				MODCOMMAND_ORIGINAL data;
+				ITPModCommand data;
 				patternChunk.ReadStruct(data);
-				if(data.command >= MAX_EFFECTS) data.command = CMD_NONE;
-				if(data.volcmd >= MAX_VOLCMDS) data.volcmd = VOLCMD_NONE;
-				if(data.note > NOTE_MAX && data.note < NOTE_MIN_SPECIAL) data.note = NOTE_NONE;
 				*(target++) = data;
 			}
 		}

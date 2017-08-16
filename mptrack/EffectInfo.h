@@ -37,8 +37,8 @@ public:
 	// Get effect index in effect list from effect command + param
 	LONG GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const;
 	// Get effect command + param from effect index
-	ModCommand::COMMAND GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const;
-	ModCommand::COMMAND GetEffectFromIndex(UINT ndx) const;
+	EffectCommand GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const;
+	EffectCommand GetEffectFromIndex(UINT ndx) const;
 	// Get parameter mask from effect (for extended effects)
 	UINT GetEffectMaskFromIndex(UINT ndx) const;
 	// Get precise effect name, also with explanation of effect parameter
@@ -57,7 +57,7 @@ public:
 	// Get effect index in effect list from volume command
 	LONG GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const;
 	// Get volume command from effect index
-	ModCommand::VOLCMD GetVolCmdFromIndex(UINT ndx) const;
+	VolumeCommand GetVolCmdFromIndex(UINT ndx) const;
 	// Get range information, effect name, etc... from a given effect.
 	bool GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin = nullptr, ModCommand::VOL *prangeMax = nullptr) const;
 	// Get effect name and parameter description

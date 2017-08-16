@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct MPTEFFECTINFO
 {
-	ModCommand::COMMAND effect;		// CMD_XXXX
+	EffectCommand     effect;		// CMD_XXXX
 	ModCommand::PARAM paramMask;	// 0 = default
 	ModCommand::PARAM paramValue;	// 0 = default
 	ModCommand::PARAM paramLimit;	// Parameter Editor limit
@@ -202,8 +202,8 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 
 
 //Returns command and corrects parameter refParam if necessary
-ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
-//---------------------------------------------------------------------------------------------
+EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
+//---------------------------------------------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
 	{
@@ -232,8 +232,8 @@ ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &
 }
 
 
-ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx) const
-//----------------------------------------------------------------
+EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx) const
+//----------------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
 	{
@@ -876,7 +876,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 
 struct MPTVOLCMDINFO
 {
-	ModCommand::VOLCMD volCmd;		// VOLCMD_XXXX
+	VolumeCommand volCmd;		// VOLCMD_XXXX
 	FlagSet<MODTYPE>::store_type supportedFormats;		// MOD_TYPE_XXX combo
 	const TCHAR *name;				// e.g. "Set Volume"
 	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
@@ -922,10 +922,10 @@ LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
 }
 
 
-ModCommand::VOLCMD EffectInfo::GetVolCmdFromIndex(UINT ndx) const
-//---------------------------------------------------------------
+VolumeCommand EffectInfo::GetVolCmdFromIndex(UINT ndx) const
+//----------------------------------------------------------
 {
-	return (ndx < CountOf(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : 0;
+	return (ndx < CountOf(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : VOLCMD_NONE;
 }
 
 

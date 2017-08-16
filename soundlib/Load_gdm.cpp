@@ -330,16 +330,14 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 					while(chunk.CanRead(2))
 					{
-						uint8 effByte = chunk.ReadUint8();
-						uint8 paramByte = chunk.ReadUint8();
-
 						// We may want to restore the old command in some cases.
 						const ModCommand oldCmd = m;
-						m.command = effByte & effectMask;
-						m.param = paramByte;
+
+						uint8 effByte = chunk.ReadUint8();
+						m.param = chunk.ReadUint8();
 
 						// Effect translation LUT
-						static const uint8 gdmEffTrans[] =
+						static const EffectCommand gdmEffTrans[] =
 						{
 							CMD_NONE, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 							CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
@@ -352,8 +350,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						};
 
 						// Translate effect
-						if(m.command < CountOf(gdmEffTrans))
-							m.command = gdmEffTrans[m.command];
+						uint8 command = effByte & effectMask;
+						if(command < CountOf(gdmEffTrans))
+							m.command = gdmEffTrans[command];
 						else
 							m.command = CMD_NONE;
 

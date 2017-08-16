@@ -428,7 +428,7 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 			{
 				PATTERNINDEX writePat = order.EnsureUnique(subSong.endOrder);
 				result = m_sndFile.Patterns[writePat].WriteEffect(
-					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(subSong.endRow).Retry(EffectWriter::rmTryNextRow));
+					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(subSong.endRow).RetryNextRow());
 			} else
 			{
 				result = false;

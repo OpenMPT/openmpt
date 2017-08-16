@@ -764,12 +764,12 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						} else
 						{
 							m.volcmd = VOLCMD_NONE;
-							for(ModCommand::VOLCMD i = 1; i < MAX_VOLCMDS; i++)
+							for(int i = VOLCMD_NONE + 1; i < MAX_VOLCMDS; i++)
 							{
-								const char cmd = sourceSpecs.GetVolEffectLetter(i);
+								const char cmd = sourceSpecs.GetVolEffectLetter(static_cast<VolumeCommand>(i));
 								if(data[pos + 5] == cmd && cmd != '?')
 								{
-									m.volcmd = i;
+									m.volcmd = static_cast<VolumeCommand>(i);
 									break;
 								}
 							}
@@ -808,12 +808,12 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						m.command = CMD_NONE;
 						if(data[pos + 8] != '.')
 						{
-							for(ModCommand::COMMAND i = 1; i < MAX_EFFECTS; i++)
+							for(int i = CMD_NONE + 1; i < MAX_EFFECTS; i++)
 							{
-								const char cmd = sourceSpecs.GetEffectLetter(i);
+								const char cmd = sourceSpecs.GetEffectLetter(static_cast<EffectCommand>(i));
 								if(data[pos + 8] == cmd && cmd != '?')
 								{
-									m.command = i;
+									m.command = static_cast<EffectCommand>(i);
 									break;
 								}
 							}
