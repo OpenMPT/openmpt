@@ -361,6 +361,9 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 
 					m->param = settings.m_param;
 					return true;
+
+				default:
+					break;
 				}
 			}
 		}
@@ -379,6 +382,8 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 				break;
 			case VOLCMD_VOLUME:
 				newCommand = CMD_VOLUME;
+				break;
+			default:
 				break;
 			}
 
