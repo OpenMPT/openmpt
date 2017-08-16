@@ -773,7 +773,7 @@ void CCtrlPatterns::OnPatternNew()
 		rows = m_sndFile.Patterns[curPat].GetNumRows();
 	}
 	rows = Clamp(rows, m_sndFile.GetModSpecifications().patternRowsMin, m_sndFile.GetModSpecifications().patternRowsMax);
-	PATTERNINDEX newPat = m_modDoc.InsertPattern(curOrd, rows);
+	PATTERNINDEX newPat = m_modDoc.InsertPattern(rows, curOrd);
 	if(m_sndFile.Patterns.IsValidPat(newPat))
 	{
 		// update time signature

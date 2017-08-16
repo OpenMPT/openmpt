@@ -431,7 +431,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						patList.resize(insertPat + 1, PATTERNINDEX_INVALID);
 					}
 
-					patList[insertPat] = sndFile.Patterns.InsertAny(64, true);
+					patList[insertPat] = modDoc.InsertPattern(64);
 					insertPat = patList[insertPat];
 				}
 			}
@@ -629,12 +629,12 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			{
 				curRow = 0;
 				ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder <= curOrder || nextOrder >= order.size() || !sndFile.Patterns.IsValidPat(order[nextOrder]))
+				if(nextOrder <= curOrder || !order.IsValidPat(nextOrder))
 				{
 					PATTERNINDEX newPat;
 					if(!insertNewPatterns
 						|| curOrder >= sndFile.GetModSpecifications().ordersMax
-						|| (newPat = sndFile.Patterns.InsertAny(sndFile.Patterns[pattern].GetNumRows(), true)) == PATTERNINDEX_INVALID
+						|| (newPat = modDoc.InsertPattern(sndFile.Patterns[pattern].GetNumRows())) == PATTERNINDEX_INVALID
 						|| order.insert(curOrder + 1, 1, newPat) == 0)
 					{
 						return success;
@@ -717,7 +717,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					} else if (data[pos] != '.')
 					{
 						// Check note names
-						for(size_t i = 0; i < 12; i++)
+						for(uint8 i = 0; i < 12; i++)
 						{
 							if(data[pos] == NoteNamesSharp[i][0] && data[pos + 1] == NoteNamesSharp[i][1])
 							{
@@ -829,7 +829,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						m.param = 0;
 						if(data[pos + 9] != '.')
 						{
-							for(size_t i = 0; i < 16; i++)
+							for(uint8 i = 0; i < 16; i++)
 							{
 								if(data[pos + 9] == szHexChar[i]) m.param |= (i << 4);
 								if(data[pos + 10] == szHexChar[i]) m.param |= i;
