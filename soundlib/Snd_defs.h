@@ -503,7 +503,7 @@ public:
 
 	SamplePosition() : v(0) { }
 	explicit SamplePosition(value_t pos) : v(pos) { }
-	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) << 32) | fractPart) { }
+	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll<<32)) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
 	static SamplePosition FromDouble(double pos) { return SamplePosition(static_cast<value_t>(pos * 4294967296.0)); }
 
