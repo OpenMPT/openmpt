@@ -169,11 +169,12 @@ inline long double abs(long double x)
 // Modulo with more intuitive behaviour for some contexts:
 // Instead of being symmetrical around 0, the pattern for positive numbers is repeated in the negative range.
 // For example, wrapping_modulo(-1, m) == (m - 1).
-template<typename N, typename M>
-constexpr typename std::common_type<N, M>::type wrapping_modulo(N n, M m)
-//-----------------------------------------------------------------------
+// Behaviour is undefined if m<=0.
+template<typename T, typename M>
+MPT_CONSTEXPR11_FUN auto wrapping_modulo(T x, M m) -> decltype(x % m)
+//-------------------------------------------------------------------
 {
-	return (m + (n % m)) % m;
+	return (x >= 0) ? (x % m) : (m - 1 - ((-1 - x) % m));
 }
 
 } // namespace mpt
