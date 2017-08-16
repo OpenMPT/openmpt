@@ -32,7 +32,7 @@ class CSoundFile;
 
 
 // Volume Column commands
-enum VolumeCommands : uint8
+enum VolumeCommand : uint8
 {
 	VOLCMD_NONE				= 0,
 	VOLCMD_VOLUME			= 1,
@@ -55,7 +55,7 @@ enum VolumeCommands : uint8
 
 
 // Effect column commands
-enum EffectCommands : uint8
+enum EffectCommand : uint8
 {
 	CMD_NONE				= 0,
 	CMD_ARPEGGIO			= 1,
@@ -131,7 +131,7 @@ public:
 	static const int maxColumnValue = 999;
 
 	// Returns empty modcommand.
-	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
+	static ModCommand Empty() { ModCommand m = { 0, 0, VOLCMD_NONE, CMD_NONE, 0, 0 }; return m; }
 
 	bool operator==(const ModCommand& mc) const
 	{

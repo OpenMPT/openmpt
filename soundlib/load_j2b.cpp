@@ -471,7 +471,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 //----------------------------------------------------------------------------------------------
 {
 	// Effect translation LUT
-	static const ModCommand::COMMAND amEffTrans[] =
+	static const EffectCommand amEffTrans[] =
 	{
 		CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 		CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
@@ -527,16 +527,16 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 			if(flags & effectFlag) // effect
 			{
 				m.param = chunk.ReadUint8();
-				m.command = chunk.ReadUint8();
+				uint8 command = chunk.ReadUint8();
 
-				if(m.command < CountOf(amEffTrans))
+				if(command < CountOf(amEffTrans))
 				{
 					// command translation
-					m.command = amEffTrans[m.command];
+					m.command = amEffTrans[command];
 				} else
 				{
 #ifdef DEBUG
-					Log(mpt::format("J2B: Unknown command: 0x%1, param 0x%2")(mpt::fmt::HEX0<2>(m.command), mpt::fmt::HEX0<2>(m.param)));
+					Log(mpt::format("J2B: Unknown command: 0x%1, param 0x%2")(mpt::fmt::HEX0<2>(command), mpt::fmt::HEX0<2>(m.param)));
 #endif // DEBUG
 					m.command = CMD_NONE;
 				}

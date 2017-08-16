@@ -236,7 +236,8 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 					break;
 				default:
 					// Junk.
-					m->command = m->param = 0;
+					m->command = CMD_NONE;
+					m->param = 0;
 					break;
 				}
 				break;

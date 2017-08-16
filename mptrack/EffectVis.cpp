@@ -137,16 +137,17 @@ void CEffectVis::SetParamFromY(ROWINDEX row, int y)
 }
 
 
-ModCommand::COMMAND CEffectVis::GetCommand(ROWINDEX row) const
-//------------------------------------------------------------
+EffectCommand CEffectVis::GetCommand(ROWINDEX row) const
+//------------------------------------------------------
 {
 	if(m_pSndFile->Patterns.IsValidPat(m_nPattern))
-		return m_pSndFile->Patterns[m_nPattern].GetpModCommand(row, m_nChan)->command;
+		return static_cast<EffectCommand>(m_pSndFile->Patterns[m_nPattern].GetpModCommand(row, m_nChan)->command);
 	else
 		return CMD_NONE;
 }
 
-void CEffectVis::SetCommand(ROWINDEX row, BYTE command)
+void CEffectVis::SetCommand(ROWINDEX row, EffectCommand command)
+//--------------------------------------------------------------
 {
 	if(m_pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
@@ -156,7 +157,7 @@ void CEffectVis::SetCommand(ROWINDEX row, BYTE command)
 			// Clear PC note
 			m.note = 0;
 			m.instr = 0;
-			m.volcmd = 0;
+			m.volcmd = VOLCMD_NONE;
 			m.vol = 0;
 		}
 		m.command = command;

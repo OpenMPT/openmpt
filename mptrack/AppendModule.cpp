@@ -307,7 +307,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		if(copyRows < targetPat.GetNumRows())
 		{
 			// If source pattern was smaller, write pattern break effect.
-			targetPat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(copyRows - 1).Retry(EffectWriter::rmTryNextRow));
+			targetPat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(copyRows - 1).RetryNextRow());
 		}
 	}
 }

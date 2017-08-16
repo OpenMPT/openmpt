@@ -155,7 +155,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(fileHeader.headerLength);
 	
 	// Pattern effect LUT
-	static const uint8 farEffects[] =
+	static const EffectCommand farEffects[] =
 	{
 		CMD_NONE,
 		CMD_PORTAMENTOUP,
@@ -255,7 +255,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(breakRow).Retry(EffectWriter::rmTryNextRow));
+		Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(breakRow).RetryNextRow());
 	}
 	
 	if(!(loadFlags & loadSampleData))

@@ -627,7 +627,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						// Put high offset on previous row
 						if(row > 0 && effect1 != settings.channels[chn].highOffset)
 						{
-							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0xA0 | (effect1 - 6))).Row(row - 1).Channel(chn).Retry(EffectWriter::rmTryPreviousRow)))
+							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0xA0 | (effect1 - 6))).Row(row - 1).Channel(chn).RetryPreviousRow()))
 							{
 								settings.channels[chn].highOffset = effect1;
 							}
@@ -711,7 +711,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						// Put vibrato type on previous row
 						if(row > 0 && effect2 != settings.channels[chn].vibratoType)
 						{
-							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x30 | (effect2 - 8))).Row(row - 1).Channel(chn).Retry(EffectWriter::rmTryPreviousRow)))
+							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x30 | (effect2 - 8))).Row(row - 1).Channel(chn).RetryPreviousRow()))
 							{
 								settings.channels[chn].vibratoType = effect2;
 							}
@@ -770,7 +770,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						// Put tremolo type on previous row
 						if(row > 0 && effect3 != settings.channels[chn].tremoloType)
 						{
-							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x40 | (effect3 - 4))).Row(row - 1).Channel(chn).Retry(EffectWriter::rmTryPreviousRow)))
+							if(sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, (0x40 | (effect3 - 4))).Row(row - 1).Channel(chn).RetryPreviousRow()))
 							{
 								settings.channels[chn].tremoloType = effect3;
 							}
@@ -867,18 +867,18 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 		{
 			tempoChange = false;
 			
-			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_TEMPO, static_cast<ModCommand::PARAM>(tempo)).Row(row).Channel(0).Retry(EffectWriter::rmTryNextRow));
-			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, static_cast<ModCommand::PARAM>(speed)).Row(row).Retry(EffectWriter::rmTryNextRow));
+			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_TEMPO, static_cast<ModCommand::PARAM>(tempo)).Row(row).Channel(0).RetryNextRow());
+			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, static_cast<ModCommand::PARAM>(speed)).Row(row).RetryNextRow());
 		}
 		// Try to put delay effects somewhere as well
 		if(writeDelay & 0xF0)
 		{
-			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0xE0 | (writeDelay >> 4)).Row(row).AllowMultiple().Retry(EffectWriter::rmIgnore));
+			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0xE0 | (writeDelay >> 4)).Row(row).AllowMultiple());
 		}
 		if(writeDelay & 0x0F)
 		{
 			const uint8 param = (writeDelay & 0x0F) * settings.internalTicks / 15;
-			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x60u | Clamp(param, uint8(1), uint8(15))).Row(row).AllowMultiple().Retry(EffectWriter::rmIgnore));
+			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x60u | Clamp(param, uint8(1), uint8(15))).Row(row).AllowMultiple());
 		}
 		writeDelay = 0;
 	}	// End for all rows
@@ -967,7 +967,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 				// Loop end?
 				if(pat != PATTERNINDEX_INVALID && ord == seqHeader.loopEnd && (seqHeader.loopStart > 0 || ord < Order().GetLastIndex()))
 				{
-					Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(seqHeader.loopStart)).Row(Patterns[pat].GetNumRows() - 1).Retry(EffectWriter::rmTryPreviousRow));
+					Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(seqHeader.loopStart)).Row(Patterns[pat].GetNumRows() - 1).RetryPreviousRow());
 				}
 			}
 		}

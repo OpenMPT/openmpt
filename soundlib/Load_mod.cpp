@@ -942,7 +942,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					// No support for Startrekker assembly macros
 					if(isStartrekker && m.command == 0x0E)
 					{
-						m.command = m.param = 0;
+						m.command = CMD_NONE;
+						m.param = 0;
 					}
 					ConvertModCommand(m);
 				}

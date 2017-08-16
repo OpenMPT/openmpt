@@ -456,7 +456,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 							pfnt->nNumX, pfnt->nNumY+(val % 10)*pfnt->spacingY, pfnt->dib);
 	} else
 	{
-		ModCommand::VOLCMD volcmd = std::min<ModCommand::VOLCMD>(mc.volcmd, MAX_VOLCMDS - 1);
+		ModCommand::VOLCMD volcmd = mc.volcmd;
 		int vol = (mc.vol & 0x7F);
 
 		if(drawDefaultVolume)
@@ -466,7 +466,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 			vol = GetDefaultVolume(mc);
 		}
 
-		if(volcmd != VOLCMD_NONE)
+		if(volcmd != VOLCMD_NONE && volcmd < MAX_VOLCMDS)
 		{
 			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, pfnt->spacingY,
 							pfnt->nVolX, pfnt->nVolY + volcmd * pfnt->spacingY, pfnt->dib);

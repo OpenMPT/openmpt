@@ -1292,7 +1292,7 @@ bool CModDoc::GlobalVolumeToPattern()
 	{
 		for(PATTERNINDEX pat : m_SndFile.Order())
 		{
-			if(m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, mpt::saturate_cast<ModCommand::PARAM>(m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME)).Retry(EffectWriter::rmTryNextRow)))
+			if(m_SndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_GLOBALVOLUME, mpt::saturate_cast<ModCommand::PARAM>(m_SndFile.m_nDefaultGlobalVolume * 64 / MAX_GLOBAL_VOLUME)).RetryNextRow()))
 			{
 				result = true;
 				break;
