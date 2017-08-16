@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta28
 
+ *  MT2 offset + delay command was not imported correctly.
+
 ### libopenmpt 0.2-beta27 (2017-08-12)
 
  *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
