@@ -54,4 +54,4 @@
   links {
    "shlwapi",
   }
-    buildoptions { "/wd4244", "/wd4267", "/wd4334" }
+    buildoptions { "/wd4018", "/wd4244", "/wd4267", "/wd4334" }
