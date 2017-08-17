@@ -26,5 +26,15 @@ endif
 
 CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
 
+ifeq ($(CHECKED_ADDRESS),1)
+CXXFLAGS += -fsanitize=address
+CFLAGS   += -fsanitize=address
+endif
+
+ifeq ($(CHECKED_UNDEFINED),1)
+CXXFLAGS += -fsanitize=undefined
+CFLAGS   += -fsanitize=undefined
+endif
+
 EXESUFFIX=
 
