@@ -1195,6 +1195,38 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-1), uint32(0x7ffffffe)), uint32(0x7ffffffd));
 	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-2), uint32(0x7ffffffe)), uint32(0x7ffffffc));
 
+	VERIFY_EQUAL(mpt::wrapping_divide(-15, 7), -3);
+	VERIFY_EQUAL(mpt::wrapping_divide(-14, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-13, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-12, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-11, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-10, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-9, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-8, 7), -2);
+	VERIFY_EQUAL(mpt::wrapping_divide(-7, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-6, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-5, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-4, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-3, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-2, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(-1, 7), -1);
+	VERIFY_EQUAL(mpt::wrapping_divide(0, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(1, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(2, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(3, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(4, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(5, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(6, 7), 0);
+	VERIFY_EQUAL(mpt::wrapping_divide(7, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(8, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(9, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(10, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(11, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(12, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(13, 7), 1);
+	VERIFY_EQUAL(mpt::wrapping_divide(14, 7), 2);
+	VERIFY_EQUAL(mpt::wrapping_divide(15, 7), 2);
+
 
 	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
 	VERIFY_EQUAL( mpt::String::RTrim(std::string(" ")), "" );

@@ -177,6 +177,13 @@ MPT_CONSTEXPR11_FUN auto wrapping_modulo(T x, M m) -> decltype(x % m)
 	return (x >= 0) ? (x % m) : (m - 1 - ((-1 - x) % m));
 }
 
+template<typename T, typename D>
+MPT_CONSTEXPR11_FUN auto wrapping_divide(T x, D d) -> decltype(x / d)
+//-------------------------------------------------------------------
+{
+	return (x >= 0) ? (x / d) : (((x + 1) / d) - 1);
+}
+
 } // namespace mpt
 
 
