@@ -87,7 +87,8 @@ namespace Test {
 
 static MPT_NOINLINE void TestVersion();
 static MPT_NOINLINE void TestTypes();
-static MPT_NOINLINE void TestMisc();
+static MPT_NOINLINE void TestMisc1();
+static MPT_NOINLINE void TestMisc2();
 static MPT_NOINLINE void TestRandom();
 static MPT_NOINLINE void TestCharsets();
 static MPT_NOINLINE void TestStringFormatting();
@@ -168,7 +169,8 @@ void DoTests()
 
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
-	DO_TEST(TestMisc);
+	DO_TEST(TestMisc1);
+	DO_TEST(TestMisc2);
 	DO_TEST(TestRandom);
 	DO_TEST(TestCharsets);
 	DO_TEST(TestStringFormatting);
@@ -635,8 +637,8 @@ Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 	return Gregorian{Y,M,D,h,m,s};
 }
 
-static MPT_NOINLINE void TestMisc()
-//---------------------------------
+static MPT_NOINLINE void TestMisc1()
+//----------------------------------
 {
 
 	VERIFY_EQUAL(mpt::endian(), mpt::detail::endian_probe());
@@ -1227,6 +1229,12 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(mpt::wrapping_divide(14, 7), 2);
 	VERIFY_EQUAL(mpt::wrapping_divide(15, 7), 2);
 
+}
+
+
+static MPT_NOINLINE void TestMisc2()
+//----------------------------------
+{
 
 	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
 	VERIFY_EQUAL( mpt::String::RTrim(std::string(" ")), "" );
