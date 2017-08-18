@@ -146,14 +146,7 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 	}
 	else
 	{
-		NOTEINDEXTYPE pos = 0;
-		if(x >= 0)
-		{
-			pos = x % m_GroupSize;
-		} else
-		{
-			pos = m_GroupSize - ((0 - x - 1 + m_GroupSize) % m_GroupSize) - 1;
-		}
+		const NOTEINDEXTYPE pos = mpt::wrapping_modulo(x, m_GroupSize);
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
 		std::string rValue;
 		const auto nmi = m_NoteNameMap.find(pos);
@@ -162,10 +155,7 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 			rValue = nmi->second;
 			if(addOctave)
 			{
-				if(x >= 0)
-					rValue += mpt::fmt::val(middlePeriodNumber + x / m_GroupSize);
-				else
-					rValue += mpt::fmt::val(middlePeriodNumber + (x + 1) / m_GroupSize - 1);
+				rValue += mpt::fmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
 			}
 		}
 		else
@@ -185,13 +175,9 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 					rValue = mpt::ToLowerCaseAscii(rValue);
 				}
 			}
-
 			if(addOctave)
 			{
-				if(x >= 0)
-					rValue += mpt::fmt::val(middlePeriodNumber + x/m_GroupSize);
-				else
-					rValue += mpt::fmt::val(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+				rValue += mpt::fmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
 			}
 		}
 		return rValue;
@@ -230,16 +216,8 @@ RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYP
 	//next note.
 	NOTEINDEXTYPE note;
 	STEPINDEXTYPE fineStep;
-	if(baseStepDiff >= 0)
-	{
-		note = static_cast<NOTEINDEXTYPE>(baseNote + baseStepDiff / (fsCount+1));
-		fineStep = baseStepDiff % (fsCount+1);
-	}
-	else
-	{
-		note = static_cast<NOTEINDEXTYPE>(baseNote + ((baseStepDiff+1) / (fsCount+1)) - 1);
-		fineStep = ((fsCount + 1) - (mpt::abs(baseStepDiff) % (fsCount+1))) % (fsCount+1);
-	}
+	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount+1)));
+	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount+1));
 
 	if(note < m_StepMin) return s_DefaultFallbackRatio;
 	if(note >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
@@ -392,9 +370,7 @@ NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 //------------------------------------------------------------------
 {
 	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
-
-	if(note >= 0) return note % GetGroupSize();
-	else return (GetGroupSize() - (mpt::abs(static_cast<int>(note)) % GetGroupSize())) % GetGroupSize();
+	return mpt::wrapping_modulo(note, GetGroupSize());
 }
 
 
