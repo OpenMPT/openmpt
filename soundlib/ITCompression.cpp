@@ -396,7 +396,7 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 
 #if MPT_MSVC_AT_LEAST(2017,3)
 // Work-around compiler crash in VS2017.3 / cl 19.11.25506
-// Bug will be reported to Microsoft at a later time.
+// https://developercommunity.visualstudio.com/content/problem/96687/c1063-and-c1001-while-compiling-trivial-code-in-vs.html
 MPT_NOINLINE
 #endif
 void ITDecompression::ChangeWidth(int &curWidth, int width)
@@ -411,7 +411,7 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 
 #if MPT_MSVC_AT_LEAST(2017,3)
 // Work-around compiler crash in VS2017.3 / cl 19.11.25506
-// Bug will be reported to Microsoft at a later time.
+// https://developercommunity.visualstudio.com/content/problem/96687/c1063-and-c1001-while-compiling-trivial-code-in-vs.html
 MPT_NOINLINE
 #endif
 int ITDecompression::ReadBits(int width)
