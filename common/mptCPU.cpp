@@ -134,17 +134,39 @@ void InitProcSupport()
 			uint32 BaseFamily = (StandardFeatureFlags.a >>  8) & 0x0f;
 			uint32 ExtModel   = (StandardFeatureFlags.a >> 16) & 0x0f;
 			uint32 ExtFamily  = (StandardFeatureFlags.a >> 20) & 0xff;
-			if(BaseFamily < 0xf)
+			if(VendorString.as_string() == "GenuineIntel")
+			{
+				if(BaseFamily == 0xf)
+				{
+					ProcFamily = static_cast<uint16>(ExtFamily + BaseFamily);
+				} else
+				{
+					ProcFamily = static_cast<uint16>(BaseFamily);
+				}
+				if(BaseFamily == 0x6 || BaseFamily == 0xf)
+				{
+					ProcModel = static_cast<uint8>((ExtModel << 4) | (BaseModel << 0));
+				} else
+				{
+					ProcModel = static_cast<uint8>(BaseModel);
+				}
+			} else if(VendorString.as_string() == "AuthenticAMD")
+			{
+				if(BaseFamily == 0xf)
+				{
+					ProcFamily = static_cast<uint16>(ExtFamily + BaseFamily);
+					ProcModel = static_cast<uint8>((ExtModel << 4) | (BaseModel << 0));
+				} else
+				{
+					ProcFamily = static_cast<uint16>(BaseFamily);
+					ProcModel = static_cast<uint8>(BaseModel);
+				}
+			} else
 			{
 				ProcFamily = static_cast<uint16>(BaseFamily);
 				ProcModel = static_cast<uint8>(BaseModel);
-				ProcStepping = static_cast<uint8>(Stepping);
-			} else
-			{
-				ProcFamily = static_cast<uint16>(ExtFamily + BaseFamily);
-				ProcModel = static_cast<uint8>((ExtModel << 4) | (BaseModel << 0));
-				ProcStepping = static_cast<uint8>(Stepping);
 			}
+			ProcStepping = static_cast<uint8>(Stepping);
 			if(StandardFeatureFlags.d & (1<< 4)) ProcSupport |= PROCSUPPORT_TSC;
 			if(StandardFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 			if(StandardFeatureFlags.d & (1<< 0)) ProcSupport |= PROCSUPPORT_FPU;
