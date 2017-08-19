@@ -146,7 +146,7 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 	}
 	else
 	{
-		const NOTEINDEXTYPE pos = mpt::wrapping_modulo(x, m_GroupSize);
+		const NOTEINDEXTYPE pos = static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(x, m_GroupSize));
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
 		std::string rValue;
 		const auto nmi = m_NoteNameMap.find(pos);
@@ -370,7 +370,7 @@ NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 //------------------------------------------------------------------
 {
 	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
-	return mpt::wrapping_modulo(note, GetGroupSize());
+	return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
 }
 
 
