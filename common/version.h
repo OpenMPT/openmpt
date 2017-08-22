@@ -61,7 +61,7 @@ namespace MptVersion
 		bool IsDirty; // svn working copy is dirty (or false)
 		bool HasMixedRevisions; // svn working copy has mixed revisions (or false)
 		bool IsPackage; // source code originates from a packaged version of the source code
-		std::string Date; // svn date (ór empty string)
+		std::string Date; // svn date (or empty string)
 		SourceInfo() : Url(std::string()), Revision(0), IsDirty(false), HasMixedRevisions(false), IsPackage(false) { }
 	public:
 		std::string GetUrlWithRevision() const; // i.e. "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234" or empty string
