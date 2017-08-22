@@ -911,7 +911,7 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
 //-----------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
-	, EncoderName(conf, "Export", encFactories.size() > 2 ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
+	, EncoderName(conf, "Export", encFactories.size() > 3 ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)
