@@ -2676,7 +2676,7 @@ BEGIN
     ID_FILE_NEWIT           "Create a new Impulse Tracker (IT) music module\nNew IT"
     ID_FILE_SAVEASWAVE      "Records the current file as a high-quality lossless file (.wav, .flac)"
     ID_PLAYER_PLAY          "Resume playing, or play the song from the selected position\nPlay"
-    ID_PLAYER_PLAYFROMSTART "Play the song from the begining\nPlay from start"
+    ID_PLAYER_PLAYFROMSTART "Play the song from the beginning\nPlay from start"
     ID_PLAYER_STOP          "Stop Playing\nStop"
     ID_PLAYER_PAUSE         "Pause\nPause"
     ID_PLAYER_SETUP         "Configure the sound device and player options"
@@ -2720,7 +2720,7 @@ STRINGTABLE
 BEGIN
     IDC_PATTERN_PLAY        "Play the curent pattern from the current position\nPlay Pattern"
     IDC_PATTERN_PLAYFROMSTART 
-                            "Play the current pattern from the begining\nReplay Pattern"
+                            "Play the current pattern from the beginning\nReplay Pattern"
     IDC_PATTERN_STOP        "Stop playing\nStop"
     IDC_PATTERN_RECORD      "Enables the recording of notes\nRecord"
     IDC_PATTERN_NEW         "Create a new pattern\nInsert Pattern"
