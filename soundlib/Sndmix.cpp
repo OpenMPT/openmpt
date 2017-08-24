@@ -747,10 +747,11 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		}
 	} else if(GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM))
 	{
+		// Other waveforms are not supported.
 		static const int8 DBMSinus[] =
 		{
-			-128, -104, -79, -54, -31, -8, 13, 33, 52, 69, 84, 96, 107, 116, 122, 125,
-			127, 125, 122, 116, 107, 96, 84, 69, 52, 33, 13, -8, -31, -54, -79, -104,
+			33, 52, 69, 84, 96, 107, 116, 122,  125, 127,  125, 122, 116, 107, 96, 84,
+			69, 52, 33, 13, -8, -31, -54, -79, -104,-128, -104, -79, -54, -31, -8, 13,
 		};
 		return DBMSinus[(position / 2u) & 0x1F];
 	} else
