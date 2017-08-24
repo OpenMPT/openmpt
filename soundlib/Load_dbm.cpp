@@ -156,12 +156,28 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 	else
 		command = CMD_NONE;
 
-	switch (command)
+	switch(command)
 	{
 	case CMD_ARPEGGIO:
 		if(param == 0)
 			command = CMD_NONE;
 		break;
+
+#ifdef MODPLUG_TRACKER
+	case CMD_VIBRATO:
+		if(param & 0x0F)
+		{
+			// DBM vibrato is half as deep as most other trackers. Convert it to IT fine vibrato range if possible.
+			uint8 depth = (param & 0x0F) * 2u;
+			param &= 0xF0;
+			if(depth < 16)
+				command = CMD_FINEVIBRATO;
+			else
+				depth = (depth + 2u) / 4u;
+			param |= depth;
+		}
+		break;
+#endif
 
 	// Volume slide nibble priority - first nibble (slide up) has precedence.
 	case CMD_VOLUMESLIDE:
@@ -339,7 +355,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 		}
 		Order().SetName(name);
-		ReadOrderFromFile<uint16le>(Order(), songChunk, numOrders);
+		ReadOrderFromFile<uint16be>(Order(), songChunk, numOrders);
 #else
 		const ORDERINDEX startIndex = Order().GetLength();
 		if(startIndex < MAX_ORDERS && songChunk.CanRead(numOrders * 2u))
@@ -436,13 +452,16 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 			PatternRow patRow = Patterns[pat].GetRow(0);
 			ROWINDEX row = 0;
-			while(chunk.CanRead(1) && row < numRows)
+			while(chunk.CanRead(1))
 			{
 				const uint8 ch = chunk.ReadUint8();
 
 				if(!ch)
 				{
-					row++;
+					// End Of Row
+					if(++row >= numRows)
+						break;
+
 					patRow = Patterns[pat].GetRow(row);
 					continue;
 				}
