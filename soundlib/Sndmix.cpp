@@ -727,6 +727,15 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		case 3:	// Random
 			return mpt::random<int, 7>(AccessPRNG()) - 0x40;
 		}
+	} else if(GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM))
+	{
+		// Other waveforms are not supported.
+		static const int8 DBMSinus[] =
+		{
+			33, 52, 69, 84, 96, 107, 116, 122,  125, 127,  125, 122, 116, 107, 96, 84,
+			69, 52, 33, 13, -8, -31, -54, -79, -104,-128, -104, -79, -54, -31, -8, 13,
+		};
+		return DBMSinus[(position / 2u) & 0x1F];
 	} else
 	{
 		position &= 0x3F;
@@ -1522,9 +1531,15 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				}
 			} else
 			{
-				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
-				if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM)) vdepth = 7;	// Closer than 6, but not quite.
-				if(m_SongFlags[SONG_S3MOLDVIBRATO]) vdepth = 5;
+				if(m_SongFlags[SONG_S3MOLDVIBRATO])
+					vdepth = 5;
+				else if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM))
+					vdepth = 7;
+				else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
+					vdepth = 7;
+				else
+					vdepth = 6;
+
 				// ST3 compatibility: Do not distinguish between vibrato types in effect memory
 				// Test case: VibratoTypeChange.s3m
 				if(m_playBehaviour[kST3VibratoMemory] && chn.rowCommand.command == CMD_FINEVIBRATO)

@@ -35,7 +35,7 @@ struct PACKED DBMFileHeader
 };
 
 
-// RIFF-style Chunk
+// IFF-style Chunk
 struct PACKED DBMChunk
 {
 	// 32-Bit chunk identifiers
@@ -197,12 +197,28 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 	else
 		command = CMD_NONE;
 
-	switch (command)
+	switch(command)
 	{
 	case CMD_ARPEGGIO:
 		if(param == 0)
 			command = CMD_NONE;
 		break;
+
+#ifdef MODPLUG_TRACKER
+	case CMD_VIBRATO:
+		if(param & 0x0F)
+		{
+			// DBM vibrato is half as deep as most other trackers. Convert it to IT fine vibrato range if possible.
+			uint8 depth = (param & 0x0F) * 2u;
+			param &= 0xF0;
+			if(depth < 16)
+				command = CMD_FINEVIBRATO;
+			else
+				depth = (depth + 2u) / 4u;
+			param |= depth;
+		}
+		break;
+#endif
 
 	// Volume slide nibble priority - first nibble (slide up) has precedence.
 	case CMD_VOLUMESLIDE:
@@ -351,6 +367,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
 	m_madeWithTracker = mpt::String::Print("DigiBooster Pro %1.%2", mpt::fmt::hex(fileHeader.trkVerHi), mpt::fmt::hex(fileHeader.trkVerLo));
 	m_playBehaviour.set(kSlidesAtSpeed1);
+	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 
 	// Name chunk
 	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);
@@ -469,13 +486,16 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 			PatternRow patRow = Patterns[pat].GetRow(0);
 			ROWINDEX row = 0;
-			while(chunk.CanRead(1) && row < numRows)
+			while(chunk.CanRead(1))
 			{
 				const uint8 ch = chunk.ReadUint8();
 
 				if(!ch)
 				{
-					row++;
+					// End Of Row
+					if(++row >= numRows)
+						break;
+
 					patRow = Patterns[pat].GetRow(row);
 					continue;
 				}
@@ -660,20 +680,24 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			ModSample &srcSample = Samples[0];
 			const int8 *smpData = srcSample.pSample8;
+			uint32 predelay = Util::muldiv_unsigned(20116, srcSample.nC5Speed, 100000);
+			smpData += predelay * srcSample.GetBytesPerSample();
+			srcSample.nLength -= predelay;
 
 			for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 			{
 				ModSample &sample = Samples[smp];
 				sample.uFlags.set(srcSample.uFlags);
-				sample.nLength *= 2;
 				LimitMax(sample.nLength, srcSample.nLength);
 				if(sample.nLength)
 				{
 					sample.AllocateSample();
 					memcpy(sample.pSample, smpData, sample.GetSampleSizeInBytes());
-					CSoundFile::AdjustSampleLoop(sample);
 					smpData += sample.GetSampleSizeInBytes();
 					srcSample.nLength -= sample.nLength;
+					uint32 gap = Util::muldiv_unsigned(454, srcSample.nC5Speed, 10000);
+					smpData += gap * srcSample.GetBytesPerSample();
+					srcSample.nLength -= gap;
 				}
 			}
 			srcSample.FreeSample();
