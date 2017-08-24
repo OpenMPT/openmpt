@@ -745,6 +745,14 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		case 3:	// Random
 			return mpt::random<int, 7>(AccessPRNG()) - 0x40;
 		}
+	} else if(GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM))
+	{
+		static const int8 DBMSinus[] =
+		{
+			-128, -104, -79, -54, -31, -8, 13, 33, 52, 69, 84, 96, 107, 116, 122, 125,
+			127, 125, 122, 116, 107, 96, 84, 69, 52, 33, 13, -8, -31, -54, -79, -104,
+		};
+		return DBMSinus[(position / 2u) & 0x1F];
 	} else
 	{
 		position &= 0x3F;
@@ -1111,7 +1119,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 				}
 			} else //Original behavior
 			{
-				const bool useFreq = m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode];
+				const bool useFreq = PeriodsAreFrequencies();
 				const uint32 (&upTable)[256] = useFreq ? LinearSlideUpTable : LinearSlideDownTable;
 				const uint32 (&downTable)[256] = useFreq ? LinearSlideDownTable : LinearSlideUpTable;
 
@@ -1426,7 +1434,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 					case 1: arpRatio = LinearSlideUpTable[(pChn->nArpeggio >> 4) * 16]; break;
 					case 2: arpRatio = LinearSlideUpTable[(pChn->nArpeggio & 0x0F) * 16]; break;
 					}
-					if(m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode])
+					if(PeriodsAreFrequencies())
 						period = Util::muldivr(period, arpRatio, 65536);
 					else
 						period = Util::muldivr(period, 65536, arpRatio);
@@ -1525,6 +1533,10 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 			return;
 		}
 
+		// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
+		if(m_playBehaviour[kITVibratoTremoloPanbrello])
+			chn.nVibratoPos += 4 * chn.nVibratoSpeed;
+
 		int vdelta = GetVibratoDelta(chn.nVibratoType, chn.nVibratoPos);
 
 		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
@@ -1569,9 +1581,15 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 				}
 			} else
 			{
-				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
-				if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM)) vdepth = 7;	// Closer than 6, but not quite.
-				if(m_SongFlags[SONG_S3MOLDVIBRATO]) vdepth = 5;
+				if(m_SongFlags[SONG_S3MOLDVIBRATO])
+					vdepth = 5;
+				else if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM))
+					vdepth = 7;
+				else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
+					vdepth = 7;
+				else
+					vdepth = 6;
+
 				// ST3 compatibility: Do not distinguish between vibrato types in effect memory
 				// Test case: VibratoTypeChange.s3m
 				if(m_playBehaviour[kST3VibratoMemory] && chn.rowCommand.command == CMD_FINEVIBRATO)
@@ -1625,10 +1643,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 				return;
 			}
 
-			// IT compatibility: IT has its own, more precise tables
-			if(m_playBehaviour[kITVibratoTremoloPanbrello])
-				chn.nVibratoPos += 4 * chn.nVibratoSpeed;
-			else
+			// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
+			if(!m_playBehaviour[kITVibratoTremoloPanbrello])
 				chn.nVibratoPos += chn.nVibratoSpeed;
 		}
 	} else if(chn.dwOldFlags[CHN_VIBRATO])
@@ -1656,7 +1672,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, Tuning:
 
 		// In IT linear slide mode, we use frequencies, otherwise we use periods, which are upside down.
 		// In this context, the "up" tables refer to the tables that increase frequency, and the down tables are the ones that decrease frequency.
-		const bool useFreq = m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode];
+		const bool useFreq = PeriodsAreFrequencies();
 		const uint32 (&upTable)[256] = useFreq ? LinearSlideUpTable : LinearSlideDownTable;
 		const uint32 (&downTable)[256] = useFreq ? LinearSlideDownTable : LinearSlideUpTable;
 		const uint32 (&fineUpTable)[16] = useFreq ? FineLinearSlideUpTable : FineLinearSlideDownTable;
@@ -2090,7 +2106,7 @@ bool CSoundFile::ReadNote()
 			// Test case: PeriodLimit.s3m
 			if (pChn->nPeriod < m_nMinPeriod
 				&& GetType() != MOD_TYPE_S3M
-				&& !(m_playBehaviour[kHertzInLinearMode] && m_SongFlags[SONG_LINEARSLIDES]))
+				&& !PeriodsAreFrequencies())
 			{
 				pChn->nPeriod = m_nMinPeriod;
 			}

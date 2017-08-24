@@ -1833,7 +1833,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 					pChn->nVibratoPos = 0x10;
 				else if(GetType() == MOD_TYPE_MTM)
 					pChn->nVibratoPos = 0x20;
-				else
+				else if(!(GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM)))
 					pChn->nVibratoPos = 0;
 			}
 			// IT Compatibility: No "retrigger" waveform here
