@@ -19,24 +19,11 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-size_t CMIDIMapper::GetSerializationSize() const
-//----------------------------------------------
-{
-	size_t s = 0;
-	for(const auto &d : m_Directives)
-	{
-		if(d.GetParamIndex() <= uint8_max) s += 5;
-		else if(d.GetParamIndex() <= uint16_max) s += 6;
-		else s += 8;
-	}
-	return s;
-}
-
-
-void CMIDIMapper::Serialize(FILE* f) const
-//----------------------------------------
+size_t CMIDIMapper::Serialize(FILE *f) const
+//------------------------------------------
 {
 	//Bytes: 1 Flags, 2 key, 1 plugindex, 1,2,4,8 plug/etc.
+	size_t size = 0;
 	for(const auto &d : m_Directives)
 	{
 		uint16 temp16 = (d.GetChnEvent() << 1) + (d.GetController() << 9);
@@ -50,7 +37,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 		if(d.GetAllowPatternEdit()) temp8 |= (1 << 5);
 		//bits 6-7: Size: 5, 6, 8, 12
 
-		BYTE parambytes = 4;
+		uint8 parambytes = 4;
 		if(temp32 <= uint16_max)
 		{
 			if(temp32 <= uint8_max) parambytes = 1;
@@ -58,12 +45,17 @@ void CMIDIMapper::Serialize(FILE* f) const
 		}
 		else temp8 |= (2 << 6);
 
-		fwrite(&temp8, 1, sizeof(temp8), f);
-		fwrite(&temp16, 1, sizeof(temp16), f);
-		temp8 = d.GetPlugIndex();
-		fwrite(&temp8, 1, sizeof(temp8), f);
-		fwrite(&temp32, 1, parambytes, f);
+		if(f)
+		{
+			fwrite(&temp8, 1, sizeof(temp8), f);
+			fwrite(&temp16, 1, sizeof(temp16), f);
+			temp8 = d.GetPlugIndex();
+			fwrite(&temp8, 1, sizeof(temp8), f);
+			fwrite(&temp32, 1, parambytes, f);
+		}
+		size += sizeof(temp8) + sizeof(temp16) + sizeof(temp8) + parambytes;
 	}
+	return size;
 }
 
 
@@ -84,7 +76,7 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 		case 3: default: psize = 11; break;
 		}
 
-		if(!file.CanRead(psize)) return true;
+		if(!file.CanRead(psize)) return false;
 		if(((i8 >> 2) & 7) != 0) { file.Skip(psize); continue;} //Skipping unrecognised mapping types.
 
 		CMIDIMappingDirective s;
@@ -104,49 +96,48 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 		AddDirective(s);
 	}
 
-	return false;
+	return true;
 }
 
 
 bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramval)
 //--------------------------------------------------------------------------------------------------------------------
 {
-	bool captured = false;
-
 	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
 	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
 	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg) & 0x7F;
 	const uint8 controllerVal = MIDIEvents::GetDataByte2FromEvent(midimsg) & 0x7F;
 
-	for(const_iterator citer = Begin(); citer != End() && !captured; citer++)
+	for(const auto &d : m_Directives)
 	{
-		if(!citer->IsActive()) continue;
-		if(citer->GetEvent() != eventType) continue;
-		if(eventType == MIDIEvents::evControllerChange && citer->GetController() != controller) continue;
-		if(!citer->GetAnyChannel() && channel + 1 != citer->GetChannel()) continue;
+		if(!d.IsActive()) continue;
+		if(d.GetEvent() != eventType) continue;
+		if(eventType == MIDIEvents::evControllerChange
+			&& d.GetController() != controller
+			&& d.GetController() != (controller == m_lastCC + 32 && m_lastCC < 32)) continue;
+		if(!d.GetAnyChannel() && channel + 1 != d.GetChannel()) continue;
 
-		const PLUGINDEX plugindex = citer->GetPlugIndex();
-		const uint32 param = citer->GetParamIndex();
-		uint16 val = (citer->GetEvent() == MIDIEvents::evChannelAftertouch ? controller : controllerVal) << 7;
+		const PLUGINDEX plugindex = d.GetPlugIndex();
+		const uint32 param = d.GetParamIndex();
+		uint16 val = (d.GetEvent() == MIDIEvents::evChannelAftertouch ? controller : controllerVal) << 7;
 
 		if(eventType == MIDIEvents::evControllerChange)
 		{
-			// Coarse (0...31) / Fine (32...63) controller pairs - coarse should be sent first.
-			if(controller == lastCC + 32 && lastCC < 32)
+			// Fine (0...31) / Coarse (32...63) controller pairs - Fine should be sent first.
+			if(controller == m_lastCC + 32 && m_lastCC < 32)
 			{
-				val = (val >> 7) | lastCCvalue;
+				val = (val >> 7) | m_lastCCvalue;
 			}
-			lastCC = controller;
-			lastCCvalue = val;
+			m_lastCC = controller;
+			m_lastCCvalue = val;
 		}
 
-		if(citer->GetAllowPatternEdit())
+		if(d.GetAllowPatternEdit())
 		{
 			mappedIndex = plugindex;
 			paramindex = param;
 			paramval = val;
 		}
-		if(citer->GetCaptureMIDI()) captured = true;
 
 		if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
 		{
@@ -157,24 +148,24 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
 #endif // NO_PLUGINS
 		}
+		if(d.GetCaptureMIDI())
+		{
+			return true;
+		}
 	}
 
-	return captured;
+	return false;
 }
 
 
-bool CMIDIMapper::Swap(const size_t a, const size_t b)
+void CMIDIMapper::Swap(const size_t a, const size_t b)
 //----------------------------------------------------
 {
 	if(a < m_Directives.size() && b < m_Directives.size())
 	{
-		CMIDIMappingDirective temp = m_Directives[a];
-		m_Directives[a] = m_Directives[b];
-		m_Directives[b] = temp;
+		std::swap(m_Directives[a], m_Directives[b]);
 		Sort();
-		return false;
 	}
-	else return true;
 }
 
 

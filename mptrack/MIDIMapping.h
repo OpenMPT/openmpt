@@ -84,7 +84,7 @@ class CMIDIMapper
 {
 public:
 	typedef std::vector<CMIDIMappingDirective>::const_iterator const_iterator;
-	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile), lastCC(uint8_max), lastCCvalue(0) {}
+	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile) {}
 
 	//If mapping found:
 	//	-mappedIndex is set to mapped value(plug index)
@@ -94,8 +94,8 @@ public:
 	//Returns true if MIDI was 'captured' by some directive, false otherwise.
 	bool OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramvalue);
 
-	//Swaps the positions of two elements. Returns true if swap was not done.
-	bool Swap(const size_t a, const size_t b);
+	//Swaps the positions of two elements.
+	void Swap(const size_t a, const size_t b);
 
 	//Return the index after sorting for the added element
 	size_t SetDirective(const size_t i, const CMIDIMappingDirective& d) {m_Directives[i] = d; Sort(); return std::find(m_Directives.begin(), m_Directives.end(), d) - m_Directives.begin();}
@@ -107,13 +107,12 @@ public:
 
 	const CMIDIMappingDirective& GetDirective(const size_t i) const {return m_Directives[i];}
 
-	const_iterator Begin() const {return m_Directives.begin();}
-	const_iterator End() const {return m_Directives.end();}
 	size_t GetCount() const {return m_Directives.size();}
 
-	size_t GetSerializationSize() const;
-	void Serialize(FILE* f) const;
-	bool Deserialize(FileReader &file); //Return false if succesful, true otherwise.
+	// Serialize to file, or just return the serialization size if no file handle is provided.
+	size_t Serialize(FILE *f = nullptr) const;
+	// Deserialize MIDI Mappings from file. Returns true if no errors were encountered.
+	bool Deserialize(FileReader &file);
 
 	bool AreOrderEqual(const size_t a, const size_t b) {return !(m_Directives[a] < m_Directives[b] || m_Directives[b] < m_Directives[a]);}
 
@@ -123,8 +122,8 @@ private:
 private:
 	CSoundFile& m_rSndFile;
 	std::vector<CMIDIMappingDirective> m_Directives;
-	uint8 lastCC;
-	uint16 lastCCvalue;
+	uint16 m_lastCCvalue = 0;
+	uint8 m_lastCC = uint8_max;
 };
 
 
