@@ -3625,7 +3625,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
 
-		if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
+		if((m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI) && !m.IsPcNote())
 		{
 			// Write command only if there's no existing command or already a midi macro command.
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");

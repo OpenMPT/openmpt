@@ -114,7 +114,8 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 		if(d.GetEvent() != eventType) continue;
 		if(eventType == MIDIEvents::evControllerChange
 			&& d.GetController() != controller
-			&& d.GetController() != (controller == m_lastCC + 32 && m_lastCC < 32)) continue;
+			&& (d.GetController() >= 32 || d.GetController() + 32 != controller))
+			continue;
 		if(!d.GetAnyChannel() && channel + 1 != d.GetChannel()) continue;
 
 		const PLUGINDEX plugindex = d.GetPlugIndex();
