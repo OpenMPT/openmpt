@@ -1074,7 +1074,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// 203-212: Vibrato depth
 				if(vol >= 203 && vol <= 212)
 				{
-					m.volcmd = VOLCMD_VIBRATODEPTH; m.vol = vol - 203;
+					m.volcmd = VOLCMD_VIBRATODEPTH;
+					m.vol = vol - 203;
 					// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that.
 					if(m.vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
 						m.volcmd = VOLCMD_VIBRATOSPEED;
@@ -1091,7 +1092,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m.command = patternData.ReadUint8();
 				m.param = patternData.ReadUint8();
 				S3MConvert(m, true);
-				// In some IT-compatible trackers, it is possible to input an parameter without a command.
+				// In some IT-compatible trackers, it is possible to input a parameter without a command.
 				// In this case, we still need to update the last value memory. OpenMPT didn't do this until v1.25.01.07.
 				// Example: ckbounce.it
 				lastValue[ch].command = m.command;
@@ -2266,7 +2267,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	// MIDI mapping directives
 	if(GetMIDIMapper().GetCount() > 0)
 	{
-		const size_t objectsize = GetMIDIMapper().GetSerializationSize();
+		const size_t objectsize = GetMIDIMapper().Serialize();
 		if(!Util::TypeCanHoldValue<uint16>(objectsize))
 		{
 			AddToLog("Too many MIDI Mapping directives to save; data won't be written.");

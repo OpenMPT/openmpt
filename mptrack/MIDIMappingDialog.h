@@ -45,6 +45,8 @@ protected:
 	CListCtrlEx m_List;
 	CSpinButtonCtrl m_SpinMoveMapping;
 
+	uint8 m_lastCC = uint8_max;
+
 public:
 	CMIDIMappingDialog(CWnd* pParent, CSoundFile& rSndfile);
 	~CMIDIMappingDialog();

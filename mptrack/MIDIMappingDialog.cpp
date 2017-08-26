@@ -25,10 +25,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 // CMIDIMappingDialog dialog
 
-CMIDIMappingDialog::CMIDIMappingDialog(CWnd* pParent /*=NULL*/, CSoundFile& rSndfile)
-	: CDialog(CMIDIMappingDialog::IDD, pParent), m_rSndFile(rSndfile), 
-	  m_rMIDIMapper(m_rSndFile.GetMIDIMapper())
-//---------------------------------------------------------------------
+CMIDIMappingDialog::CMIDIMappingDialog(CWnd *pParent, CSoundFile &rSndfile)
+	: CDialog(CMIDIMappingDialog::IDD, pParent)
+	, m_rSndFile(rSndfile)
+	, m_rMIDIMapper(m_rSndFile.GetMIDIMapper())
+//-------------------------------------------------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(true);
 	oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
@@ -91,7 +92,13 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				m_EventCBox.SetCurSel(i);
 				if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange)
 				{
-					m_ControllerCBox.SetCurSel(MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
+					uint8 cc = MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam);
+					if(m_lastCC >= 32 || cc != m_lastCC + 32)
+					{
+						// Ignore second CC message of 14-bit CC.
+						m_ControllerCBox.SetCurSel(cc);
+					}
+					m_lastCC = cc;
 				}
 				OnCbnSelchangeComboChannel();
 				OnCbnSelchangeComboEvent();
