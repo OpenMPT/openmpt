@@ -351,7 +351,6 @@ LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user )
  *
  * Checks whether an error code represents a transient error which may not occur again in a later try if for example memory has been freed up after an out-of-memory error.
  * \param error Error code.
- * \return Mask of OPENMPT_ERROR_FUNC_RESULT_LOG and OPENMPT_ERROR_FUNC_RESULT_STORE.
  * \retval 0 Error is not transient.
  * \retval 1 Error is transient.
  * \sa OPENMPT_ERROR_OUT_OF_MEMORY
