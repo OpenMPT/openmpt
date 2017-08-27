@@ -56,6 +56,8 @@ is just a high-level summary.
  *  [**Change**] The optional dependencies on `libltdl` or `libdl` are gone.
     They are no longer needed for any functionality.
 
+ *  [**Regression**] Compiling client code using the C++ API now requires a
+    compiler running in C++11 mode.
  *  [**Regression**] Support for GCC 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7 has been
     removed.
  *  [**Regression**] Support for Clang 3.0, 3.1, 3.2, 3.3 has been removed.
