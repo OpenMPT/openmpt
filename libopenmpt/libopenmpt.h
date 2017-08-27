@@ -1291,6 +1291,7 @@ LIBOPENMPT_API const char * openmpt_module_ctl_get( openmpt_module * mod, const 
  * \param mod The module handle to work on.
  * \param ctl The ctl key whose value should be set.
  * \param value The value that should be set.
+ * \return 1 if successful, 0 in case the value is not sensible (e.g. negative tempo factor) or the ctl is not recognized.
  * \sa openmpt_module_get_ctls
  */
 LIBOPENMPT_API int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char * value );

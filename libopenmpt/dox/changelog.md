@@ -109,7 +109,7 @@ is just a high-level summary.
 
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
- *  Playback improvements for IT and XM files.
+ *  Various playback improvements for IT and XM files.
  *  Channel frequency could wrap around after some excessive portamento / down
     in some formats since libopenmpt 0.2-beta17.
  *  Playback improvements for S3M files made with Impulse Tracker and
@@ -141,6 +141,7 @@ is just a high-level summary.
  *  MT2 files with instruments that had both sample and plugin assignments were
     not read correctly.
  *  Support for VBlank timing flag and comment field in PT36 files.
+ *  Improved accuracy of vibrato command in DIGI / DBM files.
  *  STM: Add support for "WUZAMOD!" magic bytes and allow some slightly
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules

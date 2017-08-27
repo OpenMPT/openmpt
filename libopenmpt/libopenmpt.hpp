@@ -925,6 +925,7 @@ public:
 	/*!
 	  \param ctl The ctl key whose value should be set.
 	  \param value The value that should be set.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
 	  \sa openmpt::module::get_ctls
 	*/
 	void ctl_set( const std::string & ctl, const std::string & value );
