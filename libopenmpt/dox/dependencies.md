@@ -43,7 +43,7 @@ Dependencies
  *  Required compilers to use libopenmpt:
      *  Any **C89** / **C99** / **C11** compatible compiler should work with
         the C API as long as a **C99** compatible **stdint.h** is available.
-     *  Any **C++11** / **C++14** / **C++1z** compatible compiler should work
+     *  Any **C++11** / **C++14** / **C++17** compatible compiler should work
         with the C++ API.
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib**
