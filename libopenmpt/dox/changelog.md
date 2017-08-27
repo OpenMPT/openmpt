@@ -67,10 +67,8 @@ is just a high-level summary.
     removed.
  *  [**Regression**] Visual Studio 2008, 2010, 2012, 2013 support has been
     removed.
- *  [**Regression**] In order to securely load libmpg123, the Windows binary
-    packages only support the precise libmpg123 binary that is downloaded by the
-    `download_mpg123.vbs` script. Other binaries might also work, but this has
-    neither been tested nor is officially supported from now on.
+ *  [**Regression**] Dynamic run-time loading of libmpg123 is no longer
+    supported. Libmpg123 must be linked at link-time now.
  *  [**Regression**] xmp-openmpt: xmp-openmpt now requires XMPlay 3.8 or later
     and compiling xmp-openmpt requires an appropriate XMPlay SDK with
     `XMPIN_FACE` >= `4`.
@@ -161,9 +159,7 @@ is just a high-level summary.
  *  Autotools build system now has options `--disable-openmpt123`,
     `--disable-tests` and `--disable-examples` which may be desireable when
     cross-compiling.
- *  Windows binary packages now include a script `download_mpg123.vbs` which
-    downloads libmpg123 and copies it to the appropriate directories relative
-    to the uncompressed binary archive.
+ *  Windows binary packages now ship with libmpg123 included.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
 
