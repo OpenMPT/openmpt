@@ -65,7 +65,7 @@ c++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bi
 fi
 echo " g++ 98"
 g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
-echo " c++ 11"
+echo " g++ 11"
 g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
 if g++ -std=c++14 -c bin/empty.cpp -o bin/empty.gpp14.out > /dev/null 2>&1 ; then
 echo " g++ 14"
