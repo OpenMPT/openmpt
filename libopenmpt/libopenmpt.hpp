@@ -19,24 +19,7 @@
 #include <string>
 #include <vector>
 
-#ifndef LIBOPENMPT_QUIRK_NO_CSTDINT
 #include <cstdint>
-#else
-#include <stdint.h>
-namespace openmpt {
-namespace std {
-typedef ::int8_t   int8_t;
-typedef ::int16_t  int16_t;
-typedef ::int32_t  int32_t;
-typedef ::int64_t  int64_t;
-typedef ::uint8_t  uint8_t; 
-typedef ::uint16_t uint16_t; 
-typedef ::uint32_t uint32_t;
-typedef ::uint64_t uint64_t;
-using namespace ::std;
-}
-}
-#endif
 
 /*!
  * \page libopenmpt_cpp_overview C++ API
@@ -156,9 +139,9 @@ class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
 	char * text;
 public:
-	exception( const std::string & text ) LIBOPENMPT_NOEXCEPT;
-	virtual ~exception() LIBOPENMPT_NOEXCEPT;
-	virtual const char * what() const LIBOPENMPT_NOEXCEPT;
+	exception( const std::string & text ) noexcept;
+	virtual ~exception() noexcept;
+	virtual const char * what() const noexcept;
 }; // class exception
 #if defined(_MSC_VER)
 #pragma warning(pop)

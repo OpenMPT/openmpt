@@ -53,26 +53,20 @@ touch bin/empty.dummy.out
 echo '' > bin/headercheck.cpp
 echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
 echo 'int main() { return 0; }' >> bin/headercheck.cpp
-echo " c++"
-c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out       -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
-echo " c++ 98"
-c++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98.out     -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
+#echo " c++"
+#c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out
 echo " c++ 11"
 c++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11.out
 if c++ -std=c++14 -c bin/empty.cpp -o bin/empty.cpp14.out > /dev/null 2>&1 ; then
 echo " c++ 14"
 c++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp14.out
 fi
-echo " g++ 98"
-g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
 echo " g++ 11"
 g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
 if g++ -std=c++14 -c bin/empty.cpp -o bin/empty.gpp14.out > /dev/null 2>&1 ; then
 echo " g++ 14"
 g++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp14.out
 fi
-echo " clang++ 98"
-clang++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp98.out -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
 echo " clang++ 11"
 clang++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp11.out
 if clang++ -std=c++14 -c bin/empty.cpp -o bin/empty.clangpp14.out > /dev/null 2>&1  ; then
