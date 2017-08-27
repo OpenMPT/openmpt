@@ -1439,7 +1439,11 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_sndFile->m_nFreqFactor = Util::Round<uint32_t>( 65536.0 * factor );
 		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "dither" ) {
-		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
+		int dither = ConvertStrTo<int>( value );
+		if ( dither < 0 || dither >= NumDitherModes ) {
+			dither = DitherDefault;
+		}
+		m_Dither->SetMode( static_cast<DitherMode>( dither ) );
 	} else {
 		if ( throw_if_unknown ) {
 			throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
