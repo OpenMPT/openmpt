@@ -1259,6 +1259,7 @@ Declare Function openmpt_module_ctl_get_ Alias "openmpt_module_ctl_get" (ByVal m
   \param module The module handle to work on.
   \param ctl The ctl key whose value should be set.
   \param value The value that should be set.
+  \return 1 if successful, 0 in case the value is not sensible (e.g. negative tempo factor) or the ctl is not recognized.
   \sa openmpt_module_get_ctls
 '/
 Declare Function openmpt_module_ctl_set(ByVal module As openmpt_module Ptr, ByVal ctl As Const ZString Ptr, ByVal value As Const ZString Ptr) As Long
