@@ -33,6 +33,7 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 	LimitMax(numSamples, SAMPLEINDEX(32));
 
 	std::vector<SAMPLEINDEX> foundSlots;
+	foundSlots.reserve(numSamples);
 
 	for(SAMPLEINDEX i = 0; i < numSamples; i++)
 	{
@@ -60,11 +61,11 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 						{
 							continue;
 						}
-						for(size_t k = 0; k < CountOf(sndFile.Instruments[ins]->Keyboard); k++)
+						for(auto &sample : sndFile.Instruments[ins]->Keyboard)
 						{
-							if(sndFile.Instruments[ins]->Keyboard[k] == candidateSlot)
+							if(sample == candidateSlot)
 							{
-								sndFile.Instruments[ins]->Keyboard[k] = 0;
+								sample = 0;
 							}
 						}
 					}
@@ -89,11 +90,11 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 					{
 						continue;
 					}
-					for(size_t k = 0; k < CountOf(sndFile.Instruments[ins]->Keyboard); k++)
+					for(auto &sample : sndFile.Instruments[ins]->Keyboard)
 					{
-						if(sndFile.Instruments[ins]->Keyboard[k] < usedSamples.size() && !usedSamples[sndFile.Instruments[ins]->Keyboard[k]])
+						if(sample < usedSamples.size() && !usedSamples[sample])
 						{
-							sndFile.Instruments[ins]->Keyboard[k] = 0;
+							sample = 0;
 						}
 					}
 				}
@@ -270,8 +271,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
-		|| mpt::CompareNoCaseAscii(fileHeader.signature, "Extended Module: ", 17)
-		|| !file.CanRead(fileHeader.orders))
+		|| memcmp(fileHeader.signature, "Extended Module: ", 17)
+		|| !file.CanRead(fileHeader.orders + 4 * (fileHeader.patterns + fileHeader.instruments)))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -421,6 +422,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				// Sure isn't FT2.
 				// Note: FT2 NORMALLY writes shdr=40 for all samples, but sometimes it
 				// just happens to write random garbage there instead. Surprise!
+				// Note: 4-mat's eternity.xm has an instrument header size of 29.
 				madeWith = verUnknown;
 			}
 		}
@@ -746,13 +748,16 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
-	std::vector<uint8> orderList(Order().size());
+	
+	const ORDERINDEX trimmedLength = Order().GetLengthTailTrimmed();
+	std::vector<uint8> orderList(trimmedLength);
 	const ORDERINDEX orderLimit = compatibilityExport ? 256 : uint16_max;
 	ORDERINDEX numOrders = 0;
 	PATTERNINDEX numPatterns = Patterns.GetNumPatterns();
 	bool changeOrderList = false;
-	for(PATTERNINDEX pat : Order())
+	for(ORDERINDEX ord = 0; ord < trimmedLength; ord++)
 	{
+		PATTERNINDEX pat = Order()[ord];
 		if(pat == Order.GetIgnoreIndex() || pat == Order.GetInvalidPatIndex() || pat > uint8_max)
 		{
 			changeOrderList = true;
