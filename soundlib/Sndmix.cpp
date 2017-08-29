@@ -1463,11 +1463,15 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 					case 2: note += (pChn->nArpeggio & 0x0F); break;
 					}
 
-					// Test case: ArpeggioClamp.xm
-					if(note > 108 + NOTE_MIN && arpPos != 0)
-						note = 108 + NOTE_MIN; // FT2's note limit
-
 					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+
+					// FT2 compatibility: FT2 has a different note limit for Arpeggio.
+					// Test case: ArpeggioClamp.xm
+					if(note >= 108 + NOTE_MIN && arpPos != 0)
+					{
+						period = std::max<uint32>(period, GetPeriodFromNote(108 + NOTE_MIN, 0, pChn->nC5Speed));
+					}
+
 				}
 			}
 			// Other trackers
