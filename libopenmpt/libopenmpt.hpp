@@ -151,6 +151,7 @@ namespace openmpt {
 //! libopenmpt exception base class
 /*!
   Base class used for all exceptions that are thrown by libopenmpt itself. Libopenmpt may additionally throw any exception thrown by the standard library which are all derived from std::exception.
+  \remarks Due to an oversight when designing the libopenmpt 0.2 C++ API, a openmpt::exception must not be copied or assigned to. libopenmpt 0.3 does correct this flaw.
   \sa \ref libopenmpt_cpp_error
 */
 class LIBOPENMPT_CXX_API exception : public std::exception {
