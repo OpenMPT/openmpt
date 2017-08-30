@@ -1,13 +1,5 @@
 @echo off
 
-set BATCH_DIR=%~dp0
-cd %BATCH_DIR%
-cd ..
-
-set MY_DIR=%CD%
-
-
-
 cd packageTemplate || goto error
 copy /y ..\LICENSE .\License.txt || goto error
 rmdir /s /q Licenses
@@ -30,7 +22,7 @@ rem copy /y ..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License
 rem copy /y ..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error
 copy /y ..\include\r8brain\other\License.txt              .\Licenses\License.R8Brain.txt || goto error
 copy /y ..\include\rtkit\rtkit.h                          .\Licenses\License.RealtimeKit.txt || goto error
-copy /y ..\include\rtmidi\License.txt                   .\Licenses\License.RtMidi.txt || goto error
+copy /y ..\include\rtmidi\License.txt                     .\Licenses\License.RtMidi.txt || goto error
 copy /y ..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error
 copy /y ..\include\soundtouch\COPYING.TXT                 .\Licenses\License.SoundTouch.txt || goto error
 rem copy /y ..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
@@ -40,14 +32,10 @@ copy /y ..\include\zlib\README                            .\Licenses\License.zli
 copy /y ..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 cd .. || goto error
 
-
-
 goto noerror
 
 :error
-cd "%MY_DIR%"
 exit 1
 
 :noerror
-cd "%MY_DIR%"
 exit 0
