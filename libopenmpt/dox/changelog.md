@@ -75,6 +75,15 @@ is just a high-level summary.
  *  [**Regression**] Support for libmpg123 older than 1.13.0 has been removed.
  *  [**Regression**] Un4seen unmo3 support has been removed.
 
+ *  [**Bug**] C++ API: `openmpt::exception` did not define copy and move
+    constructors or copy and move assignment operators in libopenmpt 0.2. The
+    compiler-generated ones were not adequate though. libopenmpt 0.3 adds the
+    appropriate special member functions. This adds the respective symbol names
+    to the exported ABI, which, depending on the compiler, might or might not
+    have been there in libopenmpt 0.2. The possibly resulting possible ODR
+    violation only affects cases that did crash in the libopenmpt 0.2 API anyway
+    due to memory double-free, and does not cause any further problems in
+    practice for all known platforms and compilers.
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
  *  [**Bug**] The C API could crash instead of failing gracefully in
