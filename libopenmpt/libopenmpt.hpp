@@ -135,6 +135,11 @@ namespace openmpt {
 #pragma warning(push)
 #pragma warning(disable:4275)
 #endif
+//! libopenmpt exception base class
+/*!
+  Base class used for all exceptions that are thrown by libopenmpt itself. Libopenmpt may additionally throw any exception thrown by the standard library which are all derived from std::exception.
+  \sa \ref libopenmpt_cpp_error
+*/
 class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
 	char * text;
