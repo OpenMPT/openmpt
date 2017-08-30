@@ -34,6 +34,54 @@ exception::exception( const std::string & text_ ) noexcept
 	}
 }
 
+exception::exception( const exception & other ) noexcept
+	: std::exception()
+	, text(0)
+{
+	const char * const text_ = ( other.what() ? other.what() : "" );
+	text = static_cast<char*>( std::malloc( std::strlen( text_ ) + 1 ) );
+	if ( text ) {
+		std::memcpy( text, text_, std::strlen( text_ ) + 1 );
+	}
+}
+
+exception::exception( exception && other ) noexcept
+	: std::exception()
+	, text(0)
+{
+	text = std::move( other.text );
+	other.text = 0;
+}
+
+exception & exception::operator = ( const exception & other ) noexcept {
+	if ( this == &other ) {
+		return *this;
+	}
+	if ( text ) {
+		std::free( text );
+		text = 0;
+	}
+	const char * const text_ = ( other.what() ? other.what() : "" );
+	text = static_cast<char*>( std::malloc( std::strlen( text_ ) + 1 ) );
+	if ( text ) {
+		std::memcpy( text, text_, std::strlen( text_ ) + 1 );
+	}
+	return *this;
+}
+
+exception & exception::operator = ( exception && other ) noexcept {
+	if ( this == &other ) {
+		return *this;
+	}
+	if ( text ) {
+		std::free( text );
+		text = 0;
+	}
+	text = std::move( other.text );
+	other.text = 0;
+	return *this;
+}
+
 exception::~exception() noexcept {
 	if ( text ) {
 		std::free( text );
@@ -45,7 +93,7 @@ const char * exception::what() const noexcept {
 	if ( text ) {
 		return text;
 	} else {
-		return "unknown openmpt exception";
+		return "out of memory";
 	}
 }
 

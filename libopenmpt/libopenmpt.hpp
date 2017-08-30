@@ -140,6 +140,10 @@ private:
 	char * text;
 public:
 	exception( const std::string & text ) noexcept;
+	exception( const exception & other ) noexcept;
+	exception( exception && other ) noexcept;
+	exception & operator = ( const exception & other ) noexcept;
+	exception & operator = ( exception && other ) noexcept;
 	virtual ~exception() noexcept;
 	virtual const char * what() const noexcept;
 }; // class exception
