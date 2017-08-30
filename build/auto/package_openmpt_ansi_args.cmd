@@ -20,6 +20,7 @@ if "%MPT_PKG_FORMAT%" == "" set MPT_PKG_FORMAT=zip
 
 
 
+cmd /c build\auto\update_package_template.cmd || goto error
 cd bin || goto error
 rmdir /s /q openmpt
 mkdir openmpt || goto error

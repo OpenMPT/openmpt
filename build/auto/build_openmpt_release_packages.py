@@ -82,6 +82,12 @@ pManual.communicate()
 if(pManual.returncode != 0):
     raise Exception("Something went wrong during manual creation!")
 
+print("Updating package template...")
+pTemplate = Popen(["build\\auto\\update_package_template.cmd"], cwd="./")
+pTemplate.communicate()
+if(pTemplate.returncode != 0):
+    raise Exception("Something went wrong during updating package template!")
+
 print("Other package contents...")
 copy_other(openmpt_zip_32bit_path,    openmpt_version_short)
 copy_other(openmpt_zip_32bitold_path, openmpt_version_short)
