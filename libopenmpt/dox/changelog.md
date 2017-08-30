@@ -61,7 +61,7 @@ is just a high-level summary.
  *  [**Regression**] Support for GCC 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7 has been
     removed.
  *  [**Regression**] Support for Clang 3.0, 3.1, 3.2, 3.3 has been removed.
- *  [**Regression**] Support for Emscripten verions older than 1.31.0 has been
+ *  [**Regression**] Support for Emscripten versions older than 1.31.0 has been
     removed.
  *  [**Regression**] Support for Android NDK versions older than 11 has been
     removed.
