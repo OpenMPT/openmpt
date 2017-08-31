@@ -13,8 +13,8 @@
 </head>
 <body class="normal">
 <hr>
-<h1>SoundTouch audio processing library v1.9.2</h1>
-<p class="normal">SoundTouch library Copyright © Olli Parviainen 2001-2015</p>
+<h1>SoundTouch audio processing library v2.0</h1>
+<p class="normal">SoundTouch library Copyright © Olli Parviainen 2001-2017</p>
 <hr>
 <h2>1. Introduction </h2>
 <p>SoundTouch is an open-source audio processing library that allows
@@ -55,6 +55,9 @@ instead of the make-win.bat script, directories bin and lib may need to
 be created manually to the SoundTouch package root for the final
 executables. The make-win.bat script creates these directories
 automatically. </p>
+<p><strong>C# example</strong>: The source code package includes also a C# example 
+    application for Windows that shows how to invoke SoundTouch.dll 
+    dynamic-load library for processing mp3 audio.
 <p><strong>OpenMP NOTE</strong>: If activating the OpenMP parallel computing in 
 the compilation, the target program will require additional vcomp dll library to 
 properly run. In Visual C++ 9.0 these libraries can be found in the following 
@@ -156,7 +159,7 @@ directly and remove the following definition:<blockquote>
 sstrip SoundTouch.dll</pre>
 </blockquote>
 
-<h3>2.1. Building in Android</h3>
+<h3>2.3. Building in Android</h3>
 <p>Android compilation instructions are within the 
     source code package, see file &quot;<b>source/Android-lib/README-SoundTouch-Android.html</b>&quot; 
     in the source code package. </p>
@@ -377,7 +380,10 @@ processors vs. non-SIMD implementation:</p>
 <p>SoundTouch 1.9 onwards support running the algorithms parallel in several CPU 
 cores. Based on benchmark the experienced multi-core processing speed-up gain 
 ranges between +30% (on a high-spec dual-core x86 Windows PC) to 215% (on a moderately low-spec 
-quad-core ARM of Raspberry Pi2).</p>
+quad-core ARM of Raspberry Pi2). </p>
+<p>See an external blog article with more detailed discussion about the
+<a href="http://www.softwarecoven.com/parallel-computing-in-embedded-mobile-devices/">
+SoundTouch OpenMP optimization</a>.</p>
 <p>The parallel computing support is implemented using OpenMP spec 3.0 
 instructions. These instructions are supported by Visual C++ 2008 and later, and 
 GCC v4.2 and later. Compilers that do not supporting OpenMP will ignore these 
@@ -567,6 +573,16 @@ this corresponds to lowering the pitch by -0.318 semitones:</p>
 <hr>
 <h2>5. Change History</h2>
 <h3>5.1. SoundTouch library Change History </h3>
+    <p><b>2.0:</b></p>
+    <ul>
+        <li>Added functions to get initial processing latency, duration ratio between the original input and processed output tracks, and clarified reporting of input/output batch sizes</li>
+        <li>Fixed issue that added brief sequence of silence to beginning of output audio</li>
+        <li>Adjusted algorithm parameters to reduce reverberating effect at tempo slowdown</li>
+        <li>Bugfix: Fixed a glitch that could cause negative array indexing in quick seek algorithm</li>
+        <li>Bugfix: flush() didn't properly flush final samples from the pipeline on 2nd time in case that soundtouch object instance was recycled and used for processing a second audio stream.</li>
+        <li>Bugfix: Pi value had incorrect 9th/10th decimals</li>
+        <li>Added C# example application that uses SoundTouch dll library for processing MP3 files</li>
+    </ul>
     <p><b>1.9.2:</b></p>
     <ul>
         <li>Fix in GNU package configuration</li>
@@ -575,8 +591,8 @@ this corresponds to lowering the pitch by -0.318 semitones:</p>
     <ul>
         <li>Improved SoundTouch::flush() function so that it returns precisely the desired amount of samples for exact output duration control</li>
         <li>Redesigned quickseek algorithm for improved sound quality when using the quickseek mode. The new quickseek algorithm can find 99% as good results as the 
-		default full-scan mode, while the quickseek algorithm is remarkable less 
-		CPU intensive.</li>
+        default full-scan mode, while the quickseek algorithm is remarkable less 
+        CPU intensive.</li>
         <li>Added adaptive integer divider scaling for improved sound quality when using integer processing algorithm
         </li>
     </ul>
@@ -819,10 +835,12 @@ switch "-bpm"</li>
 <p>Kudos for these people who have contributed to development or
 submitted bugfixes:</p>
 <ul>
-    <li> Arthur A</li>
+  <li> Arthur A</li>
+  <li> Paul Adenot</li>
   <li> Richard Ash</li>
   <li> Stanislav Brabec</li>
   <li> Christian Budde</li>
+  <li> Jamie Bullock</li>
   <li> Chris Bryan</li>  
   <li> Jacek Caban</li>
   <li> Brian Cameron</li>
@@ -830,23 +848,28 @@ submitted bugfixes:</p>
   <li> David Clark</li>
   <li> Patrick Colis</li>
   <li> Miquel Colon</li>
-    <li> Jim Credland</li>
+  <li> Jim Credland</li>
   <li> Sandro Cumerlato</li>
   <li> Justin Frankel</li>
-    <li> Masa H.</li>
+  <li> Masa H.</li>
   <li> Jason Garland</li>
   <li> Takashi Iwai</li>
-    <li> Thomas Klausner</li>
-    <li> Mathias Möhl</li>
+  <li> Thomas Klausner</li>
+  <li> Tony Mechelynck </li>
+  <li> Mathias M&ouml;hl</li>
   <li> Yuval Naveh</li>
+  <li> Mats Palmgren </li>
+  <li> Chandni Patel</li>
   <li> Paulo Pizarro</li>
+  <li> Andrey Ponomarenko</li>
   <li> Blaise Potard</li>
-    <li> Michael Pruett</li>
+  <li> Michael Pruett</li>
   <li> Rajeev Puran</li>
-    <li> RJ Ryan</li>
-    <li> John Sheehy</li>
+  <li> RJ Ryan</li>
+  <li> John Sheehy</li>
   <li> Tim Shuttleworth</li>
   <li> Albert Sirvent</li>
+  <li> Tyson Smith</li>
   <li> John Stumpo</li>
   <li> Katja Vetter</li>
 </ul>
@@ -866,9 +889,9 @@ General Public License for more details.</p>
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</p>
 <hr><!--
-$Id: README.html 230 2015-09-20 07:38:32Z oparviai $
+$Id: README.html 253 2017-07-30 09:35:00Z oparviai $
 -->
     <p>
-        <i>README.html file updated in Sep-2015</i></p>
+        <i>README.html file updated in July-2017</i></p>
 </body>
 </html>
