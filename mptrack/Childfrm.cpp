@@ -48,7 +48,6 @@ IMPLEMENT_DYNCREATE(CChildFrame, CMDIChildWnd)
 BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	//{{AFX_MSG_MAP(CChildFrame)
 	ON_WM_DESTROY()
-	ON_WM_NCACTIVATE()
 	ON_WM_MDIACTIVATE()
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,	OnInstrumentSelected)
@@ -134,6 +133,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 	{
 		MPT_ASSERT(pActivateWnd == this);
 		CMainFrame::GetMainFrame()->UpdateEffectKeys(static_cast<CModDoc *>(GetActiveDocument()));
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
 	}
 
 	// Update channel manager according to active document
@@ -156,7 +156,6 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 		nCmdShow = SW_SHOWMAXIMIZED;
 	}
 	CMDIChildWnd::ActivateFrame(nCmdShow);
-
 
 	// When song first loads, initialise patternViewState to point to start of song.
 	CView *pView = GetActiveView();
@@ -339,22 +338,6 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CChildFrame diagnostics
-
-#ifdef _DEBUG
-void CChildFrame::AssertValid() const
-{
-	CMDIChildWnd::AssertValid();
-}
-
-void CChildFrame::Dump(CDumpContext& dc) const
-{
-	CMDIChildWnd::Dump(dc);
-}
-
-#endif //_DEBUG
-
-/////////////////////////////////////////////////////////////////////////////
 // CChildFrame message handlers
 
 void CChildFrame::OnDestroy()
@@ -417,21 +400,6 @@ LRESULT CChildFrame::OnChangeViewClass(WPARAM wParam, LPARAM lParam)
 		::PostMessage(m_hWndCtrl, WM_MOD_CTRLMSG, CTRLMSG_ACTIVATEPAGE, (LPARAM)wParam);
 	}
 	return 0;
-}
-
-
-BOOL CChildFrame::OnNcActivate(BOOL bActivate)
-//--------------------------------------------
-{
-	if (m_hWndView)
-	{
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm)
-		{
-			if (bActivate) pMainFrm->SetMidiRecordWnd(m_hWndView);
-		}
-	}
-	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
 

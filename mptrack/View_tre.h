@@ -56,9 +56,9 @@ public:
 	BOOL Register(CModTree *pWnd);
 
 public:
-	virtual DROPEFFECT OnDragEnter(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-	virtual DROPEFFECT OnDragOver(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-	virtual BOOL OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+	DROPEFFECT OnDragEnter(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point) override;
+	DROPEFFECT OnDragOver(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point) override;
+	BOOL OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point) override;
 };
 
 
@@ -204,7 +204,7 @@ public:
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
 	void DeleteTreeItem(HTREEITEM hItem);
-	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam);
+	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
 	void InstrumentLibraryChDir(mpt::PathString dir, bool isSong);
@@ -227,7 +227,7 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModTree)
 	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Drag & Drop operations
@@ -298,7 +298,8 @@ protected:
 	afx_msg void OnGotoInstrumentDir();
 	afx_msg void OnGotoSampleDir();
 
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

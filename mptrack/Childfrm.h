@@ -118,26 +118,21 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CChildFrame)
 	public:
-	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd);
-	virtual void ActivateFrame(int nCmdShow);
-	virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
+	BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) override;
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	void ActivateFrame(int nCmdShow) override;
+	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 	//}}AFX_VIRTUAL
 
 // Implementation
 public:
 	virtual ~CChildFrame();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
 
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CChildFrame)
 	afx_msg void OnDestroy();
-	afx_msg BOOL OnNcActivate(BOOL bActivate);
+	afx_msg void OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd);
 	afx_msg LRESULT OnChangeViewClass(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInstrumentSelected(WPARAM, LPARAM lParam);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);

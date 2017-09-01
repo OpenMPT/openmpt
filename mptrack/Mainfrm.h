@@ -230,11 +230,11 @@ public:
 	TfLanguageProfileNotifySink();
 	~TfLanguageProfileNotifySink();
 
-	virtual HRESULT STDMETHODCALLTYPE OnLanguageChange(LANGID langid, __RPC__out BOOL *pfAccept);
-	virtual HRESULT STDMETHODCALLTYPE OnLanguageChanged();
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
-	virtual ULONG STDMETHODCALLTYPE AddRef();
-	virtual ULONG STDMETHODCALLTYPE Release();
+	HRESULT STDMETHODCALLTYPE OnLanguageChange(LANGID langid, __RPC__out BOOL *pfAccept) override;
+	HRESULT STDMETHODCALLTYPE OnLanguageChanged() override;
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) override;
+	ULONG STDMETHODCALLTYPE AddRef() override;
+	ULONG STDMETHODCALLTYPE Release() override;
 
 protected:
 	ITfInputProcessorProfiles *m_pProfiles;
@@ -426,12 +426,12 @@ public:
 
 	bool StopSoundFile(CSoundFile *);
 	bool PlaySoundFile(CSoundFile *);
-	BOOL PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note);
-	BOOL PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
-	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
+	bool PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note, int volume = -1);
+	bool PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note, int volume = -1);
+	bool PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note, int volume = -1);
 
 	void InitPreview();
-	void PreparePreview(ModCommand::NOTE note);
+	void PreparePreview(ModCommand::NOTE note, int volume);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
 	void PlayPreview() { PlaySoundFile(&m_WaveFile); }
 
@@ -462,10 +462,10 @@ public:
 protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual BOOL DestroyWindow();
-	virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	BOOL PreTranslateMessage(MSG* pMsg) override;
+	BOOL DestroyWindow() override;
+	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 	//}}AFX_VIRTUAL
 
 	/// Opens either template or example menu item.
@@ -478,8 +478,8 @@ public:
 public:
 	virtual ~CMainFrame();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	void AssertValid() const override;
+	void Dump(CDumpContext& dc) const override;
 #endif
 
 	void OnTimerGUI();

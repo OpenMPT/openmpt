@@ -26,6 +26,7 @@
 #include "FolderScanner.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "../soundlib/MIDIEvents.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -131,6 +132,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_GOTO_INSDIR,	OnGotoInstrumentDir)
 	ON_COMMAND(ID_MODTREE_GOTO_SMPDIR,	OnGotoSampleDir)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
+	ON_MESSAGE(WM_MOD_MIDIMSG,			OnMidiMsg)
 	//}}AFX_MSG_MAP
 	ON_WM_KILLFOCUS()		//rewbs.customKeys
 	ON_WM_SETFOCUS()		//rewbs.customKeys
@@ -1422,8 +1424,8 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 }
 
 
-BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
-//---------------------------------------------------------------
+BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
+//---------------------------------------------------------------------------
 {
 	if (hItem)
 	{
@@ -1445,7 +1447,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				} else
 				{
 					modDoc->NoteOff(0, true); // cut previous playing samples
-					modDoc->PlayNote(nParam & 0x7F, 0, static_cast<SAMPLEINDEX>(modItemID));
+					modDoc->PlayNote(nParam & 0x7F, 0, static_cast<SAMPLEINDEX>(modItemID), volume);
 				}
 			}
 			return TRUE;
@@ -1462,21 +1464,14 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				} else
 				{
 					modDoc->NoteOff(0, true);
-					modDoc->PlayNote(nParam & 0x7F, static_cast<INSTRUMENTINDEX>(modItemID), 0);
+					modDoc->PlayNote(nParam & 0x7F, static_cast<INSTRUMENTINDEX>(modItemID), 0, volume);
 				}
 			}
 			return TRUE;
 
 		case MODITEM_EFFECT:
 			if ((modDoc) && (modItemID < MAX_MIXPLUGINS))
-			{/*
-				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItem];
-				if (pPlugin->pMixPlugin)
-				{
-					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-					pVstPlugin->ToggleEditor();
-				}*/
+			{
 				modDoc->TogglePluginEditor(modItemID);
 			}
 			return TRUE;
@@ -1494,16 +1489,16 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 					{
 						if (modItem.type == MODITEM_INSLIB_INSTRUMENT)
 						{
-							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
+							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam, volume);
 						} else
 						{
-							pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
+							pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam, volume);
 						}
 					}
 				} else
 				{
 					// Preview sample / instrument file
-					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), nParam);
+					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), nParam, volume);
 				}
 			} else
 			{
@@ -1521,7 +1516,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				if(modItemID < CountOf(midiLib.MidiMap) && !midiLib.MidiMap[modItemID].empty())
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-					if (pMainFrm) pMainFrm->PlaySoundFile(midiLib.MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam));
+					if (pMainFrm) pMainFrm->PlaySoundFile(midiLib.MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam), volume);
 				}
 			}
 			return TRUE;
@@ -3727,12 +3722,35 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
+LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
+//--------------------------------------------------
+{
+	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	int volume;
+	switch(MIDIEvents::GetTypeFromEvent(midiData))
+	{
+	case MIDIEvents::evNoteOn:
+		volume = MIDIEvents::GetDataByte2FromEvent(midiData);
+		if(volume > 0)
+		{
+			PlayItem(GetSelectedItem(), midiByte1 + NOTE_MIN, Util::muldivr(volume, 256, 127));
+			return 1;
+		}
+		MPT_FALLTHROUGH;
+	case MIDIEvents::evNoteOff:
+		PlayItem(GetSelectedItem(), NOTE_NOTECUT);
+		break;
+	}
+	return 0;
+}
+
+
 void CModTree::OnKillFocus(CWnd* pNewWnd)
 //--------------------------------------
 {
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
-
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
 }
 
 
@@ -3741,6 +3759,7 @@ void CModTree::OnSetFocus(CWnd* pOldWnd)
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = true;
+	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWnd);
 }
 
 
