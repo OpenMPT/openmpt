@@ -1526,8 +1526,8 @@ bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 }
 
 
-BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note)
-//--------------------------------------------------------------------------------------------
+bool CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note, int volume)
+//--------------------------------------------------------------------------------------------------------
 {
 	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	bool ok = false;
@@ -1537,7 +1537,7 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 		InitPreview();
 		if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(m_WaveFile, 1, nIns, nRgn))
 		{
-			PreparePreview(note);
+			PreparePreview(note, volume);
 			ok = true;
 		}
 	}
@@ -1553,8 +1553,8 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 }
 
 
-BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note)
-//------------------------------------------------------------------------------------
+bool CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note, int volume)
+//------------------------------------------------------------------------------------------------
 {
 	bool ok = false;
 	BeginWaitCursor();
@@ -1591,7 +1591,7 @@ BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 		if(ok)
 		{
 			// Write notes to pattern. Also done if we have previously loaded this file, since we might be previewing another note now.
-			PreparePreview(note);
+			PreparePreview(note, volume);
 			prevFile = filename;
 		}
 	}
@@ -1607,8 +1607,8 @@ BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 }
 
 
-BOOL CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note)
-//--------------------------------------------------------------------------------------------------------------------------
+bool CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note, int volume)
+//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool ok = false;
 	BeginWaitCursor();
@@ -1632,7 +1632,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 		{
 			m_WaveFile.ReadSampleFromSong(1, sndFile, nSample);
 		}
-		PreparePreview(note);
+		PreparePreview(note, volume);
 		ok = true;
 	}
 	EndWaitCursor();
@@ -1652,8 +1652,6 @@ void CMainFrame::InitPreview()
 {
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(FileReader());
-	// Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.m_nDefaultTempo.Set(125);
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
@@ -1666,8 +1664,8 @@ void CMainFrame::InitPreview()
 }
 
 
-void CMainFrame::PreparePreview(ModCommand::NOTE note)
-//----------------------------------------------------
+void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
+//----------------------------------------------------------------
 {
 	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
 	m_WaveFile.SetRepeatCount(-1);
@@ -1685,6 +1683,9 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
 	}
 
+	// Avoid global volume ramping when trying samples in the treeview.
+	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_PlayState.m_nGlobalVolume = (volume > 0) ? volume : MAX_GLOBAL_VOLUME;
+
 	if(m_WaveFile.Patterns.IsValidPat(0))
 	{
 		auto m = m_WaveFile.Patterns[0].GetRow(0);
@@ -1692,7 +1693,6 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 		{
 			m[0].note = note;
 			m[0].instr = 1;
-
 		}
 		// Infinite loop on second row
 		m[1 * 2].command = CMD_POSITIONJUMP;
@@ -2173,8 +2173,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 	CMDIChildWnd *pMDIActive = MDIGetActive();
 	if (pMDIActive)
 	{
-		CView *pView = pMDIActive->GetActiveView();
-		if (pView) return (CModDoc *)pView->GetDocument();
+		return static_cast<CModDoc *>(pMDIActive->GetActiveDocument());
 	}
 	return nullptr;
 }

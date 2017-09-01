@@ -1285,7 +1285,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{
 		pMainFrame->InitPreview();
-		pMainFrame->PreparePreview(NOTE_NOTECUT);
+		pMainFrame->PreparePreview(NOTE_NOTECUT, 0);
 		pMainFrame->PlayPreview();
 	}
 
