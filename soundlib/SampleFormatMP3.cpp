@@ -284,7 +284,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	do
 	{
 		int16 sample_buf[MP3_MAX_SAMPLES_PER_FRAME];
-		frame_size = mp3_decode(mp3, const_cast<uint8 *>(stream_pos), bytes_left, sample_buf, &info); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
+		frame_size = mp3_decode(mp3, const_cast<uint8 *>(stream_pos), mpt::saturate_cast<int>(bytes_left), sample_buf, &info); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
 		if(rate != 0 && rate != info.sample_rate) break; // inconsistent stream
 		if(channels != 0 && channels != info.channels) break; // inconsistent stream
 		rate = info.sample_rate;
