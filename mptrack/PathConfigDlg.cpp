@@ -16,6 +16,16 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+static constexpr std::pair<ConfigurableDirectory TrackerSettings::*, int> PathSettings[] =
+{
+	{ &TrackerSettings::PathSongs, IDC_OPTIONS_DIR_MODS },
+	{ &TrackerSettings::PathSamples, IDC_OPTIONS_DIR_SAMPS },
+	{ &TrackerSettings::PathInstruments, IDC_OPTIONS_DIR_INSTS },
+	{ &TrackerSettings::PathPlugins, IDC_OPTIONS_DIR_VSTS },
+	{ &TrackerSettings::PathPluginPresets, IDC_OPTIONS_DIR_VSTPRESETS },
+	{ &TrackerSettings::AutosavePath, IDC_AUTOSAVE_PATH },
+};
+
 IMPLEMENT_DYNAMIC(PathConfigDlg, CPropertyPage)
 
 PathConfigDlg::PathConfigDlg()
@@ -59,24 +69,23 @@ BOOL PathConfigDlg::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// Paths
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, TrackerSettings::Instance().PathSongs.GetDefaultDir().AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, TrackerSettings::Instance().PathSamples.GetDefaultDir().AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, TrackerSettings::Instance().PathInstruments.GetDefaultDir().AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, TrackerSettings::Instance().PathPlugins.GetDefaultDir().AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().AsNative().c_str());
+	const auto &settings = TrackerSettings::Instance();
+	// Default paths
+	for(const auto &path : PathSettings)
+	{
+		::SetDlgItemTextW(m_hWnd, path.second, (settings.*path.first).GetDefaultDir().AsNative().c_str());
+	}
 
 	// Autosave
-	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().CreateBackupFiles ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK1, settings.CreateBackupFiles ? BST_CHECKED : BST_UNCHECKED);
 
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, int32_max);
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, int32_max);
-	CheckDlgButton(IDC_AUTOSAVE_ENABLE, TrackerSettings::Instance().AutosaveEnabled ? BST_CHECKED : BST_UNCHECKED);
-	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, TrackerSettings::Instance().AutosaveHistoryDepth);
-	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, TrackerSettings::Instance().AutosavePath.GetDefaultDir().AsNative().c_str());
-	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, TrackerSettings::Instance().AutosaveIntervalMinutes);
-	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, TrackerSettings::Instance().AutosaveUseOriginalPath ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, TrackerSettings::Instance().AutosaveUseOriginalPath ? BST_UNCHECKED : BST_CHECKED);
+	CheckDlgButton(IDC_AUTOSAVE_ENABLE, settings.AutosaveEnabled ? BST_CHECKED : BST_UNCHECKED);
+	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, settings.AutosaveHistoryDepth);
+	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, settings.AutosaveIntervalMinutes);
+	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, settings.AutosaveUseOriginalPath ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, settings.AutosaveUseOriginalPath ? BST_UNCHECKED : BST_CHECKED);
 	//enable/disable stuff as appropriate
 	OnAutosaveEnable();
 	OnAutosaveUseOrigDir();
@@ -88,32 +97,27 @@ BOOL PathConfigDlg::OnInitDialog()
 static mpt::PathString GetPath(HWND hwnd, int id)
 //-----------------------------------------------
 {
-	return mpt::PathString::FromUnicode(GetWindowTextUnicode(::GetDlgItem(hwnd, id)));
+	return mpt::PathString::FromUnicode(GetWindowTextUnicode(::GetDlgItem(hwnd, id))).EnsureTrailingSlash();
 }
 
 
 void PathConfigDlg::OnOK()
 //------------------------
 {
+	auto &settings = TrackerSettings::Instance();
 	// Default paths
-	CMainFrame::GetMainFrame()->SetupDirectories(
-		GetPath(m_hWnd, IDC_OPTIONS_DIR_MODS),
-		GetPath(m_hWnd, IDC_OPTIONS_DIR_SAMPS),
-		GetPath(m_hWnd, IDC_OPTIONS_DIR_INSTS),
-		GetPath(m_hWnd, IDC_OPTIONS_DIR_VSTS),
-		GetPath(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS));
+	for(const auto &path : PathSettings)
+	{
+		(settings.*path.first).SetDefaultDir(GetPath(m_hWnd, path.second));
+	}
 
 	// Autosave
-	TrackerSettings::Instance().CreateBackupFiles = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	settings.CreateBackupFiles = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
-	WCHAR tempPath[MAX_PATH];
-	TrackerSettings::Instance().AutosaveEnabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
-	TrackerSettings::Instance().AutosaveHistoryDepth = (GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
-	TrackerSettings::Instance().AutosaveIntervalMinutes = (GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
-	TrackerSettings::Instance().AutosaveUseOriginalPath = (IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
-	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, tempPath, CountOf(tempPath));
-	mpt::PathString path = mpt::PathString::FromNative(tempPath).EnsureTrailingSlash();
-	TrackerSettings::Instance().AutosavePath.SetDefaultDir(path);
+	settings.AutosaveEnabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
+	settings.AutosaveHistoryDepth = (GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
+	settings.AutosaveIntervalMinutes = (GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
+	settings.AutosaveUseOriginalPath = (IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
 
 	CPropertyPage::OnOK();
 }
