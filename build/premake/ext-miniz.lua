@@ -14,4 +14,5 @@
 	filter {}
   files {
    "../../include/miniz/miniz.c",
+   "../../include/miniz/miniz.h",
   }

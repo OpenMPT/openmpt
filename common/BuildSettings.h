@@ -696,10 +696,6 @@
 #endif
 #endif
 
-#ifdef MPT_WITH_MINIZ
-#define MINIZ_HEADER_FILE_ONLY
-#endif
-
 #ifdef MPT_WITH_PICOJSON
 #define PICOJSON_USE_INT64
 #endif

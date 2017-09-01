@@ -644,7 +644,7 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 #ifdef MPT_WITH_MINIZ
-		"Rich Geldreich for miniz\n"
+		"Rich Geldreich et al. for miniz\n"
 		"https://github.com/richgel999/miniz\n"
 		"\n"
 #endif

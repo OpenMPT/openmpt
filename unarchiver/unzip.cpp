@@ -18,7 +18,7 @@
 #if defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)
 #include <contrib/minizip/unzip.h>
 #elif defined(MPT_WITH_MINIZ)
-#include <miniz/miniz.c>
+#include <miniz/miniz.h>
 #endif
 
 
