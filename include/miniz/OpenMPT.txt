@@ -9,4 +9,9 @@ Modifications for OpenMPT:
     because unaligned access is undefined behaviour.
  *  Various warnings in platform detection logic using undefined macros have
     been fixed.
+ *  Warning `warning: cast from 'const mz_uint8 *' (aka 'const unsigned char *')
+    to 'const mz_uint32 *' (aka 'const unsigned int *') increases required
+    alignment from 1 to 4 [-Wcast-align]` has been fixed.
+ *  Prototypes of `tdefl_compressor_alloc` and `tinfl_decompressor_alloc`
+    have beeen fixed
 No further changes have been made.

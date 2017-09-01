@@ -2144,7 +2144,11 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, 
 /* Allocate the tdefl_compressor and tinfl_decompressor structures in C so that */
 /* non-C language bindings to tdefL_ and tinfl_ API don't need to worry about */
 /* structure size and allocation mechanism. */
+#if 0 // OpenMPT
 tdefl_compressor *tdefl_compressor_alloc()
+#else // OpenMPT
+tdefl_compressor *tdefl_compressor_alloc(void) // OpenMPT
+#endif // OpenMPT
 {
     return (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor));
 }
@@ -2878,7 +2882,11 @@ int tinfl_decompress_mem_to_callback(const void *pIn_buf, size_t *pIn_buf_size, 
     return result;
 }
 
+#if 0 // OpenMPT
 tinfl_decompressor *tinfl_decompressor_alloc()
+#else // OpenMPT
+tinfl_decompressor *tinfl_decompressor_alloc(void) // OpenMPT
+#endif // OpenMPT
 {
     tinfl_decompressor *pDecomp = (tinfl_decompressor *)MZ_MALLOC(sizeof(tinfl_decompressor));
     if (pDecomp)
@@ -6704,6 +6712,13 @@ static mz_bool mz_zip_writer_update_zip64_extension_block(mz_zip_array *pNew_ext
     return MZ_TRUE;
 }
 
+static mz_uint32 read_32ne(const mz_uint8 *p) // OpenMPT
+{  // OpenMPT
+    mz_uint32 result = 0; // OpenMPT
+    memcpy(&result, p, sizeof(mz_uint32)); // OpenMPT
+    return result; // OpenMPT
+} // OpenMPT
+
 /* TODO: This func is now pretty freakin complex due to zip64, split it up? */
 mz_bool mz_zip_writer_add_from_zip_reader(mz_zip_archive *pZip, mz_zip_archive *pSource_zip, mz_uint src_file_index)
 {
@@ -6941,10 +6956,17 @@ mz_bool mz_zip_writer_add_from_zip_reader(mz_zip_archive *pZip, mz_zip_archive *
             if (pZip->m_pState->m_zip64)
             {
                 /* dest is zip64, so upgrade the data descriptor */
+#if 0 // OpenMPT
                 const mz_uint32 *pSrc_descriptor = (const mz_uint32 *)((const mz_uint8 *)pBuf + (has_id ? sizeof(mz_uint32) : 0));
                 const mz_uint32 src_crc32 = pSrc_descriptor[0];
                 const mz_uint64 src_comp_size = pSrc_descriptor[1];
                 const mz_uint64 src_uncomp_size = pSrc_descriptor[2];
+#else // OpenMPT
+                const mz_uint8 *pSrc_descriptor = (const mz_uint8 *)pBuf + (has_id ? sizeof(mz_uint32) : 0); // OpenMPT
+                const mz_uint32 src_crc32 = read_32ne(pSrc_descriptor + (0 * sizeof(mz_uint32))); // OpenMPT
+                const mz_uint64 src_comp_size = read_32ne(pSrc_descriptor + (1 * sizeof(mz_uint32)));; // OpenMPT
+                const mz_uint64 src_uncomp_size = read_32ne(pSrc_descriptor + (2 * sizeof(mz_uint32))); // OpenMPT
+#endif // OpenMPT
 
                 mz_write_le32((mz_uint8 *)pBuf, MZ_ZIP_DATA_DESCRIPTOR_ID);
                 mz_write_le32((mz_uint8 *)pBuf + sizeof(mz_uint32) * 1, src_crc32);
