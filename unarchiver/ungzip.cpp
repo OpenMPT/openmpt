@@ -17,7 +17,7 @@
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
-#include <miniz/miniz.c>
+#include <miniz/miniz.h>
 #endif
 
 #endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ

@@ -478,6 +478,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\miniz\miniz.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\..\include\miniz\miniz.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
