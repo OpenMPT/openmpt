@@ -14,6 +14,7 @@
 #include "../../common/mptTime.h"
 #include "../../soundlib/plugins/PlugInterface.h"
 #include <rtmidi/RtMidi.h>
+#include <array>
 #include <deque>
 
 
@@ -61,10 +62,60 @@ protected:
 		kMaxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
 	};
 
-	struct Message
+	// MIDI queue entry with small storage optimiziation.
+	// This optimiziation is going to be used for all messages that OpenMPT can send internally,
+	// but SysEx messages received from other plugins may be longer.
+	class Message
 	{
-		double time;
-		std::vector<unsigned char> msg;
+	public:
+		double m_time;
+		size_t m_size;
+		unsigned char *m_message;
+	protected:
+		std::array<unsigned char, 32> m_msgSmall;
+
+	public:
+		Message(double time, const void *data, size_t size)
+			: m_time(time)
+			, m_size(size)
+			, m_message(nullptr)
+		{
+			if(size > sizeof(m_msgSmall))
+				m_message = new unsigned char[size];
+			else
+				m_message = m_msgSmall.data();
+			std::memcpy(m_message, data, size);
+		}
+
+		Message(double time, unsigned char msg) noexcept : Message(time, &msg, 1) { }
+
+		Message(Message &&other) noexcept
+			: m_time(other.m_time)
+			, m_size(other.m_size)
+			, m_message(other.m_message)
+			, m_msgSmall(other.m_msgSmall)
+		{
+			other.m_message = nullptr;
+			if(m_size <= sizeof(m_msgSmall))
+				m_message = m_msgSmall.data();
+			
+		}
+
+		~Message()
+		{
+			if(m_size > sizeof(m_msgSmall))
+				delete[] m_message;
+		}
+
+		Message& operator= (Message &&other) noexcept
+		{
+			m_time = other.m_time;
+			m_size = other.m_size;
+			m_message = (m_size <= sizeof(m_msgSmall)) ? m_msgSmall.data() : other.m_message;
+			m_msgSmall = other.m_msgSmall;
+			other.m_message = nullptr;
+			return *this;
+		}
 	};
 
 	std::string m_chunkData;					// Storage for GetChunk
