@@ -60,7 +60,7 @@
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
-#include <miniz/miniz.c>
+#include <miniz/miniz.h>
 #endif
 
 #ifdef _DEBUG
