@@ -1803,18 +1803,6 @@ BOOL CMainFrame::SetupPlayer()
 }
 
 
-BOOL CMainFrame::SetupDirectories(const mpt::PathString &szModDir, const mpt::PathString &szSampleDir, const mpt::PathString &szInstrDir, const mpt::PathString &szVstDir, const mpt::PathString &szPresetDir)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	// will also set working directory
-	TrackerSettings::Instance().PathSongs.SetDefaultDir(szModDir);
-	TrackerSettings::Instance().PathSamples.SetDefaultDir(szSampleDir);
-	TrackerSettings::Instance().PathInstruments.SetDefaultDir(szInstrDir);
-	TrackerSettings::Instance().PathPlugins.SetDefaultDir(szVstDir);
-	TrackerSettings::Instance().PathPluginPresets.SetDefaultDir(szPresetDir);
-	return TRUE;
-}
-
 BOOL CMainFrame::SetupMiscOptions()
 //---------------------------------
 {
