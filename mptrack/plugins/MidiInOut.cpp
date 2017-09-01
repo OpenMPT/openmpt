@@ -290,7 +290,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		{
 			if(m_sendTimingInfo)
 			{
-				m_outQueue.push_back({ GetOutputTimestamp(), { 0xF8 } });
+				m_outQueue.push_back(Message(GetOutputTimestamp(), 0xF8));
 			}
 
 			double bpm = m_SndFile.GetCurrentBPM();
@@ -303,9 +303,9 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 
 		double now = m_clock.Now() * (1.0 / 1000.0);
 		auto message = m_outQueue.begin();
-		while(message != m_outQueue.end() && message->time <= now)
+		while(message != m_outQueue.end() && message->m_time <= now)
 		{
-			m_midiOut.sendMessage(&message->msg);
+			m_midiOut.sendMessage(message->m_message, message->m_size);
 			message++;
 		}
 		m_outQueue.erase(m_outQueue.begin(), message);
@@ -363,8 +363,7 @@ void MidiInOut::Resume()
 	OpenDevice(m_outputDevice.index, false);
 	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
 	{
-		std::vector<unsigned char> message(1, 0xFA);	// Start
-		m_midiOut.sendMessage(&message);
+		MidiSend(0xFA);	// Start
 	}
 }
 
@@ -376,8 +375,8 @@ void MidiInOut::Suspend()
 	// Suspend MIDI I/O
 	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
 	{
-		std::vector<unsigned char> message(1, 0xFC);	// Stop
-		m_midiOut.sendMessage(&message);
+		unsigned char message[1] = { 0xFC };	// Stop
+		m_midiOut.sendMessage(message, 1);
 	}
 	//CloseDevice(inputDevice);
 	CloseDevice(m_outputDevice);
@@ -420,11 +419,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	}
 
 	MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
-	Message message;
-	message.time = GetOutputTimestamp();
-	message.msg.resize(3, 0);
-	memcpy(message.msg.data(), &midiCode, 3);
-	m_outQueue.push_back(std::move(message));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, 3));
 	return true;
 }
 
@@ -439,10 +434,7 @@ bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
 	}
 
 	MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
-	Message message;
-	message.time = GetOutputTimestamp();
-	message.msg.assign(static_cast<const unsigned char *>(sysex), static_cast<const unsigned char *>(sysex) + length);
-	m_outQueue.push_back(std::move(message));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex, length));
 	return true;
 }
 
