@@ -79,10 +79,17 @@ static void GatherWindowsVersion(uint32 & SystemVersion)
 #pragma warning(push)
 #pragma warning(disable:4996) // 'GetVersionExW': was declared deprecated
 #endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif // MPT_COMPILER_CLANG
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 #endif // !MPT_OS_WINDOWS_WINRT
 }
