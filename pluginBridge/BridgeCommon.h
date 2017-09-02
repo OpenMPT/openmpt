@@ -473,7 +473,7 @@ public:
 	// Pointer size of the "other" side of the bridge, in bytes
 	int32 otherPtrSize;
 
-	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0)
+	BridgeCommon() : sharedMem(nullptr), msgThreadID(0), otherPtrSize(0)
 	{
 		for(auto &sig : ackSignals)
 		{
