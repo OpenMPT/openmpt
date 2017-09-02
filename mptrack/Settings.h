@@ -232,7 +232,7 @@ public:
 	template <typename T>
 	T as() const
 	{
-		return static_cast<T>(*this);
+		return *this;
 	}
 	operator bool () const
 	{
