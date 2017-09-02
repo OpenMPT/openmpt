@@ -353,6 +353,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
+#ifdef ENABLE_ASM
 			for(auto &cpuFeatures : { std::make_pair(GetProcSupport(), MPT_USTRING("Optional CPU features used: ")), std::make_pair(GetRealProcSupport(), MPT_USTRING("Available CPU features: ")) })
 			{
 				text += cpuFeatures.second;
@@ -406,6 +407,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += MPT_USTRING("Generic without CPUID") + lf;
 			}
+#endif // ENABLE_ASM
 			text += mpt::format(MPT_USTRING("Operating System: %1"))(mpt::Windows::Version::Current().GetName()) + lf;
 			text += lf;
 			text += mpt::format(MPT_USTRING("OpenMPT Path%2: %1"))(theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
