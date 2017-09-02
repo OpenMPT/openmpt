@@ -131,11 +131,13 @@ void PluginBridge::InitializeStaticVariables()
 
 
 PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
-	: window(NULL)
+	: nativeEffect(nullptr)
+	, library(NULL)
+	, window(NULL)
+	, windowParent(NULL)
 	, windowWidth(0)
 	, windowHeight(0)
 	, isProcessing(0)
-	, nativeEffect(nullptr)
 	, needIdle(false)
 	, closeInstance(false)
 {
