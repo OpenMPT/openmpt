@@ -130,14 +130,22 @@ public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
 
-	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
 	CDocument* OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune = false);
 
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // MPT_COMPILER_CLANG
+	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
 	// inherited members, overload them all
 	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
 	{
 		return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
 	}
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
+
 };
 
 
@@ -198,6 +206,10 @@ protected:
 public:
 	CTrackApp();
 
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // MPT_COMPILER_CLANG
 	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
 		return CWinApp::OpenDocumentFile(lpszFileName, bAddToMRU);
@@ -206,6 +218,9 @@ public:
 	{
 		return CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), bAddToMRU);
 	}
+#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
 	void AddToRecentFileList(const mpt::PathString path);
