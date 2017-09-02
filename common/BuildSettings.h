@@ -20,7 +20,7 @@
 
 #if MPT_OS_WINDOWS
 
-#if MPT_BUILD_MSVC
+#if defined(MPT_BUILD_MSVC)
 
 #if defined(MPT_BUILD_TARGET_XP)
 
@@ -86,7 +86,7 @@
 
 
 // Dependencies from the MSVC build system
-#if MPT_BUILD_MSVC
+#if defined(MPT_BUILD_MSVC)
 
 // This section defines which dependencies are available when building with
 // MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
