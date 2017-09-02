@@ -3725,6 +3725,11 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
 //--------------------------------------------------
 {
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetInputHandler();
+	ih->HandleMIDIMessage(kCtxViewTree, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+
 	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 	int volume;
 	switch(MIDIEvents::GetTypeFromEvent(midiData))
@@ -3739,7 +3744,7 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
 		MPT_FALLTHROUGH;
 	case MIDIEvents::evNoteOff:
 		PlayItem(GetSelectedItem(), NOTE_NOTECUT);
-		break;
+		return 1;
 	}
 	return 0;
 }
@@ -3750,7 +3755,8 @@ void CModTree::OnKillFocus(CWnd* pNewWnd)
 {
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
+	if(pNewWnd != nullptr)
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
 }
 
 

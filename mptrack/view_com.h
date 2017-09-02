@@ -29,16 +29,14 @@ protected:
 	UINT m_nCurrentListId, m_nListId;
 
 public:
-	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
-	VOID RecalcLayout();
-	VOID UpdateButtonState();
+	void RecalcLayout();
+	void UpdateButtonState();
 
 public:
 	//{{AFX_VIRTUAL(CViewComments)
-	virtual void OnInitialUpdate();
-	virtual void UpdateView(UpdateHint hint, CObject *pObject = nullptr);
-	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
+	void OnInitialUpdate() override;
+	void UpdateView(UpdateHint hint, CObject *pObject = nullptr) override;
+	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -48,9 +46,10 @@ protected:
 	afx_msg void OnShowSamples();
 	afx_msg void OnShowInstruments();
 	afx_msg void OnShowPatterns();
-	afx_msg VOID OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
-	afx_msg VOID OnBeginLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
+	afx_msg void OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
+	afx_msg void OnBeginLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
 	afx_msg void OnDblClickListItem(NMHDR *, LRESULT *);
+	afx_msg LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
