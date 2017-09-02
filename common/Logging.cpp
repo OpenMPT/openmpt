@@ -254,7 +254,7 @@ inline bool operator < (const Entry &a, const Entry &b)
 
 static std::vector<mpt::log::Trace::Entry> Entries;
 
-static std::atomic<uint32> NextIndex = 0;
+static std::atomic<uint32> NextIndex(0);
 
 static uint32 ThreadIdGUI = 0;
 static uint32 ThreadIdAudio = 0;
