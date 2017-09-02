@@ -20,7 +20,7 @@
 
 #if MPT_OS_WINDOWS
 
-#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#if MPT_BUILD_MSVC
 
 #if defined(MPT_BUILD_TARGET_XP)
 
@@ -42,13 +42,13 @@
 
 #endif // MPT_BUILD_TARGET
 
-#else // MPT_COMPILER
+#else // !MPT_BUILD_MSVC
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
 
-#endif // MPT_COMPILER
+#endif // MPT_BUILD_MSVC
 
 #ifndef WINVER
 #define WINVER       _WIN32_WINNT
@@ -86,7 +86,7 @@
 
 
 // Dependencies from the MSVC build system
-#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#if MPT_BUILD_MSVC
 
 // This section defines which dependencies are available when building with
 // MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
@@ -198,7 +198,7 @@
 
 #endif // LIBOPENMPT_BUILD
 
-#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#endif // MPT_BUILD_MSVC
 
 
 

@@ -52,7 +52,7 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #endif // _WIN32_WINNT
 #endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 
-#if MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#if MPT_BUILD_MSVC
 #if MPT_OS_WINDOWS_WINRT
 #pragma comment(lib, "ole32.lib")
 #else
@@ -69,7 +69,7 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")
 #endif // !NO_DMO
-#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVCCLANGC2
+#endif // MPT_BUILD_MSVC
 
 #if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
 #if MPT_COMPILER_MSVC
