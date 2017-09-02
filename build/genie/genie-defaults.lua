@@ -53,6 +53,9 @@
    flags { "FloatFast" }
 
   configuration {}
+   defines { "MPT_BUILD_MSVC_STATIC" }
+   
+  configuration {}
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 
   configuration {}
