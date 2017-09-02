@@ -741,7 +741,12 @@ std::string Context::GetPosixEnvVar(std::string var, std::string def)
 	{
 		throw mpt::Wine::Exception("Wine echo $var failed.");
 	}
-	return mpt::String::RTrim(output, std::string("\r\n"));
+	std::string result = mpt::String::RTrim(output, std::string("\r\n"));
+	if(result.empty())
+	{
+		result = def;
+	}
+	return result;
 }
 
 
