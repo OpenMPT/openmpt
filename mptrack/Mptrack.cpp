@@ -2280,21 +2280,21 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 }
 
 
-mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort)
-//-----------------------------------------------------------------------------------------------
+mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
-	if(friendlyName != deviceName)
+	if(addDeviceName && friendlyName != deviceName)
 		return friendlyName + MPT_ULITERAL(" (") + deviceName + MPT_ULITERAL(")");
 	else
-		return deviceName;
+		return friendlyName;
 }
 
 
-CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort)
-//-------------------------------------------------------------------------------------
+CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort, bool addDeviceName)
+//---------------------------------------------------------------------------------------------------------
 {
-	return mpt::ToCString(GetFriendlyMIDIPortName(mpt::ToUnicode(deviceName), isInputPort));
+	return mpt::ToCString(GetFriendlyMIDIPortName(mpt::ToUnicode(deviceName), isInputPort, addDeviceName));
 }
 
 
