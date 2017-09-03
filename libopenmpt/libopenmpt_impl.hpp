@@ -118,6 +118,7 @@ protected:
 	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log );
 public:
 	static std::vector<std::string> get_supported_extensions();
+	static bool is_extension_supported( const char * extension );
 	static bool is_extension_supported( const std::string & extension );
 	static double could_open_probability( callback_stream_wrapper stream, double effort, std::unique_ptr<log_interface> log );
 	static double could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log );
