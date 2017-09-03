@@ -711,6 +711,7 @@ public:
 	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
+	static bool IsExtensionSupported(const char *ext); // UTF8, casing of ext is ignored
 	static mpt::Charset GetCharsetFromModType(MODTYPE modtype);
 	static mpt::ustring ModTypeToString(MODTYPE modtype);
 	static mpt::ustring ModContainerTypeToString(MODCONTAINERTYPE containertype);

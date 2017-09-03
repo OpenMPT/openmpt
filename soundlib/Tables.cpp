@@ -236,6 +236,56 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 }
 
 
+static bool IsEqualExtension(const char *a, const char *b)
+//--------------------------------------------------------
+{
+	if(!a || !b)
+	{
+		return false;
+	}
+	std::size_t lena = std::strlen(a);
+	std::size_t lenb = std::strlen(b);
+	if(lena == 0 || lenb == 0)
+	{
+		return false;
+	}
+	if(lena != lenb)
+	{
+		return false;
+	}
+	std::size_t len = lena;
+	for(std::size_t i = 0; i < len; ++i)
+	{
+		if(mpt::ToLowerCaseAscii(a[i]) != mpt::ToLowerCaseAscii(b[i]))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+bool CSoundFile::IsExtensionSupported(const char *ext)
+//----------------------------------------------------
+{
+	for(std::size_t i = 0; i < mpt::size(modFormatInfo); i++)
+	{
+		if(IsEqualExtension(ext, modFormatInfo[i].extension))
+		{
+			return true;
+		}
+	}
+	for(std::size_t i = 0; i < mpt::size(modContainerInfo); i++)
+	{
+		if(IsEqualExtension(ext, modContainerInfo[i].extension))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
 mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
 //-------------------------------------------------------
 {
