@@ -43,6 +43,7 @@ LFOPlugin::LFOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	m_bypassed = false;
 	m_outputToCC = false;
 	m_outputParam = int32_max;
+	m_oneshot = false;
 	RecalculateFrequency();
 	RecalculateIncrement();
 
@@ -68,13 +69,19 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			}
 		}
 
-		int intPhase = static_cast<int>(m_phase);
-		if(intPhase > 0 && (m_waveForm == kSHNoise || m_waveForm == kSmoothNoise))
+		if(m_oneshot)
 		{
-			// Phase wrap-around happened
-			NextRandom();
+			LimitMax(m_phase, 1.0);
+		} else
+		{
+			int intPhase = static_cast<int>(m_phase);
+			if(intPhase > 0 && (m_waveForm == kSHNoise || m_waveForm == kSmoothNoise))
+			{
+				// Phase wrap-around happened
+				NextRandom();
+			}
+			m_phase -= intPhase;
 		}
-		m_phase -= intPhase;
 
 		double value = 0;
 		switch(m_waveForm)
@@ -138,6 +145,7 @@ PlugParamValue LFOPlugin::GetParameter(PlugParamIndex index)
 	case kWaveform: return WaveformToParam(m_waveForm);
 	case kPolarity: return m_polarity ? 1.0f : 0.0f;
 	case kBypassed: return m_bypassed ? 1.0f : 0.0f;
+	case kLoopMode: return m_oneshot ? 1.0f : 0.0f;
 	default: return 0;
 	}
 }
@@ -167,11 +175,14 @@ void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 		break;
 	case kPolarity: m_polarity = (value >= 0.5f); break;
 	case kBypassed: m_bypassed = (value >= 0.5f); break;
+	case kLoopMode: m_oneshot = (value >= 0.5f); break;
 	case kCurrentPhase:
 		if(value == 0)
-			m_phase = 1.0;	// Enforce next random value for random LFOs
-		else
-			m_phase = value;
+		{
+			// Enforce next random value for random LFOs
+			NextRandom();
+		}
+		m_phase = value;
 		return;
 
 	default: return;
@@ -258,7 +269,10 @@ void LFOPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
 void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
 //-------------------------------------------------------------------------------------------------------------------------------
 {
-	SetParameter(kCurrentPhase, 0);
+	if(ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)) && vol > 0)
+	{
+		SetParameter(kCurrentPhase, 0);
+	}
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
 		plugin->MidiCommand(nMidiCh, nMidiProg, wMidiBank, note, vol, trackChannel);
@@ -318,9 +332,10 @@ struct PluginData
 	uint8le  polarity;
 	uint8le  bypassed;
 	uint8le  outputToCC;
+	uint8le  loopMode;
 };
 
-MPT_BINARY_STRUCT(PluginData, 32)
+MPT_BINARY_STRUCT(PluginData, 33)
 
 
 IMixPlugin::ChunkData LFOPlugin::GetChunk(bool)
@@ -338,6 +353,7 @@ IMixPlugin::ChunkData LFOPlugin::GetChunk(bool)
 	chunk.polarity = m_polarity ? 1 : 0;
 	chunk.bypassed = m_bypassed ? 1 : 0;
 	chunk.outputToCC = m_outputToCC ? 1 : 0;
+	chunk.loopMode = m_oneshot ? 1 : 0;
 
 	m_chunkData.resize(sizeof(chunk));
 	memcpy(m_chunkData.data(), &chunk, sizeof(chunk));
@@ -350,7 +366,7 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 {
 	FileReader file(chunk);
 	PluginData data;
-	if(file.ReadStruct(data)
+	if(file.ReadStructPartial(data, file.BytesLeft())
 		&& !memcmp(data.magic, "LFO ", 4)
 		&& data.version == 0)
 	{
@@ -364,6 +380,7 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 		m_polarity = data.polarity != 0;
 		m_bypassed = data.bypassed != 0;
 		m_outputToCC = data.outputToCC != 0;
+		m_oneshot = data.loopMode != 0;
 	}
 }
 
@@ -382,6 +399,7 @@ CString LFOPlugin::GetParamName(PlugParamIndex param)
 	case kWaveform: return _T("Waveform");
 	case kPolarity: return _T("Polarity");
 	case kBypassed: return _T("Bypassed");
+	case kLoopMode: return _T("Loop Mode");
 	case kCurrentPhase: return _T("Set LFO Phase");
 	}
 	return CString();
@@ -422,6 +440,9 @@ CString LFOPlugin::GetParamDisplay(PlugParamIndex param)
 		static const TCHAR *waveforms[] = { _T("Sine"), _T("Triangle"), _T("Saw"), _T("Square"), _T("Noise"), _T("Smoothed Noise") };
 		if(m_waveForm < MPT_ARRAY_COUNT(waveforms))
 			return waveforms[m_waveForm];
+	} else if(param == kLoopMode)
+	{
+		return m_oneshot ? _T("One-Shot") : _T("Looped");
 	} else if(param == kCurrentPhase)
 	{
 		return _T("Write-Only");

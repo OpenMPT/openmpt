@@ -33,6 +33,7 @@ protected:
 		kWaveform,
 		kPolarity,
 		kBypassed,
+		kLoopMode,
 		kCurrentPhase,
 		kLFONumParameters
 	};
@@ -54,7 +55,7 @@ protected:
 	float m_amplitude, m_offset, m_frequency;
 	LFOWaveform m_waveForm;
 	PlugParamIndex m_outputParam;
-	bool m_tempoSync, m_polarity, m_bypassed, m_outputToCC;
+	bool m_tempoSync, m_polarity, m_bypassed, m_outputToCC, m_oneshot;
 
 	// LFO state
 	double m_computedFrequency;

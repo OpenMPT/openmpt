@@ -25,6 +25,7 @@ BEGIN_MESSAGE_MAP(LFOPluginEditor, CAbstractVstEditor)
 	ON_COMMAND(IDC_CHECK1,	OnPolarityChanged)
 	ON_COMMAND(IDC_CHECK2,	OnTempoSyncChanged)
 	ON_COMMAND(IDC_CHECK3,	OnBypassChanged)
+	ON_COMMAND(IDC_CHECK4,	OnLoopModeChanged)
 	ON_COMMAND_RANGE(IDC_RADIO1, IDC_RADIO1 + LFOPlugin::kNumWaveforms - 1, OnWaveformChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnPlugParameterChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, OnOutputPlugChanged)
@@ -159,6 +160,9 @@ void LFOPluginEditor::UpdateParam(int32 p)
 		break;
 	case LFOPlugin::kBypassed:
 		CheckDlgButton(IDC_CHECK3, m_lfoPlugin.m_bypassed ? BST_CHECKED : BST_UNCHECKED);
+		break;
+	case LFOPlugin::kLoopMode:
+		CheckDlgButton(IDC_CHECK4, m_lfoPlugin.m_oneshot ? BST_CHECKED : BST_UNCHECKED);
 		break;
 	default:
 		break;
@@ -302,6 +306,17 @@ void LFOPluginEditor::OnBypassChanged()
 	{
 		m_lfoPlugin.m_bypassed = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 		m_lfoPlugin.AutomateParameter(LFOPlugin::kBypassed);
+	}
+}
+
+
+void LFOPluginEditor::OnLoopModeChanged()
+//---------------------------------------
+{
+	if(!m_locked)
+	{
+		m_lfoPlugin.m_oneshot = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
+		m_lfoPlugin.AutomateParameter(LFOPlugin::kLoopMode);
 	}
 }
 
