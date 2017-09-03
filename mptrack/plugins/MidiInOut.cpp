@@ -102,8 +102,8 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, m_programName);
 	uint32 flags = kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming);
 #ifdef MODPLUG_TRACKER
-	std::string inFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_inputDevice.name), true));
-	std::string outFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_outputDevice.name), false));
+	std::string inFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_inputDevice.name), true, false));
+	std::string outFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_outputDevice.name), false, false));
 	if(inFriendlyName != m_inputDevice.name)
 	{
 		flags |= kFriendlyInputName;
@@ -149,22 +149,27 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::string &name, const std::string &friendlyName, MidiDevice &midiDevice, bool isInput)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	bool foundFriendly = false;
 	for(unsigned int i = 0; i < numPorts; i++)
 	{
 		try
 		{
 			auto portName = midiDevice.GetPortName(i);
 #ifdef MODPLUG_TRACKER
-			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, portName), isInput)))
+			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, portName), isInput, false)))
 			{
 				// Preferred match
 				id = i;
-				return;
+				foundFriendly = true;
+				if(name == portName)
+				{
+					return;
+				}
 			}
 #else
 			MPT_UNREFERENCED_PARAMETER(friendlyName)
 #endif
-			if(name == portName)
+			if(name == portName && !foundFriendly)
 			{
 				id = i;
 			}
