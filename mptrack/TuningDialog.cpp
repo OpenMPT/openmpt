@@ -38,7 +38,6 @@ typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 
 // CTuningDialog dialog
-IMPLEMENT_DYNAMIC(CTuningDialog, CDialog)
 CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf)
 	: CDialog(CTuningDialog::IDD, pParent),
 	m_sndFile(csf),
