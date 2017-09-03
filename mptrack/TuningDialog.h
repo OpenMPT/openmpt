@@ -204,8 +204,6 @@ public:
 class CTuningDialog : public CDialog
 //==================================
 {
-	DECLARE_DYNAMIC(CTuningDialog)
-
 	friend class CTuningTreeCtrl;
 
 	enum EnSclImport
