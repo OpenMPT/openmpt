@@ -54,6 +54,7 @@ protected:
 	void OnPolarityChanged();
 	void OnTempoSyncChanged();
 	void OnBypassChanged();
+	void OnLoopModeChanged();
 	void OnWaveformChanged(UINT nID);
 	void OnPlugParameterChanged();
 	void OnMidiCCChanged();
