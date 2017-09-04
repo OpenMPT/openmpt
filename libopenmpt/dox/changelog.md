@@ -116,6 +116,7 @@ is just a high-level summary.
     libmodplug C++ API returned the wrong value, causing qmmp (and possibly
     other software) to crash.
 
+ *  Support for SoundTracker Pro II (STP) and Digital Tracker (DTM) modules.
  *  Increased accuracy of the sample position and sample rate to drift less when
     playing very long samples.
  *  Various playback improvements for IT and XM files.
