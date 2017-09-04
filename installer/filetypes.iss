@@ -25,6 +25,7 @@ Name: "associate_exotic\dbm"; Description: "Digi Booster Pro (DBM)";
 Name: "associate_exotic\digi"; Description: "Digi Booster (DIGI)";
 Name: "associate_exotic\dmf"; Description: "X-Tracker (DMF)";
 Name: "associate_exotic\dsm"; Description: "DSIK (DSM)";
+Name: "associate_exotic\dtm"; Description: "Digital Tracker (DTM)";
 Name: "associate_exotic\far"; Description: "Farandole Composer (FAR)";
 Name: "associate_exotic\gdm"; Description: "General Digital Music (GDM)";
 Name: "associate_exotic\imf"; Description: "Imago Orpheus (IMF)";
@@ -74,6 +75,7 @@ Root: HKCR; Subkey: ".dbm"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".digi"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\digi
 Root: HKCR; Subkey: ".dmf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dmf
 Root: HKCR; Subkey: ".dsm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dsm
+Root: HKCR; Subkey: ".dtm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\dtm
 Root: HKCR; Subkey: ".far"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\far
 Root: HKCR; Subkey: ".gdm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\gdm
 Root: HKCR; Subkey: ".imf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\imf
@@ -145,6 +147,7 @@ Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociation
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".digi"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dmf"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dsm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dtm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".far"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gdm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".imf"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
@@ -192,6 +195,7 @@ Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".digi"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dmf"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dsm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".dtm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".far"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".gdm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".imf"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable

@@ -893,6 +893,9 @@
     <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dtm.cpp">
+      <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_far.cpp">
       <ObjectFileName>$(IntDir)soundlib\</ObjectFileName>
     </ClCompile>

@@ -719,6 +719,7 @@
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\AutoSaver.h" />
     <ClInclude Include="..\..\mptrack\Autotune.h" />
+    <ClInclude Include="..\..\mptrack\BalloonMsg.h" />
     <ClInclude Include="..\..\mptrack\BuildVariants.h" />
     <ClInclude Include="..\..\mptrack\CDecimalSupport.h" />
     <ClInclude Include="..\..\mptrack\CImageListEx.h" />
@@ -952,6 +953,7 @@
     <ClCompile Include="..\..\mptrack\AppendModule.cpp" />
     <ClCompile Include="..\..\mptrack\AutoSaver.cpp" />
     <ClCompile Include="..\..\mptrack\Autotune.cpp" />
+    <ClCompile Include="..\..\mptrack\BalloonMsg.cpp" />
     <ClCompile Include="..\..\mptrack\BuildVariants.cpp" />
     <ClCompile Include="..\..\mptrack\CDecimalSupport.cpp" />
     <ClCompile Include="..\..\mptrack\CImageListEx.cpp" />
@@ -1077,6 +1079,7 @@
     <ClCompile Include="..\..\soundlib\Load_digi.cpp" />
     <ClCompile Include="..\..\soundlib\Load_dmf.cpp" />
     <ClCompile Include="..\..\soundlib\Load_dsm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_dtm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_far.cpp" />
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_imf.cpp" />
