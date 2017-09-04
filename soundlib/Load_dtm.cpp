@@ -42,6 +42,7 @@ struct DTMChunk
 		idINST = MAGIC4BE('I', 'N', 'S', 'T'),
 		idDAPT = MAGIC4BE('D', 'A', 'P', 'T'),
 		idDAIT = MAGIC4BE('D', 'A', 'I', 'T'),
+		idTEXT = MAGIC4BE('T', 'E', 'X', 'T'),
 		idVERS = MAGIC4BE('V', 'E', 'R', 'S'),
 		idPATN = MAGIC4BE('P', 'A', 'T', 'N'), // Pattern names, 48 chars long?
 		idTRKN = MAGIC4BE('T', 'R', 'K', 'N'), // Channel names, 32 chars long?
@@ -166,6 +167,13 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		return false;
+	}
+
+	// Read song message
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idTEXT))
+	{
+		chunk.Skip(12);
+		m_songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
 	}
 
 	// Read pattern properties
