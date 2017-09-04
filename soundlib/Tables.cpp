@@ -91,6 +91,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_SFX,  MPT_ULITERAL("SoundFX"),                 "sfx2" },
 	{ MOD_TYPE_SFX,  MPT_ULITERAL("MultiMedia Sound"),        "mms" },
 	{ MOD_TYPE_STP,  MPT_ULITERAL("Soundtracker Pro II"),     "stp" },
+	{ MOD_TYPE_DTM,  MPT_ULITERAL("Digital Tracker"),         "dtm" },
 
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
@@ -156,6 +157,8 @@ static constexpr ModCharsetInfo ModCharsetInfos[] =
 	// Amiga // DOS
 	{ MOD_TYPE_MOD , mpt::CharsetISO8859_1  },
 	{ MOD_TYPE_MED , mpt::CharsetISO8859_1  },
+	// Atari
+	{ MOD_TYPE_DTM , mpt::CharsetISO8859_1  },
 	// DOS
 	{ MOD_TYPE_S3M , mpt::CharsetCP437      },
 	{ MOD_TYPE_XM  , mpt::CharsetCP437      },
@@ -205,28 +208,28 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 //-----------------------------------------------------------------------------
 {
 	std::vector<const char *> exts;
-	for(size_t i = 0; i < mpt::size(modFormatInfo); i++)
+	for(const auto &formatInfo : modFormatInfo)
 	{
 		// Avoid dupes in list
-		if(i == 0 || strcmp(modFormatInfo[i].extension, modFormatInfo[i - 1].extension))
+		if(exts.empty() || strcmp(formatInfo.extension, exts.back()))
 		{
-			exts.push_back(modFormatInfo[i].extension);
+			exts.push_back(formatInfo.extension);
 		}
 	}
-	for(size_t i = 0; i < mpt::size(modContainerInfo); i++)
+	for(const auto &containerInfo : modContainerInfo)
 	{
 		// Avoid dupes in list
-		if(i == 0 || strcmp(modContainerInfo[i].extension, modContainerInfo[i - 1].extension))
+		if(exts.empty() || strcmp(containerInfo.extension, exts.back()))
 		{
-			exts.push_back(modContainerInfo[i].extension);
+			exts.push_back(containerInfo.extension);
 		}
 	}
 #ifdef MODPLUG_TRACKER
 	if(otherFormats)
 	{
-		for(size_t i = 0; i < mpt::size(otherFormatInfo); i++)
+		for(const auto &formatInfo : otherFormatInfo)
 		{
-			exts.push_back(otherFormatInfo[i].extension);
+			exts.push_back(formatInfo.extension);
 		}
 	}
 #else
@@ -239,45 +242,33 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 static bool IsEqualExtension(const char *a, const char *b)
 //--------------------------------------------------------
 {
-	if(!a || !b)
-	{
-		return false;
-	}
 	std::size_t lena = std::strlen(a);
 	std::size_t lenb = std::strlen(b);
-	if(lena == 0 || lenb == 0)
-	{
-		return false;
-	}
 	if(lena != lenb)
 	{
 		return false;
 	}
-	std::size_t len = lena;
-	for(std::size_t i = 0; i < len; ++i)
-	{
-		if(mpt::ToLowerCaseAscii(a[i]) != mpt::ToLowerCaseAscii(b[i]))
-		{
-			return false;
-		}
-	}
-	return true;
+	return mpt::CompareNoCaseAscii(a, b, lena) == 0;
 }
 
 
 bool CSoundFile::IsExtensionSupported(const char *ext)
 //----------------------------------------------------
 {
-	for(std::size_t i = 0; i < mpt::size(modFormatInfo); i++)
+	if(ext == nullptr || ext[0] == 0)
 	{
-		if(IsEqualExtension(ext, modFormatInfo[i].extension))
+		return false;
+	}
+	for(const auto &formatInfo : modFormatInfo)
+	{
+		if(IsEqualExtension(ext, formatInfo.extension))
 		{
 			return true;
 		}
 	}
-	for(std::size_t i = 0; i < mpt::size(modContainerInfo); i++)
+	for(const auto &containerInfo : modContainerInfo)
 	{
-		if(IsEqualExtension(ext, modContainerInfo[i].extension))
+		if(IsEqualExtension(ext, containerInfo.extension))
 		{
 			return true;
 		}

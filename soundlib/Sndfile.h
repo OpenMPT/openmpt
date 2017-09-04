@@ -677,6 +677,7 @@ public:
 	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -909,7 +910,7 @@ public:
 	}
 	
 	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.
-	static bool UseFinetuneAndTranspose(MODTYPE type)
+	static constexpr bool UseFinetuneAndTranspose(MODTYPE type)
 	{
 		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP | MOD_TYPE_XM));
 	}

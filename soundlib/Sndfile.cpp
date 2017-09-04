@@ -350,6 +350,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			 && !ReadGDM(file, loadFlags)
 			 && !ReadIMF(file, loadFlags)
 			 && !ReadDIGI(file, loadFlags)
+			 && !ReadDTM(file, loadFlags)
 			 && !ReadPLM(file, loadFlags)
 			 && !ReadAM(file, loadFlags)
 			 && !ReadJ2B(file, loadFlags)
@@ -1160,6 +1161,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_MT2:
 	case MOD_TYPE_MDL:
 	case MOD_TYPE_PTM:
+	case MOD_TYPE_DTM:
 	default:
 		return MOD_TYPE_IT;
 	case MOD_TYPE_MID:

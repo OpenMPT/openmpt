@@ -34,6 +34,13 @@ dmf="SMPD"
 dsm="RIFF"
 dsm="DSMF"
 
+dtm="D.T."
+dtm="S.Q."
+#dtm="PATT"
+#dtm="INST"
+dtm="DAPT"
+dtm="DAIT"
+
 far="FAR\xFE"
 far="\x0D\x0A\x1A"
 

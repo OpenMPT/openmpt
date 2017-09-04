@@ -320,6 +320,7 @@ DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.ams" ";"
 	"*.ams" ";"
 	"*.dsm" ";"
+	"*.dtm" ";"
 	"*.amf" ";"
 	"*.amf" ";"
 	"*.okt" ";"

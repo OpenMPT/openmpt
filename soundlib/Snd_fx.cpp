@@ -2255,9 +2255,9 @@ bool CSoundFile::ProcessEffects()
 	{
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 		uint32 instr = pChn->rowCommand.instr;
-		uint32 volcmd = pChn->rowCommand.volcmd;
+		ModCommand::VOLCMD volcmd = pChn->rowCommand.volcmd;
 		uint32 vol = pChn->rowCommand.vol;
-		uint32 cmd = pChn->rowCommand.command;
+		ModCommand::COMMAND cmd = pChn->rowCommand.command;
 		uint32 param = pChn->rowCommand.param;
 		bool bPorta = pChn->rowCommand.IsPortamento();
 
@@ -2322,7 +2322,7 @@ bool CSoundFile::ProcessEffects()
 			instr = 0;
 			volcmd = VOLCMD_NONE;
 			vol = 0;
-			cmd = 0;
+			cmd = CMD_NONE;
 			param = 0;
 			bPorta = false;
 		}
@@ -3321,7 +3321,7 @@ bool CSoundFile::ProcessEffects()
 						//If song is set to loop and a pattern break occurs we should stay on the same pattern.
 						//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
 						//rewbs.to
-						nPosJump = (int)m_PlayState.m_nCurrentOrder;
+						nPosJump = m_PlayState.m_nCurrentOrder;
 					}
 				}
 			}
@@ -3550,7 +3550,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 		param = pChn->nOldPortaUp;
 	}
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP));
+	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM));
 
 	// Process MIDI pitch bend for instrument plugins
 	MidiPortamento(nChn, param, doFineSlides);
@@ -3616,7 +3616,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 		param = pChn->nOldPortaDown;
 	}
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP));
+	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM));
 
 	// Process MIDI pitch bend for instrument plugins
 	MidiPortamento(nChn, -static_cast<int>(param), doFineSlides);
@@ -4109,7 +4109,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, ModCommand::PARAM param)
 	else
 		param = pChn->nOldVolumeSlide;
 
-	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI | MOD_TYPE_STP)))
+	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM)))
 	{
 		// MOD / XM nibble priority
 		if((param & 0xF0) != 0)
@@ -5768,7 +5768,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	} else if(GetType() == MOD_TYPE_669)
 	{
 		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
-		return (period + c5speed - 8363) <<  FREQ_FRACBITS;
+		return (period + c5speed - 8363) << FREQ_FRACBITS;
 	} else if(GetType() == MOD_TYPE_MDL)
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
