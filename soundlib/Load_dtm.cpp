@@ -1,10 +1,8 @@
 /*
  * Load_dtm.cpp
  * ------------
- * Purpose: Digital Tracker module Loader (DTM)
- * Notes  : There is a newer version of this format that is currently not supported properly.
- *          It has a different pattern format ("2.06"), more kinds of chunks and
- *          generally a somewhat different structure here and there.
+ * Purpose: Digital Tracker / Digital Home Studio module Loader (DTM)
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -16,11 +14,19 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum PatternFormats : uint32
+{
+	DTM_PT_PATTERN_FORMAT = 0,
+	DTM_204_PATTERN_FORMAT = MAGIC4BE('2', '.', '0', '4'),
+	DTM_206_PATTERN_FORMAT = MAGIC4BE('2', '.', '0', '6'),
+};
+
+
 struct DTMFileHeader
 {
 	char     magic[4];
 	uint32be headerSize;
-	uint16be type;
+	uint16be type;        // 0 = module
 	uint8be  stereoMode;  // FF = panoramic stereo, 00 = old stereo
 	uint8be  bitDepth;    // Typically 8, sometimes 16, but is not actually used anywhere?
 	uint16be reserved;    // Usually 0, but not in unknown title 1.dtm and unknown title 2.dtm
@@ -41,14 +47,14 @@ struct DTMChunk
 		idS_Q_ = MAGIC4BE('S', '.', 'Q', '.'),
 		idPATT = MAGIC4BE('P', 'A', 'T', 'T'),
 		idINST = MAGIC4BE('I', 'N', 'S', 'T'),
+		idIENV = MAGIC4BE('I', 'E', 'N', 'V'),
 		idDAPT = MAGIC4BE('D', 'A', 'P', 'T'),
 		idDAIT = MAGIC4BE('D', 'A', 'I', 'T'),
 		idTEXT = MAGIC4BE('T', 'E', 'X', 'T'),
 		idPATN = MAGIC4BE('P', 'A', 'T', 'N'),
 		idTRKN = MAGIC4BE('T', 'R', 'K', 'N'),
-		// Chunks with unknown content
 		idVERS = MAGIC4BE('V', 'E', 'R', 'S'),
-		idSV19 = MAGIC4BE('S', 'V', '1', '9'), // Channel panning and other stuff?
+		idSV19 = MAGIC4BE('S', 'V', '1', '9'),
 	};
 
 	uint32be id;
@@ -79,18 +85,27 @@ struct DTMSample
 	char     name[22];
 	uint8be  stereo;
 	uint8be  bitDepth;
-	uint32be midiNote;
+	uint16be transpose;
+	uint16be unknown;
 	uint32be sampleRate;
 
-	void ConvertToMPT(ModSample &mptSmp, uint32 forcedSampleRate) const
+	void ConvertToMPT(ModSample &mptSmp, uint32 forcedSampleRate, uint32 formatVersion) const
 	{
 		mptSmp.Initialize(MOD_TYPE_IT);
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = mptSmp.nLoopStart + loopLength;
 		// In revolution to come.dtm, the file header says samples rate is 24512 Hz, but samples say it's 50000 Hz
-		mptSmp.nC5Speed = (forcedSampleRate > 0) ? forcedSampleRate : sampleRate;
-		mptSmp.Transpose(MOD2XMFineTune(finetune) * (1.0 / (12.0 * 128.0)));
+		// Digital Home Studio ignores the header setting in 2.04-/2.06-style modules
+		mptSmp.nC5Speed = (formatVersion == DTM_PT_PATTERN_FORMAT && forcedSampleRate > 0) ? forcedSampleRate : sampleRate;
+		int32 transposeAmount = MOD2XMFineTune(finetune);
+		if(formatVersion == DTM_206_PATTERN_FORMAT && transpose > 0 && transpose != 48)
+		{
+			// Digital Home Studio applies this unconditionally, but some old songs sound wrong then (delirium.dtm).
+			// Maybe this should not be applied for "real" Digital Tracker modules?
+			transposeAmount += (48 - transpose) * 128;
+		}
+		mptSmp.Transpose(transposeAmount * (1.0 / (12.0 * 128.0)));
 		mptSmp.nVolume = std::min<uint8>(volume, 64u) * 4u;
 		if(stereo & 1)
 		{
@@ -113,18 +128,57 @@ struct DTMSample
 		{
 			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
 		}
-		//mptSmp.rootNote = static_cast<uint8>((midiNote >> 16) - 0x30 + NOTE_MIDDLEC);
 	}
 };
 
 MPT_BINARY_STRUCT(DTMSample, 50)
 
 
-enum PatternFormats : uint32
+struct DTMInstrument
 {
-	DTM_PT_PATTERN_FORMAT = 0,
-	DTM_NEW_PATTERN_FORMAT = MAGIC4BE('2', '.', '0', '4'),
+	uint16be insNum;
+	uint8be  unknown1;
+	uint8be  envelope; // 0xFF = none
+	uint8be  sustain;  // 0xFF = no sustain point
+	uint16be fadeout;
+	uint8be  vibRate;
+	uint8be  vibDepth;
+	uint8be  modulationRate;
+	uint8be  modulationDepth;
+	uint8be  breathRate;
+	uint8be  breathDepth;
+	uint8be  volumeRate;
+	uint8be  volumeDepth;
 };
+
+MPT_BINARY_STRUCT(DTMInstrument, 15)
+
+
+struct DTMEnvelope
+{
+	struct DTMEnvPoint
+	{
+		uint8be value;
+		uint8be tick;
+	};
+	uint16be numPoints;
+	DTMEnvPoint points[16];
+};
+
+MPT_BINARY_STRUCT(DTMEnvelope::DTMEnvPoint, 2)
+MPT_BINARY_STRUCT(DTMEnvelope, 34)
+
+
+struct DTMText
+{
+	uint16be textType;	// 0 = pattern, 1 = free, 2 = song
+	uint32be textLength;
+	uint16be tabWidth;
+	uint16be reserved;
+	uint16be oddLength;
+};
+
+MPT_BINARY_STRUCT(DTMText, 12)
 
 
 bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
@@ -147,8 +201,8 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_DTM);
 	InitializeChannels();
-	m_madeWithTracker = MPT_USTRING("Digital Tracker");
 	m_SongFlags.set(SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	// Various files have a default speed or tempo of 0
 	if(fileHeader.tempo)
 		m_nDefaultTempo.Set(fileHeader.tempo);
@@ -174,25 +228,18 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	// Read song message
-	if(FileReader chunk = chunks.GetChunk(DTMChunk::idTEXT))
-	{
-		chunk.Skip(12);
-		m_songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
-	}
-
 	// Read pattern properties
 	uint32 patternFormat;
 	if(FileReader chunk = chunks.GetChunk(DTMChunk::idPATT))
 	{
 		m_nChannels = chunk.ReadUint16BE();
-		if(m_nChannels < 1 || m_nChannels > MAX_BASECHANNELS)
+		if(m_nChannels < 1 || m_nChannels > 32)
 		{
 			return false;
 		}
 		Patterns.ResizeArray(chunk.ReadUint16BE());	// Number of stored patterns, may be lower than highest pattern number
 		patternFormat = chunk.ReadUint32BE();
-		if(patternFormat != DTM_PT_PATTERN_FORMAT && patternFormat != DTM_NEW_PATTERN_FORMAT)
+		if(patternFormat != DTM_PT_PATTERN_FORMAT && patternFormat != DTM_204_PATTERN_FORMAT && patternFormat != DTM_206_PATTERN_FORMAT)
 		{
 			return false;
 		}
@@ -201,15 +248,52 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
+	// Read global info
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idSV19))
+	{
+		chunk.Skip(2);	// Ticks per quarter note, typically 24
+		uint32 fractionalTempo = chunk.ReadUint32BE();
+		m_nDefaultTempo = TEMPO(m_nDefaultTempo.GetInt() + fractionalTempo / 4294967296.0);
+
+		uint16be panning[32];
+		chunk.ReadArray(panning);
+		for(CHANNELINDEX chn = 0; chn < 32 && chn < GetNumChannels(); chn++)
+		{
+			// Panning is in range 0...180, 90 = center
+			ChnSettings[chn].nPan = static_cast<uint16>(128 + Util::muldivr(std::min<int>(panning[chn], 180) - 90, 128, 90));
+		}
+
+		chunk.Skip(146);
+		uint16be volume[32];
+		if(chunk.ReadArray(volume))
+		{
+			for(CHANNELINDEX chn = 0; chn < 32 && chn < GetNumChannels(); chn++)
+			{
+				// Volume is in range 0...128, 64 = normal
+				ChnSettings[chn].nVolume = static_cast<uint8>(std::min<int>(volume[chn], 128) / 2);
+			}
+			m_nSamplePreAmp *= 2;	// Compensate for channel volume range
+		}
+	}
+
+	// Read song message
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idTEXT))
+	{
+		DTMText text;
+		chunk.ReadStruct(text);
+		if(text.oddLength == 0xFFFF)
+		{
+			chunk.Skip(1);
+		}
+		m_songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
+	}
+
 	// Read sample headers
 	if(FileReader chunk = chunks.GetChunk(DTMChunk::idINST))
 	{
 		uint16 numSamples = chunk.ReadUint16BE();
 		bool newSamples = (numSamples >= 0x8000);
-		if(newSamples)
-		{
-			numSamples &= 0x7FFF;
-		}
+		numSamples &= 0x7FFF;
 		if(numSamples >= MAX_SAMPLES || !chunk.CanRead(numSamples) * sizeof(DTMSample))
 		{
 			return false;
@@ -225,8 +309,57 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.Skip(2);
 			}
 			chunk.ReadStruct(dtmSample);
-			dtmSample.ConvertToMPT(mptSmp, (patternFormat == DTM_PT_PATTERN_FORMAT) ? fileHeader.forcedSampleRate : 0);
+			dtmSample.ConvertToMPT(mptSmp, fileHeader.forcedSampleRate, patternFormat);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], dtmSample.name);
+		}
+	
+		if(chunk.ReadUint16BE() == 0x0004)
+		{
+			// Digital Home Studio instruments
+			m_nInstruments = std::max<INSTRUMENTINDEX>(m_nSamples, MAX_INSTRUMENTS - 1);
+
+			FileReader envChunk = chunks.GetChunk(DTMChunk::idIENV);
+			while(chunk.CanRead(sizeof(DTMInstrument)))
+			{
+				DTMInstrument instr;
+				chunk.ReadStruct(instr);
+				if(instr.insNum < GetNumInstruments())
+				{
+					Samples[instr.insNum + 1].nVibDepth = instr.vibDepth;
+					Samples[instr.insNum + 1].nVibRate = instr.vibRate;
+					Samples[instr.insNum + 1].nVibSweep = 255;
+
+					ModInstrument *mptIns = AllocateInstrument(instr.insNum + 1, instr.insNum + 1);
+					if(mptIns != nullptr)
+					{
+						InstrumentEnvelope &mptEnv = mptIns->VolEnv;
+						mptIns->nFadeOut = std::min<uint16>(instr.fadeout, 0xFFF);
+						if(instr.envelope != 0xFF && envChunk.Seek(2 + sizeof(DTMEnvelope) * instr.envelope))
+						{
+							DTMEnvelope env;
+							envChunk.ReadStruct(env);
+							mptEnv.dwFlags.set(ENV_ENABLED);
+							mptEnv.resize(std::min<size_t>({ env.numPoints, mpt::size(env.points), MAX_ENVPOINTS }));
+							for(size_t i = 0; i < mptEnv.size(); i++)
+							{
+								mptEnv[i].value = std::min<uint8>(64, env.points[i].value);
+								mptEnv[i].tick = env.points[i].tick;
+							}
+
+							if(instr.sustain != 0xFF)
+							{
+								mptEnv.dwFlags.set(ENV_SUSTAIN);
+								mptEnv.nSustainStart = mptEnv.nSustainEnd = instr.sustain;
+							}
+							if(!mptEnv.empty())
+							{
+								mptEnv.dwFlags.set(ENV_LOOP);
+								mptEnv.nLoopStart = mptEnv.nLoopEnd = static_cast<uint8>(mptEnv.size() - 1);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -236,66 +369,127 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		chunk.Skip(4);	// FF FF FF FF
 		PATTERNINDEX patNum = chunk.ReadUint16BE();
 		ROWINDEX numRows = chunk.ReadUint16BE();
+		if(patternFormat == DTM_206_PATTERN_FORMAT)
+		{
+			numRows /= m_nDefaultSpeed;
+		}
 		if(!(loadFlags & loadPatternData) || patNum > 255 || !Patterns.Insert(patNum, numRows))
 		{
 			continue;
 		}
 
-		ModCommand *m = Patterns[patNum].GetpModCommand(0, 0);
-		for(ROWINDEX row = 0; row < numRows; row++)
+		if(patternFormat == DTM_206_PATTERN_FORMAT)
 		{
-			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, m++)
+			chunk.Skip(4);
+			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
-				uint8 data[4];
-				chunk.ReadArray(data);
-				if(patternFormat == DTM_NEW_PATTERN_FORMAT)
+				uint16 length = chunk.ReadUint16BE();
+				if(length % 2u) length++;
+				FileReader rowChunk = chunk.ReadChunk(length);
+				int tick = 0;
+				std::div_t position = { 0, 0 };
+				while(rowChunk.CanRead(6) && static_cast<ROWINDEX>(position.quot) < numRows)
 				{
-					if(data[0] > 0 && data[0] < 0x80)
+					ModCommand *m = Patterns[patNum].GetpModCommand(position.quot, chn);
+
+					uint8 data[6];
+					rowChunk.ReadArray(data);
+					if(data[0] > 0 && data[0] <= 96)
 					{
-						m->note = (data[0] >> 4) * 12 + (data[0] & 0x0F) + NOTE_MIN + 11;
+						m->note = data[0] + NOTE_MIN + 12;
+						if(position.rem)
+						{
+							m->command = CMD_MODCMDEX;
+							m->param = 0xD0 | static_cast<ModCommand::PARAM>(std::min(position.rem, 15));
+						}
+					} else if(data[0] & 0x80)
+					{
+						if(position.rem)
+						{
+							m->command = CMD_MODCMDEX;
+							m->param = 0xC0 | static_cast<ModCommand::PARAM>(std::min(position.rem, 15));
+						} else
+						{
+							m->note = NOTE_NOTECUT;
+						}
 					}
-					uint8 vol = data[1] >> 2;
-					if(vol)
+					if(data[1])
 					{
 						m->volcmd = VOLCMD_VOLUME;
-						m->vol = std::min<uint8>(vol - 1u, 64u);
+						m->vol = static_cast<ModCommand::VOL>(Util::muldivr(data[1], 64, 255));
 					}
-					m->instr = ((data[1] & 0x03) << 4) | (data[2] >> 4);
-					m->command = data[2] & 0x0F;
-					m->param = data[3];
-				} else
-				{
-					ReadMODPatternEntry(data, *m);
-					m->instr |= data[0] & 0x30;	// Allow more than 31 instruments
-				}
-				ConvertModCommand(*m);
-				// Fix commands without memory and slide nibble precedence
-				switch(m->command)
-				{
-				case CMD_PORTAMENTOUP:
-				case CMD_PORTAMENTODOWN:
-					if(!m->param)
+					m->instr = data[2];
+					if(data[3] || data[4])
 					{
-						m->command = CMD_NONE;
-					}
-					break;
-				case CMD_VOLUMESLIDE:
-				case CMD_TONEPORTAVOL:
-				case CMD_VIBRATOVOL:
-					if(m->param & 0xF0)
-					{
-						m->param &= 0xF0;
-					} else if(!m->param)
-					{
-						m->command = CMD_NONE;
-					}
-					break;
-				default:
-					break;
-				}
+						m->command = data[3];
+						m->param = data[4];
+						ConvertModCommand(*m);
 #ifdef MODPLUG_TRACKER
-				m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
+						m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
 #endif
+					}
+					tick += data[5];
+					position = std::div(tick, m_nDefaultSpeed);
+				}
+			}
+		} else
+		{
+			ModCommand *m = Patterns[patNum].GetpModCommand(0, 0);
+			for(ROWINDEX row = 0; row < numRows; row++)
+			{
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, m++)
+				{
+					uint8 data[4];
+					chunk.ReadArray(data);
+					if(patternFormat == DTM_204_PATTERN_FORMAT)
+					{
+						if(data[0] > 0 && data[0] < 0x80)
+						{
+							m->note = (data[0] >> 4) * 12 + (data[0] & 0x0F) + NOTE_MIN + 11;
+						}
+						uint8 vol = data[1] >> 2;
+						if(vol)
+						{
+							m->volcmd = VOLCMD_VOLUME;
+							m->vol = vol - 1u;
+						}
+						m->instr = ((data[1] & 0x03) << 4) | (data[2] >> 4);
+						m->command = data[2] & 0x0F;
+						m->param = data[3];
+					} else
+					{
+						ReadMODPatternEntry(data, *m);
+						m->instr |= data[0] & 0x30;	// Allow more than 31 instruments
+					}
+					ConvertModCommand(*m);
+					// Fix commands without memory and slide nibble precedence
+					switch(m->command)
+					{
+					case CMD_PORTAMENTOUP:
+					case CMD_PORTAMENTODOWN:
+						if(!m->param)
+						{
+							m->command = CMD_NONE;
+						}
+						break;
+					case CMD_VOLUMESLIDE:
+					case CMD_TONEPORTAVOL:
+					case CMD_VIBRATOVOL:
+						if(m->param & 0xF0)
+						{
+							m->param &= 0xF0;
+						} else if(!m->param)
+						{
+							m->command = CMD_NONE;
+						}
+						break;
+					default:
+						break;
+					}
+#ifdef MODPLUG_TRACKER
+					m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
+#endif
+				}
 			}
 		}
 	}
@@ -327,12 +521,12 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read sample data
-	SAMPLEINDEX smp = 1;
 	for(auto &chunk : chunks.GetAllChunks(DTMChunk::idDAIT))
 	{
-		if(smp > GetNumSamples() || !(loadFlags & loadSampleData))
+		PATTERNINDEX smp = chunk.ReadUint16BE() + 1;
+		if(smp == 0 || smp > GetNumSamples() || !(loadFlags & loadSampleData))
 		{
-			break;
+			continue;
 		}
 		ModSample &mptSmp = Samples[smp];
 		SampleIO(
@@ -340,7 +534,19 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 			mptSmp.uFlags[CHN_STEREO] ? SampleIO::stereoInterleaved: SampleIO::mono,
 			SampleIO::bigEndian,
 			SampleIO::signedPCM).ReadSample(mptSmp, chunk);
-		smp++;
+	}
+
+	// Is this accurate?
+	if(patternFormat == DTM_206_PATTERN_FORMAT)
+	{
+		m_madeWithTracker = MPT_USTRING("Digital Home Studio");
+	} else if(FileReader chunk = chunks.GetChunk(DTMChunk::idVERS))
+	{
+		uint32 version = chunk.ReadUint32BE();
+		m_madeWithTracker = mpt::format(MPT_USTRING("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
+	} else
+	{
+		m_madeWithTracker = MPT_USTRING("Digital Tracker");
 	}
 
 	return true;
