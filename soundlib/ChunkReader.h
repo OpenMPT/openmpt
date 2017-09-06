@@ -26,6 +26,7 @@ public:
 
 	template <typename Tbyte> ChunkReader(mpt::span<Tbyte> bytedata) : FileReader(bytedata) { }
 	ChunkReader(const FileReader &other) : FileReader(other) { }
+	ChunkReader(FileReader &&other) : FileReader(std::move(other)) { }
 
 	template<typename T>
 	//========
@@ -37,9 +38,9 @@ public:
 		FileReader chunkData;
 
 	public:
-		Item(const T &header, const FileReader &data) : chunkHeader(header), chunkData(data) { }
+		Item(const T &header, FileReader &&data) : chunkHeader(header), chunkData(std::move(data)) { }
 		Item(const Item<T> &) = default;
-		Item(Item<T> &&) = default;
+		Item(Item<T> &&) noexcept = default;
 
 		const T &GetHeader() const { return chunkHeader; }
 		const FileReader &GetData() const { return chunkData; }
@@ -62,13 +63,9 @@ public:
 		// Retrieve the first chunk with a given ID.
 		FileReader GetChunk(id_type id) const
 		{
-			for(auto &item : *this)
-			{
-				if(item.GetHeader().GetID() == id)
-				{
-					return item.GetData();
-				}
-			}
+			auto item = std::find_if(this->cbegin(), this->cend(), [&id](const Item<T> &item) { return item.GetHeader().GetID() == id; });
+			if(item != this->cend())
+				return item->GetData();
 			return FileReader();
 		}
 
@@ -76,7 +73,7 @@ public:
 		std::vector<FileReader> GetAllChunks(id_type id) const
 		{
 			std::vector<FileReader> result;
-			for(auto &item : *this)
+			for(const auto &item : *this)
 			{
 				if(item.GetHeader().GetID() == id)
 				{
