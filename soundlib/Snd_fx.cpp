@@ -5654,7 +5654,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	note -= NOTE_MIN;
 	if (!UseFinetuneAndTranspose())
 	{
-		if(GetType() == MOD_TYPE_MDL)
+		if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
 		{
 			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
 			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
@@ -5769,7 +5769,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	{
 		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
 		return (period + c5speed - 8363) << FREQ_FRACBITS;
-	} else if(GetType() == MOD_TYPE_MDL)
+	} else if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
 		if (!c5speed) c5speed = 8363;

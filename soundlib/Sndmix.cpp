@@ -1588,6 +1588,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 			{
 				if(m_SongFlags[SONG_S3MOLDVIBRATO])
 					vdepth = 5;
+				else if(GetType() == MOD_TYPE_DTM)
+					vdepth = 8;
 				else if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM))
 					vdepth = 7;
 				else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
