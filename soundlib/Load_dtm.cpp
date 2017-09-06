@@ -21,11 +21,12 @@ struct DTMFileHeader
 	char     magic[4];
 	uint32be headerSize;
 	uint16be type;
-	uint16be mono;      // FF 08 = mono, 00 08 = stereo?
-	uint16be reserved;  // Usually 0, but not in unknown title 1.dtm and unknown title 2.dtm
+	uint8be  stereoMode;  // FF = panoramic stereo, 00 = old stereo
+	uint8be  bitDepth;    // Typically 8, sometimes 16, but is not actually used anywhere?
+	uint16be reserved;    // Usually 0, but not in unknown title 1.dtm and unknown title 2.dtm
 	uint16be speed;
 	uint16be tempo;
-	uint32be unknown;   // Seems to be related to sample rates, often it's 0, 8400 or 24585
+	uint32be forcedSampleRate; // Seems to be ignored in newer files
 };
 
 MPT_BINARY_STRUCT(DTMFileHeader, 22)
@@ -43,10 +44,11 @@ struct DTMChunk
 		idDAPT = MAGIC4BE('D', 'A', 'P', 'T'),
 		idDAIT = MAGIC4BE('D', 'A', 'I', 'T'),
 		idTEXT = MAGIC4BE('T', 'E', 'X', 'T'),
+		idPATN = MAGIC4BE('P', 'A', 'T', 'N'),
+		idTRKN = MAGIC4BE('T', 'R', 'K', 'N'),
+		// Chunks with unknown content
 		idVERS = MAGIC4BE('V', 'E', 'R', 'S'),
-		idPATN = MAGIC4BE('P', 'A', 'T', 'N'), // Pattern names, 48 chars long?
-		idTRKN = MAGIC4BE('T', 'R', 'K', 'N'), // Channel names, 32 chars long?
-		idSV19 = MAGIC4BE('S', 'V', '1', '9'), // ?
+		idSV19 = MAGIC4BE('S', 'V', '1', '9'), // Channel panning and other stuff?
 	};
 
 	uint32be id;
@@ -68,7 +70,7 @@ MPT_BINARY_STRUCT(DTMChunk, 8)
 
 struct DTMSample
 {
-	uint32be reserved;
+	uint32be reserved;   // 0x204 for first sample, 0x208 for second, etc...
 	uint32be length;     // in bytes
 	uint8be  finetune;   // -8....7
 	uint8be  volume;     // 0...64
@@ -80,13 +82,14 @@ struct DTMSample
 	uint32be midiNote;
 	uint32be sampleRate;
 
-	void ConvertToMPT(ModSample &mptSmp) const
+	void ConvertToMPT(ModSample &mptSmp, uint32 forcedSampleRate) const
 	{
 		mptSmp.Initialize(MOD_TYPE_IT);
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = mptSmp.nLoopStart + loopLength;
-		mptSmp.nC5Speed = sampleRate;
+		// In revolution to come.dtm, the file header says samples rate is 24512 Hz, but samples say it's 50000 Hz
+		mptSmp.nC5Speed = (forcedSampleRate > 0) ? forcedSampleRate : sampleRate;
 		mptSmp.Transpose(MOD2XMFineTune(finetune) * (1.0 / (12.0 * 128.0)));
 		mptSmp.nVolume = std::min<uint8>(volume, 64u) * 4u;
 		if(stereo & 1)
@@ -151,6 +154,8 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		m_nDefaultTempo.Set(fileHeader.tempo);
 	if(fileHeader.speed)
 		m_nDefaultSpeed = fileHeader.speed;
+	if(fileHeader.stereoMode == 0)
+		SetupMODPanning(true);
 
 	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, fileHeader.headerSize - (sizeof(fileHeader) - 8u));
 
@@ -220,7 +225,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.Skip(2);
 			}
 			chunk.ReadStruct(dtmSample);
-			dtmSample.ConvertToMPT(mptSmp);
+			dtmSample.ConvertToMPT(mptSmp, (patternFormat == DTM_PT_PATTERN_FORMAT) ? fileHeader.forcedSampleRate : 0);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], dtmSample.name);
 		}
 	}
@@ -292,6 +297,32 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
 #endif
 			}
+		}
+	}
+
+	// Read pattern names
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idPATN))
+	{
+		PATTERNINDEX pat = 0;
+		std::string name;
+		while(chunk.CanRead(1) && pat < Patterns.Size())
+		{
+			chunk.ReadNullString(name, 32);
+			Patterns[pat].SetName(name);
+			pat++;
+		}
+	}
+
+	// Read channel names
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idTRKN))
+	{
+		CHANNELINDEX chn = 0;
+		std::string name;
+		while(chunk.CanRead(1) && chn < GetNumChannels())
+		{
+			chunk.ReadNullString(name, 32);
+			mpt::String::Copy(ChnSettings[chn].szName, name);
+			chn++;
 		}
 	}
 
