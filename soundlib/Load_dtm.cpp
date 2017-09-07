@@ -302,15 +302,17 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		m_nSamples = numSamples;
 		for(SAMPLEINDEX smp = 1; smp <= numSamples; smp++)
 		{
-			ModSample &mptSmp = Samples[smp];
+			SAMPLEINDEX realSample = newSamples ? (chunk.ReadUint16BE() + 1u) : smp;
 			DTMSample dtmSample;
-			if(newSamples)
-			{
-				chunk.Skip(2);
-			}
 			chunk.ReadStruct(dtmSample);
+			if(realSample < 1 || realSample >= MAX_SAMPLES)
+			{
+				continue;
+			}
+			m_nSamples = std::max(m_nSamples, realSample);
+			ModSample &mptSmp = Samples[realSample];
 			dtmSample.ConvertToMPT(mptSmp, fileHeader.forcedSampleRate, patternFormat);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], dtmSample.name);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[realSample], dtmSample.name);
 		}
 	
 		if(chunk.ReadUint16BE() == 0x0004)
@@ -371,6 +373,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX numRows = chunk.ReadUint16BE();
 		if(patternFormat == DTM_206_PATTERN_FORMAT)
 		{
+			// The stored data is actually not row-based, but tick-based.
 			numRows /= m_nDefaultSpeed;
 		}
 		if(!(loadFlags & loadPatternData) || patNum > 255 || !Patterns.Insert(patNum, numRows))
