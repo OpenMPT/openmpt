@@ -318,7 +318,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		if(chunk.ReadUint16BE() == 0x0004)
 		{
 			// Digital Home Studio instruments
-			m_nInstruments = std::max<INSTRUMENTINDEX>(m_nSamples, MAX_INSTRUMENTS - 1);
+			m_nInstruments = std::min<INSTRUMENTINDEX>(m_nSamples, MAX_INSTRUMENTS - 1);
 
 			FileReader envChunk = chunks.GetChunk(DTMChunk::idIENV);
 			while(chunk.CanRead(sizeof(DTMInstrument)))
