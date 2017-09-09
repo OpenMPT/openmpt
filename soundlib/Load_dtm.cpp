@@ -407,6 +407,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 						}
 					} else if(data[0] & 0x80)
 					{
+						// Lower 7 bits contain note, probably intended for MIDI-like note-on/note-off events
 						if(position.rem)
 						{
 							m->command = CMD_MODCMDEX;
@@ -419,9 +420,12 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 					if(data[1])
 					{
 						m->volcmd = VOLCMD_VOLUME;
-						m->vol = static_cast<ModCommand::VOL>(Util::muldivr(data[1], 64, 255));
+						m->vol = std::min(data[1], uint8(64)); // Volume can go up to 255, but we do not support over-amplification at the moment.
 					}
-					m->instr = data[2];
+					if(data[2])
+					{
+						m->instr = data[2];
+					}
 					if(data[3] || data[4])
 					{
 						m->command = data[3];
@@ -431,7 +435,10 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 						m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
 #endif
 					}
-					tick += data[5];
+					if(data[5] & 0x80)
+						tick += (data[5] & 0x7F) * 0x100 + rowChunk.ReadUint8();
+					else
+						tick += data[5];
 					position = std::div(tick, m_nDefaultSpeed);
 				}
 			}
