@@ -48,6 +48,7 @@ IMPLEMENT_DYNCREATE(CChildFrame, CMDIChildWnd)
 BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	//{{AFX_MSG_MAP(CChildFrame)
 	ON_WM_DESTROY()
+	ON_WM_NCACTIVATE()
 	ON_WM_MDIACTIVATE()
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,	OnInstrumentSelected)
@@ -121,6 +122,18 @@ BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 //-------------------------------------------------
 {
 	return CMDIChildWnd::PreCreateWindow(cs);
+}
+
+
+BOOL CChildFrame::OnNcActivate(BOOL bActivate)
+//--------------------------------------------
+{
+	if(bActivate && m_hWndView)
+	{
+		// Need this in addition to OnMDIActivate when switching from a non-MDI window such as a plugin editor
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
+	}
+	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
 
