@@ -499,6 +499,7 @@ bool CModCleanupDlg::RearrangePatterns()
 		while(i < j)
 			j = newIndex[j];
 		std::swap(sndFile.Patterns[i], sndFile.Patterns[j]);
+		modified = true;
 	}
 
 	EndWaitCursor();
