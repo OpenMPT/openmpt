@@ -467,7 +467,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			if(modDoc != nullptr)
 			{
 				// Update envelope views if speed has changed
-				modDoc->UpdateAllViews(nullptr, InstrumentHint().Envelope());
+				CMainFrame::GetMainFrame()->PostMessage(WM_MOD_UPDATEVIEWS, reinterpret_cast<WPARAM>(modDoc), InstrumentHint().Envelope().AsLPARAM());
 			}
 
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
@@ -609,7 +609,7 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 				mic.szPname[0] = 0;
 				if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
 				{
-					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, theApp.GetFriendlyMIDIPortName(CString(mic.szPname), true));
+					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, theApp.GetFriendlyMIDIPortName(mpt::ToCString(mic.szPname), true));
 				}
 			}
 			if(!numDevs)
@@ -1153,6 +1153,7 @@ HWND CModTreeBar::GetModTreeHWND()
 {
 	return m_pModTree->m_hWnd;
 }
+
 
 LRESULT CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------------

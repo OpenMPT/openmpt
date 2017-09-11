@@ -103,6 +103,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMAPPING,			OnViewMIDIMapping)
+	ON_MESSAGE(WM_MOD_UPDATEVIEWS,			OnUpdateViews)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, OnUpdateCheckProgress)
@@ -2086,8 +2087,6 @@ void CMainFrame::OnTimerGUI()
 	// Idle Time Check
 	DWORD curTime = timeGetTime();
 
-	m_wndToolBar.SetCurrentSong(m_pSndFile);
-
 	if(m_AutoSaver.IsEnabled())
 	{
 		bool success = m_AutoSaver.DoSave(curTime);
@@ -2101,11 +2100,6 @@ void CMainFrame::OnTimerGUI()
 	// Ensure the modified flag gets set in the WinMain thread, even if modification
 	// originated from Audio Thread (access to CWnd is not thread safe).
 	// Flaw: if 2 docs are modified in between Timer ticks (very rare), one mod will be lost.
-	/*CModDoc* pModDoc = GetActiveDoc();
-	if (pModDoc && pModDoc->m_bModifiedChanged) {
-		pModDoc->SetModifiedFlag(pModDoc->m_bDocModified);
-		pModDoc->m_bModifiedChanged=false;
-	}*/
 	if (m_pJustModifiedDoc)
 	{
 		m_pJustModifiedDoc->SetModified(true);
@@ -2342,6 +2336,18 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 		}
 		m_nMixChn = pnotify->mixedChannels;
 		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVUchannels, pnotify->masterVU,  pnotify->type[Notification::Stop]);
+		m_wndToolBar.SetCurrentSong(m_pSndFile);
+	}
+	return 0;
+}
+
+
+LRESULT CMainFrame::OnUpdateViews(WPARAM modDoc, LPARAM hint)
+//-----------------------------------------------------------
+{
+	if(modDoc)
+	{
+		reinterpret_cast<CModDoc *>(modDoc)->UpdateAllViews(nullptr, UpdateHint::FromLPARAM(hint));
 	}
 	return 0;
 }
