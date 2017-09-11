@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="language" content="en">
+  <title>OpenMPT 1.27 Release Notes</title>
+  <style type="text/css">
+    * { font-family: Calibri, sans-serif; }
+    body
+    {
+        color: #222;
+        background: #eee;
+        font-size: 13pt;
+        margin: 0 0 1em 0;
+        padding: 0;
+        border: none;
+    }
+
+    a { color: #b30; text-decoration: none; }
+    a:visited { color: #910; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .screenshots
+    {
+        float:right;
+        text-align:right;
+    }
+
+    .screenshots img, h1
+    {
+        border: 1px solid #ccc;
+        padding: 3px;
+        background: #f0f0f0;
+        margin: 0 0 3px 3px;
+    }
+
+    p { margin: 0.5em 1em; padding: 0; }
+
+    h1
+    {
+        margin: 0 0 1em 0;
+        padding: 10px;
+        font-size: 24pt;
+        color: #444;
+        text-shadow: 1px 1px 1px #999;
+        background: #ddd;
+        background-image: linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -o-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -moz-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -ms-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.2, #ddd), color-stop(0.6, #eee));
+        border-width: 0 0 1px 0;
+    }
+
+    h1 img { vertical-align: middle; margin-right: 1em; }
+
+    h2, h3, h4
+    {
+        border: 1px solid #ccc;
+        border-width: 0 0 0 3em;
+        margin: 1em 0.5em;
+        padding: 0px 5px;
+        font-size: 18pt;
+        color: #333;
+        text-shadow: 1px 1px #fff;
+    }
+
+    h3 { border-left-width: 2em; }
+    h4 { border-left-width: 1em; }
+
+    li {list-style-type: none; padding: 0 0 0.5em 0; }
+    li:before { content: "» "; }
+
+    li li { padding: 0; }
+
+    /* use this for pattern data */
+    pre
+    {
+        font-family: monospace;
+        display: inline;
+        color: #006;
+    }
+
+    tt
+    {
+        font-family: monospace;
+    }
+
+  </style>
+  </head>
+  <body>
+
+    <h1>
+        <img src="ReleaseNotesImages/general/modplug.png" width="80" height="80" alt="OpenMPT Logo">
+        OpenMPT 1.27 - Release Notes
+    </h1>
+
+    <p>
+        It's been a while since the last major feature update (version 1.26.04.00), and we have been working on a bunch of great new features for this new version.
+        This document should give a rough overview about the greatest changes in OpenMPT 1.27.
+    </p>
+
+    <h2>What's new?</h2>
+
+    <h3>General</h3>
+    <ul>
+        <li><strong>Unused channel removal</strong> is now more aggressive and removes any channels that contain no notes, no PC events and no global commands (so a channel that contains only Note Cuts or only portamento commands will be removed).</li>
+        <li><strong>Improved accesibility</strong> for blind users in the pattern and instrument editors.</li>
+        <li>Rearranging patterns no longer clears the pattern undo.</li>
+        <li>Added an option to MIDI Export to not export an instrument at all (available from the MIDI channel dropdown).</li>
+        <li>Added hidden setting "Misc.SaveChannelMuteStatus" (default true), which can be used to avoid <strong>channel mute status</strong> to be saved in S3M, IT and MPTM files.</li>
+        <li>Channel Manager: Channels can be renamed by middle-clicking them.</li>
+        <li>"Friendly names" can be set for MIDI input / output ports. By adding a "Device Name=Friendly Name" pair to the [MIDI Input Ports] or [MIDI Output Ports] configuration sections respectively, the real device name gets substituted by the user-supplied name in the user interface.</li>
+        <li>MIDI Mapping now supports <strong>14-bit MIDI controllers</strong>. Combinations of CC 0...31 and CC 32...63 are now recognized as double-precision MIDI messages, which increases the precision when recording them as PC events or passing them on to plugins.</li>
+        <li>OpenMPT's file handling is now fully <strong>unicode-aware</strong>.</li>
+        <li>Added a great number of user-contributed <strong>colour schemes</strong>.</li>
+        <li>Experimental direct integration with PulseAudio and ALSA when running OpenMPT through Wine.</li>
+    </ul>
+
+    <h3>Pattern Editor</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.27/vumeters.png"><img src="ReleaseNotesImages/1.27/vumeters.png" width="255" height="138" alt="Plugin VU meters" title="Plugin VU meters"></a>
+    </div>
+    <ul>
+        <li><strong>VU meters</strong> are now also shown for instrument plugins. You can define individual VU meter colours for samples and plugins!</li>
+        <li>Playback can now be <strong>locked to a pattern selection</strong> through the context menu or a keyboard shortcut.</li>
+        <li>New shortcut "Apply current instrument to existing only". Unlike "Apply current instrument", this does not affect notes without instrument numbers.</li>
+        <li>New shortcuts "<strong>Jump to previous / next entry in column</strong>" can be used to quickly jump to the next non-empty entry in the currently selected note, instrument, etc. column.</li> 
+        <li>Added option "<strong>Play notes when transposing</strong>" which previews the transposed note if the pattern selection only spans one pattern cell.</li>
+        <li><strong>Seeking with sample sync</strong> now also keeps track of pingpong-looped samples and is now enabled by default for new installations.</li>
+    </ul>
+    
+    <h3>Plugins</h3>
+    <ul>
+        <li>Added the <strong>LFO Plugin</strong>, which can automate other plugins' parameters or MIDI CCs.</li>
+        <li>Fixed sporadic Sporadic freezes and crashes in the MIDI Input / Output Plugin. It is now also possible to not send timing information to MIDI devices, and to specify a custom output latency. This value can also be negative, up to the duration of OpenMPT's own output latency.</li>
+        <li>Plugins sharing the same filename no longer casue OpenMPT to rescan them on every startup.</li>
+        <li>The default DMO effects are now also available on Windows Server and Wine without any additional downloads.</li>
+    </ul>
+
+    <h3>Sample / Instrument Editor</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.27/tuning.png"><img src="ReleaseNotesImages/1.27/tuning.png" width="255" height="125" alt="Revised Tuning Editor" title="Revised Tuning Editor"></a>
+    </div>
+    <ul>
+        <li><strong>SFZ instruments</strong>, 64-bit PCM WAV and AIFF samples can now be imported.</li>
+        <li><strong>Improved resampling accuracy</strong> when using the built-in resamplers.</li>
+        <li>Can now <strong>fade in from or fade out to arbitrary levels</strong> other than 0% and change the <strong>stereo width</strong> of a sample.</li>
+        <li>Show <strong>selection length in beats</strong> (based on current tempo).</li>
+        <li><strong>Undo / Redo</strong> for instruments.</li>
+        <li>Added <strong>Scala .scl export</strong> for custom tunings.</li>
+        <li>Redesigned and improved the <strong>Tuning Editor</strong>: Cents are shown in addition to ratios, simplified tuning management (all tunings are now "tune-specific"), decimal point as specified by the system locale can be used to input ratios, etc.</li>
+        <li>Local tunings do not exist anymore. Contents of local_tunings.tc are unpacked to individual tuning files on first start.</li>
+    </ul>
+
+    <h3>Playback</h3>
+    <p>
+        A couple of playback behaviours have been changed and improved:
+    </p>
+    <ul>
+        <li>Added the <strong>Amiga Resampler</strong>, which emulates how the Amiga's soundchip (Paula) works by means of Band-Limited Step (BLEP) synthesis. Can be enabled from the Mixer options only for Amiga-type modules. Includes support for the E0x command in MOD files.</li>
+        <li>Increased <strong>accuracy of the sample position</strong> and sample rate to drift less when playing very long samples.</li>
+        <li>All built-in DSPs (Bass Extension, Reverb, Surround) are now also available in 64-bit OpenMPT builds. Disclaimer: These DSPs have a rather low quality and should only be used for legacy projects. Plugins should be used instead to improve the sound of your modules.</li>
+        <li>For very high sample rates (starting at 88 kHz), low filter cutoff frequencies resulted in silent filter output.</li>
+        <li>Various MOD, XM, S3M and IT <strong>playback fixes</strong>.</li>
+        <li>Allow samples in DMF, GDM and MDL files to not have a default volume.</li>
+    </ul>
+
+    <h3>File Format Support</h3>
+    <ul>
+        <li><strong>Greatly improved MIDI import</strong>. New features include support for user-definable quantization level, XG and GS drum kits, sustain pedal, loop points, channel / master transpose, type 2 (multi-song) MIDI files, and many others.</li>
+        <li>Can now read <strong>Soundtracker Pro II (STP)</strong> and <strong>Digital Tracker / Digital Home Studio (DTM)</strong> modules.</li>
+        <li>Support for <strong>synthesized instruments in Startrekker modules</strong>. Instrument files must have the same name as the module itself, followed by either ".nt" or ".as".</li>
+        <li>MP3 patents have finally expired! mpg123 is now shipped with OpenMPT, so unmo3.dll support has been removed. The internal MO3 decoder is always used. MP3 sample import is now also supported out of the box on all systems.</li>
+        <li>Opus export is now also possible at sample rates that are not native to the Opus codec. They are automatically resampled.</li>
+    </ul>
+
+    <h3>There's more...</h3>
+    <p>
+        For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
+    </p>
+
+    <h2>Known Issues</h2>
+    <p>
+        <i>This list has mostly been copied over from the old OpenMPT 1.17 RC2 release notes, so this not very comprehensive... :-)</i>
+    </p>
+    <ul>
+        <li>The plugin bridge is still rather experimental. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any issues you may be having with the plugin bridge!</li>
+        <li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
+        <li>Previewing samples from the tree view's file browser stops the playing module.</li>
+        <li>Cannot preview soundfont instruments directly from the MIDI Library in the tree view.</li>
+        <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
+    </ul>
+    <p>
+        Known issues regarding specific VST plugins can be found in the <a href="https://wiki.openmpt.org/Manual:_Known_Issues">manual</a>.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+        Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!<br>
+        Our issue tracker is located at <a href="https://bugs.openmpt.org/">https://bugs.openmpt.org/</a> and can be used to report bugs and feature requests.<br>
+        You can also meet us at the ModPlug Central forums: <a href="https://forum.openmpt.org/">https://forum.openmpt.org/</a>.
+    </p>
+
+  </body>
+</html>
