@@ -527,6 +527,9 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           return true;
         TotalFileCount++;
         ExtrCreateDir(Arc,ArcFileName);
+        // It is important to not increment MatchedArgs here, so we extract
+        // dir with its entire contents and not dir record only even if
+        // dir record precedes files.
         return true;
       }
       else
@@ -763,6 +766,9 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       */	// OPENMPT ADDITION
     }
   }
+  // It is important to increment it for files, but not dirs. So we extract
+  // dir with its entire contents, not just dir record only even if dir
+  // record precedes files.
   if (MatchFound)
     MatchedArgs++;
   if (DataIO.NextVolumeMissing)
