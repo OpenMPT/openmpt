@@ -244,7 +244,7 @@ LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
   \remarks openmpt::could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your std::istream implementation whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt::could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt::could_open_probability() returned 0.5.
   \sa \ref libopenmpt_c_fileio
   \sa probe_file_header
-  \ since 0.3.0
+  \since 0.3.0
 */
 LIBOPENMPT_CXX_API double could_open_probability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
