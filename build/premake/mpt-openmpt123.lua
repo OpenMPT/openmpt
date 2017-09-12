@@ -51,20 +51,14 @@
 	
   characterset "Unicode"
   links {
-   "libopenmpt",
-   "flac",
-   "portaudio",
-   "winmm",  }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
-  filter { "not configurations:*Shared" }
-   links {
-    "vorbis",
-    "ogg",
+    "libopenmpt",
+    "flac",
+    "portaudio",
     "ksuser",
     "winmm",
-    "zlib",
-   }
+  }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter { "not configurations:*Shared" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

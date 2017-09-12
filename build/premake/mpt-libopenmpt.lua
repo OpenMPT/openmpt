@@ -79,7 +79,7 @@
 	filter {}
 
   characterset "Unicode"
-  flags { "ExtraWarnings" }
+  warnings "Extra"
   defines { "LIBOPENMPT_BUILD" }
 	defines { "MPT_ENABLE_DLOPEN" }
   filter { "kind:SharedLib" }

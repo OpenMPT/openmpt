@@ -6,10 +6,10 @@
 
 MPT_PREMAKE_VERSION = ""
 
-if _PREMAKE_VERSION == "5.0.0-alpha11" then
+if _PREMAKE_VERSION == "5.0.0-alpha12" then
  MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 5.0.0-alpha11 required"
+ print "Premake 5.0.0-alpha12 required"
  os.exit(1)
 end
 
@@ -80,17 +80,12 @@ function replace_in_file (filename, from, to)
 	outfile:close()
 end
 
--- related to issue https://github.com/premake/premake-core/issues/68
-function postprocess_vs2010_main (filename)
-	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-end
-
 function postprocess_vs2010_nonxcompat (filename)
 	replace_in_file(filename, "    </Link>\r\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\r\n    </Link>\r\n")
 end
 
 function postprocess_vs2010_disabledpiaware (filename)
-	replace_in_file(filename, "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\r\n", "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\r\n      <EnableDPIAwareness>false</EnableDPIAwareness>\r\n")
+	replace_in_file(filename, "</AdditionalManifestFiles>\r\n", "</AdditionalManifestFiles>\r\n      <EnableDPIAwareness>false</EnableDPIAwareness>\r\n")
 end
 
 newaction {
@@ -98,13 +93,6 @@ newaction {
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
 
-  postprocess_vs2010_main("build/vs2015/libopenmpt_test.vcxproj")
-  postprocess_vs2010_main("build/vs2015/openmpt123.vcxproj")
-  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_probe.vcxproj")
-  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c.vcxproj")
-  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_mem.vcxproj")
-  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_unsafe.vcxproj")
-  postprocess_vs2010_main("build/vs2015/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT-custom.vcxproj")
@@ -114,13 +102,6 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
 
-  postprocess_vs2010_main("build/vs2017/libopenmpt_test.vcxproj")
-  postprocess_vs2010_main("build/vs2017/openmpt123.vcxproj")
-  postprocess_vs2010_main("build/vs2017/libopenmpt_example_c_probe.vcxproj")
-  postprocess_vs2010_main("build/vs2017/libopenmpt_example_c.vcxproj")
-  postprocess_vs2010_main("build/vs2017/libopenmpt_example_c_mem.vcxproj")
-  postprocess_vs2010_main("build/vs2017/libopenmpt_example_c_unsafe.vcxproj")
-  postprocess_vs2010_main("build/vs2017/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2017/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2017/OpenMPT-custom.vcxproj")
@@ -130,13 +111,6 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2017/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017/PluginBridge.vcxproj")
 
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_test.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/openmpt123.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_probe.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_mem.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_c_unsafe.vcxproj")
-  postprocess_vs2010_main("build/vs2015xp/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015xp/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015xp/OpenMPT-custom.vcxproj")
@@ -146,13 +120,6 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2015xp/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015xp/PluginBridge.vcxproj")
 
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_test.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/openmpt123.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_example_c_probe.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_example_c.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_example_c_mem.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_example_c_unsafe.vcxproj")
-  postprocess_vs2010_main("build/vs2017xp/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2017xp/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017xp/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2017xp/OpenMPT-custom.vcxproj")

@@ -191,7 +191,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -215,7 +214,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -248,7 +246,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -280,7 +277,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -304,12 +300,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\..\bin\debug\vs2017-shared\x86-32-win7\libopenmpt.lib;..\..\bin\debug\vs2017-shared\x86-32-win7\openmpt-flac.lib;..\..\bin\debug\vs2017-shared\x86-32-win7\openmpt-portaudio.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
+      <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -332,12 +324,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\..\bin\debug\vs2017-shared\x86-64-win7\libopenmpt.lib;..\..\bin\debug\vs2017-shared\x86-64-win7\openmpt-flac.lib;..\..\bin\debug\vs2017-shared\x86-64-win7\openmpt-portaudio.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
+      <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -367,12 +355,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\..\bin\release\vs2017-shared\x86-32-win7\libopenmpt.lib;..\..\bin\release\vs2017-shared\x86-32-win7\openmpt-flac.lib;..\..\bin\release\vs2017-shared\x86-32-win7\openmpt-portaudio.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
+      <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -401,12 +385,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\..\bin\release\vs2017-shared\x86-64-win7\libopenmpt.lib;..\..\bin\release\vs2017-shared\x86-64-win7\openmpt-flac.lib;..\..\bin\release\vs2017-shared\x86-64-win7\openmpt-portaudio.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      
+      <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -440,15 +420,6 @@
     </ProjectReference>
     <ProjectReference Include="ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
-    </ProjectReference>
-    <ProjectReference Include="ext\vorbis.vcxproj">
-      <Project>{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}</Project>
-    </ProjectReference>
-    <ProjectReference Include="ext\ogg.vcxproj">
-      <Project>{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="ext\zlib.vcxproj">
-      <Project>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
