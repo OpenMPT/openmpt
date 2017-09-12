@@ -106,7 +106,8 @@ end
   defines { "MODPLUG_TRACKER" }
   largeaddressaware ( true )
   characterset(charset)
-  flags { "MFC", "ExtraWarnings", "WinMain" }
+  flags { "MFC" }
+  warnings "Extra"
   links {
    "UnRAR",
    "zlib",
@@ -181,7 +182,7 @@ end
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
   largeaddressaware ( true )
   characterset "Unicode"
-  flags { "ExtraWarnings" }
+  warnings "Extra"
   links {
    "portaudio",
   }
@@ -209,7 +210,7 @@ end
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER" }
   largeaddressaware ( true )
   characterset "Unicode"
-  flags { "ExtraWarnings" }
+  warnings "Extra"
   links {
    "OpenMPT-NativeSupport",
   }

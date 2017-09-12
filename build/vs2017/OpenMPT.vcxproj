@@ -931,18 +931,7 @@
     <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\common\typedefs.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
@@ -1168,28 +1157,30 @@
     <ClCompile Include="..\..\unarchiver\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\mptrack\res\COLORS.BMP" />
     <None Include="..\..\mptrack\res\DRAGGING.CUR" />
     <None Include="..\..\mptrack\res\MPTRACK.ICO" />
     <None Include="..\..\mptrack\res\MPTRACK.RC2" />
     <None Include="..\..\mptrack\res\NODROP.CUR" />
     <None Include="..\..\mptrack\res\OpenMPT.manifest" />
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb" />
-    <None Include="..\..\mptrack\res\envelope_toolbar.png" />
-    <None Include="..\..\mptrack\res\icons.png" />
-    <None Include="..\..\mptrack\res\main_toolbar.png" />
     <None Include="..\..\mptrack\res\moddoc.ico" />
-    <None Include="..\..\mptrack\res\mptrack.png" />
     <None Include="..\..\mptrack\res\nodrag.cur" />
-    <None Include="..\..\mptrack\res\pattern_toolbar.png" />
-    <None Include="..\..\mptrack\res\sample_toolbar.png" />
-    <None Include="..\..\mptrack\res\splashno.png" />
-    <None Include="..\..\mptrack\res\view_pat.bmp" />
-    <None Include="..\..\mptrack\res\vumeters.bmp" />
     <None Include="..\vs\debug\openmpt.natvis" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\mptrack\res\COLORS.BMP" />
+    <Image Include="..\..\mptrack\res\envelope_toolbar.png" />
+    <Image Include="..\..\mptrack\res\icons.png" />
+    <Image Include="..\..\mptrack\res\main_toolbar.png" />
+    <Image Include="..\..\mptrack\res\mptrack.png" />
+    <Image Include="..\..\mptrack\res\pattern_toolbar.png" />
+    <Image Include="..\..\mptrack\res\sample_toolbar.png" />
+    <Image Include="..\..\mptrack\res\splashno.png" />
+    <Image Include="..\..\mptrack\res\view_pat.bmp" />
+    <Image Include="..\..\mptrack\res\vumeters.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\UnRAR.vcxproj">

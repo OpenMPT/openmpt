@@ -1471,9 +1471,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\mptrack\res\COLORS.BMP">
-      <Filter>mptrack\res</Filter>
-    </None>
     <None Include="..\..\mptrack\res\DRAGGING.CUR">
       <Filter>mptrack\res</Filter>
     </None>
@@ -1492,37 +1489,10 @@
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\..\mptrack\res\envelope_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\icons.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\main_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
     <None Include="..\..\mptrack\res\moddoc.ico">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\..\mptrack\res\mptrack.png">
-      <Filter>mptrack\res</Filter>
-    </None>
     <None Include="..\..\mptrack\res\nodrag.cur">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\pattern_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\sample_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\splashno.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\view_pat.bmp">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\vumeters.bmp">
       <Filter>mptrack\res</Filter>
     </None>
     <None Include="..\vs\debug\openmpt.natvis">
@@ -1533,5 +1503,37 @@
     <ResourceCompile Include="..\..\mptrack\mptrack.rc">
       <Filter>mptrack</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\mptrack\res\COLORS.BMP">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\envelope_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\icons.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\main_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\mptrack.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\pattern_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\sample_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\splashno.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\view_pat.bmp">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\vumeters.bmp">
+      <Filter>mptrack\res</Filter>
+    </Image>
   </ItemGroup>
 </Project>
