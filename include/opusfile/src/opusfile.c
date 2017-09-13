@@ -1835,7 +1835,7 @@ static int op_get_link_from_serialno(const OggOpusFile *_of,int _cur_link,
   nlinks=_of->nlinks;
   li_lo=0;
   /*Start off by guessing we're just a multiplexed page in the current link.*/
-  li_hi=_cur_link+1<nlinks&&_page_offset<links[nlinks+1].offset?
+  li_hi=_cur_link+1<nlinks&&_page_offset<links[_cur_link+1].offset?
    _cur_link+1:nlinks;
   do{
     if(_page_offset>=links[_cur_link].offset)li_lo=_cur_link;
