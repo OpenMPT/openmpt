@@ -115,7 +115,7 @@ static int op_tags_ensure_capacity(OpusTags *_tags,size_t _ncomments){
   /*We only support growing.
     Trimming requires cleaning up the allocated strings in the old space, and
      is best handled separately if it's ever needed.*/
-  OP_ASSERT(_ncomments>=cur_ncomments);
+  OP_ASSERT(_ncomments>=(size_t)cur_ncomments);
   comment_lengths=_tags->comment_lengths;
   comment_lengths=(int *)_ogg_realloc(_tags->comment_lengths,size);
   if(OP_UNLIKELY(comment_lengths==NULL))return OP_EFAULT;
@@ -286,24 +286,26 @@ int opus_tags_copy(OpusTags *_dst,const OpusTags *_src){
 }
 
 int opus_tags_add(OpusTags *_tags,const char *_tag,const char *_value){
-  char *comment;
-  int   tag_len;
-  int   value_len;
-  int   ncomments;
-  int   ret;
+  char   *comment;
+  size_t  tag_len;
+  size_t  value_len;
+  int     ncomments;
+  int     ret;
   ncomments=_tags->comments;
   ret=op_tags_ensure_capacity(_tags,ncomments+1);
   if(OP_UNLIKELY(ret<0))return ret;
   tag_len=strlen(_tag);
   value_len=strlen(_value);
   /*+2 for '=' and '\0'.*/
+  if(tag_len+value_len<tag_len)return OP_EFAULT;
+  if(tag_len+value_len>(size_t)INT_MAX-2)return OP_EFAULT;
   comment=(char *)_ogg_malloc(sizeof(*comment)*(tag_len+value_len+2));
   if(OP_UNLIKELY(comment==NULL))return OP_EFAULT;
   memcpy(comment,_tag,sizeof(*comment)*tag_len);
   comment[tag_len]='=';
   memcpy(comment+tag_len+1,_value,sizeof(*comment)*(value_len+1));
   _tags->user_comments[ncomments]=comment;
-  _tags->comment_lengths[ncomments]=tag_len+value_len+1;
+  _tags->comment_lengths[ncomments]=(int)(tag_len+value_len+1);
   _tags->comments=ncomments+1;
   return 0;
 }
@@ -344,7 +346,10 @@ int opus_tags_set_binary_suffix(OpusTags *_tags,
 }
 
 int opus_tagcompare(const char *_tag_name,const char *_comment){
-  return opus_tagncompare(_tag_name,strlen(_tag_name),_comment);
+  size_t tag_len;
+  tag_len=strlen(_tag_name);
+  if(OP_UNLIKELY(tag_len>(size_t)INT_MAX))return -1;
+  return opus_tagncompare(_tag_name,(int)tag_len,_comment);
 }
 
 int opus_tagncompare(const char *_tag_name,int _tag_len,const char *_comment){
@@ -355,17 +360,18 @@ int opus_tagncompare(const char *_tag_name,int _tag_len,const char *_comment){
 }
 
 const char *opus_tags_query(const OpusTags *_tags,const char *_tag,int _count){
-  char **user_comments;
-  int    tag_len;
-  int    found;
-  int    ncomments;
-  int    ci;
+  char   **user_comments;
+  size_t   tag_len;
+  int      found;
+  int      ncomments;
+  int      ci;
   tag_len=strlen(_tag);
+  if(OP_UNLIKELY(tag_len>(size_t)INT_MAX))return NULL;
   ncomments=_tags->comments;
   user_comments=_tags->user_comments;
   found=0;
   for(ci=0;ci<ncomments;ci++){
-    if(!opus_tagncompare(_tag,tag_len,user_comments[ci])){
+    if(!opus_tagncompare(_tag,(int)tag_len,user_comments[ci])){
       /*We return a pointer to the data, not a copy.*/
       if(_count==found++)return user_comments[ci]+tag_len+1;
     }
@@ -375,17 +381,18 @@ const char *opus_tags_query(const OpusTags *_tags,const char *_tag,int _count){
 }
 
 int opus_tags_query_count(const OpusTags *_tags,const char *_tag){
-  char **user_comments;
-  int    tag_len;
-  int    found;
-  int    ncomments;
-  int    ci;
+  char   **user_comments;
+  size_t   tag_len;
+  int      found;
+  int      ncomments;
+  int      ci;
   tag_len=strlen(_tag);
+  if(OP_UNLIKELY(tag_len>(size_t)INT_MAX))return 0;
   ncomments=_tags->comments;
   user_comments=_tags->user_comments;
   found=0;
   for(ci=0;ci<ncomments;ci++){
-    if(!opus_tagncompare(_tag,tag_len,user_comments[ci]))found++;
+    if(!opus_tagncompare(_tag,(int)tag_len,user_comments[ci]))found++;
   }
   return found;
 }
@@ -410,7 +417,8 @@ static int opus_tags_get_gain(const OpusTags *_tags,int *_gain_q8,
   ncomments=_tags->comments;
   /*Look for the first valid tag with the name _tag_name and use that.*/
   for(ci=0;ci<ncomments;ci++){
-    if(opus_tagncompare(_tag_name,_tag_len,comments[ci])==0){
+    OP_ASSERT(_tag_len<=(size_t)INT_MAX);
+    if(opus_tagncompare(_tag_name,(int)_tag_len,comments[ci])==0){
       char       *p;
       opus_int32  gain_q8;
       int         negative;
