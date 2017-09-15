@@ -264,7 +264,11 @@ int main( int argc, char * argv[] ) {
 					goto fail;
 					break;
 			}
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", argv[1] );
+#else
 			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
+#endif
 			if ( result_binary ) {
 				result = 0;
 			} else {
@@ -294,7 +298,11 @@ int main( int argc, char * argv[] ) {
 					goto fail;
 					break;
 			}
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, argv[1] );
+#else
 			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
+#endif
 			if ( probability >= 0.5 ) {
 				result = 0;
 			} else {
@@ -308,7 +316,11 @@ int main( int argc, char * argv[] ) {
 
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
 			result_binary = ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", argv[1] );
+#else
 			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
+#endif
 			if ( result_binary ) {
 				result = 0;
 			} else {
@@ -316,7 +328,11 @@ int main( int argc, char * argv[] ) {
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
 			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, argv[1] );
+#else
 			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
+#endif
 			if ( probability >= 0.5 ) {
 				result = 0;
 			} else {
