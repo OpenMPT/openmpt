@@ -247,7 +247,7 @@ CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt:
 		}
 	} else if(flags & ProbeContainers)
 	{
-		if(!sndFile->Create(file, CSoundFile::onlyVerifyHeader))
+		if(!sndFile->Create(file, static_cast<CSoundFile::ModLoadingFlags>(CSoundFile::onlyVerifyHeader | CSoundFile::skipModules)))
 		{
 			return ProbeFailure;
 		}
@@ -315,6 +315,11 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 					}
 					file = containerItems[0].file;
 				}
+			}
+
+			if(loadFlags & skipModules)
+			{
+				return false;
 			}
 
 			if(!ReadXM(file, loadFlags)

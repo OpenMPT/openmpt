@@ -553,6 +553,7 @@ public:
 		loadPluginData     = 0x04,	// If unset, plugin data is not loaded (and as a consequence, plugins are not instanciated).
 		loadPluginInstance = 0x08,	// If unset, plugins are not instanciated.
 		skipContainer      = 0x10,
+		skipModules        = 0x20,
 
 		// Shortcuts
 		loadCompleteModule = loadSampleData | loadPatternData | loadPluginData | loadPluginInstance,
