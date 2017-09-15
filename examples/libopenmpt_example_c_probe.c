@@ -264,7 +264,7 @@ int main( int argc, char * argv[] ) {
 					goto fail;
 					break;
 			}
-			fprintf( stdout, "%s\n", result_binary ? "Success." : "Failure." );
+			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
 			if ( result_binary ) {
 				result = 0;
 			} else {
@@ -294,7 +294,7 @@ int main( int argc, char * argv[] ) {
 					goto fail;
 					break;
 			}
-			fprintf( stdout, "%s: %f\n", "Result", probability );
+			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
 			if ( probability >= 0.5 ) {
 				result = 0;
 			} else {
@@ -308,7 +308,7 @@ int main( int argc, char * argv[] ) {
 
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
 			result_binary = ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
-			fprintf( stdout, "%s\n", result_binary ? "Success." : "Failure." );
+			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
 			if ( result_binary ) {
 				result = 0;
 			} else {
@@ -316,7 +316,7 @@ int main( int argc, char * argv[] ) {
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
 			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
-			fprintf( stdout, "%s: %f\n", "Result", probability );
+			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
 			if ( probability >= 0.5 ) {
 				result = 0;
 			} else {
