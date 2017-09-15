@@ -49,7 +49,7 @@ Package contents
 * mptrack.exe: Main executable.
 * PluginBridge32.exe: Plugin bridge server for 32-bit VST plugins.
 * PluginBridge64.exe: Plugin bridge server for 64-bit VST plugins.
-* open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
+* Configuration Files (link): Opens settings folder (%APPDATA\OpenMPT) if not installed in portable mode.
 * OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
 * openmpt-mpg123.dll: Optional component for MPEG sample support in the sample editor and MO3 format if Media Foundation codecs are not available.
