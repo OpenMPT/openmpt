@@ -240,10 +240,11 @@ LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
   \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
   \param log Log where warning and errors are written.
   \return Probability between 0.0 and 1.0.
+  \remarks openmpt::probe_file_header() provides a simpler and faster interface that fits almost all use cases better. It is recommneded to use openmpt::probe_file_header() instead of openmpt::could_open_probability().
   \remarks openmpt::could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
   \remarks openmpt::could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your std::istream implementation whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt::could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt::could_open_probability() returned 0.5.
   \sa \ref libopenmpt_c_fileio
-  \sa probe_file_header
+  \sa openmpt::probe_file_header()
   \since 0.3.0
 */
 LIBOPENMPT_CXX_API double could_open_probability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
@@ -254,24 +255,64 @@ LIBOPENMPT_CXX_API double could_open_probability( std::istream & stream, double 
 */
 LIBOPENMPT_ATTR_DEPRECATED LIBOPENMPT_CXX_API LIBOPENMPT_DEPRECATED double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
+//! Get recommended header size for successfull format probing
+/*!
+  \sa openmpt::probe_file_header()
+  \since 0.3.0
+*/
 LIBOPENMPT_CXX_API std::size_t probe_file_header_get_recommended_size();
 
+//! Probe for module formats in openmpt::probe_file_header(). \since 0.3.0
 static const std::uint64_t probe_file_header_flags_modules    = 0x1ul;
 
+//! Probe for module-specific container formats in openmpt::probe_file_header(). \since 0.3.0
 static const std::uint64_t probe_file_header_flags_containers = 0x2ul;
 
+//! Probe for the default set of formats in openmpt::probe_file_header(). \since 0.3.0
 static const std::uint64_t probe_file_header_flags_default    = probe_file_header_flags_modules | probe_file_header_flags_containers;
 
+//! Probe for no formats in openmpt::probe_file_header(). \since 0.3.0
 static const std::uint64_t probe_file_header_flags_none       = 0x0ul;
 
+//! Possible return values for openmpt::probe_file_header(). \since 0.3.0
 enum probe_file_header_result {
 	probe_file_header_result_success      =  1,
 	probe_file_header_result_failure      =  0,
 	probe_file_header_result_wantmoredata = -1
 };
 
+//! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+/*!
+  \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \param filesize Full size of the file data on disk.
+  \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt::probe_file_header() though, if possible.
+  \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
+  \retval probe_file_header_result_failure The file is not supported by libopenmpt.
+  \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
+  \sa openmpt::probe_file_header_get_recommended_size()
+  \sa openmpt::could_open_probability()
+  \since 0.3.0
+*/
 LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size, std::uint64_t filesize );
 
+//! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+/*!
+  \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \remarks It is recommended to use the overload of this function that also takes the filesize as parameter if at all possile. libopenmpt can provide more accurate answers if the filesize is known.
+  \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
+  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt::probe_file_header() though, if possible.
+  \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
+  \retval probe_file_header_result_failure The file is not supported by libopenmpt.
+  \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
+  \sa openmpt::probe_file_header_get_recommended_size()
+  \sa openmpt::could_open_probability()
+  \since 0.3.0
+*/
 LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size );
 
 class module_impl;
