@@ -97,17 +97,19 @@ bool CPortaudioDevice::InternalOpen()
 	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateInterval * m_Settings.Samplerate);
 	if(m_HostApiType == paWASAPI)
 	{
+#if MPT_OS_WINDOWS
+		MemsetZero(m_WasapiStreamInfo);
+		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+		m_WasapiStreamInfo.hostApiType = paWASAPI;
+		m_WasapiStreamInfo.version = 1;
+#endif // MPT_OS_WINDOWS
 		if(m_Settings.ExclusiveMode)
 		{
 			m_Flags.NeedsClippedFloat = false;
 			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
 			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 #if MPT_OS_WINDOWS
-			MemsetZero(m_WasapiStreamInfo);
-			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
-			m_WasapiStreamInfo.hostApiType = paWASAPI;
-			m_WasapiStreamInfo.version = 1;
-			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
+			m_WasapiStreamInfo.flags |= paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 #endif // MPT_OS_WINDOWS
 		} else
@@ -134,7 +136,33 @@ bool CPortaudioDevice::InternalOpen()
 		m_InputStreamParameters.device = static_cast<PaDeviceIndex>(m_Settings.InputSourceID);
 	}
 	m_InputStreamParameters.channelCount = m_Settings.InputChannels;
-	if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
+	if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
+	{
+		if(m_HostApiType == paWASAPI)
+		{
+			if(m_Settings.ExclusiveMode)
+			{
+				return false;
+			}
+			if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7))
+			{ // retry with automatic stream format conversion (i.e. resampling)
+#if MPT_OS_WINDOWS
+				m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
+				m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+#endif // MPT_OS_WINDOWS
+				if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
+				{
+					return false;
+				}
+			} else
+			{
+				return false;
+			}
+		} else
+		{
+			return false;
+		}
+	}
 	PaStreamFlags flags = paNoFlag;
 	if(m_Settings.DitherType == 0)
 	{
@@ -264,6 +292,18 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 	result.InstantaneousLatency = m_CurrentRealLatency;
 	result.LastUpdateInterval = 1.0 * m_StatisticPeriodFrames / m_Settings.Samplerate;
 	result.text = mpt::ustring();
+#if MPT_OS_WINDOWS
+	if(m_HostApiType == paWASAPI)
+	{
+		if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiAutoConvert))
+		{
+			result.text += MPT_USTRING("WASAPI stream resampling.");
+		} else
+		{
+			result.text += MPT_USTRING("No resampling.");
+		}
+	}
+#endif // MPT_OS_WINDOWS
 	return result;
 }
 
@@ -335,7 +375,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 
 
 SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
-//-------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------
 {
 	SoundDevice::DynamicCaps caps;
 	PaDeviceIndex device = m_DeviceIndex;
@@ -370,6 +410,12 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
+#if MPT_OS_WINDOWS
+	if((m_HostApiType == paWASAPI) && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7))
+	{
+		caps.supportedSampleRates = baseSampleRates;
+	}
+#endif // MPT_OS_WINDOWS
 
 	if(!HasInputChannelsOnSameDevice())
 	{
