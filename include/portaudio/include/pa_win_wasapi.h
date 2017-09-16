@@ -71,7 +71,15 @@ typedef enum PaWasapiFlags
 
     /* forces custom thread priority setting, must be used if PaWasapiStreamInfo::threadPriority 
        is set to a custom value */
+#if 1 // OpenMPT
+    paWinWasapiThreadPriority           = (1 << 4), // OpenMPT
+#else // OpenMPT
     paWinWasapiThreadPriority           = (1 << 4)
+#endif // OpenMPT
+
+#if 1 // OpenMPT
+    paWinWasapiAutoConvert              = (1 << 5) // OpenMPT
+#endif // OpenMPT
 }
 PaWasapiFlags;
 #define paWinWasapiExclusive             (paWinWasapiExclusive)
@@ -79,6 +87,9 @@ PaWasapiFlags;
 #define paWinWasapiUseChannelMask        (paWinWasapiUseChannelMask)
 #define paWinWasapiPolling               (paWinWasapiPolling)
 #define paWinWasapiThreadPriority        (paWinWasapiThreadPriority)
+#if 1 // OpenMPT
+#define paWinWasapiAutoConvert           (paWinWasapiAutoConvert) // OpenMPT
+#endif // OpenMPT
 
 
 /* Host processor. Allows to skip internal PA processing completely. 

@@ -2230,6 +2230,13 @@ static PaError GetClosestFormat(IAudioClient *myClient, double sampleRate,
 
     MakeWaveFormatFromParams(outWavex, &params, sampleRate);
 
+#if 1 // OpenMPT
+	if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && _params->hostApiSpecificStreamInfo && ((PaWasapiStreamInfo *)_params->hostApiSpecificStreamInfo)->flags & paWinWasapiAutoConvert) // OpenMPT
+	{ // OpenMPT
+		return paFormatIsSupported; // OpenMPT
+	} // OpenMPT
+#endif // OpenMPT
+
 	hr = IAudioClient_IsFormatSupported(myClient, shareMode, &outWavex->Format, (shareMode == AUDCLNT_SHAREMODE_SHARED ? &sharedClosestMatch : NULL));
 	if (hr == S_OK)
 		answer = paFormatIsSupported;
@@ -2747,12 +2754,22 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
 		switch (pSub->params.wasapi_params.streamOption)
 		{
 		case eStreamOptionRaw:
+#if 1 // OpenMPT
+			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2 && pSub->shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE) // OpenMPT
+				audioProps.Options |= pa_AUDCLNT_STREAMOPTIONS_RAW; // OpenMPT
+#else // OpenMPT
 			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2)
 				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_RAW;
+#endif // OpenMPT
 			break;
 		case eStreamOptionMatchFormat:
+#if 1 // OpenMPT
+			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016 && pSub->shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE) // OpenMPT
+				audioProps.Options |= pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT; // OpenMPT
+#else // OpenMPT
 			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016)
 				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
+#endif // OpenMPT
 			break;
 		}
 
@@ -3210,6 +3227,13 @@ static PaError OpenStream( struct PaUtilHostApiRepresentation *hostApi,
 		if (fullDuplex)
 			stream->in.streamFlags = 0; // polling interface is implemented for full-duplex mode also
 
+#if 1 // OpenMPT
+		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && (stream->in.shareMode != AUDCLNT_SHAREMODE_EXCLUSIVE) && inputStreamInfo && (inputStreamInfo->flags & paWinWasapiAutoConvert)) // OpenMPT
+		{ // OpenMPT
+			stream->in.streamFlags |= 0x80000000 | 0x08000000; // AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY // OpenMPT
+		} // OpenMPT
+#endif // OpenMPT
+
 		// Fill parameters for Audio Client creation
 		stream->in.params.device_info       = info;
 		stream->in.params.stream_params     = (*inputParameters);
@@ -3336,6 +3360,13 @@ static PaError OpenStream( struct PaUtilHostApiRepresentation *hostApi,
 		else
 		if (fullDuplex)
 			stream->out.streamFlags = 0; // polling interface is implemented for full-duplex mode also
+
+#if 1 // OpenMPT
+		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && (stream->out.shareMode != AUDCLNT_SHAREMODE_EXCLUSIVE) && outputStreamInfo && (outputStreamInfo->flags & paWinWasapiAutoConvert)) // OpenMPT
+		{ // OpenMPT
+			stream->out.streamFlags |= 0x80000000 | 0x08000000; // AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY // OpenMPT
+		} // OpenMPT
+#endif // OpenMPT
 
 		// Fill parameters for Audio Client creation
 		stream->out.params.device_info       = info;
