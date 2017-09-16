@@ -355,7 +355,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, WineSupportAskCompile(conf, "WineSupport", "AskCompile", false)
 	, WineSupportCompileVerbosity(conf, "WineSupport", "CompileVerbosity", 2) // 0=silent 1=silentmake 2=progresswindow 3=standard 4=verbosemake 5=veryverbosemake 6=msgboxes
 	, WineSupportForeignOpenMPT(conf, "WineSupport", "ForeignOpenMPT", false)
-	, WineSupportAllowNonLinux(conf, "WineSupport", "AllowNonLinux", false)
+	, WineSupportAllowUnknownHost(conf, "WineSupport", "AllowUnknownHost", false)
 	, WineSupportEnablePulseAudio(conf, "WineSupport", "EnablePulseAudio", 1)
 	, WineSupportEnablePortAudio(conf, "WineSupport", "EnablePortAudio", 1)
 {

@@ -151,9 +151,15 @@ bool WineSetupIsSupported(mpt::Wine::VersionContext & wineVersion)
 {
 	bool supported = true;
 	if(wineVersion.RawBuildID().empty()) supported = false;
-	if(!TrackerSettings::Instance().WineSupportAllowNonLinux)
+	if(!TrackerSettings::Instance().WineSupportAllowUnknownHost)
 	{
-		if(!wineVersion.HostIsLinux()) supported = false;
+		if(wineVersion.HostIsLinux() || (wineVersion.HostIsBSD() && wineVersion.RawHostSysName() == "FreeBSD"))
+		{
+			// ok
+		} else
+		{
+			supported = false;
+		}
 	}
 	if(!wineVersion.Version().IsValid()) supported = false;
 	if(!wineVersion.Version().IsAtLeast(mpt::Wine::Version(1,4,0))) supported = false;
