@@ -823,7 +823,6 @@ public:
 	// Wine support
 
 	Setting<bool> WineSupportEnabled;
-	Setting<bool> WineSupportInitialQuestionAsked;
 	Setting<bool> WineSupportAlwaysRecompile;
 	Setting<bool> WineSupportAskCompile;
 	Setting<int32> WineSupportCompileVerbosity;

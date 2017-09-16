@@ -249,18 +249,6 @@ void Initialize()
 
 	mpt::ustring lf = MPT_USTRING("\n");
 
-#if 0
-	if(!TrackerSettings::Instance().WineSupportInitialQuestionAsked)
-	{
-		TrackerSettings::Instance().WineSupportInitialQuestionAsked = true;
-		mpt::ustring msg;
-		msg += MPT_USTRING("OpenMPT detected running on Wine.") + lf;
-		msg += lf;
-		msg += MPT_USTRING("Do you want to enable EXPERIMENTAL native Wine Integration now?") + lf;
-		TrackerSettings::Instance().WineSupportEnabled  = (Reporting::Confirm(msg, WineGetWindowTitle(), false, true) == cnfYes);
-	}
-#endif
-
 	if(!TrackerSettings::Instance().WineSupportEnabled)
 	{
 		return;

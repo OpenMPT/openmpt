@@ -351,7 +351,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateIgnoreVersion(conf, "Update", "IgnoreVersion", _T(""))
 	// Wine suppport
 	, WineSupportEnabled(conf, "WineSupport", "Enabled", false)
-	, WineSupportInitialQuestionAsked(conf, "WineSupport", "InitialQuestionAsked", false)
 	, WineSupportAlwaysRecompile(conf, "WineSupport", "AlwaysRecompile", false)
 	, WineSupportAskCompile(conf, "WineSupport", "AskCompile", false)
 	, WineSupportCompileVerbosity(conf, "WineSupport", "CompileVerbosity", 2) // 0=silent 1=silentmake 2=progresswindow 3=standard 4=verbosemake 5=veryverbosemake 6=msgboxes
