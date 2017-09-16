@@ -203,10 +203,19 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -1;
-	} else
-	{ // >=Vista
+	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::Win7))
+	{ // Vista
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 28;
+		typePriorities[SoundDevice::TypeASIO] = 27;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypeDSOUND] = -1;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -2;
+	} else
+	{ // >=Win7
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
+		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
 		typePriorities[SoundDevice::TypeASIO] = 27;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
