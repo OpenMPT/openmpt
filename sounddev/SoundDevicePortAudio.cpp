@@ -355,12 +355,13 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 #if MPT_OS_WINDOWS
 		if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
 		{
-			MemsetZero(m_WasapiStreamInfo);
-			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
-			m_WasapiStreamInfo.hostApiType = paWASAPI;
-			m_WasapiStreamInfo.version = 1;
-			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
-			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+			PaWasapiStreamInfo wasapiStreamInfo;
+			MemsetZero(wasapiStreamInfo);
+			wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+			wasapiStreamInfo.hostApiType = paWASAPI;
+			wasapiStreamInfo.version = 1;
+			wasapiStreamInfo.flags = paWinWasapiExclusive;
+			StreamParameters.hostApiSpecificStreamInfo = &wasapiStreamInfo;
 		}
 #endif // MPT_OS_WINDOWS
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
