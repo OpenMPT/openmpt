@@ -44,6 +44,10 @@
 
 #pragma warning( disable : 4996 ) // 'foo': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _foo. See online help for details.
 
+#endif // _MSC_VER
+
+#if defined(MPT_BUILD_MSVC)
+
 #define MPT_WITH_FLAC
 #define MPT_WITH_PORTAUDIO
 
@@ -51,7 +55,7 @@
 #define FLAC__NO_DLL
 #endif
 
-#endif // _MSC_VER
+#endif // MPT_BUILD_MSVC
 
 #if defined(MPT_WITH_SDL)
 #ifndef MPT_NEEDS_THREADS
