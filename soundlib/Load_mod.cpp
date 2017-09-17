@@ -431,8 +431,14 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 		if(sampleName[i] > 0 && sampleName[i] < ' ')
 		{
 			sampleName[i] = ' ';
+		} else if(c & 0x80)
+		{
 			invalidChars++;
 		}
+	}
+	if(sampleHeader.volume > 64)
+	{
+		invalidChars += (sampleHeader.volume - 64);
 	}
 	return invalidChars;
 }
