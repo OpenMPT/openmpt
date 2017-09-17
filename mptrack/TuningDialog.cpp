@@ -645,6 +645,13 @@ void CTuningDialog::OnBnClickedButtonExport()
 		} else if(sclFilter != -1 && filterIndex == sclFilter)
 		{
 			failure = !pT->WriteSCL(fout, dlg.GetFirstFile());
+			if(!failure)
+			{
+				if(m_pActiveTuning->GetType() == TT_GENERAL)
+				{
+					Reporting::Message(LogWarning, _T("The Scala SCL file format does not contain enough information to represent General Tunings without data loss.\n\nOpenMPT exported as much information as possible, but other software as well as OpenMPT itself will not be able to re-import the just exported Scala SCL in a way that resambles the original data completely.\n\nPlease consider additionally exporting the Tuning as an OpenMPT .tun file."), _T("Tuning - Incompatible export"), this);
+				}
+			}
 		}
 
 		fout.close();
@@ -716,8 +723,10 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	}
 
-	if (failure)
+	if(failure)
+	{
 		Reporting::Message(LogError, _T("Export failed"), _T("Error!"), this);
+	}
 
 }
 
