@@ -770,8 +770,9 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 		mpt::IO::WriteTextCRLF(f, "!");
 		for(NOTEINDEXTYPE n = 0; n < m_GroupSize; ++n)
 		{
+			bool last = (n == (m_GroupSize - 1));
 			double baseratio = static_cast<double>(GetRatio(0));
-			double ratio = static_cast<double>(GetRatio(n + 1)) / baseratio;
+			double ratio = static_cast<double>(last ? m_GroupRatio : GetRatio(n + 1)) / baseratio;
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
