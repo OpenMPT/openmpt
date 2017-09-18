@@ -22,6 +22,8 @@ is just a high-level summary.
     old 0.2 API.
  *  [**New**] openmpt123: openmpt123 can now open M3U, M3U8, M3UEXT, M3U8EXT and
     PLSv2 playlists via the `--playlist` option.
+ *  [**New**] openmpt123: openmpt123 now supports very fast file heaer probing
+    via the `--probe` option.
  *  [**New**] Libopenmpt now supports building for Windows 10 Universal (Windows
     Store 8.2) APIs with MSVC, and also for the older Windows Runtime APIs with
     MinGW-w64.
