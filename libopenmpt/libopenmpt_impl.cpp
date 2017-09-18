@@ -666,6 +666,7 @@ int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * da
 			result = probe_file_header_result_wantmoredata;
 			break;
 		default:
+			throw exception("internal error");
 			break;
 	}
 	return result;
@@ -683,6 +684,7 @@ int module_impl::probe_file_header( std::uint64_t flags, const void * data, std:
 			result = probe_file_header_result_wantmoredata;
 			break;
 		default:
+			throw exception("internal error");
 			break;
 	}
 	return result;
@@ -700,6 +702,7 @@ int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * da
 			result = probe_file_header_result_wantmoredata;
 			break;
 		default:
+			throw exception("internal error");
 			break;
 	}
 	return result;
@@ -717,6 +720,7 @@ int module_impl::probe_file_header( std::uint64_t flags, const void * data, std:
 			result = probe_file_header_result_wantmoredata;
 			break;
 		default:
+			throw exception("internal error");
 			break;
 	}
 	return result;
