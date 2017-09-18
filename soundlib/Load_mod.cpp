@@ -425,22 +425,15 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 
 	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
-	uint32 invalidChars = 0;
 	for(uint32 i = 0; i < CountOf(sampleName); i++)
 	{
 		if(sampleName[i] > 0 && sampleName[i] < ' ')
 		{
 			sampleName[i] = ' ';
-		} else if(sampleName[i] & 0x80)
-		{
-			invalidChars++;
 		}
 	}
-	if(sampleHeader.volume > 64)
-	{
-		invalidChars += (sampleHeader.volume - 64);
-	}
-	return invalidChars;
+	// Check for invalid values
+	return std::max<uint8>(sampleHeader.volume, 64) - 64 + (sampleHeader.finetune >> 4);
 }
 
 
@@ -682,11 +675,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Load Sample Headers
 	SmpLength totalSampleLen = 0;
 	m_nSamples = 31;
-	uint32 invalidChars = 0;
+	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
+		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
@@ -697,8 +690,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			isNoiseTracker = false;
 		}
 	}
-	// If there is too much binary garbage in the sample texts, reject the file.
-	if(invalidChars > 256)
+	// If there is too much binary garbage in the sample headers, reject the file.
+	if(invalidBytes > 256)
 	{
 		return false;
 	}
@@ -1446,13 +1439,13 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load Samples
 	m_nSamples = 31;
-	uint32 invalidChars = 0;
+	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
+		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 	}
-	if(invalidChars > 256)
+	if(invalidBytes > 256)
 	{
 		return false;
 	}
