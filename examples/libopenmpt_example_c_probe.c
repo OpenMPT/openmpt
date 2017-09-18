@@ -36,25 +36,6 @@
 #include <libopenmpt/libopenmpt_stream_callbacks_file.h>
 #endif
 
-#if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
-
-#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-
-static int libopenmpt_example_probe_file_header( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
-	double ret = openmpt_could_open_probability2( stream_callbacks, stream, 0.25, logfunc, loguser, errfunc, erruser, error, error_message );
-	if ( ret >= 0.5 ) {
-		return 1;
-	}
-	if ( ret < 0.25 ) {
-		return 0;
-	}
-	return 1;
-}
-
-#endif
-
-#endif
-
 static void libopenmpt_example_logfunc( const char * message, void * userdata ) {
 	(void)userdata;
 
@@ -302,7 +283,7 @@ static int probe_file( const char * filename ) {
 	#elif ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-			result_binary = ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
+			result_binary = ( openmpt_probe_file_header_from_stream( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) != OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS ) ? 0 : 1;
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", filename );
 #else

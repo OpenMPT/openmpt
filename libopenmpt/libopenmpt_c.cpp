@@ -499,6 +499,16 @@ int openmpt_probe_file_header_without_filesize( uint64_t flags, const void * dat
 	return OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR;
 }
 
+int openmpt_probe_file_header_from_stream( uint64_t flags, openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message ) {
+	try {
+		openmpt::callback_stream_wrapper istream = { stream, stream_callbacks.read, stream_callbacks.seek, stream_callbacks.tell };
+		return openmpt::module_impl::probe_file_header( flags, istream );
+	} catch ( ... ) {
+		openmpt::report_exception( __FUNCTION__, logfunc, loguser, errfunc, erruser, error, error_message );
+	}
+	return OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR;
+}
+
 openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	return openmpt_module_create2( stream_callbacks, stream, logfunc, user, NULL, NULL, NULL, NULL, ctls );
 }

@@ -15,7 +15,8 @@ is just a high-level summary.
  *  [**New**] Faster file header probing API `openmpt::probe_file_header()` and
     `openmpt::probe_file_header_get_recommended_size` (C++), and
     `openmpt_probe_file_header()`,
-    `openmpt_probe_file_header_without_filesize()` and
+    `openmpt_probe_file_header_without_filesize()`,
+    `openmpt_probe_file_header_from_stream()` and
     `openmpt_probe_file_header_get_recommended_size()` (C).
  *  [**New**] New API `openmpt::could_open_probability()` (C++) and
     `openmpt_could_open_probability()` (C). This fixes a spelling error in the

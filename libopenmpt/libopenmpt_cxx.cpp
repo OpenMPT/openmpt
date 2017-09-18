@@ -143,6 +143,9 @@ int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size
 int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size ) {
 	return openmpt::module_impl::probe_file_header( flags, data, size );
 }
+int probe_file_header( std::uint64_t flags, std::istream & stream ) {
+	return openmpt::module_impl::probe_file_header( flags, stream );
+}
 
 #if defined(_MSC_VER)
 #pragma warning(push)

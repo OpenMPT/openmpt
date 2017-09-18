@@ -562,11 +562,11 @@ LIBOPENMPT_API size_t openmpt_probe_file_header_get_recommended_size(void);
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
  * \sa openmpt_probe_file_header_get_recommended_size()
  * \sa openmpt_probe_file_header_without_filesize()
+ * \sa openmpt_probe_file_header_from_stream()
  * \sa openmpt_could_open_probability2()
  * \since 0.3.0
  */
 LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data, size_t size, uint64_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
-
 /*! \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
  *
  * \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
@@ -587,10 +587,38 @@ LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data,
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
  * \sa openmpt_probe_file_header_get_recommended_size()
  * \sa openmpt_probe_file_header()
+ * \sa openmpt_probe_file_header_from_stream()
  * \sa openmpt_could_open_probability2()
  * \since 0.3.0
  */
 LIBOPENMPT_API int openmpt_probe_file_header_without_filesize( uint64_t flags, const void * data, size_t size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
+/*! \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+ *
+ * \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+ * \param stream_callbacks Input stream callback operations.
+ * \param stream Input stream to scan.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \remarks The stream is left in an unspecified state when this function returns.
+ * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+ * \sa openmpt_probe_file_header_get_recommended_size()
+ * \sa openmpt_probe_file_header()
+ * \sa openmpt_probe_file_header_without_filesize()
+ * \sa openmpt_could_open_probability2()
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_probe_file_header_from_stream( uint64_t flags, openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
 
 /*! \brief Opaque type representing a libopenmpt module
  */

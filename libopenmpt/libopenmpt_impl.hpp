@@ -127,6 +127,8 @@ public:
 	static int probe_file_header( std::uint64_t flags, const void * data, std::size_t size, std::uint64_t filesize );
 	static int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size );
 	static int probe_file_header( std::uint64_t flags, const void * data, std::size_t size );
+	static int probe_file_header( std::uint64_t flags, std::istream & stream );
+	static int probe_file_header( std::uint64_t flags, callback_stream_wrapper stream );
 	module_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	module_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	module_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );

@@ -1462,21 +1462,7 @@ static void probe_mod_file( commandlineflags & flags, const std::string & filena
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
 	}
 	
-	const std::size_t probe_size = std::min( openmpt::probe_file_header_get_recommended_size(), ( filesize > std::numeric_limits<std::size_t>::max() ) ? std::numeric_limits<std::size_t>::max() : static_cast<std::size_t>( filesize ) );
-
-	std::vector<char> chardata( probe_size );
-	data_stream.read( chardata.data(), static_cast<std::streamsize>( probe_size ) );
-	if ( data_stream.gcount() != static_cast<std::streamsize>( probe_size ) ) {
-		throw exception( "file read error" );
-	}
-	if ( data_stream.fail() ) {
-		throw exception( "file read error" );
-	}
-
-	std::vector<std::uint8_t> data( probe_size );
-	std::copy( chardata.begin(), chardata.end(), data.begin() );
-
-	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default, data.data(), data.size(), filesize );
+	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default, data_stream );
 	std::string probe_result_string;
 	switch ( probe_result ) {
 		case openmpt::probe_file_header_result_success:
