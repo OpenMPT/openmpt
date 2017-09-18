@@ -70,7 +70,7 @@ RawPathString PathString::AsNativePrefixed() const
 int PathString::CompareNoCase(const PathString & a, const PathString & b)
 //-----------------------------------------------------------------------
 {
-	return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
+	return lstrcmpiW(a.path.c_str(), b.path.c_str());
 }
 
 #endif // !MPT_OS_WINDOWS_WINRT
