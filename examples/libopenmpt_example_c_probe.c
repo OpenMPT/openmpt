@@ -8,9 +8,9 @@
  */
 
 /*
- * Usage: libopenmpt_example_c_probe SOMEMODULE
- * Returns 0 on successful probing.
- * Returns 1 on failed probing.
+ * Usage: libopenmpt_example_c_probe SOMEMODULE ...
+ * Returns 0 on successful probing for all files.
+ * Returns 1 on failed probing for 1 or more files.
  * Returns 2 on error.
  */
 
@@ -168,9 +168,9 @@ cleanup:
 #endif
 
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-int wmain( int argc, wchar_t * argv[] ) {
+static int probe_file( const wchar_t * filename ) {
 #else
-int main( int argc, char * argv[] ) {
+static int probe_file( const char * filename ) {
 #endif
 
 	int result = 0;
@@ -192,34 +192,29 @@ int main( int argc, char * argv[] ) {
 	int result_binary = 0;
 #endif
 
-	if ( argc != 2 ) {
-		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_probe SOMEMODULE'." );
-		goto fail;
-	}
-
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-	if ( wcslen( argv[1] ) == 0 ) {
+	if ( wcslen( filename ) == 0 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_probe SOMEMODULE'." );
 		goto fail;
 	}
 #else
-	if ( strlen( argv[1] ) == 0 ) {
+	if ( strlen( filename ) == 0 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_probe SOMEMODULE'." );
 		goto fail;
 	}
 #endif
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_PREFIX )
-	blob = load_file( argv[1], prefix_size );
+	blob = load_file( filename, prefix_size );
 	if ( !blob ) {
 		fprintf( stderr, "Error: %s\n", "load_file() failed." );
 		goto fail;
 	}
 #elif ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-	file = _wfopen( argv[1], L"rb" );
+	file = _wfopen( filename, L"rb" );
 #else
-	file = fopen( argv[1], "rb" );
+	file = fopen( filename, "rb" );
 #endif
 	if ( !file ) {
 		fprintf( stderr, "Error: %s\n", "fopen() failed." );
@@ -257,9 +252,9 @@ int main( int argc, char * argv[] ) {
 					break;
 			}
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", argv[1] );
+			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", filename );
 #else
-			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
+			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", filename );
 #endif
 			if ( result_binary ) {
 				result = 0;
@@ -291,9 +286,9 @@ int main( int argc, char * argv[] ) {
 					break;
 			}
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, argv[1] );
+			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, filename );
 #else
-			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
+			fprintf( stdout, "%s: %f - %s\n", "Result", probability, filename );
 #endif
 			if ( probability >= 0.5 ) {
 				result = 0;
@@ -309,9 +304,9 @@ int main( int argc, char * argv[] ) {
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
 			result_binary = ( libopenmpt_example_probe_file_header( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) <= 0 ) ? 0 : 1;
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", argv[1] );
+			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", filename );
 #else
-			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", argv[1] );
+			fprintf( stdout, "%s - %s\n", result_binary ? "Success" : "Failure", filename );
 #endif
 			if ( result_binary ) {
 				result = 0;
@@ -321,9 +316,9 @@ int main( int argc, char * argv[] ) {
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
 			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, argv[1] );
+			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, filename );
 #else
-			fprintf( stdout, "%s: %f - %s\n", "Result", probability, argv[1] );
+			fprintf( stdout, "%s: %f - %s\n", "Result", probability, filename );
 #endif
 			if ( probability >= 0.5 ) {
 				result = 0;
@@ -363,3 +358,35 @@ cleanup:
 	return result;
 }
 
+
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+int wmain( int argc, wchar_t * argv[] ) {
+#else
+int main( int argc, char * argv[] ) {
+#endif
+
+	int global_result = 0;
+
+	if ( argc <= 1 ) {
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_probe SOMEMODULE ...'." );
+		goto fail;
+	}
+
+	for ( int i = 1; i < argc; ++i ) {
+		int result = probe_file( argv[i] );
+		if ( result > global_result ) {
+			global_result = result;
+		}
+	}
+
+	goto cleanup;
+
+fail:
+
+	global_result = 2;
+
+cleanup:
+
+	return global_result;
+
+}
