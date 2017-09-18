@@ -295,7 +295,7 @@ static int probe_file( const char * filename ) {
 				result = 1;
 			}
 		#elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
-			probability = openmpt_could_open_probability( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+			probability = openmpt_could_open_probability2( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 			fprintf( stdout, "%s: %f - %ls\n", "Result", probability, filename );
 #else
