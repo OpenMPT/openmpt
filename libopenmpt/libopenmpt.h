@@ -555,7 +555,7 @@ LIBOPENMPT_API size_t openmpt_probe_file_header_get_recommended_size(void);
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
- * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
