@@ -283,7 +283,7 @@ static int probe_file( const char * filename ) {
 	#elif ( LIBOPENMPT_EXAMPLE_PROBE_STYLE == LIBOPENMPT_EXAMPLE_PROBE_STYLE_CALLBACKS )
 
 		#if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-			result_binary = ( openmpt_probe_file_header_from_stream( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) != OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS ) ? 0 : 1;
+			result_binary = ( openmpt_probe_file_header_from_stream( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL ) != OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS ) ? 0 : 1;
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 			fprintf( stdout, "%s - %ls\n", result_binary ? "Success" : "Failure", filename );
 #else
