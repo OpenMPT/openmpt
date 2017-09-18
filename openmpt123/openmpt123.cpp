@@ -600,6 +600,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --credits              Show elaborate contributors list" << std::endl;
 		log << "     --license              Show license" << std::endl;
 		log << std::endl;
+		log << "     --probe                Probe each file whether it is a supported file format" << std::endl;
 		log << "     --info                 Display information about each file" << std::endl;
 		log << "     --ui                   Interactively play each file" << std::endl;
 		log << "     --batch                Play each file" << std::endl;
@@ -1433,12 +1434,78 @@ static void show_fields( textout & log, const std::vector<field> & fields ) {
 	}
 }
 
+static void probe_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, std::istream & data_stream, textout & log ) {
+
+	log.writeout();
+
+	std::vector<field> fields;
+
+	if ( flags.filenames.size() > 1 ) {
+		set_field( fields, "Playlist" ).ostream() << flags.playlist_index + 1 << "/" << flags.filenames.size();
+		set_field( fields, "Prev/Next" ).ostream()
+		    << "'"
+		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
+		    << "'"
+		    << " / "
+		    << "['" << get_filename( filename ) << "']"
+		    << " / "
+		    << "'"
+		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
+		    << "'"
+		   ;
+	}
+	if ( flags.verbose ) {
+		set_field( fields, "Path" ).ostream() << filename;
+	}
+	if ( flags.show_details ) {
+		set_field( fields, "Filename" ).ostream() << get_filename( filename );
+		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
+	}
+	
+	const std::size_t probe_size = std::min( openmpt::probe_file_header_get_recommended_size(), ( filesize > std::numeric_limits<std::size_t>::max() ) ? std::numeric_limits<std::size_t>::max() : static_cast<std::size_t>( filesize ) );
+
+	std::vector<char> chardata( probe_size );
+	data_stream.read( chardata.data(), static_cast<std::streamsize>( probe_size ) );
+	if ( data_stream.gcount() != static_cast<std::streamsize>( probe_size ) ) {
+		throw exception( "file read error" );
+	}
+	if ( data_stream.fail() ) {
+		throw exception( "file read error" );
+	}
+
+	std::vector<std::uint8_t> data( probe_size );
+	std::copy( chardata.begin(), chardata.end(), data.begin() );
+
+	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default, data.data(), data.size(), filesize );
+	std::string probe_result_string;
+	switch ( probe_result ) {
+		case openmpt::probe_file_header_result_success:
+			probe_result_string = "Success";
+			break;
+		case openmpt::probe_file_header_result_failure:
+			probe_result_string = "Failure";
+			break;
+		case openmpt::probe_file_header_result_wantmoredata:
+			probe_result_string = "Insufficient Data";
+			break;
+		default:
+			probe_result_string = "Internal Error";
+			break;
+	}
+	set_field( fields, "Probe" ).ostream() << probe_result_string;
+
+	show_fields( log, fields );
+
+	log.writeout();
+
+}
+
 template < typename Tmod >
 void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, textout & log, write_buffers_interface & audio_stream ) {
 
 	log.writeout();
 
-	if ( flags.mode != ModeInfo ) {
+	if ( flags.mode != ModeProbe && flags.mode != ModeInfo ) {
 		mod.set_repeat_count( flags.repeatcount );
 		apply_mod_settings( flags, mod );
 	}
@@ -1511,7 +1578,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		audio_stream.write_updated_metadata( get_metadata( mod ) );
 	}
 
-	if ( flags.mode == ModeInfo ) {
+	if ( flags.mode == ModeProbe || flags.mode == ModeInfo ) {
 		return;
 	}
 
@@ -1534,6 +1601,82 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		}
 		throw;
 	}
+
+	log.writeout();
+
+}
+
+static void probe_file( commandlineflags & flags, const std::string & filename, textout & log ) {
+
+	log.writeout();
+
+	std::ostringstream silentlog;
+
+	try {
+
+#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+		std::istringstream file_stream;
+#else
+		std::ifstream file_stream;
+#endif
+		std::uint64_t filesize = 0;
+		bool use_stdin = ( filename == "-" );
+		if ( !use_stdin ) {
+			#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+				// Only MSVC has std::ifstream::ifstream(std::wstring).
+				// Fake it for other compilers using _wfopen().
+				std::string data;
+				FILE * f = _wfopen( utf8_to_wstring( filename ).c_str(), L"rb" );
+				if ( f ) {
+					while ( !feof( f ) ) {
+						static const std::size_t BUFFER_SIZE = 4096;
+						char buffer[BUFFER_SIZE];
+						size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
+						std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
+					}
+					fclose( f );
+					f = NULL;
+				}
+				file_stream.str( data );
+				filesize = data.length();
+			#elif defined(_MSC_VER) && defined(UNICODE)
+				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
+				file_stream.seekg( 0, std::ios::end );
+				filesize = file_stream.tellg();
+				file_stream.seekg( 0, std::ios::beg );
+			#else
+				file_stream.open( filename, std::ios::binary );
+				file_stream.seekg( 0, std::ios::end );
+				filesize = file_stream.tellg();
+				file_stream.seekg( 0, std::ios::beg );
+			#endif
+		}
+		std::istream & data_stream = use_stdin ? std::cin : file_stream;
+		if ( data_stream.fail() ) {
+			throw exception( "file open error" );
+		}
+		
+		probe_mod_file( flags, filename, filesize, data_stream, log );
+
+	} catch ( silent_exit_exception & ) {
+		throw;
+	} catch ( std::exception & e ) {
+		if ( !silentlog.str().empty() ) {
+			log << "errors probing '" << filename << "': " << silentlog.str() << std::endl;
+		} else {
+			log << "errors probing '" << filename << "'" << std::endl;
+		}
+		log << "error probing '" << filename << "': " << e.what() << std::endl;
+	} catch ( ... ) {
+		if ( !silentlog.str().empty() ) {
+			log << "errors probing '" << filename << "': " << silentlog.str() << std::endl;
+		} else {
+			log << "errors probing '" << filename << "'" << std::endl;
+		}
+		log << "unknown error probing '" << filename << "'" << std::endl;
+	}
+
+	log << std::endl;
 
 	log.writeout();
 
@@ -1869,6 +2012,8 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				throw show_credits_exception();
 			} else if ( arg == "--license" ) {
 				throw show_license_exception();
+			} else if ( arg == "--probe" ) {
+				flags.mode = ModeProbe;
 			} else if ( arg == "--info" ) {
 				flags.mode = ModeInfo;
 			} else if ( arg == "--ui" ) {
@@ -2261,6 +2406,12 @@ static int main( int argc, char * argv [] ) {
 		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
 		switch ( flags.mode ) {
+			case ModeProbe: {
+				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					probe_file( flags, *filename, log );
+					flags.playlist_index++;
+				}
+			} break;
 			case ModeInfo: {
 				void_audio_stream dummy;
 				render_files( flags, log, dummy );

@@ -236,6 +236,7 @@ bool IsTerminal( int fd );
 
 enum Mode {
 	ModeNone,
+	ModeProbe,
 	ModeInfo,
 	ModeUI,
 	ModeBatch,
@@ -245,6 +246,7 @@ enum Mode {
 static inline std::string mode_to_string( Mode mode ) {
 	switch ( mode ) {
 		case ModeNone:   return "none"; break;
+		case ModeProbe:  return "probe"; break;
 		case ModeInfo:   return "info"; break;
 		case ModeUI:     return "ui"; break;
 		case ModeBatch:  return "batch"; break;
@@ -437,6 +439,13 @@ struct commandlineflags {
 		switch ( mode ) {
 			case ModeNone:
 				throw args_error_exception();
+			break;
+			case ModeProbe:
+				show_ui = false;
+				show_progress = false;
+				show_meters = false;
+				show_channel_meters = false;
+				show_pattern = false;
 			break;
 			case ModeInfo:
 				show_ui = false;
