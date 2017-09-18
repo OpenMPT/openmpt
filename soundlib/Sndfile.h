@@ -561,8 +561,8 @@ public:
 		loadNoPluginInstance = loadSampleData | loadPatternData | loadPluginData,
 	};
 
-	static const std::size_t ProbeRecommendedSize;
-	
+	static MPT_CONSTEXPR11_VAR std::size_t ProbeRecommendedSize = 2048;
+
 	enum ProbeFlags
 	{
 		ProbeModules    = 0x1,

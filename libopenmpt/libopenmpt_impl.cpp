@@ -725,6 +725,88 @@ int module_impl::probe_file_header( std::uint64_t flags, const void * data, std:
 	}
 	return result;
 }
+int module_impl::probe_file_header( std::uint64_t flags, std::istream & stream ) {
+	int result = 0;
+	char buffer[ CSoundFile::ProbeRecommendedSize ];
+	MemsetZero( buffer );
+	std::size_t size_read = 0;
+	std::size_t size_toread = CSoundFile::ProbeRecommendedSize;
+	if ( stream.bad() ) {
+		throw exception("error reading stream");
+	}
+	const bool seekable = FileDataContainerStdStreamSeekable::IsSeekable( &stream );
+	const uint64 filesize = ( seekable ? FileDataContainerStdStreamSeekable::GetLength( &stream ) : 0 );
+	while ( ( size_toread > 0 ) && stream ) {
+		stream.read( buffer + size_read, size_toread );
+		if ( stream.bad() ) {
+			throw exception("error reading stream");
+		} else if ( stream.eof() ) {
+			// normal
+		} else if ( stream.fail() ) {
+			throw exception("error reading stream");
+		} else {
+			// normal
+		}
+		std::size_t read_count = static_cast<std::size_t>( stream.gcount() );
+		size_read += read_count;
+		size_toread -= read_count;
+	}
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::byte_cast<const mpt::byte*>( buffer ), size_read ), seekable ? &filesize : nullptr ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			throw exception("internal error");
+			break;
+	}
+	return result;
+}
+int module_impl::probe_file_header( std::uint64_t flags, callback_stream_wrapper stream ) {
+	int result = 0;
+	char buffer[ CSoundFile::ProbeRecommendedSize ];
+	MemsetZero( buffer );
+	std::size_t size_read = 0;
+	std::size_t size_toread = CSoundFile::ProbeRecommendedSize;
+	if ( !stream.read ) {
+		throw exception("error reading stream");
+	}
+	CallbackStream fstream;
+	fstream.stream = stream.stream;
+	fstream.read = stream.read;
+	fstream.seek = stream.seek;
+	fstream.tell = stream.tell;
+	const bool seekable = FileDataContainerCallbackStreamSeekable::IsSeekable( fstream );
+	const uint64 filesize = ( seekable ? FileDataContainerCallbackStreamSeekable::GetLength( fstream ) : 0 );
+	while ( size_toread > 0 ) {
+		std::size_t read_count = stream.read( stream.stream, buffer + size_read, size_toread );
+		size_read += read_count;
+		size_toread -= read_count;
+		if ( read_count == 0 ) { // eof
+			break;
+		}
+	}
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const mpt::byte>( mpt::byte_cast<const mpt::byte*>( buffer ), size_read ), seekable ? &filesize : nullptr ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			throw exception("internal error");
+			break;
+	}
+	return result;
+}
 module_impl::module_impl( callback_stream_wrapper stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	CallbackStream fstream;
