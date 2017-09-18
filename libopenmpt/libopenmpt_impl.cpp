@@ -727,7 +727,7 @@ int module_impl::probe_file_header( std::uint64_t flags, const void * data, std:
 }
 int module_impl::probe_file_header( std::uint64_t flags, std::istream & stream ) {
 	int result = 0;
-	char buffer[ CSoundFile::ProbeRecommendedSize ];
+	char buffer[ PROBE_RECOMMENDED_SIZE ];
 	MemsetZero( buffer );
 	std::size_t size_read = 0;
 	std::size_t size_toread = CSoundFile::ProbeRecommendedSize;
@@ -769,7 +769,7 @@ int module_impl::probe_file_header( std::uint64_t flags, std::istream & stream )
 }
 int module_impl::probe_file_header( std::uint64_t flags, callback_stream_wrapper stream ) {
 	int result = 0;
-	char buffer[ CSoundFile::ProbeRecommendedSize ];
+	char buffer[ PROBE_RECOMMENDED_SIZE ];
 	MemsetZero( buffer );
 	std::size_t size_read = 0;
 	std::size_t size_toread = CSoundFile::ProbeRecommendedSize;
