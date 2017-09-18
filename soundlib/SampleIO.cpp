@@ -69,6 +69,30 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
 	}
+	if(!IsVariableLengthEncoded())
+	{
+		// Limit sample length to available bytes in file
+		size_t maxLength = fileSize - std::min(GetEncodedHeaderSize(), fileSize);
+		uint8 bps = GetEncodedBitsPerSample();
+		if(bps % 8u != 0)
+		{
+			MPT_ASSERT(GetEncoding() == ADPCM && bps == 4);
+			if(Util::MaxValueOfType(maxLength) / 2u >= maxLength)
+				maxLength *= 2;
+			else
+				maxLength = Util::MaxValueOfType(maxLength);
+		} else
+		{
+			size_t encodedBytesPerSample = GetNumChannels() * GetEncodedBitsPerSample() / 8u;
+			// Check if we can round up without overflowing
+			if(Util::MaxValueOfType(maxLength) - maxLength >= (encodedBytesPerSample - 1u))
+				maxLength += encodedBytesPerSample - 1u;
+			else
+				maxLength = Util::MaxValueOfType(maxLength);
+			maxLength /= encodedBytesPerSample;
+		}
+		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
+	}
 
 	sample.uFlags.set(CHN_16BIT, GetBitDepth() >= 16);
 	sample.uFlags.set(CHN_STEREO, GetChannelFormat() != mono);
