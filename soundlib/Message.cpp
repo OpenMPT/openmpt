@@ -125,34 +125,34 @@ bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnd
 bool SongMessage::ReadFixedLineLength(const mpt::byte *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
 //---------------------------------------------------------------------------------------------------------------------------------------
 {
-	const char *str = mpt::byte_cast<const char *>(data);
 	if(lineLength == 0)
 		return false;
-
-	const size_t totalLineLength = lineLength + lineEndingLength;
-	const size_t numLines = (length + totalLineLength - 1) / totalLineLength;
-	const size_t finalLength = numLines * (lineLength + 1);
 	clear();
-	reserve(finalLength);
+	reserve(length);
 
-	for(size_t line = 0, fpos = 0, cpos = 0; line < numLines; line++, fpos += totalLineLength, cpos += (lineLength + 1))
+	size_t readPos = 0, writePos = 0;
+	while(readPos < length)
 	{
-		append(str + fpos, std::min(lineLength, length - fpos));
+		size_t thisLineLength = std::min(lineLength, length - readPos);
+		append(mpt::byte_cast<const char *>(data) + readPos, thisLineLength);
 		append(1, InternalLineEnding);
 
-		// fix weird chars
-		for(size_t lpos = 0; lpos < lineLength; lpos++)
+		// Fix weird chars
+		for(size_t pos = writePos; pos < writePos + thisLineLength; pos++)
 		{
-			switch(at(cpos + lpos))
+			switch(at(pos))
 			{
 			case '\0':
 			case '\n':
 			case '\r':
-				at(cpos + lpos) = ' ';
+				at(pos) = ' ';
 				break;
 			}
 
 		}
+
+		readPos += thisLineLength + std::min(lineEndingLength, length - readPos - thisLineLength);
+		writePos += thisLineLength + 1;
 	}
 	return true;
 }
