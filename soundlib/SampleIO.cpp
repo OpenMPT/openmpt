@@ -36,11 +36,6 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 //--------------------------------------------------------------------
 {
-	if(sample.nLength < 1 || !file.IsValid())
-	{
-		return 0;
-	}
-
 	LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
@@ -92,6 +87,11 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			maxLength /= encodedBytesPerSample;
 		}
 		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
+	}
+
+	if(sample.nLength < 1 || !file.IsValid())
+	{
+		return 0;
 	}
 
 	sample.uFlags.set(CHN_16BIT, GetBitDepth() >= 16);
