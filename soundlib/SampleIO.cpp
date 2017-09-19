@@ -69,9 +69,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
 	}
-	if(!IsVariableLengthEncoded())
+	if(!IsVariableLengthEncoded() && sample.nLength > 0x40000)
 	{
-		// Limit sample length to available bytes in file
+		// Limit sample length to available bytes in file to avoid excessive memory allocation.
+		// However, for ProTracker MODs we need to support samples exceeding the end of file
+		// (see the comment about MOD.shorttune2 in Load_mod.cpp), so as a semi-arbitrary threshold,
+		// we do not apply this limit to samples shorter than 256K.
 		size_t maxLength = fileSize - std::min(GetEncodedHeaderSize(), fileSize);
 		uint8 bps = GetEncodedBitsPerSample();
 		if(bps % 8u != 0)
