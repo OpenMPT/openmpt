@@ -502,7 +502,9 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 		}
 	}
 	// Check for invalid values
-	return std::max<uint8>(sampleHeader.volume, 64) - 64 + (sampleHeader.finetune >> 4);
+	return ((sampleHeader.volume > 64) ? 1 : 0)
+		+ ((sampleHeader.finetune > 15) ? 1 : 0)
+		+ ((sampleHeader.loopStart > sampleHeader.length * 2) ? 1 : 0);
 }
 
 
@@ -764,7 +766,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
-	if(invalidBytes > 256)
+	if(invalidBytes > 40)
 	{
 		return false;
 	}
@@ -1054,7 +1056,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				// ProTracker reads beyond the end of the sample when playing. Normally samples are
 				// adjacent in PT's memory, so we simply read into the next sample in the file.
 				FileReader::off_t nextSample = file.GetPosition() + sampleIO.CalculateEncodedSize(sample.nLength);
-				if(isMdKd)
+				if(isMdKd && onlyAmigaNotes)
 					sample.nLength = std::max(sample.nLength, sample.nLoopEnd);
 
 				sampleIO.ReadSample(sample, file);
@@ -1613,7 +1615,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		MODSampleHeader sampleHeader;
 		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 	}
-	if(invalidBytes > 256)
+	if(invalidBytes > 40)
 	{
 		return false;
 	}
