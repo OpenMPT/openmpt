@@ -440,6 +440,27 @@ struct SF2LOADERINFO
 /////////////////////////////////////////////////////////////////////
 // Unit conversion
 
+static uint8 DLSSustainLevelToLinear(int32 sustain)
+{
+	// 0.1% units
+	if(sustain >= 0)
+	{
+		int32 l = sustain / (1000 * 512);
+		if(l >= 0 || l <= 128)
+			return static_cast<uint8>(l);
+	}
+	return 128;
+}
+
+
+static uint8 SF2SustainLevelToLinear(int32 sustain)
+{
+	// 0.1% units
+	int32 l = 128 * (1000 - Clamp(sustain, 0, 1000)) / 1000;
+	return static_cast<uint8>(l);
+}
+
+
 int32 CDLSBank::DLS32BitTimeCentsToMilliseconds(int32 lTimeCents)
 //---------------------------------------------------------------
 {
@@ -762,9 +783,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK
 						// 0.1% units
 						if (pblk->lScale >= 0)
 						{
-							int32 l = pblk->lScale / (1000*512);
-							if ((l >= 0) || (l <= 128)) dlsEnv.nVolSustainLevel = (uint8)l;
-							//Log("%3d: Envelope Sustain Level set to %d (%d)\n", (uint32)(pDlsIns->ulInstrument & 0x7F)|((pDlsIns->ulBank >> 16) & 0x8000), l, pblk->lScale);
+							dlsEnv.nVolSustainLevel = DLSSustainLevelToLinear(pblk->lScale);
 						}
 						break;
 
@@ -988,6 +1007,13 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 				case SF2_GEN_DECAYVOLENV:
 					dlsEnv.wVolDecay = SF2TimeToDLS(pgen->genAmount);
 					break;
+				case SF2_GEN_SUSTAINVOLENV:
+					// 0.1% units
+					if(pgen->genAmount >= 0)
+					{
+						dlsEnv.nVolSustainLevel = SF2SustainLevelToLinear(pgen->genAmount);
+					}
+					break;
 				case SF2_GEN_RELEASEVOLENV:
 					dlsEnv.wVolRelease = SF2TimeToDLS(pgen->genAmount);
 					break;
@@ -1060,6 +1086,13 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 					break;
 				case SF2_GEN_DECAYVOLENV:
 					pDlsEnv->wVolDecay = SF2TimeToDLS(pgen->genAmount);
+					break;
+				case SF2_GEN_SUSTAINVOLENV:
+					// 0.1% units
+					if(pgen->genAmount >= 0)
+					{
+						pDlsEnv->nVolSustainLevel = SF2SustainLevelToLinear(pgen->genAmount);
+					}
 					break;
 				case SF2_GEN_RELEASEVOLENV:
 					pDlsEnv->wVolRelease = SF2TimeToDLS(pgen->genAmount);
@@ -1889,7 +1922,12 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 					}
 				}
 				if (lReleaseTime < 1) lReleaseTime = 1;
-				pIns->VolEnv.push_back(lStartTime + ScaleEnvelope(lReleaseTime, tempoScale), ENVELOPE_MIN);
+				auto releaseTicks = ScaleEnvelope(lReleaseTime, tempoScale);
+				pIns->VolEnv.push_back(lStartTime + releaseTicks, ENVELOPE_MIN);
+				if(releaseTicks > 0)
+				{
+					pIns->nFadeOut = 32768 / releaseTicks;
+				}
 			} else
 			{
 				pIns->VolEnv.push_back(pIns->VolEnv.back().tick + 1u, ENVELOPE_MIN);
