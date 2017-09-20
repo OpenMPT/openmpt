@@ -34,15 +34,18 @@ is just a high-level summary.
     implemented in libopenmpt.
  *  [**New**] For Amiga modules, a new resampler based on the Amiga's sound
     characteristics has been added. It can be activated by passing the
-    `render.resampler.emulate_amiga` ctl with a value of 1. Non-Amiga modules
+    `render.resampler.emulate_amiga` ctl with a value of `1`. Non-Amiga modules
     are not affected by this, and setting the ctl overrides the resampler choice
-    specified by (OPENMPT_MODULE_)RENDER_INTERPOLATIONFILTER_LENGTH.
-    Support for the MOD command E0x (Set LED Filter) is also available when the
-    Amiga resampler is enabled. 
+    specified by `OPENMPT_MODULE_RENDER_INTERPOLATIONFILTER_LENGTH` or
+    `openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH`. Support for the MOD
+    command E0x (Set LED Filter) is also available when the Amiga resampler is
+    enabled. 
 
  *  [**Change**] libopenmpt versioning changed and follows the more conventional
     major.minor.patch as well as the recommendations of the
-    [SemVer](http://semver.org/) scheme now.
+    [SemVer](http://semver.org/) scheme now. In addition to the SemVer
+    requirements, pre-1.0.0 versions will also honor API and ABI stability in
+    libopenmpt (i.e. libopenmpt ignores SemVer Clause 4). 
  *  [**Change**] The output directories of the MSVC build system were changed to
     `bin/vs2015-shared/x86-64-win7/` (and similar) layout which allows building
     in the same tree with different compiler versions without overwriting other
@@ -87,13 +90,18 @@ is just a high-level summary.
     violation only affects cases that did crash in the libopenmpt 0.2 API anyway
     due to memory double-free, and does not cause any further problems in
     practice for all known platforms and compilers.
- *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
-    when no locale was active.
  *  [**Bug**] The C API could crash instead of failing gracefully in
     out-of-memory situations.
+ *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
+    when no locale was active.
  *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
     `libopenmpt_stream_callbacks_file.h` were missing in Windows development
     packages.
+ *  [**Bug**] libopenmpt on Windows did not properly guard against current
+    working directory DLL injection attacks.
+ *  [**Bug**] localtime() was used to determine the version of Schism Tracker
+    used to save IT and S3M files. This function is not guaranteed to be
+    thread-safe by the standard and is now no longer used.
  *  [**Bug**] Possible crashes with malformed IT, ITP, AMS, MDL, MED, MPTM, PSM
     and Startrekker files.
  *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
@@ -108,13 +116,8 @@ is just a high-level summary.
  *  [**Bug**] Cross-compiling libopenmpt with autotools for Windows now properly
     sets `-municode` and `-mconsole` as well as all required Windows system
     libraries.
- *  [**Bug**] libopenmpt on Windows did not properly guard against current
-    working directory DLL injection attacks.
  *  [**Bug**] foo_openmpt: Interpolation filter and volume ramping settings were
     confused in previous versions. This version resets both to the defaults.
- *  [**Bug**] localtime() was used to determine the version of Schism Tracker
-    used to save IT and S3M files. This function is not guaranteed to be
-    thread-safe by the standard and is now no longer used.
  *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
     libmodplug C++ API returned the wrong value, causing qmmp (and possibly
     other software) to crash.
