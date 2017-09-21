@@ -104,14 +104,10 @@ struct PTMSampleHeader
 MPT_BINARY_STRUCT(PTMSampleHeader, 80)
 
 
-bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const PTMFileHeader &fileHeader)
+//---------------------------------------------------------
 {
-	file.Rewind();
-
-	PTMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "PTMF", 4)
+	if(std::memcmp(fileHeader.magic, "PTMF", 4)
 		|| fileHeader.dosEOF != 26
 		|| fileHeader.versionHi > 2
 		|| fileHeader.flags != 0
@@ -120,10 +116,56 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		|| !fileHeader.numOrders || fileHeader.numOrders > 256
 		|| !fileHeader.numSamples || fileHeader.numSamples > 255
 		|| !fileHeader.numPatterns || fileHeader.numPatterns > 128
-		|| !file.CanRead(fileHeader.numSamples * sizeof(PTMSampleHeader)))
+		)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const PTMFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	return fileHeader.numSamples * sizeof(PTMSampleHeader);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPTM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	PTMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
+bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	file.Rewind();
+
+	PTMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

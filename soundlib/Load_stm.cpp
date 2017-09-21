@@ -94,6 +94,49 @@ struct STMPatternData
 MPT_BINARY_STRUCT(STMPatternData, 4*64*4)
 
 
+static bool ValidateHeader(const STMFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(fileHeader.filetype != 2
+		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
+		|| fileHeader.verMajor != 2
+		|| fileHeader.verMinor > 21	// ST3 only accepts 0, 10, 20 and 21
+		|| fileHeader.globalVolume > 64
+		|| (std::memcmp(fileHeader.trackername, "!Scream!", 8)
+			&& std::memcmp(fileHeader.trackername, "BMOD2STM", 8)
+			&& std::memcmp(fileHeader.trackername, "WUZAMOD!", 8))
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const STMFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(fileHeader);
+	return 31 * sizeof(STMSampleHeader) + 128;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	STMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -105,19 +148,19 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	// After reviewing all STM files on ModLand and ModArchive, it was found that the
 	// case-insensitive comparison is most likely not necessary for any files in the wild.
 	STMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| fileHeader.filetype != 2
-		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
-		|| fileHeader.verMajor != 2
-		|| fileHeader.verMinor > 21	// ST3 only accepts 0, 10, 20 and 21
-		|| fileHeader.globalVolume > 64
-		|| (memcmp(fileHeader.trackername, "!Scream!", 8)
-			&& memcmp(fileHeader.trackername, "BMOD2STM", 8)
-			&& memcmp(fileHeader.trackername, "WUZAMOD!", 8))
-		|| !file.CanRead(31 * sizeof(STMSampleHeader) + 128))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

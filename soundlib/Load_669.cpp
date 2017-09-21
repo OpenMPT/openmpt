@@ -62,35 +62,77 @@ struct _669Sample
 MPT_BINARY_STRUCT(_669Sample, 25)
 
 
-bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const _669FileHeader &fileHeader)
 {
-	_669FileHeader fileHeader;
-
-	file.Rewind();
-	if(!file.ReadStruct(fileHeader)
-		|| (memcmp(fileHeader.magic, "if", 2) && memcmp(fileHeader.magic, "JN", 2))
+	if((std::memcmp(fileHeader.magic, "if", 2) && std::memcmp(fileHeader.magic, "JN", 2))
 		|| fileHeader.samples > 64
 		|| fileHeader.restartPos >= 128
 		|| fileHeader.patterns > 128)
 	{
 		return false;
 	}
-	
-	for(size_t i = 0; i < CountOf(fileHeader.breaks); i++)
+	for(std::size_t i = 0; i < CountOf(fileHeader.breaks); i++)
 	{
 		if(fileHeader.orders[i] >= 128 && fileHeader.orders[i] < 0xFE)
+		{
 			return false;
+		}
 		if(fileHeader.orders[i] < 128 && fileHeader.tempoList[i] == 0)
+		{
 			return false;
+		}
 		if(fileHeader.breaks[i] >= 64)
+		{
 			return false;
+		}
 	}
+	return true;
+}
 
+
+static uint64 GetHeaderMinimumAdditionalSize(const _669FileHeader &fileHeader)
+//----------------------------------------------------------------------------
+{
+	return fileHeader.samples * sizeof(_669Sample) + fileHeader.patterns * 1536u;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeader669(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	_669FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
+bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	_669FileHeader fileHeader;
+
+	file.Rewind();
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
 	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
-	} else if(!file.CanRead(fileHeader.samples * sizeof(_669Sample) + fileHeader.patterns * 1536u))
+	}
+	
+	if(!file.CanRead(GetHeaderMinimumAdditionalSize(fileHeader)))
 	{
 		return false;
 	}

@@ -38,6 +38,9 @@ int32 ReadUMXIndex(FileReader &chunk);
 // Returns true if the given nme exists in the name table.
 bool FindUMXNameTableEntry(FileReader &file, const UMXFileHeader &fileHeader, const char *name);
 
+// Returns true if the given nme exists in the name table.
+bool FindUMXNameTableEntryMemory(MemoryFileReader &file, const UMXFileHeader &fileHeader, const char *name);
+
 // Read an entry from the name table.
 std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion);
 

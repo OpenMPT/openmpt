@@ -332,20 +332,75 @@ struct AMSSampleHeader
 MPT_BINARY_STRUCT(AMSSampleHeader, 17)
 
 
+static bool ValidateHeader(const AMSFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(fileHeader.versionHigh != 0x01)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const AMSFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	return fileHeader.extraSize + 3u + fileHeader.numSamps * (1u + sizeof(AMSSampleHeader)) + fileHeader.numOrds * 2u + fileHeader.numPats * 4u;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	if(!file.CanRead(7))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!file.ReadMagic("Extreme"))
+	{
+		return ProbeFailure;
+	}
+	AMSFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
-	AMSFileHeader fileHeader;
-	if(!file.ReadMagic("Extreme")
-		|| !file.ReadStruct(fileHeader)
-		|| !file.Skip(fileHeader.extraSize)
-		|| !file.CanRead(3u + fileHeader.numSamps * (1u + sizeof(AMSSampleHeader)) + fileHeader.numOrds * 2u + fileHeader.numPats * 4u)
-		|| fileHeader.versionHigh != 0x01)
+	if(!file.ReadMagic("Extreme"))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	AMSFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(!file.Skip(fileHeader.extraSize))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
@@ -641,30 +696,93 @@ struct AMS2Description
 MPT_BINARY_STRUCT(AMS2Description, 11)
 
 
+static bool ValidateHeader(const AMS2FileHeader &fileHeader)
+//----------------------------------------------------------
+{
+	if(fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const AMS2FileHeader &fileHeader)
+//----------------------------------------------------------------------------
+{
+	return 36u + sizeof(AMS2Description) + fileHeader.numIns * 2u + fileHeader.numOrds * 2u + fileHeader.numPats * 4u;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS2(MemoryFileReader file, const uint64 *pfilesize)
+//-----------------------------------------------------------------------------------------------------
+{
+	if(!file.CanRead(7))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!file.ReadMagic("AMShdr\x1A"))
+	{
+		return ProbeFailure;
+	}
+	if(!file.CanRead(1))
+	{
+		return ProbeWantMoreData;
+	}
+	const uint8 songNameLength = file.ReadUint8();
+	if(!file.Skip(songNameLength))
+	{
+		return ProbeWantMoreData;
+	}
+	AMS2FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 //--------------------------------------------------------------------
 {
 	file.Rewind();
 
-	AMS2FileHeader fileHeader;
 	if(!file.ReadMagic("AMShdr\x1A"))
 	{
 		return false;
 	}
-
-	InitializeGlobals(MOD_TYPE_AMS2);
-
-	if(!file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_songName)
-		|| !file.ReadStruct(fileHeader)
-		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2
-		|| !file.CanRead(36u + sizeof(AMS2Description) + fileHeader.numIns * 2u + fileHeader.numOrds * 2u + fileHeader.numPats * 4u))
+	std::string songName;
+	if(!file.ReadSizedString<uint8le, mpt::String::spacePadded>(songName))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	AMS2FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
 	
+	InitializeGlobals(MOD_TYPE_AMS2);
+	
+	m_songName = songName;
+
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
 	SetupMODPanning(true);

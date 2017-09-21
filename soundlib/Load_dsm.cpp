@@ -100,40 +100,100 @@ struct DSMSampleHeader
 MPT_BINARY_STRUCT(DSMSampleHeader, 64)
 
 
+struct DSMHeader
+{
+	char fileMagic0[4];
+	char fileMagic1[4];
+	char fileMagic2[4];
+};
+
+MPT_BINARY_STRUCT(DSMHeader, 12)
+
+
+static bool ValidateHeader(const DSMHeader &fileHeader)
+//-----------------------------------------------------
+{
+	if(!std::memcmp(fileHeader.fileMagic0, "RIFF", 4)
+		&& !std::memcmp(fileHeader.fileMagic2, "DSMF", 4))
+	{
+		// "Normal" DSM files with RIFF header
+		// <RIFF> <file size> <DSMF>
+		return true;
+	} else if(!std::memcmp(fileHeader.fileMagic0, "DSMF", 4))
+	{
+		// DSM files with alternative header
+		// <DSMF> <4 bytes, usually 4x NUL or RIFF> <file size> <4 bytes, usually DSMF but not always>
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDSM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	DSMHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	if(std::memcmp(fileHeader.fileMagic0, "DSMF", 4) == 0)
+	{
+		if(!file.Skip(4))
+		{
+			return ProbeWantMoreData;
+		}
+	}
+	DSMChunk chunkHeader;
+	if(!file.ReadStruct(chunkHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(std::memcmp(chunkHeader.magic, "SONG", 4))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
-	char fileMagic0[4], fileMagic1[4], fileMagic2[4];
-	if(!file.ReadArray(fileMagic0)) return false;
-	if(!file.ReadArray(fileMagic1)) return false;
-	if(!file.ReadArray(fileMagic2)) return false;
-
-	if(!memcmp(fileMagic0, "RIFF", 4)
-		&& !memcmp(fileMagic2, "DSMF", 4))
-	{
-		// "Normal" DSM files with RIFF header
-		// <RIFF> <file size> <DSMF>
-	} else if(!memcmp(fileMagic0, "DSMF", 4))
-	{
-		// DSM files with alternative header
-		// <DSMF> <4 bytes, usually 4x NUL or RIFF> <file size> <4 bytes, usually DSMF but not always>
-		file.Skip(4);
-	} else
+	DSMHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
 	}
-
-	DSMChunk chunkHeader;
-
-	file.ReadStruct(chunkHeader);
-	// Technically, the song chunk could be anywhere in the file, but we're going to simplify
-	// things by not using a chunk header here and just expect it to be right at the beginning.
-	if(memcmp(chunkHeader.magic, "SONG", 4))
+	if(!ValidateHeader(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(std::memcmp(fileHeader.fileMagic0, "DSMF", 4) == 0)
+	{
+		file.Skip(4);
+	}
+	DSMChunk chunkHeader;
+	if(!file.ReadStruct(chunkHeader))
+	{
+		return false;
+	}
+	// Technically, the song chunk could be anywhere in the file, but we're going to simplify
+	// things by not using a chunk header here and just expect it to be right at the beginning.
+	if(std::memcmp(chunkHeader.magic, "SONG", 4))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

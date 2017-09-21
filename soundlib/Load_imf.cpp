@@ -351,16 +351,81 @@ static void ImportIMFEffect(ModCommand &m)
 	}
 }
 
+
+static bool ValidateHeader(const IMFFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.im10, "IM10", 4)
+		|| fileHeader.ordNum > 256
+		|| fileHeader.insNum >= MAX_INSTRUMENTS
+		)
+	{
+		return false;
+	}
+	bool channelFound = false;
+	for(uint8 chn = 0; chn < 32; chn++)
+	{
+		switch(fileHeader.channels[chn].status)
+		{
+		case 0: // enabled; don't worry about it
+			channelFound = true;
+			break;
+		case 1: // mute
+			channelFound = true;
+			break;
+		case 2: // disabled
+			// nothing
+			break;
+		default: // uhhhh.... freak out
+			return false;
+		}
+	}
+	if(!channelFound)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const IMFFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(fileHeader);
+	return 256;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIMF(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	IMFFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	IMFFileHeader fileHeader;
 	file.Rewind();
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.im10, "IM10", 4)
-		|| fileHeader.ordNum > 256
-		|| fileHeader.insNum >= MAX_INSTRUMENTS
-		|| !file.CanRead(256))
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
 	{
 		return false;
 	}
@@ -397,7 +462,9 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	if(!detectedChannels)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

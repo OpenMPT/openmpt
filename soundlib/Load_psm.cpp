@@ -208,7 +208,48 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 		offset = 0;
 	}
 	return ConvertStrTo<uint16>(&patternID[offset]);
+}
 
+
+static bool ValidateHeader(const PSMFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.formatID, "PSM ", 4)
+		|| std::memcmp(fileHeader.fileInfoID, "FILE", 4))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	PSMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	PSMChunk chunkHeader;
+	if(!file.ReadStruct(chunkHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(chunkHeader.length == 0)
+	{
+		return ProbeFailure;
+	}
+	if((chunkHeader.id & 0x7f7f7f7fu) != chunkHeader.id) // ASCII?
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
 }
 
 
@@ -244,8 +285,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MPT_PSM_DECRYPT
 
 	// Check header
-	if(memcmp(fileHeader.formatID, "PSM ", 4)
-		|| memcmp(fileHeader.fileInfoID, "FILE", 4))
+	if(!ValidateHeader(fileHeader))
 	{
 		return false;
 	}
@@ -1029,15 +1069,10 @@ struct PSM16PatternHeader
 MPT_BINARY_STRUCT(PSM16PatternHeader, 4)
 
 
-bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
-//---------------------------------------------------------------------
+static bool ValidateHeader(const PSM16FileHeader &fileHeader)
+//-----------------------------------------------------------
 {
-	file.Rewind();
-
-	// Is it a valid PSM16 file?
-	PSM16FileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.formatID, "PSM\xFE", 4)
+	if(std::memcmp(fileHeader.formatID, "PSM\xFE", 4)
 		|| fileHeader.lineEnd != 0x1A
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
@@ -1047,7 +1082,44 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		|| std::max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM16(MemoryFileReader file, const uint64 *pfilesize)
+//------------------------------------------------------------------------------------------------------
+{
+	PSM16FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
+bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
+//---------------------------------------------------------------------
+{
+	file.Rewind();
+
+	// Is it a valid PSM16 file?
+	PSM16FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

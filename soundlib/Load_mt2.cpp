@@ -395,22 +395,65 @@ static void ReadMT2Automation(uint16 version, FileReader &file)
 }
 
 
-bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const MT2FileHeader &fileHeader)
+//---------------------------------------------------------
 {
-	file.Rewind();
-	MT2FileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.signature, "MT20", 4)
+	if(std::memcmp(fileHeader.signature, "MT20", 4)
 		|| fileHeader.version < 0x200 || fileHeader.version >= 0x300
 		|| fileHeader.numChannels < 1 || fileHeader.numChannels > 64
 		|| fileHeader.numOrders > 256
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
 		|| fileHeader.numSamples >= MAX_SAMPLES
-		|| !file.CanRead(256))
+		)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const MT2FileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(fileHeader);
+	return 256;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMT2(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	MT2FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
+bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	file.Rewind();
+	MT2FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

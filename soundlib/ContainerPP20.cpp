@@ -13,6 +13,7 @@
 
 #include "../common/FileReader.h"
 #include "Container.h"
+#include "Sndfile.h"
 
 #include <stdexcept>
 
@@ -115,24 +116,73 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 }
 
 
+struct PP20header
+{
+	char    magic[4];       // "PP20"
+	uint8be efficiency[4];
+};
+
+MPT_BINARY_STRUCT(PP20header, 8)
+
+
+static bool ValidateHeader(const PP20header &hdr)
+//-----------------------------------------------
+{
+	if(std::memcmp(hdr.magic, "PP20", 4) != 0)
+	{
+		return false;
+	}
+	if(hdr.efficiency[0] < 9 || hdr.efficiency[0] > 15
+		|| hdr.efficiency[1] < 9 || hdr.efficiency[1] > 15
+		|| hdr.efficiency[2] < 9 || hdr.efficiency[2] > 15
+		|| hdr.efficiency[3] < 9 || hdr.efficiency[3] > 15)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize)
+//-----------------------------------------------------------------------------------------------------
+{
+	PP20header hdr;
+	if(!file.ReadStruct(hdr))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(hdr))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
 //------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();
 
-	if(!file.ReadMagic("PP20")) return false;
-	if(!file.CanRead(8)) return false;
-	uint8 efficiency[4];
-	file.ReadArray(efficiency);
-	if(efficiency[0] < 9 || efficiency[0] > 15
-		|| efficiency[1] < 9 || efficiency[1] > 15
-		|| efficiency[2] < 9 || efficiency[2] > 15
-		|| efficiency[3] < 9 || efficiency[3] > 15)
+	PP20header hdr;
+	if(!file.ReadStruct(hdr))
+	{
 		return false;
+	}
+	if(!ValidateHeader(hdr))
+	{
+		return false;
+	}
 	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
+	}
+
+	if(!file.CanRead(4))
+	{
+		return false;
 	}
 
 	containerItems.emplace_back();

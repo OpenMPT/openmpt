@@ -493,21 +493,67 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 }
 
 
+static bool ValidateHeader(const MEDMODULEHEADER &pmmh)
+//-----------------------------------------------------
+{
+	if(std::memcmp(pmmh.id, "MMD", 3)
+		|| pmmh.id[3] < '0' || pmmh.id[3] > '3'
+		|| pmmh.song == 0
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const MEDMODULEHEADER &pmmh)
+//-----------------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(pmmh);
+	return sizeof(MMD0SONGHEADER);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMED(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	MEDMODULEHEADER pmmh;
+	if(!file.ReadStruct(pmmh))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(pmmh))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(pmmh));
+}
+
+
 bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 //------------------------------------------------------------------
 {
 	file.Rewind();
 	MEDMODULEHEADER pmmh;
-	uint32 dwSong;
-	if(!file.CanRead(512)
-		|| !file.ReadStruct(pmmh)
-		|| memcmp(pmmh.id, "MMD", 3)
-		|| pmmh.id[3] < '0' || pmmh.id[3] > '3'
-		|| (dwSong = pmmh.song) == 0
-		|| !file.LengthIsAtLeast(dwSong + sizeof(MMD0SONGHEADER)))
+	if(!file.ReadStruct(pmmh))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(pmmh))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(pmmh))))
+	{
+		return false;
+	}
+	const uint32 dwSong = pmmh.song;
+	if(!file.LengthIsAtLeast(dwSong + sizeof(MMD0SONGHEADER)))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

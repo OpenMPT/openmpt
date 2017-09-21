@@ -181,20 +181,52 @@ struct DTMText
 MPT_BINARY_STRUCT(DTMText, 12)
 
 
+static bool ValidateHeader(const DTMFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.magic, "D.T.", 4)
+		|| fileHeader.headerSize < sizeof(fileHeader) - 8u
+		|| fileHeader.headerSize > 256 // Excessively long song title?
+		|| fileHeader.type != 0)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDTM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	DTMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
 	DTMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "D.T.", 4)
-		|| fileHeader.headerSize < sizeof(fileHeader) - 8u
-		|| fileHeader.headerSize > 256 // Excessively long song title?
-		|| fileHeader.type != 0)
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

@@ -887,17 +887,50 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 }
 
 
-bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const DMFFileHeader &fileHeader)
+//---------------------------------------------------------
 {
-	DMFFileHeader fileHeader;
-	file.Rewind();
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.signature, "DDMF", 4)
+	if(std::memcmp(fileHeader.signature, "DDMF", 4)
 		|| !fileHeader.version || fileHeader.version > 10)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDMF(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	DMFFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
+bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	file.Rewind();
+
+	DMFFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

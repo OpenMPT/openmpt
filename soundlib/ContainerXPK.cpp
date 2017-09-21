@@ -13,6 +13,7 @@
 
 #include "../common/FileReader.h"
 #include "Container.h"
+#include "Sndfile.h"
 
 #include <stdexcept>
 
@@ -329,6 +330,68 @@ l7ca:
 }
 
 
+static bool ValidateHeader(const XPKFILEHEADER &header)
+//-----------------------------------------------------
+{
+	if(std::memcmp(header.XPKF, "XPKF", 4) != 0)
+	{
+		return false;
+	}
+	if(std::memcmp(header.SQSH, "SQSH", 4) != 0)
+	{
+		return false;
+	}
+	if(header.SrcLen == 0)
+	{
+		return false;
+	}
+	if(header.DstLen == 0)
+	{
+		return false;
+	}
+	MPT_STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
+	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static bool ValidateHeaderFileSize(const XPKFILEHEADER &header, uint64 filesize)
+//------------------------------------------------------------------------------
+{
+	if(filesize < header.SrcLen - 8)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXPK(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	XPKFILEHEADER header;
+	if(!file.ReadStruct(header))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(header))
+	{
+		return ProbeFailure;
+	}
+	if(pfilesize)
+	{
+		if(!ValidateHeaderFileSize(header, *pfilesize))
+		{
+			return ProbeFailure;
+		}
+	}
+	return ProbeSuccess;
+}
+
+
 bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
 //-----------------------------------------------------------------------------------------------------------
 {
@@ -336,18 +399,23 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	containerItems.clear();
 
 	XPKFILEHEADER header;
-	if(!file.ReadStruct(header)) return false;
-	if(std::memcmp(header.XPKF, "XPKF", 4) != 0) return false;
-	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
-	if(header.SrcLen == 0) return false;
-	if(header.DstLen == 0) return false;
-	STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
-	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8)) return false;
+	if(!file.ReadStruct(header))
+	{
+		return false;
+	}
+	if(!ValidateHeader(header))
+	{
+		return false;
+	}
 	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;
 	}
-	if(!file.CanRead(header.SrcLen - (sizeof(XPKFILEHEADER) - 8))) return false;
+
+	if(!file.CanRead(header.SrcLen - (sizeof(XPKFILEHEADER) - 8)))
+	{
+		return false;
+	}
 
 	containerItems.emplace_back();
 	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
