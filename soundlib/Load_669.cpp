@@ -132,7 +132,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	
-	if(!file.CanRead(GetHeaderMinimumAdditionalSize(fileHeader)))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
 	{
 		return false;
 	}
