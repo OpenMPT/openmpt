@@ -258,6 +258,35 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 }
 
 
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderOKT(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	if(!file.CanRead(8))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!file.ReadMagic("OKTASONG"))
+	{
+		return ProbeFailure;
+	}
+	OktIffChunk iffHead;
+	if(!file.ReadStruct(iffHead))
+	{
+		return ProbeWantMoreData;
+	}
+	if(iffHead.chunksize == 0)
+	{
+		return ProbeFailure;
+	}
+	if((iffHead.signature & 0x7f7f7f7fu) != iffHead.signature) // ASCII?
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {

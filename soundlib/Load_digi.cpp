@@ -73,20 +73,51 @@ static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
 }
 
 
+static bool ValidateHeader(const DIGIFileHeader &fileHeader)
+{
+	if(std::memcmp(fileHeader.signature, "DIGI Booster module\0", 20)
+		|| !fileHeader.numChannels
+		|| fileHeader.numChannels > 8
+		|| fileHeader.lastOrdIndex > 127)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDIGI(MemoryFileReader file, const uint64 *pfilesize)
+//-----------------------------------------------------------------------------------------------------
+{
+	DIGIFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 //--------------------------------------------------------------------
 {
 	file.Rewind();
 
 	DIGIFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.signature, "DIGI Booster module\0", 20)
-		|| !fileHeader.numChannels
-		|| fileHeader.numChannels > 8
-		|| fileHeader.lastOrdIndex > 127)
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

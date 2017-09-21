@@ -211,52 +211,128 @@ void CSoundFile::InitializeChannels()
 }
 
 
+CSoundFile::ProbeResult CSoundFile::ProbeAdditionalSize(MemoryFileReader &file, const uint64 *pfilesize, uint64 minimumAdditionalSize)
+//------------------------------------------------------------------------------------------------------------------------------------
+{
+	const uint64 availableFileSize = file.GetLength();
+	const uint64 fileSize = (pfilesize ? *pfilesize : file.GetLength());
+	//const uint64 validFileSize = std::min<uint64>(fileSize, ProbeRecommendedSize);
+	const uint64 goalSize = file.GetPosition() + minimumAdditionalSize;
+	//const uint64 goalMinimumSize = std::min<uint64>(goalSize, ProbeRecommendedSize);
+	if(pfilesize)
+	{
+		if(availableFileSize < std::min<uint64>(fileSize, ProbeRecommendedSize))
+		{
+			if(availableFileSize < goalSize)
+			{
+				return ProbeWantMoreData;
+			}
+		} else
+		{
+			if(fileSize < goalSize)
+			{
+				return ProbeFailure;
+			}
+		}
+		return ProbeSuccess;
+	}
+	return ProbeSuccess;
+}
+
+
 const std::size_t CSoundFile::ProbeRecommendedSize = PROBE_RECOMMENDED_SIZE;
+
+
+#define MPT_DO_PROBE( storedResult , call ) \
+	MPT_DO { \
+		ProbeResult lastResult = call ; \
+		if(lastResult == ProbeSuccess) { \
+			return ProbeSuccess; \
+		} else if(lastResult == ProbeWantMoreData) { \
+			storedResult = ProbeWantMoreData; \
+		} \
+	} MPT_WHILE_0 \
+/**/
 
 
 CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize)
 //-------------------------------------------------------------------------------------------------------------------
 {
-	uint64 filesize = 0;
+	ProbeResult result = ProbeFailure;
+	if(pfilesize && (*pfilesize < data.size()))
+	{
+		throw std::out_of_range("");
+	}
+	if(!data.data())
+	{
+		throw std::invalid_argument("");
+	}
+	MemoryFileReader file(data);
+	if(flags & ProbeContainers)
+	{
+		MPT_DO_PROBE(result, ProbeFileHeaderMMCMP(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPP20(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderUMX(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderXPK(file, pfilesize));
+	}
+	if(flags & ProbeModules)
+	{
+		MPT_DO_PROBE(result, ProbeFileHeader669(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderAM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderAMF_Asylum(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderAMF_DSMI(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderAMS(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderAMS2(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderDBM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderDTM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderDIGI(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderDMF(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderDSM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderFAR(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderGDM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderICE(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderIMF(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderIT(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderITP(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderJ2B(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderM15(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMDL(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMED(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMO3(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMOD(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMT2(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderMTM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderOKT(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPLM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPSM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPSM16(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPT36(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderPTM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderS3M(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderSFX(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderSTM(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderSTP(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderULT(file, pfilesize));
+		MPT_DO_PROBE(result, ProbeFileHeaderXM(file, pfilesize));
+	}
 	if(pfilesize)
 	{
-		filesize = *pfilesize;
-		if(data.size() < std::min<uint64>(filesize, ProbeRecommendedSize))
+		if((result == ProbeWantMoreData) && (mpt::saturate_cast<std::size_t>(*pfilesize) <= data.size()))
 		{
-			return ProbeWantMoreData;
+			// If the prober wants more data but we already reached EOF,
+			// probing must fail.
+			result = ProbeFailure;
 		}
 	} else
 	{
-		filesize = data.size();
+		if((result == ProbeWantMoreData) && (data.size() >= ProbeRecommendedSize))
+		{
+			// If the prober wants more daat but we already provided the recommended required maximum,
+			// just return success as this is th ebest we can do for the suggestesd probing size.
+			result = ProbeSuccess;
+		}
 	}
-	std::vector<mpt::byte> filedata(mpt::saturate_cast<std::size_t>(filesize));
-	std::copy(data.data(), data.data() + data.size(), filedata.data());
-	FileReader file(mpt::as_span(filedata));
-	std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-	if((flags & ProbeModules) && (flags & ProbeContainers))
-	{
-		if(!sndFile->Create(file, CSoundFile::onlyVerifyHeader))
-		{
-			return ProbeFailure;
-		}
-	} else if(flags & ProbeModules)
-	{
-		if(!sndFile->Create(file, static_cast<CSoundFile::ModLoadingFlags>(CSoundFile::onlyVerifyHeader | CSoundFile::skipContainer)))
-		{
-			return ProbeFailure;
-		}
-	} else if(flags & ProbeContainers)
-	{
-		if(!sndFile->Create(file, static_cast<CSoundFile::ModLoadingFlags>(CSoundFile::onlyVerifyHeader | CSoundFile::skipModules)))
-		{
-			return ProbeFailure;
-		}
-	} else
-	{
-		return ProbeFailure;
-	}
-	sndFile->Destroy();
-	return ProbeSuccess;
+	return result;
 }
 
 

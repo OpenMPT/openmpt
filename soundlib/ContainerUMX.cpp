@@ -12,9 +12,46 @@
 #include "Loaders.h"
 #include "UMXTools.h"
 #include "Container.h"
+#include "Sndfile.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+static bool ValidateHeader(const UMXFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
+		|| fileHeader.nameCount == 0
+		|| fileHeader.exportCount == 0
+		|| fileHeader.importCount == 0
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderUMX(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	UMXFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	if(!FindUMXNameTableEntryMemory(file, fileHeader, "music"))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
 
 
 bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
@@ -24,12 +61,11 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	containerItems.clear();
 
 	UMXFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
-		|| fileHeader.nameCount == 0
-		|| fileHeader.exportCount == 0
-		|| fileHeader.importCount == 0
-		)
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
 	{
 		return false;
 	}

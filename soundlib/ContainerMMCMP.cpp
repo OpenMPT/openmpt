@@ -13,6 +13,7 @@
 
 #include "../common/FileReader.h"
 #include "Container.h"
+#include "Sndfile.h"
 
 #include <stdexcept>
 
@@ -144,6 +145,66 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const M
 }
 
 
+static bool ValidateHeader(const MMCMPFILEHEADER &mfh)
+//----------------------------------------------------
+{
+	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0)
+	{
+		return false;
+	}
+	if(mfh.hdrsize != sizeof(MMCMPHEADER))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static bool ValidateHeader(const MMCMPHEADER &mmh)
+//------------------------------------------------
+{
+	if(mmh.nblocks == 0)
+	{
+		return false;
+	}
+	if(mmh.filesize == 0)
+	{
+		return false;
+	}
+	if(mmh.filesize > 0x80000000)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize)
+//------------------------------------------------------------------------------------------------------
+{
+	MMCMPFILEHEADER mfh;
+	if(!file.ReadStruct(mfh))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(mfh))
+	{
+		return ProbeFailure;
+	}
+	MMCMPHEADER mmh;
+	if(!file.ReadStruct(mmh))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(mmh))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
 //-------------------------------------------------------------------------------------------------------------
 {
@@ -151,14 +212,23 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 	containerItems.clear();
 
 	MMCMPFILEHEADER mfh;
-	if(!file.ReadStruct(mfh)) return false;
-	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0) return false;
-	if(mfh.hdrsize != sizeof(MMCMPHEADER)) return false;
+	if(!file.ReadStruct(mfh))
+	{
+		return false;
+	}
+	if(!ValidateHeader(mfh))
+	{
+		return false;
+	}
 	MMCMPHEADER mmh;
-	if(!file.ReadStruct(mmh)) return false;
-	if(mmh.nblocks == 0) return false;
-	if(mmh.filesize == 0) return false;
-	if(mmh.filesize > 0x80000000) return false;
+	if(!file.ReadStruct(mmh))
+	{
+		return false;
+	}
+	if(!ValidateHeader(mmh))
+	{
+		return false;
+	}
 	if(loadFlags == ContainerOnlyVerifyHeader)
 	{
 		return true;

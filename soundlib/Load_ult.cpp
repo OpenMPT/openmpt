@@ -336,20 +336,52 @@ struct PostFixUltCommands
 };
 
 
+static bool ValidateHeader(const UltFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(fileHeader.version < '1'
+		|| fileHeader.version > '4'
+		|| std::memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature))
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderULT(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	UltFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
-	UltFileHeader fileHeader;
 
-	// Tracker ID
-	if(!file.ReadStruct(fileHeader)
-		|| fileHeader.version < '1'
-		|| fileHeader.version > '4'
-		|| memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)) != 0)
+	UltFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

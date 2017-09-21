@@ -691,25 +691,73 @@ static long VorbisfileFilereaderTell(void *datasource)
 #endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
 
 
+struct MO3ContainerHeader
+{
+	char     magic[3];   // MO3
+	uint8le  version;
+	uint32le musicSize;
+};
+
+MPT_BINARY_STRUCT(MO3ContainerHeader, 8)
+
+
+static bool ValidateHeader(const MO3ContainerHeader &containerHeader)
+//-------------------------------------------------------------------
+{
+	if(std::memcmp(containerHeader.magic, "MO3", 3))
+	{
+		return false;
+	}
+	if(containerHeader.musicSize <= sizeof(MO3FileHeader))
+	{
+		return false;
+	}
+	if(containerHeader.version > 5)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMO3(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	MO3ContainerHeader containerHeader;
+	if(!file.ReadStruct(containerHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(containerHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
 
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
-	if(!file.CanRead(12) || !file.ReadMagic("MO3"))
+	MO3ContainerHeader containerHeader;
+	if(!file.ReadStruct(containerHeader))
 	{
 		return false;
 	}
-	const uint8 version = file.ReadUint8();
-	const uint32 musicSize = file.ReadUint32LE();
-	if(musicSize <= sizeof(MO3FileHeader) || version > 5)
+	if(!ValidateHeader(containerHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
+
+	const uint8 version = containerHeader.version;
+	const uint32 musicSize = containerHeader.musicSize;
 
 	uint32 compressedSize = uint32_max;
 	if(version >= 5)

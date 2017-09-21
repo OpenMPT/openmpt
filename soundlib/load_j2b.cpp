@@ -615,6 +615,66 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 }
 
 
+struct AMFFRiffChunkFormat
+{
+	uint32le format;
+};
+
+MPT_BINARY_STRUCT(AMFFRiffChunkFormat, 4)
+
+
+static bool ValidateHeader(const AMFFRiffChunk &fileHeader)
+//---------------------------------------------------------
+{
+	if(fileHeader.id != AMFFRiffChunk::idRIFF)
+	{
+		return false;
+	}
+	if(fileHeader.GetLength() < 8 + sizeof(AMFFMainChunk))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static bool ValidateHeader(const AMFFRiffChunkFormat &formatHeader)
+//-----------------------------------------------------------------
+{
+	if(formatHeader.format != AMFFRiffChunk::idAMFF || formatHeader.format != AMFFRiffChunk::idAM__)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAM(MemoryFileReader file, const uint64 *pfilesize)
+//---------------------------------------------------------------------------------------------------
+{
+	AMFFRiffChunk fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	AMFFRiffChunkFormat formatHeader;
+	if(!file.ReadStruct(formatHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(formatHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 //------------------------------------------------------------------
 {
@@ -624,15 +684,23 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-
-	if(fileHeader.id != AMFFRiffChunk::idRIFF)
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	AMFFRiffChunkFormat formatHeader;
+	if(!file.ReadStruct(formatHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(formatHeader))
 	{
 		return false;
 	}
 
 	bool isAM; // false: AMFF, true: AM
 
-	uint32 format = file.ReadUint32LE();
+	uint32 format = formatHeader.format;
 	if(format == AMFFRiffChunk::idAMFF)
 		isAM = false; // "AMFF"
 	else if(format == AMFFRiffChunk::idAM__)
@@ -877,6 +945,64 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	return true;
 }
 
+
+static bool ValidateHeader(const J2BFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.signature, "MUSE", 4)
+		|| (fileHeader.deadbeaf != J2BFileHeader::magicDEADBEAF // 0xDEADBEAF (RIFF AM)
+			&& fileHeader.deadbeaf != J2BFileHeader::magicDEADBABE) // 0xDEADBABE (RIFF AMFF)
+		)
+	{
+		return false;
+	}
+	if(fileHeader.packedLength == 0)
+	{
+		return false;
+	}
+	if(fileHeader.fileLength != fileHeader.packedLength + sizeof(J2BFileHeader))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static bool ValidateHeaderFileSize(const J2BFileHeader &fileHeader, uint64 filesize)
+//----------------------------------------------------------------------------------
+{
+	if(filesize != fileHeader.fileLength)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderJ2B(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	J2BFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	if(pfilesize)
+	{
+		if(!ValidateHeaderFileSize(fileHeader, *pfilesize))
+		{
+			return ProbeFailure;
+		}
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -891,17 +1017,21 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Rewind();
 	J2BFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.signature, "MUSE", 4)
-		|| (fileHeader.deadbeaf != J2BFileHeader::magicDEADBEAF // 0xDEADBEAF (RIFF AM)
-			&& fileHeader.deadbeaf != J2BFileHeader::magicDEADBABE) // 0xDEADBABE (RIFF AMFF)
-		|| fileHeader.fileLength != file.GetLength()
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(fileHeader.fileLength != file.GetLength()
 		|| fileHeader.packedLength != file.BytesLeft()
-		|| fileHeader.packedLength == 0
 		)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

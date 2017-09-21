@@ -402,20 +402,62 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 }
 
 
+static bool ValidateHeader(const ITFileHeader &fileHeader)
+//--------------------------------------------------------
+{
+	if((std::memcmp(fileHeader.id, "IMPM", 4) && std::memcmp(fileHeader.id, "tpm.", 4))
+		|| fileHeader.insnum > 0xFF
+		|| fileHeader.smpnum >= MAX_SAMPLES
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const ITFileHeader &fileHeader)
+//--------------------------------------------------------------------------
+{
+	return fileHeader.ordnum + (fileHeader.insnum + fileHeader.smpnum + fileHeader.patnum) * 4;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIT(MemoryFileReader file, const uint64 *pfilesize)
+//---------------------------------------------------------------------------------------------------
+{
+	ITFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 //------------------------------------------------------------------
 {
 	file.Rewind();
 
 	ITFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| (memcmp(fileHeader.id, "IMPM", 4) && memcmp(fileHeader.id, "tpm.", 4))
-		|| fileHeader.insnum > 0xFF
-		|| fileHeader.smpnum >= MAX_SAMPLES
-		|| !file.CanRead(fileHeader.ordnum + (fileHeader.insnum + fileHeader.smpnum + fileHeader.patnum) * 4))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

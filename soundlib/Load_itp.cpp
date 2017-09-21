@@ -60,6 +60,54 @@ struct ITPModCommand
 MPT_BINARY_STRUCT(ITPModCommand, 6)
 
 
+struct ITPHeader
+{
+	uint32le magic;
+	uint32le version;
+};
+
+MPT_BINARY_STRUCT(ITPHeader, 8)
+
+
+static bool ValidateHeader(const ITPHeader &hdr)
+//----------------------------------------------
+{
+	if(hdr.magic != MAGIC4BE('.','i','t','p'))
+	{
+		return false;
+	}
+	if(hdr.version > 0x00000103 || hdr.version < 0x00000100)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const ITPHeader &hdr)
+//----------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(hdr);
+	return 12 + 4 + 24 + 4 - sizeof(ITPHeader);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderITP(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	ITPHeader hdr;
+	if(!file.ReadStruct(hdr))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(hdr))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(hdr));
+}
+
+
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
@@ -81,21 +129,28 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		ITP_ITPEMBEDIH		= 0x40000,	// Embed instrument headers in project file
 	};
 
-	uint32 version, size;
-
 	file.Rewind();
 
-	// Check file ID
-	if(!file.CanRead(12 + 4 + 24 + 4)
-		|| file.ReadUint32LE() != MAGIC4BE('.','i','t','p')	// Magic bytes
-		|| (version = file.ReadUint32LE()) > 0x00000103		// Format version
-		|| version < 0x00000100)
+	ITPHeader hdr;
+	if(!file.ReadStruct(hdr))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(hdr))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(hdr))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
+
+	uint32 version, size;
+	version = hdr.version;
 
 	InitializeGlobals(MOD_TYPE_IT);
 	m_playBehaviour.reset();

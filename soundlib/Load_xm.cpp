@@ -262,17 +262,58 @@ enum TrackerVersions
 DECLARE_FLAGSET(TrackerVersions)
 
 
+static bool ValidateHeader(const XMFileHeader &fileHeader)
+//--------------------------------------------------------
+{
+	if(fileHeader.channels == 0
+		|| fileHeader.channels > MAX_BASECHANNELS
+		|| std::memcmp(fileHeader.signature, "Extended Module: ", 17)
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const XMFileHeader &fileHeader)
+//--------------------------------------------------------------------------
+{
+	return fileHeader.orders + 4 * (fileHeader.patterns + fileHeader.instruments);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXM(MemoryFileReader file, const uint64 *pfilesize)
+//---------------------------------------------------------------------------------------------------
+{
+	XMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 //------------------------------------------------------------------
 {
 	file.Rewind();
 
 	XMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| fileHeader.channels == 0
-		|| fileHeader.channels > MAX_BASECHANNELS
-		|| memcmp(fileHeader.signature, "Extended Module: ", 17)
-		|| !file.CanRead(fileHeader.orders + 4 * (fileHeader.patterns + fileHeader.instruments)))
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)

@@ -102,19 +102,65 @@ struct FARSampleHeader
 MPT_BINARY_STRUCT(FARSampleHeader, 48)
 
 
+static bool ValidateHeader(const FARFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
+		|| std::memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
+		)
+	{
+		return false;
+	}
+	if(fileHeader.headerLength < sizeof(FARFileHeader))
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const FARFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	return fileHeader.headerLength - sizeof(FARFileHeader);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	FARFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
 	FARFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
-		|| memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
-		|| !file.LengthIsAtLeast(fileHeader.headerLength))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

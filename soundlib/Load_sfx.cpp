@@ -96,6 +96,87 @@ static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
 	return 0;
 }
 
+
+static bool ValidateHeader(const SFXFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(fileHeader.numOrders > 128)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSFX(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	SAMPLEINDEX numSamples = 0;
+	if(numSamples == 0)
+	{
+		file.Rewind();
+		if(!file.CanRead(0x40))
+		{
+			return ProbeWantMoreData;
+		}
+		if(file.Seek(0x3c) && file.ReadMagic("SONG"))
+		{
+			numSamples = 15;
+		}
+	}
+	if(numSamples == 0)
+	{
+		file.Rewind();
+		if(!file.CanRead(0x80))
+		{
+			return ProbeWantMoreData;
+		}
+		if(file.Seek(0x7c) && file.ReadMagic("SO31"))
+		{
+			numSamples = 31;
+		}
+	}
+	if(numSamples == 0)
+	{
+		return ProbeFailure;
+	}
+	file.Rewind();
+	for(SAMPLEINDEX smp = 0; smp < numSamples; smp++)
+	{
+		if(file.ReadUint32BE() > 131072)
+		{
+			return ProbeFailure;
+		}
+	}
+	file.Skip(4);
+	if(!file.CanRead(2))
+	{
+		return ProbeWantMoreData;
+	}
+	uint16 speed = file.ReadUint16BE();
+	if(speed < 178)
+	{
+		return ProbeFailure;
+	}
+	if(!file.CanRead(sizeof(SFXSampleHeader) * numSamples))
+	{
+		return ProbeWantMoreData;
+	}
+	file.Skip(sizeof(SFXSampleHeader) * numSamples);
+	SFXFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -164,12 +245,18 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	SFXFileHeader fileHeader;
-	file.ReadStruct(fileHeader);
-
-	if(fileHeader.numOrders > 128)
+	if(!file.ReadStruct(fileHeader))
+	{
 		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
 	if(loadFlags == onlyVerifyHeader)
+	{
 		return true;
+	}
 
 	PATTERNINDEX numPatterns = 0;
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)

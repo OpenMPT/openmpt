@@ -293,18 +293,50 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 }
 
 
-bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const DBMFileHeader &fileHeader)
+//---------------------------------------------------------
 {
-	DBMFileHeader fileHeader;
-
-	file.Rewind();
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.dbm0, "DBM0", 4)
+	if(std::memcmp(fileHeader.dbm0, "DBM0", 4)
 		|| fileHeader.trkVerHi > 3)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDBM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	DBMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
+bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+
+	file.Rewind();
+	DBMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}

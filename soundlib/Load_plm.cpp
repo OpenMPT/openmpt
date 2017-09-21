@@ -83,23 +83,70 @@ struct PLMOrderItem
 MPT_BINARY_STRUCT(PLMOrderItem, 4)
 
 
+static bool ValidateHeader(const PLMFileHeader &fileHeader)
+//---------------------------------------------------------
+{
+	if(std::memcmp(fileHeader.magic, "PLM\x1A", 4)
+		|| fileHeader.version != 0x10
+		|| fileHeader.numChannels == 0 || fileHeader.numChannels > 32
+		|| fileHeader.headerSize < sizeof(PLMFileHeader)
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const PLMFileHeader &fileHeader)
+//---------------------------------------------------------------------------
+{
+	return fileHeader.headerSize - sizeof(PLMFileHeader) + 4 * (fileHeader.numOrders + fileHeader.numPatterns + fileHeader.numSamples);
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPLM(MemoryFileReader file, const uint64 *pfilesize)
+//----------------------------------------------------------------------------------------------------
+{
+	PLMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
+
+
 bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
 
 	PLMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "PLM\x1A", 4)
-		|| fileHeader.version != 0x10
-		|| fileHeader.numChannels == 0 || fileHeader.numChannels > 32
-		|| !file.Seek(fileHeader.headerSize)
-		|| !file.CanRead(4 * (fileHeader.numOrders + fileHeader.numPatterns + fileHeader.numSamples)))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
+	}
+
+	if(!file.Seek(fileHeader.headerSize))
+	{
+		return false;
 	}
 
 	InitializeGlobals(MOD_TYPE_PLM);
