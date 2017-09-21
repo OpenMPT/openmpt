@@ -641,7 +641,7 @@ static bool ValidateHeader(const AMFFRiffChunk &fileHeader)
 static bool ValidateHeader(const AMFFRiffChunkFormat &formatHeader)
 //-----------------------------------------------------------------
 {
-	if(formatHeader.format != AMFFRiffChunk::idAMFF || formatHeader.format != AMFFRiffChunk::idAM__)
+	if(formatHeader.format != AMFFRiffChunk::idAMFF && formatHeader.format != AMFFRiffChunk::idAM__)
 	{
 		return false;
 	}
