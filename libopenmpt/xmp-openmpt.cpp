@@ -741,14 +741,13 @@ static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 // more thorough checks can be saved for the GetFileInfo and Open functions
 static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 	try {
-		const double threshold = 0.1;
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
 					case XMPFILE_TYPE_MEMORY:
 						{
 							xmplay_imemstream s( reinterpret_cast<const char *>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
-							return openmpt::could_open_probability( s ) > threshold;
+							return ( openmpt::probe_file_header( openmpt::probe_file_header_flags_default, s ) == openmpt::probe_file_header_result_success ) ? TRUE : FALSE;
 						}
 						break;
 					case XMPFILE_TYPE_FILE:
@@ -757,24 +756,24 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 					default:
 						{
 							xmplay_istream s( file );
-							return openmpt::could_open_probability( s ) > threshold;
+							return ( openmpt::probe_file_header( openmpt::probe_file_header_flags_default, s ) == openmpt::probe_file_header_result_success ) ? TRUE : FALSE;
 						}
 						break;
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
 					std::string data( reinterpret_cast<const char*>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
-					std::istringstream stream( data );
-					return openmpt::could_open_probability( stream ) > threshold;
+					std::istringstream s( data );
+					return ( openmpt::probe_file_header( openmpt::probe_file_header_flags_default, s ) == openmpt::probe_file_header_result_success ) ? TRUE : FALSE;
 				} else {
 					std::string data = read_XMPFILE_string( file );
-					std::istringstream stream(data);
-					return openmpt::could_open_probability( stream ) > threshold;
+					std::istringstream s(data);
+					return ( openmpt::probe_file_header( openmpt::probe_file_header_flags_default, s ) == openmpt::probe_file_header_result_success ) ? TRUE : FALSE;
 				}
 			#endif
 		#else
 			std::ifstream s( filename, std::ios_base::binary );
-			return openmpt::could_open_probability( s ) > threshold;
+			return ( openmpt::probe_file_header( openmpt::probe_file_header_flags_default, s ) == openmpt::probe_file_header_result_success ) ? TRUE : FALSE;
 		#endif
 	} catch ( ... ) {
 		return FALSE;
