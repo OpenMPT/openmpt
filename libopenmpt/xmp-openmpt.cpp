@@ -798,33 +798,38 @@ static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 // check if a file is playable by this plugin
 // more thorough checks can be saved for the GetFileInfo and Open functions
 static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
-	const double threshold = 0.1;
-	#ifdef USE_XMPLAY_FILE_IO
-		#ifdef USE_XMPLAY_ISTREAM
-			switch ( xmpffile->GetType( file ) ) {
-				case XMPFILE_TYPE_MEMORY:
-					{
-						xmplay_imemstream s( static_cast<const char *>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
-						return openmpt::could_open_propability( s ) > threshold;
-					}
-					break;
-				case XMPFILE_TYPE_FILE:
-				case XMPFILE_TYPE_NETFILE:
-				case XMPFILE_TYPE_NETSTREAM:
-				default:
-					return openmpt::could_open_propability( (xmplay_istream( file )) ) > threshold;
-					break;
-			}
+	try {
+		const double threshold = 0.1;
+		#ifdef USE_XMPLAY_FILE_IO
+			#ifdef USE_XMPLAY_ISTREAM
+				switch ( xmpffile->GetType( file ) ) {
+					case XMPFILE_TYPE_MEMORY:
+						{
+							xmplay_imemstream s( static_cast<const char *>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
+							return openmpt::could_open_propability( s ) > threshold;
+						}
+						break;
+					case XMPFILE_TYPE_FILE:
+					case XMPFILE_TYPE_NETFILE:
+					case XMPFILE_TYPE_NETSTREAM:
+					default:
+						return openmpt::could_open_propability( (xmplay_istream( file )) ) > threshold;
+						break;
+				}
+			#else
+				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
+					return openmpt::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
+				} else {
+					return openmpt::could_open_propability( (read_XMPFILE( file )) ) > threshold;
+				}
+			#endif
 		#else
-			if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-				return openmpt::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
-			} else {
-				return openmpt::could_open_propability( (read_XMPFILE( file )) ) > threshold;
-			}
+			return openmpt::could_open_propability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
 		#endif
-	#else
-		return openmpt::could_open_propability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
-	#endif
+	} catch ( ... ) {
+		return FALSE;
+	}
+	return FALSE;
 }
 
 #if XMPIN_FACE >= 4
