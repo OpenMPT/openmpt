@@ -54,7 +54,7 @@ case $MODE in
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_PREREL.*/#define OPENMPT_API_VERSION_PREREL ""/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_IS_PREREL.*/#define OPENMPT_API_VERSION_IS_PREREL 0/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.mk | sed -e 's/LIBOPENMPT_VERSION_PREREL=.*/LIBOPENMPT_VERSION_PREREL=/' > libopenmpt/libopenmpt_version.mk.tmp && mv libopenmpt/libopenmpt_version.mk.tmp libopenmpt/libopenmpt_version.mk
-		echo > libopenmpt/dox/changelog.md.tmp
+		echo -n > libopenmpt/dox/changelog.md.tmp
 		cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
 		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/\ \(${DATE}\)/ >> libopenmpt/dox/changelog.md.tmp
 		cat libopenmpt/dox/changelog.md | tail -n +9 | sed -e 's/-pre//' >> libopenmpt/dox/changelog.md.tmp
