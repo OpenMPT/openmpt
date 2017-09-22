@@ -783,12 +783,15 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 
 static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * * length, char * * tags ) {
 	try {
+		std::map< std::string, std::string > ctls;
+		ctls[ "load.skip_plugins" ] = "1";
+		ctls[ "load.skip_samples" ] = "1";
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
 					case XMPFILE_TYPE_MEMORY:
 						{
-							openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+							openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
 							if ( length ) {
 								*length = build_xmplay_length( mod );
 							}
@@ -803,7 +806,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 					default:
 						{
 							xmplay_istream s( file );
-							openmpt::module mod( s );
+							openmpt::module mod( s, std::clog, ctls );
 							if ( length ) {
 								*length = build_xmplay_length( mod );
 							}
@@ -815,7 +818,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-					openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+					openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
 					if ( length ) {
 						*length = build_xmplay_length( mod );
 					}
@@ -823,7 +826,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 						*tags = build_xmplay_tags( mod );
 					}
 				} else {
-					openmpt::module mod( read_XMPFILE_vector( file ) );
+					openmpt::module mod( read_XMPFILE_vector( file ), std::clog, ctls );
 					if ( length ) {
 						*length = build_xmplay_length( mod );
 					}
@@ -834,7 +837,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 			#endif
 		#else
 			std::ifstream s( filename, std::ios_base::binary );
-			openmpt::module mod( s );
+			openmpt::module mod( s, std::clog, ctls );
 			if ( length ) {
 				*length = build_xmplay_length( mod );
 			}
