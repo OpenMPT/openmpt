@@ -100,7 +100,6 @@ static int Warning_libopenmpt_is_built_with_a_compiler_not_supporting_constexpr_
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
 MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//------------------------------------------------------------------------------------------------------------------
 {
 	if(msg)
 	{
