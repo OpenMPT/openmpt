@@ -27,7 +27,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
  4. wait for buildbot
  5. run
         cd build/release/libopenmpt-website
-        ./release-0.3.sh $NEWVER
+        ./release-0.3.sh $NEWVER +release
         cd ../../..
  6. post announcement to mailing list
 
