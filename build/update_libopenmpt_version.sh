@@ -3,11 +3,18 @@
 set -e
 
 MODE="${1}"
+PARAM1="${2}"
 
 function checkclean {
 	if [ $(svn status | wc -l) -ne 0 ]; then
 		echo "error: Working copy not clean"
 		exit 1
+	fi
+}
+
+function checkparam1 {
+	if [ "${PARAM1}x" = "x" ]; then
+		echo "error: No RC version provided"
 	fi
 }
 
@@ -56,8 +63,20 @@ case $MODE in
 		cat libopenmpt/libopenmpt_version.mk | sed -e 's/LIBOPENMPT_VERSION_PREREL=.*/LIBOPENMPT_VERSION_PREREL=/' > libopenmpt/libopenmpt_version.mk.tmp && mv libopenmpt/libopenmpt_version.mk.tmp libopenmpt/libopenmpt_version.mk
 		echo -n > libopenmpt/dox/changelog.md.tmp
 		cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/\ \(${DATE}\)/ >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | tail -n +9 | sed -e 's/-pre//' >> libopenmpt/dox/changelog.md.tmp
+		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/\ \(${DATE}\)/ | sed -e s/-rc/\ \(${DATE}\)/ >> libopenmpt/dox/changelog.md.tmp
+		cat libopenmpt/dox/changelog.md | tail -n +9 >> libopenmpt/dox/changelog.md.tmp
+		mv libopenmpt/dox/changelog.md.tmp libopenmpt/dox/changelog.md
+		;;
+
+	release-rc)
+		checkparam1
+		LIBOPENMPT_VERSION_PREREL=-rc.$PARAM1
+		writeall
+		setprerel
+		echo -n > libopenmpt/dox/changelog.md.tmp
+		cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
+		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/-rc/ >> libopenmpt/dox/changelog.md.tmp
+		cat libopenmpt/dox/changelog.md | tail -n +9 >> libopenmpt/dox/changelog.md.tmp
 		mv libopenmpt/dox/changelog.md.tmp libopenmpt/dox/changelog.md
 		;;
 
