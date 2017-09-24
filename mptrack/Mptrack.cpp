@@ -811,7 +811,14 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	{
 		CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
 	}
-
+	if(!(GetConfigPath() + MPT_PATHSTRING("Components")).IsDirectory())
+	{
+		CreateDirectoryW((GetConfigPath() + MPT_PATHSTRING("Components")).AsNative().c_str(), 0);
+	}
+	if(!(GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
+	{
+		CreateDirectoryW((GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
+	}
 
 	// Handle updates from old versions.
 
