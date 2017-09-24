@@ -28,7 +28,7 @@ function setprerel {
 }
 
 function addchangelog {
-	echo > libopenmpt/dox/changelog.md.tmp
+	echo -n > libopenmpt/dox/changelog.md.tmp
 	cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
 	echo "### libopenmpt ${LIBOPENMPT_VERSION_MAJOR}.${LIBOPENMPT_VERSION_MINOR}.${LIBOPENMPT_VERSION_PATCH}-pre" >> libopenmpt/dox/changelog.md.tmp
 	echo "" >> libopenmpt/dox/changelog.md.tmp
