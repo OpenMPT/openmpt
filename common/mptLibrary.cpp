@@ -410,7 +410,6 @@ public:
 
 
 LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, class mpt::PathString const &fileName)
-//------------------------------------------------------------------------------------------------
 	: searchPath(searchPath)
 	, fileName(fileName)
 {
@@ -419,21 +418,18 @@ LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, class mpt::PathStrin
 
 
 mpt::LibrarySearchPath LibraryPath::GetSearchPath() const
-//-------------------------------------------------------
 {
 	return searchPath;
 }
 
 
 mpt::PathString LibraryPath::GetFileName() const
-//----------------------------------------------
 {
 	return fileName;
 }
 
 
 mpt::PathString LibraryPath::GetDefaultPrefix()
-//---------------------------------------------
 {
 	#if MPT_OS_WINDOWS
 		return MPT_PATHSTRING("");
@@ -450,7 +446,6 @@ mpt::PathString LibraryPath::GetDefaultPrefix()
 
 
 mpt::PathString LibraryPath::GetDefaultSuffix()
-//---------------------------------------------
 {
 	#if MPT_OS_WINDOWS
 		return MPT_PATHSTRING(".dll");
@@ -467,14 +462,12 @@ mpt::PathString LibraryPath::GetDefaultSuffix()
 
 
 LibraryPath LibraryPath::App(const mpt::PathString &basename)
-//-----------------------------------------------------------
 {
 	return LibraryPath(mpt::LibrarySearchPathApplication, GetDefaultPrefix() + basename + GetDefaultSuffix());
 }
 
 
 LibraryPath LibraryPath::AppFullName(const mpt::PathString &fullname)
-//-------------------------------------------------------------------
 {
 	return LibraryPath(mpt::LibrarySearchPathApplication, fullname + GetDefaultSuffix());
 }
@@ -483,7 +476,6 @@ LibraryPath LibraryPath::AppFullName(const mpt::PathString &fullname)
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const mpt::PathString &appdata)
-//-------------------------------------------------------------------------------------------------------
 {
 	if(appdata.empty())
 	{
@@ -496,28 +488,24 @@ LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const 
 
 
 LibraryPath LibraryPath::System(const mpt::PathString &basename)
-//--------------------------------------------------------------
 {
 	return LibraryPath(mpt::LibrarySearchPathSystem, GetDefaultPrefix() + basename + GetDefaultSuffix());
 }
 
 
 LibraryPath LibraryPath::FullPath(const mpt::PathString &path)
-//------------------------------------------------------------
 {
 	return LibraryPath(mpt::LibrarySearchPathFullPath, path);
 }
 
 
 Library::Library()
-//----------------
 {
 	return;
 }
 
 
 Library::Library(const mpt::LibraryPath &path)
-//--------------------------------------------
 {
 	if(path.GetSearchPath() == mpt::LibrarySearchPathInvalid)
 	{
@@ -532,21 +520,18 @@ Library::Library(const mpt::LibraryPath &path)
 
 
 void Library::Unload()
-//--------------------
 {
 	*this = mpt::Library();
 }
 
 
 bool Library::IsValid() const
-//---------------------------
 {
 	return m_Handle && m_Handle->IsValid();
 }
 
 
 FuncPtr Library::GetProcAddress(const std::string &symbol) const
-//--------------------------------------------------------------
 {
 	if(!IsValid())
 	{

@@ -25,7 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 uint8 CSoundFile::FrequencyToCutOff(double frequency) const
-//---------------------------------------------------------
 {
 	// IT Cutoff is computed as cutoff = 110 * 2 ^ (0.25 + x/y), where x is the cutoff and y defines the filter range.
 	// Reversed, this gives us x = (log2(cutoff / 110) - 0.25) * y.
@@ -39,7 +38,6 @@ uint8 CSoundFile::FrequencyToCutOff(double frequency) const
 
 
 uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
-//--------------------------------------------------------------------------
 {
 	MPT_ASSERT(nCutOff < 128);
 	float Fc = 110.0f * std::pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (m_SongFlags[SONG_EXFILTERRANGE] ? 20.0f * 512.0f : 24.0f * 512.0f));
@@ -52,7 +50,6 @@ uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
 
 // Simple 2-poles resonant filter
 void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier) const
-//----------------------------------------------------------------------------------------
 {
 	int cutoff = (int)pChn->nCutOff + (int)pChn->nCutSwing;
 	int resonance = (int)(pChn->nResonance & 0x7F) + (int)pChn->nResSwing;

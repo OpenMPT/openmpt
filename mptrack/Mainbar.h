@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=============================
 class CStereoVU: public CStatic
-//=============================
 {
 protected:
 	uint8 numChannels;
@@ -48,9 +46,7 @@ class CModDoc;
 class CModTree;
 class CMainFrame;
 
-//===============================
 class CToolBarEx: public CToolBar
-//===============================
 {
 protected:
 	BOOL m_bVertical, m_bFlatButtons;
@@ -73,9 +69,7 @@ public:
 };
 
 
-//===================================
 class CMainToolBar: public CToolBarEx
-//===================================
 {
 protected:
 	CImageListEx m_ImageList, m_ImageListDisabled;
@@ -122,9 +116,7 @@ protected:
 #define MTB_DRAGGING	0x04
 #define MTB_TRACKER		0x08
 
-//==================================
 class CModTreeBar: public CDialogBar
-//==================================
 {
 protected:
 	DWORD m_dwStatus; // MTB_XXXX

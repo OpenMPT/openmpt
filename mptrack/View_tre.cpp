@@ -39,7 +39,6 @@ CSoundFile *CModTree::m_SongFile = nullptr;
 
 
 BOOL CModTreeDropTarget::Register(CModTree *pWnd)
-//-----------------------------------------------
 {
 	m_pModTree = pWnd;
 	return COleDropTarget::Register(pWnd);
@@ -47,7 +46,6 @@ BOOL CModTreeDropTarget::Register(CModTree *pWnd)
 
 
 DROPEFFECT CModTreeDropTarget::OnDragEnter(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
-//-----------------------------------------------------------------------------------------------------------------
 {
 	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDragEnter(pDataObject, dwKeyState, point);
 	return DROPEFFECT_NONE;
@@ -55,7 +53,6 @@ DROPEFFECT CModTreeDropTarget::OnDragEnter(CWnd *pWnd, COleDataObject* pDataObje
 
 
 DROPEFFECT CModTreeDropTarget::OnDragOver(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
-//----------------------------------------------------------------------------------------------------------------
 {
 	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDragOver(pDataObject, dwKeyState, point);
 	return DROPEFFECT_NONE;
@@ -63,7 +60,6 @@ DROPEFFECT CModTreeDropTarget::OnDragOver(CWnd *pWnd, COleDataObject* pDataObjec
 
 
 BOOL CModTreeDropTarget::OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point)
-//-----------------------------------------------------------------------------------------------------------
 {
 	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDrop(pDataObject, dropEffect, point);
 	return FALSE;
@@ -151,7 +147,6 @@ CModTree::CModTree(CModTree *pDataTree) :
 	m_hItemDrag(nullptr), m_hItemDrop(nullptr),
 	m_hInsLib(nullptr), m_hMidiLib(nullptr),
 	m_bShowAllFiles(false), doLabelEdit(false)
-//--------------------------------------------
 {
 	if(m_pDataTree != nullptr)
 	{
@@ -166,7 +161,6 @@ CModTree::CModTree(CModTree *pDataTree) :
 
 
 CModTree::~CModTree()
-//-------------------
 {
 	DocInfo.clear();
 
@@ -184,7 +178,6 @@ CModTree::~CModTree()
 
 
 void CModTree::Init()
-//-------------------
 {
 	m_MediaFoundationExtensions = FileType(CSoundFile::GetMediaFoundationFileTypes()).GetExtensions();
 
@@ -249,7 +242,6 @@ void CModTree::Init()
 
 
 BOOL CModTree::PreTranslateMessage(MSG *pMsg)
-//-------------------------------------------
 {
 	if (!pMsg) return TRUE;
 
@@ -386,7 +378,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 
 
 mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
-//----------------------------------------------------------------
 {
 	mpt::PathString fullPath = m_InstrLibPath;
 	fullPath.EnsureTrailingSlash();
@@ -395,7 +386,6 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 
 
 bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songName)
-//-----------------------------------------------------------------------------------------------
 {
 	if(!songName.empty() && mpt::PathString::CompareNoCase(m_SongFileName, songName))
 	{
@@ -436,7 +426,6 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 
 
 bool CModTree::SetSoundFile(FileReader &file)
-//-------------------------------------------
 {
 	CSoundFile *sndFile = new (std::nothrow) CSoundFile;
 	if(sndFile == nullptr || !sndFile->Create(file, CSoundFile::loadNoPatternOrPluginData))
@@ -462,7 +451,6 @@ bool CModTree::SetSoundFile(FileReader &file)
 
 
 void CModTree::OnOptionsChanged()
-//-------------------------------
 {
 	DWORD dwRemove = TVS_SINGLEEXPAND, dwAdd = 0;
 	m_dwStatus &= ~TREESTATUS_SINGLEEXPAND;
@@ -477,7 +465,6 @@ void CModTree::OnOptionsChanged()
 
 
 void CModTree::AddDocument(CModDoc &modDoc)
-//-----------------------------------------
 {
 	// Check if document is already in the list
 	if(std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; }) != DocInfo.end())
@@ -503,7 +490,6 @@ void CModTree::AddDocument(CModDoc &modDoc)
 
 
 void CModTree::RemoveDocument(CModDoc &modDoc)
-//--------------------------------------------
 {
 	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
 	if(doc != DocInfo.end())
@@ -521,7 +507,6 @@ void CModTree::RemoveDocument(CModDoc &modDoc)
 
 // Get CModDoc that is associated with a tree item
 ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
-//----------------------------------------------------------------
 {
 	hItem = GetParentRootItem(hItem);
 	if(hItem != nullptr)
@@ -539,7 +524,6 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 
 // Get modtree doc information for a given CModDoc
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
-//------------------------------------------------------------------
 {
 	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
 	if(doc != DocInfo.end())
@@ -553,7 +537,6 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 // CViewModTree drawing
 
 void CModTree::RefreshMidiLibrary()
-//---------------------------------
 {
 	std::wstring s;
 	WCHAR stmp[256];
@@ -630,7 +613,6 @@ void CModTree::RefreshMidiLibrary()
 
 
 void CModTree::RefreshDlsBanks()
-//------------------------------
 {
 	const mpt::Charset charset = mpt::CharsetLocale;
 	TCHAR s[256];
@@ -762,7 +744,6 @@ void CModTree::RefreshDlsBanks()
 
 
 void CModTree::RefreshInstrumentLibrary()
-//---------------------------------------
 {
 	SetRedraw(FALSE);
 	// Check if the currently selected item should be selected after refreshing
@@ -784,7 +765,6 @@ void CModTree::RefreshInstrumentLibrary()
 
 
 void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
-//--------------------------------------------------------------
 {
 	TCHAR s[256], stmp[256];
 	TV_ITEM tvi;
@@ -1234,7 +1214,6 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 
 CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
-//-----------------------------------------------------
 {
 	if (!hItem) return ModItem(MODITEM_NULL);
 	// First, test root items
@@ -1354,7 +1333,6 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 
 
 BOOL CModTree::ExecuteItem(HTREEITEM hItem)
-//-----------------------------------------
 {
 	if (hItem)
 	{
@@ -1432,7 +1410,6 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 
 
 BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
-//---------------------------------------------------------------------------
 {
 	if (hItem)
 	{
@@ -1558,7 +1535,6 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 
 
 BOOL CModTree::SetMidiInstrument(UINT nIns, const mpt::PathString &fileName)
-//--------------------------------------------------------------------------
 {
 	MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
 	if(nIns < 128)
@@ -1572,7 +1548,6 @@ BOOL CModTree::SetMidiInstrument(UINT nIns, const mpt::PathString &fileName)
 
 
 BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
-//---------------------------------------------------------------------------
 {
 	MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
 	if(nPerc < 128)
@@ -1587,7 +1562,6 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 
 
 void CModTree::DeleteTreeItem(HTREEITEM hItem)
-//--------------------------------------------
 {
 	const ModItem modItem = GetModItem(hItem);
 	uint32 modItemID = modItem.val1;
@@ -1697,7 +1671,6 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 
 BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
-//------------------------------------------
 {
 	const ModItem modItem = GetModItem(hItem);
 
@@ -1719,7 +1692,6 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 
 
 BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
-//---------------------------------------------
 {
 	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
@@ -1760,7 +1732,6 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 
 // Empty Instrument Library
 void CModTree::EmptyInstrumentLibrary()
-//-------------------------------------
 {
 	HTREEITEM h;
 	if (!m_hInsLib) return;
@@ -1779,7 +1750,6 @@ void CModTree::EmptyInstrumentLibrary()
 
 // Refresh Instrument Library
 void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
-//-------------------------------------------------------------
 {
 	if (!m_hInsLib) return;
 
@@ -1956,7 +1926,6 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 
 // Monitor changes in the instrument library folder.
 void CModTree::MonitorInstrumentLibrary()
-//---------------------------------------
 {
 	mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLowest);
 	DWORD result;
@@ -2028,7 +1997,6 @@ void CModTree::MonitorInstrumentLibrary()
 
 // Insert sample browser item.
 void CModTree::ModTreeInsert(const WCHAR *name, int image, const WCHAR *selectIfMatch)
-//------------------------------------------------------------------------------------
 {
 	DWORD dwId = 0;
 	switch(image)
@@ -2063,7 +2031,6 @@ void CModTree::ModTreeInsert(const WCHAR *name, int image, const WCHAR *selectIf
 
 
 int CALLBACK CModTree::ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM)
-//-------------------------------------------------------------------------------------
 {
 	lParam1 &= 0x7FFFFFFF;
 	lParam2 &= 0x7FFFFFFF;
@@ -2072,7 +2039,6 @@ int CALLBACK CModTree::ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, 
 
 
 int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM pDLSBank)
-//--------------------------------------------------------------------------------------------
 {
 	lParam1 &= 0x7FFFFFFF;
 	lParam2 &= 0x7FFFFFFF;
@@ -2095,7 +2061,6 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 
 
 void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
-//---------------------------------------------------------------------
 {
 	if(dir.empty()) return;
 	if(IsSampleBrowser())
@@ -2178,7 +2143,6 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 
 bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
-//-------------------------------------------------------------------------
 {
 	dropInfo.pModDoc = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc) : nullptr);
 	dropInfo.dwDropType = DRAGONDROP_NOTHING;
@@ -2264,7 +2228,6 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 
 
 bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
-//---------------------------------------------------
 {
 	const ModItem modItemDrop = GetModItem(hItem);
 	const uint32 modItemDropID = modItemDrop.val1;
@@ -2440,7 +2403,6 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 
 void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
-//------------------------------------------------------------------
 {
 	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(modDoc);
 	if(pInfo == nullptr) return;
@@ -2519,7 +2481,6 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 
 void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
-//------------------------------------------------------------------------
 {
 	if (pHint != this)
 	{
@@ -2535,7 +2496,6 @@ void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 }
 
 void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
-//-------------------------------------------------------------
 {
 	LPNMTREEVIEW pnm = (LPNMTREEVIEW)pnmhdr;
 	if ((pnm->itemNew.iImage == IMAGE_FOLDER) || (pnm->itemNew.iImage == IMAGE_OPENFOLDER))
@@ -2548,7 +2508,6 @@ void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
 
 
 void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
-//-----------------------------------------------------------------------
 {
 	if (!(m_dwStatus & TREESTATUS_DRAGGING))
 	{
@@ -2599,7 +2558,6 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 
 
 void CModTree::OnBeginRDrag(LPNMHDR pnmhdr, LRESULT *pResult)
-//-----------------------------------------------------------
 {
 	if (pnmhdr)
 	{
@@ -2610,7 +2568,6 @@ void CModTree::OnBeginRDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 
 
 void CModTree::OnBeginLDrag(LPNMHDR pnmhdr, LRESULT *pResult)
-//-----------------------------------------------------------
 {
 	if (pnmhdr)
 	{
@@ -2621,7 +2578,6 @@ void CModTree::OnBeginLDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 
 
 void CModTree::OnItemDblClk(LPNMHDR, LRESULT *pResult)
-//----------------------------------------------------
 {
 	POINT pt;
 	GetCursorPos(&pt);
@@ -2636,7 +2592,6 @@ void CModTree::OnItemDblClk(LPNMHDR, LRESULT *pResult)
 
 
 void CModTree::OnItemReturn(LPNMHDR, LRESULT *pResult)
-//----------------------------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 	if (hItem) ExecuteItem(hItem);
@@ -2645,7 +2600,6 @@ void CModTree::OnItemReturn(LPNMHDR, LRESULT *pResult)
 
 
 void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
-//--------------------------------------------------------
 {
 	CPoint pt, ptClient;
 	UINT flags;
@@ -2659,7 +2613,6 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 
 
 void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
-//---------------------------------------------------------
 {
 	HMENU hMenu;
 	if (m_dwStatus & TREESTATUS_LDRAG)
@@ -2919,7 +2872,6 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 
 
 void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
-//-------------------------------------------------------
 {
 	if (!(m_dwStatus & TREESTATUS_RDRAG))
 	{
@@ -2965,7 +2917,6 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 
 
 void CModTree::OnEndDrag(DWORD dwMask)
-//------------------------------------
 {
 	if (m_dwStatus & dwMask)
 	{
@@ -3000,7 +2951,6 @@ void CModTree::OnEndDrag(DWORD dwMask)
 
 
 void CModTree::OnLButtonUp(UINT nFlags, CPoint point)
-//---------------------------------------------------
 {
 	OnEndDrag(TREESTATUS_LDRAG);
 	CTreeCtrl::OnLButtonUp(nFlags, point);
@@ -3008,7 +2958,6 @@ void CModTree::OnLButtonUp(UINT nFlags, CPoint point)
 
 
 void CModTree::OnRButtonUp(UINT nFlags, CPoint point)
-//---------------------------------------------------
 {
 	OnEndDrag(TREESTATUS_RDRAG);
 	CTreeCtrl::OnRButtonUp(nFlags, point);
@@ -3016,7 +2965,6 @@ void CModTree::OnRButtonUp(UINT nFlags, CPoint point)
 
 
 void CModTree::OnMouseMove(UINT nFlags, CPoint point)
-//---------------------------------------------------
 {
 	if (m_dwStatus & TREESTATUS_DRAGGING)
 	{
@@ -3117,7 +3065,6 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 
 
 void CModTree::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-//-------------------------------------------------------------
 {
 	switch(nChar)
 	{
@@ -3130,7 +3077,6 @@ void CModTree::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 
 void CModTree::OnRefreshTree()
-//----------------------------
 {
 	BeginWaitCursor();
 	for (auto &doc : DocInfo)
@@ -3145,35 +3091,30 @@ void CModTree::OnRefreshTree()
 
 
 void CModTree::OnExecuteItem()
-//----------------------------
 {
 	ExecuteItem(GetSelectedItem());
 }
 
 
 void CModTree::OnDeleteTreeItem()
-//-------------------------------
 {
 	DeleteTreeItem(GetSelectedItem());
 }
 
 
 void CModTree::OnPlayTreeItem()
-//-----------------------------
 {
 	PlayItem(GetSelectedItem(), NOTE_MIDDLEC);
 }
 
 
 void CModTree::OnOpenTreeItem()
-//-----------------------------
 {
 	OpenTreeItem(GetSelectedItem());
 }
 
 
 void CModTree::OnMuteTreeItem()
-//-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3207,7 +3148,6 @@ void CModTree::OnMuteTreeItem()
 
 
 void CModTree::OnSoloTreeItem()
-//-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3239,7 +3179,6 @@ void CModTree::OnSoloTreeItem()
 
 
 void CModTree::OnUnmuteAllTreeItem()
-//----------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3269,7 +3208,6 @@ void CModTree::OnUnmuteAllTreeItem()
 // Helper function for generating an insert vector for samples/instruments
 template<typename T>
 std::vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId)
-//-------------------------------------------------------------------------------
 {
 	std::vector<T> newOrder(howMany);
 	for(T i = 0; i < howMany; i++)
@@ -3282,7 +3220,6 @@ std::vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId
 
 
 void CModTree::InsertOrDupItem(bool insert)
-//-----------------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3340,7 +3277,6 @@ void CModTree::InsertOrDupItem(bool insert)
 
 
 void CModTree::OnSwitchToTreeItem()
-//---------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3355,7 +3291,6 @@ void CModTree::OnSwitchToTreeItem()
 
 
 void CModTree::OnSetItemPath()
-//----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3386,7 +3321,6 @@ void CModTree::OnSetItemPath()
 
 
 void CModTree::OnSaveItem()
-//-------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3404,7 +3338,6 @@ void CModTree::OnSaveItem()
 
 
 void CModTree::OnSaveAll()
-//-------------------------
 {
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc != nullptr)
@@ -3417,7 +3350,6 @@ void CModTree::OnSaveAll()
 
 
 void CModTree::OnReloadItem()
-//---------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 
@@ -3448,7 +3380,6 @@ void CModTree::OnReloadItem()
 
 
 void CModTree::OnReloadAll()
-//--------------------------
 {
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc != nullptr)
@@ -3485,7 +3416,6 @@ void CModTree::OnReloadAll()
 
 // Find missing external samples
 void CModTree::OnFindMissing()
-//----------------------------
 {
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc == nullptr)
@@ -3498,7 +3428,6 @@ void CModTree::OnFindMissing()
 
 
 void CModTree::OnAddDlsBank()
-//---------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->OnAddDlsBank();
@@ -3506,7 +3435,6 @@ void CModTree::OnAddDlsBank()
 
 
 void CModTree::OnImportMidiLib()
-//------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->OnImportMidiLib();
@@ -3514,7 +3442,6 @@ void CModTree::OnImportMidiLib()
 
 
 void CModTree::OnExportMidiLib()
-//------------------------------
 {
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("ini")
@@ -3531,14 +3458,12 @@ void CModTree::OnExportMidiLib()
 // Drop support
 
 DROPEFFECT CModTree::OnDragEnter(COleDataObject*, DWORD, CPoint)
-//--------------------------------------------------------------
 {
 	return DROPEFFECT_LINK;
 }
 
 
 DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
-//-------------------------------------------------------------------
 {
 	UINT flags;
 	HTREEITEM hItem = HitTest(point, &flags);
@@ -3568,7 +3493,6 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 
 
 BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
-//--------------------------------------------------------------------
 {
 	STGMEDIUM stgm;
 	HDROP hDropInfo;
@@ -3613,7 +3537,6 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 
 
 void CModTree::OnRefreshInstrLib()
-//--------------------------------
 {
 	HTREEITEM hActive;
 
@@ -3645,7 +3568,6 @@ void CModTree::OnRefreshInstrLib()
 
 
 void CModTree::OnShowDirectories()
-//--------------------------------
 {
 	TrackerSettings::Instance().showDirsInSampleBrowser = !TrackerSettings::Instance().showDirsInSampleBrowser;
 	OnRefreshInstrLib();
@@ -3653,7 +3575,6 @@ void CModTree::OnShowDirectories()
 
 
 void CModTree::OnShowAllFiles()
-//-----------------------------
 {
 	if (!m_bShowAllFiles)
 	{
@@ -3664,7 +3585,6 @@ void CModTree::OnShowAllFiles()
 
 
 void CModTree::OnShowSoundFiles()
-//-------------------------------
 {
 	if (m_bShowAllFiles)
 	{
@@ -3675,21 +3595,18 @@ void CModTree::OnShowSoundFiles()
 
 
 void CModTree::OnGotoInstrumentDir()
-//----------------------------------
 {
 	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathInstruments.GetDefaultDir(), false);
 }
 
 
 void CModTree::OnGotoSampleDir()
-//------------------------------
 {
 	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathSamples.GetDefaultDir(), false);
 }
 
 
 void CModTree::OnSoundBankProperties()
-//------------------------------------
 {
 	const ModItem modItem = GetModItem(GetSelectedItem());
 	if(modItem.type == MODITEM_DLSBANK_FOLDER
@@ -3702,7 +3619,6 @@ void CModTree::OnSoundBankProperties()
 
 
 LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-//----------------------------------------------------------------
 {
 	if(wParam == kcNull)
 		return NULL;
@@ -3734,7 +3650,6 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 
 LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
-//--------------------------------------------------
 {
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -3762,7 +3677,6 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
 
 
 void CModTree::OnKillFocus(CWnd* pNewWnd)
-//--------------------------------------
 {
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
@@ -3772,7 +3686,6 @@ void CModTree::OnKillFocus(CWnd* pNewWnd)
 
 
 void CModTree::OnSetFocus(CWnd* pOldWnd)
-//--------------------------------------
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = true;
@@ -3781,7 +3694,6 @@ void CModTree::OnSetFocus(CWnd* pOldWnd)
 
 
 bool CModTree::IsItemExpanded(HTREEITEM hItem)
-//--------------------------------------------
 {
 	// checks if a treeview item is expanded.
 	if(hItem == NULL) return false;
@@ -3796,7 +3708,6 @@ bool CModTree::IsItemExpanded(HTREEITEM hItem)
 
 
 void CModTree::OnCloseItem()
-//--------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
@@ -3811,7 +3722,6 @@ void CModTree::OnCloseItem()
 
 // Delete all children of a tree item
 void CModTree::DeleteChildren(HTREEITEM hItem)
-//--------------------------------------------
 {
 	if(hItem != nullptr)
 	{
@@ -3826,7 +3736,6 @@ void CModTree::DeleteChildren(HTREEITEM hItem)
 
 // Get the n-th child of a tree node
 HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
-//-------------------------------------------------------------
 {
 	HTREEITEM hChildItem = nullptr;
 	if(hItem != nullptr && ItemHasChildren(hItem))
@@ -3844,7 +3753,6 @@ HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
 // Gets the root parent of an item, i.e. if C is a child of B and B is a child of A, GetParentRootItem(C) returns A.
 // A root item is considered to be its own parent, i.e. the returned value is only ever NULL if the input value was NULL.
 HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem)
-//----------------------------------------------------
 {
 	if(hItem != nullptr)
 	{
@@ -3861,7 +3769,6 @@ HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem)
 
 // Editing sample, instrument, order, pattern, etc. labels
 void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
-//------------------------------------------------------------
 {
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	CEdit *editCtrl = GetEditControl();
@@ -3946,7 +3853,6 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 // End editing sample, instrument, order, pattern, etc. labels
 void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
-//----------------------------------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
 	doLabelEdit = false;
@@ -4035,7 +3941,6 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 // Drop files from Windows
 void CModTree::OnDropFiles(HDROP hDropInfo)
-//-----------------------------------------
 {
 	bool refreshDLS = false;
 	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);

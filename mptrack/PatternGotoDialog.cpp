@@ -51,7 +51,6 @@ END_MESSAGE_MAP()
 // CPatternGotoDialog message handlers
 
 void CPatternGotoDialog::OnOK()
-//-----------------------------
 {
 	UpdateData();
 	auto &Order = m_SndFile.Order();
@@ -82,7 +81,6 @@ void CPatternGotoDialog::OnOK()
 }
 
 void CPatternGotoDialog::OnEnChangeGotoPat()
-//------------------------------------------
 {
 	if(ControlsLocked())
 	{
@@ -104,7 +102,6 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 
 
 void CPatternGotoDialog::OnEnChangeGotoOrd()
-//------------------------------------------
 {
 	if(ControlsLocked())
 	{

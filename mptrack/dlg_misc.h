@@ -18,9 +18,7 @@ class CSoundFile;
 class CModDoc;
 class CDLSBank;
 
-//===============================
 class CModTypeDlg: public CDialog
-//===============================
 {
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
@@ -62,9 +60,7 @@ protected:
 };
 
 
-//===============================================
 class CLegacyPlaybackSettingsDlg : public CDialog
-//===============================================
 {
 protected:
 	CCheckListBox m_CheckList;
@@ -90,9 +86,7 @@ protected:
 };
 
 
-//===============================
 class CShowLogDlg: public CDialog
-//===============================
 {
 public:
 	LPCTSTR m_lpszLog, m_lpszTitle;
@@ -106,9 +100,7 @@ protected:
 };
 
 
-//======================================
 class CRemoveChannelsDlg: public CDialog
-//======================================
 {
 public:
 	CSoundFile &sndFile;
@@ -142,9 +134,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////
 // Sound Banks
 
-//========================================
 class CSoundBankProperties: public CDialog
-//========================================
 {
 protected:
 	std::string m_szInfo;
@@ -166,9 +156,7 @@ enum
 	KBDNOTIFY_LBUTTONUP,
 };
 
-//=================================
 class CKeyboardControl: public CWnd
-//=================================
 {
 public:
 	enum
@@ -208,9 +196,7 @@ public:
 /////////////////////////////////////////////////////////////////////////
 // Sample Map
 
-//=================================
 class CSampleMapDlg: public CDialog
-//=================================
 {
 protected:
 	enum MouseAction
@@ -249,9 +235,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Edit history dialog
 
-//===================================
 class CEditHistoryDlg: public CDialog
-//===================================
 {
 
 protected:
@@ -271,9 +255,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Generic input dialog
 
-//=============================
 class CInputDlg: public CDialog
-//=============================
 {
 protected:
 	CNumberEdit m_edit;

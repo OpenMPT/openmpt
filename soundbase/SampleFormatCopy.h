@@ -33,7 +33,6 @@ OPENMPT_NAMESPACE_BEGIN
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
 size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
@@ -54,7 +53,6 @@ size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, siz
 // Copy numChannels interleaved sample streams.
 template <typename SampleConversion>
 void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, SampleConversion *conv)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	while(numFrames--)
 	{
@@ -71,7 +69,6 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 // Copy numChannels interleaved sample streams.
 template <typename SampleConversion>
 void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(conv.size() >= numChannels);
 	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));
@@ -81,7 +78,6 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 
 template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed>
 void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
-//------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SC::ConvertFixedPoint<Tsample, int, fractionalBits, clipOutput> conv;
 	count *= channels;
@@ -93,7 +89,6 @@ void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const T
 
 template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed>
 void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RESTRICT buffers, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SC::ConvertFixedPoint<Tsample, int, fractionalBits, clipOutput> conv;
 	for(std::size_t i = 0; i < count; ++i)
@@ -110,7 +105,6 @@ void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RE
 // Copy from an interleaed buffer of #channels.
 template <typename SampleConversion>
 void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SampleConversion sampleConv(conv);
 	src += channel;
@@ -126,7 +120,6 @@ void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT
 // Copy buffer to an interleaed buffer of #channels.
 template <typename SampleConversion>
 void CopyChannelToInterleaved(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SampleConversion sampleConv(conv);
 	dst += channel;

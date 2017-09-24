@@ -23,7 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define REPEATBIT 0x4000
 
 CInputHandler::CInputHandler(CWnd *mainframe)
-//-------------------------------------------
 {
 	m_pMainFrm = mainframe;
 
@@ -73,7 +72,6 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 
 
 static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
-//-----------------------------------------------------------------------------
 {
 	CommandID executeCommand = kcNull;
 	if(wnd != nullptr)
@@ -100,7 +98,6 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 
 
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
-//----------------------------------------------------------------------------------------------------------
 {
 	KeyMapRange cmd = std::make_pair(m_keyMap.end(), m_keyMap.end());
 	KeyEventType keyEventType;
@@ -145,7 +142,6 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 
 
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
-//------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
@@ -159,7 +155,6 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 
 // Feature: use Windows keys as modifier keys, intercept special keys
 bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateMsg)
-//---------------------------------------------------------------------------------
 {
 	KeyEventType keyEventType = GetKeyEventType(HIWORD(nFlags));
 	enum { VK_NonExistentKey = VK_F24+1 };
@@ -210,7 +205,6 @@ bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateM
 
 
 void CInputHandler::SetupSpecialKeyInterception()
-//-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
 	for(const auto &i : m_keyMap)
@@ -230,7 +224,6 @@ void CInputHandler::SetupSpecialKeyInterception()
 
 //Deal with Modifier keypresses. Private surouting used above.
 bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode)
-//---------------------------------------------------------------------------------------------
 {
 	FlagSet<Modifiers> tempModifierMask = ModNone;
 	// Scancode for right modifier keys should have bit 8 set, but Right Shift is actually 0x36.
@@ -275,7 +268,6 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 
 // Translate MIDI messages to shortcut commands
 CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
-//------------------------------------------------------------------------------------
 {
 	if(MIDIEvents::GetTypeFromEvent(message) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(message) != 0)
 	{
@@ -288,19 +280,15 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 
 
 int CInputHandler::GetKeyListSize(CommandID cmd) const
-//----------------------------------------------------
 {
 	return m_activeCommandSet->GetKeyListSize(cmd);
 }
 
 
-//-------------------------------------------------------------
 //----------------------- Misc
-//--------------------------------------------------------------
 
 
 void CInputHandler::LogModifiers()
-//--------------------------------
 {
 	Log(LogDebug, MPT_USTRING("----------------------------------\n"));
 	if (m_modifierMask[ModCtrl])  Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
@@ -311,7 +299,6 @@ void CInputHandler::LogModifiers()
 
 
 KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
-//------------------------------------------------------
 {
 	if (nFlags & TRANSITIONBIT)
 	{
@@ -330,7 +317,6 @@ KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 
 
 bool CInputHandler::SelectionPressed() const
-//------------------------------------------
 {
 	int nSelectionKeys = m_activeCommandSet->GetKeyListSize(kcSelect);
 	KeyCombination key;
@@ -348,28 +334,24 @@ bool CInputHandler::SelectionPressed() const
 
 
 bool CInputHandler::ShiftPressed() const
-//--------------------------------------
 {
 	return m_modifierMask[ModShift | ModRShift];
 }
 
 
 bool CInputHandler::CtrlPressed() const
-//-------------------------------------
 {
 	return m_modifierMask[ModCtrl | ModRCtrl];
 }
 
 
 bool CInputHandler::AltPressed() const
-//------------------------------------
 {
 	return m_modifierMask[ModAlt | ModRAlt];
 }
 
 
 void CInputHandler::Bypass(bool b)
-//--------------------------------
 {
 	if(b)
 		m_bypassCount++;
@@ -380,28 +362,24 @@ void CInputHandler::Bypass(bool b)
 
 
 bool CInputHandler::IsBypassed() const
-//------------------------------------
 {
 	return m_bypassCount > 0;
 }
 
 
 FlagSet<Modifiers> CInputHandler::GetModifierMask() const
-//-------------------------------------------------------
 {
 	return m_modifierMask;
 }
 
 
 void CInputHandler::SetModifierMask(FlagSet<Modifiers> mask)
-//----------------------------------------------------------
 {
 	m_modifierMask = mask;
 }
 
 
 CString CInputHandler::GetKeyTextFromCommand(CommandID c, const TCHAR *prependText) const
-//---------------------------------------------------------------------------------------
 {
 	CString s;
 	if(prependText != nullptr)
@@ -415,7 +393,6 @@ CString CInputHandler::GetKeyTextFromCommand(CommandID c, const TCHAR *prependTe
 
 
 CString CInputHandler::GetMenuText(UINT id) const
-//-----------------------------------------------
 {
 	const TCHAR *s;
 	CommandID c = kcNull;
@@ -490,7 +467,6 @@ CString CInputHandler::GetMenuText(UINT id) const
 
 
 void CInputHandler::UpdateMainMenu()
-//----------------------------------
 {
 	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu();
 	if (!pMenu) return;
@@ -553,7 +529,6 @@ void CInputHandler::UpdateMainMenu()
 
 
 void CInputHandler::SetNewCommandSet(const CCommandSet *newSet)
-//-------------------------------------------------------------
 {
 	m_activeCommandSet->Copy(newSet);
 	m_activeCommandSet->GenKeyMap(m_keyMap);
@@ -563,7 +538,6 @@ void CInputHandler::SetNewCommandSet(const CCommandSet *newSet)
 
 
 bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
-//----------------------------------------------------------------------
 {
 	Log("Changing command set.\n");
 	bool retval = m_activeCommandSet->QuickChange_SetEffects(modSpecs);
@@ -573,7 +547,6 @@ bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 
 
 bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
-//-------------------------------------------------------
 {
 
 	//Alpha-numerics (only shift or no modifier):
@@ -598,7 +571,6 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 
 
 BypassInputHandler::BypassInputHandler()
-//--------------------------------------
 	: bypassed(false)
 {
 	if(CMainFrame::GetInputHandler())
@@ -610,7 +582,6 @@ BypassInputHandler::BypassInputHandler()
 
 
 BypassInputHandler::~BypassInputHandler()
-//---------------------------------------
 {
 	if(bypassed)
 	{

@@ -16,9 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 
-//==============
 class EffectInfo
-//==============
 {
 protected:
 	const CSoundFile &sndFile;

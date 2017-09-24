@@ -4,9 +4,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace PNG { struct Bitmap; }
 
-//===============================
 class CRippleBitmap: public CWnd
-//===============================
 {
 
 public:
@@ -43,9 +41,7 @@ protected:
 };
 
 
-//=============================
 class CAboutDlg: public CDialog
-//=============================
 {
 protected:
 	CRippleBitmap m_bmp;

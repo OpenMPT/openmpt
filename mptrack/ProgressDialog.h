@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//====================================
 class CProgressDialog : public CDialog
-//====================================
 {
 public:
 	bool m_abort;

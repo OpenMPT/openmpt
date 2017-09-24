@@ -20,7 +20,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 void CPatternContainer::ClearPatterns()
-//-------------------------------------
 {
 	DestroyPatterns();
 	m_Patterns.assign(m_Patterns.size(), CPattern(*this));
@@ -28,7 +27,6 @@ void CPatternContainer::ClearPatterns()
 
 
 void CPatternContainer::DestroyPatterns()
-//---------------------------------------
 {
 	for(PATTERNINDEX i = 0; i < m_Patterns.size(); i++)
 	{
@@ -38,7 +36,6 @@ void CPatternContainer::DestroyPatterns()
 
 
 PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from, bool respectQtyLimits)
-//---------------------------------------------------------------------------------
 {
 	if(!IsValidPat(from))
 	{
@@ -56,7 +53,6 @@ PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from, bool respectQtyLimi
 
 
 PATTERNINDEX CPatternContainer::InsertAny(const ROWINDEX rows, bool respectQtyLimits)
-//-----------------------------------------------------------------------------------
 {
 	PATTERNINDEX i = 0;
 	for(i = 0; i < m_Patterns.size(); i++)
@@ -70,7 +66,6 @@ PATTERNINDEX CPatternContainer::InsertAny(const ROWINDEX rows, bool respectQtyLi
 
 
 bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
-//---------------------------------------------------------------------------
 {
 	if(rows > MAX_PATTERN_ROWS || rows == 0)
 		return false;
@@ -96,14 +91,12 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 
 
 void CPatternContainer::Remove(const PATTERNINDEX ipat)
-//-----------------------------------------------------
 {
 	if(ipat < m_Patterns.size()) m_Patterns[ipat].Deallocate();
 }
 
 
 bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
-//-------------------------------------------------------------------
 {
 	if(!IsValidPat(nPat))
 		return false;
@@ -118,7 +111,6 @@ bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
 
 
 void CPatternContainer::ResizeArray(const PATTERNINDEX newSize)
-//-------------------------------------------------------------
 {
 	if(Size() <= newSize)
 	{
@@ -133,7 +125,6 @@ void CPatternContainer::ResizeArray(const PATTERNINDEX newSize)
 
 
 void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
-//-----------------------------------------------------------------
 {
 	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
 	//if(specs.patternsMax < Size())
@@ -152,7 +143,6 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 
 
 PATTERNINDEX CPatternContainer::GetNumPatterns() const
-//----------------------------------------------------
 {
 	if(Size() == 0)
 	{
@@ -170,7 +160,6 @@ PATTERNINDEX CPatternContainer::GetNumPatterns() const
 
 
 PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
-//---------------------------------------------------------
 {
 	if(Size() == 0)
 	{
@@ -189,7 +178,6 @@ PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
 
 
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
-//----------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPatterns, MptVersion::num);
@@ -206,7 +194,6 @@ void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 
 
 void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
-//------------------------------------------------------------------------------
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPatterns, MptVersion::num);

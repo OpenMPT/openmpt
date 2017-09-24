@@ -89,7 +89,6 @@ bool IsFacilityActive(const char *facility)
 
 
 void Logger::SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text)
-//-----------------------------------------------------------------------------------------------------------------
 {
 #ifdef MPT_LOG_IS_DISABLED
 	MPT_UNREFERENCED_PARAMETER(context);
@@ -185,13 +184,11 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 }
 
 void LegacyLogger::operator () (const AnyStringLocale &text)
-//----------------------------------------------------------
 {
 	SendLogMessage(context, MPT_LEGACY_LOGLEVEL, "", text);
 }
 
 void LegacyLogger::operator () (const char *format, ...)
-//------------------------------------------------------
 {
 	static const std::size_t LOGBUF_SIZE = 1024;
 	char message[LOGBUF_SIZE];
@@ -204,7 +201,6 @@ void LegacyLogger::operator () (const char *format, ...)
 }
 
 void LegacyLogger::operator () (LogLevel level, const mpt::ustring &text)
-//-----------------------------------------------------------------------
 {
 	SendLogMessage(context, level, "", text);
 }

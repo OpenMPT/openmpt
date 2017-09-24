@@ -102,7 +102,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CModCleanupDlg::OnInitDialog()
-//---------------------------------
 {
 	CDialog::OnInitDialog();
 	for(int i = 0; i < kMaxCleanupOptions; i++)
@@ -126,7 +125,6 @@ BOOL CModCleanupDlg::OnInitDialog()
 
 
 void CModCleanupDlg::OnOK()
-//-------------------------
 {
 	ScopedLogCapturer logcapturer(modDoc, "cleanup", this);
 	for(int i = 0; i < kMaxCleanupOptions; i++)
@@ -180,7 +178,6 @@ void CModCleanupDlg::OnOK()
 
 
 void CModCleanupDlg::OnVerifyMutualExclusive()
-//--------------------------------------------
 {
 	HWND hFocus = GetFocus()->m_hWnd;
 	for(int i = 0; i < kMaxCleanupOptions; i++)	
@@ -208,7 +205,6 @@ void CModCleanupDlg::OnVerifyMutualExclusive()
 
 
 void CModCleanupDlg::OnPresetCleanupSong()
-//----------------------------------------
 {
 	// patterns
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_CHECKED);
@@ -236,7 +232,6 @@ void CModCleanupDlg::OnPresetCleanupSong()
 
 
 void CModCleanupDlg::OnPresetCompoCleanup()
-//-----------------------------------------
 {
 	// patterns
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_UNCHECKED);
@@ -264,7 +259,6 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 
 
 BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
-//------------------------------------------------------------------
 {
 	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
 	UINT_PTR nID = pNMHDR->idFrom;
@@ -342,7 +336,6 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 // Actual cleanup implementations
 
 bool CModCleanupDlg::RemoveDuplicatePatterns()
-//-----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
@@ -398,7 +391,6 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 
 // Remove unused patterns
 bool CModCleanupDlg::RemoveUnusedPatterns()
-//-----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
@@ -442,7 +434,6 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 
 // Rearrange patterns (first pattern in order list = 0, etc...)
 bool CModCleanupDlg::RearrangePatterns()
-//--------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -510,7 +501,6 @@ bool CModCleanupDlg::RearrangePatterns()
 
 // Remove unused samples
 bool CModCleanupDlg::RemoveUnusedSamples()
-//----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -559,7 +549,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 // Check if the stereo channels of a sample contain identical data
 template<typename T>
 static bool ComapreStereoChannels(SmpLength length, const T *sampleData)
-//----------------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < length; i++, sampleData += 2)
 	{
@@ -573,7 +562,6 @@ static bool ComapreStereoChannels(SmpLength length, const T *sampleData)
 
 // Remove unused sample data
 bool CModCleanupDlg::OptimizeSamples()
-//------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -677,7 +665,6 @@ bool CModCleanupDlg::OptimizeSamples()
 
 // Rearrange sample list
 bool CModCleanupDlg::RearrangeSamples()
-//-------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 	if(sndFile.GetNumSamples() < 2)
@@ -707,7 +694,6 @@ bool CModCleanupDlg::RearrangeSamples()
 
 // Remove unused instruments
 bool CModCleanupDlg::RemoveUnusedInstruments()
-//--------------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 	if(!sndFile.GetNumInstruments())
@@ -783,7 +769,6 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 // Remove ununsed plugins
 bool CModCleanupDlg::RemoveUnusedPlugins()
-//----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -843,7 +828,6 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 
 // Reset variables (convert to IT, reset global/smp/ins vars, etc.)
 bool CModCleanupDlg::ResetVariables()
-//-----------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -909,7 +893,6 @@ bool CModCleanupDlg::ResetVariables()
 
 
 bool CModCleanupDlg::RemoveUnusedChannels()
-//-----------------------------------------
 {
 	// Avoid M.K. modules to become xCHN modules if some channels are unused.
 	if(modDoc.GetModType() == MOD_TYPE_MOD && modDoc.GetNumChannels() == 4)
@@ -923,7 +906,6 @@ bool CModCleanupDlg::RemoveUnusedChannels()
 
 // Remove all patterns
 bool CModCleanupDlg::RemoveAllPatterns()
-//--------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -936,7 +918,6 @@ bool CModCleanupDlg::RemoveAllPatterns()
 
 // Remove all orders
 bool CModCleanupDlg::RemoveAllOrders()
-//------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -947,7 +928,6 @@ bool CModCleanupDlg::RemoveAllOrders()
 
 // Remove all samples
 bool CModCleanupDlg::RemoveAllSamples()
-//-------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -963,7 +943,6 @@ bool CModCleanupDlg::RemoveAllSamples()
 
 // Remove all instruments
 bool CModCleanupDlg::RemoveAllInstruments()
-//-----------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -982,7 +961,6 @@ bool CModCleanupDlg::RemoveAllInstruments()
 
 // Remove all plugins
 bool CModCleanupDlg::RemoveAllPlugins()
-//-------------------------------------
 {
 	std::vector<bool> keepMask(MAX_MIXPLUGINS, false);
 	modDoc.RemovePlugs(keepMask);
@@ -991,7 +969,6 @@ bool CModCleanupDlg::RemoveAllPlugins()
 
 
 bool CModCleanupDlg::MergeSequences()
-//-----------------------------------
 {
 	return modDoc.GetrSoundFile().Order.MergeSequences();
 }

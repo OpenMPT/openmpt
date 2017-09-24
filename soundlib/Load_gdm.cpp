@@ -97,7 +97,6 @@ static const MODTYPE gdmFormatOrigin[] =
 
 
 static bool ValidateHeader(const GDMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "GDM\xFE", 4)
 		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
@@ -113,7 +112,6 @@ static bool ValidateHeader(const GDMFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderGDM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	GDMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -130,7 +128,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderGDM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

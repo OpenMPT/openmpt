@@ -17,7 +17,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 	UMXFileHeader fileHeader;

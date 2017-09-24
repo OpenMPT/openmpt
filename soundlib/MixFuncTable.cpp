@@ -74,7 +74,6 @@ const MixFuncInterface Functions[6 * 16] =
 
 
 ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode)
-//---------------------------------------------------------------------
 {
 	switch(resamplingMode)
 	{

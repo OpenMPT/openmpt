@@ -115,7 +115,6 @@ END_MESSAGE_MAP()
 
 
 void CViewGlobals::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------
 {
 	CFormView::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CViewGlobals)
@@ -156,7 +155,6 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 }
 
 void CViewGlobals::OnInitialUpdate()
-//----------------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	int nMapMode = MM_TEXT;
@@ -221,7 +219,6 @@ void CViewGlobals::OnInitialUpdate()
 
 
 void CViewGlobals::OnDestroy()
-//----------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
@@ -237,7 +234,6 @@ void CViewGlobals::OnDestroy()
 
 
 LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
-//------------------------------------------------------
 {
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -248,7 +244,6 @@ LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
 
 
 void CViewGlobals::RecalcLayout()
-//-------------------------------
 {
 	if (m_TabCtrl.m_hWnd != NULL)
 	{
@@ -262,7 +257,6 @@ void CViewGlobals::RecalcLayout()
 
 
 int CViewGlobals::GetDlgItemIntEx(UINT nID)
-//-----------------------------------------
 {
 	CString s;
 	GetDlgItemText(nID, s);
@@ -272,7 +266,6 @@ int CViewGlobals::GetDlgItemIntEx(UINT nID)
 
 
 void CViewGlobals::OnSize(UINT nType, int cx, int cy)
-//---------------------------------------------------
 {
 	CFormView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0) && (m_hWnd))
@@ -283,14 +276,12 @@ void CViewGlobals::OnSize(UINT nType, int cx, int cy)
 
 
 void CViewGlobals::OnUpdate(CView *pView, LPARAM lHint, CObject *pHint)
-//---------------------------------------------------------------------
 {
 	if (pView != this) UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 
 void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
-//--------------------------------------------------------------
 {
 	const CModDoc *pModDoc = GetDocument();
 	int nTabCount, nTabIndex;
@@ -553,7 +544,6 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 
 
 void CViewGlobals::PopulateChannelPlugins()
-//-----------------------------------------
 {
 	// Channel effect lists
 	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
@@ -589,7 +579,6 @@ void CViewGlobals::PopulateChannelPlugins()
 
 
 IMixPlugin *CViewGlobals::GetCurrentPlugin() const
-//------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
@@ -603,7 +592,6 @@ IMixPlugin *CViewGlobals::GetCurrentPlugin() const
 
 
 void CViewGlobals::OnTabSelchange(NMHDR*, LRESULT* pResult)
-//---------------------------------------------------------
 {
 	UpdateView(GeneralHint().Channels());
 	if (pResult) *pResult = 0;
@@ -611,7 +599,6 @@ void CViewGlobals::OnTabSelchange(NMHDR*, LRESULT* pResult)
 
 
 void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
-//----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -631,7 +618,6 @@ void CViewGlobals::OnMute4() {OnMute(3, IDC_CHECK7);}
 
 
 void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
-//--------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -650,7 +636,6 @@ void CViewGlobals::OnSurround3() {OnSurround(2, IDC_CHECK6);}
 void CViewGlobals::OnSurround4() {OnSurround(3, IDC_CHECK8);}
 
 void CViewGlobals::OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID)
-//-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
@@ -672,7 +657,6 @@ void CViewGlobals::OnEditVol4() {OnEditVol(3, IDC_EDIT7);}
 
 
 void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
-//-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
@@ -697,7 +681,6 @@ void CViewGlobals::OnEditPan4() {OnEditPan(3, IDC_EDIT8);}
 
 
 void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-//---------------------------------------------------------------------------
 {
 	CModDoc *pModDoc;
 	CHANNELINDEX nChn;
@@ -790,7 +773,6 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-//---------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -824,7 +806,6 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
-//--------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -850,7 +831,6 @@ void CViewGlobals::OnEditName4() {OnEditName(3, IDC_EDIT12);}
 
 
 void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
-//--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -878,7 +858,6 @@ void CViewGlobals::OnFx4Changed() {OnFxChanged(3);}
 
 
 void CViewGlobals::OnPluginNameChanged()
-//--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -909,7 +888,6 @@ void CViewGlobals::OnPluginNameChanged()
 
 
 void CViewGlobals::OnPrevPlugin()
-//-------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin > 0) && (pModDoc))
@@ -921,7 +899,6 @@ void CViewGlobals::OnPrevPlugin()
 
 
 void CViewGlobals::OnNextPlugin()
-//-------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin < MAX_MIXPLUGINS-1) && (pModDoc))
@@ -934,7 +911,6 @@ void CViewGlobals::OnNextPlugin()
 
 
 void CViewGlobals::OnPluginChanged()
-//----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	int nPlugin = m_CbnPlugin.GetCurSel();
@@ -948,7 +924,6 @@ void CViewGlobals::OnPluginChanged()
 
 
 void CViewGlobals::OnSelectPlugin()
-//---------------------------------
 {
 #ifndef NO_PLUGINS
 	CModDoc *pModDoc = GetDocument();
@@ -970,7 +945,6 @@ void CViewGlobals::OnSelectPlugin()
 
 
 LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
-//-----------------------------------------------------------------
 {
 	if(plugin == m_nCurrentPlugin && param == m_nCurrentParam)
 	{
@@ -981,7 +955,6 @@ LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
 
 
 void CViewGlobals::OnParamChanged()
-//---------------------------------
 {
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 
@@ -1016,7 +989,6 @@ void CViewGlobals::OnParamChanged()
 
 // When focussing the parameter value, show its real value to edit
 void CViewGlobals::OnFocusParam()
-//-------------------------------
 {
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr)
@@ -1036,7 +1008,6 @@ void CViewGlobals::OnFocusParam()
 
 
 void CViewGlobals::SetPluginModified()
-//------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
@@ -1046,7 +1017,6 @@ void CViewGlobals::SetPluginModified()
 
 
 void CViewGlobals::OnProgramChanged()
-//-----------------------------------
 {
 	int32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 
@@ -1067,7 +1037,6 @@ void CViewGlobals::OnProgramChanged()
 
 
 void CViewGlobals::OnLoadParam()
-//------------------------------
 {
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr && pPlugin->LoadProgram())
@@ -1081,7 +1050,6 @@ void CViewGlobals::OnLoadParam()
 
 
 void CViewGlobals::OnSaveParam()
-//------------------------------
 {
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr)
@@ -1092,7 +1060,6 @@ void CViewGlobals::OnSaveParam()
 
 
 void CViewGlobals::OnSetParameter()
-//---------------------------------
 {
 	if(m_nCurrentPlugin >= MAX_MIXPLUGINS || IsLocked()) return;
 	IMixPlugin *pPlugin = GetCurrentPlugin();
@@ -1114,7 +1081,6 @@ void CViewGlobals::OnSetParameter()
 
 
 void CViewGlobals::UpdateDryWetDisplay()
-//--------------------------------------
 {
 	SNDMIXPLUGIN &plugin = GetDocument()->GetSoundFile()->m_MixPlugins[m_nCurrentPlugin];
 	float wetRatio = 1.0f - plugin.fDryRatio, dryRatio = plugin.fDryRatio;
@@ -1133,7 +1099,6 @@ void CViewGlobals::UpdateDryWetDisplay()
 
 
 void CViewGlobals::OnMixModeChanged()
-//-----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1148,7 +1113,6 @@ void CViewGlobals::OnMixModeChanged()
 
 
 void CViewGlobals::OnBypassChanged()
-//----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1163,7 +1127,6 @@ void CViewGlobals::OnBypassChanged()
 
 
 void CViewGlobals::OnWetDryExpandChanged()
-//----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1179,7 +1142,6 @@ void CViewGlobals::OnWetDryExpandChanged()
 
 
 void CViewGlobals::OnSpecialMixProcessingChanged()
-//------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1193,7 +1155,6 @@ void CViewGlobals::OnSpecialMixProcessingChanged()
 
 
 void CViewGlobals::OnDryMixChanged()
-//----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -1208,7 +1169,6 @@ void CViewGlobals::OnDryMixChanged()
 
 
 void CViewGlobals::OnEditPlugin()
-//-------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
@@ -1218,7 +1178,6 @@ void CViewGlobals::OnEditPlugin()
 
 
 void CViewGlobals::OnOutputRoutingChanged()
-//-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	int nroute;
@@ -1261,7 +1220,6 @@ void CViewGlobals::OnOutputRoutingChanged()
 
 
 LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
-//-----------------------------------------------------------------
 {
 	switch(wParam)
 	{
@@ -1276,7 +1234,6 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 void CViewGlobals::OnMovePlugToSlot()
-//-----------------------------------
 {
 	if(GetCurrentPlugin() == nullptr)
 	{
@@ -1334,7 +1291,6 @@ void CViewGlobals::OnMovePlugToSlot()
 // Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in
 // range [m_nInstrMin, m_nInstrMax] by m_nDiff.
 struct PlugIndexModifier
-//======================
 {
 	PlugIndexModifier(PLUGINDEX nMin, PLUGINDEX nMax, int nDiff) :
 		m_nInstrMin(nMin), m_nInstrMax(nMax), m_nDiff(nDiff) {}
@@ -1350,7 +1306,6 @@ struct PlugIndexModifier
 
 
 bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
-//-------------------------------------------------------------------------
 {
 	if (src == dest)
 		return false;
@@ -1430,7 +1385,6 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 
 
 void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots)
-//-----------------------------------------------------------------------
 {
 	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
@@ -1447,7 +1401,6 @@ void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots)
 }
 
 void CViewGlobals::OnInsertSlot()
-//-------------------------------
 {
 	CString prompt;
 	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
@@ -1507,7 +1460,6 @@ void CViewGlobals::OnInsertSlot()
 
 
 void CViewGlobals::OnClonePlug()
-//------------------------------
 {
 	if(GetCurrentPlugin() == nullptr)
 	{
@@ -1561,7 +1513,6 @@ void CViewGlobals::OnClonePlug()
 
 // The plugin param box is only filled when it gets the focus (done here).
 void CViewGlobals::OnFillParamCombo()
-//-----------------------------------
 {
 	// no need to fill it again.
 	if(m_CbnParam.GetCount() > 1)
@@ -1585,7 +1536,6 @@ void CViewGlobals::OnFillParamCombo()
 
 // The preset box is only filled when it gets the focus (done here).
 void CViewGlobals::OnFillProgramCombo()
-//-------------------------------------
 {
 	// no need to fill it again.
 	if(m_CbnPreset.GetCount() > 1)
@@ -1600,7 +1550,6 @@ void CViewGlobals::OnFillProgramCombo()
 
 
 void CViewGlobals::FillPluginProgramBox(int32 firstProg, int32 lastProg)
-//----------------------------------------------------------------------
 {
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 
@@ -1621,7 +1570,6 @@ void CViewGlobals::FillPluginProgramBox(int32 firstProg, int32 lastProg)
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
 HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
-//-------------------------------------------------------------------
 {
 	switch(nCtlColor)
 	{

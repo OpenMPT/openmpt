@@ -46,9 +46,7 @@ public:
 };
 
 
-//==============
 class Pulseaudio
-//==============
 	: public ThreadBase
 {
 private:

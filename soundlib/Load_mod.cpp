@@ -24,7 +24,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 void CSoundFile::ConvertModCommand(ModCommand &m)
-//-----------------------------------------------
 {
 	switch(m.command)
 	{
@@ -77,7 +76,6 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 #ifndef MODPLUG_NO_FILESAVE
 
 void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool compatibilityExport) const
-//------------------------------------------------------------------------------------------------------
 {
 	switch(command)
 	{
@@ -480,14 +478,12 @@ MPT_BINARY_STRUCT(PT36InfoChunk, 64)
 
 // Check if header magic equals a given string.
 static bool IsMagic(const char *magic1, const char *magic2)
-//---------------------------------------------------------
 {
 	return std::memcmp(magic1, magic2, 4) == 0;
 }
 
 
 static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME], bool is4Chn)
-//-------------------------------------------------------------------------------------------------------------------------------------------
 {
 	file.ReadStruct(sampleHeader);
 	sampleHeader.ConvertToMPT(sample, is4Chn);
@@ -510,7 +506,6 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 
 // Parse the order list to determine how many patterns are used in the file.
 static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX numOrders, SmpLength totalSampleLen, CHANNELINDEX &numChannels, bool checkForWOW)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
 	PATTERNINDEX officialPatterns = 0;		// Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
@@ -610,7 +605,6 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 
 
 void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
-//-------------------------------------------------------------------
 {
 	uint8 data[4];
 	file.ReadArray(data);
@@ -619,7 +613,6 @@ void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
 
 
 void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
-//-------------------------------------------------------------------------
 {
 	// Read Period
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
@@ -761,7 +754,6 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult *result)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(1080 + 4))
 	{
@@ -780,7 +772,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	char magic[4];
 	if(!file.Seek(1080) || !file.ReadArray(magic))
@@ -1244,7 +1235,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
 template<size_t N>
 static uint32 CountInvalidChars(const char (&name)[N])
-//----------------------------------------------------
 {
 	uint32 invalidChars = 0;
 	for(auto c : name)
@@ -1359,7 +1349,6 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderM15(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	M15FileHeaders fileHeaders;
 	if(!file.ReadStruct(fileHeaders))
@@ -1376,7 +1365,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderM15(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1734,7 +1722,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderICE(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(1464 + 4))
 	{
@@ -1786,7 +1773,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderICE(MemoryFileReader file, co
 // The only real difference to other SoundTracker formats is the way patterns are stored:
 // Every pattern consists of four independent, re-usable tracks.
 bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	char magic[4];
 	if(!file.Seek(1464) || !file.ReadArray(magic))
@@ -1956,7 +1942,6 @@ MPT_BINARY_STRUCT(PT36Header, 12);
 
 
 static bool ValidateHeader(const PT36Header &fileHeader)
-//------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magicFORM, "FORM", 4))
 	{
@@ -1971,7 +1956,6 @@ static bool ValidateHeader(const PT36Header &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPT36(MemoryFileReader file, const uint64 *pfilesize)
-//-----------------------------------------------------------------------------------------------------
 {
 	PT36Header fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -1991,7 +1975,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPT36(MemoryFileReader file, c
 // Basically just a normal ProTracker mod with different magic, wrapped in an IFF file.
 // The "PTDT" chunk is passed to the normal MOD loader.
 bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -2119,7 +2102,6 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_NO_FILESAVE
 
 bool CSoundFile::SaveMod(const mpt::PathString &filename) const
-//-------------------------------------------------------------
 {
 	FILE *f;
 

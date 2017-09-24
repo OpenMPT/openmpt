@@ -225,7 +225,6 @@ struct FLACDecoder
 
 
 bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
-//-------------------------------------------------------------------
 {
 #ifdef MPT_WITH_FLAC
 	file.Rewind();
@@ -484,7 +483,6 @@ struct FLAC__StreamEncoder_RAII
 
 #ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
-//-----------------------------------------------------------------------------------------
 {
 #ifdef MPT_WITH_FLAC
 	FLAC__StreamEncoder_RAII encoder;

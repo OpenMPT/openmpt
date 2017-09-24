@@ -86,7 +86,6 @@ std::atomic<int32> CUpdateCheck::s_InstanceCount;
 
 
 int32 CUpdateCheck::GetNumCurrentRunningInstances()
-//-------------------------------------------------
 {
 	return s_InstanceCount.load();
 }
@@ -94,7 +93,6 @@ int32 CUpdateCheck::GetNumCurrentRunningInstances()
 
 // Start update check
 void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
-//---------------------------------------------------------
 {
 	if(isAutoUpdate)
 	{
@@ -145,7 +143,6 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 
 
 CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
-//--------------------------------------------------------------------------
 	: settings(settings)
 {
 	return;
@@ -153,7 +150,6 @@ CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
 
 
 void CUpdateCheck::ThreadFunc::operator () ()
-//-------------------------------------------
 {
 	mpt::SetCurrentThreadPriority(settings.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
 	CUpdateCheck().CheckForUpdate(settings);
@@ -161,7 +157,6 @@ void CUpdateCheck::ThreadFunc::operator () ()
 
 
 CUpdateCheck::CUpdateCheck()
-//--------------------------
 	: internetHandle(nullptr)
 	, connectionHandle(nullptr)
 {
@@ -171,7 +166,6 @@ CUpdateCheck::CUpdateCheck()
 
 // Run update check (independent thread)
 CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings)
-//-------------------------------------------------------------------------------------
 {
 
 	// Prepare UA / URL strings...
@@ -314,7 +308,6 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 
 
 void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
-//-----------------------------------------------------------------------
 {
 	// íncremented before starting the thread
 	MPT_ASSERT(s_InstanceCount.load() >= 1);
@@ -337,7 +330,6 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
 
 
 CUpdateCheck::Result CUpdateCheck::ResultFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
-//-------------------------------------------------------------------------------------
 {
 	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 	return result;
@@ -345,7 +337,6 @@ CUpdateCheck::Result CUpdateCheck::ResultFromMessage(WPARAM /*wparam*/ , LPARAM 
 
 
 CUpdateCheck::Error CUpdateCheck::ErrorFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
-//-----------------------------------------------------------------------------------
 {
 	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
 	return error;
@@ -353,7 +344,6 @@ CUpdateCheck::Error CUpdateCheck::ErrorFromMessage(WPARAM /*wparam*/ , LPARAM lp
 
 
 void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
-//-------------------------------------------------------------
 {
 	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 	bool autoUpdate = wparam != 0;
@@ -372,7 +362,6 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 
 
 void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
-//-------------------------------------------------------------
 {
 	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
 	bool autoUpdate = wparam != 0;
@@ -384,7 +373,6 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 
 
 CUpdateCheck::Error::Error(CString errorMessage)
-//----------------------------------------------
 	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, errorMessage))
 {
 	return;
@@ -392,7 +380,6 @@ CUpdateCheck::Error::Error(CString errorMessage)
 
 
 CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
-//---------------------------------------------------------------
 	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, FormatErrorCode(errorMessage, errorCode)))
 {
 	return;
@@ -400,7 +387,6 @@ CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
 
 
 CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCode)
-//---------------------------------------------------------------------------------
 {
 	void *lpMsgBuf;
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -412,7 +398,6 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 
 
 CUpdateCheck::~CUpdateCheck()
-//---------------------------
 {
 	if(connectionHandle != nullptr)
 	{
@@ -443,7 +428,6 @@ END_MESSAGE_MAP()
 
 
 CUpdateSetupDlg::CUpdateSetupDlg()
-//--------------------------------
 	: CPropertyPage(IDD_OPTIONS_UPDATE)
 	, m_SettingChangedNotifyGuard(theApp.GetSettings(), TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
 {
@@ -452,7 +436,6 @@ CUpdateSetupDlg::CUpdateSetupDlg()
 
 
 BOOL CUpdateSetupDlg::OnInitDialog()
-//----------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -483,7 +466,6 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 
 
 void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
-//------------------------------------------------------------------
 {
 	if(changedPath == TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
 	{
@@ -508,7 +490,6 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 
 
 void CUpdateSetupDlg::OnOK()
-//--------------------------
 {
 	int updateCheckPeriod = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
 	if(IsDlgButtonChecked(IDC_RADIO1)) updateCheckPeriod = 0;
@@ -528,7 +509,6 @@ void CUpdateSetupDlg::OnOK()
 
 
 BOOL CUpdateSetupDlg::OnSetActive()
-//---------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_UPDATE;
 	return CPropertyPage::OnSetActive();
@@ -536,14 +516,12 @@ BOOL CUpdateSetupDlg::OnSetActive()
 
 
 void CUpdateSetupDlg::OnCheckNow()
-//--------------------------------
 {
 	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_INTERNETUPDATE);
 }
 
 
 void CUpdateSetupDlg::OnResetURL()
-//--------------------------------
 {
 	SetDlgItemText(IDC_EDIT1, CUpdateCheck::defaultUpdateURL);
 }

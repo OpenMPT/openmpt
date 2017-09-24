@@ -44,20 +44,17 @@ using namespace CTuningS11n;
 
 
 static void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t)
-//------------------------------------------------------------------------------
 {
 	Tc.AddTuning(iStrm);
 }
 
 static void WriteTuning(std::ostream& oStrm, const CTuning& t)
-//------------------------------------------------------------
 {
 	t.Serialize(oStrm);
 }
 
 
 CTuning* CTuningCollection::GetTuning(const std::string& name)
-//------------------------------------------------------------
 {
 	for(std::size_t i = 0; i<m_Tunings.size(); i++)
 	{
@@ -70,7 +67,6 @@ CTuning* CTuningCollection::GetTuning(const std::string& name)
 }
 
 const CTuning* CTuningCollection::GetTuning(const std::string& name) const
-//------------------------------------------------------------------------
 {
 	for(std::size_t i = 0; i<m_Tunings.size(); i++)
 	{
@@ -84,7 +80,6 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 
 
 Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm, const std::string &name) const
-//----------------------------------------------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite("TC", 3); // version
@@ -105,7 +100,6 @@ Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm, co
 
 
 Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm, std::string &name)
-//------------------------------------------------------------------------------------------------
 {
 	std::istream::pos_type startpos = iStrm.tellg();
 	
@@ -144,7 +138,6 @@ Tuning::SerializationResult CTuningCollection::Deserialize(std::istream& iStrm, 
 
 
 Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inStrm, std::string &name)
-//----------------------------------------------------------------------------------------------------
 {
 
 	//1. begin marker:
@@ -202,7 +195,6 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 
 
 bool CTuningCollection::Remove(const CTuning *pT)
-//-----------------------------------------------
 {
 	const auto it = std::find_if(m_Tunings.begin(), m_Tunings.end(),
 		[&] (const std::unique_ptr<CTuning> & upT) -> bool
@@ -220,7 +212,6 @@ bool CTuningCollection::Remove(const CTuning *pT)
 
 
 bool CTuningCollection::Remove(const std::size_t i)
-//-------------------------------------------------
 {
 	if(i >= m_Tunings.size())
 	{
@@ -232,7 +223,6 @@ bool CTuningCollection::Remove(const std::size_t i)
 
 
 bool CTuningCollection::AddTuning(CTuning *pT)
-//--------------------------------------------
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
@@ -247,7 +237,6 @@ bool CTuningCollection::AddTuning(CTuning *pT)
 
 
 bool CTuningCollection::AddTuning(std::istream& inStrm)
-//-----------------------------------------------------
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
@@ -271,7 +260,6 @@ bool CTuningCollection::AddTuning(std::istream& inStrm)
 
 
 bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &prefix)
-//-------------------------------------------------------------------------------------
 {
 	bool error = false;
 	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(tc.GetNumTunings())));

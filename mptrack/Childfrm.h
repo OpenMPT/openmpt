@@ -66,9 +66,7 @@ struct COMMENTVIEWSTATE
 
 
 
-//====================================
 class CChildFrame: public CMDIChildWnd
-//====================================
 {
 	friend class CModControlDlg;
 	DECLARE_DYNCREATE(CChildFrame)

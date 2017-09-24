@@ -56,7 +56,6 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 	: file(f)
 	, mptSample(sample)
 	, is215(it215)
-//-----------------------------------------------------------------------------------------------------
 {
 	packedData = new (std::nothrow) uint8[bufferSize];
 	sampleData = new (std::nothrow) uint8[blockSize];
@@ -100,7 +99,6 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 
 template<typename T>
 void ITCompression::CopySample(void *target, const void *source, SmpLength offset, SmpLength length, SmpLength skip)
-//------------------------------------------------------------------------------------------------------------------
 {
 	T *out = static_cast<T *>(target);
 	const T *in = static_cast<const T *>(source) + offset * skip;
@@ -114,7 +112,6 @@ void ITCompression::CopySample(void *target, const void *source, SmpLength offse
 // Convert sample to delta values.
 template<typename T>
 void ITCompression::Deltafy()
-//---------------------------
 {
 	T *p = static_cast<T *>(sampleData);
 	int oldVal = 0;
@@ -129,7 +126,6 @@ void ITCompression::Deltafy()
 
 template<typename Properties>
 void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actualLength)
-//--------------------------------------------------------------------------------------
 {
 	baseLength = std::min(actualLength, SmpLength(blockSize / sizeof(typename Properties::sample_t)));
 
@@ -187,7 +183,6 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 
 
 int8 ITCompression::GetWidthChangeSize(int8 w, bool is16)
-//-------------------------------------------------------
 {
 	MPT_ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
 	int8 wcs = ITWidthChangeSize[w - 1];
@@ -199,7 +194,6 @@ int8 ITCompression::GetWidthChangeSize(int8 w, bool is16)
 
 template<typename Properties>
 void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length)
-//----------------------------------------------------------------------------------------------------------------------
 {
 	if(width + 1 < 1)
 	{
@@ -267,7 +261,6 @@ void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 wi
 
 
 int8 ITCompression::ConvertWidth(int8 curWidth, int8 newWidth)
-//------------------------------------------------------------
 {
 	curWidth--;
 	newWidth--;
@@ -279,7 +272,6 @@ int8 ITCompression::ConvertWidth(int8 curWidth, int8 newWidth)
 
 
 void ITCompression::WriteBits(int8 width, int v)
-//----------------------------------------------
 {
 	while(width > remBits)
 	{
@@ -302,7 +294,6 @@ void ITCompression::WriteBits(int8 width, int v)
 
 
 void ITCompression::WriteByte(uint8 v)
-//------------------------------------
 {
 	if(packedLength < bufferSize)
 	{
@@ -322,7 +313,6 @@ void ITCompression::WriteByte(uint8 v)
 ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215)
 	: mptSample(sample)
 	, is215(it215)
-//-------------------------------------------------------------------------------
 {
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{
@@ -351,7 +341,6 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 
 template<typename Properties>
 void ITDecompression::Uncompress(typename Properties::sample_t *target)
-//---------------------------------------------------------------------
 {
 	curLength = std::min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(typename Properties::sample_t)));
 
@@ -400,7 +389,6 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 MPT_NOINLINE
 #endif
 void ITDecompression::ChangeWidth(int &curWidth, int width)
-//---------------------------------------------------------
 {
 	width++;
 	if(width >= curWidth)
@@ -415,7 +403,6 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 MPT_NOINLINE
 #endif
 int ITDecompression::ReadBits(int width)
-//--------------------------------------
 {
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
 	while(width >= remBits && dataPos < dataSize)
@@ -441,7 +428,6 @@ int ITDecompression::ReadBits(int width)
 
 template<typename Properties>
 void ITDecompression::Write(int v, int topBit, typename Properties::sample_t *target)
-//-----------------------------------------------------------------------------------
 {
 	if(v & topBit)
 		v -= (topBit << 1);

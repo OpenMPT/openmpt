@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//==================================
 class CModCleanupDlg: public CDialog
-//==================================
 {
 private:
 	enum CleanupOptions

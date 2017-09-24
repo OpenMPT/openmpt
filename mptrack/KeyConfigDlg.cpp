@@ -31,7 +31,6 @@ END_MESSAGE_MAP()
 
 
 LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
-//----------------------------------------------------------
 {
 	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(dwMidiDataParam) != 0 && isFocussed)
 	{
@@ -43,7 +42,6 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 
 BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
-//--------------------------------------------
 {
 	if(pMsg)
 	{
@@ -66,7 +64,6 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 
 
 void CCustEdit::SetKey(FlagSet<Modifiers> inMod, UINT inCode)
-//-----------------------------------------------------------
 {
 	mod = inMod;
 	code = inCode;
@@ -76,7 +73,6 @@ void CCustEdit::SetKey(FlagSet<Modifiers> inMod, UINT inCode)
 
 
 void CCustEdit::OnSetFocus(CWnd* pOldWnd)
-//---------------------------------------
 {
 	CEdit::OnSetFocus(pOldWnd);
 	// Lock the input handler
@@ -89,7 +85,6 @@ void CCustEdit::OnSetFocus(CWnd* pOldWnd)
 
 
 void CCustEdit::OnKillFocus(CWnd* pNewWnd)
-//----------------------------------------
 {
 	CEdit::OnKillFocus(pNewWnd);
 	//unlock the input handler
@@ -103,9 +98,7 @@ void CCustEdit::OnKillFocus(CWnd* pNewWnd)
 //
 //***************************************************************************************//
 
-//-----------------------------------------------------------
 // Initialisation
-//-----------------------------------------------------------
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,		OnKeyChoiceSelect)
@@ -130,7 +123,6 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 END_MESSAGE_MAP()
 
 void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
-//-------------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_KEYCATEGORY,	m_cmbCategory);
@@ -148,7 +140,6 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 
 
 BOOL COptionsKeyboard::OnSetActive()
-//----------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_KEYBOARD;
 	return CPropertyPage::OnSetActive();
@@ -157,7 +148,6 @@ BOOL COptionsKeyboard::OnSetActive()
 
 
 BOOL COptionsKeyboard::OnInitDialog()
-//-----------------------------------
 {
 	CPropertyPage::OnInitDialog();
 	m_nCurCategory = -1;
@@ -191,7 +181,6 @@ BOOL COptionsKeyboard::OnInitDialog()
 
 
 void CommandCategory::AddCommands(CommandID first, CommandID last)
-//----------------------------------------------------------------
 {
 	int count = last - first + 1, val = first;
 	commands.insert(commands.end(), count, kcNull);
@@ -202,7 +191,6 @@ void CommandCategory::AddCommands(CommandID first, CommandID last)
 // Filter commands: We only need user to see a select set off commands
 // for each category
 void COptionsKeyboard::DefineCommandCategories()
-//----------------------------------------------
 {
 	{
 		CommandCategory newCat(_T("Global keys"), kCtxAllContexts);
@@ -368,12 +356,9 @@ void COptionsKeyboard::DefineCommandCategories()
 }
 
 
-//-----------------------------------------------------------
 // Pure GUI methods
-//-----------------------------------------------------------
 
 void COptionsKeyboard::UpdateDialog()
-//-----------------------------------
 {
 	OnCategorySelChanged();		// Fills command list and automatically selects first command.
 	OnCommandKeySelChanged();	// Fills command key choice list for that command and automatically selects first choice.
@@ -381,7 +366,6 @@ void COptionsKeyboard::UpdateDialog()
 
 
 void COptionsKeyboard::OnKeyboardChanged()
-//----------------------------------------
 {
 	OnSettingsChanged();
 	UpdateDialog();
@@ -389,7 +373,6 @@ void COptionsKeyboard::OnKeyboardChanged()
 
 
 void COptionsKeyboard::OnCategorySelChanged()
-//-------------------------------------------
 {
 	int cat = m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel());
 
@@ -403,7 +386,6 @@ void COptionsKeyboard::OnCategorySelChanged()
 
 // Force last active category to be selected in dropdown menu.
 void COptionsKeyboard::UpdateCategory()
-//-------------------------------------
 {
 	for(int i = 0; i < m_cmbCategory.GetCount(); i++)
 	{
@@ -416,7 +398,6 @@ void COptionsKeyboard::UpdateCategory()
 }
 
 void COptionsKeyboard::OnSearchTermChanged()
-//------------------------------------------
 {
 	CString findString;
 	m_eFind.GetWindowText(findString);
@@ -430,7 +411,6 @@ void COptionsKeyboard::OnSearchTermChanged()
 
 
 void COptionsKeyboard::OnFindHotKey()
-//-----------------------------------
 {
 	if(m_eFindHotKey.code == 0)
 	{
@@ -441,7 +421,6 @@ void COptionsKeyboard::OnFindHotKey()
 
 
 void COptionsKeyboard::OnClearHotKey()
-//------------------------------------
 {
 	// Focus key search: Clear input
 	m_eFindHotKey.SetKey(ModNone, 0);
@@ -450,7 +429,6 @@ void COptionsKeyboard::OnClearHotKey()
 
 // Fills command list and automatically selects first command.
 void COptionsKeyboard::UpdateShortcutList(int category)
-//-----------------------------------------------------
 {
 	CString findString;
 	m_eFind.GetWindowText(findString);
@@ -541,7 +519,6 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 
 // Fills  key choice list and automatically selects first key choice
 void COptionsKeyboard::OnCommandKeySelChanged()
-//---------------------------------------------
 {
 	CommandID nCmd  = static_cast<CommandID>(m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel()));
 	CString str;
@@ -596,7 +573,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 
 //Fills or clears key choice info
 void COptionsKeyboard::OnKeyChoiceSelect()
-//----------------------------------------
 {
 	//CString str;
 	int choice = m_cmbKeyChoice.GetItemData( m_cmbKeyChoice.GetCurSel() );
@@ -633,7 +609,6 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 
 //rewbs.autochord
 void COptionsKeyboard::OnChordWaitTimeChanged()
-//---------------------------------------------
 {
 	CString s;
 	UINT val;
@@ -648,13 +623,10 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 }
 //end rewbs.autochord
 
-//-----------------------------------------------------------
 // Change handling
-//-----------------------------------------------------------
 
 
 void COptionsKeyboard::OnRestoreKeyChoice()
-//-----------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd = (CommandID)m_nCurHotKey;
@@ -680,7 +652,6 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 }
 
 void COptionsKeyboard::OnDeleteKeyChoice()
-//----------------------------------------
 {
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
@@ -702,7 +673,6 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 
 
 void COptionsKeyboard::OnSetKeyChoice()
-//-------------------------------------
 {
 	CommandID cmd = (CommandID)m_nCurHotKey;
 	if (cmd<0)
@@ -773,7 +743,6 @@ void COptionsKeyboard::OnSetKeyChoice()
 
 
 void COptionsKeyboard::OnOK()
-//---------------------------
 {
 	CMainFrame::GetInputHandler()->SetNewCommandSet(plocalCmdSet);
 
@@ -786,7 +755,6 @@ void COptionsKeyboard::OnOK()
 
 
 void COptionsKeyboard::OnDestroy()
-//--------------------------------
 {
 	CPropertyPage::OnDestroy();
 	delete plocalCmdSet;
@@ -794,7 +762,6 @@ void COptionsKeyboard::OnDestroy()
 
 
 void COptionsKeyboard::OnLoad()
-//-----------------------------
 {
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("mkb")
@@ -810,7 +777,6 @@ void COptionsKeyboard::OnLoad()
 
 
 void COptionsKeyboard::OnSave()
-//-----------------------------
 {
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mkb")
@@ -825,7 +791,6 @@ void COptionsKeyboard::OnSave()
 
 
 void COptionsKeyboard::OnNotesRepeat()
-//------------------------------------
 {
 	plocalCmdSet->QuickChange_NotesRepeat(true);
 	ForceUpdateGUI();
@@ -833,7 +798,6 @@ void COptionsKeyboard::OnNotesRepeat()
 
 
 void COptionsKeyboard::OnNoNotesRepeat()
-//--------------------------------------
 {
 	plocalCmdSet->QuickChange_NotesRepeat(false);
 	ForceUpdateGUI();
@@ -841,7 +805,6 @@ void COptionsKeyboard::OnNoNotesRepeat()
 
 
 void COptionsKeyboard::ForceUpdateGUI()
-//-------------------------------------
 {
 	m_bForceUpdate = true;						// m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
 	int ntmpChoice = m_nCurKeyChoice;			// next call will overwrite m_nCurKeyChoice
@@ -853,7 +816,6 @@ void COptionsKeyboard::ForceUpdateGUI()
 
 
 void COptionsKeyboard::OnClearLog()
-//---------------------------------
 {
 	m_eReport.SetWindowText(_T(""));
 	ForceUpdateGUI();
@@ -861,7 +823,6 @@ void COptionsKeyboard::OnClearLog()
 
 
 void COptionsKeyboard::OnRestoreDefaultKeymap()
-//---------------------------------------------
 {
 	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?", false, true, this) == cnfYes)
 	{
@@ -872,7 +833,6 @@ void COptionsKeyboard::OnRestoreDefaultKeymap()
 
 
 int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
-//---------------------------------------------------------------------
 {
 	for(size_t cat = 0; cat < commandCategories.size(); cat++)
 	{

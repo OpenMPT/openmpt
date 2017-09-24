@@ -188,7 +188,6 @@ static constexpr ModCharsetInfo ModCharsetInfos[] =
 
 
 mpt::Charset CSoundFile::GetCharsetFromModType(MODTYPE modType)
-//-------------------------------------------------------------
 {
 	// This is just a rough heuristic.
 	// It could be improved by adjusting the charset according to the tracker that had been used to save the file.
@@ -205,7 +204,6 @@ mpt::Charset CSoundFile::GetCharsetFromModType(MODTYPE modType)
 
 
 std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
-//-----------------------------------------------------------------------------
 {
 	std::vector<const char *> exts;
 	for(const auto &formatInfo : modFormatInfo)
@@ -240,7 +238,6 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 
 
 static bool IsEqualExtension(const char *a, const char *b)
-//--------------------------------------------------------
 {
 	std::size_t lena = std::strlen(a);
 	std::size_t lenb = std::strlen(b);
@@ -253,7 +250,6 @@ static bool IsEqualExtension(const char *a, const char *b)
 
 
 bool CSoundFile::IsExtensionSupported(const char *ext)
-//----------------------------------------------------
 {
 	if(ext == nullptr || ext[0] == 0)
 	{
@@ -278,7 +274,6 @@ bool CSoundFile::IsExtensionSupported(const char *ext)
 
 
 mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
-//-------------------------------------------------------
 {
 	for(const auto &formatInfo : modFormatInfo)
 	{
@@ -292,7 +287,6 @@ mpt::ustring CSoundFile::ModTypeToString(MODTYPE modtype)
 
 
 mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
-//-------------------------------------------------------------------------------
 {
 	for(const auto &containerInfo : modContainerInfo)
 	{
@@ -306,7 +300,6 @@ mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype
 
 
 mpt::ustring CSoundFile::ModTypeToTracker(MODTYPE modtype)
-//--------------------------------------------------------
 {
 	std::set<mpt::ustring> retvals;
 	mpt::ustring retval;
@@ -335,7 +328,6 @@ mpt::ustring CSoundFile::ModTypeToTracker(MODTYPE modtype)
 
 
 mpt::ustring CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype)
-//--------------------------------------------------------------------------------
 {
 	std::set<mpt::ustring> retvals;
 	mpt::ustring retval;

@@ -25,7 +25,6 @@ size_t CSampleGenerator::samples_written = 0;
 
 
 CSampleGenerator::CSampleGenerator()
-//----------------------------------
 {
 
 	// Setup function callbacks
@@ -45,7 +44,6 @@ CSampleGenerator::CSampleGenerator()
 
 // Open the smpgen dialog
 bool CSampleGenerator::ShowDialog()
-//---------------------------------
 {
 	bool isDone = false, result = false;
 	while(!isDone)
@@ -75,7 +73,6 @@ bool CSampleGenerator::ShowDialog()
 
 // Check if the currently select expression can be parsed by muParser.
 bool CSampleGenerator::TestExpression()
-//-------------------------------------
 {
 	// reset helper variables
 	samples_written = 0;
@@ -104,7 +101,6 @@ bool CSampleGenerator::TestExpression()
 
 // Check if sample parameters are valid.
 bool CSampleGenerator::CanRenderSample() const
-//--------------------------------------------
 {
 	if(sample_frequency < SMPGEN_MINFREQ || sample_frequency > SMPGEN_MAXFREQ || sample_length < SMPGEN_MINLENGTH || sample_length > SMPGEN_MAXLENGTH) return false;
 	return true;
@@ -113,7 +109,6 @@ bool CSampleGenerator::CanRenderSample() const
 
 // Actual render loop.
 bool CSampleGenerator::RenderSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
-//----------------------------------------------------------------------------
 {
 	if(!CanRenderSample() || !TestExpression() || (pSndFile == nullptr) || (nSample < 1) || (nSample > pSndFile->m_nSamples)) return false;
 
@@ -211,7 +206,6 @@ bool CSampleGenerator::RenderSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 
 // Callback function to access sample data
 mu::value_type CSampleGenerator::SampleDataCallback(mu::value_type v)
-//-------------------------------------------------------------------
 {
 	if(sample_buffer == nullptr) return 0;
 	v = CLAMP(v, 0, samples_written);
@@ -221,7 +215,6 @@ mu::value_type CSampleGenerator::SampleDataCallback(mu::value_type v)
 
 
 void CSampleGenerator::ShowError(mu::Parser::exception_type *e)
-//-------------------------------------------------------------
 {
 	std::string errmsg;
 	errmsg = "The expression\n    " + e->GetExpr() + "\ncontains an error ";
@@ -252,22 +245,16 @@ END_MESSAGE_MAP()
 // List of all possible expression for expression menu
 const samplegen_expression menu_descriptions[MAX_SAMPLEGEN_EXPRESSIONS] =
 {
-	//-------------------------------------
 	{"Variables", ""},
-	//-------------------------------------
 	{"Current position (sampling point)", "x"},
 	{"Current position (percentage)", "xp"},
 	{"Sample length", "len"},
 	{"Sample length (seconds)", "lens"},
 	{"Sampling frequency", "freq"},
-	//-------------------------------------
 	{"Constants", ""},
-	//-------------------------------------
 	{"Pi", "_pi"},
 	{"e", "_e"},
-	//-------------------------------------
 	{"Trigonometric functions", ""},
-	//-------------------------------------
 	{"Sine", "sin(x)"},
 	{"Cosine", "cos(x)"},
 	{"Tangens", "tan(x)"},
@@ -280,39 +267,29 @@ const samplegen_expression menu_descriptions[MAX_SAMPLEGEN_EXPRESSIONS] =
 	{"Hyperbolic Arcus Sine", "asinh(x)"},
 	{"Hyperbolic Arcus Cosine", "acosh(x)"},
 	{"Hyperbolic Arcus Tangens", "atanh(x)"},
-	//-------------------------------------
 	{"Log, Exp, Root", ""},
-	//-------------------------------------
 	{"Logarithm (base 2)", "log2(x)"},
 	{"Logarithm (base 10)", "log(x)"},
 	{"Natural Logarithm (base e)", "ln(x)"},
 	{"e^x", "exp(x)"},
 	{"Square Root", "sqrt(x)"},
-	//-------------------------------------
 	{"Sign and rounding", ""},
-	//-------------------------------------
 	{"Sign", "sign(x)"},
 	{"Absolute value", "abs(x)"},
 	{"Round to nearest integer", "rint(x)"},
-	//-------------------------------------
 	{"Sets", ""},
-	//-------------------------------------
 	{"Minimum", "min(x, y, ...)"},
 	{"Maximum", "max(x, y, ...)"},
 	{"Sum", "sum(x, y, ...)"},
 	{"Mean value", "avg(x, y, ...)"},
-	//-------------------------------------
 	{"Misc functions", ""},
-	//-------------------------------------
 	{"Pulse generator", "pwm(position, duty%, width)"},
 	{"Triangle", "tri(position, width)"},
 	{"Random value between 0 and x", "rnd(x)"},
 	{"Access previous sampling point", "smp(position)"},
 	{"Clip between values", "clip(value, minclip, maxclip)"},
 	{"If...Then...Else", "if(condition, statement1, statement2)"},
-	//-------------------------------------
 	{"Operators", ""},
-	//-------------------------------------
 	{"Assignment", "x = y"},
 	{"Logical And", "x abd y"},
 	{"Logical Or", "x or y"},
@@ -333,7 +310,6 @@ const samplegen_expression menu_descriptions[MAX_SAMPLEGEN_EXPRESSIONS] =
 
 
 BOOL CSmpGenDialog::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 	RecalcParameters(false, true);
@@ -362,7 +338,6 @@ BOOL CSmpGenDialog::OnInitDialog()
 
 
 void CSmpGenDialog::OnOK()
-//------------------------
 {
 	CDialog::OnOK();
 	apply = true;
@@ -380,7 +355,6 @@ void CSmpGenDialog::OnOK()
 
 
 void CSmpGenDialog::OnCancel()
-//----------------------------
 {
 	CDialog::OnCancel();
 	apply = false;
@@ -389,7 +363,6 @@ void CSmpGenDialog::OnCancel()
 
 // User changed formula
 void CSmpGenDialog::OnExpressionChanged()
-//---------------------------------------
 {
 	CString result;
 	GetDlgItemText(IDC_EDIT_FORMULA, result);
@@ -399,7 +372,6 @@ void CSmpGenDialog::OnExpressionChanged()
 
 // User changed sample length field
 void CSmpGenDialog::OnSampleLengthChanged()
-//-----------------------------------------
 {
 	int temp_length = GetDlgItemInt(IDC_EDIT_SAMPLE_LENGTH);
 	if(temp_length >= SMPGEN_MINLENGTH && temp_length <= SMPGEN_MAXLENGTH)
@@ -412,7 +384,6 @@ void CSmpGenDialog::OnSampleLengthChanged()
 
 // User changed sample length (seconds) field
 void CSmpGenDialog::OnSampleSecondsChanged()
-//------------------------------------------
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_SAMPLE_LENGTH_SEC, str);
@@ -427,7 +398,6 @@ void CSmpGenDialog::OnSampleSecondsChanged()
 
 // User changed sample frequency field
 void CSmpGenDialog::OnSampleFreqChanged()
-//---------------------------------------
 {
 	int temp_freq = GetDlgItemInt(IDC_EDIT_SAMPLE_FREQ);
 	if(temp_freq >= SMPGEN_MINFREQ && temp_freq <= SMPGEN_MAXFREQ)
@@ -440,7 +410,6 @@ void CSmpGenDialog::OnSampleFreqChanged()
 
 // Show all expressions that can be input
 void CSmpGenDialog::OnShowExpressions()
-//-------------------------------------
 {
 	HMENU hMenu = ::CreatePopupMenu(), hSubMenu = NULL;
 	if(!hMenu) return;
@@ -472,7 +441,6 @@ void CSmpGenDialog::OnShowExpressions()
 
 // Show all expression presets
 void CSmpGenDialog::OnShowPresets()
-//---------------------------------
 {
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu) return;
@@ -509,7 +477,6 @@ void CSmpGenDialog::OnShowPresets()
 
 // Insert expression from context menu
 void CSmpGenDialog::OnInsertExpression(UINT nId)
-//----------------------------------------------
 {
 	if((nId < ID_SAMPLE_GENERATOR_MENU) || (nId >= ID_SAMPLE_GENERATOR_MENU + MAX_SAMPLEGEN_EXPRESSIONS)) return;
 
@@ -521,7 +488,6 @@ void CSmpGenDialog::OnInsertExpression(UINT nId)
 
 // Select a preset (or manage them, or add one)
 void CSmpGenDialog::OnSelectPreset(UINT nId)
-//------------------------------------------
 {
 	if((nId < ID_SAMPLE_GENERATOR_PRESET_MENU) || (nId >= ID_SAMPLE_GENERATOR_PRESET_MENU + MAX_SAMPLEGEN_PRESETS + 2)) return;
 
@@ -550,7 +516,6 @@ void CSmpGenDialog::OnSelectPreset(UINT nId)
 
 // Update input fields, depending on what has been chagned
 void CSmpGenDialog::RecalcParameters(bool secondsChanged, bool forceRefresh)
-//--------------------------------------------------------------------------
 {
 	static bool isLocked = false;
 	if(isLocked) return;
@@ -592,7 +557,6 @@ void CSmpGenDialog::RecalcParameters(bool secondsChanged, bool forceRefresh)
 
 // Create a set of default formla presets
 void CSmpGenDialog::CreateDefaultPresets()
-//----------------------------------------
 {
 	samplegen_expression preset;
 
@@ -666,7 +630,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CSmpGenPresetDlg::OnInitDialog()
-//-----------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -677,7 +640,6 @@ BOOL CSmpGenPresetDlg::OnInitDialog()
 
 
 void CSmpGenPresetDlg::OnOK()
-//---------------------------
 {
 	// remove empty presets
 	for(size_t i = 0; i < presets->GetNumPresets(); i++)
@@ -692,7 +654,6 @@ void CSmpGenPresetDlg::OnOK()
 
 
 void CSmpGenPresetDlg::OnListSelChange()
-//--------------------------------------
 {
 	currentItem = ((CListBox *)GetDlgItem(IDC_LIST_SAMPLEGEN_PRESETS))->GetCurSel() + 1;
 	if(currentItem == 0 || currentItem > presets->GetNumPresets()) return;
@@ -704,7 +665,6 @@ void CSmpGenPresetDlg::OnListSelChange()
 
 
 void CSmpGenPresetDlg::OnTextChanged()
-//------------------------------------
 {
 	if(currentItem == 0 || currentItem > presets->GetNumPresets()) return;
 	CString result;
@@ -722,7 +682,6 @@ void CSmpGenPresetDlg::OnTextChanged()
 
 
 void CSmpGenPresetDlg::OnExpressionChanged()
-//------------------------------------------
 {
 	if(currentItem == 0 || currentItem > presets->GetNumPresets()) return;
 	CString result;
@@ -735,7 +694,6 @@ void CSmpGenPresetDlg::OnExpressionChanged()
 
 
 void CSmpGenPresetDlg::OnAddPreset()
-//----------------------------------
 {
 	samplegen_expression newPreset;
 	newPreset.description = "New Preset";
@@ -749,7 +707,6 @@ void CSmpGenPresetDlg::OnAddPreset()
 
 
 void CSmpGenPresetDlg::OnRemovePreset()
-//-------------------------------------
 {
 	if(currentItem == 0 || currentItem > presets->GetNumPresets()) return;
 	if(presets->RemovePreset(currentItem - 1))
@@ -758,7 +715,6 @@ void CSmpGenPresetDlg::OnRemovePreset()
 
 
 void CSmpGenPresetDlg::RefreshList()
-//----------------------------------
 {
 	CListBox *clist = (CListBox *)GetDlgItem(IDC_LIST_SAMPLEGEN_PRESETS);
 	clist->SetRedraw(FALSE);	//disable lisbox refreshes during fill to avoid flicker

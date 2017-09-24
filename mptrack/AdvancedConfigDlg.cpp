@@ -23,7 +23,6 @@ BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
 END_MESSAGE_MAP()
 
 void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
-//-------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
@@ -33,7 +32,6 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsAdvanced::PreTranslateMessage(MSG *msg)
-//--------------------------------------------------
 {
 	if(msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN)
 	{
@@ -45,7 +43,6 @@ BOOL COptionsAdvanced::PreTranslateMessage(MSG *msg)
 
 
 BOOL COptionsAdvanced::OnInitDialog()
-//-----------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -99,7 +96,6 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 
 void COptionsAdvanced::ReInit()
-//-----------------------------
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
@@ -224,7 +220,6 @@ void COptionsAdvanced::ReInit()
 
 
 void COptionsAdvanced::OnOK()
-//---------------------------
 {
 	CSoundFile::SetDefaultNoteNames();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -234,7 +229,6 @@ void COptionsAdvanced::OnOK()
 
 
 BOOL COptionsAdvanced::OnSetActive()
-//----------------------------------
 {
 	ReInit();
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_ADVANCED;
@@ -243,7 +237,6 @@ BOOL COptionsAdvanced::OnSetActive()
 
 
 void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
-//---------------------------------------------------------
 {
 	const int index = m_List.GetSelectionMark();
 	const SettingPath path = m_indexToPath[m_List.GetItemData(index)];
@@ -268,7 +261,6 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 
 
 void COptionsAdvanced::OnSaveNow()
-//--------------------------------
 {
 	TrackerSettings::Instance().SaveSettings();
 	theApp.GetSettings().WriteSettings();

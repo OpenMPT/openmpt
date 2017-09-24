@@ -39,7 +39,6 @@ END_MESSAGE_MAP()
 
 
 void LFOPluginEditor::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(LFOPluginEditor)
@@ -59,13 +58,11 @@ LFOPluginEditor::LFOPluginEditor(LFOPlugin &plugin)
 	: CAbstractVstEditor(plugin)
 	, m_lfoPlugin(plugin)
 	, m_locked(true)
-//-------------------------------------------------
 {
 }
 
 
 bool LFOPluginEditor::OpenEditor(CWnd *parent)
-//--------------------------------------------
 {
 	m_locked = true;
 	Create(IDD_LFOPLUGIN, parent);
@@ -103,7 +100,6 @@ bool LFOPluginEditor::OpenEditor(CWnd *parent)
 
 
 void LFOPluginEditor::UpdateParamDisplays()
-//-----------------------------------------
 {
 	CAbstractVstEditor::UpdateParamDisplays();
 	m_locked = true;
@@ -132,7 +128,6 @@ void LFOPluginEditor::UpdateParamDisplays()
 
 
 void LFOPluginEditor::UpdateParam(int32 p)
-//----------------------------------------
 {
 	LFOPlugin::Parameters param = static_cast<LFOPlugin::Parameters>(p);
 	CAbstractVstEditor::UpdateParam(p);
@@ -172,7 +167,6 @@ void LFOPluginEditor::UpdateParam(int32 p)
 
 
 void LFOPluginEditor::UpdateView(UpdateHint &hint)
-//------------------------------------------------
 {
 	CAbstractVstEditor::UpdateView(hint);
 	if(hint.GetType()[HINT_PLUGINNAMES | HINT_MIXPLUGINS])
@@ -218,7 +212,6 @@ void LFOPluginEditor::UpdateView(UpdateHint &hint)
 
 
 void LFOPluginEditor::InitSlider(CSliderCtrl &slider, LFOPlugin::Parameters param)
-//--------------------------------------------------------------------------------
 {
 	slider.SetRange(0, SLIDER_GRANULARITY);
 	slider.SetTicFreq(SLIDER_GRANULARITY / 10);
@@ -228,7 +221,6 @@ void LFOPluginEditor::InitSlider(CSliderCtrl &slider, LFOPlugin::Parameters para
 
 
 void LFOPluginEditor::SetSliderText(LFOPlugin::Parameters param)
-//--------------------------------------------------------------
 {
 	CString s = m_lfoPlugin.GetParamName(param) + _T(": ") + m_lfoPlugin.GetFormattedParamValue(param);
 	SetDlgItemText(IDC_STATIC1 + param, s);
@@ -236,14 +228,12 @@ void LFOPluginEditor::SetSliderText(LFOPlugin::Parameters param)
 
 
 void LFOPluginEditor::SetSliderValue(CSliderCtrl &slider, float value)
-//--------------------------------------------------------------------
 {
 	slider.SetPos(Util::Round<int>(value * SLIDER_GRANULARITY));
 }
 
 
 float LFOPluginEditor::GetSliderValue(CSliderCtrl &slider)
-//--------------------------------------------------------
 {
 	float value = slider.GetPos() / static_cast<float>(SLIDER_GRANULARITY);
 	return value;
@@ -251,7 +241,6 @@ float LFOPluginEditor::GetSliderValue(CSliderCtrl &slider)
 
 
 void LFOPluginEditor::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
-//---------------------------------------------------------------------
 {
 	CAbstractVstEditor::OnHScroll(nCode, nPos, pSB);
 	if(!m_locked && nCode != SB_ENDSCROLL && pSB != nullptr)
@@ -276,7 +265,6 @@ void LFOPluginEditor::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 
 
 void LFOPluginEditor::OnPolarityChanged()
-//---------------------------------------
 {
 	if(!m_locked)
 	{
@@ -287,7 +275,6 @@ void LFOPluginEditor::OnPolarityChanged()
 
 
 void LFOPluginEditor::OnTempoSyncChanged()
-//----------------------------------------
 {
 	if(!m_locked)
 	{
@@ -300,7 +287,6 @@ void LFOPluginEditor::OnTempoSyncChanged()
 
 
 void LFOPluginEditor::OnBypassChanged()
-//-------------------------------------
 {
 	if(!m_locked)
 	{
@@ -311,7 +297,6 @@ void LFOPluginEditor::OnBypassChanged()
 
 
 void LFOPluginEditor::OnLoopModeChanged()
-//---------------------------------------
 {
 	if(!m_locked)
 	{
@@ -322,7 +307,6 @@ void LFOPluginEditor::OnLoopModeChanged()
 
 
 void LFOPluginEditor::OnWaveformChanged(UINT nID)
-//-----------------------------------------------
 {
 	if(!m_locked)
 	{
@@ -333,7 +317,6 @@ void LFOPluginEditor::OnWaveformChanged(UINT nID)
 
 
 void LFOPluginEditor::OnPlugParameterChanged()
-//--------------------------------------------
 {
 	if(!m_locked)
 	{
@@ -344,7 +327,6 @@ void LFOPluginEditor::OnPlugParameterChanged()
 
 
 void LFOPluginEditor::OnMidiCCChanged()
-//-------------------------------------
 {
 	if(!m_locked)
 	{
@@ -355,7 +337,6 @@ void LFOPluginEditor::OnMidiCCChanged()
 
 
 void LFOPluginEditor::OnParameterChanged()
-//----------------------------------------
 {
 	if(!m_locked)
 	{
@@ -381,7 +362,6 @@ void LFOPluginEditor::OnParameterChanged()
 
 
 void LFOPluginEditor::OnOutputPlugChanged()
-//-----------------------------------------
 {
 	if(!m_locked)
 	{
@@ -397,7 +377,6 @@ void LFOPluginEditor::OnOutputPlugChanged()
 
 
 void LFOPluginEditor::OnPluginEditor()
-//------------------------------------
 {
 	std::vector<IMixPlugin *> plug;
 	if(m_lfoPlugin.GetOutputPlugList(plug) && plug.front() != nullptr)
@@ -408,7 +387,6 @@ void LFOPluginEditor::OnPluginEditor()
 
 
 LRESULT LFOPluginEditor::OnUpdateParam(WPARAM wParam, LPARAM lParam)
-//------------------------------------------------------------------
 {
 	if(wParam == m_lfoPlugin.GetSlot())
 	{

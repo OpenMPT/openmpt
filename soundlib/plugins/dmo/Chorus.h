@@ -19,9 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-//==============================
 class Chorus : public IMixPlugin
-//==============================
 {
 protected:
 	enum Parameters

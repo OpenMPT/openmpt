@@ -270,7 +270,6 @@ const char *szMidiPercussionNames[61] =
 ////////////////////////////////////////////////////////////////////////////////
 // Maps a midi instrument - returns the instrument number in the file
 uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns)
-//----------------------------------------------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns;
 	program &= 0x7F;
@@ -476,7 +475,6 @@ struct MidiChannelState
 
 
 static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const std::vector<ModChannelState> &channels, bool monoMode, PatternRow patRow)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	for(size_t i = 0; i < channels.size(); i++)
 	{
@@ -535,7 +533,6 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 
 
 static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, PatternRow patRow)
-//----------------------------------------------------------------------------------------------------------------------------------------
 {
 	CHANNELINDEX chn = midiChn.noteOn[note];
 	if(chn == CHANNELINDEX_INVALID)
@@ -578,7 +575,6 @@ static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> 
 
 
 static void EnterMIDIVolume(ModCommand &m, ModChannelState &modChn, const MidiChannelState &midiChn)
-//--------------------------------------------------------------------------------------------------
 {
 	m.volcmd = VOLCMD_VOLUME;
 
@@ -590,7 +586,6 @@ static void EnterMIDIVolume(ModCommand &m, ModChannelState &modChn, const MidiCh
 
 
 bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

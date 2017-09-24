@@ -36,7 +36,6 @@ struct PPBITBUFFER
 
 
 uint32 PPBITBUFFER::GetBits(uint32 n)
-//-----------------------------------
 {
 	uint32 result = 0;
 
@@ -57,7 +56,6 @@ uint32 PPBITBUFFER::GetBits(uint32 n)
 
 
 static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32 nDstLen)
-//---------------------------------------------------------------------------------------
 {
 	PPBITBUFFER BitBuffer;
 	uint32 nBytesLeft;
@@ -126,7 +124,6 @@ MPT_BINARY_STRUCT(PP20header, 8)
 
 
 static bool ValidateHeader(const PP20header &hdr)
-//-----------------------------------------------
 {
 	if(std::memcmp(hdr.magic, "PP20", 4) != 0)
 	{
@@ -144,7 +141,6 @@ static bool ValidateHeader(const PP20header &hdr)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize)
-//-----------------------------------------------------------------------------------------------------
 {
 	PP20header hdr;
 	if(!file.ReadStruct(hdr))
@@ -161,7 +157,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPP20(MemoryFileReader file, c
 
 
 bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();

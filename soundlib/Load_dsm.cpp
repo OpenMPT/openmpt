@@ -111,7 +111,6 @@ MPT_BINARY_STRUCT(DSMHeader, 12)
 
 
 static bool ValidateHeader(const DSMHeader &fileHeader)
-//-----------------------------------------------------
 {
 	if(!std::memcmp(fileHeader.fileMagic0, "RIFF", 4)
 		&& !std::memcmp(fileHeader.fileMagic2, "DSMF", 4))
@@ -132,7 +131,6 @@ static bool ValidateHeader(const DSMHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDSM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	DSMHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -165,7 +163,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDSM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

@@ -33,7 +33,6 @@ OPENMPT_NAMESPACE_BEGIN
 extern const TCHAR *gszChnCfgNames[3];
 
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	sndFile.ResetMixStat();
 	AudioReadTargetBufferInterleavedDynamic target(sampleFormat, false, dither, outputBuffer);
@@ -42,14 +41,12 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 
 
 static mpt::ustring GetDefaultYear()
-//----------------------------------
 {
 	return mpt::ToUnicode(CTime::GetCurrentTime().Format("%Y"));
 }
 
 
 StoredTags::StoredTags(SettingsContainer &conf)
-//---------------------------------------------
 	: artist(conf, "Export", "TagArtist", TrackerSettings::Instance().defaultArtist)
 	, album(conf, "Export", "TagAlbum", MPT_USTRING(""))
 	, trackno(conf, "Export", "TagTrackNo", MPT_USTRING(""))
@@ -85,7 +82,6 @@ END_MESSAGE_MAP()
 
 
 CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	: CDialog(IDD_WAVECONVERT, parent)
 	, m_SndFile(sndFile)
 	, m_Settings(theApp.GetSettings(), encFactories)
@@ -108,7 +104,6 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 
 
 void CWaveConvert::DoDataExchange(CDataExchange *pDX)
-//---------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO5,	m_CbnFileType);
@@ -132,7 +127,6 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 
 
 BOOL CWaveConvert::OnInitDialog()
-//-------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -213,7 +207,6 @@ BOOL CWaveConvert::OnInitDialog()
 
 
 void CWaveConvert::LoadTags()
-//---------------------------
 {
 	m_Settings.Tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.GetTitle());
 	m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.m_songMessage.GetFormatted(SongMessage::leLF));
@@ -227,7 +220,6 @@ void CWaveConvert::LoadTags()
 
 
 void CWaveConvert::SaveTags()
-//---------------------------
 {
 	m_Settings.storedTags.artist = m_Settings.Tags.artist;
 	m_Settings.storedTags.album = m_Settings.Tags.album;
@@ -239,7 +231,6 @@ void CWaveConvert::SaveTags()
 
 
 void CWaveConvert::FillTags()
-//---------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 
@@ -285,7 +276,6 @@ void CWaveConvert::FillTags()
 
 
 void CWaveConvert::OnShowEncoderInfo()
-//------------------------------------
 {
 	mpt::ustring info;
 	info += MPT_USTRING("Format: ");
@@ -300,7 +290,6 @@ void CWaveConvert::OnShowEncoderInfo()
 
 
 void CWaveConvert::FillFileTypes()
-//--------------------------------
 {
 	m_CbnFileType.ResetContent();
 	int sel = 0;
@@ -318,7 +307,6 @@ void CWaveConvert::FillFileTypes()
 
 
 void CWaveConvert::FillSamplerates()
-//----------------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleRate.CComboBox::ResetContent();
@@ -351,7 +339,6 @@ void CWaveConvert::FillSamplerates()
 
 
 void CWaveConvert::FillChannels()
-//-------------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnChannels.CComboBox::ResetContent();
@@ -382,7 +369,6 @@ void CWaveConvert::FillChannels()
 
 
 void CWaveConvert::FillFormats()
-//------------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleFormat.CComboBox::ResetContent();
@@ -512,7 +498,6 @@ void CWaveConvert::FillFormats()
 
 
 void CWaveConvert::FillDither()
-//-----------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
@@ -539,7 +524,6 @@ void CWaveConvert::FillDither()
 
 
 void CWaveConvert::OnFileTypeChanged()
-//------------------------------------
 {
 	SaveEncoderSettings();
 	DWORD_PTR dwFileType = m_CbnFileType.GetItemData(m_CbnFileType.GetCurSel());
@@ -555,7 +539,6 @@ void CWaveConvert::OnFileTypeChanged()
 
 
 void CWaveConvert::OnSamplerateChanged()
-//--------------------------------------
 {
 	SaveEncoderSettings();
 	FillFormats();
@@ -564,7 +547,6 @@ void CWaveConvert::OnSamplerateChanged()
 
 
 void CWaveConvert::OnChannelsChanged()
-//------------------------------------
 {
 	SaveEncoderSettings();
 	FillFormats();
@@ -573,14 +555,12 @@ void CWaveConvert::OnChannelsChanged()
 
 
 void CWaveConvert::OnDitherChanged()
-//----------------------------------
 {
 	SaveEncoderSettings();
 }
 
 
 void CWaveConvert::OnFormatChanged()
-//----------------------------------
 {
 	SaveEncoderSettings();
 	FillDither();
@@ -589,7 +569,6 @@ void CWaveConvert::OnFormatChanged()
 
 
 void CWaveConvert::UpdateDialog()
-//-------------------------------
 {
 	CheckDlgButton(IDC_CHECK1, (m_dwFileLimit) ? BST_CHECKED : 0);
 	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? BST_CHECKED : 0);
@@ -611,7 +590,6 @@ void CWaveConvert::UpdateDialog()
 
 
 void CWaveConvert::OnExportModeChanged()
-//--------------------------------------
 {
 	SaveEncoderSettings();
 	bool sampleExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED);
@@ -634,7 +612,6 @@ void CWaveConvert::OnExportModeChanged()
 
 
 void CWaveConvert::OnSampleSlotChanged()
-//--------------------------------------
 {
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, IDC_RADIO4);
 	// When choosing a specific sample slot, we cannot use per-channel or per-instrument export
@@ -649,7 +626,6 @@ void CWaveConvert::OnSampleSlotChanged()
 
 
 void CWaveConvert::OnCheckSizeLimit()
-//-----------------------------------
 {
 	if (IsDlgButtonChecked(IDC_CHECK1))
 	{
@@ -665,7 +641,6 @@ void CWaveConvert::OnCheckSizeLimit()
 
 
 void CWaveConvert::OnPlayerOptions()
-//----------------------------------
 {
 	CPropertySheet dlg(_T("Mixer Settings"), this);
 	COptionsMixer mixerpage;
@@ -679,7 +654,6 @@ void CWaveConvert::OnPlayerOptions()
 
 
 void CWaveConvert::OnCheckTimeLimit()
-//-----------------------------------
 {
 	if (IsDlgButtonChecked(IDC_CHECK2))
 	{
@@ -696,7 +670,6 @@ void CWaveConvert::OnCheckTimeLimit()
 
 // Channel render is mutually exclusive with instrument render
 void CWaveConvert::OnCheckChannelMode()
-//-------------------------------------
 {
 	if(IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED)
 	{
@@ -709,7 +682,6 @@ void CWaveConvert::OnCheckChannelMode()
 
 // Channel render is mutually exclusive with instrument render
 void CWaveConvert::OnCheckInstrMode()
-//-----------------------------------
 {
 	if(IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED)
 	{
@@ -721,7 +693,6 @@ void CWaveConvert::OnCheckInstrMode()
 
 
 void CWaveConvert::OnOK()
-//-----------------------
 {
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
@@ -817,7 +788,6 @@ void CWaveConvert::OnOK()
 
 
 void CWaveConvert::SaveEncoderSettings()
-//--------------------------------------
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 
@@ -861,7 +831,6 @@ void CWaveConvert::SaveEncoderSettings()
 
 
 std::size_t CWaveConvertSettings::FindEncoder(const mpt::ustring &name) const
-//---------------------------------------------------------------------------
 {
 	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
 	{
@@ -875,7 +844,6 @@ std::size_t CWaveConvertSettings::FindEncoder(const mpt::ustring &name) const
 
 
 void CWaveConvertSettings::SelectEncoder(std::size_t index)
-//---------------------------------------------------------
 {
 	ASSERT(!EncoderFactories.empty());
 	ASSERT(index < EncoderFactories.size());
@@ -885,7 +853,6 @@ void CWaveConvertSettings::SelectEncoder(std::size_t index)
 
 
 EncoderFactoryBase *CWaveConvertSettings::GetEncoderFactory() const
-//-----------------------------------------------------------------
 {
 	ASSERT(!EncoderFactories.empty());
 	return EncoderFactories[EncoderIndex];
@@ -893,7 +860,6 @@ EncoderFactoryBase *CWaveConvertSettings::GetEncoderFactory() const
 
 
 const Encoder::Traits *CWaveConvertSettings::GetTraits() const
-//------------------------------------------------------------
 {
 	ASSERT(!EncoderFactories.empty());
 	return &EncoderFactories[EncoderIndex]->GetTraits();
@@ -901,7 +867,6 @@ const Encoder::Traits *CWaveConvertSettings::GetTraits() const
 
 
 Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
-//-----------------------------------------------------------------
 {
 	ASSERT(!EncoderSettings.empty());
 	return *(EncoderSettings[EncoderIndex]);
@@ -909,7 +874,6 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 
 
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
-//-----------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
 	, EncoderName(conf, "Export", encFactories.size() > 3 ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
 	, EncoderIndex(FindEncoder(EncoderName))
@@ -949,7 +913,6 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 // CDoWaveConvert: save a mod as a wave file
 
 void CDoWaveConvert::Run()
-//------------------------
 {
 	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
 	static float floatbuffer[MIXBUFFERSIZE * 4]; // channels

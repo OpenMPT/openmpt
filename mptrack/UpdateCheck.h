@@ -22,9 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define DOWNLOAD_BUFFER_SIZE 4096
 
-//================
 class CUpdateCheck
-//================
 {
 
 private:
@@ -110,9 +108,7 @@ protected:
 };
 
 
-//=========================================
 class CUpdateSetupDlg: public CPropertyPage
-//=========================================
 	, public ISettingChanged
 {
 public:

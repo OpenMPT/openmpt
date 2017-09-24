@@ -18,9 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//=======================
 struct CModSpecifications
-//=======================
 {
 	/// Returns modtype corresponding to given file extension. The extension string
 	/// may begin with or without dot, e.g. both ".it" and "it" will be handled correctly.

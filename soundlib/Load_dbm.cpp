@@ -148,7 +148,6 @@ static const ModCommand::COMMAND dbmEffects[] =
 
 
 static void ConvertDBMEffect(uint8 &command, uint8 &param)
-//--------------------------------------------------------
 {
 	uint8 oldCmd = command;
 	if(command < CountOf(dbmEffects))
@@ -248,7 +247,6 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 
 // Read a chunk of volume or panning envelopes
 static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundFile &sndFile, bool scaleEnv)
-//----------------------------------------------------------------------------------------------------------
 {
 	uint16 numEnvs = chunk.ReadUint16BE();
 	for(uint16 env = 0; env < numEnvs; env++)
@@ -294,7 +292,6 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 
 
 static bool ValidateHeader(const DBMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.dbm0, "DBM0", 4)
 		|| fileHeader.trkVerHi > 3)
@@ -306,7 +303,6 @@ static bool ValidateHeader(const DBMFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDBM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	DBMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -323,7 +319,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDBM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 
 	file.Rewind();

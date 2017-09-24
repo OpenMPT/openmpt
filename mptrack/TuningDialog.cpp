@@ -47,7 +47,6 @@ CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &cs
 	m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning),
 	m_TreeCtrlTuning(this),
 	m_DoErrorExit(false)
-//----------------------------------------
 {
 	m_TuningCollections.push_back(&(m_sndFile.GetTuneSpecificTunings()));
 	m_TuningCollectionsNames[&(m_sndFile.GetTuneSpecificTunings())] = _T("Tunings");
@@ -56,7 +55,6 @@ CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &cs
 }
 
 CTuningDialog::~CTuningDialog()
-//----------------------------
 {
 	for(auto &tuningCol : m_TuningCollections)
 	{
@@ -71,7 +69,6 @@ CTuningDialog::~CTuningDialog()
 }
 
 HTREEITEM CTuningDialog::AddTreeItem(CTuningCollection* pTC, HTREEITEM parent, HTREEITEM insertAfter)
-//---------------------------------------------------------------------------------------------------
 {
 	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem((IsDeletable(pTC) ? CString(_T("loaded: ")) : CString()) +  m_TuningCollectionsNames[pTC], parent, insertAfter);
 	HTREEITEM temp2 = NULL;
@@ -85,7 +82,6 @@ HTREEITEM CTuningDialog::AddTreeItem(CTuningCollection* pTC, HTREEITEM parent, H
 }
 
 HTREEITEM CTuningDialog::AddTreeItem(CTuning* pT, HTREEITEM parent, HTREEITEM insertAfter)
-//-----------------------------------------------------------------------------------------
 {
 	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem(mpt::ToCString(TuningCharset, pT->GetName()), parent, insertAfter);
 	m_TreeItemTuningItemMap.AddPair(temp, TUNINGTREEITEM(pT));
@@ -94,7 +90,6 @@ HTREEITEM CTuningDialog::AddTreeItem(CTuning* pT, HTREEITEM parent, HTREEITEM in
 }
 
 void CTuningDialog::DeleteTreeItem(CTuning* pT)
-//---------------------------------------------
 {
 	if(!pT)
 		return;
@@ -113,7 +108,6 @@ void CTuningDialog::DeleteTreeItem(CTuning* pT)
 }
 
 void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
-//--------------------------------------------------------
 {
 	if(!pTC)
 		return;
@@ -155,7 +149,6 @@ void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
 }
 
 BOOL CTuningDialog::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -230,7 +223,6 @@ bool CTuningDialog::CanEdit(CTuningCollection * pTC) const
 
 
 void CTuningDialog::UpdateView(const int updateMask)
-//--------------------------------------------------
 {
 	if(m_DoErrorExit)
 	{
@@ -353,7 +345,6 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 
 void CTuningDialog::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATICRATIOMAP, m_RatioMapWnd);
@@ -404,7 +395,6 @@ END_MESSAGE_MAP()
 
 
 void CTuningDialog::DoErrorExit()
-//-------------------------------
 {
 	m_DoErrorExit = false;
 	m_pActiveTuning = NULL;
@@ -417,7 +407,6 @@ void CTuningDialog::DoErrorExit()
 // CTuningDialog message handlers
 
 void CTuningDialog::UpdateTuningType()
-//------------------------------------
 {
 	if(m_pActiveTuning)
 	{
@@ -436,7 +425,6 @@ void CTuningDialog::UpdateTuningType()
 
 
 bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
-//----------------------------------------------------------------------------
 {
 	if(!pTC)
 	{
@@ -477,18 +465,15 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 
 
 void CTuningDialog::OnEnChangeEditSteps()
-//---------------------------------------
 {
 }
 
 void CTuningDialog::OnEnChangeEditRatioperiod()
-//---------------------------------------------
 {
 }
 
 
 void CTuningDialog::OnEnChangeEditNotename()
-//------------------------------------------
 {
 
 	if(!m_NoteEditApply)
@@ -516,7 +501,6 @@ void CTuningDialog::OnEnChangeEditNotename()
 }
 
 void CTuningDialog::OnEnChangeEditRatiovalue()
-//--------------------------------------------
 {
 
 	if(!m_RatioEditApply)
@@ -542,7 +526,6 @@ void CTuningDialog::OnEnChangeEditRatiovalue()
 }
 
 void CTuningDialog::OnBnClickedButtonSetvalues()
-//----------------------------------------------
 {
 	if(m_pActiveTuning)
 	{
@@ -559,7 +542,6 @@ void CTuningDialog::OnBnClickedButtonSetvalues()
 }
 
 void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
-//-----------------------------------------------------------
 {
 	if(m_pActiveTuning == NULL)
 		return;
@@ -575,7 +557,6 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 
 
 void CTuningDialog::OnBnClickedButtonNew()
-//----------------------------------------
 {
 	POINT point;
 	GetCursorPos(&point);
@@ -595,7 +576,6 @@ void CTuningDialog::OnBnClickedButtonNew()
 
 
 void CTuningDialog::OnBnClickedButtonExport()
-//-------------------------------------------
 {
 
 	if(m_pActiveTuning == NULL && m_pActiveTuningCollection == NULL)
@@ -732,7 +712,6 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 
 void CTuningDialog::OnBnClickedButtonRemove()
-//-------------------------------------------
 {
 	if(m_pActiveTuning)
 	{
@@ -753,7 +732,6 @@ void CTuningDialog::OnBnClickedButtonRemove()
 
 
 template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::IO::Offset offset, const uint8(&magic)[N])
-//-----------------------------------------------------------------------------------------------------------------------
 {
 	if(!mpt::IO::SeekAbsolute(f, offset))
 	{
@@ -772,7 +750,6 @@ template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::I
 
 
 void CTuningDialog::OnBnClickedButtonImport()
-//-------------------------------------------
 {
 	std::string sFilter = mpt::format("Tuning files (*%1, *%2, *.scl)|*%3;*%4;*.scl|")(
 		CTuning::s_FileExtension,
@@ -937,13 +914,11 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 
 void CTuningDialog::OnEnChangeEditFinetunesteps()
-//-----------------------------------------------
 {
 }
 
 
 void CTuningDialog::OnEnKillfocusEditFinetunesteps()
-//--------------------------------------------------
 {
 	if(m_pActiveTuning)
 	{
@@ -958,7 +933,6 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 
 
 void CTuningDialog::OnEnKillfocusEditName()
-//-----------------------------------------
 {
 	if(m_pActiveTuning != NULL)
 	{
@@ -973,7 +947,6 @@ void CTuningDialog::OnEnKillfocusEditName()
 
 
 void CTuningDialog::OnEnKillfocusEditSteps()
-//------------------------------------------
 {
 	if(m_pActiveTuning)
 	{
@@ -987,7 +960,6 @@ void CTuningDialog::OnEnKillfocusEditSteps()
 
 
 void CTuningDialog::OnEnKillfocusEditRatioperiod()
-//------------------------------------------------
 {
 	double ratio = 0.0;
 	if(m_pActiveTuning && m_EditRatioPeriod.GetDecimalValue(ratio))
@@ -999,20 +971,17 @@ void CTuningDialog::OnEnKillfocusEditRatioperiod()
 }
 
 void CTuningDialog::OnEnKillfocusEditRatiovalue()
-//-----------------------------------------------
 {
 	UpdateView(UM_TUNINGDATA);
 }
 
 
 void CTuningDialog::OnEnKillfocusEditNotename()
-//-----------------------------------------------
 {
 	UpdateView(UM_TUNINGDATA);
 }
 
 bool CTuningDialog::GetModifiedStatus(const CTuningCollection* const pTc) const
-//-----------------------------------------------------------------------------
 {
 	auto iter = m_ModifiedTCs.find(pTc);
 	if(iter != m_ModifiedTCs.end())
@@ -1023,7 +992,6 @@ bool CTuningDialog::GetModifiedStatus(const CTuningCollection* const pTc) const
 }
 
 CTuningCollection* CTuningDialog::GetpTuningCollection(HTREEITEM ti) const
-//------------------------------------------------------------------------
 {
 	//If treeitem is that of a tuningcollection, return address of
 	//that tuning collection. If treeitem is that of a tuning, return
@@ -1040,7 +1008,6 @@ CTuningCollection* CTuningDialog::GetpTuningCollection(HTREEITEM ti) const
 }
 
 CTuningCollection* CTuningDialog::GetpTuningCollection(const CTuning* const pT) const
-//-----------------------------------------------------------------------------------
 {
 	for(auto &tuningCol : m_TuningCollections)
 	{
@@ -1057,7 +1024,6 @@ CTuningCollection* CTuningDialog::GetpTuningCollection(const CTuning* const pT) 
 
 
 void CTuningDialog::OnTvnSelchangedTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
-//----------------------------------------------------------------------------
 {
 	//This methods gets called when selected item in the treeview
 	//changes.
@@ -1099,7 +1065,6 @@ void CTuningDialog::OnTvnSelchangedTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 void CTuningDialog::OnTvnDeleteitemTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
-//----------------------------------------------------------------------------
 {
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	*pResult = 0;
@@ -1112,7 +1077,6 @@ void CTuningDialog::OnTvnDeleteitemTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
-//-----------------------------------------------------------------
 {
 	*pResult = 0;
 
@@ -1185,7 +1149,6 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 }
 
 bool CTuningDialog::IsDeletable(const CTuningCollection* const pTC) const
-//--------------------------------------------------------------------------------
 {
 	auto iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
 	if(iter != m_DeletableTuningCollections.end())
@@ -1196,7 +1159,6 @@ bool CTuningDialog::IsDeletable(const CTuningCollection* const pTC) const
 
 
 void CTuningDialog::OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
-//---------------------------------------------------------------------------
 {
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	*pResult = 0;
@@ -1222,7 +1184,6 @@ void CTuningDialog::OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 CTuningCollection *CTuningDialog::CanDrop(HTREEITEM dragDestItem)
-//---------------------------------------------------------------
 {
 	if(m_DragItem == NULL)
 		return nullptr;
@@ -1257,7 +1218,6 @@ CTuningCollection *CTuningDialog::CanDrop(HTREEITEM dragDestItem)
 
 
 void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
-//--------------------------------------------------
 {
 	SetCursor(CMainFrame::curArrow);
 	m_TreeCtrlTuning.SetDragging(false);
@@ -1299,7 +1259,6 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
 }
 
 bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
-//----------------------------------------------------------------
 {
 	//Default: pT == NULL
 
@@ -1333,7 +1292,6 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 }
 
 void CTuningDialog::OnAddTuningGeneral()
-//--------------------------------------
 {
 	if(!m_CommandItemDest.GetTC())
 	{
@@ -1348,7 +1306,6 @@ void CTuningDialog::OnAddTuningGeneral()
 }
 
 void CTuningDialog::OnAddTuningGroupGeometric()
-//---------------------------------------------
 {
 	if(!m_CommandItemDest.GetTC())
 	{
@@ -1363,7 +1320,6 @@ void CTuningDialog::OnAddTuningGroupGeometric()
 }
 
 void CTuningDialog::OnAddTuningGeometric()
-//----------------------------------------
 {
 	if(!m_CommandItemDest.GetTC())
 	{
@@ -1378,7 +1334,6 @@ void CTuningDialog::OnAddTuningGeometric()
 }
 
 void CTuningDialog::OnRemoveTuning()
-//----------------------------------
 {
 	CTuning* pT = m_CommandItemDest.GetT();
 	if(m_CommandItemDest.GetT())
@@ -1432,7 +1387,6 @@ void CTuningDialog::OnRemoveTuning()
 
 
 void CTuningDialog::OnCopyTuning()
-//--------------------------------
 {
 	CTuningCollection* pTC = m_CommandItemDest.GetTC();
 
@@ -1451,7 +1405,6 @@ void CTuningDialog::OnCopyTuning()
 }
 
 void CTuningDialog::OnRemoveTuningCollection()
-//--------------------------------------------
 {
 	if(!m_pActiveTuningCollection)
 		return;
@@ -1483,7 +1436,6 @@ void CTuningDialog::OnRemoveTuningCollection()
 
 
 void CTuningDialog::OnOK()
-//------------------------
 {
 	// Prevent return-key from closing the window.
 	if(GetKeyState(VK_RETURN) <= -127 && GetFocus() != GetDlgItem(IDOK))
@@ -1506,7 +1458,6 @@ END_MESSAGE_MAP()
 
 
 void CTuningTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
-//----------------------------------------------------------
 {
 	if(IsDragging())
 	{
@@ -1519,7 +1470,6 @@ void CTuningTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 
 void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
-//-----------------------------------------------------------
 {
 	if(IsDragging())
 	{
@@ -1540,7 +1490,6 @@ void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 typedef double SclFloat;
 
 CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
-//----------------------------------------------------------
 {
 	switch(id)
 	{
@@ -1575,7 +1524,6 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 
 
 static void SkipCommentLines(std::istream& iStrm, std::string& str)
-//-----------------------------------------------------------------
 {
 	std::string whitespace(" \t");
 	while(std::getline(iStrm, str))
@@ -1589,14 +1537,12 @@ static void SkipCommentLines(std::istream& iStrm, std::string& str)
 
 
 static inline SclFloat CentToRatio(const SclFloat& val)
-//-----------------------------------------------------
 {
 	return pow(2.0, val / 1200.0);
 }
 
 
 CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name, CTuning * & result)
-//--------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;
@@ -1610,7 +1556,6 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filen
 
 
 CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name, CTuning * & result)
-//--------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;

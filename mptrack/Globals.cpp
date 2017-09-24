@@ -51,7 +51,6 @@ END_MESSAGE_MAP()
 
 
 CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_modDoc(document), m_sndFile(document.GetrSoundFile()), m_parent(parent)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_bInitialized = FALSE;
 	m_hWndView = NULL;
@@ -60,14 +59,12 @@ CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_m
 
 
 CModControlDlg::~CModControlDlg()
-//-------------------------------
 {
 	ASSERT(m_hWnd == NULL);
 }
 
 
 BOOL CModControlDlg::OnInitDialog()
-//---------------------------------
 {
 	CDialog::OnInitDialog();
 	m_nDPIx = Util::GetDPIx(m_hWnd);
@@ -78,7 +75,6 @@ BOOL CModControlDlg::OnInitDialog()
 
 
 LRESULT CModControlDlg::OnDPIChanged(WPARAM wParam, LPARAM)
-//---------------------------------------------------------
 {
 	m_nDPIx = LOWORD(wParam);
 	m_nDPIy = HIWORD(wParam);
@@ -87,7 +83,6 @@ LRESULT CModControlDlg::OnDPIChanged(WPARAM wParam, LPARAM)
 
 
 void CModControlDlg::OnSize(UINT nType, int cx, int cy)
-//-----------------------------------------------------
 {
 	CDialog::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
@@ -98,7 +93,6 @@ void CModControlDlg::OnSize(UINT nType, int cx, int cy)
 
 
 LRESULT CModControlDlg::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
-//----------------------------------------------------------------
 {
 	switch(wParam)
 	{
@@ -119,7 +113,6 @@ LRESULT CModControlDlg::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 
 LRESULT CModControlDlg::SendViewMessage(UINT uMsg, LPARAM lParam) const
-//---------------------------------------------------------------------
 {
 	if (m_hWndView)	return ::SendMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return 0;
@@ -127,7 +120,6 @@ LRESULT CModControlDlg::SendViewMessage(UINT uMsg, LPARAM lParam) const
 
 
 BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
-//------------------------------------------------------------------
 {
 	if (m_hWndView)	return ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return FALSE;
@@ -135,7 +127,6 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 
 
 INT_PTR CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
-//----------------------------------------------------------------------
 {
 	INT_PTR nHit = CDialog::OnToolHitTest(point, pTI);
 	if ((nHit >= 0) && (pTI))
@@ -151,7 +142,6 @@ INT_PTR CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 
 BOOL CModControlDlg::OnToolTipText(UINT nID, NMHDR* pNMHDR, LRESULT* pResult)
-//---------------------------------------------------------------------------
 {
 	CChildFrame *pChildFrm = (CChildFrame *)GetParentFrame();
 	if (pChildFrm) return pChildFrm->OnToolTipText(nID, pNMHDR, pResult);
@@ -164,7 +154,6 @@ BOOL CModControlDlg::OnToolTipText(UINT nID, NMHDR* pNMHDR, LRESULT* pResult)
 // CModControlView
 
 BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
-//-----------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return FALSE;
@@ -176,7 +165,6 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 
 BOOL CModTabCtrl::InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam, int iImage)
-//---------------------------------------------------------------------------------
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE;
@@ -188,7 +176,6 @@ BOOL CModTabCtrl::InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam, int iIma
 
 
 LPARAM CModTabCtrl::GetItemData(int nIndex)
-//-----------------------------------------
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_PARAM;
@@ -223,7 +210,6 @@ END_MESSAGE_MAP()
 
 
 CModControlView::CModControlView()
-//--------------------------------
 {
 	MemsetZero(m_Pages);
 	m_nActiveDlg = -1;
@@ -234,14 +220,12 @@ CModControlView::CModControlView()
 
 
 BOOL CModControlView::PreCreateWindow(CREATESTRUCT& cs)
-//-----------------------------------------------------
 {
 	return CView::PreCreateWindow(cs);
 }
 
 
 void CModControlView::OnInitialUpdate() // called first time after construct
-//-------------------------------------
 {
 	CView::OnInitialUpdate();
 	CRect rect;
@@ -256,7 +240,6 @@ void CModControlView::OnInitialUpdate() // called first time after construct
 
 
 void CModControlView::OnSize(UINT nType, int cx, int cy)
-//------------------------------------------------------
 {
 	CView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
@@ -267,7 +250,6 @@ void CModControlView::OnSize(UINT nType, int cx, int cy)
 
 
 void CModControlView::RecalcLayout()
-//----------------------------------
 {
 	CRect rcClient;
 
@@ -290,21 +272,18 @@ void CModControlView::RecalcLayout()
 
 
 void CModControlView::OnUpdate(CView *, LPARAM lHint, CObject *pHint)
-//-------------------------------------------------------------------
 {
 	UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 
 void CModControlView::ForceRefresh()
-//---------------------------------
 {
 	SetActivePage(GetActivePage());
 }
 
 
 BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
-//------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModControlDlg *pDlg = NULL;
@@ -416,7 +395,6 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 
 
 void CModControlView::OnDestroy()
-//-------------------------------
 {
 	m_nActiveDlg = -1;
 	for (UINT nIndex=0; nIndex<MAX_PAGES; nIndex++)
@@ -434,7 +412,6 @@ void CModControlView::OnDestroy()
 
 
 void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
-//------------------------------------------------------------------
 {
 	CWnd *pActiveDlg = NULL;
 	CModDoc *pDoc = GetDocument();
@@ -480,7 +457,6 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 
 
 void CModControlView::OnTabSelchange(NMHDR*, LRESULT* pResult)
-//------------------------------------------------------------
 {
 	SetActivePage(m_TabCtrl.GetCurSel());
 	if (pResult) *pResult = 0;
@@ -488,7 +464,6 @@ void CModControlView::OnTabSelchange(NMHDR*, LRESULT* pResult)
 
 
 LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
-//----------------------------------------------------------------------
 {
 	if(::GetActiveWindow() != CMainFrame::GetMainFrame()->m_hWnd)
 	{
@@ -522,7 +497,6 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 
 
 LRESULT CModControlView::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
-//-----------------------------------------------------------------
 {
 	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
 	{
@@ -549,7 +523,6 @@ LRESULT CModControlView::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 
 LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
-//-------------------------------------------------------------------
 {
 	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
 	{
@@ -581,7 +554,6 @@ END_MESSAGE_MAP()
 
 
 LRESULT CModScrollView::SendCtrlMessage(UINT uMsg, LPARAM lParam) const
-//---------------------------------------------------------------------
 {
 	if (m_hWndCtrl)	return ::SendMessage(m_hWndCtrl, WM_MOD_CTRLMSG, uMsg, lParam);
 	return 0;
@@ -589,7 +561,6 @@ LRESULT CModScrollView::SendCtrlMessage(UINT uMsg, LPARAM lParam) const
 
 
 BOOL CModScrollView::PostCtrlMessage(UINT uMsg, LPARAM lParam) const
-//------------------------------------------------------------------
 {
 	if (m_hWndCtrl)	return ::PostMessage(m_hWndCtrl, WM_MOD_CTRLMSG, uMsg, lParam);
 	return FALSE;
@@ -597,21 +568,18 @@ BOOL CModScrollView::PostCtrlMessage(UINT uMsg, LPARAM lParam) const
 
 
 LRESULT CModScrollView::OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam)
-//-----------------------------------------------------------------------
 {
 	return OnModViewMsg(wParam, lParam);
 }
 
 
 void CModScrollView::OnUpdate(CView* pView, LPARAM lHint, CObject*pHint)
-//----------------------------------------------------------------------
 {
 	if (pView != this) UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 
 LRESULT CModScrollView::OnModViewMsg(WPARAM wParam, LPARAM lParam)
-//----------------------------------------------------------------
 {
 	switch(wParam)
 	{
@@ -630,7 +598,6 @@ LRESULT CModScrollView::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 
 void CModScrollView::OnInitialUpdate()
-//------------------------------------
 {
 	CScrollView::OnInitialUpdate();
 	m_nDPIx = Util::GetDPIx(m_hWnd);
@@ -639,7 +606,6 @@ void CModScrollView::OnInitialUpdate()
 
 
 LRESULT CModScrollView::OnDPIChanged(WPARAM wParam, LPARAM)
-//---------------------------------------------------------
 {
 	m_nDPIx = LOWORD(wParam);
 	m_nDPIy = HIWORD(wParam);
@@ -648,7 +614,6 @@ LRESULT CModScrollView::OnDPIChanged(WPARAM wParam, LPARAM)
 
 
 void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
-//----------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetUserText((lpszText) ? lpszText : _T(""));
@@ -656,7 +621,6 @@ void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
 
 
 BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
-//------------------------------------------------------------------------
 {
 	// we don't handle anything but scrolling just now
 	if (fFlags & (MK_SHIFT | MK_CONTROL)) return FALSE;
@@ -670,7 +634,6 @@ BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 
 
 void CModScrollView::OnDestroy()
-//------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -691,7 +654,6 @@ void CModScrollView::OnDestroy()
 
 
 LRESULT CModScrollView::OnUpdatePosition(WPARAM, LPARAM lParam)
-//-------------------------------------------------------------
 {
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify) return OnPlayerNotify(pnotify);
@@ -700,7 +662,6 @@ LRESULT CModScrollView::OnUpdatePosition(WPARAM, LPARAM lParam)
 
 
 BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
-//------------------------------------------------------------------------
 {
 	SCROLLINFO info;
 	if(LOBYTE(nScrollCode) == SB_THUMBTRACK)
@@ -720,7 +681,6 @@ BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
 
 
 BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
-//---------------------------------------------------------------
 {
 	BOOL ret = CScrollView::OnScrollBy(sizeScroll, bDoScroll);
 	if(ret)
@@ -742,7 +702,6 @@ BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 
 
 int CModScrollView::SetScrollPos(int nBar, int nPos, BOOL bRedraw)
-//----------------------------------------------------------------
 {
 	if(nBar == SB_HORZ)
 		m_nScrollPosX = nPos;
@@ -753,7 +712,6 @@ int CModScrollView::SetScrollPos(int nBar, int nPos, BOOL bRedraw)
 
 
 void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage, const SIZE& sizeLine)
-//-----------------------------------------------------------------------------------------------------------
 {
 	CScrollView::SetScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
 	// Fix scroll positions
@@ -774,7 +732,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
-//---------------------------------------------------------------------
 {
 	SetButtonStructSize(sizeof(TBBUTTON));
 	SetBitmapSize(CSize(16, 16));
@@ -789,7 +746,6 @@ BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
 
 
 BOOL CModControlBar::AddButton(UINT nID, int iImage, UINT nStyle, UINT nState)
-//----------------------------------------------------------------------------
 {
 	TBBUTTON btn;
 
@@ -804,7 +760,6 @@ BOOL CModControlBar::AddButton(UINT nID, int iImage, UINT nStyle, UINT nState)
 
 
 void CModControlBar::UpdateStyle()
-//--------------------------------
 {
 	if (m_hWnd)
 	{
@@ -821,7 +776,6 @@ void CModControlBar::UpdateStyle()
 
 
 LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
-//----------------------------------------------------------
 {
 	TBBUTTON tbbn;
 	POINT point;

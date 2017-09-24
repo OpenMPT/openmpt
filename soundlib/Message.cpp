@@ -25,7 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [out] returns true on success.
 bool SongMessage::Read(const mpt::byte *data, size_t length, LineEnding lineEnding)
-//---------------------------------------------------------------------------------
 {
 	const char *str = mpt::byte_cast<const char *>(data);
 	while(length != 0 && str[length - 1] == '\0')
@@ -107,7 +106,6 @@ bool SongMessage::Read(const mpt::byte *data, size_t length, LineEnding lineEndi
 
 
 bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnding)
-//----------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
 	FileReader::PinnedRawDataView fileView = file.ReadPinnedRawDataView(readLength);
@@ -123,7 +121,6 @@ bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnd
 // [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
 // [out] returns true on success.
 bool SongMessage::ReadFixedLineLength(const mpt::byte *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
-//---------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(lineLength == 0)
 		return false;
@@ -159,7 +156,6 @@ bool SongMessage::ReadFixedLineLength(const mpt::byte *data, const size_t length
 
 
 bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength)
-//----------------------------------------------------------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
 	FileReader::PinnedRawDataView fileView = file.ReadPinnedRawDataView(readLength);
@@ -172,7 +168,6 @@ bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, con
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [out] returns formatted song message.
 std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
-//----------------------------------------------------------------------
 {
 	std::string comments;
 	comments.reserve(length());

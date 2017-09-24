@@ -183,7 +183,6 @@ struct PSMSubSong // For internal use (pattern conversion)
 
 // Portamento effect conversion (depending on format version)
 static uint8 ConvertPSMPorta(uint8 param, bool sinariaFormat)
-//-----------------------------------------------------------
 {
 	if(sinariaFormat)
 		return param;
@@ -196,7 +195,6 @@ static uint8 ConvertPSMPorta(uint8 param, bool sinariaFormat)
 
 // Read a Pattern ID (something like "P0  " or "P13 " in the old format, or "PATT0   " in Sinaria)
 static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
-//----------------------------------------------------------------------------
 {
 	char patternID[5];
 	uint8 offset = 1;
@@ -212,7 +210,6 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 
 
 static bool ValidateHeader(const PSMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.formatID, "PSM ", 4)
 		|| std::memcmp(fileHeader.fileInfoID, "FILE", 4))
@@ -224,7 +221,6 @@ static bool ValidateHeader(const PSMFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	PSMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -254,7 +250,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 	PSMFileHeader fileHeader;
@@ -1070,7 +1065,6 @@ MPT_BINARY_STRUCT(PSM16PatternHeader, 4)
 
 
 static bool ValidateHeader(const PSM16FileHeader &fileHeader)
-//-----------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.formatID, "PSM\xFE", 4)
 		|| fileHeader.lineEnd != 0x1A
@@ -1088,7 +1082,6 @@ static bool ValidateHeader(const PSM16FileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM16(MemoryFileReader file, const uint64 *pfilesize)
-//------------------------------------------------------------------------------------------------------
 {
 	PSM16FileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -1105,7 +1098,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM16(MemoryFileReader file, 
 
 
 bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
-//---------------------------------------------------------------------
 {
 	file.Rewind();
 

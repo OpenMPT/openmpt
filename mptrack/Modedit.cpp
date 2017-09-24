@@ -41,7 +41,6 @@ OPENMPT_NAMESPACE_BEGIN
 // Change the number of channels.
 // Return true on success.
 bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg)
-//------------------------------------------------------------------------------------------
 {
 	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
 
@@ -102,7 +101,6 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 // To remove all channels whose index corresponds to false in the keepMask vector.
 // Return true on success.
 bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
-//---------------------------------------------------------------------------
 {
 	CHANNELINDEX nRemainingChannels = 0;
 	//First calculating how many channels are to be left
@@ -150,7 +148,6 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
 // Base code for adding, removing, moving and duplicating channels. Returns new number of channels on success, CHANNELINDEX_INVALID otherwise.
 // The new channel vector can contain CHANNELINDEX_INVALID for adding new (empty) channels.
 CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrder, const bool createUndoPoint)
-//------------------------------------------------------------------------------------------------------------
 {
 	//newOrder[i] tells which current channel should be placed to i:th position in
 	//the new order, or if i is not an index of current channels, then new channel is
@@ -288,7 +285,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 // The new sample vector can contain SAMPLEINDEX_INVALID for adding new (empty) samples.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first sample slot.
 SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
-//-----------------------------------------------------------------------------
 {
 	if(newOrder.size() > m_SndFile.GetModSpecifications().samplesMax)
 	{
@@ -431,7 +427,6 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 // The new instrument vector can contain INSTRUMENTINDEX_INVALID for adding new (empty) instruments.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first instrument slot.
 INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples)
-//--------------------------------------------------------------------------------------------------------------------------------
 {
 	if(newOrder.size() > m_SndFile.GetModSpecifications().instrumentsMax || GetNumInstruments() == 0)
 	{
@@ -504,7 +499,6 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 
 
 bool CModDoc::ConvertInstrumentsToSamples()
-//-----------------------------------------
 {
 	if (!m_SndFile.GetNumInstruments()) return false;
 	GetInstrumentUndo().ClearUndo();
@@ -538,7 +532,6 @@ bool CModDoc::ConvertInstrumentsToSamples()
 
 
 bool CModDoc::ConvertSamplesToInstruments()
-//-----------------------------------------
 {
 	const INSTRUMENTINDEX instrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
 	if(GetNumInstruments() > 0 || instrumentMax == 0) return false;
@@ -579,7 +572,6 @@ bool CModDoc::ConvertSamplesToInstruments()
 
 
 PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
-//---------------------------------------------------------------
 {
 	// Remove all plugins whose keepMask[plugindex] is false.
 	PLUGINDEX nRemoved = 0;
@@ -609,7 +601,6 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 
 // Clone a plugin slot (source does not necessarily have to be from the current module)
 void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
-//-------------------------------------------------------------------------
 {
 	IMixPlugin *srcVstPlug = source.pMixPlugin;
 	target.Destroy();
@@ -642,7 +633,6 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 
 
 PATTERNINDEX CModDoc::InsertPattern(ROWINDEX rows, ORDERINDEX ord)
-//----------------------------------------------------------------
 {
 	PATTERNINDEX pat = m_SndFile.Patterns.InsertAny(rows, true);
 	if(pat != PATTERNINDEX_INVALID)
@@ -658,7 +648,6 @@ PATTERNINDEX CModDoc::InsertPattern(ROWINDEX rows, ORDERINDEX ord)
 
 
 SAMPLEINDEX CModDoc::InsertSample()
-//---------------------------------
 {
 	SAMPLEINDEX i = m_SndFile.GetNextFreeSample();
 
@@ -682,7 +671,6 @@ SAMPLEINDEX CModDoc::InsertSample()
 // Insert a new instrument assigned to sample nSample or duplicate instrument nDuplicate.
 // If nSample is invalid, an appropriate sample slot is selected. 0 means "no sample".
 INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX nDuplicate)
-//----------------------------------------------------------------------------------------
 {
 	if (m_SndFile.GetModSpecifications().instrumentsMax == 0) return INSTRUMENTINDEX_INVALID;
 
@@ -760,7 +748,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 
 // Load default instrument values for inserting new instrument during editing
 void CModDoc::InitializeInstrument(ModInstrument *pIns)
-//-----------------------------------------------------
 {
 	pIns->nPluginVolumeHandling = static_cast<uint8>(TrackerSettings::Instance().DefaultPlugVolumeHandling);
 }
@@ -768,7 +755,6 @@ void CModDoc::InitializeInstrument(ModInstrument *pIns)
 
 // Try to set up a new instrument that is linked to a given plugin
 INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
-//----------------------------------------------------------------
 {
 #ifndef NO_PLUGINS
 	const bool first = (GetNumInstruments() == 0);
@@ -802,7 +788,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 
 
 INSTRUMENTINDEX CModDoc::HasInstrumentForPlugin(PLUGINDEX plug) const
-//-------------------------------------------------------------------
 {
 	for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 	{
@@ -816,7 +801,6 @@ INSTRUMENTINDEX CModDoc::HasInstrumentForPlugin(PLUGINDEX plug) const
 
 
 bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
-//------------------------------------------------------------
 {
 	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order(nSeq).size())
 		return false;
@@ -831,7 +815,6 @@ bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 
 
 bool CModDoc::RemovePattern(PATTERNINDEX nPat)
-//--------------------------------------------
 {
 	if(m_SndFile.Patterns.IsValidPat(nPat))
 	{
@@ -847,7 +830,6 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 
 
 bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
-//------------------------------------------
 {
 	if ((nSmp) && (nSmp <= m_SndFile.GetNumSamples()))
 	{
@@ -870,7 +852,6 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 
 
 bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
-//--------------------------------------------------
 {
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
@@ -896,7 +877,6 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 
 
 bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy, SEQUENCEINDEX nSourceSeq, SEQUENCEINDEX nDestSeq)
-//---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
 
@@ -926,7 +906,6 @@ bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate
 
 
 BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
-//------------------------------------------------
 {
 	ROWINDEX numRows;
 
@@ -956,7 +935,6 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 
 
 BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
-//------------------------------------------------
 {
 	ROWINDEX numRows;
 
@@ -992,7 +970,6 @@ static const CHAR *pszEnvHdr = "ModPlug Tracker Envelope\r\n";
 static const CHAR *pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
 
 static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
-//----------------------------------------------------------------------
 {
 	// We don't want to copy empty envelopes
 	if(env.empty())
@@ -1016,7 +993,6 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 
 
 static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, const CModSpecifications &specs)
-//----------------------------------------------------------------------------------------------------------
 {
 	uint32 susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 	size_t length = s.size(), pos = strlen(pszEnvHdr);
@@ -1085,7 +1061,6 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 
 
 bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
-//-----------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
@@ -1118,7 +1093,6 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 
 
 bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
-//--------------------------------------------------------------------------------------------------
 {
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns]) return false;
 	BeginWaitCursor();
@@ -1142,7 +1116,6 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 
 
 bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
-//----------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !pMainFrm) return false;
@@ -1169,7 +1142,6 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 
 
 bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
-//--------------------------------------------------------------------------------------------------
 {
 	InputFile f(fileName);
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid()) return false;
@@ -1185,7 +1157,6 @@ bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 
 // Check which channels contain note data. maxRemoveCount specified how many empty channels are reported at max.
 void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRemoveCount) const
-//---------------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
 	CHANNELINDEX chn = GetNumChannels();
@@ -1204,7 +1175,6 @@ void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRem
 
 // Check if a given channel contains note data or global effects.
 bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
-//----------------------------------------------------
 {
 	const CHANNELINDEX nChannels = GetNumChannels();
 	if(nChn >= nChannels)
@@ -1228,7 +1198,6 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 
 
 bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
-//------------------------------------------------------------------------------
 {
 	if(!sample || sample > GetNumSamples()) return false;
 	if(GetNumInstruments())
@@ -1262,7 +1231,6 @@ bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 
 
 bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels) const
-//-------------------------------------------------------------------------------------
 {
 	if(instr < 1 || instr > GetNumInstruments()) return false;
 	for(const auto &pattern : m_SndFile.Patterns) if(pattern.IsValid())
@@ -1285,7 +1253,6 @@ bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels
 
 // Convert module's default global volume to a pattern command.
 bool CModDoc::GlobalVolumeToPattern()
-//-----------------------------------
 {
 	bool result = false;
 	if(m_SndFile.GetModSpecifications().HasCommand(CMD_GLOBALVOLUME))
@@ -1306,7 +1273,6 @@ bool CModDoc::GlobalVolumeToPattern()
 
 
 SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr) const
-//-----------------------------------------------------------------------------------------
 {
 	if(m.IsPcNote())
 		return 0;
@@ -1329,7 +1295,6 @@ SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastI
 
 
 int CModDoc::GetInstrumentGroupSize(INSTRUMENTINDEX instr) const
-//--------------------------------------------------------------
 {
 	const ModInstrument *ins;
 	if(instr > 0 && instr <= GetNumInstruments()

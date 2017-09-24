@@ -21,9 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define SURROUNDBUFFERSIZE		2048	// 50ms @ 48kHz
 
 
-//=====================
 class CSurroundSettings
-//=====================
 {
 public:
 	uint32 m_nProLogicDepth;
@@ -33,9 +31,7 @@ public:
 };
 
 
-//=====================
 class CMegaBassSettings
-//=====================
 {
 public:
 	uint32 m_nXBassDepth;
@@ -45,9 +41,7 @@ public:
 };
 
 
-//=============
 class CSurround
-//=============
 {
 public:
 	CSurroundSettings m_Settings;
@@ -87,9 +81,7 @@ private:
 
 
 
-//=============
 class CMegaBass
-//=============
 {
 public:
 	CMegaBassSettings m_Settings;

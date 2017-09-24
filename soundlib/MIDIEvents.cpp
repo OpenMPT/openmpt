@@ -18,7 +18,6 @@ namespace MIDIEvents
 
 // Build a generic MIDI event
 uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2)
-//------------------------------------------------------------------------------------
 {
 	return (eventType << 4) | (midiChannel & 0x0F) | (dataByte1 << 8) | (dataByte2 << 16);
 }
@@ -26,7 +25,6 @@ uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 data
 
 // Build a MIDI CC event
 uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param)
-//------------------------------------------------------
 {
 	return Event(evControllerChange, midiChannel, static_cast<uint8>(midiCC), param);
 }
@@ -34,7 +32,6 @@ uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param)
 
 // Build a MIDI Pitchbend event
 uint32 PitchBend(uint8 midiChannel, uint16 bendAmount)
-//----------------------------------------------------
 {
 	return Event(evPitchBend, midiChannel, static_cast<uint8>(bendAmount & 0x7F), static_cast<uint8>(bendAmount >> 7));
 }
@@ -42,7 +39,6 @@ uint32 PitchBend(uint8 midiChannel, uint16 bendAmount)
 
 // Build a MIDI Program Change event
 uint32 ProgramChange(uint8 midiChannel, uint8 program)
-//----------------------------------------------------
 {
 	return Event(evProgramChange, midiChannel, program, 0);
 }
@@ -50,7 +46,6 @@ uint32 ProgramChange(uint8 midiChannel, uint8 program)
 
 // Build a MIDI Note Off event
 uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity)
-//-----------------------------------------------------------
 {
 	return Event(evNoteOff, midiChannel, note, velocity);
 }
@@ -58,7 +53,6 @@ uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity)
 
 // Build a MIDI Note On event
 uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity)
-//----------------------------------------------------------
 {
 	return Event(evNoteOn, midiChannel, note, velocity);
 }
@@ -66,7 +60,6 @@ uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity)
 
 // Build a MIDI System Event
 uint8 System(SystemEvent eventType)
-//---------------------------------
 {
 	return static_cast<uint8>((evSystem << 4) | eventType);
 }
@@ -74,7 +67,6 @@ uint8 System(SystemEvent eventType)
 
 // Get MIDI channel from a MIDI event
 uint8 GetChannelFromEvent(uint32 midiMsg)
-//---------------------------------------
 {
 	return static_cast<uint8>((midiMsg & 0xF));
 }
@@ -82,7 +74,6 @@ uint8 GetChannelFromEvent(uint32 midiMsg)
 
 // Get MIDI Event type from a MIDI event
 EventType GetTypeFromEvent(uint32 midiMsg)
-//----------------------------------------
 {
 	return static_cast<EventType>(((midiMsg >> 4) & 0xF));
 }
@@ -90,7 +81,6 @@ EventType GetTypeFromEvent(uint32 midiMsg)
 
 // Get first data byte from a MIDI event
 uint8 GetDataByte1FromEvent(uint32 midiMsg)
-//-----------------------------------------
 {
 	return static_cast<uint8>(((midiMsg >> 8) & 0xFF));
 }
@@ -98,7 +88,6 @@ uint8 GetDataByte1FromEvent(uint32 midiMsg)
 
 // Get second data byte from a MIDI event
 uint8 GetDataByte2FromEvent(uint32 midiMsg)
-//-----------------------------------------
 {
 	return static_cast<uint8>(((midiMsg >> 16) & 0xFF));
 }
@@ -106,7 +95,6 @@ uint8 GetDataByte2FromEvent(uint32 midiMsg)
 
 // Get the length of a MIDI event in bytes
 uint8 GetEventLength(uint8 firstByte)
-//-----------------------------------
 {
 	uint8 msgSize = 3;
 	switch(firstByte & 0xF0)

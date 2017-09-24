@@ -37,7 +37,6 @@ namespace ANSI
 {
 
 uint64 Now()
-//----------
 {
 	FILETIME filetime;
 	GetSystemTimeAsFileTime(&filetime);
@@ -45,7 +44,6 @@ uint64 Now()
 }
 
 mpt::ustring ToString(uint64 time100ns)
-//-------------------------------------
 {
 	static const std::size_t bufsize = 256;
 
@@ -82,27 +80,23 @@ mpt::ustring ToString(uint64 time100ns)
 #endif // MODPLUG_TRACKER
 
 Unix::Unix()
-//----------
 	: Value(0)
 {
 	return;
 }
 
 Unix::Unix(int64 unixtime)
-//------------------------
 	: Value(unixtime)
 {
 	return;
 }
 
 Unix::operator int64 () const
-//---------------------------
 {
 	return Value;
 }
 
 static int32 ToDaynum(int32 year, int32 month, int32 day)
-//-------------------------------------------------------
 {
 	month = (month + 9) % 12;
 	year = year - (month / 10);
@@ -111,7 +105,6 @@ static int32 ToDaynum(int32 year, int32 month, int32 day)
 }
 
 static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
-//-----------------------------------------------------------------------
 {
 	int64 g = d;
 	int64 y,ddd,mi,mm,dd;
@@ -134,7 +127,6 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 }
 
 mpt::Date::Unix Unix::FromUTC(tm timeUtc)
-//---------------------------------------
 {
 	int32 daynum = ToDaynum(timeUtc.tm_year+1900, timeUtc.tm_mon+1, timeUtc.tm_mday);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970,1,1))*24*60*60 + timeUtc.tm_hour*60*60 + timeUtc.tm_min*60 + timeUtc.tm_sec;
@@ -142,7 +134,6 @@ mpt::Date::Unix Unix::FromUTC(tm timeUtc)
 }
 
 tm Unix::AsUTC() const 
-//--------------------
 {
 	int64 tmp = Value;
 	int64 seconds = tmp % 60; tmp /= 60;
@@ -162,7 +153,6 @@ tm Unix::AsUTC() const
 }
 
 mpt::ustring ToShortenedISO8601(tm date)
-//--------------------------------------
 {
 	// We assume date in UTC here.
 	// There are too many differences in supported format specifiers in strftime()

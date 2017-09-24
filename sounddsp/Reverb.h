@@ -123,9 +123,7 @@ struct EnvironmentReverb
 };
 
 
-//===================
 class CReverbSettings
-//===================
 {
 public:
 	uint32 m_nReverbDepth;
@@ -135,9 +133,7 @@ public:
 };
 
 
-//===========
 class CReverb
-//===========
 {
 public:
 	CReverbSettings m_Settings;

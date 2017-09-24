@@ -19,7 +19,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Convert an S3M sample header to OpenMPT's internal sample header.
 void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
-//---------------------------------------------------------
 {
 	mptSmp.Initialize(MOD_TYPE_S3M);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
@@ -59,7 +58,6 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 
 // Convert OpenMPT's internal sample header to an S3M sample header.
 SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
-//--------------------------------------------------------------
 {
 	SmpLength smpLength = 0;
 	mpt::String::Write<mpt::String::maybeNullTerminated>(filename, mptSmp.filename);
@@ -103,7 +101,6 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 
 // Retrieve the internal sample format flags for this sample.
 SampleIO S3MSampleHeader::GetSampleFormat(bool signedSamples) const
-//-----------------------------------------------------------------
 {
 	if(pack == S3MSampleHeader::pADPCM && !(flags & S3MSampleHeader::smp16Bit) && !(flags & S3MSampleHeader::smpStereo))
 	{

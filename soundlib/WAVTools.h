@@ -278,9 +278,7 @@ struct WAVCuePoint
 MPT_BINARY_STRUCT(WAVCuePoint, 24)
 
 
-//=============
 class WAVReader
-//=============
 {
 protected:
 	ChunkReader file;
@@ -324,9 +322,7 @@ public:
 
 #ifndef MODPLUG_NO_FILESAVE
 
-//=============
 class WAVWriter
-//=============
 {
 protected:
 	// When writing to a stream: Stream pointer

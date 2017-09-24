@@ -99,7 +99,6 @@ public:
 
 
 WAVEncoder::WAVEncoder()
-//----------------------
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("wav");
@@ -143,21 +142,18 @@ WAVEncoder::WAVEncoder()
 
 
 bool WAVEncoder::IsAvailable() const
-//----------------------------------
 {
 	return true;
 }
 
 
 WAVEncoder::~WAVEncoder()
-//-----------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{

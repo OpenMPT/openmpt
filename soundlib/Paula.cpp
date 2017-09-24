@@ -271,7 +271,6 @@ static constexpr int32 WinSincIntegral[2][2048] =
 
 
 State::State(uint32 sampleRate)
-//-----------------------------
 {
 	double amigaClocksPerSample = static_cast<double>(PAULA_HZ) / sampleRate;
 	numSteps = static_cast<int>(amigaClocksPerSample / MINIMUM_INTERVAL);
@@ -283,7 +282,6 @@ State::State(uint32 sampleRate)
 
 
 void State::Reset()
-//-----------------
 {
 	remainder = SamplePosition(0);
 	activeBleps = 0;
@@ -292,7 +290,6 @@ void State::Reset()
 
 
 void State::InputSample(int16 sample)
-//-----------------------------------
 {
 	if(sample != globalOutputLevel)
 	{
@@ -312,7 +309,6 @@ void State::InputSample(int16 sample)
 
 // Return output simulated as series of bleps
 int State::OutputSample(bool filter)
-//----------------------------------
 {
 	int output = globalOutputLevel * (1 << Paula::BLEP_SCALE);
 	for(uint16 i = 0; i < activeBleps; i++)
@@ -328,7 +324,6 @@ int State::OutputSample(bool filter)
 
 // Advance the simulation by given number of clock ticks
 void State::Clock(int cycles)
-//---------------------------
 {
 	for(uint16 i = 0; i < activeBleps; i++)
 	{

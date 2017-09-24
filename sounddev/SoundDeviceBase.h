@@ -26,9 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-//========
 class Base
-//========
 	: public IBase
 {
 

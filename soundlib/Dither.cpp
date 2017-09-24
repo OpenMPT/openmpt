@@ -24,7 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 mpt::ustring Dither::GetModeName(DitherMode mode)
-//-----------------------------------------------
 {
 	switch(mode)
 	{
@@ -45,7 +44,6 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 #ifdef ENABLE_X86
 
 void X86_Dither(int *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState *state)
-//-------------------------------------------------------------------------------------
 {
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
@@ -96,7 +94,6 @@ noiseloop:
 
 
 static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
-//--------------------------------------------------------
 {
 	a = (a << 1) | (a >> 31);
 	a ^= 0x10204080u;
@@ -106,7 +103,6 @@ static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
 }
 
 static void C_Dither(int *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState *state)
-//--------------------------------------------------------------------------------------------
 {
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
@@ -131,7 +127,6 @@ static void C_Dither(int *pBuffer, std::size_t count, uint32 nBits, DitherModPlu
 }
 
 static void Dither_ModPlug(int *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
-//------------------------------------------------------------------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
 		X86_Dither(pBuffer, count * channels, nBits, &state);
@@ -145,7 +140,6 @@ template<int targetbits, int channels, int ditherdepth = 1, bool triangular = fa
 struct Dither_SimpleTemplate
 {
 MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleState &state, mpt::fast_prng &prng)
-//---------------------------------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(int) == 4);
 	const int rshift = (32-targetbits) - MIXING_ATTENUATION;
@@ -188,7 +182,6 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 };
 
 static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channels, int bits, DitherSimpleState &state, mpt::fast_prng &prng)
-//------------------------------------------------------------------------------------------------------------------------------------------
 {
 	switch(bits)
 	{
@@ -239,28 +232,24 @@ static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channel
 
 
 void Dither::Reset()
-//------------------
 {
 	state.Reset();
 	}
 
 
 void Dither::SetMode(DitherMode mode_)
-//------------------------------------
 {
 	mode = mode_;
 }
 
 
 DitherMode Dither::GetMode() const
-//--------------------------------
 {
 	return mode;
 }
 
 
 void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits)
-//-------------------------------------------------------------------------------------
 {
 	switch(mode)
 	{

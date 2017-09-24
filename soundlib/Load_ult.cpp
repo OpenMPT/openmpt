@@ -97,7 +97,6 @@ convert them. */
 
 
 static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
-//--------------------------------------------------------------------------
 {
 
 	static const uint8 ultEffTrans[] =
@@ -204,7 +203,6 @@ static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 
 
 static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
-//---------------------------------------------------------------------
 {
 	uint8 b, repeat = 1;
 	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
@@ -268,7 +266,6 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 
 // Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
 struct PostFixUltCommands
-//=======================
 {
 	PostFixUltCommands(CHANNELINDEX numChannels)
 	{
@@ -337,7 +334,6 @@ struct PostFixUltCommands
 
 
 static bool ValidateHeader(const UltFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(fileHeader.version < '1'
 		|| fileHeader.version > '4'
@@ -351,7 +347,6 @@ static bool ValidateHeader(const UltFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderULT(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	UltFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -368,7 +363,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderULT(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

@@ -50,7 +50,6 @@ MPT_BINARY_STRUCT(OktSample, 32)
 
 // Parse the sample header block
 static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------------------
 {
 	sndFile.m_nSamples = std::min<SAMPLEINDEX>(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1u);
 	sample7bit.resize(sndFile.GetNumSamples());
@@ -91,7 +90,6 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 
 // Parse a pattern block
 static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------
 {
 	if(!chunk.CanRead(2))
 	{
@@ -259,7 +257,6 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderOKT(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(8))
 	{
@@ -288,7 +285,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderOKT(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 	if(!file.ReadMagic("OKTASONG"))

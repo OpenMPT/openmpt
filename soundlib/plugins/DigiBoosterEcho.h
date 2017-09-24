@@ -14,9 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=======================================
 class DigiBoosterEcho : public IMixPlugin
-//=======================================
 {
 public:
 	enum Parameters

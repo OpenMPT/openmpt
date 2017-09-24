@@ -127,9 +127,7 @@ public:
 };
 
 
-//=====================
 class CVstPluginManager
-//=====================
 {
 #ifndef NO_PLUGINS
 protected:

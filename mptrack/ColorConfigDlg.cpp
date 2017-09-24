@@ -73,7 +73,6 @@ END_MESSAGE_MAP()
 
 
 void COptionsColors::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsColors)
@@ -93,14 +92,12 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 
 
 static CString FormatFontName(const FontSetting &font)
-//----------------------------------------------------
 {
 	return mpt::ToCString(font.name + MPT_USTRING(", ") + mpt::ufmt::val(font.size / 10));
 }
 
 
 BOOL COptionsColors::OnInitDialog()
-//---------------------------------
 {
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
@@ -165,7 +162,6 @@ BOOL COptionsColors::OnInitDialog()
 
 
 BOOL COptionsColors::OnKillActive()
-//---------------------------------
 {
 	int temp_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
 	int temp_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
@@ -182,7 +178,6 @@ BOOL COptionsColors::OnKillActive()
 
 
 void COptionsColors::OnOK()
-//-------------------------
 {
 	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT);
 	if (IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
@@ -227,7 +222,6 @@ void COptionsColors::OnOK()
 
 
 BOOL COptionsColors::OnSetActive()
-//--------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_COLORS;
 	return CPropertyPage::OnSetActive();
@@ -235,7 +229,6 @@ BOOL COptionsColors::OnSetActive()
 
 
 void COptionsColors::OnChoosePatternFont()
-//----------------------------------------
 {
 	LOGFONT lf;
 	MemsetZero(lf);
@@ -272,7 +265,6 @@ void COptionsColors::OnChoosePatternFont()
 
 
 void COptionsColors::OnChooseCommentFont()
-//----------------------------------------
 {
 	LOGFONT lf;
 	MemsetZero(lf);
@@ -300,7 +292,6 @@ void COptionsColors::OnChooseCommentFont()
 
 
 void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
-//-----------------------------------------------------------------
 {
 	int nColor = -1;
 	switch(nIdCtl)
@@ -431,7 +422,6 @@ static DWORD rgbCustomColors[16] =
 
 
 void COptionsColors::SelectColor(COLORREF *lprgb)
-//-----------------------------------------------
 {
 	CHOOSECOLOR cc;
 	cc.lStructSize = sizeof(CHOOSECOLOR);
@@ -453,28 +443,24 @@ void COptionsColors::SelectColor(COLORREF *lprgb)
 
 
 void COptionsColors::OnSelectColor1()
-//-----------------------------------
 {
 	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex1]);
 }
 
 
 void COptionsColors::OnSelectColor2()
-//-----------------------------------
 {
 	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex2]);
 }
 
 
 void COptionsColors::OnSelectColor3()
-//-----------------------------------
 {
 	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex3]);
 }
 
 
 void COptionsColors::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
-//-----------------------------------------------------------------------------
 {
 	CPropertyPage::OnVScroll(nSBCode, nPos, pScrollBar);
 	int newSel = m_ComboItem.GetCurSel() - m_ColorSpin.GetPos32();
@@ -488,7 +474,6 @@ void COptionsColors::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 
 
 void COptionsColors::OnColorSelChanged()
-//--------------------------------------
 {
 	int sel = m_ComboItem.GetCurSel();
 	if (sel >= 0)
@@ -499,13 +484,11 @@ void COptionsColors::OnColorSelChanged()
 }
 
 void COptionsColors::OnSettingsChanged()
-//--------------------------------------
 {
 	SetModified(TRUE);
 }
 
 void COptionsColors::OnUpdateDialog()
-//-----------------------------------
 {
 	const ColorDescriptions &cd = colorDefs[m_nColorItem];
 	if (cd.descText1) m_TxtColor1.SetWindowText(cd.descText1);
@@ -537,7 +520,6 @@ void COptionsColors::OnUpdateDialog()
 
 
 void COptionsColors::OnPreviewChanged()
-//-------------------------------------
 {
 	OnSettingsChanged();
 	m_BtnPreview.InvalidateRect(NULL, FALSE);
@@ -548,7 +530,6 @@ void COptionsColors::OnPreviewChanged()
 
 
 void COptionsColors::OnPresetChange()
-//-----------------------------------
 {
 	auto curSel = m_ComboPreset.GetCurSel();
 	if(curSel == 0)
@@ -567,7 +548,6 @@ void COptionsColors::OnPresetChange()
 
 
 void COptionsColors::OnLoadColorScheme()
-//--------------------------------------
 {
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("mptcolor")
@@ -590,7 +570,6 @@ void COptionsColors::OnLoadColorScheme()
 }
 
 void COptionsColors::OnSaveColorScheme()
-//--------------------------------------
 {
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mptcolor")
@@ -611,7 +590,6 @@ void COptionsColors::OnSaveColorScheme()
 
 
 void COptionsColors::OnClearWindowCache()
-//---------------------------------------
 {
 	SettingsContainer &settings = theApp.GetSongSettings();
 	// First, forget all settings...

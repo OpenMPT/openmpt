@@ -344,7 +344,6 @@ if(!writeAll)
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
 void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE *f) const
-//--------------------------------------------------------------------------------------------
 {
 	uint32 code = MAGIC4BE('M','P','T','X');	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
@@ -409,7 +408,6 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, 
 }
 
 void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
-//------------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
 	mpt::IO::WriteIntLE<uint16>(f, size);		//write size
@@ -576,7 +574,6 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 
 // Convert instrument flags which were read from 'dF..' extension to proper internal representation.
 static void ConvertReadExtendedFlags(ModInstrument *pIns)
-//-------------------------------------------------------
 {
 	// Flags of 'dF..' datafield in extended instrument properties.
 	enum
@@ -623,7 +620,6 @@ static void ConvertReadExtendedFlags(ModInstrument *pIns)
 
 
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file)
-//------------------------------------------------------------------------------------------------------------
 {
 	if(code == MAGIC4BE('K','[','.','.'))
 	{
@@ -651,7 +647,6 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 
 
 void ReadExtendedInstrumentProperty(ModInstrument* pIns, const uint32 code, FileReader &file)
-//-------------------------------------------------------------------------------------------
 {
 	uint16 size = file.ReadUint16LE();
 	if(!file.CanRead(size))
@@ -663,7 +658,6 @@ void ReadExtendedInstrumentProperty(ModInstrument* pIns, const uint32 code, File
 
 
 void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file)
-//--------------------------------------------------------------------------
 {
 	if(!file.ReadMagic("XTPM"))	// 'MPTX'
 	{
@@ -678,7 +672,6 @@ void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file)
 
 
 void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade)
-//------------------------------------------------------------------------------------------
 {
 	if(!file.ReadMagic("XTPM"))	// 'MPTX'
 	{

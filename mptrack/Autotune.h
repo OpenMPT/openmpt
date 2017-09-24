@@ -17,9 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct AutotuneThreadData;
 
-//============
 class Autotune
-//============
 {
 protected:
 	ModSample &sample;
@@ -59,9 +57,7 @@ protected:
 };
 
 
-//=================================
 class CAutotuneDlg : public CDialog
-//=================================
 {
 protected:
 	static int pitchReference;	// Pitch reference (440Hz by default)

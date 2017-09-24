@@ -41,7 +41,6 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 // Try loading the VST library.
 static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HMODULE &library)
-//--------------------------------------------------------------------------------
 {
 	__try
 	{
@@ -56,7 +55,6 @@ static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HMODULE &librar
 
 // Try loading the VST plugin and retrieve the AEffect structure.
 static AEffect *GetAEffectSEH(HMODULE library)
-//--------------------------------------------
 {
 	__try
 	{
@@ -84,7 +82,6 @@ static AEffect *GetAEffectSEH(HMODULE library)
 
 
 AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge)
-//---------------------------------------------------------------------------------------
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 
@@ -162,7 +159,6 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 
 
 VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
-//---------------------------------------------------------------------------------------------------------------------------------------
 {
 #ifdef VST_LOG
 	Log(mpt::format("VST plugin to host: Eff: %1, Opcode = %2, Index = %3, Value = %4, PTR = %5, OPT = %6\n")(
@@ -635,7 +631,6 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 // Helper function for file selection dialog stuff.
 // Note: This function has been copied over to the Plugin Bridge. Ugly, but serializing this over the bridge would be even uglier.
 VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
-//----------------------------------------------------------------------------
 {
 	if(fileSel == nullptr)
 	{
@@ -820,7 +815,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	, m_nSampleRate(sndFile.GetSampleRate())
 	, m_isInitialized(false)
 	, m_bNeedIdle(false)
-//----------------------------------------------------------------------------------------------------------------------------
 {
 	// Open plugin and initialize data structures
 	Initialize();
@@ -831,7 +825,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 
 
 void CVstPlugin::Initialize()
-//---------------------------
 {
 	// If filename matched during load but plugin ID didn't, make sure it's updated.
 	m_pMixStruct->Info.dwPluginId1 = m_Factory.pluginId1 = m_Effect.magic;
@@ -945,7 +938,6 @@ void CVstPlugin::Initialize()
 
 
 bool CVstPlugin::InitializeIOBuffers()
-//------------------------------------
 {
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	// In case of a bridged plugin, the AEffect struct has been updated before calling this opcode, so we don't have to worry about it being up-to-date.
@@ -954,7 +946,6 @@ bool CVstPlugin::InitializeIOBuffers()
 
 
 CVstPlugin::~CVstPlugin()
-//-----------------------
 {
 	CriticalSection cs;
 
@@ -980,14 +971,12 @@ CVstPlugin::~CVstPlugin()
 
 
 void CVstPlugin::Release()
-//------------------------
 {
 	delete this;
 }
 
 
 void CVstPlugin::Idle()
-//---------------------
 {
 	if(m_bNeedIdle)
 	{
@@ -1002,14 +991,12 @@ void CVstPlugin::Idle()
 
 
 int32 CVstPlugin::GetNumPrograms() const
-//--------------------------------------
 {
 	return std::max(m_Effect.numPrograms, VstInt32(0));
 }
 
 
 PlugParamIndex CVstPlugin::GetNumParameters() const
-//-------------------------------------------------
 {
 	return std::max(m_Effect.numParams, VstInt32(0));
 }
@@ -1017,21 +1004,18 @@ PlugParamIndex CVstPlugin::GetNumParameters() const
 
 // Check whether a VST parameter can be automated
 bool CVstPlugin::CanAutomateParameter(PlugParamIndex index)
-//---------------------------------------------------------
 {
 	return (Dispatch(effCanBeAutomated, index, 0, nullptr, 0.0f) != 0);
 }
 
 
 int32 CVstPlugin::GetUID() const
-//------------------------------
 {
 	return m_Effect.uniqueID;
 }
 
 
 VstInt32 CVstPlugin::GetVersion() const
-//-------------------------------------
 {
 	return m_Effect.version;
 }
@@ -1039,7 +1023,6 @@ VstInt32 CVstPlugin::GetVersion() const
 
 // Wrapper for VST dispatch call with structured exception handling.
 VstIntPtr CVstPlugin::DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception)
-//--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	__try
 	{
@@ -1055,7 +1038,6 @@ VstIntPtr CVstPlugin::DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 ind
 
 
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
-//----------------------------------------------------------------------------------------------------
 {
 	unsigned long exception = 0;
 #ifdef VST_LOG
@@ -1085,7 +1067,6 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 
 
 int32 CVstPlugin::GetCurrentProgram()
-//-----------------------------------
 {
 	if(m_Effect.numPrograms > 0)
 	{
@@ -1096,7 +1077,6 @@ int32 CVstPlugin::GetCurrentProgram()
 
 
 CString CVstPlugin::GetCurrentProgramName()
-//-----------------------------------------
 {
 	std::vector<char> s(256, 0);
 	// kVstMaxProgNameLen is 24... too short for some plugins, so use at least 256 bytes.
@@ -1106,14 +1086,12 @@ CString CVstPlugin::GetCurrentProgramName()
 
 
 void CVstPlugin::SetCurrentProgramName(const CString &name)
-//---------------------------------------------------------
 {
 	Dispatch(effSetProgramName, 0, 0, const_cast<char *>(mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str()), 0.0f);
 }
 
 
 CString CVstPlugin::GetProgramName(int32 program)
-//-----------------------------------------------
 {
 	// kVstMaxProgNameLen is 24... too short for some plugins, so use at least 256 bytes.
 	std::vector<char> rawname(256, 0);
@@ -1140,7 +1118,6 @@ CString CVstPlugin::GetProgramName(int32 program)
 
 
 void CVstPlugin::SetCurrentProgram(int32 nIndex)
-//----------------------------------------------
 {
 	if(m_Effect.numPrograms > 0)
 	{
@@ -1154,7 +1131,6 @@ void CVstPlugin::SetCurrentProgram(int32 nIndex)
 
 
 void CVstPlugin::BeginSetProgram(int32 program)
-//---------------------------------------------
 {
 	Dispatch(effBeginSetProgram, 0, 0, nullptr, 0);
 	if(program != -1)
@@ -1163,14 +1139,12 @@ void CVstPlugin::BeginSetProgram(int32 program)
 
 
 void CVstPlugin::EndSetProgram()
-//------------------------------
 {
 	Dispatch(effEndSetProgram, 0, 0, nullptr, 0);
 }
 
 
 PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
-//------------------------------------------------------------
 {
 	float fResult = 0;
 	if(nIndex < m_Effect.numParams && m_Effect.getParameter != nullptr)
@@ -1188,7 +1162,6 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 
 
 void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
-//-------------------------------------------------------------------------
 {
 	__try
 	{
@@ -1206,7 +1179,6 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 
 // Helper function for retreiving parameter name / label / display
 CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
-//-------------------------------------------------------------------------
 {
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
 	{
@@ -1220,7 +1192,6 @@ CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 
 
 CString CVstPlugin::GetParamName(PlugParamIndex param)
-//----------------------------------------------------
 {
 	VstParameterProperties properties;
 	MemsetZero(properties.label);
@@ -1236,7 +1207,6 @@ CString CVstPlugin::GetParamName(PlugParamIndex param)
 
 
 CString CVstPlugin::GetDefaultEffectName()
-//----------------------------------------
 {
 	if(m_bIsVst2)
 	{
@@ -1249,7 +1219,6 @@ CString CVstPlugin::GetDefaultEffectName()
 
 
 void CVstPlugin::Resume()
-//-----------------------
 {
 	const uint32 sampleRate = m_SndFile.GetSampleRate();
 
@@ -1275,7 +1244,6 @@ void CVstPlugin::Resume()
 
 
 void CVstPlugin::Suspend()
-//------------------------
 {
 	if(m_isResumed)
 	{
@@ -1288,7 +1256,6 @@ void CVstPlugin::Suspend()
 
 // Send events to plugin. Returns true if there are events left to be processed.
 void CVstPlugin::ProcessVSTEvents()
-//---------------------------------
 {
 	// Process VST events
 	if(m_Effect.dispatcher != nullptr && vstEvents.Finalise() > 0)
@@ -1308,7 +1275,6 @@ void CVstPlugin::ProcessVSTEvents()
 
 // Receive events from plugin and send them to the next plugin in the chain.
 void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
-//--------------------------------------------------------
 {
 	if(m_pMixStruct == nullptr)
 	{
@@ -1368,7 +1334,6 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 
 // Wrapper for VST process call with structured exception handling.
 static void ProcessSEH(AEffectProcessProc processFP, AEffect* effect, float** inputs, float** outputs, VstInt32 sampleFrames, unsigned long &exception)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	__try
 	{
@@ -1380,7 +1345,6 @@ static void ProcessSEH(AEffectProcessProc processFP, AEffect* effect, float** in
 
 
 void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//--------------------------------------------------------------------
 {
 	ProcessVSTEvents();
 
@@ -1468,7 +1432,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 bool CVstPlugin::MidiSend(uint32 dwMidiCode)
-//------------------------------------------
 {
 	// Note-Offs go at the start of the queue (since OpenMPT 1.17). Needed for situations like this:
 	// ... ..|C-5 01
@@ -1500,7 +1463,6 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 
 
 bool CVstPlugin::MidiSysexSend(const void *message, uint32 length)
-//----------------------------------------------------------------
 {
 	VstMidiSysexEvent event;
 	event.type = kVstSysExType;
@@ -1518,7 +1480,6 @@ bool CVstPlugin::MidiSysexSend(const void *message, uint32 length)
 
 
 void CVstPlugin::HardAllNotesOff()
-//--------------------------------
 {
 	float out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
@@ -1579,7 +1540,6 @@ void CVstPlugin::HardAllNotesOff()
 
 
 void CVstPlugin::SaveAllParameters()
-//----------------------------------
 {
 	if(m_pMixStruct == nullptr)
 	{
@@ -1625,7 +1585,6 @@ void CVstPlugin::SaveAllParameters()
 
 
 void CVstPlugin::RestoreAllParameters(int32 program)
-//--------------------------------------------------
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= 4)
 	{
@@ -1653,7 +1612,6 @@ void CVstPlugin::RestoreAllParameters(int32 program)
 
 
 CAbstractVstEditor *CVstPlugin::OpenEditor()
-//------------------------------------------
 {
 	try
 	{
@@ -1671,7 +1629,6 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 
 
 void CVstPlugin::Bypass(bool bypass)
-//----------------------------------
 {
 	Dispatch(effSetBypass, bypass ? 1 : 0, 0, nullptr, 0.0f);
 	IMixPlugin::Bypass(bypass);
@@ -1679,28 +1636,24 @@ void CVstPlugin::Bypass(bool bypass)
 
 
 void CVstPlugin::NotifySongPlaying(bool playing)
-//----------------------------------------------
 {
 	m_isSongPlaying = playing;
 }
 
 
 bool CVstPlugin::IsInstrument() const
-//-----------------------------------
 {
 	return ((m_Effect.flags & effFlagsIsSynth) || (!m_Effect.numInputs));
 }
 
 
 bool CVstPlugin::CanRecieveMidiEvents()
-//-------------------------------------
 {
 	return Dispatch(effCanDo, 0, 0, "receiveVstMidiEvent", 0.0f) != 0;
 }
 
 
 void CVstPlugin::ReportPlugException(std::wstring text) const
-//-----------------------------------------------------------
 {
 	text += L" (Plugin=" + m_Factory.libraryName.ToWide() + L")";
 	CVstPluginManager::ReportPlugException(text);
@@ -1709,7 +1662,6 @@ void CVstPlugin::ReportPlugException(std::wstring text) const
 
 // Cache program names for plugin bridge
 void CVstPlugin::CacheProgramNames(int32 firstProg, int32 lastProg)
-//-----------------------------------------------------------------
 {
 	if(isBridged)
 	{
@@ -1721,7 +1673,6 @@ void CVstPlugin::CacheProgramNames(int32 firstProg, int32 lastProg)
 
 // Cache parameter names for plugin bridge
 void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
-//---------------------------------------------------------------------
 {
 	if(isBridged)
 	{
@@ -1732,7 +1683,6 @@ void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
 
 
 IMixPlugin::ChunkData CVstPlugin::GetChunk(bool isBank)
-//-----------------------------------------------------
 {
 	mpt::byte *chunk = nullptr;
 	auto size = Dispatch(effGetChunk, isBank ? 0 : 1, 0, &chunk, 0);
@@ -1745,7 +1695,6 @@ IMixPlugin::ChunkData CVstPlugin::GetChunk(bool isBank)
 
 
 void CVstPlugin::SetChunk(const ChunkData &chunk, bool isBank)
-//------------------------------------------------------------
 {
 	Dispatch(effSetChunk, isBank ? 0 : 1, chunk.size(), const_cast<mpt::byte *>(chunk.data()), 0);
 }

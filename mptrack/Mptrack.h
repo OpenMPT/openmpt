@@ -122,9 +122,7 @@ struct DRAGONDROP
 //   CDocument::OnOpenDocument
 //   CDocument::OnSaveDocument
 
-//=============================================
 class CModDocTemplate: public CMultiDocTemplate
-//=============================================
 {
 public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
@@ -156,9 +154,7 @@ public:
 
 class CMPTCommandLineInfo;
 
-//=============================
 class CTrackApp: public CWinApp
-//=============================
 {
 	friend class CMainFrame;
 // static data
@@ -394,9 +390,7 @@ extern CTrackApp theApp;
 //////////////////////////////////////////////////////////////////
 // More Bitmap Helpers
 
-//===============
 class CFastBitmap
-//===============
 {
 protected:
 	static const uint8 BLEND_OFFSET = 0x80;

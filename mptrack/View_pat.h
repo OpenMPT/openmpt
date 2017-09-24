@@ -95,9 +95,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Pattern editing class
 
 
-//=======================================
 class CViewPattern: public CModScrollView
-//=======================================
 {
 public:
 

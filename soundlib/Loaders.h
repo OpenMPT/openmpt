@@ -28,7 +28,6 @@ OPENMPT_NAMESPACE_BEGIN
 // 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass ORDERINDEX_INVALID.
 template<typename T, size_t arraySize>
 bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t howMany = arraySize, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	LimitMax(howMany, arraySize);
@@ -51,7 +50,6 @@ bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t 
 // 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass ORDERINDEX_INVALID.
 template<typename T>
 bool ReadOrderFromFile(ModSequence &order, FileReader &file, size_t howMany, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	if(!file.CanRead(howMany * sizeof(T)))

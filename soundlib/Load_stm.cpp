@@ -95,7 +95,6 @@ MPT_BINARY_STRUCT(STMPatternData, 4*64*4)
 
 
 static bool ValidateHeader(const STMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(fileHeader.filetype != 2
 		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
@@ -114,7 +113,6 @@ static bool ValidateHeader(const STMFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const STMFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(fileHeader);
 	return 31 * sizeof(STMSampleHeader) + 128;
@@ -122,7 +120,6 @@ static uint64 GetHeaderMinimumAdditionalSize(const STMFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	STMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -138,7 +135,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

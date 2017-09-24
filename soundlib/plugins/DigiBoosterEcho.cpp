@@ -17,7 +17,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 IMixPlugin* DigiBoosterEcho::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//------------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) DigiBoosterEcho(factory, sndFile, mixStruct);
 }
@@ -28,7 +27,6 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 	, m_bufferSize(0)
 	, m_writePos(0)
 	, m_sampleRate(sndFile.GetSampleRate())
-//---------------------------------------------------------------------------------------------------
 {
 	m_mixBuffer.Initialize(2, 2);
 	InsertIntoFactoryList();
@@ -36,7 +34,6 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 
 
 void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//-------------------------------------------------------------------------
 {
 	if(!m_bufferSize)
 		return;
@@ -85,7 +82,6 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 void DigiBoosterEcho::SaveAllParameters()
-//---------------------------------------
 {
 	m_pMixStruct->defaultProgram = -1;
 	try
@@ -101,7 +97,6 @@ void DigiBoosterEcho::SaveAllParameters()
 
 
 void DigiBoosterEcho::RestoreAllParameters(int32 program)
-//-------------------------------------------------------
 {
 	if(m_pMixStruct->pluginData.size() == sizeof(m_chunk) && !memcmp(m_pMixStruct->pluginData.data(), "Echo", 4))
 	{
@@ -115,7 +110,6 @@ void DigiBoosterEcho::RestoreAllParameters(int32 program)
 
 
 PlugParamValue DigiBoosterEcho::GetParameter(PlugParamIndex index)
-//----------------------------------------------------------------
 {
 	if(index < kEchoNumParameters)
 	{
@@ -126,7 +120,6 @@ PlugParamValue DigiBoosterEcho::GetParameter(PlugParamIndex index)
 
 
 void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
-//----------------------------------------------------------------------------
 {
 	if(index < kEchoNumParameters)
 	{
@@ -137,7 +130,6 @@ void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void DigiBoosterEcho::Resume()
-//----------------------------
 {
 	m_isResumed = true;
 	m_sampleRate = m_SndFile.GetSampleRate();
@@ -147,7 +139,6 @@ void DigiBoosterEcho::Resume()
 
 
 void DigiBoosterEcho::PositionChanged()
-//-------------------------------------
 {
 	m_bufferSize = (m_sampleRate >> 1) + (m_sampleRate >> 6);
 	try
@@ -165,7 +156,6 @@ void DigiBoosterEcho::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString DigiBoosterEcho::GetParamName(PlugParamIndex param)
-//---------------------------------------------------------
 {
 	switch(param)
 	{
@@ -179,7 +169,6 @@ CString DigiBoosterEcho::GetParamName(PlugParamIndex param)
 
 
 CString DigiBoosterEcho::GetParamLabel(PlugParamIndex param)
-//----------------------------------------------------------
 {
 	if(param == kEchoDelay)
 		return _T("ms");
@@ -188,7 +177,6 @@ CString DigiBoosterEcho::GetParamLabel(PlugParamIndex param)
 
 
 CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
-//------------------------------------------------------------
 {
 	CString s;
 	if(param == kEchoMix)
@@ -209,7 +197,6 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 
 
 IMixPlugin::ChunkData DigiBoosterEcho::GetChunk(bool)
-//---------------------------------------------------
 {
 	auto data = reinterpret_cast<const mpt::byte *>(&m_chunk);
 	return ChunkData(data, sizeof(m_chunk));
@@ -217,7 +204,6 @@ IMixPlugin::ChunkData DigiBoosterEcho::GetChunk(bool)
 
 
 void DigiBoosterEcho::SetChunk(const ChunkData &chunk, bool)
-//----------------------------------------------------------
 {
 	auto data = chunk.data();
 	if(chunk.size() == sizeof(chunk) && !memcmp(data, "Echo", 4))
@@ -229,7 +215,6 @@ void DigiBoosterEcho::SetChunk(const ChunkData &chunk, bool)
 
 
 void DigiBoosterEcho::RecalculateEchoParams()
-//-------------------------------------------
 {
 	m_delayTime = (m_chunk.param[kEchoDelay] * m_sampleRate + 250) / 500;
 	m_PMix = (m_chunk.param[kEchoMix]) * (1.0f / 256.0f);

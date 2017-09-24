@@ -39,7 +39,6 @@ MPT_BINARY_STRUCT(ChunkHeader, 24)
 
 
 VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
-//------------------------------------------------------------------------------
 {
 	const bool firstChunk = file.GetPosition() == 0;
 	ChunkHeader header;
@@ -166,7 +165,6 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 
 
 bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
-//-----------------------------------------------------------------------
 {
 	if(!bank)
 	{
@@ -228,7 +226,6 @@ bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 
 
 void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
-//---------------------------------------------------------------
 {
 	bool writeChunk = plugin.ProgramsAreChunks();
 	ChunkHeader header;
@@ -283,7 +280,6 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 
 // Translate error code to string. Returns nullptr if there was no error.
 const char *VSTPresets::GetErrorMessage(ErrorCode code)
-//-----------------------------------------------------
 {
 	switch(code)
 	{

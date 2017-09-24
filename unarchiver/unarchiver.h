@@ -30,9 +30,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//=================================
 class CUnarchiver : public IArchive
-//=================================
 {
 
 private:

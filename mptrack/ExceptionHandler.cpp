@@ -124,7 +124,6 @@ public:
 
 
 DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
-//------------------------------------------------------------------------------
 	: stateFrozen(FreezeState(mode))
 	, mode(mode)
 	, writtenMiniDump(false)
@@ -147,28 +146,24 @@ DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
 
 
 DebugReporter::~DebugReporter()
-//-----------------------------
 {
 	Cleanup(mode);
 }
 
 
 bool DebugReporter::GenerateDump(_EXCEPTION_POINTERS *pExceptionInfo)
-//-------------------------------------------------------------------
 {
 	return WriteMemoryDump(pExceptionInfo, (crashDirectory.path + MPT_PATHSTRING("crash.dmp")).AsNative().c_str(), ExceptionHandler::fullMemDump);
 }
 
 
 bool DebugReporter::GenerateTraceLog()
-//------------------------------------
 {
 	return mpt::log::Trace::Dump(crashDirectory.path + MPT_PATHSTRING("trace.log"));
 }
 
 
 static void SaveDocumentSafe(CModDoc *pModDoc, const mpt::PathString &filename)
-//-----------------------------------------------------------------------------
 {
 	__try
 	{
@@ -182,7 +177,6 @@ static void SaveDocumentSafe(CModDoc *pModDoc, const mpt::PathString &filename)
 
 // Rescue modified files...
 int DebugReporter::RescueFiles()
-//------------------------------
 {
 	int numFiles = 0;
 	auto documents = theApp.GetOpenDocuments();
@@ -218,7 +212,6 @@ int DebugReporter::RescueFiles()
 
 
 void DebugReporter::ReportError(mpt::ustring errorMessage)
-//--------------------------------------------------------
 {
 
 	if(!crashDirectory.valid)
@@ -321,7 +314,6 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 // Freezes the state as much aspossible in order to avoid further confusion by
 // other (possibly still running) threads
 bool DebugReporter::FreezeState(DumpMode mode)
-//--------------------------------------------
 {
 	MPT_TRACE();
 
@@ -351,7 +343,6 @@ bool DebugReporter::FreezeState(DumpMode mode)
 
 
 static void StopSoundDeviceSafe(CMainFrame *pMainFrame)
-//-----------------------------------------------------
 {
 	__try
 	{
@@ -372,7 +363,6 @@ static void StopSoundDeviceSafe(CMainFrame *pMainFrame)
 
 
 void DebugReporter::StopSoundDevice()
-//-----------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 	if(pMainFrame)
@@ -389,7 +379,6 @@ void DebugReporter::StopSoundDevice()
 
 
 bool DebugReporter::Cleanup(DumpMode mode)
-//----------------------------------------
 {
 	MPT_TRACE();
 
@@ -502,7 +491,6 @@ static const E * GetCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
 
 
 void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
-//----------------------------------------------------------------------------
 {
 	DebugReporter report(DumpModeCrash, nullptr);
 	mpt::ustring errorMessage;
@@ -536,7 +524,6 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 
 
 static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
-//---------------------------------------------------------------------------
 {
 	DebugReporter report(DumpModeCrash, pExceptionInfo);
 
@@ -563,7 +550,6 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 
 
 LONG ExceptionHandler::UnhandledExceptionFilterContinue(_EXCEPTION_POINTERS *pExceptionInfo)
-//------------------------------------------------------------------------------------------
 {
 
 	UnhandledExceptionFilterImpl(pExceptionInfo);
@@ -587,7 +573,6 @@ LONG ExceptionHandler::UnhandledExceptionFilterContinue(_EXCEPTION_POINTERS *pEx
 
 
 LONG ExceptionHandler::ExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
-//-------------------------------------------------------------------------
 {
 	UnhandledExceptionFilterImpl(pExceptionInfo);
 	// Let a potential debugger handle the exception...
@@ -600,7 +585,6 @@ static void mpt_terminate_handler();
 
 
 void ExceptionHandler::Register()
-//-------------------------------
 {
 	if(useImplicitFallbackSEH)
 	{
@@ -618,7 +602,6 @@ void ExceptionHandler::Register()
 
 
 void ExceptionHandler::ConfigureSystemHandler()
-//---------------------------------------------
 {
 #if (_WIN32_WINNT >= 0x0600)
 	if(delegateToWindowsHandler)
@@ -642,7 +625,6 @@ void ExceptionHandler::ConfigureSystemHandler()
 
 
 void ExceptionHandler::UnconfigureSystemHandler()
-//-----------------------------------------------
 {
 	::SetErrorMode(g_OriginalErrorMode);
 	g_OriginalErrorMode = 0;
@@ -650,7 +632,6 @@ void ExceptionHandler::UnconfigureSystemHandler()
 
 
 void ExceptionHandler::Unregister()
-//---------------------------------
 {
 	if(handleStdUnexpected)
 	{
@@ -709,7 +690,6 @@ static void mpt_terminate_handler()
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 
 MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//------------------------------------------------------------------------------------------------------------------
 {
 	DebugReporter report(msg ? DumpModeWarning : DumpModeCrash, nullptr);
 	if(IsDebuggerPresent())
@@ -736,14 +716,12 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 void DebugInjectCrash()
-//---------------------
 {
 	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("Injected crash."));
 }
 
 
 void DebugTraceDump()
-//-------------------
 {
 	DebugReporter report(DumpModeDebug, nullptr);
 }

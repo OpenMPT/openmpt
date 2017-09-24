@@ -13,9 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//========================================
 class CCtrlComments: public CModControlDlg
-//========================================
 {
 protected:
 	int charWidth;

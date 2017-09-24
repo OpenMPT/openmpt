@@ -22,9 +22,7 @@ struct VSTPluginLib;
 class ComponentPluginBridge32;
 class ComponentPluginBridge64;
 
-//====================================
 class CSelectPluginDlg: public CDialog
-//====================================
 {
 protected:
 	SNDMIXPLUGIN *m_pPlugin;

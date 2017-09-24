@@ -69,7 +69,6 @@ static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 
 
 uint8 VSTPluginLib::GetDllBits(bool fromCache) const
-//--------------------------------------------------
 {
 	// Built-in plugins are always native.
 	if(dllPath.empty())
@@ -93,7 +92,6 @@ uint8 VSTPluginLib::GetDllBits(bool fromCache) const
 
 #ifdef MODPLUG_TRACKER
 void VSTPluginLib::WriteToCache() const
-//-------------------------------------
 {
 	SettingsContainer &cacheFile = theApp.GetPluginCache();
 
@@ -115,7 +113,6 @@ void VSTPluginLib::WriteToCache() const
 
 
 bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
-//--------------------------------------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	CVstPluginManager *that = theApp.GetPluginManager();
@@ -135,7 +132,6 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 
 
 CVstPluginManager::CVstPluginManager()
-//------------------------------------
 #ifndef NO_DMO
 	: MustUnInitilizeCOM(false)
 #endif
@@ -204,7 +200,6 @@ CVstPluginManager::CVstPluginManager()
 
 
 CVstPluginManager::~CVstPluginManager()
-//-------------------------------------
 {
 	for(auto &plug : pluginList)
 	{
@@ -225,14 +220,12 @@ CVstPluginManager::~CVstPluginManager()
 
 
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
-//-------------------------------------------------------------------
 {
 	return std::find(pluginList.begin(), pluginList.end(), pLib) != pluginList.end();
 }
 
 
 void CVstPluginManager::EnumerateDirectXDMOs()
-//--------------------------------------------
 {
 #ifndef NO_DMO
 	const mpt::UUID knownDMOs[] =
@@ -311,7 +304,6 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 // Extract instrument and category information from plugin.
 #ifndef NO_VST
 static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
-//----------------------------------------------------------------------
 {
 	unsigned long exception = 0;
 	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(effect, effGetPlugCategory, 0, 0, nullptr, 0, exception));
@@ -337,7 +329,6 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 #ifdef MODPLUG_TRACKER
 // Add a plugin to the list of known plugins.
 VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
@@ -472,7 +463,6 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 
 // Remove a plugin from the list of known plugins and release any remaining instances of it.
 bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
-//----------------------------------------------------------
 {
 	for(const_iterator p = begin(); p != end(); p++)
 	{
@@ -498,7 +488,6 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 
 // Create an instance of a plugin.
 bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------
 {
 	VSTPluginLib *pFound = nullptr;
 #ifdef MODPLUG_TRACKER
@@ -627,7 +616,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 #ifdef MODPLUG_TRACKER
 void CVstPluginManager::OnIdle()
-//------------------------------
 {
 	for(auto &factory : pluginList)
 	{
@@ -652,7 +640,6 @@ void CVstPluginManager::OnIdle()
 
 
 void CVstPluginManager::ReportPlugException(const std::string &msg)
-//-----------------------------------------------------------------
 {
 	Reporting::Notification(msg.c_str());
 #ifdef VST_LOG
@@ -661,7 +648,6 @@ void CVstPluginManager::ReportPlugException(const std::string &msg)
 }
 
 void CVstPluginManager::ReportPlugException(const std::wstring &msg)
-//------------------------------------------------------------------
 {
 	Reporting::Notification(msg);
 #ifdef VST_LOG

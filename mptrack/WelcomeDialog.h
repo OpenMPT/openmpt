@@ -14,9 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//===============================
 class WelcomeDlg : public CDialog
-//===============================
 {
 protected:
 	mpt::PathString vstPath;

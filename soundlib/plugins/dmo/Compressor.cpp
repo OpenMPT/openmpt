@@ -28,7 +28,6 @@ namespace DMO
 float logGain(float x, int32 shiftL, int32 shiftR);
 
 IMixPlugin* Compressor::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//-------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) Compressor(factory, sndFile, mixStruct);
 }
@@ -36,7 +35,6 @@ IMixPlugin* Compressor::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMI
 
 Compressor::Compressor(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//-----------------------------------------------------------------------------------------
 {
 	m_param[kCompGain] = 0.5f;
 	m_param[kCompAttack] = 0.02f;
@@ -51,7 +49,6 @@ Compressor::Compressor(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 
 
 void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//--------------------------------------------------------------------
 {
 	if(!m_bufSize || !m_mixBuffer.Ok())
 		return;
@@ -109,7 +106,6 @@ void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue Compressor::GetParameter(PlugParamIndex index)
-//-----------------------------------------------------------
 {
 	if(index < kCompNumParameters)
 	{
@@ -120,7 +116,6 @@ PlugParamValue Compressor::GetParameter(PlugParamIndex index)
 
 
 void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
-//-----------------------------------------------------------------------
 {
 	if(index < kCompNumParameters)
 	{
@@ -132,7 +127,6 @@ void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void Compressor::Resume()
-//-----------------------
 {
 	m_isResumed = true;
 	PositionChanged();
@@ -141,7 +135,6 @@ void Compressor::Resume()
 
 
 void Compressor::PositionChanged()
-//--------------------------------
 {
 	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 200, 1000);
 	try
@@ -160,7 +153,6 @@ void Compressor::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString Compressor::GetParamName(PlugParamIndex param)
-//----------------------------------------------------
 {
 	switch(param)
 	{
@@ -176,7 +168,6 @@ CString Compressor::GetParamName(PlugParamIndex param)
 
 
 CString Compressor::GetParamLabel(PlugParamIndex param)
-//-----------------------------------------------------
 {
 	switch(param)
 	{
@@ -193,7 +184,6 @@ CString Compressor::GetParamLabel(PlugParamIndex param)
 
 
 CString Compressor::GetParamDisplay(PlugParamIndex param)
-//-------------------------------------------------------
 {
 	float value = m_param[param];
 	switch(param)
@@ -226,7 +216,6 @@ CString Compressor::GetParamDisplay(PlugParamIndex param)
 
 
 void Compressor::RecalculateCompressorParams()
-//--------------------------------------------
 {
 	const float sampleRate = m_SndFile.GetSampleRate() / 1000.0f;
 	m_gain = std::pow(10.0f, GainInDecibel() / 20.0f);

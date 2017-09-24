@@ -41,7 +41,6 @@ END_MESSAGE_MAP()
 
 
 void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSFx);
@@ -57,7 +56,6 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CMidiMacroSetup::OnInitDialog()
-//----------------------------------
 {
 	CString s;
 	CDialog::OnInitDialog();
@@ -150,7 +148,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 // macro == -1 for updating all macros at once
 void CMidiMacroSetup::UpdateMacroList(int macro)
-//----------------------------------------------
 {
 	if (!m_EditMacro[0])
 	{
@@ -204,7 +201,6 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 
 
 void CMidiMacroSetup::UpdateDialog()
-//----------------------------------
 {
 	UINT sfx, sfx_preset, zxx;
 
@@ -226,14 +222,12 @@ void CMidiMacroSetup::UpdateDialog()
 
 
 void CMidiMacroSetup::OnSetAsDefault()
-//------------------------------------
 {
 	theApp.SetDefaultMidiMacro(m_MidiCfg);
 }
 
 
 void CMidiMacroSetup::OnResetCfg()
-//--------------------------------
 {
 	theApp.GetDefaultMidiMacro(m_MidiCfg);
 	m_CbnZxxPreset.SetCurSel(0);
@@ -242,7 +236,6 @@ void CMidiMacroSetup::OnResetCfg()
 
 
 void CMidiMacroSetup::OnMacroHelp()
-//---------------------------------
 {
 	Reporting::Information(_T("Valid characters in macros:\n\n"
 		"0-9, A-F - Raw hex data (4-Bit value)\n"
@@ -262,7 +255,6 @@ void CMidiMacroSetup::OnMacroHelp()
 
 
 void CMidiMacroSetup::OnSFxChanged()
-//----------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
 	if (sfx < 16)
@@ -275,7 +267,6 @@ void CMidiMacroSetup::OnSFxChanged()
 
 
 void CMidiMacroSetup::OnSFxPresetChanged()
-//----------------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
 	parameteredMacroType sfx_preset = static_cast<parameteredMacroType>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
@@ -292,7 +283,6 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 
 
 void CMidiMacroSetup::OnZxxPresetChanged()
-//----------------------------------------
 {
 	fixedMacroType zxx_preset = static_cast<fixedMacroType>(m_CbnZxxPreset.GetItemData(m_CbnZxxPreset.GetCurSel()));
 
@@ -305,7 +295,6 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 
 
 void CMidiMacroSetup::OnSFxEditChanged()
-//--------------------------------------
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
 	if (sfx < 16)
@@ -326,7 +315,6 @@ void CMidiMacroSetup::OnSFxEditChanged()
 
 
 void CMidiMacroSetup::OnZxxEditChanged()
-//--------------------------------------
 {
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if (zxx < 128)
@@ -342,14 +330,12 @@ void CMidiMacroSetup::OnZxxEditChanged()
 }
 
 void CMidiMacroSetup::OnSetSFx(UINT id)
-//-------------------------------------
 {
 	m_CbnSFx.SetCurSel(id - (ID_PLUGSELECT + NUM_MACROS));
 	OnSFxChanged();
 }
 
 void CMidiMacroSetup::OnViewAllParams(UINT id)
-//--------------------------------------------
 {
 #ifndef NO_PLUGINS
 	CString message, plugName;
@@ -373,7 +359,6 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 }
 
 void CMidiMacroSetup::OnPlugChanged()
-//-----------------------------------
 {
 #ifndef NO_PLUGINS
 	int plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
@@ -397,7 +382,6 @@ void CMidiMacroSetup::OnPlugChanged()
 }
 
 void CMidiMacroSetup::OnPlugParamChanged()
-//----------------------------------------
 {
 	UINT param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
 
@@ -412,7 +396,6 @@ void CMidiMacroSetup::OnPlugParamChanged()
 }
 
 void CMidiMacroSetup::OnCCChanged()
-//---------------------------------
 {
 	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
 	const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_cc, cc);
@@ -420,7 +403,6 @@ void CMidiMacroSetup::OnCCChanged()
 }
 
 void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
-//----------------------------------------------------------
 {
 
 	if (sfx_preset == sfx_plug)
@@ -454,7 +436,6 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 
 
 bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric)
-//---------------------------------------------------------------------------------------
 {
 	CString macroStrT;
 	wnd.GetWindowText(macroStrT);

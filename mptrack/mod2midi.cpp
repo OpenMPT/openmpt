@@ -496,7 +496,6 @@ BEGIN_MESSAGE_MAP(CModToMidi, CDialog)
 END_MESSAGE_MAP()
 
 void CModToMidi::DoDataExchange(CDataExchange *pDX)
-//-------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnInstrument);
@@ -510,7 +509,6 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 	: CDialog(IDD_MOD2MIDI, pWndParent)
 	, m_instrMap((sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()) + 1)
 	, m_sndFile(sndFile)
-//--------------------------------------------------------------------------------------------
 {
 	for (INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 	{
@@ -536,7 +534,6 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 
 
 BOOL CModToMidi::OnInitDialog()
-//-----------------------------
 {
 	CString s;
 
@@ -589,7 +586,6 @@ BOOL CModToMidi::OnInitDialog()
 
 
 void CModToMidi::FillProgramBox(bool percussion)
-//----------------------------------------------
 {
 	if (m_bPerc == percussion) return;
 	m_CbnProgram.ResetContent();
@@ -620,7 +616,6 @@ void CModToMidi::FillProgramBox(bool percussion)
 
 
 void CModToMidi::UpdateDialog()
-//-----------------------------
 {
 	m_nCurrInstr = m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel());
 	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
@@ -662,7 +657,6 @@ void CModToMidi::UpdateDialog()
 
 
 void CModToMidi::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-//-------------------------------------------------------------------------
 {
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 	short int pos = (short int)m_SpinInstrument.GetPos();
@@ -680,7 +674,6 @@ void CModToMidi::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CModToMidi::OnChannelChanged()
-//---------------------------------
 {
 	uint8 nMidiCh = static_cast<uint8>(m_CbnChannel.GetItemData(m_CbnChannel.GetCurSel()));
 	if(m_nCurrInstr >= m_instrMap.size())
@@ -694,7 +687,6 @@ void CModToMidi::OnChannelChanged()
 
 
 void CModToMidi::OnProgramChanged()
-//---------------------------------
 {
 	DWORD_PTR nProgram = m_CbnProgram.GetItemData(m_CbnProgram.GetCurSel());
 	if (nProgram == CB_ERR) return;
@@ -706,7 +698,6 @@ void CModToMidi::OnProgramChanged()
 
 
 void CDoMidiConvert::Run()
-//------------------------
 {
 	mpt::ofstream f(m_fileName, std::ios::binary | std::ios::trunc);
 	if(!f.good())

@@ -15,9 +15,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//=============
 struct FileTags
-//=============
 {
 
 	mpt::ustring encoder;

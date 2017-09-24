@@ -75,7 +75,6 @@ private:
 public:
 	template <typename Trd>
 	Dither(Trd & rd)
-	//--------------
 		: state(rd)
 	{
 		mode = DitherDefault;

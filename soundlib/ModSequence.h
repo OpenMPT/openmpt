@@ -19,9 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class ModSequenceSet;
 
-//=================================================
 class ModSequence: public std::vector<PATTERNINDEX>
-//=================================================
 {
 	friend class ModSequenceSet;
 
@@ -118,9 +116,7 @@ public:
 };
 
 
-//==================
 class ModSequenceSet
-//==================
 {
 	friend void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t);
 	friend void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t);

@@ -27,7 +27,6 @@ BEGIN_MESSAGE_MAP(ExternalSamplesDlg, CDialog)
 END_MESSAGE_MAP()
 
 void ExternalSamplesDlg::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
@@ -37,13 +36,11 @@ void ExternalSamplesDlg::DoDataExchange(CDataExchange* pDX)
 
 
 ExternalSamplesDlg::ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent) : CDialog(IDD_MISSINGSAMPLES, parent), modDoc(modDoc), sndFile(modDoc.GetrSoundFile()), isScanning(false)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 }
 
 
 BOOL ExternalSamplesDlg::OnInitDialog()
-//-------------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -64,7 +61,6 @@ BOOL ExternalSamplesDlg::OnInitDialog()
 
 
 void ExternalSamplesDlg::GenerateList()
-//-------------------------------------
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
@@ -93,7 +89,6 @@ void ExternalSamplesDlg::GenerateList()
 
 
 void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
-//----------------------------------------------------
 {
 	const int item = m_List.GetSelectionMark();
 	if(item == -1) return;
@@ -118,7 +113,6 @@ void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 
 
 void ExternalSamplesDlg::OnScanFolder()
-//-------------------------------------
 {
 	if(isScanning)
 	{
@@ -197,7 +191,6 @@ void ExternalSamplesDlg::OnScanFolder()
 
 
 bool ExternalSamplesDlg::SetSample(SAMPLEINDEX smp, const mpt::PathString &fileName)
-//----------------------------------------------------------------------------------
 {
 	modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
 	const mpt::PathString oldPath = sndFile.GetSamplePath(smp);

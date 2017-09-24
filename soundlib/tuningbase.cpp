@@ -40,7 +40,6 @@ const char CTuningRTI::s_FileExtension[5] = ".tun";
 
 
 void CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
-//--------------------------------------------------------------------------
 {
 	if(!str.empty())
 	{
@@ -58,7 +57,6 @@ void CTuningRTI::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 
 
 bool CTuningRTI::Multiply(const RATIOTYPE& r)
-//-------------------------------------------
 {
 	if(r <= 0)
 		return true;
@@ -74,7 +72,6 @@ bool CTuningRTI::Multiply(const RATIOTYPE& r)
 
 
 bool CTuningRTI::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
-//----------------------------------------------------------------------------------------------------------------
 {
 	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
 		return true;
@@ -88,7 +85,6 @@ bool CTuningRTI::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r
 
 
 bool CTuningRTI::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
-//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	{
 		if(vr.first > vr.second || v.size() == 0) return true;
@@ -109,7 +105,6 @@ bool CTuningRTI::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RAT
 
 
 bool CTuningRTI::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
-//--------------------------------------------------------------------------------------------
 {
 	{
 		if(vr.first > vr.second) return true;
@@ -129,7 +124,6 @@ bool CTuningRTI::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, co
 
 
 bool CTuningRTI::ChangeGroupsize(const NOTEINDEXTYPE& s)
-//------------------------------------------------------
 {
 	if(s < 1)
 		return true;
@@ -146,7 +140,6 @@ bool CTuningRTI::ChangeGroupsize(const NOTEINDEXTYPE& s)
 
 
 bool CTuningRTI::ChangeGroupRatio(const RATIOTYPE& r)
-//---------------------------------------------------
 {
 	if(r <= 0)
 		return true;

@@ -21,7 +21,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Convert OpenMPT's internal envelope representation to XM envelope data.
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le &numPoints, uint8le &flags, uint8le &sustain, uint8le &loopStart, uint8le &loopEnd, EnvType env)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	numPoints = static_cast<uint8>(std::min(12u, mptEnv.size()));
 
@@ -56,7 +55,6 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le
 
 // Convert OpenMPT's internal sample representation to an XMInstrument.
 uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
-//-------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -96,7 +94,6 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 
 // Get a list of samples that should be written to the file.
 std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const
-//---------------------------------------------------------------------------------------------------------------
 {
 	std::vector<SAMPLEINDEX> sampleList;		// List of samples associated with this instrument
 	std::vector<bool> addedToList;			// Which samples did we already add to the sample list?
@@ -127,7 +124,6 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 
 // Convert XM envelope data to an OpenMPT's internal envelope representation.
 void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	mptEnv.resize(std::min<uint8>(numPoints, 12));
 
@@ -181,7 +177,6 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoi
 
 // Convert an XMInstrument to OpenMPT's internal instrument representation.
 void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
-//----------------------------------------------------------
 {
 	mptIns.nFadeOut = volFade;
 
@@ -207,7 +202,6 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 
 // Apply auto-vibrato settings from sample to file.
 void XMInstrument::ApplyAutoVibratoToXM(const ModSample &mptSmp, MODTYPE fromType)
-//--------------------------------------------------------------------------------
 {
 	vibType = mptSmp.nVibType;
 	vibSweep = mptSmp.nVibSweep;
@@ -226,7 +220,6 @@ void XMInstrument::ApplyAutoVibratoToXM(const ModSample &mptSmp, MODTYPE fromTyp
 
 // Apply auto-vibrato settings from file to a sample.
 void XMInstrument::ApplyAutoVibratoToMPT(ModSample &mptSmp) const
-//---------------------------------------------------------------
 {
 	mptSmp.nVibType = vibType;
 	mptSmp.nVibSweep = vibSweep;
@@ -237,7 +230,6 @@ void XMInstrument::ApplyAutoVibratoToMPT(ModSample &mptSmp) const
 
 // Write stuff to the header that's always necessary (also for empty instruments)
 void XMInstrumentHeader::Finalise()
-//---------------------------------
 {
 	size = sizeof(XMInstrumentHeader);
 	if(numSamples > 0)
@@ -254,7 +246,6 @@ void XMInstrumentHeader::Finalise()
 
 // Convert OpenMPT's internal sample representation to an XMInstrumentHeader.
 void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
-//-----------------------------------------------------------------------------------------
 {
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
@@ -265,7 +256,6 @@ void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 
 // Convert an XMInstrumentHeader to OpenMPT's internal instrument representation.
 void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
-//----------------------------------------------------------------
 {
 	instrument.ConvertToMPT(mptIns);
 
@@ -293,7 +283,6 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 
 // Convert OpenMPT's internal sample representation to an XIInstrumentHeader.
 void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
-//-----------------------------------------------------------------------------------------
 {
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 
@@ -310,7 +299,6 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 
 // Convert an XIInstrumentHeader to OpenMPT's internal instrument representation.
 void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
-//----------------------------------------------------------------
 {
 	instrument.ConvertToMPT(mptIns);
 
@@ -329,7 +317,6 @@ void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 
 // Convert OpenMPT's internal sample representation to an XMSample.
 void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compatibilityExport)
-//---------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -380,7 +367,6 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 
 // Convert an XMSample to OpenMPT's internal sample representation.
 void XMSample::ConvertToMPT(ModSample &mptSmp) const
-//--------------------------------------------------
 {
 	mptSmp.Initialize(MOD_TYPE_XM);
 
@@ -432,7 +418,6 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 
 // Retrieve the internal sample format flags for this instrument.
 SampleIO XMSample::GetSampleFormat() const
-//----------------------------------------
 {
 	if(reserved == sampleADPCM && !(flags & (XMSample::sample16Bit | XMSample::sampleStereo)))
 	{

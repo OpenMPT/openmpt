@@ -22,7 +22,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(uint32 macroIndex) const
-//------------------------------------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
 
@@ -47,7 +46,6 @@ parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(uint32 macroIndex)
 
 // Retrieve Zxx (Z80-ZFF) type from current macro configuration
 fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
-//-------------------------------------------------------
 {
 	// Compare with all possible preset patterns
 	for(uint32 i = 0; i < zxx_max; i++)
@@ -76,7 +74,6 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 
 
 void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const
-//-------------------------------------------------------------------------------------------------------------------------------------
 {
 	switch(macroType)
 	{
@@ -120,7 +117,6 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
 void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const
-//------------------------------------------------------------------------------------------------------------
 {
 	for(uint32 i = 0; i < 128; i++)
 	{
@@ -207,7 +203,6 @@ bool MIDIMacroConfig::operator== (const MIDIMacroConfig &other) const
 
 // Returns macro description including plugin parameter / MIDI CC information
 CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin) const
-//-------------------------------------------------------------------------------------------
 {
 	const parameteredMacroType macroType = GetParameteredMacroType(macroIndex);
 
@@ -251,7 +246,6 @@ CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *
 
 // Returns generic macro description.
 CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType) const
-//------------------------------------------------------------------------------------
 {
 	switch(macroType)
 	{
@@ -284,7 +278,6 @@ CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType)
 
 // Returns generic macro description.
 CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
-//------------------------------------------------------------------------
 {
 	switch(macroType)
 	{
@@ -314,7 +307,6 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 
 
 int MIDIMacroConfig::MacroToPlugParam(uint32 macroIndex) const
-//------------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
 
@@ -334,7 +326,6 @@ int MIDIMacroConfig::MacroToPlugParam(uint32 macroIndex) const
 
 
 int MIDIMacroConfig::MacroToMidiCC(uint32 macroIndex) const
-//---------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
 
@@ -351,7 +342,6 @@ int MIDIMacroConfig::MacroToMidiCC(uint32 macroIndex) const
 
 
 int MIDIMacroConfig::FindMacroForParam(PlugParamIndex param) const
-//----------------------------------------------------------------
 {
 	for(int macroIndex = 0; macroIndex < NUM_MACROS; macroIndex++)
 	{
@@ -370,7 +360,6 @@ int MIDIMacroConfig::FindMacroForParam(PlugParamIndex param) const
 // Check if the MIDI Macro configuration used is the default one,
 // i.e. the configuration that is assumed when loading a file that has no macros embedded.
 bool MIDIMacroConfig::IsMacroDefaultSetupUsed() const
-//---------------------------------------------------
 {
 	const MIDIMacroConfig defaultConfig;
 
@@ -397,7 +386,6 @@ bool MIDIMacroConfig::IsMacroDefaultSetupUsed() const
 
 // Reset MIDI macro config to default values.
 void MIDIMacroConfig::Reset()
-//---------------------------
 {
 	MemsetZero(szMidiGlb);
 	MemsetZero(szMidiSFXExt);
@@ -417,7 +405,6 @@ void MIDIMacroConfig::Reset()
 
 // Clear all Zxx macros so that they do nothing.
 void MIDIMacroConfig::ClearZxxMacros()
-//------------------------------------
 {
 	MemsetZero(szMidiSFXExt);
 	MemsetZero(szMidiZXXExt);
@@ -426,7 +413,6 @@ void MIDIMacroConfig::ClearZxxMacros()
 
 // Sanitize all macro config strings.
 void MIDIMacroConfig::Sanitize()
-//------------------------------
 {
 	for(uint32 i = 0; i < CountOf(szMidiGlb); i++)
 	{
@@ -445,7 +431,6 @@ void MIDIMacroConfig::Sanitize()
 
 // Helper function for UpgradeMacros()
 void MIDIMacroConfig::UpgradeMacroString(char *macro) const
-//---------------------------------------------------------
 {
 	for(uint32 i = 0; i < MACRO_LENGTH; i++)
 	{
@@ -465,7 +450,6 @@ void MIDIMacroConfig::UpgradeMacroString(char *macro) const
 
 // Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
 void MIDIMacroConfig::UpgradeMacros()
-//-----------------------------------
 {
 	for(uint32 i = 0; i < CountOf(szMidiSFXExt); i++)
 	{
@@ -480,7 +464,6 @@ void MIDIMacroConfig::UpgradeMacros()
 
 // Normalize by removing blanks and other unwanted characters from macro strings for internal usage.
 std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
-//----------------------------------------------------------------
 {
 	std::string sanitizedMacro = macro;
 

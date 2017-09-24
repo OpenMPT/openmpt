@@ -182,7 +182,6 @@ MPT_BINARY_STRUCT(DTMText, 12)
 
 
 static bool ValidateHeader(const DTMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "D.T.", 4)
 		|| fileHeader.headerSize < sizeof(fileHeader) - 8u
@@ -196,7 +195,6 @@ static bool ValidateHeader(const DTMFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDTM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	DTMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -213,7 +211,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDTM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

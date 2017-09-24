@@ -253,7 +253,6 @@ static const EffectCommand imfEffects[] =
 };
 
 static void ImportIMFEffect(ModCommand &m)
-//----------------------------------------
 {
 	uint8 n;
 	// fix some of them
@@ -353,7 +352,6 @@ static void ImportIMFEffect(ModCommand &m)
 
 
 static bool ValidateHeader(const IMFFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.im10, "IM10", 4)
 		|| fileHeader.ordNum > 256
@@ -389,7 +387,6 @@ static bool ValidateHeader(const IMFFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const IMFFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(fileHeader);
 	return 256;
@@ -397,7 +394,6 @@ static uint64 GetHeaderMinimumAdditionalSize(const IMFFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIMF(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	IMFFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -413,7 +409,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIMF(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	IMFFileHeader fileHeader;
 	file.Rewind();

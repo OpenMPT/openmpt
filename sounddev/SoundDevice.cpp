@@ -25,7 +25,6 @@ namespace SoundDevice {
 
 
 SysInfo::SysInfo()
-//----------------
 	: WindowsVersion(mpt::Windows::Version::Current())
 	, IsWine(mpt::Windows::IsWine())
 	, WineHostIsLinux(false)
@@ -38,14 +37,12 @@ SysInfo::SysInfo()
 
 
 SysInfo SysInfo::Current()
-//------------------------
 {
 	return SysInfo();
 }
 
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
-//--------------------------------------------------------------------
 {
 	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
 	if(tmp.size() == 0)
@@ -57,7 +54,6 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 
 
 ChannelMapping::ChannelMapping(uint32 numHostChannels)
-//----------------------------------------------------
 {
 	ChannelToDeviceChannel.resize(numHostChannels);
 	for(uint32 channel = 0; channel < numHostChannels; ++channel)
@@ -68,7 +64,6 @@ ChannelMapping::ChannelMapping(uint32 numHostChannels)
 
 
 ChannelMapping::ChannelMapping(const std::vector<int32> &mapping)
-//---------------------------------------------------------------
 {
 	if(IsValid(mapping))
 	{
@@ -78,7 +73,6 @@ ChannelMapping::ChannelMapping(const std::vector<int32> &mapping)
 
 
 ChannelMapping ChannelMapping::BaseChannel(uint32 channels, int32 baseChannel)
-//----------------------------------------------------------------------------
 {
 	SoundDevice::ChannelMapping result;
 	result.ChannelToDeviceChannel.resize(channels);
@@ -91,7 +85,6 @@ ChannelMapping ChannelMapping::BaseChannel(uint32 channels, int32 baseChannel)
 
 
 bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
-//-------------------------------------------------------------
 {
 	if(mapping.empty())
 	{
@@ -120,28 +113,24 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 
 
 std::string ChannelMapping::ToString() const
-//------------------------------------------
 {
 	return mpt::String::Combine<int32>(ChannelToDeviceChannel, std::string(","));
 }
 
 
 mpt::ustring ChannelMapping::ToUString() const
-//--------------------------------------------
 {
 	return mpt::String::Combine<int32>(ChannelToDeviceChannel, MPT_USTRING(","));
 }
 
 
 ChannelMapping ChannelMapping::FromString(const std::string &str)
-//---------------------------------------------------------------
 {
 	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, std::string(",")));
 }
 
 
 ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
-//----------------------------------------------------------------
 {
 	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, MPT_USTRING(",")));
 }

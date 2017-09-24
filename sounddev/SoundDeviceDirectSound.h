@@ -35,9 +35,7 @@ public:
 	virtual bool DoInitialize() { return true; }
 };
 
-//================================================
 class CDSoundDevice: public CSoundDeviceWithThread
-//================================================
 {
 protected:
 	IDirectSound *m_piDS;

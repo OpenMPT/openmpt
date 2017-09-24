@@ -33,7 +33,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Convert integer mix to floating-point
 static void AMD_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//---------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -66,7 +65,6 @@ mainloop:
 }
 
 static void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-//-------------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -101,7 +99,6 @@ mainloop:
 
 
 static void AMD_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
-//---------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -131,7 +128,6 @@ mainloop:
 
 
 static void AMD_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -169,7 +165,6 @@ mainloop:
 #include <emmintrin.h>
 
 static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------------------------
 {
 	__m128 i2fc = _mm_load_ps1(&_i2fc);
 	const __m128i *in = reinterpret_cast<const __m128i *>(pSrc);
@@ -196,7 +191,6 @@ static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2,
 
 
 static void SSE2_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-//--------------------------------------------------------------------------------------------------------------------
 {
 	__m128 f2ic = _mm_load_ps1(&_f2ic);
 	__m128i *out = reinterpret_cast<__m128i *>(pOut);
@@ -227,7 +221,6 @@ static void SSE2_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *p
 #ifdef ENABLE_SSE
 
 static void SSE_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//---------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -258,7 +251,6 @@ mainloop:
 
 
 static void SSE_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -292,7 +284,6 @@ mainloop:
 // Convert floating-point mix to integer
 
 static void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-//-------------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pIn1
@@ -320,7 +311,6 @@ mainloop:
 // Convert integer mix to floating-point
 
 static void X86_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//---------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pSrc
@@ -346,7 +336,6 @@ mainloop:
 
 
 static void X86_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
-//---------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pIn
@@ -368,7 +357,6 @@ R2I_Loop:
 
 
 static void X86_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pOut
@@ -393,7 +381,6 @@ I2R_Loop:
 
 
 static void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-//-----------------------------------------------------------------------------------------------------------------
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
@@ -404,7 +391,6 @@ static void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut
 
 
 static void C_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//-------------------------------------------------------------------------------------------------------------
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
@@ -415,7 +401,6 @@ static void C_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, ui
 
 
 static void C_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
-//-------------------------------------------------------------------------------------------
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
@@ -425,7 +410,6 @@ static void C_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const
 
 
 static void C_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-//--------------------------------------------------------------------------------------------
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
@@ -436,7 +420,6 @@ static void C_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, cons
 
 
 void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------------
 {
 
 	#ifdef ENABLE_SSE2
@@ -471,7 +454,6 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 
 
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-//--------------------------------------------------------------------------------------------------------
 {
 	#ifdef ENABLE_SSE2
 	if(GetProcSupport() & PROCSUPPORT_SSE2)
@@ -498,7 +480,6 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 
 
 void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-//-----------------------------------------------------------------------------------
 {
 
 	#ifdef ENABLE_SSE
@@ -526,7 +507,6 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 
 
 void FloatToMonoMix(const float *pIn, int *pOut, uint32 nCount, const float _f2ic)
-//--------------------------------------------------------------------------------
 {
 
 	#ifdef ENABLE_X86_AMD
@@ -551,7 +531,6 @@ void FloatToMonoMix(const float *pIn, int *pOut, uint32 nCount, const float _f2i
 
 
 void InitMixBuffer(mixsample_t *pBuffer, uint32 nSamples)
-//-------------------------------------------------------
 {
 	memset(pBuffer, 0, nSamples * sizeof(mixsample_t));
 }
@@ -562,7 +541,6 @@ void InitMixBuffer(mixsample_t *pBuffer, uint32 nSamples)
 
 #ifdef ENABLE_X86
 static void X86_InterleaveFrontRear(int32 *pFrontBuf, int32 *pRearBuf, uint32 nFrames)
-//------------------------------------------------------------------------------------
 {
 	_asm {
 	mov ecx, nFrames	// ecx = framecount
@@ -592,7 +570,6 @@ interleaveloop:
 #endif
 
 static void C_InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 nFrames)
-//----------------------------------------------------------------------------------------------
 {
 	// copy backwards as we are writing back into FrontBuf
 	for(int i=nFrames-1; i>=0; i--)
@@ -605,7 +582,6 @@ static void C_InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf,
 }
 
 void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 nFrames)
-//-------------------------------------------------------------------------------------
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
 		X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
@@ -617,7 +593,6 @@ void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 n
 
 #ifdef ENABLE_X86
 static void X86_MonoFromStereo(int32 *pMixBuf, uint32 nSamples)
-//-------------------------------------------------------------
 {
 	_asm {
 	mov ecx, nSamples
@@ -638,7 +613,6 @@ stloop:
 #endif
 
 static void C_MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
-//-----------------------------------------------------------------
 {
 	for(uint32 i=0; i<nSamples; ++i)
 	{
@@ -647,7 +621,6 @@ static void C_MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 }
 
 void MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
-//--------------------------------------------------------
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
 		X86_MonoFromStereo(pMixBuf, nSamples);
@@ -664,7 +637,6 @@ void MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 
 #ifdef ENABLE_X86
 static void X86_StereoFill(int32 *pBuffer, uint32 nSamples, int32 *lpROfs, int32 *lpLOfs)
-//---------------------------------------------------------------------------------------
 {
 	_asm {
 	mov edi, pBuffer
@@ -738,7 +710,6 @@ done:
 
 // c implementation taken from libmodplug
 static void C_StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs)
-//---------------------------------------------------------------------------------------------------
 {
 	if ((!rofs) && (!lofs))
 	{
@@ -769,7 +740,6 @@ static void C_StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rof
 
 
 void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs)
-//------------------------------------------------------------------------------------------
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
 		X86_StereoFill(pBuffer, nSamples, &rofs, &lofs);
@@ -782,7 +752,6 @@ void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsam
 #ifdef ENABLE_X86
 typedef ModChannel ModChannel_;
 static void X86_EndChannelOfs(ModChannel *pChannel, int32 *pBuffer, uint32 nSamples)
-//----------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pChannel
@@ -825,7 +794,6 @@ brkloop:
 
 // c implementation taken from libmodplug
 static void C_EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
-//---------------------------------------------------------------------------------
 {
 
 	mixsample_t rofs = chn.nROfs;
@@ -856,7 +824,6 @@ static void C_EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSampl
 }
 
 void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
-//------------------------------------------------------------------------
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
 		X86_EndChannelOfs(&chn, pBuffer, nSamples);
@@ -867,7 +834,6 @@ void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
 
 
 void InterleaveStereo(const mixsample_t * MPT_RESTRICT inputL, const mixsample_t * MPT_RESTRICT inputR, mixsample_t * MPT_RESTRICT output, size_t numSamples)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	while(numSamples--)
 	{
@@ -878,7 +844,6 @@ void InterleaveStereo(const mixsample_t * MPT_RESTRICT inputL, const mixsample_t
 
 
 void DeinterleaveStereo(const mixsample_t * MPT_RESTRICT input, mixsample_t * MPT_RESTRICT outputL, mixsample_t * MPT_RESTRICT outputR, size_t numSamples)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	while(numSamples--)
 	{
@@ -891,7 +856,6 @@ void DeinterleaveStereo(const mixsample_t * MPT_RESTRICT input, mixsample_t * MP
 #ifndef MODPLUG_TRACKER
 
 void ApplyGain(int32 *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
-//-----------------------------------------------------------------------------------------------------
 {
 	if(gainFactor16_16 == (1<<16))
 	{
@@ -908,7 +872,6 @@ void ApplyGain(int32 *soundBuffer, std::size_t channels, std::size_t countChunk,
 }
 
 static void ApplyGain(float *beg, float *end, float factor)
-//---------------------------------------------------------
 {
 	for(float *it = beg; it != end; ++it)
 	{
@@ -917,7 +880,6 @@ static void ApplyGain(float *beg, float *end, float factor)
 }
 
 void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
-//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(gainFactor == 1.0f)
 	{

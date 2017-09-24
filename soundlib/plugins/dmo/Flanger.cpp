@@ -23,7 +23,6 @@ namespace DMO
 {
 
 IMixPlugin* Flanger::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//----------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) Flanger(factory, sndFile, mixStruct);
 }
@@ -31,7 +30,6 @@ IMixPlugin* Flanger::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPL
 
 Flanger::Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: Chorus(factory, sndFile, mixStruct)
-//-----------------------------------------------------------------------------------
 {
 	m_param[kFlangerWetDryMix] = 0.5f;
 	m_param[kFlangerWaveShape] = 1.0f;
@@ -48,7 +46,6 @@ Flanger::Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 
 
 void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value)
-//--------------------------------------------------------------------
 {
 	if(index < kFlangerNumParameters)
 	{
@@ -66,7 +63,6 @@ void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value)
 #ifdef MODPLUG_TRACKER
 
 CString Flanger::GetParamName(PlugParamIndex param)
-//-------------------------------------------------
 {
 	switch(param)
 	{
@@ -83,7 +79,6 @@ CString Flanger::GetParamName(PlugParamIndex param)
 
 
 CString Flanger::GetParamLabel(PlugParamIndex param)
-//--------------------------------------------------
 {
 	switch(param)
 	{
@@ -103,7 +98,6 @@ CString Flanger::GetParamLabel(PlugParamIndex param)
 
 
 CString Flanger::GetParamDisplay(PlugParamIndex param)
-//----------------------------------------------------
 {
 	CString s;
 	float value = m_param[param];

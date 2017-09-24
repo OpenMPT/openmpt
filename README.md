@@ -258,7 +258,6 @@ Coding conventions
 
 ~~~~{.cpp}
 void Foo::Bar(int foobar)
-//-----------------------
 {
     while(true)
     {

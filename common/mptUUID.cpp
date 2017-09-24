@@ -40,7 +40,6 @@ namespace Util
 
 
 std::wstring CLSIDToString(CLSID clsid)
-//-------------------------------------
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
@@ -86,7 +85,6 @@ std::wstring CLSIDToString(CLSID clsid)
 
 
 CLSID StringToCLSID(const std::wstring &str)
-//------------------------------------------
 {
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -118,7 +116,6 @@ CLSID StringToCLSID(const std::wstring &str)
 
 
 bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
-//-------------------------------------------------------------
 {
 	bool result = false;
 	clsid = CLSID();
@@ -149,7 +146,6 @@ bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
 
 
 bool IsCLSID(const std::wstring &str)
-//-----------------------------------
 {
 	bool result = false;
 	CLSID clsid = CLSID();
@@ -182,7 +178,6 @@ bool IsCLSID(const std::wstring &str)
 
 
 std::wstring IIDToString(IID iid)
-//-------------------------------
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
@@ -226,7 +221,6 @@ std::wstring IIDToString(IID iid)
 
 
 IID StringToIID(const std::wstring &str)
-//--------------------------------------
 {
 	IID iid = IID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -252,7 +246,6 @@ IID StringToIID(const std::wstring &str)
 
 
 std::wstring GUIDToString(GUID guid)
-//----------------------------------
 {
 	std::vector<OLECHAR> tmp(256);
 	if(::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size())) <= 0)
@@ -264,14 +257,12 @@ std::wstring GUIDToString(GUID guid)
 
 
 GUID StringToGUID(const std::wstring &str)
-//----------------------------------------
 {
 	return StringToIID(str);
 }
 
 
 GUID CreateGUID()
-//---------------
 {
 	GUID guid = GUID();
 	switch(::CoCreateGuid(&guid))
@@ -290,7 +281,6 @@ GUID CreateGUID()
 #if !MPT_OS_WINDOWS_WINRT
 
 UUID StringToUUID(const mpt::ustring &str)
-//----------------------------------------
 {
 	UUID uuid = UUID();
 	std::wstring wstr = mpt::ToWide(str);
@@ -312,7 +302,6 @@ UUID StringToUUID(const mpt::ustring &str)
 
 
 mpt::ustring UUIDToString(UUID uuid)
-//----------------------------------
 {
 	std::wstring wstr;
 	RPC_WSTR tmp = nullptr;
@@ -355,7 +344,6 @@ mpt::ustring UUIDToString(UUID uuid)
 
 
 bool IsValid(UUID uuid)
-//---------------------
 {
 	return false
 		|| uuid.Data1 != 0

@@ -28,7 +28,6 @@ END_MESSAGE_MAP()
 
 
 WelcomeDlg::WelcomeDlg(CWnd *parent)
-//----------------------------------
 {
 	Create(IDD_WECLOME, parent);
 	CenterWindow(parent);
@@ -36,14 +35,12 @@ WelcomeDlg::WelcomeDlg(CWnd *parent)
 
 
 static mpt::PathString GetFullKeyPath(const char *keyFile)
-//--------------------------------------------------------
 {
 	return theApp.GetAppDirPath() + MPT_PATHSTRING("extraKeymaps\\") + mpt::PathString::FromUTF8(keyFile) + MPT_PATHSTRING(".mkb");
 }
 
 
 BOOL WelcomeDlg::OnInitDialog()
-//-----------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -131,7 +128,6 @@ BOOL WelcomeDlg::OnInitDialog()
 
 
 void WelcomeDlg::OnOptions()
-//--------------------------
 {
 	OnOK();
 	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -139,7 +135,6 @@ void WelcomeDlg::OnOptions()
 
 
 void WelcomeDlg::OnScanPlugins()
-//------------------------------
 {
 #ifndef NO_VST
 	CSelectPluginDlg::ScanPlugins(vstPath, this);
@@ -148,7 +143,6 @@ void WelcomeDlg::OnScanPlugins()
 
 
 void WelcomeDlg::OnOK()
-//---------------------
 {
 	CDialog::OnOK();
 

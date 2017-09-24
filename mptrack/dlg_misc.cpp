@@ -47,7 +47,6 @@ END_MESSAGE_MAP()
 
 
 void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
@@ -69,7 +68,6 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CModTypeDlg::OnInitDialog()
-//------------------------------
 {
 	CDialog::OnInitDialog();
 	m_nType = sndFile.GetType();
@@ -116,14 +114,12 @@ BOOL CModTypeDlg::OnInitDialog()
 
 
 CString CModTypeDlg::FormatVersionNumber(DWORD version)
-//-----------------------------------------------------
 {
 	return std::string(MptVersion::ToStr(version) + (MptVersion::IsTestBuild(version) ? " (test build)" : "")).c_str();
 }
 
 
 void CModTypeDlg::UpdateChannelCBox()
-//-----------------------------------
 {
 	const MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 	CHANNELINDEX currChanSel = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel()));
@@ -152,7 +148,6 @@ void CModTypeDlg::UpdateChannelCBox()
 
 
 void CModTypeDlg::UpdateDialog()
-//------------------------------
 {
 	m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 
@@ -270,7 +265,6 @@ void CModTypeDlg::UpdateDialog()
 
 
 void CModTypeDlg::OnPTModeChanged()
-//---------------------------------
 {
 	// PT1/2 mode enforces Amiga limits
 	const bool ptMode = IsDlgButtonChecked(IDC_CHECK_PT1X) != BST_UNCHECKED;
@@ -280,14 +274,12 @@ void CModTypeDlg::OnPTModeChanged()
 
 
 void CModTypeDlg::OnTempoModeChanged()
-//------------------------------------
 {
 	GetDlgItem(IDC_BUTTON1)->EnableWindow(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel()) == tempoModeModern);
 }
 
 
 void CModTypeDlg::OnTempoSwing()
-//------------------------------
 {
 	const ROWINDEX oldRPB = sndFile.m_nDefaultRowsPerBeat;
 	const ROWINDEX oldRPM = sndFile.m_nDefaultRowsPerMeasure;
@@ -313,7 +305,6 @@ void CModTypeDlg::OnTempoSwing()
 
 
 void CModTypeDlg::OnLegacyPlaybackSettings()
-//------------------------------------------
 {
 	CLegacyPlaybackSettingsDlg dlg(this, m_playBehaviour, m_nType);
 	dlg.DoModal();
@@ -322,7 +313,6 @@ void CModTypeDlg::OnLegacyPlaybackSettings()
 
 
 void CModTypeDlg::OnDefaultBehaviour()
-//------------------------------------
 {
 	m_playBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
 	UpdateDialog();
@@ -330,7 +320,6 @@ void CModTypeDlg::OnDefaultBehaviour()
 
 
 bool CModTypeDlg::VerifyData()
-//----------------------------
 {
 
 	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
@@ -366,7 +355,6 @@ bool CModTypeDlg::VerifyData()
 
 
 void CModTypeDlg::OnOK()
-//----------------------
 {
 	if (!VerifyData())
 		return;
@@ -427,7 +415,6 @@ void CModTypeDlg::OnOK()
 
 
 BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
-//---------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	const TCHAR *text = _T("");
@@ -498,7 +485,6 @@ BEGIN_MESSAGE_MAP(CLegacyPlaybackSettingsDlg, CDialog)
 END_MESSAGE_MAP()
 
 void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1,	m_CheckList);
@@ -506,7 +492,6 @@ void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
-//---------------------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -631,7 +616,6 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 
 
 void CLegacyPlaybackSettingsDlg::OnOK()
-//-------------------------------------
 {
 	CDialog::OnOK();
 
@@ -644,7 +628,6 @@ void CLegacyPlaybackSettingsDlg::OnOK()
 
 
 void CLegacyPlaybackSettingsDlg::OnSelectDefaults()
-//-------------------------------------------------
 {
 	const int count = m_CheckList.GetCount();
 	PlayBehaviourSet defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
@@ -656,7 +639,6 @@ void CLegacyPlaybackSettingsDlg::OnSelectDefaults()
 
 
 void CLegacyPlaybackSettingsDlg::UpdateSelectDefaults()
-//-----------------------------------------------------
 {
 	bool usesDefaults = false;
 	const int count = m_CheckList.GetCount();
@@ -678,7 +660,6 @@ void CLegacyPlaybackSettingsDlg::UpdateSelectDefaults()
 // CShowLogDlg
 
 BOOL CShowLogDlg::OnInitDialog()
-//------------------------------
 {
 	CDialog::OnInitDialog();
 	if (m_lpszTitle) SetWindowText(m_lpszTitle);
@@ -687,7 +668,6 @@ BOOL CShowLogDlg::OnInitDialog()
 
 
 UINT CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
-//----------------------------------------------------------
 {
 	m_lpszLog = pszLog;
 	m_lpszTitle = lpszTitle;
@@ -699,7 +679,6 @@ UINT CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
 // CRemoveChannelsDlg
 
 void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_REMCHANSLIST,		m_RemChansList);
@@ -713,7 +692,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CRemoveChannelsDlg::OnInitDialog()
-//-------------------------------------
 {
 	CString s;
 	CDialog::OnInitDialog();
@@ -746,7 +724,6 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 
 
 void CRemoveChannelsDlg::OnOK()
-//-----------------------------
 {
 	int nCount = m_RemChansList.GetSelCount();
 	CArray<int,int> aryListBoxSel;
@@ -766,7 +743,6 @@ void CRemoveChannelsDlg::OnOK()
 
 
 void CRemoveChannelsDlg::OnChannelChanged()
-//-----------------------------------------
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
@@ -778,7 +754,6 @@ void CRemoveChannelsDlg::OnChannelChanged()
 // Sound Bank Information
 
 CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, CWnd *parent) : CDialog(IDD_SOUNDBANK_INFO, parent)
-//------------------------------------------------------------------------------------------------------------------
 {
 	
 	fileName = bank.GetFileName();
@@ -804,7 +779,6 @@ CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, CWnd *parent) :
 
 
 BOOL CSoundBankProperties::OnInitDialog()
-//---------------------------------------
 {
 	CDialog::OnInitDialog();
 	::SetDlgItemTextA(m_hWnd, IDC_EDIT1, m_szInfo.c_str());
@@ -829,7 +803,6 @@ END_MESSAGE_MAP()
 
 
 void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
-//----------------------------------------------------------------------
 {
 	m_hParent = parent;
 	m_nOctaves = nOctaves;
@@ -848,14 +821,12 @@ void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
 
 
 void CKeyboardControl::OnDestroy()
-//--------------------------------
 {
 	m_font.DeleteObject();
 }
 
 
 void CKeyboardControl::OnPaint()
-//------------------------------
 {
 	HGDIOBJ oldpen, oldbrush;
 	CRect rcClient, rect;
@@ -948,7 +919,6 @@ void CKeyboardControl::OnPaint()
 
 
 void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
-//----------------------------------------------------------
 {
 	int sel = -1, xmin, xmax;
 	CRect rcClient, rect;
@@ -1044,7 +1014,6 @@ void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
 
 
 void CKeyboardControl::OnLButtonDown(UINT, CPoint)
-//------------------------------------------------
 {
 	if ((m_nSelection != -1) && (m_hParent))
 	{
@@ -1054,7 +1023,6 @@ void CKeyboardControl::OnLButtonDown(UINT, CPoint)
 
 
 void CKeyboardControl::OnLButtonUp(UINT, CPoint)
-//----------------------------------------------
 {
 	if ((m_nSelection != -1) && (m_hParent))
 	{
@@ -1076,7 +1044,6 @@ BEGIN_MESSAGE_MAP(CSampleMapDlg, CDialog)
 END_MESSAGE_MAP()
 
 void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleMapDlg)
@@ -1088,7 +1055,6 @@ void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CSampleMapDlg::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
@@ -1109,7 +1075,6 @@ BOOL CSampleMapDlg::OnInitDialog()
 
 
 void CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
-//--------------------------------------------------------------------
 {
 	CDialog::OnHScroll(nCode, nPos, pBar);
 	OnUpdateKeyboard();
@@ -1118,7 +1083,6 @@ void CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
 
 
 void CSampleMapDlg::OnUpdateSamples()
-//-----------------------------------
 {
 	UINT nOldPos = 0;
 	UINT nNewPos = 0;
@@ -1167,7 +1131,6 @@ void CSampleMapDlg::OnUpdateSamples()
 
 
 void CSampleMapDlg::OnUpdateOctave()
-//----------------------------------
 {
 	TCHAR s[64];
 
@@ -1179,7 +1142,6 @@ void CSampleMapDlg::OnUpdateOctave()
 
 
 void CSampleMapDlg::OnUpdateKeyboard()
-//------------------------------------
 {
 	SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 	UINT nBaseOctave = m_SbOctave.GetPos() & 7;
@@ -1204,7 +1166,6 @@ void CSampleMapDlg::OnUpdateKeyboard()
 
 
 LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
-//-------------------------------------------------------------------
 {
 	TCHAR s[32] = _T("--");
 
@@ -1262,7 +1223,6 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 
 
 void CSampleMapDlg::OnOK()
-//------------------------
 {
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if (pIns)
@@ -1295,7 +1255,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CEditHistoryDlg::OnInitDialog()
-//----------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -1349,7 +1308,6 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 
 void CEditHistoryDlg::OnClearHistory()
-//------------------------------------
 {
 	if(m_pModDoc != nullptr && !m_pModDoc->GetrSoundFile().GetFileHistory().empty())
 	{
@@ -1361,7 +1319,6 @@ void CEditHistoryDlg::OnClearHistory()
 
 
 void CEditHistoryDlg::OnOK()
-//--------------------------
 {
 	CDialog::OnOK();
 }
@@ -1371,7 +1328,6 @@ void CEditHistoryDlg::OnOK()
 // Generic input dialog
 
 void CInputDlg::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	if(m_minValueInt == m_maxValueInt && m_minValueDbl == m_maxValueDbl)
@@ -1384,7 +1340,6 @@ void CInputDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CInputDlg::OnInitDialog()
-//----------------------------
 {
 	CDialog::OnInitDialog();
 	SetDlgItemText(IDC_PROMPT, m_description);
@@ -1450,7 +1405,6 @@ BOOL CInputDlg::OnInitDialog()
 
 
 void CInputDlg::OnOK()
-//--------------------
 {
 	CDialog::OnOK();
 	GetDlgItemText(IDC_EDIT1, resultAsString);
@@ -1464,9 +1418,7 @@ void CInputDlg::OnOK()
 ///////////////////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
-//===================================
 class CMsgBoxHidable : public CDialog
-//===================================
 {
 public:
 	CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus = true, CWnd* pParent = NULL);
@@ -1481,7 +1433,6 @@ protected:
 
 
 struct MsgBoxHidableMessage
-//=========================
 {
 	LPCTSTR strMsg;
 	uint32 nMask;
@@ -1503,7 +1454,6 @@ STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
 // to get the needed information from message array, and updates the variable that
 // controls the show/don't show-flags.
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
-//----------------------------------------------
 {
 	// Check whether the message should be shown.
 	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].nMask) == 0)
@@ -1529,11 +1479,9 @@ CMsgBoxHidable::CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus, CWnd* pParent)
 	:	CDialog(CMsgBoxHidable::IDD, pParent),
 		m_StrMsg(strMsg),
 		m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
-//----------------------------------------------------------------------------
 {}
 
 BOOL CMsgBoxHidable::OnInitDialog()
-//----------------------------------
 {
 	CDialog::OnInitDialog();
 	SetDlgItemText(IDC_MESSAGETEXT, m_StrMsg);
@@ -1542,7 +1490,6 @@ BOOL CMsgBoxHidable::OnInitDialog()
 }
 
 void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Check(pDX, IDC_DONTSHOWAGAIN, m_nCheckStatus);
@@ -1554,7 +1501,6 @@ void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
 
 
 void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd)
-//--------------------------------------------------------------------------------------------------
 {
 	const ModCommand::NOTE upperLimit = std::min(ModCommand::NOTE(NOTE_MAX), noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; note++)
@@ -1563,7 +1509,6 @@ void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCo
 
 
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool addSpecial = noteStart == noteEnd;
 	if(noteStart == noteEnd)

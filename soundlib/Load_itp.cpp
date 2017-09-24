@@ -70,7 +70,6 @@ MPT_BINARY_STRUCT(ITPHeader, 8)
 
 
 static bool ValidateHeader(const ITPHeader &hdr)
-//----------------------------------------------
 {
 	if(hdr.magic != MAGIC4BE('.','i','t','p'))
 	{
@@ -85,7 +84,6 @@ static bool ValidateHeader(const ITPHeader &hdr)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const ITPHeader &hdr)
-//----------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(hdr);
 	return 12 + 4 + 24 + 4 - sizeof(ITPHeader);
@@ -93,7 +91,6 @@ static uint64 GetHeaderMinimumAdditionalSize(const ITPHeader &hdr)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderITP(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	ITPHeader hdr;
 	if(!file.ReadStruct(hdr))
@@ -109,7 +106,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderITP(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------
 {
 #if !defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_FUZZ_TRACKER)
 	// Doesn't really make sense to support this format when there's no support for external files...

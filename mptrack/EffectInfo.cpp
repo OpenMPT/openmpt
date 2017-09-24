@@ -133,21 +133,18 @@ static const MPTEFFECTINFO gFXInfo[] =
 
 
 UINT EffectInfo::GetNumEffects() const
-//------------------------------------
 {
 	return CountOf(gFXInfo);
 }
 
 
 bool EffectInfo::IsExtendedEffect(UINT ndx) const
-//------------------------------------------------
 {
 	return ((ndx < CountOf(gFXInfo)) && (gFXInfo[ndx].paramMask));
 }
 
 
 bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool bXX) const
-//--------------------------------------------------------------------------------------------------------------
 {
 	bool bSupported;
 	UINT fxndx = CountOf(gFXInfo);
@@ -184,7 +181,6 @@ bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND comm
 
 
 LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const
-//---------------------------------------------------------------------------------------------
 {
 	UINT ndx = CountOf(gFXInfo);
 	for (UINT i = 0; i < CountOf(gFXInfo); i++)
@@ -203,7 +199,6 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 
 //Returns command and corrects parameter refParam if necessary
 EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
-//---------------------------------------------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
 	{
@@ -233,7 +228,6 @@ EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refPar
 
 
 EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx) const
-//----------------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
 	{
@@ -244,7 +238,6 @@ EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx) const
 }
 
 UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
-//-----------------------------------------------------
 {
 	if (ndx >= CountOf(gFXInfo))
 	{
@@ -256,7 +249,6 @@ UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
 }
 
 bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM *prangeMin, ModCommand::PARAM *prangeMax) const
-//------------------------------------------------------------------------------------------------------------------------------
 {
 
 	if (s) s->Empty();
@@ -329,7 +321,6 @@ bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM
 
 
 UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
-//--------------------------------------------------------
 {
 	UINT pos;
 
@@ -382,7 +373,6 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 
 
 UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
-//------------------------------------------------------
 {
 	UINT param;
 
@@ -427,7 +417,6 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 
 
 bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNELINDEX chn) const
-//----------------------------------------------------------------------------------------------
 {
 	CString s;
 	const TCHAR *continueOrIgnore;
@@ -905,14 +894,12 @@ STATIC_ASSERT(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
 
 
 UINT EffectInfo::GetNumVolCmds() const
-//------------------------------------
 {
 	return CountOf(gVolCmdInfo);
 }
 
 
 LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
-//------------------------------------------------------------------
 {
 	for (UINT i = 0; i < CountOf(gVolCmdInfo); i++)
 	{
@@ -923,14 +910,12 @@ LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
 
 
 VolumeCommand EffectInfo::GetVolCmdFromIndex(UINT ndx) const
-//----------------------------------------------------------
 {
 	return (ndx < CountOf(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : VOLCMD_NONE;
 }
 
 
 bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin, ModCommand::VOL *prangeMax) const
-//----------------------------------------------------------------------------------------------------------------
 {
 	if (s) s->Empty();
 	if (prangeMin) *prangeMin = 0;
@@ -958,7 +943,6 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin,
 
 
 bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
-//------------------------------------------------------------------------
 {
 	if(s == nullptr) return false;
 	s->Empty();

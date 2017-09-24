@@ -248,7 +248,6 @@ std::vector<mpt::ustring> BuildVariants::GetBuildNames(std::vector<BuildVariant>
 
 
 bool BuildVariants::ProcessorCanRunCurrentBuild()
-//-------------------------------------------
 {
 	BuildVariant build = GetCurrentBuildVariant();
 	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags) return false;

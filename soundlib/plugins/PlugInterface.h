@@ -52,9 +52,7 @@ struct SNDMIXPLUGINSTATE
 };
 
 
-//==============
 class IMixPlugin
-//==============
 {
 	friend class CAbstractVstEditor;
 
@@ -224,7 +222,6 @@ public:
 
 
 inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff)
-//---------------------------------------------------------------------------------
 {
 	float val = GetParameter(nIndex) + diff;
 	Limit(val, PlugParamValue(0), PlugParamValue(1));
@@ -234,9 +231,7 @@ inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue di
 
 // IMidiPlugin: Default implementation of plugins with MIDI input
 
-//===================================
 class IMidiPlugin : public IMixPlugin
-//===================================
 {
 protected:
 	enum

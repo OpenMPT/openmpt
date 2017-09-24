@@ -29,14 +29,12 @@ COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin)
 	: CAbstractVstEditor(plugin)
 	, m_width(0)
 	, m_height(0)
-//--------------------------------------------------
 {
 
 }
 
 
 void COwnerVstEditor::OnPaint()
-//-----------------------------
 {
 	CAbstractVstEditor::OnPaint();
 	CVstPlugin &plugin = static_cast<CVstPlugin &>(m_VstPlugin);
@@ -64,7 +62,6 @@ void COwnerVstEditor::OnPaint()
 
 
 bool COwnerVstEditor::OpenEditor(CWnd *parent)
-//--------------------------------------------
 {
 	Create(IDD_PLUGINEDITOR, parent);
 
@@ -98,7 +95,6 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 
 
 void COwnerVstEditor::DoClose()
-//-----------------------------
 {
 	// Prevent some plugins from storing a bogus window size (e.g. Electri-Q)
 	ShowWindow(SW_HIDE);
@@ -109,7 +105,6 @@ void COwnerVstEditor::DoClose()
 
 
 bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
-//----------------------------------------------------------------
 {
 	if(contentWidth < 0 || contentHeight < 0 || !m_hWnd)
 	{

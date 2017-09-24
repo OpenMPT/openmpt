@@ -24,7 +24,6 @@ END_MESSAGE_MAP()
 
 
 CRippleBitmap::CRippleBitmap()
-//----------------------------
 {
 	bitmapSrc = PNG::ReadPNG(MAKEINTRESOURCE(IDB_MPTRACK));
 	bitmapTarget = new PNG::Bitmap(bitmapSrc->width, bitmapSrc->height);
@@ -55,7 +54,6 @@ CRippleBitmap::CRippleBitmap()
 
 
 CRippleBitmap::~CRippleBitmap()
-//-----------------------------
 {
 	if(!showMouse)
 	{
@@ -67,7 +65,6 @@ CRippleBitmap::~CRippleBitmap()
 
 
 void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
-//--------------------------------------------------------
 {
 
 	// Rate limit in order to avoid too may ripples.
@@ -119,7 +116,6 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 
 
 void CRippleBitmap::OnMouseLeave()
-//--------------------------------
 {
 	if(!showMouse)
 	{
@@ -130,7 +126,6 @@ void CRippleBitmap::OnMouseLeave()
 
 
 void CRippleBitmap::OnPaint()
-//---------------------------
 {
 	CPaintDC dc(this);
 
@@ -145,7 +140,6 @@ void CRippleBitmap::OnPaint()
 
 
 bool CRippleBitmap::Animate()
-//---------------------------
 {
 	// Were there any pixels being moved in the last frame?
 	if(!activity)
@@ -217,7 +211,6 @@ bool CRippleBitmap::Animate()
 
 
 CAboutDlg::CAboutDlg()
-//--------------------
 {
 	m_TimerID = 0;
 
@@ -225,14 +218,12 @@ CAboutDlg::CAboutDlg()
 
 
 CAboutDlg::~CAboutDlg()
-//---------------------
 {
 	instance = NULL;
 }
 
 
 void CAboutDlg::OnOK()
-//--------------------
 {
 	instance = NULL;
 	if(m_TimerID != 0)
@@ -246,14 +237,12 @@ void CAboutDlg::OnOK()
 
 
 void CAboutDlg::OnCancel()
-//------------------------
 {
 	OnOK();
 }
 
 
 BOOL CAboutDlg::OnInitDialog()
-//----------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -294,7 +283,6 @@ BOOL CAboutDlg::OnInitDialog()
 
 
 void CAboutDlg::OnTimer(UINT_PTR nIDEvent)
-//----------------------------------------
 {
 	if(nIDEvent == m_TimerID)
 	{

@@ -22,14 +22,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 StreamEncoderSettings &StreamEncoderSettings::Instance()
-//------------------------------------------------------
 {
 	return TrackerSettings::Instance().ExportStreamEncoderSettings;
 }
 
 
 StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
-//------------------------------------------------------------------------------------------------
 	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
 	, MP3ID3v2MinPadding(conf, section, "MP3ID3v2MinPadding", 1024)
 	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
@@ -46,7 +44,6 @@ StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt:
 
 
 StreamWriterBase::StreamWriterBase(std::ostream &stream)
-//------------------------------------------------------
 	: f(stream)
 	, fStart(f.tellp())
 {
@@ -54,14 +51,12 @@ StreamWriterBase::StreamWriterBase(std::ostream &stream)
 }
 
 StreamWriterBase::~StreamWriterBase()
-//-----------------------------------
 {
 	return;
 }
 
 
 void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const char *data)
-//-----------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(frameCount);
 	MPT_UNREFERENCED_PARAMETER(data);
@@ -69,14 +64,12 @@ void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const char *
 
 
 void StreamWriterBase::WriteCues(const std::vector<uint64> &cues)
-//---------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(cues);
 }
 
 
 void StreamWriterBase::WriteBuffer()
-//----------------------------------
 {
 	if(!f)
 	{
@@ -92,32 +85,27 @@ void StreamWriterBase::WriteBuffer()
 
 
 void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits)
-//---------------------------------------------------------------
 {
 	m_Traits = traits;
 }
 
 
 mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
-//-------------------------------------------------------------------
 {
 	return mpt::format(MPT_USTRING("VBR %1%%"))(static_cast<int>(quality * 100.0f));
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
-//--------------------------------------------------------------------
 {
 	return mpt::format(MPT_USTRING("VBR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
-//--------------------------------------------------------------------
 {
 	return mpt::format(MPT_USTRING("ABR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
-//--------------------------------------------------------------------
 {
 	return mpt::format(MPT_USTRING("CBR %1 kbit"))(bitrate);
 }

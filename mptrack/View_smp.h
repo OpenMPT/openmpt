@@ -20,9 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define SMP_LEFTBAR_BUTTONS		8
 
 
-//======================================
 class CViewSample: public CModScrollView
-//======================================
 {
 public:
 	enum Flags

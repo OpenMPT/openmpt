@@ -24,7 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 PNG::Bitmap *PNG::ReadPNG(FileReader &file)
-//-----------------------------------------
 {
 	file.Rewind();
 	if(!file.ReadMagic("\211PNG\r\n\032\n"))
@@ -166,7 +165,6 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 
 
 PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
-//----------------------------------------------
 {
 	const char *pData = nullptr;
 	HGLOBAL hglob = nullptr;
@@ -183,7 +181,6 @@ PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 
 // Create a DIB for the current device from our PNG.
 bool PNG::Bitmap::ToDIB(CBitmap &bitmap, CDC *dc) const
-//-----------------------------------------------------
 {
 	BITMAPINFOHEADER bi;
 	MemsetZero(bi);

@@ -223,9 +223,7 @@ class CModDoc;
 
 #define HISTORY_TIMER_PRECISION	18.2f
 
-//================
 struct FileHistory
-//================
 {
 	// Date when the file was loaded in the the tracker or created.
 	tm loadDate;
@@ -267,9 +265,7 @@ public:
 typedef char NoteName[4];
 
 
-//==============
 class CSoundFile
-//==============
 {
 	friend class GetLengthMemory;
 
@@ -1074,7 +1070,6 @@ public:
 
 #ifndef NO_PLUGINS
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
-//-----------------------------------------------------------------------
 {
 	if(instr > 0 && instr <= GetNumInstruments() && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
 		return m_MixPlugins[Instruments[instr]->nMixPlug - 1].pMixPlugin;

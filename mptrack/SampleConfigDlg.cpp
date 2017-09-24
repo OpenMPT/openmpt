@@ -34,7 +34,6 @@ END_MESSAGE_MAP()
 
 
 void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSampleEditor)
@@ -45,7 +44,6 @@ void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsSampleEditor::OnInitDialog()
-//---------------------------------------
 {
 	CPropertyPage::OnInitDialog();
 	SetDlgItemInt(IDC_EDIT_UNDOSIZE, TrackerSettings::Instance().m_SampleUndoBufferSize.Get().GetSizeInPercent());
@@ -82,7 +80,6 @@ BOOL COptionsSampleEditor::OnInitDialog()
 
 
 void COptionsSampleEditor::OnOK()
-//-------------------------------
 {
 	CPropertyPage::OnOK();
 
@@ -106,7 +103,6 @@ void COptionsSampleEditor::OnOK()
 
 
 BOOL COptionsSampleEditor::OnSetActive()
-//--------------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_SAMPLEDITOR;
 	return CPropertyPage::OnSetActive();
@@ -114,7 +110,6 @@ BOOL COptionsSampleEditor::OnSetActive()
 
 
 void COptionsSampleEditor::OnUndoSizeChanged()
-//--------------------------------------------
 {
 	RecalcUndoSize();
 	OnSettingsChanged();
@@ -122,7 +117,6 @@ void COptionsSampleEditor::OnUndoSizeChanged()
 
 
 void COptionsSampleEditor::RecalcUndoSize()
-//-----------------------------------------
 {
 	UINT sizePercent = GetDlgItemInt(IDC_EDIT_UNDOSIZE);
 	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(sizePercent).GetSizeInBytes() >> 20);

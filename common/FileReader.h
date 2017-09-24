@@ -319,9 +319,7 @@ public:
 		return CreateChunk(position, length);
 	}
 
-	//=====================
 	class PinnedRawDataView
-	//=====================
 	{
 	private:
 		std::size_t size_;

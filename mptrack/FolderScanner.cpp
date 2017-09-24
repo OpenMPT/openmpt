@@ -14,14 +14,12 @@
 OPENMPT_NAMESPACE_BEGIN
 
 FolderScanner::FolderScanner(const mpt::PathString &path, bool findInSubDirs) : paths(1, path), findInSubDirs(findInSubDirs), hFind(INVALID_HANDLE_VALUE)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(wfd);
 }
 
 
 FolderScanner::~FolderScanner()
-//-----------------------------
 {
 	FindClose(hFind);
 }
@@ -29,7 +27,6 @@ FolderScanner::~FolderScanner()
 
 // Return one file at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found.
 bool FolderScanner::NextFileOrDirectory(mpt::PathString &file, bool allowDirectories)
-//-----------------------------------------------------------------------------------
 {
 	bool foundFile = false;
 	do

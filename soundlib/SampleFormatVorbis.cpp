@@ -118,14 +118,12 @@ static long VorbisfileFilereaderTell(void *datasource)
 
 #if defined(MPT_WITH_VORBIS)
 static mpt::ustring UStringFromVorbis(const char *str)
-//----------------------------------------------------
 {
 	return str ? mpt::ToUnicode(mpt::CharsetUTF8, str) : mpt::ustring();
 }
 #endif // MPT_WITH_VORBIS
 
 static FileTags GetVorbisFileTags(OggVorbis_File &vf)
-//---------------------------------------------------
 {
 	FileTags tags;
 	#if defined(MPT_WITH_VORBIS)
@@ -153,7 +151,6 @@ static FileTags GetVorbisFileTags(OggVorbis_File &vf)
 #endif // MPT_WITH_VORBISFILE
 
 bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
-//---------------------------------------------------------------------
 {
 
 #if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
@@ -337,7 +334,6 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 
 
 bool CSoundFile::CanReadVorbis()
-//------------------------------
 {
 	bool result = false;
 	#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)

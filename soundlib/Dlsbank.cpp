@@ -462,7 +462,6 @@ static uint8 SF2SustainLevelToLinear(int32 sustain)
 
 
 int32 CDLSBank::DLS32BitTimeCentsToMilliseconds(int32 lTimeCents)
-//---------------------------------------------------------------
 {
 	// tc = log2(time[secs]) * 1200*65536
 	// time[secs] = 2^(tc/(1200*65536))
@@ -476,7 +475,6 @@ int32 CDLSBank::DLS32BitTimeCentsToMilliseconds(int32 lTimeCents)
 
 // 0dB = 0x10000
 int32 CDLSBank::DLS32BitRelativeGainToLinear(int32 lCentibels)
-//------------------------------------------------------------
 {
 	// v = 10^(cb/(200*65536)) * V
 	return (int32)(65536.0 * pow(10.0, ((double)lCentibels)/(200*65536.0)) );
@@ -484,7 +482,6 @@ int32 CDLSBank::DLS32BitRelativeGainToLinear(int32 lCentibels)
 
 
 int32 CDLSBank::DLS32BitRelativeLinearToGain(int32 lGain)
-//-------------------------------------------------------
 {
 	// cb = log10(v/V) * 200 * 65536
 	if (lGain <= 0) return -960 * 65536;
@@ -493,7 +490,6 @@ int32 CDLSBank::DLS32BitRelativeLinearToGain(int32 lGain)
 
 
 int32 CDLSBank::DLSMidiVolumeToLinear(uint32 nMidiVolume)
-//-------------------------------------------------------
 {
 	return (nMidiVolume * nMidiVolume << 16) / (127*127);
 }
@@ -503,7 +499,6 @@ int32 CDLSBank::DLSMidiVolumeToLinear(uint32 nMidiVolume)
 // Implementation
 
 CDLSBank::CDLSBank()
-//------------------
 {
 	m_nMaxWaveLink = 0;
 	m_nType = SOUNDBANK_TYPE_INVALID;
@@ -511,7 +506,6 @@ CDLSBank::CDLSBank()
 
 
 bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
-//-------------------------------------------------------
 {
 	RIFFCHUNKID riff;
 	FILE *f;
@@ -563,7 +557,6 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 // Find an instrument based on the given parameters
 
 DLSINSTRUMENT *CDLSBank::FindInstrument(bool bDrum, uint32 nBank, uint32 dwProgram, uint32 dwKey, uint32 *pInsNo)
-//---------------------------------------------------------------------------------------------------------------
 {
 	if (m_Instruments.empty()) return NULL;
 	for (uint32 iIns=0; iIns<m_Instruments.size(); iIns++)
@@ -611,7 +604,6 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(bool bDrum, uint32 nBank, uint32 dwProgr
 // Update DLS instrument definition from an IFF chunk
 
 bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK *pchunk, uint32 dwMaxLen)
-//--------------------------------------------------------------------------------------------------------
 {
 	if ((!pchunk->len) || (pchunk->len+8 > dwMaxLen)) return false;
 	if (pchunk->id == IFFID_LIST)
@@ -816,7 +808,6 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK
 // Converts SF2 chunks to DLS
 
 bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &header, FileReader &chunk)
-//---------------------------------------------------------------------------------------------------
 {
 	if (!chunk.IsValid()) return false;
 	switch(header.id)
@@ -963,7 +954,6 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 
 
 static int16 SF2TimeToDLS(int16 amount)
-//-------------------------------------
 {
 	int32 time = CDLSBank::DLS32BitTimeCentsToMilliseconds(static_cast<int32>(amount) << 16);
 	return static_cast<int16>(Clamp(time, 20, 20000) / 20);
@@ -972,7 +962,6 @@ static int16 SF2TimeToDLS(int16 amount)
 
 // Convert all instruments to the DLS format
 bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
-//----------------------------------------------------
 {
 	if (m_Instruments.empty() || m_SamplesEx.empty())
 		return false;
@@ -1153,7 +1142,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 // Open: opens a DLS bank
 
 bool CDLSBank::Open(const mpt::PathString &filename)
-//--------------------------------------------------
 {
 	if(filename.empty()) return false;
 	m_szFileName = filename;
@@ -1164,7 +1152,6 @@ bool CDLSBank::Open(const mpt::PathString &filename)
 
 
 bool CDLSBank::Open(FileReader file)
-//----------------------------------
 {
 	SF2LOADERINFO sf2info;
 	uint32 nInsDef;
@@ -1405,7 +1392,6 @@ bool CDLSBank::Open(FileReader file)
 // Extracts the WaveForms from a DLS bank
 
 uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey)
-//---------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
 
@@ -1423,7 +1409,6 @@ uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey)
 
 
 bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &waveData, uint32 &length)
-//----------------------------------------------------------------------------------------------------
 {
 	waveData.clear();
 	length = 0;
@@ -1501,7 +1486,6 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 
 
 bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose)
-//-------------------------------------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
 	std::vector<uint8> pWaveForm;
@@ -1633,14 +1617,12 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 
 
 static uint16 ScaleEnvelope(uint32 time, float tempoScale)
-//--------------------------------------------------------
 {
 	return std::max<uint16>(Util::Round<uint16>(time * tempoScale), 1);
 }
 
 
 bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn)
-//---------------------------------------------------------------------------------------------------------
 {
 	SAMPLEINDEX RgnToSmp[DLSMAXREGIONS];
 	DLSINSTRUMENT *pDlsIns;
@@ -1953,7 +1935,6 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 
 
 const char *CDLSBank::GetRegionName(uint32 nIns, uint32 nRgn) const
-//-----------------------------------------------------------------
 {
 	if (nIns >= m_Instruments.size()) return nullptr;
 	const DLSINSTRUMENT &dlsIns = m_Instruments[nIns];
@@ -1972,7 +1953,6 @@ const char *CDLSBank::GetRegionName(uint32 nIns, uint32 nRgn) const
 
 
 uint8 CDLSBank::GetPanning(uint32 ins, uint32 region) const
-//---------------------------------------------------------
 {
 	const DLSINSTRUMENT &dlsIns = m_Instruments[ins];
 	if(region >= CountOf(dlsIns.Regions))

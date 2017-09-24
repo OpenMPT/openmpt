@@ -49,7 +49,6 @@ END_MESSAGE_MAP()
 
 
 void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
-//-------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE1, m_treePlugins);
@@ -63,7 +62,6 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *
 	, m_pModDoc(pModDoc)
 	, m_nPlugSlot(nPlugSlot)
 	, m_pPlugin(nullptr)
-//-------------------------------------------------------------------------------------
 {
 	if(m_pModDoc && 0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
 	{
@@ -75,14 +73,12 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *
 
 
 CSelectPluginDlg::~CSelectPluginDlg()
-//-----------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
 
 BOOL CSelectPluginDlg::OnInitDialog()
-//-----------------------------------
 {
 	DWORD dwRemove = TVS_EDITLABELS|TVS_SINGLEEXPAND;
 	DWORD dwAdd = TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
@@ -124,7 +120,6 @@ BOOL CSelectPluginDlg::OnInitDialog()
 
 
 void CSelectPluginDlg::OnOK()
-//---------------------------
 {
 	if(m_pPlugin==nullptr) { CDialog::OnOK(); return; }
 
@@ -224,7 +219,6 @@ void CSelectPluginDlg::OnOK()
 
 
 void CSelectPluginDlg::OnCancel()
-//-------------------------------
 {
 	//remember window size:
 	SaveWindowPos();
@@ -233,7 +227,6 @@ void CSelectPluginDlg::OnCancel()
 
 
 VSTPluginLib* CSelectPluginDlg::GetSelectedPlugin()
-//-------------------------------------------------
 {
 	HTREEITEM item = m_treePlugins.GetSelectedItem();
 	if(item)
@@ -244,7 +237,6 @@ VSTPluginLib* CSelectPluginDlg::GetSelectedPlugin()
 
 
 void CSelectPluginDlg::SaveWindowPos() const
-//------------------------------------------
 {
 	WINDOWPLACEMENT wnd;
 	wnd.length = sizeof(WINDOWPLACEMENT);
@@ -261,7 +253,6 @@ void CSelectPluginDlg::SaveWindowPos() const
 
 
 BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
-//---------------------------------------------------
 {
 	// Use up/down keys to navigate in tree view, even if search field is focussed.
 	if(pMsg != nullptr && pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN) && GetFocus() != &m_treePlugins)
@@ -290,7 +281,6 @@ BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
 
 
 void CSelectPluginDlg::OnNameFilterChanged()
-//------------------------------------------
 {
 	// Update name filter text
 	m_nameFilter = mpt::ToLowerCase(GetWindowTextUnicode(*GetDlgItem(IDC_NAMEFILTER)));
@@ -300,7 +290,6 @@ void CSelectPluginDlg::OnNameFilterChanged()
 
 
 void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
-//------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
@@ -468,7 +457,6 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 
 
 HTREEITEM CSelectPluginDlg::AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
-//-----------------------------------------------------------------------------------------------------------------
 {
 	return m_treePlugins.InsertItem(
 		TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,
@@ -482,7 +470,6 @@ HTREEITEM CSelectPluginDlg::AddTreeItem(const WCHAR *title, int image, bool sort
 
 
 void CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
-//----------------------------------------------------------
 {
 	if(m_pPlugin == nullptr) return;
 
@@ -496,7 +483,6 @@ void CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
 
 
 void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
-//-----------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *pPlug = GetSelectedPlugin();
@@ -562,7 +548,6 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 
 
 bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
-//-----------------------------------------------------------------
 {
 #ifndef NO_VST
 	// TODO: Keep these lists up-to-date.
@@ -625,7 +610,6 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 
 
 void CSelectPluginDlg::OnAddPlugin()
-//----------------------------------
 {
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
@@ -675,7 +659,6 @@ void CSelectPluginDlg::OnAddPlugin()
 
 
 void CSelectPluginDlg::OnScanFolder()
-//-----------------------------------
 {
 	BrowseForFolder dlg(TrackerSettings::Instance().PathPlugins.GetWorkingDir(), "Select a folder that should be scanned for VST plugins (including sub-folders)");
 	if(!dlg.Show(this)) return;
@@ -694,7 +677,6 @@ void CSelectPluginDlg::OnScanFolder()
 
 
 VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *parent)
-//------------------------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *plugLib = nullptr;
@@ -754,7 +736,6 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 
 // After adding new plugins, check if they were missing in any open songs.
 void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
-//------------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	auto docs = theApp.GetOpenDocuments();
@@ -786,7 +767,6 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 
 
 void CSelectPluginDlg::OnRemovePlugin()
-//-------------------------------------
 {
 	const HTREEITEM pluginToDelete = m_treePlugins.GetSelectedItem();
 	VSTPluginLib *pPlug = GetSelectedPlugin();
@@ -803,7 +783,6 @@ void CSelectPluginDlg::OnRemovePlugin()
 
 
 void CSelectPluginDlg::OnSetBridge()
-//----------------------------------
 {
 	VSTPluginLib *plug = GetSelectedPlugin();
 	if(plug)
@@ -822,7 +801,6 @@ void CSelectPluginDlg::OnSetBridge()
 
 
 void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
-//-------------------------------------------------------
 {
 	CDialog::OnSize(nType, cx, cy);
 
@@ -861,7 +839,6 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 
 void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
-//-------------------------------------------------------
 {
 	lpMMI->ptMinTrackSize.x = MulDiv(350, Util::GetDPIx(m_hWnd), 96);
 	lpMMI->ptMinTrackSize.y = MulDiv(310, Util::GetDPIy(m_hWnd), 96);
@@ -870,7 +847,6 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 
 
 void CSelectPluginDlg::OnPluginTagsChanged()
-//------------------------------------------
 {
 	VSTPluginLib *plug = GetSelectedPlugin();
 	if (plug)

@@ -27,7 +27,6 @@ END_MESSAGE_MAP()
 
 
 void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(DoDataExchange)
@@ -37,14 +36,12 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 
 
 CloseMainDialog::CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS)
-//--------------------------------------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(true);
 };
 
 
 CloseMainDialog::~CloseMainDialog()
-//---------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
 };
@@ -53,7 +50,6 @@ CloseMainDialog::~CloseMainDialog()
 // Format a list entry string - apparently list boxes in ANSI windows are ANSI too, so inserted unicode
 // strings are converted to ANSI. Thus, we will keep using CStrings here for ANSI builds.
 CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
-//-------------------------------------------------------------------------
 {
 	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCStringSilent();
 	return CString(pModDoc->GetrSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
@@ -61,7 +57,6 @@ CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 
 
 BOOL CloseMainDialog::OnInitDialog()
-//----------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -92,7 +87,6 @@ BOOL CloseMainDialog::OnInitDialog()
 
 
 void CloseMainDialog::OnOK()
-//--------------------------
 {
 	const int count = m_List.GetCount();
 	for(int i = 0; i < count; i++)
@@ -119,14 +113,12 @@ void CloseMainDialog::OnOK()
 
 
 void CloseMainDialog::OnCancel()
-//------------------------------
 {
 	CDialog::OnCancel();
 }
 
 
 void CloseMainDialog::OnSaveAll()
-//-------------------------------
 {
 	if(m_List.GetCount() == 1)
 		m_List.SetSel(0, TRUE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
@@ -137,7 +129,6 @@ void CloseMainDialog::OnSaveAll()
 
 
 void CloseMainDialog::OnSaveNone()
-//--------------------------------
 {
 	if(m_List.GetCount() == 1)
 		m_List.SetSel(0, FALSE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
@@ -149,7 +140,6 @@ void CloseMainDialog::OnSaveNone()
 
 // Switch between full path / filename only display
 void CloseMainDialog::OnSwitchFullPaths()
-//---------------------------------------
 {
 	const int count = m_List.GetCount();
 	const bool fullPath = (IsDlgButtonChecked(IDC_CHECK1) == BST_CHECKED);

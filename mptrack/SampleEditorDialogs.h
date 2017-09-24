@@ -20,9 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
-//===========================
 class CAmpDlg: public CDialog
-//===========================
 {
 public:
 	struct AmpSettings
@@ -55,9 +53,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 // Sample import dialog
 
-//=================================
 class CRawSampleDlg: public CDialog
-//=================================
 {
 protected:
 	static SampleIO m_nFormat;
@@ -85,9 +81,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Add silence dialog - add silence to a sample
 
-//==================================
 class CAddSilenceDlg: public CDialog
-//==================================
 {
 public:
 	enum AddSilenceOptions
@@ -130,9 +124,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample grid dialog
 
-//==================================
 class CSampleGridDlg: public CDialog
-//==================================
 {
 public:
 	SmpLength m_nSegments, m_nMaxSegments;
@@ -154,9 +146,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample cross-fade dialog
 
-//===================================
 class CSampleXFadeDlg: public CDialog
-//===================================
 {
 public:
 	static uint32 m_fadeLength;
@@ -199,9 +189,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Resampling dialog
 
-//==================================
 class CResamplingDlg: public CDialog
-//==================================
 {
 protected:
 	enum ResamplingOption
@@ -234,9 +222,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample mix dialog
 
-//=================================
 class CMixSampleDlg: public CDialog
-//=================================
 {
 protected:
 	// Dialog controls

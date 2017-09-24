@@ -17,9 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-//===============================
 class ParamEq : public IMixPlugin
-//===============================
 {
 protected:
 	enum Parameters

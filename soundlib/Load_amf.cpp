@@ -81,7 +81,6 @@ MPT_BINARY_STRUCT(AMFFileHeader, 41)
 
 
 static bool ValidateHeader(const AsylumFileHeader &fileHeader)
-//------------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.signature, "ASYLUM Music Format V1.0\0", 25)
 		|| fileHeader.numSamples > 64
@@ -94,14 +93,12 @@ static bool ValidateHeader(const AsylumFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const AsylumFileHeader &fileHeader)
-//------------------------------------------------------------------------------
 {
 	return 256 + 64 * sizeof(AsylumSampleHeader) + 64 * 4 * 8 * fileHeader.numPatterns;
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMF_Asylum(MemoryFileReader file, const uint64 *pfilesize)
-//-----------------------------------------------------------------------------------------------------------
 {
 	AsylumFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -117,7 +114,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMF_Asylum(MemoryFileReader f
 
 
 bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -213,7 +209,6 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 
 // Read a single AMF track (channel) into a pattern.
 static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
-//------------------------------------------------------------------------------------
 {
 	fileChunk.Rewind();
 	ModCommand::INSTR lastInstr = 0;
@@ -384,7 +379,6 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 
 
 static bool ValidateHeader(const AMFFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.amf, "AMF", 3)
 		|| fileHeader.version < 8 || fileHeader.version > 14
@@ -398,7 +392,6 @@ static bool ValidateHeader(const AMFFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMF_DSMI(MemoryFileReader file, const uint64 *pfilesize)
-//---------------------------------------------------------------------------------------------------------
 {
 	AMFFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -415,7 +408,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMF_DSMI(MemoryFileReader fil
 
 
 bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------
 {
 	file.Rewind();
 

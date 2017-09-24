@@ -19,13 +19,11 @@ BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
 END_MESSAGE_MAP()
 
 CProgressDialog::CProgressDialog(CWnd *parent)
-//--------------------------------------------
 	: CDialog(IDD_PROGRESS, parent)
 	, m_abort(false)
 { }
 
 BOOL CProgressDialog::OnInitDialog()
-//----------------------------------
 {
 	CDialog::OnInitDialog();
 	PostMessage(WM_COMMAND, IDC_BUTTON1);
@@ -34,35 +32,30 @@ BOOL CProgressDialog::OnInitDialog()
 
 
 void CProgressDialog::SetTitle(const TCHAR *title)
-//------------------------------------------------
 {
 	SetWindowText(title);
 }
 
 
 void CProgressDialog::SetText(const TCHAR *text)
-//----------------------------------------------
 {
 	SetDlgItemText(IDC_TEXT1, text);
 }
 
 
 void CProgressDialog::SetRange(uint32 min, uint32 max)
-//----------------------------------------------------
 {
 	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETRANGE32, min, max);
 }
 
 
 void CProgressDialog::SetProgress(uint32 progress)
-//------------------------------------------------
 {
 	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETPOS, progress, 0);
 }
 
 
 void CProgressDialog::ProcessMessages()
-//-------------------------------------
 {
 	MSG msg;
 	while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

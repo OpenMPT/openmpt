@@ -20,9 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct FindReplace;
 
-//=========================================
 class CFindReplaceTab: public CPropertyPage
-//=========================================
 {
 protected:
 	CComboBox m_cbnNote, m_cbnInstr, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam, m_cbnPCParam;

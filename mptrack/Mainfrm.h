@@ -223,9 +223,7 @@ public:
 };
 
 
-//=====================================================================
 class TfLanguageProfileNotifySink : public ITfLanguageProfileNotifySink
-//=====================================================================
 {
 public:
 	TfLanguageProfileNotifySink();
@@ -244,9 +242,7 @@ protected:
 };
 
 
-//==========================================================================================================================================
 class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver, public TfLanguageProfileNotifySink
-//==========================================================================================================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data

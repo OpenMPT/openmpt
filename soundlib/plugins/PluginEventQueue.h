@@ -33,9 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
-//====================
 class PluginEventQueue
-//====================
 {
 protected:
 

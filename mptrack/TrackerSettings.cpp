@@ -43,14 +43,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 TrackerSettings &TrackerSettings::Instance()
-//------------------------------------------
 {
 	return theApp.GetTrackerSettings();
 }
 
 
 static MptVersion::VersionNum GetPreviousSettingsVersion(const std::string &iniVersion)
-//-------------------------------------------------------------------------------------
 {
 	MptVersion::VersionNum result = 0;
 	if(!iniVersion.empty())
@@ -68,20 +66,17 @@ static MptVersion::VersionNum GetPreviousSettingsVersion(const std::string &iniV
 
 
 std::string SettingsModTypeToString(MODTYPE modtype)
-//--------------------------------------------------
 {
 	return CSoundFile::GetModSpecifications(modtype).fileExtension;
 }
 
 MODTYPE SettingsStringToModType(const std::string &str)
-//-----------------------------------------------------
 {
 	return CModSpecifications::ExtensionToType(str);
 }
 
 
 static ResamplingMode GetDefaultResamplerMode()
-//---------------------------------------------
 {
 	ResamplingMode result = CResamplerSettings().SrcMode;
 #ifdef ENABLE_ASM
@@ -105,7 +100,6 @@ static ResamplingMode GetDefaultResamplerMode()
 
 
 static uint32 GetDefaultPatternSetup()
-//------------------------------------
 {
 	return PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 		| PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
@@ -117,7 +111,6 @@ static uint32 GetDefaultPatternSetup()
 
 
 void SampleUndoBufferSize::CalculateSize()
-//----------------------------------------
 {
 	if(sizePercent < 0)
 		sizePercent = 0;
@@ -136,7 +129,6 @@ void SampleUndoBufferSize::CalculateSize()
 
 
 DebugSettings::DebugSettings(SettingsContainer &conf)
-//---------------------------------------------------
 	: conf(conf)
 	// Debug
 #if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
@@ -179,7 +171,6 @@ DebugSettings::DebugSettings(SettingsContainer &conf)
 
 
 DebugSettings::~DebugSettings()
-//-----------------------------
 {
 	if(DebugTraceAlwaysDump)
 	{
@@ -189,7 +180,6 @@ DebugSettings::~DebugSettings()
 
 
 TrackerSettings::TrackerSettings(SettingsContainer &conf)
-//-------------------------------------------------------
 	: conf(conf)
 	// Version
 	, IniVersion(conf, "Version", "Version", std::string())
@@ -715,14 +705,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 
 TrackerSettings::~TrackerSettings()
-//---------------------------------
 {
 	return;
 }
 
 
 void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manager)
-//--------------------------------------------------------------------------------
 {
 	if(m_SoundDeviceSettingsUseOldDefaults)
 	{
@@ -782,7 +770,6 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 
 
 void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
-//------------------------------------------------------------------------------
 {
 	
 	if(!PathTunings.GetDefaultDir().IsDirectory())
@@ -830,7 +817,6 @@ void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
 
 
 std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
-//--------------------------------------------------------------------
 {
 	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>();
 	mpt::ifstream f(
@@ -934,25 +920,21 @@ public:
 };
 
 SoundDevice::Settings TrackerSettings::GetSoundDeviceSettingsDefaults() const
-//---------------------------------------------------------------------------
 {
 	return m_SoundDeviceSettingsDefaults;
 }
 
 SoundDevice::Identifier TrackerSettings::GetSoundDeviceIdentifier() const
-//-----------------------------------------------------------------------
 {
 	return m_SoundDeviceIdentifier;
 }
 
 void TrackerSettings::SetSoundDeviceIdentifier(const SoundDevice::Identifier &identifier)
-//---------------------------------------------------------------------------------------
 {
 	m_SoundDeviceIdentifier = identifier;
 }
 
 SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice::Identifier &device) const
-//--------------------------------------------------------------------------------------------------------
 {
 	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
@@ -965,7 +947,6 @@ SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice:
 }
 
 void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::Identifier &device, const SoundDevice::Settings &settings)
-//------------------------------------------------------------------------------------------------------------------------
 {
 	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
@@ -978,7 +959,6 @@ void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::Identifier &devi
 
 
 MixerSettings TrackerSettings::GetMixerSettings() const
-//-----------------------------------------------------
 {
 	MixerSettings settings;
 	settings.m_nMaxMixChannels = MixerMaxChannels;
@@ -994,7 +974,6 @@ MixerSettings TrackerSettings::GetMixerSettings() const
 }
 
 void TrackerSettings::SetMixerSettings(const MixerSettings &settings)
-//-------------------------------------------------------------------
 {
 	MixerMaxChannels = settings.m_nMaxMixChannels;
 	MixerDSPMask = settings.DSPMask;
@@ -1009,7 +988,6 @@ void TrackerSettings::SetMixerSettings(const MixerSettings &settings)
 
 
 CResamplerSettings TrackerSettings::GetResamplerSettings() const
-//--------------------------------------------------------------
 {
 	CResamplerSettings settings;
 	settings.SrcMode = ResamplerMode;
@@ -1020,7 +998,6 @@ CResamplerSettings TrackerSettings::GetResamplerSettings() const
 }
 
 void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
-//----------------------------------------------------------------------------
 {
 	ResamplerMode = settings.SrcMode;
 	ResamplerSubMode = settings.gbWFIRType;
@@ -1030,7 +1007,6 @@ void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
 
 
 void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
-//------------------------------------------------------------------------------
 {
 	colours[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
 	colours[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);
@@ -1073,7 +1049,6 @@ void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
 
 
 void TrackerSettings::FixupEQ(EQPreset &eqSettings)
-//-------------------------------------------------
 {
 	for(UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
@@ -1087,7 +1062,6 @@ void TrackerSettings::FixupEQ(EQPreset &eqSettings)
 
 
 void TrackerSettings::SaveSettings()
-//----------------------------------
 {
 
 	WINDOWPLACEMENT wpl;
@@ -1167,21 +1141,18 @@ void TrackerSettings::SaveSettings()
 
 
 bool TrackerSettings::IsComponentBlocked(const std::string &key)
-//---------------------------------------------------------------
 {
 	return Setting<bool>(conf, "Components", std::string("Block") + key, ComponentManagerSettingsDefault().IsBlocked(key));
 }
 
 
 std::vector<uint32> TrackerSettings::GetSampleRates() const
-//---------------------------------------------------------
 {
 	return m_SoundSampleRates;
 }
 
 
 std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
-//----------------------------------------------------------
 {
 	return std::vector<uint32>{
 		192000,
@@ -1204,7 +1175,6 @@ std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
 // Chords
 
 void TrackerSettings::LoadChords(MPTChords &chords)
-//-------------------------------------------------
 {	
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
@@ -1225,7 +1195,6 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 
 
 void TrackerSettings::SaveChords(MPTChords &chords)
-//-------------------------------------------------
 {
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
@@ -1237,7 +1206,6 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 
 
 void TrackerSettings::SetMIDIDevice(UINT id)
-//------------------------------------------
 {
 	m_nMidiDevice = id;
 	MIDIINCAPS mic;
@@ -1250,7 +1218,6 @@ void TrackerSettings::SetMIDIDevice(UINT id)
 
 
 UINT TrackerSettings::GetCurrentMIDIDevice()
-//------------------------------------------
 {
 	if(midiDeviceName.Get().IsEmpty())
 		return m_nMidiDevice;
@@ -1292,7 +1259,6 @@ UINT TrackerSettings::GetCurrentMIDIDevice()
 
 
 mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
-//--------------------------------------------------------------------
 {
 	mpt::ustring cc;
 	bool first = true;
@@ -1313,7 +1279,6 @@ mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 
 
 std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in)
-//---------------------------------------------------------
 {
 	CString cc = mpt::ToCString(in);
 	std::bitset<128> midiIgnoreCCs;
@@ -1332,13 +1297,11 @@ std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in)
 
 
 DefaultAndWorkingDirectory::DefaultAndWorkingDirectory()
-//------------------------------------------------------
 {
 	return;
 }
 
 DefaultAndWorkingDirectory::DefaultAndWorkingDirectory(const mpt::PathString &def)
-//--------------------------------------------------------------------------------
 	: m_Default(def)
 	, m_Working(def)
 {
@@ -1346,13 +1309,11 @@ DefaultAndWorkingDirectory::DefaultAndWorkingDirectory(const mpt::PathString &de
 }
 
 DefaultAndWorkingDirectory::~DefaultAndWorkingDirectory()
-//-------------------------------------------------------
 {
 	return;
 }
 
 void DefaultAndWorkingDirectory::SetDefaultDir(const mpt::PathString &filenameFrom, bool stripFilename)
-//-----------------------------------------------------------------------------------------------------
 {
 	if(InternalSet(m_Default, filenameFrom, stripFilename) && !m_Default.empty())
 	{
@@ -1362,19 +1323,16 @@ void DefaultAndWorkingDirectory::SetDefaultDir(const mpt::PathString &filenameFr
 }
 
 void DefaultAndWorkingDirectory::SetWorkingDir(const mpt::PathString &filenameFrom, bool stripFilename)
-//-----------------------------------------------------------------------------------------------------
 {
 	InternalSet(m_Working, filenameFrom, stripFilename);
 }
 
 mpt::PathString DefaultAndWorkingDirectory::GetDefaultDir() const
-//---------------------------------------------------------------
 {
 	return m_Default;
 }
 
 mpt::PathString DefaultAndWorkingDirectory::GetWorkingDir() const
-//---------------------------------------------------------------
 {
 	return m_Working;
 }
@@ -1383,7 +1341,6 @@ mpt::PathString DefaultAndWorkingDirectory::GetWorkingDir() const
 // If stripFilename is true, the filenameFrom parameter is assumed to be a full path including a filename.
 // Return true if the value changed.
 bool DefaultAndWorkingDirectory::InternalSet(mpt::PathString &dest, const mpt::PathString &filenameFrom, bool stripFilename)
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString newPath = (stripFilename ? filenameFrom.GetPath() : filenameFrom);
 	newPath.EnsureTrailingSlash();
@@ -1393,7 +1350,6 @@ bool DefaultAndWorkingDirectory::InternalSet(mpt::PathString &dest, const mpt::P
 }
 
 ConfigurableDirectory::ConfigurableDirectory(SettingsContainer &conf, const AnyStringLocale &section, const AnyStringLocale &key, const mpt::PathString &def)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	: conf(conf)
 	, m_Setting(conf, section, key, def)
 {
@@ -1401,7 +1357,6 @@ ConfigurableDirectory::ConfigurableDirectory(SettingsContainer &conf, const AnyS
 }
 
 ConfigurableDirectory::~ConfigurableDirectory()
-//---------------------------------------------
 {
 	m_Setting = theApp.IsPortableMode() ? theApp.AbsolutePathToRelative(m_Default) : m_Default;
 }

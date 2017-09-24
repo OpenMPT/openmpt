@@ -19,9 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 struct SplitKeyboardSettings;
 
-//=========================================
 class CPatternPropertiesDlg: public CDialog
-//=========================================
 {
 protected:
 	CModDoc &modDoc;
@@ -50,9 +48,7 @@ protected:
 // Command Editing
 
 
-//================================
 class CEditCommand: public CDialog
-//================================
 {
 protected:
 	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand, cbnPlugParam;
@@ -108,9 +104,7 @@ protected:
 
 struct MPTChord;
 
-//================================
 class CChordEditor: public CDialog
-//================================
 {
 protected:
 	CKeyboardControl m_Keyboard;
@@ -138,9 +132,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-//=========================================
 class CSplitKeyboadSettings: public CDialog
-//=========================================
 {
 protected:
 	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
@@ -166,9 +158,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Show channel properties from pattern editor
 
-//===========================================
 class QuickChannelProperties : public CDialog
-//===========================================
 {
 protected:
 	CModDoc *document;

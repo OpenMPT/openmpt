@@ -29,9 +29,7 @@ namespace MidiExport
 }
 
 
-//==============================
 class CModToMidi: public CDialog
-//==============================
 {
 protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
@@ -57,9 +55,7 @@ protected:
 };
 
 
-//==========================================
 class CDoMidiConvert: public CProgressDialog
-//==========================================
 {
 public:
 	CSoundFile &m_sndFile;

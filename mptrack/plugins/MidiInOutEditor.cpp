@@ -31,7 +31,6 @@ END_MESSAGE_MAP()
 
 
 void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(MidiInOutEditor)
@@ -46,13 +45,11 @@ void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
 MidiInOutEditor::MidiInOutEditor(MidiInOut &plugin)
 	: CAbstractVstEditor(plugin)
 	, m_locked(true)
-//-------------------------------------------------
 {
 }
 
 
 bool MidiInOutEditor::OpenEditor(CWnd *parent)
-//--------------------------------------------
 {
 	Create(IDD_MIDI_IO_PLUGIN, parent);
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
@@ -68,7 +65,6 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 
 // Update lists of available input / output devices
 void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput)
-//----------------------------------------------------------------------------------------------------------
 {
 	combo.SetRedraw(FALSE);
 	combo.ResetContent();
@@ -102,7 +98,6 @@ void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevic
 
 // Refresh current input / output device in GUI
 void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
-//-----------------------------------------------------------------------------
 {
 	int items = combo.GetCount();
 	for(int i = 0; i < items; i++)
@@ -117,7 +112,6 @@ void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
 
 
 static void IOChanged(MidiInOut &plugin, CComboBox &combo, PlugParamIndex param)
-//------------------------------------------------------------------------------
 {
 	// Update device ID and notify plugin.
 	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(combo.GetItemData(combo.GetCurSel()));
@@ -127,21 +121,18 @@ static void IOChanged(MidiInOut &plugin, CComboBox &combo, PlugParamIndex param)
 
 
 void MidiInOutEditor::OnInputChanged()
-//------------------------------------
 {
 	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_inputCombo, MidiInOut::kInputParameter);
 }
 
 
 void MidiInOutEditor::OnOutputChanged()
-//-------------------------------------
 {
 	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_outputCombo, MidiInOut::kOutputParameter);
 }
 
 
 void MidiInOutEditor::OnLatencyChanged()
-//--------------------------------------
 {
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
 	BOOL success = FALSE;
@@ -155,7 +146,6 @@ void MidiInOutEditor::OnLatencyChanged()
 
 
 void MidiInOutEditor::OnTimingMessagesChanged()
-//---------------------------------------------
 {
 	if(!m_locked)
 	{

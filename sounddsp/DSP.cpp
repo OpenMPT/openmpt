@@ -79,14 +79,12 @@ static void ShelfEQ(int32 scale,
 
 
 CSurroundSettings::CSurroundSettings() : m_nProLogicDepth(12), m_nProLogicDelay(20)
-//---------------------------------------------------------------------------------
 {
 
 }
 
 
 CMegaBassSettings::CMegaBassSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange(DEFAULT_XBASS_RANGE)
-//-----------------------------------------------------------------------------------------------------
 {
 
 }
@@ -139,7 +137,6 @@ CMegaBass::CMegaBass()
 
 
 void CSurround::Initialize(bool bReset, DWORD MixingFreq)
-//-------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(bReset);
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
@@ -169,7 +166,6 @@ void CSurround::Initialize(bool bReset, DWORD MixingFreq)
 
 
 void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
-//---------------------------------------------------
 {
 	// Bass Expansion Reset
 	{
@@ -210,7 +206,6 @@ void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
 
 // 2-channel surround
 void CSurround::ProcessStereoSurround(int * MixSoundBuffer, int count)
-//--------------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -237,7 +232,6 @@ void CSurround::ProcessStereoSurround(int * MixSoundBuffer, int count)
 
 // 4-channels surround
 void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count)
-//---------------------------------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -267,7 +261,6 @@ void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, i
 
 
 void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uint32 nChannels)
-//---------------------------------------------------------------------------------------------
 {
 
 	if(nChannels >= 2)
@@ -282,7 +275,6 @@ void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, ui
 
 
 void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uint32 nChannels)
-//---------------------------------------------------------------------------------------------
 {
 
 	if(nChannels >= 2)
@@ -402,7 +394,6 @@ static void X86_MonoDCRemoval(int *pBuffer, uint32 nSamples, int32 &nDCRFlt_Y1l,
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
 void CMegaBass::SetXBassParameters(uint32 nDepth, uint32 nRange)
-//--------------------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
 	uint32 gain = nDepth / 20;
@@ -417,7 +408,6 @@ void CMegaBass::SetXBassParameters(uint32 nDepth, uint32 nRange)
 
 // [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-50ms]
 void CSurround::SetSurroundParameters(uint32 nDepth, uint32 nDelay)
-//-----------------------------------------------------------------
 {
 	uint32 gain = (nDepth * 16) / 100;
 	if (gain > 16) gain = 16;

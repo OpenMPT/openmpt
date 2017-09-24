@@ -26,7 +26,6 @@ const CSoundFile& CPattern::GetSoundFile() const { return m_rPatternContainer.Ge
 
 
 CHANNELINDEX CPattern::GetNumChannels() const
-//-------------------------------------------
 {
 	return GetSoundFile().GetNumChannels();
 }
@@ -34,7 +33,6 @@ CHANNELINDEX CPattern::GetNumChannels() const
 
 // Check if there is any note data on a given row.
 bool CPattern::IsEmptyRow(ROWINDEX row) const
-//-------------------------------------------
 {
 	if(m_ModCommands.empty() || !IsValidRow(row))
 	{
@@ -54,7 +52,6 @@ bool CPattern::IsEmptyRow(ROWINDEX row) const
 
 
 bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure)
-//------------------------------------------------------------------------------------
 {
 	if(rowsPerBeat < 1
 		|| rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
@@ -71,7 +68,6 @@ bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMe
 
 // Add or remove rows from the pattern.
 bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool resizeAtEnd)
-//-------------------------------------------------------------------------------------------
 {
 	CSoundFile &sndFile = GetSoundFile();
 
@@ -107,14 +103,12 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 
 
 void CPattern::ClearCommands()
-//----------------------------
 {
 	std::fill(m_ModCommands.begin(), m_ModCommands.end(), ModCommand::Empty());
 }
 
 
 bool CPattern::AllocatePattern(ROWINDEX rows)
-//-------------------------------------------
 {
 	size_t newSize = GetNumChannels() * rows;
 	if(rows == 0)
@@ -137,7 +131,6 @@ bool CPattern::AllocatePattern(ROWINDEX rows)
 
 
 void CPattern::Deallocate()
-//-------------------------
 {
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	m_ModCommands.clear();
@@ -146,7 +139,6 @@ void CPattern::Deallocate()
 
 
 bool CPattern::operator== (const CPattern &other) const
-//-----------------------------------------------------
 {
 	return GetNumRows() == other.GetNumRows()
 		&& GetNumChannels() == other.GetNumChannels()
@@ -161,7 +153,6 @@ bool CPattern::operator== (const CPattern &other) const
 #ifdef MODPLUG_TRACKER
 
 bool CPattern::Expand()
-//---------------------
 {
 	const ROWINDEX newRows = m_Rows * 2;
 	const CHANNELINDEX nChns = GetNumChannels();
@@ -195,7 +186,6 @@ bool CPattern::Expand()
 
 
 bool CPattern::Shrink()
-//---------------------
 {
 	if (m_ModCommands.empty()
 		|| m_Rows < GetSoundFile().GetModSpecifications().patternRowsMin * 2)
@@ -247,7 +237,6 @@ bool CPattern::Shrink()
 
 
 bool CPattern::SetName(const std::string &newName)
-//------------------------------------------------
 {
 	m_PatternName = newName;
 	return true;
@@ -255,7 +244,6 @@ bool CPattern::SetName(const std::string &newName)
 
 
 bool CPattern::SetName(const char *newName, size_t maxChars)
-//----------------------------------------------------------
 {
 	if(newName == nullptr || maxChars == 0)
 	{
@@ -268,7 +256,6 @@ bool CPattern::SetName(const char *newName, size_t maxChars)
 
 // Write some kind of effect data to the pattern. Exact data to be written and write behaviour can be found in the EffectWriter object.
 bool CPattern::WriteEffect(EffectWriter &settings)
-//------------------------------------------------
 {
 	// First, reject invalid parameters.
 	if(m_ModCommands.empty()
@@ -474,7 +461,6 @@ void WriteData(std::ostream& oStrm, const CPattern& pat);
 void ReadData(std::istream& iStrm, CPattern& pat, const size_t nSize = 0);
 
 void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
-//------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPattern, MptVersion::num);
@@ -494,7 +480,6 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 
 
 void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
-//-------------------------------------------------------------------
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPattern, MptVersion::num);
@@ -514,7 +499,6 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 
 
 static uint8 CreateDiffMask(const ModCommand &chnMC, const ModCommand &newMC)
-//---------------------------------------------------------------------------
 {
 	uint8 mask = 0;
 	if(chnMC.note != newMC.note)
@@ -535,7 +519,6 @@ static uint8 CreateDiffMask(const ModCommand &chnMC, const ModCommand &newMC)
 
 // Writes pattern data. Adapted from SaveIT.
 void WriteData(std::ostream& oStrm, const CPattern& pat)
-//------------------------------------------------------
 {
 	if(!pat.IsValid())
 		return;
@@ -589,7 +572,6 @@ if(ch < chns)						\
 
 
 void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
-//-------------------------------------------------------------
 {
 	if (!pat.IsValid()) // Expecting patterns to be allocated and resized properly.
 		return;

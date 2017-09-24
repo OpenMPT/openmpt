@@ -60,7 +60,6 @@ MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 #ifndef MODPLUG_NO_FILESAVE
 
 static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
-//--------------------------------------------------
 {
 	const INSTRUMENTINDEX iCount = sf.GetNumInstruments();
 	for(INSTRUMENTINDEX i = 1; i <= iCount; i++)
@@ -72,13 +71,11 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 }
 
 static void WriteTuningCollection(std::ostream& oStrm, const CTuningCollection& tc)
-//---------------------------------------------------------------------------------
 {
 	tc.Serialize(oStrm, "Tune specific tunings");
 }
 
 static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
-//-------------------------------------------------------------------
 {
 	if(sf.GetNumInstruments() > 0)
 	{
@@ -146,7 +143,6 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 
 
 static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, const size_t)
-//----------------------------------------------------------------------------------------
 {
 	std::string name;
 	tc.Deserialize(iStrm, name);
@@ -155,7 +151,6 @@ static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, con
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
 static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::string>& shortToTNameMap, const size_t maxNum = 500)
-//-------------------------------------------------------------------------------------------------------------------------------
 {
 	TUNNUMTYPE numTuning = 0;
 	mpt::IO::ReadIntLE<TUNNUMTYPE>(iStrm, numTuning);
@@ -180,7 +175,6 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 
 
 static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t = 0, bool old = false)
-//-----------------------------------------------------------------------------------------------------
 {
 	std::map<uint16, std::string> shortToTNameMap;
 	if(old)
@@ -285,7 +279,6 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 
 
 static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t dummy = 0)
-//-------------------------------------------------------------------------------------
 {
 	ReadTuningMapImpl(iStrm, csf, dummy, false);
 }
@@ -296,7 +289,6 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t dum
 
 
 size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers)
-//-----------------------------------------------------------------------------------
 {
 	if(trkvers < 0x0200)
 	{
@@ -344,7 +336,6 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 
 
 static void CopyPatternName(CPattern &pattern, FileReader &file)
-//--------------------------------------------------------------
 {
 	char name[MAX_PATTERNNAME] = "";
 	file.ReadString<mpt::String::maybeNullTerminated>(name, MAX_PATTERNNAME);
@@ -369,7 +360,6 @@ struct SchismVersionFromDate
 
 // Get version of Schism Tracker that was used to create an IT/S3M file.
 mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
-//-----------------------------------------------------------
 {
 	// Schism Tracker version information in a nutshell:
 	// < 0x020: a proper version (files saved by such versions are likely very rare)
@@ -403,7 +393,6 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 
 
 static bool ValidateHeader(const ITFileHeader &fileHeader)
-//--------------------------------------------------------
 {
 	if((std::memcmp(fileHeader.id, "IMPM", 4) && std::memcmp(fileHeader.id, "tpm.", 4))
 		|| fileHeader.insnum > 0xFF
@@ -417,14 +406,12 @@ static bool ValidateHeader(const ITFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const ITFileHeader &fileHeader)
-//--------------------------------------------------------------------------
 {
 	return fileHeader.ordnum + (fileHeader.insnum + fileHeader.smpnum + fileHeader.patnum) * 4;
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIT(MemoryFileReader file, const uint64 *pfilesize)
-//---------------------------------------------------------------------------------------------------
 {
 	ITFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -440,7 +427,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderIT(MemoryFileReader file, con
 
 
 bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1262,7 +1248,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 
 void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
-//----------------------------------------------------------------
 {
 	mpt::istringstream iStrm(file.GetRawDataAsString());
 
@@ -1299,7 +1284,6 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 
 // Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
 static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
-//-----------------------------------------------------------------
 {
 	size_t num = sndFile.GetFileHistory().size();
 #ifdef MODPLUG_TRACKER
@@ -1356,7 +1340,6 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
 
 
 bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExport)
-//--------------------------------------------------------------------------------
 {
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 
@@ -1888,7 +1871,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	//hack
 	//BEGIN: MPT SPECIFIC:
-	//--------------------
 
 	bool success = true;
 
@@ -1935,7 +1917,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	f = nullptr;
 
 	//END  : MPT SPECIFIC
-	//-------------------
 
 	//NO WRITING HERE ANYMORE.
 
@@ -1949,7 +1930,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 #ifndef MODPLUG_NO_FILESAVE
 
 uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
-//------------------------------------------------------
 {
 #ifndef NO_PLUGINS
 	uint32 chinfo[MAX_BASECHANNELS];
@@ -2051,7 +2031,6 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 
 
 void CSoundFile::LoadMixPlugins(FileReader &file)
-//-----------------------------------------------
 {
 	while(file.CanRead(9))
 	{
@@ -2102,7 +2081,6 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 
 #ifndef NO_PLUGINS
 void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
-//-------------------------------------------------------------------------
 {
 	// MPT's standard plugin data. Size not specified in file.. grrr..
 	file.ReadStruct(plugin.Info);
@@ -2161,7 +2139,6 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 #ifndef MODPLUG_NO_FILESAVE
 
 void CSoundFile::SaveExtendedSongProperties(FILE* f) const
-//--------------------------------------------------------
 {
 	const CModSpecifications &specs = GetModSpecifications();
 	// Extra song data - Yet Another Hack.
@@ -2331,7 +2308,6 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 
 template<typename T>
 void ReadField(FileReader &chunk, std::size_t size, T &field)
-//-----------------------------------------------------------
 {
 	field = chunk.ReadSizedIntLE<T>(size);
 }
@@ -2339,7 +2315,6 @@ void ReadField(FileReader &chunk, std::size_t size, T &field)
 
 template<typename T>
 void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
-//---------------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(T) <= sizeof(int32));
 	field = static_cast<T>(chunk.ReadSizedIntLE<int32>(size));
@@ -2347,7 +2322,6 @@ void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
 
 
 void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMptMade)
-//------------------------------------------------------------------------------------
 {
 	if(!file.ReadMagic("STPM"))	// 'MPTS'
 	{

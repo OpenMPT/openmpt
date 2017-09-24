@@ -23,7 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Functor for fixing hacked patterns
 struct FixHackedPatterns
-//======================
 {
 	FixHackedPatterns(const CModSpecifications *originalSpecs, MODTYPE type, bool autofix, bool *foundHacks)
 	{
@@ -43,7 +42,6 @@ struct FixHackedPatterns
 
 // Find and fix envelopes where two nodes are on the same tick.
 bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
-//-------------------------------------------------------------------
 {
 	bool found = false;
 	for(uint32 i = 1; i < env.size(); i++)
@@ -63,7 +61,6 @@ bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 
 // Go through the module to find out if it contains any hacks introduced by (Open)MPT
 bool CModDoc::HasMPTHacks(const bool autofix)
-//-------------------------------------------
 {
 	const CModSpecifications *originalSpecs = &m_SndFile.GetModSpecifications();
 	// retrieve original (not hacked) specs.

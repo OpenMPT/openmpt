@@ -51,9 +51,7 @@ enum AsioFeatures
 };
 DECLARE_FLAGSET(AsioFeatures)
 
-//====================================
 class CASIODevice: public SoundDevice::Base
-//====================================
 {
 	friend class TemporaryASIODriverOpener;
 

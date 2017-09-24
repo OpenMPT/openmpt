@@ -23,7 +23,6 @@ namespace DMO
 {
 
 IMixPlugin* Chorus::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//---------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) Chorus(factory, sndFile, mixStruct);
 }
@@ -31,7 +30,6 @@ IMixPlugin* Chorus::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLU
 
 Chorus::Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//---------------------------------------------------------------------------------
 {
 	m_param[kChorusWetDryMix] = 0.5f;
 	m_param[kChorusDepth] = 0.1f;
@@ -48,7 +46,6 @@ Chorus::Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStru
 
 // Integer part of buffer position
 int32 Chorus::GetBufferIntOffset(int32 fpOffset) const
-//----------------------------------------------------
 {
 	if(fpOffset < 0)
 		fpOffset += m_bufSize * 4096;
@@ -58,7 +55,6 @@ int32 Chorus::GetBufferIntOffset(int32 fpOffset) const
 
 
 void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//----------------------------------------------------------------
 {
 	if(!m_bufSize || !m_mixBuffer.Ok())
 		return;
@@ -129,7 +125,6 @@ void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue Chorus::GetParameter(PlugParamIndex index)
-//-------------------------------------------------------
 {
 	if(index < kChorusNumParameters)
 	{
@@ -140,7 +135,6 @@ PlugParamValue Chorus::GetParameter(PlugParamIndex index)
 
 
 void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
-//-------------------------------------------------------------------
 {
 	if(index < kChorusNumParameters)
 	{
@@ -156,7 +150,6 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void Chorus::Resume()
-//-------------------
 {
 	PositionChanged();
 	RecalculateChorusParams();
@@ -170,7 +163,6 @@ void Chorus::Resume()
 
 
 void Chorus::PositionChanged()
-//----------------------------
 {
 	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 3840, 1000);
 	try
@@ -187,7 +179,6 @@ void Chorus::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString Chorus::GetParamName(PlugParamIndex param)
-//------------------------------------------------
 {
 	switch(param)
 	{
@@ -204,7 +195,6 @@ CString Chorus::GetParamName(PlugParamIndex param)
 
 
 CString Chorus::GetParamLabel(PlugParamIndex param)
-//-------------------------------------------------
 {
 	switch(param)
 	{
@@ -224,7 +214,6 @@ CString Chorus::GetParamLabel(PlugParamIndex param)
 
 
 CString Chorus::GetParamDisplay(PlugParamIndex param)
-//---------------------------------------------------
 {
 	CString s;
 	float value = m_param[param];
@@ -264,7 +253,6 @@ CString Chorus::GetParamDisplay(PlugParamIndex param)
 
 
 void Chorus::RecalculateChorusParams()
-//------------------------------------
 {
 	const float sampleRate = static_cast<float>(m_SndFile.GetSampleRate());
 

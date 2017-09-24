@@ -199,9 +199,7 @@ namespace Encoder
 } // namespace Encoder
 
 
-//==========================
 struct StreamEncoderSettings
-//==========================
 {
 	Setting<int32> FLACCompressionLevel;
 	Setting<uint32> MP3ID3v2MinPadding;
@@ -218,9 +216,7 @@ struct StreamEncoderSettings
 };
 
 
-//=======================
 class IAudioStreamEncoder
-//=======================
 {
 protected:
 	IAudioStreamEncoder() { }
@@ -233,9 +229,7 @@ public:
 };
 
 
-//====================
 class StreamWriterBase
-//====================
 	: public IAudioStreamEncoder
 {
 protected:	
@@ -254,9 +248,7 @@ protected:
 };
 
 
-//======================
 class EncoderFactoryBase
-//======================
 {
 private:
 	Encoder::Traits m_Traits;

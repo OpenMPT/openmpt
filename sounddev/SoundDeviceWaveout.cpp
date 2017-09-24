@@ -37,7 +37,6 @@ static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 
 CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-//----------------------------------------------------------------------------
 	: CSoundDeviceWithThread(info, sysInfo)
 {
 	MPT_TRACE();
@@ -51,7 +50,6 @@ CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 
 
 CWaveDevice::~CWaveDevice()
-//-------------------------
 {
 	MPT_TRACE();
 	Close();
@@ -59,14 +57,12 @@ CWaveDevice::~CWaveDevice()
 
 
 int CWaveDevice::GetDeviceIndex() const
-//-------------------------------------
 {
 	return ConvertStrTo<int>(GetDeviceInternalID());
 }
 
 
 SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
-//--------------------------------------------------
 {
 	MPT_TRACE();
 	SoundDevice::Caps caps;
@@ -98,7 +94,6 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 
 
 SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
-//--------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	SoundDevice::DynamicCaps caps;
@@ -135,7 +130,6 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 
 
 bool CWaveDevice::InternalOpen()
-//------------------------------
 {
 	MPT_TRACE();
 	if(m_Settings.InputChannels > 0)
@@ -212,7 +206,6 @@ bool CWaveDevice::InternalOpen()
 
 
 bool CWaveDevice::InternalClose()
-//-------------------------------
 {
 	MPT_TRACE();
 	if(m_hWaveOut)
@@ -253,7 +246,6 @@ bool CWaveDevice::InternalClose()
 
 
 void CWaveDevice::StartFromSoundThread()
-//--------------------------------------
 {
 	MPT_TRACE();
 	if(m_hWaveOut)
@@ -270,7 +262,6 @@ void CWaveDevice::StartFromSoundThread()
 
 
 void CWaveDevice::StopFromSoundThread()
-//-------------------------------------
 {
 	MPT_TRACE();
 	if(m_hWaveOut)
@@ -287,7 +278,6 @@ void CWaveDevice::StopFromSoundThread()
 
 
 bool CWaveDevice::CheckResult(MMRESULT result)
-//--------------------------------------------
 {
 	if(result == MMSYSERR_NOERROR)
 	{
@@ -307,7 +297,6 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 
 
 bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
-//---------------------------------------------------------
 {
 	if(result == MMSYSERR_NOERROR)
 	{
@@ -331,7 +320,6 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 
 
 void CWaveDevice::InternalFillAudioBuffer()
-//-----------------------------------------
 {
 	MPT_TRACE();
 	if(!m_hWaveOut)
@@ -402,7 +390,6 @@ void CWaveDevice::InternalFillAudioBuffer()
 
 
 int64 CWaveDevice::InternalGetStreamPositionFrames() const
-//---------------------------------------------------------
 {
 	// Apparently, at least with Windows XP, TIME_SAMPLES wraps aroud at 0x7FFFFFF (see
 	// http://www.tech-archive.net/Archive/Development/microsoft.public.win32.programmer.mmedia/2005-02/0070.html
@@ -486,7 +473,6 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 
 
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
-//-----------------------------------------------
 {
 	MPT_TRACE();
 	DWORD flags = static_cast<volatile WAVEHDR*>(hdr)->dwFlags;
@@ -511,7 +497,6 @@ void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 
 
 void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR param1, DWORD_PTR /* param2 */)
-//----------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if((uMsg == WOM_DONE) && (dwUser))
@@ -523,7 +508,6 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 
 
 SoundDevice::BufferAttributes CWaveDevice::InternalGetEffectiveBufferAttributes() const
-//-------------------------------------------------------------------------------------
 {
 	SoundDevice::BufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
@@ -534,7 +518,6 @@ SoundDevice::BufferAttributes CWaveDevice::InternalGetEffectiveBufferAttributes(
 
 
 SoundDevice::Statistics CWaveDevice::GetStatistics() const
-//--------------------------------------------------------
 {
 	MPT_TRACE();
 	SoundDevice::Statistics result;
@@ -553,7 +536,6 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 
 
 std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
-//-----------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	std::vector<SoundDevice::Info> devices;

@@ -17,7 +17,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_CbnEmptySlots);
@@ -45,7 +44,6 @@ CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const
 
 
 BOOL CMoveFXSlotDialog::OnInitDialog()
-//------------------------------------
 {
 	CDialog::OnInitDialog();
 	SetDlgItemText(IDC_STATIC1, m_csPrompt);
@@ -82,7 +80,6 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 
 
 void CMoveFXSlotDialog::OnOK()
-//----------------------------
 {
 	m_nToSlot = m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel());
 	moveChain = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;

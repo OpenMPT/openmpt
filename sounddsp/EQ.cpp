@@ -71,7 +71,6 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 #define PBS_Y2	DWORD PTR [eax + EQBANDSTRUCT.y2]
 
 static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
-//--------------------------------------------------------------------
 {
 	_asm {
 	mov eax, pbs		// eax = pbs
@@ -120,7 +119,6 @@ EQ_Loop:
 #ifdef ENABLE_X86_AMD
 
 static void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
-//-------------------------------------------------------------------------------------------
 {
 	float tmp[16];
 
@@ -206,7 +204,6 @@ mainloop:
 #ifdef ENABLE_SSE
 
 static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
-//-------------------------------------------------------------------------------------------
 {
 	static const float gk1 = 1.0f;
 	_asm {
@@ -306,7 +303,6 @@ done:;
 #else
 
 static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
-//--------------------------------------------------------------------
 {
 	for (UINT i=0; i<nCount; i++)
 	{
@@ -324,7 +320,6 @@ static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 
 
 void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
-//---------------------------------------------------------------------
 {
 	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, 1.0f/MIXING_SCALEF);
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
@@ -336,7 +331,6 @@ void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 
 void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
-//-----------------------------------------------------------------------
 {
 
 #ifdef ENABLE_SSE
@@ -400,7 +394,6 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 
 CEQ::CEQ()
-//--------
 {
 	#if defined(ENABLE_SSE) || defined(ENABLE_X86_AMD)
 		MPT_ASSERT_ALWAYS(((uintptr_t)&(gEQ[0])) % 4 == 0);
@@ -411,7 +404,6 @@ CEQ::CEQ()
 
 
 void CEQ::Initialize(bool bReset, DWORD MixingFreq)
-//-------------------------------------------------
 {
 	float32 fMixingFreq = (float32)MixingFreq;
 	// Gain = 0.5 (-6dB) .. 2 (+6dB)
@@ -493,7 +485,6 @@ void CEQ::Initialize(bool bReset, DWORD MixingFreq)
 
 
 void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
-//------------------------------------------------------------------------------------------------------
 {
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
@@ -527,21 +518,18 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool b
 
 
 void CQuadEQ::Initialize(bool bReset, DWORD MixingFreq)
-//-----------------------------------------------------
 {
 	front.Initialize(bReset, MixingFreq);
 	rear.Initialize(bReset, MixingFreq);
 }
 
 void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
-//----------------------------------------------------------------------------------------------------------
 {
 	front.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);
 	rear.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);
 }
 
 void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChannels)
-//-----------------------------------------------------------------------------------
 {
 	if(nChannels == 1)
 	{

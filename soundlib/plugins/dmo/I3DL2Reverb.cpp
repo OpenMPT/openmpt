@@ -23,7 +23,6 @@ namespace DMO
 {
 
 void I3DL2Reverb::DelayLine::Init(int32 ms, int32 padding, uint32 sampleRate, int32 delayTap)
-//-------------------------------------------------------------------------------------------
 {
 	m_length = Util::muldiv(sampleRate, ms, 1000) + padding;
 	m_position = 0;
@@ -33,7 +32,6 @@ void I3DL2Reverb::DelayLine::Init(int32 ms, int32 padding, uint32 sampleRate, in
 
 
 void I3DL2Reverb::DelayLine::SetDelayTap(int32 delayTap)
-//------------------------------------------------------
 {
 	if(m_length > 0)
 		m_delayPosition = (delayTap + m_position + m_length) % m_length;
@@ -41,7 +39,6 @@ void I3DL2Reverb::DelayLine::SetDelayTap(int32 delayTap)
 
 
 void I3DL2Reverb::DelayLine::Advance()
-//------------------------------------
 {
 	if(--m_position < 0)
 		m_position += m_length;
@@ -51,14 +48,12 @@ void I3DL2Reverb::DelayLine::Advance()
 
 
 MPT_FORCEINLINE void I3DL2Reverb::DelayLine::Set(float value)
-//-----------------------------------------------------------
 {
 	at(m_position) = value;
 }
 
 
 float I3DL2Reverb::DelayLine::Get(int32 offset) const
-//---------------------------------------------------
 {
 	offset = (offset + m_position) % m_length;
 	if(offset < 0)
@@ -68,14 +63,12 @@ float I3DL2Reverb::DelayLine::Get(int32 offset) const
 
 
 MPT_FORCEINLINE float I3DL2Reverb::DelayLine::Get() const
-//-------------------------------------------------------
 {
 	return at(m_delayPosition);
 }
 
 
 IMixPlugin* I3DL2Reverb::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//--------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) I3DL2Reverb(factory, sndFile, mixStruct);
 }
@@ -84,7 +77,6 @@ IMixPlugin* I3DL2Reverb::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDM
 I3DL2Reverb::I3DL2Reverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
 	, m_recalcParams(true)
-//-------------------------------------------------------------------------------------------
 {
 	m_param[kI3DL2ReverbRoom] = 0.9f;
 	m_param[kI3DL2ReverbRoomHF] = 0.99f;
@@ -106,7 +98,6 @@ I3DL2Reverb::I3DL2Reverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 
 
 void I3DL2Reverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//---------------------------------------------------------------------
 {
 	if(m_recalcParams)
 	{
@@ -302,7 +293,6 @@ void I3DL2Reverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue I3DL2Reverb::GetParameter(PlugParamIndex index)
-//------------------------------------------------------------
 {
 	if(index < kI3DL2ReverbNumParameters)
 	{
@@ -313,7 +303,6 @@ PlugParamValue I3DL2Reverb::GetParameter(PlugParamIndex index)
 
 
 void I3DL2Reverb::SetParameter(PlugParamIndex index, PlugParamValue value)
-//------------------------------------------------------------------------
 {
 	if(index < kI3DL2ReverbNumParameters)
 	{
@@ -327,7 +316,6 @@ void I3DL2Reverb::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void I3DL2Reverb::Resume()
-//------------------------
 {
 	RecalculateI3DL2ReverbParams();
 	PositionChanged();
@@ -336,7 +324,6 @@ void I3DL2Reverb::Resume()
 
 
 void I3DL2Reverb::PositionChanged()
-//---------------------------------
 {
 	MemsetZero(m_filterHist);
 	m_prevL = 0;
@@ -377,7 +364,6 @@ void I3DL2Reverb::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString I3DL2Reverb::GetParamName(PlugParamIndex param)
-//-----------------------------------------------------
 {
 	switch(param)
 	{
@@ -400,7 +386,6 @@ CString I3DL2Reverb::GetParamName(PlugParamIndex param)
 
 
 CString I3DL2Reverb::GetParamLabel(PlugParamIndex param)
-//------------------------------------------------------
 {
 	switch(param)
 	{
@@ -424,7 +409,6 @@ CString I3DL2Reverb::GetParamLabel(PlugParamIndex param)
 
 
 CString I3DL2Reverb::GetParamDisplay(PlugParamIndex param)
-//--------------------------------------------------------
 {
 	static const TCHAR *modes[] = { _T("LQ"), _T("LQ+"), _T("HQ"), _T("HQ+") };
 	float value = m_param[param];
@@ -453,7 +437,6 @@ CString I3DL2Reverb::GetParamDisplay(PlugParamIndex param)
 
 
 void I3DL2Reverb::RecalculateI3DL2ReverbParams()
-//----------------------------------------------
 {
 	m_quality = Quality();
 	m_effectiveSampleRate = static_cast<float>(m_SndFile.GetSampleRate() / ((m_quality & kFullSampleRate) ? 1u : 2u));
@@ -483,7 +466,6 @@ void I3DL2Reverb::RecalculateI3DL2ReverbParams()
 
 
 void I3DL2Reverb::SetDelayTaps()
-//------------------------------
 {
 	// Early reflections
 	static const float delays[] =
@@ -523,7 +505,6 @@ void I3DL2Reverb::SetDelayTaps()
 
 
 void I3DL2Reverb::SetDecayCoeffs()
-//--------------------------------
 {
 	float levelLtmp = 1.0f, levelRtmp = 1.0f;
 	float levelL = 0.0f, levelR = 0.0f;
@@ -573,7 +554,6 @@ void I3DL2Reverb::SetDecayCoeffs()
 
 
 float I3DL2Reverb::CalcDecayCoeffs(int32 index)
-//---------------------------------------------
 {
 	float hfRef = static_cast<float>(2.0 * M_PI) / m_effectiveSampleRate * HFReference();
 	float decayHFRatio = DecayHFRatio();

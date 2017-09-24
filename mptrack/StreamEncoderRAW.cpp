@@ -64,7 +64,6 @@ public:
 
 
 RAWEncoder::RAWEncoder()
-//----------------------
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("raw");
@@ -108,21 +107,18 @@ RAWEncoder::RAWEncoder()
 
 
 bool RAWEncoder::IsAvailable() const
-//----------------------------------
 {
 	return true;
 }
 
 
 RAWEncoder::~RAWEncoder()
-//-----------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{

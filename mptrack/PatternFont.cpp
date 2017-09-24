@@ -84,14 +84,12 @@ const PATTERNFONT *PatternFont::currentFont = nullptr;
 static MODPLUGDIB customFontBitmap;
 
 static void DrawChar(HDC hDC, WCHAR ch, int x, int y, int w, int h)
-//-----------------------------------------------------------------
 {
 	CRect rect(x, y, x + w, y + h);
 	::DrawTextW(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
 
 static void DrawChar(HDC hDC, CHAR ch, int x, int y, int w, int h)
-//----------------------------------------------------------------
 {
 	CRect rect(x, y, x + w, y + h);
 	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
@@ -99,7 +97,6 @@ static void DrawChar(HDC hDC, CHAR ch, int x, int y, int w, int h)
 
 template<typename char_t>
 static void DrawString(HDC hDC, const char_t *text, int len, int x, int y, int w, int h)
-//--------------------------------------------------------------------------------------
 {
 	for(int i = 0; i < len; i++)
 	{
@@ -109,7 +106,6 @@ static void DrawString(HDC hDC, const char_t *text, int len, int x, int y, int w
 }
 
 void PatternFont::UpdateFont(HWND hwnd)
-//-------------------------------------
 {
 	FontSetting font = TrackerSettings::Instance().patternFont;
 	const PATTERNFONT *builtinFont = nullptr;
@@ -409,7 +405,6 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 
 void PatternFont::DeleteFontData()
-//--------------------------------
 {
 	delete[] customFontBitmap.lpDibBits;
 	customFontBitmap.lpDibBits = nullptr;

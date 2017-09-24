@@ -30,9 +30,7 @@ namespace SoundDevice {
 
 #if !defined(MPT_BUILD_WINESUPPORT)
 
-//===================
 class SoundDeviceStub
-//===================
 	: public SoundDevice::IBase
 {
 

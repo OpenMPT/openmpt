@@ -26,7 +26,6 @@ namespace DMO
 
 // Computes (log2(x) + 1) * 2 ^ (shiftL - shiftR) (x = -2^31...2^31)
 float logGain(float x, int32 shiftL, int32 shiftR)
-//------------------------------------------------
 {
 	uint32 intSample = static_cast<uint32>(static_cast<int32>(x));
 	const uint32 sign = intSample & 0x80000000;
@@ -53,7 +52,6 @@ float logGain(float x, int32 shiftL, int32 shiftR)
 
 
 IMixPlugin* Distortion::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//-------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) Distortion(factory, sndFile, mixStruct);
 }
@@ -61,7 +59,6 @@ IMixPlugin* Distortion::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMI
 
 Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//-----------------------------------------------------------------------------------------
 {
 	m_param[kDistGain] = 0.7f;
 	m_param[kDistEdge] = 0.15f;
@@ -75,7 +72,6 @@ Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 
 
 void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//--------------------------------------------------------------------
 {
 	if(!m_mixBuffer.Ok())
 		return;
@@ -113,7 +109,6 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue Distortion::GetParameter(PlugParamIndex index)
-//-----------------------------------------------------------
 {
 	if(index < kDistNumParameters)
 	{
@@ -124,7 +119,6 @@ PlugParamValue Distortion::GetParameter(PlugParamIndex index)
 
 
 void Distortion::SetParameter(PlugParamIndex index, PlugParamValue value)
-//-----------------------------------------------------------------------
 {
 	if(index < kDistNumParameters)
 	{
@@ -136,7 +130,6 @@ void Distortion::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void Distortion::Resume()
-//-----------------------
 {
 	m_isResumed = true;
 	RecalculateDistortionParams();
@@ -145,7 +138,6 @@ void Distortion::Resume()
 
 
 void Distortion::PositionChanged()
-//--------------------------------
 {
 	// Reset filter state
 	m_preEQz1[0] = m_preEQz1[1] = 0;
@@ -157,7 +149,6 @@ void Distortion::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString Distortion::GetParamName(PlugParamIndex param)
-//----------------------------------------------------
 {
 	switch(param)
 	{
@@ -172,7 +163,6 @@ CString Distortion::GetParamName(PlugParamIndex param)
 
 
 CString Distortion::GetParamLabel(PlugParamIndex param)
-//-----------------------------------------------------
 {
 	switch(param)
 	{
@@ -186,7 +176,6 @@ CString Distortion::GetParamLabel(PlugParamIndex param)
 
 
 CString Distortion::GetParamDisplay(PlugParamIndex param)
-//-------------------------------------------------------
 {
 	float value = m_param[param];
 	switch(param)
@@ -212,7 +201,6 @@ CString Distortion::GetParamDisplay(PlugParamIndex param)
 
 
 void Distortion::RecalculateDistortionParams()
-//--------------------------------------------
 {
 	// Pre-EQ
 	m_preEQb1 = std::sqrt((2.0f * std::cos(2.0f * float(M_PI) * std::min(FreqInHertz(m_param[kDistPreLowpassCutoff]) / m_SndFile.GetSampleRate(), 0.5f)) + 3.0f) / 5.0f);

@@ -27,7 +27,6 @@ CMIDIMappingDialog::CMIDIMappingDialog(CWnd *pParent, CSoundFile &rSndfile)
 	: CDialog(IDD_MIDIPARAMCONTROL, pParent)
 	, m_sndFile(rSndfile)
 	, m_rMIDIMapper(m_sndFile.GetMIDIMapper())
-//-------------------------------------------------------------------------
 {
 	CMainFrame::GetInputHandler()->Bypass(true);
 	oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
@@ -35,7 +34,6 @@ CMIDIMappingDialog::CMIDIMappingDialog(CWnd *pParent, CSoundFile &rSndfile)
 
 
 CMIDIMappingDialog::~CMIDIMappingDialog()
-//---------------------------------------
 {
 	CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
 	CMainFrame::GetInputHandler()->Bypass(false);
@@ -43,7 +41,6 @@ CMIDIMappingDialog::~CMIDIMappingDialog()
 
 
 void CMIDIMappingDialog::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO_CONTROLLER, m_ControllerCBox);
@@ -77,7 +74,6 @@ END_MESSAGE_MAP()
 
 
 LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
-//-------------------------------------------------------------------
 {
 	if(IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
@@ -109,7 +105,6 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 
 BOOL CMIDIMappingDialog::OnInitDialog()
-//-------------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -170,7 +165,6 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 
 
 int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective &m, int insertAt)
-//------------------------------------------------------------------------------
 {
 	CString s;
 	if(m.GetAnyChannel())
@@ -219,7 +213,6 @@ int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective &m, int insertAt)
 
 
 void CMIDIMappingDialog::SelectItem(int i)
-//----------------------------------------
 {
 	m_List.SetItemState(i, LVIS_SELECTED, LVIS_SELECTED);
 	m_List.SetSelectionMark(i);
@@ -227,7 +220,6 @@ void CMIDIMappingDialog::SelectItem(int i)
 
 
 void CMIDIMappingDialog::UpdateDialog(int selItem)
-//------------------------------------------------
 {
 	CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
@@ -260,7 +252,6 @@ void CMIDIMappingDialog::UpdateDialog(int selItem)
 
 
 void CMIDIMappingDialog::UpdateEvent()
-//------------------------------------
 {
 	m_ControllerCBox.EnableWindow(m_Setting.GetEvent() == MIDIEvents::evControllerChange ? TRUE : FALSE);
 	if(m_Setting.GetEvent() != MIDIEvents::evControllerChange)
@@ -269,7 +260,6 @@ void CMIDIMappingDialog::UpdateEvent()
 
 
 void CMIDIMappingDialog::UpdateParameters()
-//-----------------------------------------
 {
 	m_PlugParamCBox.SetRedraw(FALSE);
 	m_PlugParamCBox.ResetContent();
@@ -281,7 +271,6 @@ void CMIDIMappingDialog::UpdateParameters()
 
 
 void CMIDIMappingDialog::OnSelectionChanged(NMHDR *pNMHDR, LRESULT * /*pResult*/)
-//--------------------------------------------------------------------------------
 {
 	int i;
 	if(pNMHDR != nullptr)
@@ -314,42 +303,36 @@ void CMIDIMappingDialog::OnSelectionChanged(NMHDR *pNMHDR, LRESULT * /*pResult*/
 
 
 void CMIDIMappingDialog::OnBnClickedCheckactive()
-//-----------------------------------------------
 {
 	m_Setting.SetActive(IsDlgButtonChecked(IDC_CHECKACTIVE) == BST_CHECKED);
 }
 
 
 void CMIDIMappingDialog::OnBnClickedCheckCapture()
-//------------------------------------------------
 {
 	m_Setting.SetCaptureMIDI(IsDlgButtonChecked(IDC_CHECKCAPTURE) == BST_CHECKED);
 }
 
 
 void CMIDIMappingDialog::OnBnClickedCheckPatRecord()
-//--------------------------------------------------
 {
 	m_Setting.SetAllowPatternEdit(IsDlgButtonChecked(IDC_CHECK_PATRECORD) == BST_CHECKED);
 }
 
 
 void CMIDIMappingDialog::OnCbnSelchangeComboController()
-//------------------------------------------------------
 {
 	m_Setting.SetController(m_ControllerCBox.GetCurSel());
 }
 
 
 void CMIDIMappingDialog::OnCbnSelchangeComboChannel()
-//---------------------------------------------------
 {
 	m_Setting.SetChannel(m_ChannelCBox.GetCurSel());
 }
 
 
 void CMIDIMappingDialog::OnCbnSelchangeComboPlugin()
-//--------------------------------------------------
 {
 	int i = m_PluginCBox.GetCurSel();
 	if(i < 0 || i >= MAX_MIXPLUGINS) return;
@@ -359,14 +342,12 @@ void CMIDIMappingDialog::OnCbnSelchangeComboPlugin()
 
 
 void CMIDIMappingDialog::OnCbnSelchangeComboParam()
-//-------------------------------------------------
 {
 	m_Setting.SetParamIndex(m_PlugParamCBox.GetCurSel());
 }
 
 
 void CMIDIMappingDialog::OnCbnSelchangeComboEvent()
-//-------------------------------------------------
 {
 	uint8 eventType = static_cast<uint8>(m_EventCBox.GetItemData(m_EventCBox.GetCurSel()));
 	m_Setting.SetEvent(eventType);
@@ -375,7 +356,6 @@ void CMIDIMappingDialog::OnCbnSelchangeComboEvent()
 
 
 void CMIDIMappingDialog::OnBnClickedButtonAdd()
-//---------------------------------------------
 {
 	if(m_sndFile.GetModSpecifications().MIDIMappingDirectivesMax <= m_rMIDIMapper.GetCount())
 	{
@@ -392,7 +372,6 @@ void CMIDIMappingDialog::OnBnClickedButtonAdd()
 
 
 void CMIDIMappingDialog::OnBnClickedButtonReplace()
-//-------------------------------------------------
 {
 	const int i = m_List.GetSelectionMark();
 	if(i >= 0 && (size_t)i < m_rMIDIMapper.GetCount())
@@ -408,7 +387,6 @@ void CMIDIMappingDialog::OnBnClickedButtonReplace()
 
 
 void CMIDIMappingDialog::OnBnClickedButtonRemove()
-//------------------------------------------------
 {
 	int i = m_List.GetSelectionMark();
 	if(i >= 0 && (size_t)i < m_rMIDIMapper.GetCount())
@@ -434,7 +412,6 @@ void CMIDIMappingDialog::OnBnClickedButtonRemove()
 
 
 void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResult)
-//---------------------------------------------------------------------------------
 {
 	const int index = m_List.GetSelectionMark();
 	if(index < 0 || index >= m_List.GetItemCount()) return;
@@ -469,7 +446,6 @@ void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResu
 
 
 BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
-//-----------------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	const TCHAR *text = _T("");
@@ -512,7 +488,6 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 
 
 void CMIDIMappingDialog::SetModified()
-//------------------------------------
 {
 	if(m_sndFile.GetpModDoc() != nullptr)
 		m_sndFile.GetpModDoc()->SetModified();

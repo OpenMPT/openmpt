@@ -15,9 +15,7 @@ class CSoundFile;
 
 OPENMPT_NAMESPACE_BEGIN
 
-//==================================
 class CTempoSwingDlg: public CDialog
-//==================================
 {
 protected:
 	// Scrollable container for the sliders

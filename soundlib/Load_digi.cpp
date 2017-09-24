@@ -36,7 +36,6 @@ MPT_BINARY_STRUCT(DIGIFileHeader, 610)
 
 
 static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
-//---------------------------------------------------------------
 {
 	CSoundFile::ReadMODPatternEntry(file, m);
 	CSoundFile::ConvertModCommand(m);
@@ -87,7 +86,6 @@ static bool ValidateHeader(const DIGIFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDIGI(MemoryFileReader file, const uint64 *pfilesize)
-//-----------------------------------------------------------------------------------------------------
 {
 	DIGIFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -104,7 +102,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDIGI(MemoryFileReader file, c
 
 
 bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------
 {
 	file.Rewind();
 

@@ -25,7 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 // CToolBarEx: custom toolbar base class
 
 BOOL CToolBarEx::SetHorizontal()
-//------------------------------
 {
 	m_bVertical = FALSE;
 	SetBarStyle(GetBarStyle() | CBRS_ALIGN_TOP);
@@ -34,7 +33,6 @@ BOOL CToolBarEx::SetHorizontal()
 
 
 BOOL CToolBarEx::SetVertical()
-//----------------------------
 {
 	m_bVertical = TRUE;
 	return TRUE;
@@ -42,7 +40,6 @@ BOOL CToolBarEx::SetVertical()
 
 
 CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
-//------------------------------------------------------------
 {
 	CSize sizeResult;
 	// if we're committing set the buttons appropriately
@@ -87,7 +84,6 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 
 
 BOOL CToolBarEx::EnableControl(CWnd &wnd, UINT nIndex, UINT nHeight)
-//------------------------------------------------------------------
 {
 	if (wnd.m_hWnd != NULL)
 	{
@@ -106,7 +102,6 @@ BOOL CToolBarEx::EnableControl(CWnd &wnd, UINT nIndex, UINT nHeight)
 
 
 void CToolBarEx::ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle)
-//-----------------------------------------------------------
 {
 	if (m_hWnd)
 	{
@@ -123,7 +118,6 @@ void CToolBarEx::ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle)
 
 
 void CToolBarEx::EnableFlatButtons(BOOL bFlat)
-//--------------------------------------------
 {
 	m_bFlatButtons = bFlat;
 	ChangeCtrlStyle(TBSTYLE_FLAT, bFlat);
@@ -237,7 +231,6 @@ END_MESSAGE_MAP()
 
 
 BOOL CMainToolBar::Create(CWnd *parent)
-//-------------------------------------
 {
 	CRect rect;
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY;
@@ -340,7 +333,6 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 
 void CMainToolBar::Init(CMainFrame *pMainFrm)
-//-------------------------------------------
 {
 	EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 	SetHorizontal();
@@ -349,7 +341,6 @@ void CMainToolBar::Init(CMainFrame *pMainFrm)
 
 
 BOOL CMainToolBar::SetHorizontal()
-//--------------------------------
 {
 	CToolBarEx::SetHorizontal();
 	m_VuMeter.SetOrientation(true);
@@ -389,7 +380,6 @@ BOOL CMainToolBar::SetHorizontal()
 
 
 BOOL CMainToolBar::SetVertical()
-//------------------------------
 {
 	CToolBarEx::SetVertical();
 	m_VuMeter.SetOrientation(false);
@@ -426,7 +416,6 @@ BOOL CMainToolBar::SetVertical()
 
 
 UINT CMainToolBar::GetBaseOctave() const
-//--------------------------------------
 {
 	if (nCurrentOctave >= MIN_BASEOCTAVE) return (UINT)nCurrentOctave;
 	return 4;
@@ -434,7 +423,6 @@ UINT CMainToolBar::GetBaseOctave() const
 
 
 BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
-//--------------------------------------------
 {
 	TCHAR s[64];
 
@@ -451,7 +439,6 @@ BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
 
 
 BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
-//-----------------------------------------------------
 {
 	// Update Info
 	if (pSndFile)
@@ -521,7 +508,6 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 
 
 void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
-//-------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm;
 
@@ -586,7 +572,6 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 
 
 void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
-//----------------------------------------------------------------------
 {
 	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton));
@@ -627,7 +612,6 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 void CMainToolBar::OnSelectMIDIDevice(UINT id)
-//--------------------------------------------
 {
 	CMainFrame::GetMainFrame()->midiCloseDevice();
 	TrackerSettings::Instance().SetMIDIDevice(id - ID_SELECT_MIDI_DEVICE);
@@ -636,7 +620,6 @@ void CMainToolBar::OnSelectMIDIDevice(UINT id)
 
 
 void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
-//-------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm == nullptr)
@@ -694,7 +677,6 @@ END_MESSAGE_MAP()
 
 
 CModTreeBar::CModTreeBar()
-//------------------------
 {
 	m_pModTree = m_pModTreeData = NULL;
 	m_nTreeSplitRatio = TrackerSettings::Instance().glTreeSplitRatio;
@@ -702,7 +684,6 @@ CModTreeBar::CModTreeBar()
 
 
 LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
-//-------------------------------------------------------------
 {
 	LRESULT l = CDialogBar::HandleInitDialog(wParam, lParam);
 	m_pModTreeData = new CModTree(nullptr);
@@ -717,7 +698,6 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 
 
 CModTreeBar::~CModTreeBar()
-//-------------------------
 {
 	if (m_pModTree)
 	{
@@ -733,7 +713,6 @@ CModTreeBar::~CModTreeBar()
 
 
 void CModTreeBar::Init()
-//----------------------
 {
 	m_nTreeSplitRatio = TrackerSettings::Instance().glTreeSplitRatio;
 	if (m_pModTree)
@@ -745,28 +724,24 @@ void CModTreeBar::Init()
 
 
 VOID CModTreeBar::RefreshDlsBanks()
-//---------------------------------
 {
 	if (m_pModTree) m_pModTree->RefreshDlsBanks();
 }
 
 
 VOID CModTreeBar::RefreshMidiLibrary()
-//------------------------------------
 {
 	if (m_pModTree) m_pModTree->RefreshMidiLibrary();
 }
 
 
 VOID CModTreeBar::OnOptionsChanged()
-//----------------------------------
 {
 	if (m_pModTree) m_pModTree->OnOptionsChanged();
 }
 
 
 VOID CModTreeBar::RecalcLayout()
-//------------------------------
 {
 	CRect rect;
 
@@ -786,7 +761,6 @@ VOID CModTreeBar::RecalcLayout()
 
 
 CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
-//--------------------------------------------
 {
 	int width = Util::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd);
 	CSize sz;
@@ -800,7 +774,6 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 
 
 VOID CModTreeBar::DoMouseMove(CPoint pt)
-//--------------------------------------
 {
 	CRect rect;
 
@@ -893,7 +866,6 @@ VOID CModTreeBar::DoMouseMove(CPoint pt)
 
 
 VOID CModTreeBar::DoLButtonDown(CPoint pt)
-//----------------------------------------
 {
 	if ((m_dwStatus & MTB_CAPTURE) && (!(m_dwStatus & MTB_DRAGGING)))
 	{
@@ -909,7 +881,6 @@ VOID CModTreeBar::DoLButtonDown(CPoint pt)
 
 
 VOID CModTreeBar::DoLButtonUp()
-//-----------------------------
 {
 	if (m_dwStatus & MTB_DRAGGING)
 	{
@@ -951,7 +922,6 @@ VOID CModTreeBar::DoLButtonUp()
 
 
 VOID CModTreeBar::CancelTracking()
-//--------------------------------
 {
 	if (m_dwStatus & MTB_TRACKER)
 	{
@@ -968,7 +938,6 @@ VOID CModTreeBar::CancelTracking()
 
 
 void CModTreeBar::OnInvertTracker(UINT x)
-//---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -1005,28 +974,24 @@ void CModTreeBar::OnInvertTracker(UINT x)
 
 
 VOID CModTreeBar::OnDocumentCreated(CModDoc *pModDoc)
-//---------------------------------------------------
 {
 	if (m_pModTree && pModDoc) m_pModTree->AddDocument(*pModDoc);
 }
 
 
 VOID CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
-//--------------------------------------------------
 {
 	if (m_pModTree && pModDoc) m_pModTree->RemoveDocument(*pModDoc);
 }
 
 
 VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
-//---------------------------------------------------------------------------
 {
 	if (m_pModTree) m_pModTree->OnUpdate(pModDoc, hint, pHint);
 }
 
 
 VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
-//----------------------------------------------------------------------
 {
 	if (m_pModTree && pModDoc) m_pModTree->UpdatePlayPos(*pModDoc, pNotify);
 }
@@ -1036,7 +1001,6 @@ VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
 // CModTreeBar message handlers
 
 void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
-//-----------------------------------------------------------------------------
 {
 	CDialogBar::OnNcCalcSize(bCalcValidRects, lpncsp);
 	if (lpncsp)
@@ -1052,7 +1016,6 @@ LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 #else
 UINT CModTreeBar::OnNcHitTest(CPoint point)
 #endif
-//-----------------------------------------
 {
 	CRect rect;
 
@@ -1065,7 +1028,6 @@ UINT CModTreeBar::OnNcHitTest(CPoint point)
 
 
 void CModTreeBar::OnNcPaint()
-//---------------------------
 {
 	RECT rect;
 	CDialogBar::OnNcPaint();
@@ -1087,7 +1049,6 @@ void CModTreeBar::OnNcPaint()
 
 
 void CModTreeBar::OnSize(UINT nType, int cx, int cy)
-//--------------------------------------------------
 {
 	CDialogBar::OnSize(nType, cx, cy);
 	RecalcLayout();
@@ -1095,7 +1056,6 @@ void CModTreeBar::OnSize(UINT nType, int cx, int cy)
 
 
 void CModTreeBar::OnNcMouseMove(UINT, CPoint point)
-//-------------------------------------------------
 {
 	CRect rect;
 	CPoint pt = point;
@@ -1108,14 +1068,12 @@ void CModTreeBar::OnNcMouseMove(UINT, CPoint point)
 
 
 void CModTreeBar::OnMouseMove(UINT, CPoint point)
-//-----------------------------------------------
 {
 	DoMouseMove(point);
 }
 
 
 void CModTreeBar::OnNcLButtonDown(UINT, CPoint point)
-//---------------------------------------------------
 {
 	CRect rect;
 	CPoint pt = point;
@@ -1128,35 +1086,30 @@ void CModTreeBar::OnNcLButtonDown(UINT, CPoint point)
 
 
 void CModTreeBar::OnLButtonDown(UINT, CPoint point)
-//-------------------------------------------------
 {
 	DoLButtonDown(point);
 }
 
 
 void CModTreeBar::OnNcLButtonUp(UINT, CPoint)
-//-------------------------------------------
 {
 	DoLButtonUp();
 }
 
 
 void CModTreeBar::OnLButtonUp(UINT, CPoint)
-//-----------------------------------------
 {
 	DoLButtonUp();
 }
 
 
 HWND CModTreeBar::GetModTreeHWND()
-//--------------------------------
 {
 	return m_pModTree->m_hWnd;
 }
 
 
 LRESULT CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
-//---------------------------------------------------------------------------------
 {
 	if(::GetFocus() == m_pModTree->m_hWnd)
 		return m_pModTree->SendMessage(cmdID, wParam, lParam);
@@ -1167,7 +1120,6 @@ LRESULT CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lPar
 
 
 bool CModTreeBar::SetTreeSoundfile(FileReader &file)
-//--------------------------------------------------
 {
 	return m_pModTree->SetSoundFile(file);
 }
@@ -1187,7 +1139,6 @@ END_MESSAGE_MAP()
 
 
 void CStereoVU::OnPaint()
-//-----------------------
 {
 	CRect rect;
 	CPaintDC dc(this);
@@ -1196,7 +1147,6 @@ void CStereoVU::OnPaint()
 
 
 void CStereoVU::SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force)
-//-----------------------------------------------------------------------------------
 {
 	bool changed = false;
 	if(validChannels == 0)
@@ -1236,7 +1186,6 @@ void CStereoVU::SetVuMeter(uint8 validChannels, const uint32 channels[4], bool f
 
 // Draw stereo VU
 void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
-//------------------------------------------------
 {
 	CRect rect;
 	GetClientRect(&rect);
@@ -1285,7 +1234,6 @@ void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
 
 // Draw a single VU Meter
 void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
-//-----------------------------------------------------------------------------
 {
 	uint32 vu = vuMeter[index];
 
@@ -1347,7 +1295,6 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 
 
 void CStereoVU::OnLButtonDown(UINT, CPoint)
-//-----------------------------------------
 {
 	// Reset clip indicator.
 	CMainFrame::GetMainFrame()->m_VUMeter.ResetClipped();

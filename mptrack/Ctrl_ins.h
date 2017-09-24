@@ -19,9 +19,7 @@ class CNoteMapWnd;
 class CCtrlInstruments;
 
 
-//===============================
 class CNoteMapWnd: public CStatic
-//===============================
 {
 protected:
 	CModDoc &m_modDoc;
@@ -94,9 +92,7 @@ protected:
 };
 
 
-//===========================================
 class CCtrlInstruments: public CModControlDlg
-//===========================================
 {
 	friend class PrepareInstrUndo;
 

@@ -29,9 +29,7 @@ enum RetryAnswer
 };
 
 
-//=============
 class Reporting
-//=============
 {
 
 public:
