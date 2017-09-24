@@ -55,7 +55,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Trim envelopes and remove release nodes.
 static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications &specs, std::bitset<wNumWarnings> &warnings)
-//---------------------------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
 	const uint8 envMax = specs.envelopePointsMax;
@@ -88,7 +87,6 @@ static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications
 
 
 bool CModDoc::ChangeModType(MODTYPE nNewType)
-//-------------------------------------------
 {
 	std::bitset<wNumWarnings> warnings;
 	warnings.reset();

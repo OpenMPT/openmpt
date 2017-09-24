@@ -20,9 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct ModSample;
 
-//=================
 class ITCompression
-//=================
 {
 public:
 	ITCompression(const ModSample &sample, bool it215, std::ostream *f, SmpLength maxLength = 0);
@@ -69,9 +67,7 @@ protected:
 };
 
 
-//===================
 class ITDecompression
-//===================
 {
 public:
 	ITDecompression(FileReader &file, ModSample &sample, bool it215);

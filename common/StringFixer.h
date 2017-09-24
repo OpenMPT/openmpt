@@ -31,14 +31,12 @@ namespace mpt { namespace String
 	// Size of the array must be known at compile time.
 	template <size_t size>
 	void SetNullTerminator(char (&buffer)[size])
-	//------------------------------------------
 	{
 		STATIC_ASSERT(size > 0);
 		buffer[size - 1] = 0;
 	}
 
 	inline void SetNullTerminator(char *buffer, size_t size)
-	//------------------------------------------------------
 	{
 		MPT_ASSERT(size > 0);
 		buffer[size - 1] = 0;
@@ -46,14 +44,12 @@ namespace mpt { namespace String
 
 	template <size_t size>
 	void SetNullTerminator(wchar_t (&buffer)[size])
-	//---------------------------------------------
 	{
 		STATIC_ASSERT(size > 0);
 		buffer[size - 1] = 0;
 	}
 
 	inline void SetNullTerminator(wchar_t *buffer, size_t size)
-	//---------------------------------------------------------
 	{
 		MPT_ASSERT(size > 0);
 		buffer[size - 1] = 0;
@@ -63,7 +59,6 @@ namespace mpt { namespace String
 	// Remove any chars after the first null char
 	template <size_t size>
 	void FixNullString(char (&buffer)[size])
-	//--------------------------------------
 	{
 		STATIC_ASSERT(size > 0);
 		SetNullTerminator(buffer);
@@ -81,7 +76,6 @@ namespace mpt { namespace String
 	}
 
 	inline void FixNullString(std::string & str)
-	//------------------------------------------
 	{
 		for(std::size_t i = 0; i < str.length(); ++i)
 		{
@@ -125,7 +119,6 @@ namespace mpt { namespace String
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, typename Tbyte>
 	void Read(std::string &dest, const Tbyte *srcBuffer, size_t srcSize)
-	//------------------------------------------------------------------
 	{
 
 		const char *src = mpt::byte_cast<const char*>(srcBuffer);
@@ -179,7 +172,6 @@ namespace mpt { namespace String
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, typename Tbyte>
 	void Read(mpt::ustring &dest, mpt::Charset charset, const Tbyte *srcBuffer, size_t srcSize)
-	//-----------------------------------------------------------------------------------------
 	{
 		std::string tmp;
 		Read<mode>(tmp, srcBuffer, srcSize);
@@ -190,7 +182,6 @@ namespace mpt { namespace String
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t srcSize, typename Tbyte>
 	void Read(std::string &dest, const Tbyte (&srcBuffer)[srcSize])
-	//-------------------------------------------------------------
 	{
 		STATIC_ASSERT(srcSize > 0);
 		Read<mode>(dest, srcBuffer, srcSize);
@@ -200,7 +191,6 @@ namespace mpt { namespace String
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t srcSize, typename Tbyte>
 	void Read(mpt::ustring &dest, mpt::Charset charset, const Tbyte(&srcBuffer)[srcSize])
-	//-----------------------------------------------------------------------------------
 	{
 		std::string tmp;
 		Read<mode>(tmp, srcBuffer);
@@ -212,7 +202,6 @@ namespace mpt { namespace String
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, size_t destSize, typename Tbyte>
 	void Read(char (&destBuffer)[destSize], const Tbyte *srcBuffer, size_t srcSize)
-	//-----------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 
@@ -264,7 +253,6 @@ namespace mpt { namespace String
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t destSize, size_t srcSize, typename Tbyte>
 	void Read(char (&destBuffer)[destSize], const Tbyte (&srcBuffer)[srcSize])
-	//------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
@@ -277,7 +265,6 @@ namespace mpt { namespace String
 	// otherwise use one of the safer overloads below.
 	template <ReadWriteMode mode>
 	void Write(char *destBuffer, const size_t destSize, const char *srcBuffer, const size_t srcSize)
-	//----------------------------------------------------------------------------------------------
 	{
 		MPT_ASSERT(destSize > 0);
 
@@ -320,7 +307,6 @@ namespace mpt { namespace String
 	// Only use this version of the function if the size of the source buffer is variable and the destination buffer also has variable size.
 	template <ReadWriteMode mode>
 	void Write(std::vector<char> &destBuffer, const char *srcBuffer, const size_t srcSize)
-	//------------------------------------------------------------------------------------
 	{
 		MPT_ASSERT(destBuffer.size() > 0);
 		Write<mode>(destBuffer.data(), destBuffer.size(), srcBuffer, srcSize);
@@ -331,7 +317,6 @@ namespace mpt { namespace String
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, size_t destSize>
 	void Write(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
-	//-----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		Write<mode>(destBuffer, destSize, srcBuffer, srcSize);
@@ -342,7 +327,6 @@ namespace mpt { namespace String
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
 	void Write(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
@@ -351,7 +335,6 @@ namespace mpt { namespace String
 
 	template <ReadWriteMode mode>
 	void Write(char *destBuffer, const size_t destSize, const std::string &src)
-	//-------------------------------------------------------------------------
 	{
 		MPT_ASSERT(destSize > 0);
 		Write<mode>(destBuffer, destSize, src.c_str(), src.length());
@@ -359,7 +342,6 @@ namespace mpt { namespace String
 
 	template <ReadWriteMode mode>
 	void Write(std::vector<char> &destBuffer, const std::string &src)
-	//---------------------------------------------------------------
 	{
 		MPT_ASSERT(destBuffer.size() > 0);
 		Write<mode>(destBuffer, src.c_str(), src.length());
@@ -367,7 +349,6 @@ namespace mpt { namespace String
 
 	template <ReadWriteMode mode, size_t destSize>
 	void Write(char (&destBuffer)[destSize], const std::string &src)
-	//--------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		Write<mode, destSize>(destBuffer, src.c_str(), src.length());
@@ -377,7 +358,6 @@ namespace mpt { namespace String
 	// Copy from a char array to a fixed size char array.
 	template <size_t destSize>
 	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
-	//------------------------------------------------------------------------------------------------------------------------
 	{
 		const size_t copySize = std::min(destSize - 1u, srcSize);
 		std::strncpy(destBuffer, srcBuffer, copySize);
@@ -386,7 +366,6 @@ namespace mpt { namespace String
 
 	// Copy at most srcSize characters from srcBuffer to a std::string.
 	static inline void CopyN(std::string &dest, const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
-	//---------------------------------------------------------------------------------------------------------------------------
 	{
 		dest.assign(srcBuffer, srcBuffer + mpt::strnlen(srcBuffer, srcSize));
 	}
@@ -395,7 +374,6 @@ namespace mpt { namespace String
 	// Copy from one fixed size char array to another one.
 	template <size_t destSize, size_t srcSize>
 	void Copy(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//-----------------------------------------------------------------------
 	{
 		CopyN(destBuffer, srcBuffer, srcSize);
 	}
@@ -403,7 +381,6 @@ namespace mpt { namespace String
 	// Copy from a std::string to a fixed size char array.
 	template <size_t destSize>
 	void Copy(char (&destBuffer)[destSize], const std::string &src)
-	//-------------------------------------------------------------
 	{
 		CopyN(destBuffer, src.c_str(), src.length());
 	}
@@ -411,14 +388,12 @@ namespace mpt { namespace String
 	// Copy from a fixed size char array to a std::string.
 	template <size_t srcSize>
 	void Copy(std::string &dest, const char (&srcBuffer)[srcSize])
-	//------------------------------------------------------------
 	{
 		CopyN(dest, srcBuffer, srcSize);
 	}
 
 	// Copy from a std::string to a std::string.
 	static inline void Copy(std::string &dest, const std::string &src)
-	//----------------------------------------------------------------
 	{
 		dest.assign(src);
 	}

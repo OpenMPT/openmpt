@@ -100,7 +100,6 @@ END_MESSAGE_MAP()
 // CViewComments operations
 
 CViewComments::CViewComments()
-//----------------------------
 {
 	m_nCurrentListId = 0;
 	m_nListId = 0;//IDC_LIST_SAMPLES;
@@ -108,7 +107,6 @@ CViewComments::CViewComments()
 
 
 void CViewComments::OnInitialUpdate()
-//-----------------------------------
 {
 	CModScrollView::OnInitialUpdate();
 	if(m_nListId == 0)
@@ -150,7 +148,6 @@ void CViewComments::OnInitialUpdate()
 
 
 void CViewComments::OnDestroy()
-//-----------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
@@ -164,7 +161,6 @@ void CViewComments::OnDestroy()
 
 
 LRESULT CViewComments::OnMidiMsg(WPARAM midiData, LPARAM)
-//-------------------------------------------------------
 {
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -178,7 +174,6 @@ LRESULT CViewComments::OnMidiMsg(WPARAM midiData, LPARAM)
 // CViewComments drawing
 
 void CViewComments::UpdateView(UpdateHint hint, CObject *)
-//--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -419,7 +414,6 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 
 
 void CViewComments::RecalcLayout()
-//--------------------------------
 {
 	CRect rect;
 
@@ -431,7 +425,6 @@ void CViewComments::RecalcLayout()
 
 
 void CViewComments::UpdateButtonState()
-//-------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -445,7 +438,6 @@ void CViewComments::UpdateButtonState()
 
 
 void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
-//------------------------------------------------------
 {
 	CEdit *editCtrl = m_ItemList.GetEditControl();
 	if(editCtrl)
@@ -458,7 +450,6 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 
 
 void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
-//-----------------------------------------------------------
 {
 	LV_DISPINFO *plvDispInfo = (LV_DISPINFO *)pnmhdr;
 	LV_ITEM &lvItem = plvDispInfo->item;
@@ -500,7 +491,6 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 
 
 void CViewComments::OnSize(UINT nType, int cx, int cy)
-//----------------------------------------------------
 {
 	CView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0) && (m_hWnd))
@@ -511,7 +501,6 @@ void CViewComments::OnSize(UINT nType, int cx, int cy)
 
 
 void CViewComments::OnShowSamples()
-//---------------------------------
 {
 	if (m_nListId != IDC_LIST_SAMPLES)
 	{
@@ -523,7 +512,6 @@ void CViewComments::OnShowSamples()
 
 
 void CViewComments::OnShowInstruments()
-//-------------------------------------
 {
 	if (m_nListId != IDC_LIST_INSTRUMENTS)
 	{
@@ -539,7 +527,6 @@ void CViewComments::OnShowInstruments()
 
 
 void CViewComments::OnShowPatterns()
-//----------------------------------
 {
 	if (m_nListId != IDC_LIST_PATTERNS)
 	{
@@ -550,7 +537,6 @@ void CViewComments::OnShowPatterns()
 }
 
 void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
-//--------------------------------------------------------
 {
 	// Double click -> switch to instrument or sample tab
 	int nItem = m_ItemList.GetSelectionMark();
@@ -575,7 +561,6 @@ void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
 
 
 LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
-//---------------------------------------------------------------
 {
 //	switch(wParam)
 //	{

@@ -36,9 +36,7 @@ struct GZtrailer
 
 MPT_BINARY_STRUCT(GZtrailer, 8)
 
-//=====================================
 class CGzipArchive : public ArchiveBase
-//=====================================
 {
 protected:
 

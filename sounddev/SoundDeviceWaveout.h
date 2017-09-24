@@ -39,9 +39,7 @@ public:
 };
 
 
-//==============================================
 class CWaveDevice: public CSoundDeviceWithThread
-//==============================================
 {
 protected:
 	HANDLE m_ThreadWakeupEvent;

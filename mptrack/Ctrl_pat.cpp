@@ -80,7 +80,6 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 END_MESSAGE_MAP()
 
 void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CModControlDlg::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CCtrlPatterns)
@@ -99,7 +98,6 @@ void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
 
 
 CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document) : CModControlDlg(parent, document), m_OrderList(*this, document)
-//---------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_nInstrument = 0;
 
@@ -111,7 +109,6 @@ CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document) : CModC
 
 
 BOOL CCtrlPatterns::OnInitDialog()
-//--------------------------------
 {
 	CWnd::EnableToolTips(true);
 	CRect rect, rcOrderList;
@@ -191,7 +188,6 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 
 void CCtrlPatterns::RecalcLayout()
-//--------------------------------
 {
 	// Update Order List Position
 	if (m_OrderList.m_hWnd)
@@ -217,7 +213,6 @@ void CCtrlPatterns::RecalcLayout()
 
 
 void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
-//------------------------------------------------------------
 {
 	m_OrderList.UpdateView(hint, pObj);
 	FlagSet<HintType> hintType = hint.GetType();
@@ -359,14 +354,12 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 
 CRuntimeClass *CCtrlPatterns::GetAssociatedViewClass()
-//----------------------------------------------------
 {
 	return RUNTIME_CLASS(CViewPattern);
 }
 
 
 LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
-//---------------------------------------------------------------
 {
 	switch(wParam)
 	{
@@ -522,14 +515,12 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 
 void CCtrlPatterns::SetCurrentPattern(PATTERNINDEX nPat)
-//------------------------------------------------------
 {
 	SendViewMessage(VIEWMSG_SETCURRENTPATTERN, (LPARAM)nPat);
 }
 
 
 BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
-//-------------------------------------------------
 {
 	if (nIns == m_nInstrument) return TRUE;
 	int n = m_CbnInstrument.GetCount();
@@ -557,7 +548,6 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 // CCtrlPatterns messages
 
 void CCtrlPatterns::OnActivatePage(LPARAM lParam)
-//-----------------------------------------------
 {
 	int nIns = m_parent.GetInstrumentChange();
 	if (nIns > 0)
@@ -629,7 +619,6 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 
 
 void CCtrlPatterns::OnDeactivatePage()
-//------------------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&pFrame->GetPatternViewState());
@@ -637,7 +626,6 @@ void CCtrlPatterns::OnDeactivatePage()
 
 
 void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-//----------------------------------------------------------------------------
 {
 	CModControlDlg::OnVScroll(nSBCode, nPos, pScrollBar);
 	short int pos = (short int)m_SpinInstrument.GetPos();
@@ -653,7 +641,6 @@ void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 
 void CCtrlPatterns::OnSequencePrev()
-//----------------------------------
 {
 	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1);
 	m_OrderList.SetFocus();
@@ -661,7 +648,6 @@ void CCtrlPatterns::OnSequencePrev()
 
 
 void CCtrlPatterns::OnSequenceNext()
-//----------------------------------
 {
 	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1);
 	m_OrderList.SetFocus();
@@ -669,21 +655,18 @@ void CCtrlPatterns::OnSequenceNext()
 
 
 void CCtrlPatterns::OnChannelManager()
-//------------------------------------
 {
 	m_modDoc.OnChannelManager();
 }
 
 
 void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-//------------------------------------------------------------------
 {
 	CModControlDlg::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 
 void CCtrlPatterns::OnSpacingChanged()
-//------------------------------------
 {
 	if ((m_EditSpacing.m_hWnd) && (m_EditSpacing.GetWindowTextLength() > 0))
 	{
@@ -699,7 +682,6 @@ void CCtrlPatterns::OnSpacingChanged()
 
 
 void CCtrlPatterns::OnInstrumentChanged()
-//---------------------------------------
 {
 	int n = m_CbnInstrument.GetCurSel();
 	if (n >= 0)
@@ -718,7 +700,6 @@ void CCtrlPatterns::OnInstrumentChanged()
 
 
 void CCtrlPatterns::OnPrevInstrument()
-//------------------------------------
 {
 	int n = m_CbnInstrument.GetCount();
 	if (n > 0)
@@ -732,7 +713,6 @@ void CCtrlPatterns::OnPrevInstrument()
 
 
 void CCtrlPatterns::OnNextInstrument()
-//------------------------------------
 {
 	int n = m_CbnInstrument.GetCount();
 	if (n > 0)
@@ -746,7 +726,6 @@ void CCtrlPatterns::OnNextInstrument()
 
 
 void CCtrlPatterns::OnPlayerPause()
-//---------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PauseMod();
@@ -754,7 +733,6 @@ void CCtrlPatterns::OnPlayerPause()
 
 
 void CCtrlPatterns::OnPatternNew()
-//--------------------------------
 {
 	ORDERINDEX curOrd = m_OrderList.GetCurSel(true).firstOrd;
 	PATTERNINDEX curPat = (curOrd < m_sndFile.Order().size()) ? m_sndFile.Order()[curOrd] : 0;
@@ -798,7 +776,6 @@ void CCtrlPatterns::OnPatternNew()
 
 // Duplicates one or more patterns.
 void CCtrlPatterns::OnPatternDuplicate()
-//--------------------------------------
 {
 	OrdSelection selection = m_OrderList.GetCurSel(false);
 	const ORDERINDEX insertFrom = selection.firstOrd;
@@ -881,7 +858,6 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 
 void CCtrlPatterns::OnPatternStop()
-//---------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PauseMod(&m_modDoc);
@@ -891,7 +867,6 @@ void CCtrlPatterns::OnPatternStop()
 
 
 void CCtrlPatterns::OnPatternPlay()
-//---------------------------------
 {
 	m_modDoc.OnPatternPlay();
 	SwitchToView();
@@ -899,7 +874,6 @@ void CCtrlPatterns::OnPatternPlay()
 
 //rewbs.playSongFromCursor
 void CCtrlPatterns::OnPatternPlayNoLoop()
-//---------------------------------
 {
 	m_modDoc.OnPatternPlayNoLoop();
 	SwitchToView();
@@ -907,7 +881,6 @@ void CCtrlPatterns::OnPatternPlayNoLoop()
 //end rewbs.playSongFromCursor
 
 void CCtrlPatterns::OnPatternPlayFromStart()
-//------------------------------------------
 {
 	m_modDoc.OnPatternRestart();
 	SwitchToView();
@@ -915,7 +888,6 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 
 
 void CCtrlPatterns::OnPatternRecord()
-//-----------------------------------
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
@@ -926,7 +898,6 @@ void CCtrlPatterns::OnPatternRecord()
 
 
 void CCtrlPatterns::OnPatternVUMeters()
-//-------------------------------------
 {
 	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
 	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
@@ -937,7 +908,6 @@ void CCtrlPatterns::OnPatternVUMeters()
 
 //rewbs.patPlugName
 void CCtrlPatterns::OnPatternViewPlugNames()
-//------------------------------------------
 {
 	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
 	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
@@ -948,7 +918,6 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 //end rewbs.patPlugName
 
 void CCtrlPatterns::OnPatternProperties()
-//---------------------------------------
 {
 	SendViewMessage(VIEWMSG_PATTERNPROPERTIES);
 	SwitchToView();
@@ -956,7 +925,6 @@ void CCtrlPatterns::OnPatternProperties()
 
 
 void CCtrlPatterns::OnPatternExpand()
-//-----------------------------------
 {
 	SendViewMessage(VIEWMSG_EXPANDPATTERN);
 	SwitchToView();
@@ -964,7 +932,6 @@ void CCtrlPatterns::OnPatternExpand()
 
 
 void CCtrlPatterns::OnPatternCopy()
-//---------------------------------
 {
 	SendViewMessage(VIEWMSG_COPYPATTERN);
 	SwitchToView();
@@ -972,7 +939,6 @@ void CCtrlPatterns::OnPatternCopy()
 
 
 void CCtrlPatterns::OnPatternPaste()
-//----------------------------------
 {
 	SendViewMessage(VIEWMSG_PASTEPATTERN);
 	SwitchToView();
@@ -980,7 +946,6 @@ void CCtrlPatterns::OnPatternPaste()
 
 
 void CCtrlPatterns::OnPatternShrink()
-//-----------------------------------
 {
 	SendViewMessage(VIEWMSG_SHRINKPATTERN);
 	SwitchToView();
@@ -988,7 +953,6 @@ void CCtrlPatterns::OnPatternShrink()
 
 
 void CCtrlPatterns::OnPatternAmplify()
-//------------------------------------
 {
 	SendViewMessage(VIEWMSG_AMPLIFYPATTERN);
 	SwitchToView();
@@ -996,7 +960,6 @@ void CCtrlPatterns::OnPatternAmplify()
 
 
 void CCtrlPatterns::OnPatternPlayRow()
-//------------------------------------
 {
 	::SendMessage(m_hWndView, WM_COMMAND, ID_PATTERN_PLAYROW, 0);
 	SwitchToView();
@@ -1004,14 +967,12 @@ void CCtrlPatterns::OnPatternPlayRow()
 
 
 void CCtrlPatterns::OnUpdateRecord(CCmdUI *pCmdUI)
-//------------------------------------------------
 {
 	if (pCmdUI) pCmdUI->SetCheck((m_bRecord) ? TRUE : FALSE);
 }
 
 
 void CCtrlPatterns::OnFollowSong()
-//--------------------------------
 {
 	SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
 	SwitchToView();
@@ -1019,7 +980,6 @@ void CCtrlPatterns::OnFollowSong()
 
 
 void CCtrlPatterns::OnChangeLoopStatus()
-//--------------------------------------
 {
 	OnModCtrlMsg(CTRLMSG_PAT_LOOP, IsDlgButtonChecked(IDC_PATTERN_LOOP));
 	SwitchToView();
@@ -1027,7 +987,6 @@ void CCtrlPatterns::OnChangeLoopStatus()
 
 
 void CCtrlPatterns::OnEditUndo()
-//------------------------------
 {
 	if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_UNDO, 0);
 	SwitchToView();
@@ -1035,14 +994,12 @@ void CCtrlPatterns::OnEditUndo()
 
 
 void CCtrlPatterns::OnSwitchToView()
-//----------------------------------
 {
 	PostViewMessage(VIEWMSG_SETFOCUS);
 }
 
 
 void CCtrlPatterns::OnPatternNameChanged()
-//----------------------------------------
 {
 	if(!IsLocked())
 	{
@@ -1065,7 +1022,6 @@ void CCtrlPatterns::OnPatternNameChanged()
 
 
 void CCtrlPatterns::OnSequenceNameChanged()
-//-----------------------------------------
 {
 	CString tmp;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, tmp);
@@ -1080,7 +1036,6 @@ void CCtrlPatterns::OnSequenceNameChanged()
 
 
 void CCtrlPatterns::OnChordEditor()
-//---------------------------------
 {
 	CChordEditor dlg(this);
 	dlg.DoModal();
@@ -1089,7 +1044,6 @@ void CCtrlPatterns::OnChordEditor()
 
 
 void CCtrlPatterns::OnDetailLo()
-//------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_LO, TBSTATE_CHECKED|TBSTATE_ENABLED);
 	if (m_nDetailLevel != PatternCursor::instrColumn)
@@ -1104,7 +1058,6 @@ void CCtrlPatterns::OnDetailLo()
 
 
 void CCtrlPatterns::OnDetailMed()
-//-------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_MED, TBSTATE_CHECKED|TBSTATE_ENABLED);
 	if (m_nDetailLevel != PatternCursor::volumeColumn)
@@ -1119,7 +1072,6 @@ void CCtrlPatterns::OnDetailMed()
 
 
 void CCtrlPatterns::OnDetailHi()
-//------------------------------
 {
 	m_ToolBar.SetState(ID_PATTERNDETAIL_HI, TBSTATE_CHECKED|TBSTATE_ENABLED);
 	if (m_nDetailLevel != PatternCursor::lastColumn)
@@ -1133,7 +1085,6 @@ void CCtrlPatterns::OnDetailHi()
 }
 
 void CCtrlPatterns::OnToggleOverflowPaste()
-//-----------------------------------------
 {
 	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
 	UpdateView(UpdateHint().MPTOptions());
@@ -1142,7 +1093,6 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 
 
 void CCtrlPatterns::TogglePluginEditor()
-//--------------------------------------
 {
 	if(m_sndFile.GetInstrumentPlugin(m_nInstrument) != nullptr)
 	{
@@ -1152,14 +1102,12 @@ void CCtrlPatterns::TogglePluginEditor()
 
 
 bool CCtrlPatterns::HasValidPlug(INSTRUMENTINDEX instr)
-//-----------------------------------------------------
 {
 	return m_sndFile.GetInstrumentPlugin(instr) != nullptr;
 }
 
 
 BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-//--------------------------------------------------------------------
 {
 	if (nFlags==0)
 	{
@@ -1170,7 +1118,6 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 
 void CCtrlPatterns::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
-//----------------------------------------------------------------------
 {
 	if(nButton == XBUTTON1) OnModCtrlMsg(CTRLMSG_PREVORDER, 0);
 	else if(nButton == XBUTTON2) OnModCtrlMsg(CTRLMSG_NEXTORDER, 0);
@@ -1179,7 +1126,6 @@ void CCtrlPatterns::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 
 
 BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
-//---------------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
 	UINT_PTR nID = pNMHDR->idFrom;
@@ -1200,7 +1146,6 @@ BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 
 
 void CCtrlPatterns::OnSequenceNumChanged()
-//----------------------------------------
 {
 	if ((m_EditSequence.m_hWnd) && (m_EditSequence.GetWindowTextLength() > 0))
 	{

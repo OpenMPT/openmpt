@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//===============================================
 class COptionsSampleEditor : public CPropertyPage
-//===============================================
 {
 protected:
 	CComboBox m_cbnDefaultSampleFormat, m_cbnDefaultVolumeHandling;

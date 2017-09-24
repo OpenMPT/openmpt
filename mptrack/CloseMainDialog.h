@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//===================================
 class CloseMainDialog: public CDialog
-//===================================
 {
 protected:
 	

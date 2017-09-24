@@ -21,9 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Tuning {
 
 
-//=====================
 class CTuningCollection
-//=====================
 {
 
 public:

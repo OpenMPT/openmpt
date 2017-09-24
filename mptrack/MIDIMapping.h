@@ -19,9 +19,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//=========================
 class CMIDIMappingDirective
-//=========================
 {
 public:
 	CMIDIMappingDirective() :
@@ -78,9 +76,7 @@ private:
 class CSoundFile;
 
 
-//===============
 class CMIDIMapper
-//===============
 {
 public:
 	typedef std::vector<CMIDIMappingDirective>::const_iterator const_iterator;

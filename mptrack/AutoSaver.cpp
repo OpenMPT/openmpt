@@ -31,7 +31,6 @@ OPENMPT_NAMESPACE_BEGIN
 ///////////////////////////
 
 CAutoSaver::CAutoSaver()
-//----------------------
 	: m_bSaveInProgress(false)
 	, m_nLastSave(timeGetTime())
 {
@@ -39,31 +38,26 @@ CAutoSaver::CAutoSaver()
 
 
 bool CAutoSaver::IsEnabled() const
-//--------------------------------
 {
 	return TrackerSettings::Instance().AutosaveEnabled;
 }
 
 bool CAutoSaver::GetUseOriginalPath() const
-//-----------------------------------------
 {
 	return TrackerSettings::Instance().AutosaveUseOriginalPath;
 }
 
 mpt::PathString CAutoSaver::GetPath() const
-//-----------------------------------------
 {
 	return TrackerSettings::Instance().AutosavePath.GetDefaultDir();
 }
 
 uint32 CAutoSaver::GetHistoryDepth() const
-//----------------------------------------
 {
 	return TrackerSettings::Instance().AutosaveHistoryDepth;
 }
 
 uint32 CAutoSaver::GetSaveInterval() const
-//----------------------------------------
 {
 	return TrackerSettings::Instance().AutosaveIntervalMinutes;
 }
@@ -75,7 +69,6 @@ uint32 CAutoSaver::GetSaveInterval() const
 
 
 bool CAutoSaver::DoSave(DWORD curTime)
-//------------------------------------
 {
 	bool success = true;
 
@@ -118,7 +111,6 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 
 bool CAutoSaver::CheckTimer(DWORD curTime)
-//----------------------------------------
 {
 	DWORD curInterval = curTime - m_nLastSave;
 	return (curInterval >= GetSaveIntervalMilliseconds());
@@ -126,7 +118,6 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 
 
 mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
-//--------------------------------------------------------
 {
 	mpt::PathString name;
 	
@@ -159,7 +150,6 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 
 
 bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
-//----------------------------------------------
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
@@ -200,7 +190,6 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 
 
 void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
-//----------------------------------------------------
 {
 	mpt::PathString path;
 	

@@ -15,9 +15,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=========================
 class CVuMeter: public CWnd
-//=========================
 {
 protected:
 	LONG m_nDisplayedVu, m_nVuMeter;
@@ -43,9 +41,7 @@ enum
 };
 
 
-//=======================================
 class CCtrlGeneral: public CModControlDlg
-//=======================================
 {
 public:
 	CCtrlGeneral(CModControlView &parent, CModDoc &document);

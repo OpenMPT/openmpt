@@ -132,7 +132,6 @@ MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
 
 
 bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
-//----------------------------------------------------------------------------------
 {
 #if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)
 
@@ -351,7 +350,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 
 bool CSoundFile::CanReadMP3()
-//---------------------------
 {
 	bool result = false;
 	#if defined(MPT_WITH_MPG123)

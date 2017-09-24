@@ -19,9 +19,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//==========================================
 class COptionsAdvanced: public CPropertyPage
-//==========================================
 {
 protected:
 	CListCtrlEx m_List;

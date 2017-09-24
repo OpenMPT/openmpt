@@ -23,9 +23,7 @@ enum OpenSampleTypes
 };
 MPT_DECLARE_ENUM(OpenSampleTypes)
 
-//=======================================
 class CCtrlSamples: public CModControlDlg
-//=======================================
 {
 protected:
 	friend class CDoPitchShiftTimeStretch;

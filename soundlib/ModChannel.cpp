@@ -15,7 +15,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel)
-//-------------------------------------------------------------------------------------------------
 {
 	if(resetMask & resetSetPosBasic)
 	{
@@ -95,7 +94,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 
 
 void ModChannel::Stop()
-//---------------------
 {
 	nPeriod = 0;
 	increment.Set(0);
@@ -107,7 +105,6 @@ void ModChannel::Stop()
 
 
 void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins)
-//-------------------------------------------------------------------------------------
 {
 	nInsVol = 64;
 	if(smp != nullptr)
@@ -118,7 +115,6 @@ void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrumen
 
 
 ModCommand::NOTE ModChannel::GetPluginNote(bool realNoteMapping) const
-//--------------------------------------------------------------------
 {
 	if(nArpeggioLastNote != NOTE_NONE)
 	{

@@ -42,9 +42,7 @@ struct ArchiveFileInfo
 	}
 };
 
-//============
 class IArchive
-//============
 {
 public:
 	typedef std::vector<ArchiveFileInfo>::const_iterator const_iterator;
@@ -64,9 +62,7 @@ public:
 	virtual const ArchiveFileInfo & operator [] (std::size_t index) const = 0;
 };
 
-//===============
 class ArchiveBase
-//===============
  : public IArchive
 {
 protected:

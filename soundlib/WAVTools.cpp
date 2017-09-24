@@ -25,7 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
-//-----------------------------------------------------------
 {
 	file.Rewind();
 
@@ -128,7 +127,6 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 
 void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
-//---------------------------------------------------------------------------
 {
 	// Read sample loop points and other sampler information
 	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
@@ -150,7 +148,6 @@ void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 
 
 void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
-//----------------------------------------------------------------------------------------
 {
 	// Read sample name
 	FileReader textChunk = infoChunk.GetChunk(RIFFChunk::idINAM);
@@ -246,7 +243,6 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 
 // Apply WAV loop information to a mod sample.
 void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, SampleFlags &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(loopEnd == 0)
 	{
@@ -271,7 +267,6 @@ void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sa
 
 // Convert internal loop information into a WAV loop.
 void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
-//-------------------------------------------------------------------------
 {
 	identifier = 0;
 	loopType = bidi ? loopBidi : loopForward;
@@ -297,7 +292,6 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 // Output to stream: Initialize with std::ostream*.
 WAVWriter::WAVWriter(std::ostream *stream) : s(nullptr), memory(nullptr), memSize(0)
-//----------------------------------------------------------------------------------
 {
 	s = stream;
 	Init();
@@ -306,14 +300,12 @@ WAVWriter::WAVWriter(std::ostream *stream) : s(nullptr), memory(nullptr), memSiz
 
 // Output to clipboard: Initialize with pointer to memory and size of reserved memory.
 WAVWriter::WAVWriter(void *mem, size_t size) : s(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
-//----------------------------------------------------------------------------------------------------------
 {
 	Init();
 }
 
 
 WAVWriter::~WAVWriter()
-//---------------------
 {
 	Finalize();
 }
@@ -321,7 +313,6 @@ WAVWriter::~WAVWriter()
 
 // Reset all file variables.
 void WAVWriter::Init()
-//--------------------
 {
 	chunkStartPos = 0;
 	position = 0;
@@ -334,7 +325,6 @@ void WAVWriter::Init()
 
 // Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 size_t WAVWriter::Finalize()
-//--------------------------
 {
 	FinalizeChunk();
 
@@ -355,7 +345,6 @@ size_t WAVWriter::Finalize()
 
 // Write a new chunk header to the file.
 void WAVWriter::StartChunk(RIFFChunk::ChunkIdentifiers id)
-//--------------------------------------------------------
 {
 	FinalizeChunk();
 
@@ -367,7 +356,6 @@ void WAVWriter::StartChunk(RIFFChunk::ChunkIdentifiers id)
 
 // End current chunk by updating the chunk header and writing a padding byte if necessary.
 void WAVWriter::FinalizeChunk()
-//-----------------------------
 {
 	if(chunkStartPos != 0)
 	{
@@ -393,7 +381,6 @@ void WAVWriter::FinalizeChunk()
 
 // Seek to a position in file.
 void WAVWriter::Seek(size_t pos)
-//------------------------------
 {
 	position = pos;
 	totalSize = std::max(totalSize, position);
@@ -407,7 +394,6 @@ void WAVWriter::Seek(size_t pos)
 
 // Write some data to the file.
 void WAVWriter::Write(const void *data, size_t numBytes)
-//------------------------------------------------------
 {
 	if(s != nullptr)
 	{
@@ -430,7 +416,6 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 
 // Write the WAV format to the file.
 void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding)
-//-------------------------------------------------------------------------------------------------------------------------
 {
 	StartChunk(RIFFChunk::idfmt_);
 	WAVFormatChunk wavFormat;
@@ -477,7 +462,6 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 
 // Write text tags to the file.
 void WAVWriter::WriteMetatags(const FileTags &tags)
-//-------------------------------------------------
 {
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
@@ -498,7 +482,6 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 
 // Write a single tag into a open idLIST chunk
 void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext)
-//---------------------------------------------------------------------------------
 {
 	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, utext);
 	if(!text.empty())
@@ -522,7 +505,6 @@ void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &ute
 
 // Write a sample loop information chunk to the file.
 void WAVWriter::WriteLoopInformation(const ModSample &sample)
-//-----------------------------------------------------------
 {
 	if(!sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP] && !ModCommand::IsNote(sample.rootNote))
 	{
@@ -567,7 +549,6 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 
 // Write a sample's cue points to the file.
 void WAVWriter::WriteCueInformation(const ModSample &sample)
-//----------------------------------------------------------
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
@@ -585,7 +566,6 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 
 // Write MPT's sample information chunk to the file.
 void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName)
-//-----------------------------------------------------------------------------------------------------
 {
 	StartChunk(RIFFChunk::idxtra);
 	WAVExtraChunk mptInfo;

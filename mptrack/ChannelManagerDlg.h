@@ -14,9 +14,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 
-//======================================
 class CChannelManagerDlg: public CDialog
-//======================================
 {
 public:
 

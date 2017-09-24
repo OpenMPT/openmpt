@@ -18,9 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//===================================
 class ChunkReader : public FileReader
-//===================================
 {
 public:
 
@@ -29,9 +27,7 @@ public:
 	ChunkReader(FileReader &&other) : FileReader(std::move(other)) { }
 
 	template<typename T>
-	//========
 	class Item
-	//========
 	{
 	private:
 		T chunkHeader;
@@ -47,9 +43,7 @@ public:
 	};
 
 	template<typename T>
-	//===========================================
 	class ChunkList : public std::vector<Item<T>>
-	//===========================================
 	{
 	public:
 		typedef decltype(T().GetID()) id_type;

@@ -84,7 +84,6 @@ MPT_BINARY_STRUCT(PLMOrderItem, 4)
 
 
 static bool ValidateHeader(const PLMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "PLM\x1A", 4)
 		|| fileHeader.version != 0x10
@@ -99,14 +98,12 @@ static bool ValidateHeader(const PLMFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const PLMFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	return fileHeader.headerSize - sizeof(PLMFileHeader) + 4 * (fileHeader.numOrders + fileHeader.numPatterns + fileHeader.numSamples);
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPLM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	PLMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -122,7 +119,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPLM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

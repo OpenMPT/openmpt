@@ -48,7 +48,6 @@ namespace SoundDevice {
 #if MPT_OS_WINDOWS
 
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings)
-//------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(WaveFormat);
 	if(!m_Settings.sampleFormat.IsValid()) return false;
@@ -85,7 +84,6 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 #if MPT_OS_WINDOWS
 
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
-//-------------------------------------------------------------
 	: m_SoundDevice(SoundDevice)
 {
 	MPT_TRACE();
@@ -106,7 +104,6 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 
 
 CAudioThread::~CAudioThread()
-//---------------------------
 {
 	MPT_TRACE();
 	if(m_hPlayThread != NULL)
@@ -137,7 +134,6 @@ CAudioThread::~CAudioThread()
 MPT_REGISTERED_COMPONENT(ComponentAvRt, "AvRt")
 
 ComponentAvRt::ComponentAvRt()
-//----------------------------
 	: ComponentLibrary(ComponentTypeSystem)
 	, AvSetMmThreadCharacteristicsW(nullptr)
 	, AvRevertMmThreadCharacteristics(nullptr)
@@ -146,7 +142,6 @@ ComponentAvRt::ComponentAvRt()
 }
 
 bool ComponentAvRt::DoInitialize()
-//--------------------------------
 {
 	if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista))
 	{
@@ -163,14 +158,12 @@ bool ComponentAvRt::DoInitialize()
 }
 
 ComponentAvRt::~ComponentAvRt()
-//-----------------------------
 {
 	return;
 }
 
 
 CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const std::wstring & priorityClass, int priority)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	: m_SysInfo(sysInfo)
 	, m_AvRt(avrt)
 	, m_BoostPriority(boostPriority)
@@ -201,7 +194,6 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 
 
 CPriorityBooster::~CPriorityBooster()
-//-----------------------------------
 {
 	MPT_TRACE();
 	if(m_BoostPriority)
@@ -238,7 +230,6 @@ private:
 public:
 
 	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_)
-	//-------------------------------------------------------
 		: self(self_)
 		, sleepSeconds(sleepSeconds_)
 	{
@@ -268,19 +259,16 @@ public:
 	}
 
 	long GetSleepMilliseconds() const
-	//-------------------------------
 	{
 		return sleepMilliseconds;
 	}
 
 	HANDLE GetWakeupEvent() const
-	//---------------------------
 	{
 		return sleepEvent;
 	}
 
 	void Retrigger()
-	//--------------
 	{
 		MPT_TRACE();
 		if(!periodic_nt_timer)
@@ -292,7 +280,6 @@ public:
 	}
 
 	CPeriodicWaker::~CPeriodicWaker()
-	//-------------------------------
 	{
 		MPT_TRACE();
 		if(periodic_nt_timer)
@@ -311,7 +298,6 @@ DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
 	return ((CAudioThread*)user)->AudioThread();
 }
 DWORD CAudioThread::AudioThread()
-//-------------------------------
 {
 	MPT_TRACE();
 
@@ -386,7 +372,6 @@ DWORD CAudioThread::AudioThread()
 
 
 void CAudioThread::SetWakeupEvent(HANDLE ev)
-//------------------------------------------
 {
 	MPT_TRACE();
 	m_hHardwareWakeupEvent = ev;
@@ -394,7 +379,6 @@ void CAudioThread::SetWakeupEvent(HANDLE ev)
 
 
 void CAudioThread::SetWakeupInterval(double seconds)
-//--------------------------------------------------
 {
 	MPT_TRACE();
 	m_WakeupInterval = seconds;
@@ -402,14 +386,12 @@ void CAudioThread::SetWakeupInterval(double seconds)
 
 
 bool CAudioThread::IsActive()
-//---------------------------
 {
 	return InterlockedExchangeAdd(&m_AudioThreadActive, 0) ? true : false;
 }
 
 
 void CAudioThread::Activate()
-//---------------------------
 {
 	MPT_TRACE();
 	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0))
@@ -424,7 +406,6 @@ void CAudioThread::Activate()
 
 
 void CAudioThread::Deactivate()
-//-----------------------------
 {
 	MPT_TRACE();
 	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0))
@@ -438,7 +419,6 @@ void CAudioThread::Deactivate()
 
 
 CSoundDeviceWithThread::CSoundDeviceWithThread(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-//--------------------------------------------------------------------------------------------------
 	: SoundDevice::Base(info, sysInfo), m_AudioThread(*this)
 {
 	return;
@@ -446,14 +426,12 @@ CSoundDeviceWithThread::CSoundDeviceWithThread(SoundDevice::Info info, SoundDevi
 
 
 CSoundDeviceWithThread::~CSoundDeviceWithThread()
-//-----------------------------------------------
 {
 	return;
 }
 
 
 void CSoundDeviceWithThread::FillAudioBufferLocked()
-//--------------------------------------------------
 {
 	MPT_TRACE();
 	SourceFillAudioBufferLocked();
@@ -461,7 +439,6 @@ void CSoundDeviceWithThread::FillAudioBufferLocked()
 
 
 void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
-//----------------------------------------------------
 {
 	MPT_TRACE();
 	m_AudioThread.SetWakeupEvent(ev);
@@ -469,7 +446,6 @@ void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
 
 
 void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
-//------------------------------------------------------------
 {
 	MPT_TRACE();
 	m_AudioThread.SetWakeupInterval(seconds);
@@ -477,7 +453,6 @@ void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
 
 
 bool CSoundDeviceWithThread::InternalStart()
-//------------------------------------------
 {
 	MPT_TRACE();
 	m_AudioThread.Activate();
@@ -486,7 +461,6 @@ bool CSoundDeviceWithThread::InternalStart()
 
 
 void CSoundDeviceWithThread::InternalStop()
-//-----------------------------------------
 {
 	MPT_TRACE();
 	m_AudioThread.Deactivate();

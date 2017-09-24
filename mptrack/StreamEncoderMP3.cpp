@@ -118,9 +118,7 @@ struct ReplayGain
 	}
 };
 
-//===============
 class ID3V2Tagger
-//===============
 {
 public:
 	// Write Tags
@@ -147,7 +145,6 @@ private:
 // CFileTagging - helper class for writing tags
 
 ID3V2Tagger::ID3V2Tagger()
-//------------------------
 	: totalID3v2Size(0)
 {
 	return;
@@ -160,7 +157,6 @@ ID3V2Tagger::ID3V2Tagger()
 // Basically, it's a BigEndian integer, but the MSB of all bytes is 0.
 // Thus, a 32-bit integer turns into a 28-bit integer.
 uint32 ID3V2Tagger::intToSynchsafe(uint32 in)
-//-------------------------------------------
 {
 	uint32 out = 0, steps = 0;
 	do
@@ -173,7 +169,6 @@ uint32 ID3V2Tagger::intToSynchsafe(uint32 in)
 
 // Write Tags
 void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGain replayGain)
-//--------------------------------------------------------------------------------------------
 {
 	if(!s) return;
 	
@@ -250,7 +245,6 @@ uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackPeakFrameSize()
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
-//-----------------------------------------------
 {
 	uint32 size = 0;
 	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX)
@@ -262,7 +256,6 @@ uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
 }
 
 void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream &s)
-//----------------------------------------------------------------------------------
 {
 	ID3v2Frame frame;
 	std::string content;
@@ -338,7 +331,6 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 // Write a ID3v2 frame
 void ID3V2Tagger::WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, std::ostream &s)
-//---------------------------------------------------------------------------------------------
 {
 	if(!cFrameID[0] || sFramecontent.empty() || !s) return;
 
@@ -1458,7 +1450,6 @@ public:
 
 
 MP3Encoder::MP3Encoder(MP3EncoderType type)
-//-----------------------------------------
 	: m_Type(MP3EncoderDefault)
 {
 #ifdef MPT_MP3ENCODER_LAME
@@ -1496,7 +1487,6 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 
 
 bool MP3Encoder::IsAvailable() const
-//----------------------------------
 {
 	return false
 #ifdef MPT_MP3ENCODER_LAME
@@ -1511,14 +1501,12 @@ bool MP3Encoder::IsAvailable() const
 
 
 MP3Encoder::~MP3Encoder()
-//-----------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	std::unique_ptr<IAudioStreamEncoder> result = nullptr;
 	if(false)
@@ -1540,7 +1528,6 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 
 
 mpt::ustring MP3Encoder::DescribeQuality(float quality) const
-//-----------------------------------------------------------
 {
 #ifdef MPT_MP3ENCODER_LAME
 	if(m_Type == MP3EncoderLame)
@@ -1561,7 +1548,6 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 }
 
 mpt::ustring MP3Encoder::DescribeBitrateABR(int bitrate) const
-//------------------------------------------------------------
 {
 	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
 }

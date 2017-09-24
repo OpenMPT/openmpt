@@ -114,9 +114,7 @@ enum EffectType : uint8
 };
 
 
-//==============
 class ModCommand
-//==============
 {
 public:
 	typedef uint8 NOTE;

@@ -17,7 +17,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CUnarchiver::CUnarchiver(FileReader &file)
-//----------------------------------------
 	: impl(nullptr)
 	, inFile(file)
 	, emptyArchive(inFile)
@@ -52,14 +51,12 @@ CUnarchiver::CUnarchiver(FileReader &file)
 
 
 CUnarchiver::~CUnarchiver()
-//-------------------------
 {
 	return;
 }
 
 
 static inline std::string GetExtension(const std::string &filename)
-//-----------------------------------------------------------------
 {
 	if(filename.find_last_of(".") != std::string::npos)
 	{
@@ -70,7 +67,6 @@ static inline std::string GetExtension(const std::string &filename)
 
 
 std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extensions)
-//--------------------------------------------------------------------------------
 {
 	if(!IsArchive())
 	{
@@ -110,7 +106,6 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 
 
 bool CUnarchiver::ExtractBestFile(const std::vector<const char *> &extensions)
-//----------------------------------------------------------------------------
 {
 	std::size_t bestFile = FindBestFile(extensions);
 	if(bestFile == failIndex)
@@ -122,63 +117,54 @@ bool CUnarchiver::ExtractBestFile(const std::vector<const char *> &extensions)
 
 
 bool CUnarchiver::IsArchive() const
-//---------------------------------
 {
 	return impl->IsArchive();
 }
 
 
 mpt::ustring CUnarchiver::GetComment() const
-//------------------------------------------
 {
 	return impl->GetComment();
 }
 
 
 bool CUnarchiver::ExtractFile(std::size_t index)
-//----------------------------------------------
 {
 	return impl->ExtractFile(index);
 }
 
 
 FileReader CUnarchiver::GetOutputFile() const
-//-------------------------------------------
 {
 	return impl->GetOutputFile();
 }
 
 
 std::size_t CUnarchiver::size() const
-//-----------------------------------
 {
 	return impl->size();
 }
 
 
 IArchive::const_iterator CUnarchiver::begin() const
-//-------------------------------------------------
 {
 	return impl->begin();
 }
 
 
 IArchive::const_iterator CUnarchiver::end() const
-//-----------------------------------------------
 {
 	return impl->end();
 }
 
 
 const ArchiveFileInfo & CUnarchiver::at(std::size_t index) const
-//--------------------------------------------------------------
 {
 	return impl->at(index);
 }
 
 
 const ArchiveFileInfo & CUnarchiver::operator [] (std::size_t index) const
-//------------------------------------------------------------------------
 {
 	return impl->operator[](index);
 }

@@ -25,9 +25,7 @@ enum
 
 struct Measurements;
 
-//===================
 class ParamControlSet
-//===================
 {
 protected:
 	CSliderCtrl valueSlider;
@@ -53,9 +51,7 @@ public:
 };
 
 
-//=================================================
 class CDefaultVstEditor : public CAbstractVstEditor
-//=================================================
 {
 protected:
 

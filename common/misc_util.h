@@ -52,7 +52,6 @@ namespace mpt { namespace String {
 // No escaping is performed.
 template<typename T>
 mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_USTRING(","))
-//----------------------------------------------------------------------------------------
 {
 	mpt::ustring str;
 	for(std::size_t i = 0; i < vals.size(); ++i)
@@ -67,7 +66,6 @@ mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_UST
 }
 template<typename T>
 std::string Combine(const std::vector<T> &vals, const std::string &sep=std::string(","))
-//--------------------------------------------------------------------------------------
 {
 	std::string str;
 	for(std::size_t i = 0; i < vals.size(); ++i)
@@ -86,7 +84,6 @@ std::string Combine(const std::vector<T> &vals, const std::string &sep=std::stri
 // Leading or trailing separators result in a default-constructed element being inserted before or after the other elements.
 template<typename T>
 std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRING(","))
-//-------------------------------------------------------------------------------------
 {
 	std::vector<T> vals;
 	std::size_t pos = 0;
@@ -103,7 +100,6 @@ std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRIN
 }
 template<typename T>
 std::vector<T> Split(const std::string &str, const std::string &sep=std::string(","))
-//-----------------------------------------------------------------------------------
 {
 	std::vector<T> vals;
 	std::size_t pos = 0;
@@ -136,32 +132,26 @@ namespace mpt {
 // which a templated version returning the argument type would not do. OpenMPT
 // probably assumes this semantic when calling abs(int8) in various places.
 inline int abs(int x)
-//-------------------
 {
 	return std::abs(x);
 }
 inline long abs(long x)
-//---------------------
 {
 	return std::abs(x);
 }
 inline long long abs(long long x)
-//-------------------------------
 {
 	return std::abs(x);
 }
 inline float abs(float x)
-//-----------------------
 {
 	return std::fabs(x);
 }
 inline double abs(double x)
-//-------------------------
 {
 	return std::fabs(x);
 }
 inline long double abs(long double x)
-//-----------------------------------
 {
 	return std::fabs(x);
 }
@@ -172,14 +162,12 @@ inline long double abs(long double x)
 // Behaviour is undefined if m<=0.
 template<typename T, typename M>
 MPT_CONSTEXPR11_FUN auto wrapping_modulo(T x, M m) -> decltype(x % m)
-//-------------------------------------------------------------------
 {
 	return (x >= 0) ? (x % m) : (m - 1 - ((-1 - x) % m));
 }
 
 template<typename T, typename D>
 MPT_CONSTEXPR11_FUN auto wrapping_divide(T x, D d) -> decltype(x / d)
-//-------------------------------------------------------------------
 {
 	return (x >= 0) ? (x / d) : (((x + 1) / d) - 1);
 }
@@ -190,7 +178,6 @@ MPT_CONSTEXPR11_FUN auto wrapping_divide(T x, D d) -> decltype(x / d)
 // Memset given object to zero.
 template <class T>
 inline void MemsetZero(T &a)
-//--------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
@@ -208,7 +195,6 @@ inline void MemsetZero(T &a)
 // Copy given object to other location.
 template <class T>
 void MemCopy(T &destination, const T &source)
-//-------------------------------------------
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 #if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
@@ -438,7 +424,6 @@ inline Tdst void_cast(Tsrc src)
 // Saturate the value of src to the domain of Tdst
 template <typename Tdst, typename Tsrc>
 inline Tdst saturate_cast(Tsrc src)
-//---------------------------------
 {
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
 	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);
@@ -480,7 +465,6 @@ inline Tdst saturate_cast(Tsrc src)
 
 template <typename Tdst>
 inline Tdst saturate_cast(double src)
-//-----------------------------------
 {
 	if(src >= std::numeric_limits<Tdst>::max())
 	{
@@ -495,7 +479,6 @@ inline Tdst saturate_cast(double src)
 
 template <typename Tdst>
 inline Tdst saturate_cast(float src)
-//----------------------------------
 {
 	if(src >= std::numeric_limits<Tdst>::max())
 	{
@@ -649,7 +632,6 @@ MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.
 template<class T, class C>
 inline void Limit(T& val, const C lowerLimit, const C upperLimit)
-//---------------------------------------------------------------
 {
 	if(lowerLimit > upperLimit) return;
 	if(val < lowerLimit) val = lowerLimit;
@@ -660,7 +642,6 @@ inline void Limit(T& val, const C lowerLimit, const C upperLimit)
 // Like Limit, but returns value
 template<class T, class C>
 inline T Clamp(T val, const C lowerLimit, const C upperLimit)
-//-----------------------------------------------------------
 {
 	if(val < lowerLimit) return lowerLimit;
 	else if(val > upperLimit) return upperLimit;
@@ -672,7 +653,6 @@ inline T Clamp(T val, const C lowerLimit, const C upperLimit)
 // GCC does not warn if the type is templated.
 template<typename T, typename C>
 inline bool IsInRange(T val, C lo, C hi)
-//--------------------------------------
 {
 	return lo <= val && val <= hi;
 }
@@ -680,7 +660,6 @@ inline bool IsInRange(T val, C lo, C hi)
 // Like Limit, but with upperlimit only.
 template<class T, class C>
 inline void LimitMax(T& val, const C upperLimit)
-//----------------------------------------------
 {
 	if(val > upperLimit)
 		val = upperLimit;
@@ -690,7 +669,6 @@ inline void LimitMax(T& val, const C upperLimit)
 // Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
 template <class T>
 int sgn(T value)
-//--------------
 {
 	return (value > T(0)) - (value < T(0));
 }

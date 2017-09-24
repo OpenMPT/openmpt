@@ -531,9 +531,7 @@ public:
 };
 
 
-//=================
 class DebugSettings
-//=================
 {
 
 private:
@@ -571,9 +569,7 @@ public:
 };
 
 
-//===================
 class TrackerSettings
-//===================
 {
 
 private:

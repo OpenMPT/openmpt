@@ -18,9 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 struct ModCommandPos;
 class CSoundFile;
 
-//===========================
 class PatternClipboardElement
-//===========================
 {
 public:
 	
@@ -34,9 +32,7 @@ public:
 };
 
 
-//====================
 class PatternClipboard
-//====================
 {
 	friend class PatternClipboardDialog;
 
@@ -106,9 +102,7 @@ protected:
 };
 
 
-//===========================================
 class PatternClipboardDialog : public CDialog
-//===========================================
 {
 protected:
 

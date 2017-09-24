@@ -16,7 +16,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 void CTempoSwingDlg::RowCtls::SetValue(TempoSwing::value_type v)
-//--------------------------------------------------------------
 {
 	int32 val = Util::muldivr(static_cast<int32>(v) - TempoSwing::Unity, CTempoSwingDlg::SliderUnity, TempoSwing::Unity);
 	valueSlider.SetPos(val);
@@ -24,7 +23,6 @@ void CTempoSwingDlg::RowCtls::SetValue(TempoSwing::value_type v)
 
 
 TempoSwing::value_type CTempoSwingDlg::RowCtls::GetValue() const
-//--------------------------------------------------------------
 {
 	return Util::muldivr(valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
 }
@@ -56,7 +54,6 @@ CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing
 
 
 void CTempoSwingDlg::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHECK1, m_checkGroup);
@@ -66,7 +63,6 @@ void CTempoSwingDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CTempoSwingDlg::OnInitDialog()
-//---------------------------------
 {
 	struct Measurements
 	{
@@ -204,7 +200,6 @@ BOOL CTempoSwingDlg::OnInitDialog()
 
 
 void CTempoSwingDlg::OnOK()
-//-------------------------
 {
 	CDialog::OnOK();
 	// If this is the default setup, just clear the vector.
@@ -226,7 +221,6 @@ void CTempoSwingDlg::OnOK()
 
 
 void CTempoSwingDlg::OnCancel()
-//-----------------------------
 {
 	CDialog::OnCancel();
 	OnClose();
@@ -234,7 +228,6 @@ void CTempoSwingDlg::OnCancel()
 
 
 void CTempoSwingDlg::OnClose()
-//----------------------------
 {
 	// Restore original swing properties after preview
 	if(m_pattern == PATTERNINDEX_INVALID)
@@ -248,7 +241,6 @@ void CTempoSwingDlg::OnClose()
 
 
 void CTempoSwingDlg::OnReset()
-//----------------------------
 {
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
@@ -259,7 +251,6 @@ void CTempoSwingDlg::OnReset()
 
 
 void CTempoSwingDlg::OnUseGlobal()
-//--------------------------------
 {
 	if(m_sndFile.m_tempoSwing.empty())
 	{
@@ -275,7 +266,6 @@ void CTempoSwingDlg::OnUseGlobal()
 
 
 void CTempoSwingDlg::OnToggleGroup()
-//----------------------------------
 {
 	const BOOL checked = m_checkGroup.GetCheck() != BST_UNCHECKED;
 	GetDlgItem(IDC_EDIT1)->EnableWindow(checked);
@@ -284,7 +274,6 @@ void CTempoSwingDlg::OnToggleGroup()
 
 
 void CTempoSwingDlg::OnGroupChanged()
-//-----------------------------------
 {
 	int val = GetDlgItemInt(IDC_EDIT1);
 	if(val > 0) m_groupSize = std::min(val, static_cast<int>(m_tempoSwing.size()));
@@ -292,7 +281,6 @@ void CTempoSwingDlg::OnGroupChanged()
 
 
 void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
-//-----------------------------------------------------------------------------
 {
 	if(pScrollBar == &m_scrollBar)
 	{
@@ -376,7 +364,6 @@ END_MESSAGE_MAP()
 
 
 void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
-//----------------------------------------------------------------------------------------------
 {
 	if(m_parent.m_checkGroup.GetCheck() != BST_UNCHECKED)
 	{
@@ -426,7 +413,6 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 
 
 BOOL CTempoSwingDlg::SliderContainer::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
-//-----------------------------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	for(size_t i = 0; i < m_parent.m_controls.size(); i++)

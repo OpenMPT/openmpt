@@ -30,7 +30,6 @@ END_MESSAGE_MAP()
 
 
 void CTuningRatioMapWnd::OnPaint()
-//-------------------------------
 {
 	HGDIOBJ oldfont = NULL;
 	CRect rcClient;
@@ -112,7 +111,6 @@ void CTuningRatioMapWnd::OnPaint()
 }
 
 void CTuningRatioMapWnd::OnSetFocus(CWnd *pOldWnd)
-//-----------------------------------------
 {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
@@ -120,7 +118,6 @@ void CTuningRatioMapWnd::OnSetFocus(CWnd *pOldWnd)
 
 
 void CTuningRatioMapWnd::OnKillFocus(CWnd *pNewWnd)
-//------------------------------------------
 {
 	CWnd::OnKillFocus(pNewWnd);
 	InvalidateRect(NULL, FALSE);
@@ -128,7 +125,6 @@ void CTuningRatioMapWnd::OnKillFocus(CWnd *pNewWnd)
 
 
 BOOL CTuningRatioMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-//-------------------------------------------------------------------------
 {
 	NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(m_nNote - sgn(zDelta));
 	if(m_pTuning->IsValidNote(note - m_nNoteCentre))
@@ -144,7 +140,6 @@ BOOL CTuningRatioMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 
 void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
-//-----------------------------------------------------
 {
 	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2))
 	{
@@ -176,7 +171,6 @@ void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
 
 
 NOTEINDEXTYPE CTuningRatioMapWnd::GetShownCentre() const
-//------------------------------------------------------
 {
 	return m_nNote - m_nNoteCentre;
 }

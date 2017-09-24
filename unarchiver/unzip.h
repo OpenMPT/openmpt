@@ -13,9 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//====================================
 class CZipArchive : public ArchiveBase
-//====================================
 {
 protected:
 	void *zipFile;

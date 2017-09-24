@@ -16,9 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct InstrumentEnvelope;
 
-//=======================================
 class CScaleEnvPointsDlg : public CDialog
-//=======================================
 {
 protected:
 	CNumberEdit m_EditX, m_EditY;

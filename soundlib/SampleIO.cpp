@@ -34,7 +34,6 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 
 // Read a sample from memory
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
-//--------------------------------------------------------------------
 {
 	if(!file.IsValid())
 	{
@@ -862,7 +861,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 // Write a sample to file
 size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength maxSamples) const
-//------------------------------------------------------------------------------------------------
 {
 	if(!sample.HasSampleData()) return 0;
 
@@ -1065,7 +1063,6 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 
 // Write a sample to file
 size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples) const
-//------------------------------------------------------------------------------------------------
 {
 	return WriteSample(&f, sample, maxSamples);
 }
@@ -1073,7 +1070,6 @@ size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength
 
 // Write a sample to file
 size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
-//----------------------------------------------------------------------------------------
 {
 	mpt::FILE_ostream s(f);
 	return WriteSample(f ? &s : nullptr, sample, maxSamples);

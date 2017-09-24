@@ -67,7 +67,6 @@ STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT))
 const char *szHexChar = "0123456789ABCDEF";
 
 CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
-//------------------------------------------------------------------------------------------------------------
 {
 	if(filename.IsDirectory())
 	{
@@ -140,7 +139,6 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 
 
 CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
-//-----------------------------------------------------------------------------------------------
 {
 	CDocument *doc = OpenDocumentFile(filename, isExampleTune ? TRUE : FALSE, TRUE);
 	if(doc)
@@ -184,9 +182,7 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 #endif
 
 
-//======================================
 class CModDocManager: public CDocManager
-//======================================
 {
 public:
 	CModDocManager() {}
@@ -203,7 +199,6 @@ public:
 
 
 BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
-//---------------------------------------------------
 {
 	BOOL bResult, bActivate;
 #ifdef DDEDEBUG
@@ -274,7 +269,6 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 
 
 void CTrackApp::OnFileCloseAll()
-//------------------------------
 {
 	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
@@ -295,7 +289,6 @@ void CTrackApp::OnFileCloseAll()
 
 
 int CTrackApp::GetOpenDocumentCount() const
-//-----------------------------------------
 {
 	return AfxGetApp()->m_pDocManager->GetOpenDocumentCount();
 }
@@ -303,7 +296,6 @@ int CTrackApp::GetOpenDocumentCount() const
 
 // Retrieve a list of all open modules.
 std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
-//--------------------------------------------------------
 {
 	std::vector<CModDoc *> documents;
 
@@ -325,9 +317,7 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
 
-//================================================
 class CMPTCommandLineInfo: public CCommandLineInfo
-//================================================
 {
 public:
 	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck, m_bNoWine,
@@ -381,7 +371,6 @@ static void TimeoutSplashScreen();
 MIDILIBSTRUCT CTrackApp::midiLibrary;
 
 BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
-//-----------------------------------------------------------------------------
 {
 	if(filename.empty()) return FALSE;
 
@@ -421,7 +410,6 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 }
 
 BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
-//----------------------------------------------------------------------------
 {
 	mpt::PathString UltraSndPath;
 
@@ -477,7 +465,6 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 
 
 BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
-//---------------------------------------------------------------
 {
 	if(filename.empty()) return FALSE;
 	IniFileSettingsContainer file(filename);
@@ -485,7 +472,6 @@ BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 }
 
 BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
-//-------------------------------------------------------
 {
 	for(uint32 iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
 	{
@@ -516,7 +502,6 @@ std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
 BOOL CTrackApp::LoadDefaultDLSBanks()
-//-----------------------------------
 {
 	uint32 numBanks = theApp.GetSettings().Read<uint32>("DLS Banks", "NumBanks", 0);
 	gpDLSBanks.reserve(numBanks);
@@ -552,7 +537,6 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 
 
 BOOL CTrackApp::SaveDefaultDLSBanks()
-//-----------------------------------
 {
 	uint32 nBanks = 0;
 	for(const auto &bank : gpDLSBanks)
@@ -578,7 +562,6 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 
 
 BOOL CTrackApp::RemoveDLSBank(UINT nBank)
-//---------------------------------------
 {
 	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return FALSE;
 	delete gpDLSBanks[nBank];
@@ -589,7 +572,6 @@ BOOL CTrackApp::RemoveDLSBank(UINT nBank)
 
 
 BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
-//---------------------------------------------------------
 {
 	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return FALSE;
 	// Check for dupes
@@ -637,7 +619,6 @@ END_MESSAGE_MAP()
 // CTrackApp construction
 
 CTrackApp::CTrackApp()
-//--------------------
 	: m_GuiThreadId(0)
 	, m_pSettingsIniFile(nullptr)
 	, m_pSongSettings(nullptr)
@@ -655,14 +636,12 @@ CTrackApp::CTrackApp()
 
 
 void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
-//-------------------------------------------------------
 {
 	AddToRecentFileList(mpt::PathString::TunnelOutofCString(lpszPathName));
 }
 
 
 void CTrackApp::AddToRecentFileList(const mpt::PathString path)
-//-------------------------------------------------------------
 {
 	RemoveMruItem(path);
 	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);
@@ -675,7 +654,6 @@ void CTrackApp::AddToRecentFileList(const mpt::PathString path)
 
 
 void CTrackApp::RemoveMruItem(const size_t item)
-//----------------------------------------------
 {
 	if(item < TrackerSettings::Instance().mruFiles.size())
 	{
@@ -686,7 +664,6 @@ void CTrackApp::RemoveMruItem(const size_t item)
 
 
 void CTrackApp::RemoveMruItem(const mpt::PathString &path)
-//--------------------------------------------------------
 {
 	for(auto i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
 	{
@@ -712,9 +689,7 @@ mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef()
 } // namespace Tracker
 
 
-//============================
 class ComponentManagerSettings
-//============================
 	: public IComponentManagerSettings
 {
 private:
@@ -754,7 +729,6 @@ public:
 // %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
 // Returns true on success.
 bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir, mpt::PathString sNewFileName)
-//--------------------------------------------------------------------------------------------------------------
 {
 	// copy a config file from the exe directory to the new config dirs
 	mpt::PathString sOldPath;
@@ -783,7 +757,6 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 
 // Set up paths were configuration data is written to. Set overridePortable to true if application's own directory should always be used.
 void CTrackApp::SetupPaths(bool overridePortable)
-//-----------------------------------------------
 {
 	WCHAR dir[MAX_PATH] = { 0 };
 
@@ -898,7 +871,6 @@ CString CTrackApp::SuggestModernBuildText()
 
 
 bool CTrackApp::CheckSystemSupport()
-//----------------------------------
 {
 	const mpt::ustring lf = MPT_USTRING("\n");
 	const mpt::ustring url = MptVersion::GetDownloadURL();
@@ -978,7 +950,6 @@ bool CTrackApp::CheckSystemSupport()
 
 
 BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
-//-------------------------------------------------------------
 {
 
 	// The first step of InitInstance, always executed without any crash handler.
@@ -1040,7 +1011,6 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 
 
 BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
-//------------------------------------------------------------
 {
 
 	m_GuiThreadId = GetCurrentThreadId();
@@ -1294,7 +1264,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 
 BOOL CTrackApp::InitInstance()
-//---------------------------
 {
 	CMPTCommandLineInfo cmdInfo;
 	if(!InitInstanceEarly(cmdInfo))
@@ -1306,7 +1275,6 @@ BOOL CTrackApp::InitInstance()
 
 
 BOOL CTrackApp::InitInstanceLate(CMPTCommandLineInfo &cmdInfo)
-//------------------------------------------------------------
 {
 	BOOL result = FALSE;
 	if(ExceptionHandler::useExplicitSEH)
@@ -1328,7 +1296,6 @@ BOOL CTrackApp::InitInstanceLate(CMPTCommandLineInfo &cmdInfo)
 
 
 int CTrackApp::Run()
-//------------------
 {
 	int result = 255;
 	if(ExceptionHandler::useExplicitSEH)
@@ -1350,7 +1317,6 @@ int CTrackApp::Run()
 
 
 LRESULT CTrackApp::ProcessWndProcException(CException * e, const MSG * pMsg)
-//--------------------------------------------------------------------------
 {
 	if(ExceptionHandler::handleMfcExceptions)
 	{
@@ -1379,7 +1345,6 @@ LRESULT CTrackApp::ProcessWndProcException(CException * e, const MSG * pMsg)
 
 
 int CTrackApp::ExitInstance()
-//---------------------------
 {
 	int result = 0;
 	if(ExceptionHandler::useExplicitSEH)
@@ -1401,7 +1366,6 @@ int CTrackApp::ExitInstance()
 
 
 int CTrackApp::ExitInstanceImpl()
-//-------------------------------
 {
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
@@ -1461,7 +1425,6 @@ int CTrackApp::ExitInstanceImpl()
 
 
 CModDoc *CTrackApp::NewDocument(MODTYPE newType)
-//----------------------------------------------
 {
 	// Build from template
 	if(newType == MOD_TYPE_NONE)
@@ -1500,7 +1463,6 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 
 
 void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt::PathString &overridePath)
-//---------------------------------------------------------------------------------------------------------
 {
 	files.clear();
 
@@ -1539,7 +1501,6 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 
 
 void CTrackApp::OnFileOpen()
-//--------------------------
 {
 	FileDialog::PathList files;
 	OpenModulesDialog(files);
@@ -1552,7 +1513,6 @@ void CTrackApp::OnFileOpen()
 
 // App command to run the dialog
 void CTrackApp::OnAppAbout()
-//--------------------------
 {
 	if (CAboutDlg::instance) return;
 	CAboutDlg::instance = new CAboutDlg();
@@ -1563,9 +1523,7 @@ void CTrackApp::OnAppAbout()
 /////////////////////////////////////////////////////////////////////////////
 // Splash Screen
 
-//=================================
 class CSplashScreen: public CDialog
-//=================================
 {
 protected:
 	CBitmap m_Bitmap;
@@ -1594,14 +1552,12 @@ static DWORD gSplashScreenStartTime = 0;
 
 
 CSplashScreen::CSplashScreen()
-//----------------------------
 {
 	bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
 }
 
 
 CSplashScreen::~CSplashScreen()
-//-----------------------------
 {
 	gpSplashScreen = nullptr;
 	delete bitmap;
@@ -1609,7 +1565,6 @@ CSplashScreen::~CSplashScreen()
 
 
 void CSplashScreen::OnPaint()
-//---------------------------
 {
 	CPaintDC dc(this);
 
@@ -1625,7 +1580,6 @@ void CSplashScreen::OnPaint()
 
 
 BOOL CSplashScreen::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -1647,14 +1601,12 @@ BOOL CSplashScreen::OnInitDialog()
 
 
 void CSplashScreen::OnOK()
-//------------------------
 {
 	StopSplashScreen();
 }
 
 
 static void StartSplashScreen()
-//-----------------------------
 {
 	if(!gpSplashScreen)
 	{
@@ -1669,7 +1621,6 @@ static void StartSplashScreen()
 
 
 static void StopSplashScreen()
-//----------------------------
 {
 	if(gpSplashScreen)
 	{
@@ -1682,7 +1633,6 @@ static void StopSplashScreen()
 
 
 static void TimeoutSplashScreen()
-//-------------------------------
 {
 	if(gpSplashScreen)
 	{
@@ -1698,7 +1648,6 @@ static void TimeoutSplashScreen()
 // Idle-time processing
 
 BOOL CTrackApp::OnIdle(LONG lCount)
-//---------------------------------
 {
 	BOOL b = CWinApp::OnIdle(lCount);
 
@@ -1730,7 +1679,6 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 
 
 RGBQUAD rgb2quad(COLORREF c)
-//--------------------------
 {
 	RGBQUAD r;
 	r.rgbBlue = GetBValue(c);
@@ -1742,7 +1690,6 @@ RGBQUAD rgb2quad(COLORREF c)
 
 
 void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MODPLUGDIB *lpdib)
-//---------------------------------------------------------------------------------------------
 {
 	if (!lpdib) return;
 	SetDIBitsToDevice(	hdc,
@@ -1761,7 +1708,6 @@ void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MOD
 
 
 MODPLUGDIB *LoadDib(LPCTSTR lpszName)
-//-----------------------------------
 {
 	HINSTANCE hInstance = AfxGetInstanceHandle();
 	HRSRC hrsrc = FindResource(hInstance, lpszName, RT_BITMAP);
@@ -1781,7 +1727,6 @@ MODPLUGDIB *LoadDib(LPCTSTR lpszName)
 
 
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
-//-------------------------------------------------------------------------------------------------------
 {
 	CRect rect = *lpRect;
 
@@ -1821,7 +1766,6 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 
 
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
-//--------------------------------------------------------------------------------------------------------
 {
 	CRect rect = *lpRect;
 
@@ -1866,7 +1810,6 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText, BOOL bDisabled, BO
 
 
 UINT MsgBox(UINT nStringID, CWnd *parent, LPCSTR lpszTitle, UINT n)
-//-----------------------------------------------------------------
 {
 	CString str;
 	str.LoadString(nStringID);
@@ -1875,14 +1818,12 @@ UINT MsgBox(UINT nStringID, CWnd *parent, LPCSTR lpszTitle, UINT n)
 
 
 void ErrorBox(UINT nStringID, CWnd *parent)
-//-----------------------------------------
 {
 	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONERROR);
 }
 
 
 mpt::ustring GetWindowTextUnicode(HWND hwnd)
-//------------------------------------------
 {
 	int len = ::GetWindowTextLengthW(hwnd);
 	std::wstring str(len, L' ');
@@ -1904,7 +1845,6 @@ mpt::ustring GetWindowTextUnicode(HWND hwnd)
 // combined in one big blit
 
 void CFastBitmap::Init(MODPLUGDIB *lpTextDib)
-//-------------------------------------------
 {
 	m_nBlendOffset = 0;
 	m_pTextDib = lpTextDib;
@@ -1931,7 +1871,6 @@ void CFastBitmap::Init(MODPLUGDIB *lpTextDib)
 
 
 void CFastBitmap::Blit(HDC hdc, int x, int y, int cx, int cy)
-//-----------------------------------------------------------
 {
 	SetDIBitsToDevice(	hdc,
 						x,
@@ -1949,7 +1888,6 @@ void CFastBitmap::Blit(HDC hdc, int x, int y, int cx, int cy)
 
 
 void CFastBitmap::SetColor(UINT nIndex, COLORREF cr)
-//--------------------------------------------------
 {
 	if (nIndex < 256)
 	{
@@ -1961,7 +1899,6 @@ void CFastBitmap::SetColor(UINT nIndex, COLORREF cr)
 
 
 void CFastBitmap::SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr)
-//--------------------------------------------------------------------------
 {
 	for (UINT i=0; i<nColors; i++)
 	{
@@ -1971,7 +1908,6 @@ void CFastBitmap::SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr)
 
 
 void CFastBitmap::SetBlendColor(COLORREF cr)
-//------------------------------------------
 {
 	UINT r = GetRValue(cr);
 	UINT g = GetGValue(cr);
@@ -1990,7 +1926,6 @@ void CFastBitmap::SetBlendColor(COLORREF cr)
 
 // Monochrome 4-bit bitmap (0=text, !0 = back)
 void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODPLUGDIB *lpdib)
-//--------------------------------------------------------------------------------------------
 {
 	const uint8_t *psrc;
 	BYTE *pdest;
@@ -2055,7 +1990,6 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODP
 
 
 void CFastBitmap::SetSize(int x, int y)
-//-------------------------------------
 {
 	if(x > 4)
 	{
@@ -2085,7 +2019,6 @@ void CFastBitmap::SetSize(int x, int y)
 //
 
 BOOL CTrackApp::InitializeDXPlugins()
-//-----------------------------------
 {
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
@@ -2173,7 +2106,6 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 
 BOOL CTrackApp::UninitializeDXPlugins()
-//-------------------------------------
 {
 	if(!m_pPluginManager) return FALSE;
 
@@ -2214,32 +2146,27 @@ BOOL CTrackApp::UninitializeDXPlugins()
 // Internet-related functions
 
 bool CTrackApp::OpenURL(const char *url)
-//--------------------------------------
 {
 	if(!url) return false;
 	return OpenURL(mpt::PathString::FromUTF8(url));
 }
 
 bool CTrackApp::OpenURL(const std::string &url)
-//---------------------------------------------
 {
 	return OpenURL(mpt::PathString::FromUTF8(url));
 }
 
 bool CTrackApp::OpenURL(const CString &url)
-//-----------------------------------------
 {
 	return OpenURL(mpt::ToUnicode(url));
 }
 
 bool CTrackApp::OpenURL(const mpt::ustring &url)
-//----------------------------------------------
 {
 	return OpenURL(mpt::PathString::FromUnicode(url));
 }
 
 bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
-//-----------------------------------------------------
 {
 	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
@@ -2259,7 +2186,6 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 
 
 const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
-//------------------------------------------------------------------------------
 {
 	switch(mode)
 	{
@@ -2281,7 +2207,6 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 
 
 mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName)
-//-------------------------------------------------------------------------------------------------------------------
 {
 	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
 	if(addDeviceName && friendlyName != deviceName)
@@ -2292,7 +2217,6 @@ mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, 
 
 
 CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort, bool addDeviceName)
-//---------------------------------------------------------------------------------------------------------
 {
 	return mpt::ToCString(GetFriendlyMIDIPortName(mpt::ToUnicode(deviceName), isInputPort, addDeviceName));
 }

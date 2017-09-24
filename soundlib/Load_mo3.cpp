@@ -362,7 +362,6 @@ struct MO3SampleChunk
 }
 
 static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
-//------------------------------------------------------------------
 {
 	if(!size)
 	{
@@ -510,7 +509,6 @@ struct MO3Delta16BitParams
 
 template<typename Properties>
 static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t *dst, uint32 length, uint8 numChannels)
-//----------------------------------------------------------------------------------------------------------------------
 {
 	uint8 dh = Properties::dhInit, cl = 0;
 	int8 carry = 0;
@@ -557,7 +555,6 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 
 template<typename Properties>
 static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties::sample_t *dst, uint32 length, uint8 numChannels)
-//--------------------------------------------------------------------------------------------------------------------------------
 {
 	uint8 dh = Properties::dhInit, cl = 0;
 	int8 carry;
@@ -702,7 +699,6 @@ MPT_BINARY_STRUCT(MO3ContainerHeader, 8)
 
 
 static bool ValidateHeader(const MO3ContainerHeader &containerHeader)
-//-------------------------------------------------------------------
 {
 	if(std::memcmp(containerHeader.magic, "MO3", 3))
 	{
@@ -721,7 +717,6 @@ static bool ValidateHeader(const MO3ContainerHeader &containerHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMO3(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	MO3ContainerHeader containerHeader;
 	if(!file.ReadStruct(containerHeader))
@@ -738,7 +733,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMO3(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

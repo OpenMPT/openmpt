@@ -75,7 +75,6 @@ struct SFXSampleHeader
 MPT_BINARY_STRUCT(SFXSampleHeader, 30)
 
 static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
-//----------------------------------------------------------------------
 {
 	uint16 lowPeriod, highPeriod;
 
@@ -98,7 +97,6 @@ static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
 
 
 static bool ValidateHeader(const SFXFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(fileHeader.numOrders > 128)
 	{
@@ -109,7 +107,6 @@ static bool ValidateHeader(const SFXFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSFX(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	SAMPLEINDEX numSamples = 0;
 	if(numSamples == 0)
@@ -178,7 +175,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSFX(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	if(file.Seek(0x3C), file.ReadMagic("SONG"))
 	{

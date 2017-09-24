@@ -105,7 +105,6 @@ MPT_BINARY_STRUCT(PTMSampleHeader, 80)
 
 
 static bool ValidateHeader(const PTMFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "PTMF", 4)
 		|| fileHeader.dosEOF != 26
@@ -125,14 +124,12 @@ static bool ValidateHeader(const PTMFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const PTMFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	return fileHeader.numSamples * sizeof(PTMSampleHeader);
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPTM(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	PTMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -148,7 +145,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPTM(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

@@ -33,7 +33,6 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_ENABLE_FILEIO_STDIO)
 
 static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
-//-------------------------------------------------------------------------------
 {
 	#if MPT_OS_WINDOWS
 		return _wfopen(filename.AsNativePrefixed().c_str(), mode ? mpt::ToWide(mpt::CharsetASCII, mode).c_str() : L"");
@@ -530,9 +529,7 @@ public:
 
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
-//===============
 class CMappedFile
-//===============
 {
 protected:
 	HANDLE m_hFile;
@@ -556,9 +553,7 @@ public:
 #endif // MODPLUG_TRACKER
 
 
-//=============
 class InputFile
-//=============
 {
 private:
 	mpt::PathString m_Filename;

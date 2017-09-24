@@ -47,7 +47,6 @@ static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 
 
 static void GatherWindowsVersion(uint32 & SystemVersion)
-//------------------------------------------------------
 {
 	// Initialize to used SDK version
 	SystemVersion =
@@ -110,7 +109,6 @@ struct WindowsVersionCache
 }
 
 static void GatherWindowsVersionFromCache(uint32 & SystemVersion)
-//---------------------------------------------------------------
 {
 	static WindowsVersionCache gs_WindowsVersionCache;
 	SystemVersion = gs_WindowsVersionCache.SystemVersion;
@@ -123,7 +121,6 @@ static void GatherWindowsVersionFromCache(uint32 & SystemVersion)
 
 
 Version::Version()
-//----------------
 	: SystemIsWindows(false)
 	, SystemVersion(mpt::Windows::Version::WinNT4)
 {
@@ -132,7 +129,6 @@ Version::Version()
 
 
 mpt::Windows::Version Version::Current()
-//--------------------------------------
 {
 	mpt::Windows::Version result;
 	#if MPT_OS_WINDOWS
@@ -148,14 +144,12 @@ mpt::Windows::Version Version::Current()
 
 
 bool Version::IsWindows() const
-//-----------------------------
 {
 	return SystemIsWindows;
 }
 
 
 bool Version::IsBefore(mpt::Windows::Version::Number version) const
-//-----------------------------------------------------------------
 {
 	if(!SystemIsWindows)
 	{
@@ -166,7 +160,6 @@ bool Version::IsBefore(mpt::Windows::Version::Number version) const
 
 
 bool Version::IsAtLeast(mpt::Windows::Version::Number version) const
-//------------------------------------------------------------------
 {
 	if(!SystemIsWindows)
 	{
@@ -194,7 +187,6 @@ static MPT_CONSTEXPR11_VAR struct { Version::Number version; const MPT_UCHAR_TYP
 
 
 mpt::ustring Version::VersionToString(uint16 version)
-//---------------------------------------------------
 {
 	mpt::ustring result;
 	for(const auto &v : versionMap)
@@ -219,14 +211,12 @@ mpt::ustring Version::VersionToString(uint16 version)
 
 
 mpt::ustring Version::VersionToString(Number version)
-//---------------------------------------------------
 {
 	return VersionToString(static_cast<uint16>(version));
 }
 
 
 mpt::ustring Version::GetName() const
-//-----------------------------------
 {
 	mpt::ustring name = MPT_USTRING("Generic Windows NT");
 	for(const auto &v : versionMap)
@@ -263,7 +253,6 @@ mpt::ustring Version::GetName() const
 
 #ifdef MODPLUG_TRACKER
 mpt::ustring Version::GetNameShort() const
-//----------------------------------------
 {
 	mpt::ustring name;
 	if(mpt::Windows::IsWine())
@@ -290,7 +279,6 @@ mpt::ustring Version::GetNameShort() const
 
 
 mpt::Windows::Version::Number Version::GetMinimumKernelLevel()
-//------------------------------------------------------------
 {
 	uint16 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
@@ -305,7 +293,6 @@ mpt::Windows::Version::Number Version::GetMinimumKernelLevel()
 
 
 mpt::Windows::Version::Number Version::GetMinimumAPILevel()
-//---------------------------------------------------------
 {
 	uint16 minimumApiVersion = 0;
 	#if MPT_OS_WINDOWS && defined(_WIN32_WINNT)
@@ -321,7 +308,6 @@ mpt::Windows::Version::Number Version::GetMinimumAPILevel()
 #if MPT_OS_WINDOWS
 
 static bool GatherSystemIsWine()
-//------------------------------
 {
 	bool SystemIsWine = false;
 	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
@@ -376,19 +362,16 @@ static bool SystemIsWine(bool allowDetection = true)
 }
 
 void PreventWineDetection()
-//-------------------------
 {
 	SystemIsWine(false);
 }
 
 bool IsOriginal()
-//---------------
 {
 	return mpt::Windows::Version::Current().IsWindows() && !SystemIsWine();
 }
 
 bool IsWine()
-//-----------
 {
 	return mpt::Windows::Version::Current().IsWindows() && SystemIsWine();
 }
@@ -411,7 +394,6 @@ namespace Wine
 
 
 Version::Version()
-//----------------
 	: valid(false)
 	, vmajor(0)
 	, vminor(0)
@@ -422,7 +404,6 @@ Version::Version()
 
 
 Version::Version(const mpt::ustring &rawVersion)
-//----------------------------------------------
 	: valid(false)
 	, vmajor(0)
 	, vminor(0)
@@ -455,7 +436,6 @@ Version::Version(const mpt::ustring &rawVersion)
 
 
 Version::Version(uint8 vmajor, uint8 vminor, uint8 vupdate)
-//---------------------------------------------------------
 	: valid((vmajor > 0) || (vminor > 0) || (vupdate > 0)) 
 	, vmajor(vmajor)
 	, vminor(vminor)
@@ -466,7 +446,6 @@ Version::Version(uint8 vmajor, uint8 vminor, uint8 vupdate)
 
 
 mpt::Wine::Version Version::FromInteger(uint32 version)
-//-----------------------------------------------------
 {
 	mpt::Wine::Version result;
 	result.valid = (version <= 0xffffff);
@@ -478,21 +457,18 @@ mpt::Wine::Version Version::FromInteger(uint32 version)
 
 
 bool Version::IsValid() const
-//---------------------------
 {
 	return valid;
 }
 
 
 mpt::ustring Version::AsString() const
-//------------------------------------
 {
 	return mpt::ufmt::dec(vmajor) + MPT_USTRING(".") + mpt::ufmt::dec(vminor) + MPT_USTRING(".") + mpt::ufmt::dec(vupdate);
 }
 
 
 uint32 Version::AsInteger() const
-//-------------------------------
 {
 	uint32 version = 0;
 	version |= static_cast<uint32>(vmajor) << 16;
@@ -503,7 +479,6 @@ uint32 Version::AsInteger() const
 
 
 bool Version::IsBefore(mpt::Wine::Version other) const
-//----------------------------------------------------
 {
 	if(!IsValid())
 	{
@@ -514,7 +489,6 @@ bool Version::IsBefore(mpt::Wine::Version other) const
 
 
 bool Version::IsAtLeast(mpt::Wine::Version other) const
-//-----------------------------------------------------
 {
 	if(!IsValid())
 	{
@@ -525,7 +499,6 @@ bool Version::IsAtLeast(mpt::Wine::Version other) const
 
 
 mpt::Wine::Version GetMinimumWineVersion()
-//----------------------------------------
 {
 	mpt::Wine::Version minimumWineVersion = mpt::Wine::Version(0,0,0);
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
@@ -540,7 +513,6 @@ mpt::Wine::Version GetMinimumWineVersion()
 
 
 VersionContext::VersionContext()
-//------------------------------
 	: m_IsWine(false)
 	, m_HostIsLinux(false)
 	, m_HostIsBSD(false)

@@ -75,9 +75,7 @@ public:
 #if defined(MODPLUG_TRACKER)
 
 
-//===========================================
 class AudioReadTargetBufferInterleavedDynamic
-//===========================================
 	: public IAudioReadTarget
 {
 private:

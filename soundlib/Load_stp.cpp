@@ -100,7 +100,6 @@ typedef std::vector<STPLoopInfo> STPLoopList;
 
 
 static TEMPO ConvertTempo(uint16 ciaSpeed)
-//----------------------------------------
 {
 	// 3546 is the resulting CIA timer value when using 4F7D (tempo 125 bpm) command in STProII
 	return TEMPO((125.0 * 3546.0) / ciaSpeed);
@@ -108,7 +107,6 @@ static TEMPO ConvertTempo(uint16 ciaSpeed)
 
 
 static void ConvertLoopSlice(ModSample &src, ModSample &dest, SmpLength start, SmpLength len, bool loop)
-//------------------------------------------------------------------------------------------------------
 {
 	if(!src.HasSampleData()) return;
 
@@ -141,7 +139,6 @@ static void ConvertLoopSlice(ModSample &src, ModSample &dest, SmpLength start, S
 }
 
 static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
-//--------------------------------------------------------------------
 {
 	// This should only modify a sample if it has more than one loop
 	// (otherwise, it behaves like a normal sample loop)
@@ -205,7 +202,6 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 
 
 static bool ValidateHeader(const STPFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "STP3", 4)
 		|| fileHeader.version > 2
@@ -221,7 +217,6 @@ static bool ValidateHeader(const STPFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTP(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	STPFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -238,7 +233,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTP(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

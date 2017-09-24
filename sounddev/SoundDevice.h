@@ -26,9 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-//====================
 class IMessageReceiver
-//====================
 {
 public:
 	virtual void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) = 0;
@@ -72,9 +70,7 @@ struct BufferFormat;
 struct BufferAttributes;
 
 
-//===========
 class ISource
-//===========
 {
 public:
 	// main thread
@@ -472,9 +468,7 @@ struct Statistics
 };
 
 
-//=========
 class IBase
-//=========
 {
 
 protected:

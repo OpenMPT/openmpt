@@ -17,9 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 //of the code use plain number 4.
 #define CHANNELS_IN_TAB	4
 
-//==================================
 class CViewGlobals: public CFormView
-//==================================
 {
 protected:
 	CRect m_rcClient;

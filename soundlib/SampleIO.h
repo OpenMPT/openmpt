@@ -22,9 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 struct ModSample;
 
 // Sample import / export formats
-//============
 class SampleIO
-//============
 {
 protected:
 	typedef uint32 format_type;

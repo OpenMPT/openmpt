@@ -21,9 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // CFindRangeDlg: Find a range of values.
 
-//==================================
 class CFindRangeDlg : public CDialog
-//==================================
 {
 public:
 	enum DisplayMode
@@ -131,7 +129,6 @@ END_MESSAGE_MAP()
 
 
 void CFindReplaceTab::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_cbnNote);
@@ -145,7 +142,6 @@ void CFindReplaceTab::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CFindReplaceTab::OnInitDialog()
-//----------------------------------
 {
 	CString s;
 
@@ -297,7 +293,6 @@ BOOL CFindReplaceTab::OnInitDialog()
 
 
 bool CFindReplaceTab::IsPCEvent() const
-//-------------------------------------
 {
 	if(m_isReplaceTab)
 	{
@@ -312,7 +307,6 @@ bool CFindReplaceTab::IsPCEvent() const
 
 
 void CFindReplaceTab::UpdateInstrumentList()
-//------------------------------------------
 {
 	const bool isPCEvent = IsPCEvent();
 	if(m_cbnInstr.GetCount() != 0 && !!GetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA) == isPCEvent)
@@ -370,7 +364,6 @@ void CFindReplaceTab::UpdateInstrumentList()
 
 
 void CFindReplaceTab::UpdateParamList()
-//-------------------------------------
 {
 	const bool isPCEvent = IsPCEvent();
 	if(m_cbnInstr.GetCount() == 0 || !!GetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA) != isPCEvent)
@@ -452,7 +445,6 @@ void CFindReplaceTab::UpdateParamList()
 
 
 void CFindReplaceTab::UpdateVolumeList()
-//--------------------------------------
 {
 	TCHAR s[256];
 	const bool isPCEvent = IsPCEvent();
@@ -571,7 +563,6 @@ void CFindReplaceTab::UpdateVolumeList()
 
 
 void CFindReplaceTab::OnNoteChanged()
-//-----------------------------------
 {
 	CheckOnChange(IDC_CHECK1);
 	int item = m_cbnNote.GetItemData(m_cbnNote.GetCurSel());
@@ -627,7 +618,6 @@ void CFindReplaceTab::OnNoteChanged()
 
 
 void CFindReplaceTab::OnInstrChanged()
-//------------------------------------
 {
 	CheckOnChange(IDC_CHECK2);
 	int item = m_cbnInstr.GetItemData(m_cbnInstr.GetCurSel());
@@ -679,7 +669,6 @@ void CFindReplaceTab::OnInstrChanged()
 
 
 void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range, bool isHex)
-//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	int sel = comboBox.GetCurSel();
 	int item = comboBox.GetItemData(sel);
@@ -759,7 +748,6 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 
 
 void CFindReplaceTab::OnVolumeChanged()
-//-------------------------------------
 {
 	CheckOnChange(IDC_CHECK4);
 	int item = m_cbnVolume.GetCurSel();
@@ -794,7 +782,6 @@ void CFindReplaceTab::OnVolumeChanged()
 
 
 void CFindReplaceTab::OnParamChanged()
-//------------------------------------
 {
 	CheckOnChange(IDC_CHECK6);
 	int item = m_cbnParam.GetCurSel();
@@ -841,7 +828,6 @@ void CFindReplaceTab::OnParamChanged()
 
 
 void CFindReplaceTab::OnPCParamChanged()
-//--------------------------------------
 {
 	CheckOnChange(IDC_CHECK3);
 	int item = m_cbnPCParam.GetItemData(m_cbnPCParam.GetCurSel());
@@ -871,7 +857,6 @@ void CFindReplaceTab::OnPCParamChanged()
 
 
 void CFindReplaceTab::OnCheckChannelSearch()
-//------------------------------------------
 {
 	if (!m_isReplaceTab)
 	{
@@ -885,7 +870,6 @@ void CFindReplaceTab::OnCheckChannelSearch()
 
 
 void CFindReplaceTab::OnOK()
-//--------------------------
 {
 	// Search flags
 	FlagSet<FindReplace::Flags> &flags = m_isReplaceTab ? m_settings.replaceFlags : m_settings.findFlags;

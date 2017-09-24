@@ -45,7 +45,6 @@ namespace mpt
 
 
 RawPathString PathString::AsNativePrefixed() const
-//------------------------------------------------
 {
 	if(path.length() <= MAX_PATH || path.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
 	{
@@ -68,7 +67,6 @@ RawPathString PathString::AsNativePrefixed() const
 #if !MPT_OS_WINDOWS_WINRT
 
 int PathString::CompareNoCase(const PathString & a, const PathString & b)
-//-----------------------------------------------------------------------
 {
 	return lstrcmpiW(a.path.c_str(), b.path.c_str());
 }
@@ -81,7 +79,6 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 // and unlimited versions are only available on Windows 8 and later.
 // Furthermore, we also convert forward-slashes to backslashes and always remove trailing slashes.
 PathString PathString::Simplify() const
-//-------------------------------------
 {
 	if(path.empty())
 		return PathString();
@@ -157,7 +154,6 @@ namespace mpt
 #if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
 
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
-//------------------------------------------------------------------------------------------------------
 {
 	// We cannot use CRT splitpath here, because:
 	//  * limited to _MAX_PATH or similar
@@ -239,42 +235,36 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 }
 
 PathString PathString::GetDrive() const
-//-------------------------------------
 {
 	PathString drive;
 	SplitPath(&drive, nullptr, nullptr, nullptr);
 	return drive;
 }
 PathString PathString::GetDir() const
-//-----------------------------------
 {
 	PathString dir;
 	SplitPath(nullptr, &dir, nullptr, nullptr);
 	return dir;
 }
 PathString PathString::GetPath() const
-//------------------------------------
 {
 	PathString drive, dir;
 	SplitPath(&drive, &dir, nullptr, nullptr);
 	return drive + dir;
 }
 PathString PathString::GetFileName() const
-//----------------------------------------
 {
 	PathString fname;
 	SplitPath(nullptr, nullptr, &fname, nullptr);
 	return fname;
 }
 PathString PathString::GetFileExt() const
-//---------------------------------------
 {
 	PathString ext;
 	SplitPath(nullptr, nullptr, nullptr, &ext);
 	return ext;
 }
 PathString PathString::GetFullFileName() const
-//--------------------------------------------
 {
 	PathString name, ext;
 	SplitPath(nullptr, nullptr, &name, &ext);
@@ -283,7 +273,6 @@ PathString PathString::GetFullFileName() const
 
 
 bool PathString::IsDirectory() const
-//----------------------------------
 {
 	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
 	// GetFileAttributesW also does the job just fine.
@@ -302,7 +291,6 @@ bool PathString::IsDirectory() const
 }
 
 bool PathString::IsFile() const
-//-----------------------------
 {
 	#if MPT_OS_WINDOWS_WINRT
 		WIN32_FILE_ATTRIBUTE_DATA data;
@@ -324,7 +312,6 @@ bool PathString::IsFile() const
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 bool PathString::FileOrDirectoryExists() const
-//--------------------------------------------
 {
 	return ::PathFileExistsW(path.c_str()) != FALSE;
 }
@@ -335,14 +322,12 @@ bool PathString::FileOrDirectoryExists() const
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
-//--------------------------------------------------------------------
 {
 	return GetDrive() + GetDir() + GetFileName() + newExt;
 }
 
 
 PathString PathString::SanitizeComponent() const
-//----------------------------------------------
 {
 	PathString result = *this;
 	SanitizeFilename(result);
@@ -352,7 +337,6 @@ PathString PathString::SanitizeComponent() const
 
 // Convert an absolute path to a path that's relative to "&relativeTo".
 PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
-//-------------------------------------------------------------------------------
 {
 	mpt::PathString result = path;
 	if(path.empty())
@@ -375,7 +359,6 @@ PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) cons
 
 // Convert a path that is relative to "&relativeTo" to an absolute path.
 PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) const
-//-------------------------------------------------------------------------------
 {
 	mpt::PathString result = path;
 	if(path.empty())
@@ -400,7 +383,6 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 #if defined(_MFC_VER)
 
 mpt::PathString PathString::TunnelOutofCString(const CString &path)
-//-----------------------------------------------------------------
 {
 	#ifdef UNICODE
 		return mpt::PathString::FromWide(path.GetString());
@@ -423,7 +405,6 @@ mpt::PathString PathString::TunnelOutofCString(const CString &path)
 
 
 CString PathString::TunnelIntoCString(const mpt::PathString &path)
-//----------------------------------------------------------------
 {
 	#ifdef UNICODE
 		return path.ToWide().c_str();
@@ -481,7 +462,6 @@ bool PathIsAbsolute(const mpt::PathString &path) {
 #if MPT_OS_WINDOWS
 
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
-//----------------------------------------------------------
 {
 	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
 	if(size == 0)
@@ -607,7 +587,6 @@ mpt::PathString GetSystemPath()
 #if MPT_OS_WINDOWS
 
 mpt::PathString GetTempDirectory()
-//--------------------------------
 {
 	DWORD size = GetTempPathW(0, nullptr);
 	if(size)
@@ -623,7 +602,6 @@ mpt::PathString GetTempDirectory()
 }
 
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
-//-----------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
@@ -691,7 +669,6 @@ TempDirGuard::~TempDirGuard()
 #if defined(MODPLUG_TRACKER)
 
 static inline char SanitizeFilenameChar(char c)
-//---------------------------------------------
 {
 	if(	c == '\\' ||
 		c == '\"' ||
@@ -709,7 +686,6 @@ static inline char SanitizeFilenameChar(char c)
 }
 
 static inline wchar_t SanitizeFilenameChar(wchar_t c)
-//---------------------------------------------------
 {
 	if(	c == L'\\' ||
 		c == L'\"' ||
@@ -727,7 +703,6 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 }
 
 void SanitizeFilename(mpt::PathString &filename)
-//----------------------------------------------
 {
 	mpt::RawPathString tmp = filename.AsNative();
 	for(auto &c : tmp)
@@ -738,7 +713,6 @@ void SanitizeFilename(mpt::PathString &filename)
 }
 
 void SanitizeFilename(char *beg, char *end)
-//-----------------------------------------
 {
 	for(char *it = beg; it != end; ++it)
 	{
@@ -747,7 +721,6 @@ void SanitizeFilename(char *beg, char *end)
 }
 
 void SanitizeFilename(wchar_t *beg, wchar_t *end)
-//-----------------------------------------------
 {
 	for(wchar_t *it = beg; it != end; ++it)
 	{
@@ -756,7 +729,6 @@ void SanitizeFilename(wchar_t *beg, wchar_t *end)
 }
 
 void SanitizeFilename(std::string &str)
-//-------------------------------------
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
@@ -765,7 +737,6 @@ void SanitizeFilename(std::string &str)
 }
 
 void SanitizeFilename(std::wstring &str)
-//--------------------------------------
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
@@ -775,7 +746,6 @@ void SanitizeFilename(std::wstring &str)
 
 #if defined(_MFC_VER)
 void SanitizeFilename(CString &str)
-//---------------------------------
 {
 	for(int i = 0; i < str.GetLength(); i++)
 	{
@@ -791,7 +761,6 @@ void SanitizeFilename(CString &str)
 
 
 mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
-//----------------------------------------------------------------------------
 {
 	mpt::PathString filter;
 	if(GetShortName().empty() || GetExtensions().empty())
@@ -846,7 +815,6 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 
 
 mpt::PathString FileType::AsFilterOnlyString() const
-//--------------------------------------------------
 {
 	mpt::PathString filter;
 	const auto extensions = GetExtensions();
@@ -870,14 +838,12 @@ mpt::PathString FileType::AsFilterOnlyString() const
 
 
 mpt::PathString ToFilterString(const FileType &fileType, FlagSet<FileTypeFormat> format)
-//--------------------------------------------------------------------------------------
 {
 	return fileType.AsFilterString(format);
 }
 
 
 mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<FileTypeFormat> format)
-//----------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
 	for(const auto &type : fileTypes)
@@ -889,7 +855,6 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 
 
 mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty)
-//---------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter = fileType.AsFilterOnlyString();
 	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
@@ -897,7 +862,6 @@ mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicol
 
 
 mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty)
-//-----------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filter;
 	for(const auto &type : fileTypes)

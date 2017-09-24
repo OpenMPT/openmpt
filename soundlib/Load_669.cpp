@@ -91,14 +91,12 @@ static bool ValidateHeader(const _669FileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const _669FileHeader &fileHeader)
-//----------------------------------------------------------------------------
 {
 	return fileHeader.samples * sizeof(_669Sample) + fileHeader.patterns * 1536u;
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeader669(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	_669FileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -114,7 +112,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeader669(MemoryFileReader file, co
 
 
 bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	_669FileHeader fileHeader;
 

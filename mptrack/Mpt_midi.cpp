@@ -27,7 +27,6 @@ HMIDIIN CMainFrame::shMidiIn = NULL;
 //Get Midi message(dwParam1), apply MIDI settings having effect on volume, and return
 //the volume value [0, 256]. In addition value -1 is used as 'use default value'-indicator.
 int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE midivolume)
-//--------------------------------------------------------------------------------------
 {
 	int nVol = MIDIEvents::GetDataByte2FromEvent(dwParam1);
 	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
@@ -51,7 +50,6 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 
 
 void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
-//------------------------------------------------------------------------
 {
 	if ( (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9) )
@@ -78,7 +76,6 @@ void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
 // MMSYSTEM Midi Record
 
 void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
-//-------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HWND hWndMidi;
@@ -120,7 +117,6 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 
 
 bool CMainFrame::midiOpenDevice(bool showSettings)
-//------------------------------------------------
 {
 	if (shMidiIn) return true;
 	
@@ -148,7 +144,6 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 
 
 void CMainFrame::midiCloseDevice()
-//--------------------------------
 {
 	if (shMidiIn)
 	{
@@ -159,7 +154,6 @@ void CMainFrame::midiCloseDevice()
 
 
 void CMainFrame::OnMidiRecord()
-//-----------------------------
 {
 	if (shMidiIn)
 	{
@@ -172,7 +166,6 @@ void CMainFrame::OnMidiRecord()
 
 
 void CMainFrame::OnUpdateMidiRecord(CCmdUI *pCmdUI)
-//-------------------------------------------------
 {
 	if (pCmdUI) pCmdUI->SetCheck((shMidiIn) ? TRUE : FALSE);
 }

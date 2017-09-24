@@ -27,9 +27,7 @@ namespace SoundDevice {
 
 #ifdef MPT_WITH_PORTAUDIO
 
-//=========================================
 class CPortaudioDevice: public SoundDevice::Base
-//=========================================
 {
 
 protected:

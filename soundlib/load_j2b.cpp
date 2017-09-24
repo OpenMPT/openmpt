@@ -468,7 +468,6 @@ MPT_BINARY_STRUCT(AMSampleHeader, 60)
 
 // Convert RIFF AM(FF) pattern data to MPT pattern data.
 static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------------
 {
 	// Effect translation LUT
 	static const EffectCommand amEffTrans[] =
@@ -624,7 +623,6 @@ MPT_BINARY_STRUCT(AMFFRiffChunkFormat, 4)
 
 
 static bool ValidateHeader(const AMFFRiffChunk &fileHeader)
-//---------------------------------------------------------
 {
 	if(fileHeader.id != AMFFRiffChunk::idRIFF)
 	{
@@ -639,7 +637,6 @@ static bool ValidateHeader(const AMFFRiffChunk &fileHeader)
 
 
 static bool ValidateHeader(const AMFFRiffChunkFormat &formatHeader)
-//-----------------------------------------------------------------
 {
 	if(formatHeader.format != AMFFRiffChunk::idAMFF && formatHeader.format != AMFFRiffChunk::idAM__)
 	{
@@ -650,7 +647,6 @@ static bool ValidateHeader(const AMFFRiffChunkFormat &formatHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAM(MemoryFileReader file, const uint64 *pfilesize)
-//---------------------------------------------------------------------------------------------------
 {
 	AMFFRiffChunk fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -676,7 +672,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAM(MemoryFileReader file, con
 
 
 bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------
 {
 	file.Rewind();
 	AMFFRiffChunk fileHeader;
@@ -947,7 +942,6 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 
 static bool ValidateHeader(const J2BFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.signature, "MUSE", 4)
 		|| (fileHeader.deadbeaf != J2BFileHeader::magicDEADBEAF // 0xDEADBEAF (RIFF AM)
@@ -969,7 +963,6 @@ static bool ValidateHeader(const J2BFileHeader &fileHeader)
 
 
 static bool ValidateHeaderFileSize(const J2BFileHeader &fileHeader, uint64 filesize)
-//----------------------------------------------------------------------------------
 {
 	if(filesize != fileHeader.fileLength)
 	{
@@ -980,7 +973,6 @@ static bool ValidateHeaderFileSize(const J2BFileHeader &fileHeader, uint64 files
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderJ2B(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	J2BFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -1004,7 +996,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderJ2B(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 
 #if !defined(MPT_WITH_ZLIB) && !defined(MPT_WITH_MINIZ)

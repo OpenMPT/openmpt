@@ -40,13 +40,11 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_OPUSFILE)
 
 static mpt::ustring UStringFromOpus(const char *str)
-//--------------------------------------------------
 {
 	return str ? mpt::ToUnicode(mpt::CharsetUTF8, str) : mpt::ustring();
 }
 
 static FileTags GetOpusFileTags(OggOpusFile *of)
-//----------------------------------------------
 {
 	FileTags tags;
 	const OpusTags *ot = op_tags(of, -1);

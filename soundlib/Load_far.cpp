@@ -103,7 +103,6 @@ MPT_BINARY_STRUCT(FARSampleHeader, 48)
 
 
 static bool ValidateHeader(const FARFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
 		|| std::memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
@@ -120,14 +119,12 @@ static bool ValidateHeader(const FARFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const FARFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	return fileHeader.headerLength - sizeof(FARFileHeader);
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	FARFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -143,7 +140,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderFAR(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 

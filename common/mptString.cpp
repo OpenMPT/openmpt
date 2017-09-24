@@ -442,7 +442,6 @@ static const uint32 CharsetTableCP437AMS2[256] = {
 #endif
 
 static std::wstring From8bit(const std::string &str, const uint32 (&table)[256], wchar_t replacement = L'\uFFFD')
-//---------------------------------------------------------------------------------------------------------------
 {
 	std::wstring res;
 	res.reserve(str.length());
@@ -461,7 +460,6 @@ static std::wstring From8bit(const std::string &str, const uint32 (&table)[256],
 }
 
 static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], char replacement = '?')
-//----------------------------------------------------------------------------------------------------
 {
 	std::string res;
 	res.reserve(str.length());
@@ -505,7 +503,6 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 #if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static std::wstring FromAscii(const std::string &str, wchar_t replacement = L'\uFFFD')
-//------------------------------------------------------------------------------------
 {
 	std::wstring res;
 	res.reserve(str.length());
@@ -524,7 +521,6 @@ static std::wstring FromAscii(const std::string &str, wchar_t replacement = L'\u
 }
 
 static std::string ToAscii(const std::wstring &str, char replacement = '?')
-//-------------------------------------------------------------------------
 {
 	std::string res;
 	res.reserve(str.length());
@@ -543,7 +539,6 @@ static std::string ToAscii(const std::wstring &str, char replacement = '?')
 }
 
 static std::wstring FromISO_8859_1(const std::string &str, wchar_t replacement = L'\uFFFD')
-//-----------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(replacement);
 	std::wstring res;
@@ -557,7 +552,6 @@ static std::wstring FromISO_8859_1(const std::string &str, wchar_t replacement =
 }
 
 static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
-//------------------------------------------------------------------------------
 {
 	std::string res;
 	res.reserve(str.length());
@@ -592,7 +586,6 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 // following non-convertible characters are not a problem.
 
 static std::wstring LocaleDecode(const std::string &str, const std::locale & locale, wchar_t replacement = L'\uFFFD', int retry = 0, bool * progress = nullptr)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(str.empty())
 	{
@@ -678,7 +671,6 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 }
 
 static std::string LocaleEncode(const std::wstring &str, const std::locale & locale, char replacement = '?', int retry = 0, bool * progress = nullptr)
-//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(str.empty())
 	{
@@ -764,7 +756,6 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 }
 
 static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\uFFFD')
-//-------------------------------------------------------------------------------------
 {
 	try
 	{
@@ -795,7 +786,6 @@ static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\
 }
 
 static std::string ToLocale(const std::wstring &str, char replacement = '?')
-//--------------------------------------------------------------------------
 {
 	try
 	{
@@ -832,7 +822,6 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 #if defined(MPT_CHARSET_CODECVTUTF8)
 
 static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
-//-----------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(replacement);
 	std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
@@ -840,7 +829,6 @@ static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uF
 }
 
 static std::string ToUTF8(const std::wstring &str, char replacement = '?')
-//------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(replacement);
 	std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
@@ -852,7 +840,6 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 #if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
-//-----------------------------------------------------------------------------------
 {
 	const std::string &in = str;
 
@@ -931,7 +918,6 @@ static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uF
 }
 
 static std::string ToUTF8(const std::wstring &str, char replacement = '?')
-//------------------------------------------------------------------------
 {
 	const std::wstring &in = str;
 
@@ -1429,7 +1415,6 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 
 
 bool IsUTF8(const std::string &str)
-//---------------------------------
 {
 	return (str == String::EncodeImpl<std::string>(mpt::CharsetUTF8, String::DecodeImpl<std::string>(mpt::CharsetUTF8, str)));
 }

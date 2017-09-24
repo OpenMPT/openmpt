@@ -64,7 +64,6 @@ int CChildFrame::glMdiOpenCount = 0;
 // CChildFrame construction/destruction
 
 CChildFrame::CChildFrame()
-//------------------------
 {
 	m_bInitialActivation=true; //rewbs.fix3185
 	m_szCurrentViewClassName[0] = 0;
@@ -75,7 +74,6 @@ CChildFrame::CChildFrame()
 
 
 CChildFrame::~CChildFrame()
-//-------------------------
 {
 	if ((--glMdiOpenCount) == 0)
 	{
@@ -85,7 +83,6 @@ CChildFrame::~CChildFrame()
 
 
 BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
-//-----------------------------------------------------------------------------
 {
 	// create a splitter with 2 rows, 1 column
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
@@ -111,7 +108,6 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 
 
 void CChildFrame::SetSplitterHeight(int cy)
-//------------------------------------------
 {
 	if (cy <= 1) cy = 188;	//default to 188? why not..
 	m_wndSplitter.SetRowInfo(0, Util::ScalePixels(cy, m_hWnd), 15);
@@ -119,14 +115,12 @@ void CChildFrame::SetSplitterHeight(int cy)
 
 
 BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
-//-------------------------------------------------
 {
 	return CMDIChildWnd::PreCreateWindow(cs);
 }
 
 
 BOOL CChildFrame::OnNcActivate(BOOL bActivate)
-//--------------------------------------------
 {
 	if(bActivate && m_hWndView)
 	{
@@ -138,7 +132,6 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 
 
 void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd)
-//---------------------------------------------------------------------------------------
 {
 	CMDIChildWnd::OnMDIActivate(bActivate, pActivateWnd, pDeactivateWnd);
 
@@ -162,7 +155,6 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 
 
 void CChildFrame::ActivateFrame(int nCmdShow)
-//-------------------------------------------
 {
 	if ((glMdiOpenCount == 1) && (TrackerSettings::Instance().gbMdiMaximize) && (nCmdShow == -1))
 	{
@@ -191,7 +183,6 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 
 
 void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
-//----------------------------------------------------
 {
 	// update our parent window first
 	GetMDIFrame()->OnUpdateFrameTitle(bAddToTitle);
@@ -222,7 +213,6 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 
 
 BOOL CChildFrame::ChangeViewClass(CRuntimeClass* pViewClass, CCreateContext* pContext)
-//------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CWnd *pWnd;
@@ -255,7 +245,6 @@ BOOL CChildFrame::ChangeViewClass(CRuntimeClass* pViewClass, CCreateContext* pCo
 }
 
 void CChildFrame::ForceRefresh()
-//------------------------------
 {
 	CModControlView *pModView;
 	if ((pModView = GetModControlView()) != nullptr)
@@ -267,7 +256,6 @@ void CChildFrame::ForceRefresh()
 }
 
 void CChildFrame::SavePosition(BOOL bForce)
-//-----------------------------------------
 {
 	if (m_hWnd)
 	{
@@ -301,7 +289,6 @@ void CChildFrame::SavePosition(BOOL bForce)
 
 
 int CChildFrame::GetSplitterHeight()
-//----------------------------------
 {
 	if (m_hWnd)
 	{
@@ -319,7 +306,6 @@ int CChildFrame::GetSplitterHeight()
 
 
 LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
-//------------------------------------------------------------------
 {
 	if (m_hWndView)	return ::SendMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return 0;
@@ -327,7 +313,6 @@ LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 
 
 LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
-//---------------------------------------------------------------------
 {
 	CView *pView = GetActiveView();
 	CModDoc *pModDoc = NULL;
@@ -354,7 +339,6 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 // CChildFrame message handlers
 
 void CChildFrame::OnDestroy()
-//---------------------------
 {
 	SavePosition();
 	CMDIChildWnd::OnDestroy();
@@ -362,7 +346,6 @@ void CChildFrame::OnDestroy()
 
 
 BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
-//--------------------------------------------------------------------
 {
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
@@ -403,7 +386,6 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 
 
 LRESULT CChildFrame::OnChangeViewClass(WPARAM wParam, LPARAM lParam)
-//------------------------------------------------------------------
 {
 	CModControlDlg *pDlg = (CModControlDlg *)lParam;
 	if (pDlg)
@@ -417,14 +399,12 @@ LRESULT CChildFrame::OnChangeViewClass(WPARAM wParam, LPARAM lParam)
 
 
 const char *CChildFrame::GetCurrentViewClassName() const
-//------------------------------------------------------
 {
 	return m_szCurrentViewClassName;
 }
 
 
 std::string CChildFrame::SerializeView() const
-//--------------------------------------------
 {
 	mpt::ostringstream f(std::ios::out | std::ios::binary);
 	// Version
@@ -448,7 +428,6 @@ std::string CChildFrame::SerializeView() const
 
 
 void CChildFrame::DeserializeView(FileReader &file)
-//-------------------------------------------------
 {
 	uint32 version, page;
 	if(file.ReadVarInt(version) && version == 0 &&

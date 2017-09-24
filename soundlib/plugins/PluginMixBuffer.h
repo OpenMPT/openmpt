@@ -16,9 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 // buffer_t: Sample buffer type (float, double, ...)
 // bufferSize: Buffer size in samples
 template<typename buffer_t, uint32 bufferSize>
-//===================
 class PluginMixBuffer
-//===================
 {
 protected:
 
@@ -34,7 +32,6 @@ protected:
 
 	// Return pointer to an aligned buffer
 	buffer_t *GetBuffer(size_t index) const
-	//-------------------------------------
 	{
 		MPT_ASSERT(index < inputs.size() + outputs.size());
 		return &alignedBuffer[bufferSize * index];
@@ -44,7 +41,6 @@ public:
 
 	// Allocate input and output buffers
 	bool Initialize(uint32 numInputs, uint32 numOutputs)
-	//--------------------------------------------------
 	{
 		// Short cut - we do not need to recreate the buffers.
 		if(inputs.size() == numInputs && outputs.size() == numOutputs)
@@ -88,7 +84,6 @@ public:
 
 	// Silence all input buffers.
 	void ClearInputBuffers(uint32 numSamples)
-	//---------------------------------------
 	{
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < inputs.size(); i++)
@@ -99,7 +94,6 @@ public:
 
 	// Silence all output buffers.
 	void ClearOutputBuffers(uint32 numSamples)
-	//----------------------------------------
 	{
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < outputs.size(); i++)
@@ -109,7 +103,6 @@ public:
 	}
 
 	PluginMixBuffer()
-	//---------------
 	{
 		Initialize(2, 0);
 	}

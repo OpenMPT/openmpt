@@ -197,7 +197,6 @@ public:
 
 
 FLACEncoder::FLACEncoder()
-//------------------------
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("flac");
@@ -233,21 +232,18 @@ FLACEncoder::FLACEncoder()
 
 
 bool FLACEncoder::IsAvailable() const
-//-----------------------------------
 {
 	return true;
 }
 
 
 FLACEncoder::~FLACEncoder()
-//------------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{

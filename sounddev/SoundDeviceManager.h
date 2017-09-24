@@ -35,9 +35,7 @@ class ComponentASIO;
 class ComponentPortAudio;
 
 
-//===========
 class Manager
-//===========
 {
 
 public:

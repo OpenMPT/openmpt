@@ -46,7 +46,6 @@ template <> struct Traits<std::wstring> {
 // Remove whitespace at start of string
 template <typename Tstring>
 inline Tstring LTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	typename Tstring::size_type pos = str.find_first_not_of(whitespace);
 	if(pos != Tstring::npos)
@@ -63,7 +62,6 @@ inline Tstring LTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::Strin
 // Remove whitespace at end of string
 template <typename Tstring>
 inline Tstring RTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	typename Tstring::size_type pos = str.find_last_not_of(whitespace);
 	if(pos != Tstring::npos)
@@ -80,7 +78,6 @@ inline Tstring RTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::Strin
 // Remove whitespace at start and end of string
 template <typename Tstring>
 inline Tstring Trim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
-//-------------------------------------------------------------------------------------------------------------------------
 {
 	return RTrim(LTrim(str, whitespace), whitespace);
 }
@@ -88,7 +85,6 @@ inline Tstring Trim(Tstring str, const Tstring &whitespace = Tstring(mpt::String
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
 inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &newStr_)
-//-----------------------------------------------------------------------------------
 {
 	std::size_t pos = 0;
 	const Tstring oldStr = oldStr_;
@@ -106,7 +102,6 @@ inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &new
 
 
 static inline std::size_t strnlen(const char *str, std::size_t n)
-//---------------------------------------------------------------
 {
 #if MPT_COMPILER_MSVC
 	return ::strnlen(str, n);

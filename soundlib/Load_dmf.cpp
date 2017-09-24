@@ -203,7 +203,6 @@ struct DMFPatternSettings
 
 // Convert portamento value (not very accurate due to X-Tracker's higher granularity, to say the least)
 static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFine)
-//---------------------------------------------------------------------------------
 {
 	if(val == 0)
 		return 0;
@@ -216,7 +215,6 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 
 // Convert portamento / volume slide value (not very accurate due to X-Tracker's higher granularity, to say the least)
 static uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
-//----------------------------------------------------------------------------
 {
 	val = std::max<uint8>(1, val / 4);
 	const bool isFine = (val < 0x0F) || (internalTicks < 2);
@@ -233,7 +231,6 @@ static uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
 
 // Calculate tremor on/off param
 static uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
-//--------------------------------------------------------------
 {
 	uint8 ontime = (val >> 4);
 	uint8 offtime = (val & 0x0F);
@@ -245,7 +242,6 @@ static uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
 
 // Calculate delay parameter for note cuts / delays
 static uint8 DMFdelay2MPT(uint8 val, const uint8 internalTicks)
-//-------------------------------------------------------------
 {
 	int newval = (int)val * (int)internalTicks / 255;
 	Limit(newval, 0, 15);
@@ -255,7 +251,6 @@ static uint8 DMFdelay2MPT(uint8 val, const uint8 internalTicks)
 
 // Convert vibrato-style command parameters
 static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
-//---------------------------------------------------------------
 {
 	// MPT: 1 vibrato period == 64 ticks... we have internalTicks ticks per row.
 	// X-Tracker: Period length specified in rows!
@@ -267,7 +262,6 @@ static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 
 // Try using effect memory (zero paramer) to give the effect swapper some optimization hints.
 static void ApplyEffectMemory(const ModCommand *m, ROWINDEX row, CHANNELINDEX numChannels, uint8 effect, uint8 &param)
-//--------------------------------------------------------------------------------------------------------------------
 {
 	if(effect == CMD_NONE || param == 0)
 	{
@@ -330,7 +324,6 @@ static void ApplyEffectMemory(const ModCommand *m, ROWINDEX row, CHANNELINDEX nu
 
 
 static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &settings, CSoundFile &sndFile)
-//--------------------------------------------------------------------------------------------------------
 {
 	// Pattern flags
 	enum PatternFlags
@@ -888,7 +881,6 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 
 
 static bool ValidateHeader(const DMFFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.signature, "DDMF", 4)
 		|| !fileHeader.version || fileHeader.version > 10)
@@ -900,7 +892,6 @@ static bool ValidateHeader(const DMFFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDMF(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	DMFFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -917,7 +908,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDMF(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1142,7 +1132,6 @@ struct DMFHTree
 
 
 uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
-//-----------------------------------------------------------------------------------------
 {
 	DMFHTree tree;
 

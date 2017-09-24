@@ -16,9 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//===================================
 class CMidiMacroSetup: public CDialog
-//===================================
 {
 public:
 	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = NULL) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_MidiCfg(sndFile.m_MidiCfg) { }

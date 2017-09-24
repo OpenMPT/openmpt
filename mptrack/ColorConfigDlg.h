@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//========================================
 class COptionsColors: public CPropertyPage
-//========================================
 {
 protected:
 	COLORREF CustomColors[MAX_MODCOLORS];

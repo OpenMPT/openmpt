@@ -32,14 +32,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 double Autotune::FrequencyToNote(double freq, double pitchReference)
-//------------------------------------------------------------------
 {
 	return ((12.0 * (log(freq / (pitchReference / 2.0)) / log(2.0))) + 57.0);
 }
 
 
 double Autotune::NoteToFrequency(double note, double pitchReference)
-//------------------------------------------------------------------
 {
 	return pitchReference * pow(2.0, (note - 69.0) / 12.0);
 }
@@ -47,7 +45,6 @@ double Autotune::NoteToFrequency(double note, double pitchReference)
 
 // Calculate the amount of samples for autocorrelation shifting for a given note
 SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReference)
-//---------------------------------------------------------------------------------
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
 	return std::max(Util::Round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
@@ -57,7 +54,6 @@ SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReferen
 // Create an 8-Bit sample buffer with loop unrolling and mono conversion for autocorrelation.
 template <class T>
 void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd)
-//-------------------------------------------------------------------------------------------------
 {
 	const uint8 channels = sample.GetNumChannels();
 	sampleLoopStart *= channels;
@@ -88,7 +84,6 @@ void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLe
 	
 // Prepare a sample buffer for autocorrelation
 bool Autotune::PrepareSample(SmpLength maxShift)
-//----------------------------------------------
 {
 
 	// Determine which parts of the sample should be examined.
@@ -145,7 +140,6 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 
 bool Autotune::CanApply() const
-//-----------------------------
 {
 	return (sample.pSample != nullptr && sample.nLength >= MIN_SAMPLE_LENGTH);
 }
@@ -163,7 +157,6 @@ struct AutotuneThreadData
 
 
 void Autotune::AutotuneThread(AutotuneThreadData & info)
-//------------------------------------------------------
 {
 	info.histogram.resize(HISTORY_BINS, 0);
 #ifdef ENABLE_SSE2
@@ -219,7 +212,6 @@ void Autotune::AutotuneThread(AutotuneThreadData & info)
 
 
 bool Autotune::Apply(double pitchReference, int targetNote)
-//---------------------------------------------------------
 {
 	if(!CanApply())
 	{
@@ -347,7 +339,6 @@ int CAutotuneDlg::pitchReference = 440;	// Pitch reference in Hz
 int CAutotuneDlg::targetNote = 0;		// Target note (C- = 0, C# = 1, etc...)
 
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAutotuneDlg)
@@ -357,7 +348,6 @@ void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CAutotuneDlg::OnInitDialog()
-//-------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -379,7 +369,6 @@ BOOL CAutotuneDlg::OnInitDialog()
 
 
 void CAutotuneDlg::OnOK()
-//-----------------------
 {
 	CDialog::OnOK();
 
@@ -389,7 +378,6 @@ void CAutotuneDlg::OnOK()
 
 
 void CAutotuneDlg::OnCancel()
-//---------------------------
 {
 	CDialog::OnCancel();
 }

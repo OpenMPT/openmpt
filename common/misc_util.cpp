@@ -113,7 +113,6 @@ namespace mpt
 {
 
 std::string getenv(const std::string &env_var, const std::string &def)
-//--------------------------------------------------------------------
 {
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 	MPT_UNREFERENCED_PARAMETER(env_var);

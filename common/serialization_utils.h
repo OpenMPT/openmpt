@@ -85,7 +85,6 @@ typedef int32 SsbStatus;
 
 
 struct ReadEntry
-//==============
 {
 	ReadEntry() : nIdpos(0), rposStart(0), nSize(invalidDatasize), nIdLength(0) {}
 
@@ -116,14 +115,12 @@ enum Rwf
 
 template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
-//---------------------------------------------------------
 {
 	mpt::IO::WriteIntLE(oStrm, data);
 }
 
 template<>
 inline void Binarywrite(std::ostream& oStrm, const float& data)
-//-------------------------------------------------------------
 {
 	IEEE754binary32LE tmp = IEEE754binary32LE(data);
 	mpt::IO::Write(oStrm, tmp);
@@ -131,7 +128,6 @@ inline void Binarywrite(std::ostream& oStrm, const float& data)
 
 template<>
 inline void Binarywrite(std::ostream& oStrm, const double& data)
-//--------------------------------------------------------------
 {
 	IEEE754binary64LE tmp = IEEE754binary64LE(data);
 	mpt::IO::Write(oStrm, tmp);
@@ -139,7 +135,6 @@ inline void Binarywrite(std::ostream& oStrm, const double& data)
 
 template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
-//-------------------------------------------------------
 {
 	static_assert(std::is_trivial<T>::value == true, "");
 	Binarywrite(oStrm, data);
@@ -153,14 +148,12 @@ inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) 
 
 template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
-//--------------------------------------------------
 {
 	mpt::IO::ReadIntLE(iStrm, data);
 }
 
 template<>
 inline void Binaryread(std::istream& iStrm, float& data)
-//------------------------------------------------------
 {
 	IEEE754binary32LE tmp = IEEE754binary32LE(0.0f);
 	mpt::IO::Read(iStrm, tmp);
@@ -169,7 +162,6 @@ inline void Binaryread(std::istream& iStrm, float& data)
 
 template<>
 inline void Binaryread(std::istream& iStrm, double& data)
-//-------------------------------------------------------
 {
 	IEEE754binary64LE tmp = IEEE754binary64LE(0.0);
 	mpt::IO::Read(iStrm, tmp);
@@ -179,14 +171,12 @@ inline void Binaryread(std::istream& iStrm, double& data)
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
-//---------------------------------------------------------------------------
 {
 	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
 }
 
 template <>
 inline void Binaryread<float>(std::istream& iStrm, float& data, const Offtype bytecount)
-//--------------------------------------------------------------------------------------
 {
 	typedef IEEE754binary32LE T;
 	mpt::byte bytes[sizeof(T)];
@@ -199,7 +189,6 @@ inline void Binaryread<float>(std::istream& iStrm, float& data, const Offtype by
 
 template <>
 inline void Binaryread<double>(std::istream& iStrm, double& data, const Offtype bytecount)
-//----------------------------------------------------------------------------------------
 {
 	typedef IEEE754binary64LE T;
 	mpt::byte bytes[sizeof(T)];
@@ -213,7 +202,6 @@ inline void Binaryread<double>(std::istream& iStrm, double& data, const Offtype 
 
 template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
-//----------------------------------------------------------------------
 {
 	static_assert(std::is_trivial<T>::value == true, "");
 	if (nSize == sizeof(T) || nSize == invalidDatasize)
@@ -226,7 +214,6 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
 
 template <>
 inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const DataSize nSize)
-//--------------------------------------------------------------------------------------------
 {
 	ReadItemString(iStrm, str, nSize);
 }
@@ -461,7 +448,6 @@ private:
 
 template <class T, class FuncObj>
 void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
-//----------------------------------------------------------------
 {
 	const Postype pos = m_pOstrm->tellp();
 	Func(*m_pOstrm, obj);
@@ -470,7 +456,6 @@ void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
 
 template <class T, class FuncObj>
 SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
-//-------------------------------------------------------------------
 {
 	const ReadEntry* pE = Find(id);
 	const Postype pos = m_pIstrm->tellg();
@@ -482,7 +467,6 @@ SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 
 template <class T, class FuncObj>
 SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
-//-----------------------------------------------------------------------------------
 {
 	m_pIstrm->clear();
 	if (iter->rposStart != 0)
@@ -494,7 +478,6 @@ SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj 
 
 
 inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const ID &id)
-//--------------------------------------------------------------------------------------
 {
 	if(iter->nIdpos >= m_Idarray.size()) return IdMismatch;
 	return (id == ID(&m_Idarray[iter->nIdpos], iter->nIdLength)) ? IdMatch : IdMismatch;
@@ -502,7 +485,6 @@ inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const
 
 
 inline SsbRead::ReadIterator SsbRead::GetReadBegin()
-//--------------------------------------------------
 {
 	MPT_ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
 	if (GetFlag(RwfRMapCached) == false)
@@ -512,7 +494,6 @@ inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 
 
 inline SsbRead::ReadIterator SsbRead::GetReadEnd()
-//------------------------------------------------
 {
 	if (GetFlag(RwfRMapCached) == false)
 		CacheMap();
@@ -522,7 +503,6 @@ inline SsbRead::ReadIterator SsbRead::GetReadEnd()
 
 template <class T>
 struct VectorWriter
-//=================
 {
 	VectorWriter(size_t nCount) : m_nCount(nCount) {}
 	void operator()(std::ostream &oStrm, const std::vector<T> &vec)
@@ -537,7 +517,6 @@ struct VectorWriter
 
 template <class T>
 struct VectorReader
-//=================
 {
 	VectorReader(size_t nCount) : m_nCount(nCount) {}
 	void operator()(std::istream& iStrm, std::vector<T> &vec, const size_t)
@@ -553,7 +532,6 @@ struct VectorReader
 
 template <class T>
 struct ArrayReader
-//================
 {
 	ArrayReader(size_t nCount) : m_nCount(nCount) {}
 	void operator()(std::istream& iStrm, T* pData, const size_t)

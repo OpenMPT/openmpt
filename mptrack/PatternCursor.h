@@ -14,9 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=================
 class PatternCursor
-//=================
 {
 	friend class PatternRect;
 
@@ -209,9 +207,7 @@ public:
 };
 
 
-//===============
 class PatternRect
-//===============
 {
 protected:
 	PatternCursor upperLeft, lowerRight;

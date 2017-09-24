@@ -27,7 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 // For a given pattern cell, check if it contains a command supported by the X-Param mechanism.
 // If so, calculate the multipler for this cell and the value of all the other cells belonging to this param.
 void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	UINT xp = 0, mult = 1;
 	int nCmdRow = (int)nRow;
@@ -114,7 +113,6 @@ BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, CDialog)
 END_MESSAGE_MAP()
 
 BOOL CPatternPropertiesDlg::OnInitDialog()
-//----------------------------------------
 {
 	CComboBox *combo;
 	CDialog::OnInitDialog();
@@ -176,7 +174,6 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 
 
 void CPatternPropertiesDlg::OnHalfRowNumber()
-//-------------------------------------------
 {
 	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -189,7 +186,6 @@ void CPatternPropertiesDlg::OnHalfRowNumber()
 
 
 void CPatternPropertiesDlg::OnDoubleRowNumber()
-//---------------------------------------------
 {
 	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
@@ -202,7 +198,6 @@ void CPatternPropertiesDlg::OnDoubleRowNumber()
 
 
 void CPatternPropertiesDlg::OnOverrideSignature()
-//-----------------------------------------------
 {
 	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
 	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
@@ -211,7 +206,6 @@ void CPatternPropertiesDlg::OnOverrideSignature()
 
 
 void CPatternPropertiesDlg::OnTempoSwing()
-//----------------------------------------
 {
 	CPattern &pat = modDoc.GetrSoundFile().Patterns[m_nPattern];
 	const ROWINDEX oldRPB = pat.GetRowsPerBeat();
@@ -233,7 +227,6 @@ void CPatternPropertiesDlg::OnTempoSwing()
 
 
 void CPatternPropertiesDlg::OnOK()
-//--------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 	CPattern &pattern = sndFile.Patterns[m_nPattern];
@@ -319,7 +312,6 @@ END_MESSAGE_MAP()
 
 
 void CEditCommand::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
@@ -335,14 +327,12 @@ void CEditCommand::DoDataExchange(CDataExchange* pDX)
 
 
 CEditCommand::CEditCommand(CSoundFile &sndFile) : sndFile(sndFile), oldSpecs(nullptr), effectInfo(sndFile), m(nullptr), modified(false)
-//-------------------------------------------------------------------------------------------------------------------------------------
 {
 	CDialog::Create(IDD_PATTERN_EDITCOMMAND);
 }
 
 
 BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
-//-----------------------------------------------
 {
 	if ((pMsg) && (pMsg->message == WM_KEYDOWN))
 	{
@@ -357,7 +347,6 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 
 
 bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent)
-//--------------------------------------------------------------------------------------------
 {
 	editPos.pattern = pat;
 	const ROWINDEX row = editPos.row = cursor.GetRow();
@@ -419,7 +408,6 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 
 
 void CEditCommand::InitNote()
-//---------------------------
 {
 	// Note
 	cbnNote.SetRedraw(FALSE);
@@ -486,7 +474,6 @@ void CEditCommand::InitNote()
 
 
 void CEditCommand::InitVolume()
-//-----------------------------
 {
 	cbnVolCmd.SetRedraw(FALSE);
 	cbnVolCmd.ResetContent();
@@ -520,7 +507,6 @@ void CEditCommand::InitVolume()
 
 
 void CEditCommand::InitEffect()
-//-----------------------------
 {
 	if(m->IsPcNote())
 	{
@@ -556,7 +542,6 @@ void CEditCommand::InitEffect()
 
 
 void CEditCommand::InitPlugParam()
-//--------------------------------
 {
 	if(!m->IsPcNote())
 	{
@@ -581,7 +566,6 @@ void CEditCommand::InitPlugParam()
 
 
 void CEditCommand::UpdateVolCmdRange()
-//------------------------------------
 {
 	ModCommand::VOL rangeMin = 0, rangeMax = 0;
 	LONG fxndx = effectInfo.GetIndexFromVolCmd(m->volcmd);
@@ -604,7 +588,6 @@ void CEditCommand::UpdateVolCmdRange()
 
 
 void CEditCommand::UpdateEffectRange(bool set)
-//--------------------------------------------
 {
 	DWORD pos;
 	bool enable = true;
@@ -645,7 +628,6 @@ void CEditCommand::UpdateEffectRange(bool set)
 
 
 void CEditCommand::OnNoteChanged()
-//--------------------------------
 {
 	const bool wasParamControl = m->IsPcNote();
 	ModCommand::NOTE newNote = m->note;
@@ -688,7 +670,6 @@ void CEditCommand::OnNoteChanged()
 
 
 void CEditCommand::OnVolCmdChanged()
-//----------------------------------
 {
 	ModCommand::VOLCMD newVolCmd = m->volcmd;
 	ModCommand::VOL newVol = m->vol;
@@ -720,7 +701,6 @@ void CEditCommand::OnVolCmdChanged()
 
 
 void CEditCommand::OnCommandChanged()
-//-----------------------------------
 {
 	ModCommand::COMMAND newCommand = m->command;
 	ModCommand::PARAM newParam = m->param;
@@ -756,7 +736,6 @@ void CEditCommand::OnCommandChanged()
 
 
 void CEditCommand::OnPlugParamChanged()
-//-------------------------------------
 {
 	uint16 newPlugParam = m->GetValueVolCol();
 
@@ -776,7 +755,6 @@ void CEditCommand::OnPlugParamChanged()
 
 
 void CEditCommand::UpdateVolCmdValue()
-//------------------------------------
 {
 	CString s;
 	if(m->IsPcNote())
@@ -794,7 +772,6 @@ void CEditCommand::UpdateVolCmdValue()
 
 
 void CEditCommand::UpdateEffectValue(bool set)
-//--------------------------------------------
 {
 	CString s;
 
@@ -840,7 +817,6 @@ void CEditCommand::UpdateEffectValue(bool set)
 
 
 void CEditCommand::PrepareUndo(const char *description)
-//-----------------------------------------------------
 {
 	CModDoc *modDoc = sndFile.GetpModDoc();
 	if(!modified)
@@ -854,7 +830,6 @@ void CEditCommand::PrepareUndo(const char *description)
 
 
 void CEditCommand::OnHScroll(UINT, UINT, CScrollBar *bar)
-//-------------------------------------------------------
 {
 	if(bar == static_cast<CWnd *>(&sldVolParam))
 	{
@@ -867,7 +842,6 @@ void CEditCommand::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 
 void CEditCommand::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
-//--------------------------------------------------------------------------
 {
 	CDialog::OnActivate(nState, pWndOther, bMinimized);
 	if(nState == WA_INACTIVE) ShowWindow(SW_HIDE);
@@ -888,7 +862,6 @@ END_MESSAGE_MAP()
 
 
 void CChordEditor::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CChordEditor)
@@ -903,7 +876,6 @@ void CChordEditor::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CChordEditor::OnInitDialog()
-//-------------------------------
 {
 	CMainFrame *pMainFrm;
 
@@ -943,7 +915,6 @@ BOOL CChordEditor::OnInitDialog()
 
 
 MPTChord &CChordEditor::GetChord()
-//--------------------------------
 {
 	MPTChords &chords = TrackerSettings::GetChords();
 	int chord = m_CbnShortcut.GetCurSel();
@@ -954,7 +925,6 @@ MPTChord &CChordEditor::GetChord()
 
 
 LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
-//----------------------------------------------------------------
 {
 	if (wParam != KBDNOTIFY_LBUTTONDOWN) return 0;
 	MPTChord &chord = GetChord();
@@ -990,7 +960,6 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 
 
 void CChordEditor::OnChordChanged()
-//---------------------------------
 {
 	MPTChord &chord = GetChord();
 	if(chord.key != MPTChord::relativeMode)
@@ -1005,7 +974,6 @@ void CChordEditor::OnChordChanged()
 
 
 void CChordEditor::UpdateKeyboard()
-//---------------------------------
 {
 	MPTChord &chord = GetChord();
 	UINT note = chord.key % 12;
@@ -1027,7 +995,6 @@ void CChordEditor::UpdateKeyboard()
 
 
 void CChordEditor::OnBaseNoteChanged()
-//------------------------------------
 {
 	MPTChord &chord = GetChord();
 	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
@@ -1039,7 +1006,6 @@ void CChordEditor::OnBaseNoteChanged()
 
 
 void CChordEditor::OnNote1Changed()
-//---------------------------------
 {
 	MPTChord &chord = GetChord();
 	int note = m_CbnNote1.GetCurSel();
@@ -1052,7 +1018,6 @@ void CChordEditor::OnNote1Changed()
 
 
 void CChordEditor::OnNote2Changed()
-//---------------------------------
 {
 	MPTChord &chord = GetChord();
 	int note = m_CbnNote2.GetCurSel();
@@ -1065,7 +1030,6 @@ void CChordEditor::OnNote2Changed()
 
 
 void CChordEditor::OnNote3Changed()
-//---------------------------------
 {
 	MPTChord &chord = GetChord();
 	int note = m_CbnNote3.GetCurSel();
@@ -1086,7 +1050,6 @@ END_MESSAGE_MAP()
 
 
 void CSplitKeyboadSettings::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
@@ -1099,7 +1062,6 @@ void CSplitKeyboadSettings::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CSplitKeyboadSettings::OnInitDialog()
-//----------------------------------------
 {
 	if(sndFile.GetpModDoc() == nullptr) return FALSE;
 
@@ -1168,7 +1130,6 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 
 
 void CSplitKeyboadSettings::OnOK()
-//--------------------------------
 {
 	CDialog::OnOK();
 
@@ -1181,14 +1142,12 @@ void CSplitKeyboadSettings::OnOK()
 
 
 void CSplitKeyboadSettings::OnCancel()
-//------------------------------------
 {
 	CDialog::OnCancel();
 }
 
 
 void CSplitKeyboadSettings::OnOctaveModifierChanged()
-//---------------------------------------------------
 {
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_CbnOctaveModifier.GetCurSel() != 9) ? BST_CHECKED : BST_UNCHECKED);
 }
@@ -1212,7 +1171,6 @@ END_MESSAGE_MAP()
 
 
 void QuickChannelProperties::DoDataExchange(CDataExchange* pDX)
-//-------------------------------------------------------------
 {
 	DDX_Control(pDX, IDC_SLIDER1,	volSlider);
 	DDX_Control(pDX, IDC_SLIDER2,	panSlider);
@@ -1224,20 +1182,17 @@ void QuickChannelProperties::DoDataExchange(CDataExchange* pDX)
 
 QuickChannelProperties::QuickChannelProperties()
 	: visible(false)
-//----------------------------------------------
 {
 }
 
 
 QuickChannelProperties::~QuickChannelProperties()
-//-----------------------------------------------
 {
 	DestroyWindow();
 }
 
 
 void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
-//----------------------------------------------------------------
 {
 	if(nState == WA_INACTIVE)
 	{
@@ -1250,7 +1205,6 @@ void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 
 // Show channel properties for a given channel at a given screen position.
 void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
-//-----------------------------------------------------------------------------------------------------
 {
 	if(!m_hWnd)
 	{
@@ -1306,7 +1260,6 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 
 
 void QuickChannelProperties::UpdateDisplay()
-//------------------------------------------
 {
 	// Set up channel properties
 	visible = false;
@@ -1332,7 +1285,6 @@ void QuickChannelProperties::UpdateDisplay()
 }
 
 void QuickChannelProperties::PrepareUndo()
-//----------------------------------------
 {
 	if(!settingsChanged)
 	{
@@ -1344,7 +1296,6 @@ void QuickChannelProperties::PrepareUndo()
 
 
 void QuickChannelProperties::OnVolChanged()
-//-----------------------------------------
 {
 	if(!visible)
 	{
@@ -1363,7 +1314,6 @@ void QuickChannelProperties::OnVolChanged()
 
 
 void QuickChannelProperties::OnPanChanged()
-//-----------------------------------------
 {
 	if(!visible)
 	{
@@ -1384,7 +1334,6 @@ void QuickChannelProperties::OnPanChanged()
 
 
 void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
-//-----------------------------------------------------------------
 {
 	if(!visible)
 	{
@@ -1425,7 +1374,6 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 
 void QuickChannelProperties::OnMuteChanged()
-//------------------------------------------
 {
 	if(!visible)
 	{
@@ -1438,7 +1386,6 @@ void QuickChannelProperties::OnMuteChanged()
 
 
 void QuickChannelProperties::OnSurroundChanged()
-//----------------------------------------------
 {
 	if(!visible)
 	{
@@ -1453,7 +1400,6 @@ void QuickChannelProperties::OnSurroundChanged()
 
 
 void QuickChannelProperties::OnNameChanged()
-//------------------------------------------
 {
 	if(!visible)
 	{
@@ -1476,7 +1422,6 @@ void QuickChannelProperties::OnNameChanged()
 
 
 void QuickChannelProperties::OnPrevChannel()
-//------------------------------------------
 {
 	if(channel > 0)
 	{
@@ -1487,7 +1432,6 @@ void QuickChannelProperties::OnPrevChannel()
 
 
 void QuickChannelProperties::OnNextChannel()
-//------------------------------------------
 {
 	if(channel < document->GetNumChannels() - 1)
 	{
@@ -1498,7 +1442,6 @@ void QuickChannelProperties::OnNextChannel()
 
 
 BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
-//---------------------------------------------------------
 {
 	if(pMsg)
 	{
@@ -1527,7 +1470,6 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 
 
 LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
-//-------------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return 0;

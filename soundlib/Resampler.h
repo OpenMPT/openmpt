@@ -51,9 +51,7 @@ typedef mixsample_t SINC_TYPE;
 STATIC_ASSERT((SINC_MASK & 0xffff) == SINC_MASK); // exceeding fractional freq
 
 
-//======================
 class CResamplerSettings
-//======================
 {
 public:
 	ResamplingMode SrcMode;
@@ -76,9 +74,7 @@ public:
 };
 
 
-//==============
 class CResampler
-//==============
 {
 public:
 	CResamplerSettings m_Settings;

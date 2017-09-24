@@ -35,9 +35,7 @@ typedef struct _EQBANDSTRUCT
 	bool bEnable;
 } EQBANDSTRUCT;
 
-//=======
 class CEQ
-//=======
 {
 private:
 	EQBANDSTRUCT gEQ[MAX_EQ_BANDS*2];
@@ -51,9 +49,7 @@ public:
 };
 
 
-//===========
 class CQuadEQ
-//===========
 {
 private:
 	CEQ front;

@@ -40,7 +40,6 @@ const CModDoc *IMixPlugin::GetModDoc() const { return m_SndFile.GetpModDoc(); }
 
 
 IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//-----------------------------------------------------------------------------------------
 	: m_pNext(nullptr)
 	, m_pPrev(nullptr)
 	, m_Factory(factory)
@@ -71,7 +70,6 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 
 
 IMixPlugin::~IMixPlugin()
-//-----------------------
 {
 #ifdef MODPLUG_TRACKER
 	CloseEditor();
@@ -94,7 +92,6 @@ IMixPlugin::~IMixPlugin()
 
 
 void IMixPlugin::InsertIntoFactoryList()
-//--------------------------------------
 {
 	m_pMixStruct->pMixPlugin = this;
 
@@ -110,7 +107,6 @@ void IMixPlugin::InsertIntoFactoryList()
 #ifdef MODPLUG_TRACKER
 
 void IMixPlugin::SetSlot(PLUGINDEX slot)
-//--------------------------------------
 {
 	m_nSlot = slot;
 	m_pMixStruct = &m_SndFile.m_MixPlugins[slot];
@@ -118,7 +114,6 @@ void IMixPlugin::SetSlot(PLUGINDEX slot)
 
 
 CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
-//-------------------------------------------------------------
 {
 	CString paramName = GetParamName(param);
 	CString name;
@@ -135,7 +130,6 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 
 // Get a parameter's current value, represented by the plugin.
 CString IMixPlugin::GetFormattedParamValue(PlugParamIndex param)
-//--------------------------------------------------------------
 {
 
 	CString paramDisplay = GetParamDisplay(param);
@@ -149,7 +143,6 @@ CString IMixPlugin::GetFormattedParamValue(PlugParamIndex param)
 
 
 CString IMixPlugin::GetFormattedProgramName(int32 index)
-//------------------------------------------------------
 {
 	CString rawname = GetProgramName(index);
 	
@@ -167,7 +160,6 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 
 
 void IMixPlugin::SetEditorPos(int32 x, int32 y)
-//---------------------------------------------
 {
 	m_pMixStruct->editorX = x;
 	m_pMixStruct->editorY = y;
@@ -175,7 +167,6 @@ void IMixPlugin::SetEditorPos(int32 x, int32 y)
 
 
 void IMixPlugin::GetEditorPos(int32 &x, int32 &y) const
-//-----------------------------------------------------
 {
 	x = m_pMixStruct->editorX;
 	y = m_pMixStruct->editorY;
@@ -186,14 +177,12 @@ void IMixPlugin::GetEditorPos(int32 &x, int32 &y) const
 
 
 bool IMixPlugin::IsBypassed() const
-//---------------------------------
 {
 	return m_pMixStruct != nullptr && m_pMixStruct->IsBypassed();
 }
 
 
 void IMixPlugin::RecalculateGain()
-//--------------------------------
 {
 	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
 	if(gain < 0.1f) gain = 1.0f;
@@ -208,7 +197,6 @@ void IMixPlugin::RecalculateGain()
 
 
 void IMixPlugin::SetDryRatio(uint32 param)
-//----------------------------------------
 {
 	param = std::min(param, uint32(127));
 	m_pMixStruct->fDryRatio = 1.0f - (param / 127.0f);
@@ -216,7 +204,6 @@ void IMixPlugin::SetDryRatio(uint32 param)
 
 
 void IMixPlugin::Bypass(bool bypass)
-//----------------------------------
 {
 	m_pMixStruct->Info.SetBypass(bypass);
 
@@ -228,7 +215,6 @@ void IMixPlugin::Bypass(bool bypass)
 
 
 double IMixPlugin::GetOutputLatency() const
-//-----------------------------------------
 {
 	if(GetSoundFile().IsRenderingToDisc())
 		return 0;
@@ -238,7 +224,6 @@ double IMixPlugin::GetOutputLatency() const
 
 
 void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT pOutR, float * MPT_RESTRICT leftPlugOutput, float * MPT_RESTRICT rightPlugOutput, uint32 numFrames) const
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 /*	float *leftPlugOutput;
 	float *rightPlugOutput;
@@ -375,7 +360,6 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 
 // Render some silence and return maximum level returned by the plugin.
 float IMixPlugin::RenderSilence(uint32 numFrames)
-//-----------------------------------------------
 {
 	// The JUCE framework doesn't like processing while being suspended.
 	const bool wasSuspended = !IsResumed();
@@ -415,7 +399,6 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 
 // Get list of plugins to which output is sent. A nullptr indicates master output.
 size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
-//-------------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output.
 	// Returning nullptr means plugin outputs directly to master.
@@ -438,7 +421,6 @@ size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
 
 // Get a list of plugins that send data to this plugin.
 size_t IMixPlugin::GetInputPlugList(std::vector<IMixPlugin *> &list)
-//------------------------------------------------------------------
 {
 	std::vector<IMixPlugin *> candidatePlugOutputs;
 	list.clear();
@@ -467,7 +449,6 @@ size_t IMixPlugin::GetInputPlugList(std::vector<IMixPlugin *> &list)
 
 // Get a list of instruments that send data to this plugin.
 size_t IMixPlugin::GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list)
-//---------------------------------------------------------------------------
 {
 	list.clear();
 	const PLUGINDEX nThisMixPlug = m_nSlot + 1;		//m_nSlot is position in mixplug array.
@@ -485,7 +466,6 @@ size_t IMixPlugin::GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list)
 
 
 size_t IMixPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
-//---------------------------------------------------------------------
 {
 	list.clear();
 
@@ -505,7 +485,6 @@ size_t IMixPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
 
 
 void IMixPlugin::SaveAllParameters()
-//----------------------------------
 {
 	if (m_pMixStruct == nullptr)
 	{
@@ -537,7 +516,6 @@ void IMixPlugin::SaveAllParameters()
 
 
 void IMixPlugin::RestoreAllParameters(int32 /*program*/)
-//------------------------------------------------------
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pluginData.size() >= sizeof(uint32))
 	{
@@ -562,7 +540,6 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 
 #ifdef MODPLUG_TRACKER
 void IMixPlugin::ToggleEditor()
-//-----------------------------
 {
 	// We only really need this mutex for bridged plugins, as we may be processing window messages (in the same thread) while the editor opens.
 	// The user could press the toggle button while the editor is loading and thus close the editor while still being initialized.
@@ -588,7 +565,6 @@ void IMixPlugin::ToggleEditor()
 
 // Provide default plugin editor
 CAbstractVstEditor *IMixPlugin::OpenEditor()
-//------------------------------------------
 {
 	try
 	{
@@ -602,7 +578,6 @@ CAbstractVstEditor *IMixPlugin::OpenEditor()
 
 
 void IMixPlugin::CloseEditor()
-//----------------------------
 {
 	if(m_pEditor)
 	{
@@ -615,7 +590,6 @@ void IMixPlugin::CloseEditor()
 
 // Automate a parameter from the plugin GUI (both custom and default plugin GUI)
 void IMixPlugin::AutomateParameter(PlugParamIndex param)
-//------------------------------------------------------
 {
 	CModDoc *modDoc = GetModDoc();
 	if(modDoc == nullptr)
@@ -659,7 +633,6 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 
 
 void IMixPlugin::SetModified()
-//----------------------------
 {
 	CModDoc *modDoc = GetModDoc();
 	if(modDoc != nullptr && m_SndFile.GetModSpecifications().supportsPlugins)
@@ -670,7 +643,6 @@ void IMixPlugin::SetModified()
 
 
 bool IMixPlugin::SaveProgram()
-//----------------------------
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
@@ -711,7 +683,6 @@ bool IMixPlugin::SaveProgram()
 
 
 bool IMixPlugin::LoadProgram(mpt::PathString fileName)
-//----------------------------------------------------
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
@@ -773,7 +744,6 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 
 IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//-------------------------------------------------------------------------------------------
 {
 	MemsetZero(m_MidiCh);
 	for(int ch = 0; ch < 16; ch++)
@@ -785,7 +755,6 @@ IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 
 
 void IMidiPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
-//------------------------------------------------------------
 {
 	if(pwd != 0)
 	{
@@ -798,7 +767,6 @@ void IMidiPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
 
 
 void IMidiPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX /*trackChannel*/)
-//------------------------------------------------------------------------------------------------------------------
 {
 	//Error checking
 	LimitMax(nController, MIDIEvents::MIDICC_end);
@@ -813,7 +781,6 @@ void IMidiPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nP
 
 // Bend MIDI pitch for given MIDI channel using fine tracker param (one unit = 1/64th of a note step)
 void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
-//-----------------------------------------------------------------------
 {
 	if(m_SndFile.m_playBehaviour[kOldMIDIPitchBends])
 	{
@@ -835,7 +802,6 @@ void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 
 // Set MIDI pitch for given MIDI channel using fixed point pitch bend value (converted back to 0-16383 MIDI range)
 void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
-//-------------------------------------------------------------------
 {
 	MPT_ASSERT(EncodePitchBendParam(MIDIEvents::pitchBendMin) <= newPitchBendPos && newPitchBendPos <= EncodePitchBendParam(MIDIEvents::pitchBendMax));
 	m_MidiCh[nMidiCh].midiPitchBendPos = newPitchBendPos;
@@ -845,7 +811,6 @@ void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
 
 // Apply vibrato effect through pitch wheel commands on a given MIDI channel.
 void IMidiPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
-//-----------------------------------------------------------------
 {
 	depth = EncodePitchBendParam(depth);
 	if(depth != 0 || (m_MidiCh[nMidiCh].midiPitchBendPos & vstVibratoFlag))
@@ -871,7 +836,6 @@ void IMidiPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
 
 
 void IMidiPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
-//---------------------------------------------------------------------------------------------------------------------------------
 {
 	PlugInstrChannel &channel = m_MidiCh[nMidiCh];
 
@@ -973,7 +937,6 @@ void IMidiPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, 
 
 
 bool IMidiPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
-//-------------------------------------------------------------------------
 {
 	note -= NOTE_MIN;
 	return (m_MidiCh[midiChn].noteOnMap[note][trackerChn] != 0);
@@ -981,7 +944,6 @@ bool IMidiPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 
 
 void IMidiPlugin::ReceiveMidi(uint32 midiCode)
-//--------------------------------------------
 {
 	ResetSilence();
 
@@ -1006,7 +968,6 @@ void IMidiPlugin::ReceiveMidi(uint32 midiCode)
 
 
 void IMidiPlugin::ReceiveSysex(const void *message, uint32 length)
-//----------------------------------------------------------------
 {
 	ResetSilence();
 
@@ -1025,7 +986,6 @@ void IMidiPlugin::ReceiveSysex(const void *message, uint32 length)
 // SNDMIXPLUGIN functions
 
 void SNDMIXPLUGIN::SetGain(uint8 gain)
-//------------------------------------
 {
 	Info.gain = gain;
 	if(pMixPlugin != nullptr) pMixPlugin->RecalculateGain();
@@ -1033,7 +993,6 @@ void SNDMIXPLUGIN::SetGain(uint8 gain)
 
 
 void SNDMIXPLUGIN::SetBypass(bool bypass)
-//---------------------------------------
 {
 	if(pMixPlugin != nullptr)
 		pMixPlugin->Bypass(bypass);
@@ -1043,7 +1002,6 @@ void SNDMIXPLUGIN::SetBypass(bool bypass)
 
 
 void SNDMIXPLUGIN::Destroy()
-//--------------------------
 {
 	if(pMixPlugin)
 	{

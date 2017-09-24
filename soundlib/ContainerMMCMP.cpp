@@ -85,7 +85,6 @@ struct MMCMPBITBUFFER
 
 
 uint32 MMCMPBITBUFFER::GetBits(uint32 nBits)
-//------------------------------------------
 {
 	uint32 d;
 	if (!nBits) return 0;
@@ -129,7 +128,6 @@ static const uint8 MMCMP16BitFetch[16] =
 
 
 static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, uint32 pos, uint32 len)
-//----------------------------------------------------------------------------------------------
 {
 	if(pos >= unpackedData.size()) return false;
 	if(len > unpackedData.size()) return false;
@@ -139,14 +137,12 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, uint32 
 
 
 static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const MMCMPSUBBLOCK &subblk)
-//---------------------------------------------------------------------------------------------------
 {
 	return MMCMP_IsDstBlockValid(unpackedData, subblk.unpk_pos, subblk.unpk_size);
 }
 
 
 static bool ValidateHeader(const MMCMPFILEHEADER &mfh)
-//----------------------------------------------------
 {
 	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0)
 	{
@@ -161,7 +157,6 @@ static bool ValidateHeader(const MMCMPFILEHEADER &mfh)
 
 
 static bool ValidateHeader(const MMCMPHEADER &mmh)
-//------------------------------------------------
 {
 	if(mmh.nblocks == 0)
 	{
@@ -180,7 +175,6 @@ static bool ValidateHeader(const MMCMPHEADER &mmh)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize)
-//------------------------------------------------------------------------------------------------------
 {
 	MMCMPFILEHEADER mfh;
 	if(!file.ReadStruct(mfh))
@@ -206,7 +200,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMMCMP(MemoryFileReader file, 
 
 
 bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();

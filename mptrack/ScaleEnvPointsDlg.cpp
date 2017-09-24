@@ -22,7 +22,6 @@ double CScaleEnvPointsDlg::m_fFactorY = 1.0;
 
 
 BOOL CScaleEnvPointsDlg::OnInitDialog()
-//-------------------------------------
 {
 	CDialog::OnInitDialog();
 	m_EditX.SubclassDlgItem(IDC_EDIT_FACTORX, this);
@@ -36,7 +35,6 @@ BOOL CScaleEnvPointsDlg::OnInitDialog()
 
 
 void CScaleEnvPointsDlg::OnOK()
-//-----------------------------
 {
 	m_EditX.GetDecimalValue(m_fFactorX);
 	m_EditY.GetDecimalValue(m_fFactorY);
@@ -45,7 +43,6 @@ void CScaleEnvPointsDlg::OnOK()
 
 
 void CScaleEnvPointsDlg::Apply()
-//------------------------------
 {
 	if(m_fFactorX > 0 && m_fFactorX != 1)
 	{

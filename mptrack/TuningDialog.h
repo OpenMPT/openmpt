@@ -29,10 +29,8 @@ OPENMPT_NAMESPACE_BEGIN
 // MODPLUG_TRACKER anyway.
 extern const mpt::Charset TuningCharset;
 
-//==========================
 template<class T1, class T2>
 class CBijectiveMap
-//==========================
 {
 public:
 	CBijectiveMap(const T1& a, const T2& b)
@@ -112,9 +110,7 @@ private:
 
 class CTuningDialog;
 
-//======================================
 class CTuningTreeCtrl : public CTreeCtrl
-//======================================
 {
 private:
 	CTuningDialog& m_rParentDialog;
@@ -135,9 +131,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-//===================
 class CTuningTreeItem
-//===================
 {
 private:
 	CTuning* m_pTuning;
@@ -200,9 +194,7 @@ public:
 
 // CTuningDialog dialog
 
-//==================================
 class CTuningDialog : public CDialog
-//==================================
 {
 	friend class CTuningTreeCtrl;
 

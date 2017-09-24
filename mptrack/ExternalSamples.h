@@ -17,9 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CSoundFile;
 
-//=======================================
 class ExternalSamplesDlg : public CDialog
-//=======================================
 {
 protected:
 	CModDoc &modDoc;

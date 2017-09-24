@@ -28,7 +28,6 @@ OPENMPT_NAMESPACE_BEGIN
  * Return: pData.
  */
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob)
-//---------------------------------------------------------------------------------------------
 {
 	pData = nullptr;
 	nSize = 0;
@@ -50,7 +49,6 @@ LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, 
 
 // Returns WinAPI error message corresponding to error code returned by GetLastError().
 CString GetErrorMessage(DWORD nErrorCode)
-//---------------------------------------
 {
 	LPTSTR lpMsgBuf = NULL;
 

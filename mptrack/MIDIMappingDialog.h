@@ -22,9 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class CMIDIMapper;
 
-//=======================================
 class CMIDIMappingDialog : public CDialog
-//=======================================
 {
 public:
 	CMIDIMappingDirective m_Setting;

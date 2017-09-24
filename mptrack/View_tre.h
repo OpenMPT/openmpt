@@ -44,9 +44,7 @@ struct ModTreeDocInfo
 };
 
 
-//=============================================
 class CModTreeDropTarget: public COleDropTarget
-//=============================================
 {
 protected:
 	CModTree *m_pModTree;
@@ -68,9 +66,7 @@ OPENMPT_NAMESPACE_END
 OPENMPT_NAMESPACE_BEGIN
 
 
-//===============================
 class CModTree: public CTreeCtrlW
-//===============================
 {
 protected:
 

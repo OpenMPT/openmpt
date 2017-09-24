@@ -33,9 +33,7 @@ enum smpgen_clip_methods
 	smpgen_normalize,
 };
 
-//====================
 class CSampleGenerator
-//====================
 {
 protected:
 	
@@ -92,9 +90,7 @@ struct samplegen_expression
 #define MAX_SAMPLEGEN_PRESETS 100
 
 
-//==================
 class CSmpGenPresets
-//==================
 {
 protected:
 	vector<samplegen_expression> presets;
@@ -115,9 +111,7 @@ public:
 // Sample Generator Dialog implementation
 
 
-//=================================
 class CSmpGenDialog: public CDialog
-//=================================
 {
 protected:
 
@@ -179,9 +173,7 @@ protected:
 // Sample Generator Preset Dialog implementation
 
 
-//====================================
 class CSmpGenPresetDlg: public CDialog
-//====================================
 {
 protected:
 	CSmpGenPresets *presets;

@@ -17,9 +17,7 @@ class CMainFrame;
 
 #define NUM_CHANNELCOMBOBOXES	4
 
-//===========================================
 class COptionsSoundcard: public CPropertyPage
-//===========================================
 {
 protected:
 	CComboBoxEx m_CbnDevice;
@@ -85,9 +83,7 @@ protected:
 };
 
 
-//=======================================
 class COptionsMixer: public CPropertyPage
-//=======================================
 {
 protected:
 
@@ -138,9 +134,7 @@ protected:
 
 #ifndef NO_EQ
 
-//=================================
 class CEQSlider: public CSliderCtrl
-//=================================
 {
 public:
 	CWnd *m_pParent;
@@ -155,9 +149,7 @@ public:
 #endif // !NO_EQ
 
 
-//========================================
 class COptionsPlayer: public CPropertyPage
-//========================================
 {
 protected:
 	CComboBox m_CbnReverbPreset;
@@ -205,9 +197,7 @@ protected:
 };
 
 
-//=======================================
 class CMidiSetupDlg: public CPropertyPage
-//=======================================
 {
 public:
 	DWORD m_dwMidiSetup;
@@ -235,9 +225,7 @@ protected:
 
 
 
-//======================================
 class COptionsWine: public CPropertyPage
-//======================================
 {
 
 protected:

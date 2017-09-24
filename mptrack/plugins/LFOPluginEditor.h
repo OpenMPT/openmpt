@@ -17,9 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct UpdateHint;
 
-//===============================================
 class LFOPluginEditor : public CAbstractVstEditor
-//===============================================
 {
 protected:
 	CComboBox m_plugParam, m_outPlug, m_midiCC;

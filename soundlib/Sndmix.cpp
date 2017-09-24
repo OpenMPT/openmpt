@@ -58,7 +58,6 @@ static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) {
 
 
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
-//-------------------------------------------------------------------
 {
 	SetPreAmp(mixersettings.m_nPreAmp); // adjust agc
 	bool reset = false;
@@ -75,7 +74,6 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 
 
 void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersettings)
-//--------------------------------------------------------------------------------
 {
 	m_Resampler.m_Settings = resamplersettings;
 	m_Resampler.UpdateTables();
@@ -84,7 +82,6 @@ void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersetting
 
 
 void CSoundFile::InitPlayer(bool bReset)
-//--------------------------------------
 {
 	if(bReset)
 	{
@@ -113,7 +110,6 @@ void CSoundFile::InitPlayer(bool bReset)
 
 
 bool CSoundFile::FadeSong(uint32 msec)
-//------------------------------------
 {
 	samplecount_t nsamples = Util::muldiv(msec, m_MixerSettings.gdwMixingFreq, 1000);
 	if (nsamples <= 0) return false;
@@ -140,7 +136,6 @@ bool CSoundFile::FadeSong(uint32 msec)
 // count = Number of stereo sample pairs to process
 // separation = -256...256 (negative values = swap L/R, 0 = mono, 128 = normal)
 static void ApplyStereoSeparation(mixsample_t *mixBuf, std::size_t count, int32 separation)
-//-----------------------------------------------------------------------------------------
 {
 #ifdef MPT_INTMIXER
 	const mixsample_t factor_num = separation; // 128 =^= 1.0f
@@ -178,7 +173,6 @@ static void ApplyStereoSeparation(mixsample_t *mixBuf, std::size_t count, int32 
 
 
 static void ApplyStereoSeparation(mixsample_t *SoundFrontBuffer, mixsample_t *SoundRearBuffer, std::size_t channels, std::size_t countChunk, int32 separation)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(separation == MixerSettings::StereoSeparationScale)
 	{ // identity
@@ -190,7 +184,6 @@ static void ApplyStereoSeparation(mixsample_t *SoundFrontBuffer, mixsample_t *So
 
 
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
-//---------------------------------------------------------------------------------------
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
@@ -337,7 +330,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 
 void CSoundFile::ProcessDSP(std::size_t countChunk)
-//-------------------------------------------------
 {
 	#ifndef NO_DSP
 		if(m_MixerSettings.DSPMask & SNDDSP_SURROUND)
@@ -376,7 +368,6 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 // Handles navigation/effects
 
 bool CSoundFile::ProcessRow()
-//---------------------------
 {
 	while(++m_PlayState.m_nTickCount >= GetNumTicksOnCurrentRow())
 	{
@@ -727,7 +718,6 @@ bool CSoundFile::ProcessRow()
 
 // Calculate delta for Vibrato / Tremolo / Panbrello effect
 int CSoundFile::GetVibratoDelta(int type, int position) const
-//-----------------------------------------------------------
 {
 	// IT compatibility: IT has its own, more precise tables
 	if(m_playBehaviour[kITVibratoTremoloPanbrello])
@@ -774,7 +764,6 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 
 
 void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol) const
-//-------------------------------------------------------------------
 {
 	if(m_playBehaviour[kITSwingBehaviour])
 	{
@@ -795,7 +784,6 @@ void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol) const
 
 
 void CSoundFile::ProcessPanningSwing(ModChannel *pChn) const
-//----------------------------------------------------------
 {
 	if(m_playBehaviour[kITSwingBehaviour] || m_playBehaviour[kMPTOldSwingBehaviour])
 	{
@@ -812,7 +800,6 @@ void CSoundFile::ProcessPanningSwing(ModChannel *pChn) const
 
 
 void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
-//---------------------------------------------------------------
 {
 	if (pChn->dwFlags[CHN_TREMOLO])
 	{
@@ -868,7 +855,6 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 
 
 void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
-//---------------------------------------------------------
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -982,7 +968,6 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 
 
 bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const
-//----------------------------------------------------------------------------------
 {
 	if(pChn->pModInstrument == nullptr)
 	{
@@ -998,7 +983,6 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) c
 
 
 void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
-//----------------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_VOLUME))
 	{
@@ -1039,7 +1023,6 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 
 
 void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn) const
-//-------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_PANNING))
 	{
@@ -1070,7 +1053,6 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn) const
 
 
 void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
-//------------------------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_PITCH))
 	{
@@ -1142,7 +1124,6 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 
 
 void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envType) const
-//--------------------------------------------------------------------------------------
 {
 	ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
@@ -1257,7 +1238,6 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 
 
 void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn) const
-//-----------------------------------------------------------------
 {
 	IncrementEnvelopePosition(pChn, ENV_VOLUME);
 	IncrementEnvelopePosition(pChn, ENV_PANNING);
@@ -1266,7 +1246,6 @@ void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn) const
 
 
 void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol) const
-//----------------------------------------------------------------------
 {
 	// FadeOut volume
 	if(pChn->dwFlags[CHN_NOTEFADE] && pChn->pModInstrument != nullptr)
@@ -1288,7 +1267,6 @@ void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol) const
 
 
 void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn) const
-//----------------------------------------------------------------
 {
 	const ModInstrument *pIns = pChn->pModInstrument;
 
@@ -1302,7 +1280,6 @@ void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn) const
 
 
 void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
-//-------------------------------------------------------
 {
 	int pdelta = pChn->nPanbrelloOffset;
 	if(pChn->rowCommand.command == CMD_PANBRELLO)
@@ -1348,7 +1325,6 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 
 
 void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEINDEXTYPE &arpeggioSteps)
-//----------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
@@ -1522,7 +1498,6 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 
 
 void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYPE &vibratoFactor)
-//-----------------------------------------------------------------------------------------------
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -1669,7 +1644,6 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 
 
 void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
-//--------------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
@@ -1850,7 +1824,6 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, Tuning:
 
 
 void CSoundFile::ProcessRamping(ModChannel *pChn) const
-//-----------------------------------------------------
 {
 	pChn->leftRamp = pChn->rightRamp = 0;
 	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->leftVol != pChn->newLeftVol || pChn->rightVol != pChn->newRightVol))
@@ -1916,7 +1889,6 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 
 
 SamplePosition CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const
-//---------------------------------------------------------------------------------------------------
 {
 	uint32 freq;
 
@@ -1945,7 +1917,6 @@ SamplePosition CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, 
 // Handles envelopes & mixer setup
 
 bool CSoundFile::ReadNote()
-//-------------------------
 {
 #ifdef MODPLUG_TRACKER
 	// Checking end of row ?
@@ -2399,7 +2370,6 @@ bool CSoundFile::ReadNote()
 
 
 void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
-//-------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 	if(nChn < GetNumChannels())
@@ -2422,7 +2392,6 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 #ifndef NO_PLUGINS
 
 void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
-//------------------------------------------------
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -2558,7 +2527,6 @@ MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuf
 
 
 void CSoundFile::ProcessGlobalVolume(long lCount)
-//-----------------------------------------------
 {
 
 	// should we ramp?
@@ -2622,7 +2590,6 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 
 
 void CSoundFile::ProcessStereoSeparation(long countChunk)
-//-------------------------------------------------------
 {
 	ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
 }

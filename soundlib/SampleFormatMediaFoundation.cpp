@@ -73,7 +73,6 @@ static void mptMFSafeRelease(T **ppT)
 // to memcpy.
 
 static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
-//---------------------------------------------------------
 {
 
 	FileTags tags;
@@ -197,7 +196,6 @@ MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
 
 #ifdef MODPLUG_TRACKER
 std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
-//-------------------------------------------------------------
 {
 	std::vector<FileType> result;
 
@@ -304,7 +302,6 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 
 
 bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
-//----------------------------------------------------------------------------------------------
 {
 
 #if !defined(MPT_WITH_MEDIAFOUNDATION)
@@ -476,7 +473,6 @@ fail:
 
 
 bool CSoundFile::CanReadMediaFoundation()
-//---------------------------------------
 {
 	bool result = false;
 	#if defined(MPT_WITH_MEDIAFOUNDATION)

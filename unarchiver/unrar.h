@@ -15,9 +15,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_WITH_UNRAR
 
-//===============
 class CRarArchive
-//===============
 	: public ArchiveBase
 {
 

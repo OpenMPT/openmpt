@@ -31,7 +31,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define DMO_LOG
 
 IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//------------------------------------------------------------------------------------------------
 {
 	CLSID clsid;
 	if (Util::VerifyStringToCLSID(factory.dllPath.ToWide(), clsid))
@@ -73,7 +72,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	, m_pMediaParams(nullptr)
 	, m_nSamplesPerSec(sndFile.GetSampleRate())
 	, m_uid(uid)
-//--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(FAILED(m_pMediaObject->QueryInterface(IID_IMediaParamInfo, (void **)&m_pParamInfo)))
 		m_pParamInfo = nullptr;
@@ -88,7 +86,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 
 
 DMOPlugin::~DMOPlugin()
-//---------------------
 {
 	if(m_pMediaParams)
 	{
@@ -114,7 +111,6 @@ DMOPlugin::~DMOPlugin()
 
 
 uint32 DMOPlugin::GetLatency() const
-//----------------------------------
 {
 	REFERENCE_TIME time;	// Unit 100-nanoseconds
 	if(m_pMediaProcess->GetLatency(&time) == S_OK)
@@ -130,7 +126,6 @@ static const float _si2f = 1.0f / 32768.0f;
 
 
 static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, float * MPT_RESTRICT output, uint32 numFrames)
-//-----------------------------------------------------------------------------------------------------------------------------------------------
 {
 #if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
 	if(GetProcSupport() & PROCSUPPORT_SSE)
@@ -165,7 +160,6 @@ static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MP
 
 
 static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
-//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 #if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
 	if(GetProcSupport() & PROCSUPPORT_SSE)
@@ -201,7 +195,6 @@ static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RES
 
 // Interleave two float streams into one int16 stereo stream.
 static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, int16 * MPT_RESTRICT output, uint32 numFrames)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
@@ -254,7 +247,6 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 
 // Deinterleave an int16 stereo stream into two float streams.
 static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
-//--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 #ifdef ENABLE_SSE
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
@@ -311,7 +303,6 @@ static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * M
 
 
 void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//-------------------------------------------------------------------
 {
 	if(!numFrames || !m_mixBuffer.Ok())
 		return;
@@ -335,7 +326,6 @@ void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamIndex DMOPlugin::GetNumParameters() const
-//------------------------------------------------
 {
 	DWORD dwParamCount = 0;
 	m_pParamInfo->GetParamCount(&dwParamCount);
@@ -344,7 +334,6 @@ PlugParamIndex DMOPlugin::GetNumParameters() const
 
 
 PlugParamValue DMOPlugin::GetParameter(PlugParamIndex index)
-//----------------------------------------------------------
 {
 	if(index < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{
@@ -377,7 +366,6 @@ PlugParamValue DMOPlugin::GetParameter(PlugParamIndex index)
 
 
 void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
-//----------------------------------------------------------------------
 {
 	if(index < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{
@@ -405,7 +393,6 @@ void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void DMOPlugin::Resume()
-//----------------------
 {
 	m_nSamplesPerSec = m_SndFile.GetSampleRate();
 	m_isResumed = true;
@@ -454,7 +441,6 @@ void DMOPlugin::Resume()
 
 
 void DMOPlugin::PositionChanged()
-//-------------------------------
 {
 	m_pMediaObject->Discontinuity(0);
 	m_pMediaObject->Flush();
@@ -462,7 +448,6 @@ void DMOPlugin::PositionChanged()
 
 
 void DMOPlugin::Suspend()
-//-----------------------
 {
 	m_isResumed = false;
 	m_pMediaObject->Flush();
@@ -474,7 +459,6 @@ void DMOPlugin::Suspend()
 #ifdef MODPLUG_TRACKER
 
 CString DMOPlugin::GetParamName(PlugParamIndex param)
-//---------------------------------------------------
 {
 	if(param < GetNumParameters() && m_pParamInfo != nullptr)
 	{
@@ -493,7 +477,6 @@ CString DMOPlugin::GetParamName(PlugParamIndex param)
 
 
 CString DMOPlugin::GetParamLabel(PlugParamIndex param)
-//----------------------------------------------------
 {
 	if(param < GetNumParameters() && m_pParamInfo != nullptr)
 	{
@@ -511,7 +494,6 @@ CString DMOPlugin::GetParamLabel(PlugParamIndex param)
 
 
 CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
-//------------------------------------------------------
 {
 	if(param < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{

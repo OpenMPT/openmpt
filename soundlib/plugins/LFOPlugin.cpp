@@ -21,7 +21,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 IMixPlugin* LFOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) LFOPlugin(factory, sndFile, mixStruct);
 }
@@ -32,7 +31,6 @@ LFOPlugin::LFOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	, m_nextRandom(0)
 	, m_tempo(0)
 	, m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng()))
-//---------------------------------------------------------------------------------------
 {
 	m_amplitude = 0.5f;
 	m_offset = 0.5f;
@@ -54,7 +52,6 @@ LFOPlugin::LFOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 
 // Processing (we do not process audio, just send out parameters)
 void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//-------------------------------------------------------------------
 {
 	if(!m_bypassed)
 	{
@@ -134,7 +131,6 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue LFOPlugin::GetParameter(PlugParamIndex index)
-//----------------------------------------------------------
 {
 	switch(index)
 	{
@@ -152,7 +148,6 @@ PlugParamValue LFOPlugin::GetParameter(PlugParamIndex index)
 
 
 void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
-//----------------------------------------------------------------------
 {
 	ResetSilence();
 	Limit(value, 0.0f, 1.0f);
@@ -198,7 +193,6 @@ void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void LFOPlugin::Resume()
-//----------------------
 {
 	m_isResumed = true;
 	RecalculateIncrement();
@@ -208,7 +202,6 @@ void LFOPlugin::Resume()
 
 
 void LFOPlugin::PositionChanged()
-//-------------------------------
 {
 	// TODO Changing tempo (with tempo sync enabled), parameter automation over time and setting the LFO phase manually is not considered here.
 	m_phase = m_increment * m_SndFile.GetTotalSampleCount();
@@ -217,7 +210,6 @@ void LFOPlugin::PositionChanged()
 
 
 bool LFOPlugin::MidiSend(uint32 midiCode)
-//---------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 		return plugin->MidiSend(midiCode);
@@ -227,7 +219,6 @@ bool LFOPlugin::MidiSend(uint32 midiCode)
 
 
 bool LFOPlugin::MidiSysexSend(const void *message, uint32 length)
-//---------------------------------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 		return plugin->MidiSysexSend(message, length);
@@ -237,7 +228,6 @@ bool LFOPlugin::MidiSysexSend(const void *message, uint32 length)
 
 
 void LFOPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel)
-//------------------------------------------------------------------------------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
@@ -247,7 +237,6 @@ void LFOPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPar
 
 
 void LFOPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
-//---------------------------------------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
@@ -257,7 +246,6 @@ void LFOPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 
 
 void LFOPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
-//---------------------------------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
@@ -267,7 +255,6 @@ void LFOPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
 
 
 void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
-//-------------------------------------------------------------------------------------------------------------------------------
 {
 	if(ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)) && vol > 0)
 	{
@@ -281,7 +268,6 @@ void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, ui
 
 
 void LFOPlugin::HardAllNotesOff()
-//-------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
@@ -291,7 +277,6 @@ void LFOPlugin::HardAllNotesOff()
 
 
 bool LFOPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
-//---------------------------------------------------------------------------
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 		return plugin->IsNotePlaying(note, midiChn, trackerChn);
@@ -301,7 +286,6 @@ bool LFOPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 
 
 void LFOPlugin::SaveAllParameters()
-//---------------------------------
 {
 	auto chunk = GetChunk(false);
 	if(chunk.empty())
@@ -313,7 +297,6 @@ void LFOPlugin::SaveAllParameters()
 
 
 void LFOPlugin::RestoreAllParameters(int32 /*program*/)
-//-----------------------------------------------------
 {
 	SetChunk(mpt::as_span(m_pMixStruct->pluginData), false);
 }
@@ -339,7 +322,6 @@ MPT_BINARY_STRUCT(PluginData, 33)
 
 
 IMixPlugin::ChunkData LFOPlugin::GetChunk(bool)
-//---------------------------------------------
 {
 	PluginData chunk;
 	memcpy(chunk.magic, "LFO ", 4);
@@ -362,7 +344,6 @@ IMixPlugin::ChunkData LFOPlugin::GetChunk(bool)
 
 
 void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
-//----------------------------------------------------
 {
 	FileReader file(chunk);
 	PluginData data;
@@ -388,7 +369,6 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 #ifdef MODPLUG_TRACKER
 
 CString LFOPlugin::GetParamName(PlugParamIndex param)
-//---------------------------------------------------
 {
 	switch(param)
 	{
@@ -407,7 +387,6 @@ CString LFOPlugin::GetParamName(PlugParamIndex param)
 
 
 CString LFOPlugin::GetParamLabel(PlugParamIndex param)
-//----------------------------------------------------
 {
 	if(param == kFrequency)
 	{
@@ -423,7 +402,6 @@ CString LFOPlugin::GetParamLabel(PlugParamIndex param)
 
 
 CString LFOPlugin::GetParamDisplay(PlugParamIndex param)
-//------------------------------------------------------
 {
 	CString s;
 	if(param == kPolarity)
@@ -464,7 +442,6 @@ CString LFOPlugin::GetParamDisplay(PlugParamIndex param)
 
 
 CAbstractVstEditor *LFOPlugin::OpenEditor()
-//-----------------------------------------
 {
 	try
 	{
@@ -480,7 +457,6 @@ CAbstractVstEditor *LFOPlugin::OpenEditor()
 
 
 void LFOPlugin::NextRandom()
-//--------------------------
 {
 	m_random = m_nextRandom;
 	m_nextRandom = mpt::random<int32>(m_PRNG) / static_cast<float>(int32_min);
@@ -488,7 +464,6 @@ void LFOPlugin::NextRandom()
 
 
 void LFOPlugin::RecalculateFrequency()
-//------------------------------------
 {
 	m_computedFrequency = 0.25 * std::pow(2.0, m_frequency * 8.0) - 0.25;
 	if(m_tempoSync)
@@ -520,7 +495,6 @@ void LFOPlugin::RecalculateFrequency()
 
 
 void LFOPlugin::RecalculateIncrement()
-//------------------------------------
 {
 	m_increment = m_computedFrequency / m_SndFile.GetSampleRate();
 	if(m_tempoSync)
@@ -531,7 +505,6 @@ void LFOPlugin::RecalculateIncrement()
 
 
 IMixPlugin *LFOPlugin::GetOutputPlugin() const
-//--------------------------------------------
 {
 	PLUGINDEX outPlug = m_pMixStruct->GetOutputPlugin();
 	if(outPlug > m_nSlot && outPlug < MAX_MIXPLUGINS)

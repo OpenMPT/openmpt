@@ -47,7 +47,6 @@ STATIC_ASSERT(CountOf(volumeEffectTypes) == MAX_VOLCMDS);
 
 
 EffectType ModCommand::GetEffectType(COMMAND cmd)
-//-----------------------------------------------
 {
 	if(cmd < CountOf(effectTypes))
 	{
@@ -60,7 +59,6 @@ EffectType ModCommand::GetEffectType(COMMAND cmd)
 
 
 EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
-//-------------------------------------------------------
 {
 	if(volcmd < CountOf(volumeEffectTypes))
 	{
@@ -74,7 +72,6 @@ EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
 
 // Convert an Exx command (MOD) to Sxx command (S3M)
 void ModCommand::ExtendedMODtoS3MEffect()
-//---------------------------------------
 {
 	if(command != CMD_MODCMDEX)
 		return;
@@ -101,7 +98,6 @@ void ModCommand::ExtendedMODtoS3MEffect()
 
 // Convert an Sxx command (S3M) to Exx command (MOD)
 void ModCommand::ExtendedS3MtoMODEffect()
-//---------------------------------------
 {
 	if(command != CMD_S3MCMDEX)
 		return;
@@ -126,7 +122,6 @@ void ModCommand::ExtendedS3MtoMODEffect()
 
 // Convert a mod command from one format to another.
 void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------
 {
 	if(fromType == toType)
 	{
@@ -856,7 +851,6 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 
 
 bool ModCommand::IsGlobalCommand() const
-//--------------------------------------
 {
 	switch(command)
 	{
@@ -901,7 +895,6 @@ bool ModCommand::IsGlobalCommand() const
 // "Importance" of every FX command. Table is used for importing from formats with multiple effect colums
 // and is approximately the same as in SchismTracker.
 size_t ModCommand::GetEffectWeight(COMMAND cmd)
-//---------------------------------------------
 {
 	// Effect weights, sorted from lowest to highest weight.
 	static const COMMAND weights[] =
@@ -969,7 +962,6 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 // If moving the command into the volume column is more important than accuracy, use force = true.
 // (Code translated from SchismTracker and mainly supposed to be used with loaders ported from this tracker)
 bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
-//------------------------------------------------------------------------
 {
 	switch(effect)
 	{
@@ -1084,7 +1076,6 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 
 // Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
 bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2)
-//-------------------------------------------------------------------------------------
 {
 	if(eff1 == CMD_VOLUMESLIDE && (eff2 == CMD_VIBRATO || eff2 == CMD_TONEPORTAVOL) && param2 == 0)
 	{
@@ -1132,7 +1123,6 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 
 
 bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2)
-//----------------------------------------------------------------------------------------------------
 {
 	for(uint8 n = 0; n < 4; n++)
 	{

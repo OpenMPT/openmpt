@@ -15,9 +15,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//========================================
 class CViewComments: public CModScrollView
-//========================================
 {
 public:
 	CViewComments();

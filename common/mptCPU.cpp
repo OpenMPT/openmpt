@@ -61,7 +61,6 @@ struct cpuid_result {
 
 
 static cpuid_result cpuid(uint32 function)
-//----------------------------------------
 {
 	cpuid_result result;
 	int CPUInfo[4];
@@ -77,7 +76,6 @@ static cpuid_result cpuid(uint32 function)
 #if 0
 
 static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
-//---------------------------------------------------------------
 {
 	cpuid_result result;
 	int CPUInfo[4];
@@ -93,7 +91,6 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 
 
 static MPT_NOINLINE bool has_cpuid()
-//----------------------------------
 {
 	const size_t eflags_cpuid = 1 << 21;
 	size_t eflags_old = __readeflags();
@@ -106,7 +103,6 @@ static MPT_NOINLINE bool has_cpuid()
 
 
 void InitProcSupport()
-//--------------------
 {
 
 	RealProcSupport = 0;
@@ -293,7 +289,6 @@ void InitProcSupport()
 
 
 void InitProcSupport()
-//--------------------
 {
 	ProcSupport = 0;
 }
@@ -333,7 +328,6 @@ uint32 GetMinimumProcSupportFlags()
 
 
 int GetMinimumSSEVersion()
-//------------------------
 {
 	int minimumSSEVersion = 0;
 	#if MPT_COMPILER_MSVC
@@ -354,7 +348,6 @@ int GetMinimumSSEVersion()
 
 
 int GetMinimumAVXVersion()
-//------------------------
 {
 	int minimumAVXVersion = 0;
 	#if MPT_COMPILER_MSVC

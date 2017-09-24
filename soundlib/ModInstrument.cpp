@@ -18,7 +18,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Convert envelope data between various formats.
 void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
-//----------------------------------------------------------------
 {
 	if(!(fromType & MOD_TYPE_XM) && (toType & MOD_TYPE_XM))
 	{
@@ -65,7 +64,6 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 // Get envelope value at a given tick. Assumes that the envelope data is in rage [0, rangeIn],
 // returns value in range [0, rangeOut].
 int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn) const
-//-----------------------------------------------------------------------------------------------
 {
 	uint32 pt = size() - 1u;
 	const int32 ENV_PRECISION = 1 << 16;
@@ -113,7 +111,6 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 
 
 void InstrumentEnvelope::Sanitize(uint8 maxValue)
-//-----------------------------------------------
 {
 	if(!empty())
 	{
@@ -135,7 +132,6 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 
 
 ModInstrument::ModInstrument(SAMPLEINDEX sample)
-//----------------------------------------------
 {
 	nFadeOut = 256;
 	dwFlags.reset();
@@ -182,7 +178,6 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 
 // Translate instrument properties between two given formats.
 void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
-//-----------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(fromType);
 
@@ -261,7 +256,6 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 
 // Get a set of all samples referenced by this instrument
 std::set<SAMPLEINDEX> ModInstrument::GetSamples() const
-//-----------------------------------------------------
 {
 	std::set<SAMPLEINDEX> referencedSamples;
 
@@ -281,7 +275,6 @@ std::set<SAMPLEINDEX> ModInstrument::GetSamples() const
 // Write sample references into a bool vector. If a sample is referenced by this instrument, true is written.
 // The caller has to initialize the vector.
 void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
-//------------------------------------------------------------------------
 {
 	for(size_t i = 0; i < CountOf(Keyboard); i++)
 	{
@@ -295,7 +288,6 @@ void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 
 
 void ModInstrument::Sanitize(MODTYPE modType)
-//-------------------------------------------
 {
 	LimitMax(nFadeOut, 65536u);
 	LimitMax(nGlobalVol, 64u);

@@ -38,9 +38,7 @@ public:
 };
 
 
-//===========================
 class CCustEdit: public CEdit
-//===========================
 {
 protected:
 	COptionsKeyboard *m_pOptKeyDlg;
@@ -62,9 +60,7 @@ public:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 };
 
-//==========================================
 class COptionsKeyboard: public CPropertyPage
-//==========================================
 {
 protected:
 	CListBox m_lbnHotKeys;

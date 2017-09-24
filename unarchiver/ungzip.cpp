@@ -30,7 +30,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
-//--------------------------------------------------------------
 {
 	inFile.Rewind();
 	inFile.ReadStruct(header);
@@ -48,14 +47,12 @@ CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
 
 
 CGzipArchive::~CGzipArchive()
-//---------------------------
 {
 	return;
 }
 
 
 bool CGzipArchive::ExtractFile(std::size_t index)
-//-----------------------------------------------
 {
 	if(index >= contents.size())
 	{

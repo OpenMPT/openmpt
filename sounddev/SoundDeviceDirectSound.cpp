@@ -74,7 +74,6 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 
 
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR lpstrDriver, LPVOID lpContext)
-//----------------------------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> &devices = *(std::vector<SoundDevice::Info>*)lpContext;
 	if(!lpstrDescription)
@@ -103,7 +102,6 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 
 
 std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
-//-------------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
 	DirectSoundEnumerateW(DSEnumCallbackW, &devices);
@@ -112,7 +110,6 @@ std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysI
 
 
 CDSoundDevice::CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-//--------------------------------------------------------------------------------
 	: CSoundDeviceWithThread(info, sysInfo)
 	, m_piDS(NULL)
 	, m_pPrimary(NULL)
@@ -128,14 +125,12 @@ CDSoundDevice::CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInf
 
 
 CDSoundDevice::~CDSoundDevice()
-//-----------------------------
 {
 	Close();
 }
 
 
 SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
-//----------------------------------------------------
 {
 	SoundDevice::Caps caps;
 	caps.Available = true;
@@ -189,7 +184,6 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 
 
 SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
-//----------------------------------------------------------------------------------------------------
 {
 	SoundDevice::DynamicCaps caps;
 	IDirectSound *dummy = nullptr;
@@ -241,7 +235,6 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 
 
 bool CDSoundDevice::InternalOpen()
-//--------------------------------
 {
 	if(m_Settings.InputChannels > 0) return false;
 
@@ -345,7 +338,6 @@ bool CDSoundDevice::InternalOpen()
 
 
 bool CDSoundDevice::InternalClose()
-//---------------------------------
 {
 	if (m_pMixBuffer)
 	{
@@ -368,14 +360,12 @@ bool CDSoundDevice::InternalClose()
 
 
 void CDSoundDevice::StartFromSoundThread()
-//----------------------------------------
 {
 	// done in InternalFillAudioBuffer
 }
 
 
 void CDSoundDevice::StopFromSoundThread()
-//---------------------------------------
 {
 	if(m_pMixBuffer)
 	{
@@ -386,7 +376,6 @@ void CDSoundDevice::StopFromSoundThread()
 
 
 void CDSoundDevice::InternalFillAudioBuffer()
-//-------------------------------------------
 {
 	if(!m_pMixBuffer)
 	{
@@ -524,7 +513,6 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 
 SoundDevice::BufferAttributes CDSoundDevice::InternalGetEffectiveBufferAttributes() const
-//---------------------------------------------------------------------------------------
 {
 	SoundDevice::BufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
@@ -535,7 +523,6 @@ SoundDevice::BufferAttributes CDSoundDevice::InternalGetEffectiveBufferAttribute
 
 
 SoundDevice::Statistics CDSoundDevice::GetStatistics() const
-//----------------------------------------------------------
 {
 	MPT_TRACE();
 	SoundDevice::Statistics result;

@@ -58,7 +58,6 @@ static LHAInputStreamType vtable =
 
 
 CLhaArchive::CLhaArchive(FileReader &file) : ArchiveBase(file), inputstream(nullptr), reader(nullptr), firstfile(nullptr)
-//-----------------------------------------------------------------------------------------------------------------------
 {
 	OpenArchive();
 	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
@@ -74,14 +73,12 @@ CLhaArchive::CLhaArchive(FileReader &file) : ArchiveBase(file), inputstream(null
 
 
 CLhaArchive::~CLhaArchive()
-//-------------------------
 {
 	return;
 }
 
 
 void CLhaArchive::OpenArchive()
-//-----------------------------
 {
 	inFile.Rewind();
 	inputstream = lha_input_stream_new(&vtable, &inFile);
@@ -98,7 +95,6 @@ void CLhaArchive::OpenArchive()
 
 
 void CLhaArchive::CloseArchive()
-//------------------------------
 {
 	if(reader)
 	{
@@ -114,7 +110,6 @@ void CLhaArchive::CloseArchive()
 
 
 bool CLhaArchive::ExtractFile(std::size_t index)
-//----------------------------------------------
 {
 	if(index >= contents.size())
 	{

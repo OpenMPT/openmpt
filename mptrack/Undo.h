@@ -23,9 +23,7 @@ struct ModSample;
 // Pattern Undo
 
 
-//================
 class CPatternUndo
-//================
 {
 protected:
 
@@ -99,9 +97,7 @@ enum sampleUndoTypes
 };
 
 
-//===============
 class CSampleUndo
-//===============
 {
 protected:
 
@@ -162,9 +158,7 @@ public:
 // Instrument Undo
 
 
-//===================
 class CInstrumentUndo
-//===================
 {
 protected:
 

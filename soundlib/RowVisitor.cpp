@@ -36,7 +36,6 @@ RowVisitor::RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence)
 
 
 const ModSequence &RowVisitor::Order() const
-//------------------------------------------
 {
 	if(m_sequence >= m_sndFile.Order.GetNumSequences())
 		return m_sndFile.Order();
@@ -48,7 +47,6 @@ const ModSequence &RowVisitor::Order() const
 // Resize / Clear the row vector.
 // If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
 void RowVisitor::Initialize(bool reset)
-//-------------------------------------
 {
 	auto &order = Order();
 	const ORDERINDEX endOrder = order.GetLengthTailTrimmed();
@@ -88,7 +86,6 @@ void RowVisitor::Initialize(bool reset)
 // order, row - which row should be (un)set
 // If visited is true, the row will be set as visited.
 void RowVisitor::SetVisited(ORDERINDEX ord, ROWINDEX row, bool visited)
-//---------------------------------------------------------------------
 {
 	auto &order = Order();
 	if(ord >= order.size() || row >= GetVisitedRowsVectorSize(order[ord]))
@@ -119,7 +116,6 @@ void RowVisitor::SetVisited(ORDERINDEX ord, ROWINDEX row, bool visited)
 // If autoSet is true, the queried row will automatically be marked as visited.
 // Use this parameter instead of consecutive IsRowVisited / SetRowVisited calls.
 bool RowVisitor::IsVisited(ORDERINDEX ord, ROWINDEX row, bool autoSet)
-//--------------------------------------------------------------------
 {
 	if(ord >= Order().size())
 	{
@@ -152,7 +148,6 @@ bool RowVisitor::IsVisited(ORDERINDEX ord, ROWINDEX row, bool autoSet)
 
 // Get the needed vector size for pattern nPat.
 size_t RowVisitor::GetVisitedRowsVectorSize(PATTERNINDEX pattern) const
-//---------------------------------------------------------------------
 {
 	if(m_sndFile.Patterns.IsValidPat(pattern))
 	{
@@ -170,7 +165,6 @@ size_t RowVisitor::GetVisitedRowsVectorSize(PATTERNINDEX pattern) const
 // If fastSearch is true (default), only the first row of each pattern is looked at, otherwise every row is examined.
 // Function returns true on success.
 bool RowVisitor::GetFirstUnvisitedRow(ORDERINDEX &ord, ROWINDEX &row, bool fastSearch) const
-//------------------------------------------------------------------------------------------
 {
 	auto &order = Order();
 	const ORDERINDEX endOrder = order.GetLengthTailTrimmed();
@@ -208,7 +202,6 @@ bool RowVisitor::GetFirstUnvisitedRow(ORDERINDEX &ord, ROWINDEX &row, bool fastS
 
 // Set all rows of a previous pattern loop as unvisited.
 void RowVisitor::ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow)
-//------------------------------------------------------------------
 {
 	MPT_ASSERT(ord == m_currentOrder);	// Shouldn't trigger, unless we're jumping around in the GUI during a pattern loop.
 
@@ -224,7 +217,6 @@ void RowVisitor::ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow)
 
 // Add a row to the visited row memory for this pattern.
 void RowVisitor::AddVisitedRow(ORDERINDEX ord, ROWINDEX row)
-//----------------------------------------------------------
 {
 	if(ord != m_currentOrder)
 	{

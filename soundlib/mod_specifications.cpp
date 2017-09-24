@@ -426,7 +426,6 @@ const CModSpecifications & itEx = itEx_;
 
 
 MODTYPE CModSpecifications::ExtensionToType(std::string ext)
-//----------------------------------------------------------
 {
 	if(ext == "")
 	{
@@ -449,7 +448,6 @@ MODTYPE CModSpecifications::ExtensionToType(std::string ext)
 
 
 bool CModSpecifications::HasNote(ModCommand::NOTE note) const
-//-----------------------------------------------------------
 {
 	if(note >= noteMin && note <= noteMax)
 		return true;
@@ -470,7 +468,6 @@ bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 
 
 bool CModSpecifications::HasVolCommand(ModCommand::VOLCMD volcmd) const
-//---------------------------------------------------------------------
 {
 	if(volcmd >= MAX_VOLCMDS) return false;
 	if(volcommands[volcmd] == '?') return false;
@@ -479,7 +476,6 @@ bool CModSpecifications::HasVolCommand(ModCommand::VOLCMD volcmd) const
 
 
 bool CModSpecifications::HasCommand(ModCommand::COMMAND cmd) const
-//----------------------------------------------------------------
 {
 	if(cmd >= MAX_EFFECTS) return false;
 	if(commands[cmd] == '?') return false;
@@ -488,7 +484,6 @@ bool CModSpecifications::HasCommand(ModCommand::COMMAND cmd) const
 
 
 char CModSpecifications::GetVolEffectLetter(ModCommand::VOLCMD volcmd) const
-//--------------------------------------------------------------------------
 {
 	if(volcmd >= MAX_VOLCMDS) return '?';
 	return volcommands[volcmd];
@@ -496,7 +491,6 @@ char CModSpecifications::GetVolEffectLetter(ModCommand::VOLCMD volcmd) const
 
 
 char CModSpecifications::GetEffectLetter(ModCommand::COMMAND cmd) const
-//---------------------------------------------------------------------
 {
 	if(cmd >= MAX_EFFECTS) return '?';
 	return commands[cmd];

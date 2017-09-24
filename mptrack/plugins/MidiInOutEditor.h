@@ -18,9 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class MidiInOut;
 
-//===============================================
 class MidiInOutEditor : public CAbstractVstEditor
-//===============================================
 {
 protected:
 	CComboBox m_inputCombo, m_outputCombo;

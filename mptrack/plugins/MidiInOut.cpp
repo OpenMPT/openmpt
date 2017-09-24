@@ -24,7 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//------------------------------------------------------------------------------------------------
 {
 	try
 	{
@@ -45,7 +44,6 @@ MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 #ifdef MODPLUG_TRACKER
 	, m_programName(_T("Default"))
 #endif // MODPLUG_TRACKER
-//---------------------------------------------------------------------------------------
 {
 	m_mixBuffer.Initialize(2, 2);
 	InsertIntoFactoryList();
@@ -53,14 +51,12 @@ MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 
 
 MidiInOut::~MidiInOut()
-//---------------------
 {
 	Suspend();
 }
 
 
 uint32 MidiInOut::GetLatency() const
-//----------------------------------
 {
 	// There is only a latency if the user-provided latency value is greater than the negative output latency.
 	return Util::Round<uint32>(std::min(0.0, m_latency + GetOutputLatency()) * m_SndFile.GetSampleRate());
@@ -68,7 +64,6 @@ uint32 MidiInOut::GetLatency() const
 
 
 void MidiInOut::SaveAllParameters()
-//---------------------------------
 {
 	auto chunk = GetChunk(false);
 	if(chunk.empty())
@@ -80,7 +75,6 @@ void MidiInOut::SaveAllParameters()
 
 
 void MidiInOut::RestoreAllParameters(int32 program)
-//-------------------------------------------------
 {
 	IMixPlugin::RestoreAllParameters(program);	// First plugin version didn't use chunks.
 	SetChunk(mpt::as_span(m_pMixStruct->pluginData), false);
@@ -97,7 +91,6 @@ enum ChunkFlags
 };
 
 IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
-//--------------------------------------------------------
 {
 	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, m_programName);
 	uint32 flags = kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming);
@@ -147,7 +140,6 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 
 // Try to match a port name against stored name or friendly name (preferred)
 static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::string &name, const std::string &friendlyName, MidiDevice &midiDevice, bool isInput)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool foundFriendly = false;
 	for(unsigned int i = 0; i < numPorts; i++)
@@ -181,7 +173,6 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 
 
 void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
-//---------------------------------------------------------------
 {
 	FileReader file(chunk);
 	if(!file.CanRead(9 * sizeof(uint32))
@@ -225,7 +216,6 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 
 
 void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value)
-//----------------------------------------------------------------------
 {
 	MidiDevice::ID newDevice = ParameterToDeviceID(value);
 	OpenDevice(newDevice, (index == kInputParameter));
@@ -238,7 +228,6 @@ void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 float MidiInOut::GetParameter(PlugParamIndex index)
-//-------------------------------------------------
 {
 	const MidiDevice &device = (index == kInputParameter) ? m_inputDevice : m_outputDevice;
 	return DeviceIDToParameter(device.index);
@@ -248,7 +237,6 @@ float MidiInOut::GetParameter(PlugParamIndex index)
 #ifdef MODPLUG_TRACKER
 
 CString MidiInOut::GetParamName(PlugParamIndex param)
-//---------------------------------------------------
 {
 	if(param == kInputParameter)
 		return _T("MIDI In");
@@ -259,7 +247,6 @@ CString MidiInOut::GetParamName(PlugParamIndex param)
 
 // Parameter value as text
 CString MidiInOut::GetParamDisplay(PlugParamIndex param)
-//------------------------------------------------------
 {
 	const MidiDevice &device = (param == kInputParameter) ? m_inputDevice : m_outputDevice;
 	return device.name.c_str();
@@ -267,7 +254,6 @@ CString MidiInOut::GetParamDisplay(PlugParamIndex param)
 
 
 CAbstractVstEditor *MidiInOut::OpenEditor()
-//-----------------------------------------
 {
 	try
 	{
@@ -284,7 +270,6 @@ CAbstractVstEditor *MidiInOut::OpenEditor()
 
 // Processing (we don't process any audio, only MIDI messages)
 void MidiInOut::Process(float *, float *, uint32 numFrames)
-//---------------------------------------------------------
 {
 	if(m_midiOut.isPortOpen())
 	{
@@ -319,7 +304,6 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 
 
 void MidiInOut::InputCallback(double /*deltatime*/, std::vector<unsigned char> &message)
-//--------------------------------------------------------------------------------------
 {
 	// We will check the bypass status before passing on the message, and not before entering the function,
 	// because otherwise we might read garbage if we toggle bypass status in the middle of a SysEx message.
@@ -357,7 +341,6 @@ void MidiInOut::InputCallback(double /*deltatime*/, std::vector<unsigned char> &
 
 // Resume playback
 void MidiInOut::Resume()
-//----------------------
 {
 	// Resume MIDI I/O
 	m_isResumed = true;
@@ -375,7 +358,6 @@ void MidiInOut::Resume()
 
 // Stop playback
 void MidiInOut::Suspend()
-//-----------------------
 {
 	// Suspend MIDI I/O
 	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
@@ -392,7 +374,6 @@ void MidiInOut::Suspend()
 
 // Playback discontinuity
 void MidiInOut::PositionChanged()
-//-------------------------------
 {
 	if(m_sendTimingInfo)
 	{
@@ -403,7 +384,6 @@ void MidiInOut::PositionChanged()
 
 
 void MidiInOut::Bypass(bool bypass)
-//---------------------------------
 {
 	if(bypass)
 	{
@@ -415,7 +395,6 @@ void MidiInOut::Bypass(bool bypass)
 
 
 bool MidiInOut::MidiSend(uint32 midiCode)
-//---------------------------------------
 {
 	if(!m_midiOut.isPortOpen() || IsBypassed())
 	{
@@ -430,7 +409,6 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 
 
 bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
-//-------------------------------------------------------------
 {
 	if(!m_midiOut.isPortOpen() || IsBypassed())
 	{
@@ -445,7 +423,6 @@ bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
 
 
 void MidiInOut::HardAllNotesOff()
-//-------------------------------
 {
 	const bool wasSuspended = !IsResumed();
 	if(wasSuspended)
@@ -483,7 +460,6 @@ void MidiInOut::HardAllNotesOff()
 
 // Open a device for input or output.
 void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
-//----------------------------------------------------------------------
 {
 	MidiDevice &device = asInputDevice ? m_inputDevice : m_outputDevice;
 
@@ -533,7 +509,6 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
 
 // Close an active device.
 void MidiInOut::CloseDevice(MidiDevice &device)
-//---------------------------------------------
 {
 	if(device.stream.isPortOpen())
 	{
@@ -545,7 +520,6 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 
 // Calculate the current output timestamp
 double MidiInOut::GetOutputTimestamp() const
-//------------------------------------------
 {
 	return m_clock.Now() * (1.0 / 1000.0) + GetOutputLatency() + m_latency;
 }
@@ -553,7 +527,6 @@ double MidiInOut::GetOutputTimestamp() const
 
 // Get a device name
 std::string MidiDevice::GetPortName(MidiDevice::ID port)
-//------------------------------------------------------
 {
 	std::string portName = stream.getPortName(port);
 #if MPT_OS_WINDOWS

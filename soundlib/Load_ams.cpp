@@ -24,7 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
 static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk)
-//--------------------------------------------------------------------------------------
 {
 	enum
 	{
@@ -333,7 +332,6 @@ MPT_BINARY_STRUCT(AMSSampleHeader, 17)
 
 
 static bool ValidateHeader(const AMSFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(fileHeader.versionHigh != 0x01)
 	{
@@ -344,14 +342,12 @@ static bool ValidateHeader(const AMSFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const AMSFileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	return fileHeader.extraSize + 3u + fileHeader.numSamps * (1u + sizeof(AMSSampleHeader)) + fileHeader.numOrds * 2u + fileHeader.numPats * 4u;
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(7))
 	{
@@ -375,7 +371,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -697,7 +692,6 @@ MPT_BINARY_STRUCT(AMS2Description, 11)
 
 
 static bool ValidateHeader(const AMS2FileHeader &fileHeader)
-//----------------------------------------------------------
 {
 	if(fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
 	{
@@ -708,14 +702,12 @@ static bool ValidateHeader(const AMS2FileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const AMS2FileHeader &fileHeader)
-//----------------------------------------------------------------------------
 {
 	return 36u + sizeof(AMS2Description) + fileHeader.numIns * 2u + fileHeader.numOrds * 2u + fileHeader.numPats * 4u;
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS2(MemoryFileReader file, const uint64 *pfilesize)
-//-----------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(7))
 	{
@@ -748,7 +740,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMS2(MemoryFileReader file, c
 
 
 bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1038,7 +1029,6 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 // AMS Sample unpacking
 
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
-//------------------------------------------------------------------------------------------------------------------------
 {
 	std::vector<int8> tempBuf(destSize, 0);
 	size_t depackSize = destSize;

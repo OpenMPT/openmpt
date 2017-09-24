@@ -16,9 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_VST
 
-//==============================================
 class COwnerVstEditor: public CAbstractVstEditor
-//==============================================
 {
 protected:
 	CStatic m_plugWindow;

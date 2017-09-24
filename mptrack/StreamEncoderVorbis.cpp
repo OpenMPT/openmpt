@@ -203,14 +203,12 @@ public:
 
 
 VorbisEncoder::VorbisEncoder()
-//----------------------------
 {
 	SetTraits(VorbisBuildTraits());
 }
 
 
 bool VorbisEncoder::IsAvailable() const
-//-------------------------------------
 {
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 	return true;
@@ -221,14 +219,12 @@ bool VorbisEncoder::IsAvailable() const
 
 
 VorbisEncoder::~VorbisEncoder()
-//-----------------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 	return mpt::make_unique<VorbisStreamWriter>(file, settings, tags);
@@ -239,7 +235,6 @@ std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::
 
 
 mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
-//--------------------------------------------------------------
 {
 	static const int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
 	int q = Clamp(Util::Round<int>(quality * 10.0f), 0, 10);

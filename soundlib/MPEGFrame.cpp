@@ -59,7 +59,6 @@ static const uint8 sideInfoSize[2][2] =
 
 
 bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[3])
-//----------------------------------------------------
 {
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0	// Sync
 		&& (header[1] & 0x18) != 0x08	// Invalid MPEG version
@@ -74,7 +73,6 @@ MPEGFrame::MPEGFrame(FileReader &file)
 	, numSamples(0)
 	, isValid(false)
 	, isLAME(false)
-//------------------------------------
 {
 	uint8 header[4];
 	file.ReadArray(header);

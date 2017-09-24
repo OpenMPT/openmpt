@@ -30,9 +30,7 @@ enum DragPoints
 	ENV_DRAGNEXT			= (MAX_ENVPOINTS + 6),
 };
 
-//==========================================
 class CViewInstrument: public CModScrollView
-//==========================================
 {
 protected:
 	CImageList m_bmpEnvBar;

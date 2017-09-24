@@ -39,7 +39,6 @@ BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 END_MESSAGE_MAP()
 
 void CCtrlComments::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CModControlDlg::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CCtrlComments)
@@ -49,7 +48,6 @@ void CCtrlComments::DoDataExchange(CDataExchange* pDX)
 
 
 CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModControlDlg(parent, document)
-//---------------------------------------------------------------------------------------------------------
 {
 	m_nLockCount = 0;
 	m_Reformatting = false;
@@ -58,14 +56,12 @@ CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModC
 
 
 CRuntimeClass *CCtrlComments::GetAssociatedViewClass()
-//----------------------------------------------------
 {
 	return RUNTIME_CLASS(CViewComments);
 }
 
 
 void CCtrlComments::OnActivatePage(LPARAM)
-//----------------------------------------
 {
 	// Don't stop generating VU meter messages
 	m_modDoc.SetNotifications(Notification::Default);
@@ -74,14 +70,12 @@ void CCtrlComments::OnActivatePage(LPARAM)
 
 
 void CCtrlComments::OnDeactivatePage()
-//------------------------------------
 {
 	CModControlDlg::OnDeactivatePage();
 }
 
 
 BOOL CCtrlComments::OnInitDialog()
-//--------------------------------
 {
 	CModControlDlg::OnInitDialog();
 	// Initialize comments
@@ -96,7 +90,6 @@ BOOL CCtrlComments::OnInitDialog()
 
 
 void CCtrlComments::RecalcLayout()
-//--------------------------------
 {
 	CRect rcClient, rect;
 	int cx0, cy0;
@@ -127,7 +120,6 @@ void CCtrlComments::RecalcLayout()
 
 
 void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
-//-------------------------------------------------------------
 {
 	CommentHint commentHint = hint.ToType<CommentHint>();
 	if (pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE]) return;
@@ -189,7 +181,6 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 
 
 void CCtrlComments::OnCommentsUpdated()
-//-------------------------------------
 {
 
 #if defined(MPT_COMMENTS_LONG_LINES_TRUNCATE) || defined(MPT_COMMENTS_LONG_LINES_WRAP)
@@ -316,7 +307,6 @@ void CCtrlComments::OnCommentsUpdated()
 
 
 void CCtrlComments::OnCommentsChanged()
-//-------------------------------------
 {
 	if(m_nLockCount)
 		return;
@@ -333,7 +323,6 @@ void CCtrlComments::OnCommentsChanged()
 
 
 BOOL CCtrlComments::PreTranslateMessage(MSG *pMsg)
-//------------------------------------------------
 {
 	if(pMsg->message == WM_KEYDOWN && pMsg->wParam == 'A' && GetKeyState(VK_CONTROL) < 0)
 	{

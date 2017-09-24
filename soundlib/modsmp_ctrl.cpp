@@ -23,7 +23,6 @@ namespace ctrlSmp
 {
 
 void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength, CSoundFile &sndFile)
-//---------------------------------------------------------------------------------------------------
 {
 	void * const pOldSmp = smp.pSample;
 	FlagSet<ChannelFlags> setFlags, resetFlags;
@@ -44,7 +43,6 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 
 SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength || nStartFrom > smp.nLength)
 		return smp.nLength;
@@ -112,7 +110,6 @@ namespace
 }
 
 SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------------
 {
 	LimitMax(selEnd, smp.nLength);
 	if(selEnd <= selStart)
@@ -141,7 +138,6 @@ SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSou
 
 
 SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &sndFile)
-//-------------------------------------------------------------------------------------
 {
 	// Invalid sample size
 	if(nNewLength > MAX_SAMPLE_LENGTH || nNewLength == smp.nLength)
@@ -209,7 +205,6 @@ public:
 	}
 
 	void CopyLoop(bool direction) const
-	//---------------------------------
 	{
 		// Direction: true = start reading and writing forward, false = start reading and writing backward (write direction never changes)
 		const int numSamples = 2 * InterpolationMaxLookahead + (direction ? 1 : 0);	// Loop point is included in forward loop expansion
@@ -262,7 +257,6 @@ public:
 
 template<typename T>
 void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
-//-----------------------------------------------------------------
 {
 	const int numChannels = smp.GetNumChannels();
 	const int copySamples = numChannels * InterpolationMaxLookahead;
@@ -307,7 +301,6 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 
 
 bool PrecomputeLoops(ModSample &smp, CSoundFile &sndFile, bool updateChannels)
-//----------------------------------------------------------------------------
 {
 	if(smp.nLength == 0 || smp.pSample == nullptr)
 		return false;
@@ -331,7 +324,6 @@ bool PrecomputeLoops(ModSample &smp, CSoundFile &sndFile, bool updateChannels)
 
 // Propagate loop point changes to player
 bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile)
-//--------------------------------------------------------------
 {
 	if(!smp.HasSampleData())
 		return false;
@@ -383,7 +375,6 @@ bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile)
 
 
 void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSample, SAMPLEINDEX maxSample)
-//-------------------------------------------------------------------------------------------------------
 {
 	if(minSample == SAMPLEINDEX_INVALID)
 	{
@@ -450,7 +441,6 @@ namespace
 	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
 	template<class T>
 	OffsetData CalculateOffset(const T *pStart, const SmpLength nLength)
-	//------------------------------------------------------------------
 	{
 		OffsetData offsetVals = {0,0,0};
 
@@ -478,7 +468,6 @@ namespace
 
 	template <class T>
 	void RemoveOffsetAndNormalize(T *pStart, const SmpLength nLength, const double dOffset, const double dAmplify)
-	//------------------------------------------------------------------------------------------------------------
 	{
 		T *p = pStart;
 		for(SmpLength i = 0; i < nLength; i++, p++)
@@ -496,7 +485,6 @@ float RemoveDCOffset(ModSample &smp,
 					 SmpLength iEnd,
 					 const MODTYPE modtype,
 					 CSoundFile &sndFile)
-//---------------------------------------
 {
 	if(!smp.HasSampleData())
 		return 0;
@@ -565,7 +553,6 @@ float RemoveDCOffset(ModSample &smp,
 
 template <class T>
 static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
-//---------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < nLength / 2; i++)
 	{
@@ -575,7 +562,6 @@ static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
 
 // Reverse sample data
 bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
-//---------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
 	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
@@ -603,7 +589,6 @@ bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 
 template <class T>
 static void UnsignSampleImpl(T *pStart, const SmpLength nLength)
-//--------------------------------------------------------------
 {
 	const T offset = (std::numeric_limits<T>::min)();
 	for(SmpLength i = 0; i < nLength; i++)
@@ -614,7 +599,6 @@ static void UnsignSampleImpl(T *pStart, const SmpLength nLength)
 
 // Virtually unsign sample data
 bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
-//--------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
 	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
@@ -638,7 +622,6 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 template <class T>
 static void InvertSampleImpl(T *pStart, const SmpLength nLength)
-//--------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < nLength; i++)
 	{
@@ -648,7 +631,6 @@ static void InvertSampleImpl(T *pStart, const SmpLength nLength)
 
 // Invert sample data (flip by 180 degrees)
 bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
-//--------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
 	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
@@ -672,7 +654,6 @@ bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 template <class T>
 static void XFadeSampleImpl(const T *srcIn, const T *srcOut, T *output, const SmpLength fadeLength, double e)
-//-----------------------------------------------------------------------------------------------------------
 {
 	const double length = 1.0 / static_cast<double>(fadeLength);
 	for(SmpLength i = 0; i < fadeLength; i++, srcIn++, srcOut++, output++)
@@ -688,7 +669,6 @@ static void XFadeSampleImpl(const T *srcIn, const T *srcOut, T *output, const Sm
 
 // X-Fade sample data to create smooth loop transitions
 bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterloopFade, bool useSustainLoop, CSoundFile &sndFile)
-//-------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
 	const SmpLength loopStart = useSustainLoop ? smp.nSustainStart : smp.nLoopStart;
@@ -725,7 +705,6 @@ bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterlo
 
 template <class T>
 static void SilenceSampleImpl(T *p, SmpLength length, SmpLength inc, bool fromStart, bool toEnd)
-//----------------------------------------------------------------------------------------------
 {
 	const int dest = toEnd ? 0 : p[(length - 1) * inc];
 	const int base = fromStart ? 0 :p[0];
@@ -741,7 +720,6 @@ static void SilenceSampleImpl(T *p, SmpLength length, SmpLength inc, bool fromSt
 
 // X-Fade sample data to create smooth loop transitions
 bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
-//-------------------------------------------------------------------------------------
 {
 	LimitMax(end, smp.nLength);
 	if(!smp.HasSampleData() || start >= end) return false;
@@ -768,7 +746,6 @@ bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 
 template <class T>
 static void StereoSepSampleImpl(T *p, SmpLength length, int32 separation)
-//-----------------------------------------------------------------------
 {
 	const int32 fac1 = static_cast<int32>(32768 + separation / 2), fac2 = static_cast<int32>(32768 - separation / 2);
 	while(length--)
@@ -782,7 +759,6 @@ static void StereoSepSampleImpl(T *p, SmpLength length, int32 separation)
 
 // X-Fade sample data to create smooth loop transitions
 bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double separation, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------------------------
 {
 	LimitMax(end, smp.nLength);
 	if(!smp.HasSampleData() || start >= end || smp.GetNumChannels() != 2) return false;
@@ -805,7 +781,6 @@ bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double sepa
 
 template <class T>
 static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
-//----------------------------------------------------------------------
 {
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
@@ -817,7 +792,6 @@ static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 
 template <class T>
 static void ConvertStereoToMonoOneChannelImpl(T *pDest, const SmpLength length)
-//-----------------------------------------------------------------------------
 {
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
@@ -829,7 +803,6 @@ static void ConvertStereoToMonoOneChannelImpl(T *pDest, const SmpLength length)
 
 // Convert a multichannel sample to mono (currently only implemented for stereo)
 bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode conversionMode)
-//--------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData() || smp.GetNumChannels() != 2) return false;
 
@@ -873,7 +846,6 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 
 template <class T>
 static void ConvertMonoToStereoImpl(const T * MPT_RESTRICT src, T * MPT_RESTRICT dst, SmpLength length)
-//-----------------------------------------------------------------------------------------------------
 {
 	while(length--)
 	{
@@ -887,7 +859,6 @@ static void ConvertMonoToStereoImpl(const T * MPT_RESTRICT src, T * MPT_RESTRICT
 
 // Convert a multichannel sample to mono (currently only implemented for stereo)
 bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile)
-//-------------------------------------------------------
 {
 	if(!smp.HasSampleData() || smp.GetNumChannels() != 1) return false;
 
@@ -915,7 +886,6 @@ bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile)
 
 // Convert 16-bit sample to 8-bit
 bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
-//-----------------------------------------------------
 {
 	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 2)
 		return false;
@@ -934,7 +904,6 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
 
 // Convert 8-bit sample to 16-bit
 bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
-//------------------------------------------------------
 {
 	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 1)
 		return false;

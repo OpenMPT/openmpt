@@ -19,7 +19,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 static bool ValidateHeader(const UMXFileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
 		|| fileHeader.nameCount == 0
@@ -34,7 +33,6 @@ static bool ValidateHeader(const UMXFileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderUMX(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	UMXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -55,7 +53,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderUMX(MemoryFileReader file, co
 
 
 bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
-//-----------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();

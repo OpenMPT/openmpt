@@ -16,9 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//====================================
 class SongMessage : public std::string
-//====================================
 {
 public:
 

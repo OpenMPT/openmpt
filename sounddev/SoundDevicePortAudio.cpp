@@ -42,7 +42,6 @@ namespace SoundDevice {
 
 
 CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-//--------------------------------------------------------------------------------------
 	: SoundDevice::Base(info, sysInfo)
 	, m_StatisticPeriodFrames(0)
 {
@@ -58,14 +57,12 @@ CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo 
 
 
 CPortaudioDevice::~CPortaudioDevice()
-//-----------------------------------
 {
 	Close();
 }
 
 
 bool CPortaudioDevice::InternalOpen()
-//-----------------------------------
 {
 	MemsetZero(m_StreamParameters);
 	MemsetZero(m_InputStreamParameters);
@@ -181,7 +178,6 @@ bool CPortaudioDevice::InternalOpen()
 
 
 bool CPortaudioDevice::InternalClose()
-//------------------------------------
 {
 	if(m_Stream)
 	{
@@ -205,21 +201,18 @@ bool CPortaudioDevice::InternalClose()
 
 
 bool CPortaudioDevice::InternalStart()
-//------------------------------------
 {
 	return Pa_StartStream(m_Stream) == paNoError;
 }
 
 
 void CPortaudioDevice::InternalStop()
-//-----------------------------------
 {
 	Pa_StopStream(m_Stream);
 }
 
 
 void CPortaudioDevice::InternalFillAudioBuffer()
-//----------------------------------------------
 {
 	if(m_CurrentFrameCount == 0) return;
 	SourceLockedAudioPreRead(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
@@ -230,7 +223,6 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 
 
 int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
-//--------------------------------------------------------------
 {
 	if(Pa_IsStreamActive(m_Stream) != 1) return 0;
 	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * m_StreamInfo->sampleRate);
@@ -238,7 +230,6 @@ int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
 
 
 SoundDevice::BufferAttributes CPortaudioDevice::InternalGetEffectiveBufferAttributes() const
-//------------------------------------------------------------------------------------------
 {
 	SoundDevice::BufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_StreamInfo->outputLatency;
@@ -256,7 +247,6 @@ SoundDevice::BufferAttributes CPortaudioDevice::InternalGetEffectiveBufferAttrib
 
 
 bool CPortaudioDevice::OnIdle()
-//-----------------------------
 {
 	if(!IsPlaying())
 	{
@@ -285,7 +275,6 @@ bool CPortaudioDevice::OnIdle()
 
 
 SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
-//-------------------------------------------------------------
 {
 	MPT_TRACE();
 	SoundDevice::Statistics result;
@@ -309,7 +298,6 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 
 
 SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
-//-------------------------------------------------------
 {
 	SoundDevice::Caps caps;
 	caps.Available = true;
@@ -375,7 +363,6 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 
 
 SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
-//---------------------------------------------------------------------------------------------------------
 {
 	SoundDevice::DynamicCaps caps;
 	PaDeviceIndex device = m_DeviceIndex;
@@ -432,7 +419,6 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 
 
 bool CPortaudioDevice::OpenDriverSettings()
-//-----------------------------------------
 {
 #if MPT_OS_WINDOWS
 	if(m_HostApiType != paWASAPI)
@@ -462,7 +448,6 @@ int CPortaudioDevice::StreamCallback(
 	const PaStreamCallbackTimeInfo* timeInfo,
 	PaStreamCallbackFlags statusFlags
 	)
-//-----------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(input);
 	if(!output) return paAbort;
@@ -514,14 +499,12 @@ int CPortaudioDevice::StreamCallbackWrapper(
 	PaStreamCallbackFlags statusFlags,
 	void *userData
 	)
-//------------------------------------------
 {
 	return reinterpret_cast<CPortaudioDevice*>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
 }
 
 
 std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
-//---------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
@@ -602,7 +585,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 
 
 std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType)
-//---------------------------------------------------------------------------------------------------------------------------
 {
 	std::vector<std::pair<PaDeviceIndex, mpt::ustring> > result;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
@@ -646,7 +628,6 @@ std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::Enumerate
 
 
 bool CPortaudioDevice::HasInputChannelsOnSameDevice() const
-//---------------------------------------------------------
 {
 	if(m_DeviceIndex == paNoDevice)
 	{
@@ -663,7 +644,6 @@ bool CPortaudioDevice::HasInputChannelsOnSameDevice() const
 
 #if MPT_COMPILER_MSVC
 static void PortaudioLog(const char *text)
-//----------------------------------------
 {
 	if(!text)
 	{

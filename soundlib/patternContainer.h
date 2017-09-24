@@ -18,9 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 
-//=====================
 class CPatternContainer
-//=====================
 {
 public:
 	CPattern& operator[](const int pat) { return m_Patterns[pat]; }
@@ -97,7 +95,6 @@ private:
 
 template <class Func>
 Func CPatternContainer::ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func)
-//-------------------------------------------------------------------------------------------------
 {
 	if (nStartPat > nLastPat || nLastPat >= Size())
 		return func;

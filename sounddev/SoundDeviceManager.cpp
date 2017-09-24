@@ -50,7 +50,6 @@ struct CompareInfo
 
 template <typename Tdevice>
 void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
-//----------------------------------------------------------
 {
 	const auto infos = Tdevice::EnumerateDevices(sysInfo);
 	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
@@ -67,14 +66,12 @@ void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 
 template <typename Tdevice>
 SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
-//------------------------------------------------------------------------------------------------------------
 {
 	return new Tdevice(info, sysInfo);
 }
 
 
 void Manager::ReEnumerate()
-//-------------------------
 {
 	MPT_TRACE();
 	m_SoundDevices.clear();
@@ -247,7 +244,6 @@ void Manager::ReEnumerate()
 
 
 SoundDevice::Manager::GlobalID Manager::GetGlobalID(SoundDevice::Identifier identifier) const
-//-------------------------------------------------------------------------------------------
 {
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{
@@ -261,7 +257,6 @@ SoundDevice::Manager::GlobalID Manager::GetGlobalID(SoundDevice::Identifier iden
 
 
 SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Manager::GlobalID id) const
-//--------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(id > m_SoundDevices.size())
@@ -273,7 +268,6 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Manager::GlobalID id) con
 
 
 SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) const
-//---------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(m_SoundDevices.empty())
@@ -296,7 +290,6 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 
 
 SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType)
-//---------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(m_SoundDevices.empty())
@@ -344,7 +337,6 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 
 
 bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	bool result = false;
@@ -366,7 +358,6 @@ bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice
 
 
 SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, SoundDevice::IBase *currentSoundDevice)
-//------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(m_DeviceCaps.find(identifier) == m_DeviceCaps.end())
@@ -392,7 +383,6 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, Sou
 
 
 SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier identifier, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice, bool update)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if((m_DeviceDynamicCaps.find(identifier) == m_DeviceDynamicCaps.end()) || update)
@@ -427,7 +417,6 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier i
 
 
 SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifier)
-//---------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	const SoundDevice::Info info = FindDeviceInfo(identifier);
@@ -460,7 +449,6 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 
 
 Manager::Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
-//--------------------------------------------------------------------------
 	: m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
 {
@@ -469,7 +457,6 @@ Manager::Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
 
 
 Manager::~Manager()
-//-----------------
 {
 	return;
 }

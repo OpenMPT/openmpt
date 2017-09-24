@@ -23,7 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension)
-//----------------------------------------------------------------------------------------------
 	: m_IsTempFile(false)
 {
 	try
@@ -121,7 +120,6 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 
 OnDiskFileWrapper::~OnDiskFileWrapper()
-//-------------------------------------
 {
 	if(m_IsTempFile)
 	{
@@ -133,14 +131,12 @@ OnDiskFileWrapper::~OnDiskFileWrapper()
 
 
 bool OnDiskFileWrapper::IsValid() const
-//-------------------------------------
 {
 	return !m_Filename.empty();
 }
 
 
 mpt::PathString OnDiskFileWrapper::GetFilename() const
-//----------------------------------------------------
 {
 	return m_Filename;
 }

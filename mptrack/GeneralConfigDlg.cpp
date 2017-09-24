@@ -71,7 +71,6 @@ static const struct GeneralOptionsDescriptions
 
 
 void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
@@ -84,7 +83,6 @@ void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsGeneral::OnInitDialog()
-//----------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -145,7 +143,6 @@ BOOL COptionsGeneral::OnInitDialog()
 
 
 void COptionsGeneral::OnOK()
-//--------------------------
 {
 	TrackerSettings::Instance().defaultArtist = GetWindowTextUnicode(m_defaultArtist);
 	TrackerSettings::Instance().defaultModType = static_cast<MODTYPE>(m_defaultFormat.GetItemData(m_defaultFormat.GetCurSel()));
@@ -176,7 +173,6 @@ void COptionsGeneral::OnOK()
 
 
 BOOL COptionsGeneral::OnSetActive()
-//---------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_GENERAL;
 	return CPropertyPage::OnSetActive();
@@ -184,7 +180,6 @@ BOOL COptionsGeneral::OnSetActive()
 
 
 void COptionsGeneral::OnOptionSelChanged()
-//----------------------------------------
 {
 	LPCSTR pszDesc = NULL;
 	const int sel = m_CheckList.GetCurSel();
@@ -197,7 +192,6 @@ void COptionsGeneral::OnOptionSelChanged()
 
 
 void COptionsGeneral::OnBrowseTemplate()
-//--------------------------------------
 {
 	mpt::PathString basePath = theApp.GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\");
 	mpt::PathString defaultFile = mpt::PathString::FromUnicode(GetWindowTextUnicode(m_defaultTemplate));

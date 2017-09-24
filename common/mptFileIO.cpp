@@ -177,14 +177,12 @@ LazyFileRef::operator std::string () const
 #if MPT_OS_WINDOWS
 
 CMappedFile::~CMappedFile()
-//-------------------------
 {
 	Close();
 }
 
 
 bool CMappedFile::Open(const mpt::PathString &filename)
-//-----------------------------------------------------
 {
 	m_hFile = CreateFileW(
 		filename.AsNativePrefixed().c_str(),
@@ -205,7 +203,6 @@ bool CMappedFile::Open(const mpt::PathString &filename)
 
 
 void CMappedFile::Close()
-//-----------------------
 {
 	m_FileName = mpt::PathString();
 	// Unlock file
@@ -234,7 +231,6 @@ void CMappedFile::Close()
 
 
 size_t CMappedFile::GetLength()
-//-----------------------------
 {
 	LARGE_INTEGER size;
 	if(GetFileSizeEx(m_hFile, &size) == FALSE)
@@ -246,7 +242,6 @@ size_t CMappedFile::GetLength()
 
 
 const mpt::byte *CMappedFile::Lock()
-//----------------------------------
 {
 	size_t length = GetLength();
 	if(!length) return nullptr;

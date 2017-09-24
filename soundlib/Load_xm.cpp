@@ -28,7 +28,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Allocate samples for an instrument
 static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
-//--------------------------------------------------------------------------------------------
 {
 	LimitMax(numSamples, SAMPLEINDEX(32));
 
@@ -124,7 +123,6 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 
 // Read .XM patterns
 static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------------------
 {
 	// Reading patterns
 	sndFile.Patterns.ResizeArray(fileHeader.patterns);
@@ -263,7 +261,6 @@ DECLARE_FLAGSET(TrackerVersions)
 
 
 static bool ValidateHeader(const XMFileHeader &fileHeader)
-//--------------------------------------------------------
 {
 	if(fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
@@ -277,14 +274,12 @@ static bool ValidateHeader(const XMFileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const XMFileHeader &fileHeader)
-//--------------------------------------------------------------------------
 {
 	return fileHeader.orders + 4 * (fileHeader.patterns + fileHeader.instruments);
 }
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXM(MemoryFileReader file, const uint64 *pfilesize)
-//---------------------------------------------------------------------------------------------------
 {
 	XMFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -300,7 +295,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXM(MemoryFileReader file, con
 
 
 bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -748,7 +742,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 
 bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExport)
-//--------------------------------------------------------------------------------
 {
 	if(filename.empty())
 	{

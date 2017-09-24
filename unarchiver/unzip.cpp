@@ -99,7 +99,6 @@ struct ZipFileAbstraction
 
 
 CZipArchive::CZipArchive(FileReader &file)
-//----------------------------------------
 	: ArchiveBase(file)
 	, zipFile(nullptr)
 {
@@ -173,14 +172,12 @@ CZipArchive::CZipArchive(FileReader &file)
 
 
 CZipArchive::~CZipArchive()
-//-------------------------
 {
 	unzClose(zipFile);
 }
 
 
 bool CZipArchive::ExtractFile(std::size_t index)
-//----------------------------------------------
 {
 	if(index >= contents.size())
 	{
@@ -221,7 +218,6 @@ bool CZipArchive::ExtractFile(std::size_t index)
 
 
 CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
-//------------------------------------------------------------
 {
 	zipFile = new mz_zip_archive();
 	
@@ -266,7 +262,6 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 
 
 CZipArchive::~CZipArchive()
-//-------------------------
 {
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 
@@ -282,7 +277,6 @@ CZipArchive::~CZipArchive()
 
 
 bool CZipArchive::ExtractFile(std::size_t index)
-//----------------------------------------------
 {
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 

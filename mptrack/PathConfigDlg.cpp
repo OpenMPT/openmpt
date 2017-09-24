@@ -35,7 +35,6 @@ PathConfigDlg::PathConfigDlg()
 
 
 void PathConfigDlg::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 }
@@ -65,7 +64,6 @@ END_MESSAGE_MAP()
 
 
 BOOL PathConfigDlg::OnInitDialog()
-//--------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -95,14 +93,12 @@ BOOL PathConfigDlg::OnInitDialog()
 
 
 static mpt::PathString GetPath(HWND hwnd, int id)
-//-----------------------------------------------
 {
 	return mpt::PathString::FromUnicode(GetWindowTextUnicode(::GetDlgItem(hwnd, id))).EnsureTrailingSlash();
 }
 
 
 void PathConfigDlg::OnOK()
-//------------------------
 {
 	auto &settings = TrackerSettings::Instance();
 	// Default paths
@@ -124,7 +120,6 @@ void PathConfigDlg::OnOK()
 
 
 void PathConfigDlg::BrowseFolder(UINT nID)
-//----------------------------------------
 {
 	TCHAR *prompt = (nID == IDC_AUTOSAVE_PATH)
 		? _T("Select a folder to store autosaved files in...")
@@ -139,7 +134,6 @@ void PathConfigDlg::BrowseFolder(UINT nID)
 
 
 void PathConfigDlg::OnAutosaveEnable()
-//------------------------------------
 {
 	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
 	GetDlgItem(IDC_AUTOSAVE_INTERVAL)->EnableWindow(enabled);
@@ -156,7 +150,6 @@ void PathConfigDlg::OnAutosaveEnable()
 
 
 void PathConfigDlg::OnAutosaveUseOrigDir()
-//----------------------------------------
 {
 	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
 	{
@@ -170,14 +163,12 @@ void PathConfigDlg::OnAutosaveUseOrigDir()
 
 
 void PathConfigDlg::OnSettingsChanged()
-//-------------------------------------
 {
 	SetModified(TRUE);
 }
 
 
 BOOL PathConfigDlg::OnSetActive()
-//--------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
 	return CPropertyPage::OnSetActive();
@@ -185,7 +176,6 @@ BOOL PathConfigDlg::OnSetActive()
 
 
 BOOL PathConfigDlg::OnKillActive()
-//--------------------------------
 {
 	mpt::PathString path = GetPath(m_hWnd, IDC_AUTOSAVE_PATH);
 

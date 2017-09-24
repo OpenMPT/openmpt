@@ -26,9 +26,7 @@ struct OrdSelection
 	ORDERINDEX GetSelCount() const {return lastOrd - firstOrd + 1;}
 };
 
-//===========================
 class COrderList: public CWnd
-//===========================
 {
 	friend class CCtrlPatterns;
 protected:
@@ -175,9 +173,7 @@ protected:
 
 // CPatEdit: Edit control that switches back to the pattern view if Tab key is pressed.
 
-//==========================
 class CPatEdit: public CEdit
-//==========================
 {
 protected:
 	CCtrlPatterns *m_pParent;
@@ -189,9 +185,7 @@ public:
 };
 
 
-//========================================
 class CCtrlPatterns: public CModControlDlg
-//========================================
 {
 	friend class COrderList;
 protected:

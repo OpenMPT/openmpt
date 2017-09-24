@@ -25,9 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModControlView;
 class CModControlBar;
 
-//=======================================
 class CModControlBar: public CToolBarCtrl
-//=======================================
 {
 public:
 	BOOL Init(CImageList &icons, CImageList &disabledIcons);
@@ -38,9 +36,7 @@ public:
 };
 
 
-//==================================
 class CModControlDlg: public CDialog
-//==================================
 {
 protected:
 	CModDoc &m_modDoc;
@@ -103,9 +99,7 @@ protected:
 };
 
 
-//================================
 class CModTabCtrl: public CTabCtrl
-//================================
 {
 public:
 	BOOL InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam=0, int iImage=-1);
@@ -114,9 +108,7 @@ public:
 };
 
 
-//=================================
 class CModControlView: public CView
-//=================================
 {
 public:
 	enum Views
@@ -194,9 +186,7 @@ protected:
 #define NCBTNS_PUSHED			0x08
 
 
-//======================================
 class CModScrollView: public CScrollView
-//======================================
 {
 protected:
 	HWND m_hWndCtrl;

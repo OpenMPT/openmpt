@@ -112,7 +112,6 @@ END_MESSAGE_MAP()
 
 
 void COptionsSoundcard::OnSampleFormatChanged()
-//---------------------------------------------
 {
 	OnSettingsChanged();
 	UpdateDither();
@@ -120,7 +119,6 @@ void COptionsSoundcard::OnSampleFormatChanged()
 
 
 void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
@@ -148,7 +146,6 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 
 
 COptionsSoundcard::COptionsSoundcard(SoundDevice::Identifier deviceIdentifier)
-//----------------------------------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 	, m_InitialDeviceIdentifier(deviceIdentifier)
 {
@@ -157,14 +154,12 @@ COptionsSoundcard::COptionsSoundcard(SoundDevice::Identifier deviceIdentifier)
 
 
 void COptionsSoundcard::SetInitialDevice()
-//----------------------------------------
 {
 	SetDevice(m_InitialDeviceIdentifier, true);
 }
 
 
 void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
-//------------------------------------------------------------------------------
 {
 	SoundDevice::Identifier olddev = m_CurrentDeviceInfo.GetIdentifier();
 	SoundDevice::Info newInfo;
@@ -190,7 +185,6 @@ void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
 
 
 void COptionsSoundcard::OnSoundCardRescan()
-//-----------------------------------------
 {
 	{
 		// Close sound device because IDs might change when re-enumerating which could cause all kinds of havoc.
@@ -205,7 +199,6 @@ void COptionsSoundcard::OnSoundCardRescan()
 
 
 BOOL COptionsSoundcard::OnInitDialog()
-//------------------------------------
 {
 	CPropertyPage::OnInitDialog();
 	SetInitialDevice();
@@ -215,7 +208,6 @@ BOOL COptionsSoundcard::OnInitDialog()
 
 
 void COptionsSoundcard::UpdateLatency()
-//-------------------------------------
 {
 	{
 		GetDlgItem(IDC_STATIC_LATENCY)->EnableWindow(TRUE);
@@ -261,7 +253,6 @@ void COptionsSoundcard::UpdateLatency()
 
 
 void COptionsSoundcard::UpdateUpdateInterval()
-//--------------------------------------------
 {
 	{
 		m_CbnUpdateIntervalMS.EnableWindow(TRUE);
@@ -296,7 +287,6 @@ void COptionsSoundcard::UpdateUpdateInterval()
 
 
 void COptionsSoundcard::UpdateGeneral()
-//-------------------------------------
 {
 	// General
 	{
@@ -325,7 +315,6 @@ void COptionsSoundcard::UpdateGeneral()
 
 
 void COptionsSoundcard::UpdateEverything()
-//----------------------------------------
 {
 	// Sound Device
 	{
@@ -442,7 +431,6 @@ void COptionsSoundcard::UpdateEverything()
 
 
 void COptionsSoundcard::UpdateDevice()
-//------------------------------------
 {
 	UpdateGeneral();
 	UpdateControls();
@@ -457,7 +445,6 @@ void COptionsSoundcard::UpdateDevice()
 
 
 void COptionsSoundcard::UpdateChannels()
-//--------------------------------------
 {
 	{
 		m_CbnChannels.EnableWindow(TRUE);
@@ -490,7 +477,6 @@ void COptionsSoundcard::UpdateChannels()
 
 
 void COptionsSoundcard::UpdateSampleFormat()
-//------------------------------------------
 {
 	{
 		m_CbnSampleFormat.EnableWindow(TRUE);
@@ -533,7 +519,6 @@ void COptionsSoundcard::UpdateSampleFormat()
 
 
 void COptionsSoundcard::UpdateDither()
-//------------------------------------
 {
 	{
 		m_CbnDither.EnableWindow(TRUE);
@@ -575,7 +560,6 @@ void COptionsSoundcard::UpdateDither()
 
 
 void COptionsSoundcard::UpdateChannelMapping()
-//--------------------------------------------
 {
 	{
 		GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(TRUE);
@@ -634,7 +618,6 @@ void COptionsSoundcard::UpdateChannelMapping()
 
 
 void COptionsSoundcard::OnDeviceChanged()
-//---------------------------------------
 {
 	int n = m_CbnDevice.GetCurSel();
 	if(n >= 0)
@@ -647,7 +630,6 @@ void COptionsSoundcard::OnDeviceChanged()
 
 
 void COptionsSoundcard::OnExclusiveModeChanged()
-//----------------------------------------------
 {
 	UpdateSampleRates();
 	OnSettingsChanged();
@@ -655,7 +637,6 @@ void COptionsSoundcard::OnExclusiveModeChanged()
 
 
 void COptionsSoundcard::OnChannelsChanged()
-//-----------------------------------------
 {
 	UpdateChannelMapping();
 	OnSettingsChanged();
@@ -663,7 +644,6 @@ void COptionsSoundcard::OnChannelsChanged()
 
 
 void COptionsSoundcard::OnSoundCardDriverPanel()
-//----------------------------------------------
 {
 	theApp.GetSoundDevicesManager()->OpenDriverSettings(
 		theApp.GetSoundDevicesManager()->FindDeviceInfo(static_cast<SoundDevice::Manager::GlobalID>(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel()))).GetIdentifier(),
@@ -674,7 +654,6 @@ void COptionsSoundcard::OnSoundCardDriverPanel()
 
 
 void COptionsSoundcard::OnChannelChanged(int channel)
-//---------------------------------------------------
 {
 	CComboBox *combo = &m_CbnChannelMapping[channel];
 	const LONG_PTR newChn = combo->GetItemData(combo->GetCurSel());
@@ -727,7 +706,6 @@ void COptionsSoundcard::OnChannelChanged(int channel)
 
 // Fill the dropdown box with a list of valid sample rates, depending on the selected sound device.
 void COptionsSoundcard::UpdateSampleRates()
-//-----------------------------------------
 {
 	{
 		GetDlgItem(IDC_STATIC_FORMAT)->EnableWindow(TRUE);
@@ -772,7 +750,6 @@ void COptionsSoundcard::UpdateSampleRates()
 
 
 void COptionsSoundcard::UpdateControls()
-//--------------------------------------
 {
 	{
 		m_BtnDriverPanel.EnableWindow(TRUE);
@@ -809,7 +786,6 @@ void COptionsSoundcard::UpdateControls()
 
 
 BOOL COptionsSoundcard::OnSetActive()
-//-----------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_SOUNDCARD;
 	return CPropertyPage::OnSetActive();
@@ -817,7 +793,6 @@ BOOL COptionsSoundcard::OnSetActive()
 
 
 void COptionsSoundcard::OnOK()
-//----------------------------
 {
 	if(!theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
 	{
@@ -903,7 +878,6 @@ void COptionsSoundcard::OnOK()
 
 
 void COptionsSoundcard::UpdateStatistics()
-//----------------------------------------
 {
 	if (!m_EditStatistics) return;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -955,7 +929,6 @@ END_MESSAGE_MAP()
 
 
 void COptionsMixer::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
@@ -975,7 +948,6 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsMixer::OnInitDialog()
-//--------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -1063,7 +1035,6 @@ BOOL COptionsMixer::OnInitDialog()
 
 
 BOOL COptionsMixer::OnSetActive()
-//-------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIXER;
 	return CPropertyPage::OnSetActive();
@@ -1071,7 +1042,6 @@ BOOL COptionsMixer::OnSetActive()
 
 
 void COptionsMixer::OnResamplerChanged()
-//--------------------------------------
 {
 	ResamplingMode srcMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
 	m_CbnWFIRType.ResetContent();
@@ -1133,7 +1103,6 @@ void COptionsMixer::OnResamplerChanged()
 
 
 void COptionsMixer::OnRampingChanged()
-//------------------------------------
 {
 	if(!m_initialized)
 		return;
@@ -1143,7 +1112,6 @@ void COptionsMixer::OnRampingChanged()
 
 
 void COptionsMixer::OnHScroll(UINT n, UINT pos, CScrollBar *p)
-//------------------------------------------------------------
 {
 	CPropertyPage::OnHScroll(n, pos, p);
 	if(p == (CScrollBar *)&m_SliderStereoSep)
@@ -1155,7 +1123,6 @@ void COptionsMixer::OnHScroll(UINT n, UINT pos, CScrollBar *p)
 
 
 void COptionsMixer::UpdateRamping()
-//---------------------------------
 {
 	MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
 	CString s;
@@ -1171,7 +1138,6 @@ void COptionsMixer::UpdateRamping()
 
 
 void COptionsMixer::UpdateStereoSep()
-//-----------------------------------
 {
 	CString s;
 	s.Format(_T("%d%%"), ((8 * m_SliderStereoSep.GetPos()) * 100) / 128);
@@ -1180,7 +1146,6 @@ void COptionsMixer::UpdateStereoSep()
 
 
 void COptionsMixer::OnOK()
-//------------------------
 {
 	// resampler mode
 	{
@@ -1270,9 +1235,7 @@ void COptionsMixer::OnOK()
 
 #ifndef NO_EQ
 
-//====================================
 class CEQSavePresetDlg: public CDialog
-//====================================
 {
 protected:
 	EQPreset &m_EQ;
@@ -1285,7 +1248,6 @@ public:
 
 
 BOOL CEQSavePresetDlg::OnInitDialog()
-//-----------------------------------
 {
 	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	if (pCombo)
@@ -1305,7 +1267,6 @@ BOOL CEQSavePresetDlg::OnInitDialog()
 
 
 void CEQSavePresetDlg::OnOK()
-//---------------------------
 {
 	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	if (pCombo)
@@ -1323,7 +1284,6 @@ void CEQSavePresetDlg::OnOK()
 
 
 void CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
-//--------------------------------------------------
 {
 	m_nSliderNo = n;
 	m_pParent = parent;
@@ -1332,7 +1292,6 @@ void CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
 
 
 BOOL CEQSlider::PreTranslateMessage(MSG *pMsg)
-//--------------------------------------------
 {
 	if ((pMsg) && (pMsg->message == WM_RBUTTONDOWN) && (m_pParent))
 	{
@@ -1390,7 +1349,6 @@ END_MESSAGE_MAP()
 
 
 void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsPlayer)
@@ -1405,7 +1363,6 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsPlayer::OnInitDialog()
-//---------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -1498,7 +1455,6 @@ BOOL COptionsPlayer::OnInitDialog()
 
 
 BOOL COptionsPlayer::OnSetActive()
-//--------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PLAYER;
 
@@ -1514,7 +1470,6 @@ BOOL COptionsPlayer::OnSetActive()
 
 
 void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
-//-----------------------------------------------------------------
 {
 	if (nSBCode == SB_ENDSCROLL) return;
 	if ((psb) && (psb->m_hWnd == m_SbReverbDepth.m_hWnd))
@@ -1533,7 +1488,6 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 
 
 void COptionsPlayer::OnOK()
-//-------------------------
 {
 	DWORD dwQuality = 0;
 
@@ -1601,7 +1555,6 @@ void COptionsPlayer::OnOK()
 #ifndef NO_EQ
 
 void COptionsPlayer::UpdateEQ(bool bReset)
-//----------------------------------------
 {
 	CriticalSection cs;
 	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
@@ -1610,7 +1563,6 @@ void COptionsPlayer::UpdateEQ(bool bReset)
 
 
 void COptionsPlayer::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
-//-----------------------------------------------------------------------------
 {
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
@@ -1623,7 +1575,6 @@ void COptionsPlayer::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 
 
 void COptionsPlayer::LoadEQPreset(const EQPreset &preset)
-//-------------------------------------------------------
 {
 	m_EQPreset = preset;
 	UpdateEQ(TRUE);
@@ -1632,7 +1583,6 @@ void COptionsPlayer::LoadEQPreset(const EQPreset &preset)
 
 
 void COptionsPlayer::OnSavePreset()
-//---------------------------------
 {
 	CEQSavePresetDlg dlg(m_EQPreset, this);
 	if (dlg.DoModal() == IDOK)
@@ -1643,7 +1593,6 @@ void COptionsPlayer::OnSavePreset()
 
 
 static void f2s(UINT f, TCHAR *s)
-//-------------------------------
 {
 	if (f < 1000)
 	{
@@ -1664,7 +1613,6 @@ static void f2s(UINT f, TCHAR *s)
 
 
 void COptionsPlayer::UpdateDialog()
-//---------------------------------
 {
 	TCHAR s[32];
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
@@ -1684,7 +1632,6 @@ void COptionsPlayer::UpdateDialog()
 
 
 void COptionsPlayer::OnSliderMenu(UINT nID)
-//-----------------------------------------
 {
 	UINT n = nID - ID_EQSLIDER_BASE;
 	if (n < MAX_EQ_BANDS)
@@ -1710,7 +1657,6 @@ void COptionsPlayer::OnSliderMenu(UINT nID)
 
 
 void COptionsPlayer::OnSliderFreq(UINT nID)
-//-----------------------------------------
 {
 	UINT n = nID - ID_EQMENU_BASE;
 	if ((m_nSliderMenu < MAX_EQ_BANDS) && (n < EQ_MAX_FREQS))
@@ -1753,7 +1699,6 @@ END_MESSAGE_MAP()
 
 
 void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
@@ -1767,7 +1712,6 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CMidiSetupDlg::OnInitDialog()
-//--------------------------------
 {
 	MIDIINCAPS mic;
 	CComboBox *combo;
@@ -1844,7 +1788,6 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 
 void CMidiSetupDlg::OnOK()
-//------------------------
 {
 	CComboBox *combo;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1888,7 +1831,6 @@ void CMidiSetupDlg::OnOK()
 
 
 BOOL CMidiSetupDlg::OnSetActive()
-//-------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 	return CPropertyPage::OnSetActive();
@@ -1906,7 +1848,6 @@ END_MESSAGE_MAP()
 
 
 COptionsWine::COptionsWine()
-//--------------------------
 	: CPropertyPage(IDD_OPTIONS_WINE)
 {
 	return;
@@ -1914,7 +1855,6 @@ COptionsWine::COptionsWine()
 
 
 void COptionsWine::DoDataExchange(CDataExchange* pDX)
-//---------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsWine)
@@ -1925,7 +1865,6 @@ void COptionsWine::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL COptionsWine::OnInitDialog()
-//-------------------------------
 {
 	CPropertyPage::OnInitDialog();
 	GetDlgItem(IDC_CHECK_WINE_ENABLE)->EnableWindow(mpt::Windows::IsWine() ? TRUE : FALSE);
@@ -1957,14 +1896,12 @@ BOOL COptionsWine::OnInitDialog()
 
 
 void COptionsWine::OnSettingsChanged()
-//------------------------------------
 {
 	SetModified(TRUE);
 }
 
 
 void COptionsWine::OnOK()
-//-----------------------
 {
 	TrackerSettings::Instance().WineSupportEnabled = IsDlgButtonChecked(IDC_CHECK_WINE_ENABLE) ? true : false;
 	TrackerSettings::Instance().WineSupportEnablePulseAudio = m_CbnPulseAudio.GetItemData(m_CbnPulseAudio.GetCurSel());
@@ -1974,7 +1911,6 @@ void COptionsWine::OnOK()
 
 
 BOOL COptionsWine::OnSetActive()
-//------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_WINE;
 	return CPropertyPage::OnSetActive();

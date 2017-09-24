@@ -286,7 +286,6 @@ MPT_BINARY_STRUCT(MMD0EXP, 80)
 static const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
 static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
-//---------------------------------------------------------------
 {
 	ModCommand::COMMAND command = p.command;
 	uint32 param = p.param;
@@ -494,7 +493,6 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 
 
 static bool ValidateHeader(const MEDMODULEHEADER &pmmh)
-//-----------------------------------------------------
 {
 	if(std::memcmp(pmmh.id, "MMD", 3)
 		|| pmmh.id[3] < '0' || pmmh.id[3] > '3'
@@ -508,7 +506,6 @@ static bool ValidateHeader(const MEDMODULEHEADER &pmmh)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const MEDMODULEHEADER &pmmh)
-//-----------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(pmmh);
 	return sizeof(MMD0SONGHEADER);
@@ -516,7 +513,6 @@ static uint64 GetHeaderMinimumAdditionalSize(const MEDMODULEHEADER &pmmh)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMED(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	MEDMODULEHEADER pmmh;
 	if(!file.ReadStruct(pmmh))
@@ -532,7 +528,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMED(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------
 {
 	file.Rewind();
 	MEDMODULEHEADER pmmh;

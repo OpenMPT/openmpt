@@ -203,7 +203,6 @@ MPT_BINARY_STRUCT(MT2VST, 128)
 
 
 static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
-//---------------------------------------------------------------------------
 {
 	bool hasLegacyTempo = false;
 
@@ -370,7 +369,6 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 
 // This doesn't really do anything but skipping the envelope chunk at the moment.
 static void ReadMT2Automation(uint16 version, FileReader &file)
-//-------------------------------------------------------------
 {
 	uint32 flags;
 	uint32 trkfxid;
@@ -396,7 +394,6 @@ static void ReadMT2Automation(uint16 version, FileReader &file)
 
 
 static bool ValidateHeader(const MT2FileHeader &fileHeader)
-//---------------------------------------------------------
 {
 	if(std::memcmp(fileHeader.signature, "MT20", 4)
 		|| fileHeader.version < 0x200 || fileHeader.version >= 0x300
@@ -413,7 +410,6 @@ static bool ValidateHeader(const MT2FileHeader &fileHeader)
 
 
 static uint64 GetHeaderMinimumAdditionalSize(const MT2FileHeader &fileHeader)
-//---------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(fileHeader);
 	return 256;
@@ -421,7 +417,6 @@ static uint64 GetHeaderMinimumAdditionalSize(const MT2FileHeader &fileHeader)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMT2(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	MT2FileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -437,7 +432,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMT2(MemoryFileReader file, co
 
 
 bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 	MT2FileHeader fileHeader;

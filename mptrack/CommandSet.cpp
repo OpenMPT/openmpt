@@ -35,7 +35,6 @@ enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
 
 
 CCommandSet::CCommandSet()
-//------------------------
 {
 	// Which key binding rules to enforce?
 	enforceRule[krPreventDuplicate]				= true;
@@ -60,13 +59,10 @@ CCommandSet::CCommandSet()
 }
 
 
-//-------------------------------------------------------
 // Setup
-//-------------------------------------------------------
 
 // Helper function for setting up commands
 void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message, enmKcVisibility visibility, enmKcDummy dummy)
-//----------------------------------------------------------------------------------------------------------------------------
 {
 	commands[kc].UID = uid;
 	commands[kc].isHidden = (visibility == kcHidden);
@@ -77,7 +73,6 @@ void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message,
 
 //Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()
-//-------------------------------
 {	//TODO: make this hideous list a bit nicer, with a constructor or somthing.
 	//NOTE: isHidden implies automatically set, since the user will not be able to see it.
 
@@ -732,13 +727,10 @@ void CCommandSet::SetupCommands()
 }
 
 
-//-------------------------------------------------------
 // Command Manipulation
-//-------------------------------------------------------
 
 
 CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos, bool checkEventConflict)
-//----------------------------------------------------------------------------------------------------------
 {
 	auto &kcList = commands[cmd].kcList;
 
@@ -781,7 +773,6 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 
 std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict) const
-//------------------------------------------------------------------------------------------------------------------------------
 {
 	if(IsDummyCommand(cmd))	// no need to search if we are adding a dummy key
 		return std::make_pair(kcNull, KeyCombination());
@@ -813,7 +804,6 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 
 
 bool CCommandSet::IsDummyCommand(CommandID cmd) const
-//---------------------------------------------------
 {
 	// e.g. Chord modifier is a dummy command, which serves only to automatically
 	// generate a set of keycombinations for chords (I'm not proud of this design).
@@ -822,7 +812,6 @@ bool CCommandSet::IsDummyCommand(CommandID cmd) const
 
 
 CString CCommandSet::Remove(int pos, CommandID cmd)
-//-------------------------------------------------
 {
 	if (pos>=0 && (size_t)pos<commands[cmd].kcList.size())
 	{
@@ -835,7 +824,6 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 
 
 CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
-//-----------------------------------------------------------
 {
 
 	auto &kcList = commands[cmd].kcList;
@@ -855,7 +843,6 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 
 
 CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool adding)
-//--------------------------------------------------------------------------------
 {
 	//World's biggest, most confusing method. :)
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
@@ -1427,12 +1414,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 }
 
 
-//-------------------------------------------------------
 // Export
-//-------------------------------------------------------
 //Generate a keymap from a command set
 void CCommandSet::GenKeyMap(KeyMap &km)
-//-------------------------------------
 {
 	std::vector<KeyEventType> eventTypes;
 	std::vector<InputTargetContext> contexts;
@@ -1496,7 +1480,6 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 
 void CCommandSet::Copy(const CCommandSet *source)
-//----------------------------------------------
 {
 	oldSpecs = nullptr;
 	std::copy(std::begin(source->commands), std::end(source->commands), std::begin(commands));
@@ -1504,7 +1487,6 @@ void CCommandSet::Copy(const CCommandSet *source)
 
 
 bool CCommandSet::SaveFile(const mpt::PathString &filename)
-//---------------------------------------------------------
 {
 
 /* Layout:
@@ -1575,7 +1557,6 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 
 bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription, CCommandSet *commandSet)
-//---------------------------------------------------------------------------------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd = kcNumCommands;
@@ -1719,7 +1700,6 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 
 
 bool CCommandSet::LoadFile(const mpt::PathString &filename)
-//---------------------------------------------------------
 {
 	mpt::ifstream fin(filename);
 	if(fin.fail())
@@ -1734,7 +1714,6 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 
 bool CCommandSet::LoadDefaultKeymap()
-//-----------------------------------
 {
 	mpt::istringstream s;
 	return LoadFile(s, L"\"executable resource\"");
@@ -1743,7 +1722,6 @@ bool CCommandSet::LoadDefaultKeymap()
 
 //Could do better search algo but this is not perf critical.
 int CCommandSet::FindCmd(int uid) const
-//-------------------------------------
 {
 	for (int i=0; i<kcNumCommands; i++)
 	{
@@ -1756,7 +1734,6 @@ int CCommandSet::FindCmd(int uid) const
 
 
 CString KeyCombination::GetContextText(InputTargetContext ctx)
-//------------------------------------------------------------
 {
 	switch(ctx)
 	{
@@ -1787,7 +1764,6 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 
 
 CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
-//------------------------------------------------------------------
 {
 	CString text;
 
@@ -1814,7 +1790,6 @@ CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
 
 
 CString KeyCombination::GetModifierText(FlagSet<Modifiers> mod)
-//-------------------------------------------------------------
 {
 	CString text;
 	if (mod[ModShift]) text.Append(_T("Shift+"));
@@ -1830,7 +1805,6 @@ CString KeyCombination::GetModifierText(FlagSet<Modifiers> mod)
 
 
 CString KeyCombination::GetKeyText(FlagSet<Modifiers> mod, UINT code)
-//-------------------------------------------------------------------
 {
 	CString keyText = GetModifierText(mod);
 	if(mod[ModMidi])
@@ -1850,7 +1824,6 @@ CString KeyCombination::GetKeyText(FlagSet<Modifiers> mod, UINT code)
 
 
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key) const
-//---------------------------------------------------------------------
 {
 	if (key < commands[c].kcList.size())
 		return commands[c].kcList[0].GetKeyText();
@@ -1859,12 +1832,9 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key) const
 }
 
 
-//-------------------------------------------------------
 // Quick Changes - modify many commands with one call.
-//-------------------------------------------------------
 
 bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
-//----------------------------------------------------
 {
 	for (CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes; cmd=(CommandID)(cmd + 1))		//for all notes
 	{
@@ -1881,7 +1851,6 @@ bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
 
 
 bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
-//--------------------------------------------------------------------------
 {
 	// Is this already the active key configuration?
 	if(&modSpecs == oldSpecs)
@@ -1947,7 +1916,6 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 // Stupid MFC crap: for some reason VK code isn't enough to get correct string with GetKeyName.
 // We also need to figure out the correct "extended" bit.
 bool KeyCombination::IsExtended(UINT code)
-//----------------------------------------
 {
 	if (code==VK_SNAPSHOT)	//print screen
 		return true;
@@ -1969,7 +1937,6 @@ bool KeyCombination::IsExtended(UINT code)
 
 
 void CCommandSet::SetupContextHierarchy()
-//---------------------------------------
 {
 	// For now much be fully expanded (i.e. don't rely on grandparent relationships).
 	m_isParentContext[kCtxAllContexts].set(kCtxViewGeneral);
@@ -2005,7 +1972,6 @@ void CCommandSet::SetupContextHierarchy()
 
 
 bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict) const
-//-------------------------------------------------------------------------------------------------------------
 {
 	bool modConflict      = (kc1.Modifier()==kc2.Modifier());
 	bool codeConflict     = (kc1.KeyCode()==kc2.KeyCode());
@@ -2021,7 +1987,6 @@ bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2,
 
 
 bool CCommandSet::IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const
-//------------------------------------------------------------------------------------
 {
 	return m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 }

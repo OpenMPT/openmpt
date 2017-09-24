@@ -75,7 +75,6 @@ static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LP
 
 
 void CRarArchive::RARCallbackProcessData(const char * buf, std::size_t size)
-//--------------------------------------------------------------------------
 {
 	if(!captureCurrentFile)
 	{
@@ -86,7 +85,6 @@ void CRarArchive::RARCallbackProcessData(const char * buf, std::size_t size)
 
 
 CRarArchive::CRarArchive(FileReader &file)
-//----------------------------------------
 	: ArchiveBase(file)
 	, diskFile()
 	, captureCurrentFile(false)
@@ -211,14 +209,12 @@ CRarArchive::CRarArchive(FileReader &file)
 
 
 CRarArchive::~CRarArchive()
-//-------------------------
 {
 	return;
 }
 
 
 bool CRarArchive::ExtractFile(std::size_t index)
-//----------------------------------------------
 {
 
 	if(!diskFile || !diskFile->IsValid())
@@ -294,7 +290,6 @@ bool CRarArchive::ExtractFile(std::size_t index)
 
 
 void CRarArchive::Reset()
-//-----------------------
 {
 	captureCurrentFile = false;
 	comment = mpt::ustring();
@@ -304,7 +299,6 @@ void CRarArchive::Reset()
 
 
 void CRarArchive::ResetFile()
-//---------------------------
 {
 	captureCurrentFile = false;
 	data = std::vector<char>();

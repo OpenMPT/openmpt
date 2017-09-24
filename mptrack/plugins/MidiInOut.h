@@ -21,9 +21,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//==============
 class MidiDevice
-//==============
 {
 public:
 	typedef unsigned int ID;
@@ -43,9 +41,7 @@ public:
 };
 
 
-//==================================
 class MidiInOut : public IMidiPlugin
-//==================================
 {
 	friend class MidiInOutEditor;
 

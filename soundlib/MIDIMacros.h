@@ -84,9 +84,7 @@ struct MIDIMacroConfigData
 
 MPT_BINARY_STRUCT(MIDIMacroConfigData, 4896) // this is directly written to files, so the size must be correct!
 
-//================================================
 class MIDIMacroConfig : public MIDIMacroConfigData
-//================================================
 {
 
 public:

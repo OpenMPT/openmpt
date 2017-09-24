@@ -97,9 +97,7 @@ struct SOUNDBANKINFO
 struct IFFCHUNK;
 struct SF2LOADERINFO;
 
-//============
 class CDLSBank
-//============
 {
 protected:
 	SOUNDBANKINFO m_BankInfo;

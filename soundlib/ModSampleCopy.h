@@ -22,7 +22,6 @@ struct ModSample;
 // Copy a mono sample data buffer.
 template <typename SampleConversion, typename Tbyte>
 size_t CopyMonoSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
-//-------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 1);
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -46,7 +45,6 @@ size_t CopyMonoSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourc
 // Copy a stereo interleaved sample data buffer.
 template <typename SampleConversion, typename Tbyte>
 size_t CopyStereoInterleavedSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
-//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 2);
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -74,7 +72,6 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const Tbyte *sourceBuffer,
 // Copy a stereo split sample data buffer.
 template <typename SampleConversion, typename Tbyte>
 size_t CopyStereoSplitSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
-//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 2);
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -114,7 +111,6 @@ size_t CopyStereoSplitSample(ModSample &sample, const Tbyte *sourceBuffer, size_
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
 template <typename SampleConversion, typename Tbyte>
 size_t CopyAndNormalizeSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, typename SampleConversion::peak_t *srcPeak = nullptr, SampleConversion conv = SampleConversion())
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
 

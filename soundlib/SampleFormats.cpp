@@ -39,7 +39,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file, mayNormalize)
@@ -70,7 +69,6 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 
 
 bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize)
-//--------------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
 	if(!ReadITIInstrument(nInstr, file)
@@ -97,7 +95,6 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 
 
 bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize)
-//--------------------------------------------------------------------------------------------------
 {
 	// Scanning free sample
 	SAMPLEINDEX nSample = GetNextFreeSample(nInstr); // may also return samples which are only referenced by the current instrument
@@ -134,7 +131,6 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 
 
 bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples)
-//-----------------------------------------------------------------------------------------------
 {
 	if(nInstr == 0 || nInstr >= MAX_INSTRUMENTS || !Instruments[nInstr]) return true;
 
@@ -159,7 +155,6 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 
 // Remove all unused samples from the given nInstr and keep keepSample if provided
 bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX keepSample)
-//--------------------------------------------------------------------------------------
 {
 	if(Instruments[nInstr] == nullptr)
 	{
@@ -204,7 +199,6 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX kee
 //
 
 bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoundFile &srcSong, INSTRUMENTINDEX sourceInstr)
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	if ((!sourceInstr) || (sourceInstr > srcSong.GetNumInstruments())
 		|| (targetInstr >= MAX_INSTRUMENTS) || (!srcSong.Instruments[sourceInstr]))
@@ -272,7 +266,6 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 
 
 bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample)
-//----------------------------------------------------------------------------------------------------------------
 {
 	if(!sourceSample
 		|| sourceSample > srcSong.GetNumSamples()
@@ -316,7 +309,6 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 
 static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign, uint32 numChannels)
-//----------------------------------------------------------------------------------------------------------------------
 {
 	static const int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
 	static const int32 IMAUnpackTable[90] =
@@ -396,7 +388,6 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 // WAV Open
 
 bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, FileReader *wsmpChunk)
-//-------------------------------------------------------------------------------------------------------------
 {
 	WAVReader wavFile(file);
 
@@ -513,7 +504,6 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 #ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
-//----------------------------------------------------------------------------------------
 {
 	mpt::ofstream f(filename, std::ios::binary);
 	if(!f)
@@ -564,7 +554,6 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 // Save RAW
 
 bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
-//----------------------------------------------------------------------------------------
 {
 	mpt::ofstream f(filename, std::ios::binary);
 	if(!f)
@@ -685,21 +674,18 @@ MPT_BINARY_STRUCT(GF1Layer, 47)
 
 
 static double PatchFreqToNote(uint32 nFreq)
-//-----------------------------------------
 {
 	return std::log(nFreq / 2044.0) * (12.0 * 1.44269504088896340736);	// 1.0/std::log(2.0)
 }
 
 
 static int32 PatchFreqToNoteInt(uint32 nFreq)
-//-------------------------------------------
 {
 	return Util::Round<int32>(PatchFreqToNote(nFreq));
 }
 
 
 static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader &sampleHeader, FileReader &file)
-//---------------------------------------------------------------------------------------------------------------
 {
 	ModSample &sample = that->GetSample(nSample);
 
@@ -747,7 +733,6 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 
 
 bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 	GF1PatchFileHeader fileHeader;
@@ -780,7 +765,6 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 
 // PAT Instrument
 bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
-//--------------------------------------------------------------------------
 {
 	file.Rewind();
 	GF1PatchFileHeader fileHeader;
@@ -878,7 +862,6 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 
 bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -908,7 +891,6 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 
 
 bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
-//-------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1014,7 +996,6 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 #ifndef MODPLUG_NO_FILESAVE
 
 bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const
-//----------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns = Instruments[nInstr];
 	if(pIns == nullptr || filename.empty())
@@ -1085,7 +1066,6 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 
 // Read first sample from XI file into a sample slot
 bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
-//------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1473,7 +1453,6 @@ struct SFZRegion
 };
 
 bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
-//--------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -1967,7 +1946,6 @@ MPT_BINARY_STRUCT(AIFFInstrumentChunk, 20)
 
 
 bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
-//---------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	ChunkReader chunkFile(file);
@@ -2131,7 +2109,6 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 
 
 bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
-//-------------------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -2199,7 +2176,6 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 
 
 bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind)
-//--------------------------------------------------------------------------------
 {
 	if(rewind)
 	{
@@ -2257,7 +2233,6 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 
 
 bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
-//-------------------------------------------------------------------
 {
 	ITInstrument instrumentHeader;
 
@@ -2291,7 +2266,6 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 
 
 bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
-//--------------------------------------------------------------------------
 {
 	ITInstrument instrumentHeader;
 	SAMPLEINDEX smp = 0;
@@ -2366,7 +2340,6 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 #ifndef MODPLUG_NO_FILESAVE
 
 bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const
-//----------------------------------------------------------------------------------------------------------------------------------
 {
 	ITInstrument iti;
 	ModInstrument *pIns = Instruments[nInstr];
@@ -2513,7 +2486,6 @@ MPT_BINARY_STRUCT(IFFSampleHeader, 20)
 
 
 bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
-//--------------------------------------------------------------------
 {
 	file.Rewind();
 

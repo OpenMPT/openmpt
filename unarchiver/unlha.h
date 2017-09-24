@@ -24,9 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_WITH_LHASA
 
-//====================================
 class CLhaArchive : public ArchiveBase
-//====================================
 {
 private:
 	LHAInputStream *inputstream;

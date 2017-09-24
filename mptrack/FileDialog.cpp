@@ -21,7 +21,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Display the file dialog.
 bool FileDialog::Show(const CWnd *parent)
-//---------------------------------------
 {
 	filenames.clear();
 
@@ -118,7 +117,6 @@ bool FileDialog::Show(const CWnd *parent)
 
 // Callback function for instrument preview
 UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
-//------------------------------------------------------------------------------------------------
 {
 	if(uiMsg == WM_NOTIFY)
 	{
@@ -145,7 +143,6 @@ UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM /*wParam
 
 // Helper callback to set start path.
 int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*lParam*/, LPARAM lpData)
-//------------------------------------------------------------------------------------------------------
 {
 	if(uMsg == BFFM_INITIALIZED && lpData != NULL)
 	{
@@ -159,7 +156,6 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 
 // Display the folder dialog.
 bool BrowseForFolder::Show(const CWnd *parent)
-//--------------------------------------------
 {
 	WCHAR path[MAX_PATH];
 

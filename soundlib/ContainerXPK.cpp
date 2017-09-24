@@ -67,7 +67,6 @@ struct XPK_BufferBounds
 };
 
 static int32 bfextu(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
-//----------------------------------------------------------------------------
 {
 	int32 r;
 
@@ -85,7 +84,6 @@ static int32 bfextu(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 }
 
 static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
-//----------------------------------------------------------------------------
 {
 	int32 r;
 
@@ -103,7 +101,6 @@ static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 
 
 static uint8 XPK_ReadTable(int32 index)
-//-------------------------------------
 {
 	static const uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
@@ -114,7 +111,6 @@ static uint8 XPK_ReadTable(int32 index)
 }
 
 static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, std::vector<char> &unpackedData, int32 len)
-//----------------------------------------------------------------------------------------------------
 {
 	if(len <= 0) return false;
 	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
@@ -331,7 +327,6 @@ l7ca:
 
 
 static bool ValidateHeader(const XPKFILEHEADER &header)
-//-----------------------------------------------------
 {
 	if(std::memcmp(header.XPKF, "XPKF", 4) != 0)
 	{
@@ -359,7 +354,6 @@ static bool ValidateHeader(const XPKFILEHEADER &header)
 
 
 static bool ValidateHeaderFileSize(const XPKFILEHEADER &header, uint64 filesize)
-//------------------------------------------------------------------------------
 {
 	if(filesize < header.SrcLen - 8)
 	{
@@ -370,7 +364,6 @@ static bool ValidateHeaderFileSize(const XPKFILEHEADER &header, uint64 filesize)
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXPK(MemoryFileReader file, const uint64 *pfilesize)
-//----------------------------------------------------------------------------------------------------
 {
 	XPKFILEHEADER header;
 	if(!file.ReadStruct(header))
@@ -393,7 +386,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXPK(MemoryFileReader file, co
 
 
 bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, ContainerLoadingFlags loadFlags)
-//-----------------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	containerItems.clear();

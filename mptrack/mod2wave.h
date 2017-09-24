@@ -67,9 +67,7 @@ struct CWaveConvertSettings
 };
 
 
-//================================
 class CWaveConvert: public CDialog
-//================================
 {
 public:
 	CWaveConvertSettings m_Settings;
@@ -127,9 +125,7 @@ public:
 };
 
 
-//==========================================
 class CDoWaveConvert: public CProgressDialog
-//==========================================
 {
 public:
 	const CWaveConvertSettings &m_Settings;

@@ -12,9 +12,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=========================================
 class COptionsGeneral: public CPropertyPage
-//=========================================
 {
 protected:
 	CEdit m_defaultArtist;

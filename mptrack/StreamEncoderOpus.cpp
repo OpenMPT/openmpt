@@ -184,14 +184,12 @@ public:
 
 
 OggOpusEncoder::OggOpusEncoder()
-//------------------------------
 {
 	SetTraits(BuildTraits());
 }
 
 
 bool OggOpusEncoder::IsAvailable() const
-//--------------------------------------
 {
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 	return true;
@@ -202,14 +200,12 @@ bool OggOpusEncoder::IsAvailable() const
 
 
 OggOpusEncoder::~OggOpusEncoder()
-//-------------------------------
 {
 	return;
 }
 
 
 std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!IsAvailable())
 	{

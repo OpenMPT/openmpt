@@ -23,7 +23,6 @@ namespace DMO
 {
 
 IMixPlugin* WavesReverb::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//--------------------------------------------------------------------------------------------------
 {
 	return new (std::nothrow) WavesReverb(factory, sndFile, mixStruct);
 }
@@ -31,7 +30,6 @@ IMixPlugin* WavesReverb::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDM
 
 WavesReverb::WavesReverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//-------------------------------------------------------------------------------------------
 {
 	m_param[kRvbInGain] = 1.0f;
 	m_param[kRvbReverbMix] = 1.0f;
@@ -44,7 +42,6 @@ WavesReverb::WavesReverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 
 
 void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
-//---------------------------------------------------------------------
 {
 	if(!m_mixBuffer.Ok())
 		return;
@@ -124,7 +121,6 @@ void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 
 PlugParamValue WavesReverb::GetParameter(PlugParamIndex index)
-//------------------------------------------------------------
 {
 	if(index < kDistNumParameters)
 	{
@@ -135,7 +131,6 @@ PlugParamValue WavesReverb::GetParameter(PlugParamIndex index)
 
 
 void WavesReverb::SetParameter(PlugParamIndex index, PlugParamValue value)
-//------------------------------------------------------------------------
 {
 	if(index < kDistNumParameters)
 	{
@@ -147,7 +142,6 @@ void WavesReverb::SetParameter(PlugParamIndex index, PlugParamValue value)
 
 
 void WavesReverb::Resume()
-//------------------------
 {
 	m_isResumed = true;
 	// Recalculate delays
@@ -172,7 +166,6 @@ void WavesReverb::Resume()
 
 
 void WavesReverb::PositionChanged()
-//---------------------------------
 {
 	MemsetZero(m_state);
 }
@@ -181,7 +174,6 @@ void WavesReverb::PositionChanged()
 #ifdef MODPLUG_TRACKER
 
 CString WavesReverb::GetParamName(PlugParamIndex param)
-//-----------------------------------------------------
 {
 	switch(param)
 	{
@@ -195,7 +187,6 @@ CString WavesReverb::GetParamName(PlugParamIndex param)
 
 
 CString WavesReverb::GetParamLabel(PlugParamIndex param)
-//------------------------------------------------------
 {
 	switch(param)
 	{
@@ -210,7 +201,6 @@ CString WavesReverb::GetParamLabel(PlugParamIndex param)
 
 
 CString WavesReverb::GetParamDisplay(PlugParamIndex param)
-//--------------------------------------------------------
 {
 	float value = m_param[param];
 	switch(param)
@@ -235,7 +225,6 @@ CString WavesReverb::GetParamDisplay(PlugParamIndex param)
 
 
 void WavesReverb::RecalculateWavesReverbParams()
-//----------------------------------------------
 {
 	// Recalculate filters
 	const double ReverbTimeSmp = -3000.0 / (m_SndFile.GetSampleRate() * ReverbTime());

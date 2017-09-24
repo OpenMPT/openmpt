@@ -110,7 +110,6 @@ static mpt::prng * s_PRNG = nullptr;
 
 
 mpt::PathString GetPathPrefix()
-//-----------------------------
 {
 	if((*PathPrefix).empty())
 	{
@@ -121,7 +120,6 @@ mpt::PathString GetPathPrefix()
 
 
 void DoTests()
-//------------
 {
 
 	#if MPT_OS_WINDOWS
@@ -198,7 +196,6 @@ static mpt::PathString GetTempFilenameBase();
 
 
 static void RemoveFile(const mpt::PathString &filename)
-//-----------------------------------------------------
 {
 	#if MPT_OS_WINDOWS
 		for(int retry=0; retry<10; retry++)
@@ -218,7 +215,6 @@ static void RemoveFile(const mpt::PathString &filename)
 
 // Test if functions related to program version data work
 static MPT_NOINLINE void TestVersion()
-//------------------------------------
 {
 	//Verify that macros and functions work.
 	{
@@ -329,7 +325,6 @@ static MPT_NOINLINE void TestVersion()
 
 // Test if data types are interpreted correctly
 static MPT_NOINLINE void TestTypes()
-//----------------------------------
 {
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
 	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
@@ -467,7 +462,6 @@ static bool EndsWith(const mpt::ustring &str, const mpt::ustring &match)
 
 
 static MPT_NOINLINE void TestStringFormatting()
-//---------------------------------------------
 {
 	VERIFY_EQUAL(mpt::fmt::val(1.5f), "1.5");
 	VERIFY_EQUAL(mpt::fmt::val(true), "1");
@@ -638,7 +632,6 @@ Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 }
 
 static MPT_NOINLINE void TestMisc1()
-//----------------------------------
 {
 
 	VERIFY_EQUAL(mpt::endian(), mpt::detail::endian_probe());
@@ -1233,7 +1226,6 @@ static MPT_NOINLINE void TestMisc1()
 
 
 static MPT_NOINLINE void TestMisc2()
-//----------------------------------
 {
 
 	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
@@ -1681,7 +1673,6 @@ static MPT_NOINLINE void TestMisc2()
 
 
 static MPT_NOINLINE void TestRandom()
-//-----------------------------------
 {
 	mpt::prng & prng = *s_PRNG;
 	for(std::size_t i = 0; i < 10000; ++i)
@@ -1759,7 +1750,6 @@ static MPT_NOINLINE void TestRandom()
 
 
 static MPT_NOINLINE void TestCharsets()
-//-------------------------------------
 {
 
 	// MPT_UTF8 version
@@ -2256,7 +2246,6 @@ namespace Test {
 #endif // MODPLUG_TRACKER
 
 static MPT_NOINLINE void TestSettings()
-//-------------------------------------
 {
 
 #ifdef MODPLUG_TRACKER
@@ -2336,7 +2325,6 @@ static MPT_NOINLINE void TestSettings()
 
 // Test MIDI Event generating / reading
 static MPT_NOINLINE void TestMIDIEvents()
-//---------------------------------------
 {
 	uint32 midiEvent;
 
@@ -2380,7 +2368,6 @@ static MPT_NOINLINE void TestMIDIEvents()
 
 // Check if our test file was loaded correctly.
 static void TestLoadXMFile(const CSoundFile &sndFile)
-//---------------------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	const CModDoc *pModDoc = sndFile.GetpModDoc();
@@ -2586,7 +2573,6 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 // Check if our test file was loaded correctly.
 static void TestLoadMPTMFile(const CSoundFile &sndFile)
-//-----------------------------------------------------
 {
 
 	// Global Variables
@@ -2925,7 +2911,6 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 // Check if our test file was loaded correctly.
 static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
-//------------------------------------------------------------------
 {
 
 	// Global Variables
@@ -3195,7 +3180,6 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 
 // Test file loading and saving
 static MPT_NOINLINE void TestLoadSaveFile()
-//-----------------------------------------
 {
 	if(!ShouldRunTests())
 	{
@@ -3345,7 +3329,6 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 // Test various editing features
 static MPT_NOINLINE void TestEditing()
-//------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
@@ -3415,7 +3398,6 @@ static MPT_NOINLINE void TestEditing()
 
 
 static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<ChannelFlags> smpFormat, bool it215)
-//----------------------------------------------------------------------------------------------------------------
 {
 
 	ModSample smp;
@@ -3444,7 +3426,6 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 
 
 static MPT_NOINLINE void TestITCompression()
-//------------------------------------------
 {
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
@@ -3470,7 +3451,6 @@ static MPT_NOINLINE void TestITCompression()
 #if 0
 
 static bool RatioEqual(CTuningBase::RATIOTYPE a, CTuningBase::RATIOTYPE b)
-//------------------------------------------------------------------------
 {
 	if(a == CTuningBase::RATIOTYPE(0) && b == CTuningBase::RATIOTYPE(0))
 	{
@@ -3485,7 +3465,6 @@ static bool RatioEqual(CTuningBase::RATIOTYPE a, CTuningBase::RATIOTYPE b)
 
 
 static void CheckEqualTuningCollections(const CTuningCollection &a, const CTuningCollection &b)
-//--------------------------------------------------------------------------------------------
 {
 	VERIFY_EQUAL(a.GetName(), b.GetName());
 	VERIFY_EQUAL(a.GetNumTunings(), b.GetNumTunings());
@@ -3509,7 +3488,6 @@ static void CheckEqualTuningCollections(const CTuningCollection &a, const CTunin
 
 
 static MPT_NOINLINE void TestTunings()
-//------------------------------------
 {
 
 	// nothing for now
@@ -3530,7 +3508,6 @@ T Rand(const T min, const T max)
 }
 
 static void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
-//--------------------------------------------------------------------------------------
 {
 	const double dPcxProb = dProbPcs + dProbPc;
 	for(auto &m : pat)
@@ -3555,7 +3532,6 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 
 // Test PC note serialization
 static MPT_NOINLINE void TestPCnoteSerialization()
-//------------------------------------------------
 {
 	FileReader file;
 	std::unique_ptr<CSoundFile> pSndFile = mpt::make_unique<CSoundFile>();
@@ -3599,7 +3575,6 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 
 // Test String I/O functionality
 static MPT_NOINLINE void TestStringIO()
-//-------------------------------------
 {
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
@@ -3838,7 +3813,6 @@ static MPT_NOINLINE void TestStringIO()
 
 
 static MPT_NOINLINE void TestSampleConversion()
-//---------------------------------------------
 {
 	std::vector<uint8> sourceBufContainer(65536 * 4);
 	std::vector<uint8> targetBufContainer(65536 * 6);
@@ -4008,7 +3982,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Test {
 
 void DoTests()
-//------------
 {
 	return;
 }

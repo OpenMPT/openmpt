@@ -19,9 +19,7 @@ class CTuningDialog;
 typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 //Copied from CNoteMapWnd.
-//===============================
 class CTuningRatioMapWnd: public CStatic
-//===============================
 {
 	friend class CTuningDialog;
 protected:

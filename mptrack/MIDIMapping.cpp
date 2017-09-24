@@ -20,7 +20,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 size_t CMIDIMapper::Serialize(FILE *f) const
-//------------------------------------------
 {
 	//Bytes: 1 Flags, 2 key, 1 plugindex, 1,2,4,8 plug/etc.
 	size_t size = 0;
@@ -60,7 +59,6 @@ size_t CMIDIMapper::Serialize(FILE *f) const
 
 
 bool CMIDIMapper::Deserialize(FileReader &file)
-//---------------------------------------------
 {
 	m_Directives.clear();
 	while(file.CanRead(1))
@@ -101,7 +99,6 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 
 
 bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramval)
-//--------------------------------------------------------------------------------------------------------------------
 {
 	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
 	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
@@ -160,7 +157,6 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 
 
 void CMIDIMapper::Swap(const size_t a, const size_t b)
-//----------------------------------------------------
 {
 	if(a < m_Directives.size() && b < m_Directives.size())
 	{

@@ -27,7 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 // Sample amplification dialog
 
 void CAmpDlg::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAmpDlg)
@@ -36,7 +35,6 @@ void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 factorMax)
-//-------------------------------------------------------------------------------------
 	: CDialog(IDD_SAMPLE_AMPLIFY, parent)
 	, m_settings(settings)
 	, m_nFactorMin(factorMin)
@@ -44,7 +42,6 @@ CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 fac
 {}
 
 BOOL CAmpDlg::OnInitDialog()
-//--------------------------
 {
 	CDialog::OnInitDialog();
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
@@ -140,14 +137,12 @@ BOOL CAmpDlg::OnInitDialog()
 
 
 void CAmpDlg::OnDestroy()
-//-----------------------
 {
 	m_list.DeleteImageList();
 }
 
 
 void CAmpDlg::OnOK()
-//------------------
 {
 	m_settings.factor = static_cast<int16>(Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT1)), m_nFactorMin, m_nFactorMax));
 	m_settings.fadeInStart = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT2)), m_nFactorMin, m_nFactorMax);
@@ -165,7 +160,6 @@ void CAmpDlg::OnOK()
 SampleIO CRawSampleDlg::m_nFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM);
 
 BOOL CRawSampleDlg::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 	UpdateDialog();
@@ -174,7 +168,6 @@ BOOL CRawSampleDlg::OnInitDialog()
 
 
 void CRawSampleDlg::OnOK()
-//------------------------
 {
 	if(IsDlgButtonChecked(IDC_RADIO1)) m_nFormat |= SampleIO::_8bit;
 	if(IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= SampleIO::_16bit;
@@ -188,7 +181,6 @@ void CRawSampleDlg::OnOK()
 
 
 void CRawSampleDlg::UpdateDialog()
-//--------------------------------
 {
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat.GetBitDepth() == 8) ? IDC_RADIO1 : IDC_RADIO2 );
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat.GetEncoding() == SampleIO::unsignedPCM) ? IDC_RADIO3 : IDC_RADIO4);
@@ -215,7 +207,6 @@ CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sample
 	, m_nSamples(m_addSamples)
 	, m_sampleRate(sampleRate)
 	, m_unit(kSamples)
-//-----------------------------------------------------------------------------------
 {
 	if(origLength > 0)
 	{
@@ -230,7 +221,6 @@ CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sample
 
 
 BOOL CAddSilenceDlg::OnInitDialog()
-//---------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -270,7 +260,6 @@ BOOL CAddSilenceDlg::OnInitDialog()
 
 
 void CAddSilenceDlg::OnOK()
-//-------------------------
 {
 	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
 	if(m_unit == kMilliseconds)
@@ -292,7 +281,6 @@ void CAddSilenceDlg::OnOK()
 
 
 void CAddSilenceDlg::OnEditModeChanged()
-//--------------------------------------
 {
 	AddSilenceOptions newEditOption = GetEditMode();
 	if(newEditOption != kResize && m_nEditOption == kResize)
@@ -311,7 +299,6 @@ void CAddSilenceDlg::OnEditModeChanged()
 
 
 void CAddSilenceDlg::OnUnitChanged()
-//----------------------------------
 {
 	m_unit = static_cast<Unit>(static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1))->GetCurSel());
 	SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
@@ -329,7 +316,6 @@ void CAddSilenceDlg::OnUnitChanged()
 
 
 CAddSilenceDlg::AddSilenceOptions CAddSilenceDlg::GetEditMode() const
-//-------------------------------------------------------------------
 {
 	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return kSilenceAtBeginning;
 	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return kSilenceAtEnd;
@@ -342,7 +328,6 @@ CAddSilenceDlg::AddSilenceOptions CAddSilenceDlg::GetEditMode() const
 // Sample grid dialog
 
 void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
-//-----------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleGridDlg)
@@ -353,7 +338,6 @@ void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CSampleGridDlg::OnInitDialog()
-//---------------------------------
 {
 	CDialog::OnInitDialog();
 	m_SpinSegments.SetRange32(0, m_nMaxSegments);
@@ -365,7 +349,6 @@ BOOL CSampleGridDlg::OnInitDialog()
 
 
 void CSampleGridDlg::OnOK()
-//-------------------------
 {
 	m_nSegments = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	CDialog::OnOK();
@@ -390,7 +373,6 @@ END_MESSAGE_MAP()
 
 
 void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleGridDlg)
@@ -405,7 +387,6 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BOOL CSampleXFadeDlg::OnInitDialog()
-//----------------------------------
 {
 	CDialog::OnInitDialog();
 	const bool hasNormal = m_sample.uFlags[CHN_LOOP] && m_sample.nLoopStart > 0;
@@ -427,7 +408,6 @@ BOOL CSampleXFadeDlg::OnInitDialog()
 
 
 void CSampleXFadeDlg::OnOK()
-//--------------------------
 {
 	m_fadeLength = m_SliderLength.GetPos();
 	m_fadeLaw = m_SliderFadeLaw.GetPos();
@@ -439,7 +419,6 @@ void CSampleXFadeDlg::OnOK()
 
 
 void CSampleXFadeDlg::OnLoopTypeChanged()
-//---------------------------------------
 {
 	SmpLength loopStart = m_sample.nLoopStart, loopEnd = m_sample.nLoopEnd;
 	if(IsDlgButtonChecked(IDC_RADIO2))
@@ -465,7 +444,6 @@ void CSampleXFadeDlg::OnLoopTypeChanged()
 
 
 void CSampleXFadeDlg::OnFadeLengthChanged()
-//-----------------------------------------
 {
 	if(m_editLocked) return;
 	SmpLength numSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
@@ -475,7 +453,6 @@ void CSampleXFadeDlg::OnFadeLengthChanged()
 
 
 void CSampleXFadeDlg::OnHScroll(UINT, UINT, CScrollBar *sb)
-//---------------------------------------------------------
 {
 	if(sb == (CScrollBar *)(&m_SliderLength))
 	{
@@ -494,7 +471,6 @@ void CSampleXFadeDlg::OnHScroll(UINT, UINT, CScrollBar *sb)
 
 
 BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
-//------------------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
 	UINT_PTR nID = pNMHDR->idFrom;
@@ -537,7 +513,6 @@ BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
 END_MESSAGE_MAP()
 
 BOOL CResamplingDlg::OnInitDialog()
-//---------------------------------
 {
 	CDialog::OnInitDialog();
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + lastChoice);
@@ -574,7 +549,6 @@ BOOL CResamplingDlg::OnInitDialog()
 
 
 void CResamplingDlg::OnOK()
-//-------------------------
 {
 	if(IsDlgButtonChecked(IDC_RADIO1))
 	{
@@ -615,7 +589,6 @@ int CMixSampleDlg::amplifyMix = 50;
 
 
 void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMixSampleDlg)
@@ -629,12 +602,10 @@ void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
 
 CMixSampleDlg::CMixSampleDlg(CWnd *parent)
 	: CDialog(IDD_MIXSAMPLES, parent)
-//----------------------------------------
 { }
 
 
 BOOL CMixSampleDlg::OnInitDialog()
-//--------------------------------
 {
 	CDialog::OnInitDialog();
 
@@ -659,7 +630,6 @@ BOOL CMixSampleDlg::OnInitDialog()
 
 
 void CMixSampleDlg::OnOK()
-//------------------------
 {
 	CDialog::OnOK();
 	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, MAX_SAMPLE_LENGTH);

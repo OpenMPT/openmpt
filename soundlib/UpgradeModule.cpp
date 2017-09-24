@@ -18,7 +18,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 struct UpgradePatternData
-//=======================
 {
 	UpgradePatternData(CSoundFile &sf)
 		: sndFile(sf)
@@ -229,7 +228,6 @@ struct UpgradePatternData
 
 
 void CSoundFile::UpgradeModule()
-//------------------------------
 {
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 46) && m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{

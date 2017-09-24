@@ -18,9 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class ModSequence;
 
-//==============
 class RowVisitor
-//==============
 {
 protected:
 	// Memory for every row in the module if it has been visited or not.
