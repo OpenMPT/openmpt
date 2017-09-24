@@ -111,6 +111,15 @@ cat configure.ac | sed "s/!!MPT_LIBOPENMPT_VERSION_PREREL!!/${LIBOPENMPT_VERSION
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_CURRENT!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_REVISION!!/${LIBOPENMPT_LTVER_CURRENT}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_LIBOPENMPT_LTVER_AGE!!/${LIBOPENMPT_LTVER_AGE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+echo " SemVer metadata "
+MPT_SEMVER_METADATA_PREFIX=
+if [ "${LIBOPENMPT_VERSION_PREREL}x" = "x" ] ; then
+	MPT_SEMVER_METADATA_PREFIX=release
+else
+	MPT_SEMVER_METADATA_PREFIX=r${BUILD_SVNVERSION}
+fi
+cat configure.ac | sed "s/!!MPT_SEMVER_METADATA_PREFIX!!/${MPT_SEMVER_METADATA_PREFIX}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+
 echo " SVNURL"
 cat configure.ac | sed "s/!!MPT_SVNURL!!/${BUILD_SVNURL}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 echo " SVNVERSION"
