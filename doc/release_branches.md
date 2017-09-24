@@ -4,7 +4,9 @@ branching release braches
  1. adjust buildbot configuration by copying current trunk configuration to a
     new branch configuration and replace `trunk` with the branch version (i.e.
     `127`)
- 2. add release build configuration to the buildbot branch configuration file
+ 2. add release build configuration to the buildbot branch configuration file,
+    adjust buildbot config of release build configurations to output to the
+    separate auto-release directory
  3. branch the nondist externals repository
  4. branch the current trunk HEAD (`$VER` is the branch version):
     `svn copy -m "branch OpenMPT-$VER" https://source.openmpt.org/svn/openmpt/trunk/OpenMPT https://source.openmpt.org/svn/openmpt/branches/OpenMPT-$VER`
