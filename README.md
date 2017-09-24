@@ -243,8 +243,6 @@ Coding conventions
 
 (see below for an example)
 
-- Functions / methods are "underlined" (The `//------` comment, see below for
-  an example what it should look like).
 - Place curly braces at the beginning of the line, not at the end
 - Generally make use of the custom index types like `SAMPLEINDEX` or
   `ORDERINDEX` when referring to samples, orders, etc.
