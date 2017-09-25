@@ -146,11 +146,15 @@ Type: files; Name: {app}\ModPlug Central.url
 Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}; Tasks: not portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
 ; portable installation
 Type: dirifempty; Name: {app}\Autosave; Tasks: portable
 Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
 Type: dirifempty; Name: {app}\tunings; Tasks: portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}; Tasks: portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
 
 #include "utilities.iss"
 
