@@ -73,7 +73,7 @@
 
   \section libopenmpt_freebasic_threads libopenmpt in multi-threaded environments
 
-  - libopenmpt is tread-aware.
+  - libopenmpt is thread-aware.
   - Individual libopenmpt objects are not thread-safe.
   - libopenmpt itself does not spawn any user-visible threads but may spawn
   threads for internal use.
@@ -304,7 +304,6 @@ Const OPENMPT_ERROR_ARGUMENT_NULL_POINTER = OPENMPT_ERROR_BASE + 103
 
   Checks whether an error code represents a transient error which may not occur again in a later try if for example memory has been freed up after an out-of-memory error.
   \param errorcode Error code.
-  \return Mask of OPENMPT_ERROR_FUNC_RESULT_LOG and OPENMPT_ERROR_FUNC_RESULT_STORE.
   \retval 0 Error is not transient.
   \retval 1 Error is transient.
   \sa OPENMPT_ERROR_OUT_OF_MEMORY
@@ -442,12 +441,121 @@ Declare Function openmpt_could_open_probability(ByVal stream_callbacks As openmp
   \param errorcode Pointer to an integer where an error may get stored. May be NULL.
   \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
   \return Probability between 0.0 and 1.0.
-  \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
-  \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
+  \remarks openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() provide a simpler and faster interface that fits almost all use cases better. It is recommneded to use openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() instead of openmpt::could_open_probability().
+  \remarks openmpt_could_open_probability2() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
+  \remarks openmpt_could_open_probability2() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
   \sa openmpt_stream_callbacks
+  \sa openmpt_probe_file_header
+  \sa openmpt_probe_file_header_without_filesize
   \since 0.3.0
 '/
 Declare Function openmpt_could_open_probability2(ByVal stream_callbacks As openmpt_stream_callbacks, ByVal stream As Any Ptr, ByVal effort As Double, ByVal logfunc As openmpt_log_func, ByVal loguser As Any Ptr, ByVal errfunc As openmpt_error_func, ByVal erruser As Any Ptr, ByVal errorcode As Long Ptr, ByVal error_message As Const ZString Ptr Ptr) As Double
+
+/'* \brief Get recommended header size for successfull format probing
+
+  \sa openmpt_probe_file_header()
+  \sa openmpt_probe_file_header_without_filesize()
+  \since 0.3.0
+'/
+Declare Function openmpt_probe_file_header_get_recommended_size() As UInteger
+
+'* Probe for module formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES = 1
+'* Probe for module-specific container formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS = 2
+
+'* Probe for the default set of formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT = OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES or OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS
+'* Probe for no formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_FLAGS_NONE = 0
+
+'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS = 1
+'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE = 0
+'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA = -1
+'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+Const OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR = -255
+
+/'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+
+  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \param filesize Full size of the file data on disk.
+  \param logfunc Logging function where warning and errors are written. May be NULL.
+  \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param errfunc Error function to define error behaviour. May be NULL.
+  \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param error Pointer to an integer where an error may get stored. May be NULL.
+  \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+  \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+  \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+  \sa openmpt_probe_file_header_get_recommended_size()
+  \sa openmpt_probe_file_header_without_filesize()
+  \sa openmpt_probe_file_header_from_stream()
+  \sa openmpt_could_open_probability2()
+  \since 0.3.0
+'/
+Declare Function openmpt_probe_file_header(ByVal flags As ULongInt, ByVal Data As Const Any Ptr, ByVal size As UInteger, ByVal filesize As ULongInt, ByVal logfunc As openmpt_log_func, ByVal loguser As Any Ptr, ByVal errfunc As openmpt_error_func, ByVal erruser As Any Ptr, ByVal Error As Long Ptr, ByVal error_message As Const ZString Ptr Ptr) As Long
+
+/'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+
+  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \param logfunc Logging function where warning and errors are written. May be NULL.
+  \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param errfunc Error function to define error behaviour. May be NULL.
+  \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param error Pointer to an integer where an error may get stored. May be NULL.
+  \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+  \remarks It is recommended to use openmpt_prove_file_header() and provide the acutal file's size as a parameter if at all possible. libopenmpt can provide more accurate answers if the filesize is known.
+  \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
+  \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+  \sa openmpt_probe_file_header_get_recommended_size()
+  \sa openmpt_probe_file_header()
+  \sa openmpt_probe_file_header_from_stream()
+  \sa openmpt_could_open_probability2()
+  \since 0.3.0
+'/
+Declare Function openmpt_probe_file_header_without_filesize(ByVal flags As ULongInt, ByVal Data As Const Any Ptr, ByVal size As UInteger, ByVal logfunc As openmpt_log_func, ByVal loguser As Any Ptr, ByVal errfunc As openmpt_error_func, ByVal erruser As Any Ptr, ByVal Error As Long Ptr, ByVal error_message As Const ZString Ptr Ptr) As Long
+
+/'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+
+  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param stream_callbacks Input stream callback operations.
+  \param stream Input stream to scan.
+  \param logfunc Logging function where warning and errors are written. May be NULL.
+  \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param errfunc Error function to define error behaviour. May be NULL.
+  \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param error Pointer to an integer where an error may get stored. May be NULL.
+  \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+  \remarks The stream is left in an unspecified state when this function returns.
+  \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+  \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+  \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+  \sa openmpt_probe_file_header_get_recommended_size()
+  \sa openmpt_probe_file_header()
+  \sa openmpt_probe_file_header_without_filesize()
+  \sa openmpt_could_open_probability2()
+  \since 0.3.0
+'/
+Declare Function openmpt_probe_file_header_from_stream(ByVal flags As ULongInt, ByVal stream_callbacks As openmpt_stream_callbacks, ByVal stream As Any Ptr, ByVal logfunc As openmpt_log_func, ByVal loguser As Any Ptr, ByVal errfunc As openmpt_error_func, ByVal erruser As Any Ptr, ByVal Error As Long Ptr, ByVal error_message As Const ZString Ptr Ptr) As Long
+
 
 '* \brief Opaque type representing a libopenmpt module
 Type openmpt_module
