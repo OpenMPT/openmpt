@@ -44,6 +44,9 @@
   filter { "architecture:x86_64" }
    targetsuffix "64"
   filter {}
+	filter { "action:vs*", "architecture:x86_64" }
+		linkoptions { "/HIGHENTROPYVA:NO" }
+	filter {}
 
 	if _OPTIONS["xp"] then
 		filter { "architecture:x86" }
