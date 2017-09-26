@@ -504,7 +504,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_propability( open
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \return Probability between 0.0 and 1.0.
- * \remarks openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() provide a simpler and faster interface that fits almost all use cases better. It is recommneded to use openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() instead of openmpt::could_open_probability().
+ * \remarks openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() provide a simpler and faster interface that fits almost all use cases better. It is recommended to use openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() instead of openmpt::could_open_probability().
  * \remarks openmpt_could_open_probability2() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
  * \remarks openmpt_could_open_probability2() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability2() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability2() returned 0.5. \include libopenmpt_example_c_probe.c
  * \sa \ref libopenmpt_c_fileio
@@ -580,7 +580,7 @@ LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data,
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \remarks It is recommended to use openmpt_prove_file_header() and provide the acutal file's size as a parameter if at all possible. libopenmpt can provide more accurate answers if the filesize is known.
  * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
- * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
@@ -606,7 +606,7 @@ LIBOPENMPT_API int openmpt_probe_file_header_without_filesize( uint64_t flags, c
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
  * \remarks The stream is left in an unspecified state when this function returns.
  * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
- * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt_probe_file_header() though, if possible.
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.

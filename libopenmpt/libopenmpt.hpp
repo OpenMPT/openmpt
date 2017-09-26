@@ -320,7 +320,7 @@ LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_
   \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
   \param stream Input stream to scan.
   \remarks stream is left in an unspecified state when this function returns.
-  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommneded to use openmpt::probe_file_header() though, if possible.
+  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
   \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
   \retval probe_file_header_result_failure The file is not supported by libopenmpt.
   \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
