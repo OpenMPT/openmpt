@@ -1432,6 +1432,7 @@ End Function
   \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
   \return A pointer to the constructed openmpt_module, or NULL on failure.
   \remarks The file handle can be closed after an openmpt_module has been constructed successfully.
+  \sa openmpt_module_create2
 '/
 Function openmpt_module_create_from_fbhandle2(_
 		ByVal file As Integer,_
@@ -1454,6 +1455,7 @@ End Function
   \return A pointer to the constructed openmpt_module, or NULL on failure.
   \remarks The file handle can be closed after an openmpt_module has been constructed successfully.
   \deprecated Please use openmpt_module_create_from_fbhandle2().
+  \sa openmpt_module_create2
 '/
 Function openmpt_module_create_from_fbhandle(_
 		ByVal file As Integer,_
@@ -1474,6 +1476,7 @@ End Function
   \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
   \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
   \return A pointer to the constructed openmpt_module, or NULL on failure.
+  \sa openmpt_module_create2
 '/
 Function openmpt_module_create_from_filename2(_
 		ByRef filename As String,_
@@ -1501,6 +1504,7 @@ End Function
   \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
   \return A pointer to the constructed openmpt_module, or NULL on failure.
   \deprecated Please use openmpt_module_create_from_filename2().
+  \sa openmpt_module_create2
 '/
 Function openmpt_module_create_from_filename(_
 		ByRef filename As String,_
