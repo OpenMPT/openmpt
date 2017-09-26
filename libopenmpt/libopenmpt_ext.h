@@ -75,7 +75,9 @@ LIBOPENMPT_API openmpt_module * openmpt_module_ext_get_module( openmpt_module_ex
 /*! Retrieve a libopenmpt extension.
  *
  * \param mod_ext The module handle to work on.
- * \param interface_id The name of the extension interface to retrieve.
+ * \param interface_id The name of the extension interface to retrieve (e.g. LIBOPENMPT_EXT_C_INTERFACE_PATTERN_VIS).
+ * \param interface Appropriate structure of interface function pointers which is to be filled by this function (e.g. a pointer to a openmpt_module_ext_interface_pattern_vis structure).
+ * \param interface_size Size of the interface's structure of function pointers (e.g. sizeof(openmpt_module_ext_interface_pattern_vis)).
  * \return 1 on success, 0 if the interface was not found.
  * \since 0.3.0
  */
