@@ -181,7 +181,7 @@ class interactive {
 	/*!
 	  \param factor The new pitch factor in range ]0.0, 4.0] - 1.0 means unmodified pitch.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the factor is outside the specified range.
-	  \remarks Modifying the pitch without applying the the same tempo factor openmpt::ext::interactive::set_tempo_factor may cause rhythmic samples (e.g. drum loops) to go out of sync.
+	  \remarks Modifying the pitch without applying the the same tempo factor using openmpt::ext::interactive::set_tempo_factor may cause rhythmic samples (e.g. drum loops) to go out of sync.
 	  \remarks To shift the pich by `n` semitones, the parameter can be calculated as follows: `pow( 2.0, n / 12.0 )`
 	  \sa openmpt::ext::interactive::get_pitch_factor
 	*/
@@ -198,7 +198,7 @@ class interactive {
 	/*!
 	  \param volume The new global volume in range [0.0, 1.0]
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the volume is outside the specified range.
-	  \remarks The global volume may be reset by pattern commands at any time. Use openmpt::module:set_render_param to apply a global overall volume factor that is independent of pattern commands.
+	  \remarks The global volume may be reset by pattern commands at any time. Use openmpt::module::set_render_param to apply a global overall volume factor that is independent of pattern commands.
 	  \sa openmpt::ext::interactive::get_global_volume
 	*/
 	virtual void set_global_volume( double volume ) = 0;
@@ -259,7 +259,7 @@ class interactive {
 	//! Get the current mute status for an instrument
 	/*!
 	  \param instrument The instrument whose mute status should be retrieved, in range [0, openmpt::module::get_num_instruments()[ if openmpt::module::get_num_instruments is not 0, otherwise in [0, openmpt::module::get_num_samples()[
-	  \return The current channel mute status. true is muted, false is unmuted.
+	  \return The current instrument mute status. true is muted, false is unmuted.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument is outside the specified range.
 	  \sa openmpt::ext::interactive::set_instrument_mute_status
 	*/
