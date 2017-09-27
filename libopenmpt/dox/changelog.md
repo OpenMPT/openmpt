@@ -7,7 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.1-pre
 
-### libopenmpt 0.3.0 (2017-09-27)
+ *  [**Bug**] Windows: libopenmpt resource did not compile for release versions.
+
+### libopenmpt 0.3.0 (2017-09-27, not released)
 
  *  [**New**] New error handling functionality in the C API, which in particular
     allows distinguishing potentially transient out-of-memory errors from parse
