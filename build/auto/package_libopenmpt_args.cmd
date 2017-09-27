@@ -154,6 +154,7 @@ copy /y ..\..\libopenmpt\libopenmpt.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_config.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_version.h inc\libopenmpt\ || goto error
+copy /y ..\..\libopenmpt\libopenmpt_ext.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h inc\libopenmpt\ || goto error
@@ -178,6 +179,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-
  inc\libopenmpt\libopenmpt.hpp ^
  inc\libopenmpt\libopenmpt_config.h ^
  inc\libopenmpt\libopenmpt_version.h ^
+ inc\libopenmpt\libopenmpt_ext.h ^
  inc\libopenmpt\libopenmpt_ext.hpp ^
  inc\libopenmpt\libopenmpt_stream_callbacks_buffer.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_fd.h ^
