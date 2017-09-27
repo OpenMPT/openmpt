@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 #else
 #define GLOBALVOL_7BIT_FORMATS_EXT Enum<MODTYPE>::value_type()
 #endif // MODPLUG_TRACKER
-#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | GLOBALVOL_7BIT_FORMATS_EXT)
+#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM | GLOBALVOL_7BIT_FORMATS_EXT)
 
 
 // Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
@@ -3417,7 +3417,7 @@ bool CSoundFile::ProcessEffects()
 
 			if(nPosJump >= Order().size())
 			{
-				nPosJump = 0;
+				nPosJump = Order().GetRestartPos();
 			}
 
 			// IT / FT2 compatibility: don't reset loop count on pattern break.
