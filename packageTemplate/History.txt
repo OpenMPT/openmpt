@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.01.00 (27 September 2017, revision 8995)
+v1.27.01.00 (27 September 2017, revision 9000)
 ----------------------------------------------
 General tab
    [Imp] <js> Indicate whether a plugin is bridged (http://bugs.openmpt.org/view.php?id=904).
