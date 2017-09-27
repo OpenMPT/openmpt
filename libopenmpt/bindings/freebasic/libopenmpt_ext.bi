@@ -76,6 +76,7 @@ Declare Function openmpt_module_ext_get_module(ByVal mod_ext As openmpt_module_e
   \param interface Appropriate structure of interface function pointers which is to be filled by this function (e.g. a pointer to a openmpt_module_ext_interface_pattern_vis structure).
   \param interface_size Size of the interface's structure of function pointers (e.g. sizeof(openmpt_module_ext_interface_pattern_vis)).
   \return 1 on success, 0 if the interface was not found.
+  \since 0.3.0
 '/
 Declare Function openmpt_module_ext_get_interface(ByVal mod_ext As openmpt_module_ext Ptr, ByVal interface_id As Const ZString Ptr, ByVal interface As Any Ptr, ByVal interface_size As UInteger) As Long
 
@@ -272,3 +273,60 @@ Type openmpt_module_ext_interface_interactive
 End Type
 
 End Extern
+
+/'* \brief Construct an openmpt_module_ext
+
+  \param file The FreeBASIC file handle to load from.
+  \param logfunc Logging function where warning and errors are written. May be NULL.
+  \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param errfunc Error function to define error behaviour. May be NULL.
+  \param erruser Error function user context. Used to pass any user-defined data associated with this module to the error function.
+  \param errorcode Pointer to an integer where an error may get stored. May be NULL.
+  \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+  \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+  \return A pointer to the constructed openmpt_module, or NULL on failure.
+  \remarks The file handle can be closed after an openmpt_module has been constructed successfully.
+  \sa openmpt_module_ext_create
+'/
+Function openmpt_module_ext_create_from_fbhandle(_
+		ByVal file As Integer,_
+		ByVal logfunc As openmpt_log_func = 0,_
+		ByVal loguser As Any Ptr = 0,_
+		ByVal errfunc As openmpt_error_func = 0,_
+		ByVal erruser As Any Ptr = 0,_
+		ByVal errorcode As Long Ptr = 0,_
+		ByVal error_message As Const ZString Ptr Ptr = 0,_
+		ByVal ctls As Const openmpt_module_initial_ctl Ptr = 0) As openmpt_module_ext Ptr
+	Return openmpt_module_ext_create(openmpt_stream_get_file_callbacks(), Cast(FILE Ptr, FileAttr(file, fbFileAttrHandle)), logfunc, loguser, errfunc, erruser, errorcode, error_message, ctls)
+End Function
+
+/'* \brief Construct an openmpt_module_ext
+
+  \param filename The file to load from.
+  \param logfunc Logging function where warning and errors are written. May be NULL.
+  \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+  \param errfunc Error function to define error behaviour. May be NULL.
+  \param erruser Error function user context. Used to pass any user-defined data associated with this module to the error function.
+  \param errorcode Pointer to an integer where an error may get stored. May be NULL.
+  \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+  \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+  \return A pointer to the constructed openmpt_module, or NULL on failure.
+  \sa openmpt_module_ext_create
+'/
+Function openmpt_module_ext_create_from_filename(_
+		ByRef filename As String,_
+		ByVal logfunc As openmpt_log_func = 0,_
+		ByVal loguser As Any Ptr = 0,_
+		ByVal errfunc As openmpt_error_func = 0,_
+		ByVal erruser As Any Ptr = 0,_
+		ByVal errorcode As Long Ptr = 0,_
+		ByVal error_message As Const ZString Ptr Ptr = 0,_
+		ByVal ctls As Const openmpt_module_initial_ctl Ptr = 0) As openmpt_module_ext Ptr
+	Var file = fopen(filename, "rb")
+	Var retval = CPtr(openmpt_module Ptr, 0)
+	If(file <> 0) Then
+		retval = openmpt_module_ext_create(openmpt_stream_get_file_callbacks(), file, logfunc, loguser, errfunc, erruser, errorcode, error_message, ctls)
+		fclose(file)
+	EndIf
+	Return retval
+End Function
