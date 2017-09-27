@@ -76,7 +76,7 @@ shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
 copy_binaries("bin/release-LTCG/vs2015-static/x86-64-win7/", openmpt_zip_64bit_path)
 print("Copying 64-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_64bitold_basepath, ignore_errors=True)
-copy_binaries("bin/release-LTCG/vs2015-static/x86-64-winxp/", openmpt_zip_64bitold_path)
+copy_binaries("bin/release-LTCG/vs2015-static/x86-64-winxp64/", openmpt_zip_64bitold_path)
 
 pManual.communicate()
 if(pManual.returncode != 0):
