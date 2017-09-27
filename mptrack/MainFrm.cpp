@@ -2389,8 +2389,10 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcStopSong:
 		case kcEstimateSongLength:
 		case kcApproxRealBPM:
-			{	CModDoc* pModDoc = GetActiveDoc();
-				if (pModDoc)
+		case kcPanic:
+			{
+				CModDoc *modDoc = GetActiveDoc();
+				if (modDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
 				else if(wParam == kcPlayPauseSong  || wParam == kcStopSong)
 					StopPreview();
@@ -2856,10 +2858,11 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
-		str = mpt::format(MPT_USTRING("FX%1: "))(iPlug + 1);
+		str.clear();
+		str += mpt::format(MPT_USTRING("FX%1: "))(iPlug + 1);
 		const size_t size0 = str.size();
 		str += (librarynames) ? mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::CharsetLocale, plugin.GetName());
-		if(str.size() <= size0) str += MPT_USTRING("undefined");
+		if(str.size() <= size0) str += MPT_USTRING("--");
 		
 		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		if(vstPlug != nullptr && vstPlug->isBridged)

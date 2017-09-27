@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.01.00 (27 September 2017, revision 8990)
+v1.27.01.00 (27 September 2017, revision 8995)
 ----------------------------------------------
 General tab
    [Imp] <js> Indicate whether a plugin is bridged (http://bugs.openmpt.org/view.php?id=904).
@@ -211,6 +211,7 @@ Misc
    [Mod] <js> MIDI Macro Configuration: Remove checkbox for embedding MIDI macros. They are embedded automatically when required.
    [Fix] <js> Modifying channels outside the channel editor (renaming, moving, etc.) did not update the channel manager instantly.
    [Fix] <js> SF2: Sustain level was not imported.
+   [Fix] <js> The "Panic" shortcut never worked (tx isdera).
    [Reg] <jh> The minimum system requirements changed. OpenMPT now requires at least Windows XP or Wine 1.6. Older systems (Windows 98 SE, Windows ME, Windows 2000, as well as Wine 1.0 through 1.5) are no longer supported. OpenMPT 1.27 also drops support for some very old CPUs (http://forum.openmpt.org/index.php?topic=5708).
 
 Bundled plugins
