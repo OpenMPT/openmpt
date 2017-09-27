@@ -3340,7 +3340,7 @@ bool CSoundFile::ProcessEffects()
 
 			if(nPosJump >= Order.size())
 			{
-				nPosJump = 0;
+				nPosJump = Order.GetRestartPos();
 			}
 
 			// IT / FT2 compatibility: don't reset loop count on pattern break.
