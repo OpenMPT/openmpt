@@ -14,6 +14,10 @@ call build\auto\helper_get_svnversion.cmd
 call build\auto\helper_get_openmpt_version.cmd
 
 set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%+%SVNVERSION%
+if "x%LIBOPENMPT_VERSION_PREREL%" == "x" (
+	set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%+release
+)
+
 
 set MPT_PKG_FORMAT=%5
 if "%MPT_PKG_FORMAT%" == "" set MPT_PKG_FORMAT=zip
