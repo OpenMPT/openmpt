@@ -8,6 +8,13 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta28
 
  *  MT2 offset + delay command was not imported correctly.
+ *  If the order list was longer than 256 items and there was a pattern break
+    effect without a position jump on the last pattern of the sequence, it did
+    not jump to the correct restart order.
+ *  Tighten MOD / ICE rejection heuristics for invalid files and loosen them in
+    other places to allow some valid MOD files to load.
+ *  Some valid FAR files were rejected erroneously.
+ *  Improved accuracy of vibrato command in DIGI / DBM files.
 
 ### libopenmpt 0.2-beta27 (2017-08-12)
 

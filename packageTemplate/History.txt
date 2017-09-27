@@ -30,6 +30,17 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.26.15.00 (* September 2017, revision 8808)
+---------------------------------------------
+Other formats
+   [Fix] <js> DBM: Vibrato strength was too deep.
+   [Fix] <js> MT2: Offset + delay command was not imported correctly.
+   [Fix] <js> Possible crash with some valid FAR files.
+
+Playback
+   [Fix] <js> If the order list was longer than 256 items and there was a pattern break effect without a position jump on the last pattern of the sequence, it did not jump to the correct restart order.
+
+
 v1.26.14.00 (14 August 2017, revision 8772)
 -------------------------------------------
 Pattern tab
