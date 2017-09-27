@@ -158,18 +158,23 @@ is just a high-level summary.
     offset.
  *  MT2 files with instruments that had both sample and plugin assignments were
     not read correctly.
+ *  Some valid FAR files were rejected erroneously.
  *  Support for VBlank timing flag and comment field in PT36 files.
  *  Improved accuracy of vibrato command in DIGI / DBM files.
  *  STM: Add support for "WUZAMOD!" magic bytes and allow some slightly
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
     should be taken into account or not.
- *  Tighten heuristics for rejecting invalid 669 and M15 files.
+ *  Tighten heuristics for rejecting invalid 669, M15, MOD and ICE files and
+    loosen them in other places to allow some valid MOD files to load.
  *  Improvements to seeking: Channel panning was not always updated from
     instruments / samples when seeking, and out-of-range global volume was not
     applied correctly in some formats.
  *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
     slide part of combined volume slide + vibrato commands.
+ *  If the order list was longer than 256 items and there was a pattern break
+    effect without a position jump on the last pattern of the sequence, it did
+    not jump to the correct restart order.
  *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
  *  openmpt123: Improved section layout in man page.
