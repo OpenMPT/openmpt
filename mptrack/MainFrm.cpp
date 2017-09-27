@@ -2389,8 +2389,10 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcStopSong:
 		case kcEstimateSongLength:
 		case kcApproxRealBPM:
-			{	CModDoc* pModDoc = GetActiveDoc();
-				if (pModDoc)
+		case kcPanic:
+			{
+				CModDoc *modDoc = GetActiveDoc();
+				if (modDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
 				else if(wParam == kcPlayPauseSong  || wParam == kcStopSong)
 					StopPreview();
