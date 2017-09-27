@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.1-pre
+
 ### libopenmpt 0.3.0 (2017-09-27)
 
  *  [**New**] New error handling functionality in the C API, which in particular
