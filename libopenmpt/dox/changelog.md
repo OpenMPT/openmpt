@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.3.1-pre
+### libopenmpt 0.3.1 (2017-09-28)
 
  *  [**Bug**] Windows: libopenmpt resource did not compile for release versions.
 
