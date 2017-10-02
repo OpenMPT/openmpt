@@ -496,7 +496,9 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 		{
 			if(s_KeyboardHookReentryFlag)
 			{
-				return -1; // exit early without calling further hooks when re-entering
+				// Exit early without calling our hook when re-entering.
+				// We still need to call other hooks though.
+				return CallNextHookEx(ghKbdHook, code, wParam, lParam); // required by spec
 			}
 			s_KeyboardHookReentryFlag = true;
 		}
