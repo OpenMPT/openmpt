@@ -1645,8 +1645,12 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 							// jackdance.mod by Karsten Obarski has 0xy arpeggios...
 							if(m.param < 0x03)
 							{
-								break;
+								m.command = CMD_NONE;
+							} else
+							{
+								m.command = CMD_ARPEGGIO;
 							}
+							break;
 						case 1:
 							m.command = CMD_ARPEGGIO;
 							break;
