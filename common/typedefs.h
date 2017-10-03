@@ -347,18 +347,22 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 // Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
-#if MPT_COMPILER_MSVC
-#define MPT_FALLTHROUGH __fallthrough
+#if (MPT_CXX >= 17)
+	#define MPT_FALLTHROUGH [[fallthrough]]
+#elif MPT_COMPILER_MSVC
+	#define MPT_FALLTHROUGH __fallthrough
 #elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#define MPT_FALLTHROUGH [[clang::fallthrough]]
+	#define MPT_FALLTHROUGH [[clang::fallthrough]]
+#elif MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(7,1,0)
+	#define MPT_FALLTHROUGH __attribute__((fallthrough))
 #elif defined(__has_cpp_attribute)
 	#if __has_cpp_attribute(fallthrough)
-	#define MPT_FALLTHROUGH [[fallthrough]]
+		#define MPT_FALLTHROUGH [[fallthrough]]
 	#else
-	#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
+		#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
 	#endif
 #else
-#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
+	#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
 #endif
 
 
