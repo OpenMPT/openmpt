@@ -2212,6 +2212,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				break;
 			case NNA_NOTECUT:
 				chn.nFadeOutVol = 0;
+				chn.dwFlags.set(CHN_NOTEFADE);
+				break;
 			case NNA_NOTEFADE:
 				chn.dwFlags.set(CHN_NOTEFADE);
 				break;
