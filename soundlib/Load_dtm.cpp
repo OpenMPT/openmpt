@@ -323,7 +323,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		uint16 numSamples = chunk.ReadUint16BE();
 		bool newSamples = (numSamples >= 0x8000);
 		numSamples &= 0x7FFF;
-		if(numSamples >= MAX_SAMPLES || !chunk.CanRead(numSamples) * sizeof(DTMSample))
+		if(numSamples >= MAX_SAMPLES || !chunk.CanRead(numSamples * sizeof(DTMSample)))
 		{
 			return false;
 		}
