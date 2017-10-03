@@ -109,7 +109,7 @@ static std::string format_exception( const char * const function ) {
 	} catch ( ... ) {
 		err += function;
 		err += ": ";
-		err += "UNKOWN INTERNAL ERROR";
+		err += "UNKNOWN INTERNAL ERROR";
 	}
 	return err;
 }
@@ -374,7 +374,7 @@ int openmpt_error_is_transient( int error ) {
 }
 
 const char * openmpt_error_string( int error ) {
-	const char * text = "unkown error";
+	const char * text = "unknown error";
 	switch ( error ) {
 		case OPENMPT_ERROR_OK:                
 			text = "";

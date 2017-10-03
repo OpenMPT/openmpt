@@ -413,7 +413,7 @@ struct AMSampleHeader
 	uint16le pan;
 	uint16le volume;
 	uint16le flags;
-	uint16le unkown;		// 0x0000 / 0x0080?
+	uint16le unknown;		// 0x0000 / 0x0080?
 	uint32le length;
 	uint32le loopStart;
 	uint32le loopEnd;

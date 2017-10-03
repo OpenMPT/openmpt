@@ -509,7 +509,7 @@ static void show_info( std::ostream & log, bool verbose ) {
 	log << " <https://libsdl.org/>" << std::endl;
 #endif
 #ifdef MPT_WITH_PULSEAUDIO
-	log << " " << "libpulse, libpulse-simple" << " (headers " << pa_get_headers_version()  << ", API " << PA_API_VERSION << ", PROTOCOL " << PA_PROTOCOL_VERSION << ", library " << ( pa_get_library_version() ? pa_get_library_version() : "unkown" ) << ") <https://www.freedesktop.org/wiki/Software/PulseAudio/>" << std::endl;
+	log << " " << "libpulse, libpulse-simple" << " (headers " << pa_get_headers_version()  << ", API " << PA_API_VERSION << ", PROTOCOL " << PA_PROTOCOL_VERSION << ", library " << ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) << ") <https://www.freedesktop.org/wiki/Software/PulseAudio/>" << std::endl;
 #endif
 #ifdef MPT_WITH_PORTAUDIO
 	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
