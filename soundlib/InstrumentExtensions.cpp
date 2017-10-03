@@ -439,14 +439,16 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 			/* hackish workaround to resolve mismatched size values: */ \
 			/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
 			/* This worked fine on little-endian, on big-endian not so much. Thus support reading size-mismatched fields. */ \
-			type tmp; \
-			if(!file.CanRead(fsize)) return false; \
-			tmp = file.ReadTruncatedIntLE<type>(fsize); \
-			STATIC_ASSERT(sizeof(tmp) == sizeof(input-> name )); \
-			memcpy(&(input-> name ), &tmp, sizeof(type)); \
-			return true; \
+			if(file.CanRead(fsize)) \
+			{ \
+				type tmp; \
+				tmp = file.ReadTruncatedIntLE<type>(fsize); \
+				STATIC_ASSERT(sizeof(tmp) == sizeof(input-> name )); \
+				memcpy(&(input-> name ), &tmp, sizeof(type)); \
+				result = true; \
+			} \
 		} \
-	}
+	} break;
 
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for array members ONLY
@@ -461,9 +463,9 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 			{ \
 				input-> name [i] = arrayChunk.ReadIntLE<type>(); \
 			} \
-			return true; \
+			result = true; \
 		} \
-	}
+	} break;
 
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for envelope tick/value members
@@ -477,14 +479,16 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 		{ \
 			env[i]. envField = arrayChunk.ReadIntLE<type>(); \
 		} \
-		return true; \
-	}
+		result = true; \
+	} break;
 
 
 // Return a pointer on the wanted field in 'input' ModInstrument given field code & size
 bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize, FileReader &file)
 {
 	if(input == nullptr) return false;
+
+	bool result = false;
 
 	// Members which can be found in this table but not in the write table are only required in the legacy ITP format.
 	switch(fcode)
@@ -547,28 +551,30 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 		// Integer part of pitch/tempo lock
 		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(tmp, input->pitchToTempoLock.GetFract());
-		return true;
-	}
+		result = true;
+	} break;
 	case MAGIC4LE('P','T','T','F'):
 	{
 		// Fractional part of pitch/tempo lock
 		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(input->pitchToTempoLock.GetInt(), tmp);
-		return true;
-	}
-
+		result = true;
+	} break;
 	case MAGIC4BE('V','E','.','.'):
 		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
-		return true;
+		result = true;
+		break;
 	case MAGIC4BE('P','E','.','.'):
 		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
-		return true;
+		result = true;
+		break;
 	case MAGIC4BE('P','i','E','.'):
 		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
-		return true;
+		result = true;
+		break;
 	}
 
-	return false;
+	return result;
 }
 
 
