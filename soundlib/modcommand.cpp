@@ -109,10 +109,10 @@ void ModCommand::ExtendedS3MtoMODEffect()
 	case 0x20: param = (param & 0x0F) | 0x50; break;
 	case 0x30: param = (param & 0x0F) | 0x40; break;
 	case 0x40: param = (param & 0x0F) | 0x70; break;
-	case 0x50:
-	case 0x60:
-	case 0x90:
-	case 0xA0: command = CMD_XFINEPORTAUPDOWN; break;
+	case 0x50: command = CMD_XFINEPORTAUPDOWN; break;  // map to unused X5x
+	case 0x60: command = CMD_XFINEPORTAUPDOWN; break;  // map to unused X6x
+	case 0x90: command = CMD_XFINEPORTAUPDOWN; break;  // map to unused X9x
+	case 0xA0: command = CMD_XFINEPORTAUPDOWN; break;  // map to unused XAx
 	case 0xB0: param = (param & 0x0F) | 0x60; break;
 	case 0x70: command = CMD_NONE; break;  // No NNA / envelope control in MOD/XM format
 	// rest are the same
