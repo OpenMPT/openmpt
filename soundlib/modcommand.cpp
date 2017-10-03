@@ -114,7 +114,7 @@ void ModCommand::ExtendedS3MtoMODEffect()
 	case 0x90:
 	case 0xA0: command = CMD_XFINEPORTAUPDOWN; break;
 	case 0xB0: param = (param & 0x0F) | 0x60; break;
-	case 0x70: command = CMD_NONE;	// No NNA / envelope control in MOD/XM format
+	case 0x70: command = CMD_NONE; break;  // No NNA / envelope control in MOD/XM format
 	// rest are the same
 	}
 }
