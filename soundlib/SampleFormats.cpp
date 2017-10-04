@@ -33,6 +33,7 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/ModSampleCopy.h"
+#include <map>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2243,12 +2244,12 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 			}
 			lines_per_field[last_field].push_back(AUTrimFieldFromAnnotationLine(line));
 		}
-		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["title"  ], "\n"));
-		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["artist" ], "\n"));
-		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["album"  ], "\n"));
-		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["track"  ], "\n"));
-		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["genre"  ], "\n"));
-		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["comment"], "\n"));
+		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["title"  ], std::string("\n")));
+		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["artist" ], std::string("\n")));
+		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["album"  ], std::string("\n")));
+		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["track"  ], std::string("\n")));
+		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["genre"  ], std::string("\n")));
+		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["comment"], std::string("\n")));
 	} else
 	{
 		// Most applications tend to write their own name here,
