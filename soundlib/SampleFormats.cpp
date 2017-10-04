@@ -2116,11 +2116,19 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	if(!file.ReadMagic(".snd"))
 		return false;
 
-	uint32 dataOffset = file.ReadUint32BE();
+	uint32 dataOffset = file.ReadUint32BE();  // must be divisible by 8 according to spec, however, there are files that ignore this requirement
 	uint32 dataSize = file.ReadUint32BE();
 	uint32 encoding = file.ReadUint32BE();
 	uint32 sampleRate = file.ReadUint32BE();
 	uint32 channels = file.ReadUint32BE();
+
+	// According to spec, a minimum 8 byte annotation field after the header fields is required,
+	// however, there are files in the wild that violate this requirement.
+	// Thus, check for 24 instead of 32 here.
+	if(dataOffset < 24) // data offset points inside header
+	{
+		return false;
+	}
 
 	if(channels < 1 || channels > 2)
 		return false;
