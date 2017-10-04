@@ -2108,6 +2108,53 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 }
 
 
+static bool AUIsAnnotationLineWithField(const std::string & line)
+{
+	std::size_t pos = line.find('=');
+	if(pos == std::string::npos)
+	{
+		return false;
+	}
+	if(pos == 0)
+	{
+		return false;
+	}
+	std::string field = line.substr(0, pos);
+	bool invalidChars = false;
+	for(auto c : field)
+	{
+		if(!IsInRange(c, 'a', 'z') && !IsInRange(c, 'A', 'Z') && !IsInRange(c, '0', '9') && c != '-' && c != '_')
+		{
+			invalidChars = true;
+		}
+	}
+	if(invalidChars)
+	{
+		return false;
+	}
+	return true;
+}
+
+static std::string AUTrimFieldFromAnnotationLine(const std::string & line)
+{
+	if(!AUIsAnnotationLineWithField(line))
+	{
+		return line;
+	}
+	std::size_t pos = line.find('=');
+	return line.substr(pos + 1);
+}
+
+static std::string AUGetAnnotationFieldFromLine(const std::string & line)
+{
+	if(!AUIsAnnotationLineWithField(line))
+	{
+		return std::string();
+	}
+	std::size_t pos = line.find('=');
+	return line.substr(0, pos);
+}
+
 bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
 {
 	file.Rewind();
@@ -2153,8 +2200,64 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	default: return false;
 	}
 
-	if(!file.Seek(dataOffset))
+	if(!file.LengthIsAtLeast(dataOffset))
+	{
 		return false;
+	}
+
+	FileTags tags;
+
+	// This reads annotation metadata as written by sox or ffmpeg.
+	// Additionally, we fall back to just reading the whole field as a single comment.
+	file.Seek(24);
+	std::vector<mpt::byte> annotationData;
+	file.ReadVector<mpt::byte>(annotationData, dataOffset - 24);
+	std::string annotation(annotationData.begin(), annotationData.end());
+	annotation = mpt::String::RTrim(annotation, std::string(1, '\0'));
+	std::size_t term = annotation.find(std::string(1, '\0'));
+	if(term != std::string::npos)
+	{ // only up to first \0 byte
+		annotation = annotation.substr(0, term);
+	}
+	annotation = mpt::String::Replace(annotation, "\r\n", "\n");
+	annotation = mpt::String::Replace(annotation, "\r", "\n");
+	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::CharsetUTF8 : mpt::CharsetISO8859_1;
+	std::vector<std::string> lines = mpt::String::Split<std::string>(annotation, "\n");
+	bool has_fields = false;
+	for(const auto & line : lines)
+	{
+		if(AUIsAnnotationLineWithField(line))
+		{
+			has_fields = true;
+		}
+	}
+	if(has_fields)
+	{
+		std::map<std::string, std::vector<std::string>> lines_per_field;
+		std::string last_field = "comment";
+		for(const auto & line : lines)
+		{
+			if(AUIsAnnotationLineWithField(line))
+			{
+				last_field = mpt::ToLowerCaseAscii(mpt::String::Trim(AUGetAnnotationFieldFromLine(line)));
+			}
+			lines_per_field[last_field].push_back(AUTrimFieldFromAnnotationLine(line));
+		}
+		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["title"  ], "\n"));
+		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["artist" ], "\n"));
+		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["album"  ], "\n"));
+		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["track"  ], "\n"));
+		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["genre"  ], "\n"));
+		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["comment"], "\n"));
+	} else
+	{
+		// Most applications tend to write their own name here,
+		// thus there is little use in interpreting the string as a title.
+		annotation = mpt::String::RTrim(annotation, std::string("\r\n"));
+		tags.comments = mpt::ToUnicode(charset, annotation);
+	}
+
+	file.Seek(dataOffset);
 
 	ModSample &mptSample = Samples[nSample];
 	DestroySampleThreadsafe(nSample);
@@ -2164,7 +2267,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 		LimitMax(length, dataSize);
 	mptSample.nLength = (length * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
 	mptSample.nC5Speed = sampleRate;
-	strcpy(m_szNames[nSample], "");
+	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
 
 	if(mayNormalize)
 	{
