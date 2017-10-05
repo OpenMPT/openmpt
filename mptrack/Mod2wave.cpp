@@ -1137,6 +1137,10 @@ void CDoWaveConvert::Run()
 				fileEnc->WriteInterleaved(lRead, floatbuffer);
 			} else
 			{
+				if(fileEnc->GetConvertedEndianness() != mpt::endian())
+				{
+					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, lRead * encSettings.Channels);
+				}
 				fileEnc->WriteInterleavedConverted(lRead, buffer);
 			}
 			const std::streampos newPos = fileStream.tellp();
@@ -1240,6 +1244,10 @@ void CDoWaveConvert::Run()
 					case SampleFormatInt24:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int24*>(buffer), mixbuffer, channels, framesChunk); break;
 					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int32*>(buffer), mixbuffer, channels, framesChunk); break;
 					default: ASSERT(false); break;
+				}
+				if(fileEnc->GetConvertedEndianness() != mpt::endian())
+				{
+					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, framesChunk * channels);
 				}
 				fileEnc->WriteInterleavedConverted(framesChunk, buffer);
 			}
