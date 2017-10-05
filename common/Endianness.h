@@ -124,6 +124,23 @@ struct LittleEndian_tag
 
 
 
+namespace mpt {
+
+template <typename Tbyte>
+inline void SwapBufferEndian(std::size_t elementSize, Tbyte * buffer, std::size_t elements)
+{
+	MPT_STATIC_ASSERT(sizeof(Tbyte) == 1);
+	for(std::size_t element = 0; element < elements; ++element)
+	{
+		std::reverse(&buffer[0], &buffer[elementSize]);
+		buffer += elementSize;
+	}
+}
+
+} // namespace mpt
+
+
+
 // Ending swaps:
 // SwapBytesBE(x) and variants may be used either to:
 // -Convert integer x, which is in big endian format (for example read from file),
