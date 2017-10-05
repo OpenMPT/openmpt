@@ -463,8 +463,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleSilence, 1383, _T("Silence Sample Selection"));
 	DefineKeyCommand(kcSampleNormalize, 1384, _T("Normalise Sample"));
 	DefineKeyCommand(kcSampleAmplify, 1385, _T("Amplify Sample"));
-	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom Out"));
-	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom In"));
+	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom In"));
+	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom Out"));
 	//time saving HACK:
 	for(int j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
 	{
@@ -1515,7 +1515,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
-		f << "\n//----( " << mpt::ToCharset(mpt::CharsetUTF8, KeyCombination::GetContextText((InputTargetContext)ctx)) << " (" << ctx << ") )------------\n";
+		f << "\n//----( " << mpt::ToCharset(mpt::CharsetUTF8, KeyCombination::GetContextText((InputTargetContext)ctx)) << " )------------\n";
 
 		for (int cmd=0; cmd<kcNumCommands; cmd++)
 		{
@@ -1737,7 +1737,6 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 {
 	switch(ctx)
 	{
-
 		case kCtxAllContexts:			return _T("Global Context");
 		case kCtxViewGeneral:			return _T("General Context [bottom]");
 		case kCtxViewPatterns:			return _T("Pattern Context [bottom]");
@@ -1760,7 +1759,7 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 		case kCtxUnknownContext:
 		default:						return _T("Unknown Context");
 	}
-};
+}
 
 
 CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
