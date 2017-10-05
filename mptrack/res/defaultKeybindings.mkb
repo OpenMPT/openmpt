@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 version:1
 
-//----( Global Context (0) )------------
+//----( Global Context )------------
 0:1347:2:78:1		//File/New: Ctrl+N (KeyDown)
 0:1346:2:79:1		//File/Open: Ctrl+O (KeyDown)
 0:1348:2:87:5		//File/Close: Ctrl+W (KeyDown|KeyHold)
@@ -53,9 +53,9 @@ version:1
 0:1034:2:37:5		//Previous Order: Ctrl+LEFT (KeyDown|KeyHold)
 0:1035:2:39:5		//Next Order: Ctrl+RIGHT (KeyDown|KeyHold)
 
-//----( General Context [bottom] (1) )------------
+//----( General Context [bottom] )------------
 
-//----( Pattern Context [bottom] (2) )------------
+//----( Pattern Context [bottom] )------------
 2:1017:0:34:5		//Jump down by measure: PGDOWN (KeyDown|KeyHold)
 2:1018:0:33:5		//Jump up by measure: PGUP (KeyDown|KeyHold)
 2:1338:4:34:5		//Jump down by beat: Alt+PGDOWN (KeyDown|KeyHold)
@@ -81,14 +81,14 @@ version:1
 2:1011:2:76:1		//Select Channel / Select All: Ctrl+L (KeyDown)
 2:1968:3:76:1		//Select Column: Shift+Ctrl+L (KeyDown)
 2:1663:0:122:1		//Toggle follow song: F11 (KeyDown)
-2:1003:0:13:1		//Quick copy: ENTER (KeyDown)
-2:1004:0:32:5		//Quick paste: SPACE (KeyDown|KeyHold)
-2:1001:2:32:1		//Enable recording: Ctrl+SPACE (KeyDown)
-2:1002:2:13:5		//Play row: Ctrl+ENTER (KeyDown|KeyHold)
-2:1317:4:18:1		//Set row jump on note entry: Alt (KeyDown)
-2:1685:2:9:1		//Switch to order list: Ctrl+TAB (KeyDown)
+2:1003:0:13:1		//Quick Copy: ENTER (KeyDown)
+2:1004:0:32:5		//Quick Paste: SPACE (KeyDown|KeyHold)
+2:1001:2:32:1		//Enable Recording: Ctrl+SPACE (KeyDown)
+2:1002:2:13:5		//Play Row: Ctrl+ENTER (KeyDown|KeyHold)
+2:1317:4:18:1		//Set edit step on note entry: Alt (KeyDown)
+2:1685:2:9:1		//Switch to Order List: Ctrl+TAB (KeyDown)
 2:1806:2:68:5		//Duplicate Pattern: Ctrl+D (KeyDown|KeyHold)
-2:1836:2:191:1		//Edit plugin assigned to PC note: Ctrl+/ (KeyDown)
+2:1836:2:191:1		//Toggle PC Event/instrument plugin editor: Ctrl+/ (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show Note Properties: ANWENDUNG (KeyDown)
 2:1772:5:80:1		//Show Pattern Properties: Shift+Alt+P (KeyDown)
@@ -99,8 +99,8 @@ version:1
 2:1900:3:77:1		//Toggle Clipboard Manager: Shift+Ctrl+M (KeyDown)
 2:1901:3:37:1		//Cycle to Previous Clipboard: Shift+Ctrl+LEFT (KeyDown)
 2:1902:3:39:1		//Cycle to Next Clipboard: Shift+Ctrl+RIGHT (KeyDown)
-2:1005:0:121:1		//Mute current Channel: F10 (KeyDown)
-2:1006:2:121:1		//Solo current Channel: Ctrl+F10 (KeyDown)
+2:1005:0:121:1		//Mute Current Channel: F10 (KeyDown)
+2:1006:2:121:1		//Solo Current Channel: Ctrl+F10 (KeyDown)
 2:1771:6:121:1		//Unmute all channels: Ctrl+Alt+F10 (KeyDown)
 2:1883:2:49:1		//Channel Record Select: Ctrl+1 (KeyDown)
 2:1884:2:50:1		//Channel Split Record Select: Ctrl+2 (KeyDown)
@@ -137,7 +137,7 @@ version:1
 2:1055:0:109:5		//Previous pattern: NUM SUB (KeyDown|KeyHold)
 2:1054:0:107:5		//Next pattern: NUM PLUS (KeyDown|KeyHold)
 
-//----( Pattern Context [bottom] - Note Col (3) )------------
+//----( Pattern Context [bottom] - Note Col )------------
 3:1064:0:81/16:1		//Base octave C: Q (KeyDown)
 3:1065:0:87/17:1		//Base octave C#: W (KeyDown)
 3:1066:0:69/18:1		//Base octave D: E (KeyDown)
@@ -193,13 +193,13 @@ version:1
 3:1221:0:57:1		//Set octave 9: 9 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift (KeyDown)
-3:1667:0:192:1		//Note Cut (without instrument number): ' (KeyDown)
-3:1668:0:187:1		//Note Off (without instrument number): = (KeyDown)
-3:1792:1:187:1		//Note Fade (without instrument number): Shift+= (KeyDown)
-3:1788:1:189:1		//Parameter control(MPTm only): Shift+- (KeyDown)
-3:1789:0:189:1		//Parameter control(smooth)(MPTm only): - (KeyDown)
+3:1667:0:192:1		//Note Cut: ' (KeyDown)
+3:1668:0:187:1		//Note Off: = (KeyDown)
+3:1792:1:187:1		//Note Fade: Shift+= (KeyDown)
+3:1788:1:189:1		//Parameter Control: Shift+- (KeyDown)
+3:1789:0:189:1		//Parameter Control (smooth): - (KeyDown)
 
-//----( Pattern Context [bottom] - Ins Col (4) )------------
+//----( Pattern Context [bottom] - Ins Col )------------
 4:1202:0:96:1		//Set instrument digit 0: NUM 0 (KeyDown)
 4:1202:0:48:1		//Set instrument digit 0: 0 (KeyDown)
 4:1203:0:97:1		//Set instrument digit 1: NUM 1 (KeyDown)
@@ -221,7 +221,7 @@ version:1
 4:1211:0:105:1		//Set instrument digit 9: NUM 9 (KeyDown)
 4:1211:0:57:1		//Set instrument digit 9: 9 (KeyDown)
 
-//----( Pattern Context [bottom] - Vol Col (5) )------------
+//----( Pattern Context [bottom] - Vol Col )------------
 5:1222:0:48:1		//Set volume digit 0: 0 (KeyDown)
 5:1222:0:96:1		//Set volume digit 0: NUM 0 (KeyDown)
 5:1223:0:49:1		//Set volume digit 1: 1 (KeyDown)
@@ -257,50 +257,56 @@ version:1
 5:1244:0:69:1		//Volume Command - Portamento Down: E (KeyDown)
 5:1246:0:79:1		//Volume Command - Offset: O (KeyDown)
 
-//----( Pattern Context [bottom] - FX Col (6) )------------
-6:1294:0:220:1		//FX midi macro slide: \ (KeyDown)
-6:1295:1:186:1		//FX combined note delay and note cut: Shift+; (KeyDown)
-6:1295:0:186:1		//FX combined note delay and note cut: ; (KeyDown)
-6:1666:0:191:1		//FX parameter extension command: / (KeyDown)
+//----( Pattern Context [bottom] - FX Col )------------
+6:1294:0:220:1		//Smooth MIDI Macro Slide: \ (KeyDown)
+6:1295:1:186:1		//Combined Note Delay and Note Cut: Shift+; (KeyDown)
+6:1295:0:186:1		//Combined Note Delay and Note Cut: ; (KeyDown)
+6:1666:0:191:1		//Parameter Extension Command: / (KeyDown)
 
-//----( Pattern Context [bottom] - Param Col (7) )------------
-7:1247:0:48:1		//FX Param digit 0: 0 (KeyDown)
-7:1247:0:96:1		//FX Param digit 0: NUM 0 (KeyDown)
-7:1248:0:49:1		//FX Param digit 1: 1 (KeyDown)
-7:1248:0:97:1		//FX Param digit 1: NUM 1 (KeyDown)
-7:1249:0:50:1		//FX Param digit 2: 2 (KeyDown)
-7:1249:0:98:1		//FX Param digit 2: NUM 2 (KeyDown)
-7:1250:0:51:1		//FX Param digit 3: 3 (KeyDown)
-7:1250:0:99:1		//FX Param digit 3: NUM 3 (KeyDown)
-7:1251:0:52:1		//FX Param digit 4: 4 (KeyDown)
-7:1251:0:100:1		//FX Param digit 4: NUM 4 (KeyDown)
-7:1252:0:53:1		//FX Param digit 5: 5 (KeyDown)
-7:1252:0:101:1		//FX Param digit 5: NUM 5 (KeyDown)
-7:1253:0:54:1		//FX Param digit 6: 6 (KeyDown)
-7:1253:0:102:1		//FX Param digit 6: NUM 6 (KeyDown)
-7:1254:0:55:1		//FX Param digit 7: 7 (KeyDown)
-7:1254:0:103:1		//FX Param digit 7: NUM 7 (KeyDown)
-7:1255:0:56:1		//FX Param digit 8: 8 (KeyDown)
-7:1255:0:104:1		//FX Param digit 8: NUM 8 (KeyDown)
-7:1256:0:57:1		//FX Param digit 9: 9 (KeyDown)
-7:1256:0:105:1		//FX Param digit 9: NUM 9 (KeyDown)
-7:1257:0:65:1		//FX Param digit A: A (KeyDown)
-7:1258:0:66:1		//FX Param digit B: B (KeyDown)
-7:1259:0:67:1		//FX Param digit C: C (KeyDown)
-7:1260:0:68:1		//FX Param digit D: D (KeyDown)
-7:1261:0:69:1		//FX Param digit E: E (KeyDown)
-7:1262:0:70:1		//FX Param digit F: F (KeyDown)
+//----( Pattern Context [bottom] - Param Col )------------
+7:1247:0:48:1		//Effect Parameter Digit 0: 0 (KeyDown)
+7:1247:0:96:1		//Effect Parameter Digit 0: NUM 0 (KeyDown)
+7:1248:0:49:1		//Effect Parameter Digit 1: 1 (KeyDown)
+7:1248:0:97:1		//Effect Parameter Digit 1: NUM 1 (KeyDown)
+7:1249:0:50:1		//Effect Parameter Digit 2: 2 (KeyDown)
+7:1249:0:98:1		//Effect Parameter Digit 2: NUM 2 (KeyDown)
+7:1250:0:51:1		//Effect Parameter Digit 3: 3 (KeyDown)
+7:1250:0:99:1		//Effect Parameter Digit 3: NUM 3 (KeyDown)
+7:1251:0:52:1		//Effect Parameter Digit 4: 4 (KeyDown)
+7:1251:0:100:1		//Effect Parameter Digit 4: NUM 4 (KeyDown)
+7:1252:0:53:1		//Effect Parameter Digit 5: 5 (KeyDown)
+7:1252:0:101:1		//Effect Parameter Digit 5: NUM 5 (KeyDown)
+7:1253:0:54:1		//Effect Parameter Digit 6: 6 (KeyDown)
+7:1253:0:102:1		//Effect Parameter Digit 6: NUM 6 (KeyDown)
+7:1254:0:55:1		//Effect Parameter Digit 7: 7 (KeyDown)
+7:1254:0:103:1		//Effect Parameter Digit 7: NUM 7 (KeyDown)
+7:1255:0:56:1		//Effect Parameter Digit 8: 8 (KeyDown)
+7:1255:0:104:1		//Effect Parameter Digit 8: NUM 8 (KeyDown)
+7:1256:0:57:1		//Effect Parameter Digit 9: 9 (KeyDown)
+7:1256:0:105:1		//Effect Parameter Digit 9: NUM 9 (KeyDown)
+7:1257:0:65:1		//Effect Parameter Digit A: A (KeyDown)
+7:1258:0:66:1		//Effect Parameter Digit B: B (KeyDown)
+7:1259:0:67:1		//Effect Parameter Digit C: C (KeyDown)
+7:1260:0:68:1		//Effect Parameter Digit D: D (KeyDown)
+7:1261:0:69:1		//Effect Parameter Digit E: E (KeyDown)
+7:1262:0:70:1		//Effect Parameter Digit F: F (KeyDown)
 
-//----( Sample Context [bottom] (8) )------------
+//----( Sample Context [bottom] )------------
+8:1907:2:81:1		//Transpose +1: Ctrl+Q (KeyDown)
+8:1908:2:65:1		//Transpose -1: Ctrl+A (KeyDown)
+8:1909:3:81:1		//Transpose +1 Octave: Shift+Ctrl+Q (KeyDown)
+8:1910:3:65:1		//Transpose -1 Octave: Shift+Ctrl+A (KeyDown)
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1964:3:84:1		//Trim to loop end: Shift+Ctrl+T (KeyDown)
-8:1383:0:8:1		//Silence sample selection: BACKSPACE (KeyDown)
+8:1383:0:8:1		//Silence Sample Selection: BACKSPACE (KeyDown)
 8:1384:1:78:1		//Normalise Sample: Shift+N (KeyDown)
 8:1385:2:77:1		//Amplify Sample: Ctrl+M (KeyDown)
 8:1381:3:82:1		//Reverse Sample: Shift+Ctrl+R (KeyDown)
-8:1382:0:46:1		//Delete sample selection: DELETE (KeyDown)
-8:1386:0:107:1		//Zoom Out: NUM PLUS (KeyDown)
-8:1387:0:109:1		//Zoom In: NUM SUB (KeyDown)
+8:1382:0:46:1		//Delete Sample Selection: DELETE (KeyDown)
+8:1386:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)
+8:1386:2:187:5		//Zoom In: Ctrl++ (KeyDown|KeyHold)
+8:1387:0:109:5		//Zoom Out: NUM SUB (KeyDown|KeyHold)
+8:1387:2:189:5		//Zoom Out: Ctrl+- (KeyDown|KeyHold)
 8:1882:0:32:1		//Zoom into Selection: Space (KeyDown)
 8:1962:0:49:1		//Zoom into sample start: 1 (KeyDown)
 8:1963:0:50:1		//Zoom into sample end: 2 (KeyDown)
@@ -322,10 +328,6 @@ version:1
 8:1790:2:69:1		//Remove DC Offset: Ctrl+E (KeyDown)
 8:1856:2:68:1		//Quick Fade: Ctrl+D (KeyDown)
 8:1857:2:76:1		//Crossfade Sample Loop: Ctrl+L (KeyDown)
-8:1907:2:81:1		//Transpose +1 (Note Map): Ctrl+Q (KeyDown)
-8:1908:2:65:1		//Transpose -1 (Note Map): Ctrl+A (KeyDown)
-8:1909:3:81:1		//Transpose +12 (Note Map): Shift+Ctrl+Q (KeyDown)
-8:1910:3:65:1		//Transpose -12 (Note Map): Shift+Ctrl+A (KeyDown)
 8:1924:1:49:1		//Preview Sample Cue 1: Shift+1 (KeyDown)
 8:1925:1:50:1		//Preview Sample Cue 2: Shift+2 (KeyDown)
 8:1926:1:51:1		//Preview Sample Cue 3: Shift+3 (KeyDown)
@@ -336,9 +338,11 @@ version:1
 8:1931:1:56:1		//Preview Sample Cue 8: Shift+8 (KeyDown)
 8:1932:1:57:1		//Preview Sample Cue 9: Shift+9 (KeyDown)
 
-//----( Instrument Context [bottom] (9) )------------
+//----( Instrument Context [bottom] )------------
 9:1837:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)
+9:1837:2:187:5		//Zoom In: Ctrl++ (KeyDown|KeyHold)
 9:1838:0:109:5		//Zoom Out: NUM SUB (KeyDown|KeyHold)
+9:1838:2:189:5		//Zoom Out: Ctrl+- (KeyDown|KeyHold)
 9:1954:2:69:1		//Scale Envelope Points: Ctrl+E (KeyDown)
 9:1956:1:36:1		//Select Envelope Loop Start: Shift+POS1 (KeyDown)
 9:1957:1:35:1		//Select Envelope Loop End: Shift+ENDE (KeyDown)
@@ -351,41 +355,41 @@ version:1
 9:1960:1:37:5		//Move envelope point left (Coarse): Shift+LEFT (KeyDown|KeyHold)
 9:1961:1:39:5		//Move envelope point right (Coarse): Shift+RIGHT (KeyDown|KeyHold)
 9:1823:0:38:5		//Move envelope point up: UP (KeyDown|KeyHold)
-9:1834:0:33:5		//Move envelope point up (big step): PGUP (KeyDown|KeyHold)
+9:1834:0:33:5		//Move envelope point up (Coarse): PGUP (KeyDown|KeyHold)
 9:1824:0:40:5		//Move envelope point down: DOWN (KeyDown|KeyHold)
-9:1835:0:34:5		//Move envelope point down (big step): PGDOWN (KeyDown|KeyHold)
-9:1827:0:45:1		//Insert envelope point: INSERT (KeyDown)
-9:1828:0:46:1		//Remove envelope point: DELETE (KeyDown)
-9:1828:0:8:1		//Remove envelope point: BACKSPACE (KeyDown)
-9:1829:0:36:1		//Set loop start: HOME (KeyDown)
-9:1830:0:35:1		//Set loop end: END (KeyDown)
+9:1835:0:34:5		//Move envelope point down (Coarse): PGDOWN (KeyDown|KeyHold)
+9:1827:0:45:1		//Insert Envelope Point: INSERT (KeyDown)
+9:1828:0:46:1		//Remove Envelope Point: DELETE (KeyDown)
+9:1828:0:8:1		//Remove Envelope Point: BACKSPACE (KeyDown)
+9:1829:0:36:1		//Set Loop Start: HOME (KeyDown)
+9:1830:0:35:1		//Set Loop End: END (KeyDown)
 9:1831:2:36:1		//Set sustain loop start: Ctrl+HOME (KeyDown)
 9:1832:2:35:1		//Set sustain loop end: Ctrl+END (KeyDown)
 9:1833:2:82:1		//Toggle release node: Ctrl+R (KeyDown)
 
-//----( Comments Context [bottom] (10) )------------
+//----( Comments Context [bottom] )------------
 
-//----( Unknown Context (11) )------------
+//----( Unknown Context )------------
 
-//----( Unknown Context (12) )------------
+//----( Unknown Context )------------
 
-//----( Plugin GUI Context (13) )------------
-13:1763:0:109:5		//Previous plugin preset: NUM SUB (KeyDown|KeyHold)
-13:1764:0:107:5		//Next plugin preset: NUM PLUS (KeyDown|KeyHold)
+//----( Plugin GUI Context )------------
+13:1763:0:109:5		//Previous Plugin Preset: NUM SUB (KeyDown|KeyHold)
+13:1764:0:107:5		//Next Plugin Preset: NUM PLUS (KeyDown|KeyHold)
 13:1782:2:109:5		//Plugin preset backward jump: Ctrl+NUM SUB (KeyDown|KeyHold)
 13:1783:2:107:5		//Plugin preset forward jump: Ctrl+NUM PLUS (KeyDown|KeyHold)
-13:1765:3:68:1		//Randomize plugin parameters: Shift+Ctrl+D (KeyDown)
-13:1839:2:82:1		//Toggle parameter recording: Ctrl+R (KeyDown)
-13:1840:2:75:1		//Pass key presses to plugin: Ctrl+K (KeyDown)
-13:1841:2:66:1		//Bypass plugin: Ctrl+B (KeyDown)
+13:1765:3:68:1		//Randomize Plugin Parameters: Shift+Ctrl+D (KeyDown)
+13:1839:2:82:1		//Toggle Parameter Recording: Ctrl+R (KeyDown)
+13:1840:2:75:1		//Pass Key Presses to Plugin: Ctrl+K (KeyDown)
+13:1841:2:66:1		//Bypass Plugin: Ctrl+B (KeyDown)
 
-//----( General Context [top] (14) )------------
+//----( General Context [top] )------------
 
-//----( Pattern Context [top] (15) )------------
+//----( Pattern Context [top] )------------
 
-//----( Sample Context [top] (16) )------------
+//----( Sample Context [top] )------------
 
-//----( Instrument Context [top] (17) )------------
+//----( Instrument Context [top] )------------
 17:1851:2:68:1		//Duplicate Instrument: Ctrl+D (KeyDown)
 17:1850:3:69:1		//Edit Sample Map: Shift+Ctrl+E (KeyDown)
 17:1849:2:69:1		//Edit Current Sample: Ctrl+E (KeyDown)
@@ -397,9 +401,9 @@ version:1
 17:1845:3:81:1		//Transpose +1 Octave (Note Map): Shift+Ctrl+Q (KeyDown)
 17:1844:3:65:1		//Transpose -1 Octave (Note Map): Shift+Ctrl+A (KeyDown)
 
-//----( Comments Context [top] (18) )------------
+//----( Comments Context [top] )------------
 
-//----( Orderlist (19) )------------
+//----( Orderlist )------------
 19:1802:0:46:5		//Delete Order: DELETE (KeyDown|KeyHold)
 19:1803:0:45:5		//Insert Order: INSERT (KeyDown|KeyHold)
 19:1950:3:67:1		//Copy Orders: Shift+Ctrl+C (KeyDown)
@@ -440,7 +444,7 @@ version:1
 19:1875:2:76:1		//Lock Playback to Selection: Ctrl+L (KeyDown)
 19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)
 
-//----( Quick Channel Settings Context (20) )------------
+//----( Quick Channel Settings Context )------------
 20:1878:1:37:5		//Previous Channel: Shift+Left (KeyDown|KeyHold)
 20:1878:1:8:5		//Previous Channel: Shift+Backspace (KeyDown|KeyHold)
 20:1879:1:39:5		//Next Channel: Shift+Right (KeyDown|KeyHold)
