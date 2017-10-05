@@ -313,6 +313,16 @@ struct MODSampleHeader
 		return writeLength;
 	}
 
+	// Compute a "rating" of this sample header by counting invalid header data to ultimately reject garbage files.
+	uint32 GetInvalidByteScore() const
+	{
+		return ((volume > 64) ? 1 : 0)
+			+ ((finetune > 15) ? 1 : 0)
+			+ ((loopStart > length * 2) ? 1 : 0);
+	}
+
+	// Suggested threshold for rejecting invalid files based on cumulated score returned by GetInvalidByteScore
+	static const uint32 INVALID_BYTE_THRESHOLD = 40;
 
 	// Retrieve the internal sample format flags for this sample.
 	static SampleIO GetSampleFormat()
@@ -498,9 +508,7 @@ static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSam
 		}
 	}
 	// Check for invalid values
-	return ((sampleHeader.volume > 64) ? 1 : 0)
-		+ ((sampleHeader.finetune > 15) ? 1 : 0)
-		+ ((sampleHeader.loopStart > sampleHeader.length * 2) ? 1 : 0);
+	return sampleHeader.GetInvalidByteScore();
 }
 
 
@@ -766,6 +774,20 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 	{
 		return ProbeFailure;
 	}
+
+	file.Seek(20);
+	uint32 invalidBytes = 0;
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+	{
+		MODSampleHeader sampleHeader;
+		file.ReadStruct(sampleHeader);
+		invalidBytes += sampleHeader.GetInvalidByteScore();
+	}
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
+	{
+		return ProbeFailure;
+	}
+
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
 	return ProbeSuccess;
 }
@@ -834,7 +856,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
-	if(invalidBytes > 40)
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 	{
 		return false;
 	}
@@ -1739,17 +1761,17 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderICE(MemoryFileReader file, co
 		return ProbeFailure;
 	}
 	file.Seek(20);
-	uint32 invalidChars = 0;
+	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
 		if(!file.ReadStruct(sampleHeader))
 		{
-		return ProbeWantMoreData;
+			return ProbeWantMoreData;
 		}
-		invalidChars += CountInvalidChars(sampleHeader.name);
+		invalidBytes += sampleHeader.GetInvalidByteScore();
 	}
-	if(invalidChars > 256)
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 	{
 		return ProbeFailure;
 	}
@@ -1812,7 +1834,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		MODSampleHeader sampleHeader;
 		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
 	}
-	if(invalidBytes > 40)
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 	{
 		return false;
 	}
