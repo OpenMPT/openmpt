@@ -55,10 +55,29 @@ public:
 		fileWAV->StartChunk(RIFFChunk::iddata);
 
 	}
+	virtual mpt::endian_type GetConvertedEndianness() const
+	{
+		return mpt::endian_little;
+	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
 		ASSERT(formatInfo.Sampleformat.IsFloat());
-		WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+		{
+			WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
+		} else
+		{
+			std::vector<IEEE754binary32LE> frameData(formatInfo.Channels);
+			for(std::size_t frame = 0; frame < count; ++frame)
+			{
+				for(int channel = 0; channel < formatInfo.Channels; ++channel)
+				{
+					frameData[channel] = IEEE754binary32LE(interleaved[channel]);
+				}
+				fileWAV->WriteBuffer(reinterpret_cast<const char*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+				interleaved += formatInfo.Channels;
+			}
+		}
 	}
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
 	{

@@ -42,6 +42,10 @@ public:
 
 		MPT_UNREFERENCED_PARAMETER(tags);
 	}
+	virtual mpt::endian_type GetConvertedEndianness() const
+	{
+		return mpt::endian();
+	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
 		ASSERT(formatInfo.Sampleformat.IsFloat());

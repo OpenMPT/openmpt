@@ -56,6 +56,12 @@ StreamWriterBase::~StreamWriterBase()
 }
 
 
+mpt::endian_type StreamWriterBase::GetConvertedEndianness() const
+{
+	return mpt::endian();
+}
+
+
 void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const char *data)
 {
 	MPT_UNREFERENCED_PARAMETER(frameCount);
