@@ -1619,7 +1619,7 @@ static mpt::ustring FromCodePageDirect(uint16 codepage, const std::string & src)
 	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, nullptr, 0);
 	if(required_size <= 0)
 	{
-		return std::wstring();
+		return mpt::ustring();
 	}
 	std::vector<WCHAR> decoded_string(required_size);
 	MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
