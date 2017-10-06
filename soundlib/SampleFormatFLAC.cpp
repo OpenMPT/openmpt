@@ -182,7 +182,7 @@ struct FLACDecoder
 			// We're not really going to read a WAV file here because there will be only one RIFF chunk per metadata event, but we can still re-use the code for parsing RIFF metadata...
 			WAVReader riffReader(data);
 			riffReader.FindMetadataChunks(chunks);
-			riffReader.ApplySampleSettings(sample, client.sndFile.m_szNames[client.sample]);
+			riffReader.ApplySampleSettings(sample, client.sndFile.GetCharsetInternal(), client.sndFile.m_szNames[client.sample]);
 		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.ready)
 		{
 			// Try reading Vorbis Comments for sample title, sample rate and loop points

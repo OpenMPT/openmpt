@@ -408,7 +408,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	sample.Initialize();
 	sample.nLength = wavFile.GetSampleLength();
 	sample.nC5Speed = wavFile.GetSampleRate();
-	wavFile.ApplySampleSettings(sample, m_szNames[nSample]);
+	wavFile.ApplySampleSettings(sample, GetCharsetInternal(), m_szNames[nSample]);
 
 	FileReader sampleChunk = wavFile.GetSampleData();
 
