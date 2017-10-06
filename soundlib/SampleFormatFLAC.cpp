@@ -193,9 +193,9 @@ struct FLACDecoder
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
 				if(length > 6 && !mpt::CompareNoCaseAscii(tag, "TITLE=", 6))
 				{
-					std::string sampleName;
-					mpt::String::Read<mpt::String::maybeNullTerminated>(sampleName, tag + 6, length - 6);
-					mpt::String::Copy(client.sndFile.m_szNames[client.sample], mpt::ToCharset(client.sndFile.GetCharsetInternal(), mpt::CharsetUTF8, sampleName));
+					mpt::ustring sampleName;
+					mpt::String::Read<mpt::String::maybeNullTerminated>(sampleName, client.sndFile.GetCharsetInternal(), tag + 6, length - 6);
+					mpt::String::Copy(client.sndFile.m_szNames[client.sample], mpt::ToCharset(mpt::CharsetUTF8, sampleName));
 				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "SAMPLERATE=", 11))
 				{
 					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
