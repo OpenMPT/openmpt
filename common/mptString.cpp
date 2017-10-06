@@ -1570,7 +1570,7 @@ CString ToCString(const mpt::ustring &str)
 
 
 
-static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, bool * isFallback)
+static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, bool * isFallback = nullptr)
 {
 	mpt::Charset result = fallback;
 	switch(codepage)
