@@ -54,6 +54,7 @@ struct RIFFChunk
 		idxtra	= MAGIC4LE('x','t','r','a'),	// OpenMPT extra infomration
 		idcue_	= MAGIC4LE('c','u','e',' '),	// Cue points
 		idwsmp	= MAGIC4LE('w','s','m','p'),	// DLS bank samples
+		idCSET	= MAGIC4LE('C','S','E','T'),	// Character Set
 		id____	= 0x00000000,	// Found when loading buggy MPT samples
 
 		// Identifiers in "LIST" chunk
@@ -288,8 +289,11 @@ protected:
 	FileReader::off_t sampleLength;
 	WAVFormatChunk formatInfo;
 	uint16 subFormat;
+	uint16 codePage;
 	bool isDLS;
 	bool mayBeCoolEdit16_8;
+
+	uint16 GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks);
 
 public:
 	WAVReader(FileReader &inputFile);
@@ -316,7 +320,7 @@ public:
 	SmpLength GetSampleLength() const { return mpt::saturate_cast<SmpLength>(sampleLength); }
 
 	// Apply sample settings from file (loop points, MPT extra settings, ...) to a sample.
-	void ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SAMPLENAME]);
+	void ApplySampleSettings(ModSample &sample, mpt::Charset charset, char (&sampleCharset)[MAX_SAMPLENAME]);
 };
 
 

@@ -12,6 +12,7 @@
 #include "Loaders.h"
 #include "WAVTools.h"
 #include "Tagging.h"
+#include "../common/version.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
@@ -29,6 +30,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	file.Rewind();
 
 	RIFFHeader fileHeader;
+	codePage = 28591; // ISO 8859-1
 	isDLS = false;
 	subFormat = 0;
 	mayBeCoolEdit16_8 = false;
@@ -118,6 +120,9 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 		}
 	}
 
+	// Determine string encoding
+	codePage = GetFileCodePage(chunks);
+
 	// Check for loop points, texts, etc...
 	FindMetadataChunks(chunks);
 
@@ -147,13 +152,49 @@ void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 }
 
 
-void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
+uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
+{
+	FileReader csetChunk = chunks.GetChunk(RIFFChunk::idCSET);
+	if(!csetChunk.IsValid())
+	{
+		FileReader iSFT = infoChunk.GetChunk(RIFFChunk::idISFT);
+		if(iSFT.ReadMagic("OpenMPT"))
+		{
+			std::string versionString;
+			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, iSFT.BytesLeft());
+			versionString = mpt::String::Trim(versionString);
+			MptVersion::VersionNum version = MptVersion::ToNum(versionString);
+			if(version && version < MAKE_VERSION_NUMERIC(1,28,00,02))
+			{
+				return 1252; // mpt::CharsetWindows1252; // OpenMPT up to and including 1.28.00.01 wrote metadata in windows-1252 encoding
+			} else
+			{
+				return 28591; // mpt::CharsetISO8859_1; // as per spec
+			}
+		} else
+		{
+			return 28591; // mpt::CharsetISO8859_1; // as per spec
+		}
+	}
+	if(!csetChunk.CanRead(2))
+	{
+		// chunk not parsable
+		return 28591; // mpt::CharsetISO8859_1;
+	}
+	uint16 codepage = csetChunk.ReadUint16LE();
+	return codepage;
+}
+
+
+void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharset, char (&sampleName)[MAX_SAMPLENAME])
 {
 	// Read sample name
 	FileReader textChunk = infoChunk.GetChunk(RIFFChunk::idINAM);
 	if(textChunk.IsValid())
 	{
-		textChunk.ReadString<mpt::String::nullTerminated>(sampleName, textChunk.GetLength());
+		std::string sampleNameEncoded;
+		textChunk.ReadString<mpt::String::nullTerminated>(sampleNameEncoded, textChunk.GetLength());
+		mpt::String::Copy(sampleName, mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::CharsetWindows1252, sampleNameEncoded)));
 	}
 	if(isDLS)
 	{
@@ -234,6 +275,9 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		if(xtraChunk.CanRead(MAX_SAMPLENAME))
 		{
 			// Name present (clipboard only)
+			// FIXME: When modules can have individual encoding in OpenMPT or when
+			// internal metadata gets converted to Unicode, we must adjust this to
+			// also specify encoding.
 			xtraChunk.ReadString<mpt::String::nullTerminated>(sampleName, MAX_SAMPLENAME);
 			xtraChunk.ReadString<mpt::String::nullTerminated>(sample.filename, xtraChunk.BytesLeft());
 		}
@@ -463,6 +507,12 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 // Write text tags to the file.
 void WAVWriter::WriteMetatags(const FileTags &tags)
 {
+	StartChunk(RIFFChunk::idCSET);
+	Write(SwapBytesLE(uint16(65001)));  // code page    (UTF-8)
+	Write(SwapBytesLE(uint16(0)));      // country code (unset)
+	Write(SwapBytesLE(uint16(0)));      // language     (unset)
+	Write(SwapBytesLE(uint16(0)));      // dialect      (unset)
+
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
 	WriteArray(info);
@@ -483,7 +533,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 // Write a single tag into a open idLIST chunk
 void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext)
 {
-	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, utext);
+	std::string text = mpt::ToCharset(mpt::CharsetUTF8, utext);
 	if(!text.empty())
 	{
 		const size_t length = text.length() + 1;
@@ -576,6 +626,11 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 	if(sampleName != nullptr)
 	{
 		// Write sample name (clipboard only)
+
+		// FIXME: When modules can have individual encoding in OpenMPT or when
+		// internal metadata gets converted to Unicode, we must adjust this to
+		// also specify encoding.
+
 		char name[MAX_SAMPLENAME];
 		mpt::String::Write<mpt::String::nullTerminated>(name, sampleName, MAX_SAMPLENAME);
 		WriteArray(name);
