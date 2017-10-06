@@ -738,6 +738,8 @@ void CWaveConvert::OnOK()
 
 	m_Settings.Tags = FileTags();
 
+	m_Settings.Tags.SetEncoder();
+
 	if(encSettings.Tags)
 	{
 		CString tmp;
@@ -886,6 +888,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, silencePlugBuffers(false)
 	, outputToSample(false)
 {
+	Tags.SetEncoder();
 	for(const auto & factory : EncoderFactories)
 	{
 		const Encoder::Traits &encTraits = factory->GetTraits();
