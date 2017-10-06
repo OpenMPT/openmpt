@@ -377,6 +377,12 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 
 
 
+mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string &str);
+
+
+
+
+
 #ifdef MODPLUG_TRACKER
 
 #if MPT_OS_WINDOWS

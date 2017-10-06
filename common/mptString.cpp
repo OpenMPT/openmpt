@@ -1570,6 +1570,87 @@ CString ToCString(const mpt::ustring &str)
 
 
 
+static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, bool * isFallback)
+{
+	mpt::Charset result = fallback;
+	switch(codepage)
+	{
+	case 65001:
+		result = mpt::CharsetUTF8;
+		if(isFallback) *isFallback = false;
+		break;
+	case 20127:
+		result = mpt::CharsetASCII;
+		if(isFallback) *isFallback = false;
+		break;
+	case 28591:
+		result = mpt::CharsetISO8859_1;
+		if(isFallback) *isFallback = false;
+		break;
+	case 28605:
+		result = mpt::CharsetISO8859_15;
+		if(isFallback) *isFallback = false;
+		break;
+	case 437:
+		result = mpt::CharsetCP437;
+		if(isFallback) *isFallback = false;
+		break;
+	case 1252:
+		result = mpt::CharsetWindows1252;
+		if(isFallback) *isFallback = false;
+		break;
+	default:
+		result = fallback;
+		if(isFallback) *isFallback = true;
+		break;
+	}
+	return result;
+}
+
+#if MPT_OS_WINDOWS
+
+static bool TestCodePage(uint16 codepage)
+{
+	return IsValidCodePage(codepage) ? true : false;
+}
+
+static mpt::ustring FromCodePageDirect(uint16 codepage, const std::string & src)
+{
+	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, nullptr, 0);
+	if(required_size <= 0)
+	{
+		return std::wstring();
+	}
+	std::vector<WCHAR> decoded_string(required_size);
+	MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
+	return mpt::ToUnicode(std::wstring(decoded_string.data()));
+}
+
+#endif // MPT_OS_WINDOWS
+
+mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string &str)
+{
+	#if MPT_OS_WINDOWS
+		mpt::ustring result;
+		bool noCharsetMatch = true;
+		mpt::Charset fileCharset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);
+		if(noCharsetMatch && TestCodePage(codepage))
+		{
+			result = mpt::FromCodePageDirect(codepage, str);
+		} else
+		{
+			result = mpt::ToUnicode(fileCharset, str);
+		}
+		return result;
+	#else // !MPT_OS_WINDOWS
+		return mpt::ToUnicode(mpt::CharsetFromCodePage(codepage, fallback), str);
+	#endif // MPT_OS_WINDOWS
+}
+
+
+
+
+
 char ToLowerCaseAscii(char c)
 {
 	if('A' <= c && c <= 'Z')
