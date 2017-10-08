@@ -915,8 +915,6 @@ BEGIN
     CONTROL         "Clear plugin &buffers before exporting",IDC_RENDERSILENCE,
                     "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_MULTILINE | WS_TABSTOP,12,192,174,12
     GROUPBOX        "Limit",IDC_STATIC,198,6,186,84
-    CONTROL         "Limit file &size to: (KBytes)",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,19,114,11
-    EDITTEXT        IDC_EDIT1,324,18,50,12,ES_AUTOHSCROLL
     CONTROL         "Limit song &length to: (seconds)",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,37,114,10
     EDITTEXT        IDC_EDIT2,324,36,50,12,ES_AUTOHSCROLL
     CONTROL         "Play &entire song",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,204,54,72,12
