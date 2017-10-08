@@ -69,13 +69,13 @@ public:
 			{
 				annotationTotalSize = Util::AlignUp<std::size_t>(24u + annotationTotalSize, StreamEncoderSettings::Instance().AUPaddingAlignHint) - 24u;
 			}
-			annotationTotalSize = Util::AlignUp(annotationTotalSize, 8u);
+			annotationTotalSize = Util::AlignUp<std::size_t>(annotationTotalSize, 8u);
 		}
 		MPT_ASSERT(annotationTotalSize >= annotationSize);
 		MPT_ASSERT(annotationTotalSize % 8 == 0);
 
 		mpt::IO::WriteText(f, ".snd");
-		mpt::IO::WriteIntBE<uint32>(f, 24 + annotationTotalSize);
+		mpt::IO::WriteIntBE<uint32>(f, mpt::saturate_cast<uint32>(24u + annotationTotalSize));
 		mpt::IO::WriteIntBE<uint32>(f, ~uint32(0));
 		uint32 encoding = 0;
 		if(formatInfo.Sampleformat.IsFloat())
