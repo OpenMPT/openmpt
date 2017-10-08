@@ -203,6 +203,7 @@ namespace Encoder
 struct StreamEncoderSettings
 {
 	Setting<int32> FLACCompressionLevel;
+	Setting<uint32> AUPaddingAlignHint;
 	Setting<uint32> MP3ID3v2MinPadding;
 	Setting<uint32> MP3ID3v2PaddingAlignHint;
 	Setting<bool> MP3ID3v2WriteReplayGainTXXX;

@@ -23,6 +23,7 @@
 #include "ChannelManagerDlg.h"
 #include "MIDIMacroDialog.h"
 #include "MIDIMappingDialog.h"
+#include "StreamEncoderAU.h"
 #include "StreamEncoderFLAC.h"
 #include "StreamEncoderMP3.h"
 #include "StreamEncoderOpus.h"
@@ -1501,10 +1502,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 {
 	WAVEncoder wavencoder;
 	FLACEncoder flacencoder;
+	AUEncoder auencoder;
 	RAWEncoder rawencoder;
 	std::vector<EncoderFactoryBase*> encFactories;
 	encFactories.push_back(&wavencoder);
 	encFactories.push_back(&flacencoder);
+	encFactories.push_back(&auencoder);
 	encFactories.push_back(&rawencoder);
 	OnFileWaveConvert(nMinOrder, nMaxOrder, encFactories);
 }
@@ -1788,6 +1791,7 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 {
 	WAVEncoder wavencoder;
 	FLACEncoder flacencoder;
+	AUEncoder auencoder;
 	OggOpusEncoder opusencoder;
 	VorbisEncoder vorbisencoder;
 	MP3Encoder mp3lame(MP3EncoderLame);
@@ -1797,6 +1801,7 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	std::vector<EncoderFactoryBase*> encoders;
 	if(wavencoder.IsAvailable()) encoders.push_back(&wavencoder);
 	if(flacencoder.IsAvailable()) encoders.push_back(&flacencoder);
+	if(auencoder.IsAvailable()) encoders.push_back(&auencoder);
 	if(opusencoder.IsAvailable()) encoders.push_back(&opusencoder);
 	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
 	if(mp3lame.IsAvailable())
