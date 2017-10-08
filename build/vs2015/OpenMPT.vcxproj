@@ -783,6 +783,7 @@
     <ClInclude Include="..\..\mptrack\SelectPluginDialog.h" />
     <ClInclude Include="..\..\mptrack\Settings.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoder.h" />
+    <ClInclude Include="..\..\mptrack\StreamEncoderAU.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderFLAC.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderMP3.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderOpus.h" />
@@ -1005,6 +1006,7 @@
     <ClCompile Include="..\..\mptrack\SelectPluginDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Settings.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoder.cpp" />
+    <ClCompile Include="..\..\mptrack\StreamEncoderAU.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderFLAC.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderMP3.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp" />

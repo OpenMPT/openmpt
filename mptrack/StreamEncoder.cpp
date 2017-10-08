@@ -29,6 +29,7 @@ StreamEncoderSettings &StreamEncoderSettings::Instance()
 
 StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
 	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
+	, AUPaddingAlignHint(conf, section, "AUPaddingAlignHint", 4096)
 	, MP3ID3v2MinPadding(conf, section, "MP3ID3v2MinPadding", 1024)
 	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
 	, MP3ID3v2WriteReplayGainTXXX(conf, section, "MP3ID3v2WriteReplayGainTXXX", true)

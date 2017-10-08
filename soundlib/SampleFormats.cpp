@@ -2208,7 +2208,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 
 	FileTags tags;
 
-	// This reads annotation metadata as written by sox or ffmpeg.
+	// This reads annotation metadata as written by OpenMPT, sox, ffmpeg.
 	// Additionally, we fall back to just reading the whole field as a single comment.
 	file.Seek(24);
 	std::vector<mpt::byte> annotationData;
