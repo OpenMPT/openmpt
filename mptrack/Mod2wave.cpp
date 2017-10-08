@@ -62,7 +62,6 @@ StoredTags::StoredTags(SettingsContainer &conf)
 // CWaveConvert - setup for converting a wave file
 
 BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
-	ON_COMMAND(IDC_CHECK1,			OnCheckSizeLimit)
 	ON_COMMAND(IDC_CHECK2,			OnCheckTimeLimit)
 	ON_COMMAND(IDC_CHECK4,			OnCheckChannelMode)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
@@ -98,7 +97,6 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 	m_Settings.repeatCount = 1;
 	m_nNumOrders = numOrders;
 
-	m_dwFileLimit = 0;
 	m_dwSongLimit = 0;
 }
 
@@ -570,9 +568,7 @@ void CWaveConvert::OnFormatChanged()
 
 void CWaveConvert::UpdateDialog()
 {
-	CheckDlgButton(IDC_CHECK1, (m_dwFileLimit) ? BST_CHECKED : 0);
 	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? BST_CHECKED : 0);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), (m_dwFileLimit) ? TRUE : FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
 
 	// Repeat / selection play
@@ -621,21 +617,6 @@ void CWaveConvert::OnSampleSlotChanged()
 		CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 	}
-	UpdateDialog();
-}
-
-
-void CWaveConvert::OnCheckSizeLimit()
-{
-	if (IsDlgButtonChecked(IDC_CHECK1))
-	{
-		m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
-		if (!m_dwFileLimit)
-		{
-			m_dwFileLimit = 1000;
-			SetDlgItemText(IDC_EDIT1, _T("1000"));
-		}
-	} else m_dwFileLimit = 0;
 	UpdateDialog();
 }
 
@@ -694,7 +675,6 @@ void CWaveConvert::OnCheckInstrMode()
 
 void CWaveConvert::OnOK()
 {
-	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
 
 	const bool selection = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
@@ -923,7 +903,8 @@ void CDoWaveConvert::Run()
 
 	TCHAR s[80];
 	UINT ok = IDOK, pos = 0;
-	uint64 ullSamples = 0, ullMaxSamples;
+	uint64 ullSamples = 0;
+	uint64 ullMaxSamples = 0;
 
 	if(m_lpszFileName.empty())
 	{
@@ -1007,23 +988,20 @@ void CDoWaveConvert::Run()
 	m_SndFile.SetMixerSettings(mixersettings);
 	m_SndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	m_SndFile.InitPlayer(true);
-	if(!m_dwFileLimit) m_dwFileLimit = Util::MaxValueOfType(m_dwFileLimit) >> 10;
-	m_dwFileLimit <<= 10;
 
 	// Tags must be known at the stream start,
 	// so that the encoder class could write them before audio data if mandated by the format,
 	// otherwise they should just be cached by the encoder.
 	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream, encSettings, m_Settings.Tags);
 
-	ullMaxSamples = m_dwFileLimit / (channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
-	if (m_dwSongLimit)
+	if(m_dwSongLimit)
 	{
 		uint64 l = (uint64)m_dwSongLimit * samplerate;
-		if (l < ullMaxSamples) ullMaxSamples = l;
+		ullMaxSamples = l;
 	}
 
 	// Calculate maximum samples
-	uint64 max = ullMaxSamples;
+	uint64 max = m_dwSongLimit ? ullMaxSamples : uint64_max;
 	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_SndFile.GetRepeatCount());
 
 	// Reset song position tracking
@@ -1149,17 +1127,16 @@ void CDoWaveConvert::Run()
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<uint64>(newPos - oldPos);
 
-			if(bytesWritten >= m_dwFileLimit)
-			{
-				break;
-			} else if(!fileStream)
+			if(!fileStream)
 			{
 				break;
 			}
 
 		}
-		if (ullSamples >= ullMaxSamples)
+		if(m_dwSongLimit && (ullSamples >= ullMaxSamples))
+		{
 			break;
+		}
 
 		auto currentTime = timeGetTime();
 		if((currentTime - prevTime) >= 16)
