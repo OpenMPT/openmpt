@@ -207,9 +207,15 @@ void COptionsAdvanced::ReInit()
 
 		}
 
+#if MPT_USTRING_MODE_WIDE
 		m_List.SetItemText(index, 1, value.FormatTypeAsString().c_str());
 		m_List.SetItemText(index, 2, value.FormatValueAsString().c_str());
 		m_List.SetItemText(index, 3, defaultValue.FormatValueAsString().c_str());
+#else
+		m_List.SetItemText(index, 1, mpt::ToCString(value.FormatTypeAsString()));
+		m_List.SetItemText(index, 2, mpt::ToCString(value.FormatValueAsString()));
+		m_List.SetItemText(index, 3, mpt::ToCString(defaultValue.FormatValueAsString()));
+#endif
 		m_indexToPath.push_back(path);
 	}
 
@@ -254,7 +260,11 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 		val.SetFromString(inputDlg.resultAsString);
 	}
 	theApp.GetSettings().Write(path, val);
+#if MPT_USTRING_MODE_WIDE
 	m_List.SetItemText(index, 2, val.FormatValueAsString().c_str());
+#else
+	m_List.SetItemText(index, 2, mpt::ToCString(val.FormatValueAsString()));
+#endif
 	m_List.SetSelectionMark(index);
 	OnSettingsChanged();
 }

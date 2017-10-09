@@ -744,6 +744,16 @@ void SanitizeFilename(std::wstring &str)
 	}
 }
 
+#if MPT_USTRING_MODE_UTF8
+void SanitizeFilename(mpt::u8string &str)
+{
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = SanitizeFilenameChar(str[i]);
+	}
+}
+#endif // MPT_USTRING_MODE_UTF8
+
 #if defined(_MFC_VER)
 void SanitizeFilename(CString &str)
 {
