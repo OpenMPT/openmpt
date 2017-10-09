@@ -410,6 +410,9 @@ void SanitizeFilename(wchar_t *beg, wchar_t *end);
 
 void SanitizeFilename(std::string &str);
 void SanitizeFilename(std::wstring &str);
+#if MPT_USTRING_MODE_UTF8
+void SanitizeFilename(mpt::u8string &str);
+#endif // MPT_USTRING_MODE_UTF8
 
 template <std::size_t size>
 void SanitizeFilename(char (&buffer)[size])
