@@ -635,7 +635,7 @@ typedef struct openmpt_module_initial_ctl {
  * \param stream Input stream to load the module from.
  * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module. May be NULL.
  * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
- * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \param ctls A map of initial ctl values. See openmpt_module_get_ctls()
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa openmpt_stream_callbacks
@@ -654,7 +654,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create( ope
  * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
- * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \param ctls A map of initial ctl values. See openmpt_module_get_ctls()
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa openmpt_stream_callbacks
@@ -669,7 +669,7 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create2( openmpt_stream_callbacks
  * \param filesize Amount of data available.
  * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
  * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
- * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \param ctls A map of initial ctl values. See openmpt_module_get_ctls()
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa \ref libopenmpt_c_fileio
@@ -687,7 +687,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create_from
  * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
- * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \param ctls A map of initial ctl values. See openmpt_module_get_ctls()
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa \ref libopenmpt_c_fileio
@@ -765,6 +765,12 @@ LIBOPENMPT_API void openmpt_module_error_set_last( openmpt_module * mod, int err
  */
 LIBOPENMPT_API void openmpt_module_error_clear( openmpt_module * mod );
 
+/**
+ * \defgroup openmpt_module_render_param Render param indices
+ *
+ * \brief Parameter index to use with openmpt_module_get_render_param() and openmpt_module_set_render_param()
+ * @{
+ */
 /*! \brief Master Gain
  *
  * The related value represents a relative gain in milliBel.\n
@@ -801,11 +807,12 @@ LIBOPENMPT_API void openmpt_module_error_clear( openmpt_module * mod );
  * Higher values imply slower/softer volume ramps.
  */
 #define OPENMPT_MODULE_RENDER_VOLUMERAMPING_STRENGTH     4
+/** @}*/
 
 /**
  * \defgroup openmpt_module_command_index Pattern cell indices
  *
- * \brief Parameter index to use with openmpt_module_get_pattern_row_channel_command, openmpt_module_format_pattern_row_channel_command and openmpt_module_highlight_pattern_row_channel_command
+ * \brief Parameter index to use with openmpt_module_get_pattern_row_channel_command(), openmpt_module_format_pattern_row_channel_command() and openmpt_module_highlight_pattern_row_channel_command()
  * @{
  */
 #define OPENMPT_MODULE_COMMAND_NOTE         0
@@ -893,7 +900,7 @@ LIBOPENMPT_API double openmpt_module_set_position_order_row( openmpt_module * mo
 /*! \brief Get render parameter
  *
  * \param mod The module handle to work on.
- * \param param Parameter to query. See openmpt_module_render_param.
+ * \param param Parameter to query. See \ref openmpt_module_render_param
  * \param value Pointer to the variable that receives the current value of the parameter.
  * \return 1 on success, 0 on failure (invalid param or value is NULL).
  * \sa OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL
@@ -906,7 +913,7 @@ LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int pa
 /*! \brief Set render parameter
  *
  * \param mod The module handle to work on.
- * \param param Parameter to set. See openmpt_module_render_param.
+ * \param param Parameter to set. See \ref openmpt_module_render_param
  * \param value The value to set param to.
  * \return 1 on success, 0 on failure (invalid param).
  * \sa OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL
@@ -1283,7 +1290,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod
  * \param pattern The pattern whose data should be retrieved.
  * \param row The row from which the data should be retrieved.
  * \param channel The channel from which the data should be retrieved.
- * \param command The cell index at which the data should be retrieved. See openmpt_module_command_index
+ * \param command The cell index at which the data should be retrieved. See \ref openmpt_module_command_index
  * \return The internal, raw pattern data at the given pattern position.
  */
 LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command );
@@ -1295,7 +1302,7 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
  * \param row The row from which the data should be retrieved.
  * \param channel The channel from which the data should be retrieved.
  * \param command The cell index at which the data should be retrieved.
- * \return The formatted pattern data at the given pattern position. See openmpt_module_command_index
+ * \return The formatted pattern data at the given pattern position. See \ref openmpt_module_command_index
  * \sa openmpt_module_highlight_pattern_row_channel_command
  */
 LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command );
@@ -1305,7 +1312,7 @@ LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( o
  * \param pattern The pattern whose data should be retrieved.
  * \param row The row from which the data should be retrieved.
  * \param channel The channel from which the data should be retrieved.
- * \param command The cell index at which the data should be retrieved. See openmpt_module_command_index
+ * \param command The cell index at which the data should be retrieved. See \ref openmpt_module_command_index
  * \return The highlighting string for the formatted pattern data as retrieved by openmpt_module_get_pattern_row_channel_command at the given pattern position.
  * \remarks The returned string will map each character position of the string returned by openmpt_module_get_pattern_row_channel_command to a highlighting instruction.
  *          Possible highlighting characters are:
