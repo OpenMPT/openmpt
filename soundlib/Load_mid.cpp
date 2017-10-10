@@ -532,7 +532,7 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 }
 
 
-static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, PatternRow patRow)
+static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, PatternRow patRow, std::bitset<16> drumChns)
 {
 	CHANNELINDEX chn = midiChn.noteOn[note];
 	if(chn == CHANNELINDEX_INVALID)
@@ -557,7 +557,7 @@ static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> 
 			m.command = CMD_S3MCMDEX;
 			m.param = 0xD0 | delay;
 		}
-	} else if(m.IsNote() && midiCh != (MIDI_DRUMCHANNEL - 1))
+	} else if(m.IsNote() && !drumChns[midiCh])
 	{
 		// Only do note cuts for melodic instruments - they sound weird on drums which should fade out naturally.
 		if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xD0)
@@ -888,7 +888,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					} else
 					{
 						// Note Off
-						MIDINoteOff(midiChnStatus[midiCh], modChnStatus, data1, delay, patRow);
+						MIDINoteOff(midiChnStatus[midiCh], modChnStatus, data1, delay, patRow, drumChns);
 					}
 				}
 				break;
@@ -961,7 +961,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								if(chnState.midiCh == midiCh && chnState.sustained)
 								{
-									MIDINoteOff(midiChnStatus[midiCh], modChnStatus, chnState.note - NOTE_MIN, delay, patRow);
+									MIDINoteOff(midiChnStatus[midiCh], modChnStatus, chnState.note - NOTE_MIN, delay, patRow, drumChns);
 								}
 							}
 						}
@@ -1011,7 +1011,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						midiChnStatus[midiCh].sustain = false;
 						for(uint8 note = 0; note < 128; note++)
 						{
-							MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow);
+							MIDINoteOff(midiChnStatus[midiCh], modChnStatus, note, delay, patRow, drumChns);
 						}
 						break;
 					case MIDIEvents::MIDICC_MonoOperation:
