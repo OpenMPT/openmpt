@@ -52,6 +52,7 @@ public:
 
 public:
 	BOOL Init(const CRect&, HFONT hFont);
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	void InvalidateSelection();
 	PATTERNINDEX GetCurrentPattern() const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
@@ -62,7 +63,7 @@ public:
 	};
 	// Why VC wants to inline this huge function is beyond my understanding...
 	MPT_NOINLINE bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false, bool setPlayPos = true);
-	BOOL UpdateScrollInfo();
+	void UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
 	void QueuePattern(CPoint pt);
@@ -118,8 +119,8 @@ public:
 	void DeleteUpdatePlaystate(ORDERINDEX first, ORDERINDEX last);
 
 	//{{AFX_VIRTUAL(COrderList)
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
+	BOOL PreTranslateMessage(MSG *pMsg) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -166,6 +167,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnLockPlayback();
 	afx_msg void OnUnlockPlayback();
+	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,					OnHelpHitTest)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,				OnCustomKeyMsg)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -214,11 +215,12 @@ BOOL COrderList::Init(const CRect &rect, HFONT hFont)
 	SetScrollPos(0);
 	EnableScrollBarCtrl(SB_HORZ, TRUE);
 	SetCurSel(0);
+	EnableToolTips();
 	return TRUE;
 }
 
 
-BOOL COrderList::UpdateScrollInfo()
+void COrderList::UpdateScrollInfo()
 {
 	CRect rcClient;
 
@@ -244,7 +246,6 @@ BOOL COrderList::UpdateScrollInfo()
 			SetScrollInfo(SB_HORZ, &info, TRUE);
 		}
 	}
-	return FALSE;
 }
 
 
@@ -1517,6 +1518,46 @@ void COrderList::DeleteUpdatePlaystate(ORDERINDEX first, ORDERINDEX last)
 	// Adjust order lock position
 	if(sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
 		Util::DeleteRange(first, last, sndFile.m_lockOrderStart, sndFile.m_lockOrderEnd);
+}
+
+
+INT_PTR COrderList::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	CRect rect;
+	GetClientRect(&rect);
+
+	pTI->hwnd = m_hWnd;
+	pTI->uId = GetOrderFromPoint(rect, point);
+	pTI->rect = rect;
+	pTI->lpszText = LPSTR_TEXTCALLBACK;
+	return pTI->uId;
+}
+
+
+BOOL COrderList::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
+{
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+	if(!(pTTT->uFlags & TTF_IDISHWND))
+	{
+		CString text;
+		const CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
+		const ModSequence &order = sndFile.Order();
+		const ORDERINDEX ord = static_cast<ORDERINDEX>(pNMHDR->idFrom), ordLen = order.GetLengthTailTrimmed();
+		text.Format(_T("Order %u of %u [%02X of %02X]"), ord, ordLen, ord, ordLen);
+		if(order.IsValidPat(ord))
+		{
+			PATTERNINDEX pat = order[ord];
+			const std::string name = sndFile.Patterns[pat].GetName();
+			if(!name.empty())
+			{
+				::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, int32_max);	// Allow multiline tooltip
+				text += _T("\r\n") + mpt::ToCString(sndFile.GetCharsetInternal(), name);
+			}
+		}
+		mpt::CopyCStringToBuffer(pTTT->szText, text);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 
