@@ -30,21 +30,21 @@ class COrderList: public CWnd
 {
 	friend class CCtrlPatterns;
 protected:
-	HFONT m_hFont;
+	HFONT m_hFont = nullptr;
 	COLORREF colorText, colorTextSel, colorInvalid;
-	int m_cxFont, m_cyFont;
+	int m_cxFont = 0, m_cyFont = 0;
 	//m_nXScroll  : The order at the beginning of shown orderlist
 	//m_nScrollPos: The same as order
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
 	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
-	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos, m_nMouseDownPos, m_playPos;
+	ORDERINDEX m_nXScroll = 0, m_nScrollPos = 0, m_nScrollPos2nd = ORDERINDEX_INVALID, m_nDropPos, m_nMouseDownPos, m_playPos = ORDERINDEX_INVALID;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
 	int m_nOrderlistMargins;
 	CModDoc &m_pModDoc;
 	CCtrlPatterns &m_pParent;
-	bool m_bScrolling, m_bDragging;
+	bool m_bScrolling = false, m_bDragging = false;
 
 public:
 	COrderList(CCtrlPatterns &parent, CModDoc &document);
@@ -124,6 +124,9 @@ public:
 	//}}AFX_VIRTUAL
 
 protected:
+	ModSequence& Order();
+	const ModSequence& Order() const;
+
 	void SetScrollPos(int pos);
 	int GetScrollPos(bool getTrackPos = false);
 
