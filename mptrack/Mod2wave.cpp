@@ -42,7 +42,7 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 
 static mpt::ustring GetDefaultYear()
 {
-	return mpt::ToUnicode(CTime::GetCurrentTime().Format("%Y"));
+	return mpt::ToUnicode(CTime::GetCurrentTime().Format(_T("%Y")));
 }
 
 
@@ -67,8 +67,9 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
-	ON_COMMAND(IDC_RADIO3,			OnExportModeChanged)
+	ON_COMMAND(IDC_RADIO3,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO4,			OnExportModeChanged)
+	ON_COMMAND(IDC_RADIO5,			OnExportModeChanged)
 	ON_COMMAND(IDC_PLAYEROPTIONS,	OnPlayerOptions)
 	ON_COMMAND(IDC_BUTTON1,			OnShowEncoderInfo)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnFileTypeChanged)
@@ -95,6 +96,7 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 		m_Settings.maxOrder = maxOrder;
 	}
 	m_Settings.repeatCount = 1;
+	m_Settings.minSequence = m_Settings.maxSequence = m_SndFile.Order.GetCurrentSequenceIndex();
 	m_nNumOrders = numOrders;
 
 	m_dwSongLimit = 0;
@@ -112,6 +114,8 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinMinOrder);
 	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
 	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
+	DDX_Control(pDX, IDC_SPIN6,		m_SpinMinSequence);
+	DDX_Control(pDX, IDC_SPIN7,		m_SpinMaxSequence);
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSampleSlot);
 
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
@@ -135,17 +139,25 @@ BOOL CWaveConvert::OnInitDialog()
 	CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 
 	const bool selection = (m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID);
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, selection ? IDC_RADIO2 : IDC_RADIO1);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selection ? IDC_RADIO2 : IDC_RADIO1);
 	if(selection)
 	{
 		SetDlgItemInt(IDC_EDIT3, m_Settings.minOrder);
 		SetDlgItemInt(IDC_EDIT4, m_Settings.maxOrder);
 	}
-	m_SpinMinOrder.SetRange(0, m_nNumOrders);
-	m_SpinMaxOrder.SetRange(0, m_nNumOrders);
+	m_SpinMinOrder.SetRange32(0, m_nNumOrders);
+	m_SpinMaxOrder.SetRange32(0, m_nNumOrders);
+
+	const SEQUENCEINDEX numSequences = m_SndFile.Order.GetNumSequences();
+	const BOOL enableSeq = numSequences > 1 ? TRUE : FALSE;
+	GetDlgItem(IDC_RADIO3)->EnableWindow(enableSeq);
+	m_SpinMinSequence.SetRange32(0, numSequences - 1);
+	m_SpinMaxSequence.SetRange32(0, numSequences - 1);
+	SetDlgItemInt(IDC_EDIT12, m_Settings.minSequence);
+	SetDlgItemInt(IDC_EDIT13, m_Settings.maxSequence);
 
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
-	m_SpinLoopCount.SetRange(1, int16_max);
+	m_SpinLoopCount.SetRange32(1, int16_max);
 
 	GetDlgItem(IDC_BUTTON1)->EnableWindow(encTraits->showEncoderInfo ? TRUE : FALSE);
 
@@ -172,9 +184,9 @@ BOOL CWaveConvert::OnInitDialog()
 	GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(FALSE);
 	GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(FALSE);
 #ifndef NO_PLUGINS
-	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	for(const auto &plug : m_SndFile.m_MixPlugins)
 	{
-		if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
+		if(plug.pMixPlugin != nullptr)
 		{
 			GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(TRUE);
 			GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(TRUE);
@@ -197,7 +209,7 @@ BOOL CWaveConvert::OnInitDialog()
 	if(m_Settings.sampleSlot > m_SndFile.GetNumSamples()) m_Settings.sampleSlot = 0;
 	m_CbnSampleSlot.SetCurSel(m_Settings.sampleSlot);
 
-	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, m_Settings.outputToSample ? IDC_RADIO4 : IDC_RADIO3);
+	CheckRadioButton(IDC_RADIO4, IDC_RADIO5, m_Settings.outputToSample ? IDC_RADIO5 : IDC_RADIO4);
 
 	UpdateDialog();
 	return TRUE;
@@ -232,22 +244,21 @@ void CWaveConvert::FillTags()
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 
-	const bool canTags = encTraits->canTags;
-
 	DWORD_PTR dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 
 	CheckDlgButton(IDC_CHECK3, encTraits->canCues?encSettings.Cues?TRUE:FALSE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
 
-	CheckDlgButton(IDC_CHECK7, canTags?encSettings.Tags?TRUE:FALSE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK7), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO3), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT6), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT8), canTags?TRUE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags?TRUE:FALSE);
+	const BOOL canTags = encTraits->canTags ? TRUE : FALSE;
+	CheckDlgButton(IDC_CHECK7, encSettings.Tags ? canTags : FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK7), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO3), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT6), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT8), canTags);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags);
 	m_CbnGenre.EnableWindow(canTags?TRUE:FALSE);
 	m_EditGenre.EnableWindow(canTags?TRUE:FALSE);
 
@@ -347,7 +358,7 @@ void CWaveConvert::FillChannels()
 		{
 			continue;
 		}
-		if(IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED)
+		if(IsDlgButtonChecked(IDC_RADIO5) != BST_UNCHECKED)
 		{
 			if(channels > 2)
 			{
@@ -572,14 +583,25 @@ void CWaveConvert::UpdateDialog()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
 
 	// Repeat / selection play
-	BOOL bSel = (IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED) ? TRUE : FALSE;
-	GetDlgItem(IDC_EDIT3)->EnableWindow(bSel);
-	GetDlgItem(IDC_EDIT4)->EnableWindow(bSel);
-	GetDlgItem(IDC_EDIT5)->EnableWindow(!bSel);
-	m_SpinLoopCount.EnableWindow(!bSel);
+	int sel = IDC_RADIO1;
+	if(IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED) sel = IDC_RADIO2;
+	if(IsDlgButtonChecked(IDC_RADIO3) != BST_UNCHECKED) sel = IDC_RADIO3;
+
+	GetDlgItem(IDC_EDIT3)->EnableWindow(sel == IDC_RADIO2);
+	GetDlgItem(IDC_EDIT4)->EnableWindow(sel == IDC_RADIO2);
+
+	GetDlgItem(IDC_EDIT5)->EnableWindow(sel == IDC_RADIO1);
+	m_SpinLoopCount.EnableWindow(sel == IDC_RADIO1);
+
+	const SEQUENCEINDEX numSequences = m_SndFile.Order.GetNumSequences();
+	const BOOL enableSeq = (numSequences > 1 && sel == IDC_RADIO3) ? TRUE : FALSE;
+	GetDlgItem(IDC_EDIT12)->EnableWindow(enableSeq);
+	GetDlgItem(IDC_EDIT13)->EnableWindow(enableSeq);
+	m_SpinMinOrder.EnableWindow(enableSeq);
+	m_SpinMaxOrder.EnableWindow(enableSeq);
 
 	// No free slots => Cannot do instrument- or channel-based export to sample
-	BOOL canDoMultiExport = (bSel /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
+	BOOL canDoMultiExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
 	GetDlgItem(IDC_CHECK4)->EnableWindow(canDoMultiExport);
 	GetDlgItem(IDC_CHECK6)->EnableWindow(canDoMultiExport);
 }
@@ -588,7 +610,7 @@ void CWaveConvert::UpdateDialog()
 void CWaveConvert::OnExportModeChanged()
 {
 	SaveEncoderSettings();
-	bool sampleExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED);
+	bool sampleExport = (IsDlgButtonChecked(IDC_RADIO5) != BST_UNCHECKED);
 	m_CbnFileType.EnableWindow(sampleExport ? FALSE : TRUE);
 	m_CbnSampleSlot.EnableWindow(sampleExport && !IsDlgButtonChecked(IDC_CHECK4) && !IsDlgButtonChecked(IDC_CHECK6));
 	if(sampleExport)
@@ -609,7 +631,7 @@ void CWaveConvert::OnExportModeChanged()
 
 void CWaveConvert::OnSampleSlotChanged()
 {
-	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, IDC_RADIO4);
+	CheckRadioButton(IDC_RADIO4, IDC_RADIO5, IDC_RADIO5);
 	// When choosing a specific sample slot, we cannot use per-channel or per-instrument export
 	int sel = m_CbnSampleSlot.GetCurSel();
 	if(sel >= 0 && m_CbnSampleSlot.GetItemData(sel) > 0)
@@ -688,11 +710,20 @@ void CWaveConvert::OnOK()
 	{
 		m_Settings.minOrder = m_Settings.maxOrder = ORDERINDEX_INVALID;
 	}
+	if(IsDlgButtonChecked(IDC_RADIO3))
+	{
+		SEQUENCEINDEX maxSequence = m_SndFile.Order.GetNumSequences() - 1;
+		m_Settings.minSequence = std::min(mpt::saturate_cast<SEQUENCEINDEX>(GetDlgItemInt(IDC_EDIT12, NULL, FALSE)), maxSequence);
+		m_Settings.maxSequence = std::min(mpt::saturate_cast<SEQUENCEINDEX>(GetDlgItemInt(IDC_EDIT13, NULL, FALSE)), maxSequence);
+	} else
+	{
+		m_Settings.minSequence = m_Settings.maxSequence = m_SndFile.Order.GetCurrentSequenceIndex();
+	}
 
 	m_Settings.repeatCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
 	m_Settings.normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 	m_Settings.silencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
-	m_Settings.outputToSample = IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED;
+	m_Settings.outputToSample = IsDlgButtonChecked(IDC_RADIO5) != BST_UNCHECKED;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
 	if (m_bGivePlugsIdleTime)
 	{
@@ -904,7 +935,6 @@ void CDoWaveConvert::Run()
 	TCHAR s[80];
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0;
-	uint64 ullMaxSamples = 0;
 
 	if(m_lpszFileName.empty())
 	{
@@ -994,10 +1024,10 @@ void CDoWaveConvert::Run()
 	// otherwise they should just be cached by the encoder.
 	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream, encSettings, m_Settings.Tags);
 
-	if(m_dwSongLimit)
+	uint64 ullMaxSamples = uint64_max / (channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
+	if (m_dwSongLimit)
 	{
-		uint64 l = (uint64)m_dwSongLimit * samplerate;
-		ullMaxSamples = l;
+		LimitMax(ullMaxSamples, m_dwSongLimit * samplerate);
 	}
 
 	// Calculate maximum samples
