@@ -1531,7 +1531,7 @@ BOOL COrderList::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 		const CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
 		const ModSequence &order = Order();
 		const ORDERINDEX ord = static_cast<ORDERINDEX>(pNMHDR->idFrom), ordLen = order.GetLengthTailTrimmed();
-		text.Format(_T("Order %u of %u [%02X of %02X]"), ord, ordLen, ord, ordLen);
+		text.Format(_T("Position %u of %u [%02Xh of %02Xh]"), ord, ordLen, ord, ordLen);
 		if(order.IsValidPat(ord))
 		{
 			PATTERNINDEX pat = order[ord];
