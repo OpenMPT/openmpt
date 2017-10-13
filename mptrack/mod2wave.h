@@ -40,7 +40,7 @@ struct StoredTags
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
-	std::vector<std::unique_ptr<Encoder::Settings> > EncoderSettings;
+	std::vector<std::unique_ptr<Encoder::Settings>> EncoderSettings;
 
 	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;
@@ -53,6 +53,7 @@ struct CWaveConvertSettings
 	int repeatCount;
 	ORDERINDEX minOrder, maxOrder;
 	SAMPLEINDEX sampleSlot;
+	SEQUENCEINDEX minSequence, maxSequence;
 
 	bool normalize : 1;
 	bool silencePlugBuffers : 1;
@@ -77,7 +78,7 @@ public:
 	ORDERINDEX m_nNumOrders;
 
 	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat, m_CbnSampleSlot;
-	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
+	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder, m_SpinMinSequence, m_SpinMaxSequence;
 
 	bool m_bGivePlugsIdleTime;
 	bool m_bChannelMode;		// Render by channel
