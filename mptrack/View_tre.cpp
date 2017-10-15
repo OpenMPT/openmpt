@@ -782,7 +782,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	{
 		// Module folder + sub folders
 		std::wstring name = modDoc.GetPathNameMpt().GetFullFileName().ToWide();
-		if(name.empty()) name = mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent().ToWide();
+		if(name.empty()) name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToWide();
 
 		if(!info.hSong)
 		{
