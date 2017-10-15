@@ -74,7 +74,7 @@ struct CrashOutputDirectory
 	CrashOutputDirectory()
 		: valid(true)
 	{
-		const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
+		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
 		// Create a crash directory
 		path = mpt::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
 		if(!path.IsDirectory())
@@ -194,7 +194,7 @@ int DebugReporter::RescueFiles()
 			filename += crashDirectory.path;
 			filename += mpt::PathString::FromUnicode(mpt::ufmt::val(++numFiles));
 			filename += MPT_PATHSTRING("_");
-			filename += mpt::PathString::FromCStringSilent(modDoc->GetTitle()).SanitizeComponent();
+			filename += mpt::PathString::FromCString(modDoc->GetTitle()).SanitizeComponent();
 			filename += MPT_PATHSTRING(".");
 			filename += mpt::PathString::FromUTF8(modDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 

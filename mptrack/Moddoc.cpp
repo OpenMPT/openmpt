@@ -458,7 +458,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 		mpt::PathString fileName = docFileName.GetFileName();
 		if(fileName.empty())
 		{
-			fileName = mpt::PathString::FromCStringSilent(GetTitle()).SanitizeComponent();
+			fileName = mpt::PathString::FromCString(GetTitle()).SanitizeComponent();
 		}
 		mpt::PathString defaultSaveName = drive + dir + fileName + ext;
 
@@ -2577,7 +2577,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		//Catch case where we don't have a filename yet.
 		if(fname.empty())
 		{
-			newPath += mpt::PathString::FromCStringSilent(GetTitle()).SanitizeComponent();
+			newPath += mpt::PathString::FromCString(GetTitle()).SanitizeComponent();
 		} else
 		{
 			newPath += fname;

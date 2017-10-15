@@ -134,11 +134,11 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 			{
 				name = theApp.GetConfigPath();
 			}
-			name += mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
+			name += mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
 		}
 	} else
 	{
-		name = GetPath() + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
+		name = GetPath() + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
 	const mpt::ustring timeStamp = mpt::ToUnicode((CTime::GetCurrentTime()).Format(_T(".AutoSave.%Y%m%d.%H%M%S.")));
@@ -210,7 +210,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	}
 
 	std::vector<mpt::PathString> foundfiles;
-	mpt::PathString searchPattern = path + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
+	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
 	WIN32_FIND_DATAW findData;
 	MemsetZero(findData);

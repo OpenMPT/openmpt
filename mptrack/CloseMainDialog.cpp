@@ -51,7 +51,7 @@ CloseMainDialog::~CloseMainDialog()
 // strings are converted to ANSI. Thus, we will keep using CStrings here for ANSI builds.
 CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 {
-	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCStringSilent();
+	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCString();
 	return CString(pModDoc->GetrSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
 }
 
