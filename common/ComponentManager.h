@@ -185,6 +185,18 @@ protected:
 #define MPT_COMPONENT_BIND_SYMBOL(libName, symbol, func) MPT_DO { if(!Bind( func , libName , symbol )) { SetBindFailed(); } } MPT_WHILE_0
 #define MPT_COMPONENT_BIND_SYMBOL_OPTIONAL(libName, symbol, func) Bind( func , libName , symbol )
 
+#if MPT_OS_WINDOWS
+#ifdef UNICODE
+#define MPT_COMPONENT_BINDWIN_SUFFIX "W"
+#else
+#define MPT_COMPONENT_BINDWIN_SUFFIX "A"
+#endif
+#define MPT_COMPONENT_BINDWIN(libName, func) MPT_DO { if(!Bind( func , libName , #func MPT_COMPONENT_BINDWIN_SUFFIX )) { SetBindFailed(); } } MPT_WHILE_0
+#define MPT_COMPONENT_BINDWIN_OPTIONAL(libName, func) Bind( func , libName , #func MPT_COMPONENT_BINDWIN_SUFFIX )
+#define MPT_COMPONENT_BINDWIN_SYMBOL(libName, symbol, func) MPT_DO { if(!Bind( func , libName , symbol MPT_COMPONENT_BINDWIN_SUFFIX )) { SetBindFailed(); } } MPT_WHILE_0
+#define MPT_COMPONENT_BINDWIN_SYMBOL_OPTIONAL(libName, symbol, func) Bind( func , libName , symbol MPT_COMPONENT_BINDWIN_SUFFIX )
+#endif
+
 
 class ComponentSystemDLL : public ComponentLibrary
 {
