@@ -470,6 +470,22 @@ mpt::ustring PrintImpl(const mpt::ustring & format
 }
 #endif
 
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+mpt::lstring PrintImpl(const mpt::lstring & format
+	, const mpt::lstring & x1
+	, const mpt::lstring & x2
+	, const mpt::lstring & x3
+	, const mpt::lstring & x4
+	, const mpt::lstring & x5
+	, const mpt::lstring & x6
+	, const mpt::lstring & x7
+	, const mpt::lstring & x8
+	)
+{
+	return PrintImplTemplate<mpt::lstring>(format, x1,x2,x3,x4,x5,x6,x7,x8);
+}
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
 #if defined(_MFC_VER)
 CString PrintImpl(const CString & format
 	, const CString & x1

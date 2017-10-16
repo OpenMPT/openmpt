@@ -42,10 +42,10 @@ OPENMPT_NAMESPACE_BEGIN
 //     ordering.
 //  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
-//     std::string         std::wstring          mpt::ustring                    CString
-//     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::cfmt
-//     mpt::format("%1")   mpt::wformat(L"%1")   mpt::uformat(MPT_ULITERAL(%1)   mpt::cformat(_T("%1"))
-//     mpt::format("%1")   mpt::format(L"%1")    mpt::format(MPT_USTRING(%1))    mpt::format(CString(_T("%1"))
+//     std::string         std::wstring          mpt::ustring                    mpt::tsrtring                        CString
+//     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::tfmt                            mpt::cfmt
+//     mpt::format("%1")   mpt::wformat(L"%1")   mpt::uformat(MPT_ULITERAL(%1)   mpt::tformat(_T("%1"))               mpt::cformat(_T("%1"))
+//     mpt::format("%1")   mpt::format(L"%1")    mpt::format(MPT_USTRING(%1))    mpt::format(mpt::tstring(_T("%1"))   mpt::format(CString(_T("%1"))
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
@@ -246,6 +246,9 @@ template <> struct FormatValTFunctor<std::wstring> { template <typename T> inlin
 #if MPT_USTRING_MODE_UTF8
 template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatVal(x, f)); } };
 #endif
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::CharsetLocale, FormatVal(x, f)); } };
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 #ifdef UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
@@ -459,6 +462,12 @@ typedef fmtT<std::wstring> ufmt;
 #else
 typedef fmtT<mpt::ustring> ufmt;
 #endif
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+typedef fmtT<mpt::lstring> lfmt;
+#endif // MPT_ENABLE_CHARSET_LOCALE
+#if MPT_OS_WINDOWS
+typedef fmtT<mpt::tstring> tfmt;
+#endif
 #if defined(_MFC_VER)
 typedef fmtT<CString> cfmt;
 #endif
@@ -486,6 +495,9 @@ template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; 
 #if MPT_USTRING_MODE_UTF8
 template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; };
 #endif
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <> struct to_string_type<mpt::lstring   > { typedef mpt::lstring type; };
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 template <> struct to_string_type<CString        > { typedef CString      type; };
 #endif
@@ -527,6 +539,19 @@ mpt::ustring PrintImpl(const mpt::ustring & format
 	, const mpt::ustring & x8 = mpt::ustring()
 	);
 #endif
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+mpt::lstring PrintImpl(const mpt::lstring & format
+	, const mpt::lstring & x1 = mpt::lstring()
+	, const mpt::lstring & x2 = mpt::lstring()
+	, const mpt::lstring & x3 = mpt::lstring()
+	, const mpt::lstring & x4 = mpt::lstring()
+	, const mpt::lstring & x5 = mpt::lstring()
+	, const mpt::lstring & x6 = mpt::lstring()
+	, const mpt::lstring & x7 = mpt::lstring()
+	, const mpt::lstring & x8 = mpt::lstring()
+	);
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if defined(_MFC_VER)
 CString PrintImpl(const CString & format
@@ -751,6 +776,20 @@ static inline message_formatter<mpt::ustring> uformat(const mpt::ustring &format
 {
 	return message_formatter<mpt::ustring>(format);
 }
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+static inline message_formatter<mpt::lstring> lformat(const mpt::lstring &format)
+{
+	return message_formatter<mpt::lstring>(format);
+}
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
+#if MPT_OS_WINDOWS
+static inline message_formatter<mpt::tstring> tformat(const mpt::tstring &format)
+{
+	return message_formatter<mpt::tstring>(format);
+}
+#endif
 
 #if defined(_MFC_VER)
 static inline message_formatter<CString> cformat(const CString &format)

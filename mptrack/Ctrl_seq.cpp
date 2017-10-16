@@ -1542,7 +1542,7 @@ BOOL COrderList::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 				text += _T("\r\n") + mpt::ToCString(sndFile.GetCharsetInternal(), name);
 			}
 		}
-		mpt::CopyCStringToBuffer(pTTT->szText, text);
+		mpt::CStringBuf(pTTT->szText) = text;
 		return TRUE;
 	}
 	return FALSE;
