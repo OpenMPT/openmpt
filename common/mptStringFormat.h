@@ -40,14 +40,12 @@ OPENMPT_NAMESPACE_BEGIN
 //     This mimics the behaviour of QString::arg() in QT4/5 or MFC AfxFormatString2(). C printf-like functions offer similar functionality
 //     with a '%n$TYPE' syntax. In .NET, the syntax is '{n}'. This is useful to support localization strings that can change the parameter
 //     ordering.
-//     There are macro verions (MPT_FORMAT and variants) which properly use wide string literals for the format parameter.
 //  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
-//     std::string        std::wstring       mpt::ustring                           CString
-//     mpt::fmt::val      mpt::wfmt::val     mpt::ufmt::val                         mpt::cfmt::val
-//     mpt::FormatVal     mpt::FormatValW    mpt::FormatValTFunctor<mpt::ustring>() mpt::FormatValTFunctor<Cstring>()
-//     mpt::fmt           mpt::wfmt          mpt::ufmt                              mpt::cfmt
-//     mpt::format        mpt::format        mpt::format                            mpt::format
+//     std::string         std::wstring          mpt::ustring                    CString
+//     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::cfmt
+//     mpt::format("%1")   mpt::wformat(L"%1")   mpt::uformat(MPT_ULITERAL(%1)   mpt::cformat(_T("%1"))
+//     mpt::format("%1")   mpt::format(L"%1")    mpt::format(MPT_USTRING(%1))    mpt::format(CString(_T("%1"))
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
