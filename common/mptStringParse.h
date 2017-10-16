@@ -129,6 +129,15 @@ template<> inline std::wstring ConvertStrTo(const mpt::ustring &str) { return mp
 #endif
 #endif
 
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template<typename T>
+inline T ConvertStrTo(const mpt::lstring &str)
+{
+	return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetLocale, str));
+}
+template<> inline mpt::lstring ConvertStrTo(const mpt::lstring &str) { return str; }
+#endif
+
 
 namespace mpt
 {

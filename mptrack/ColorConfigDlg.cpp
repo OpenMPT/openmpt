@@ -237,7 +237,7 @@ void COptionsColors::OnChoosePatternFont()
 	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::CopyCStringToBuffer(lf.lfFaceName, mpt::ToCString(patternFont.name));
+	mpt::WinStringBuf(lf.lfFaceName) = mpt::ToWin(patternFont.name);
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	if(patternFont.name != PATTERNFONT_SMALL && patternFont.name != PATTERNFONT_LARGE)
@@ -272,7 +272,7 @@ void COptionsColors::OnChooseCommentFont()
 	lf.lfHeight = -MulDiv(commentFont.size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
-	mpt::CopyCStringToBuffer(lf.lfFaceName, mpt::ToCString(commentFont.name));
+	mpt::WinStringBuf(lf.lfFaceName) = mpt::ToWin(commentFont.name);
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	dlg.m_cf.lpLogFont = &lf;

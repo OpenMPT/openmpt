@@ -214,7 +214,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 		TCHAR s[_MAX_PATH], *pszCmd, *pszData;
 		std::size_t len;
 
-		mpt::CopyCStringToBuffer(s, lpszCommand);
+		mpt::WinStringBuf(s) = lpszCommand;
 		len = _tcslen(s) - 1;
 		while ((len > 0) && (_tcschr(_T("(){}[]\'\" "), s[len]))) s[len--] = 0;
 		pszCmd = s;

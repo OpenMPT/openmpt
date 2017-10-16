@@ -173,13 +173,37 @@ bool IsUTF8(const std::string &str);
 #define MPT_WSTRING(x)   std::wstring( L ## x )
 
 
-#if MPT_ENABLE_U8STRING
-
 template <mpt::Charset charset_tag>
 struct charset_char_traits : std::char_traits<char> {
 	static mpt::Charset charset() { return charset_tag; }
 };
 #define MPT_ENCODED_STRING_TYPE(charset) std::basic_string< char, mpt::charset_char_traits< charset > >
+
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+
+typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetLocale) lstring;
+
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
+#if MPT_OS_WINDOWS
+
+template <typename Tchar> struct windows_char_traits { };
+template <> struct windows_char_traits<char>  { typedef mpt::lstring string_type; };
+template <> struct windows_char_traits<wchar_t> { typedef std::wstring string_type; };
+
+#ifdef UNICODE
+typedef windows_char_traits<wchar_t>::string_type tstring;
+#else
+typedef windows_char_traits<char>::string_type tstring;
+#endif
+
+typedef mpt::tstring winstring;
+
+#endif // MPT_OS_WINDOWS
+
+
+#if MPT_ENABLE_U8STRING
 
 typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 
@@ -214,6 +238,9 @@ static inline std::wstring ToWide(const std::wstring &str) { return str; }
 static inline std::wstring ToWide(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 std::wstring ToWide(Charset from, const std::string &str);
 static inline std::wstring ToWide(Charset from, const char * str) { return ToWide(from, str ? std::string(str) : std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+std::wstring ToWide(const mpt::lstring &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #endif
 
 // Convert to a string encoded in the 'to'-specified character set.
@@ -228,6 +255,31 @@ static inline std::string ToCharset(Charset to, const wchar_t * str) { return To
 #endif
 std::string ToCharset(Charset to, Charset from, const std::string &str);
 static inline std::string ToCharset(Charset to, Charset from, const char * str) { return ToCharset(to, from, str ? std::string(str) : std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+std::string ToCharset(Charset to, const mpt::lstring &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+#if MPT_WSTRING_CONVERT
+mpt::lstring ToLocale(const std::wstring &str);
+static inline mpt::lstring ToLocale(const wchar_t * str) { return ToLocale(str ? std::wstring(str): std::wstring()); }
+#endif
+mpt::lstring ToLocale(Charset from, const std::string &str);
+static inline mpt::lstring ToLocale(Charset from, const char * str) { return ToLocale(from, str ? std::string(str): std::string()); }
+static inline mpt::lstring ToLocale(const mpt::lstring &str) { return str; }
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
+#if MPT_OS_WINDOWS
+#if MPT_WSTRING_CONVERT
+mpt::winstring ToWin(const std::wstring &str);
+static inline mpt::winstring ToWin(const wchar_t * str) { return ToWin(str ? std::wstring(str): std::wstring()); }
+#endif
+mpt::winstring ToWin(Charset from, const std::string &str);
+static inline mpt::winstring ToWin(Charset from, const char * str) { return ToWin(from, str ? std::string(str): std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+mpt::winstring ToWin(const mpt::lstring &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
+#endif // MPT_OS_WINDOWS
 
 
 #if defined(_MFC_VER)
@@ -243,6 +295,13 @@ CString ToCString(const std::wstring &str);
 static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 CString ToCString(Charset from, const std::string &str);
 static inline CString ToCString(Charset from, const char * str) { return ToCString(from, str ? std::string(str) : std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+CString ToCString(const mpt::lstring &str);
+mpt::lstring ToLocale(const CString &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
+#if MPT_OS_WINDOWS
+mpt::winstring ToWin(const CString &str);
+#endif // MPT_OS_WINDOWS
 
 // Convert from a MFC CString. The CString encoding depends on UNICODE.
 // This should also be used when converting from TCHAR strings.
@@ -308,6 +367,9 @@ static inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
 static inline mpt::ustring ToUnicode(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 static inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
 static inline mpt::ustring ToUnicode(Charset from, const char * str) { return ToUnicode(from, str ? std::string(str) : std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+static inline mpt::ustring ToUnicode(const mpt::lstring &str) { return ToWide(str); }
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 static inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
 #endif // MFC
@@ -319,6 +381,9 @@ static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str
 #endif
 mpt::ustring ToUnicode(Charset from, const std::string &str);
 static inline mpt::ustring ToUnicode(Charset from, const char * str) { return ToUnicode(from, str ? std::string(str) : std::string()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+mpt::ustring ToUnicode(const mpt::lstring &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 mpt::ustring ToUnicode(const CString &str);
 #endif // MFC
@@ -334,6 +399,12 @@ mpt::ustring ToUnicode(const CString &str);
 std::wstring ToWide(const mpt::ustring &str);
 #endif
 std::string ToCharset(Charset to, const mpt::ustring &str);
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+mpt::lstring ToLocale(const mpt::ustring &str);
+#endif // MPT_ENABLE_CHARSET_LOCALE
+#if MPT_OS_WINDOWS
+mpt::winstring ToWin(const mpt::ustring &str);
+#endif // MPT_OS_WINDOWS
 #if defined(_MFC_VER)
 CString ToCString(const mpt::ustring &str);
 #endif // MFC
@@ -356,136 +427,187 @@ mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string
 
 
 
+template <typename Tstring, typename Tchar, std::size_t size>
+class StringBufRefImpl
+{
+private:
+	Tchar * buf;
+public:
+	StringBufRefImpl(Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator Tstring () const
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return Tstring(buf, buf + len);
+	}
+	StringBufRefImpl & operator = (const Tstring & str)
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		MPT_STATIC_ASSERT(size > 0);
+		std::fill(buf, buf + size, Tchar('\0'));
+		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
+		buf[size - 1] = Tchar('\0');
+		return *this;
+	}
+};
+
+template <typename Tstring, typename Tchar, std::size_t size>
+class StringBufRefImpl<Tstring, const Tchar, size>
+{
+private:
+	const Tchar * buf;
+public:
+	StringBufRefImpl(const Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator Tstring () const
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return Tstring(buf, buf + len);
+	}
+};
+
+template <typename Tstring, typename Tchar, std::size_t size>
+inline StringBufRefImpl<Tstring, Tchar, size> StringBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<Tstring, Tchar, size>(buf);
+}
+
+template <typename Tchar, std::size_t size>
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar, size> AutoStringBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar, size>(buf);
+}
+
+
+template <mpt::Charset charset, typename Tchar, std::size_t size>
+class CharsetStringBufRefImpl
+{
+private:
+	Tchar * buf;
+public:
+	CharsetStringBufRefImpl(Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator mpt::ustring () const
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return mpt::ToUnicode(charset, std::string(buf, buf + len));
+	}
+	CharsetStringBufRefImpl & operator = (const mpt::ustring & ustr)
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		MPT_STATIC_ASSERT(size > 0);
+		std::string str = mpt::ToCharset(charset, ustr);
+		std::fill(buf, buf + size, Tchar('\0'));
+		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
+		buf[size - 1] = Tchar('\0');
+		return *this;
+	}
+};
+
+template <Charset charset, typename Tchar, std::size_t size>
+class CharsetStringBufRefImpl<charset, const Tchar, size>
+{
+private:
+	const Tchar * buf;
+public:
+	CharsetStringBufRefImpl(const Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator mpt::ustring () const
+	{
+		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return mpt::ToUnicode(charset, std::string(buf, buf + len));
+	}
+};
+
+template <mpt::Charset charset, typename Tchar, std::size_t size>
+inline CharsetStringBufRefImpl<charset, Tchar, size> StringBuf(Tchar (&buf)[size])
+{
+	return CharsetStringBufRefImpl<charset, Tchar, size>(buf);
+}
+
+
 #ifdef MODPLUG_TRACKER
 
 #if MPT_OS_WINDOWS
 
-namespace String { namespace detail
-{
-
-	template <mpt::Charset charset, std::size_t size>
-	inline mpt::ustring StringFromBuffer(const char (&buf)[size])
-	{
-		STATIC_ASSERT(size > 0);
-		std::size_t len = std::find(buf, buf + size, '\0') - buf; // terminate at \0
-		return mpt::ToUnicode(charset, std::string(buf, buf + len));
-	}
-
-	template <mpt::Charset charset, std::size_t size>
-	inline mpt::ustring StringFromBuffer(const wchar_t (&buf)[size])
-	{
-		STATIC_ASSERT(size > 0);
-		std::size_t len = std::find(buf, buf + size, L'\0') - buf; // terminate at \0
-		return mpt::ToUnicode(std::wstring(buf, buf + len));
-	}
-
-	template <mpt::Charset charset, std::size_t size>
-	inline bool StringToBuffer(char (&buf)[size], const mpt::ustring &str)
-	{
-		STATIC_ASSERT(size > 0);
-		MemsetZero(buf);
-		std::string encoded = mpt::ToCharset(charset, str);
-		std::copy(encoded.data(), encoded.data() + std::min(encoded.length(), size - 1), buf);
-		buf[size - 1] = '\0';
-		return (encoded.length() <= size - 1);
-	}
-
-	template <mpt::Charset charset, std::size_t size>
-	inline bool StringToBuffer(wchar_t (&buf)[size], const mpt::ustring &str)
-	{
-		STATIC_ASSERT(size > 0);
-		MemsetZero(buf);
-		std::wstring encoded = mpt::ToWide(str);
-		std::copy(encoded.data(), encoded.data() + std::min(encoded.length(), size - 1), buf);
-		buf[size - 1] = L'\0';
-		return (encoded.length() <= size - 1);
-	}
-
-} } // namespace String::detail
-
-// mpt::FromTcharBuf
-// A lot of expecially older WinAPI functions return strings by filling in
-// fixed-width TCHAR arrays inside some struct.
-// mpt::FromTcharBuf converts these string to mpt::ustring regardless of whether
-// in ANSI or UNICODE build and properly handles potentially missing NULL
-// termination.
-
 template <typename Tchar, std::size_t size>
-inline mpt::ustring FromTcharBuf(const Tchar (&buf)[size])
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar, size> WinStringBuf(Tchar (&buf)[size])
 {
-	return mpt::String::detail::StringFromBuffer<mpt::CharsetLocale>(buf);
-}
-
-// mpt::FromTcharStr
-// Converts TCHAR strings to mpt::ustring in both ANSI and UNICODE builds.
-// Useful when going through CString is not appropriate.
-
-template <typename Tchar> mpt::ustring FromTcharStr(const Tchar *str);
-template <> inline mpt::ustring FromTcharStr<char>(const char *str)
-{
-	if(!str)
-	{
-		return mpt::ustring();
-	}
-	return mpt::ToUnicode(mpt::CharsetLocale, std::string(str));
-}
-template <> inline mpt::ustring FromTcharStr<wchar_t>(const wchar_t *str)
-{
-	if(!str)
-	{
-		return mpt::ustring();
-	}
-	return mpt::ToUnicode(std::wstring(str));
-}
-
-// mpt::ToTcharBuf
-// The inverse of mpt::FromTcharBuf.
-// Always NULL-terminates the buffer.
-// Return false if the string has been truncated to fit.
-
-template <typename Tchar, std::size_t size>
-inline bool ToTcharBuf(Tchar (&buf)[size], const mpt::ustring &str)
-{
-	return mpt::String::detail::StringToBuffer<mpt::CharsetLocale>(buf, str);
-}
-
-// mpt::ToTcharStr
-// Converts mpt::ustring to std::basic_stringy<TCHAR>,
-// which is usable in both ANSI and UNICODE builds.
-// Useful when going through CString is not appropriate.
-
-template <typename Tchar> std::basic_string<Tchar> ToTcharStrImpl(const mpt::ustring &str);
-template <> inline std::string ToTcharStrImpl<char>(const mpt::ustring &str)
-{
-	return mpt::ToCharset(mpt::CharsetLocale, str);
-}
-template <> inline std::wstring ToTcharStrImpl<wchar_t>(const mpt::ustring &str)
-{
-	return mpt::ToWide(str);
-}
-
-inline std::basic_string<TCHAR> ToTcharStr(const mpt::ustring &str)
-{
-	return ToTcharStrImpl<TCHAR>(str);
+	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar, size>(buf);
 }
 
 #if defined(_MFC_VER)
 
-template <std::size_t size>
-inline CString CStringFromBuffer(const TCHAR (&buf)[size])
+template <typename Tchar, std::size_t size>
+class CStringBufRefImpl
 {
-	MPT_STATIC_ASSERT(size > 0);
-	std::size_t len = std::find(buf, buf + size, _T('\0')) - buf; // terminate at \0
-	return CString(buf, len);
-}
+private:
+	Tchar * buf;
+public:
+	CStringBufRefImpl(Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator CString () const
+	{
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return CString(buf, len);
+	}
+	CStringBufRefImpl & operator = (const CString & str)
+	{
+		MPT_STATIC_ASSERT(size > 0);
+		std::fill(buf, buf + size, Tchar('\0'));
+		std::copy(str.GetString(), str.GetString() + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
+		buf[size - 1] = Tchar('\0');
+		return *this;
+	}
+};
 
-template <std::size_t size>
-inline void CopyCStringToBuffer(TCHAR (&buf)[size], const CString &str)
+template <typename Tchar, std::size_t size>
+class CStringBufRefImpl<const Tchar, size>
 {
-	MPT_STATIC_ASSERT(size > 0);
-	MemsetZero(buf);
-	std::copy(str.GetString(), str.GetString() + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
-	buf[size - 1] = _T('\0');
+private:
+	const Tchar * buf;
+public:
+	CStringBufRefImpl(const Tchar * buf)
+		: buf(buf)
+	{
+		return;
+	}
+	operator CString () const
+	{
+		MPT_STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
+		return CString(buf, buf + len);
+	}
+};
+
+template <typename Tchar, std::size_t size>
+inline CStringBufRefImpl<Tchar, size> CStringBuf(Tchar (&buf)[size])
+{
+	return CStringBufRefImpl<Tchar, size>(buf);
 }
 
 #endif // _MFC_VER
@@ -558,6 +680,11 @@ public:
 	BasicAnyString(const char *str) : mpt::ustring(str ? mpt::ToUnicode(charset, str) : mpt::ustring()) { }
 	BasicAnyString(const std::string str) : mpt::ustring(mpt::ToUnicode(charset, str)) { }
 
+	// locale
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	BasicAnyString(const mpt::lstring str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
 	// unicode
 	BasicAnyString(const mpt::ustring &str) : mpt::ustring(str) { }
 	BasicAnyString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
@@ -584,6 +711,11 @@ class AnyUnicodeString : public mpt::ustring
 {
 
 public:
+
+	// locale
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	AnyUnicodeString(const mpt::lstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 	// unicode
 	AnyUnicodeString(const mpt::ustring &str) : mpt::ustring(str) { }
