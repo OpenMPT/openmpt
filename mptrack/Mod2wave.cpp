@@ -332,7 +332,7 @@ void CWaveConvert::FillSamplerates()
 	}
 	for(auto samplerate : encTraits->samplerates)
 	{
-		int ndx = m_CbnSampleRate.AddString(mpt::tformat(_T("%1 Hz"))(samplerate));
+		int ndx = m_CbnSampleRate.AddString(mpt::cformat(_T("%1 Hz"))(samplerate));
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
 		if(samplerate == encSettings.Samplerate)
 		{

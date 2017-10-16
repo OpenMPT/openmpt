@@ -273,7 +273,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditName.Invalidate();
 
 		//Finetunesteps-edit
-		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->GetFineStepCount()));
+		m_EditFineTuneSteps.SetWindowText(mpt::cfmt::val(m_pActiveTuning->GetFineStepCount()));
 		m_EditFineTuneSteps.Invalidate();
 
 		//Making sure that ratiomap window is showing and
@@ -290,8 +290,8 @@ void CTuningDialog::UpdateView(const int updateMask)
 		{
 			m_EditSteps.EnableWindow(TRUE);
 			m_EditRatioPeriod.EnableWindow(TRUE);
-			m_EditSteps.SetWindowText(mpt::tfmt::val(period));
-			m_EditRatioPeriod.SetWindowText(mpt::tfmt::val(GroupRatio));
+			m_EditSteps.SetWindowText(mpt::cfmt::val(period));
+			m_EditRatioPeriod.SetWindowText(mpt::cfmt::val(GroupRatio));
 		} else
 		{
 			m_EditSteps.EnableWindow(FALSE);
@@ -547,7 +547,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 		return;
 
 	m_RatioEditApply = false;
-	m_EditRatio.SetWindowText(mpt::tfmt::val(m_pActiveTuning->GetRatio(note)));
+	m_EditRatio.SetWindowText(mpt::cfmt::val(m_pActiveTuning->GetRatio(note)));
 	m_NoteEditApply = false;
 	m_EditNotename.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuning->GetNoteName(note, false)));
 
@@ -925,7 +925,7 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 		CString buffer;
 		m_EditFineTuneSteps.GetWindowText(buffer);
 		m_pActiveTuning->SetFineStepCount(ConvertStrTo<Tuning::USTEPINDEXTYPE>(buffer));
-		m_EditFineTuneSteps.SetWindowText(mpt::tfmt::val(m_pActiveTuning->GetFineStepCount()));
+		m_EditFineTuneSteps.SetWindowText(mpt::cfmt::val(m_pActiveTuning->GetFineStepCount()));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
 	}
@@ -1494,7 +1494,7 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 	switch(id)
 	{
 		case enSclImportFailTooManyNotes:
-			return mpt::tformat(_T("OpenMPT supports importing scl-files with at most %1 notes"))(mpt::tfmt::val(s_nSclImportMaxNoteCount));
+			return mpt::cformat(_T("OpenMPT supports importing scl-files with at most %1 notes"))(mpt::cfmt::val(s_nSclImportMaxNoteCount));
 
 		case enSclImportFailTooLargeNumDenomIntegers:
 			return _T("Invalid numerator or denominator");
