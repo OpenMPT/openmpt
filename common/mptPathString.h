@@ -228,14 +228,6 @@ public:
 	// really special purpose, if !UNICODE, encode unicode in CString as UTF8:
 	static mpt::PathString TunnelOutofCString(const CString &path);
 	static CString TunnelIntoCString(const mpt::PathString &path);
-	// CStringW
-#ifdef UNICODE
-	MPT_DEPRECATED_PATH CString ToCStringW() const { return mpt::ToCString(path); }
-	MPT_DEPRECATED_PATH static PathString FromCStringW(const CString &path) { return PathString(mpt::ToWide(path)); }
-#else
-	CStringW ToCStringW() const { return mpt::ToCStringW(path); }
-	static PathString FromCStringW(const CStringW &path) { return PathString(mpt::ToWide(path)); }
-#endif
 #endif
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
