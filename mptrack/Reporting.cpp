@@ -30,35 +30,35 @@ static inline UINT LogLevelToFlags(LogLevel level)
 }
 
 
-static std::wstring GetTitle()
+static CString GetTitle()
 {
-	return MAINFRAME_TITLEW;
+	return MAINFRAME_TITLE;
 }
 
 
-static std::wstring FillEmptyCaption(const std::wstring &caption, LogLevel level)
+static CString FillEmptyCaption(const CString &caption, LogLevel level)
 {
-	std::wstring result = mpt::ToWide(caption);
-	if(result.empty())
+	CString result = caption;
+	if(result.IsEmpty())
 	{
-		result = GetTitle() + std::wstring(L" - ");
+		result = GetTitle() + _T(" - ");
 		switch(level)
 		{
-		case LogDebug: result += L"Debug"; break;
-		case LogNotification: result += L"Notification"; break;
-		case LogInformation: result += L"Information"; break;
-		case LogWarning: result += L"Warning"; break;
-		case LogError: result += L"Error"; break;
+		case LogDebug: result += _T("Debug"); break;
+		case LogNotification: result += _T("Notification"); break;
+		case LogInformation: result += _T("Information"); break;
+		case LogWarning: result += _T("Warning"); break;
+		case LogError: result += _T("Error"); break;
 		}
 	}
 	return result;
 }
 
 
-static std::wstring FillEmptyCaption(const std::wstring &caption)
+static CString FillEmptyCaption(const CString &caption)
 {
-	std::wstring result = mpt::ToWide(caption);
-	if(result.empty())
+	CString result = caption;
+	if(result.IsEmpty())
 	{
 		result = GetTitle();
 	}
@@ -66,84 +66,83 @@ static std::wstring FillEmptyCaption(const std::wstring &caption)
 }
 
 
-static UINT ShowNotificationImpl(const std::wstring &text, const std::wstring &caption, UINT flags, const CWnd *parent)
+static UINT ShowNotificationImpl(const CString &text, const CString &caption, UINT flags, const CWnd *parent)
 {
 	if(parent == nullptr)
 	{
 		parent = CMainFrame::GetActiveWindow();
 	}
 	BypassInputHandler bih;
-	UINT result = ::MessageBoxW(parent->GetSafeHwnd(), text.c_str(), caption.empty() ? MAINFRAME_TITLEW : caption.c_str(), flags);
-
+	UINT result = ::MessageBox(parent->GetSafeHwnd(), text, caption.IsEmpty() ? MAINFRAME_TITLE : caption, flags);
 	return result;
 }
 
 
 UINT Reporting::CustomNotification(const AnyStringLocale &text, const AnyStringLocale &caption, UINT flags, const CWnd *parent)
 {
-	return ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption)), flags, parent);
+	return ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption)), flags, parent);
 }
 
 
 void Reporting::Notification(const AnyStringLocale &text, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), LogNotification), LogLevelToFlags(LogNotification), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), LogNotification), LogLevelToFlags(LogNotification), parent);
 }
 void Reporting::Notification(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), LogNotification), LogLevelToFlags(LogNotification), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption), LogNotification), LogLevelToFlags(LogNotification), parent);
 }
 
 
 void Reporting::Information(const AnyStringLocale &text, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), LogInformation), LogLevelToFlags(LogInformation), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), LogInformation), LogLevelToFlags(LogInformation), parent);
 }
 void Reporting::Information(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), LogInformation), LogLevelToFlags(LogInformation), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption), LogInformation), LogLevelToFlags(LogInformation), parent);
 }
 
 
 void Reporting::Warning(const AnyStringLocale &text, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), LogWarning), LogLevelToFlags(LogWarning), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), LogWarning), LogLevelToFlags(LogWarning), parent);
 }
 void Reporting::Warning(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), LogWarning), LogLevelToFlags(LogWarning), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption), LogWarning), LogLevelToFlags(LogWarning), parent);
 }
 
 
 void Reporting::Error(const AnyStringLocale &text, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), LogError), LogLevelToFlags(LogError), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), LogError), LogLevelToFlags(LogError), parent);
 }
 void Reporting::Error(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), LogError), LogLevelToFlags(LogError), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption), LogError), LogLevelToFlags(LogError), parent);
 }
 
 
 void Reporting::Message(LogLevel level, const AnyStringLocale &text, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), level), LogLevelToFlags(level), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), level), LogLevelToFlags(level), parent);
 }
 void Reporting::Message(LogLevel level, const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), level), LogLevelToFlags(level), parent);
+	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption), level), LogLevelToFlags(level), parent);
 }
 
 
 ConfirmAnswer Reporting::Confirm(const AnyStringLocale &text, bool showCancel, bool defaultNo, const CWnd *parent)
 {
-	return Confirm(mpt::ToWide(text), GetTitle() + L" - Confirmation", showCancel, defaultNo, parent);
+	return Confirm(mpt::ToCString(text), GetTitle() + _T(" - Confirmation"), showCancel, defaultNo, parent);
 }
 
 
 ConfirmAnswer Reporting::Confirm(const AnyStringLocale &text, const AnyStringLocale &caption, bool showCancel, bool defaultNo, const CWnd *parent)
 {
-	UINT result = ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption)), (showCancel ? MB_YESNOCANCEL : MB_YESNO) | MB_ICONQUESTION | (defaultNo ? MB_DEFBUTTON2 : 0), parent);
+	UINT result = ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption)), (showCancel ? MB_YESNOCANCEL : MB_YESNO) | MB_ICONQUESTION | (defaultNo ? MB_DEFBUTTON2 : 0), parent);
 	switch(result)
 	{
 	case IDYES:
@@ -159,13 +158,13 @@ ConfirmAnswer Reporting::Confirm(const AnyStringLocale &text, const AnyStringLoc
 
 RetryAnswer Reporting::RetryCancel(const AnyStringLocale &text, const CWnd *parent)
 {
-	return RetryCancel(mpt::ToWide(text), GetTitle(), parent);
+	return RetryCancel(mpt::ToCString(text), GetTitle(), parent);
 }
 
 
 RetryAnswer Reporting::RetryCancel(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
 {
-	UINT result = ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption)), MB_RETRYCANCEL, parent);
+	UINT result = ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption)), MB_RETRYCANCEL, parent);
 	switch(result)
 	{
 	case IDRETRY:
