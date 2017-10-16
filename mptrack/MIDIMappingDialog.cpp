@@ -482,7 +482,7 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 		break;
 	}
 
-	mpt::WinStringBuf(pTTT->szText) = mpt::ToWin(text);
+	mpt::WinStringBuf(pTTT->szText) = mpt::winstring(text);
 	return TRUE;
 }
 
