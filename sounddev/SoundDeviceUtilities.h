@@ -51,9 +51,9 @@ class ComponentAvRt
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
-	typedef HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
+	typedef HANDLE (WINAPI *pAvSetMmThreadCharacteristics)(LPCTSTR, LPDWORD);
 	typedef BOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
-	pAvSetMmThreadCharacteristicsW AvSetMmThreadCharacteristicsW;
+	pAvSetMmThreadCharacteristics AvSetMmThreadCharacteristics;
 	pAvRevertMmThreadCharacteristics AvRevertMmThreadCharacteristics;
 public:
 	ComponentAvRt();
@@ -73,7 +73,7 @@ private:
 	HANDLE hTask;
 	int oldPriority;
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const std::wstring & priorityClass, int priority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const mpt::winstring & priorityClass, int priority);
 	~CPriorityBooster();
 };
 
@@ -84,7 +84,7 @@ class CAudioThread
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
 	ComponentHandle<ComponentAvRt> m_AvRt;
-	std::wstring m_MMCSSClass;
+	mpt::winstring m_MMCSSClass;
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;

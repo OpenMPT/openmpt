@@ -97,11 +97,11 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 {
 	MPT_TRACE();
 	SoundDevice::DynamicCaps caps;
-	WAVEOUTCAPSW woc;
+	WAVEOUTCAPS woc;
 	MemsetZero(woc);
 	if(GetDeviceIndex() > 0)
 	{
-		if(waveOutGetDevCapsW(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+		if(waveOutGetDevCaps(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
 			{
@@ -286,10 +286,13 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 	if(!m_Failed)
 	{ // only show the first error
 		m_Failed = true;
-		WCHAR errortext[MAXERRORLENGTH + 1];
+		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
-		waveOutGetErrorTextW(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1: %2"))(mpt::ufmt::hex0<8>(result), mpt::ToUnicode(errortext)));
+		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
+		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1: %2"))
+			( mpt::ufmt::hex0<8>(result)
+			, mpt::ToUnicode(mpt::WinStringBuf(errortext))
+			));
 	}
 	RequestClose();
 	return false;
@@ -305,13 +308,13 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 	if(!m_Failed)
 	{ // only show the first error
 		m_Failed = true;
-		WCHAR errortext[MAXERRORLENGTH + 1];
+		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
-		waveOutGetErrorTextW(result, errortext, MAXERRORLENGTH);
+		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
 		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1 (param 0x%2): %3"))
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ufmt::hex0<8>(param)
-			, mpt::ToUnicode(errortext)
+			, mpt::ToUnicode(mpt::WinStringBuf(errortext))
 			));
 	}
 	RequestClose();
@@ -547,11 +550,11 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		info.internalID = mpt::ufmt::dec(index);
 		info.apiName = MPT_USTRING("WaveOut");
 		info.useNameAsIdentifier = true;
-		WAVEOUTCAPSW woc;
+		WAVEOUTCAPS woc;
 		MemsetZero(woc);
-		if(waveOutGetDevCapsW((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
-			info.name = mpt::ToUnicode(woc.szPname);
+			info.name = mpt::ToUnicode(mpt::WinStringBuf(woc.szPname));
 			info.extraData[MPT_USTRING("DriverID")] = mpt::format(MPT_USTRING("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
 			info.extraData[MPT_USTRING("DriverVersion")] = mpt::format(MPT_USTRING("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		} else if(index == 0)

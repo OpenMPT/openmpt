@@ -315,44 +315,44 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 	LONG cr;
 
 	HKEY hkEnum = NULL;
-	cr = RegOpenKeyW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\ASIO", &hkEnum);
+	cr = RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\ASIO"), &hkEnum);
 
 	for(DWORD index = 0; ; ++index)
 	{
 
-		WCHAR keynameBuf[ASIO_MAXDRVNAMELEN];
-		if((cr = RegEnumKeyW(hkEnum, index, keynameBuf, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
+		TCHAR keynameBuf[ASIO_MAXDRVNAMELEN];
+		if((cr = RegEnumKey(hkEnum, index, keynameBuf, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
 		{
 			break;
 		}
-		const std::wstring keyname = keynameBuf;
-		Log(mpt::format(MPT_USTRING("ASIO: Found '%1':"))(keyname));
+		const mpt::winstring keyname = mpt::WinStringBuf(keynameBuf);
+		Log(mpt::format(MPT_USTRING("ASIO: Found '%1':"))(mpt::ToUnicode(keyname)));
 
 		HKEY hksub = NULL;
-		if(RegOpenKeyExW(hkEnum, keynameBuf, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
+		if(RegOpenKeyEx(hkEnum, keyname.c_str(), 0, KEY_READ, &hksub) != ERROR_SUCCESS)
 		{
 			continue;
 		}
 
-		WCHAR descriptionBuf[ASIO_MAXDRVNAMELEN];
+		TCHAR descriptionBuf[ASIO_MAXDRVNAMELEN];
 		DWORD datatype = REG_SZ;
 		DWORD datasize = sizeof(descriptionBuf);
 		mpt::ustring description;
-		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
+		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("Description"), 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
-			description = mpt::ToUnicode(descriptionBuf);
+			description = mpt::ToUnicode(mpt::WinStringBuf(descriptionBuf));
 			Log(mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
 		} else
 		{
 			description = mpt::ToUnicode(keyname);
 		}
 
-		WCHAR idBuf[256];
+		TCHAR idBuf[256];
 		datatype = REG_SZ;
 		datasize = sizeof(idBuf);
-		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"CLSID", 0, &datatype, (LPBYTE)idBuf, &datasize))
+		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("CLSID"), 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
-			const mpt::ustring internalID = mpt::ToUnicode(idBuf);
+			const mpt::ustring internalID = mpt::ToUnicode(mpt::WinStringBuf(idBuf));
 			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
 				Log(mpt::format(MPT_USTRING("ASIO:   clsid=%1"))(internalID));
