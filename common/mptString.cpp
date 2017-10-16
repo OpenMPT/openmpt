@@ -91,8 +91,8 @@ List of string types
     is an obvious reason to do so.
 
  *  CStringW (OpenMPT)
-    MFC Unicode string type. Use in MFC GUI code when explicit Unicode support
-    is required.
+    MFC Unicode string type. Do not use unless there is an obvious reason to do
+    so.
 
  *  mpt::PathString (OpenMPT, libopenmpt)
     String type representing paths and filenames. Always use for these in order
@@ -216,13 +216,7 @@ else
    T = mpt::PathString
   fi
  elif mfc/gui code
-  if directly interface with wide winapi
-   T = CStringW
-  elif needs unicode support
-   T = CStringW
-  else
-   T = CString
-  fi
+  T = CString
  else
   if directly interfacing with wide winapi
    T = std::wstring
@@ -293,7 +287,7 @@ when converting between different Unicode encodings.
 Interfacing with WinAPI
 -----------------------
 
-When in MFC code, use CString or CStringW as appropriate.
+When in MFC code, use CString.
 When in non MFC code, either use std::wstring when directly interfacing with the
 Unicode API, or use the TCHAR helper functions: ToTcharBuf, FromTcharBuf,
 ToTcharStr, FromTcharStr.
@@ -1474,39 +1468,6 @@ std::string ToCharset(Charset to, const CString &str)
 	#endif
 }
 
-#ifdef UNICODE
-// inline
-#else // !UNICODE
-CStringW ToCStringW(const CString &str)
-{
-	return ToWide(str).c_str();
-}
-CStringW ToCStringW(const std::wstring &str)
-{
-	return str.c_str();
-}
-CStringW ToCStringW(Charset from, const std::string &str)
-{
-	return ToWide(from, str).c_str();
-}
-CStringW ToCStringW(const CStringW &str)
-{
-	return str;
-}
-std::wstring ToWide(const CStringW &str)
-{
-	return str.GetString();
-}
-std::string ToCharset(Charset to, const CStringW &str)
-{
-	return ToCharset(to, str.GetString());
-}
-CString ToCString(const CStringW &str)
-{
-	return ToCharset(CharsetLocale, str).c_str();
-}
-#endif // UNICODE
-
 #endif // MFC
 
 
@@ -1532,12 +1493,6 @@ mpt::ustring ToUnicode(const CString &str)
 		return String::ConvertImpl<mpt::ustring, std::string>(mpt::CharsetUTF8, mpt::CharsetLocale, str.GetString());
 	#endif // UNICODE
 }
-#ifndef UNICODE
-mpt::ustring ToUnicode(const CStringW &str)
-{
-	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
-}
-#endif // !UNICODE
 #endif // MFC
 #endif // MPT_USTRING_MODE_WIDE
 
@@ -1731,9 +1686,9 @@ mpt::ustring ToLowerCase(const mpt::ustring &s)
 			tmp.MakeLower();
 			return mpt::ToUnicode(tmp);
 		#else // !UNICODE
-			CStringW tmp = mpt::ToCStringW(s);
+			CStringW tmp = mpt::ToWide(s).c_str();
 			tmp.MakeLower();
-			return mpt::ToUnicode(tmp);
+			return mpt::ToUnicode(tmp.GetString());
 		#endif // UNICODE
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);
@@ -1750,9 +1705,9 @@ mpt::ustring ToUpperCase(const mpt::ustring &s)
 			tmp.MakeUpper();
 			return mpt::ToUnicode(tmp);
 		#else // !UNICODE
-			CStringW tmp = mpt::ToCStringW(s);
+			CStringW tmp = mpt::ToWide(s).c_str();
 			tmp.MakeUpper();
-			return mpt::ToUnicode(tmp);
+			return mpt::ToUnicode(tmp.GetString());
 		#endif // UNICODE
 	#else // !_MFC_VER
 		std::wstring ws = mpt::ToWide(s);

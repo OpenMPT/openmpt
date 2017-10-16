@@ -97,10 +97,10 @@ public:
 
 #endif // UNICODE
 
-	CStringW GetItemTextW(HTREEITEM item) const
+	std::wstring GetItemTextW(HTREEITEM item) const
 	{
 #ifdef UNICODE
-		return GetItemText(item);
+		return mpt::ToWide(GetItemText(item));
 #else
 		TVITEMW tvi;
 		tvi.hItem = item;
@@ -117,7 +117,7 @@ public:
 			nRes = wcslen(tvi.pszText);
 		} while (nRes >= size_t(nLen - 1));
 		str.ReleaseBuffer();
-		return str;
+		return mpt::ToWide(str);
 #endif // UNICODE
 	}
 
