@@ -87,7 +87,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 	: m_SoundDevice(SoundDevice)
 {
 	MPT_TRACE();
-	m_MMCSSClass = mpt::ToWide(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
+	m_MMCSSClass = mpt::ToWin(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -135,7 +135,7 @@ MPT_REGISTERED_COMPONENT(ComponentAvRt, "AvRt")
 
 ComponentAvRt::ComponentAvRt()
 	: ComponentLibrary(ComponentTypeSystem)
-	, AvSetMmThreadCharacteristicsW(nullptr)
+	, AvSetMmThreadCharacteristics(nullptr)
 	, AvRevertMmThreadCharacteristics(nullptr)
 {
 	return;
@@ -148,7 +148,7 @@ bool ComponentAvRt::DoInitialize()
 		return false;
 	}
 	AddLibrary("avrt", mpt::LibraryPath::System(MPT_PATHSTRING("avrt")));
-	MPT_COMPONENT_BIND("avrt", AvSetMmThreadCharacteristicsW);
+	MPT_COMPONENT_BINDWIN("avrt", AvSetMmThreadCharacteristics);
 	MPT_COMPONENT_BIND("avrt", AvRevertMmThreadCharacteristics);
 	if(HasBindFailed())
 	{
@@ -163,7 +163,7 @@ ComponentAvRt::~ComponentAvRt()
 }
 
 
-CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const std::wstring & priorityClass, int priority)
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const mpt::winstring & priorityClass, int priority)
 	: m_SysInfo(sysInfo)
 	, m_AvRt(avrt)
 	, m_BoostPriority(boostPriority)
@@ -182,7 +182,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 		{
 			if(!priorityClass.empty())
 			{
-				hTask = m_AvRt->AvSetMmThreadCharacteristicsW(priorityClass.c_str(), &task_idx);
+				hTask = m_AvRt->AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
 			}
 		} else
 		{

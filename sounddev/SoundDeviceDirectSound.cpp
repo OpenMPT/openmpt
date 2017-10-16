@@ -36,14 +36,14 @@ MPT_REGISTERED_COMPONENT(ComponentDirectSound, "DirectSound")
 
 namespace Legacy
 {
-static BOOL WINAPI DSEnumCallbackGetDefaultName(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
+static BOOL WINAPI DSEnumCallbackGetDefaultName(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR, LPVOID lpContext)
 {
 	mpt::ustring & name = *reinterpret_cast<mpt::ustring*>(lpContext);
 	if(!lpGuid)
 	{
 		if(lpstrDescription)
 		{
-			name = mpt::ToUnicode(std::wstring(lpstrDescription));
+			name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 			return FALSE;
 		}
 	}
@@ -57,7 +57,7 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04()
 	{
 		return name;
 	}
-	DirectSoundEnumerateW(DSEnumCallbackGetDefaultName, &name);
+	DirectSoundEnumerate(DSEnumCallbackGetDefaultName, &name);
 	if(name.empty())
 	{
 		return name;
@@ -73,7 +73,7 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 }
 
 
-static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR lpstrDriver, LPVOID lpContext)
+static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
 {
 	std::vector<SoundDevice::Info> &devices = *(std::vector<SoundDevice::Info>*)lpContext;
 	if(!lpstrDescription)
@@ -85,10 +85,10 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	info.type = TypeDSOUND;
 	info.isDefault = (!lpGuid);
 	info.internalID = mpt::ToUnicode(Util::GUIDToString(guid));
-	info.name = mpt::ToUnicode(lpstrDescription);
+	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
-		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(lpstrDriver);
+		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
 	}
 	if(lpGuid)
 	{
@@ -104,7 +104,7 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
 {
 	std::vector<SoundDevice::Info> devices;
-	DirectSoundEnumerateW(DSEnumCallbackW, &devices);
+	DirectSoundEnumerate(DSEnumCallback, &devices);
 	return devices;
 }
 
