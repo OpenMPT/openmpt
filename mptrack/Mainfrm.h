@@ -29,8 +29,7 @@ class Base;
 class ISource;
 } // namerspace SoundDevice
 
-#define MAINFRAME_TITLE				"Open ModPlug Tracker"
-#define MAINFRAME_TITLEW			L"Open ModPlug Tracker"
+#define MAINFRAME_TITLE _T("Open ModPlug Tracker")
 
 // Custom window messages
 enum

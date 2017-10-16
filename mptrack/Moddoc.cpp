@@ -768,7 +768,7 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 		if(level < LogDebug)
 		{
 			std::wstring text = preamble + mpt::ToWide(GetLogString());
-			std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
+			std::wstring actualTitle = (title.length() == 0) ? mpt::ToWide(CString(MAINFRAME_TITLE)) : title;
 			Reporting::Message(level, text, actualTitle, parent);
 			return IDOK;
 		}
