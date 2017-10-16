@@ -2742,7 +2742,7 @@ HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
 		if(env->empty())
 			str += _T(" envelope has no points");
 		else
-			str += mpt::tformat(_T(" envelope, %1 point%2"))(env->size(), env->size() == 1 ? _T("") : _T("s"));
+			str += mpt::cformat(_T(" envelope, %1 point%2"))(env->size(), env->size() == 1 ? _T("") : _T("s"));
 	} else
 	{
 		bool isEnvPoint = false;
@@ -2758,10 +2758,10 @@ HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
 		}
 		if(!isEnvPoint)
 		{
-			str += mpt::tformat(_T(" at point %1, tick %2"))(point + 1, tick);
+			str += mpt::cformat(_T(" at point %1, tick %2"))(point + 1, tick);
 		} else
 		{
-			str = mpt::tformat(_T("Point %1, tick %2, %3 %4"))(point + 1, tick, typeStr, EnvValueToString(EnvGetTick(point), EnvGetValue(point)));
+			str = mpt::cformat(_T("Point %1, tick %2, %3 %4"))(point + 1, tick, typeStr, EnvValueToString(EnvGetTick(point), EnvGetValue(point)));
 			if(env->dwFlags[ENV_LOOP])
 			{
 				if(point == env->nLoopStart)

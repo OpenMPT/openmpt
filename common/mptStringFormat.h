@@ -44,9 +44,9 @@ OPENMPT_NAMESPACE_BEGIN
 //  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
 //     std::string        std::wstring       mpt::ustring                           CString
-//     mpt::fmt::val      mpt::wfmt::val     mpt::ufmt::val                         mpt::tfmt::val
+//     mpt::fmt::val      mpt::wfmt::val     mpt::ufmt::val                         mpt::cfmt::val
 //     mpt::FormatVal     mpt::FormatValW    mpt::FormatValTFunctor<mpt::ustring>() mpt::FormatValTFunctor<Cstring>()
-//     mpt::fmt           mpt::wfmt          mpt::ufmt                              mpt::tfmt
+//     mpt::fmt           mpt::wfmt          mpt::ufmt                              mpt::cfmt
 //     mpt::format        mpt::format        mpt::format                            mpt::format
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
@@ -462,7 +462,7 @@ typedef fmtT<std::wstring> ufmt;
 typedef fmtT<mpt::ustring> ufmt;
 #endif
 #if defined(_MFC_VER)
-typedef fmtT<CString> tfmt;
+typedef fmtT<CString> cfmt;
 #endif
 
 } // namespace mpt
@@ -755,7 +755,7 @@ static inline message_formatter<mpt::ustring> uformat(const mpt::ustring &format
 }
 
 #if defined(_MFC_VER)
-static inline message_formatter<CString> tformat(const CString &format)
+static inline message_formatter<CString> cformat(const CString &format)
 {
 	return message_formatter<CString>(format);
 }

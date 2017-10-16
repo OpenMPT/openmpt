@@ -584,7 +584,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), MPT_USTRING("foobar"));
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), MPT_USTRING("foobar"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,2,3), _T("123"));
-	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
+	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
 #endif
 
 }

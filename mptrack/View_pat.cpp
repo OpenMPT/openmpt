@@ -6677,11 +6677,11 @@ HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 
 	const CSoundFile *sndFile = GetSoundFile();
 	CString str = TrackerSettings::Instance().patternAccessibilityFormat;
-	str.Replace(_T("%sequence%"), mpt::tfmt::val(sndFile->Order.GetCurrentSequenceIndex()));
-	str.Replace(_T("%order%"), mpt::tfmt::val(GetCurrentOrder()));
-	str.Replace(_T("%pattern%"), mpt::tfmt::val(GetCurrentPattern()));
-	str.Replace(_T("%row%"), mpt::tfmt::val(m_Cursor.GetRow()));
-	str.Replace(_T("%channel%"), mpt::tfmt::val(m_Cursor.GetChannel() + 1));
+	str.Replace(_T("%sequence%"), mpt::cfmt::val(sndFile->Order.GetCurrentSequenceIndex()));
+	str.Replace(_T("%order%"), mpt::cfmt::val(GetCurrentOrder()));
+	str.Replace(_T("%pattern%"), mpt::cfmt::val(GetCurrentPattern()));
+	str.Replace(_T("%row%"), mpt::cfmt::val(m_Cursor.GetRow()));
+	str.Replace(_T("%channel%"), mpt::cfmt::val(m_Cursor.GetChannel() + 1));
 	str.Replace(_T("%column_type%"), column);
 	str.Replace(_T("%column_description%"), GetCursorDescription());
 

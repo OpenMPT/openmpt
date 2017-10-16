@@ -74,7 +74,7 @@ void CTuningRatioMapWnd::OnPaint()
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, isValidNote ? mpt::tfmt::val(noteToDraw) : _T("..."), FALSE, FALSE);
+			DrawButtonRect(hdc, &rect, isValidNote ? mpt::cfmt::val(noteToDraw) : _T("..."), FALSE, FALSE);
 
 			// Mapped Note
 			bHighLight = ((bFocus) && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
@@ -93,10 +93,10 @@ void CTuningRatioMapWnd::OnPaint()
 			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 			rect.SetRect(m_cxFont * 2, ypaint, m_cxFont * 3 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::tfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::cfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 			rect.SetRect(m_cxFont * 3, ypaint, m_cxFont * 4 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::tfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 		}
 		rect.SetRect(rcClient.left+m_cxFont*4-1, rcClient.top, rcClient.left+m_cxFont*4+3, ypaint);
