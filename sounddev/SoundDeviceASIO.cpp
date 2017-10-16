@@ -340,8 +340,8 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		mpt::ustring description;
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
-			Log(mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
 			description = mpt::ToUnicode(descriptionBuf);
+			Log(mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
 		} else
 		{
 			description = mpt::ToUnicode(keyname);
