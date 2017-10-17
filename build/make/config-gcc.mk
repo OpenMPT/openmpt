@@ -25,8 +25,8 @@ ARFLAGS  := rcs
 endif
 
 ifeq ($(MODERN),1)
-CXXFLAGS += -Wlogical-op -Wframe-larger-than=16000
-CFLAGS   += -Wlogical-op -Wframe-larger-than=4000
+CXXFLAGS += -Wlogical-op -Wdouble-promotion -Wframe-larger-than=16000
+CFLAGS   += -Wlogical-op -Wdouble-promotion -Wframe-larger-than=4000
 endif
 
 CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
