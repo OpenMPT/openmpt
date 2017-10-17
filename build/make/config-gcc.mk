@@ -24,6 +24,11 @@ ARFLAGS  := rcs
 
 endif
 
+ifeq ($(MODERN),1)
+CXXFLAGS += -Wframe-larger-than=16000
+CFLAGS   += -Wframe-larger-than=4000
+endif
+
 CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
 
 ifeq ($(CHECKED_ADDRESS),1)
