@@ -379,8 +379,10 @@ inline bool WriteIntBE(Tfile & f, const T v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t fixedSize = 0)
 {
+	std::size_t minSize = fixedSize;
+	std::size_t maxSize = fixedSize;
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2);
 	MPT_ASSERT(maxSize == 0 || maxSize >= minSize);
@@ -402,8 +404,10 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t minSize 
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t fixedSize = 0)
 {
+	std::size_t minSize = fixedSize;
+	std::size_t maxSize = fixedSize;
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 3 || minSize == 4);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 3 || maxSize == 4);
 	MPT_ASSERT(maxSize == 0 || maxSize >= minSize);
@@ -436,8 +440,10 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t minSize 
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t fixedSize = 0)
 {
+	std::size_t minSize = fixedSize;
+	std::size_t maxSize = fixedSize;
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 4 || minSize == 8);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 4 || maxSize == 8);
 	MPT_ASSERT(maxSize == 0 || maxSize >= minSize);
