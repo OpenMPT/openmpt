@@ -711,7 +711,7 @@ void SsbWrite::FinishWrite()
 	oStrm.seekp(m_posEntrycount);
 
 	// Write a fixed size=2 Adaptive64LE because space for this value has already been reserved berforehand.
-	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2, 2);
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2);
 
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
@@ -719,7 +719,7 @@ void SsbWrite::FinishWrite()
 		const uint64 rposMap = posMapStart - m_posStart;
 
 		// Write a fixed size=8 Adaptive64LE because space for this value has already been reserved berforehand.
-		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8, 8);
+		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8);
 
 	}
 
