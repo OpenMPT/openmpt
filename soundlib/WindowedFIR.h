@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MPT_INTMIXER
 // quantizer scale of window coefs - only required for integer mixing
 #define WFIR_QUANTBITS		15
-#define WFIR_QUANTSCALE		float(1L<<WFIR_QUANTBITS)
+#define WFIR_QUANTSCALE		double(1L<<WFIR_QUANTBITS)
 #define WFIR_8SHIFT			(WFIR_QUANTBITS-8)
 #define WFIR_16BITSHIFT		(WFIR_QUANTBITS)
 typedef int16 WFIR_TYPE;
@@ -77,8 +77,9 @@ enum WFIRType
 
 class CWindowedFIR
 {
+private:	
+	double coef(int,double,double,int,int);
 public:
-	float coef(int,float,float,int,int);
 	void InitTable(double WFIRCutoff, uint8 WFIRType);
 	WFIR_TYPE lut[WFIR_LUTLEN*WFIR_WIDTH];
 };
