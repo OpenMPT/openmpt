@@ -1205,7 +1205,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 					FileHistory hist;
 					MemsetZero(hist);
-					hist.openTime = static_cast<uint32>(editTime * (HISTORY_TIMER_PRECISION / 18.2f));
+					hist.openTime = static_cast<uint32>(editTime * (HISTORY_TIMER_PRECISION / 18.2));
 					m_FileHistory.push_back(hist);
 				}
 			}
@@ -1326,7 +1326,7 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
 			else
 				sndFile.AddToLog("Unable to retrieve current time.");
 
-			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * (double)HISTORY_TIMER_PRECISION);
+			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * HISTORY_TIMER_PRECISION);
 #endif // MODPLUG_TRACKER
 		}
 

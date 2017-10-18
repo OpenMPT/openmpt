@@ -636,7 +636,7 @@ void ITHistoryStruct::ConvertToMPT(FileHistory &mptHistory) const
 	mptHistory.loadDate.tm_hour = Clamp((fattime >> 11) & 0x1F, 0, 23);
 	mptHistory.loadDate.tm_min = Clamp((fattime >> 5) & 0x3F, 0, 59);
 	mptHistory.loadDate.tm_sec = Clamp((fattime & 0x1F) * 2, 0, 59);
-	mptHistory.openTime = static_cast<uint32>(runtime * (HISTORY_TIMER_PRECISION / 18.2f));
+	mptHistory.openTime = static_cast<uint32>(runtime * (HISTORY_TIMER_PRECISION / 18.2));
 }
 
 
@@ -646,7 +646,7 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 	// Create FAT file dates
 	fatdate = static_cast<uint16>(mptHistory.loadDate.tm_mday | ((mptHistory.loadDate.tm_mon + 1) << 5) | ((mptHistory.loadDate.tm_year - 80) << 9));
 	fattime = static_cast<uint16>((mptHistory.loadDate.tm_sec / 2) | (mptHistory.loadDate.tm_min << 5) | (mptHistory.loadDate.tm_hour << 11));
-	runtime = static_cast<uint32>(mptHistory.openTime * (18.2f / HISTORY_TIMER_PRECISION));
+	runtime = static_cast<uint32>(mptHistory.openTime * (18.2 / HISTORY_TIMER_PRECISION));
 }
 
 

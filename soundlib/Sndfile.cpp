@@ -50,7 +50,7 @@ mpt::ustring FileHistory::AsISO8601() const
 	if(openTime > 0)
 	{
 		// Calculate the date when editing finished.
-		double openSeconds = (double)openTime / (double)HISTORY_TIMER_PRECISION;
+		double openSeconds = static_cast<double>(openTime) / HISTORY_TIMER_PRECISION;
 		tm tmpLoadDate = loadDate;
 		int64 loadDateSinceEpoch = mpt::Date::Unix::FromUTC(tmpLoadDate);
 		int64 saveDateSinceEpoch = loadDateSinceEpoch + Util::Round<int64>(openSeconds);
