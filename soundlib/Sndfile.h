@@ -221,7 +221,7 @@ class CModDoc;
 /////////////////////////////////////////////////////////////////////////
 // File edit history
 
-#define HISTORY_TIMER_PRECISION	18.2f
+#define HISTORY_TIMER_PRECISION	18.2
 
 struct FileHistory
 {
