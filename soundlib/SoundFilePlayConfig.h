@@ -48,8 +48,7 @@ enum ForcePanningMode
 class CSoundFilePlayConfig
 {
 public:
-	CSoundFilePlayConfig(void);
-	~CSoundFilePlayConfig(void);
+	CSoundFilePlayConfig();
 
 	void SetMixLevels(MixLevels mixLevelType);
 
