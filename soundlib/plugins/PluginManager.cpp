@@ -228,7 +228,7 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 void CVstPluginManager::EnumerateDirectXDMOs()
 {
 #ifndef NO_DMO
-	const mpt::UUID knownDMOs[] =
+	constexpr mpt::UUID knownDMOs[] =
 	{
 		MPT_UUID(745057C7,F353,4F2D,A7EE,58434477730E), // AEC (Acoustic echo cancellation, not usable)
 		MPT_UUID(EFE6629C,81F7,4281,BD91,C9D604A95AF6), // Chorus
