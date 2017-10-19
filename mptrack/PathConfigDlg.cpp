@@ -92,9 +92,9 @@ BOOL PathConfigDlg::OnInitDialog()
 }
 
 
-static mpt::PathString GetPath(HWND hwnd, int id)
+mpt::PathString PathConfigDlg::GetPath(int id)
 {
-	return mpt::PathString::FromUnicode(GetWindowTextUnicode(::GetDlgItem(hwnd, id))).EnsureTrailingSlash();
+	return mpt::PathString::FromCString(GetWindowTextString(*GetDlgItem(id))).EnsureTrailingSlash();
 }
 
 
@@ -104,7 +104,7 @@ void PathConfigDlg::OnOK()
 	// Default paths
 	for(const auto &path : PathSettings)
 	{
-		(settings.*path.first).SetDefaultDir(GetPath(m_hWnd, path.second));
+		(settings.*path.first).SetDefaultDir(GetPath(path.second));
 	}
 
 	// Autosave
@@ -124,7 +124,7 @@ void PathConfigDlg::BrowseFolder(UINT nID)
 	TCHAR *prompt = (nID == IDC_AUTOSAVE_PATH)
 		? _T("Select a folder to store autosaved files in...")
 		: _T("Select a default folder...");
-	BrowseForFolder dlg(GetPath(m_hWnd, nID), prompt);
+	BrowseForFolder dlg(GetPath(nID), prompt);
 	if(dlg.Show(this))
 	{
 		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
@@ -177,7 +177,7 @@ BOOL PathConfigDlg::OnSetActive()
 
 BOOL PathConfigDlg::OnKillActive()
 {
-	mpt::PathString path = GetPath(m_hWnd, IDC_AUTOSAVE_PATH);
+	mpt::PathString path = GetPath(IDC_AUTOSAVE_PATH);
 
 	if (!path.IsDirectory() && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{

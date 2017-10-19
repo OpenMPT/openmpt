@@ -1830,19 +1830,11 @@ void ErrorBox(UINT nStringID, CWnd *parent)
 }
 
 
-mpt::ustring GetWindowTextUnicode(HWND hwnd)
+CString GetWindowTextString(const CWnd &wnd)
 {
-	int len = ::GetWindowTextLengthW(hwnd);
-	std::wstring str(len, L' ');
-	if(len)
-	{
-		::GetWindowTextW(hwnd, &str[0], len + 1);
-	}
-#if MPT_USTRING_MODE_WIDE
-	return str;
-#else
-	return mpt::ToUnicode(str);
-#endif
+	CString result;
+	wnd.GetWindowText(result);
+	return result;
 }
 
 
