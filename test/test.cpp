@@ -631,11 +631,25 @@ Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 	return Gregorian{Y,M,D,h,m,s};
 }
 
+#if MPT_ENDIAN_IS_CONSTEXPR
+static constexpr int32le TestEndianConstexpr(uint32 x)
+{
+	int32le foo;
+	foo = x;
+	return foo;
+}
+#endif
+
 static MPT_NOINLINE void TestMisc1()
 {
 
 	VERIFY_EQUAL(mpt::endian(), mpt::detail::endian_probe());
 	VERIFY_EQUAL((mpt::endian() == mpt::endian_big) || (mpt::endian() == mpt::endian_little), true);	
+
+#if MPT_ENDIAN_IS_CONSTEXPR
+	constexpr int32le foo = TestEndianConstexpr(23);
+	(void)foo;
+#endif
 
 #define SwapBytesReturn(x) SwapBytesLE(SwapBytesBE(x))
 

@@ -43,6 +43,25 @@
 	#endif
 #endif // MPT_COMPILER
 
+#if MPT_PLATFORM_ENDIAN_KNOWN && MPT_CXX_AT_LEAST(14)
+//#define MPT_ENDIAN_IS_CONSTEXPR 1
+// For now, we do not want to use constexpr endianness functions and types.
+// It bloats the binary size somewhat (possibly because of either the zeroing
+// constructor or because of not being able to use byteswap intrinsics) and has
+// currently no compelling benefit for us
+#define MPT_ENDIAN_IS_CONSTEXPR 0
+#else
+#define MPT_ENDIAN_IS_CONSTEXPR 0
+#endif
+
+#if MPT_ENDIAN_IS_CONSTEXPR
+#define MPT_ENDIAN_CONSTEXPR_FUN MPT_CONSTEXPR14_FUN
+#define MPT_ENDIAN_CONSTEXPR_VAR MPT_CONSTEXPR14_VAR
+#else
+#define MPT_ENDIAN_CONSTEXPR_FUN MPT_FORCEINLINE
+#define MPT_ENDIAN_CONSTEXPR_VAR const
+#endif
+
 #if !MPT_PLATFORM_IEEE_FLOAT
 #include <array>
 #endif
@@ -55,11 +74,11 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
 struct endian_type { uint16 value; };
-static MPT_FORCEINLINE bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
-static MPT_FORCEINLINE bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
+static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
+static MPT_ENDIAN_CONSTEXPR_FUN bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
 
-static const endian_type endian_big    = { 0x1234u };
-static const endian_type endian_little = { 0x3412u };
+static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_big    = { 0x1234u };
+static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_little = { 0x3412u };
 
 namespace detail {
 	static MPT_FORCEINLINE endian_type endian_probe()
@@ -72,7 +91,7 @@ namespace detail {
 	}
 }
 
-static MPT_FORCEINLINE endian_type endian()
+static MPT_ENDIAN_CONSTEXPR_FUN endian_type endian()
 {
 	#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 		return endian_little;
@@ -83,12 +102,12 @@ static MPT_FORCEINLINE endian_type endian()
 	#endif
 }
 
-static MPT_FORCEINLINE bool endian_is_little()
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_little()
 {
 	return endian() == endian_little;
 }
 
-static MPT_FORCEINLINE bool endian_is_big()
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_big()
 {
 	return endian() == endian_big;
 }
@@ -114,12 +133,12 @@ enum Endianness
 
 struct BigEndian_tag
 {
-	static const mpt::detail::Endianness Endianness = mpt::detail::BigEndian;
+	static MPT_ENDIAN_CONSTEXPR_VAR mpt::detail::Endianness Endianness = mpt::detail::BigEndian;
 };
 
 struct LittleEndian_tag
 {
-	static const mpt::detail::Endianness Endianness = mpt::detail::LittleEndian;
+	static MPT_ENDIAN_CONSTEXPR_VAR mpt::detail::Endianness Endianness = mpt::detail::LittleEndian;
 };
 
 
@@ -149,6 +168,8 @@ inline void SwapBufferEndian(std::size_t elementSize, Tbyte * buffer, std::size_
 // Similarly SwapBytesLE(x) converts known little endian format to format of current
 // endian architecture or value x in format of current architecture to little endian
 // format.
+
+#if !MPT_ENDIAN_IS_CONSTEXPR
 
 #if MPT_COMPILER_GCC
 #define MPT_bswap16 __builtin_bswap16
@@ -181,6 +202,8 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #endif
 #endif
 } } // namespace mpt::detail
+
+#endif // !MPT_ENDIAN_IS_CONSTEXPR
 
 
 // No intrinsics available
@@ -315,39 +338,39 @@ static MPT_FORCEINLINE T MPT_bswap_impl(T val)
 
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 
-static MPT_FORCEINLINE uint64 SwapBytesBE(uint64 value) { return MPT_bswap64be(value); }
-static MPT_FORCEINLINE uint32 SwapBytesBE(uint32 value) { return MPT_bswap32be(value); }
-static MPT_FORCEINLINE uint16 SwapBytesBE(uint16 value) { return MPT_bswap16be(value); }
-static MPT_FORCEINLINE uint64 SwapBytesLE(uint64 value) { return MPT_bswap64le(value); }
-static MPT_FORCEINLINE uint32 SwapBytesLE(uint32 value) { return MPT_bswap32le(value); }
-static MPT_FORCEINLINE uint16 SwapBytesLE(uint16 value) { return MPT_bswap16le(value); }
-static MPT_FORCEINLINE int64  SwapBytesBE(int64  value) { return MPT_bswap64be(value); }
-static MPT_FORCEINLINE int32  SwapBytesBE(int32  value) { return MPT_bswap32be(value); }
-static MPT_FORCEINLINE int16  SwapBytesBE(int16  value) { return MPT_bswap16be(value); }
-static MPT_FORCEINLINE int64  SwapBytesLE(int64  value) { return MPT_bswap64le(value); }
-static MPT_FORCEINLINE int32  SwapBytesLE(int32  value) { return MPT_bswap32le(value); }
-static MPT_FORCEINLINE int16  SwapBytesLE(int16  value) { return MPT_bswap16le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytesBE(uint64 value) noexcept { return MPT_bswap64be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytesBE(uint32 value) noexcept { return MPT_bswap32be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytesBE(uint16 value) noexcept { return MPT_bswap16be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytesLE(uint64 value) noexcept { return MPT_bswap64le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytesLE(uint32 value) noexcept { return MPT_bswap32le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytesLE(uint16 value) noexcept { return MPT_bswap16le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytesBE(int64  value) noexcept { return MPT_bswap64be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytesBE(int32  value) noexcept { return MPT_bswap32be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytesBE(int16  value) noexcept { return MPT_bswap16be(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytesLE(int64  value) noexcept { return MPT_bswap64le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytesLE(int32  value) noexcept { return MPT_bswap32le(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytesLE(int16  value) noexcept { return MPT_bswap16le(value); }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
 // endian-converting and casting back to int.
 // Thus these overloads.
-static MPT_FORCEINLINE uint8  SwapBytesLE(uint8  value) { return value; }
-static MPT_FORCEINLINE int8   SwapBytesLE(int8   value) { return value; }
-static MPT_FORCEINLINE char   SwapBytesLE(char   value) { return value; }
-static MPT_FORCEINLINE uint8  SwapBytesBE(uint8  value) { return value; }
-static MPT_FORCEINLINE int8   SwapBytesBE(int8   value) { return value; }
-static MPT_FORCEINLINE char   SwapBytesBE(char   value) { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytesLE(uint8  value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytesLE(int8   value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytesLE(char   value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytesBE(uint8  value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytesBE(int8   value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytesBE(char   value) noexcept { return value; }
 
-static MPT_FORCEINLINE uint64 SwapBytes(uint64 value) { return MPT_bswap64(value); }
-static MPT_FORCEINLINE uint32 SwapBytes(uint32 value) { return MPT_bswap32(value); }
-static MPT_FORCEINLINE uint16 SwapBytes(uint16 value) { return MPT_bswap16(value); }
-static MPT_FORCEINLINE int64  SwapBytes(int64  value) { return MPT_bswap64(value); }
-static MPT_FORCEINLINE int32  SwapBytes(int32  value) { return MPT_bswap32(value); }
-static MPT_FORCEINLINE int16  SwapBytes(int16  value) { return MPT_bswap16(value); }
-static MPT_FORCEINLINE uint8  SwapBytes(uint8  value) { return value; }
-static MPT_FORCEINLINE int8   SwapBytes(int8   value) { return value; }
-static MPT_FORCEINLINE char   SwapBytes(char   value) { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytes(uint64 value) noexcept { return MPT_bswap64(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytes(uint32 value) noexcept { return MPT_bswap32(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytes(uint16 value) noexcept { return MPT_bswap16(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytes(int64  value) noexcept { return MPT_bswap64(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytes(int32  value) noexcept { return MPT_bswap32(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytes(int16  value) noexcept { return MPT_bswap16(value); }
+static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytes(uint8  value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytes(int8   value) noexcept { return value; }
+static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return value; }
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
@@ -866,16 +889,41 @@ public:
 	typedef T base_type;
 	typedef Tendian endian_type;
 private:
-#if MPT_PLATFORM_ENDIAN_KNOWN
+#if MPT_ENDIAN_IS_CONSTEXPR
+	struct zeroed_byte
+	{
+		mpt::byte byte;
+		MPT_ENDIAN_CONSTEXPR_FUN zeroed_byte() noexcept : byte(0) {}
+		MPT_ENDIAN_CONSTEXPR_FUN zeroed_byte & operator = (mpt::byte newbyte) noexcept { byte = newbyte; return *this; }
+		MPT_ENDIAN_CONSTEXPR_FUN operator mpt::byte () const noexcept { return byte; }
+	};
+	zeroed_byte data[sizeof(base_type)];
+#elif MPT_PLATFORM_ENDIAN_KNOWN
 	mpt::byte data[sizeof(base_type)];
 #else // !MPT_PLATFORM_ENDIAN_KNOWN
 	std::array<mpt::byte, sizeof(base_type)> data;
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 public:
-	MPT_FORCEINLINE void set(base_type val)
+	MPT_ENDIAN_CONSTEXPR_FUN void set(base_type val) noexcept
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-		#if MPT_PLATFORM_ENDIAN_KNOWN
+		#if MPT_ENDIAN_IS_CONSTEXPR
+			MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+			{
+				typename std::make_unsigned<base_type>::type uval = val;
+				for(std::size_t i = 0; i < sizeof(base_type); ++i)
+				{
+					data[i] = static_cast<mpt::byte>((uval >> (8*i)) & 0xffu);
+				}
+			} else
+			{
+				typename std::make_unsigned<base_type>::type uval = val;
+				for(std::size_t i = 0; i < sizeof(base_type); ++i)
+				{
+					data[i] = static_cast<mpt::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
+				}
+			}
+		#elif MPT_PLATFORM_ENDIAN_KNOWN
 			MPT_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
 			{
 				val = SwapBytes(val);
@@ -886,10 +934,28 @@ public:
 			data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}
-	MPT_FORCEINLINE base_type get() const
+	MPT_ENDIAN_CONSTEXPR_FUN base_type get() const noexcept
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-		#if MPT_PLATFORM_ENDIAN_KNOWN
+		#if MPT_ENDIAN_IS_CONSTEXPR
+			MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+			{
+				typename std::make_unsigned<base_type>::type uval = 0;
+				for(std::size_t i = 0; i < sizeof(base_type); ++i)
+				{
+					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*i);
+				}
+				return static_cast<base_type>(uval);
+			} else
+			{
+				typename std::make_unsigned<base_type>::type uval = 0;
+				for(std::size_t i = 0; i < sizeof(base_type); ++i)
+				{
+					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*(sizeof(base_type)-1-i));
+				}
+				return static_cast<base_type>(uval);
+			}
+		#elif MPT_PLATFORM_ENDIAN_KNOWN
 			base_type val = base_type();
 			std::memcpy(&val, data, sizeof(val));
 			MPT_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
@@ -902,21 +968,21 @@ public:
 			return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
 		#endif // MPT_PLATFORM_ENDIAN_KNOWN
 	}
-	MPT_FORCEINLINE packed & operator = (const base_type & val) { set(val); return *this; }
-	MPT_FORCEINLINE operator base_type () const { return get(); }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator = (const base_type & val) noexcept { set(val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN operator base_type () const noexcept { return get(); }
 public:
-	packed & operator &= (base_type val) { set(get() & val); return *this; }
-	packed & operator |= (base_type val) { set(get() | val); return *this; }
-	packed & operator ^= (base_type val) { set(get() ^ val); return *this; }
-	packed & operator += (base_type val) { set(get() + val); return *this; }
-	packed & operator -= (base_type val) { set(get() - val); return *this; }
-	packed & operator *= (base_type val) { set(get() * val); return *this; }
-	packed & operator /= (base_type val) { set(get() / val); return *this; }
-	packed & operator %= (base_type val) { set(get() % val); return *this; }
-	packed & operator ++ () { set(get() + 1); return *this; } // prefix
-	packed & operator -- () { set(get() - 1); return *this; } // prefix
-	base_type operator ++ (int) { base_type old = get(); set(old + 1); return old; } // postfix
-	base_type operator -- (int) { base_type old = get(); set(old - 1); return old; } // postfix
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator &= (base_type val) noexcept { set(get() & val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator |= (base_type val) noexcept { set(get() | val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator ^= (base_type val) noexcept { set(get() ^ val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator += (base_type val) noexcept { set(get() + val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator -= (base_type val) noexcept { set(get() - val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator *= (base_type val) noexcept { set(get() * val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator /= (base_type val) noexcept { set(get() / val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator %= (base_type val) noexcept { set(get() % val); return *this; }
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator ++ () noexcept { set(get() + 1); return *this; } // prefix
+	MPT_ENDIAN_CONSTEXPR_FUN packed & operator -- () noexcept { set(get() - 1); return *this; } // prefix
+	MPT_ENDIAN_CONSTEXPR_FUN base_type operator ++ (int) noexcept { base_type old = get(); set(old + 1); return old; } // postfix
+	MPT_ENDIAN_CONSTEXPR_FUN base_type operator -- (int) noexcept { base_type old = get(); set(old - 1); return old; } // postfix
 };
 
 typedef packed< int64, LittleEndian_tag> int64le;
