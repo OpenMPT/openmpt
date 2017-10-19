@@ -130,6 +130,53 @@ public:
 	}
 	#define MPT_UUID_HELPER( prefix , value , suffix ) ( prefix ## value ## suffix )
 	#define MPT_UUID(group1, group2, group3, group4, group5) mpt::UUID::FromGroups(MPT_UUID_HELPER(0x,group1,u), MPT_UUID_HELPER(0x,group2,u), MPT_UUID_HELPER(0x,group3,u), MPT_UUID_HELPER(0x,group4,u), MPT_UUID_HELPER(0x,group5,ull))
+private:
+	static MPT_CONSTEXPR11_FUN uint8 NibbleFromChar(char x)
+	{
+		return
+			('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' +  0) :
+			('a' <= x && x <= 'z') ? static_cast<uint8>(x - 'a' + 10) :
+			('A' <= x && x <= 'Z') ? static_cast<uint8>(x - 'A' + 10) :
+			throw std::domain_error("");
+	}
+	static MPT_CONSTEXPR11_FUN uint8 ByteFromHex(char x, char y)
+	{
+		return static_cast<uint8>(uint8(0)
+			| (NibbleFromChar(x) << 4)
+			| (NibbleFromChar(y) << 0)
+			);
+	}
+	static MPT_CONSTEXPR11_FUN uint16 ParseHex16(const char * str)
+	{
+		return static_cast<uint16>(uint16(0)
+			| (static_cast<uint16>(ByteFromHex(str[0], str[1])) << 8)
+			| (static_cast<uint16>(ByteFromHex(str[2], str[3])) << 0)
+			);
+	}
+	static MPT_CONSTEXPR11_FUN uint32 ParseHex32(const char * str)
+	{
+		return static_cast<uint32>(uint32(0)
+			| (static_cast<uint32>(ByteFromHex(str[0], str[1])) << 24)
+			| (static_cast<uint32>(ByteFromHex(str[2], str[3])) << 16)
+			| (static_cast<uint32>(ByteFromHex(str[4], str[5])) <<  8)
+			| (static_cast<uint32>(ByteFromHex(str[6], str[7])) <<  0)
+			);
+	}
+public:
+	static MPT_CONSTEXPR11_FUN UUID ParseLiteral(const char * str, std::size_t len)
+	{
+		return
+			(len != 36 || str[8] != '-' || str[13] != '-' || str[18] != '-' || str[23] != '-') ? throw std::domain_error("") :
+			mpt::UUID(
+				ParseHex32(str + 0),
+				ParseHex16(str + 9),
+				ParseHex16(str + 14),
+				uint64(0)
+					| (static_cast<uint64>(ParseHex16(str + 19)) << 48)
+					| (static_cast<uint64>(ParseHex16(str + 24)) << 32)
+					| (static_cast<uint64>(ParseHex32(str + 28)) <<  0)
+			);
+	}
 public:
 	MPT_CONSTEXPR11_FUN UUID() noexcept : Data1(0), Data2(0), Data3(0), Data4(0) { }
 	MPT_CONSTEXPR11_FUN explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4) noexcept : Data1(Data1), Data2(Data2), Data3(Data3), Data4(Data4) { }
@@ -164,6 +211,12 @@ MPT_CONSTEXPR11_FUN bool operator!=(const mpt::UUID & a, const mpt::UUID & b) no
 }
 
 } // namespace mpt
+
+
+MPT_CONSTEXPR11_FUN mpt::UUID operator "" _uuid (const char * str, std::size_t len)
+{
+	return mpt::UUID::ParseLiteral(str, len);
+}
 
 
 OPENMPT_NAMESPACE_END
