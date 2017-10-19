@@ -1305,9 +1305,9 @@ static MPT_NOINLINE void TestMisc2()
 		uuiddata[i] = static_cast<uint8>(i);
 	}
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
-	mpt::UUID uuid2;
+	UUIDbin uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
-	VERIFY_EQUAL(uuid2.ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
+	VERIFY_EQUAL(mpt::UUID(uuid2).ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
