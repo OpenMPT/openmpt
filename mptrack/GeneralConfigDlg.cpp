@@ -144,9 +144,9 @@ BOOL COptionsGeneral::OnInitDialog()
 
 void COptionsGeneral::OnOK()
 {
-	TrackerSettings::Instance().defaultArtist = GetWindowTextUnicode(m_defaultArtist);
+	TrackerSettings::Instance().defaultArtist = mpt::ToUnicode(GetWindowTextString(m_defaultArtist));
 	TrackerSettings::Instance().defaultModType = static_cast<MODTYPE>(m_defaultFormat.GetItemData(m_defaultFormat.GetCurSel()));
-	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromUnicode(GetWindowTextUnicode(m_defaultTemplate));
+	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 
 	NewFileAction action = nfDefaultFormat;
 	if(IsDlgButtonChecked(IDC_RADIO2)) action = nfSameAsCurrent;
@@ -194,7 +194,7 @@ void COptionsGeneral::OnOptionSelChanged()
 void COptionsGeneral::OnBrowseTemplate()
 {
 	mpt::PathString basePath = theApp.GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\");
-	mpt::PathString defaultFile = mpt::PathString::FromUnicode(GetWindowTextUnicode(m_defaultTemplate));
+	mpt::PathString defaultFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 	if(defaultFile.empty()) defaultFile = TrackerSettings::Instance().defaultTemplateFile;
 
 	OpenFileDialog dlg;

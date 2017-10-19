@@ -42,6 +42,9 @@ protected:
 	BOOL OnSetActive();
 
 	void BrowseFolder(UINT nID);
+
+	mpt::PathString GetPath(int id);
+
 };
 
 OPENMPT_NAMESPACE_END
