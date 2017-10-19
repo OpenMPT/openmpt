@@ -97,39 +97,46 @@ private:
 	uint16 Data3;
 	uint64 Data4;
 public:
-	uint32 GetData1() const;
-	uint16 GetData2() const;
-	uint16 GetData3() const;
-	uint64 GetData4() const;
+	MPT_CONSTEXPR11_FUN uint32 GetData1() const noexcept { return Data1; }
+	MPT_CONSTEXPR11_FUN uint16 GetData2() const noexcept { return Data2; }
+	MPT_CONSTEXPR11_FUN uint16 GetData3() const noexcept { return Data3; }
+	MPT_CONSTEXPR11_FUN uint64 GetData4() const noexcept { return Data4; }
 public:
 	// xxxxxxxx-xxxx-Mmxx-Nnxx-xxxxxxxxxxxx
 	// <--32-->-<16>-<16>-<-------64------>
-	bool IsNil() const;
-	bool IsValid() const;
-	uint8 Variant() const;
-	uint8 Version() const;
-	bool IsRFC4122() const;
+	MPT_CONSTEXPR11_FUN bool IsNil() const noexcept { return (Data1 == 0) && (Data2 == 0) && (Data3 == 0) && (Data4 == 0); }
+	MPT_CONSTEXPR11_FUN bool IsValid() const noexcept { return (Data1 != 0) || (Data2 != 0) || (Data3 != 0) || (Data4 != 0); }
+	MPT_CONSTEXPR11_FUN uint8 Variant() const noexcept { return Nn() >> 4u; }
+	MPT_CONSTEXPR11_FUN uint8 Version() const noexcept { return Mm() >> 4u; }
+	MPT_CONSTEXPR11_FUN bool IsRFC4122() const noexcept { return (Variant() & 0xcu) == 0x8u; }
 private:
-	uint8 Mm() const;
-	uint8 Nn() const;
-	void MakeRFC4122(uint8 version);
+	MPT_CONSTEXPR11_FUN uint8 Mm() const noexcept { return static_cast<uint8>((Data3 >> 8) & 0xffu); }
+	MPT_CONSTEXPR11_FUN uint8 Nn() const noexcept { return static_cast<uint8>((Data4 >> 56) & 0xffu); }
+	void MakeRFC4122(uint8 version) noexcept;
 public:
 #if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO))
 	explicit UUID(::UUID uuid);
 	operator ::UUID () const;
-	static UUID FromGroups(uint32 group1, uint16 group2, uint16 group3, uint16 group4, uint64 group5);
+#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || !NO_DMO)
+	static MPT_CONSTEXPR11_FUN UUID FromGroups(uint32 group1, uint16 group2, uint16 group3, uint16 group4, uint64 group5) noexcept
+	{
+		//MPT_ASSERT((group5 & 0xffff000000000000ull) == 0ull);
+		return mpt::UUID
+			( group1
+			, group2
+			, group3
+			, (static_cast<uint64>(group4) << 48) ^ group5
+			);
+	}
 	#define MPT_UUID_HELPER( prefix , value , suffix ) ( prefix ## value ## suffix )
 	#define MPT_UUID(group1, group2, group3, group4, group5) mpt::UUID::FromGroups(MPT_UUID_HELPER(0x,group1,u), MPT_UUID_HELPER(0x,group2,u), MPT_UUID_HELPER(0x,group3,u), MPT_UUID_HELPER(0x,group4,u), MPT_UUID_HELPER(0x,group5,ull))
-#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || !NO_DMO)
 public:
-	UUID();
-	explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4);
+	MPT_CONSTEXPR11_FUN UUID() noexcept : Data1(0), Data2(0), Data3(0), Data4(0) { }
+	MPT_CONSTEXPR11_FUN explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4) noexcept : Data1(Data1), Data2(Data2), Data3(Data3), Data4(Data4) { }
 	explicit UUID(UUIDbin uuid);
 	explicit UUID(GUIDms guid);
 	operator UUIDbin () const;
 	operator GUIDms () const;
-	friend bool operator==(const mpt::UUID & a, const mpt::UUID & b);
-	friend bool operator!=(const mpt::UUID & a, const mpt::UUID & b);
 public:
 	// Create a UUID
 	static UUID Generate();
@@ -147,8 +154,14 @@ public:
 	mpt::ustring ToUString() const;
 };
 
-bool operator==(const mpt::UUID & a, const mpt::UUID & b);
-bool operator!=(const mpt::UUID & a, const mpt::UUID & b);
+MPT_CONSTEXPR11_FUN bool operator==(const mpt::UUID & a, const mpt::UUID & b) noexcept
+{
+	return (a.GetData1() == b.GetData1()) && (a.GetData2() == b.GetData2()) && (a.GetData3() == b.GetData3()) && (a.GetData4() == b.GetData4());
+}
+MPT_CONSTEXPR11_FUN bool operator!=(const mpt::UUID & a, const mpt::UUID & b) noexcept
+{
+	return (a.GetData1() != b.GetData1()) || (a.GetData2() != b.GetData2()) || (a.GetData3() != b.GetData3()) || (a.GetData4() != b.GetData4());	
+}
 
 } // namespace mpt
 
