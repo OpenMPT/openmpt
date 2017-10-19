@@ -423,17 +423,6 @@ UUID::operator ::UUID () const
 	return UUIDToWin32(*this);
 }
 
-mpt::UUID UUID::FromGroups(uint32 group1, uint16 group2, uint16 group3, uint16 group4, uint64 group5)
-{
-	MPT_ASSERT((group5 & 0xffff000000000000ull) == 0ull);
-	return mpt::UUID
-		( group1
-		, group2
-		, group3
-		, (static_cast<uint64>(group4) << 48) | group5
-		);
-}
-
 #endif // MODPLUG_TRACKER || !NO_DMO
 
 #endif // MPT_OS_WINDOWS
@@ -522,62 +511,7 @@ UUID UUID::RFC4122Random()
 	return result;
 }
 
-uint32 UUID::GetData1() const
-{
-	return Data1;
-}
-
-uint16 UUID::GetData2() const
-{
-	return Data2;
-}
-
-uint16 UUID::GetData3() const
-{
-	return Data3;
-}
-
-uint64 UUID::GetData4() const
-{
-	return Data4;
-}
-
-bool UUID::IsNil() const
-{
-	return (Data1 == 0) && (Data2 == 0) && (Data3 == 0) && (Data4 == 0);
-}
-
-bool UUID::IsValid() const
-{
-	return (Data1 != 0) || (Data2 != 0) || (Data3 != 0) || (Data4 != 0);
-}
-
-uint8 UUID::Mm() const
-{
-	return static_cast<uint8>((Data3 >> 8) & 0xffu);
-}
-
-uint8 UUID::Nn() const
-{
-	return static_cast<uint8>((Data4 >> 56) & 0xffu);
-}
-
-uint8 UUID::Variant() const
-{
-	return Nn() >> 4u;
-}
-
-uint8 UUID::Version() const
-{
-	return Mm() >> 4u;
-}
-
-bool UUID::IsRFC4122() const
-{
-	return (Variant() & 0xcu) == 0x8u;
-}
-
-void UUID::MakeRFC4122(uint8 version)
+void UUID::MakeRFC4122(uint8 version) noexcept
 {
 	// variant
 	uint8 Nn = static_cast<uint8>((Data4 >> 56) & 0xffu);
@@ -592,32 +526,6 @@ void UUID::MakeRFC4122(uint8 version)
 	Mm &= ~(0xf0u);
 	Mm |= (version << 4u);
 	Data3 |= static_cast<uint16>(Mm) << 8;
-}
-
-UUID::UUID()
-{
-	Data1 = 0;
-	Data2 = 0;
-	Data3 = 0;
-	Data4 = 0;
-}
-
-UUID::UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4)
-{
-	this->Data1 = Data1;
-	this->Data2 = Data2;
-	this->Data3 = Data3;
-	this->Data4 = Data4;
-}
-
-bool operator==(const mpt::UUID & a, const mpt::UUID & b)
-{
-	return (a.Data1 == b.Data1) && (a.Data2 == b.Data2) && (a.Data3 == b.Data3) && (a.Data4 == b.Data4);
-}
-
-bool operator!=(const mpt::UUID & a, const mpt::UUID & b)
-{
-	return (a.Data1 != b.Data1) || (a.Data2 != b.Data2) || (a.Data3 != b.Data3) || (a.Data4 != b.Data4);
 }
 
 UUID UUID::FromString(const std::string &str)

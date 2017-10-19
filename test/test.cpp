@@ -1310,6 +1310,9 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(mpt::UUID(uuid2).ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
+	constexpr mpt::UUID uuid3 = MPT_UUID(2ed6593a,dfe6,4cf8,b2e5,75ad7f600c32);
+	VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), uuid3);
+
 	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
 
 	{ mpt::ostringstream ss; VERIFY_EQUAL(ss.tellp(), std::streampos(0)); }
