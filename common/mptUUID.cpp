@@ -722,12 +722,30 @@ mpt::ustring UUID::ToUString() const
 		;
 }
 
+UUID::UUID(UUIDbin uuid)
+{
+	Data1 = uuid.Data1.get();
+	Data2 = uuid.Data2.get();
+	Data3 = uuid.Data3.get();
+	Data4 = uuid.Data4.get();
+}
+
 UUID::UUID(GUIDms guid)
 {
 	Data1 = guid.Data1.get();
 	Data2 = guid.Data2.get();
 	Data3 = guid.Data3.get();
 	Data4 = guid.Data4.get();
+}
+
+UUID::operator UUIDbin() const
+{
+	UUIDbin result;
+	result.Data1 = GetData1();
+	result.Data2 = GetData2();
+	result.Data3 = GetData3();
+	result.Data4 = GetData4();
+	return result;
 }
 
 UUID::operator GUIDms() const

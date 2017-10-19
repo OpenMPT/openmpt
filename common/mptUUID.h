@@ -75,17 +75,27 @@ struct GUIDms
 	uint16le Data3;
 	uint64be Data4; // yes, big endian here
 };
-STATIC_ASSERT(sizeof(GUIDms) == 16);
+MPT_BINARY_STRUCT(GUIDms, 16)
+
+// RFC binary format
+struct UUIDbin
+{
+	uint32be Data1;
+	uint16be Data2;
+	uint16be Data3;
+	uint64be Data4;
+};
+MPT_BINARY_STRUCT(UUIDbin, 16)
 
 namespace mpt {
 
 struct UUID
 {
 private:
-	uint32be Data1;
-	uint16be Data2;
-	uint16be Data3;
-	uint64be Data4;
+	uint32 Data1;
+	uint16 Data2;
+	uint16 Data3;
+	uint64 Data4;
 public:
 	uint32 GetData1() const;
 	uint16 GetData2() const;
@@ -114,7 +124,9 @@ public:
 public:
 	UUID();
 	explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4);
+	explicit UUID(UUIDbin uuid);
 	explicit UUID(GUIDms guid);
+	operator UUIDbin () const;
 	operator GUIDms () const;
 	friend bool operator==(const mpt::UUID & a, const mpt::UUID & b);
 	friend bool operator!=(const mpt::UUID & a, const mpt::UUID & b);
@@ -134,8 +146,6 @@ public:
 	std::string ToString() const;
 	mpt::ustring ToUString() const;
 };
-
-STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 
 bool operator==(const mpt::UUID & a, const mpt::UUID & b);
 bool operator!=(const mpt::UUID & a, const mpt::UUID & b);
