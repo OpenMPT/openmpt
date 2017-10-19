@@ -88,7 +88,7 @@ void CWindowedFIR::InitTable(double WFIRCutoff, uint8 WFIRType)
 		for( _LCc=0;_LCc<WFIR_WIDTH;_LCc++ )
 		{
 #ifdef MPT_INTMIXER
-			double _LCoef = floorf( 0.5 + WFIR_QUANTSCALE*_LCoefs[_LCc]*_LGain );
+			double _LCoef = std::floor( 0.5 + WFIR_QUANTSCALE*_LCoefs[_LCc]*_LGain );
 			lut[_LIdx+_LCc] = (signed short)( (_LCoef<-WFIR_QUANTSCALE)?-WFIR_QUANTSCALE:((_LCoef>WFIR_QUANTSCALE)?WFIR_QUANTSCALE:_LCoef) );
 #else
 			double _LCoef = _LCoefs[_LCc] * _LGain;
