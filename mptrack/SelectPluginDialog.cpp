@@ -283,7 +283,7 @@ BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
 void CSelectPluginDlg::OnNameFilterChanged()
 {
 	// Update name filter text
-	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_NAMEFILTER))));
+	m_nameFilter = mpt::ToLowerCase(GetWindowTextUnicode(*GetDlgItem(IDC_NAMEFILTER)));
 
 	UpdatePluginsList();
 }
@@ -851,7 +851,7 @@ void CSelectPluginDlg::OnPluginTagsChanged()
 	VSTPluginLib *plug = GetSelectedPlugin();
 	if (plug)
 	{
-		plug->tags = mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_PLUGINTAGS)));
+		plug->tags = GetWindowTextUnicode(*GetDlgItem(IDC_PLUGINTAGS));
 	}
 }
 

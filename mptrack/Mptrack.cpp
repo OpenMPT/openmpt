@@ -1838,6 +1838,12 @@ CString GetWindowTextString(const CWnd &wnd)
 }
 
 
+mpt::ustring GetWindowTextUnicode(const CWnd &wnd)
+{
+	return mpt::ToUnicode(GetWindowTextString(wnd));
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // CFastBitmap 8-bit output / 4-bit input
 // useful for lots of small blits with color mapping
