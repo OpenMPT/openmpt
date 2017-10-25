@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.0-pre
 
+ *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
+    other versions between 12b and 15c as well).
+
 ### libopenmpt 0.3 (2017-09-27)
 
  *  [**New**] New error handling functionality in the C API, which in particular
