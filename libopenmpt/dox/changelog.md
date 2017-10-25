@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.2-pre
 
+ *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
+    other versions between 12b and 15c as well).
+
 ### libopenmpt 0.3.1 (2017-09-28)
 
  *  [**Bug**] Windows: libopenmpt resource did not compile for release versions.

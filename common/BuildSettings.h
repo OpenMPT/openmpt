@@ -633,9 +633,11 @@
 
 #define _USE_MATH_DEFINES
 
+#if !MPT_OS_ANDROID
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif
+#endif // !MPT_OS_ANDROID
 
 
 
