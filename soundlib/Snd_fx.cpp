@@ -1228,8 +1228,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 	if(sampleChanged && bPorta)
 	{
 		// IT compatibility: No sample change (also within multi-sample instruments) during portamento when using Compatible Gxx.
-		// Test case: PortaInsNumCompat.it, PortaSampleCompat.it
-		if(m_playBehaviour[kITPortamentoInstrument] && m_SongFlags[SONG_ITCOMPATGXX])
+		// Test case: PortaInsNumCompat.it, PortaSampleCompat.it, PortaCutCompat.it
+		if(m_playBehaviour[kITPortamentoInstrument] && m_SongFlags[SONG_ITCOMPATGXX] && pChn->nLength != 0)
 		{
 			pSmp = pChn->pModSample;
 		}
