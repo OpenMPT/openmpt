@@ -111,6 +111,37 @@
  * - Consecutive accesses can happen from different threads.
  * - Different objects can be accessed concurrently from different threads.
  *
+ * \section libopenmpt_c_staticlinking Statically linking to libopenmpt
+ *
+ * libopenmpt is implemented in C++. This imlies that linking to libopenmpt
+ * statically requires linking to the C++ runtime and standard library. The
+ * **highly preferred and recommended** way to do this is by using the C++
+ * compiler instead of the platform linker to do the linking. This will do all
+ * necessary things that are C++ specific (in particular, it will pull in the
+ * appropriate runtime and/or library). If for whatever reason it is not
+ * possible to use the C++ compiler for statically linking against libopenmpt,
+ * the libopenmpt build system can list the required libraries in the pkg-config
+ * file `libopenmpt.pc`. However, there is no reliable way to determine the name
+ * of the required library or libraries from within the build system. The
+ * libopenmpt autotools `configure` and plain `Makefile` honor the custom
+ * variable `CXXSTDLIB_PCLIBSPRIVATE` which serves the sole purpose of listing
+ * the standard library (or libraries) required for static linking. The contents
+ * of this variable will be put in `libopenmpt.pc` `Libs.private` and used for
+ * nothing else.
+ *
+ * This problem is inherent to libraries implemented in C++ that can also be used
+ * without a C++ compiler. Other libraries try to solve that by listing
+ * `-lstdc++` unconditionally in `Libs.private`. However, that will break
+ * platforms that use a different C++ standard library (in particular FreeBSD).
+ *
+ * See https://lists.freedesktop.org/archives/pkg-config/2016-August/001055.html .
+ *
+ * Dymically linking to libopenmpt does not require anything special and will
+ * work as usual (and exactly as done for libraries implemented in C).
+ *
+ * Note: This section does not apply when using Microsoft Visual Studio or
+ * Andriod NDK ndk-build build systems.
+ *
  * \section libopenmpt_c_detailed Detailed documentation
  *
  * \ref libopenmpt_c
