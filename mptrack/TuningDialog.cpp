@@ -684,7 +684,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 				tuningName = MPT_USTRING("untitled");
 			}
 			std::wstring fileNameW = fileName.ToWide();
-			std::wstring numberW = numberFmt.ToWString(i + 1);
+			std::wstring numberW = mpt::wfmt::fmt(i + 1, numberFmt);
 			SanitizeFilename(numberW);
 			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_number%", numberW);
 			std::wstring nameW = mpt::ToWide(tuningName);

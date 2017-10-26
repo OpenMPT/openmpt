@@ -274,7 +274,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 			tuningName = MPT_USTRING("untitled");
 		}
 		SanitizeFilename(tuningName);
-		fn += mpt::PathString::FromUnicode(mpt::format(MPT_USTRING("%1 - %2"))(numberFmt.ToWString(i + 1), tuningName));
+		fn += mpt::PathString::FromUnicode(mpt::format(MPT_USTRING("%1 - %2"))(mpt::ufmt::fmt(i + 1, numberFmt), tuningName));
 		fn += mpt::PathString::FromUTF8(CTuning::s_FileExtension);
 		if(fn.FileOrDirectoryExists())
 		{

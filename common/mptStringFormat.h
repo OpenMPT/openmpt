@@ -321,23 +321,6 @@ public:
 	FormatSpec & FloatFixed() { return NotaFix(); }
 	FormatSpec & FloatScientific() { return NotaSci(); }
 	FormatSpec & Precision(int p) { return Prec(p); }
-	template<typename Tstring, typename T>
-	inline Tstring ToStringT(const T & x) const
-	{
-		return FormatValTFunctor<Tstring>()(x, *this);
-	}
-	template<typename T>
-	inline std::string ToString(const T & x) const
-	{
-		return FormatVal(x, *this);
-	}
-#if MPT_WSTRING_FORMAT
-	template<typename T>
-	inline std::wstring ToWString(const T & x) const
-	{
-		return FormatValW(x, *this);
-	}
-#endif
 };
 
 
@@ -349,6 +332,12 @@ template<typename T>
 static inline Tstring val(const T& x)
 {
 	return ToStringTFunctor<Tstring>()(x);
+}
+
+template<typename T>
+static inline Tstring fmt(const T& x, const FormatSpec& f)
+{
+	return FormatValTFunctor<Tstring>()(x, f);
 }
 
 template<typename T>
