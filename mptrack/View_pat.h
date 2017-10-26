@@ -217,8 +217,8 @@ public:
 	void SanitizeCursor();
 
 	UINT GetColumnOffset(PatternCursor::Columns column) const;
-	POINT GetPointFromPosition(PatternCursor cursor);
-	PatternCursor GetPositionFromPoint(POINT pt);
+	POINT GetPointFromPosition(PatternCursor cursor) const;
+	PatternCursor GetPositionFromPoint(POINT pt) const;
 
 	DWORD GetDragItem(CPoint point, RECT &rect);
 

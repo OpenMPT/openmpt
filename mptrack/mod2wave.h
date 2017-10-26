@@ -40,7 +40,7 @@ struct StoredTags
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
-	std::vector<std::unique_ptr<Encoder::Settings> > EncoderSettings;
+	std::vector<std::unique_ptr<Encoder::Settings>> EncoderSettings;
 
 	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;
@@ -53,6 +53,7 @@ struct CWaveConvertSettings
 	int repeatCount;
 	ORDERINDEX minOrder, maxOrder;
 	SAMPLEINDEX sampleSlot;
+	SEQUENCEINDEX minSequence, maxSequence;
 
 	bool normalize : 1;
 	bool silencePlugBuffers : 1;
@@ -73,11 +74,11 @@ public:
 	CWaveConvertSettings m_Settings;
 	const Encoder::Traits *encTraits;
 	CSoundFile &m_SndFile;
-	uint64 m_dwFileLimit, m_dwSongLimit;
+	uint64 m_dwSongLimit;
 	ORDERINDEX m_nNumOrders;
 
 	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat, m_CbnSampleSlot;
-	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
+	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder, m_SpinMinSequence, m_SpinMaxSequence;
 
 	bool m_bGivePlugsIdleTime;
 	bool m_bChannelMode;		// Render by channel
@@ -109,7 +110,6 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange *pDX);
 	virtual void OnOK();
-	afx_msg void OnCheckSizeLimit();
 	afx_msg void OnCheckTimeLimit();
 	afx_msg void OnCheckChannelMode();
 	afx_msg void OnCheckInstrMode();
@@ -132,7 +132,7 @@ public:
 	CSoundFile &m_SndFile;
 	const mpt::PathString &m_lpszFileName;
 	const CString &caption;
-	uint64 m_dwFileLimit, m_dwSongLimit;
+	uint64 m_dwSongLimit;
 	bool m_bGivePlugsIdleTime;
 
 public:
@@ -142,7 +142,7 @@ public:
 		, m_Settings(settings)
 		, m_lpszFileName(filename)
 		, caption(caption)
-		, m_dwFileLimit(0), m_dwSongLimit(0)
+		, m_dwSongLimit(0)
 	{ }
 	void Run();
 };

@@ -212,7 +212,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 }
 
 
-POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
+POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) const
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	POINT pt;
@@ -246,7 +246,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 }
 
 
-PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
+PatternCursor CViewPattern::GetPositionFromPoint(POINT pt) const
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int xofs = GetXScrollPos();

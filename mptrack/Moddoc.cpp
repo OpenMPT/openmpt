@@ -1548,7 +1548,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	int nRenderPasses = 1;
 	// Channel mode
 	std::vector<bool> usedChannels;
-	std::vector<FlagSet<ChannelFlags> > channelFlags;
+	std::vector<FlagSet<ChannelFlags>> channelFlags;
 	// Instrument mode
 	std::vector<bool> instrMuteState;
 
@@ -1597,159 +1597,172 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	pMainFrm->PauseMod(this);
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
-	std::string fileNameAdd;
-	for(int i = 0 ; i < nRenderPasses ; i++)
+	const SEQUENCEINDEX currentSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	for(SEQUENCEINDEX seq = wsdlg.m_Settings.minSequence; seq <= wsdlg.m_Settings.maxSequence; seq++)
 	{
-		mpt::PathString thisName = fileName;
-		CString caption = "file";
-		fileNameAdd.clear();
-
-		// Channel mode
-		if(wsdlg.m_bChannelMode)
+		m_SndFile.Order.SetSequence(seq);
+		std::string fileNameAdd;
+		for(int i = 0; i < nRenderPasses; i++)
 		{
-			// Re-mute previously processed channel
-			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags.set(CHN_MUTE);
-
-			// Was this channel actually muted? Don't process it then.
-			if(!usedChannels[i])
-				continue;
-
-			// Add channel number & name (if available) to path string
-			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
+			mpt::PathString thisName = fileName;
+			CString caption = _T("file");
+			fileNameAdd.clear();
+			if(wsdlg.m_Settings.minSequence != wsdlg.m_Settings.maxSequence)
 			{
-				fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
-				caption.Format(_T("%u:"), i + 1);
-				caption += m_SndFile.ChnSettings[i].szName;
-			} else
-			{
-				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-				caption.Format(_T("channel %u"), i + 1);
-			}
-			// Unmute channel to process
-			m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
-		}
-		// Instrument mode
-		if(wsdlg.m_bInstrumentMode)
-		{
-			if(m_SndFile.GetNumInstruments() == 0)
-			{
-				// Re-mute previously processed sample
-				if(i > 0) MuteSample(static_cast<SAMPLEINDEX>(i), true);
-
-				if(m_SndFile.GetSample(static_cast<SAMPLEINDEX>(i + 1)).pSample == nullptr || !IsSampleUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
-					continue;
-
-				// Add sample number & name (if available) to path string
-				if(strcmp(m_SndFile.m_szNames[i + 1], ""))
+				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<2>(seq));
+				std::string seqName = m_SndFile.Order(seq).GetName();
+				if(!seqName.empty())
 				{
-					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
-					caption.Format(_T("%u: "), i + 1);
-					caption += m_SndFile.m_szNames[i + 1];
-				} else
-				{
-					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-					caption.Format(_T("sample %u"), i + 1);
+					fileNameAdd += "-" + seqName;
 				}
-				// Unmute sample to process
-				MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
-			} else
-			{
-				// Re-mute previously processed instrument
-				if(i > 0) MuteInstrument(static_cast<INSTRUMENTINDEX>(i), true);
+			}
 
-				if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
+			// Channel mode
+			if(wsdlg.m_bChannelMode)
+			{
+				// Re-mute previously processed channel
+				if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags.set(CHN_MUTE);
+
+				// Was this channel actually muted? Don't process it then.
+				if(!usedChannels[i])
 					continue;
 
-				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
+				// Add channel number & name (if available) to path string
+				if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
 				{
-					fileNameAdd = mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
+					fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
 					caption.Format(_T("%u:"), i + 1);
-					caption += m_SndFile.Instruments[i + 1]->name;
+					caption += m_SndFile.ChnSettings[i].szName;
 				} else
 				{
-					fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-					caption.Format(_T("instrument %u"), i + 1);
+					fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+					caption.Format(_T("channel %u"), i + 1);
 				}
-				// Unmute instrument to process
-				MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
+				// Unmute channel to process
+				m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
 			}
-		}
-
-		if(!fileNameAdd.empty())
-		{
-			SanitizeFilename(fileNameAdd);
-			thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
-		}
-		thisName += fileExt;
-		if(wsdlg.m_Settings.outputToSample)
-		{
-			thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
-			// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
-			::CloseHandle(::CreateFileW(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
-		}
-
-		// Render song (or current channel, or current sample/instrument)
-		CDoWaveConvert dwcdlg(m_SndFile, thisName, caption, wsdlg.m_Settings, pMainFrm);
-		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
-		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-
-		BypassInputHandler bih;
-		bool cancel = dwcdlg.DoModal() != IDOK;
-
-		if(wsdlg.m_Settings.outputToSample)
-		{
-			if(!cancel)
+			// Instrument mode
+			if(wsdlg.m_bInstrumentMode)
 			{
-				InputFile f(thisName);
-				if(f.IsValid())
+				if(m_SndFile.GetNumInstruments() == 0)
 				{
-					FileReader file = GetFileReader(f);
-					SAMPLEINDEX smp = wsdlg.m_Settings.sampleSlot;
-					if(smp == 0 || smp > GetNumSamples()) smp = m_SndFile.GetNextFreeSample();
-					if(smp == SAMPLEINDEX_INVALID)
+					// Re-mute previously processed sample
+					if(i > 0) MuteSample(static_cast<SAMPLEINDEX>(i), true);
+
+					if(m_SndFile.GetSample(static_cast<SAMPLEINDEX>(i + 1)).pSample == nullptr || !IsSampleUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
+						continue;
+
+					// Add sample number & name (if available) to path string
+					if(strcmp(m_SndFile.m_szNames[i + 1], ""))
 					{
-						Reporting::Error(_T("Too many samples!"));
-						cancel = true;
+						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
+						caption.Format(_T("%u: "), i + 1);
+						caption += m_SndFile.m_szNames[i + 1];
+					} else
+					{
+						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+						caption.Format(_T("sample %u"), i + 1);
 					}
-					if(!cancel)
+					// Unmute sample to process
+					MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
+				} else
+				{
+					// Re-mute previously processed instrument
+					if(i > 0) MuteInstrument(static_cast<INSTRUMENTINDEX>(i), true);
+
+					if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
+						continue;
+
+					if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
 					{
-						if(GetNumSamples() < smp) m_SndFile.m_nSamples = smp;
-						GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
-						if(m_SndFile.ReadSampleFromFile(smp, file, false))
+						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
+						caption.Format(_T("%u:"), i + 1);
+						caption += m_SndFile.Instruments[i + 1]->name;
+					} else
+					{
+						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+						caption.Format(_T("instrument %u"), i + 1);
+					}
+					// Unmute instrument to process
+					MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
+				}
+			}
+
+			if(!fileNameAdd.empty())
+			{
+				SanitizeFilename(fileNameAdd);
+				thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
+			}
+			thisName += fileExt;
+			if(wsdlg.m_Settings.outputToSample)
+			{
+				thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+				// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
+				::CloseHandle(::CreateFileW(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
+			}
+
+			// Render song (or current channel, or current sample/instrument)
+			CDoWaveConvert dwcdlg(m_SndFile, thisName, caption, wsdlg.m_Settings, pMainFrm);
+			dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
+			dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+
+			BypassInputHandler bih;
+			bool cancel = dwcdlg.DoModal() != IDOK;
+
+			if(wsdlg.m_Settings.outputToSample)
+			{
+				if(!cancel)
+				{
+					InputFile f(thisName);
+					if(f.IsValid())
+					{
+						FileReader file = GetFileReader(f);
+						SAMPLEINDEX smp = wsdlg.m_Settings.sampleSlot;
+						if(smp == 0 || smp > GetNumSamples()) smp = m_SndFile.GetNextFreeSample();
+						if(smp == SAMPLEINDEX_INVALID)
 						{
-							strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
-							strncat(m_SndFile.m_szNames[smp], fileNameAdd.c_str(), MPT_ARRAY_COUNT(m_SndFile.m_szNames[smp]) - strlen("Render To Sample") - 1);
-							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
-							if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
+							Reporting::Error(_T("Too many samples!"));
+							cancel = true;
+						}
+						if(!cancel)
+						{
+							if(GetNumSamples() < smp) m_SndFile.m_nSamples = smp;
+							GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
+							if(m_SndFile.ReadSampleFromFile(smp, file, false))
 							{
-								// Insert new instrument for the generated sample in case it is not referenced by any instruments yet.
-								// It should only be already referenced if the user chose to export to an existing sample slot.
-								InsertInstrument(smp);
-								UpdateAllViews(nullptr, InstrumentHint().Info().Names());
+								strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
+								strncat(m_SndFile.m_szNames[smp], fileNameAdd.c_str(), MPT_ARRAY_COUNT(m_SndFile.m_szNames[smp]) - strlen("Render To Sample") - 1);
+								UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+								if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
+								{
+									// Insert new instrument for the generated sample in case it is not referenced by any instruments yet.
+									// It should only be already referenced if the user chose to export to an existing sample slot.
+									InsertInstrument(smp);
+									UpdateAllViews(nullptr, InstrumentHint().Info().Names());
+								}
+								SetModified();
+							} else
+							{
+								GetSampleUndo().RemoveLastUndoStep(smp);
 							}
-							SetModified();
-						} else
-						{
-							GetSampleUndo().RemoveLastUndoStep(smp);
 						}
 					}
 				}
-			}
 
-			// Always clean up after ourselves
-			for(int retry = 0; retry < 10; retry++)
-			{
-				// stupid virus scanners
-				if(DeleteFileW(thisName.AsNative().c_str()) != EACCES)
+				// Always clean up after ourselves
+				for(int retry = 0; retry < 10; retry++)
 				{
-					break;
+					// stupid virus scanners
+					if(DeleteFileW(thisName.AsNative().c_str()) != EACCES)
+					{
+						break;
+					}
+					Sleep(10);
 				}
-				Sleep(10);
 			}
-		}
 
-		if(cancel) break;
+			if(cancel) break;
+		}
 	}
 
 	// Restore channels' flags
@@ -1772,6 +1785,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		}
 	}
 
+	m_SndFile.Order.SetSequence(currentSeq);
 	m_SndFile.SetRepeatCount(oldRepeat);
 	m_SndFile.GetLength(eAdjust, GetLengthTarget(currentOrd, currentRow));
 	m_SndFile.m_PlayState.m_nNextOrder = currentOrd;
