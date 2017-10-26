@@ -198,7 +198,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 	logcapturer.ShowLog(std::wstring()
 		+ L"File: " + filename.ToWide() + L"\n"
-		+ L"Last saved with: " + mpt::ToWide(m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
+		+ L"Last saved with: " + mpt::ToWide(m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(MptVersion::AsUString()) + L"\n"
 		+ L"\n"
 		);
 
@@ -241,9 +241,9 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
 	{
-		Reporting::Notification(mpt::format("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n")(
-			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
-			MptVersion::str));
+		Reporting::Notification(mpt::format(MPT_USTRING("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n"))(
+			MptVersion::ToUString(m_SndFile.m_dwLastSavedWithVersion),
+			MptVersion::AsUString()));
 	}
 
 	SetModifiedFlag(FALSE);

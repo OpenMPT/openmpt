@@ -48,7 +48,7 @@ TrackerSettings &TrackerSettings::Instance()
 }
 
 
-static MptVersion::VersionNum GetPreviousSettingsVersion(const std::string &iniVersion)
+static MptVersion::VersionNum GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
 {
 	MptVersion::VersionNum result = 0;
 	if(!iniVersion.empty())
@@ -182,8 +182,8 @@ DebugSettings::~DebugSettings()
 TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	: conf(conf)
 	// Version
-	, IniVersion(conf, "Version", "Version", std::string())
-	, FirstRun(IniVersion.Get() == std::string())
+	, IniVersion(conf, "Version", "Version", mpt::ustring())
+	, FirstRun(IniVersion.Get() == mpt::ustring())
 	, PreviousSettingsVersion(GetPreviousSettingsVersion(IniVersion))
 	, gcsInstallGUID(conf, "Version", "InstallGUID", mpt::ustring())
 	// Display
@@ -696,7 +696,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		midiImportTicks = 16;
 
 	// Last fixup: update config version
-	IniVersion = MptVersion::str;
+	IniVersion = MptVersion::AsUString();
 
 	// Write updated settings
 	conf.Flush();

@@ -115,7 +115,7 @@ BOOL CModTypeDlg::OnInitDialog()
 
 CString CModTypeDlg::FormatVersionNumber(DWORD version)
 {
-	return std::string(MptVersion::ToStr(version) + (MptVersion::IsTestBuild(version) ? " (test build)" : "")).c_str();
+	return mpt::ToCString(MptVersion::ToUString(version) + (MptVersion::IsTestBuild(version) ? MPT_USTRING(" (test build)") : MPT_USTRING("")));
 }
 
 
