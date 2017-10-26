@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta28
 
+ *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
+    other versions between 12b and 15c as well).
+
  *  MT2 offset + delay command was not imported correctly.
  *  If the order list was longer than 256 items and there was a pattern break
     effect without a position jump on the last pattern of the sequence, it did
