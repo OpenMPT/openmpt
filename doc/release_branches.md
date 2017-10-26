@@ -6,7 +6,8 @@ branching release braches
     `127`)
  2. add release build configuration to the buildbot branch configuration file,
     adjust buildbot config of release build configurations to output to the
-    separate auto-release directory
+    separate auto-release directory and change the archive format from 7z to zip
+    for windows binaries
  3. branch the nondist externals repository
  4. branch the current trunk HEAD (`$VER` is the branch version):
     `svn copy -m "branch OpenMPT-$VER" https://source.openmpt.org/svn/openmpt/trunk/OpenMPT https://source.openmpt.org/svn/openmpt/branches/OpenMPT-$VER`
