@@ -32,15 +32,16 @@ namespace MptVersion
 
 	extern const VersionNum num; // e.g. 0x01170208
 	extern const char * const str; // e.g "1.17.02.08"
+	mpt::ustring AsUString(); // e.g "1.17.02.08"
 
 	// Return a OpenMPT version string suitable for file format tags 
 	std::string GetOpenMPTVersionStr(); // e.g. "OpenMPT 1.17.02.08"
 
 	// Returns numerical version value from given version string.
 	VersionNum ToNum(const std::string &s);
+	VersionNum ToNum(const mpt::ustring &s);
 
 	// Returns version string from given numerical version value.
-	std::string ToStr(const VersionNum v);
 	mpt::ustring ToUString(const VersionNum v);
 
 	// Return a version without build number (the last number in the version).
