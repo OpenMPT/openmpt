@@ -18,6 +18,9 @@ Packaging
     transformation if required.
  *  Use the autotools source package.
  *  Use the default set of dependencies required by the autotools package.
+ *  Read \ref libopenmpt_c_staticlinking and thus possibly pass
+    `CXXSTDLIB_PCLIBSPRIVATE` variable to `configure` if appropriate and/or
+    desired.
  *  Run the test suite in your build process.
  *  Send any build system improvement patches upstream.
  *  Do not include the libmodplug emulation layer in the default libopenmpt

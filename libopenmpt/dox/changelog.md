@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.0-pre
 
+ *  [**New**] Autotools `configure` and plain `Makefile` now honor the variable
+    `CXXSTDLIB_PCLIBSPRIVATE` which serves the sole purpose of listing the
+    standard library (or libraries) required for static linking. The contents of
+    this variable will be put in `libopenmpt.pc` `Libs.private` and used for
+    nothing else. See \ref libopenmpt_c_staticlinking .
+
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
 

@@ -33,6 +33,9 @@ AC_DEFINE([MPT_SVNDATE], ["!!MPT_SVNDATE!!"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [!!MPT_PACKAGE!!], [is package])
 
 
+AC_ARG_VAR(CXXSTDLIB_PCLIBSPRIVATE, [C++ standard library (or libraries) required for static linking. This will be put in the pkg-config file libopenmpt.pc Libs.private field and used for nothing else.])
+
+
 AC_CANONICAL_HOST
 case $host_os in
  mingw32*)
@@ -126,7 +129,7 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
 
 
 LIBOPENMPT_REQUIRES_PRIVATE="$ZLIB_PKG $MPG123_PKG $OGG_PKG $VORBIS_PKG $VORBISFILE_PKG"
-LIBOPENMPT_LIBS_PRIVATE=""
+LIBOPENMPT_LIBS_PRIVATE="$CXXSTDLIB_PCLIBSPRIVATE"
 AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 

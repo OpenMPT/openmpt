@@ -33,6 +33,11 @@
 #  LDLIBS
 #  ARFLAGS
 #
+#  CXXSTDLIB_PCLIBSPRIVATE   C++ standard library (or libraries) required for
+#                   static linking. This will be put in the pkg-config file
+#                   libopenmpt.pc Libs.private field and used for nothing else.
+#
+#
 #
 # Build flags (provide on each `make` invocation) (defaults are shown):
 #
@@ -354,6 +359,9 @@ MPT_WITH_DOXYGEN := 1
 endif
 
 endif
+
+PC_LIBS_PRIVATE :=
+PC_LIBS_PRIVATE += $(CXXSTDLIB_PCLIBSPRIVATE)
 
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 NO_ZLIB:=1
@@ -960,7 +968,7 @@ bin/libopenmpt.pc:
 	$(VERYSILENT)echo 'Version: $(DIST_LIBOPENMPT_VERSION)' >> $@.tmp
 	$(VERYSILENT)echo 'Requires.private: $(PC_REQUIRES_ZLIB) $(PC_REQUIRES_MPG123) $(PC_REQUIRES_OGG) $(PC_REQUIRES_VORBIS) $(PC_REQUIRES_VORBISFILE)' >> $@.tmp
 	$(VERYSILENT)echo 'Libs: -L$${libdir} -lopenmpt' >> $@.tmp
-	$(VERYSILENT)echo 'Libs.private: ' >> $@.tmp
+	$(VERYSILENT)echo 'Libs.private: $(PC_LIBS_PRIVATE)' >> $@.tmp
 	$(VERYSILENT)echo 'Cflags: -I$${includedir}' >> $@.tmp
 	$(VERYSILENT)mv $@.tmp $@
 
