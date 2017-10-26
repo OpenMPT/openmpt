@@ -1386,7 +1386,7 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleFilename);
 
 				std::wstring fileNameW = fileName.ToWide();
-				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", numberFmt.ToWString(smp));
+				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", mpt::wfmt::fmt(smp, numberFmt));
 				fileNameW = mpt::String::Replace(fileNameW, L"%sample_filename%", mpt::ToWide(sSampleFilename));
 				fileNameW = mpt::String::Replace(fileNameW, L"%sample_name%", mpt::ToWide(sSampleName));
 				fileName = mpt::PathString::FromWide(fileNameW);
