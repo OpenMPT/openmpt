@@ -13,6 +13,10 @@ is just a high-level summary.
     this variable will be put in `libopenmpt.pc` `Libs.private` and used for
     nothing else. See \ref libopenmpt_c_staticlinking .
 
+ *  [**Change**] Windows bin and dev release packages now use zip archives
+    instead of 7z archives as it had originally been intended for the 0.3.0
+    release.
+
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
 
