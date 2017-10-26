@@ -181,17 +181,11 @@ public:
 	{
 	}
 	
-	MPT_CONSTEXPR11_FUN operator bool () const
+	MPT_CONSTEXPR11_FUN explicit operator bool () const
 	{
 		return load();
 	}
-	// In order to catch undesired conversions to bool in integer contexts,
-	// add a deprecated conversion operator to store_type.
-	// C++11 explicit conversion cast operators ('explicit operator bool ();')
-	// would solve this in a better way and always fail at compile-time instead of this
-	// solution which just warns in some cases.
-	// The macro-based extended instrument fields writer in InstrumentExtensions.cpp currently needs this conversion,
-	// so it is not marked deprecated (for now).
+	// The macro-based extended instrument fields writer in InstrumentExtensions.cpp currently needs this conversion.
 	/*MPT_DEPRECATED*/ MPT_CONSTEXPR11_FUN operator store_type () const
 	{
 		return load().as_bits();
