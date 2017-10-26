@@ -265,16 +265,18 @@ private:
 	std::size_t width;
 	int precision;
 public:
-	FormatSpec() : flags(0), width(0), precision(-1) {}
-	FormatFlags GetFlags() const { return flags; }
-	std::size_t GetWidth() const { return width; }
-	int GetPrecision() const { return precision; }
-	FormatSpec & SetFlags(FormatFlags f) { flags = f; return *this; }
-	FormatSpec & SetWidth(std::size_t w) { width = w; return *this; }
-	FormatSpec & SetPrecision(int p) { precision = p; return *this; }
+	MPT_CONSTEXPR11_FUN FormatSpec() noexcept : flags(0), width(0), precision(-1) {}
+	MPT_CONSTEXPR11_FUN FormatFlags GetFlags() const noexcept { return flags; }
+	MPT_CONSTEXPR11_FUN std::size_t GetWidth() const noexcept { return width; }
+	MPT_CONSTEXPR11_FUN int GetPrecision() const noexcept { return precision; }
+	MPT_CONSTEXPR14_FUN FormatSpec & SetFlags(FormatFlags f) noexcept { flags = f; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & SetWidth(std::size_t w) noexcept { width = w; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & SetPrecision(int p) noexcept { precision = p; return *this; }
 public:
 	// short-hand construction
-	explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1) : flags(f), width(w), precision(p) {}
+	MPT_CONSTEXPR11_FUN explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1) noexcept : flags(f), width(w), precision(p) {}
+public:
+	// parsing printf
 	explicit FormatSpec(const char * format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
 	explicit FormatSpec(const wchar_t * format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
 	explicit FormatSpec(const std::string & format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
@@ -286,41 +288,41 @@ public:
 	FormatSpec & ParsePrintf(const std::string & format);
 	FormatSpec & ParsePrintf(const std::wstring & format);
 public:
-	FormatSpec & BaseDec() { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
-	FormatSpec & BaseHex() { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
-	FormatSpec & CaseLow() { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
-	FormatSpec & CaseUpp() { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseUpp; return *this; }
-	FormatSpec & FillOff() { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
-	FormatSpec & FillSpc() { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillSpc; return *this; }
-	FormatSpec & FillNul() { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
-	FormatSpec & NotaNrm() { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaNrm; return *this; }
-	FormatSpec & NotaFix() { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaFix; return *this; }
-	FormatSpec & NotaSci() { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
-	FormatSpec & Width(std::size_t w) { width = w; return *this; }
-	FormatSpec & Prec(int p) { precision = p; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & BaseDec() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & CaseUpp() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseUpp; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillOff() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillSpc() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillSpc; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillNul() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & NotaNrm() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaNrm; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & NotaFix() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaFix; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & NotaSci() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & Width(std::size_t w) noexcept { width = w; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & Prec(int p) noexcept { precision = p; return *this; }
 public:
-	FormatSpec & Dec() { return BaseDec(); }
-	FormatSpec & Hex() { return BaseHex(); }
-	FormatSpec & Low() { return CaseLow(); }
-	FormatSpec & Upp() { return CaseUpp(); }
-	FormatSpec & Off() { return FillOff(); }
-	FormatSpec & Spc() { return FillSpc(); }
-	FormatSpec & Nul() { return FillNul(); }
-	FormatSpec & Nrm() { return NotaNrm(); }
-	FormatSpec & Fix() { return NotaFix(); }
-	FormatSpec & Sci() { return NotaSci(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Dec() noexcept { return BaseDec(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Hex() noexcept { return BaseHex(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Low() noexcept { return CaseLow(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Upp() noexcept { return CaseUpp(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Off() noexcept { return FillOff(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Spc() noexcept { return FillSpc(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Nul() noexcept { return FillNul(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Nrm() noexcept { return NotaNrm(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Fix() noexcept { return NotaFix(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Sci() noexcept { return NotaSci(); }
 public:
-	FormatSpec & Decimal() { return BaseDec(); }
-	FormatSpec & Hexadecimal() { return BaseHex(); }
-	FormatSpec & Lower() { return CaseLow(); }
-	FormatSpec & Upper() { return CaseUpp(); }
-	FormatSpec & FillNone() { return FillOff(); }
-	FormatSpec & FillSpace() { return FillSpc(); }
-	FormatSpec & FillZero() { return FillNul(); }
-	FormatSpec & FloatNormal() { return NotaNrm(); }
-	FormatSpec & FloatFixed() { return NotaFix(); }
-	FormatSpec & FloatScientific() { return NotaSci(); }
-	FormatSpec & Precision(int p) { return Prec(p); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Decimal() noexcept { return BaseDec(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Hexadecimal() noexcept { return BaseHex(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Lower() noexcept { return CaseLow(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Upper() noexcept { return CaseUpp(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillNone() noexcept { return FillOff(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillSpace() noexcept { return FillSpc(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillZero() noexcept { return FillNul(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FloatNormal() noexcept { return NotaNrm(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FloatFixed() noexcept { return NotaFix(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & FloatScientific() noexcept { return NotaSci(); }
+	MPT_CONSTEXPR14_FUN FormatSpec & Precision(int p) noexcept { return Prec(p); }
 };
 
 
