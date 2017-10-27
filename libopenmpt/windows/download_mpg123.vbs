@@ -100,19 +100,19 @@ CreateFolder "download.tmp"
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-mpg123version = "1.25.6"
-mpg123x86size = 491965
-mpg123x86md5  = "7466c67993978ec65c96436323a9da7d"
-mpg123x86sha1 = "93bb8998292f2d0b9b6f4afc7903f63ea39e4dd2"
-mpg123x64size = 536637
-mpg123x64md5  = "6c999a686f3ef93bd4ddb56a0f947f52"
-mpg123x64sha1 = "cb33aef09f8db80211844bbd98a05f64b9080977"
+mpg123version = "1.25.7.openmpt1"
+mpg123x86size = 132279
+mpg123x86md5  = "3d22c3cd8da0690ed065166719d6f861"
+mpg123x86sha1 = "6df86e066d6aacca385678d26527ad68699af99b"
+mpg123x64size = 137948
+mpg123x64md5  = "1f9953dc664c2f73e30ad54eed692160"
+mpg123x64sha1 = "601b24fbdbd95f97bc7cd17d47e69da95b469b21"
 
-Download httpprotocol & "://mpg123.de/download/win32/" & mpg123version & "/mpg123-" & mpg123version & "-x86.zip", mpg123x86size, mpg123x86md5, mpg123x86sha1, "download.tmp\mpg123-" & mpg123version & "-x86.zip"
+Download httpprotocol & "://lib.openmpt.org/files/libopenmpt/contrib/mpg123/" & mpg123version & "/mpg123-" & mpg123version & "-x86.zip", mpg123x86size, mpg123x86md5, mpg123x86sha1, "download.tmp\mpg123-" & mpg123version & "-x86.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-" & mpg123version & "-x86")
 UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-" & mpg123version & "-x86.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
-Download httpprotocol & "://mpg123.de/download/win64/" & mpg123version & "/mpg123-" & mpg123version & "-x86-64.zip", mpg123x64size, mpg123x64md5, mpg123x64sha1, "download.tmp\mpg123-" & mpg123version & "-x86-64.zip"
+Download httpprotocol & "://lib.openmpt.org/files/libopenmpt/contrib/mpg123/" & mpg123version & "/mpg123-" & mpg123version & "-x86-64.zip", mpg123x64size, mpg123x64md5, mpg123x64sha1, "download.tmp\mpg123-" & mpg123version & "-x86-64.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-" & mpg123version & "-x86-64")
 UnZIP fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\mpg123-" & mpg123version & "-x86-64.zip"), fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp")
 
