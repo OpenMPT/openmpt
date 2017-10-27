@@ -7,8 +7,8 @@ MPG123VERSION="${1}"
 rm -f "mpg123-${MPG123VERSION}-x86.zip"
 rm -f "mpg123-${MPG123VERSION}-x86-64.zip"
 
-wget "http://mpg123.de/download/win32/${MPG123VERSION}/mpg123-${MPG123VERSION}-x86.zip"
-wget "http://mpg123.de/download/win64/${MPG123VERSION}/mpg123-${MPG123VERSION}-x86-64.zip"
+wget "https://mpg123.de/download/win32/${MPG123VERSION}/mpg123-${MPG123VERSION}-x86.zip"
+wget "https://mpg123.de/download/win64/${MPG123VERSION}/mpg123-${MPG123VERSION}-x86-64.zip"
 
 echo "mpg123version = \"${MPG123VERSION}\""
 echo "mpg123x86size = $(stat --printf="%s" mpg123-${MPG123VERSION}-x86.zip)"
