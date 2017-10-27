@@ -1114,6 +1114,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kMODSampleSwap);
 		playBehaviour.set(kMODOutOfRangeNoteDelay);
 		playBehaviour.set(kMODTempoOnSecondTick);
+		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
 	default:
@@ -1149,6 +1150,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 
 	case MOD_TYPE_MOD:
 		playBehaviour.set(kMODSampleSwap);
+		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
 	default:

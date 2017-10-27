@@ -2440,8 +2440,9 @@ bool CSoundFile::ProcessEffects()
 			triggerNote = false;
 		} else if(m_playBehaviour[kRowDelayWithNoteDelay] && nStartTick > 0 && tickCount == nStartTick)
 		{
-			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 / FastTracker 2 do the same.
-			// Test case: PatternDelay-NoteDelay.it, PatternDelay-NoteDelay.xm
+			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered.
+			// ProTracker / Scream Tracker 3 / FastTracker 2 do the same.
+			// Test case: PatternDelay-NoteDelay.it, PatternDelay-NoteDelay.xm, PatternDelaysRetrig.mod
 			triggerNote = true;
 		}
 
