@@ -67,12 +67,12 @@ cd ..
 
 
 echo "mpg123version = \"${MPG123VERSION}.openmpt${OPENMPTVERSION}\""
-echo "mpg123x86size = $(stat --printf="%s" libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86.zip)"
-echo "mpg123x86md5  = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86.zip | md5sum | awk '{ print $1; }')\""
-echo "mpg123x86sha1 = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86.zip | sha1sum | awk '{ print $1; }')\""
-echo "mpg123x64size = $(stat --printf="%s" libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86-64.zip)"
-echo "mpg123x64md5  = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86-64.zip | md5sum | awk '{ print $1; }')\""
-echo "mpg123x64sha1 = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}-x86-64.zip | sha1sum | awk '{ print $1; }')\""
+echo "mpg123x86size = $(stat --printf="%s" libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip)"
+echo "mpg123x86md5  = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip | md5sum | awk '{ print $1; }')\""
+echo "mpg123x86sha1 = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip | sha1sum | awk '{ print $1; }')\""
+echo "mpg123x64size = $(stat --printf="%s" libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip)"
+echo "mpg123x64md5  = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip | md5sum | awk '{ print $1; }')\""
+echo "mpg123x64sha1 = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip | sha1sum | awk '{ print $1; }')\""
 
 
 rm -rf "${FILE}"
