@@ -19,6 +19,8 @@
 //#define MPT_TEST_CXX11
 
 
+#include <type_traits>
+
 #include "../common/Endianness.h"
 #include "../common/FlagSet.h"
 #include "../soundlib/Snd_defs.h"
@@ -139,18 +141,6 @@ struct ToStringHelper<SamplePosition>
 
 namespace Test {
 
-// We do not generally have type_traits from C++03-TR1
-// and std::numeric_limits does not provide a is_integer which is useable as template argument.
-template <typename T> struct is_integer : public std::false_type { };
-template <> struct is_integer<signed short>     : public std::true_type { };
-template <> struct is_integer<signed int>       : public std::true_type { };
-template <> struct is_integer<signed long>      : public std::true_type { };
-template <> struct is_integer<signed long long> : public std::true_type { };
-template <> struct is_integer<unsigned short>     : public std::true_type { };
-template <> struct is_integer<unsigned int>       : public std::true_type { };
-template <> struct is_integer<unsigned long>      : public std::true_type { };
-template <> struct is_integer<unsigned long long> : public std::true_type { };
-
 class Testcase
 {
 
@@ -221,7 +211,7 @@ private:
 	template <typename Tx, typename Ty>
 	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
-		if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
+		if(!IsEqual(x, y, std::is_integral<Tx>(), std::is_integral<Ty>()))
 		{
 			throw TestFailed(mpt::format(std::string("%1 != %2"))(ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
 			//throw TestFailed();
@@ -294,7 +284,7 @@ public:
 		ShowStart();
 		try
 		{
-			if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
+			if(!IsEqual(x, y, std::is_integral<Tx>(), std::is_integral<Ty>()))
 			{
 				//throw TestFailed(mpt::format(std::string("%1 != %2"))(x, y));
 				throw TestFailed();
