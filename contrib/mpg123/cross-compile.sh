@@ -9,7 +9,7 @@ set -e
 
 
 MPG123VERSION="1.25.7"
-OPENMPTVERSION="1"
+OPENMPTVERSION="2"
 
 
 BASEURL="https://mpg123.de/download/"
@@ -18,12 +18,14 @@ DIR="mpg123-${MPG123VERSION}"
 
 
 rm -rf "${FILE}"
-rm -rf dist-x86
-rm -rf dist-x86_64
-mkdir dist-x86
-mkdir dist-x86_64
+rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86"
+rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64"
 rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip"
-rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86_64.zip"
+rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip"
+
+
+mkdir "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86"
+mkdir "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64"
 
 
 wget "${BASEURL}${FILE}"
@@ -37,9 +39,9 @@ cd "${DIR}-x86"
  ./configure --host=i686-w64-mingw32 --enable-debug=no --enable-modules=no --enable-network=no --disable-static --enable-shared --with-cpu=generic --with-default-audio=win32 --with-audio=win32 --with-optimization=2 LDFLAGS=-static-libgcc
  make
  i686-w64-mingw32-strip src/libmpg123/.libs/libmpg123-0.dll
- cp COPYING ../dist-x86/
- cp AUTHORS ../dist-x86/
- cp src/libmpg123/.libs/libmpg123-0.dll ../dist-x86/
+ cp COPYING "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86/"
+ cp AUTHORS "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86/"
+ cp src/libmpg123/.libs/libmpg123-0.dll "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86/"
 cd ..
 
 
@@ -51,19 +53,14 @@ cd "${DIR}-x86_64"
  ./configure --host=x86_64-w64-mingw32 --enable-debug=no --enable-modules=no --enable-network=no --disable-static --enable-shared --with-cpu=generic --with-default-audio=win32 --with-audio=win32 --with-optimization=2 LDFLAGS=-static-libgcc
  make
  x86_64-w64-mingw32-strip src/libmpg123/.libs/libmpg123-0.dll
- cp COPYING ../dist-x86_64/
- cp AUTHORS ../dist-x86_64/
- cp src/libmpg123/.libs/libmpg123-0.dll ../dist-x86_64/
+ cp COPYING "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64/"
+ cp AUTHORS "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64/"
+ cp src/libmpg123/.libs/libmpg123-0.dll "../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64/"
 cd ..
 
 
-cd dist-x86
- 7z a -tzip -mx=9 ../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip    COPYING AUTHORS libmpg123-0.dll
-cd ..
-
-cd dist-x86_64
- 7z a -tzip -mx=9 ../libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip COPYING AUTHORS libmpg123-0.dll
-cd ..
+7z a -tzip -mx=9 libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86.zip    "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86"
+7z a -tzip -mx=9 libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64.zip "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64"
 
 
 echo "mpg123version = \"${MPG123VERSION}.openmpt${OPENMPTVERSION}\""
@@ -76,8 +73,7 @@ echo "mpg123x64sha1 = \"$(cat libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.ope
 
 
 rm -rf "${FILE}"
-rm -rf dist-x86
-rm -rf dist-x86_64
 rm -rf "${DIR}-x86"
 rm -rf "${DIR}-x86_64"
-
+rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86"
+rm -rf "libopenmpt-0.2-contrib-mpg123-${MPG123VERSION}.openmpt${OPENMPTVERSION}-x86-64"
