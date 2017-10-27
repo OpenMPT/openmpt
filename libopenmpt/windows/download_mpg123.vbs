@@ -128,10 +128,12 @@ If fso.FolderExists("bin") Then
 End If
 
 If fso.FolderExists("openmpt123") Then
-	CreateFolder "openmpt123\x86"
-	CreateFolder "openmpt123\x86_64"
-	fso.CopyFile "download.tmp\mpg123-" & mpg123version & "-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
-	fso.CopyFile "download.tmp\mpg123-" & mpg123version & "-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
+	If fso.FolderExists("openmpt123\x86") Then
+		fso.CopyFile "download.tmp\mpg123-" & mpg123version & "-x86\libmpg123-0.dll",        "openmpt123\x86\libmpg123-0.dll", True
+	End If
+	If fso.FolderExists("openmpt123\x86_64") Then
+		fso.CopyFile "download.tmp\mpg123-" & mpg123version & "-x86-64\libmpg123-0.dll",     "openmpt123\x86_64\libmpg123-0.dll", True
+	End If
 End If
 
 If fso.FolderExists("XMPlay") Then

@@ -19,6 +19,7 @@ del /f /q libopenmpt-winold-r%MPT_REVISION%.7z
 mkdir libopenmpt-winold
 cd libopenmpt-winold || goto error
 mkdir openmpt123
+mkdir openmpt123\x86
 mkdir XMPlay
 mkdir Winamp
 rmdir /s /q Licenses
@@ -49,7 +50,7 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\ || goto error
+copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
@@ -57,7 +58,7 @@ copy /y ..\..\libopenmpt\windows\download_mpg123.vbs .\ || goto error
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
- openmpt123\openmpt123.exe ^
+ openmpt123\x86\openmpt123.exe ^
  XMPlay\xmp-openmpt.txt ^
  XMPlay\xmp-openmpt.dll ^
  Winamp\in_openmpt.txt ^
