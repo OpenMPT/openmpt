@@ -2143,7 +2143,7 @@ enum {
 
 struct CAFAudioFormat
 {
-	IEEE754binary64BE mSampleRate;
+	IEEE754binary64EmulatedBE mSampleRate;
 	uint32be          mFormatID;
 	uint32be          mFormatFlags;
 	uint32be          mBytesPerPacket;
