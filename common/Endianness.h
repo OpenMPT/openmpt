@@ -866,15 +866,32 @@ STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary64LE) == 8);
 STATIC_ASSERT(sizeof(IEEE754binary64BE) == 8);
 
-typedef IEEE754binary32LE float32le;
-typedef IEEE754binary32BE float32be;
-typedef IEEE754binary64LE float64le;
-typedef IEEE754binary64BE float64be;
+
+// unaligned
+
+typedef IEEE754binary32EmulatedLE float32le;
+typedef IEEE754binary32EmulatedBE float32be;
+typedef IEEE754binary64EmulatedLE float64le;
+typedef IEEE754binary64EmulatedBE float64be;
 
 STATIC_ASSERT(sizeof(float32le) == 4);
 STATIC_ASSERT(sizeof(float32be) == 4);
 STATIC_ASSERT(sizeof(float64le) == 8);
 STATIC_ASSERT(sizeof(float64be) == 8);
+
+
+// potentially aligned
+
+typedef IEEE754binary32LE float32le_fast;
+typedef IEEE754binary32BE float32be_fast;
+typedef IEEE754binary64LE float64le_fast;
+typedef IEEE754binary64BE float64be_fast;
+
+STATIC_ASSERT(sizeof(float32le_fast) == 4);
+STATIC_ASSERT(sizeof(float32be_fast) == 4);
+STATIC_ASSERT(sizeof(float64le_fast) == 8);
+STATIC_ASSERT(sizeof(float64be_fast) == 8);
+
 
 
 // On-disk integer types with defined endianness and no alignemnt requirements
