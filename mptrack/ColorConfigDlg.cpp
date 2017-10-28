@@ -101,7 +101,7 @@ BOOL COptionsColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
-	MemCopy(CustomColors, TrackerSettings::Instance().rgbCustomColors);
+	CustomColors = TrackerSettings::Instance().rgbCustomColors;
 	for (size_t i = 0; i < mpt::size(colorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
@@ -212,7 +212,7 @@ void COptionsColors::OnOK()
 	TrackerSettings::Instance().m_nRowHighlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
 	TrackerSettings::Instance().m_nRowHighlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
 
-	MemCopy(TrackerSettings::Instance().rgbCustomColors, CustomColors);
+	TrackerSettings::Instance().rgbCustomColors = CustomColors;
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);

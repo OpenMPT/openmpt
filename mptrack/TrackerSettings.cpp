@@ -1006,7 +1006,7 @@ void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
 }
 
 
-void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
+void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS> &colours)
 {
 	colours[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
 	colours[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);

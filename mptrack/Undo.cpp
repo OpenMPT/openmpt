@@ -482,7 +482,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	// Restore old sample header
 	sample = undo.OldSample;
 	sample.pSample = pCurrentSample; // select the "correct" old sample
-	MemCopy(sndFile.m_szNames[smp], undo.oldName);
+	mpt::String::Copy(sndFile.m_szNames[smp], undo.oldName);
 
 	if(replace)
 	{

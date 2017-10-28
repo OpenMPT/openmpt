@@ -94,7 +94,7 @@ void CViewPattern::UpdateColors()
 {
 	BYTE r,g,b;
 
-	m_Dib.SetAllColors(0, MAX_MODCOLORS, TrackerSettings::Instance().rgbCustomColors);
+	m_Dib.SetAllColors(0, MAX_MODCOLORS, TrackerSettings::Instance().rgbCustomColors.data());
 
 	r = hilightcolor(GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
 		GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));

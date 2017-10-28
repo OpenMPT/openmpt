@@ -512,7 +512,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		// VstTimeInfo* in [return value]
 		if(msg->result != 0)
 		{
-			MemCopy(sharedMem->timeInfo, *FromVstPtr<VstTimeInfo>(result));
+			sharedMem->timeInfo = *FromVstPtr<VstTimeInfo>(result);
 		}
 		break;
 
