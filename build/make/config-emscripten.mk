@@ -4,14 +4,16 @@ CXX = em++
 LD  = em++
 AR  = emar
 
+EMSCRIPTEN_TARGET?=asmjs
+
+ifeq ($(EMSCRIPTEN_TARGET),js)
+
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
-LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
+CXXFLAGS += -std=c++11 -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -std=c99   -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+LDFLAGS  += -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 LDLIBS   += 
 ARFLAGS  := rcs
-
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
 
 # allow growing heap (might be slower, especially with V8 (as used by Chrome))
 #LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
@@ -20,15 +22,60 @@ CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
+else ifeq ($(EMSCRIPTEN_TARGET),asmjs)
+
+CPPFLAGS += 
+CXXFLAGS += -std=c++11 -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
+LDLIBS   += 
+ARFLAGS  := rcs
+
+# allow growing heap (might be slower, especially with V8 (as used by Chrome))
+#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
+#LDFLAGS += -s TOTAL_MEMORY=67108864
+
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+
+else ifeq ($(EMSCRIPTEN_TARGET),wasm)
+
+CPPFLAGS += 
+CXXFLAGS += -std=c++11 -fPIC -O2 -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -std=c99   -fPIC -O2 -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+LDFLAGS  += -O2 -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
+LDLIBS   += 
+ARFLAGS  := rcs
+
+# allow growing heap (might be slower, especially with V8 (as used by Chrome))
+#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
+#LDFLAGS += -s TOTAL_MEMORY=67108864
+
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+
+endif
+
+CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
+
 CXXFLAGS_WARNINGS += -Wmissing-declarations
 CFLAGS_WARNINGS   += -Wmissing-prototypes
 
 REQUIRES_RUNPREFIX=1
 
+ifeq ($(EMSCRIPTEN_TARGET),wasm)
+
+EXESUFFIX=.wasm
+SOSUFFIX=.wasm
+
+else
+
 EXESUFFIX=.js
 SOSUFFIX=.js
 RUNPREFIX=nodejs 
 TEST_LDFLAGS= --pre-js build/make/test-pre.js 
+
+endif
 
 DYNLINK=0
 SHARED_LIB=1
