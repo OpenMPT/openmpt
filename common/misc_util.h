@@ -182,7 +182,7 @@ inline void MemsetZero(T &a)
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
+	//MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
