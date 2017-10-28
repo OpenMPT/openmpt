@@ -142,7 +142,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 		// Copy and scale original 4-bit bitmap
 		LimitMax(font.size, 10);
 		font.size++;
-		MemCopy(customFontBitmap.bmiHeader, CMainFrame::bmpNotes->bmiHeader);
+		customFontBitmap.bmiHeader = CMainFrame::bmpNotes->bmiHeader;
 		customFontBitmap.bmiHeader.biWidth *= font.size;
 		customFontBitmap.bmiHeader.biHeight *= font.size;
 		customFontBitmap.bmiHeader.biSizeImage = customFontBitmap.bmiHeader.biWidth * customFontBitmap.bmiHeader.biHeight / 2;

@@ -220,22 +220,6 @@ inline void MemsetZero(T &a)
 }
 
 
-#ifdef MODPLUG_TRACKER
-// Copy given object to other location.
-template <class T>
-void MemCopy(T &destination, const T &source)
-{
-	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
-#if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
-	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
-#else // default
-	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
-#endif
-	std::memcpy(&destination, &source, sizeof(T));
-}
-#endif // MODPLUG_TRACKER
-
-
 namespace mpt {
 
 

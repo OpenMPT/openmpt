@@ -15,7 +15,7 @@ OPENMPT_NAMESPACE_BEGIN
 class COptionsColors: public CPropertyPage
 {
 protected:
-	COLORREF CustomColors[MAX_MODCOLORS];
+	std::array<COLORREF, MAX_MODCOLORS> CustomColors;
 	UINT m_nColorItem;
 	CComboBox m_ComboItem, m_ComboFont, m_ComboPreset;
 	CButton m_BtnColor1, m_BtnColor2, m_BtnColor3, m_BtnPreview;

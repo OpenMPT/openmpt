@@ -23,6 +23,7 @@
 #include "StreamEncoder.h"
 #include "Settings.h"
 
+#include <array>
 #include <bitset>
 
 
@@ -758,7 +759,7 @@ public:
 
 	// Display (Colors)
 
-	COLORREF rgbCustomColors[MAX_MODCOLORS];
+	std::array<COLORREF, MAX_MODCOLORS> rgbCustomColors;
 
 	// AutoSave
 	CachedSetting<bool> CreateBackupFiles;
@@ -842,7 +843,7 @@ public:
 
 	void SaveSettings();
 
-	static void GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS]);
+	static void GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS> &colours);
 
 	std::vector<uint32> GetSampleRates() const;
 
