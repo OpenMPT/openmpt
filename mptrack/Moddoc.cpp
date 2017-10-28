@@ -177,8 +177,10 @@ BOOL CModDoc::OnNewDocument()
 }
 
 
-BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
+BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 {
+	const mpt::PathString filename = lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString();
+
 	ScopedLogCapturer logcapturer(*this);
 
 	if(filename.empty()) return OnNewDocument();
@@ -190,7 +192,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	{
 		FileReader file = GetFileReader(f);
 		ASSERT(GetPathNameMpt() == mpt::PathString());
-		SetPathName(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
+		SetPathNameMpt(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
 		m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 	}
 
@@ -289,7 +291,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 		if (!bTemplateFile)
 		{
 			// Set new path for this file, unless we are saving a template, in which case we want to keep the old file path.
-			SetPathName(filename);
+			SetPathNameMpt(filename);
 		}
 		logcapturer.ShowLog(true);
 		if (bTemplateFile)
@@ -399,31 +401,10 @@ void CModDoc::DeleteContents()
 }
 
 
-#ifndef UNICODE
-BOOL CModDoc::DoFileSave()
+BOOL CModDoc::DoSave(LPCTSTR lpszPathName, BOOL)
 {
-	// Completely replaces MFC implementation.
-	DWORD dwAttrib = GetFileAttributesW(mpt::PathString::TunnelOutofCString(m_strPathName).AsNative().c_str());
-	if(dwAttrib & FILE_ATTRIBUTE_READONLY)
-	{
-		if(!DoSave(mpt::PathString()))
-		{
-			return FALSE;
-		}
-	} else
-	{
-		if(!DoSave(mpt::PathString::TunnelOutofCString(m_strPathName)))
-		{
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-#endif
+	const mpt::PathString filename = lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString();
 
-
-BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
-{
 	const mpt::PathString docFileName = GetPathNameMpt();
 	const std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 
@@ -2589,7 +2570,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		//unnotified file overwriting may occur.
 		m_ShowSavedialog = true;
 
-		SetPathName(newPath, FALSE);
+		SetPathNameMpt(newPath, FALSE);
 	}
 
 	UpdateAllViews(NULL, UpdateHint().ModType());

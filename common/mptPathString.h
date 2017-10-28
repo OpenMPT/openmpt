@@ -225,9 +225,6 @@ public:
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	CString ToCString() const { return mpt::ToCString(path); }
 	static PathString FromCString(const CString &path) { return PathString(mpt::ToWide(path)); }
-	// really special purpose, if !UNICODE, encode unicode in CString as UTF8:
-	static mpt::PathString TunnelOutofCString(const CString &path);
-	static CString TunnelIntoCString(const mpt::PathString &path);
 #endif
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries

@@ -1677,7 +1677,7 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_INSLIB_SONG:
-		theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
+		theApp.OpenDocumentFile(InsLibGetFullPath(hItem).ToCString());
 		break;
 	case MODITEM_HDR_INSTRUMENTLIB:
 		CTrackApp::OpenDirectory(m_InstrLibPath);
@@ -2938,7 +2938,7 @@ void CModTree::OnEndDrag(DWORD dwMask)
 				{
 					if (dropinfo.dwDropType == DRAGONDROP_SONG)
 					{
-						theApp.OpenDocumentFile(fullPath);
+						theApp.OpenDocumentFile(fullPath.ToCString());
 					} else
 					{
 						::SendMessage(m_hDropWnd, WM_MOD_DRAGONDROPPING, TRUE, (LPARAM)&dropinfo);
@@ -3969,7 +3969,7 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 				} else
 				{
 					// Pass message on
-					theApp.OpenDocumentFile(file);
+					theApp.OpenDocumentFile(file.ToCString());
 				}
 			}
 		}

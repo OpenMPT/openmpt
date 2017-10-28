@@ -98,30 +98,6 @@ struct DRAGONDROP
 /////////////////////////////////////////////////////////////////////////////
 // Document Template
 
-// OK, this is a really dirty hack for ANSI builds (which are still used because the code is not yet UNICODE compatible).
-// To support wide path names even in ansi builds, we use mpt::PathString everywhere.
-// Except, there is one set of cases, where MFC dictates TCHAR/CString on us: The filename handling for MDI documents.
-// Here, if in ANSI build, we encode the wide string in utf8 and pass it around through MFC. When MFC calls us again,
-// we unpack it again. This works surprisingly well for the hackish nature this has.
-// Rough edges:
-//  - CDocument::GetTitle is still ANSI encoded and returns replacement chars for non-representable chars.
-//  - CWinApp::AddToRecentFileList chokes on filenames it cannot access. We simply avoid passing non-ansi-representable filenames there.
-// Modified MFC functionality:
-//  CTrackApp:
-//   CWinApp::OpenDocument
-//   CWinApp::AddToRecentFileList
-//  CModDocManager:
-//   CDocManager::OpenDocumentFile
-//  CModDocTemplate:
-//   CMultiDocTemplate::OpenDocumentFile
-//  CModDoc:
-//   CDocument::GetPathName
-//   CDocument::SetPathName
-//   CDocument::DoFileSave
-//   CDocument::DoSave
-//   CDocument::OnOpenDocument
-//   CDocument::OnSaveDocument
-
 class CModDocTemplate: public CMultiDocTemplate
 {
 public:
@@ -130,19 +106,7 @@ public:
 
 	CDocument* OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune = false);
 
-#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#endif // MPT_COMPILER_CLANG
-	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
-	// inherited members, overload them all
-	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
-	{
-		return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
-	}
-#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
+	virtual CDocument* OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru = TRUE, BOOL makeVisible = TRUE) override;
 
 };
 
@@ -202,23 +166,7 @@ protected:
 public:
 	CTrackApp();
 
-#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#endif // MPT_COMPILER_CLANG
-	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
-	{
-		return CWinApp::OpenDocumentFile(lpszFileName, bAddToMRU);
-	}
-	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
-	{
-		return CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), bAddToMRU);
-	}
-#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
-
-	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
+	virtual void AddToRecentFileList(LPCTSTR lpszPathName) override;
 	void AddToRecentFileList(const mpt::PathString path);
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const size_t item);

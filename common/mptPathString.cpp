@@ -380,41 +380,6 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 }
 
 
-#if defined(_MFC_VER)
-
-mpt::PathString PathString::TunnelOutofCString(const CString &path)
-{
-	#ifdef UNICODE
-		return mpt::PathString::FromWide(path.GetString());
-	#else
-		// Since MFC code can call into our code from a lot of places, we cannot assume
-		// that filenames we get from MFC are always encoded in our hacked UTF8-in-CString encoding.
-		// Instead, we use a rough heuristic: if the string is parseable as UTF8, we assume it is.
-		// This fails for CP_ACP strings, that are also valid UTF8. That's the trade-off here.
-		if(mpt::IsUTF8(path.GetString()))
-		{
-			// utf8
-			return mpt::PathString::FromUTF8(path.GetString());
-		} else
-		{
-			// ANSI
-			return mpt::PathString::FromWide(mpt::ToWide(path));
-		}
-	#endif
-}
-
-
-CString PathString::TunnelIntoCString(const mpt::PathString &path)
-{
-	#ifdef UNICODE
-		return path.ToWide().c_str();
-	#else
-		return path.ToUTF8().c_str();
-	#endif
-}
-
-#endif // MFC
-
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt

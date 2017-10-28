@@ -306,14 +306,10 @@ protected:
 	//{{AFX_VIRTUAL(CModDoc)
 	public:
 	BOOL OnNewDocument() override;
-	MPT_DEPRECATED_PATH BOOL OnOpenDocument(LPCTSTR lpszPathName) override
+	BOOL OnOpenDocument(LPCTSTR lpszPathName) override;
+	BOOL OnSaveDocument(LPCTSTR lpszPathName) override
 	{
-		return OnOpenDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString());
-	}
-	BOOL OnOpenDocument(const mpt::PathString &filename);
-	MPT_DEPRECATED_PATH BOOL OnSaveDocument(LPCTSTR lpszPathName) override
-	{
-		return OnSaveDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), false);
+		return OnSaveDocument(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString(), false);
 	}
 	BOOL OnSaveDocument(const mpt::PathString &filename)
 	{
@@ -323,50 +319,24 @@ protected:
 	void SafeFileClose();
 	BOOL OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile);
 
-	MPT_DEPRECATED_PATH void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE) override
+	void SetPathNameMpt(const mpt::PathString &filename, BOOL bAddToMRU = 1)
 	{
-		return SetPathName(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bAddToMRU);
-	}
-	void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
-	{
-		CDocument::SetPathName(mpt::PathString::TunnelIntoCString(filename), bAddToMRU);
-		#ifndef UNICODE
-			// As paths are faked into utf8 when !UNICODE,
-			// explicitly set the title in locale again.
-			// This replaces non-ANSI characters in the title
-			// with replacement character but overall the
-			// unicode handling is sane and consistent this
-			// way.
-			SetTitle(mpt::ToCString((filename.GetFileName() + filename.GetFileExt()).ToWide()));
-		#endif
-	}
-	MPT_DEPRECATED_PATH const CString& GetPathName() const
-	{
-		return CDocument::GetPathName();
+		SetPathName(filename.ToCString(), bAddToMRU);
 	}
 	mpt::PathString GetPathNameMpt() const
 	{
-		return mpt::PathString::TunnelOutofCString(CDocument::GetPathName());
+		return mpt::PathString::FromCString(GetPathName());
 	}
 
 	BOOL SaveModified() override;
 	bool SaveAllSamples();
 	bool SaveSample(SAMPLEINDEX smp);
 
-#ifndef UNICODE
-	// MFC checks for writeable filename in there and issues SaveAs dialog if not.
-	// This fails for our utf8-in-CString hack.
-	BOOL DoFileSave() override;
-#endif
-
-#ifndef UNICODE
-	MPT_DEPRECATED_PATH
-#endif
-	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE) override
+	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE) override;
+	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE)
 	{
-		return DoSave(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bSaveAs);
+		return DoSave(filename.ToCString(), bSaveAs);
 	}
-	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
 	void DeleteContents() override;
 	void SetModifiedFlag(BOOL bModified=TRUE) override;
 	//}}AFX_VIRTUAL
