@@ -24,10 +24,10 @@ struct RIFFHeader
 	// 32-Bit chunk identifiers
 	enum RIFFMagic
 	{
-		idRIFF	= MAGIC4LE('R','I','F','F'),	// magic for WAV files
-		idLIST	= MAGIC4LE('L','I','S','T'),	// magic for samples in DLS banks
-		idWAVE	= MAGIC4LE('W','A','V','E'),	// type for WAV files
-		idwave	= MAGIC4LE('w','a','v','e'),	// type for samples in DLS banks
+		idRIFF	= MagicLE("RIFF"),	// magic for WAV files
+		idLIST	= MagicLE("LIST"),	// magic for samples in DLS banks
+		idWAVE	= MagicLE("WAVE"),	// type for WAV files
+		idwave	= MagicLE("wave"),	// type for samples in DLS banks
 	};
 
 	uint32le magic;		// RIFF (in WAV files) or LIST (in DLS banks)
@@ -44,34 +44,34 @@ struct RIFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idfmt_	= MAGIC4LE('f','m','t',' '),	// Sample format information
-		iddata	= MAGIC4LE('d','a','t','a'),	// Sample data
-		idpcm_	= MAGIC4LE('p','c','m',' '),	// IMA ADPCM samples
-		idfact	= MAGIC4LE('f','a','c','t'),	// Compressed samples
-		idsmpl	= MAGIC4LE('s','m','p','l'),	// Sampler and loop information
-		idinst	= MAGIC4LE('i','n','s','t'),	// Instrument information
-		idLIST	= MAGIC4LE('L','I','S','T'),	// List of chunks
-		idxtra	= MAGIC4LE('x','t','r','a'),	// OpenMPT extra infomration
-		idcue_	= MAGIC4LE('c','u','e',' '),	// Cue points
-		idwsmp	= MAGIC4LE('w','s','m','p'),	// DLS bank samples
-		idCSET	= MAGIC4LE('C','S','E','T'),	// Character Set
+		idfmt_	= MagicLE("fmt "),	// Sample format information
+		iddata	= MagicLE("data"),	// Sample data
+		idpcm_	= MagicLE("pcm "),	// IMA ADPCM samples
+		idfact	= MagicLE("fact"),	// Compressed samples
+		idsmpl	= MagicLE("smpl"),	// Sampler and loop information
+		idinst	= MagicLE("inst"),	// Instrument information
+		idLIST	= MagicLE("LIST"),	// List of chunks
+		idxtra	= MagicLE("xtra"),	// OpenMPT extra infomration
+		idcue_	= MagicLE("cue "),	// Cue points
+		idwsmp	= MagicLE("wsmp"),	// DLS bank samples
+		idCSET	= MagicLE("CSET"),	// Character Set
 		id____	= 0x00000000,	// Found when loading buggy MPT samples
 
 		// Identifiers in "LIST" chunk
-		idINAM	= MAGIC4LE('I','N','A','M'), // title
-		idISFT	= MAGIC4LE('I','S','F','T'), // software
-		idICOP	= MAGIC4LE('I','C','O','P'), // copyright
-		idIART	= MAGIC4LE('I','A','R','T'), // artist
-		idIPRD	= MAGIC4LE('I','P','R','D'), // product (album)
-		idICMT	= MAGIC4LE('I','C','M','T'), // comment
-		idIENG	= MAGIC4LE('I','E','N','G'), // engineer
-		idISBJ	= MAGIC4LE('I','S','B','J'), // subject
-		idIGNR	= MAGIC4LE('I','G','N','R'), // genre
-		idICRD	= MAGIC4LE('I','C','R','D'), // date created
+		idINAM	= MagicLE("INAM"), // title
+		idISFT	= MagicLE("ISFT"), // software
+		idICOP	= MagicLE("ICOP"), // copyright
+		idIART	= MagicLE("IART"), // artist
+		idIPRD	= MagicLE("IPRD"), // product (album)
+		idICMT	= MagicLE("ICMT"), // comment
+		idIENG	= MagicLE("IENG"), // engineer
+		idISBJ	= MagicLE("ISBJ"), // subject
+		idIGNR	= MagicLE("IGNR"), // genre
+		idICRD	= MagicLE("ICRD"), // date created
 
-		idYEAR  = MAGIC4LE('Y','E','A','R'), // year
-		idTRCK  = MAGIC4LE('T','R','C','K'), // track number
-		idTURL  = MAGIC4LE('T','U','R','L'), // url
+		idYEAR  = MagicLE("YEAR"), // year
+		idTRCK  = MagicLE("TRCK"), // track number
+		idTURL  = MagicLE("TURL"), // url
 	};
 
 	uint32le id;		// See ChunkIdentifiers

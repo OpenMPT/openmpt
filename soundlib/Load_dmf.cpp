@@ -40,14 +40,14 @@ struct DMFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idCMSG	= MAGIC4LE('C','M','S','G'),	// Song message
-		idSEQU	= MAGIC4LE('S','E','Q','U'),	// Order list
-		idPATT	= MAGIC4LE('P','A','T','T'),	// Patterns
-		idSMPI	= MAGIC4LE('S','M','P','I'),	// Sample headers
-		idSMPD	= MAGIC4LE('S','M','P','D'),	// Sample data
-		idSMPJ	= MAGIC4LE('S','M','P','J'),	// Sample jump table (XTracker 32 only)
-		idENDE	= MAGIC4LE('E','N','D','E'),	// Last four bytes of DMF file
-		idSETT	= MAGIC4LE('S','E','T','T'),	// Probably contains GUI settings
+		idCMSG	= MagicLE("CMSG"),	// Song message
+		idSEQU	= MagicLE("SEQU"),	// Order list
+		idPATT	= MagicLE("PATT"),	// Patterns
+		idSMPI	= MagicLE("SMPI"),	// Sample headers
+		idSMPD	= MagicLE("SMPD"),	// Sample data
+		idSMPJ	= MagicLE("SMPJ"),	// Sample jump table (XTracker 32 only)
+		idENDE	= MagicLE("ENDE"),	// Last four bytes of DMF file
+		idSETT	= MagicLE("SETT"),	// Probably contains GUI settings
 	};
 
 	uint32le id;

@@ -2142,7 +2142,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 {
 	const CModSpecifications &specs = GetModSpecifications();
 	// Extra song data - Yet Another Hack.
-	mpt::IO::WriteIntLE<uint32>(f, MAGIC4BE('M','P','T','S'));
+	mpt::IO::WriteIntLE<uint32>(f, MagicBE("MPTS"));
 
 #define WRITEMODULARHEADER(code, fsize) \
 	{ \
@@ -2160,26 +2160,26 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	if(m_nDefaultTempo.GetInt() > 255)
 	{
 		uint32 tempo = m_nDefaultTempo.GetInt();
-		WRITEMODULAR(MAGIC4BE('D','T','.','.'), tempo);
+		WRITEMODULAR(MagicBE("DT.."), tempo);
 	}
 	if(m_nDefaultTempo.GetFract() != 0 && specs.hasFractionalTempo)
 	{
 		uint32 tempo = m_nDefaultTempo.GetFract();
-		WRITEMODULAR(MAGIC4LE('D','T','F','R'), tempo);
+		WRITEMODULAR(MagicLE("DTFR"), tempo);
 	}
 
-	WRITEMODULAR(MAGIC4BE('R','P','B','.'), m_nDefaultRowsPerBeat);
-	WRITEMODULAR(MAGIC4BE('R','P','M','.'), m_nDefaultRowsPerMeasure);
+	WRITEMODULAR(MagicBE("RPB."), m_nDefaultRowsPerBeat);
+	WRITEMODULAR(MagicBE("RPM."), m_nDefaultRowsPerMeasure);
 
 	if(GetType() != MOD_TYPE_XM)
 	{
-		WRITEMODULAR(MAGIC4BE('C','.','.','.'), m_nChannels);
+		WRITEMODULAR(MagicBE("C..."), m_nChannels);
 	}
 
 	if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumChannels() > 64)
 	{
 		// IT header has only room for 64 channels. Save the settings that do not fit to the header here as an extension.
-		WRITEMODULARHEADER(MAGIC4BE('C','h','n','S'), (GetNumChannels() - 64) * 2);
+		WRITEMODULARHEADER(MagicBE("ChnS"), (GetNumChannels() - 64) * 2);
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];
@@ -2192,36 +2192,36 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	}
 
 	{
-		WRITEMODULARHEADER(MAGIC4BE('T','M','.','.'), 1);
+		WRITEMODULARHEADER(MagicBE("TM.."), 1);
 		uint8 mode = static_cast<uint8>(m_nTempoMode);
 		mpt::IO::WriteIntLE(f, mode);
 	}
 
 	const int32 tmpMixLevels = static_cast<int32>(m_nMixLevels);
-	WRITEMODULAR(MAGIC4BE('P','M','M','.'), tmpMixLevels);
+	WRITEMODULAR(MagicBE("PMM."), tmpMixLevels);
 
 	if(m_dwCreatedWithVersion)
 	{
-		WRITEMODULAR(MAGIC4BE('C','W','V','.'), m_dwCreatedWithVersion);
+		WRITEMODULAR(MagicBE("CWV."), m_dwCreatedWithVersion);
 	}
 
-	WRITEMODULAR(MAGIC4BE('L','S','W','V'), MptVersion::num);
-	WRITEMODULAR(MAGIC4BE('S','P','A','.'), m_nSamplePreAmp);
-	WRITEMODULAR(MAGIC4BE('V','S','T','V'), m_nVSTiVolume);
+	WRITEMODULAR(MagicBE("LSWV"), MptVersion::num);
+	WRITEMODULAR(MagicBE("SPA."), m_nSamplePreAmp);
+	WRITEMODULAR(MagicBE("VSTV"), m_nVSTiVolume);
 
 	if(GetType() == MOD_TYPE_XM && m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
 	{
-		WRITEMODULAR(MAGIC4BE('D','G','V','.'), m_nDefaultGlobalVolume);
+		WRITEMODULAR(MagicBE("DGV."), m_nDefaultGlobalVolume);
 	}
 
 	if(GetType() != MOD_TYPE_XM && Order().GetRestartPos() != 0)
 	{
-		WRITEMODULAR(MAGIC4BE('R','P','.','.'), Order().GetRestartPos());
+		WRITEMODULAR(MagicBE("RP.."), Order().GetRestartPos());
 	}
 
 	if(m_nResampling != SRCMODE_DEFAULT && specs.hasDefaultResampling)
 	{
-		WRITEMODULAR(MAGIC4LE('R','S','M','P'), static_cast<uint32>(m_nResampling));
+		WRITEMODULAR(MagicLE("RSMP"), static_cast<uint32>(m_nResampling));
 	}
 
 	// Sample cues
@@ -2235,7 +2235,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 				// Write one chunk for every sample.
 				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
 				// with the amount of samples that OpenMPT supports.
-				WRITEMODULARHEADER(MAGIC4LE('C','U','E','S'), 2 + CountOf(sample.cues) * 4);
+				WRITEMODULARHEADER(MagicLE("CUES"), 2 + CountOf(sample.cues) * 4);
 				mpt::IO::WriteIntLE<uint16>(f, smp);
 				for(std::size_t i = 0; i < CountOf(sample.cues); i++)
 				{
@@ -2252,7 +2252,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		TempoSwing::Serialize(oStrm, m_tempoSwing);
 		std::string data = oStrm.str();
 		uint16 length = mpt::saturate_cast<uint16>(data.size());
-		WRITEMODULARHEADER(MAGIC4LE('S','W','N','G'), length);
+		WRITEMODULARHEADER(MagicLE("SWNG"), length);
 		mpt::IO::WriteRaw(f, data.data(), length);
 	}
 
@@ -2270,7 +2270,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			}
 		}
 		uint16 numBytes = static_cast<uint16>(maxBit / 8u);
-		WRITEMODULARHEADER(MAGIC4BE('M','S','F','.'), numBytes);
+		WRITEMODULARHEADER(MagicBE("MSF."), numBytes);
 		mpt::IO::WriteRaw(f, bits, numBytes);
 	}
 
@@ -2278,7 +2278,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	{
 		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, m_songArtist);
 		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
-		WRITEMODULARHEADER(MAGIC4LE('A','U','T','H'), length);
+		WRITEMODULARHEADER(MagicLE("AUTH"), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
 	}
 
@@ -2292,7 +2292,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			AddToLog("Too many MIDI Mapping directives to save; data won't be written.");
 		} else
 		{
-			WRITEMODULARHEADER(MAGIC4BE('M','I','M','A'), static_cast<uint16>(objectsize));
+			WRITEMODULARHEADER(MagicBE("MIMA"), static_cast<uint16>(objectsize));
 			GetMIDIMapper().Serialize(f);
 		}
 	}
@@ -2341,7 +2341,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 		const uint16 size = file.ReadUint16LE();
 
 		// Start of MPTM extensions, non-ASCII ID or truncated field
-		if(code == MAGIC4LE('2','2','8',4))
+		if(code == MagicLE("228\x04"))
 		{
 			file.SkipBack(6);
 			break;
@@ -2354,35 +2354,35 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 
 		switch (code)					// interpret field code
 		{
-			case MAGIC4BE('D','T','.','.'): { uint32 tempo; ReadField(chunk, size, tempo); m_nDefaultTempo.Set(tempo, m_nDefaultTempo.GetFract()); break; }
-			case MAGIC4LE('D','T','F','R'): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
-			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
-			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
+			case MagicBE("DT.."): { uint32 tempo; ReadField(chunk, size, tempo); m_nDefaultTempo.Set(tempo, m_nDefaultTempo.GetFract()); break; }
+			case MagicLE("DTFR"): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
+			case MagicBE("RPB."): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
+			case MagicBE("RPM."): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
 				// FIXME: If there are only PC events on the last few channels in an MPTM MO3, they won't be imported!
-			case MAGIC4BE('C','.','.','.'): if(GetType() != MOD_TYPE_XM && m_ContainerType != MOD_CONTAINERTYPE_MO3) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = Clamp(chn, m_nChannels, MAX_BASECHANNELS); } break;
-			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
-			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
-			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MAGIC4BE('L','S','W','V'): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
-			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
-			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
-			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
-			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order().SetRestartPos(restartPos); } break;
-			case MAGIC4LE('R','S','M','P'):
+			case MagicBE("C..."): if(GetType() != MOD_TYPE_XM && m_ContainerType != MOD_CONTAINERTYPE_MO3) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = Clamp(chn, m_nChannels, MAX_BASECHANNELS); } break;
+			case MagicBE("TM.."): ReadFieldCast(chunk, size, m_nTempoMode); break;
+			case MagicBE("PMM."): ReadFieldCast(chunk, size, m_nMixLevels); break;
+			case MagicBE("CWV."): ReadField(chunk, size, m_dwCreatedWithVersion); break;
+			case MagicBE("LSWV"): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
+			case MagicBE("SPA."): ReadField(chunk, size, m_nSamplePreAmp); break;
+			case MagicBE("VSTV"): ReadField(chunk, size, m_nVSTiVolume); break;
+			case MagicBE("DGV."): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
+			case MagicBE("RP.."): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order().SetRestartPos(restartPos); } break;
+			case MagicLE("RSMP"):
 				ReadFieldCast(chunk, size, m_nResampling);
 				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
 				break;
 #ifdef MODPLUG_TRACKER
-			case MAGIC4BE('M','I','M','A'): GetMIDIMapper().Deserialize(chunk); break;
+			case MagicBE("MIMA"): GetMIDIMapper().Deserialize(chunk); break;
 #endif
-			case MAGIC4LE('A','U','T','H'):
+			case MagicLE("AUTH"):
 				{
 					std::string artist;
 					chunk.ReadString<mpt::String::spacePadded>(artist, chunk.GetLength());
 					m_songArtist = mpt::ToUnicode(mpt::CharsetUTF8, artist);
 				}
 				break;
-			case MAGIC4BE('C','h','n','S'):
+			case MagicBE("ChnS"):
 				// Channel settings for channels 65+
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
@@ -2406,7 +2406,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 				}
 				break;
 
-			case MAGIC4LE('C','U','E','S'):
+			case MagicLE("CUES"):
 				// Sample cues
 				if(size > 2)
 				{
@@ -2422,7 +2422,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 				}
 				break;
 
-			case MAGIC4LE('S','W','N','G'):
+			case MagicLE("SWNG"):
 				// Tempo Swing Factors
 				if(size > 2)
 				{
@@ -2431,7 +2431,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 				}
 				break;
 
-			case MAGIC4BE('M','S','F','.'):
+			case MagicBE("MSF."):
 				// Playback compatibility flags
 				{
 					size_t bit = 0;

@@ -40,16 +40,16 @@ struct PSMChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idTITL	= MAGIC4LE('T','I','T','L'),
-		idSDFT	= MAGIC4LE('S','D','F','T'),
-		idPBOD	= MAGIC4LE('P','B','O','D'),
-		idSONG	= MAGIC4LE('S','O','N','G'),
-		idDATE	= MAGIC4LE('D','A','T','E'),
-		idOPLH	= MAGIC4LE('O','P','L','H'),
-		idPPAN	= MAGIC4LE('P','P','A','N'),
-		idPATT	= MAGIC4LE('P','A','T','T'),
-		idDSAM	= MAGIC4LE('D','S','A','M'),
-		idDSMP	= MAGIC4LE('D','S','M','P'),
+		idTITL	= MagicLE("TITL"),
+		idSDFT	= MagicLE("SDFT"),
+		idPBOD	= MagicLE("PBOD"),
+		idSONG	= MagicLE("SONG"),
+		idDATE	= MagicLE("DATE"),
+		idOPLH	= MagicLE("OPLH"),
+		idPPAN	= MagicLE("PPAN"),
+		idPATT	= MagicLE("PATT"),
+		idDSAM	= MagicLE("DSAM"),
+		idDSMP	= MagicLE("DSMP"),
 	};
 
 	uint32le id;

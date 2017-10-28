@@ -141,9 +141,9 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 {
 
 	//1. begin marker:
-	int32 beginMarker = 0;
-	mpt::IO::ReadIntLE<int32>(inStrm, beginMarker);
-	if(beginMarker != MAGIC4BE('T','C','S','H'))
+	uint32 beginMarker = 0;
+	mpt::IO::ReadIntLE<uint32>(inStrm, beginMarker);
+	if(beginMarker != MagicBE("TCSH"))	// Magic is reversed in file, hence BE
 		return Tuning::SerializationResult::NoMagic;
 
 	//2. version
@@ -184,9 +184,9 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 	}
 
 	//6. End marker
-	int32 endMarker = 0;
-	mpt::IO::ReadIntLE<int32>(inStrm, endMarker);
-	if(endMarker != MAGIC4BE('T','C','S','F'))
+	uint32 endMarker = 0;
+	mpt::IO::ReadIntLE<uint32>(inStrm, endMarker);
+	if(endMarker != MagicBE("TCSF"))	// Magic is reversed in file, hence BE
 		return Tuning::SerializationResult::Failure;
 	
 	return Tuning::SerializationResult::Success;

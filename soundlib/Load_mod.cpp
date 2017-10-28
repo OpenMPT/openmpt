@@ -450,10 +450,10 @@ struct PT36IffChunk
 	// IFF chunk names
 	enum ChunkIdentifiers
 	{
-		idVERS	= MAGIC4BE('V','E','R','S'),
-		idINFO	= MAGIC4BE('I','N','F','O'),
-		idCMNT	= MAGIC4BE('C','M','N','T'),
-		idPTDT	= MAGIC4BE('P','T','D','T'),
+		idVERS	= MagicBE("VERS"),
+		idINFO	= MagicBE("INFO"),
+		idCMNT	= MagicBE("CMNT"),
+		idPTDT	= MagicBE("PTDT"),
 	};
 
 	uint32be signature;	// IFF chunk name
