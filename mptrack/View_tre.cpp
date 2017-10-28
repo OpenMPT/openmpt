@@ -1697,10 +1697,12 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	FileDialog dlg = OpenFileDialog()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments and Banks|*.xi;*.pat;*.iti;*.sfz;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.mss;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+			"All Instruments and Banks|*.xi;*.pat;*.iti;*.sfz;*.wav;*.w64;*.caf;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.mss;*.flac;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Wave Files (*.wav)|*.wav|"
+			"Wave64 Files (*.w64)|*.w64|"
+			"CAF Files (*.caf)|*.caf|"
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC

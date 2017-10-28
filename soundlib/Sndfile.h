@@ -994,8 +994,10 @@ public:
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false, bool includeInstrumentFormats = true);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false, FileReader *wsmpChunk = nullptr);
+	bool ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
+	bool ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);

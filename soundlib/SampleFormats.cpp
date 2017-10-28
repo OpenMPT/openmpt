@@ -45,6 +45,8 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 	if(!ReadWAVSample(nSample, file, mayNormalize)
 		&& !(includeInstrumentFormats && ReadXISample(nSample, file))
 		&& !(includeInstrumentFormats && ReadITISample(nSample, file))
+		&& !ReadW64Sample(nSample, file)
+		&& !ReadCAFSample(nSample, file)
 		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
 		&& !(includeInstrumentFormats && ReadPATSample(nSample, file))
@@ -547,6 +549,246 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+
+/////////////////
+// Sony Wave64 //
+
+
+struct Wave64FileHeader
+{
+	GUIDms   GuidRIFF;
+	uint64le FileSize;
+	GUIDms   GuidWAVE;
+};
+
+MPT_BINARY_STRUCT(Wave64FileHeader, 40)
+
+
+struct Wave64ChunkHeader
+{
+	GUIDms   GuidChunk;
+	uint64le Size;
+};
+
+MPT_BINARY_STRUCT(Wave64ChunkHeader, 24)
+
+
+struct Wave64Chunk
+{
+	Wave64ChunkHeader header;
+
+	FileReader::off_t GetLength() const
+	{
+		uint64 length = header.Size;
+		if(length < sizeof(Wave64ChunkHeader))
+		{
+			length = 0;
+		} else
+		{
+			length -= sizeof(Wave64ChunkHeader);
+		}
+		return mpt::saturate_cast<FileReader::off_t>(length);
+	}
+
+	mpt::UUID GetID() const
+	{
+		return mpt::UUID(header.GuidChunk);
+	}
+};
+
+MPT_BINARY_STRUCT(Wave64Chunk, 24)
+
+
+static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const ChunkReader::ChunkList<RIFFChunk> & infoChunk, RIFFChunk::ChunkIdentifiers id)
+{
+	if(!infoChunk.ChunkExists(id))
+	{
+		return;
+	}
+	FileReader textChunk = infoChunk.GetChunk(id);
+	if(!textChunk.IsValid())
+	{
+		return;
+	}
+	std::string str;
+	textChunk.ReadString<mpt::String::maybeNullTerminated>(str, textChunk.GetLength());
+	str = mpt::String::Replace(str, std::string("\r\n"), std::string("\n"));
+	str = mpt::String::Replace(str, std::string("\r"), std::string("\n"));
+	dst = mpt::ToUnicode(codePage, mpt::CharsetWindows1252, str);
+}
+
+
+bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
+{
+	file.Rewind();
+
+	constexpr mpt::UUID guidRIFF       = "66666972-912E-11CF-A5D6-28DB04C10000"_uuid;
+	constexpr mpt::UUID guidWAVE       = "65766177-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+
+	constexpr mpt::UUID guidLIST       = "7473696C-912F-11CF-A5D6-28DB04C10000"_uuid;
+	constexpr mpt::UUID guidFMT        = "20746D66-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+	//constexpr mpt::UUID guidFACT       = "74636166-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+	constexpr mpt::UUID guidDATA       = "61746164-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+	//constexpr mpt::UUID guidLEVL       = "6C76656C-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+	//constexpr mpt::UUID guidJUNK       = "6b6E756A-ACF3-11D3-8CD1-00C04f8EDB8A"_uuid;
+	//constexpr mpt::UUID guidBEXT       = "74786562-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+	//constexpr mpt::UUID guiMARKER      = "ABF76256-392D-11D2-86C7-00C04F8EDB8A"_uuid;
+	//constexpr mpt::UUID guiSUMMARYLIST = "925F94BC-525A-11D2-86DC-00C04F8EDB8A"_uuid;
+
+	constexpr mpt::UUID guidCSET       = "54455343-ACF3-11D3-8CD1-00C04F8EDB8A"_uuid;
+
+	Wave64FileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(mpt::UUID(fileHeader.GuidRIFF) != guidRIFF)
+	{
+		return false;
+	}
+	if(mpt::UUID(fileHeader.GuidWAVE) != guidWAVE)
+	{
+		return false;
+	}
+	if(fileHeader.FileSize != file.GetLength())
+	{
+		return false;
+	}
+
+	ChunkReader chunkFile = file;
+	auto chunkList = chunkFile.ReadChunks<Wave64Chunk>(8);
+
+	if(!chunkList.ChunkExists(guidFMT))
+	{
+		return false;
+	}
+	FileReader formatChunk = chunkList.GetChunk(guidFMT);
+	WAVFormatChunk format;
+	if(!formatChunk.ReadStruct(format))
+	{
+		return false;
+	}
+	uint16 sampleFormat = format.format;
+	if(format.format == WAVFormatChunk::fmtExtensible)
+	{
+		WAVFormatChunkExtension formatExt;
+		if(!formatChunk.ReadStruct(formatExt))
+		{
+			return false;
+		}
+		sampleFormat = static_cast<uint16>(mpt::UUID(formatExt.subFormat).GetData1());
+	}
+	if(format.sampleRate == 0)
+	{
+		return false;
+	}
+	if(format.numChannels == 0)
+	{
+		return false;
+	}
+	if(format.numChannels > 2)
+	{
+		return false;
+	}
+	if(sampleFormat != WAVFormatChunk::fmtPCM && sampleFormat != WAVFormatChunk::fmtFloat)
+	{
+		return false;
+	}
+	if(sampleFormat == WAVFormatChunk::fmtFloat && format.bitsPerSample != 32 && format.bitsPerSample != 64)
+	{
+		return false;
+	}
+	if(sampleFormat == WAVFormatChunk::fmtPCM && format.bitsPerSample > 64)
+	{
+		return false;
+	}
+
+	SampleIO::Bitdepth bitDepth;
+	switch((format.bitsPerSample - 1) / 8u)
+	{
+	default:
+	case 0: bitDepth = SampleIO::_8bit ; break;
+	case 1: bitDepth = SampleIO::_16bit; break;
+	case 2: bitDepth = SampleIO::_24bit; break;
+	case 3: bitDepth = SampleIO::_32bit; break;
+	case 7: bitDepth = SampleIO::_64bit; break;
+	}
+	SampleIO sampleIO(
+		bitDepth,
+		(format.numChannels > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
+		SampleIO::littleEndian,
+		(sampleFormat == WAVFormatChunk::fmtFloat) ? SampleIO::floatPCM : SampleIO::signedPCM);
+	if(format.bitsPerSample <= 8)
+	{
+		sampleIO |= SampleIO::unsignedPCM;
+	}
+	if(mayNormalize)
+	{
+		sampleIO.MayNormalize();
+	}
+
+	FileTags tags;
+
+	uint16 codePage = 28591; // mpt::CharsetISO8859_1
+	FileReader csetChunk = chunkList.GetChunk(guidCSET);
+	if(csetChunk.IsValid())
+	{
+		if(csetChunk.CanRead(2))
+		{
+			codePage = csetChunk.ReadUint16LE();
+		}
+	}
+
+	if(chunkList.ChunkExists(guidLIST))
+	{
+		ChunkReader listChunk = chunkList.GetChunk(guidLIST);
+		if(listChunk.ReadMagic("INFO"))
+		{
+			auto infoChunk = listChunk.ReadChunks<RIFFChunk>(2);
+			Wave64TagFromLISTINFO(tags.title, codePage, infoChunk, RIFFChunk::idINAM);
+			Wave64TagFromLISTINFO(tags.encoder, codePage, infoChunk, RIFFChunk::idISFT);
+			//Wave64TagFromLISTINFO(void, codePage, infoChunk, RIFFChunk::idICOP);
+			Wave64TagFromLISTINFO(tags.artist, codePage, infoChunk, RIFFChunk::idIART);
+			Wave64TagFromLISTINFO(tags.album, codePage, infoChunk, RIFFChunk::idIPRD);
+			Wave64TagFromLISTINFO(tags.comments, codePage, infoChunk, RIFFChunk::idICMT);
+			//Wave64TagFromLISTINFO(void, codePage, infoChunk, RIFFChunk::idIENG);
+			//Wave64TagFromLISTINFO(void, codePage, infoChunk, RIFFChunk::idISBJ);
+			Wave64TagFromLISTINFO(tags.genre, codePage, infoChunk, RIFFChunk::idIGNR);
+			//Wave64TagFromLISTINFO(void, codePage, infoChunk, RIFFChunk::idICRD);
+			Wave64TagFromLISTINFO(tags.year, codePage, infoChunk, RIFFChunk::idYEAR);
+			Wave64TagFromLISTINFO(tags.trackno, codePage, infoChunk, RIFFChunk::idTRCK);
+			Wave64TagFromLISTINFO(tags.url, codePage, infoChunk, RIFFChunk::idTURL);
+			//Wave64TagFromLISTINFO(tags.bpm, codePage, infoChunk, void);
+		}
+	}
+
+	if(!chunkList.ChunkExists(guidDATA))
+	{
+		return false;
+	}
+	FileReader audioData = chunkList.GetChunk(guidDATA);
+	
+	SmpLength length = mpt::saturate_cast<SmpLength>(audioData.GetLength() / (sampleIO.GetEncodedBitsPerSample()/8));
+
+	ModSample &mptSample = Samples[nSample];
+	DestroySampleThreadsafe(nSample);
+	mptSample.Initialize();
+	mptSample.nLength = length;
+	mptSample.nC5Speed = format.sampleRate;
+
+	sampleIO.ReadSample(mptSample, audioData);
+
+	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
+
+	mptSample.Convert(MOD_TYPE_IT, GetType());
+	mptSample.PrecomputeLoops(*this, false);
+
+	return true;
+
+}
+
 
 
 #ifndef MODPLUG_NO_FILESAVE
@@ -1817,6 +2059,319 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX, FileReader &)
 	return false;
 }
 #endif // MPT_EXTERNAL_SAMPLES
+
+
+
+///////////////
+// Apple CAF //
+
+
+struct CAFFileHeader
+{
+	uint32be mFileType;
+	uint16be mFileVersion;
+	uint16be mFileFlags;
+};
+
+MPT_BINARY_STRUCT(CAFFileHeader, 8)
+
+
+struct CAFChunkHeader
+{
+	uint32be mChunkType;
+	int64be  mChunkSize;
+};
+
+MPT_BINARY_STRUCT(CAFChunkHeader, 12)
+
+
+struct CAFChunk
+{
+	enum ChunkIdentifiers
+	{
+		iddesc = MagicBE("desc"),
+		iddata = MagicBE("data"),
+		idstrg = MagicBE("strg"),
+		idinfo = MagicBE("info")
+	};
+
+	CAFChunkHeader header;
+
+	FileReader::off_t GetLength() const
+	{
+		int64 length = header.mChunkSize;
+		if(length == -1)
+		{
+			length = std::numeric_limits<int64>::max(); // spec
+		}
+		if(length < 0)
+		{
+			length = std::numeric_limits<int64>::max(); // heuristic
+		}
+		return mpt::saturate_cast<FileReader::off_t>(length);
+	}
+
+	ChunkIdentifiers GetID() const
+	{
+		return static_cast<ChunkIdentifiers>(header.mChunkType.get());
+	}
+};
+
+MPT_BINARY_STRUCT(CAFChunk, 12)
+
+
+enum {
+	CAFkAudioFormatLinearPCM      = MagicBE("lpcm"),
+	CAFkAudioFormatAppleIMA4      = MagicBE("ima4"),
+	CAFkAudioFormatMPEG4AAC       = MagicBE("aac "),
+	CAFkAudioFormatMACE3          = MagicBE("MAC3"),
+	CAFkAudioFormatMACE6          = MagicBE("MAC6"),
+	CAFkAudioFormatULaw           = MagicBE("ulaw"),
+	CAFkAudioFormatALaw           = MagicBE("alaw"),
+	CAFkAudioFormatMPEGLayer1     = MagicBE(".mp1"),
+	CAFkAudioFormatMPEGLayer2     = MagicBE(".mp2"),
+	CAFkAudioFormatMPEGLayer3     = MagicBE(".mp3"),
+	CAFkAudioFormatAppleLossless  = MagicBE("alac")
+};
+
+
+enum {
+	CAFkCAFLinearPCMFormatFlagIsFloat         = (1L << 0),
+	CAFkCAFLinearPCMFormatFlagIsLittleEndian  = (1L << 1)
+};
+
+
+struct CAFAudioFormat
+{
+	IEEE754binary64BE mSampleRate;
+	uint32be          mFormatID;
+	uint32be          mFormatFlags;
+	uint32be          mBytesPerPacket;
+	uint32be          mFramesPerPacket;
+	uint32be          mChannelsPerFrame;
+	uint32be          mBitsPerChannel;
+};
+
+MPT_BINARY_STRUCT(CAFAudioFormat, 32)
+
+
+static void CAFSetTagFromInfoKey(mpt::ustring & dst, const std::map<std::string,std::string> & infoMap, const std::string & key)
+{
+	auto item = infoMap.find(key);
+	if(item == infoMap.end())
+	{
+		return;
+	}
+	if(item->second.empty())
+	{
+		return;
+	}
+	dst = mpt::ToUnicode(mpt::CharsetUTF8, item->second);
+}
+
+
+bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
+{
+	file.Rewind();
+
+	CAFFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(fileHeader.mFileType != MagicBE("caff"))
+	{
+		return false;
+	}
+	if(fileHeader.mFileVersion != 1)
+	{
+		return false;
+	}
+
+	ChunkReader chunkFile = file;
+	auto chunkList = chunkFile.ReadChunks<CAFChunk>(0);
+
+	CAFAudioFormat audioFormat;
+	if(!chunkList.GetChunk(CAFChunk::iddesc).ReadStruct(audioFormat))
+	{
+		return false;
+	}
+	if(audioFormat.mSampleRate <= 0.0)
+	{
+		return false;
+	}
+	if(audioFormat.mChannelsPerFrame == 0)
+	{
+		return false;
+	}
+	if(audioFormat.mChannelsPerFrame > 2)
+	{
+		return false;
+	}
+
+	if(!Util::TypeCanHoldValue<uint32>(Util::Round<int64>(audioFormat.mSampleRate)))
+	{
+		return false;
+	}
+	uint32 sampleRate = static_cast<uint32>(Util::Round<int64>(audioFormat.mSampleRate));
+	if(sampleRate <= 0)
+	{
+		return false;
+	}
+
+	SampleIO sampleIO;
+	if(audioFormat.mFormatID == CAFkAudioFormatLinearPCM)
+	{
+		if(audioFormat.mFramesPerPacket != 1)
+		{
+			return false;
+		}
+		if(audioFormat.mBytesPerPacket == 0)
+		{
+			return false;
+		}
+		if(audioFormat.mBitsPerChannel == 0)
+		{
+			return false;
+		}
+		if(audioFormat.mFormatFlags & CAFkCAFLinearPCMFormatFlagIsFloat)
+		{
+			if(audioFormat.mBitsPerChannel != 32 && audioFormat.mBitsPerChannel != 64)
+			{
+				return false;
+			}
+			if(audioFormat.mBytesPerPacket != audioFormat.mChannelsPerFrame * audioFormat.mBitsPerChannel/8)
+			{
+				return false;
+			}
+		}
+		if(audioFormat.mBytesPerPacket % audioFormat.mChannelsPerFrame != 0)
+		{
+			return false;
+		}
+		if(audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame != 1
+			&& audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame != 2
+			&& audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame != 3
+			&& audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame != 4
+			&& audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame != 8
+			)
+		{
+			return false;
+		}
+		SampleIO::Channels channels = (audioFormat.mChannelsPerFrame == 2) ? SampleIO::stereoInterleaved : SampleIO::mono;
+		SampleIO::Endianness endianness = (audioFormat.mFormatFlags & CAFkCAFLinearPCMFormatFlagIsLittleEndian) ? SampleIO::littleEndian : SampleIO::bigEndian;
+		SampleIO::Encoding encoding = (audioFormat.mFormatFlags & CAFkCAFLinearPCMFormatFlagIsFloat) ? SampleIO::floatPCM : SampleIO::signedPCM;
+		SampleIO::Bitdepth bitdepth = static_cast<SampleIO::Bitdepth>((audioFormat.mBytesPerPacket / audioFormat.mChannelsPerFrame) * 8);
+		sampleIO = SampleIO(bitdepth, channels, endianness, encoding);
+	} else
+	{
+		return false;
+	}
+
+	if(mayNormalize)
+	{
+		sampleIO.MayNormalize();
+	}
+
+	/*
+	std::map<uint32, std::string> stringMap; // UTF-8
+	if(chunkList.ChunkExists(CAFChunk::idstrg))
+	{
+		FileReader stringsChunk = chunkList.GetChunk(CAFChunk::idstrg);
+		uint32 numEntries = stringsChunk.ReadUint32BE();
+		if(stringsChunk.Skip(12 * numEntries))
+		{
+			FileReader stringData = stringsChunk.ReadChunk(stringsChunk.BytesLeft());
+			stringsChunk.Seek(4);
+			for(uint32 entry = 0; entry < numEntries && stringsChunk.CanRead(12); entry++)
+			{
+				uint32 stringID = stringsChunk.ReadUint32BE();
+				int64 offset = stringsChunk.ReadIntBE<int64>();
+				if(offset >= 0 && Util::TypeCanHoldValue<FileReader::off_t>(offset))
+				{
+					stringData.Seek(mpt::saturate_cast<FileReader::off_t>(offset));
+					std::string str;
+					if(stringData.ReadNullString(str))
+					{
+						stringMap[stringID] = str;
+					}
+				}
+			}
+		}
+	}
+	*/
+
+	std::map<std::string, std::string> infoMap; // UTF-8
+	if(chunkList.ChunkExists(CAFChunk::idinfo))
+	{
+		FileReader informationChunk = chunkList.GetChunk(CAFChunk::idinfo);
+		uint32 numEntries = informationChunk.ReadUint32BE();
+		for(uint32 entry = 0; entry < numEntries && informationChunk.CanRead(2); entry++)
+		{
+			std::string key;
+			std::string value;
+			if(!informationChunk.ReadNullString(key))
+			{
+				break;
+			}
+			if(!informationChunk.ReadNullString(value))
+			{
+				break;
+			}
+			if(!key.empty() && !value.empty())
+			{
+				infoMap[key] = value;
+			}
+		}
+	}
+	FileTags tags;
+	CAFSetTagFromInfoKey(tags.bpm, infoMap, "tempo");
+	//CAFSetTagFromInfoKey(void, infoMap, "key signature");
+	//CAFSetTagFromInfoKey(void, infoMap, "time signature");
+	CAFSetTagFromInfoKey(tags.artist, infoMap, "artist");
+	CAFSetTagFromInfoKey(tags.album, infoMap, "album");
+	CAFSetTagFromInfoKey(tags.trackno, infoMap, "track number");
+	CAFSetTagFromInfoKey(tags.year, infoMap, "year");
+	//CAFSetTagFromInfoKey(void, infoMap, "composer");
+	//CAFSetTagFromInfoKey(void, infoMap, "lyricist");
+	CAFSetTagFromInfoKey(tags.genre, infoMap, "genre");
+	CAFSetTagFromInfoKey(tags.title, infoMap, "title");
+	//CAFSetTagFromInfoKey(void, infoMap, "recorded date");
+	CAFSetTagFromInfoKey(tags.comments, infoMap, "comments");
+	//CAFSetTagFromInfoKey(void, infoMap, "copyright");
+	//CAFSetTagFromInfoKey(void, infoMap, "source encoder");
+	CAFSetTagFromInfoKey(tags.encoder, infoMap, "encoding application");
+	//CAFSetTagFromInfoKey(void, infoMap, "nominal bit rate");
+	//CAFSetTagFromInfoKey(void, infoMap, "channel layout");
+	//CAFSetTagFromInfoKey(tags.url, infoMap, void);
+
+	if(!chunkList.ChunkExists(CAFChunk::iddata))
+	{
+		return false;
+	}
+	FileReader dataChunk = chunkList.GetChunk(CAFChunk::iddata);
+	dataChunk.Skip(4);  // edit count
+	FileReader audioData = dataChunk.ReadChunk(dataChunk.BytesLeft());
+	
+	SmpLength length = mpt::saturate_cast<SmpLength>((audioData.GetLength() / audioFormat.mBytesPerPacket) * audioFormat.mFramesPerPacket);
+
+	ModSample &mptSample = Samples[nSample];
+	DestroySampleThreadsafe(nSample);
+	mptSample.Initialize();
+	mptSample.nLength = length;
+	mptSample.nC5Speed = sampleRate;
+
+	sampleIO.ReadSample(mptSample, audioData);
+
+	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
+
+	mptSample.Convert(MOD_TYPE_IT, GetType());
+	mptSample.PrecomputeLoops(*this, false);
+
+	return true;
+
+}
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
