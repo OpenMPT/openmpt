@@ -471,7 +471,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
-			theApp.OpenDocumentFile(file);
+			theApp.OpenDocumentFile(file.ToCString());
 		}
 	}
 	::DragFinish(hDropInfo);
@@ -2187,7 +2187,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules") : theApp.GetAppDirPath() + MPT_PATHSTRING("ExampleSongs"));
 		for(const auto &file : files)
 		{
-			theApp.OpenDocumentFile(file);
+			theApp.OpenDocumentFile(file.ToCString());
 		}
 	}
 }
@@ -2208,7 +2208,7 @@ void CMainFrame::OnExampleSong(UINT nId)
 void CMainFrame::OnOpenMRUItem(UINT nId)
 {
 	mpt::PathString file = TrackerSettings::Instance().mruFiles[nId - ID_MRU_LIST_FIRST];
-	theApp.OpenDocumentFile(file);
+	theApp.OpenDocumentFile(file.ToCString());
 }
 
 

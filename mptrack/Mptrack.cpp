@@ -66,8 +66,10 @@ STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT))
 
 const char *szHexChar = "0123456789ABCDEF";
 
-CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
+CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru, BOOL makeVisible)
 {
+	const mpt::PathString filename = (lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString());
+
 	if(filename.IsDirectory())
 	{
 		CDocument *pDoc = nullptr;
@@ -82,7 +84,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 			{
 				if(wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
 				{
-					pDoc = OpenDocumentFile(path + mpt::PathString::FromNative(wfd.cFileName), addToMru, makeVisible);
+					pDoc = OpenDocumentFile((path + mpt::PathString::FromNative(wfd.cFileName)).ToCString(), addToMru, makeVisible);
 				}
 			} while (FindNextFileW(hFind, &wfd));
 			FindClose(hFind);
@@ -105,7 +107,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 		theApp.RemoveMruItem(filename);
 	}
 
-	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
+	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : filename.ToCString().GetString(), addToMru, makeVisible);
 	if(pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -140,7 +142,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 
 CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
 {
-	CDocument *doc = OpenDocumentFile(filename, isExampleTune ? TRUE : FALSE, TRUE);
+	CDocument *doc = OpenDocumentFile(filename.ToCString(), isExampleTune ? TRUE : FALSE, TRUE);
 	if(doc)
 	{
 		CModDoc *modDoc = static_cast<CModDoc *>(doc);
@@ -187,14 +189,6 @@ class CModDocManager: public CDocManager
 public:
 	CModDocManager() {}
 	virtual BOOL OnDDECommand(LPTSTR lpszCommand);
-	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName)
-	{
-		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString());
-	}
-	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename)
-	{
-		return CDocManager::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
-	}
 };
 
 
@@ -238,13 +232,13 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			{
 				bResult = TRUE;
 				bActivate = TRUE;
-				OpenDocumentFile(mpt::PathString::FromCString(pszData));
+				OpenDocumentFile(pszData);
 			}
 		} else
 		// New
 		if (!lstrcmpi(pszCmd, _T("New")))
 		{
-			OpenDocumentFile(mpt::PathString());
+			OpenDocumentFile(_T(""));
 			bResult = TRUE;
 			bActivate = TRUE;
 		}
@@ -637,7 +631,7 @@ CTrackApp::CTrackApp()
 
 void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 {
-	AddToRecentFileList(mpt::PathString::TunnelOutofCString(lpszPathName));
+	AddToRecentFileList(mpt::PathString::FromCString(lpszPathName));
 }
 
 
@@ -1465,7 +1459,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 	}
 
 	SetDefaultDocType(newType);
-	return static_cast<CModDoc *>(m_pModTemplate->OpenDocumentFile(mpt::PathString()));
+	return static_cast<CModDoc *>(m_pModTemplate->OpenDocumentFile(_T("")));
 }
 
 
@@ -1513,7 +1507,7 @@ void CTrackApp::OnFileOpen()
 	OpenModulesDialog(files);
 	for(const auto &file : files)
 	{
-		OpenDocumentFile(file);
+		OpenDocumentFile(file.ToCString());
 	}
 }
 
