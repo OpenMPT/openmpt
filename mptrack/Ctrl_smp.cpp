@@ -3353,7 +3353,7 @@ CCtrlSamples::SampleSelectionPoints CCtrlSamples::GetSelectionPoints()
 	SAMPLEVIEWSTATE viewstate;
 	const ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	MemsetZero(viewstate);
+	Clear(viewstate);
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	points.nStart = viewstate.dwBeginSel;
 	points.nEnd = viewstate.dwEndSel;
@@ -3379,7 +3379,7 @@ void CCtrlSamples::SetSelectionPoints(SmpLength nStart, SmpLength nEnd)
 	Limit(nEnd, SmpLength(0), sample.nLength);
 
 	SAMPLEVIEWSTATE viewstate;
-	MemsetZero(viewstate);
+	Clear(viewstate);
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 
 	viewstate.dwBeginSel = nStart;
