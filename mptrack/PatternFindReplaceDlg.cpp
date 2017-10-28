@@ -374,6 +374,7 @@ void CFindReplaceTab::UpdateParamList()
 	int effectIndex = m_cbnCommand.GetItemData(m_cbnCommand.GetCurSel());
 	ModCommand::PARAM n = 0; // unused parameter adjustment
 	ModCommand::COMMAND cmd = m_effectInfo.GetEffectFromIndex(effectIndex, n);
+	const UINT mask = m_effectInfo.GetEffectMaskFromIndex(effectIndex);
 	if(m_isReplaceTab)
 		m_settings.replaceCommand = cmd;
 	else
@@ -393,17 +394,19 @@ void CFindReplaceTab::UpdateParamList()
 		findParam &= 0x0F;
 		if(!m_isReplaceTab && !IsDlgButtonChecked(IDC_CHECK6))
 		{
-			UINT mask = m_effectInfo.GetEffectMaskFromIndex(effectIndex);
 			m_settings.findParamMin = (m_settings.findParamMin & 0x0F) | mask;
 			m_settings.findParamMax = (m_settings.findParamMax & 0x0F) | mask;
+		} else if(m_isReplaceTab)
+		{
+			m_settings.replaceParam |= mask;
 		}
-
 	}
+
 	if(oldcount != newcount)
 	{
 		TCHAR s[16];
 		int newpos;
-		if(oldcount)
+		if(oldcount && m_cbnParam.GetCurSel() != CB_ERR)
 			newpos = m_cbnParam.GetItemData(m_cbnParam.GetCurSel());
 		else
 			newpos = findParam;
@@ -422,6 +425,12 @@ void CFindReplaceTab::UpdateParamList()
 				sel = 0;
 			else if(m_settings.replaceParamAction == FindReplace::ReplaceMultiply)
 				sel = 1;
+
+			m_settings.replaceParam = newpos;
+			if(isExtended)
+			{
+				m_settings.replaceParam = (m_settings.replaceParam & 0x0F) | mask;
+			}
 		} else
 		{
 			m_cbnParam.SetItemData(m_cbnParam.AddString(_T("Range")), kFindRange);
