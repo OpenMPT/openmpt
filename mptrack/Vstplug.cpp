@@ -33,7 +33,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-VstTimeInfo CVstPlugin::timeInfo = { 0 };
+static VstTimeInfo g_timeInfoFallback = { 0 };
 
 typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
@@ -228,10 +228,12 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 	// returns const VstTimeInfo* (or 0 if not supported)
 	// <value> should contain a mask indicating which fields are required
 	case audioMasterGetTime:
-		MemsetZero(timeInfo);
 
 		if(pVstPlugin)
 		{
+			VstTimeInfo & timeInfo = pVstPlugin->timeInfo;
+			MemsetZero(timeInfo);
+
 			timeInfo.sampleRate = pVstPlugin->m_nSampleRate;
 			CSoundFile &sndFile = pVstPlugin->GetSoundFile();
 			if(pVstPlugin->IsSongPlaying())
@@ -297,8 +299,12 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 				timeInfo.timeSigNumerator = std::max(sndFile.m_PlayState.m_nCurrentRowsPerMeasure, rpb) / rpb;
 				timeInfo.timeSigDenominator = 4; //mpt::gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
+			return ToVstPtr(&timeInfo);
+		} else
+		{
+			MemsetZero(g_timeInfoFallback);
+			return ToVstPtr(&g_timeInfoFallback);
 		}
-		return ToVstPtr(&timeInfo);
 
 	// Receive MIDI events from plugin
 	case audioMasterProcessEvents:
@@ -816,6 +822,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	, m_isInitialized(false)
 	, m_bNeedIdle(false)
 {
+	MemsetZero(timeInfo);
 	// Open plugin and initialize data structures
 	Initialize();
 	InsertIntoFactoryList();
