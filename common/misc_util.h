@@ -175,6 +175,35 @@ MPT_CONSTEXPR11_FUN auto wrapping_divide(T x, D d) -> decltype(x / d)
 } // namespace mpt
 
 
+template <typename T>
+struct value_initializer
+{
+	inline void operator () (T & x)
+	{
+		x = T();
+	}
+};
+
+template <typename T, std::size_t N>
+struct value_initializer<T[N]>
+{
+	inline void operator () (T (& a)[N])
+	{
+		for(auto & e : a)
+		{
+			value_initializer<T>()(e);
+		}
+	}
+};
+
+template <typename T>
+inline void Clear(T & x)
+{
+	MPT_STATIC_ASSERT(!std::is_pointer<T>::value);
+	value_initializer<T>()(x);
+}
+
+
 // Memset given object to zero.
 template <class T>
 inline void MemsetZero(T &a)
@@ -182,10 +211,10 @@ inline void MemsetZero(T &a)
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 #if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	//MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
+	MPT_STATIC_ASSERT(std::is_trivial<T>::value); // approximation
 #else // default
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	MPT_STATIC_ASSERT(std::is_trivially_copyable<T>::value); // C++11, but not supported on most compilers we care about
+	MPT_STATIC_ASSERT(std::is_trivially_constructible<T>::value); // C++11, but not supported on most compilers we care about
 #endif
 	std::memset(&a, 0, sizeof(T));
 }
