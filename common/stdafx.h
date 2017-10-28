@@ -93,6 +93,8 @@ struct IUnknown;
 // <cstring>
 // <time.h>
 
+#include <array>
+
 // for std::abs
 #include <cstdlib>
 #include <stdlib.h>
