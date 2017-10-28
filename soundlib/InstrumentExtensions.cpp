@@ -304,37 +304,37 @@ if(!writeAll)
 	MPT_ASSERT(fixedsize > 0);
 }
 
-	WRITE_MPTHEADER_sized_member(	nFadeOut					, uint32	, MAGIC4BE('F','O','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nPan						, uint32	, MAGIC4BE('P','.','.','.')	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.size()				, uint32	, MAGIC4BE('V','E','.','.')	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.size()				, uint32	, MAGIC4BE('P','E','.','.')	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.size()				, uint32	, MAGIC4BE('P','i','E','.')	)
-	WRITE_MPTHEADER_sized_member(	wMidiBank					, uint16	, MAGIC4BE('M','B','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nMidiProgram				, uint8		, MAGIC4BE('M','P','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nMidiChannel				, uint8		, MAGIC4BE('M','C','.','.')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, tick		, uint16	, MAGIC4BE('V','P','[','.')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, tick		, uint16	, MAGIC4BE('P','P','[','.')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, tick		, uint16	, MAGIC4BE('P','i','P','[')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, value		, uint8		, MAGIC4BE('V','E','[','.')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, value		, uint8		, MAGIC4BE('P','E','[','.')	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, value		, uint8		, MAGIC4BE('P','i','E','[')	)
-	WRITE_MPTHEADER_sized_member(	nMixPlug					, uint8		, MAGIC4BE('M','i','P','.')	)
-	WRITE_MPTHEADER_sized_member(	nVolRampUp					, uint16	, MAGIC4BE('V','R','.','.')	)
-	WRITE_MPTHEADER_trunc_member(	nResampling					, uint16	, MAGIC4BE('R','.','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nCutSwing					, uint8		, MAGIC4BE('C','S','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nResSwing					, uint8		, MAGIC4BE('R','S','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nFilterMode					, uint8		, MAGIC4BE('F','M','.','.')	)
-	WRITE_MPTHEADER_sized_member(	nPluginVelocityHandling		, uint8		, MAGIC4BE('P','V','E','H')	)
-	WRITE_MPTHEADER_sized_member(	nPluginVolumeHandling		, uint8		, MAGIC4BE('P','V','O','H')	)
-	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetInt()	, uint16	, MAGIC4BE('P','T','T','L')	)
-	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetFract() , uint16	, MAGIC4LE('P','T','T','F')	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode		, uint8		, MAGIC4BE('P','E','R','N')	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode			, uint8		, MAGIC4BE('A','E','R','N')	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode			, uint8		, MAGIC4BE('V','E','R','N')	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags			, uint32	, MAGIC4BE('P','F','L','G')	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags				, uint32	, MAGIC4BE('A','F','L','G')	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags				, uint32	, MAGIC4BE('V','F','L','G')	)
-	WRITE_MPTHEADER_sized_member(	midiPWD						, int8		, MAGIC4BE('M','P','W','D')	)
+	WRITE_MPTHEADER_sized_member(	nFadeOut					, uint32	, MagicBE("FO..")	)
+	WRITE_MPTHEADER_sized_member(	nPan						, uint32	, MagicBE("P...")	)
+	WRITE_MPTHEADER_sized_member(	VolEnv.size()				, uint32	, MagicBE("VE..")	)
+	WRITE_MPTHEADER_sized_member(	PanEnv.size()				, uint32	, MagicBE("PE..")	)
+	WRITE_MPTHEADER_sized_member(	PitchEnv.size()				, uint32	, MagicBE("PiE.")	)
+	WRITE_MPTHEADER_sized_member(	wMidiBank					, uint16	, MagicBE("MB..")	)
+	WRITE_MPTHEADER_sized_member(	nMidiProgram				, uint8		, MagicBE("MP..")	)
+	WRITE_MPTHEADER_sized_member(	nMidiChannel				, uint8		, MagicBE("MC..")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, tick		, uint16	, MagicBE("VP[.")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, tick		, uint16	, MagicBE("PP[.")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, tick		, uint16	, MagicBE("PiP[")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, value		, uint8		, MagicBE("VE[.")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, value		, uint8		, MagicBE("PE[.")	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, value		, uint8		, MagicBE("PiE[")	)
+	WRITE_MPTHEADER_sized_member(	nMixPlug					, uint8		, MagicBE("MiP.")	)
+	WRITE_MPTHEADER_sized_member(	nVolRampUp					, uint16	, MagicBE("VR..")	)
+	WRITE_MPTHEADER_trunc_member(	nResampling					, uint16	, MagicBE("R...")	)
+	WRITE_MPTHEADER_sized_member(	nCutSwing					, uint8		, MagicBE("CS..")	)
+	WRITE_MPTHEADER_sized_member(	nResSwing					, uint8		, MagicBE("RS..")	)
+	WRITE_MPTHEADER_sized_member(	nFilterMode					, uint8		, MagicBE("FM..")	)
+	WRITE_MPTHEADER_sized_member(	nPluginVelocityHandling		, uint8		, MagicBE("PVEH")	)
+	WRITE_MPTHEADER_sized_member(	nPluginVolumeHandling		, uint8		, MagicBE("PVOH")	)
+	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetInt()	, uint16	, MagicBE("PTTL")	)
+	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetFract() , uint16	, MagicLE("PTTF")	)
+	WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode		, uint8		, MagicBE("PERN")	)
+	WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode			, uint8		, MagicBE("AERN")	)
+	WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode			, uint8		, MagicBE("VERN")	)
+	WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags			, uint32	, MagicBE("PFLG")	)
+	WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags				, uint32	, MagicBE("AFLG")	)
+	WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags				, uint32	, MagicBE("VFLG")	)
+	WRITE_MPTHEADER_sized_member(	midiPWD						, int8		, MagicBE("MPWD")	)
 }
 
 
@@ -345,35 +345,35 @@ if(!writeAll)
 // too late to turn back....
 void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE *f) const
 {
-	uint32 code = MAGIC4BE('M','P','T','X');	// write extension header code
+	uint32 code = MagicBE("MPTX");	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
 
 	if (nInstruments == 0)
 		return;
 
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','R','.','.'), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','i','P','.'), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','C','.','.'), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','S','.','.'), sizeof(ModInstrument().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','M','.','.'), sizeof(ModInstrument().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','R','N'), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('A','E','R','N'), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','R','N'), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','T','T','L'), sizeof(uint16),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4LE('P','T','T','F'), sizeof(uint16),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','E','H'), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','O','H'), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("VR.."), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("MiP."), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("MC.."), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("MP.."), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("MB.."), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("P..."), sizeof(ModInstrument().nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("FO.."), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("R..."), sizeof(ModInstrument().nResampling), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("CS.."), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("RS.."), sizeof(ModInstrument().nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("FM.."), sizeof(ModInstrument().nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("PERN"), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("AERN"), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("VERN"), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("PVEH"), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MagicBE("PVOH"), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
 
 	if(!(GetType() & MOD_TYPE_XM))
 	{
 		// XM instrument headers already have support for this
-		WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','W','D'), sizeof(ModInstrument().midiPWD), f, nInstruments);
+		WriteInstrumentPropertyForAllInstruments(MagicBE("MPWD"), sizeof(ModInstrument().midiPWD), f, nInstruments);
 	}
 
 	if(GetType() & MOD_TYPE_MPT)
@@ -388,21 +388,21 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, 
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes[0] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VE.."), sizeof(ModInstrument().VolEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VP[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VE[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 		if(maxNodes[1] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PE.."), sizeof(ModInstrument().PanEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PP[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PE[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 		if(maxNodes[2] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE."), sizeof(ModInstrument().PitchEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiP["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 	}
 }
@@ -493,82 +493,82 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	// Members which can be found in this table but not in the write table are only required in the legacy ITP format.
 	switch(fcode)
 	{
-	GET_MPTHEADER_sized_member(	nFadeOut				, uint32		, MAGIC4BE('F','O','.','.')	)
-	GET_MPTHEADER_sized_member(	dwFlags					, uint32		, MAGIC4BE('d','F','.','.')	)
-	GET_MPTHEADER_sized_member(	nGlobalVol				, uint32		, MAGIC4BE('G','V','.','.')	)
-	GET_MPTHEADER_sized_member(	nPan					, uint32		, MAGIC4BE('P','.','.','.')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, MAGIC4BE('V','L','S','.')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, uint8			, MAGIC4BE('V','L','E','.')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nSustainStart	, uint8			, MAGIC4BE('V','S','B','.')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nSustainEnd		, uint8			, MAGIC4BE('V','S','E','.')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nLoopStart		, uint8			, MAGIC4BE('P','L','S','.')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nLoopEnd			, uint8			, MAGIC4BE('P','L','E','.')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nSustainStart	, uint8			, MAGIC4BE('P','S','B','.')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nSustainEnd		, uint8			, MAGIC4BE('P','S','E','.')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nLoopStart		, uint8			, MAGIC4BE('P','i','L','S')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nLoopEnd		, uint8			, MAGIC4BE('P','i','L','E')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nSustainStart	, uint8			, MAGIC4BE('P','i','S','B')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nSustainEnd	, uint8			, MAGIC4BE('P','i','S','E')	)
-	GET_MPTHEADER_sized_member(	nNNA					, uint8			, MAGIC4BE('N','N','A','.')	)
-	GET_MPTHEADER_sized_member(	nDCT					, uint8			, MAGIC4BE('D','C','T','.')	)
-	GET_MPTHEADER_sized_member(	nDNA					, uint8			, MAGIC4BE('D','N','A','.')	)
-	GET_MPTHEADER_sized_member(	nPanSwing				, uint8			, MAGIC4BE('P','S','.','.')	)
-	GET_MPTHEADER_sized_member(	nVolSwing				, uint8			, MAGIC4BE('V','S','.','.')	)
-	GET_MPTHEADER_sized_member(	nIFC					, uint8			, MAGIC4BE('I','F','C','.')	)
-	GET_MPTHEADER_sized_member(	nIFR					, uint8			, MAGIC4BE('I','F','R','.')	)
-	GET_MPTHEADER_sized_member(	wMidiBank				, uint16		, MAGIC4BE('M','B','.','.')	)
-	GET_MPTHEADER_sized_member(	nMidiProgram			, uint8			, MAGIC4BE('M','P','.','.')	)
-	GET_MPTHEADER_sized_member(	nMidiChannel			, uint8			, MAGIC4BE('M','C','.','.')	)
-	GET_MPTHEADER_sized_member(	nPPS					, int8			, MAGIC4BE('P','P','S','.')	)
-	GET_MPTHEADER_sized_member(	nPPC					, uint8			, MAGIC4BE('P','P','C','.')	)
-	GET_MPTHEADER_envelope_member(ENV_VOLUME	, tick	, uint16		, MAGIC4BE('V','P','[','.')	)
-	GET_MPTHEADER_envelope_member(ENV_PANNING	, tick	, uint16		, MAGIC4BE('P','P','[','.')	)
-	GET_MPTHEADER_envelope_member(ENV_PITCH		, tick	, uint16		, MAGIC4BE('P','i','P','[')	)
-	GET_MPTHEADER_envelope_member(ENV_VOLUME	, value	, uint8			, MAGIC4BE('V','E','[','.')	)
-	GET_MPTHEADER_envelope_member(ENV_PANNING	, value	, uint8			, MAGIC4BE('P','E','[','.')	)
-	GET_MPTHEADER_envelope_member(ENV_PITCH		, value	, uint8			, MAGIC4BE('P','i','E','[')	)
-	GET_MPTHEADER_array_member(	NoteMap					, uint8			, MAGIC4BE('N','M','[','.')	)
-	GET_MPTHEADER_array_member(	Keyboard				, uint16		, MAGIC4BE('K','[','.','.')	)
-	GET_MPTHEADER_array_member(	name					, char			, MAGIC4BE('n','[','.','.')	)
-	GET_MPTHEADER_array_member(	filename				, char			, MAGIC4BE('f','n','[','.')	)
-	GET_MPTHEADER_sized_member(	nMixPlug				, uint8			, MAGIC4BE('M','i','P','.')	)
-	GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, MAGIC4BE('V','R','.','.')	)
-	GET_MPTHEADER_sized_member(	nResampling				, uint32		, MAGIC4BE('R','.','.','.')	)
-	GET_MPTHEADER_sized_member(	nCutSwing				, uint8			, MAGIC4BE('C','S','.','.')	)
-	GET_MPTHEADER_sized_member(	nResSwing				, uint8			, MAGIC4BE('R','S','.','.')	)
-	GET_MPTHEADER_sized_member(	nFilterMode				, uint8			, MAGIC4BE('F','M','.','.')	)
-	GET_MPTHEADER_sized_member(	nPluginVelocityHandling	, uint8			, MAGIC4BE('P','V','E','H')	)
-	GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, uint8			, MAGIC4BE('P','V','O','H')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, MAGIC4BE('P','E','R','N')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8			, MAGIC4BE('A','E','R','N')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, MAGIC4BE('V','E','R','N')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, MAGIC4BE('P','F','L','G')	)
-	GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, MAGIC4BE('A','F','L','G')	)
-	GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, MAGIC4BE('V','F','L','G')	)
-	GET_MPTHEADER_sized_member(	midiPWD					, int8			, MAGIC4BE('M','P','W','D')	)
-	case MAGIC4BE('P','T','T','L'):
+	GET_MPTHEADER_sized_member(	nFadeOut				, uint32		, MagicBE("FO..")	)
+	GET_MPTHEADER_sized_member(	dwFlags					, uint32		, MagicBE("dF..")	)
+	GET_MPTHEADER_sized_member(	nGlobalVol				, uint32		, MagicBE("GV..")	)
+	GET_MPTHEADER_sized_member(	nPan					, uint32		, MagicBE("P...")	)
+	GET_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, MagicBE("VLS.")	)
+	GET_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, uint8			, MagicBE("VLE.")	)
+	GET_MPTHEADER_sized_member(	VolEnv.nSustainStart	, uint8			, MagicBE("VSB.")	)
+	GET_MPTHEADER_sized_member(	VolEnv.nSustainEnd		, uint8			, MagicBE("VSE.")	)
+	GET_MPTHEADER_sized_member(	PanEnv.nLoopStart		, uint8			, MagicBE("PLS.")	)
+	GET_MPTHEADER_sized_member(	PanEnv.nLoopEnd			, uint8			, MagicBE("PLE.")	)
+	GET_MPTHEADER_sized_member(	PanEnv.nSustainStart	, uint8			, MagicBE("PSB.")	)
+	GET_MPTHEADER_sized_member(	PanEnv.nSustainEnd		, uint8			, MagicBE("PSE.")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.nLoopStart		, uint8			, MagicBE("PiLS")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.nLoopEnd		, uint8			, MagicBE("PiLE")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.nSustainStart	, uint8			, MagicBE("PiSB")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.nSustainEnd	, uint8			, MagicBE("PiSE")	)
+	GET_MPTHEADER_sized_member(	nNNA					, uint8			, MagicBE("NNA.")	)
+	GET_MPTHEADER_sized_member(	nDCT					, uint8			, MagicBE("DCT.")	)
+	GET_MPTHEADER_sized_member(	nDNA					, uint8			, MagicBE("DNA.")	)
+	GET_MPTHEADER_sized_member(	nPanSwing				, uint8			, MagicBE("PS..")	)
+	GET_MPTHEADER_sized_member(	nVolSwing				, uint8			, MagicBE("VS..")	)
+	GET_MPTHEADER_sized_member(	nIFC					, uint8			, MagicBE("IFC.")	)
+	GET_MPTHEADER_sized_member(	nIFR					, uint8			, MagicBE("IFR.")	)
+	GET_MPTHEADER_sized_member(	wMidiBank				, uint16		, MagicBE("MB..")	)
+	GET_MPTHEADER_sized_member(	nMidiProgram			, uint8			, MagicBE("MP..")	)
+	GET_MPTHEADER_sized_member(	nMidiChannel			, uint8			, MagicBE("MC..")	)
+	GET_MPTHEADER_sized_member(	nPPS					, int8			, MagicBE("PPS.")	)
+	GET_MPTHEADER_sized_member(	nPPC					, uint8			, MagicBE("PPC.")	)
+	GET_MPTHEADER_envelope_member(ENV_VOLUME	, tick	, uint16		, MagicBE("VP[.")	)
+	GET_MPTHEADER_envelope_member(ENV_PANNING	, tick	, uint16		, MagicBE("PP[.")	)
+	GET_MPTHEADER_envelope_member(ENV_PITCH		, tick	, uint16		, MagicBE("PiP[")	)
+	GET_MPTHEADER_envelope_member(ENV_VOLUME	, value	, uint8			, MagicBE("VE[.")	)
+	GET_MPTHEADER_envelope_member(ENV_PANNING	, value	, uint8			, MagicBE("PE[.")	)
+	GET_MPTHEADER_envelope_member(ENV_PITCH		, value	, uint8			, MagicBE("PiE[")	)
+	GET_MPTHEADER_array_member(	NoteMap					, uint8			, MagicBE("NM[.")	)
+	GET_MPTHEADER_array_member(	Keyboard				, uint16		, MagicBE("K[..")	)
+	GET_MPTHEADER_array_member(	name					, char			, MagicBE("n[..")	)
+	GET_MPTHEADER_array_member(	filename				, char			, MagicBE("fn[.")	)
+	GET_MPTHEADER_sized_member(	nMixPlug				, uint8			, MagicBE("MiP.")	)
+	GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, MagicBE("VR..")	)
+	GET_MPTHEADER_sized_member(	nResampling				, uint32		, MagicBE("R...")	)
+	GET_MPTHEADER_sized_member(	nCutSwing				, uint8			, MagicBE("CS..")	)
+	GET_MPTHEADER_sized_member(	nResSwing				, uint8			, MagicBE("RS..")	)
+	GET_MPTHEADER_sized_member(	nFilterMode				, uint8			, MagicBE("FM..")	)
+	GET_MPTHEADER_sized_member(	nPluginVelocityHandling	, uint8			, MagicBE("PVEH")	)
+	GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, uint8			, MagicBE("PVOH")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, MagicBE("PERN")	)
+	GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8			, MagicBE("AERN")	)
+	GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, MagicBE("VERN")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, MagicBE("PFLG")	)
+	GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, MagicBE("AFLG")	)
+	GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, MagicBE("VFLG")	)
+	GET_MPTHEADER_sized_member(	midiPWD					, int8			, MagicBE("MPWD")	)
+	case MagicBE("PTTL"):
 	{
 		// Integer part of pitch/tempo lock
 		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(tmp, input->pitchToTempoLock.GetFract());
 		result = true;
 	} break;
-	case MAGIC4LE('P','T','T','F'):
+	case MagicLE("PTTF"):
 	{
 		// Fractional part of pitch/tempo lock
 		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(input->pitchToTempoLock.GetInt(), tmp);
 		result = true;
 	} break;
-	case MAGIC4BE('V','E','.','.'):
+	case MagicBE("VE.."):
 		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
-	case MAGIC4BE('P','E','.','.'):
+	case MagicBE("PE.."):
 		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
-	case MAGIC4BE('P','i','E','.'):
+	case MagicBE("PiE."):
 		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
@@ -627,7 +627,7 @@ static void ConvertReadExtendedFlags(ModInstrument *pIns)
 
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file)
 {
-	if(code == MAGIC4BE('K','[','.','.'))
+	if(code == MagicBE("K[.."))
 	{
 		// skip keyboard mapping
 		file.Skip(size);
@@ -642,12 +642,12 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 		return;
 	}
 
-	if(code == MAGIC4BE('n','[','.','.'))
+	if(code == MagicBE("n[.."))
 		mpt::String::SetNullTerminator(pIns->name);
-	if(code == MAGIC4BE('f','n','[','.'))
+	if(code == MagicBE("fn[."))
 		mpt::String::SetNullTerminator(pIns->filename);
 
-	if(code == MAGIC4BE('d','F','.','.')) // 'dF..' field requires additional processing.
+	if(code == MagicBE("dF..")) // 'dF..' field requires additional processing.
 		ConvertReadExtendedFlags(pIns);
 }
 
@@ -692,8 +692,8 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 	{
 		uint32 code = file.ReadUint32LE();
 
-		if(code == MAGIC4BE('M','P','T','S')	// Reached song extensions, break out of this loop
-			|| code == MAGIC4LE('2','2','8',4)	// Reached MPTM extensions (in case there are no song extensions)
+		if(code == MagicBE("MPTS")	// Reached song extensions, break out of this loop
+			|| code == MagicLE("228\x04")	// Reached MPTM extensions (in case there are no song extensions)
 			|| (code & 0x80808080) || !(code & 0x60606060))	// Non-ASCII chunk ID
 		{
 			file.SkipBack(4);

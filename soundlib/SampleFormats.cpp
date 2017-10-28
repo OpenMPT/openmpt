@@ -1839,11 +1839,11 @@ struct AIFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idCOMM	= MAGIC4BE('C','O','M','M'),
-		idSSND	= MAGIC4BE('S','S','N','D'),
-		idINST	= MAGIC4BE('I','N','S','T'),
-		idMARK	= MAGIC4BE('M','A','R','K'),
-		idNAME	= MAGIC4BE('N','A','M','E'),
+		idCOMM	= MagicBE("COMM"),
+		idSSND	= MagicBE("SSND"),
+		idINST	= MagicBE("INST"),
+		idMARK	= MagicBE("MARK"),
+		idNAME	= MagicBE("NAME"),
 	};
 
 	uint32be id;		// See ChunkIdentifiers
@@ -2559,9 +2559,9 @@ struct IFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idVHDR	= MAGIC4BE('V','H','D','R'),
-		idBODY	= MAGIC4BE('B','O','D','Y'),
-		idNAME	= MAGIC4BE('N','A','M','E'),
+		idVHDR	= MagicBE("VHDR"),
+		idBODY	= MagicBE("BODY"),
+		idNAME	= MagicBE("NAME"),
 	};
 
 	uint32be id;		// See ChunkIdentifiers

@@ -32,17 +32,17 @@ struct MDLChunk
 	// 16-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idInfo			= MAGIC2LE('I','N'),
-		idMessage		= MAGIC2LE('M','E'),
-		idPats			= MAGIC2LE('P','A'),
-		idPatNames		= MAGIC2LE('P','N'),
-		idTracks		= MAGIC2LE('T','R'),
-		idInstrs		= MAGIC2LE('I','I'),
-		idVolEnvs		= MAGIC2LE('V','E'),
-		idPanEnvs		= MAGIC2LE('P','E'),
-		idFreqEnvs		= MAGIC2LE('F','E'),
-		idSampleInfo	= MAGIC2LE('I','S'),
-		ifSampleData	= MAGIC2LE('S','A'),
+		idInfo			= MagicLE("IN"),
+		idMessage		= MagicLE("ME"),
+		idPats			= MagicLE("PA"),
+		idPatNames		= MagicLE("PN"),
+		idTracks		= MagicLE("TR"),
+		idInstrs		= MagicLE("II"),
+		idVolEnvs		= MagicLE("VE"),
+		idPanEnvs		= MagicLE("PE"),
+		idFreqEnvs		= MagicLE("FE"),
+		idSampleInfo	= MagicLE("IS"),
+		ifSampleData	= MagicLE("SA"),
 	};
 
 	uint16le id;

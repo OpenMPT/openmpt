@@ -19,14 +19,14 @@ struct OktIffChunk
 	// IFF chunk names
 	enum ChunkIdentifiers
 	{
-		idCMOD	= MAGIC4BE('C','M','O','D'),
-		idSAMP	= MAGIC4BE('S','A','M','P'),
-		idSPEE	= MAGIC4BE('S','P','E','E'),
-		idSLEN	= MAGIC4BE('S','L','E','N'),
-		idPLEN	= MAGIC4BE('P','L','E','N'),
-		idPATT	= MAGIC4BE('P','A','T','T'),
-		idPBOD	= MAGIC4BE('P','B','O','D'),
-		idSBOD	= MAGIC4BE('S','B','O','D'),
+		idCMOD	= MagicBE("CMOD"),
+		idSAMP	= MagicBE("SAMP"),
+		idSPEE	= MagicBE("SPEE"),
+		idSLEN	= MagicBE("SLEN"),
+		idPLEN	= MagicBE("PLEN"),
+		idPATT	= MagicBE("PATT"),
+		idPBOD	= MagicBE("PBOD"),
+		idSBOD	= MagicBE("SBOD"),
 	};
 
 	uint32be signature;	// IFF chunk name

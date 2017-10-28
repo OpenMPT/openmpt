@@ -71,7 +71,7 @@ MPT_BINARY_STRUCT(ITPHeader, 8)
 
 static bool ValidateHeader(const ITPHeader &hdr)
 {
-	if(hdr.magic != MAGIC4BE('.','i','t','p'))
+	if(hdr.magic != MagicBE(".itp"))
 	{
 		return false;
 	}
@@ -350,17 +350,17 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 code = file.ReadUint32LE();
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && (songFlags & ITP_ITPEMBEDIH) && code == MAGIC4BE('E', 'B', 'I', 'H'))
+	if(version >= 0x00000101 && (songFlags & ITP_ITPEMBEDIH) && code == MagicBE("EBIH"))
 	{
 		code = file.ReadUint32LE();
 
 		INSTRUMENTINDEX ins = 1;
 		while(ins <= GetNumInstruments() && file.CanRead(4))
 		{
-			if(code == MAGIC4BE('M', 'P', 'T', 'S'))
+			if(code == MagicBE("MPTS"))
 			{
 				break;
-			} else if(code == MAGIC4BE('S', 'E', 'P', '@') || code == MAGIC4BE('M', 'P', 'T', 'X'))
+			} else if(code == MagicBE("SEP@") || code == MagicBE("MPTX"))
 			{
 				// jump code - switch to next instrument
 				ins++;
@@ -374,7 +374,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Song extensions
-	if(code == MAGIC4BE('M', 'P', 'T', 'S'))
+	if(code == MagicBE("MPTS"))
 	{
 		file.SkipBack(4);
 		LoadExtendedSongProperties(file);

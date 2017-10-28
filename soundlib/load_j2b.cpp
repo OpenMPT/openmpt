@@ -58,17 +58,17 @@ struct AMFFRiffChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idRIFF	= MAGIC4LE('R','I','F','F'),
-		idAMFF	= MAGIC4LE('A','M','F','F'),
-		idAM__	= MAGIC4LE('A','M',' ',' '),
-		idMAIN	= MAGIC4LE('M','A','I','N'),
-		idINIT	= MAGIC4LE('I','N','I','T'),
-		idORDR	= MAGIC4LE('O','R','D','R'),
-		idPATT	= MAGIC4LE('P','A','T','T'),
-		idINST	= MAGIC4LE('I','N','S','T'),
-		idSAMP	= MAGIC4LE('S','A','M','P'),
-		idAI__	= MAGIC4LE('A','I',' ',' '),
-		idAS__	= MAGIC4LE('A','S',' ',' '),
+		idRIFF	= MagicLE("RIFF"),
+		idAMFF	= MagicLE("AMFF"),
+		idAM__	= MagicLE("AM  "),
+		idMAIN	= MagicLE("MAIN"),
+		idINIT	= MagicLE("INIT"),
+		idORDR	= MagicLE("ORDR"),
+		idPATT	= MagicLE("PATT"),
+		idINST	= MagicLE("INST"),
+		idSAMP	= MagicLE("SAMP"),
+		idAI__	= MagicLE("AI  "),
+		idAS__	= MagicLE("AS  "),
 	};
 
 	uint32le id;		// See ChunkIdentifiers

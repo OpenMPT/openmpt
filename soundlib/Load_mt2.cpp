@@ -578,7 +578,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 		switch(id)
 		{
-		case MAGIC4LE('B','P','M','+'):
+		case MagicLE("BPM+"):
 			if(!hasLegacyTempo)
 			{
 				m_nTempoMode = tempoModeModern;
@@ -590,13 +590,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 
-		case MAGIC4LE('T','F','X','M'):
+		case MagicLE("TFXM"):
 			break;
 
-		case MAGIC4LE('T','R','K','O'):
+		case MagicLE("TRKO"):
 			break;
 
-		case MAGIC4LE('T','R','K','S'):
+		case MagicLE("TRKS"):
 			m_nSamplePreAmp = chunk.ReadUint16LE() / 256u;	// 131072 is 0dB... I think (that's how MTIOModule_MT2.cpp reads)
 			m_nVSTiVolume = m_nSamplePreAmp / 2u;
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
@@ -611,7 +611,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 
-		case MAGIC4LE('T','R','K','L'):
+		case MagicLE("TRKL"):
 			for(CHANNELINDEX i = 0; i < m_nChannels && chunk.CanRead(1); i++)
 			{
 				std::string name;
@@ -620,7 +620,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 
-		case MAGIC4LE('P','A','T','N'):
+		case MagicLE("PATN"):
 			for(PATTERNINDEX i = 0; i < fileHeader.numPatterns && chunk.CanRead(1) && Patterns.IsValidIndex(i); i++)
 			{
 				std::string name;
@@ -629,15 +629,15 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 
-		case MAGIC4LE('M','S','G','\0'):
+		case MagicLE("MSG\0"):
 			chunk.Skip(1);	// Show message on startup
 			m_songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
 			break;
 
-		case MAGIC4LE('P','I','C','T'):
+		case MagicLE("PICT"):
 			break;
 
-		case MAGIC4LE('S','U','M','\0'):
+		case MagicLE("SUM\0"):
 			{
 				uint8 summaryMask[6];
 				chunk.ReadArray(summaryMask);
@@ -650,14 +650,14 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 
-		case MAGIC4LE('T','M','A','P'):
+		case MagicLE("TMAP"):
 			break;
-		case MAGIC4LE('M','I','D','I'):
+		case MagicLE("MIDI"):
 			break;
-		case MAGIC4LE('T','R','E','Q'):
+		case MagicLE("TREQ"):
 			break;
 
-		case MAGIC4LE('V','S','T','2'):
+		case MagicLE("VST2"):
 			numVST = chunk.ReadUint32LE();
 #ifndef NO_VST
 			if(!(loadFlags & loadPluginData))

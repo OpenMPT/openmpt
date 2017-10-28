@@ -1752,7 +1752,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader chunk = musicChunk.ReadChunk(len);
 		switch(id)
 		{
-		case MAGIC4LE('V','E','R','S'):
+		case MagicLE("VERS"):
 			// Tracker magic bytes (depending on format)
 			switch(m_nType)
 			{
@@ -1780,12 +1780,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			}
 			break;
-		case MAGIC4LE('M', 'I', 'D', 'I'):
+		case MagicLE("MIDI"):
 			// Full MIDI config
 			chunk.ReadStruct<MIDIMacroConfigData>(m_MidiCfg);
 			m_MidiCfg.Sanitize();
 			break;
-		case MAGIC4LE('O', 'M', 'P', 'T'):
+		case MagicLE("OMPT"):
 			// Read pattern names: "PNAM"
 			if(chunk.ReadMagic("PNAM"))
 			{

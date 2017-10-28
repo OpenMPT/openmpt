@@ -39,17 +39,17 @@ struct DBMChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idNAME	= MAGIC4BE('N','A','M','E'),
-		idINFO	= MAGIC4BE('I','N','F','O'),
-		idSONG	= MAGIC4BE('S','O','N','G'),
-		idINST	= MAGIC4BE('I','N','S','T'),
-		idVENV	= MAGIC4BE('V','E','N','V'),
-		idPENV	= MAGIC4BE('P','E','N','V'),
-		idPATT	= MAGIC4BE('P','A','T','T'),
-		idPNAM	= MAGIC4BE('P','N','A','M'),
-		idSMPL	= MAGIC4BE('S','M','P','L'),
-		idDSPE	= MAGIC4BE('D','S','P','E'),
-		idMPEG	= MAGIC4BE('M','P','E','G'),
+		idNAME	= MagicBE("NAME"),
+		idINFO	= MagicBE("INFO"),
+		idSONG	= MagicBE("SONG"),
+		idINST	= MagicBE("INST"),
+		idVENV	= MagicBE("VENV"),
+		idPENV	= MagicBE("PENV"),
+		idPATT	= MagicBE("PATT"),
+		idPNAM	= MagicBE("PNAM"),
+		idSMPL	= MagicBE("SMPL"),
+		idDSPE	= MagicBE("DSPE"),
+		idMPEG	= MagicBE("MPEG"),
 	};
 
 	uint32be id;
