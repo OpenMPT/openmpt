@@ -444,7 +444,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	uint8 storedIdLen = 0;
 	Binaryread<uint8>(iStrm, storedIdLen);
 	char storedIdBuf[256];
-	MemsetZero(storedIdBuf);
+	Clear(storedIdBuf);
 	if(storedIdLen > 0)
 	{
 		iStrm.read(storedIdBuf, storedIdLen);
