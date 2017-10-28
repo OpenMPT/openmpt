@@ -53,7 +53,7 @@ protected:
 
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
-	static VstTimeInfo timeInfo;
+	VstTimeInfo timeInfo;
 
 public:
 	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
