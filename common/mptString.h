@@ -427,28 +427,27 @@ mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string
 
 
 
-template <typename Tstring, typename Tchar, std::size_t size>
+template <typename Tstring, typename Tchar>
 class StringBufRefImpl
 {
 private:
 	Tchar * buf;
+	std::size_t size;
 public:
-	StringBufRefImpl(Tchar * buf)
+	StringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
+		, size(size)
 	{
-		return;
+		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		MPT_ASSERT(size > 0);
 	}
 	operator Tstring () const
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
-		MPT_STATIC_ASSERT(size > 0);
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
 		return Tstring(buf, buf + len);
 	}
 	StringBufRefImpl & operator = (const Tstring & str)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
-		MPT_STATIC_ASSERT(size > 0);
 		std::fill(buf, buf + size, Tchar('\0'));
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
 		buf[size - 1] = Tchar('\0');
@@ -456,93 +455,89 @@ public:
 	}
 };
 
-template <typename Tstring, typename Tchar, std::size_t size>
-class StringBufRefImpl<Tstring, const Tchar, size>
+template <typename Tstring, typename Tchar>
+class StringBufRefImpl<Tstring, const Tchar>
 {
 private:
 	const Tchar * buf;
+	std::size_t size;
 public:
-	StringBufRefImpl(const Tchar * buf)
+	StringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
+		, size(size)
 	{
-		return;
+		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		MPT_ASSERT(size > 0);
 	}
 	operator Tstring () const
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
-		MPT_STATIC_ASSERT(size > 0);
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
 		return Tstring(buf, buf + len);
 	}
 };
 
 template <typename Tstring, typename Tchar, std::size_t size>
-inline StringBufRefImpl<Tstring, Tchar, size> StringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<Tstring, Tchar> StringBuf(Tchar (&buf)[size])
 {
-	return StringBufRefImpl<Tstring, Tchar, size>(buf);
+	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }
 
 template <typename Tchar, std::size_t size>
-inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar, size> AutoStringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> AutoStringBuf(Tchar (&buf)[size])
 {
-	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar, size>(buf);
+	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar>(buf, size);
 }
 
 
-template <mpt::Charset charset, typename Tchar, std::size_t size>
+template <typename Tchar>
 class CharsetStringBufRefImpl
 {
 private:
-	Tchar * buf;
+	StringBufRefImpl<std::string, Tchar> strbuf;
+	mpt::Charset charset;
 public:
-	CharsetStringBufRefImpl(Tchar * buf)
-		: buf(buf)
+	CharsetStringBufRefImpl(Tchar * buf, std::size_t size, mpt::Charset charset)
+		: strbuf(buf, size)
+		, charset(charset)
 	{
-		return;
+		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		MPT_ASSERT(size > 0);
 	}
 	operator mpt::ustring () const
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
-		MPT_STATIC_ASSERT(size > 0);
-		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
-		return mpt::ToUnicode(charset, std::string(buf, buf + len));
+		return mpt::ToUnicode(charset, strbuf);
 	}
 	CharsetStringBufRefImpl & operator = (const mpt::ustring & ustr)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
-		MPT_STATIC_ASSERT(size > 0);
-		std::string str = mpt::ToCharset(charset, ustr);
-		std::fill(buf, buf + size, Tchar('\0'));
-		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
-		buf[size - 1] = Tchar('\0');
+		strbuf = mpt::ToCharset(charset, ustr);
 		return *this;
 	}
 };
 
-template <Charset charset, typename Tchar, std::size_t size>
-class CharsetStringBufRefImpl<charset, const Tchar, size>
+template <typename Tchar>
+class CharsetStringBufRefImpl<const Tchar>
 {
 private:
-	const Tchar * buf;
+	StringBufRefImpl<std::string, const Tchar> strbuf;
+	mpt::Charset charset;
 public:
-	CharsetStringBufRefImpl(const Tchar * buf)
-		: buf(buf)
+	CharsetStringBufRefImpl(const Tchar * buf, std::size_t size)
+		: strbuf(buf, size)
+		, charset(charset)
 	{
-		return;
+		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		MPT_ASSERT(size > 0);
 	}
 	operator mpt::ustring () const
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
-		MPT_STATIC_ASSERT(size > 0);
-		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
-		return mpt::ToUnicode(charset, std::string(buf, buf + len));
+		return mpt::ToUnicode(charset, strbuf);
 	}
 };
 
-template <mpt::Charset charset, typename Tchar, std::size_t size>
-inline CharsetStringBufRefImpl<charset, Tchar, size> StringBuf(Tchar (&buf)[size])
+template <typename Tchar, std::size_t size>
+inline CharsetStringBufRefImpl<Tchar> StringBuf(mpt::Charset charset, Tchar (&buf)[size])
 {
-	return CharsetStringBufRefImpl<charset, Tchar, size>(buf);
+	return CharsetStringBufRefImpl<Tchar>(buf, size, charset);
 }
 
 
@@ -551,33 +546,33 @@ inline CharsetStringBufRefImpl<charset, Tchar, size> StringBuf(Tchar (&buf)[size
 #if MPT_OS_WINDOWS
 
 template <typename Tchar, std::size_t size>
-inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar, size> WinStringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WinStringBuf(Tchar (&buf)[size])
 {
-	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar, size>(buf);
+	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar>(buf, size);
 }
 
 #if defined(_MFC_VER)
 
-template <typename Tchar, std::size_t size>
+template <typename Tchar>
 class CStringBufRefImpl
 {
 private:
 	Tchar * buf;
+	std::size_t size;
 public:
-	CStringBufRefImpl(Tchar * buf)
+	CStringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
+		, size(size)
 	{
-		return;
+		MPT_ASSERT(size > 0);
 	}
 	operator CString () const
 	{
-		MPT_STATIC_ASSERT(size > 0);
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
 		return CString(buf, len);
 	}
 	CStringBufRefImpl & operator = (const CString & str)
 	{
-		MPT_STATIC_ASSERT(size > 0);
 		std::fill(buf, buf + size, Tchar('\0'));
 		std::copy(str.GetString(), str.GetString() + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
 		buf[size - 1] = Tchar('\0');
@@ -585,29 +580,30 @@ public:
 	}
 };
 
-template <typename Tchar, std::size_t size>
-class CStringBufRefImpl<const Tchar, size>
+template <typename Tchar>
+class CStringBufRefImpl<const Tchar>
 {
 private:
 	const Tchar * buf;
+	std::size_t size;
 public:
-	CStringBufRefImpl(const Tchar * buf)
+	CStringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
+		, size(size)
 	{
-		return;
+		MPT_ASSERT(size > 0);
 	}
 	operator CString () const
 	{
-		MPT_STATIC_ASSERT(size > 0);
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
 		return CString(buf, buf + len);
 	}
 };
 
 template <typename Tchar, std::size_t size>
-inline CStringBufRefImpl<Tchar, size> CStringBuf(Tchar (&buf)[size])
+inline CStringBufRefImpl<Tchar> CStringBuf(Tchar (&buf)[size])
 {
-	return CStringBufRefImpl<Tchar, size>(buf);
+	return CStringBufRefImpl<Tchar>(buf, size);
 }
 
 #endif // _MFC_VER
