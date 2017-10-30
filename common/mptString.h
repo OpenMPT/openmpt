@@ -434,13 +434,17 @@ private:
 	Tchar * buf;
 	std::size_t size;
 public:
-	StringBufRefImpl(Tchar * buf, std::size_t size)
+	explicit StringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
 	}
+	StringBufRefImpl(const StringBufRefImpl &) = delete;
+	StringBufRefImpl(StringBufRefImpl &&) = default;
+	StringBufRefImpl & operator = (const StringBufRefImpl &) = delete;
+	StringBufRefImpl & operator = (StringBufRefImpl &&) = delete;
 	operator Tstring () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
@@ -462,13 +466,17 @@ private:
 	const Tchar * buf;
 	std::size_t size;
 public:
-	StringBufRefImpl(const Tchar * buf, std::size_t size)
+	explicit StringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
 	}
+	StringBufRefImpl(const StringBufRefImpl &) = delete;
+	StringBufRefImpl(StringBufRefImpl &&) = default;
+	StringBufRefImpl & operator = (const StringBufRefImpl &) = delete;
+	StringBufRefImpl & operator = (StringBufRefImpl &&) = delete;
 	operator Tstring () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
@@ -496,13 +504,17 @@ private:
 	StringBufRefImpl<std::string, Tchar> strbuf;
 	mpt::Charset charset;
 public:
-	CharsetStringBufRefImpl(Tchar * buf, std::size_t size, mpt::Charset charset)
+	explicit CharsetStringBufRefImpl(Tchar * buf, std::size_t size, mpt::Charset charset)
 		: strbuf(buf, size)
 		, charset(charset)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
 		MPT_ASSERT(size > 0);
 	}
+	CharsetStringBufRefImpl(const CharsetStringBufRefImpl &) = delete;
+	CharsetStringBufRefImpl(CharsetStringBufRefImpl &&) = default;
+	CharsetStringBufRefImpl & operator = (const CharsetStringBufRefImpl &) = delete;
+	CharsetStringBufRefImpl & operator = (CharsetStringBufRefImpl &&) = delete;
 	operator mpt::ustring () const
 	{
 		return mpt::ToUnicode(charset, strbuf);
@@ -521,13 +533,17 @@ private:
 	StringBufRefImpl<std::string, const Tchar> strbuf;
 	mpt::Charset charset;
 public:
-	CharsetStringBufRefImpl(const Tchar * buf, std::size_t size)
+	explicit CharsetStringBufRefImpl(const Tchar * buf, std::size_t size)
 		: strbuf(buf, size)
 		, charset(charset)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
 		MPT_ASSERT(size > 0);
 	}
+	CharsetStringBufRefImpl(const CharsetStringBufRefImpl &) = delete;
+	CharsetStringBufRefImpl(CharsetStringBufRefImpl &&) = default;
+	CharsetStringBufRefImpl & operator = (const CharsetStringBufRefImpl &) = delete;
+	CharsetStringBufRefImpl & operator = (CharsetStringBufRefImpl &&) = delete;
 	operator mpt::ustring () const
 	{
 		return mpt::ToUnicode(charset, strbuf);
@@ -560,12 +576,16 @@ private:
 	Tchar * buf;
 	std::size_t size;
 public:
-	CStringBufRefImpl(Tchar * buf, std::size_t size)
+	explicit CStringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
 	{
 		MPT_ASSERT(size > 0);
 	}
+	CStringBufRefImpl(const CStringBufRefImpl &) = delete;
+	CStringBufRefImpl(CStringBufRefImpl &&) = default;
+	CStringBufRefImpl & operator = (const CStringBufRefImpl &) = delete;
+	CStringBufRefImpl & operator = (CStringBufRefImpl &&) = delete;
 	operator CString () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
@@ -587,12 +607,16 @@ private:
 	const Tchar * buf;
 	std::size_t size;
 public:
-	CStringBufRefImpl(const Tchar * buf, std::size_t size)
+	explicit CStringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
 	{
 		MPT_ASSERT(size > 0);
 	}
+	CStringBufRefImpl(const CStringBufRefImpl &) = delete;
+	CStringBufRefImpl(CStringBufRefImpl &&) = default;
+	CStringBufRefImpl & operator = (const CStringBufRefImpl &) = delete;
+	CStringBufRefImpl & operator = (CStringBufRefImpl &&) = delete;
 	operator CString () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
