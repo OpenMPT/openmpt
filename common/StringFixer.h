@@ -158,7 +158,8 @@ namespace mpt { namespace String
 				std::transform(dest.begin(), dest.end(), dest.begin(), detail::NullToSpace);
 
 				// Trim trailing spaces.
-				dest = mpt::String::RTrim(dest);
+				dest = mpt::String::RTrim(dest, std::string(" "));
+				
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
 				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
