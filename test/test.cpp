@@ -3580,6 +3580,7 @@ static MPT_NOINLINE void TestStringIO()
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
 	char src2[4] = { 'X', 'Y', 'Z', ' ' };		// Full buffer, last character space
 	char src3[4] = { 'X', 'Y', 'Z', '!' };		// Full buffer, last character non-space
+	char src4[4] = { 'x', 'y', '\t', '\n' };	// Full buffer containing non-space whitespace
 	char dst1[6];	// Destination buffer, larger than source buffer
 	char dst2[3];	// Destination buffer, smaller than source buffer
 
@@ -3600,24 +3601,28 @@ static MPT_NOINLINE void TestStringIO()
 	ReadTest(nullTerminated, dst1, src1, "X ");
 	ReadTest(nullTerminated, dst1, src2, "XYZ");
 	ReadTest(nullTerminated, dst1, src3, "XYZ");
+	ReadTest(nullTerminated, dst1, src4, "xy\t");
 
 	// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
 	ReadTest(maybeNullTerminated, dst1, src0, "");
 	ReadTest(maybeNullTerminated, dst1, src1, "X ");
 	ReadTest(maybeNullTerminated, dst1, src2, "XYZ ");
 	ReadTest(maybeNullTerminated, dst1, src3, "XYZ!");
+	ReadTest(maybeNullTerminated, dst1, src4, "xy\t\n");
 
 	// Check reading of space-padded strings with ignored last character
 	ReadTest(spacePaddedNull, dst1, src0, " X");
 	ReadTest(spacePaddedNull, dst1, src1, "X");
 	ReadTest(spacePaddedNull, dst1, src2, "XYZ");
 	ReadTest(spacePaddedNull, dst1, src3, "XYZ");
+	ReadTest(spacePaddedNull, dst1, src4, "xy\t");
 
 	// Check reading of space-padded strings
 	ReadTest(spacePadded, dst1, src0, " X X");
 	ReadTest(spacePadded, dst1, src1, "X  X");
 	ReadTest(spacePadded, dst1, src2, "XYZ");
 	ReadTest(spacePadded, dst1, src3, "XYZ!");
+	ReadTest(spacePadded, dst1, src4, "xy\t\n");
 
 	///////////////////////////////
 
@@ -3626,24 +3631,28 @@ static MPT_NOINLINE void TestStringIO()
 	ReadTest(nullTerminated, dst2, src1, "X ");
 	ReadTest(nullTerminated, dst2, src2, "XY");
 	ReadTest(nullTerminated, dst2, src3, "XY");
+	ReadTest(nullTerminated, dst2, src4, "xy");
 
 	// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
 	ReadTest(maybeNullTerminated, dst2, src0, "");
 	ReadTest(maybeNullTerminated, dst2, src1, "X ");
 	ReadTest(maybeNullTerminated, dst2, src2, "XY");
 	ReadTest(maybeNullTerminated, dst2, src3, "XY");
+	ReadTest(maybeNullTerminated, dst2, src4, "xy");
 
 	// Check reading of space-padded strings with ignored last character
 	ReadTest(spacePaddedNull, dst2, src0, " X");
 	ReadTest(spacePaddedNull, dst2, src1, "X");
 	ReadTest(spacePaddedNull, dst2, src2, "XY");
 	ReadTest(spacePaddedNull, dst2, src3, "XY");
+	ReadTest(spacePaddedNull, dst2, src4, "xy");
 
 	// Check reading of space-padded strings
 	ReadTest(spacePadded, dst2, src0, " X");
 	ReadTest(spacePadded, dst2, src1, "X");
 	ReadTest(spacePadded, dst2, src2, "XY");
 	ReadTest(spacePadded, dst2, src3, "XY");
+	ReadTest(spacePadded, dst2, src4, "xy");
 
 	///////////////////////////////
 
@@ -3723,24 +3732,28 @@ static MPT_NOINLINE void TestStringIO()
 		ReadTest(nullTerminated, dststring, src1, "X ");
 		ReadTest(nullTerminated, dststring, src2, "XYZ");
 		ReadTest(nullTerminated, dststring, src3, "XYZ");
+		ReadTest(nullTerminated, dststring, src4, "xy\t");
 
 		// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
 		ReadTest(maybeNullTerminated, dststring, src0, "");
 		ReadTest(maybeNullTerminated, dststring, src1, "X ");
 		ReadTest(maybeNullTerminated, dststring, src2, "XYZ ");
 		ReadTest(maybeNullTerminated, dststring, src3, "XYZ!");
+		ReadTest(maybeNullTerminated, dststring, src4, "xy\t\n");
 
 		// Check reading of space-padded strings with ignored last character
 		ReadTest(spacePaddedNull, dststring, src0, " X");
 		ReadTest(spacePaddedNull, dststring, src1, "X");
 		ReadTest(spacePaddedNull, dststring, src2, "XYZ");
 		ReadTest(spacePaddedNull, dststring, src3, "XYZ");
+		ReadTest(spacePaddedNull, dststring, src4, "xy\t");
 
 		// Check reading of space-padded strings
 		ReadTest(spacePadded, dststring, src0, " X X");
 		ReadTest(spacePadded, dststring, src1, "X  X");
 		ReadTest(spacePadded, dststring, src2, "XYZ");
 		ReadTest(spacePadded, dststring, src3, "XYZ!");
+		ReadTest(spacePadded, dststring, src4, "xy\t\n");
 
 		///////////////////////////////
 
