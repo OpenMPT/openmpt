@@ -24,6 +24,12 @@ ARFLAGS  := rcs
 
 endif
 
+ifeq ($(MODERN),1)
+CXXFLAGS += -Wdouble-promotion -Wframe-larger-than=16000
+CFLAGS   += -Wdouble-promotion -Wframe-larger-than=4000
+LDFLAGS  += -fuse-ld=gold -Wl,-no-undefined -Wl,--detect-odr-violations
+endif
+
 CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 
