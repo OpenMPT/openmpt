@@ -24,17 +24,6 @@ ARFLAGS  := rcs
 
 endif
 
-ifeq ($(MODERN),1)
-CXXFLAGS += -Wdouble-promotion -Wframe-larger-than=16000
-CFLAGS   += -Wdouble-promotion -Wframe-larger-than=4000
-LDFLAGS  += -fuse-ld=gold -Wl,-no-undefined -Wl,--detect-odr-violations
-endif
-
-CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
-CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
-
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
-
 ifeq ($(CHECKED_ADDRESS),1)
 CXXFLAGS += -fsanitize=address
 CFLAGS   += -fsanitize=address
@@ -44,5 +33,17 @@ ifeq ($(CHECKED_UNDEFINED),1)
 CXXFLAGS += -fsanitize=undefined
 CFLAGS   += -fsanitize=undefined
 endif
+
+CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
+CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
+
+ifeq ($(MODERN),1)
+LDFLAGS  += -fuse-ld=gold
+CXXFLAGS_WARNINGS += -Wdouble-promotion -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wdouble-promotion -Wframe-larger-than=4000
+LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+endif
+
+CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
 
 EXESUFFIX=
