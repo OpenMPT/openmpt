@@ -334,6 +334,7 @@ endif
 
 CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CXXFLAGS_WARNINGS)
 CFLAGS   += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CFLAGS_WARNINGS)
+LDFLAGS  += $(LDFLAGS_WARNINGS)
 
 endif
 
