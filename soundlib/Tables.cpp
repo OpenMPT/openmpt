@@ -976,9 +976,16 @@ void CResampler::InitializeTablesFromScratch(bool force)
 
 #ifdef MPT_RESAMPLER_TABLES_CACHED
 
-void CResampler::InitializeTablesFromCache()
+static const CResampler & GetCachedResampler()
 {
 	static CResampler s_CachedResampler(true);
+	return s_CachedResampler;	
+}
+
+
+void CResampler::InitializeTablesFromCache()
+{
+	const CResampler & s_CachedResampler = GetCachedResampler();
 	InitFloatmixerTables();
 	std::copy(s_CachedResampler.gKaiserSinc, s_CachedResampler.gKaiserSinc + SINC_PHASES*8, gKaiserSinc);
 	std::copy(s_CachedResampler.gDownsample13x, s_CachedResampler.gDownsample13x + SINC_PHASES*8, gDownsample13x);
@@ -995,7 +1002,7 @@ struct ResampleCacheInitialzer
 {
 	ResampleCacheInitialzer()
 	{
-		CResampler cachePrimer;
+		GetCachedResampler();
 	}
 };
 static ResampleCacheInitialzer g_ResamplerCachePrimer;
