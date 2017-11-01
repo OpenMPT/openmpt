@@ -350,7 +350,6 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
 					#if defined(ENABLE_X86)
 						features.push_back(MPT_USTRING("x86"));
-						if(procSupport & PROCSUPPORT_FPU) features.push_back(MPT_USTRING("fpu"));
 						if(procSupport & PROCSUPPORT_CMOV) features.push_back(MPT_USTRING("cmov"));
 					#endif
 					#if defined(ENABLE_X64)
@@ -383,18 +382,12 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += lf;
 			}
 			text += lf;
-			if(GetRealProcSupport() & PROCSUPPORT_CPUID)
-			{
-				text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
-					( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
-					, ProcFamily
-					, ProcModel
-					, ProcStepping
-					) + lf;
-			} else
-			{
-				text += MPT_USTRING("Generic without CPUID") + lf;
-			}
+			text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
+				( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
+				, ProcFamily
+				, ProcModel
+				, ProcStepping
+				) + lf;
 #endif // ENABLE_ASM
 			text += mpt::format(MPT_USTRING("Operating System: %1"))(mpt::Windows::Version::Current().GetName()) + lf;
 			text += lf;

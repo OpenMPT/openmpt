@@ -90,18 +90,6 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 #endif
 
 
-static MPT_NOINLINE bool has_cpuid()
-{
-	const size_t eflags_cpuid = 1 << 21;
-	size_t eflags_old = __readeflags();
-	size_t eflags_flipped = eflags_old ^ eflags_cpuid;
-	__writeeflags(eflags_flipped);
-	size_t eflags_testchanged = __readeflags();
-	__writeeflags(eflags_old);
-	return ((eflags_testchanged ^ eflags_old) & eflags_cpuid) != 0;
-}
-
-
 void InitProcSupport()
 {
 
@@ -112,10 +100,7 @@ void InitProcSupport()
 	ProcModel = 0;
 	ProcStepping = 0;
 
-	if(has_cpuid())
 	{
-
-		ProcSupport |= PROCSUPPORT_CPUID;
 
 		cpuid_result VendorString = cpuid(0x00000000u);
 		std::strcpy(ProcVendorID, VendorString.as_string().c_str());
@@ -165,7 +150,6 @@ void InitProcSupport()
 			ProcStepping = static_cast<uint8>(Stepping);
 			if(StandardFeatureFlags.d & (1<< 4)) ProcSupport |= PROCSUPPORT_TSC;
 			if(StandardFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
-			if(StandardFeatureFlags.d & (1<< 0)) ProcSupport |= PROCSUPPORT_FPU;
 			if(StandardFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 			if(StandardFeatureFlags.d & (1<<25)) ProcSupport |= PROCSUPPORT_SSE;
 			if(StandardFeatureFlags.d & (1<<26)) ProcSupport |= PROCSUPPORT_SSE2;
@@ -195,7 +179,6 @@ void InitProcSupport()
 					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 					if(ExtendedFeatureFlags.d & (1<< 4)) ProcSupport |= PROCSUPPORT_TSC;
 					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
-					if(ExtendedFeatureFlags.d & (1<< 0)) ProcSupport |= PROCSUPPORT_FPU;
 					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 					if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
 					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
@@ -269,11 +252,6 @@ void InitProcSupport()
 			}
 
 		}
-
-	} else
-	{
-
-		ProcSupport |= PROCSUPPORT_FPU; // We assume FPU because we require it.
 
 	}
 
