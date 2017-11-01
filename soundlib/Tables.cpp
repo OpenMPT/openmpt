@@ -988,14 +988,14 @@ void CResampler::InitializeTablesFromCache()
 
 #ifdef MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
 
-struct ResampleCacheInitialzer
+struct ResampleCacheInitializer
 {
-	ResampleCacheInitialzer()
+	ResampleCacheInitializer()
 	{
 		GetCachedResampler();
 	}
 };
-static ResampleCacheInitialzer g_ResamplerCachePrimer;
+static ResampleCacheInitializer g_ResamplerCachePrimer;
 
 #endif // MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
 
