@@ -303,6 +303,7 @@ struct commandlineflags {
 	std::string output_extension;
 	bool force_overwrite;
 	bool paused;
+	std::string warnings;
 	void apply_default_buffer_sizes() {
 		if ( ui_redraw_interval == default_high ) {
 			ui_redraw_interval = 50;
