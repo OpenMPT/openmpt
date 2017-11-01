@@ -727,7 +727,7 @@ public:
 			return target;
 		} else
 		{
-			return 0.0f;
+			return 0.0;
 		}
 	}
 
@@ -741,7 +741,7 @@ public:
 			return target;
 		} else
 		{
-			return 0.0f;
+			return 0.0;
 		}
 	}
 
