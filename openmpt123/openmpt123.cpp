@@ -604,7 +604,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --info                 Display information about each file" << std::endl;
 		log << "     --ui                   Interactively play each file" << std::endl;
 		log << "     --batch                Play each file" << std::endl;
-		log << "     --render               Render each file to PCM data" << std::endl;
+		log << "     --render               Render each file to individual PCM data files" << std::endl;
 		if ( !longhelp ) {
 			log << std::endl;
 			log.writeout();
@@ -654,8 +654,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
 		log << "     --period n             Set output period size to n ms [default: " << commandlineflags().period  << "]" << std::endl;
 		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-		log << "     --output-type t        Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
-		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		log << "     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: " << commandlineflags().output_extension << "]" << std::endl;
+		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: " << commandlineflags().output_filename << "]" << std::endl;
 		log << "     --force                Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
 		log << std::endl;
 		log << "     --                     Interpret further arguments as filenames" << std::endl;
