@@ -797,7 +797,7 @@ struct Convert<double, float>
 	typedef double output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		return val;
+		return static_cast<double>(val);
 	}
 };
 
