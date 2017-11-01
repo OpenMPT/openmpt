@@ -16,6 +16,10 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
 
+ *  [**Change**] openmpt123: openmpt123 now rejects `--output-type` in `--ui`
+    and `--batch` modes and also rejects `--output` in `--render` mode. These
+    combinations of options really made no sense and were rather confusing.
+
 ### libopenmpt 0.3 (2017-09-27)
 
  *  [**New**] New error handling functionality in the C API, which in particular
