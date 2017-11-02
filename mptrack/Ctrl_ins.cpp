@@ -1238,7 +1238,14 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		hint.ModType(); // For possibly updating note names in Pitch/Pan Separation dropdown
 	}
 	LockControls();
-	if (hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES]) OnMixPlugChanged();
+	if(hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES])
+	{
+		OnMixPlugChanged();
+	}
+	if(hint.ToType<GeneralHint>().GetType()[HINT_TUNINGS])
+	{
+		BuildTuningComboBox();
+	}
 	UnlockControls();
 
 	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
@@ -2827,8 +2834,8 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 {
 	if (IsLocked()) return;
 
-	ModInstrument* pInstH = m_sndFile.Instruments[m_nInstrument];
-	if(pInstH == 0)
+	ModInstrument *instr = m_sndFile.Instruments[m_nInstrument];
+	if(instr == nullptr)
 		return;
 
 	size_t sel = m_ComboTuning.GetCurSel();
@@ -2836,27 +2843,23 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	{
 		CriticalSection cs;
 		PrepareUndo("Reset Tuning");
-		pInstH->SetTuning(NULL);
+		instr->SetTuning(nullptr);
 		cs.Leave();
 
-		SetModified(InstrumentHint(m_nInstrument).Info(), true);
+		SetModified(InstrumentHint().Info(), true);
 		return;
 	}
 
 	sel -= 1;
-	CTuningCollection* tc = 0;
 
 	if(sel < m_sndFile.GetTuneSpecificTunings().GetNumTunings())
-		tc = &m_sndFile.GetTuneSpecificTunings();
-
-	if(tc)
 	{
 		CriticalSection cs;
 		PrepareUndo("Set Tuning");
-		pInstH->SetTuning(&tc->GetTuning(sel));
+		instr->SetTuning(&m_sndFile.GetTuneSpecificTunings().GetTuning(sel));
 		cs.Leave();
 
-		SetModified(InstrumentHint(m_nInstrument).Info(), true);
+		SetModified(InstrumentHint().Info(), true);
 		return;
 	}
 
@@ -2873,7 +2876,8 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//new tuning(s) come visible.
 	BuildTuningComboBox();
 
-	m_modDoc.UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Info());
+	m_modDoc.UpdateAllViews(nullptr, GeneralHint().Tunings());
+	m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info());
 }
 
 
@@ -3076,6 +3080,7 @@ void CCtrlInstruments::OnEnKillFocusEditFadeOut()
 
 void CCtrlInstruments::BuildTuningComboBox()
 {
+	m_ComboTuning.SetRedraw(FALSE);
 	m_ComboTuning.ResetContent();
 
 	m_ComboTuning.AddString(_T("OpenMPT IT behaviour")); //<-> Instrument pTuning pointer == NULL
@@ -3084,7 +3089,8 @@ void CCtrlInstruments::BuildTuningComboBox()
 		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName()));
 	}
 	m_ComboTuning.AddString(_T("Control Tunings..."));
-	m_ComboTuning.SetCurSel(0);
+	UpdateTuningComboBox();
+	m_ComboTuning.SetRedraw(TRUE);
 }
 
 
