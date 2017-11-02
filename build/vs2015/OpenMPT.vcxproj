@@ -759,6 +759,7 @@
     <ClInclude Include="..\..\mptrack\Mainbar.h" />
     <ClInclude Include="..\..\mptrack\Mainfrm.h" />
     <ClInclude Include="..\..\mptrack\ModConvert.h" />
+    <ClInclude Include="..\..\mptrack\ModDocTemplate.h" />
     <ClInclude Include="..\..\mptrack\Moddoc.h" />
     <ClInclude Include="..\..\mptrack\MoveFXSlotDialog.h" />
     <ClInclude Include="..\..\mptrack\Mpdlgs.h" />
@@ -982,6 +983,7 @@
     <ClCompile Include="..\..\mptrack\Mainbar.cpp" />
     <ClCompile Include="..\..\mptrack\Mod2wave.cpp" />
     <ClCompile Include="..\..\mptrack\ModConvert.cpp" />
+    <ClCompile Include="..\..\mptrack\ModDocTemplate.cpp" />
     <ClCompile Include="..\..\mptrack\Moddoc.cpp" />
     <ClCompile Include="..\..\mptrack\Modedit.cpp" />
     <ClCompile Include="..\..\mptrack\MoveFXSlotDialog.cpp" />

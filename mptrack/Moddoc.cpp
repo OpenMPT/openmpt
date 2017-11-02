@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
+#include "ModDocTemplate.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "Childfrm.h"
@@ -1932,6 +1933,7 @@ void CModDoc::OnPlayerPlay()
 
 		CriticalSection cs;
 
+		// Kill editor voices
 		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++) if (!m_SndFile.m_PlayState.Chn[i].nMasterChn)
 		{
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);

@@ -291,6 +291,9 @@
     <ClInclude Include="..\..\mptrack\ModConvert.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\ModDocTemplate.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\Moddoc.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -948,6 +951,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ModConvert.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\ModDocTemplate.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Moddoc.cpp">
