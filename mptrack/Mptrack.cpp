@@ -122,7 +122,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru
 			}
 			if(!filename.IsFile())
 			{
-				Reporting::Error(L"Unable to open \"" + filename.ToWide() + L"\": file does not exist.");
+				Reporting::Error(_T("Unable to open \"") + filename.ToCString() + _T("\": file does not exist."));
 			}
 			else //Case: Valid path but opening fails.
 			{
@@ -168,7 +168,7 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 		{
 			// Remove extension from title, so that saving the file will not suggest a filename like e.g. "example.it.it".
 			const CString title = modDoc->GetTitle();
-			const int dotPos = title.ReverseFind('.');
+			const int dotPos = title.ReverseFind(_T('.'));
 			if(dotPos >= 0)
 			{
 				modDoc->SetTitle(title.Left(dotPos));
@@ -176,6 +176,26 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 		}
 	}
 	return doc;
+}
+
+
+void CModDocTemplate::AddDocument(CDocument *doc)
+{
+	CMultiDocTemplate::AddDocument(doc);
+	m_documents.insert(static_cast<CModDoc *>(doc));
+}
+
+
+void CModDocTemplate::RemoveDocument(CDocument *doc)
+{
+	CMultiDocTemplate::RemoveDocument(doc);
+	m_documents.erase(static_cast<CModDoc *>(doc));
+}
+
+
+bool CModDocTemplate::DocumentExists(const CModDoc *doc) const
+{
+	return m_documents.count(const_cast<CModDoc *>(doc)) != 0;
 }
 
 
@@ -203,17 +223,19 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 	// for example of parsing the DDE command string.
 	bResult = FALSE;
 	bActivate = FALSE;
-	if ((lpszCommand) && (*lpszCommand) && (theApp.m_pMainWnd))
+	if ((lpszCommand) && lpszCommand[0] && (theApp.m_pMainWnd))
 	{
-		TCHAR s[_MAX_PATH], *pszCmd, *pszData;
-		std::size_t len;
+		std::size_t len = _tcslen(lpszCommand);
+		std::vector<TCHAR> s(lpszCommand, lpszCommand + len + 1);
 
-		mpt::WinStringBuf(s) = lpszCommand;
-		len = _tcslen(s) - 1;
-		while ((len > 0) && (_tcschr(_T("(){}[]\'\" "), s[len]))) s[len--] = 0;
-		pszCmd = s;
+		len--;
+		while((len > 0) && _tcschr(_T("(){}[]\'\" "), s[len]))
+		{
+			s[len--] = 0;
+		}
+		TCHAR *pszCmd = s.data();
 		while (pszCmd[0] == _T('[')) pszCmd++;
-		pszData = pszCmd;
+		TCHAR *pszData = pszCmd;
 		while ((pszData[0] != _T('(')) && (pszData[0]))
 		{
 			if (((BYTE)pszData[0]) <= (BYTE)0x20) *pszData = 0;
@@ -2074,7 +2096,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			if(plugPath == failedPlugin)
 			{
 				GetSettings().Remove("VST Plugins", "FailedPlugin");
-				const std::wstring text = L"The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToWide() + L"\n\nDo you still want to load it?";
+				const CString text = _T("The following plugin has previously crashed OpenMPT during initialisation:\n\n") + failedPlugin.ToCString() + _T("\n\nDo you still want to load it?");
 				if(Reporting::Confirm(text, false, true, &pluginScanDlg) == cnfNo)
 				{
 					continue;

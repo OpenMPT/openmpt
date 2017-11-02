@@ -1777,14 +1777,12 @@ void CMainFrame::SetupMidi(DWORD d, UINT_PTR n)
 
 void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
 {
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
 	if (pDocTmpl)
 	{
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CModDoc *pDoc;
-		while ((pos != NULL) && ((pDoc = dynamic_cast<CModDoc *>(pDocTmpl->GetNextDoc(pos))) != nullptr))
+		for(auto &doc : *pDocTmpl)
 		{
-			pDoc->UpdateAllViews(NULL, hint, pHint);
+			doc->UpdateAllViews(nullptr, hint, pHint);
 		}
 	}
 }
@@ -2239,20 +2237,11 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 LRESULT CMainFrame::OnUpdateViews(WPARAM modDoc, LPARAM hint)
 {
 	CModDoc *doc = reinterpret_cast<CModDoc *>(modDoc);
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if(pDocTmpl)
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl && pDocTmpl->DocumentExists(doc))
 	{
 		// Since this message is potentially posted, we first need to verify if the document still exists
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-		while((pos != nullptr) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != nullptr))
-		{
-			if(static_cast<CModDoc *>(pDoc) == doc)
-			{
-				doc->UpdateAllViews(nullptr, UpdateHint::FromLPARAM(hint));
-				break;
-			}
-		}
+		doc->UpdateAllViews(nullptr, UpdateHint::FromLPARAM(hint));
 	}
 	return 0;
 }
@@ -2261,20 +2250,11 @@ LRESULT CMainFrame::OnUpdateViews(WPARAM modDoc, LPARAM hint)
 LRESULT CMainFrame::OnSetModified(WPARAM modDoc, LPARAM)
 {
 	CModDoc *doc = reinterpret_cast<CModDoc *>(modDoc);
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if(pDocTmpl)
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl && pDocTmpl->DocumentExists(doc))
 	{
 		// Since this message is potentially posted, we first need to verify if the document still exists
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-		while((pos != nullptr) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != nullptr))
-		{
-			if(static_cast<CModDoc *>(pDoc) == doc)
-			{
-				doc->UpdateFrameCounts();
-				break;
-			}
-		}
+		doc->UpdateFrameCounts();
 	}
 	return 0;
 }
