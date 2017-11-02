@@ -28,14 +28,12 @@
 #include "AutoSaver.h"
 #include "MainFrm.h"
 #include "InputHandler.h"
-#include "globals.h"
+#include "Globals.h"
 #include "ChannelManagerDlg.h"
 #include "../common/version.h"
-#include "Ctrl_pat.h"
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"
 #include "SelectPluginDialog.h"
-#include "ExceptionHandler.h"
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "../common/mptFileIO.h"
@@ -2262,6 +2260,7 @@ LRESULT CMainFrame::OnSetModified(WPARAM modDoc, LPARAM)
 			if(static_cast<CModDoc *>(pDoc) == doc)
 			{
 				doc->UpdateFrameCounts();
+				break;
 			}
 		}
 	}
