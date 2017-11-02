@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "MainFrm.h"
+#include "ModDocTemplate.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/AudioReadTarget.h"
