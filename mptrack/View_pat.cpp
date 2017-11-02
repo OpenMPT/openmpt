@@ -3441,7 +3441,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 16383));
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
-		pMainFrm->ThreadSafeSetModified(pModDoc);
+		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
 	}
 
@@ -3552,7 +3552,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		}
 		if(update)
 		{
-			pMainFrm->ThreadSafeSetModified(pModDoc);
+			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
 
 			// Update GUI only if not recording live.
@@ -3575,7 +3575,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			// Sending MIDI may modify the plugin. For now, if MIDI data
 			// is not active sensing, set modified.
 			if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
-				pMainFrm->ThreadSafeSetModified(pModDoc);
+				pModDoc->SetModified();
 		}
 
 	}

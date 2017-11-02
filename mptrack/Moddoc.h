@@ -126,7 +126,7 @@ public:
 	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
 	bool IsModified() const { return m_bModified != FALSE; }	// Work-around: CDocument::IsModified() is not const...
-	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
+	void SetModified(bool modified = true);
 	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
@@ -338,7 +338,6 @@ protected:
 		return DoSave(filename.ToCString(), bSaveAs);
 	}
 	void DeleteContents() override;
-	void SetModifiedFlag(BOOL bModified=TRUE) override;
 	//}}AFX_VIRTUAL
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
