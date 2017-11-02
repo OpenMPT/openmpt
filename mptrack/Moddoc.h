@@ -257,7 +257,10 @@ public:
 	bool LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName);
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
+	// Notify all views of document updates (GUI thread only)
 	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);
+	// Notify all views of document updates (for non-GUI threads)
+	void UpdateAllViews(UpdateHint hint);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin, bool onlyThisEditor = false);

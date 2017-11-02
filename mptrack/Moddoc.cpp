@@ -1474,6 +1474,12 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 }
 
 
+void CModDoc::UpdateAllViews(UpdateHint hint)
+{
+	CMainFrame::GetMainFrame()->SendNotifyMessage(WM_MOD_UPDATEVIEWS, reinterpret_cast<WPARAM>(this), hint.AsLPARAM());
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc commands
 
