@@ -3328,7 +3328,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename, FALSE);
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.ToCString(), FALSE);
 	return pModDoc;
 }
 
