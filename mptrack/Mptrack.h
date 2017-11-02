@@ -12,15 +12,13 @@
 
 #include "resource.h"       // main symbols
 #include "Settings.h"
-#include <windows.h>
-#include "../mptrack/MPTrackUtil.h"
-#include "../mptrack/Reporting.h"
+#include "MPTrackUtil.h"
+#include "Reporting.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
 #include "../common/ComponentManager.h"
 #include "../common/mptMutex.h"
 #include "../common/mptRandom.h"
-#include <vector>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -180,7 +178,7 @@ protected:
 public:
 	CTrackApp();
 
-	virtual void AddToRecentFileList(LPCTSTR lpszPathName) override;
+	void AddToRecentFileList(LPCTSTR lpszPathName) override;
 	void AddToRecentFileList(const mpt::PathString path);
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const size_t item);
@@ -305,16 +303,16 @@ public:
 public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTrackApp)
-	public:
-	virtual BOOL InitInstance();
-	virtual BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
-	virtual BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
-	virtual BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
-	virtual int Run();
-	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
-	virtual int ExitInstance();
-	virtual int ExitInstanceImpl();
-	virtual BOOL OnIdle(LONG lCount);
+public:
+	BOOL InitInstance() override;
+	BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
+	BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
+	BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
+	int Run() override;
+	LRESULT ProcessWndProcException(CException* e, const MSG* pMsg) override;
+	int ExitInstance() override;
+	int ExitInstanceImpl();
+	BOOL OnIdle(LONG lCount) override;
 	//}}AFX_VIRTUAL
 
 // Implementation
