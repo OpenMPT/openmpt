@@ -637,7 +637,7 @@ void IMixPlugin::SetModified()
 	CModDoc *modDoc = GetModDoc();
 	if(modDoc != nullptr && m_SndFile.GetModSpecifications().supportsPlugins)
 	{
-		CMainFrame::GetMainFrame()->ThreadSafeSetModified(modDoc);
+		modDoc->SetModified();
 	}
 }
 
