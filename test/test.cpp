@@ -33,8 +33,9 @@
 #include "../soundlib/tuningcollection.h"
 #include "../soundlib/tuning.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/mptrack.h"
-#include "../mptrack/moddoc.h"
+#include "../mptrack/Mptrack.h"
+#include "../mptrack/Moddoc.h"
+#include "../mptrack/ModDocTemplate.h"
 #include "../mptrack/MainFrm.h"
 #include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
@@ -3328,7 +3329,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.ToCString(), FALSE);
+	CModDoc *pModDoc = static_cast<CModDoc *>(theApp.OpenDocumentFile(filename.ToCString(), FALSE));
 	return pModDoc;
 }
 
