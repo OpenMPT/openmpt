@@ -27,6 +27,7 @@ else
 end
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
+	dofile "../../build/premake/premake-defaults-strict.lua"
 if charset == "MBCS" then
   filter { "configurations:*Shared" }
    targetname "OpenMPT-ANSI"
@@ -157,6 +158,7 @@ end
   mpt_projectname = "OpenMPT-NativeSupport"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+	dofile "../../build/premake/premake-defaults-strict.lua"
   includedirs {
    "../../common",
    "../../include",
@@ -197,6 +199,7 @@ end
   mpt_projectname = "OpenMPT-WineWrapper"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+	dofile "../../build/premake/premake-defaults-strict.lua"
   includedirs {
    "../../common",
    "../../include",

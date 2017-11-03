@@ -6,6 +6,7 @@
   mpt_projectname = "r8brain"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-r8brain"
   includedirs { "../../include/r8brain" }
