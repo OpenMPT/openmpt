@@ -69,7 +69,7 @@ BOOL CAmpDlg::OnInitDialog()
 
 	const struct
 	{
-		TCHAR *name;
+		const TCHAR *name;
 		Fade::Law id;
 	} fadeLaws[] =
 	{
@@ -125,7 +125,7 @@ BOOL CAmpDlg::OnInitDialog()
 	for(size_t i = 0; i < CountOf(fadeLaws); i++)
 	{
 		cbi.iItem = i;
-		cbi.pszText = fadeLaws[i].name;
+		cbi.pszText = const_cast<LPTSTR>(fadeLaws[i].name);
 		cbi.iImage = cbi.iSelectedImage = i;
 		cbi.lParam = fadeLaws[i].id;
 		m_fadeBox.InsertItem(&cbi);

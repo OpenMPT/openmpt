@@ -1656,7 +1656,7 @@ bool CVstPlugin::IsInstrument() const
 
 bool CVstPlugin::CanRecieveMidiEvents()
 {
-	return Dispatch(effCanDo, 0, 0, "receiveVstMidiEvent", 0.0f) != 0;
+	return Dispatch(effCanDo, 0, 0, (void*)("receiveVstMidiEvent"), 0.0f) != 0;
 }
 
 

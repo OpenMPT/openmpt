@@ -91,7 +91,7 @@ BOOL COptionsGeneral::OnInitDialog()
 	const struct
 	{
 		MODTYPE type;
-		TCHAR *str;
+		const TCHAR *str;
 	} formats[] =
 	{
 		{ MOD_TYPE_MOD, _T("MOD") },

@@ -164,11 +164,11 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 }
 
 
-BOOL CModTabCtrl::InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam, int iImage)
+BOOL CModTabCtrl::InsertItem(int nIndex, LPCTSTR pszText, LPARAM lParam, int iImage)
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE;
-	tci.pszText = pszText;
+	tci.pszText = const_cast<LPTSTR>(pszText);
 	tci.lParam = lParam;
 	tci.iImage = iImage;
 	return CTabCtrl::InsertItem(nIndex, &tci);

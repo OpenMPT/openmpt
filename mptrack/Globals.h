@@ -102,7 +102,7 @@ protected:
 class CModTabCtrl: public CTabCtrl
 {
 public:
-	BOOL InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam=0, int iImage=-1);
+	BOOL InsertItem(int nIndex, LPCTSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	LPARAM GetItemData(int nIndex);
 };

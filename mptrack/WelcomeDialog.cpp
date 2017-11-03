@@ -115,8 +115,8 @@ BOOL WelcomeDlg::OnInitDialog()
 			combo->SetCurSel(i);
 		}
 	}
-	combo->SetItemDataPtr(combo->AddString(_T("Impulse Tracker")), "US_mpt-ft2_classic");
-	combo->SetItemDataPtr(combo->AddString(_T("FastTracker 2")), "US_mpt-it2_classic");
+	combo->SetItemDataPtr(combo->AddString(_T("Impulse Tracker")), (void*)("US_mpt-ft2_classic"));
+	combo->SetItemDataPtr(combo->AddString(_T("FastTracker 2")), (void*)("US_mpt-it2_classic"));
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get().name == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);

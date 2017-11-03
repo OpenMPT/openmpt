@@ -121,7 +121,7 @@ void PathConfigDlg::OnOK()
 
 void PathConfigDlg::BrowseFolder(UINT nID)
 {
-	TCHAR *prompt = (nID == IDC_AUTOSAVE_PATH)
+	const TCHAR *prompt = (nID == IDC_AUTOSAVE_PATH)
 		? _T("Select a folder to store autosaved files in...")
 		: _T("Select a default folder...");
 	BrowseForFolder dlg(GetPath(nID), prompt);

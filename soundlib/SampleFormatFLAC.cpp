@@ -621,6 +621,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 	bool result = false;
 	FLAC__int32 *sampleData = nullptr;
+	SmpLength numSamples = 0;
 
 	encoder.f = mpt_fopen(filename, "wb");
 	if(encoder.f == nullptr || FLAC__stream_encoder_init_FILE(encoder, encoder.f, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
@@ -629,7 +630,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	}
 
 	// Convert sample data to signed 32-Bit integer array.
-	const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
+	numSamples = sample.nLength * sample.GetNumChannels();
 	sampleData = new (std::nothrow) FLAC__int32[numSamples];
 	if(sampleData == nullptr)
 	{

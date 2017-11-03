@@ -555,8 +555,8 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	{
 		int32 id1;
 		int32 id2;
-		char *name;
-		char *problem;
+		const char *name;
+		const char *problem;
 	} problemPlugs[] =
 	{
 		{ kEffectMagic, CCONST('N', 'i', '4', 'S'), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },

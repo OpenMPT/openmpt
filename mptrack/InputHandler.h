@@ -38,7 +38,7 @@ public:
 	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
 	static KeyEventType GetKeyEventType(UINT nFlags);
 	bool isKeyPressHandledByTextBox(DWORD wparam);
-	CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message);
+	CommandID HandleMIDIMessage(InputTargetContext context, uint32 message);
 
 	int GetKeyListSize(CommandID cmd) const;
 
