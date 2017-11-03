@@ -78,7 +78,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru
 			{
 				// Case: Valid path but opening failed.
 				const int numDocs = theApp.GetOpenDocumentCount();
-				Reporting::Notification(mpt::format(_T("Opening \"%1\" failed. This can happen if ")
+				Reporting::Notification(mpt::cformat(_T("Opening \"%1\" failed. This can happen if ")
 					_T("no more modules can be opened or if the file type was not ")
 					_T("recognised. If the former is true, it is ")
 					_T("recommended to close some modules as otherwise a crash is likely")
