@@ -20,6 +20,7 @@
 #include "Childfrm.h"
 #include "Dlsbank.h"
 #include "Mpdlgs.h"
+#include "FolderScanner.h"
 #include "KeyConfigDlg.h"
 #include "PathConfigDlg.h"
 #include "GeneralConfigDlg.h"
@@ -122,9 +123,6 @@ END_MESSAGE_MAP()
 // Globals
 OptionsPage CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_DEFAULT;
 HHOOK CMainFrame::ghKbdHook = NULL;
-
-std::vector<mpt::PathString> CMainFrame::s_ExampleModulePaths;
-std::vector<mpt::PathString> CMainFrame::s_TemplateModulePaths;
 
 // GDI
 HICON CMainFrame::m_hIcon = NULL;
@@ -2148,7 +2146,7 @@ void CMainFrame::OnPlayerPause()
 void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 {
 	const UINT nIdBegin = (isTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
-	const std::vector<mpt::PathString>& vecFilePaths = (isTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
+	const std::vector<mpt::PathString> &vecFilePaths = (isTemplateFile) ? m_TemplateModulePaths : m_ExampleModulePaths;
 
 	const UINT nIndex = nId - nIdBegin;
 	if (nIndex < vecFilePaths.size())
@@ -2591,7 +2589,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 	ASSERT(hMenu != NULL);
 	if (hMenu != NULL)
 	{
-		UINT_PTR nAddCounter = 0;
+		UINT_PTR filesAdded = 0;
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
@@ -2603,34 +2601,18 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			basePath += pszFolderName;
 			if(!basePath.IsDirectory())
 				continue;
-			mpt::PathString sPath = basePath + MPT_PATHSTRING("*");
 
-			WIN32_FIND_DATAW findData;
-			MemsetZero(findData);
-			HANDLE hFindFile = FindFirstFileW(sPath.AsNative().c_str(), &findData);
-			if(hFindFile != INVALID_HANDLE_VALUE)
+			FolderScanner scanner(basePath, false);
+			mpt::PathString fileName;
+			while(filesAdded < nMaxCount && scanner.NextFile(fileName))
 			{
-				while(nAddCounter < nMaxCount)
-				{
-					// Note: The order in which the example files appears in the menu is unspecified.
-					if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-					{
-						vPaths.push_back(basePath + mpt::PathString::FromNative(findData.cFileName));
-						AppendMenuW(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, findData.cFileName);
-						++nAddCounter;
-					}
-					if(FindNextFileW(hFindFile, &findData) == FALSE)
-					{
-						break;
-					}
-				}
-				FindClose(hFindFile);
-				hFindFile = INVALID_HANDLE_VALUE;
+				vPaths.push_back(fileName);
+				AppendMenu(hMenu, MF_STRING, nIdRangeBegin + filesAdded, fileName.GetFullFileName().ToCString());
+				filesAdded++;
 			}
-
 		}
 
-		if(nAddCounter == 0)
+		if(filesAdded == 0)
 		{
 			AppendMenu(hMenu, MF_STRING | MF_GRAYED | MF_DISABLED, 0, _T("No items found"));
 		} else
@@ -2648,7 +2630,7 @@ void CMainFrame::CreateExampleModulesMenu()
 {
 	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, m_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
 	if (hMenu && pMainMenu && m_InputHandler)
 		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
@@ -2677,7 +2659,7 @@ void CMainFrame::CreateTemplateModulesMenu()
 {
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, m_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
 	CMenu *pFileMenu = GetFileMenu();
 	if (hMenu && pFileMenu && m_InputHandler)
 	{
