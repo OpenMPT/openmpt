@@ -279,7 +279,7 @@ public:
 		}
 	}
 
-	CPeriodicWaker::~CPeriodicWaker()
+	~CPeriodicWaker()
 	{
 		MPT_TRACE();
 		if(periodic_nt_timer)

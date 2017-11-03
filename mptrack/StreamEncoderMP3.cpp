@@ -130,7 +130,7 @@ private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
 	uint32 intToSynchsafe(uint32 in);
 	// Write a frame
-	void WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, std::ostream &s);
+	void WriteID3v2Frame(const char cFrameID[4], std::string sFramecontent, std::ostream &s);
 	// Return an upper bound for the size of all replay gain frames
 	uint32 GetMaxReplayGainFramesSizes();
 	uint32 GetMaxReplayGainTxxxTrackGainFrameSize();
@@ -330,7 +330,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 }
 
 // Write a ID3v2 frame
-void ID3V2Tagger::WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, std::ostream &s)
+void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecontent, std::ostream &s)
 {
 	if(!cFrameID[0] || sFramecontent.empty() || !s) return;
 

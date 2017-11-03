@@ -798,7 +798,12 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		{
 			// No speedup for these columns next time
 			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~COLUMN_BITS_SKIP;
-			goto SkipRow;
+			// skip row
+			{
+				ypaint += m_szCell.cy;
+				if (ypaint >= rcClient.bottom) break;
+				continue;
+			}
 		}
 		rect.right = rect.left + m_szHeader.cx;
 		bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
@@ -1091,7 +1096,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			if ((xbmp + nColumnWidth >= (UINT)m_Dib.GetWidth()) || (xpaint >= rcClient.right)) break;
 		} while (++col < maxcol);
 		m_Dib.Blit(hdc, xpaint-xbmp, ypaint, xbmp, m_szCell.cy);
-	SkipRow:
+		// skip row
 		ypaint += m_szCell.cy;
 		if (ypaint >= rcClient.bottom) break;
 	}

@@ -158,13 +158,13 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	TCITEM tie;
 	tie.mask = TCIF_TEXT | TCIF_IMAGE;
 	tie.iImage = -1;
-	tie.pszText = _T("Solo/Mute");
+	tie.pszText = const_cast<LPTSTR>(_T("Solo/Mute"));
 	TabCtrl_InsertItem(menu, 0, &tie);
-	tie.pszText = _T("Record select");
+	tie.pszText = const_cast<LPTSTR>(_T("Record select"));
 	TabCtrl_InsertItem(menu, 1, &tie);
-	tie.pszText = _T("Plugins");
+	tie.pszText = const_cast<LPTSTR>(_T("Plugins"));
 	TabCtrl_InsertItem(menu, 2, &tie);
-	tie.pszText = _T("Reorder/Remove");
+	tie.pszText = const_cast<LPTSTR>(_T("Reorder/Remove"));
 	TabCtrl_InsertItem(menu, 3, &tie);
 	m_currentTab = 0;
 

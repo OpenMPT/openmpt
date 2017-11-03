@@ -268,66 +268,68 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		nID = ::GetDlgCtrlID((HWND)nID);
 	}
 
+	LPCTSTR lpszText = nullptr;
 	switch(nID)
 	{
 	// patterns
 	case IDC_CHK_CLEANUP_PATTERNS:
-		pTTT->lpszText = _T("Remove all unused patterns and rearrange them.");
+		lpszText = _T("Remove all unused patterns and rearrange them.");
 		break;
 	case IDC_CHK_REMOVE_PATTERNS:
-		pTTT->lpszText = _T("Remove all patterns.");
+		lpszText = _T("Remove all patterns.");
 		break;
 	case IDC_CHK_REARRANGE_PATTERNS:
-		pTTT->lpszText = _T("Number the patterns given by their order in the sequence.");
+		lpszText = _T("Number the patterns given by their order in the sequence.");
 		break;
 	case IDC_CHK_REMOVE_DUPLICATES:
-		pTTT->lpszText = _T("Merge patterns with identical content.");
+		lpszText = _T("Merge patterns with identical content.");
 		break;
 	// orders
 	case IDC_CHK_REMOVE_ORDERS:
-		pTTT->lpszText = _T("Reset the order list.");
+		lpszText = _T("Reset the order list.");
 		break;
 	case IDC_CHK_MERGE_SEQUENCES:
-		pTTT->lpszText = _T("Merge multiple sequences into one.");
+		lpszText = _T("Merge multiple sequences into one.");
 		break;
 	// samples
 	case IDC_CHK_CLEANUP_SAMPLES:
-		pTTT->lpszText = _T("Remove all unused samples.");
+		lpszText = _T("Remove all unused samples.");
 		break;
 	case IDC_CHK_REMOVE_SAMPLES:
-		pTTT->lpszText = _T("Remove all samples.");
+		lpszText = _T("Remove all samples.");
 		break;
 	case IDC_CHK_REARRANGE_SAMPLES:
-		pTTT->lpszText = _T("Reorder sample list by removing empty samples.");
+		lpszText = _T("Reorder sample list by removing empty samples.");
 		break;
 	case IDC_CHK_OPTIMIZE_SAMPLES:
-		pTTT->lpszText = _T("Remove unused data after the sample loop end.");
+		lpszText = _T("Remove unused data after the sample loop end.");
 		break;
 	// instruments
 	case IDC_CHK_CLEANUP_INSTRUMENTS:
-		pTTT->lpszText = _T("Remove all unused instruments.");
+		lpszText = _T("Remove all unused instruments.");
 		break;
 	case IDC_CHK_REMOVE_INSTRUMENTS:
-		pTTT->lpszText = _T("Remove all instruments and convert them to samples.");
+		lpszText = _T("Remove all instruments and convert them to samples.");
 		break;
 	// plugins
 	case IDC_CHK_CLEANUP_PLUGINS:
-		pTTT->lpszText = _T("Remove all unused plugins.");
+		lpszText = _T("Remove all unused plugins.");
 		break;
 	case IDC_CHK_REMOVE_PLUGINS:
-		pTTT->lpszText = _T("Remove all plugins.");
+		lpszText = _T("Remove all plugins.");
 		break;
 	// misc
 	case IDC_CHK_SAMPLEPACK:
-		pTTT->lpszText = _T("Convert the module to .IT and reset song / sample / instrument variables");
+		lpszText = _T("Convert the module to .IT and reset song / sample / instrument variables");
 		break;
 	case IDC_CHK_UNUSED_CHANNELS:
-		pTTT->lpszText = _T("Removes all empty pattern channels.");
+		lpszText = _T("Removes all empty pattern channels.");
 		break;
 	default:
-		pTTT->lpszText = _T("");
+		lpszText = _T("");
 		break;
 	}
+	pTTT->lpszText = const_cast<LPTSTR>(lpszText);
 	return TRUE;
 }
 
