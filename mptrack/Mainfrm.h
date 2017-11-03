@@ -539,9 +539,9 @@ public:
 	static const size_t nMaxItemsInTemplateModulesMenu = 50;
 
 	/// Array of paths of example modules that are available from help menu.
-	static std::vector<mpt::PathString> s_ExampleModulePaths;
+	std::vector<mpt::PathString> m_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
-	static std::vector<mpt::PathString> s_TemplateModulePaths;
+	std::vector<mpt::PathString> m_TemplateModulePaths;
 };
 
 
