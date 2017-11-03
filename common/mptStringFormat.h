@@ -86,6 +86,9 @@ MPT_DEPRECATED std::string ToString(const mpt::ustring & x); // Unknown encoding
 #if defined(_MFC_VER)
 MPT_DEPRECATED std::string ToString(const mpt::ustring & x); // Unknown encoding.
 #endif
+#if defined(_MFC_VER)
+MPT_DEPRECATED std::string ToString(const CString & x);
+#endif
 std::string ToString(const bool & x);
 std::string ToString(const signed char & x);
 std::string ToString(const unsigned char & x);
@@ -162,6 +165,22 @@ std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
 #endif
 
+#if defined(_MFC_VER)
+#ifdef UNICODE
+#if MPT_WSTRING_FORMAT
+template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::ToCString(ToWString(x)); }
+#else
+template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::ToCString(ToUString(x)); }
+#endif
+#else
+namespace detail {
+template <typename T> struct CstringToStdStringImpl { CString operator () (const T & v) { return mpt::ToCString(mpt::CharsetLocale, ToString(v)); } };
+template <> struct CstringToStdStringImpl<CString> { CString operator () (const CString & v) { return v; } };
+}
+template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::detail::CstringToStdStringImpl<T>()(x); }
+#endif
+#endif
+
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return ToUString(x); } };
@@ -169,11 +188,7 @@ template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
 #endif
 #if defined(_MFC_VER)
-#ifdef UNICODE
-template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCString(ToUString(x)); } };
-#else
-template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCString(mpt::CharsetLocale, ToString(x)); } };
-#endif
+template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCStringHelper(x); } };
 #endif
 
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
