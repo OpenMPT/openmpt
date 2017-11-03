@@ -6,6 +6,7 @@
   mpt_projectname = "soundtouch"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   filter { "configurations:*Shared" }
    targetname "openmpt-soundtouch"

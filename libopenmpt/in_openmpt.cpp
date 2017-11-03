@@ -55,9 +55,9 @@ typedef ::uint64_t uint64_t;
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
-static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION);
+static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION);
 #else
-static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
+static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
 #endif
 
 #ifndef NOMINMAX
@@ -452,7 +452,7 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 
 In_Module inmod = {
 	IN_VER,
-	in_openmpt_string, // SHORT_TITLE,
+	const_cast< char * >( in_openmpt_string ), // SHORT_TITLE,
 	0, // hMainWindow
 	0, // hDllInstance
 	NULL, // filled later in Init() "mptm\0ModPlug Tracker Module (*.mptm)\0",
