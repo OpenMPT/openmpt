@@ -23,6 +23,11 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
 
+ *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
+    effect if a previous sample has already stopped playing.
+ *  MOD: Slides and delayed notes are executed on every repetition of a row with
+    row delay (fixes "ode to protracker").
+
 ### libopenmpt 0.3.1 (2017-09-28)
 
  *  [**Bug**] Windows: libopenmpt resource did not compile for release versions.

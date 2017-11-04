@@ -106,7 +106,7 @@
     <h3>General</h3>
     <ul>
         <li><strong>Unused channel removal</strong> is now more aggressive and removes any channels that contain no notes, no PC events and no global commands (so a channel that contains only Note Cuts or only portamento commands will be removed).</li>
-        <li><strong>Improved accesibility</strong> for blind users in the pattern and instrument editors.</li>
+        <li><strong>Improved accessibility</strong> for blind users in the pattern and instrument editors.</li>
         <li>Rearranging patterns no longer clears the pattern undo.</li>
         <li>Added an option to MIDI Export to not export an instrument at all (available from the MIDI channel dropdown).</li>
         <li>Added hidden setting "Misc.SaveChannelMuteStatus" (default true), which can be used to avoid <strong>channel mute status</strong> to be saved in S3M, IT and MPTM files.</li>
@@ -135,8 +135,8 @@
     <h3>Plugins</h3>
     <ul>
         <li>Added the <strong>LFO Plugin</strong>, which can automate other plugins' parameters or MIDI CCs.</li>
-        <li>Fixed sporadic Sporadic freezes and crashes in the MIDI Input / Output Plugin. It is now also possible to not send timing information to MIDI devices, and to specify a custom output latency. This value can also be negative, up to the duration of OpenMPT's own output latency.</li>
-        <li>Plugins sharing the same filename no longer casue OpenMPT to rescan them on every startup.</li>
+        <li>Fixed sporadic freezes and crashes in the MIDI Input / Output Plugin. It is now also possible to not send timing information to MIDI devices, and to specify a custom output latency. This value can also be negative, up to the duration of OpenMPT's own output latency.</li>
+        <li>Plugins sharing the same filename no longer cause OpenMPT to rescan them on every startup.</li>
         <li>The default DMO effects are now also available on Windows Server and Wine without any additional downloads.</li>
     </ul>
 
@@ -175,6 +175,7 @@
         <li>Support for <strong>synthesized instruments in Startrekker modules</strong>. Instrument files must have the same name as the module itself, followed by either ".nt" or ".as".</li>
         <li>MP3 patents have finally expired! mpg123 is now shipped with OpenMPT, so unmo3.dll support has been removed. The internal MO3 decoder is always used. MP3 sample import is now also supported out of the box on all systems.</li>
         <li>Opus export is now also possible at sample rates that are not native to the Opus codec. They are automatically resampled.</li>
+        <li>AU (Sun Audio) export to support uncompressed PCM export for streams larger than 2 GB.</li>
     </ul>
 
     <h3>There's more...</h3>

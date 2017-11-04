@@ -30,6 +30,39 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.02.00 (4 November 2017, revision 9xxx)
+--------------------------------------------
+Pattern tab
+   [Imp] <js> Provide tooltips for order list items to see their position (e.g. for creating a pattern jump target) and pattern name.
+   [Imp] <js> Clipboad Manager is now resizable.
+   [Fix] <js> Switching between normal and "extended" effects (Exy/Sxy) could confuse the parameter that was being searched for.
+
+Sample tab
+   [Fix] <js> Setting loops through the context menu did not create an undo point.
+
+IT::Compatible Playback Mode
+   [Fix] <js> In Compatible Gxx mode, allow sample changes next to a tone portamento effect if a previous sample has already stopped playing (fixes livingston_-_booger_4.it).
+
+MOD
+   [Fix] <js> Slides and delayed notes are executed on every repetition of a row with row delay (fixes "ode to protracker", http://bugs.openmpt.org/view.php?id=1053).
+
+Other formats
+   [Fix] <js> MID import: Take XG / GS drum channel setup into account for deciding whether to import note-offs.
+
+Stream Export
+   [New] <jh> Add AU export. This allows to export uncompressed PCM audio larger than 2 GB (http://bugs.openmpt.org/view.php?id=766).
+   [New] <js> Can now choose which sequences to export (http://bugs.openmpt.org/view.php?id=33).
+   [Reg] <jh> Remove the rather useless export file size limitation.
+
+Misc
+   [Imp] <js> Better support for opening files with very long path names via DDE.
+   [Fix] <js> Possible crash when closing a currently playing module with lots of speed changes.
+   [Fix] <jh> On Wine, keyboard input was not possible in some dialogs (http://bugs.openmpt.org/view.php?id=1037).
+
+Third-Party Libraries
+   [Mod] Update mpg123 (v1.25.7)
+
+
 v1.27.01.00 (27 September 2017, revision 9000)
 ----------------------------------------------
 General tab
