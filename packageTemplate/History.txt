@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.02.00 (4 November 2017, revision 9xxx)
+v1.27.02.00 (4 November 2017, revision 9220)
 --------------------------------------------
 Pattern tab
    [Imp] <js> Provide tooltips for order list items to see their position (e.g. for creating a pattern jump target) and pattern name.
