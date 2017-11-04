@@ -18,6 +18,8 @@ is just a high-level summary.
     other places to allow some valid MOD files to load.
  *  Some valid FAR files were rejected erroneously.
  *  Improved accuracy of vibrato command in DIGI / DBM files.
+ *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
+    effect if a previous sample has already stopped playing.
 
 ### libopenmpt 0.2-beta27 (2017-08-12)
 
