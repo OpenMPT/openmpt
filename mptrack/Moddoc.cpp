@@ -1515,6 +1515,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	encFactories.push_back(&wavencoder);
 	encFactories.push_back(&flacencoder);
 	encFactories.push_back(&rawencoder);
+	MPT_ASSERT(encFactories.size() == MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS);
 	OnFileWaveConvert(nMinOrder, nMaxOrder, encFactories);
 }
 
@@ -1821,6 +1822,8 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	std::vector<EncoderFactoryBase*> encoders;
 	if(wavencoder.IsAvailable()) encoders.push_back(&wavencoder);
 	if(flacencoder.IsAvailable()) encoders.push_back(&flacencoder);
+	if(rawencoder.IsAvailable()) encoders.push_back(&rawencoder);
+	MPT_ASSERT(encoders.size() == MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS);
 	if(opusencoder.IsAvailable()) encoders.push_back(&opusencoder);
 	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
 	if(mp3lame.IsAvailable())
@@ -1831,7 +1834,6 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		encoders.push_back(&mp3acm);
 	}
 	if(mp3lamecompatible.IsAvailable()) encoders.push_back(&mp3lamecompatible);
-	if(rawencoder.IsAvailable()) encoders.push_back(&rawencoder);
 	OnFileWaveConvert(nMinOrder, nMaxOrder, encoders);
 }
 
