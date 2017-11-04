@@ -852,7 +852,7 @@ std::size_t CWaveConvertSettings::FindEncoder(const mpt::ustring &name) const
 			return i;
 		}
 	}
-	return EncoderFactories.size() > 2 ? 2 : 0;
+	return EncoderFactories.size() > MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS ? MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS : 0;
 }
 
 
@@ -888,7 +888,7 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
 	: EncoderFactories(encFactories)
-	, EncoderName(conf, "Export", encFactories.size() > 4 ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
+	, EncoderName(conf, "Export", encFactories.size() > MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)
