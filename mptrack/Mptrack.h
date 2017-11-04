@@ -12,15 +12,13 @@
 
 #include "resource.h"       // main symbols
 #include "Settings.h"
-#include <windows.h>
-#include "../mptrack/MPTrackUtil.h"
-#include "../mptrack/Reporting.h"
+#include "MPTrackUtil.h"
+#include "Reporting.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
 #include "../common/ComponentManager.h"
 #include "../common/mptMutex.h"
 #include "../common/mptRandom.h"
-#include <vector>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -124,6 +122,8 @@ struct DRAGONDROP
 
 class CModDocTemplate: public CMultiDocTemplate
 {
+	std::set<CModDoc *> m_documents;	// Allow faster lookup of open documents than MFC's linear search allows for
+
 public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
@@ -144,6 +144,18 @@ public:
 #pragma clang diagnostic pop
 #endif // MPT_COMPILER_CLANG
 
+	void AddDocument(CDocument *doc) override;
+	void RemoveDocument(CDocument *doc) override;
+	bool DocumentExists(const CModDoc *doc) const;
+
+	size_t size() const { return m_documents.size(); }
+	bool empty() const { return m_documents.empty(); }
+	std::set<CModDoc *>::iterator begin() { return m_documents.begin(); }
+	std::set<CModDoc *>::const_iterator begin() const { return m_documents.begin(); }
+	std::set<CModDoc *>::const_iterator cbegin() const { return m_documents.cbegin(); }
+	std::set<CModDoc *>::iterator end() { return m_documents.end(); }
+	std::set<CModDoc *>::const_iterator end() const { return m_documents.end(); }
+	std::set<CModDoc *>::const_iterator cend() const { return m_documents.cend(); }
 };
 
 
@@ -343,16 +355,16 @@ public:
 public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTrackApp)
-	public:
-	virtual BOOL InitInstance();
-	virtual BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
-	virtual BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
-	virtual BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
-	virtual int Run();
-	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
-	virtual int ExitInstance();
-	virtual int ExitInstanceImpl();
-	virtual BOOL OnIdle(LONG lCount);
+public:
+	BOOL InitInstance() override;
+	BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
+	BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
+	BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
+	int Run() override;
+	LRESULT ProcessWndProcException(CException* e, const MSG* pMsg) override;
+	int ExitInstance() override;
+	int ExitInstanceImpl();
+	BOOL OnIdle(LONG lCount) override;
 	//}}AFX_VIRTUAL
 
 // Implementation

@@ -126,7 +126,7 @@ public:
 	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
 	bool IsModified() const { return m_bModified != FALSE; }	// Work-around: CDocument::IsModified() is not const...
-	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
+	void SetModified(bool modified = true);
 	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
@@ -257,7 +257,10 @@ public:
 	bool LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName);
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
+	// Notify all views of document updates (GUI thread only)
 	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);
+	// Notify all views of document updates (for non-GUI threads)
+	void UpdateAllViews(UpdateHint hint);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin, bool onlyThisEditor = false);
@@ -368,7 +371,6 @@ protected:
 	}
 	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
 	void DeleteContents() override;
-	void SetModifiedFlag(BOOL bModified=TRUE) override;
 	//}}AFX_VIRTUAL
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;

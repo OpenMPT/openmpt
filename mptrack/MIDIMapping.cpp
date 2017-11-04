@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "MIDIMapping.h"
 #include "../common/FileReader.h"
 #include "../soundlib/MIDIEvents.h"
@@ -143,7 +143,8 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 			IMixPlugin *pPlug = m_rSndFile.m_MixPlugins[plugindex - 1].pMixPlugin;
 			if(!pPlug) continue;
 			pPlug->SetParameter(param, val / 16383.0f);
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
+			if(m_rSndFile.GetpModDoc() != nullptr)
+				m_rSndFile.GetpModDoc()->SetModified();
 #endif // NO_PLUGINS
 		}
 		if(d.GetCaptureMIDI())

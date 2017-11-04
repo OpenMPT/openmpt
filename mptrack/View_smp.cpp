@@ -1962,7 +1962,7 @@ void CViewSample::OnSetSustainLoop()
 		{
 			if ((sample.nSustainStart != m_dwBeginSel) || (sample.nSustainEnd != m_dwEndSel))
 			{
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set  Sustain Loop");
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Loop");
 				sample.SetSustainLoop(m_dwBeginSel, m_dwEndSel, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
 				SetModified(SampleHint().Info().Data(), true, false);
 			}

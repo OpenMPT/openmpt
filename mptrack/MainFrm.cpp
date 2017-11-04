@@ -28,15 +28,12 @@
 #include "AutoSaver.h"
 #include "MainFrm.h"
 #include "InputHandler.h"
-#include "globals.h"
+#include "Globals.h"
 #include "ChannelManagerDlg.h"
-#include <direct.h>
 #include "../common/version.h"
-#include "Ctrl_pat.h"
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"
 #include "SelectPluginDialog.h"
-#include "ExceptionHandler.h"
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "../common/mptFileIO.h"
@@ -104,6 +101,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMAPPING,			OnViewMIDIMapping)
 	ON_MESSAGE(WM_MOD_UPDATEVIEWS,			OnUpdateViews)
+	ON_MESSAGE(WM_MOD_SETMODIFIED,			OnSetModified)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, OnUpdateCheckProgress)
@@ -199,7 +197,6 @@ CMainFrame::CMainFrame()
 
 	m_SoundCardOptionsDialog = nullptr;
 
-	m_pJustModifiedDoc = nullptr;
 	m_hWndMidi = NULL;
 	m_pSndFile = nullptr;
 	m_dwTimeSec = 0;
@@ -1780,14 +1777,12 @@ void CMainFrame::SetupMidi(DWORD d, UINT_PTR n)
 
 void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
 {
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
 	if (pDocTmpl)
 	{
-		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CModDoc *pDoc;
-		while ((pos != NULL) && ((pDoc = dynamic_cast<CModDoc *>(pDocTmpl->GetNextDoc(pos))) != nullptr))
+		for(auto &doc : *pDocTmpl)
 		{
-			pDoc->UpdateAllViews(NULL, hint, pHint);
+			doc->UpdateAllViews(nullptr, hint, pHint);
 		}
 	}
 }
@@ -1839,9 +1834,6 @@ void CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 void CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 {
 	if (pModDoc == GetModPlaying()) PauseMod();
-
-	// Make sure that OnTimer() won't try to set the closed document modified anymore.
-	if (pModDoc == m_pJustModifiedDoc) m_pJustModifiedDoc = nullptr;
 
 	m_wndTree.OnDocumentClosed(pModDoc);
 }
@@ -2019,15 +2011,6 @@ void CMainFrame::OnTimerGUI()
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
 			OnViewOptions();
 		}
-	}
-
-	// Ensure the modified flag gets set in the WinMain thread, even if modification
-	// originated from Audio Thread (access to CWnd is not thread safe).
-	// Flaw: if 2 docs are modified in between Timer ticks (very rare), one mod will be lost.
-	if (m_pJustModifiedDoc)
-	{
-		m_pJustModifiedDoc->SetModified(true);
-		m_pJustModifiedDoc = NULL;
 	}
 
 	if(m_SoundCardOptionsDialog)
@@ -2253,9 +2236,25 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 
 LRESULT CMainFrame::OnUpdateViews(WPARAM modDoc, LPARAM hint)
 {
-	if(modDoc)
+	CModDoc *doc = reinterpret_cast<CModDoc *>(modDoc);
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl && pDocTmpl->DocumentExists(doc))
 	{
-		reinterpret_cast<CModDoc *>(modDoc)->UpdateAllViews(nullptr, UpdateHint::FromLPARAM(hint));
+		// Since this message is potentially posted, we first need to verify if the document still exists
+		doc->UpdateAllViews(nullptr, UpdateHint::FromLPARAM(hint));
+	}
+	return 0;
+}
+
+
+LRESULT CMainFrame::OnSetModified(WPARAM modDoc, LPARAM)
+{
+	CModDoc *doc = reinterpret_cast<CModDoc *>(modDoc);
+	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	if(pDocTmpl && pDocTmpl->DocumentExists(doc))
+	{
+		// Since this message is potentially posted, we first need to verify if the document still exists
+		doc->UpdateFrameCounts();
 	}
 	return 0;
 }

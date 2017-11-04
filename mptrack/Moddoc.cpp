@@ -151,11 +151,14 @@ CModDoc::~CModDoc()
 }
 
 
-void CModDoc::SetModifiedFlag(BOOL bModified)
+void CModDoc::SetModified(bool modified)
 {
-	bool changed = (!!bModified != IsModified());
-	CDocument::SetModifiedFlag(bModified);
-	if (changed) UpdateFrameCounts();
+	STATIC_ASSERT(sizeof(long) == sizeof(m_bModified));
+	if(!!InterlockedExchange(reinterpret_cast<long *>(&m_bModified), modified ? TRUE : FALSE) != modified)
+	{
+		// Update window titles in GUI thread
+		CMainFrame::GetMainFrame()->SendNotifyMessage(WM_MOD_SETMODIFIED, reinterpret_cast<WPARAM>(this), 0);
+	}
 }
 
 
@@ -171,7 +174,7 @@ BOOL CModDoc::OnNewDocument()
 
 	ReinitRecordState();
 	InitializeMod();
-	SetModifiedFlag(FALSE);
+	SetModified(false);
 	return TRUE;
 }
 
@@ -245,7 +248,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 			MptVersion::str));
 	}
 
-	SetModifiedFlag(FALSE);
+	SetModified(false);
 	m_bHasValidPath = true;
 
 	// Check if there are any missing samples, and if there are, show a dialog to relocate them.
@@ -492,7 +495,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 	}
 	if(OnSaveDocument(saveFileName))
 	{
-		SetModified(FALSE);
+		SetModified(false);
 		m_bHasValidPath=true;
 		m_ShowSavedialog = false;
 		CMainFrame::GetMainFrame()->UpdateTree(this, GeneralHint().General()); // Update treeview (e.g. filename might have changed).
@@ -863,7 +866,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 			&& event != MIDIEvents::evPitchBend
 			&& m_SndFile.GetModSpecifications().supportsPlugins)
 		{
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+			SetModified();
 		}
 	}
 }
@@ -1118,7 +1121,7 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 	const bool success = UpdateChannelMuteStatus(nChn);
 	if(success && MuteToggleModifiesDocument())
 	{
-		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+		SetModified();
 	}
 
 	return success;
@@ -1486,6 +1489,12 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 		}
 	}
 #endif
+}
+
+
+void CModDoc::UpdateAllViews(UpdateHint hint)
+{
+	CMainFrame::GetMainFrame()->SendNotifyMessage(WM_MOD_UPDATEVIEWS, reinterpret_cast<WPARAM>(this), hint.AsLPARAM());
 }
 
 

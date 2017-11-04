@@ -45,6 +45,7 @@ enum HintType
 	// General module setting hints (GeneralHint)
 	HINT_MODGENERAL		= 0x10,	// General global module settings have changed
 	HINT_MODCHANNELS	= 0x20,	// Module channel settings have changed (e.g. channel volume). Parameter: Channel ID
+	HINT_TUNINGS		= 0x40,	// Tuning collection was updated
 	// Pattern-specific hints (PatternHint)
 	HINT_PATTERNDATA	= 0x10,	// Pattern data has changed. Parameter: Pattern ID (0 = all patterns)
 	HINT_PATTERNROW		= 0x20,	// A row of the currently edited pattern has changed. Parameter: Row number
@@ -134,6 +135,7 @@ struct GeneralHint : public UpdateHint
 	GeneralHint(int channelTab = 0) : UpdateHint(classCategory, channelTab) { }
 	MPT_FORCEINLINE GeneralHint &General() { type |= HINT_MODGENERAL; return *this; }
 	MPT_FORCEINLINE GeneralHint &Channels() { type |= HINT_MODCHANNELS; return *this; }
+	MPT_FORCEINLINE GeneralHint &Tunings() { type |= HINT_TUNINGS; return *this; }
 
 	MPT_FORCEINLINE int GetChannel() const { return GetData<int>(); }
 };
