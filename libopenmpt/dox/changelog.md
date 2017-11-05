@@ -20,6 +20,11 @@ is just a high-level summary.
     and `--batch` modes and also rejects `--output` in `--render` mode. These
     combinations of options really made no sense and were rather confusing.
 
+ *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
+    effect if a previous sample has already stopped playing.
+ *  MOD: Slides and delayed notes are executed on every repetition of a row with
+    row delay (fixes "ode to protracker").
+
 ### libopenmpt 0.3 (2017-09-27)
 
  *  [**New**] New error handling functionality in the C API, which in particular
