@@ -18,7 +18,7 @@ is just a high-level summary.
  *  [**Change**] Windows bin and dev release packages now use zip archives
     instead of 7z archives as it had originally been intended for the 0.3.0
     release.
- *  [**Change**] openmpt123: The following combinations of options are not
+ *  [**Change**] openmpt123: The following combinations of options are now
     deprecated because they made no real sense in the first place:
     `--render --output`, `--ui --output-type`, `--batch --output-type`
 
