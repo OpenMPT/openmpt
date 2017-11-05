@@ -113,7 +113,7 @@
  *
  * \section libopenmpt_c_staticlinking Statically linking to libopenmpt
  *
- * libopenmpt is implemented in C++. This imlies that linking to libopenmpt
+ * libopenmpt is implemented in C++. This implies that linking to libopenmpt
  * statically requires linking to the C++ runtime and standard library. The
  * **highly preferred and recommended** way to do this is by using the C++
  * compiler instead of the platform linker to do the linking. This will do all
