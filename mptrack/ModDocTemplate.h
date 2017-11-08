@@ -15,6 +15,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
+namespace mpt { class PathString; }
 
 class CModDocTemplate: public CMultiDocTemplate
 {
