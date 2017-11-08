@@ -724,7 +724,7 @@ LogLevel CModDoc::GetMaxLogLevel() const
 {
 	LogLevel retval = LogInformation;
 	// find the most severe loglevel
-	for(const auto i : m_Log)
+	for(const auto &i : m_Log)
 	{
 		retval = std::min(retval, i.level);
 	}
