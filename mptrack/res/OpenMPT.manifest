@@ -7,9 +7,6 @@
  />
  <description>OpenMPT / ModPlug Tracker</description>
  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
-  <!-- VS2008 and VS2010 mt.exe will warn with a -->
-  <!-- 'manifest authoring warning 81010002: Unrecognized Element' -->
-  <!-- here. There is nothing we can do about that. -->
   <application>
    <!-- Windows 10 -->
    <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
