@@ -15,8 +15,6 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 
-#define new DEBUG_NEW
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace ctrlSmp
