@@ -39,7 +39,7 @@ struct STPFileHeader
 	uint16be sampleStructSize;
 };
 
-MPT_BINARY_STRUCT(STPFileHeader, 204);
+MPT_BINARY_STRUCT(STPFileHeader, 204)
 
 
 // Sample header (common part between all versions)
@@ -85,7 +85,7 @@ struct STPSampleHeader
 	}
 };
 
-MPT_BINARY_STRUCT(STPSampleHeader, 20);
+MPT_BINARY_STRUCT(STPSampleHeader, 20)
 
 
 struct STPLoopInfo

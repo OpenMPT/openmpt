@@ -1964,7 +1964,7 @@ struct PT36Header
 	char    magicMODL[4];  // "MODL"
 };
 
-MPT_BINARY_STRUCT(PT36Header, 12);
+MPT_BINARY_STRUCT(PT36Header, 12)
 
 
 static bool ValidateHeader(const PT36Header &fileHeader)
