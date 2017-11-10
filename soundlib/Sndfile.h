@@ -118,15 +118,17 @@ struct GetLengthTarget
 	ROWINDEX startRow;
 	ORDERINDEX startOrder;
 	SEQUENCEINDEX sequence;
+	
+	struct pos_type
+	{
+		ROWINDEX row;
+		ORDERINDEX order;
+	};
 
 	union
 	{
 		double time;
-		struct
-		{
-			ROWINDEX row;
-			ORDERINDEX order;
-		} pos;
+		pos_type pos;
 	};
 
 	enum Mode
