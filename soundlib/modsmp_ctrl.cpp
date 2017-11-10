@@ -14,8 +14,6 @@
 #include "Sndfile.h"
 #include "SampleFormatConverters.h"
 
-#define new DEBUG_NEW
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace ctrlSmp
