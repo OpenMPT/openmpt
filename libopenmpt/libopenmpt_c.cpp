@@ -244,7 +244,7 @@ static void do_report_exception( const char * const function, openmpt_log_func c
 				openmpt_log_func_default( message.c_str(), NULL );
 			}
 		} catch ( ... ) {
-			fprintf( stderr, "openmpt: %s:%i: UNKNOWN INTERNAL ERROR in error handling: function='%s', logfunc=%p, loguser=%p, errfunc=%p, erruser=%p, impl=%p\n", __FILE__, static_cast<int>( __LINE__ ), function ? function : "", logfunc, loguser, errfunc, erruser, impl );
+			fprintf( stderr, "openmpt: %s:%i: UNKNOWN INTERNAL ERROR in error handling: function='%s', logfunc=%p, loguser=%p, errfunc=%p, erruser=%p, impl=%p\n", __FILE__, static_cast<int>( __LINE__ ), function ? function : "", reinterpret_cast<void*>( logfunc ), loguser, reinterpret_cast<void*>( errfunc ), erruser, static_cast<void*>( impl ) );
 			fflush( stderr );
 		}
 	}
