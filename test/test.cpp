@@ -390,7 +390,8 @@ static std::string StringFormat(const char *format, T x)
 
 #endif
 
-static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
+template <typename Tfloat>
+static void TestFloatFormat(Tfloat x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
 {
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
@@ -407,7 +408,8 @@ static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, s
 }
 
 
-static void TestFloatFormats(double x)
+template <typename Tfloat>
+static void TestFloatFormats(Tfloat x)
 {
 
 	TestFloatFormat(x, "%g", mpt::fmt::NotaNrm | mpt::fmt::FillOff);
@@ -533,6 +535,17 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(0.0000000001f);
 	TestFloatFormats(-0.0000000001f);
 	TestFloatFormats(6.12345f);
+
+	TestFloatFormats(0.0);
+	TestFloatFormats(1.0);
+	TestFloatFormats(-1.0);
+	TestFloatFormats(0.1);
+	TestFloatFormats(-0.1);
+	TestFloatFormats(1000000000.0);
+	TestFloatFormats(-1000000000.0);
+	TestFloatFormats(0.0000000001);
+	TestFloatFormats(-0.0000000001);
+	TestFloatFormats(6.12345);
 
 	TestFloatFormats(42.1234567890);
 	TestFloatFormats(0.1234567890);
