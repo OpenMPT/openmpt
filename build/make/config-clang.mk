@@ -39,8 +39,8 @@ CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
-CXXFLAGS_WARNINGS += -Wdouble-promotion -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wdouble-promotion -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += -Wpedantic -Wdouble-promotion -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wpedantic -Wdouble-promotion -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 endif
 
