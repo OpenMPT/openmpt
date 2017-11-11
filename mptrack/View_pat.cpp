@@ -142,7 +142,6 @@ CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? G
 CViewPattern::CViewPattern()
 {
 	EnableActiveAccessibility();
-	m_pEffectVis = nullptr;
 	m_bLastNoteEntryBlocked = false;
 
 	m_nPattern = 0;
@@ -742,8 +741,7 @@ void CViewPattern::OnDestroy()
 	if (m_pEffectVis)
 	{
 		m_pEffectVis->DoClose();
-		delete m_pEffectVis;
-		m_pEffectVis = NULL;
+		m_pEffectVis = nullptr;
 	}
 
 	if (m_pEditWnd)
@@ -2100,14 +2098,14 @@ void CViewPattern::OnVisualizeEffect()
 		if (m_pEffectVis)
 		{
 			// Window already there, update data
-			m_pEffectVis->UpdateSelection(row0, row1, nchn, pModDoc, m_nPattern);
+			m_pEffectVis->UpdateSelection(row0, row1, nchn, m_nPattern);
 		} else
 		{
 			// Open window & send data
 			CriticalSection cs;
 			try
 			{
-				m_pEffectVis = new CEffectVis(this, row0, row1, nchn, pModDoc, m_nPattern);
+				m_pEffectVis = mpt::make_unique<CEffectVis>(this, row0, row1, nchn, *pModDoc, m_nPattern);
 				m_pEffectVis->OpenEditor(CMainFrame::GetMainFrame());
 				// HACK: to get status window set up; must create clear destinction between
 				// construction, 1st draw code and all draw code.
