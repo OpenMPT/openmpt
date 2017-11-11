@@ -20,7 +20,7 @@ Developers:
    <sp>    pelya      / Sergiy Pylypenko [pelya]
    <tn>    plastik_s  / Trevor Nunes     [plastik_s]
 Patch submitters:
-   <cm>    kode54     / Chris Moeller
+   <cm>    kode54     / Christopher Snowhill
    <da>    Revenant   / Devin Acker
    <ih>    xaimus     / Imran Hameed
    <ks>    coda       / Ken Snyder
