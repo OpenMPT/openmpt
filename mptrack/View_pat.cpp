@@ -1967,8 +1967,8 @@ void CViewPattern::PatternStep(ROWINDEX row)
 
 	if(pMainFrm != nullptr && pModDoc != nullptr)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		if(!sndFile.Patterns.IsValidPat(m_nPattern))
 			return;
 
 		CriticalSection cs;
@@ -1978,16 +1978,16 @@ void CViewPattern::PatternStep(ROWINDEX row)
 			InvalidatePattern(true, true);
 
 		// Cut instruments/samples in virtual channels
-		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(CHANNELINDEX i = sndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
-			pSndFile->m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			sndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		pSndFile->LoopPattern(m_nPattern);
-		pSndFile->m_PlayState.m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
-		pSndFile->m_SongFlags.reset(SONG_PAUSED);
-		pSndFile->m_SongFlags.set(SONG_STEP);
+		sndFile.LoopPattern(m_nPattern);
+		sndFile.m_PlayState.m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
+		sndFile.m_SongFlags.reset(SONG_PAUSED);
+		sndFile.m_SongFlags.set(SONG_STEP);
 
-		SetPlayCursor(m_nPattern, pSndFile->m_PlayState.m_nNextRow, 0);
+		SetPlayCursor(m_nPattern, sndFile.m_PlayState.m_nNextRow, 0);
 		cs.Leave();
 
 		if(pMainFrm->GetModPlaying() != pModDoc)
@@ -2786,10 +2786,10 @@ void CViewPattern::OnRemoveChannelDialog()
 void CViewPattern::OnRemoveChannel()
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	if(pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return;
+	if(pModDoc == nullptr) return;
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	if(pSndFile->GetNumChannels() <= pSndFile->GetModSpecifications().channelsMin)
+	if(sndFile.GetNumChannels() <= sndFile.GetModSpecifications().channelsMin)
 	{
 		Reporting::Error("No channel removed - channel number already at minimum.", "Remove channel");
 		return;
@@ -2937,12 +2937,13 @@ void CViewPattern::UndoRedo(bool undo)
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
 		PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
-		if(pat < pModDoc->GetSoundFile()->Patterns.Size())
+		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		if(pat < sndFile.Patterns.Size())
 		{
 			if(pat != m_nPattern)
 			{
 				// Find pattern in sequence.
-				ORDERINDEX matchingOrder = GetSoundFile()->Order().FindOrder(pat, GetCurrentOrder());
+				ORDERINDEX matchingOrder = sndFile.Order().FindOrder(pat, GetCurrentOrder());
 				if(matchingOrder != ORDERINDEX_INVALID)
 				{
 					SetCurrentOrder(matchingOrder);
@@ -3230,28 +3231,24 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	{
 		return 0;
 	}
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr)
-	{
-		return 0;
-	}
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	//Work out where to put the new data
 	const CHANNELINDEX nChn = GetCurrentChannel();
 	ROWINDEX nRow = GetCurrentRow();
 	PATTERNINDEX nPattern = m_nPattern;
 	if(IsLiveRecord())
-		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_PlayState.m_nRow, pSndFile->m_PlayState.m_nPattern);
+		SetEditPos(sndFile, nRow, nPattern, sndFile.m_PlayState.m_nRow, sndFile.m_PlayState.m_nPattern);
 
-	ModCommand *pRow = pSndFile->Patterns[nPattern].GetpModCommand(nRow, nChn);
+	ModCommand *pRow = sndFile.Patterns[nPattern].GetpModCommand(nRow, nChn);
 
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
 
-	IMixPlugin *pPlug = pSndFile->m_MixPlugins[plugSlot].pMixPlugin;
+	IMixPlugin *pPlug = sndFile.m_MixPlugins[plugSlot].pMixPlugin;
 	if (pPlug == nullptr) return 0;
 
-	if(pSndFile->GetType() == MOD_TYPE_MPT)
+	if(sndFile.GetType() == MOD_TYPE_MPT)
 	{
 		// MPTM: Use PC Notes
 
@@ -3263,33 +3260,33 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(paramIndex) * ModCommand::maxColumnValue));
 			InvalidateRow(nRow);
 		}
-	} else if(pSndFile->GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
+	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
 		// Other formats: Use MIDI macros
 
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
 		int activePlugParam  = -1;
-		BYTE activeMacro      = pSndFile->m_PlayState.Chn[nChn].nActiveMacro;
+		BYTE activeMacro      = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
 
-		if (pSndFile->m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
+		if (sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
 		{
-			activePlugParam = pSndFile->m_MidiCfg.MacroToPlugParam(activeMacro);
+			activePlugParam = sndFile.m_MidiCfg.MacroToPlugParam(activeMacro);
 		}
 
 		//If the wrong macro is active, see if we can find the right one.
 		//If we can, activate it for this chan by writing appropriate SFx command it.
 		if (activePlugParam != paramIndex)
 		{ 
-			int foundMacro = pSndFile->m_MidiCfg.FindMacroForParam(paramIndex);
+			int foundMacro = sndFile.m_MidiCfg.FindMacroForParam(paramIndex);
 			if (foundMacro >= 0)
 			{
-				pSndFile->m_PlayState.Chn[nChn].nActiveMacro = static_cast<uint8>(foundMacro);
+				sndFile.m_PlayState.Chn[nChn].nActiveMacro = static_cast<uint8>(foundMacro);
 				if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) //we overwrite existing Zxx and \xx only.
 				{
 					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 					pRow->command = CMD_S3MCMDEX;
-					if(!pSndFile->GetModSpecifications().HasCommand(CMD_S3MCMDEX)) pRow->command = CMD_MODCMDEX;
+					if(!sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX)) pRow->command = CMD_MODCMDEX;
 					pRow->param = 0xF0 + (foundMacro & 0x0F);
 					InvalidateRow(nRow);
 				}
@@ -3665,7 +3662,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if(!m_Status[psFollowSong]
 					|| (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-					|| (pModDoc->GetSoundFile()->IsPaused()))
+					|| (pModDoc->GetrSoundFile().IsPaused()))
 				{
 					SetCurrentRow(GetCurrentRow() + m_nSpacing);
 				}
@@ -3816,7 +3813,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return NULL;
 	
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
@@ -3912,12 +3909,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			return wParam;
 
 		case kcNavigateNextChanSelect:
-		case kcNavigateNextChan: SetCurrentColumn((GetCurrentChannel() + 1) % pSndFile->GetNumChannels(), m_Cursor.GetColumnType()); return wParam;
+		case kcNavigateNextChan: SetCurrentColumn((GetCurrentChannel() + 1) % sndFile.GetNumChannels(), m_Cursor.GetColumnType()); return wParam;
 		case kcNavigatePrevChanSelect:
 		case kcNavigatePrevChan:{if(GetCurrentChannel() > 0)
-									SetCurrentColumn((GetCurrentChannel() - 1) % pSndFile->GetNumChannels(), m_Cursor.GetColumnType());
+									SetCurrentColumn((GetCurrentChannel() - 1) % sndFile.GetNumChannels(), m_Cursor.GetColumnType());
 								else
-									SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_Cursor.GetColumnType());
+									SetCurrentColumn(sndFile.GetNumChannels() - 1, m_Cursor.GetColumnType());
 								SetSelToCursor();
 								return wParam;}
 
@@ -3935,15 +3932,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam;
 
 		case kcEndHorizontalSelect:
-		case kcEndHorizontal:	if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
+		case kcEndHorizontal:	if (m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
 								else if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 		case kcEndVerticalSelect:
 		case kcEndVertical:		if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								else if (m_Cursor.CompareColumn(PatternCursor(0, pSndFile->GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
+								else if (m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
 								return wParam;
 		case kcEndAbsoluteSelect:
-		case kcEndAbsolute:		SetCurrentColumn(pSndFile->GetNumChannels() - 1, m_nDetailLevel);
+		case kcEndAbsolute:		SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
 								if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 								return wParam;
 
@@ -3953,19 +3950,19 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			return wParam;
 
 		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
-								while ((n < pSndFile->Patterns.Size()) && !pSndFile->Patterns.IsValidPat(n)) n++;
-								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
+								while ((n < sndFile.Patterns.Size()) && !sndFile.Patterns.IsValidPat(n)) n++;
+								SetCurrentPattern((n < sndFile.Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = pSndFile->Order().FindOrder(m_nPattern, currentOrder, true);
+								ORDERINDEX newOrder = sndFile.Order().FindOrder(m_nPattern, currentOrder, true);
 								if(newOrder != ORDERINDEX_INVALID)
 									SetCurrentOrder(newOrder);
 								return wParam;
 							}
-		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size() - 1;
-								while (n > 0 && !pSndFile->Patterns.IsValidPat(n)) n--;
+		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : sndFile.Patterns.Size() - 1;
+								while (n > 0 && !sndFile.Patterns.IsValidPat(n)) n--;
 								SetCurrentPattern(n);
 								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = pSndFile->Order().FindOrder(m_nPattern, currentOrder, false);
+								ORDERINDEX newOrder = sndFile.Order().FindOrder(m_nPattern, currentOrder, false);
 								if(newOrder != ORDERINDEX_INVALID)
 									SetCurrentOrder(newOrder);
 								return wParam;
@@ -3995,7 +3992,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 									PatternCursor(m_Selection.GetEndRow(), m_Selection.GetEndChannel(), PatternCursor::lastColumn));
 								return wParam;
 		case kcSelectRow:		SetCurSel(PatternCursor(m_Selection.GetStartRow(), 0, PatternCursor::firstColumn),
-									PatternCursor(m_Selection.GetEndRow(), pSndFile->GetNumChannels(), PatternCursor::lastColumn));
+									PatternCursor(m_Selection.GetEndRow(), sndFile.GetNumChannels(), PatternCursor::lastColumn));
 								return wParam;
 
 		case kcClearRow:		OnClearField(RowMask(), false);	return wParam;
@@ -4007,7 +4004,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcDeleteRows:		OnDeleteRows(); return wParam;
 		case kcDeleteAllRows:	OnDeleteRowsEx(); return wParam;
 		case kcInsertRow:		OnInsertRows(); return wParam;
-		case kcInsertAllRows:	InsertRows(0, pSndFile->GetNumChannels() - 1); return wParam;
+		case kcInsertAllRows:	InsertRows(0, sndFile.GetNumChannels() - 1); return wParam;
 
 		case kcShowNoteProperties: ShowEditWindow(); return wParam;
 		case kcShowPatternProperties: OnPatternProperties(); return wParam;
@@ -5563,10 +5560,8 @@ void CViewPattern::TogglePluginEditor(int chan)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(!pSndFile) return;
 
-	int plug = pSndFile->ChnSettings[chan].nMixPlugin;
+	int plug = pModDoc->GetrSoundFile().ChnSettings[chan].nMixPlugin;
 	if(plug > 0)
 		pModDoc->TogglePluginEditor(plug - 1);
 
@@ -5639,13 +5634,13 @@ bool CViewPattern::HandleSplit(ModCommand &m, int note)
 	if(isSplit)
 	{
 		CModDoc *pModDoc = GetDocument();
-		CSoundFile *pSndFile;
-		if (pModDoc == nullptr || (pSndFile = pModDoc->GetSoundFile()) == nullptr) return false;
+		if (pModDoc == nullptr) return false;
+		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 		if (pModDoc->GetSplitKeyboardSettings().octaveLink && note <= NOTE_MAX)
 		{
 			note += 12 * pModDoc->GetSplitKeyboardSettings().octaveModifier;
-			Limit(note, pSndFile->GetModSpecifications().noteMin, pSndFile->GetModSpecifications().noteMax);
+			Limit(note, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
 		}
 		if (pModDoc->GetSplitKeyboardSettings().splitInstrument)
 		{
