@@ -120,8 +120,8 @@ protected: // create from serialization only
 
 // public members
 public:
-	CSoundFile &GetrSoundFile() { return m_SndFile; }
-	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
+	CSoundFile &GetSoundFile() { return m_SndFile; }
+	const CSoundFile &GetSoundFile() const { return m_SndFile; }
 
 	bool IsModified() const { return m_bModified != FALSE; }	// Work-around: CDocument::IsModified() is not const...
 	void SetModified(bool modified = true);

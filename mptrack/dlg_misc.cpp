@@ -1263,11 +1263,11 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 	CString s;
 	uint64 totalTime = 0;
-	const size_t num = m_pModDoc->GetrSoundFile().GetFileHistory().size();
+	const size_t num = m_pModDoc->GetSoundFile().GetFileHistory().size();
 	
 	for(size_t n = 0; n < num; n++)
 	{
-		const FileHistory *hist = &(m_pModDoc->GetrSoundFile().GetFileHistory().at(n));
+		const FileHistory *hist = &(m_pModDoc->GetSoundFile().GetFileHistory().at(n));
 		totalTime += hist->openTime;
 
 		// Date
@@ -1300,7 +1300,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		SetWindowText(s);
 	}
 	// Enable or disable Clear button
-	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetrSoundFile().GetFileHistory().empty()) ? FALSE : TRUE);
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetSoundFile().GetFileHistory().empty()) ? FALSE : TRUE);
 
 	return TRUE;
 
@@ -1309,9 +1309,9 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 void CEditHistoryDlg::OnClearHistory()
 {
-	if(m_pModDoc != nullptr && !m_pModDoc->GetrSoundFile().GetFileHistory().empty())
+	if(m_pModDoc != nullptr && !m_pModDoc->GetSoundFile().GetFileHistory().empty())
 	{
-		m_pModDoc->GetrSoundFile().GetFileHistory().clear();
+		m_pModDoc->GetSoundFile().GetFileHistory().clear();
 		m_pModDoc->SetModified();
 		OnInitDialog();
 	}

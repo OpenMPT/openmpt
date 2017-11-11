@@ -513,7 +513,7 @@ bool CViewInstrument::EnvSetSustainStart(int nPoint)
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
-	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
 	if (nPoint != envelope->nSustainStart)
 	{
@@ -534,7 +534,7 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
-	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
 	if (nPoint != envelope->nSustainEnd)
 	{
@@ -555,7 +555,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
 
 	// Don't allow release nodes in IT/XM. GetDocument()/... nullptr check is done in GetEnvelopePtr, so no need to check twice.
-	if(!GetDocument()->GetrSoundFile().GetModSpecifications().hasReleaseNode)
+	if(!GetDocument()->GetSoundFile().GetModSpecifications().hasReleaseNode)
 	{
 		if(envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
@@ -622,7 +622,7 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	return EnvToggleEnv(ENV_VOLUME, GetDocument()->GetrSoundFile(), *pIns, bEnable, 64);
+	return EnvToggleEnv(ENV_VOLUME, GetDocument()->GetSoundFile(), *pIns, bEnable, 64);
 }
 
 
@@ -630,7 +630,7 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
-	return EnvToggleEnv(ENV_PANNING, GetDocument()->GetrSoundFile(), *pIns, bEnable, 32);
+	return EnvToggleEnv(ENV_PANNING, GetDocument()->GetSoundFile(), *pIns, bEnable, 32);
 }
 
 
@@ -640,7 +640,7 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 	if(pIns == nullptr) return false;
 
 	pIns->PitchEnv.dwFlags.reset(ENV_FILTER);
-	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetrSoundFile(), *pIns, bEnable, 32);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, bEnable, 32);
 }
 
 
@@ -649,7 +649,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 	ModInstrument *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
 
-	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetrSoundFile(), *pIns, bEnable, 64, ENV_FILTER);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, bEnable, 64, ENV_FILTER);
 }
 
 
@@ -757,7 +757,7 @@ void CViewInstrument::UpdateNcButtonState()
 {
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	CDC *pDC = NULL;
 	for (UINT i=0; i<ENV_LEFTBAR_BUTTONS; i++) if (cLeftBarButtons[i] != ID_SEPARATOR)
@@ -853,8 +853,8 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		CModDoc *modDoc = GetDocument();
 		if(modDoc != nullptr)
 		{
-			rowsPerBeat = modDoc->GetrSoundFile().m_nDefaultRowsPerBeat;
-			rowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
+			rowsPerBeat = modDoc->GetSoundFile().m_nDefaultRowsPerBeat;
+			rowsPerMeasure = modDoc->GetSoundFile().m_nDefaultRowsPerMeasure;
 		}
 
 		// Paint it black!
@@ -915,7 +915,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	if (m_bGrid)
 	{
-		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_PlayState.m_nMusicSpeed);
+		DrawGrid(&m_dcMemMain, pModDoc->GetSoundFile().m_PlayState.m_nMusicSpeed);
 	} else
 	{
 		// Paint it black!
@@ -1010,7 +1010,7 @@ bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
 	{
-		ModInstrument *pIns = pModDoc->GetrSoundFile().Instruments[m_nInstrument];
+		ModInstrument *pIns = pModDoc->GetSoundFile().Instruments[m_nInstrument];
 		if (pIns)
 		{
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
@@ -1050,7 +1050,7 @@ uint32 CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 	if (pModDoc && nTick >= 0)
 	{
 		InstrumentEnvelope *envelope = GetEnvelopePtr();
-		if(envelope != nullptr && envelope->size() < pModDoc->GetrSoundFile().GetModSpecifications().envelopePointsMax)
+		if(envelope != nullptr && envelope->size() < pModDoc->GetSoundFile().GetModSpecifications().envelopePointsMax)
 		{
 			nValue = Clamp(nValue, ENVELOPE_MIN, ENVELOPE_MAX);
 
@@ -1683,7 +1683,7 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 {
 	const CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
-	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
 	if (m_dwStatus & INSSTATUS_DRAGGING) return;
 
@@ -1945,7 +1945,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 	{
 		if (m_nInstrument && !m_baPlayingNote[note])
 		{
-			CSoundFile &sndFile = pModDoc->GetrSoundFile();
+			CSoundFile &sndFile = pModDoc->GetSoundFile();
 			ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
 			{
@@ -2022,7 +2022,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	bool bCanDrop = false;
 
 	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	switch(lpDropInfo->dwDropType)
 	{
 	case DRAGONDROP_INSTRUMENT:
@@ -2151,13 +2151,13 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 	CModDoc *modDoc = GetDocument();
 	if(modDoc != nullptr)
 	{
-		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 
 		MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 		if(event == MIDIEvents::evNoteOn)
 		{
-			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetrSoundFile().GetCharsetInternal(), modDoc->GetrSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
+			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
 		}
 
 		return 1;
@@ -2212,7 +2212,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return NULL;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -2280,7 +2280,7 @@ void CViewInstrument::OnEnvelopeScalePoints()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
 		return;
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	if(m_nInstrument >= 1
 		&& m_nInstrument <= sndFile.GetNumInstruments()
@@ -2567,7 +2567,7 @@ ModInstrument *CViewInstrument::GetInstrumentPtr() const
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return nullptr;
-	return pModDoc->GetrSoundFile().Instruments[m_nInstrument];
+	return pModDoc->GetSoundFile().Instruments[m_nInstrument];
 }
 
 

@@ -50,7 +50,7 @@ BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
 END_MESSAGE_MAP()
 
 
-CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_modDoc(document), m_sndFile(document.GetrSoundFile()), m_parent(parent)
+CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_modDoc(document), m_sndFile(document.GetSoundFile()), m_parent(parent)
 {
 	m_bInitialized = FALSE;
 	m_hWndView = NULL;
@@ -422,7 +422,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		UINT nCount = 4;
 		UINT mask = 1 | 2 | 4 | 16;
 
-		if(pDoc->GetrSoundFile().GetModSpecifications().instrumentsMax > 0 || pDoc->GetNumInstruments() > 0)
+		if(pDoc->GetSoundFile().GetModSpecifications().instrumentsMax > 0 || pDoc->GetNumInstruments() > 0)
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph

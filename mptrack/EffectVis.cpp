@@ -25,10 +25,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
 CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat)
-	: effectInfo(modDoc.GetrSoundFile())
+	: effectInfo(modDoc.GetSoundFile())
 	, m_pViewPattern(pViewPattern)
 	, m_ModDoc(modDoc)
-	, m_SndFile(modDoc.GetrSoundFile())
+	, m_SndFile(modDoc.GetSoundFile())
 {
 	m_nFillEffect = effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	m_templatePCNote.Set(NOTE_PCS, 1, 0, 0);

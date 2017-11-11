@@ -615,7 +615,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		target.editorY += addPixels;
 	}
 #ifndef NO_PLUGINS
-	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
+	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetSoundFile()))
 	{
 		IMixPlugin *newVstPlug = target.pMixPlugin;
 		newVstPlug->SetCurrentProgram(srcVstPlug->GetCurrentProgram());

@@ -55,7 +55,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 
 bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo) const
 {
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	if (!sndFile.Patterns.IsValidPat(pattern)) return false;
 	ROWINDEX nRows = sndFile.Patterns[pattern].GetNumRows();
@@ -125,7 +125,7 @@ PATTERNINDEX CPatternUndo::Redo()
 // linkedFromPrevious is true if a connected undo event is going to be deleted (can only be called internally).
 PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linkedFromPrevious)
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	bool linkToPrevious = false;
 
@@ -303,7 +303,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	// Create new undo slot
 	UndoInfo undo;
 
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	const ModSample &oldSample = sndFile.GetSample(smp);
 
 	// Save old sample header
@@ -400,7 +400,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 {
 	if(!SampleBufferExists(fromBuf, smp) || fromBuf[smp - 1].empty()) return false;
 
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	// Select most recent undo slot and temporarily remove it from the buffer so that it won't get deleted by possible buffer size restrictions in PrepareBuffer()
 	UndoInfo undo = fromBuf[smp - 1].back();
@@ -679,7 +679,7 @@ bool CInstrumentUndo::PrepareUndo(const INSTRUMENTINDEX ins, const char *descrip
 
 bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins, const char *description, EnvelopeType envType)
 {
-	if(ins == 0 || ins >= MAX_INSTRUMENTS || modDoc.GetrSoundFile().Instruments[ins] == nullptr) return false;
+	if(ins == 0 || ins >= MAX_INSTRUMENTS || modDoc.GetSoundFile().Instruments[ins] == nullptr) return false;
 	if(ins > buffer.size())
 	{
 		buffer.resize(ins);
@@ -695,7 +695,7 @@ bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins
 	// Create new undo slot
 	UndoInfo undo;
 
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	undo.description = description;
 	undo.editedEnvelope = envType;
 	if(envType < ENV_MAXTYPES)
@@ -730,7 +730,7 @@ bool CInstrumentUndo::Redo(const INSTRUMENTINDEX ins)
 // Restore undo/redo point for given Instrument
 bool CInstrumentUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const INSTRUMENTINDEX ins)
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	if(sndFile.Instruments[ins] == nullptr || !InstrumentBufferExists(fromBuf, ins) || fromBuf[ins - 1].empty()) return false;
 
 	// Select most recent undo slot
@@ -809,7 +809,7 @@ void CInstrumentUndo::RearrangeInstruments(undobuf_t &buffer, const std::vector<
 // newIndex contains one new index for each old index. newIndex[1] represents the first sample.
 void CInstrumentUndo::RearrangeSamples(undobuf_t &buffer, const INSTRUMENTINDEX ins, std::vector<SAMPLEINDEX> &newIndex)
 {
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	if(sndFile.Instruments[ins] == nullptr || !InstrumentBufferExists(buffer, ins) || buffer[ins - 1].empty()) return;
 
 	for(auto &i : buffer[ins - 1]) if(i.editedEnvelope >= ENV_MAXTYPES)

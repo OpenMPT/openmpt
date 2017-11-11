@@ -136,7 +136,7 @@ void CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 		if (nIns < MAX_INSTRUMENTS) m_nInstrument = nIns;
 
 		// create missing instrument if needed
-		CSoundFile &sndFile = m_modDoc.GetrSoundFile();
+		CSoundFile &sndFile = m_modDoc.GetSoundFile();
 		if(m_nInstrument > 0 && m_nInstrument <= sndFile.GetNumInstruments() && sndFile.Instruments[m_nInstrument] == nullptr)
 		{
 			ModInstrument *instrument = sndFile.AllocateInstrument(m_nInstrument);
@@ -184,7 +184,7 @@ void CNoteMapWnd::OnPaint()
 	}
 	dc.IntersectClipRect(&rcClient);
 
-	const CSoundFile &sndFile = m_modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	if (m_cxFont > 0 && m_cyFont > 0)
 	{
 		bool bFocus = (::GetFocus() == m_hWnd);
@@ -322,7 +322,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 	TCHAR s[64];
 	CInputHandler* ih = CMainFrame::GetInputHandler();
 
-	CSoundFile &sndFile = m_modDoc.GetrSoundFile();
+	CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if (pIns)
 	{
@@ -386,7 +386,7 @@ BOOL CNoteMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CNoteMapWnd::OnMapCopyNote()
 {
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
 		m_undo = true;
@@ -411,7 +411,7 @@ void CNoteMapWnd::OnMapCopyNote()
 
 void CNoteMapWnd::OnMapCopySample()
 {
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
 		m_undo = true;
@@ -437,7 +437,7 @@ void CNoteMapWnd::OnMapCopySample()
 
 void CNoteMapWnd::OnMapReset()
 {
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
 		m_undo = true;
@@ -462,7 +462,7 @@ void CNoteMapWnd::OnMapReset()
 
 void CNoteMapWnd::OnMapRemove()
 {
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if (pIns)
 	{
 		m_undo = true;
@@ -501,7 +501,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 {
 	if(nAmount == 0 || m_modDoc.GetModType() == MOD_TYPE_XM) return;
 
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if((nAmount == 12 || nAmount == -12))
 	{
 		// Special case for instrument-specific tunings
@@ -565,7 +565,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return NULL;
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 
 	// Handle notes
 
@@ -614,7 +614,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 void CNoteMapWnd::EnterNote(UINT note)
 {
-	CSoundFile &sndFile = m_modDoc.GetrSoundFile();
+	CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (m_nNote < NOTE_MAX))
 	{
@@ -645,7 +645,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 
 bool CNoteMapWnd::HandleChar(WPARAM c)
 {
-	CSoundFile &sndFile = m_modDoc.GetrSoundFile();
+	CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (m_nNote < NOTE_MAX))
 	{
@@ -765,7 +765,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 // 		return true;
 	case VK_RETURN:
 		{
-			ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+			ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 			if(pIns)
 			{
 				if (m_bIns)
@@ -1195,7 +1195,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		{
 			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
-			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetrSoundFile();
+			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetSoundFile();
 			if (pSndFile) return OpenInstrument(*pSndFile, static_cast<INSTRUMENTINDEX>(pDropInfo->dwDropItem));
 		}
 		break;

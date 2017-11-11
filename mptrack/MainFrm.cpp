@@ -1342,7 +1342,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 {
 	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(!pModDoc) return false;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	if(!IsValidSoundFile(sndFile)) return false;
 
 	// if something is playing, pause it
@@ -1617,8 +1617,8 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 	const CModDoc *activeDoc = GetActiveDoc();
 	if(activeDoc != nullptr && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD))
 	{
-		m_WaveFile.SetMixLevels(activeDoc->GetrSoundFile().GetMixLevels());
-		m_WaveFile.m_nSamplePreAmp = activeDoc->GetrSoundFile().m_nSamplePreAmp;
+		m_WaveFile.SetMixLevels(activeDoc->GetSoundFile().GetMixLevels());
+		m_WaveFile.m_nSamplePreAmp = activeDoc->GetSoundFile().m_nSamplePreAmp;
 	} else
 	{
 		// Preview at 0dB
@@ -1897,7 +1897,7 @@ void CMainFrame::OnPluginManager()
 
 	if (pModDoc)
 	{
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		//Find empty plugin slot
 		for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 		{
@@ -2468,7 +2468,7 @@ bool CMainFrame::UpdateEffectKeys(const CModDoc *modDoc)
 {
 	if(modDoc != nullptr)
 	{
-		return m_InputHandler->SetEffectLetters(modDoc->GetrSoundFile().GetModSpecifications());
+		return m_InputHandler->SetEffectLetters(modDoc->GetSoundFile().GetModSpecifications());
 	}
 	return false;
 }

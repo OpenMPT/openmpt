@@ -68,7 +68,7 @@ BOOL CModTreeDropTarget::OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFF
 
 ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc) : modDoc(modDoc)
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	nSeqSel = SEQUENCEINDEX_INVALID;
 	nOrdSel = ORDERINDEX_INVALID;
 	hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = nullptr;
@@ -773,7 +773,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	if (IsSampleBrowser() || hintType == HINT_NONE) return;
 
 	const CModDoc &modDoc = info.modDoc;
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	// Create headers
 	s[0] = 0;
@@ -1578,7 +1578,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SEQUENCE:
 		wsprintf(s, _T("Remove sequence %u?"), modItemID);
 		if(Reporting::Confirm(s, false, true) == cnfNo) break;
-		modDoc->GetrSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
+		modDoc->GetSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
 		modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		break;
 
@@ -1595,7 +1595,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			PATTERNINDEX pat = static_cast<PATTERNINDEX>(modItemID);
 			bool isUsed = false;
 			// First, find all used patterns in all sequences.
-			for(const auto &sequence : modDoc->GetrSoundFile().Order)
+			for(const auto &sequence : modDoc->GetSoundFile().Order)
 			{
 				if(std::find(sequence.cbegin(), sequence.cend(), pat) != sequence.cend())
 				{
@@ -1613,7 +1613,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		wsprintf(s, _T("Remove sample %u?"), modItemID);
-		if(!modDoc->GetrSoundFile().GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData() || Reporting::Confirm(s, false, true) == cnfYes)
+		if(!modDoc->GetSoundFile().GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData() || Reporting::Confirm(s, false, true) == cnfYes)
 		{
 			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace, "Delete");
 			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
@@ -2238,7 +2238,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx].get() : nullptr);
 	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx].get() : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? &pInfoDrop->modDoc : nullptr;
-	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetrSoundFile() : nullptr;
+	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetSoundFile() : nullptr;
 	const bool sameModDoc = pInfoDrag && (pModDoc == &pInfoDrag->modDoc);
 
 	switch(modItemDrop.type)
@@ -2279,7 +2279,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 			if(bDoDrop && pInfoDrag != nullptr)
 			{
 				// copy mod sequence over.
-				CSoundFile &dragSndFile = pInfoDrag->modDoc.GetrSoundFile();
+				CSoundFile &dragSndFile = pInfoDrag->modDoc.GetSoundFile();
 				const SEQUENCEINDEX nOrigSeq = (SEQUENCEINDEX)modItemDragID;
 				const ModSequence &origSeq = dragSndFile.Order(nOrigSeq);
 
@@ -2338,7 +2338,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				} else
 				{
 					// Load sample into other module
-					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), pInfoDrag->modDoc.GetrSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
+					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), pInfoDrag->modDoc.GetSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
 				}
 				pModDoc->UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
@@ -2373,7 +2373,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				} else
 				{
 					// Load instrument into other module
-					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), pInfoDrag->modDoc.GetrSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
+					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), pInfoDrag->modDoc.GetSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
 				}
 				pModDoc->UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
 				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
@@ -2409,7 +2409,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(modDoc);
 	if(pInfo == nullptr) return;
 
-	const CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	ORDERINDEX nNewOrd = (pNotify) ? pNotify->order : ORDERINDEX_INVALID;
 	SEQUENCEINDEX nNewSeq = sndFile.Order.GetCurrentSequenceIndex();
 	if (nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
@@ -2541,7 +2541,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 			// can we drag an order header? (only in MPTM format and if there's only one sequence)
 			{
 				const CModDoc *pModDoc = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc) : nullptr);
-				if(pModDoc && pModDoc->GetrSoundFile().Order.GetNumSequences() == 1)
+				if(pModDoc && pModDoc->GetSoundFile().Order.GetNumSequences() == 1)
 					bDrag = true;
 			}
 			break;
@@ -2640,7 +2640,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 		if (hMenu)
 		{
 			const CModDoc *modDoc = GetDocumentFromItem(hItem);
-			const CSoundFile *sndFile = modDoc != nullptr ? &modDoc->GetrSoundFile() : nullptr;
+			const CSoundFile *sndFile = modDoc != nullptr ? &modDoc->GetSoundFile() : nullptr;
 
 			UINT nDefault = 0;
 			BOOL bSep = FALSE;
@@ -2781,7 +2781,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 
 					if(modDoc != nullptr)
 					{
-						AppendMenu(hMenu, (modDoc->GetrSoundFile().m_MixPlugins[modItemID].IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, _T("&Bypass"));
+						AppendMenu(hMenu, (modDoc->GetSoundFile().m_MixPlugins[modItemID].IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, _T("&Bypass"));
 					}
 				}
 				break;
@@ -3138,7 +3138,7 @@ void CModTree::OnMuteTreeItem()
 			UpdateView(*info, InstrumentHint((INSTRUMENTINDEX)modItemID).Info().Names());
 		} else if ((modItem.type == MODITEM_EFFECT))
 		{
-			IMixPlugin *pPlugin = modDoc.GetrSoundFile().m_MixPlugins[modItemID].pMixPlugin;
+			IMixPlugin *pPlugin = modDoc.GetSoundFile().m_MixPlugins[modItemID].pMixPlugin;
 			if(pPlugin == nullptr)
 				return;
 			pPlugin->ToggleBypass();
@@ -3232,7 +3232,7 @@ void CModTree::InsertOrDupItem(bool insert)
 	if (info)
 	{
 		CModDoc &modDoc = info->modDoc;
-		CSoundFile &sndFile = modDoc.GetrSoundFile();
+		CSoundFile &sndFile = modDoc.GetSoundFile();
 		if(modItem.type == MODITEM_SEQUENCE || modItem.type == MODITEM_HDR_ORDERS)
 		{
 			// Duplicate / insert sequence
@@ -3302,7 +3302,7 @@ void CModTree::OnSetItemPath()
 	if(pModDoc && modItem.val1)
 	{
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
-		const mpt::PathString path = pModDoc->GetrSoundFile().GetSamplePath(smpID);
+		const mpt::PathString path = pModDoc->GetSoundFile().GetSamplePath(smpID);
 		FileDialog dlg = OpenFileDialog()
 			.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");	// Only show samples that we actually can save as well.
 		if(path.empty())
@@ -3312,9 +3312,9 @@ void CModTree::OnSetItemPath()
 		if(!dlg.Show()) return;
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
-		if(dlg.GetFirstFile() != pModDoc->GetrSoundFile().GetSamplePath(smpID))
+		if(dlg.GetFirstFile() != pModDoc->GetSoundFile().GetSamplePath(smpID))
 		{
-			pModDoc->GetrSoundFile().SetSamplePath(smpID, dlg.GetFirstFile());
+			pModDoc->GetSoundFile().SetSamplePath(smpID, dlg.GetFirstFile());
 			pModDoc->SetModified();
 		}
 		OnReloadItem();
@@ -3361,7 +3361,7 @@ void CModTree::OnReloadItem()
 	if(pModDoc && modItem.val1)
 	{
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		pModDoc->GetSampleUndo().PrepareUndo(smpID, sundo_replace, "Replace");
 		if(!sndFile.LoadExternalSample(smpID, sndFile.GetSamplePath(smpID)))
 		{
@@ -3386,7 +3386,7 @@ void CModTree::OnReloadAll()
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc != nullptr)
 	{
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		bool anyMissing = false;
 		for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 		{
@@ -3779,7 +3779,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 	if(editCtrl != nullptr && modDoc != nullptr)
 	{
-		const CSoundFile &sndFile = modDoc->GetrSoundFile();
+		const CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
 		std::string text;
 		doLabelEdit = false;
@@ -3865,7 +3865,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 	if(info->item.pszText != nullptr && modDoc != nullptr)
 	{
-		CSoundFile &sndFile = modDoc->GetrSoundFile();
+		CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
 
 		const std::string itemText = mpt::ToCharset(sndFile.GetCharsetInternal(), CString(info->item.pszText));
