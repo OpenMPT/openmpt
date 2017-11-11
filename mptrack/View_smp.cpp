@@ -2952,7 +2952,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	uint8 midibyte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
 	uint8 midibyte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
 
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetrSoundFile() : nullptr;
 	if (!pSndFile) return 0;
 
 	uint8 nNote = midibyte1 + NOTE_MIN;

@@ -580,14 +580,12 @@ void CViewGlobals::PopulateChannelPlugins()
 
 IMixPlugin *CViewGlobals::GetCurrentPlugin() const
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
-	if(pSndFile == nullptr || m_nCurrentPlugin >= MAX_MIXPLUGINS)
+	if(GetDocument() == nullptr || m_nCurrentPlugin >= MAX_MIXPLUGINS)
 	{
 		return nullptr;
 	}
 
-	return pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin;
+	return GetDocument()->GetrSoundFile().m_MixPlugins[m_nCurrentPlugin].pMixPlugin;
 }
 
 
