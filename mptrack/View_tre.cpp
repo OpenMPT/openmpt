@@ -2238,7 +2238,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx].get() : nullptr);
 	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx].get() : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? &pInfoDrop->modDoc : nullptr;
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetrSoundFile() : nullptr;
 	const bool sameModDoc = pInfoDrag && (pModDoc == &pInfoDrag->modDoc);
 
 	switch(modItemDrop.type)
@@ -2640,7 +2640,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 		if (hMenu)
 		{
 			const CModDoc *modDoc = GetDocumentFromItem(hItem);
-			const CSoundFile *sndFile = modDoc != nullptr ? modDoc->GetSoundFile() : nullptr;
+			const CSoundFile *sndFile = modDoc != nullptr ? &modDoc->GetrSoundFile() : nullptr;
 
 			UINT nDefault = 0;
 			BOOL bSep = FALSE;

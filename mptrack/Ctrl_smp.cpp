@@ -465,7 +465,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		{
 			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
-			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
+			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetrSoundFile();
 			if (pSndFile) return OpenSample(*pSndFile, (SAMPLEINDEX)pDropInfo->dwDropItem) ? TRUE : FALSE;
 		}
 		break;

@@ -1195,7 +1195,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		{
 			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
-			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
+			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetrSoundFile();
 			if (pSndFile) return OpenInstrument(*pSndFile, static_cast<INSTRUMENTINDEX>(pDropInfo->dwDropItem));
 		}
 		break;

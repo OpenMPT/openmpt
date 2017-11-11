@@ -120,8 +120,6 @@ protected: // create from serialization only
 
 // public members
 public:
-	CSoundFile *GetSoundFile() { return &m_SndFile; }
-	const CSoundFile *GetSoundFile() const { return &m_SndFile; }
 	CSoundFile &GetrSoundFile() { return m_SndFile; }
 	const CSoundFile &GetrSoundFile() const { return m_SndFile; }
 
