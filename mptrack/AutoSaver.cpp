@@ -143,7 +143,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 	
 	const mpt::ustring timeStamp = mpt::ToUnicode((CTime::GetCurrentTime()).Format(_T(".AutoSave.%Y%m%d.%H%M%S.")));
 	name += mpt::PathString::FromUnicode(timeStamp);			//append backtup tag + timestamp
-	name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
+	name += mpt::PathString::FromUTF8(modDoc.GetSoundFile().GetModSpecifications().fileExtension);
 
 	return name;
 }
@@ -153,7 +153,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
-	CSoundFile &sndFile = modDoc.GetrSoundFile(); 
+	CSoundFile &sndFile = modDoc.GetSoundFile(); 
 	
 	mpt::PathString fileName = BuildFileName(modDoc);
 
@@ -161,7 +161,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
 
 	bool success = false;
-	switch(modDoc.GetrSoundFile().GetBestSaveFormat())
+	switch(modDoc.GetSoundFile().GetBestSaveFormat())
 	{
 	case MOD_TYPE_MOD:
 		success = sndFile.SaveMod(fileName);

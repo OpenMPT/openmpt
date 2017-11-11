@@ -65,7 +65,7 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *
 {
 	if(m_pModDoc && 0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
 	{
-		m_pPlugin = &(pModDoc->GetrSoundFile().m_MixPlugins[m_nPlugSlot]);
+		m_pPlugin = &(pModDoc->GetSoundFile().m_MixPlugins[m_nPlugSlot]);
 	}
 
 	CMainFrame::GetInputHandler()->Bypass(true);
@@ -168,7 +168,7 @@ void CSelectPluginDlg::OnOK()
 			// Now, create the new plugin
 			if(pManager && m_pModDoc)
 			{
-				pManager->CreateMixPlugin(*m_pPlugin, m_pModDoc->GetrSoundFile());
+				pManager->CreateMixPlugin(*m_pPlugin, m_pModDoc->GetSoundFile());
 				if (m_pPlugin->pMixPlugin)
 				{
 					IMixPlugin *p = m_pPlugin->pMixPlugin;
@@ -741,7 +741,7 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 	auto docs = theApp.GetOpenDocuments();
 	for(auto &modDoc : docs)
 	{
-		CSoundFile &sndFile = modDoc->GetrSoundFile();
+		CSoundFile &sndFile = modDoc->GetSoundFile();
 		bool updateDoc = false;
 		for(auto &plugin : sndFile.m_MixPlugins)
 		{

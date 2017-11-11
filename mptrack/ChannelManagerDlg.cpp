@@ -695,7 +695,7 @@ void CChannelManagerDlg::OnPaint()
 	HBRUSH green = CreateSolidBrush(RGB(96, 192, 96));
 
 	UINT c = 0, l = 0;
-	const CSoundFile &sndFile = m_ModDoc->GetrSoundFile();
+	const CSoundFile &sndFile = m_ModDoc->GetSoundFile();
 	CString s;
 	for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 	{
@@ -950,10 +950,10 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 		// Rename channel
 		TCHAR s[64];
 		wsprintf(s, _T("New name for channel %u:"), chn + 1);
-		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetrSoundFile().GetCharsetInternal(), m_ModDoc->GetrSoundFile().ChnSettings[chn].szName));
+		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName));
 		if(dlg.DoModal() == IDOK)
 		{
-			mpt::String::Copy(m_ModDoc->GetrSoundFile().ChnSettings[chn].szName, mpt::ToCharset(m_ModDoc->GetrSoundFile().GetCharsetInternal(), dlg.resultAsString));
+			mpt::String::Copy(m_ModDoc->GetSoundFile().ChnSettings[chn].szName, mpt::ToCharset(m_ModDoc->GetSoundFile().GetCharsetInternal(), dlg.resultAsString));
 			InvalidateRect(rect, FALSE);
 			m_ModDoc->SetModified();
 			m_ModDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels(), this);

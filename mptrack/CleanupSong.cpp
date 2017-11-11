@@ -109,7 +109,7 @@ BOOL CModCleanupDlg::OnInitDialog()
 		CheckDlgButton(m_CleanupIDtoDlgID[i], (m_CheckBoxes[i]) ? BST_CHECKED : BST_UNCHECKED);
 	}
 
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	GetDlgItem(m_CleanupIDtoDlgID[kMergeSequences])->EnableWindow((sndFile.GetType() & MOD_TYPE_MPT) ? TRUE : FALSE);
 
@@ -339,7 +339,7 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 
 bool CModCleanupDlg::RemoveDuplicatePatterns()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
 	std::vector<PATTERNINDEX> patternMapping(numPatterns, PATTERNINDEX_INVALID);
 
@@ -394,7 +394,7 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 // Remove unused patterns
 bool CModCleanupDlg::RemoveUnusedPatterns()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
 	std::vector<bool> patternUsed(numPatterns, false);
 
@@ -437,7 +437,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 // Rearrange patterns (first pattern in order list = 0, etc...)
 bool CModCleanupDlg::RearrangePatterns()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
 	std::vector<PATTERNINDEX> newIndex(numPatterns, PATTERNINDEX_INVALID);
@@ -504,7 +504,7 @@ bool CModCleanupDlg::RearrangePatterns()
 // Remove unused samples
 bool CModCleanupDlg::RemoveUnusedSamples()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	std::vector<bool> samplesUsed(sndFile.GetNumSamples() + 1, true);
 
@@ -565,7 +565,7 @@ static bool ComapreStereoChannels(SmpLength length, const T *sampleData)
 // Remove unused sample data
 bool CModCleanupDlg::OptimizeSamples()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	SAMPLEINDEX numLoopOpt = 0, numStereoOpt = 0;
 	std::vector<bool> stereoOptSamples(sndFile.GetNumSamples(), false);
@@ -668,7 +668,7 @@ bool CModCleanupDlg::OptimizeSamples()
 // Rearrange sample list
 bool CModCleanupDlg::RearrangeSamples()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	if(sndFile.GetNumSamples() < 2)
 		return false;
 
@@ -697,7 +697,7 @@ bool CModCleanupDlg::RearrangeSamples()
 // Remove unused instruments
 bool CModCleanupDlg::RemoveUnusedInstruments()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	if(!sndFile.GetNumInstruments())
 		return false;
 
@@ -772,7 +772,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 // Remove ununsed plugins
 bool CModCleanupDlg::RemoveUnusedPlugins()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	std::vector<bool> usedmap(MAX_MIXPLUGINS, false);
 	
@@ -831,7 +831,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 // Reset variables (convert to IT, reset global/smp/ins vars, etc.)
 bool CModCleanupDlg::ResetVariables()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	if(Reporting::Confirm(_T("OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), _T("Resetting variables"), false, false, this) == cnfNo)
 		return false;
@@ -901,7 +901,7 @@ bool CModCleanupDlg::RemoveUnusedChannels()
 		return false;
 
 	std::vector<bool> usedChannels;
-	modDoc.CheckUsedChannels(usedChannels, modDoc.GetNumChannels() - modDoc.GetrSoundFile().GetModSpecifications().channelsMin);
+	modDoc.CheckUsedChannels(usedChannels, modDoc.GetNumChannels() - modDoc.GetSoundFile().GetModSpecifications().channelsMin);
 	return modDoc.RemoveChannels(usedChannels);
 }
 
@@ -909,7 +909,7 @@ bool CModCleanupDlg::RemoveUnusedChannels()
 // Remove all patterns
 bool CModCleanupDlg::RemoveAllPatterns()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	if(sndFile.Patterns.Size() == 0) return false;
 	modDoc.GetPatternUndo().ClearUndo();
@@ -921,7 +921,7 @@ bool CModCleanupDlg::RemoveAllPatterns()
 // Remove all orders
 bool CModCleanupDlg::RemoveAllOrders()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	sndFile.Order.Initialize();
 	sndFile.SetCurrentOrder(0);
@@ -931,7 +931,7 @@ bool CModCleanupDlg::RemoveAllOrders()
 // Remove all samples
 bool CModCleanupDlg::RemoveAllSamples()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	if (sndFile.GetNumSamples() == 0) return false;
 
@@ -946,7 +946,7 @@ bool CModCleanupDlg::RemoveAllSamples()
 // Remove all instruments
 bool CModCleanupDlg::RemoveAllInstruments()
 {
-	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	if(sndFile.GetNumInstruments() == 0) return false;
 
@@ -972,7 +972,7 @@ bool CModCleanupDlg::RemoveAllPlugins()
 
 bool CModCleanupDlg::MergeSequences()
 {
-	return modDoc.GetrSoundFile().Order.MergeSequences();
+	return modDoc.GetSoundFile().Order.MergeSequences();
 }
 
 

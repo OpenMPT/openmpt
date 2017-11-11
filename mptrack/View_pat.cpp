@@ -135,8 +135,8 @@ END_MESSAGE_MAP()
 
 static_assert(ModCommand::maxColumnValue <= 999, "Command range for ID_CHANGE_PCNOTE_PARAM is designed for 999");
 
-const CSoundFile *CViewPattern::GetSoundFile() const { return (GetDocument() != nullptr) ? &GetDocument()->GetrSoundFile() : nullptr; };
-CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? &GetDocument()->GetrSoundFile() : nullptr; };
+const CSoundFile *CViewPattern::GetSoundFile() const { return (GetDocument() != nullptr) ? &GetDocument()->GetSoundFile() : nullptr; };
+CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? &GetDocument()->GetSoundFile() : nullptr; };
 
 
 CViewPattern::CViewPattern()
@@ -1338,7 +1338,7 @@ void CViewPattern::OnPatternProperties()
 {
 	CModDoc *pModDoc = GetDocument();
 	PATTERNINDEX pat = m_nPattern;
-	if(pModDoc && pModDoc->GetrSoundFile().Patterns.IsValidPat(pat))
+	if(pModDoc && pModDoc->GetSoundFile().Patterns.IsValidPat(pat))
 	{
 		CPatternPropertiesDlg dlg(*pModDoc, pat, this);
 		if(dlg.DoModal() == IDOK)
@@ -1387,7 +1387,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		return;
 	}
 
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	m_MenuCursor = GetPositionFromPoint(pt);
 
 	// Right-click outside single-point selection? Reposition cursor to the new location
@@ -1695,7 +1695,7 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	const bool isMuted = pModDoc->IsChannelMuted(chn);
 	if(!isMuted) pModDoc->MuteChannel(chn, true);
@@ -1934,7 +1934,7 @@ void CViewPattern::OnEditGoto()
 
 	ORDERINDEX curOrder = GetCurrentOrder();
 	CHANNELINDEX curChannel = GetCurrentChannel() + 1;
-	CPatternGotoDialog dlg(this, GetCurrentRow(), curChannel, m_nPattern, curOrder, pModDoc->GetrSoundFile());
+	CPatternGotoDialog dlg(this, GetCurrentRow(), curChannel, m_nPattern, curOrder, pModDoc->GetSoundFile());
 
 	if (dlg.DoModal() == IDOK)
 	{
@@ -1965,7 +1965,7 @@ void CViewPattern::PatternStep(ROWINDEX row)
 
 	if(pMainFrm != nullptr && pModDoc != nullptr)
 	{
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		if(!sndFile.Patterns.IsValidPat(m_nPattern))
 			return;
 
@@ -2091,7 +2091,7 @@ void CViewPattern::OnCursorPaste()
 void CViewPattern::OnVisualizeEffect()
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc != nullptr && pModDoc->GetrSoundFile().Patterns.IsValidPat(m_nPattern))
+	if (pModDoc != nullptr && pModDoc->GetSoundFile().Patterns.IsValidPat(m_nPattern))
 	{
 		const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 		const CHANNELINDEX nchn = m_Selection.GetStartChannel();
@@ -2665,7 +2665,7 @@ void CViewPattern::OnDropSelection()
 	{
 		return;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	if(!sndFile.Patterns.IsValidPat(m_nPattern))
 	{
 		return;
@@ -2785,7 +2785,7 @@ void CViewPattern::OnRemoveChannel()
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	if(sndFile.GetNumChannels() <= sndFile.GetModSpecifications().channelsMin)
 	{
@@ -2935,7 +2935,7 @@ void CViewPattern::UndoRedo(bool undo)
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
 		PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
-		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		const CSoundFile &sndFile = pModDoc->GetSoundFile();
 		if(pat < sndFile.Patterns.Size())
 		{
 			if(pat != m_nPattern)
@@ -3229,7 +3229,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	{
 		return 0;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	//Work out where to put the new data
 	const CHANNELINDEX nChn = GetCurrentChannel();
@@ -3378,7 +3378,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	if(pModDoc == nullptr || pMainFrm == nullptr) return 0;
 
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 //Midi message from our perspective:
 //     +---------------------------+---------------------------+-------------+-------------+
@@ -3660,7 +3660,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if(!m_Status[psFollowSong]
 					|| (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-					|| (pModDoc->GetrSoundFile().IsPaused()))
+					|| (pModDoc->GetSoundFile().IsPaused()))
 				{
 					SetCurrentRow(GetCurrentRow() + m_nSpacing);
 				}
@@ -3781,7 +3781,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
 		CriticalSection cs;
-		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+		CSoundFile &sndFile = GetDocument()->GetSoundFile();
 		if(m_nOrder != sndFile.m_PlayState.m_nCurrentOrder)
 		{
 			// We jumped to a different order
@@ -3811,7 +3811,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return NULL;
 	
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
@@ -4425,7 +4425,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 	{
 		return;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const CModSpecifications &specs = sndFile.GetModSpecifications();
 
 	if(!ModCommand::IsSpecialNote(note))
@@ -4701,7 +4701,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	{
 		return;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	if(note < NOTE_MIN_SPECIAL)
 	{
@@ -5061,7 +5061,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 	{
 		return;
 	}
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	if(!sndFile.Patterns.IsValidPat(m_nPattern))
 	{
 		return;
@@ -5559,7 +5559,7 @@ void CViewPattern::TogglePluginEditor(int chan)
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
 
-	int plug = pModDoc->GetrSoundFile().ChnSettings[chan].nMixPlugin;
+	int plug = pModDoc->GetSoundFile().ChnSettings[chan].nMixPlugin;
 	if(plug > 0)
 		pModDoc->TogglePluginEditor(plug - 1);
 
@@ -5633,7 +5633,7 @@ bool CViewPattern::HandleSplit(ModCommand &m, int note)
 	{
 		CModDoc *pModDoc = GetDocument();
 		if (pModDoc == nullptr) return false;
-		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 		if (pModDoc->GetSplitKeyboardSettings().octaveLink && note <= NOTE_MAX)
 		{
@@ -5906,7 +5906,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
-	const CModSpecifications &specs = GetDocument()->GetrSoundFile().GetModSpecifications();
+	const CModSpecifications &specs = GetDocument()->GetSoundFile().GetModSpecifications();
 	CHANNELINDEX numChannels = GetDocument()->GetNumChannels();
 	DWORD canAddChannels = (numChannels < specs.channelsMax) ? 0 : MF_GRAYED;
 	DWORD canRemoveChannels = (numChannels > specs.channelsMin) ? 0 : MF_GRAYED;
@@ -6326,7 +6326,7 @@ void CViewPattern::SetSplitKeyboardSettings()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
 
-	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetrSoundFile(), pModDoc->GetSplitKeyboardSettings());
+	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetSoundFile(), pModDoc->GetSplitKeyboardSettings());
 	if (dlg.DoModal() == IDOK)
 	{
 		// Update split keyboard settings in other pattern views
@@ -6352,7 +6352,7 @@ void CViewPattern::OnTogglePCNotePluginEditor()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
 		return;
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	if(!sndFile.Patterns.IsValidPat(m_nPattern))
 		return;
 

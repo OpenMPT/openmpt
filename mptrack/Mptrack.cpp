@@ -1341,7 +1341,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 		if(pModDoc != nullptr && TrackerSettings::Instance().defaultNewFileAction == nfSameAsCurrent)
 		{
-			newType = pModDoc->GetrSoundFile().GetBestSaveFormat();
+			newType = pModDoc->GetSoundFile().GetBestSaveFormat();
 		}
 	}
 

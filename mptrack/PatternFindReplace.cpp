@@ -50,8 +50,8 @@ void CViewPattern::OnEditFind()
 			settings.findFlags.reset(FindReplace::FullSearch);
 		}
 
-		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetrSoundFile(), settings);
-		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetrSoundFile(), settings);
+		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetSoundFile(), settings);
+		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetSoundFile(), settings);
 		CPropertySheet dlg(_T("Find/Replace"));
 
 		dlg.AddPage(&pageFind);

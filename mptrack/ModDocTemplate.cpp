@@ -107,7 +107,7 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			CMainFrame::GetMainFrame()->UpdateTree(modDoc, GeneralHint().General());
 
 			// Reset edit history for template files
-			CSoundFile &sndFile = modDoc->GetrSoundFile();
+			CSoundFile &sndFile = modDoc->GetSoundFile();
 			sndFile.GetFileHistory().clear();
 			sndFile.m_dwCreatedWithVersion = MptVersion::num;
 			sndFile.m_dwLastSavedWithVersion = 0;

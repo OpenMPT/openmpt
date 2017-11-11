@@ -521,7 +521,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Check whether the new format supports embedding the edit history in the file.
-	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetrSoundFile().GetFileHistory().size() > 0)
+	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetSoundFile().GetFileHistory().size() > 0)
 	{
 		CHANGEMODTYPE_WARNING(wEditHistory);
 	}

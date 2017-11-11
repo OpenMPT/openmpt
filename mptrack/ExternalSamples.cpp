@@ -35,7 +35,7 @@ void ExternalSamplesDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-ExternalSamplesDlg::ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent) : CDialog(IDD_MISSINGSAMPLES, parent), modDoc(modDoc), sndFile(modDoc.GetrSoundFile()), isScanning(false)
+ExternalSamplesDlg::ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent) : CDialog(IDD_MISSINGSAMPLES, parent), modDoc(modDoc), sndFile(modDoc.GetSoundFile()), isScanning(false)
 {
 }
 
@@ -94,7 +94,7 @@ void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 	if(item == -1) return;
 	const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(m_List.GetItemData(item));
 
-	const mpt::PathString path = modDoc.GetrSoundFile().GetSamplePath(smp);
+	const mpt::PathString path = modDoc.GetSoundFile().GetSamplePath(smp);
 	FileDialog dlg = OpenFileDialog()
 		.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");	// Only show samples that we actually can save as well.
 	if(TrackerSettings::Instance().previewInFileDialogs)

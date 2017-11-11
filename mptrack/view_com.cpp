@@ -191,7 +191,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 
 	if(!updateSamples && !updateInstr && !updateAll) return;
 
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
 
@@ -442,7 +442,7 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 	CEdit *editCtrl = m_ItemList.GetEditControl();
 	if(editCtrl)
 	{
-		const CModSpecifications &specs = GetDocument()->GetrSoundFile().GetModSpecifications();
+		const CModSpecifications &specs = GetDocument()->GetSoundFile().GetModSpecifications();
 		const size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
 		editCtrl->LimitText(maxStrLen);
 	}
@@ -458,7 +458,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 	if(lvItem.pszText != nullptr && !lvItem.iSubItem && pModDoc)
 	{
 		UINT iItem = lvItem.iItem;
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 		if(m_nListId == IDC_LIST_SAMPLES)
 		{

@@ -3334,9 +3334,9 @@ static mpt::PathString GetTempFilenameBase()
 
 typedef CModDoc *TSoundFileContainer;
 
-static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
+static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 {
-	return sndFile->GetrSoundFile();
+	return sndFile->GetSoundFile();
 }
 
 
@@ -3391,7 +3391,7 @@ static mpt::PathString GetTempFilenameBase()
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
 
-static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
+static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 {
 	return *sndFile.get();
 }
@@ -3453,11 +3453,11 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("mptm"));
 
-		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
+		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
 		#endif
 
@@ -3469,7 +3469,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.mptm"));
 
-		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
+		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
@@ -3481,19 +3481,19 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("xm"));
 
-		TestLoadXMFile(GetrSoundFile(sndFileContainer));
+		TestLoadXMFile(GetSoundFile(sndFileContainer));
 
 		// In OpenMPT 1.20 (up to revision 1459), there was a bug in the XM saver
 		// that would create broken XMs if the sample map contained samples that
 		// were only referenced below C-1 or above B-8 (such samples should not
 		// be written). Let's insert a sample there and check if re-loading the
 		// file still works.
-		GetrSoundFile(sndFileContainer).m_nSamples++;
-		GetrSoundFile(sndFileContainer).Instruments[1]->Keyboard[110] = GetrSoundFile(sndFileContainer).GetNumSamples();
+		GetSoundFile(sndFileContainer).m_nSamples++;
+		GetSoundFile(sndFileContainer).Instruments[1]->Keyboard[110] = GetSoundFile(sndFileContainer).GetNumSamples();
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
 		#endif
 
@@ -3505,7 +3505,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.xm"));
 
-		TestLoadXMFile(GetrSoundFile(sndFileContainer));
+		TestLoadXMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
@@ -3517,11 +3517,11 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
 
-		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
+		TestLoadS3MFile(GetSoundFile(sndFileContainer), false);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 
@@ -3533,7 +3533,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.s3m"));
 
-		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
+		TestLoadS3MFile(GetSoundFile(sndFileContainer), true);
 
 		DestroySoundFileContainer(sndFileContainer);
 
@@ -3587,7 +3587,7 @@ static MPT_NOINLINE void TestEditing()
 {
 #ifdef MODPLUG_TRACKER
 	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
-	auto &sndFile = modDoc->GetrSoundFile();
+	auto &sndFile = modDoc->GetSoundFile();
 	sndFile.Create(FileReader(), CSoundFile::loadCompleteModule, modDoc);
 	sndFile.m_nChannels = 4;
 	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
