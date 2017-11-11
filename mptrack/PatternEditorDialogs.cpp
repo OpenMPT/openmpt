@@ -1263,7 +1263,7 @@ void QuickChannelProperties::UpdateDisplay()
 {
 	// Set up channel properties
 	visible = false;
-	const ModChannelSettings &settings = document->GetSoundFile()->ChnSettings[channel];
+	const ModChannelSettings &settings = document->GetrSoundFile().ChnSettings[channel];
 	SetDlgItemInt(IDC_EDIT1, settings.nVolume, FALSE);
 	SetDlgItemInt(IDC_EDIT2, settings.nPan, FALSE);
 	volSlider.SetPos(settings.nVolume);
@@ -1275,7 +1275,7 @@ void QuickChannelProperties::UpdateDisplay()
 	wsprintf(description, _T("Channel %d:"), channel + 1);
 	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, description);
 	nameEdit.LimitText(MAX_CHANNELNAME - 1);
-	nameEdit.SetWindowText(mpt::ToCString(document->GetSoundFile()->GetCharsetInternal(), settings.szName));
+	nameEdit.SetWindowText(mpt::ToCString(document->GetrSoundFile().GetCharsetInternal(), settings.szName));
 
 	settingsChanged = false;
 	visible = true;

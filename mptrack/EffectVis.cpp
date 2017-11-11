@@ -587,11 +587,12 @@ void CEffectVis::UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDE
 	m_nPattern = pat;
 
 	//Check document exists
-	if (!m_pModDoc || (m_pSndFile = m_pModDoc->GetSoundFile()) == nullptr)
+	if (m_pModDoc == nullptr)
 	{
 		DoClose();
 		return;
 	}
+	m_pSndFile = m_pModDoc->GetSoundFile();
 
 	//Check pattern, start row and channel exist
 	if(!m_pSndFile->Patterns.IsValidPat(m_nPattern) || !m_pSndFile->Patterns[m_nPattern].IsValidRow(m_startRow) || m_nChan >= m_pSndFile->GetNumChannels())
