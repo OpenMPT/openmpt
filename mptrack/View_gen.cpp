@@ -546,7 +546,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 void CViewGlobals::PopulateChannelPlugins()
 {
 	// Channel effect lists
-	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 	CString s;
 	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
@@ -566,8 +566,8 @@ void CViewGlobals::PopulateChannelPlugins()
 					s.Format(_T("FX%u: "), ifx + 1);
 					s += sndFile.m_MixPlugins[ifx].GetName();
 					int n = m_CbnEffects[ichn].AddString(s);
-					m_CbnEffects[ichn].SetItemData(n, ifx+1);
-					if (sndFile.ChnSettings[nChn].nMixPlugin == ifx+1) fxsel = n;
+					m_CbnEffects[ichn].SetItemData(n, ifx + 1);
+					if (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1) fxsel = n;
 				}
 			}
 			m_CbnEffects[ichn].SetRedraw(TRUE);
@@ -812,7 +812,7 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 	if ((pModDoc) && (!m_nLockCount))
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
-		const UINT nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
+		const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
 		CString tmp;
 		GetDlgItemText(itemID, tmp);
 		const std::string s = mpt::ToCharset(sndFile.GetCharsetInternal(), tmp);
@@ -1283,6 +1283,7 @@ void CViewGlobals::OnMovePlugToSlot()
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
+		PopulateChannelPlugins();
 		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
 	}
 }
@@ -1451,6 +1452,7 @@ void CViewGlobals::OnInsertSlot()
 
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		OnPluginChanged();
+		PopulateChannelPlugins();
 		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
 
 		SetPluginModified();
@@ -1504,6 +1506,7 @@ void CViewGlobals::OnClonePlug()
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
+		PopulateChannelPlugins();
 		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
 
 		SetPluginModified();
