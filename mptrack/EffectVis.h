@@ -15,6 +15,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class CViewPattern;
+class CModDoc;
+class CSoundFile;
 
 #define FXVSTATUS_LDRAGGING		0x01
 #define FXVSTATUS_RDRAGGING		0x02
@@ -25,7 +27,7 @@ class CEffectVis : public CDialog
 	DECLARE_DYNAMIC(CEffectVis)
 
 public:
-	enum
+	enum EditAction
 	{
 		kAction_OverwriteFX,
 		kAction_FillFX,
@@ -34,14 +36,11 @@ public:
 		kAction_Preserve
 	};
 
-	CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc *pModDoc, PATTERNINDEX pat);
-	~CEffectVis();
-
-// Dialog Data
-	enum { IDD = IDD_EFFECTVISUALIZER };
+	CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat);
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
+	void PostNcDestroy() override;
 
 	EffectInfo effectInfo;
 
@@ -55,16 +54,16 @@ protected:
 	void ShowVisImage(CDC *pDC);
 	RECT invalidated;
 
-	ROWINDEX m_nLastDrawnRow; // for interpolation
-	int m_nLastDrawnY; // for interpolation
-	int m_nRowToErase;
-	int m_nParamToErase;
+	ROWINDEX m_nLastDrawnRow = ROWINDEX_INVALID; // for interpolation
+	int m_nLastDrawnY = -1; // for interpolation
+	int m_nRowToErase = -1;
+	int m_nParamToErase = -1;
 
 	int m_nodeSizeHalf;	// Half width of a node;
 	int m_marginBottom;
 	int m_innerBorder;
 
-	ROWINDEX m_nOldPlayPos;
+	ROWINDEX m_nOldPlayPos = ROWINDEX_INVALID;
 	ModCommand m_templatePCNote;
 
 protected:
@@ -73,15 +72,16 @@ protected:
 	ROWINDEX m_nRows;
 	CHANNELINDEX m_nChan;
 	PATTERNINDEX m_nPattern;
-	int m_nFillEffect, m_nAction;
+	int m_nFillEffect;
+	EditAction m_nAction = kAction_OverwriteFX;
 
-	int m_nDragItem;
+	int m_nDragItem = -1;
 	UINT m_nBtnMouseOver;
-	DWORD m_dwStatus;
+	DWORD m_dwStatus = 0;
 
-	float m_pixelsPerRow, m_pixelsPerFXParam, m_pixelsPerPCParam;
+	float m_pixelsPerRow = 1, m_pixelsPerFXParam = 1, m_pixelsPerPCParam = 1;
 
-	bool m_forceRedraw : 1;
+	bool m_forceRedraw  = true;
 
 	void InvalidateRow(int row);
 	int RowToScreenX(ROWINDEX row) const;
@@ -98,16 +98,16 @@ protected:
 	bool IsPcNote(ROWINDEX row) const;
 	void SetPcNote(ROWINDEX row);
 
-	CSoundFile *m_pSndFile;
-	CModDoc *m_pModDoc;
+	CModDoc &m_ModDoc;
+	CSoundFile &m_SndFile;
 	CRect m_rcDraw;
 	CRect m_rcFullWin;
 
 	CComboBox m_cmbEffectList, m_cmbActionList;
 	CEdit m_edVisStatus;
 
-	virtual void OnOK();
-	virtual void OnCancel();
+	void OnOK() override;
+	void OnCancel() override;
 	afx_msg void OnClose();
 
 	CViewPattern *m_pViewPattern;
@@ -119,9 +119,9 @@ protected:
 
 public:
 
-	void UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc *pModDoc, PATTERNINDEX pat);
+	void UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, PATTERNINDEX pat);
 	void Update();
-	BOOL OpenEditor(CWnd *parent);
+	void OpenEditor(CWnd *parent);
 	void SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow);
 	void DoClose();
 

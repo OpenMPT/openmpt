@@ -179,7 +179,7 @@ protected:
 	BYTE splitActiveNoteChannel[NOTE_MAX + NOTE_MIN];
 
 public:
-	CEffectVis *m_pEffectVis;	//rewbs.fxVis
+	std::unique_ptr<CEffectVis> m_pEffectVis;
 
 	CViewPattern();
 	~CViewPattern();
