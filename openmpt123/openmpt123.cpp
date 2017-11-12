@@ -204,16 +204,16 @@ public:
 			impl = 0;
 		}
 	}
-	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+	void write_metadata( std::map<std::string,std::string> metadata ) override {
 		impl->write_metadata( metadata );
 	}
-	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+	void write_updated_metadata( std::map<std::string,std::string> metadata ) override {
 		impl->write_updated_metadata( metadata );
 	}
-	virtual void write( const std::vector<float*> buffers, std::size_t frames ) {
+	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		impl->write( buffers, frames );
 	}
-	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		impl->write( buffers, frames );
 	}
 };                                                                                                                
