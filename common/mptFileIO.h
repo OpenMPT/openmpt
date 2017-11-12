@@ -305,12 +305,8 @@ public:
 	{
 		return;
 	}
-	~FILE_output_streambuf()
-	{
-		return;
-	}
 protected:
-	virtual int_type overflow(int_type ch)
+	int_type overflow(int_type ch) override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -327,7 +323,7 @@ protected:
 		}
 		return ch;
 	}
-	virtual int sync()
+	int sync() override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -339,7 +335,7 @@ protected:
 		}
 		return 0;
 	}
-	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
+	pos_type seekpos(pos_type pos, std::ios_base::openmode which) override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -347,7 +343,7 @@ protected:
 		}
 		return seekoff(pos, std::ios_base::beg, which);
 	}
-	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
+	pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -442,7 +438,7 @@ private:
 		return mpt::IO::WriteRaw(f, pbase(), n);
 	}
 protected:
-	virtual int_type overflow(int_type ch)
+	int_type overflow(int_type ch) override  
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -461,7 +457,7 @@ protected:
 		pbump(1);
 		return ch;
 	}
-	virtual int sync()
+	int sync() override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -473,7 +469,7 @@ protected:
 		}
 		return Tparent::sync();
 	}
-	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
+	pos_type seekpos(pos_type pos, std::ios_base::openmode which) override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
@@ -485,7 +481,7 @@ protected:
 		}
 		return Tparent::seekpos(pos, which);
 	}
-	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
+	pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override
 	{
 		if(!mpt::IO::IsValid(f))
 		{
