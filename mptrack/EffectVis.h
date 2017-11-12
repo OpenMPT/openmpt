@@ -50,7 +50,7 @@ protected:
 	void DrawNodes();
 	void DrawGrid();
 
-	void ShowVis(CDC * pDC, CRect rectBorder);
+	void ShowVis(CDC *pDC);
 	void ShowVisImage(CDC *pDC);
 	RECT invalidated;
 
