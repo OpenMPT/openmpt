@@ -26,13 +26,12 @@ class RAWEncoder : public EncoderFactoryBase
 
 public:
 
-	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const;
-	bool IsAvailable() const;
+	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const override;
+	bool IsAvailable() const override;
 
 public:
 
 	RAWEncoder();
-	virtual ~RAWEncoder();
 
 };
 

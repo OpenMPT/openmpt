@@ -139,7 +139,7 @@ public:
 		}
 
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		size_t countTotal = count;
 		while(countTotal > 0)
@@ -215,12 +215,6 @@ bool VorbisEncoder::IsAvailable() const
 #else
 	return false;
 #endif
-}
-
-
-VorbisEncoder::~VorbisEncoder()
-{
-	return;
 }
 
 

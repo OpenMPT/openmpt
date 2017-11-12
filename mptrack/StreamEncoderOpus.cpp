@@ -163,7 +163,7 @@ public:
 		ope_encoder_flush_header(ope_encoder);
 		
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		ope_encoder_write_float(ope_encoder, interleaved, count);
 	}
@@ -196,12 +196,6 @@ bool OggOpusEncoder::IsAvailable() const
 #else
 	return false;
 #endif
-}
-
-
-OggOpusEncoder::~OggOpusEncoder()
-{
-	return;
 }
 
 
