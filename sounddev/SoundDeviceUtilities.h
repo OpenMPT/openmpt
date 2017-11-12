@@ -58,7 +58,7 @@ public:
 public:
 	ComponentAvRt();
 	virtual ~ComponentAvRt();
-	virtual bool DoInitialize();
+	bool DoInitialize() override;
 };
 
 

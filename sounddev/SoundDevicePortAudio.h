@@ -104,7 +104,7 @@ class ComponentPortAudio : public ComponentBuiltin
 public:
 	ComponentPortAudio();
 	virtual ~ComponentPortAudio();
-	virtual bool DoInitialize();
+	bool DoInitialize() override;
 };
 
 

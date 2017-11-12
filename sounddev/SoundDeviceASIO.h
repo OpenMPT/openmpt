@@ -35,7 +35,7 @@ class ComponentASIO : public ComponentBuiltin
 public:
 	ComponentASIO() { }
 	virtual ~ComponentASIO() { }
-	virtual bool DoInitialize() { return true; }
+	bool DoInitialize() override { return true; }
 };
 
 enum AsioFeatures

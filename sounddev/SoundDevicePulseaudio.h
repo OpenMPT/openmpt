@@ -42,7 +42,7 @@ class ComponentPulseaudio
 public:
 	ComponentPulseaudio() { }
 	virtual ~ComponentPulseaudio() { }
-	virtual bool DoInitialize() { return true; }
+	bool DoInitialize() override { return true; }
 };
 
 

@@ -35,7 +35,7 @@ class ComponentWaveOut : public ComponentBuiltin
 public:
 	ComponentWaveOut() { }
 	virtual ~ComponentWaveOut() { }
-	virtual bool DoInitialize() { return true; }
+	bool DoInitialize() override { return true; }
 };
 
 

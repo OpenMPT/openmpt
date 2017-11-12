@@ -32,7 +32,7 @@ class ComponentDirectSound : public ComponentBuiltin
 public:
 	ComponentDirectSound() { }
 	virtual ~ComponentDirectSound() { }
-	virtual bool DoInitialize() { return true; }
+	bool DoInitialize() override { return true; }
 };
 
 class CDSoundDevice: public CSoundDeviceWithThread
