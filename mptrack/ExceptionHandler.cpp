@@ -182,7 +182,7 @@ int DebugReporter::RescueFiles()
 	auto documents = theApp.GetOpenDocuments();
 	for(auto modDoc : documents)
 	{
-		if(modDoc->IsModified() && modDoc->GetSoundFile() != nullptr)
+		if(modDoc->IsModified())
 		{
 			if(numFiles == 0)
 			{
@@ -196,7 +196,7 @@ int DebugReporter::RescueFiles()
 			filename += MPT_PATHSTRING("_");
 			filename += mpt::PathString::FromCStringSilent(modDoc->GetTitle()).SanitizeComponent();
 			filename += MPT_PATHSTRING(".");
-			filename += mpt::PathString::FromUTF8(modDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+			filename += mpt::PathString::FromUTF8(modDoc->GetrSoundFile().GetModSpecifications().fileExtension);
 
 			try
 			{
