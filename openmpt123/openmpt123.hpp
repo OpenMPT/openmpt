@@ -145,7 +145,7 @@ public:
 		return;
 	}
 public:
-	virtual void write( const std::string & /* text */ ) {
+	void write( const std::string & /* text */ ) override {
 		return;
 	}
 };
@@ -163,10 +163,10 @@ public:
 		writeout();
 	}
 public:
-	virtual void write( const std::string & text ) {
+	void write( const std::string & text ) override {
 		s << text;
 	}
-	virtual void writeout() {
+	void writeout() override {
 		textout::writeout();
 		s.flush();
 	}
@@ -187,7 +187,7 @@ public:
 		writeout();
 	}
 public:
-	virtual void write( const std::string & text ) {
+	void write( const std::string & text ) override {
 		#if defined(UNICODE)
 			std::wstring wtext = utf8_to_wstring( text );
 			WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
@@ -590,7 +590,7 @@ private:
 		}
 	}
 public:
-	void write( const std::vector<float*> buffers, std::size_t frames ) {
+	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		lock();
 		for ( std::size_t frame = 0; frame < frames; ++frame ) {
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
@@ -600,7 +600,7 @@ public:
 		}
 		unlock();
 	}
-	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		lock();
 		for ( std::size_t frame = 0; frame < frames; ++frame ) {
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
@@ -612,7 +612,7 @@ public:
 	}
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
-	virtual bool sleep( int ms ) = 0;
+	bool sleep( int ms ) override = 0;
 };
 
 class void_audio_stream : public write_buffers_interface {
@@ -621,15 +621,15 @@ public:
 		return;
 	}
 public:
-	virtual void write( const std::vector<float*> buffers, std::size_t frames ) {
+	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		(void)buffers;
 		(void)frames;
 	}
-	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		(void)buffers;
 		(void)frames;
 	}
-	virtual bool is_dummy() const {
+	bool is_dummy() const override {
 		return true;
 	}
 };
@@ -640,16 +640,16 @@ protected:
 		return;
 	}
 public:
-	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+	void write_metadata( std::map<std::string,std::string> metadata ) override {
 		(void)metadata;
 		return;
 	}
-	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+	void write_updated_metadata( std::map<std::string,std::string> metadata ) override {
 		(void)metadata;
 		return;
 	}
-	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
-	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
+	void write( const std::vector<float*> buffers, std::size_t frames ) override = 0;
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override = 0;
 	virtual ~file_audio_stream_base() {
 		return;
 	}
