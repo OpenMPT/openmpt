@@ -158,7 +158,7 @@ public:
 	{
 		return;
 	}
-	virtual bool DoInitialize()
+	bool DoInitialize() override
 	{
 		if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7))
 		{

@@ -54,7 +54,7 @@ public:
 		return;
 	}
 	virtual ~ComponentSoundDeviceManager() { }
-	virtual bool DoInitialize()
+	bool DoInitialize() override
 	{
 		return true;
 	}

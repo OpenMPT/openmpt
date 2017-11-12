@@ -104,7 +104,7 @@ public:
 	{
 		return;
 	}
-	bool DoInitialize()
+	bool DoInitialize() override
 	{
 #if defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
 		if(!ComponentBundledDLL::DoInitialize())
