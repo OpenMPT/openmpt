@@ -76,7 +76,7 @@ void CEffectVis::OnEffectChanged()
 void CEffectVis::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
-	ShowVis(&dc, m_rcDraw);
+	ShowVis(&dc);
 
 }
 
@@ -203,10 +203,10 @@ ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 
 uint16 CEffectVis::ScreenYToPCParam(int y) const
 {
-	if (y<=PCParamToScreenY(ModCommand::maxColumnValue))
+	if (y <= PCParamToScreenY(ModCommand::maxColumnValue))
 		return ModCommand::maxColumnValue;
 
-	if (y>=PCParamToScreenY(0x00))
+	if (y >= PCParamToScreenY(0x00))
 		return 0x00;
 
 	return Util::Round<uint16>((m_rcDraw.bottom - y) / m_pixelsPerPCParam);
@@ -254,7 +254,7 @@ void CEffectVis::DrawGrid()
 	const UINT numHorizontalLines = 4;
 	for (UINT i=0; i<numHorizontalLines; i++)
 	{
-		switch (i%4)
+		switch (i % 4)
 		{
 			case 0: CMainFrame::penScratch = CMainFrame::penGray00; break;
 			case 1: CMainFrame::penScratch = CMainFrame::penGray40; break;
@@ -281,7 +281,7 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 	//erase current playpos:
 	if (m_nOldPlayPos>=m_startRow &&  m_nOldPlayPos<=m_endRow)
 	{
-		x1=RowToScreenX(m_nOldPlayPos);
+		x1 = RowToScreenX(m_nOldPlayPos);
 		m_dcPlayPos.SelectObject(CMainFrame::penBlack);
 		m_dcPlayPos.MoveTo(x1,m_rcDraw.top);
 		m_dcPlayPos.LineTo(x1,m_rcDraw.bottom);
@@ -290,7 +290,7 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 	if ((nRow<m_startRow) || (nRow>m_endRow) || (nPat != m_nPattern))
 		return;
 
-	x1=RowToScreenX(nRow);
+	x1 = RowToScreenX(nRow);
 	m_dcPlayPos.SelectObject(CMainFrame::penSample);
 	m_dcPlayPos.MoveTo(x1,m_rcDraw.top);
 	m_dcPlayPos.LineTo(x1,m_rcDraw.bottom);
@@ -300,28 +300,27 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 }
 
 
-void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
+void CEffectVis::ShowVis(CDC *pDC)
 {
-	MPT_UNREFERENCED_PARAMETER(rectBorder);
 	if (m_forceRedraw)
 	{
 		m_forceRedraw = false;
 
 		// if we already have a memory dc, destroy it (this occurs for a re-size)
-		if (m_dcGrid.GetSafeHdc())
+		if (m_dcGrid.m_hDC)
 		{
-			m_dcGrid.SelectObject(m_pbOldGrid) ;
-			m_dcGrid.DeleteDC() ;
+			m_dcGrid.SelectObject(m_pbOldGrid);
+			m_dcGrid.DeleteDC();
 
-			m_dcNodes.SelectObject(m_pbOldNodes) ;
-			m_dcNodes.DeleteDC() ;
+			m_dcNodes.SelectObject(m_pbOldNodes);
+			m_dcNodes.DeleteDC();
 
-			m_dcPlayPos.SelectObject(m_pbOldPlayPos) ;
-			m_dcPlayPos.DeleteDC() ;
+			m_dcPlayPos.SelectObject(m_pbOldPlayPos);
+			m_dcPlayPos.DeleteDC();
 
-			m_bPlayPos.DeleteObject() ;
-			m_bGrid.DeleteObject() ;
-			m_bNodes.DeleteObject() ;
+			m_bPlayPos.DeleteObject();
+			m_bGrid.DeleteObject();
+			m_bNodes.DeleteObject();
 		}
 
 		// create a memory based dc for drawing the grid
@@ -361,29 +360,29 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 	memDC.CreateCompatibleDC(pDC);
 	if (!memDC)
 		return;
-	memBitmap.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height()) ;
-	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap) ;
+	memBitmap.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height());
+	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap);
 
 	// make sure we have the bitmaps
-	if (!m_dcGrid.GetSafeHdc())
-		return ;
-	if (!m_dcNodes.GetSafeHdc())
-		return ;
-	if (!m_dcPlayPos.GetSafeHdc())
-		return ;
+	if (!m_dcGrid.m_hDC)
+		return;
+	if (!m_dcNodes.m_hDC)
+		return;
+	if (!m_dcPlayPos.m_hDC)
+		return;
 
-	if (memDC.GetSafeHdc() != NULL)
+	if (memDC.m_hDC != NULL)
 	{
 		// draw the grid
-		memDC.BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcGrid, 0, 0, SRCCOPY) ;
+		memDC.BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcGrid, 0, 0, SRCCOPY);
 
 		// merge the nodes image with the grid
-		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcNodes, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
+		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcNodes, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000);
 		// further merge the playpos
-		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcPlayPos, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
+		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcPlayPos, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000);
 
 		// copy the resulting bitmap to the destination
-		pDC->BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &memDC, 0, 0, SRCCOPY) ;
+		pDC->BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &memDC, 0, 0, SRCCOPY);
 	}
 
 	memDC.SelectObject(oldBitmap);
@@ -516,17 +515,15 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	m_rcDraw.SetRect( m_rcFullWin.left,  m_rcFullWin.top,
 				      m_rcFullWin.right, m_rcFullWin.bottom - m_marginBottom);
 
-#define INFOWIDTH 200
-#define ACTIONLISTWIDTH 150
-#define COMMANDLISTWIDTH 150
+	const int actionListWidth = Util::ScalePixels(150, m_hWnd);
+	const int commandListWidth = Util::ScalePixels(150, m_hWnd);
 
 	if (IsWindow(m_edVisStatus.m_hWnd))
-		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, m_rcFullWin.right-COMMANDLISTWIDTH-ACTIONLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, m_rcFullWin.right-commandListWidth-actionListWidth, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 	if (IsWindow(m_cmbActionList))
-		m_cmbActionList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH-ACTIONLISTWIDTH, m_rcDraw.bottom, ACTIONLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+		m_cmbActionList.SetWindowPos(this,  m_rcFullWin.right-commandListWidth-actionListWidth, m_rcDraw.bottom, actionListWidth, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 	if (IsWindow(m_cmbEffectList))
-		m_cmbEffectList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH, m_rcDraw.bottom, COMMANDLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
-
+		m_cmbEffectList.SetWindowPos(this,  m_rcFullWin.right-commandListWidth, m_rcDraw.bottom, commandListWidth, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 
 	if(m_nRows)
 		m_pixelsPerRow = (float)(m_rcDraw.Width() - m_innerBorder * 2) / (float)m_nRows;
@@ -535,7 +532,7 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
 	m_forceRedraw = true;
-	InvalidateRect(NULL, FALSE);	 //redraw everything
+	InvalidateRect(NULL, FALSE);	//redraw everything
 }
 
 void CEffectVis::Update()
@@ -667,8 +664,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		paramValue = ScreenYToPCParam(point.y);
 		effectName.Format(_T("%s"), _T("Param Control")); // TODO - show smooth & plug+param
-	}
-	else
+	} else
 	{
 		paramValue = ScreenYToFXParam(point.y);
 		effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(GetCommand(row), ModCommand::PARAM(GetParam(row))), &effectName, true);
@@ -775,7 +771,7 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 	{
 		case kAction_FillFX:
 			// Only set command if there isn't a command already at this row and it's not a PC note
-			if (!GetCommand(row) && !IsPcNote(row))
+			if (GetCommand(row) == CMD_NONE && !IsPcNote(row))
 			{
 				SetCommand(row, effectInfo.GetEffectFromIndex(m_nFillEffect));
 			}
@@ -806,7 +802,7 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 			break;
 
 		case kAction_Preserve:
-			if (GetCommand(row) || IsPcNote(row))
+			if (GetCommand(row) != CMD_NONE || IsPcNote(row))
 			{
 				// Only set param if we have an effect type or if this is a PC note.
 				// Never change the effect type.
