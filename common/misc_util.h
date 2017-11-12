@@ -220,6 +220,41 @@ inline void MemsetZero(T &a)
 }
 
 
+
+namespace mpt {
+
+// C++2a compatible bit_cast.
+// See <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0476r1.html>.
+// Not implementing constexpr because this is not easily possible pre C++2a.
+template <typename Tdst, typename Tsrc>
+MPT_FORCEINLINE Tdst bit_cast(const Tsrc & src) noexcept
+{
+	MPT_STATIC_ASSERT(sizeof(Tdst) == sizeof(Tsrc));
+#if MPT_GCC_BEFORE(5,1,0) || MPT_CLANG_BEFORE(3,5,0) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__))
+	MPT_STATIC_ASSERT(std::is_trivial<Tdst>::value); // approximation
+	MPT_STATIC_ASSERT(std::is_trivial<Tsrc>::value); // approximation
+#else // default
+	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tdst>::value);
+	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tsrc>::value);
+#endif
+	#if MPT_COMPILER_UNION_TYPE_ALIASES
+		union {
+			Tsrc src;
+			Tdst dst;
+		} conv;
+		conv.src = src;
+		return conv.dst;
+	#else // !MPT_COMPILER_UNION_TYPE_ALIASES
+		Tdst dst{};
+		std::memcpy(&dst, &src, sizeof(Tdst));
+		return dst;
+	#endif // MPT_COMPILER_UNION_TYPE_ALIASES
+}
+
+} // namespace mpt
+
+
+
 namespace mpt {
 
 
