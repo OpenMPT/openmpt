@@ -150,7 +150,7 @@ public:
 	exception & operator = ( const exception & other ) noexcept;
 	exception & operator = ( exception && other ) noexcept;
 	virtual ~exception() noexcept;
-	virtual const char * what() const noexcept;
+	const char * what() const noexcept override;
 }; // class exception
 #if defined(_MSC_VER)
 #pragma warning(pop)
