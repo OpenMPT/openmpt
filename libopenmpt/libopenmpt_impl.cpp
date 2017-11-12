@@ -298,11 +298,8 @@ public:
 	log_forwarder( log_interface & dest ) : destination(dest) {
 		return;
 	}
-	virtual ~log_forwarder() {
-		return;
-	}
 private:
-	void AddToLog( LogLevel level, const mpt::ustring & text ) const {
+	void AddToLog( LogLevel level, const mpt::ustring & text ) const override {
 		destination.log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
 	}
 }; // class log_forwarder
@@ -313,7 +310,7 @@ private:
 public:
 	std::vector<std::pair<LogLevel,std::string> > GetMessages() const;
 private:
-	void AddToLog( LogLevel level, const mpt::ustring & text ) const;
+	void AddToLog( LogLevel level, const mpt::ustring & text ) const override;
 }; // class loader_log
 
 std::vector<std::pair<LogLevel,std::string> > loader_log::GetMessages() const {

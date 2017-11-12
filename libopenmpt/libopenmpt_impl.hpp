@@ -58,7 +58,7 @@ private:
 public:
 	std_ostream_log( std::ostream & dst );
 	virtual ~std_ostream_log();
-	virtual void log( const std::string & message ) const;
+	void log( const std::string & message ) const override;
 }; // class CSoundFileLog_std_ostream
 
 class log_forwarder;
