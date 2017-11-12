@@ -257,11 +257,11 @@ protected:
 public:
 	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
-	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
-	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
-	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
-	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
+	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
+	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) override;
+	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) override;
+	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
+	bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) override;
 
 protected:
 	// Plugin wants to send MIDI to OpenMPT
