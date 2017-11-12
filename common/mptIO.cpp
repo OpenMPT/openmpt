@@ -350,10 +350,6 @@ FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength)
 	return;
 }
 
-FileDataContainerSeekable::~FileDataContainerSeekable()
-{
-	return;
-}
 void FileDataContainerSeekable::CacheStream() const
 {
 	if(cached)
@@ -461,11 +457,6 @@ FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istr
 	return;
 }
 
-FileDataContainerStdStreamSeekable::~FileDataContainerStdStreamSeekable()
-{
-	return;
-}
-
 IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(mpt::byte *dst, off_t pos, off_t count) const
 {
 	stream->clear(); // tellg needs eof and fail bits unset
@@ -481,11 +472,6 @@ IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(mpt::
 
 FileDataContainerUnseekable::FileDataContainerUnseekable()
 	: cachesize(0), streamFullyCached(false)
-{
-	return;
-}
-
-FileDataContainerUnseekable::~FileDataContainerUnseekable()
 {
 	return;
 }
@@ -627,11 +613,6 @@ FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
 	return;
 }
 
-FileDataContainerStdStream::~FileDataContainerStdStream()
-{
-	return;
-}
-
 bool FileDataContainerStdStream::InternalEof() const
 {
 	if(*stream)
@@ -739,11 +720,6 @@ FileDataContainerCallbackStreamSeekable::FileDataContainerCallbackStreamSeekable
 	return;
 }
 
-FileDataContainerCallbackStreamSeekable::~FileDataContainerCallbackStreamSeekable()
-{
-	return;
-}
-
 IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::InternalRead(mpt::byte *dst, off_t pos, off_t count) const
 {
 	if(!stream.read)
@@ -775,11 +751,6 @@ FileDataContainerCallbackStream::FileDataContainerCallbackStream(CallbackStream 
 	: FileDataContainerUnseekable()
 	, stream(s)
 	, eof_reached(false)
-{
-	return;
-}
-
-FileDataContainerCallbackStream::~FileDataContainerCallbackStream()
 {
 	return;
 }
