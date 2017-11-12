@@ -387,19 +387,7 @@ static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return
 static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
-	STATIC_ASSERT(sizeof(uint32) == sizeof(float32));
-	#if MPT_COMPILER_UNION_TYPE_ALIASES
-		union {
-			float32 f;
-			uint32 i;
-		} conv;
-		conv.f = f;
-		return conv.i;
-	#else
-		uint32 i = 0;
-		std::memcpy(&i, &f, sizeof(float32));
-		return i;
-	#endif
+	return mpt::bit_cast<uint32>(f);
 #else
 	int e = 0;
 	float m = std::frexp(f, &e);
@@ -429,19 +417,7 @@ static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
-	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
-	#if MPT_COMPILER_UNION_TYPE_ALIASES
-		union {
-			float64 f;
-			uint64 i;
-		} conv;
-		conv.f = f;
-		return conv.i;
-	#else
-		uint64 i = 0;
-		std::memcpy(&i, &f, sizeof(float64));
-		return i;
-	#endif
+	return mpt::bit_cast<uint64>(f);
 #else
 	int e = 0;
 	double m = std::frexp(f, &e);
@@ -473,19 +449,7 @@ static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
-	STATIC_ASSERT(sizeof(uint32) == sizeof(float32));
-	#if MPT_COMPILER_UNION_TYPE_ALIASES
-		union {
-			uint32 i;
-			float32 f;
-		} conv;
-		conv.i = i;
-		return conv.f;
-	#else
-		float32 f = 0.0f;
-		std::memcpy(&f, &i, sizeof(float32));
-		return f;
-	#endif
+	return mpt::bit_cast<float32>(i);
 #else
 	uint32 mant = (i & 0x007fffffu) >>  0;
 	uint32 expo = (i & 0x7f800000u) >> 23;
@@ -509,19 +473,7 @@ static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 {
 #if MPT_PLATFORM_IEEE_FLOAT
-	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
-	#if MPT_COMPILER_UNION_TYPE_ALIASES
-		union {
-			uint64 i;
-			float64 f;
-		} conv;
-		conv.i = i;
-		return conv.f;
-	#else
-		float64 f = 0.0;
-		std::memcpy(&f, &i, sizeof(float64));
-		return f;
-	#endif
+	return mpt::bit_cast<float64>(i);
 #else
 	uint64 mant = (i & 0x000fffffffffffffull) >>  0;
 	uint64 expo = (i & 0x7ff0000000000000ull) >> 52;
