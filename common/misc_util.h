@@ -621,7 +621,7 @@ MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi, Com
 template<typename T>
 MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
 {
-	return clamp(v, lo, hi, std::less<T>());
+	return mpt::clamp(v, lo, hi, std::less<T>());
 }
 
 } // namespace mpt
