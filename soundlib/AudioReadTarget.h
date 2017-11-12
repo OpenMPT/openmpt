@@ -39,10 +39,9 @@ public:
 	{
 		MPT_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
 	}
-	virtual ~AudioReadTargetBuffer() { }
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
@@ -92,7 +91,7 @@ public:
 	{
 		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
 	}
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		switch(sampleFormat.value)
 		{
@@ -186,9 +185,8 @@ public:
 	{
 		return;
 	}
-	virtual ~AudioReadTargetGainBuffer() { }
 public:
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
 
