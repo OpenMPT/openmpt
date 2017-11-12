@@ -37,7 +37,7 @@ private:
 protected:
 	ComponentPluginBridge(int bitness);
 protected:
-	virtual bool DoInitialize();
+	bool DoInitialize() override;
 public:
 	Availability GetAvailability() const { return availability; }
 	mpt::PathString GetFileName() const { return exeName; }
