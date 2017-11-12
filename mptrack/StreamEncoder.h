@@ -228,7 +228,7 @@ class IAudioStreamEncoder
 protected:
 	IAudioStreamEncoder() { }
 public:
-	virtual ~IAudioStreamEncoder() { }
+	virtual ~IAudioStreamEncoder() = default;
 public:
 	virtual mpt::endian_type GetConvertedEndianness() const = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
@@ -263,7 +263,7 @@ private:
 	Encoder::Traits m_Traits;
 protected:
 	EncoderFactoryBase() { }
-	virtual ~EncoderFactoryBase() { }
+	virtual ~EncoderFactoryBase() = default;
 	void SetTraits(const Encoder::Traits &traits);
 public:
 	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const = 0;

@@ -109,11 +109,11 @@ public:
 		}
 
 	}
-	virtual mpt::endian_type GetConvertedEndianness() const
+	mpt::endian_type GetConvertedEndianness() const override
 	{
 		return mpt::endian_big;
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		MPT_ASSERT(formatInfo.Sampleformat.IsFloat());
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
@@ -133,7 +133,7 @@ public:
 			}
 		}
 	}
-	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
+	void WriteInterleavedConverted(size_t frameCount, const char *data) override
 	{
 		if(formatInfo.Sampleformat.GetBitsPerSample() == 8)
 		{
@@ -151,7 +151,7 @@ public:
 			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
 		}
 	}
-	virtual void WriteCues(const std::vector<uint64> &cues)
+	void WriteCues(const std::vector<uint64> &cues) override
 	{
 		MPT_UNREFERENCED_PARAMETER(cues);
 	}
@@ -209,12 +209,6 @@ AUEncoder::AUEncoder()
 bool AUEncoder::IsAvailable() const
 {
 	return true;
-}
-
-
-AUEncoder::~AUEncoder()
-{
-	return;
 }
 
 

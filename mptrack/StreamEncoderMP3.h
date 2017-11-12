@@ -54,16 +54,14 @@ private:
 
 public:
 
-	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const;
-	mpt::ustring DescribeQuality(float quality) const;
-	mpt::ustring DescribeBitrateABR(int bitrate) const;
-	bool IsAvailable() const;
+	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const override;
+	mpt::ustring DescribeQuality(float quality) const override;
+	mpt::ustring DescribeBitrateABR(int bitrate) const override;
+	bool IsAvailable() const override;
 
 public:
 
 	MP3Encoder(MP3EncoderType type=MP3EncoderDefault);
-
-	virtual ~MP3Encoder();
 
 };
 

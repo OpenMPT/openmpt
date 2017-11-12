@@ -123,12 +123,12 @@ public:
 		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
 
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		ASSERT(formatInfo.Sampleformat.IsFloat());
 		WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
 	}
-	virtual void WriteInterleavedConverted(size_t frameCount, const char *data)
+	void WriteInterleavedConverted(size_t frameCount, const char *data) override
 	{
 		sampleBuf.resize(frameCount * formatInfo.Channels);
 		switch(formatInfo.Sampleformat.GetBitsPerSample()/8)
@@ -234,12 +234,6 @@ FLACEncoder::FLACEncoder()
 bool FLACEncoder::IsAvailable() const
 {
 	return true;
-}
-
-
-FLACEncoder::~FLACEncoder()
-{
-	return;
 }
 
 

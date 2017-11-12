@@ -815,7 +815,7 @@ public:
 		}
 
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		if(!gfp_inited)
 		{
@@ -1336,7 +1336,7 @@ public:
 			tagger.WriteID3v2Tags(f, tags);
 		}
 	}
-	virtual void WriteInterleaved(size_t count, const float *interleaved)
+	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		if(!acmStream)
 		{
@@ -1497,12 +1497,6 @@ bool MP3Encoder::IsAvailable() const
 		|| ((m_Type == MP3EncoderACM) && IsComponentAvailable(m_Acm))
 #endif // MPT_MP3ENCODER_ACM
 		;
-}
-
-
-MP3Encoder::~MP3Encoder()
-{
-	return;
 }
 
 
