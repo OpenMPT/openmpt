@@ -41,7 +41,6 @@ Metadata and other state is not provided or updated.
 #include <string>
 #include <vector>
 
-#include <climits>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
