@@ -368,7 +368,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 OPENMPT_NAMESPACE_END
-#include <climits>
+#include <limits>
 #include <cstdint>
 #include <stdint.h>
 OPENMPT_NAMESPACE_BEGIN
@@ -382,20 +382,20 @@ typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
 
-const int8 int8_min     = INT8_MIN;
-const int16 int16_min   = INT16_MIN;
-const int32 int32_min   = INT32_MIN;
-const int64 int64_min   = INT64_MIN;
+constexpr int8 int8_min     = std::numeric_limits<int8>::min();
+constexpr int16 int16_min   = std::numeric_limits<int16>::min();
+constexpr int32 int32_min   = std::numeric_limits<int32>::min();
+constexpr int64 int64_min   = std::numeric_limits<int64>::min();
 
-const int8 int8_max     = INT8_MAX;
-const int16 int16_max   = INT16_MAX;
-const int32 int32_max   = INT32_MAX;
-const int64 int64_max   = INT64_MAX;
+constexpr int8 int8_max     = std::numeric_limits<int8>::max();
+constexpr int16 int16_max   = std::numeric_limits<int16>::max();
+constexpr int32 int32_max   = std::numeric_limits<int32>::max();
+constexpr int64 int64_max   = std::numeric_limits<int64>::max();
 
-const uint8 uint8_max   = UINT8_MAX;
-const uint16 uint16_max = UINT16_MAX;
-const uint32 uint32_max = UINT32_MAX;
-const uint64 uint64_max = UINT64_MAX;
+constexpr uint8 uint8_max   = std::numeric_limits<uint8>::max();
+constexpr uint16 uint16_max = std::numeric_limits<uint16>::max();
+constexpr uint32 uint32_max = std::numeric_limits<uint32>::max();
+constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 
 // 24-bit integer wrapper (for 24-bit PCM)
@@ -446,7 +446,7 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 namespace mpt {
 
-MPT_STATIC_ASSERT(CHAR_BIT == 8);
+MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
 
 MPT_STATIC_ASSERT(sizeof(char) == 1);
 

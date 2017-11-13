@@ -19,7 +19,8 @@ Dependencies
         
         libopenmpt makes the following assumptions about the C++ implementation
         used for building:
-         *  `CHAR_BIT == 8` (enforced by static_assert)
+         *  `std::numeric_limits<unsigned char>::digits == 8` (enforced by
+            static_assert)
          *  `sizeof(char) == 1` (enforced by static_assert)
          *  existence of `std::uintptr_t` (enforced by static_assert)
          *  `sizeof(float) == 4` (enforced by static_assert)
