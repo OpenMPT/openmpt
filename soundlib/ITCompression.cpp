@@ -407,7 +407,7 @@ int ITDecompression::ReadBits(int width)
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
 	while(width >= remBits && dataPos < dataSize)
 	{
-		v |= (chunk[dataPos] >> bitPos) << vPos;
+		v |= (mpt::byte_cast<uint8>(chunk[dataPos]) >> bitPos) << vPos;
 		vPos += remBits;
 		width -= remBits;
 		dataPos++;
@@ -417,7 +417,7 @@ int ITDecompression::ReadBits(int width)
 
 	if(width > 0 && dataPos < dataSize)
 	{
-		v |= (chunk[dataPos] >> bitPos) << vPos;
+		v |= (mpt::byte_cast<uint8>(chunk[dataPos]) >> bitPos) << vPos;
 		v &= vMask;
 		remBits -= width;
 		bitPos += width;

@@ -709,7 +709,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		annolen = std::min<uint32>(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
-			m_songMessage.Read(lpStream + annotxt, annolen - 1, SongMessage::leAutodetect);
+			m_songMessage.Read(mpt::byte_cast<const mpt::byte*>(lpStream) + annotxt, annolen - 1, SongMessage::leAutodetect);
 		}
 		// Song Name
 		uint32 songname = pmex->songname;

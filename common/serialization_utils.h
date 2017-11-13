@@ -236,7 +236,7 @@ public:
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		typename mpt::make_le<T>::type valle;
 		valle = val;
-		return ID(std::string(mpt::as_raw_memory(valle), mpt::as_raw_memory(valle) + sizeof(valle)));
+		return ID(std::string(mpt::byte_cast<const char*>(mpt::as_raw_memory(valle)), mpt::byte_cast<const char*>(mpt::as_raw_memory(valle) + sizeof(valle))));
 	}
 	bool IsPrintable() const;
 	mpt::ustring AsString() const;

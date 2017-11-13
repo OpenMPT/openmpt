@@ -17,6 +17,7 @@
 #include "../common/mptTypeTraits.h"
 #include "../common/Endianness.h"
 #include <algorithm>
+#include <array>
 #include <iosfwd>
 #include <limits>
 #include <cstring>
@@ -207,12 +208,29 @@ inline bool WritePartial(Tfile & f, const T & v, size_t size = sizeof(T))
 	return IO::WriteRaw(f, mpt::as_raw_memory(v), size);
 }
 
+template <typename Tfile>
+inline bool ReadByte(Tfile & f, mpt::byte & v)
+{
+	bool result = false;
+	mpt::byte byte = mpt::as_byte(0);
+	const IO::Offset readResult = IO::ReadRaw(f, &byte, sizeof(mpt::byte));
+	if(readResult < 0)
+	{
+		result = false;
+	} else
+	{
+		result = (static_cast<uint64>(readResult) == sizeof(mpt::byte));
+	}
+	v = byte;
+	return result;
+}
+
 template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
 	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	mpt::byte bytes[sizeof(T)];
+	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
 	if(readResult < 0)
@@ -234,7 +252,7 @@ inline bool ReadIntLE(Tfile & f, T & v)
 {
 	bool result = false;
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	mpt::byte bytes[sizeof(T)];
+	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
 	if(readResult < 0)
@@ -255,7 +273,7 @@ inline bool ReadIntBE(Tfile & f, T & v)
 {
 	bool result = false;
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	mpt::byte bytes[sizeof(T)];
+	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
 	if(readResult < 0)
@@ -275,17 +293,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v)
 {
 	bool result = true;
-	mpt::byte byte = 0;
+	uint8 byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 	additionalBytes = (byte & 0x01);
 	v = byte >> 1;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));
 	}
 	return result;
@@ -295,17 +313,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v)
 {
 	bool result = true;
-	mpt::byte byte = 0;
+	uint8 byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 	additionalBytes = (byte & 0x03);
 	v = byte >> 2;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
@@ -315,17 +333,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 {
 	bool result = true;
-	mpt::byte byte = 0;
+	uint8 byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 	additionalBytes = (1 << (byte & 0x03)) - 1;
 	v = byte >> 2;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
 		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));
 	}
 	return result;

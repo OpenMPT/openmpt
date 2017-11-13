@@ -691,10 +691,10 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
 	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
 	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
-	VERIFY_EQUAL(IEEE754binary32LE(0x00,0x00,0x80,0x3f), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32BE(0x3f,0x80,0x00,0x00), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(0x00,0x00,0x80,0x3f));
-	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(0x3f,0x80,0x00,0x00));
+	VERIFY_EQUAL(IEEE754binary32LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x80),mpt::as_byte(0x3f)), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32BE(mpt::as_byte(0x3f),mpt::as_byte(0x80),mpt::as_byte(0x00),mpt::as_byte(0x00)), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x80),mpt::as_byte(0x3f)));
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(mpt::as_byte(0x3f),mpt::as_byte(0x80),mpt::as_byte(0x00),mpt::as_byte(0x00)));
 
 	VERIFY_EQUAL(EncodeIEEE754binary64(1.0), 0x3ff0000000000000ull);
 	VERIFY_EQUAL(EncodeIEEE754binary64(-1.0), 0xbff0000000000000ull);
@@ -708,10 +708,10 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(DecodeIEEE754binary64(0x3ff0000000000000ull),  1.0);
 	VERIFY_EQUAL(IEEE754binary64LE(1.0).GetInt64(), 0x3ff0000000000000ull);
 	VERIFY_EQUAL(IEEE754binary64BE(1.0).GetInt64(), 0x3ff0000000000000ull);
-	VERIFY_EQUAL(IEEE754binary64LE(0x00,0x00,0x00,0x00,0x00,0x00,0xf0,0x3f), 1.0);
-	VERIFY_EQUAL(IEEE754binary64BE(0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00), 1.0);
-	VERIFY_EQUAL(IEEE754binary64LE(1.0), IEEE754binary64LE(0x00,0x00,0x00,0x00,0x00,0x00,0xf0,0x3f));
-	VERIFY_EQUAL(IEEE754binary64BE(1.0), IEEE754binary64BE(0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00));
+	VERIFY_EQUAL(IEEE754binary64LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0xf0),mpt::as_byte(0x3f)), 1.0);
+	VERIFY_EQUAL(IEEE754binary64BE(mpt::as_byte(0x3f),mpt::as_byte(0xf0),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00)), 1.0);
+	VERIFY_EQUAL(IEEE754binary64LE(1.0), IEEE754binary64LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0xf0),mpt::as_byte(0x3f)));
+	VERIFY_EQUAL(IEEE754binary64BE(1.0), IEEE754binary64BE(mpt::as_byte(0x3f),mpt::as_byte(0xf0),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00)));
 
 	// Packed integers with defined endianness
 	{
@@ -1316,7 +1316,7 @@ static MPT_NOINLINE void TestMisc2()
 	mpt::byte uuiddata[16];
 	for(std::size_t i = 0; i < 16; ++i)
 	{
-		uuiddata[i] = static_cast<uint8>(i);
+		uuiddata[i] = mpt::byte_cast<mpt::byte>(static_cast<uint8>(i));
 	}
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 	UUIDbin uuid2;
@@ -1745,10 +1745,10 @@ static MPT_NOINLINE void TestMisc2()
 
 	{
 		std::vector<mpt::byte> data;
-		data.push_back(0);
-		data.push_back(255);
-		data.push_back(1);
-		data.push_back(2);
+		data.push_back(mpt::as_byte(0));
+		data.push_back(mpt::as_byte(255));
+		data.push_back(mpt::as_byte(1));
+		data.push_back(mpt::as_byte(2));
 		mpt::PathString fn = GetTempFilenameBase() + MPT_PATHSTRING("lazy");
 		RemoveFile(fn);
 		mpt::LazyFileRef f(fn);
@@ -4199,10 +4199,10 @@ static MPT_NOINLINE void TestSampleConversion()
 		for(size_t i = 0; i < 65536; i++)
 		{
 			IEEE754binary32BE floatbits = IEEE754binary32BE((static_cast<float>(i) / 65536.0f) - 0.5f);
-			source32[i * 4 + 0] = floatbits.GetByte(0);
-			source32[i * 4 + 1] = floatbits.GetByte(1);
-			source32[i * 4 + 2] = floatbits.GetByte(2);
-			source32[i * 4 + 3] = floatbits.GetByte(3);
+			source32[i * 4 + 0] = mpt::byte_cast<uint8>(floatbits.GetByte(0));
+			source32[i * 4 + 1] = mpt::byte_cast<uint8>(floatbits.GetByte(1));
+			source32[i * 4 + 2] = mpt::byte_cast<uint8>(floatbits.GetByte(2));
+			source32[i * 4 + 3] = mpt::byte_cast<uint8>(floatbits.GetByte(3));
 		}
 
 		int16 *truncated16 = static_cast<int16 *>(targetBuf);

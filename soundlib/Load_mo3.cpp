@@ -1542,7 +1542,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 				sampleChunk.chunk.Rewind();
 				FileReader::PinnedRawDataView sampleChunkView = sampleChunk.chunk.GetPinnedRawDataView();
-				mergedData.insert(mergedData.end(), sampleChunkView.begin(), sampleChunkView.end());
+				mergedData.insert(mergedData.end(), mpt::byte_cast<const char*>(sampleChunkView.begin()), mpt::byte_cast<const char*>(sampleChunkView.end()));
 
 #endif
 
