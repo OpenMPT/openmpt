@@ -1650,7 +1650,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(sharedHeader)
 			{
 				FileReader::PinnedRawDataView headChunkView = headerChunk.GetPinnedRawDataView(initialRead);
-				vorb = stb_vorbis_open_pushdata(headChunkView.data(), headChunkView.size(), &consumed, &error, nullptr);
+				vorb = stb_vorbis_open_pushdata(mpt::byte_cast<const unsigned char*>(headChunkView.data()), headChunkView.size(), &consumed, &error, nullptr);
 				headerChunk.Skip(consumed);
 			}
 			FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
@@ -1658,7 +1658,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			std::size_t dataLeft = sampleDataView.size();
 			if(!sharedHeader)
 			{
-				vorb = stb_vorbis_open_pushdata(data, mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);
+				vorb = stb_vorbis_open_pushdata(mpt::byte_cast<const unsigned char*>(data), mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);
 				sampleData.Skip(consumed);
 				data += consumed;
 				dataLeft -= consumed;
@@ -1674,7 +1674,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					int channels = 0, decodedSamples = 0;
 					float **output;
-					consumed = stb_vorbis_decode_frame_pushdata(vorb, data, mpt::saturate_cast<int>(dataLeft), &channels, &output, &decodedSamples);
+					consumed = stb_vorbis_decode_frame_pushdata(vorb, mpt::byte_cast<const unsigned char*>(data), mpt::saturate_cast<int>(dataLeft), &channels, &output, &decodedSamples);
 					sampleData.Skip(consumed);
 					data += consumed;
 					dataLeft -= consumed;
