@@ -1,8 +1,5 @@
-libopusenc library version 0.1.
+libopusenc library version 0.1.1.
 The following changes have been made:
-- The following commits have been applied on top of version 0.1:
-   - https://github.com/xiph/libopusenc/commit/5da76ecdf4487b1ec4f60d0c912a4539c9d6ec9e
-   - https://github.com/xiph/libopusenc/commit/ad7f3e406a5b174920e84d3088579dd6056769e0
 - Obviously unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
