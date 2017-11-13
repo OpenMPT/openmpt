@@ -51,8 +51,15 @@ template <> struct uint_of_size<8> { typedef uint64 type; };
 template <typename T> struct is_byte_castable : public std::false_type { };
 template <> struct is_byte_castable<char>                : public std::true_type { };
 template <> struct is_byte_castable<unsigned char>       : public std::true_type { };
+template <> struct is_byte_castable<mpt::byte>           : public std::true_type { };
 template <> struct is_byte_castable<const char>          : public std::true_type { };
 template <> struct is_byte_castable<const unsigned char> : public std::true_type { };
+template <> struct is_byte_castable<const mpt::byte>     : public std::true_type { };
+
+
+template <typename T> struct is_byte        : public std::false_type { };
+template <> struct is_byte<mpt::byte>       : public std::true_type  { };
+template <> struct is_byte<const mpt::byte> : public std::true_type  { };
 
 
 // Tell which types are safe to binary write into files.
@@ -62,9 +69,10 @@ template <> struct is_byte_castable<const unsigned char> : public std::true_type
 template <typename T> struct is_binary_safe : public std::false_type { }; 
 
 // Specialization for byte types.
-template <> struct is_binary_safe<char>  : public std::true_type { };
-template <> struct is_binary_safe<uint8> : public std::true_type { };
-template <> struct is_binary_safe<int8>  : public std::true_type { };
+template <> struct is_binary_safe<char>      : public std::true_type { };
+template <> struct is_binary_safe<uint8>     : public std::true_type { };
+template <> struct is_binary_safe<int8>      : public std::true_type { };
+template <> struct is_binary_safe<mpt::byte> : public std::true_type { };
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };

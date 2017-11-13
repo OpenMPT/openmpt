@@ -450,8 +450,13 @@ MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
 
 MPT_STATIC_ASSERT(sizeof(char) == 1);
 
-typedef unsigned char byte;
+#if MPT_CXX_AT_LEAST(17)
+using byte = std::byte;
+#else
+enum class byte : unsigned char { };
+#endif
 MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
+MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 
 } // namespace mpt
 

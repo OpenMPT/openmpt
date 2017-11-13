@@ -477,22 +477,22 @@ public:
 	std::string GetRawDataAsString() const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView();
-		return std::string(view.span().begin(), view.span().end());
+		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
 	}
 	std::string ReadRawDataAsString()
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView();
-		return std::string(view.span().begin(), view.span().end());
+		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
 	}
 	std::string GetRawDataAsString(std::size_t size) const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView(size);
-		return std::string(view.span().begin(), view.span().end());
+		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
 	}
 	std::string ReadRawDataAsString(std::size_t size)
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView(size);
-		return std::string(view.span().begin(), view.span().end());
+		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
 	}
 
 protected:
@@ -1022,7 +1022,7 @@ public:
 		off_t avail = DataContainer().Read(bytes, streamPos, sizeof(bytes)), readPos = 1;
 		
 		size_t writtenBits = 0;
-		uint8 b = bytes[0];
+		uint8 b = mpt::byte_cast<uint8>(bytes[0]);
 		target = (b & 0x7F);
 
 		// Count actual bits used in most significant byte (i.e. this one)
@@ -1036,7 +1036,7 @@ public:
 
 		while(readPos < avail && (b & 0x80) != 0)
 		{
-			b = bytes[readPos++];
+			b = mpt::byte_cast<uint8>(bytes[readPos++]);
 			target <<= 7;
 			target |= (b & 0x7F);
 			writtenBits += 7;

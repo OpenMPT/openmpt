@@ -357,7 +357,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 			{
 				for(uint32 i = 0; i < 8; i++)
 				{
-					uint8 delta = data[dataPos];
+					uint8 delta = mpt::byte_cast<uint8>(data[dataPos]);
 					if(i & 1)
 					{
 						delta >>= 4;
@@ -2766,8 +2766,8 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	// This reads annotation metadata as written by OpenMPT, sox, ffmpeg.
 	// Additionally, we fall back to just reading the whole field as a single comment.
 	file.Seek(24);
-	std::vector<mpt::byte> annotationData;
-	file.ReadVector<mpt::byte>(annotationData, dataOffset - 24);
+	std::vector<char> annotationData;
+	file.ReadVector<char>(annotationData, dataOffset - 24);
 	std::string annotation(annotationData.begin(), annotationData.end());
 	annotation = mpt::String::RTrim(annotation, std::string(1, '\0'));
 	std::size_t term = annotation.find(std::string(1, '\0'));

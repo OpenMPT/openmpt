@@ -134,7 +134,7 @@ public:
 
 	inline crc & process(char c)
 	{
-		processByte(static_cast<byte_type>(c));
+		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
@@ -146,7 +146,13 @@ public:
 
 	inline crc & process(unsigned char c)
 	{
-		processByte(static_cast<byte_type>(c));
+		processByte(mpt::byte_cast<byte_type>(c));
+		return *this;
+	}
+
+	inline crc & process(mpt::byte c)
+	{
+		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
@@ -170,7 +176,7 @@ public:
 
 	inline crc & operator () (char c)
 	{
-		processByte(static_cast<byte_type>(c));
+		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
@@ -182,7 +188,13 @@ public:
 
 	inline crc & operator () (unsigned char c)
 	{
-		processByte(static_cast<byte_type>(c));
+		processByte(mpt::byte_cast<byte_type>(c));
+		return *this;
+	}
+
+	inline crc & operator () (mpt::byte c)
+	{
+		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 

@@ -84,7 +84,7 @@ namespace detail {
 	static MPT_FORCEINLINE endian_type endian_probe()
 	{
 		STATIC_ASSERT(sizeof(endian_type) == 2);
-		const mpt::byte probe[2] = { 0x12, 0x34 };
+		const mpt::byte probe[2] = { mpt::as_byte(0x12), mpt::as_byte(0x34) };
 		endian_type test;
 		std::memcpy(&test, probe, 2);
 		return test;
@@ -719,9 +719,9 @@ public:
 	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-			return static_cast<mpt::byte>(EncodeIEEE754binary64(value) >> (i*8));
+			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> (i*8)));
 		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
-			return static_cast<mpt::byte>(EncodeIEEE754binary64(value) >> ((8-1-i)*8));
+			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> ((8-1-i)*8)));
 		#else
 			STATIC_ASSERT(false);
 		#endif
@@ -1024,7 +1024,8 @@ public:
 	const_unaligned_ptr_le() : mem(nullptr) {}
 	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_le(const mpt::byte *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	explicit const_unaligned_ptr_le(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
@@ -1061,7 +1062,8 @@ public:
 	const_unaligned_ptr_be() : mem(nullptr) {}
 	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_be(const mpt::byte *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	explicit const_unaligned_ptr_be(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
@@ -1093,7 +1095,8 @@ public:
 	const_unaligned_ptr() : mem(nullptr) {}
 	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr(const mpt::byte *mem) : mem(mem) {}
+	explicit const_unaligned_ptr(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	explicit const_unaligned_ptr(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }

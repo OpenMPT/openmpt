@@ -372,8 +372,8 @@ struct byte_cast_impl
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		// not checking is_byte_castable here because we are actually
 		// doing a static_cast and converting the value
-		STATIC_ASSERT(std::is_integral<Tsrc>::value);
-		STATIC_ASSERT(std::is_integral<Tdst>::value);
+		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return static_cast<Tdst>(src);
 	}
 };
@@ -386,8 +386,8 @@ struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-		STATIC_ASSERT(std::is_integral<Tsrc>::value);
-		STATIC_ASSERT(std::is_integral<Tdst>::value);
+		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return mpt::as_span(mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.begin()), mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.end()));
 	}
 };
@@ -400,8 +400,8 @@ struct byte_cast_impl<Tdst*, Tsrc*>
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-		STATIC_ASSERT(std::is_integral<Tsrc>::value);
-		STATIC_ASSERT(std::is_integral<Tdst>::value);
+		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -416,7 +416,7 @@ struct void_cast_impl<Tdst*, void*>
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-		STATIC_ASSERT(std::is_integral<Tdst>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -427,7 +427,7 @@ struct void_cast_impl<Tdst*, const void*>
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
-		STATIC_ASSERT(std::is_integral<Tdst>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
@@ -438,7 +438,7 @@ struct void_cast_impl<void*, Tsrc*>
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
-		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
 		return reinterpret_cast<void*>(src);
 	}
 };
@@ -449,7 +449,7 @@ struct void_cast_impl<const void*, Tsrc*>
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
-		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
 		return reinterpret_cast<const void*>(src);
 	}
 };
@@ -467,6 +467,16 @@ inline Tdst void_cast(Tsrc src)
 {
 	return void_cast_impl<Tdst, Tsrc>()(src);
 }
+
+
+
+template <typename T>
+MPT_CONSTEXPR14_FUN mpt::byte as_byte(T src) noexcept
+{
+	MPT_STATIC_ASSERT(std::is_integral<T>::value);
+	return static_cast<mpt::byte>(static_cast<uint8>(src));
+}
+
 
 
 // Saturate the value of src to the domain of Tdst
