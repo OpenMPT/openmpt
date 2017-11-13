@@ -979,7 +979,7 @@ public:
 			bool identical = true;
 			for(std::size_t i = 0; i < magicLength; ++i)
 			{
-				mpt::byte c = 0;
+				mpt::byte c = mpt::as_byte(0);
 				DataContainer().Read(&c, streamPos + i, 1);
 				if(c != mpt::byte_cast<mpt::byte>(magic[i]))
 				{
