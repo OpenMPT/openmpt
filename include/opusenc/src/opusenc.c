@@ -62,6 +62,12 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+#ifdef _MSC_VER
+# if (_MSC_VER < 1900)
+#  define snprintf _snprintf
+# endif
+#endif
+
 struct StdioObject {
   FILE *file;
 };
@@ -338,7 +344,10 @@ OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void
   }
   enc->buffer_start = enc->buffer_end = 0;
   enc->st = st;
-  enc->callbacks = *callbacks;
+  if (callbacks != NULL)
+  {
+    enc->callbacks = *callbacks;
+  }
   enc->streams->user_data = user_data;
   if (error) *error = OPE_OK;
   return enc;
@@ -359,7 +368,7 @@ fail:
 /* Create a new OggOpus stream, pulling one page at a time. */
 OPE_EXPORT OggOpusEnc *ope_encoder_create_pull(OggOpusComments *comments, opus_int32 rate, int channels, int family, int *error) {
   OggOpusEnc *enc = ope_encoder_create_callbacks(NULL, NULL, comments, rate, channels, family, error);
-  enc->pull_api = 1;
+  if (enc) enc->pull_api = 1;
   return enc;
 }
 
@@ -467,7 +476,7 @@ static void encode_buffer(OggOpusEnc *enc) {
       if (e_o_s) {
         EncStream *tmp;
         tmp = enc->streams->next;
-        if (enc->streams->close_at_end) enc->callbacks.close(enc->streams->user_data);
+        if (enc->streams->close_at_end && !enc->pull_api) enc->callbacks.close(enc->streams->user_data);
         stream_destroy(enc->streams);
         enc->streams = tmp;
         if (!tmp) enc->last_stream = NULL;
@@ -816,6 +825,7 @@ int ope_encoder_ctl(OggOpusEnc *enc, int request, ...) {
         ret = OPE_BAD_ARG;
         break;
       }
+      value = MIN(value, MAX_LOOKAHEAD);
       enc->decision_delay = value;
     }
     break;
@@ -833,7 +843,7 @@ int ope_encoder_ctl(OggOpusEnc *enc, int request, ...) {
         break;
       }
       enc->max_ogg_delay = value;
-      oggp_set_muxing_delay(enc->oggp, enc->max_ogg_delay);
+      if (enc->oggp) oggp_set_muxing_delay(enc->oggp, enc->max_ogg_delay);
     }
     break;
     case OPE_GET_MUXING_DELAY_REQUEST:
