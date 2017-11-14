@@ -150,11 +150,13 @@ public:
 		return *this;
 	}
 
+#if MPT_BYTE_IS_STD_BYTE
 	inline crc & process(mpt::byte c)
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
+#endif
 
 	template <typename InputIt>
 	crc & process(InputIt beg, InputIt end)
@@ -192,11 +194,13 @@ public:
 		return *this;
 	}
 
+#if MPT_BYTE_IS_STD_BYTE
 	inline crc & operator () (mpt::byte c)
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
+#endif
 
 	template <typename InputIt>
 	crc & operator () (InputIt beg, InputIt end)

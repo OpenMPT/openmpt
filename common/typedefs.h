@@ -452,8 +452,13 @@ MPT_STATIC_ASSERT(sizeof(char) == 1);
 
 #if MPT_CXX_AT_LEAST(17)
 using byte = std::byte;
+#define MPT_BYTE_IS_STD_BYTE 1
 #else
-enum class byte : unsigned char { };
+// In C++11 and C++14, a C++17 compatible definition of byte would not be required to be allowed to alias other types,
+// thus just use a typedef for unsigned char which is guaranteed to be allowed to alias.
+//enum class byte : unsigned char { };
+typedef unsigned char byte;
+#define MPT_BYTE_IS_STD_BYTE 0
 #endif
 MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
 MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);

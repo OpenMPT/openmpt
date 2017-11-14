@@ -1024,9 +1024,7 @@ public:
 	const_unaligned_ptr_le() : mem(nullptr) {}
 	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_le(const mpt::byte *mem) : mem(mem) {}
-	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	explicit const_unaligned_ptr_le(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr_le(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }
@@ -1062,9 +1060,7 @@ public:
 	const_unaligned_ptr_be() : mem(nullptr) {}
 	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr_be(const mpt::byte *mem) : mem(mem) {}
-	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	explicit const_unaligned_ptr_be(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr_be(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_be & operator ++ () { mem += sizeof(value_type); return *this; }
@@ -1095,9 +1091,7 @@ public:
 	const_unaligned_ptr() : mem(nullptr) {}
 	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
-	explicit const_unaligned_ptr(const mpt::byte *mem) : mem(mem) {}
-	explicit const_unaligned_ptr(const uint8 *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
-	explicit const_unaligned_ptr(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
 	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr & operator ++ () { mem += sizeof(value_type); return *this; }
