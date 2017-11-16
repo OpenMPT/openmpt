@@ -18,7 +18,7 @@ else
 CPPFLAGS +=
 CXXFLAGS += -std=c++11 -fPIC
 CFLAGS   += -std=c99   -fPIC
-LDFLAGS  += 
+LDFLAGS  += -fuse-ld=lld
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
