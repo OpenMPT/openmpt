@@ -285,7 +285,10 @@ uint32 MultimediaClock::SetResolution(uint32 ms)
 		return m_CurrentPeriod;
 	}
 	Cleanup();
-	SetPeriod(ms);
+	if(ms != 0)
+	{
+		SetPeriod(ms);
+	}
 	return GetResolution();
 }
 
