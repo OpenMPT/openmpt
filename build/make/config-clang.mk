@@ -18,7 +18,7 @@ else
 CPPFLAGS +=
 CXXFLAGS += -std=c++11 -fPIC
 CFLAGS   += -std=c99   -fPIC
-LDFLAGS  += -fuse-ld=lld
+LDFLAGS  += 
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
@@ -38,7 +38,7 @@ CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count
 CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 
 ifeq ($(MODERN),1)
-LDFLAGS  += -fuse-ld=gold
+LDFLAGS  += -fuse-ld=lld
 CXXFLAGS_WARNINGS += -Wpedantic -Wdouble-promotion -Wframe-larger-than=16000
 CFLAGS_WARNINGS   += -Wpedantic -Wdouble-promotion -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
