@@ -15,6 +15,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+namespace Util { class MultimediaClock; }
+
 class CVuMeter: public CWnd
 {
 protected:
@@ -23,10 +25,10 @@ protected:
 
 public:
 	CVuMeter() { m_nDisplayedVu = -1; lastVuUpdateTime = timeGetTime(); m_nVuMeter = 0; }
-	VOID SetVuMeter(LONG lVuMeter, bool force=false);
+	void SetVuMeter(LONG lVuMeter, bool force=false);
 
 protected:
-	VOID DrawVuMeter(CDC &dc, bool redraw=false);
+	void DrawVuMeter(CDC &dc, bool redraw=false);
 
 protected:
 	afx_msg void OnPaint();
@@ -71,6 +73,7 @@ public:
 
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
+	std::unique_ptr<Util::MultimediaClock> m_tapTimer;
 
 	TEMPO tempoMin, tempoMax;
 	//}}AFX_DATA
