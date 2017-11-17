@@ -21,9 +21,6 @@
     <ClInclude Include="..\..\..\include\opusenc\src\opus_header.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\opusenc\src\os_support.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\opusenc\src\picture.h">
       <Filter>src</Filter>
     </ClInclude>
