@@ -499,7 +499,6 @@
     <ClInclude Include="..\..\..\include\opusenc\src\arch.h" />
     <ClInclude Include="..\..\..\include\opusenc\src\ogg_packer.h" />
     <ClInclude Include="..\..\..\include\opusenc\src\opus_header.h" />
-    <ClInclude Include="..\..\..\include\opusenc\src\os_support.h" />
     <ClInclude Include="..\..\..\include\opusenc\src\picture.h" />
     <ClInclude Include="..\..\..\include\opusenc\src\resample_sse.h" />
     <ClInclude Include="..\..\..\include\opusenc\src\speex_resampler.h" />
