@@ -696,7 +696,7 @@ public:
 
 	// Pattern Editor
 
-	Setting<bool> gbLoopSong;
+	CachedSetting<bool> gbLoopSong;
 	CachedSetting<UINT> gnPatternSpacing;
 	CachedSetting<bool> gbPatternVUMeters;
 	CachedSetting<bool> gbPatternPluginNames;
