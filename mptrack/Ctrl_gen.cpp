@@ -19,6 +19,7 @@
 #include "Ctrl_gen.h"
 #include "View_gen.h"
 #include "../common/misc_util.h"
+#include "../common/mptTime.h"
 #include "../soundlib/mod_specifications.h"
 
 
@@ -143,18 +144,24 @@ void CCtrlGeneral::OnDeactivatePage()
 	m_modDoc.SetFollowWnd(NULL);
 	m_VuMeterLeft.SetVuMeter(0, true);
 	m_VuMeterRight.SetVuMeter(0, true);
+	m_tapTimer = nullptr;	// Reset high-precision clock if required
 }
 
 
 void CCtrlGeneral::OnTapTempo()
 {
 	static uint32 tapLength[16], lastTap = 0;
+	if(m_tapTimer == nullptr)
+	{
+		m_tapTimer = mpt::make_unique<Util::MultimediaClock>(1);
+	}
+
 	// Shift back the previously recorded tap history
 	for(size_t i = CountOf(tapLength) - 1; i >= 1; i--)
 	{
 		tapLength[i] = tapLength[i - 1];
 	}
-	const uint32 now = timeGetTime();
+	const uint32 now = m_tapTimer->Now();
 	tapLength[0] = now - lastTap;
 	lastTap = now;
 
@@ -706,7 +713,7 @@ void CVuMeter::OnPaint()
 }
 
 
-VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
+void CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 {
 	lVuMeter >>= 8;
 	if (lVuMeter != m_nVuMeter)
@@ -723,7 +730,7 @@ VOID CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 }
 
 
-VOID CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
+void CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 {
 	LONG vu;
 	LONG lastvu;
