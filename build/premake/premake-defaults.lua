@@ -12,18 +12,15 @@
 
 	filter {}
 		if _OPTIONS["xp"] then
-			if _ACTION == "vs2012" then
-				toolset "v110_xp"
-			elseif _ACTION == "vs2013" then
-				toolset "v120_xp"
-			elseif _ACTION == "vs2015" then
+			if _ACTION == "vs2015" then
 				toolset "v140_xp"
-				buildoptions { "/Zc:threadSafeInit-" }
 			elseif _ACTION == "vs2017" then
 				toolset "v141_xp"
-				buildoptions { "/Zc:threadSafeInit-" }
 			end
 			defines { "MPT_BUILD_TARGET_XP" }
+			filter { "action:vs*" }
+				buildoptions { "/Zc:threadSafeInit-" }
+			filter {}
 		end
 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
