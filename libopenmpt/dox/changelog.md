@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta29
 
+ *  [**Bug**] VS2015 project files targetting Windows XP did not set compiler
+    option `/Zc:threadSafeInit-` which could cause at least the player plugins
+    `in_openmpt` and `xmp-openmpt` to fail to load.
+
 ### libopenmpt 0.2-beta28 (2017-11-04)
 
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
