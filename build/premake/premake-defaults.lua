@@ -9,6 +9,7 @@
 				toolset "v120_xp"
 			elseif _ACTION == "vs2015" then
 				toolset "v140_xp"
+				buildoptions { "/Zc:threadSafeInit-" }
 			end
 			defines { "MPT_BUILD_TARGET_XP" }
 		end
