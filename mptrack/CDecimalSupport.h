@@ -136,8 +136,8 @@ public:
 #endif
 		if (hglb != NULL)
 		{
-			LPTSTR lptstr = reinterpret_cast<TCHAR*>(GlobalLock(hglb));
-			if (lptstr != NULL)
+			TCHAR *lptstr = static_cast<TCHAR *>(GlobalLock(hglb));
+			if (lptstr != nullptr)
 			{
 				bHandled = true;
 				for (TCHAR* s = lptstr; *s; ++s)
@@ -175,6 +175,12 @@ public:
 						continue;
 					}
 
+					if (*s == _T('\r'))
+					{
+						// Stop at new line
+						*s = 0;
+						break;
+					}
 					if (*s < _T('0') || *s > _T('9'))
 					{
 						bHandled = false;
