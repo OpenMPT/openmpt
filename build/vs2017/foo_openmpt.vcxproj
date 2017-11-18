@@ -135,17 +135,17 @@
     <ProjectReference Include="ext\mpg123.vcxproj">
       <Project>{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\include\foobar2000sdk\pfc\pfc.vcxproj">
-      <Project>{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}</Project>
+    <ProjectReference Include="ext\pfc.vcxproj">
+      <Project>{FA172403-6C7E-484B-B20B-E22C8789E92C}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000_SDK.vcxproj">
-      <Project>{E8091321-D79D-4575-86EF-064EA1A4A20D}</Project>
+    <ProjectReference Include="ext\foobar2000_SDK.vcxproj">
+      <Project>{4466B6FB-7A2F-43CA-B1AC-2DB4B60AD4AF}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\helpers\foobar2000_sdk_helpers.vcxproj">
-      <Project>{EE47764E-A202-4F85-A767-ABDAB4AFF35F}</Project>
+    <ProjectReference Include="ext\foobar2000_sdk_helpers.vcxproj">
+      <Project>{89E23C46-46C3-492F-A6F7-6F6B26DA8A9D}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
-      <Project>{71AD2674-065B-48F5-B8B0-E1F9D3892081}</Project>
+    <ProjectReference Include="ext\foobar2000_component_client.vcxproj">
+      <Project>{7D50EE3C-511D-475E-BC7B-14207B6A6B2A}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

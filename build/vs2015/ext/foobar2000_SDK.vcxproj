@@ -1,0 +1,618 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugMDd|Win32">
+      <Configuration>DebugMDd</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugMDd|x64">
+      <Configuration>DebugMDd</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|Win32">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|x64">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|Win32">
+      <Configuration>DebugShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|x64">
+      <Configuration>DebugShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|Win32">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|x64">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4466B6FB-7A2F-43CA-B1AC-2DB4B60AD4AF}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>foobar2000_SDK</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\Debug\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\Debug\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\Release\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\Release\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\Release\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\Release\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\DebugMDd\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\DebugMDd\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\ReleaseLTCG\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\ReleaseLTCG\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\DebugShared\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\DebugShared\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\DebugShared\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\DebugShared\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <OutDir>..\..\lib\vs2015\x86\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86\ReleaseShared\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <OutDir>..\..\lib\vs2015\x86_64\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\vs2015\foobar2000_SDK\x86_64\ReleaseShared\</IntDir>
+    <TargetName>openmpt-foobar2000_SDK</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\abort_callback.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\advconfig.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\album_art.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\album_art_helpers.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\app_close_blocker.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_chunk.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_postprocessor.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\autoplaylist.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\cfg_var.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\chapterizer.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\commandline.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\completion_notify.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\component.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\componentversion.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_io_callback.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_object.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_object_impl.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\console.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\contextmenu.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\contextmenu_manager.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\core_api.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\coreversion.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\decode_postprocessor.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp_manager.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\event_logger.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\exceptions.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info_impl.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_operation_callback.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem_helper.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\genrand.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\hasher_md5.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\http_client.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\icon_remap.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\info_lookup_handler.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\initquit.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\input.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\input_file_type.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\input_impl.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\library_manager.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\link_resolver.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\main_thread_callback.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\mem_block_container.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\menu.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\menu_helpers.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\message_loop.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\metadb.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\metadb_handle.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\modeless_dialog.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ole_interaction.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\output.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\packet_decoder.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\play_callback.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playable_location.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playback_control.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playback_stream_capture.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playlist.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playlist_loader.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\popup_message.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\preferences_page.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\progress_meter.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\replaygain.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\replaygain_scanner.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\resampler.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\search_tools.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service_impl.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\system_time_keeper.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\tag_processor.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\threaded_process.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\titleformat.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\track_property.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui_edit_context.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui_element.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\unpack.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\vis.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\abort_callback.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\advconfig.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\album_art.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\app_close_blocker.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_chunk.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_chunk_channel_config.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\cfg_var.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\chapterizer.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\commandline.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\completion_notify.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\componentversion.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_object.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\console.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp_manager.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_cached_impl.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info_impl.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info_merge.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_operation_callback.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem_helper.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\guids.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\hasher_md5.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\input.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\input_file_type.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\link_resolver.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\main_thread_callback.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\mainmenu.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\mem_block_container.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\menu_helpers.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\menu_item.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\menu_manager.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\metadb.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\metadb_handle.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\metadb_handle_list.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\output.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\packet_decoder.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playable_location.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playback_control.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playlist.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\playlist_loader.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\popup_message.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\preferences_page.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\replaygain.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\replaygain_info.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\search_tools.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\tag_processor.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\tag_processor_id3v2.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\threaded_process.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\titleformat.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui_element.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
