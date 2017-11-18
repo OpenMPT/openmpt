@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.3-pre
 
+ *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
+
  *  [**Bug**] All VS2015 and VS2017 project files targetting Windows XP did not
     set compiler option `/Zc:threadSafeInit-` which caused at least the player
     plugins `in_openmpt` and `xmp-openmpt` to fail to load.
