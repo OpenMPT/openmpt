@@ -21,7 +21,6 @@ exit 1
 :setupargumentsstart
 
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_VS_WITHTARGET=%MPT_VS_VER%w2k
 if "%MPT_VS_TARGET%" == "xp"      set MPT_VS_WITHTARGET=%MPT_VS_VER%xp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_VS_WITHTARGET=%MPT_VS_VER%
 if "%MPT_VS_TARGET%" == "default" set MPT_VS_WITHTARGET=%MPT_VS_VER%
@@ -31,24 +30,20 @@ if "%MPT_VS_ARCH%" == "x64"   set MPT_VS_ARCH_OTHER=Win32
 
 
 if "%MPT_VS_ARCH%" == "Win32" (
-	if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET=win2000
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
 if "%MPT_VS_ARCH%" == "x64" (
-	if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET=winxp64
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp64
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET32=win2000
 if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET32=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET32=vista
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET32=win7
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_BIN_TARGET64=winxp64
 if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET64=winxp64
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET64=vista
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET64=win7
@@ -68,9 +63,8 @@ if "%MPT_VS_CONF%" == "ReleaseLTCG"   set MPT_BIN_RUNTIME=static
 if "%MPT_VS_ARCH%" == "Win32" set MPT_DIST_VARIANT_PREFIX=win32
 if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_PREFIX=win64
 
-if "%MPT_VS_TARGET%" == "w2k"     set MPT_DIST_VARIANT_SUFFIX=old
 if "%MPT_VS_TARGET%" == "xp"      set MPT_DIST_VARIANT_SUFFIX=old
-if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=
+if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=old
 if "%MPT_VS_TARGET%" == "default" set MPT_DIST_VARIANT_SUFFIX=
 
 set MPT_DIST_VARIANT=%MPT_DIST_VARIANT_PREFIX%%MPT_DIST_VARIANT_SUFFIX%
