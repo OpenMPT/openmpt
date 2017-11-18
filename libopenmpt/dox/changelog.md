@@ -12,6 +12,7 @@ is just a high-level summary.
     standard library (or libraries) required for static linking. The contents of
     this variable will be put in `libopenmpt.pc` `Libs.private` and used for
     nothing else. See \ref libopenmpt_c_staticlinking .
+ *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
 
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
