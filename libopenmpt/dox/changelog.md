@@ -10,7 +10,7 @@ is just a high-level summary.
  *  [**Bug**] All VS2015 and VS2017 project files targetting Windows XP did not
     set compiler option `/Zc:threadSafeInit-` which caused at least the player
     plugins `in_openmpt` and `xmp-openmpt` to fail to load.
- 
+
 ### libopenmpt 0.3.2 (2017-11-04)
 
  *  [**New**] Autotools `configure` and plain `Makefile` now honor the variable
