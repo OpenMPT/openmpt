@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.4-pre
+
 ### libopenmpt 0.3.3 (2017-11-19)
 
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
