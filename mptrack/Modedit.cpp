@@ -668,7 +668,7 @@ SAMPLEINDEX CModDoc::InsertSample()
 }
 
 
-// Insert a new instrument assigned to sample nSample or duplicate instrument nDuplicate.
+// Insert a new instrument assigned to sample nSample or duplicate instrument "duplicateSource".
 // If "sample" is invalid, an appropriate sample slot is selected. 0 means "no sample".
 INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX duplicateSource, bool silent)
 {
@@ -768,8 +768,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 {
 #ifndef NO_PLUGINS
 	const bool first = (GetNumInstruments() == 0);
-	if(first && !ConvertSamplesToInstruments()) return INSTRUMENTINDEX_INVALID;
-
 	INSTRUMENTINDEX instr = InsertInstrument(0, INSTRUMENTINDEX_INVALID, true);
 	if(instr == INSTRUMENTINDEX_INVALID) return INSTRUMENTINDEX_INVALID;
 
