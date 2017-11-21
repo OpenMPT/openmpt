@@ -669,26 +669,30 @@ SAMPLEINDEX CModDoc::InsertSample()
 
 
 // Insert a new instrument assigned to sample nSample or duplicate instrument nDuplicate.
-// If nSample is invalid, an appropriate sample slot is selected. 0 means "no sample".
-INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX nDuplicate)
+// If "sample" is invalid, an appropriate sample slot is selected. 0 means "no sample".
+INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX duplicateSource, bool silent)
 {
 	if (m_SndFile.GetModSpecifications().instrumentsMax == 0) return INSTRUMENTINDEX_INVALID;
 
 	ModInstrument *pDup = nullptr;
-
-	if ((nDuplicate > 0) && (nDuplicate <= m_SndFile.m_nInstruments))
+	if(duplicateSource > 0 && duplicateSource <= m_SndFile.m_nInstruments)
 	{
-		pDup = m_SndFile.Instruments[nDuplicate];
+		pDup = m_SndFile.Instruments[duplicateSource];
 	}
-	if ((!m_SndFile.GetNumInstruments()) && ((m_SndFile.GetNumSamples() > 1) || (m_SndFile.GetSample(1).pSample)))
+
+	if(!m_SndFile.GetNumInstruments() && (m_SndFile.GetNumSamples() > 1 || m_SndFile.GetSample(1).pSample))
 	{
-		if (pDup) return INSTRUMENTINDEX_INVALID;
-		ConfirmAnswer result = Reporting::Confirm("Convert existing samples to instruments first?", true);
-		if (result == cnfCancel)
+		bool doConvert = true;
+		if(!silent)
 		{
-			return INSTRUMENTINDEX_INVALID;
+			ConfirmAnswer result = Reporting::Confirm("Convert existing samples to instruments first?", true);
+			if(result == cnfCancel)
+			{
+				return INSTRUMENTINDEX_INVALID;
+			}
+			doConvert = (result == cnfYes);
 		}
-		if (result == cnfYes)
+		if(doConvert)
 		{
 			if(!ConvertSamplesToInstruments())
 			{
@@ -700,7 +704,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	const INSTRUMENTINDEX newins = m_SndFile.GetNextFreeInstrument();
 	if(newins == INSTRUMENTINDEX_INVALID)
 	{
-		ErrorBox(IDS_ERR_TOOMANYINS, CMainFrame::GetMainFrame());
+		if(!silent)
+		{
+			ErrorBox(IDS_ERR_TOOMANYINS, CMainFrame::GetMainFrame());
+		}
 		return INSTRUMENTINDEX_INVALID;
 	} else if(newins > m_SndFile.GetNumInstruments())
 	{
@@ -709,11 +716,11 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 
 	// Determine which sample slot to use
 	SAMPLEINDEX newsmp = 0;
-	if (nSample < m_SndFile.GetModSpecifications().samplesMax)
+	if(sample < m_SndFile.GetModSpecifications().samplesMax)
 	{
 		// Use specified slot
-		newsmp = nSample;
-	} else if (!pDup)
+		newsmp = sample;
+	} else if(!pDup)
 	{
 		newsmp = m_SndFile.GetNextFreeSample(newins);
 		if (newsmp > m_SndFile.GetNumSamples())
@@ -729,8 +736,11 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	ModInstrument *pIns = m_SndFile.AllocateInstrument(newins, newsmp);
 	if(pIns == nullptr)
 	{
-		cs.Leave();
-		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
+		if(!silent)
+		{
+			cs.Leave();
+			ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
+		}
 		return INSTRUMENTINDEX_INVALID;
 	}
 	InitializeInstrument(pIns);
@@ -760,17 +770,14 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	const bool first = (GetNumInstruments() == 0);
 	if(first && !ConvertSamplesToInstruments()) return INSTRUMENTINDEX_INVALID;
 
-	INSTRUMENTINDEX instr = m_SndFile.GetNextFreeInstrument();
+	INSTRUMENTINDEX instr = InsertInstrument(0, INSTRUMENTINDEX_INVALID, true);
 	if(instr == INSTRUMENTINDEX_INVALID) return INSTRUMENTINDEX_INVALID;
 
-	ModInstrument *ins = m_SndFile.AllocateInstrument(instr, 0);
-	if(ins == nullptr) return INSTRUMENTINDEX_INVALID;
-	InitializeInstrument(ins);
-
-	mpt::String::Copy(ins->name, mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
-	mpt::String::Copy(ins->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
-	ins->nMixPlug = plug + 1;
-	ins->nMidiChannel = 1;
+	ModInstrument &ins = *m_SndFile.Instruments[instr];
+	mpt::String::Copy(ins.name, mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
+	mpt::String::Copy(ins.filename, mpt::ToCharset(m_SndFile.GetCharsetInternal(), mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
+	ins.nMixPlug = plug + 1;
+	ins.nMidiChannel = 1;
 
 	InstrumentHint hint = InstrumentHint(instr).Info().Envelope().Names();
 	if(first) hint.ModType();
