@@ -387,6 +387,10 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 
 CASIODevice::CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: SoundDevice::Base(info, sysInfo)
+	, m_RenderSilence(0)
+	, m_RenderingSilence(0)
+	, m_AsioRequestFlags(0)
+	, m_DebugRealtimeThreadID(0)
 {
 	MPT_TRACE();
 	InitMembers();
