@@ -82,7 +82,7 @@ END_MESSAGE_MAP()
 
 const TCHAR *const CUpdateCheck::defaultUpdateURL = _T("https://update.openmpt.org/check/$VERSION/$GUID");
 
-std::atomic<int32> CUpdateCheck::s_InstanceCount;
+std::atomic<int32> CUpdateCheck::s_InstanceCount(0);
 
 
 int32 CUpdateCheck::GetNumCurrentRunningInstances()

@@ -25,6 +25,8 @@ Base::Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	, m_MessageReceiver(nullptr)
 	, m_Info(info)
 	, m_SysInfo(sysInfo)
+	, m_StreamPositionOutputFrames(0)
+	, m_RequestFlags(0)
 {
 	MPT_TRACE();
 
