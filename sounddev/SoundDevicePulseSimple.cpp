@@ -246,6 +246,7 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(SoundDevice::S
 PulseaudioSimple::PulseaudioSimple(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: ThreadBase(info, sysInfo)
 	, m_PA_SimpleOutput(nullptr)
+	, m_StatisticLastLatencyFrames(0)
 {
 	return;
 }

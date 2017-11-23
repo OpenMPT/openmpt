@@ -38,6 +38,7 @@ static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: CSoundDeviceWithThread(info, sysInfo)
+	, m_DriverBugs(0)
 {
 	MPT_TRACE();
 	m_ThreadWakeupEvent;
