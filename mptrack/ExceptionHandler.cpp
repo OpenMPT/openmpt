@@ -21,6 +21,8 @@
 #include "../common/mptFileIO.h"
 #include "../soundlib/mod_specifications.h"
 
+#include <atomic>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -57,6 +59,13 @@ static std::terminate_handler g_OriginalTerminateHandler = nullptr;
 static std::unexpected_handler g_OriginalUnexpectedHandler = nullptr;
 
 static UINT g_OriginalErrorMode = 0;
+
+
+static std::atomic<int> & g_CrashCount()
+{
+	static std::atomic<int> s_CrashCount(0);
+	return s_CrashCount;
+}
 
 
 enum DumpMode
@@ -102,6 +111,7 @@ struct CrashOutputDirectory
 class DebugReporter
 {
 private:
+	int crashCount;
 	bool stateFrozen;
 	const DumpMode mode;
 	const CrashOutputDirectory crashDirectory;
@@ -124,7 +134,8 @@ public:
 
 
 DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
-	: stateFrozen(FreezeState(mode))
+	: crashCount(g_CrashCount().fetch_add(1) + 1)
+	, stateFrozen(FreezeState(mode))
 	, mode(mode)
 	, writtenMiniDump(false)
 	, writtenTraceLog(false)
@@ -241,11 +252,16 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	errorMessage += MPT_ULITERAL("\n\n");
-	errorMessage += mpt::format(MPT_USTRING("OpenMPT %1 (%2 (%3))\n"))
+	errorMessage += mpt::format(MPT_USTRING("OpenMPT %1 (%2 (%3))"))
 		( mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
 		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision())
 		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetStateString())
 		);
+
+	errorMessage += MPT_ULITERAL("\n\n");
+	errorMessage += mpt::format(MPT_USTRING("Session error count: %1"))(crashCount);
+
+	errorMessage += MPT_ULITERAL("\n\n");
 
 	{
 		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("error.txt"), std::ios::binary);
