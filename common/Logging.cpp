@@ -230,6 +230,7 @@ struct Entry {
 	const char * Function;
 	const char * File;
 	int          Line;
+	Direction    Direction;
 };
 
 inline bool operator < (const Entry &a, const Entry &b)
@@ -277,7 +278,7 @@ void Disable()
 	g_Enabled = false;
 }
 
-MPT_NOINLINE void Trace(const mpt::log::Context & context)
+MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction)
 {
 	// This will get called in realtime contexts and hot paths.
 	// No blocking allowed here.
@@ -300,6 +301,7 @@ MPT_NOINLINE void Trace(const mpt::log::Context & context)
 	entry.Function = context.function;
 	entry.File = context.file;
 	entry.Line = context.line;
+	entry.Direction = direction;
 }
 
 void Seal()
@@ -383,6 +385,7 @@ bool Dump(const mpt::PathString &filename)
 		{
 			f << " " << mpt::fmt::hex0<8>(entry.ThreadId) << " ";
 		}
+		f << (entry.Direction == mpt::log::Trace::Direction::Enter ? ">" : entry.Direction == mpt::log::Trace::Direction::Leave ? "<" : " ") << " ";
 		f << entry.File << "(" << entry.Line << "): " << entry.Function;
 		f << std::endl;
 	}
