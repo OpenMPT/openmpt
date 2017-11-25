@@ -309,7 +309,7 @@ CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 
 std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
 
 	LONG cr;
@@ -392,7 +392,7 @@ CASIODevice::CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	, m_AsioRequestFlags(0)
 	, m_DebugRealtimeThreadID(0)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	InitMembers();
 	m_QueriedFeatures.reset();
 	m_UsedFeatures.reset();
@@ -401,7 +401,7 @@ CASIODevice::CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 
 void CASIODevice::InitMembers()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	m_pAsioDrv = nullptr;
 
 	m_BufferLatency = 0.0;
@@ -435,7 +435,7 @@ void CASIODevice::InitMembers()
 
 bool CASIODevice::HandleRequests()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	bool result = false;
 	uint32 flags = m_AsioRequestFlags.exchange(0);
 	if(flags & AsioRequestFlagLatenciesChanged)
@@ -449,14 +449,14 @@ bool CASIODevice::HandleRequests()
 
 CASIODevice::~CASIODevice()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	Close();
 }
 
 
 bool CASIODevice::InternalOpen()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 
 	MPT_ASSERT(!IsDriverOpen());
 
@@ -714,7 +714,7 @@ bool CASIODevice::InternalOpen()
 
 void CASIODevice::UpdateLatency()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	long inputLatency = 0;
 	long outputLatency = 0;
 	try
@@ -739,7 +739,7 @@ void CASIODevice::UpdateLatency()
 
 void CASIODevice::SetRenderSilence(bool silence, bool wait)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	m_RenderSilence = (silence ? 1 : 0);
 	if(!wait)
 	{
@@ -778,7 +778,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 
 bool CASIODevice::InternalStart()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
 
 	if(m_Settings.KeepDeviceRunning)
@@ -807,14 +807,14 @@ bool CASIODevice::InternalStart()
 
 bool CASIODevice::InternalIsPlayingSilence() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	return m_Settings.KeepDeviceRunning && m_DeviceRunning && m_RenderSilence.load();
 }
 
 
 void CASIODevice::InternalEndPlayingSilence()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!InternalIsPlayingSilence())
 	{
 		return;
@@ -834,19 +834,19 @@ void CASIODevice::InternalEndPlayingSilence()
 
 void CASIODevice::InternalStopAndAvoidPlayingSilence()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	InternalStopImpl(true);
 }
 
 void CASIODevice::InternalStop()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	InternalStopImpl(false);
 }
 
 void CASIODevice::InternalStopImpl(bool force)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
 
 	if(m_Settings.KeepDeviceRunning && !force)
@@ -870,7 +870,7 @@ void CASIODevice::InternalStopImpl(bool force)
 
 bool CASIODevice::InternalClose()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_DeviceRunning)
 	{
 		m_DeviceRunning = false;
@@ -924,7 +924,7 @@ bool CASIODevice::InternalClose()
 
 void CASIODevice::OpenDriver()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(IsDriverOpen())
 	{
 		return;
@@ -963,7 +963,7 @@ void CASIODevice::OpenDriver()
 
 void CASIODevice::CloseDriver()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsDriverOpen())
 	{
 		return;
@@ -1101,14 +1101,14 @@ bool CASIODevice::IsSampleTypeBigEndian(ASIOSampleType sampleType)
 
 void CASIODevice::InternalFillAudioBuffer()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	FillAsioBuffer();
 }
 
 
 void CASIODevice::FillAsioBuffer(bool useSource)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	const bool rendersilence = !useSource;
 	const std::size_t countChunk = m_nAsioBufferLen;
 	const std::size_t inputChannels = m_Settings.InputChannels;
@@ -1402,7 +1402,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 
 bool CASIODevice::InternalHasTimeInfo() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	return m_Settings.UseHardwareTiming;
 }
 
@@ -1419,7 +1419,7 @@ SoundDevice::BufferAttributes CASIODevice::InternalGetEffectiveBufferAttributes(
 
 void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_Settings.UseHardwareTiming)
 	{
 		SoundDevice::TimeInfo timeInfo;
@@ -1452,14 +1452,14 @@ void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
 
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	BufferSwitchTimeInfo(nullptr, doubleBufferIndex, directProcess); // delegate
 }
 
 
 ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	ASIOError asioresult = ASE_InvalidParameter;
 	struct DebugRealtimeThreadIdGuard
 	{
@@ -1542,7 +1542,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(Util::Round<uint32>(sRate) == m_Settings.Samplerate)
 	{
 		// not different, ignore it
@@ -1588,7 +1588,7 @@ bool CASIODevice::DebugInRealtimeCallback() const
 
 SoundDevice::Statistics CASIODevice::GetStatistics() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = m_BufferLatency;
 	result.LastUpdateInterval = static_cast<double>(m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate);
@@ -1615,7 +1615,7 @@ SoundDevice::Statistics CASIODevice::GetStatistics() const
 
 long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	long result = 0;
 	switch(selector)
 	{
@@ -1705,7 +1705,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 
 long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, double* opt)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return 0;
 	return g_CallbacksInstance->AsioMessage(selector, value, message, opt);
@@ -1714,7 +1714,7 @@ long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, 
 
 void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->SampleRateDidChange(sRate);
@@ -1723,7 +1723,7 @@ void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
 
 void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->BufferSwitch(doubleBufferIndex, directProcess);
@@ -1732,7 +1732,7 @@ void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directPr
 
 ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return params;
 	return g_CallbacksInstance->BufferSwitchTimeInfo(params, doubleBufferIndex, directProcess);
@@ -1741,14 +1741,14 @@ ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubl
 
 void CASIODevice::ReportASIOException(const std::string &str)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SendDeviceMessage(LogError, mpt::ToUnicode(mpt::CharsetLocale, str));
 }
 
 
 SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::Caps caps;
 
 	caps.Available = true;
@@ -1776,7 +1776,7 @@ SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 
 SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
 
 	TemporaryASIODriverOpener opener(*this);
@@ -1871,7 +1871,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 
 bool CASIODevice::OpenDriverSettings()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
 	{

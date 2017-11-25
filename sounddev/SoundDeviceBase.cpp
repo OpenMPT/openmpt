@@ -28,7 +28,7 @@ Base::Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	, m_StreamPositionOutputFrames(0)
 	, m_RequestFlags(0)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 
 	m_DeviceUnavailableOnOpen = false;
 
@@ -42,14 +42,14 @@ Base::Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 
 Base::~Base()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	return;
 }
 
 
 SoundDevice::DynamicCaps Base::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::DynamicCaps result;
 	result.supportedSampleRates = baseSampleRates;
 	return result;
@@ -58,7 +58,7 @@ SoundDevice::DynamicCaps Base::GetDeviceDynamicCaps(const std::vector<uint32> &b
 
 bool Base::Init(const SoundDevice::AppInfo &appInfo)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(IsInited())
 	{
 		return true;
@@ -71,7 +71,7 @@ bool Base::Init(const SoundDevice::AppInfo &appInfo)
 
 bool Base::Open(const SoundDevice::Settings &settings)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(IsOpen())
 	{
 		Close();
@@ -90,7 +90,7 @@ bool Base::Open(const SoundDevice::Settings &settings)
 
 bool Base::Close()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen()) return true;
 	Stop();
 	bool result = InternalClose();
@@ -101,7 +101,7 @@ bool Base::Close()
 
 uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!m_Source)
 	{
 		return 0;
@@ -114,7 +114,7 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 
 uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!m_Source)
 	{
 		return 0;
@@ -127,7 +127,7 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 
 void Base::SourceNotifyPreStart()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_Source)
 	{
 		m_Source->SoundSourcePreStartCallback();
@@ -137,7 +137,7 @@ void Base::SourceNotifyPreStart()
 
 void Base::SourceNotifyPostStop()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_Source)
 	{
 		m_Source->SoundSourcePostStopCallback();
@@ -147,7 +147,7 @@ void Base::SourceNotifyPostStop()
 
 bool Base::SourceIsLockedByCurrentThread() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!m_Source)
 	{
 		return false;
@@ -158,7 +158,7 @@ bool Base::SourceIsLockedByCurrentThread() const
 
 void Base::SourceFillAudioBufferLocked()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_Source)
 	{
 		SourceLockedGuard lock(*m_Source);
@@ -169,7 +169,7 @@ void Base::SourceFillAudioBufferLocked()
 
 void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!InternalHasTimeInfo())
 	{
 		SoundDevice::TimeInfo timeInfo;
@@ -202,7 +202,7 @@ void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLat
 
 void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(numFrames <= 0)
 	{
 		return;
@@ -216,7 +216,7 @@ void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::siz
 
 void Base::SourceLockedAudioDone()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(m_Source)
 	{
 		m_Source->SoundSourceLockedDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
@@ -226,7 +226,7 @@ void Base::SourceLockedAudioDone()
 
 void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_LOG(level, "sounddev", str);
 	if(m_MessageReceiver)
 	{
@@ -237,7 +237,7 @@ void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 
 bool Base::Start()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen()) return false; 
 	if(!IsPlaying())
 	{
@@ -260,7 +260,7 @@ bool Base::Start()
 
 void Base::Stop()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen()) return;
 	if(IsPlaying())
 	{
@@ -276,7 +276,7 @@ void Base::Stop()
 
 void Base::StopAndAvoidPlayingSilence()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen())
 	{
 		return;
@@ -296,7 +296,7 @@ void Base::StopAndAvoidPlayingSilence()
 
 void Base::EndPlayingSilence()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen())
 	{
 		return;
@@ -311,7 +311,7 @@ void Base::EndPlayingSilence()
 
 SoundDevice::StreamPosition Base::GetStreamPosition() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsOpen())
 	{
 		return StreamPosition();
@@ -339,7 +339,7 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 
 SoundDevice::Statistics Base::GetStatistics() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = m_Settings.Latency;
 	result.LastUpdateInterval = m_Settings.UpdateInterval;
