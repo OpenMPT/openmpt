@@ -54,22 +54,26 @@
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetName).pdb\"",
 			}
 		filter { "architecture:x86_64" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetName).pdb\"",
 			}
 	else
 		filter { "architecture:x86" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-win7\" mkdir \"$(TargetDir)\\..\\x86-64-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetName).pdb\"",
 			}
 		filter { "architecture:x86_64" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-32-win7\" mkdir \"$(TargetDir)\\..\\x86-32-win7\"",
 				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetName).pdb\"",
 			}
 	end
 

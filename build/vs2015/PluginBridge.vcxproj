@@ -284,7 +284,8 @@
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -317,7 +318,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -358,7 +360,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -399,7 +402,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
@@ -431,7 +435,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
@@ -464,7 +469,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
@@ -505,7 +511,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
@@ -546,7 +553,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -579,7 +587,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -613,7 +622,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -653,7 +663,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -693,7 +704,8 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFi
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"</Command>
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
