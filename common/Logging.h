@@ -133,19 +133,17 @@ struct Context
 	const char * const file;
 	const int line;
 	const char * const function;
-	MPT_FORCEINLINE Context(const char *file, int line, const char *function)
+	MPT_CONSTEXPR11_FUN Context(const char *file, int line, const char *function) noexcept
 		: file(file)
 		, line(line)
 		, function(function)
 	{
-		return;
 	}
-	MPT_FORCEINLINE Context(const Context &c)
+	MPT_CONSTEXPR11_FUN Context(const Context &c) noexcept
 		: file(c.file)
 		, line(c.line)
 		, function(c.function)
 	{
-		return;
 	}
 }; // class Context
 
@@ -236,7 +234,7 @@ enum class Direction : int8
 	Leave   = -1,
 };
 
-MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction = Direction::Unknown);
+MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction = Direction::Unknown) noexcept;
 
 enum ThreadKind {
 	ThreadKindGUI,
@@ -257,7 +255,7 @@ class Scope
 private:
 	const mpt::log::Context context;
 public:
-	inline Scope(const mpt::log::Context & context) noexcept
+	MPT_FORCEINLINE Scope(const mpt::log::Context & context) noexcept
 		: context(context)
 	{
 		if(mpt::log::Trace::g_Enabled)
@@ -265,7 +263,7 @@ public:
 			mpt::log::Trace::Trace(context, mpt::log::Trace::Direction::Enter);
 		}
 	}
-	inline ~Scope() noexcept
+	MPT_FORCEINLINE ~Scope() noexcept
 	{
 		if(mpt::log::Trace::g_Enabled)
 		{
