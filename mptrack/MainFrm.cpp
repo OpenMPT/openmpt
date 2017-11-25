@@ -414,7 +414,7 @@ BOOL CMainFrame::DestroyWindow()
 
 void CMainFrame::OnClose()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
 		// Show modified documents window
@@ -615,7 +615,7 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 
 void CMainFrame::OnTimerNotify()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	ASSERT(InGuiThread());
 	ASSERT(!InNotifyHandler());
 	m_InNotifyHandler = true;
@@ -705,7 +705,7 @@ bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
 
 void CMainFrame::SoundSourceLock()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	m_SoundDeviceFillBufferCriticalSection.Enter();
 	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
 	m_AudioThreadId = GetCurrentThreadId();
@@ -715,7 +715,7 @@ void CMainFrame::SoundSourceLock()
 
 void CMainFrame::SoundSourceUnlock()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
 	m_AudioThreadId = 0;
 	m_SoundDeviceFillBufferCriticalSection.Leave();
@@ -744,7 +744,7 @@ public:
 
 void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_UNREFERENCED_PARAMETER(inputBuffer);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
@@ -777,7 +777,7 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, S
 
 void CMainFrame::SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	MPT_UNREFERENCED_PARAMETER(bufferFormat);
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
 	MPT_ASSERT(InAudioThread());
@@ -791,14 +791,14 @@ void CMainFrame::SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, S
 
 bool CMainFrame::IsAudioDeviceOpen() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	return gpSoundDevice && gpSoundDevice->IsOpen();
 }
 
 
 bool CMainFrame::audioOpenDevice()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
@@ -854,7 +854,7 @@ bool CMainFrame::audioOpenDevice()
 
 void CMainFrame::audioCloseDevice()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(gpSoundDevice)
 	{
 		gpSoundDevice->Close();
@@ -934,7 +934,7 @@ static void SetVUMeter(uint32 *masterVU, const VUMeter &vumeter)
 
 bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	ASSERT(InAudioThread());
 	if(!m_pSndFile) return false;
 
@@ -1215,7 +1215,7 @@ void CMainFrame::ResetNotificationBuffer()
 
 bool CMainFrame::PreparePlayback()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	// open the audio device to update needed TrackerSettings mixer parameters
 	if(!audioOpenDevice()) return false;
 	return true;
@@ -1224,7 +1224,7 @@ bool CMainFrame::PreparePlayback()
 
 bool CMainFrame::StartPlayback()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
 	if(!gpSoundDevice->Start()) return false;
@@ -1244,7 +1244,7 @@ bool CMainFrame::StartPlayback()
 
 void CMainFrame::StopPlayback()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsAudioDeviceOpen()) return;
 	gpSoundDevice->Stop();
 	if(m_NotifyTimer)
@@ -1262,7 +1262,7 @@ void CMainFrame::StopPlayback()
 
 bool CMainFrame::RestartPlayback()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
 	if(!gpSoundDevice->IsPlaying()) return false;
@@ -1279,7 +1279,7 @@ bool CMainFrame::RestartPlayback()
 
 bool CMainFrame::PausePlayback()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(!IsAudioDeviceOpen()) return false;
 	gpSoundDevice->Stop();
 	if(m_NotifyTimer)
@@ -1653,7 +1653,7 @@ HWND CMainFrame::GetFollowSong() const
 
 void CMainFrame::IdleHandlerSounddevice()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(gpSoundDevice)
 	{
 		const FlagSet<SoundDevice::RequestFlags> requestFlags = gpSoundDevice->GetRequestFlags();
@@ -1677,14 +1677,14 @@ void CMainFrame::IdleHandlerSounddevice()
 
 BOOL CMainFrame::ResetSoundCard()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceIdentifier()), TrackerSettings::Instance().GetSoundDeviceIdentifier(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
 }
 
 
 BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset)
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	if(forceReset
 		|| (TrackerSettings::Instance().GetSoundDeviceIdentifier() != deviceIdentifier)
 		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier) != deviceSettings)
