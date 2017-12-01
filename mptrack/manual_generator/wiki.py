@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # OpenMPT help file scraper
-# by coda and Saga Musix
+# by coda (https://coda.s3m.us/) and Saga Musix (https://sagamusix.de/)
 # This script downloads the OpenMPT manual TOC and then downloads all pages
 # from that TOC. The pages are parsed and all required image files are fetched.
 # The script also generates the appropriate files that can be fed into the
@@ -16,7 +16,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 shutil.rmtree('html', ignore_errors=True)
 shutil.copytree('source', 'html')
 
-style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.page.gallery.styles%7Cmediawiki.skinning.interface%7Cskins.vector.styles&only=styles&skin=vector').read().decode('UTF-8')
+style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.page.gallery.styles%7Cmediawiki.skinning.interface%7Cskins.vector.styles%7Csite.styles&only=styles&skin=vector').read().decode('UTF-8')
 
 # Remove a few unused CSS classes
 style = re.sub(r'\}(\w+)?[\.#]vector([\w >]+)\{.+?\}', '}', style)
