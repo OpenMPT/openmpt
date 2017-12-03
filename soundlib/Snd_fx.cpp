@@ -2259,8 +2259,6 @@ bool CSoundFile::ProcessEffects()
 		uint32 nStartTick = 0;
 		pChn->isFirstTick = m_SongFlags[SONG_FIRSTTICK];
 
-		pChn->dwFlags.reset(CHN_FASTVOLRAMP);
-
 		// Process parameter control note.
 		if(pChn->rowCommand.note == NOTE_PC)
 		{
