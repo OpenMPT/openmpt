@@ -1885,6 +1885,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 	}
 	pChn->rampLeftVol = pChn->leftVol * (1 << VOLUMERAMPPRECISION);
 	pChn->rampRightVol = pChn->rightVol * (1 << VOLUMERAMPPRECISION);
+	pChn->dwFlags.reset(CHN_FASTVOLRAMP);
 }
 
 
