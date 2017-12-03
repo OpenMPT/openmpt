@@ -1,5 +1,10 @@
-lhasa LHA decompression library from https://github.com/fragglet/lhasa tag v0.3.1 (commit c6d6ca6df218a54c94443f8d15afe2869461506f).
-The test directory is not included in the OpenMPT repository.
-No further local changes have been made.
+lhasa LHA decompression library from https://github.com/fragglet/lhasa tag
+v0.3.1 (commit c6d6ca6df218a54c94443f8d15afe2869461506f).
+The following changes have been made:
+ *  commit
+    https://github.com/fragglet/lhasa/commit/59c43fc841bfdba970a810e21d97f5e074cd286e
+    has been applied.
+ *  Obviously, unnecessary folders and files have been removed.
+ *  The test directory is not included in the OpenMPT repository.
 For building, premake is used to generate Visual Studio project files.
 See ../build/premake/ for details.
