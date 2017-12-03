@@ -8,8 +8,8 @@
 set -e
 
 
-MPG123VERSION="1.25.7"
-OPENMPTVERSION="2"
+MPG123VERSION="1.25.8"
+OPENMPTVERSION="1"
 
 
 BASEURL="https://mpg123.de/download/"
