@@ -562,8 +562,9 @@ typedef std::mt19937       main_prng;
 // work-around compiler crash
 // c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.12.25827\include\random(978): fatal error C1001: An internal error has occurred in the compiler.
 // (compiler file 'f:\dd\vctools\compiler\utc\src\p2\main.c', line 258)
+// reported at: https://developercommunity.visualstudio.com/content/problem/162089/random-engines-crashing-vs-155-optimizer.html?childToView=164098#comment-164098
 typedef std::mt19937_64    best_prng;
-#else 
+#else
 typedef std::ranlux48      best_prng;
 #endif
 
