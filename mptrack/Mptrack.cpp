@@ -69,86 +69,6 @@ const char *szHexChar = "0123456789ABCDEF";
 #endif
 
 
-class CModDocManager: public CDocManager
-{
-public:
-	CModDocManager() {}
-	virtual BOOL OnDDECommand(LPTSTR lpszCommand);
-};
-
-
-BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
-{
-	BOOL bResult, bActivate;
-#ifdef DDEDEBUG
-	Log("OnDDECommand: %s\n", lpszCommand);
-#endif
-	// Handle any DDE commands recognized by your application
-	// and return TRUE.  See implementation of CWinApp::OnDDEComand
-	// for example of parsing the DDE command string.
-	bResult = FALSE;
-	bActivate = FALSE;
-	if ((lpszCommand) && lpszCommand[0] && (theApp.m_pMainWnd))
-	{
-		std::size_t len = _tcslen(lpszCommand);
-		std::vector<TCHAR> s(lpszCommand, lpszCommand + len + 1);
-
-		len--;
-		while((len > 0) && _tcschr(_T("(){}[]\'\" "), s[len]))
-		{
-			s[len--] = 0;
-		}
-		TCHAR *pszCmd = s.data();
-		while (pszCmd[0] == _T('[')) pszCmd++;
-		TCHAR *pszData = pszCmd;
-		while ((pszData[0] != _T('(')) && (pszData[0]))
-		{
-			if (((BYTE)pszData[0]) <= (BYTE)0x20) *pszData = 0;
-			pszData++;
-		}
-		while ((*pszData) && (_tcschr(_T("(){}[]\'\" "), *pszData)))
-		{
-			*pszData = 0;
-			pszData++;
-		}
-		// Edit/Open
-		if ((!lstrcmpi(pszCmd, _T("Edit")))
-		 || (!lstrcmpi(pszCmd, _T("Open"))))
-		{
-			if (pszData[0])
-			{
-				bResult = TRUE;
-				bActivate = TRUE;
-				OpenDocumentFile(pszData);
-			}
-		} else
-		// New
-		if (!lstrcmpi(pszCmd, _T("New")))
-		{
-			OpenDocumentFile(_T(""));
-			bResult = TRUE;
-			bActivate = TRUE;
-		}
-	#ifdef DDEDEBUG
-		Log("%s(%s)\n", pszCmd, pszData);
-	#endif
-		if ((bActivate) && (theApp.m_pMainWnd->m_hWnd))
-		{
-			if (theApp.m_pMainWnd->IsIconic()) theApp.m_pMainWnd->ShowWindow(SW_RESTORE);
-			theApp.m_pMainWnd->SetActiveWindow();
-		}
-	}
-	// Return FALSE for any DDE commands you do not handle.
-#ifdef DDEDEBUG
-	if (!bResult)
-	{
-		Log("WARNING: failure in CModDocManager::OnDDECommand()\n");
-	}
-#endif
-	return bResult;
-}
-
-
 void CTrackApp::OnFileCloseAll()
 {
 	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
@@ -161,8 +81,7 @@ void CTrackApp::OnFileCloseAll()
 		}
 	}
 
-	auto documents = theApp.GetOpenDocuments();
-	for(auto &doc : documents)
+	for(auto &doc : GetOpenDocuments())
 	{
 		doc->SafeFileClose();
 	}
@@ -171,7 +90,7 @@ void CTrackApp::OnFileCloseAll()
 
 int CTrackApp::GetOpenDocumentCount() const
 {
-	return AfxGetApp()->m_pDocManager->GetOpenDocumentCount();
+	return GetModDocTemplate()->size();
 }
 
 
@@ -180,7 +99,7 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 {
 	std::vector<CModDoc *> documents;
 
-	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
+	CDocTemplate *pDocTmpl = GetModDocTemplate();
 	if(pDocTmpl)
 	{
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
@@ -201,22 +120,14 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 class CMPTCommandLineInfo: public CCommandLineInfo
 {
 public:
-	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck, m_bNoWine,
-		 m_bPortable, m_bNoCrashHandler, m_bDebugCrashHandler;
+	bool m_bNoDls = false, m_bNoPlugins = false, m_bNoAssembly = false, m_bNoSysCheck = false, m_bNoWine = false,
+		 m_bPortable = false, m_bNoCrashHandler = false, m_bDebugCrashHandler = false;
 #ifdef _DEBUG
-	bool m_bNoTests;
+	bool m_bNoTests = false;
 #endif
 
 public:
-	CMPTCommandLineInfo()
-	{
-		m_bNoDls = m_bNoPlugins = m_bNoAssembly = m_bNoSysCheck = m_bNoWine =
-		m_bPortable = m_bNoCrashHandler = m_bDebugCrashHandler = false;
-#ifdef _DEBUG
-		m_bNoTests = false;
-#endif
-	}
-	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
+	void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast) override
 	{
 		if ((lpszParam) && (bFlag))
 		{
@@ -522,7 +433,7 @@ void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 }
 
 
-void CTrackApp::AddToRecentFileList(const mpt::PathString path)
+void CTrackApp::AddToRecentFileList(const mpt::PathString &path)
 {
 	RemoveMruItem(path);
 	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);
@@ -1354,9 +1265,8 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 {
 	files.clear();
 
-	std::vector<const char *> modExtensions = CSoundFile::GetSupportedExtensions(true);
 	std::string exts;
-	for(const auto &ext : modExtensions)
+	for(const auto &ext : CSoundFile::GetSupportedExtensions(true))
 	{
 		exts += std::string("*.") + ext + std::string(";");
 	}
@@ -2078,13 +1988,13 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 	case SRCMODE_NEAREST:
 		return addTaps ? _T("No Interpolation (1 tap)") : _T("No Interpolation");
 	case SRCMODE_LINEAR:
-		return addTaps ? _T("Linear (2 tap)"):_T("Linear");
+		return addTaps ? _T("Linear (2 tap)") : _T("Linear");
 	case SRCMODE_SPLINE:
-		return addTaps ? _T("Cubic Spline (4 tap)"): _T("Cubic Spline");
+		return addTaps ? _T("Cubic Spline (4 tap)") :  _T("Cubic Spline");
 	case SRCMODE_POLYPHASE:
-		return addTaps ? _T("Polyphase (8 tap)"): _T("Polyphase");
+		return addTaps ? _T("Polyphase (8 tap)") : _T("Polyphase");
 	case SRCMODE_FIRFILTER:
-		return addTaps ? _T("XMMS-ModPlug (8 tap)"): _T("XMMS-ModPlug");
+		return addTaps ? _T("XMMS-ModPlug (8 tap)") : _T("XMMS-ModPlug");
 	default:
 		MPT_ASSERT_NOTREACHED();
 	}

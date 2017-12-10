@@ -1,7 +1,7 @@
 /*
  * ModDocTemplate.cpp
  * ------------------
- * Purpose: CDocTemplate specialization for CModDoc.
+ * Purpose: CDocTemplate and CModDocManager specialization for CModDoc.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -9,6 +9,7 @@
 
 
 #include "stdafx.h"
+#include "FolderScanner.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ModDocTemplate.h"
@@ -21,77 +22,27 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru
 {
 	const mpt::PathString filename = (lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString());
 
-	if(filename.IsDirectory())
-	{
-		CDocument *pDoc = nullptr;
-		mpt::PathString path = filename;
-		path.EnsureTrailingSlash();
-		HANDLE hFind;
-		WIN32_FIND_DATAW wfd;
-		MemsetZero(wfd);
-		if((hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
-		{
-			do
-			{
-				if(wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
-				{
-					pDoc = OpenDocumentFile((path + mpt::PathString::FromNative(wfd.cFileName)).ToCString(), addToMru, makeVisible);
-				}
-			} while (FindNextFileW(hFind, &wfd));
-			FindClose(hFind);
-		}
-		return pDoc;
-	}
-
-	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
-	{
-		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
-		{
-			return nullptr;
-		}
-	}
-
 	// First, remove document from MRU list.
 	if(addToMru)
 	{
 		theApp.RemoveMruItem(filename);
 	}
 
-	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : filename.ToCString().GetString(), addToMru, makeVisible);
+	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? nullptr : filename.ToCString().GetString(), addToMru, makeVisible);
 	if(pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
-	} else //Case: pDoc == 0, opening document failed.
+	} else if(!filename.empty() && CMainFrame::GetMainFrame() && addToMru)
 	{
-		if(!filename.empty())
-		{
-			if(CMainFrame::GetMainFrame() && addToMru)
-			{
-				CMainFrame::GetMainFrame()->UpdateMRUList();
-			}
-			if(!filename.IsFile())
-			{
-				Reporting::Error(_T("Unable to open \"") + filename.ToCString() + _T("\": file does not exist."));
-			} else
-			{
-				// Case: Valid path but opening failed.
-				const int numDocs = theApp.GetOpenDocumentCount();
-				Reporting::Notification(mpt::cformat(_T("Opening \"%1\" failed. This can happen if ")
-					_T("no more modules can be opened or if the file type was not ")
-					_T("recognised. If the former is true, it is ")
-					_T("recommended to close some modules as otherwise a crash is likely")
-					_T(" (currently there %2 %3 document%4 open)."))(
-					filename.ToCString(), (numDocs == 1) ? _T("is") : _T("are"), numDocs, (numDocs == 1) ? _T("") : _T("s")));
-			}
-		}
+		// Opening the document failed
+		CMainFrame::GetMainFrame()->UpdateMRUList();
 	}
 	return pDoc;
 }
 
 
-CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
+CDocument *CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
 {
 	CDocument *doc = OpenDocumentFile(filename.ToCString(), isExampleTune ? TRUE : FALSE, TRUE);
 	if(doc)
@@ -148,5 +99,125 @@ bool CModDocTemplate::DocumentExists(const CModDoc *doc) const
 {
 	return m_documents.count(const_cast<CModDoc *>(doc)) != 0;
 }
+
+
+CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU)
+{
+	const mpt::PathString filename = (lpszFileName ? mpt::PathString::FromCString(lpszFileName) : mpt::PathString());
+
+	if(filename.IsDirectory())
+	{
+		FolderScanner scanner(filename, true);
+		mpt::PathString file;
+		CDocument *pDoc = nullptr;
+		while(scanner.NextFile(file))
+		{
+			pDoc = OpenDocumentFile(file.ToCString(), bAddToMRU);
+		}
+		return pDoc;
+	}
+
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
+	{
+		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
+		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
+		{
+			return nullptr;
+		}
+	}
+
+	CDocument *pDoc = CDocManager::OpenDocumentFile(lpszFileName, bAddToMRU);
+	if(pDoc == nullptr && !filename.empty())
+	{
+		if(!filename.IsFile())
+		{
+			Reporting::Error(mpt::cformat(_T("Unable to open \"%1\": file does not exist."))(filename.ToCString()));
+			theApp.RemoveMruItem(filename);
+			CMainFrame::GetMainFrame()->UpdateMRUList();
+		} else
+		{
+			// Case: Valid path but opening failed.
+			const int numDocs = theApp.GetOpenDocumentCount();
+			Reporting::Notification(mpt::cformat(_T("Opening \"%1\" failed. This can happen if ")
+				_T("no more modules can be opened or if the file type was not ")
+				_T("recognised (currently there %2 %3 document%4 open)."))(
+					filename.ToCString(), (numDocs == 1) ? _T("is") : _T("are"), numDocs, (numDocs == 1) ? _T("") : _T("s")));
+		}
+	}
+	return pDoc;
+}
+
+
+BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
+{
+	BOOL bResult, bActivate;
+#ifdef DDEDEBUG
+	Log("OnDDECommand: %s\n", lpszCommand);
+#endif
+	// Handle any DDE commands recognized by your application
+	// and return TRUE.  See implementation of CWinApp::OnDDEComand
+	// for example of parsing the DDE command string.
+	bResult = FALSE;
+	bActivate = FALSE;
+	if ((lpszCommand) && lpszCommand[0] && (theApp.m_pMainWnd))
+	{
+		std::size_t len = _tcslen(lpszCommand);
+		std::vector<TCHAR> s(lpszCommand, lpszCommand + len + 1);
+
+		len--;
+		while((len > 0) && _tcschr(_T("(){}[]\'\" "), s[len]))
+		{
+			s[len--] = 0;
+		}
+		TCHAR *pszCmd = s.data();
+		while (pszCmd[0] == _T('[')) pszCmd++;
+		TCHAR *pszData = pszCmd;
+		while ((pszData[0] != _T('(')) && (pszData[0]))
+		{
+			if (((BYTE)pszData[0]) <= (BYTE)' ') *pszData = 0;
+			pszData++;
+		}
+		while ((*pszData) && (_tcschr(_T("(){}[]\'\" "), *pszData)))
+		{
+			*pszData = 0;
+			pszData++;
+		}
+		// Edit/Open
+		if ((!lstrcmpi(pszCmd, _T("Edit")))
+		 || (!lstrcmpi(pszCmd, _T("Open"))))
+		{
+			if (pszData[0])
+			{
+				bResult = TRUE;
+				bActivate = TRUE;
+				OpenDocumentFile(pszData);
+			}
+		} else
+		// New
+		if (!lstrcmpi(pszCmd, _T("New")))
+		{
+			OpenDocumentFile(_T(""));
+			bResult = TRUE;
+			bActivate = TRUE;
+		}
+	#ifdef DDEDEBUG
+		Log("%s(%s)\n", pszCmd, pszData);
+	#endif
+		if ((bActivate) && (theApp.m_pMainWnd->m_hWnd))
+		{
+			if (theApp.m_pMainWnd->IsIconic()) theApp.m_pMainWnd->ShowWindow(SW_RESTORE);
+			theApp.m_pMainWnd->SetActiveWindow();
+		}
+	}
+	// Return FALSE for any DDE commands you do not handle.
+#ifdef DDEDEBUG
+	if (!bResult)
+	{
+		Log("WARNING: failure in CModDocManager::OnDDECommand()\n");
+	}
+#endif
+	return bResult;
+}
+
 
 OPENMPT_NAMESPACE_END
