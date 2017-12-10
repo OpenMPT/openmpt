@@ -150,7 +150,7 @@ public:
 	CTrackApp();
 
 	void AddToRecentFileList(LPCTSTR lpszPathName) override;
-	void AddToRecentFileList(const mpt::PathString path);
+	void AddToRecentFileList(const mpt::PathString &path);
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const size_t item);
 	void RemoveMruItem(const mpt::PathString &path);

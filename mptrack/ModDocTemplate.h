@@ -1,7 +1,7 @@
 /*
  * ModDocTemplate.h
  * ----------------
- * Purpose: CDocTemplate specialization for CModDoc.
+ * Purpose: CDocTemplate and CModDocManager specializations for CModDoc.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -42,5 +42,14 @@ public:
 	std::unordered_set<CModDoc *>::const_iterator end() const { return m_documents.end(); }
 	std::unordered_set<CModDoc *>::const_iterator cend() const { return m_documents.cend(); }
 };
+
+
+class CModDocManager : public CDocManager
+{
+public:
+	CDocument *OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE) override;
+	BOOL OnDDECommand(LPTSTR lpszCommand) override;
+};
+
 
 OPENMPT_NAMESPACE_END

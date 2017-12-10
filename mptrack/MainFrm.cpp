@@ -2160,7 +2160,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 		}
 		if(!pDoc)
 		{
-			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
+			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read." : L"does not exist."));
 		}
 	} else
 	{
