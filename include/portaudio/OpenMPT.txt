@@ -11,7 +11,8 @@
     modified to include a new option which enables automated stream resampling
     on Windows 7 or later. Modifications have been marked with `// OpenMPT`.
  *  `src/os/win/pa_x86_plain_converters.c` has been modified to exclude inline
-    asm for Clang/C2. Modifications have been marked with `// OpenMPT`.
+    asm for Clang/C2 or non-x86 platforms. Modifications have been marked with
+    `// OpenMPT`.
  *  A couple of unnecessary folders have been omitted in SVN:
     bindings, cmake_support, doc, examples, pablio, test, testcvs
  *  For building, premake is used to generate Visual Studio project files.
