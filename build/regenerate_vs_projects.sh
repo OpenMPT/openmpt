@@ -74,6 +74,18 @@ ${PREMAKE} --group=PluginBridge vs2017 --xp
 ${PREMAKE} --group=OpenMPT vs2017 --xp
 ${PREMAKE} --group=all-externals vs2017 --xp
 
+#${PREMAKE} --group=libopenmpt_test vs2017 --win10
+#${PREMAKE} --group=foo_openmpt vs2017 --win10
+#${PREMAKE} --group=in_openmpt vs2017 --win10
+#${PREMAKE} --group=xmp-openmpt vs2017 --win10
+#${PREMAKE} --group=libopenmpt-full vs2017 --win10
+#${PREMAKE} --group=libopenmpt-small vs2017 --win10
+#${PREMAKE} --group=libopenmpt vs2017 --win10
+#${PREMAKE} --group=openmpt123 vs2017 --win10
+#${PREMAKE} --group=PluginBridge vs2017 --win10
+#${PREMAKE} --group=OpenMPT vs2017 --win10
+#${PREMAKE} --group=all-externals vs2017 --win10
+
 ${PREMAKE} postprocess
 
 rm premake5.lua
