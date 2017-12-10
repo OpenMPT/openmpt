@@ -24,6 +24,11 @@ How to compile
         To compile the project, open `build/vs2017/OpenMPT.sln` and hit the
         compile button.
 
+ -  The Windows 8.1 SDK and Microsoft Foundation Classes (MFC) are required to
+    build OpenMPT (both are included with Visual Studio, however may need to be
+    selected explicitly during setup). In order to build OpenMPT for Windows XP,
+    the XP targetting toolset also needs to be installed.
+
  -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
 
     If you don't want this, uncomment `#define NO_VST` and comment out
