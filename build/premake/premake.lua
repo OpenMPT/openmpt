@@ -38,6 +38,11 @@ newoption {
 	description = "Generate XP targetting projects",
 }
 
+newoption {
+	trigger = "win10",
+	description = "Generate Windows 10 Desktop targetting projects",
+}
+
 --newoption {
 --	trigger = "layout-custom",
 --	description = "Generate legay OpenmPT project layout",
@@ -47,12 +52,34 @@ newoption {
 --	layout = custom
 --end
 
-if _OPTIONS["xp"] then
+-- arm64 requires Premake 5.0.0-alpha13
+with_arm64 = false
+
+if _OPTIONS["win10"] then
+	if _ACTION == "vs2017" then
+		if with_arm64 then
+			allplatforms = { "x86", "x86_64", "arm", "arm64" }
+		else
+			allplatforms = { "x86", "x86_64", "arm" }
+		end
+	else
+		allplatforms = { "x86", "x86_64" }
+	end
+	trkplatforms = { "x86", "x86_64" }
+	mpt_projectpathname = _ACTION .. "win10"
+	mpt_bindirsuffix = "win10"
+	mpt_bindirsuffix32 = "win10"
+	mpt_bindirsuffix64 = "win10"
+elseif _OPTIONS["xp"] then
+	allplatforms = { "x86", "x86_64" }
+	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = _ACTION .. "xp"
 	mpt_bindirsuffix = "winxp"
 	mpt_bindirsuffix32 = "winxp"
 	mpt_bindirsuffix64 = "winxp64"
 else
+	allplatforms = { "x86", "x86_64" }
+	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = _ACTION
 	mpt_bindirsuffix = "win7"
 	mpt_bindirsuffix32 = "win7"
@@ -129,6 +156,15 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2017xp/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017xp/PluginBridge.vcxproj")
 
+  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT.vcxproj")
+  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT.vcxproj")
+  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-custom.vcxproj")
+  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-custom.vcxproj")
+  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-ANSI.vcxproj")
+  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-ANSI.vcxproj")
+  --postprocess_vs2010_nonxcompat("build/vs2017win10/PluginBridge.vcxproj")
+  --postprocess_vs2010_disabledpiaware("build/vs2017win10/PluginBridge.vcxproj")
+
  end
 }
 
@@ -137,7 +173,8 @@ if _OPTIONS["group"] == "libopenmpt-all" then
 solution "libopenmpt-all"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -168,7 +205,8 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 solution "libopenmpt_test"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/ext-mpg123.lua"
@@ -184,7 +222,8 @@ solution "foo_openmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
-
+	dofile "../../build/premake/premake-defaults-solution.lua"
+	
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/ext-foobar2000sdk.lua"
@@ -201,6 +240,7 @@ solution "in_openmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -217,6 +257,7 @@ solution "xmp-openmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release" }
  platforms { "x86" }
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -233,7 +274,8 @@ if _OPTIONS["group"] == "libopenmpt-full" then
 solution "libopenmpt-full"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt-full.lua"
  dofile "../../build/premake/ext-mpg123.lua"
@@ -248,7 +290,8 @@ if _OPTIONS["group"] == "libopenmpt-small" then
 solution "libopenmpt-small"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/ext-minimp3.lua"
@@ -263,7 +306,8 @@ if _OPTIONS["group"] == "libopenmpt" then
 solution "libopenmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
@@ -282,7 +326,8 @@ if _OPTIONS["group"] == "openmpt123" then
 solution "openmpt123"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -300,7 +345,8 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
- platforms { "x86", "x86_64" }
+ platforms ( trkplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
 
@@ -313,7 +359,8 @@ layout = ""
 solution "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( trkplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -340,7 +387,8 @@ layout = "custom"
 solution "OpenMPT-custom"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( trkplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -367,7 +415,8 @@ layout = ""
 solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( trkplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -397,7 +446,8 @@ if _OPTIONS["group"] == "all-externals" then
 solution "all-externals"
  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
- platforms { "x86", "x86_64" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-foobar2000sdk.lua"
