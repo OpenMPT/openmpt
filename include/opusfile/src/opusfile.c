@@ -2078,7 +2078,11 @@ static int op_fetch_and_process_page(OggOpusFile *_of,
          &&OP_LIKELY(diff<total_duration)){
           cur_packet_gp=prev_packet_gp;
           for(pi=0;pi<op_count;pi++){
-            diff=durations[pi]-diff;
+            /*Check for overflow.*/
+            if(diff<0&&OP_UNLIKELY(OP_INT64_MAX+diff<durations[pi])){
+              diff=durations[pi]+1;
+            }
+            else diff=durations[pi]-diff;
             /*If we have samples to trim...*/
             if(diff>0){
               /*If we trimmed the entire packet, stop (the spec says encoders
@@ -2597,15 +2601,14 @@ int op_pcm_seek(OggOpusFile *_of,ogg_int64_t _pcm_offset){
     ogg_int64_t gp;
     gp=_of->prev_packet_gp;
     if(OP_LIKELY(gp!=-1)){
-      int nbuffered;
+      ogg_int64_t discard_count;
+      int         nbuffered;
       nbuffered=OP_MAX(_of->od_buffer_size-_of->od_buffer_pos,0);
       OP_ALWAYS_TRUE(!op_granpos_add(&gp,gp,-nbuffered));
       /*We do _not_ add cur_discard_count to gp.
         Otherwise the total amount to discard could grow without bound, and it
          would be better just to do a full seek.*/
-      if(OP_LIKELY(!op_granpos_diff(&diff,gp,pcm_start))){
-        ogg_int64_t discard_count;
-        discard_count=_pcm_offset-diff;
+      if(OP_LIKELY(!op_granpos_diff(&discard_count,target_gp,gp))){
         /*We use a threshold of 90 ms instead of 80, since 80 ms is the
            _minimum_ we would have discarded after a full seek.
           Assuming 20 ms frames (the default), we'd discard 90 ms on average.*/
