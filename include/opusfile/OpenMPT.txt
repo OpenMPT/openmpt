@@ -1,5 +1,10 @@
 libopusfile library version 0.10.
 The following changes have been made:
+- Commits
+  https://github.com/xiph/opusfile/commit/567165a7feb9b4e540dc9d257fd276849d660060
+  and
+  https://github.com/xiph/opusfile/commit/67273ef32d5d5a0f8a0fc038948b8348c4387b5c
+  have been applied.
 - Obviously unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
