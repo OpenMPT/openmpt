@@ -147,13 +147,14 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 		try
 		{
 			auto portName = midiDevice.GetPortName(i);
+			bool deviceNameMatches = (portName == name);
 #ifdef MODPLUG_TRACKER
 			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, portName), isInput, false)))
 			{
 				// Preferred match
 				id = i;
 				foundFriendly = true;
-				if(name == portName)
+				if(deviceNameMatches)
 				{
 					return;
 				}
@@ -161,7 +162,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 #else
 			MPT_UNREFERENCED_PARAMETER(friendlyName)
 #endif
-			if(name == portName && !foundFriendly)
+			if(deviceNameMatches && !foundFriendly)
 			{
 				id = i;
 			}
@@ -500,7 +501,7 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
 			MidiInOutEditor *editor = dynamic_cast<MidiInOutEditor *>(GetEditor());
 			if(editor != nullptr)
 			{
-				Reporting::Error("MIDI device cannot be opened:\n" + error.getMessage(), "MIDI Input / Output", editor);
+				Reporting::Error("MIDI device cannot be opened. Is it open in another application?\n\n" + error.getMessage(), "MIDI Input / Output", editor);
 			}
 		}
 	}
