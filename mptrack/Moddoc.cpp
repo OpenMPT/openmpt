@@ -133,7 +133,7 @@ CModDoc::CModDoc()
 	, m_PatternUndo(*this)
 	, m_SampleUndo(*this)
 	, m_InstrumentUndo(*this)
-	, bModifiedAutosave(false)
+	, m_modifiedAutosave(false)
 {
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
@@ -156,11 +156,19 @@ CModDoc::~CModDoc()
 void CModDoc::SetModified(bool modified)
 {
 	STATIC_ASSERT(sizeof(long) == sizeof(m_bModified));
+	InterlockedExchange(&m_modifiedAutosave, modified);
 	if(!!InterlockedExchange(reinterpret_cast<long *>(&m_bModified), modified ? TRUE : FALSE) != modified)
 	{
 		// Update window titles in GUI thread
 		CMainFrame::GetMainFrame()->SendNotifyMessage(WM_MOD_SETMODIFIED, reinterpret_cast<WPARAM>(this), 0);
 	}
+}
+
+
+// Return "modified since last autosave" status and reset it until the next SetModified() (as this is only used for polling during autosave)
+bool CModDoc::ModifiedSinceLastAutosave()
+{
+	return !!InterlockedExchange(&m_modifiedAutosave, false);
 }
 
 
