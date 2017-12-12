@@ -105,7 +105,7 @@ protected:
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	time_t m_creationTime;
 
-	bool bModifiedAutosave : 1; // Modified since last autosave?
+	long m_modifiedAutosave; // Modified since last autosave?
 public:
 	bool m_ShowSavedialog : 1;
 	bool m_bHasValidPath : 1; //becomes true if document is loaded or saved.
@@ -125,7 +125,7 @@ public:
 
 	bool IsModified() const { return m_bModified != FALSE; }	// Work-around: CDocument::IsModified() is not const...
 	void SetModified(bool modified = true);
-	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
+	bool ModifiedSinceLastAutosave();
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
