@@ -82,7 +82,6 @@
   characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD" }
-	defines { "MPT_ENABLE_DLOPEN" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
