@@ -64,7 +64,6 @@
   characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
-	defines { "MPT_ENABLE_DLOPEN" }
   links {
    "mpg123",
    "ogg",

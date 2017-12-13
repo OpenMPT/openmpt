@@ -74,7 +74,6 @@
   flags { "Unicode" }
   flags { "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD" }
-	defines { "MPT_ENABLE_DLOPEN" }
   links {
    "mpg123",
    "vorbis",
