@@ -558,12 +558,16 @@ typedef mpt::sane_random_device random_device;
 // output domain which we rely upon.
 typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
 typedef std::mt19937       main_prng;
-#if MPT_MSVC_AT_LEAST(2017,5)
+#if MPT_MSVC_AT_LEAST(2017,5) && defined(_MSC_FULL_VER)
+#if (_MSC_FULL_VER < 191225831)
 // work-around compiler crash
 // c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.12.25827\include\random(978): fatal error C1001: An internal error has occurred in the compiler.
 // (compiler file 'f:\dd\vctools\compiler\utc\src\p2\main.c', line 258)
 // reported at: https://developercommunity.visualstudio.com/content/problem/162089/random-engines-crashing-vs-155-optimizer.html?childToView=164098#comment-164098
 typedef std::mt19937_64    best_prng;
+#else
+typedef std::ranlux48      best_prng;
+#endif
 #else
 typedef std::ranlux48      best_prng;
 #endif
