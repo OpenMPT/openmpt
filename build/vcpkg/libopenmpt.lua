@@ -2,7 +2,8 @@
 solution "libopenmpt"
 	location ( "../../build/vcpkg" )
 	configurations { "Debug", "Release", "DebugStatic", "ReleaseStatic" }
-	platforms ( { "x86", "x86_64", "arm" } )
+	--platforms ( { "x86", "x86_64", "arm" } )
+	platforms ( { "x86", "x86_64" } )
 
 	filter { "platforms:x86" }
 		system "Windows"
