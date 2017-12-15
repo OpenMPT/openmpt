@@ -52,7 +52,7 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #endif // _WIN32_WINNT
 #endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 
-#if defined(MPT_BUILD_MSVC)
+#if defined(MPT_BUILD_MSVC) || defined(MPT_BUILD_VCPKG)
 #if MPT_OS_WINDOWS_WINRT
 #pragma comment(lib, "ole32.lib")
 #else

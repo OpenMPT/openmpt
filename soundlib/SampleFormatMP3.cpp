@@ -62,7 +62,7 @@ typedef size_t mpg123_size_t;
 typedef ssize_t mpg123_ssize_t;
 
 class ComponentMPG123
-#if defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
+#if defined(MPT_ENABLE_MPG123_DELAYLOAD)
 	: public ComponentBundledDLL
 #else
 	: public ComponentBuiltin
@@ -96,7 +96,7 @@ public:
 
 public:
 	ComponentMPG123()
-#if defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
+#if defined(MPT_ENABLE_MPG123_DELAYLOAD)
 		: ComponentBundledDLL(MPT_PATHSTRING("openmpt-mpg123"))
 #else
 		: ComponentBuiltin()
@@ -106,7 +106,7 @@ public:
 	}
 	bool DoInitialize()
 	{
-#if defined(MPT_BUILD_MSVC_STATIC) && !MPT_OS_WINDOWS_WINRT
+#if defined(MPT_ENABLE_MPG123_DELAYLOAD)
 		if(!ComponentBundledDLL::DoInitialize())
 		{
 			return false;
