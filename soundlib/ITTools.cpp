@@ -42,16 +42,15 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, 
 		// Attention: Full MPTM envelope is stored in extended instrument properties
 		for(uint32 ev = 0; ev < num; ev++)
 		{
-			data[ev * 3] = mptEnv[ev].value - envOffset;
-			data[ev * 3 + 1] = mptEnv[ev].tick & 0xFF;
-			data[ev * 3 + 2] = mptEnv[ev].tick >> 8;
+			data[ev].value = static_cast<int8>(mptEnv[ev].value) - envOffset;
+			data[ev].tick = mptEnv[ev].tick;
 		}
 	} else
 	{
 		// Fix non-existing envelopes so that they can still be edited in Impulse Tracker.
 		num = 2;
-		data[0] = data[3] = envDefault - envOffset;
-		data[4] = 10;
+		data[0].value = data[1].value = envDefault - envOffset;
+		data[1].tick = 10;
 	}
 }
 
@@ -76,8 +75,8 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 	// Attention: Full MPTM envelope is stored in extended instrument properties
 	for(uint32 ev = 0; ev < std::min<uint32>(25, num); ev++)
 	{
-		mptEnv[ev].value = data[ev * 3] + envOffset;
-		mptEnv[ev].tick = (data[ev * 3 + 2] << 8) | (data[ev * 3 + 1]);
+		mptEnv[ev].value = Clamp<int8, int8>(data[ev].value + envOffset, 0, 64);
+		mptEnv[ev].tick = data[ev].tick;
 		if(ev > 0 && ev < num && mptEnv[ev].tick < mptEnv[ev - 1].tick)
 		{
 			// Fix broken envelopes... Instruments 2 and 3 in NoGap.it by Werewolf have envelope points where the high byte of envelope nodes is missing.
