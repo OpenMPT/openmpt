@@ -81,14 +81,20 @@ struct ITEnvelope
 		envFilter	= 0x80,
 	};
 
-	uint8 flags;		// Envelope Flags
-	uint8 num;			// Number of Envelope Nodes
-	uint8 lpb;			// Loop Start
-	uint8 lpe;			// Loop End
-	uint8 slb;			// Sustain Start
-	uint8 sle;			// Sustain End
-	uint8 data[25 * 3];	// Envelope Node Positions / Values
-	uint8 reserved;		// Reserved
+	struct Node
+	{
+		int8le   value;
+		uint16le tick;
+	};
+
+	uint8 flags;	// Envelope Flags
+	uint8 num;		// Number of Envelope Nodes
+	uint8 lpb;		// Loop Start
+	uint8 lpe;		// Loop End
+	uint8 slb;		// Sustain Start
+	uint8 sle;		// Sustain End
+	Node  data[25];	// Envelope Node Positions / Values
+	uint8 reserved;	// Reserved
 
 	// Convert OpenMPT's internal envelope format to an IT/MPTM envelope.
 	void ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault);
@@ -96,6 +102,7 @@ struct ITEnvelope
 	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 maxNodes) const;
 };
 
+MPT_BINARY_STRUCT(ITEnvelope::Node, 3)
 MPT_BINARY_STRUCT(ITEnvelope, 82)
 
 
