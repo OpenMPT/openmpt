@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.03.00 (* December 2017, revision 9347)
+v1.27.03.00 (* December 2017, revision 9367)
 --------------------------------------------
 General tab
    [Imp] <js> Always ensure that tempo tapping is done with a high-resolution timer. This may improve tapping accuracy if no module is playing.
@@ -43,6 +43,9 @@ Pattern tab
 Playback
    [Fix] <js> Volume envelopes of previewed notes in pattern or instrument editor were not volume-ramped correctly, causing audible clicks.
 
+IT
+   [Fix] <js> Try to fix broken volume envelopes with negative values in breakdwn.it by Elysis.
+
 Stream Export
    [Fix] <jh> RAW encoder was set as the default encoder by mistake since OpenMPT 1.27.01.00.
 
@@ -51,6 +54,7 @@ Misc
    [Fix] <js> High-resolution timers were not disabled when playback was stopped, possibly leading to unintentional increased power consumption.
    [Fix] <js> Allow numbers with trailing newlines to be pasted into decimal and signed numer edit fields (http://bugs.openmpt.org/view.php?id=1055).
    [Fix] <js> Example pattern data was not displayed correctly in the manual.
+   [Fix] <js> Autosave was broken in OpenMPT 1.27.02.00.
 
 Third-Party Libraries
    [Mod] Update libopusenc (v0.1.1), mpg123 (v1.25.7), ogg (v1.3.3), opusfile (v0.10).
