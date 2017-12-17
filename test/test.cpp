@@ -3646,6 +3646,11 @@ static MPT_NOINLINE void TestEditing()
 	modDoc->ConvertInstrumentsToSamples();
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(37, 4)->instr, 3);
 
+	modDoc->SetModified();
+	VERIFY_EQUAL_NONCONT(modDoc->IsModified(), true);
+	VERIFY_EQUAL_NONCONT(modDoc->ModifiedSinceLastAutosave(), true);
+	VERIFY_EQUAL_NONCONT(modDoc->ModifiedSinceLastAutosave(), false);
+
 	sndFile.Destroy();
 	modDoc->OnCloseDocument();
 #endif
