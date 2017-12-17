@@ -155,7 +155,8 @@ def toc_parse_chapter(m):
     </OBJECT>"""
 
 toc_text = re.sub(r'<!--(.+?)-->', '', toc_page, flags = re.DOTALL)
-toc_text = re.sub(r'<div(.+?)/div>', '', toc_text, flags = re.DOTALL)
+toc_text = re.sub(r'<div(.+?)>', '', toc_text, flags = re.DOTALL)
+toc_text = re.sub(r'</div>', '', toc_text, flags = re.DOTALL)
 toc_text = re.sub(r'<a href="' + base_url + '/(.+?)".*?>(.+?)</a>', toc_parse, toc_text)
 toc_text = re.sub(r'<li> ([^<]+)$', toc_parse_chapter, toc_text, flags = re.MULTILINE)
 toc.write(toc_text)
