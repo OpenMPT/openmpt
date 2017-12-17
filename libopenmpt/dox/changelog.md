@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.3.4-pre
+### libopenmpt 0.3.4 (2017-12-17)
 
  *  IT: Fix broken volume envelopes with negative values as found in breakdwn.it
     by Elysis.
