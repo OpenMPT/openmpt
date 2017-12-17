@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.4-pre
 
+ *  IT: Fix broken volume envelopes with negative values as found in breakdwn.it
+    by Elysis.
+ 
 ### libopenmpt 0.3.3 (2017-11-19)
 
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.

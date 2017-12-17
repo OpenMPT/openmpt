@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.03.00 (* December 2017, revision 9367)
---------------------------------------------
+v1.27.03.00 (17 December 2017, revision 9370)
+---------------------------------------------
 General tab
    [Imp] <js> Always ensure that tempo tapping is done with a high-resolution timer. This may improve tapping accuracy if no module is playing.
    [Fix] <js> Restart position spinner was sometimes unavailable after deleting orders (http://bugs.openmpt.org/view.php?id=1056).
@@ -44,7 +44,7 @@ Playback
    [Fix] <js> Volume envelopes of previewed notes in pattern or instrument editor were not volume-ramped correctly, causing audible clicks.
 
 IT
-   [Fix] <js> Try to fix broken volume envelopes with negative values in breakdwn.it by Elysis.
+   [Fix] <js> Fix broken volume envelopes with negative values as found in breakdwn.it by Elysis.
 
 Stream Export
    [Fix] <jh> RAW encoder was set as the default encoder by mistake since OpenMPT 1.27.01.00.
