@@ -256,6 +256,12 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
+	if(!strcmp(pIns->filename, "") && srcSong.GetpModDoc() != nullptr)
+	{
+		mpt::String::Copy(pIns->filename, srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale());
+	}
+#endif
 	pIns->Convert(srcSong.GetType(), GetType());
 
 	// Copy all referenced samples over
@@ -303,6 +309,14 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 		targetSmp.uFlags.reset(SMP_KEEPONDISK);
 	}
 
+#ifdef MODPLUG_TRACKER
+	if(!strcmp(targetSmp.filename, "") && srcSong.GetpModDoc() != nullptr)
+	{
+		mpt::String::Copy(targetSmp.filename, mpt::ToCharset(GetCharsetInternal(), srcSong.GetpModDoc()->GetTitle()));
+	}
+#endif
+
+	targetSmp.Convert(srcSong.GetType(), GetType());
 	return true;
 }
 
@@ -2975,11 +2989,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	}
 	if(GetNumSamples() < smp) m_nSamples = smp;
 
-	for(size_t j = 0; j < CountOf(pIns->Keyboard); j++)
+	// Adjust sample assignment
+	for(auto &sample : pIns->Keyboard)
 	{
-		if(pIns->Keyboard[j] && pIns->Keyboard[j] <= nsamples)
+		if(sample > 0 && sample <= nsamples)
 		{
-			pIns->Keyboard[j] = samplemap[pIns->Keyboard[j] - 1];
+			sample = samplemap[sample - 1];
 		}
 	}
 
