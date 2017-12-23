@@ -253,6 +253,12 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
+	if(!strcmp(pIns->filename, "") && srcSong.GetpModDoc() != nullptr)
+	{
+		mpt::String::Copy(pIns->filename, srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale());
+	}
+#endif
 	pIns->Convert(srcSong.GetType(), GetType());
 
 	// Copy all referenced samples over
@@ -277,29 +283,37 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	DestroySampleThreadsafe(targetSample);
 
 	const ModSample &sourceSmp = srcSong.GetSample(sourceSample);
+	ModSample &targetSmp = GetSample(targetSample);
 
 	if(GetNumSamples() < targetSample) m_nSamples = targetSample;
-	Samples[targetSample] = sourceSmp;
-	Samples[targetSample].Convert(srcSong.GetType(), GetType());
+	targetSmp = sourceSmp;
 	strcpy(m_szNames[targetSample], srcSong.m_szNames[sourceSample]);
 
 	if(sourceSmp.pSample)
 	{
-		Samples[targetSample].pSample = nullptr;	// Don't want to delete the original sample!
-		if(Samples[targetSample].AllocateSample())
+		targetSmp.pSample = nullptr;	// Don't want to delete the original sample!
+		if(targetSmp.AllocateSample())
 		{
 			SmpLength nSize = sourceSmp.GetSampleSizeInBytes();
-			memcpy(Samples[targetSample].pSample, sourceSmp.pSample, nSize);
-			Samples[targetSample].PrecomputeLoops(*this, false);
+			memcpy(targetSmp.pSample, sourceSmp.pSample, nSize);
+			targetSmp.PrecomputeLoops(*this, false);
 		}
 		// Remember on-disk path (for MPTM files), but don't implicitely enable on-disk storage
 		// (we really don't want this for e.g. duplicating samples or splitting stereo samples)
 #ifdef MPT_EXTERNAL_SAMPLES
 		SetSamplePath(targetSample, srcSong.GetSamplePath(sourceSample));
 #endif
-		Samples[targetSample].uFlags.reset(SMP_KEEPONDISK);
+		targetSmp.uFlags.reset(SMP_KEEPONDISK);
 	}
 
+#ifdef MODPLUG_TRACKER
+	if(!strcmp(targetSmp.filename, "") && srcSong.GetpModDoc() != nullptr)
+	{
+		mpt::String::Copy(targetSmp.filename, mpt::ToCharset(GetCharsetInternal(), srcSong.GetpModDoc()->GetTitle()));
+	}
+#endif
+
+	targetSmp.Convert(srcSong.GetType(), GetType());
 	return true;
 }
 
@@ -2245,18 +2259,14 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 	ModInstrument dummy;
 	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
-	SAMPLEINDEX nsamples = instrumentHeader.nos;
 	// Old SchismTracker versions set nos=0
-	for(size_t i = 0; i < CountOf(dummy.Keyboard); i++)
-	{
-		nsamples = std::max(nsamples, dummy.Keyboard[i]);
-	}
+	const SAMPLEINDEX nsamples = std::max(static_cast<SAMPLEINDEX>(instrumentHeader.nos), *std::max_element(std::begin(dummy.Keyboard), std::end(dummy.Keyboard)));
 	if(!nsamples)
 		return false;
 
 	// Preferrably read the middle-C sample
 	auto sample = dummy.Keyboard[NOTE_MIDDLEC - NOTE_MIN];
-	if(sample > 0 && sample <= instrumentHeader.nos)
+	if(sample > 0)
 		sample--;
 	else
 		sample = 0;
@@ -2289,12 +2299,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	Instruments[nInstr] = pIns;
 	file.Rewind();
 	ITInstrToMPT(file, *pIns, instrumentHeader.trkvers);
-	SAMPLEINDEX nsamples = instrumentHeader.nos;
 	// Old SchismTracker versions set nos=0
-	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
-	{
-		nsamples = std::max(nsamples, pIns->Keyboard[i]);
-	}
+	const SAMPLEINDEX nsamples = std::max(static_cast<SAMPLEINDEX>(instrumentHeader.nos), *std::max_element(std::begin(pIns->Keyboard), std::end(pIns->Keyboard)));
 
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
@@ -2316,11 +2322,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	}
 	if(GetNumSamples() < smp) m_nSamples = smp;
 
-	for(size_t j = 0; j < CountOf(pIns->Keyboard); j++)
+	// Adjust sample assignment
+	for(auto &sample : pIns->Keyboard)
 	{
-		if(pIns->Keyboard[j] && pIns->Keyboard[j] <= nsamples)
+		if(sample > 0 && sample <= nsamples)
 		{
-			pIns->Keyboard[j] = samplemap[pIns->Keyboard[j] - 1];
+			sample = samplemap[sample - 1];
 		}
 	}
 
