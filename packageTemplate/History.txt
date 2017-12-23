@@ -30,6 +30,14 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.04.00 (* January 2017, revision 9381)
+-------------------------------------------
+Sample tab
+   [Imp] <js> When dropping a sample with no filename from another module, copy the module name to the filename field instead.
+   [Fix] <js> Dropping a sample from another module did not adjust its parameters to the new module format.
+   [Fix] <js> When reading an ITI file as a sample, the middle-C sample was not used as intended in ITIs written with old versions of Schism Tracker.
+
+
 v1.27.03.00 (17 December 2017, revision 9370)
 ---------------------------------------------
 General tab

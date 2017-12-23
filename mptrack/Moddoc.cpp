@@ -2145,6 +2145,16 @@ void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 }
 
 
+static CString FormatSongLength(double length)
+{
+	length = Util::Round(length);
+	double minutes = std::floor(length / 60.0), seconds = std::fmod(length, 60.0);
+	CString s;
+	s.Format(_T("%.0fmn%02.0fs"), minutes, seconds);
+	return s;
+}
+
+
 void CModDoc::OnEstimateSongLength()
 {
 	CString s = _T("Approximate song length: ");
@@ -2161,7 +2171,7 @@ void CModDoc::OnEstimateSongLength()
 		if(songLength != std::numeric_limits<double>::infinity())
 		{
 			songLength = Util::Round(songLength);
-			s.AppendFormat(_T("%.0fmn%02.0fs"), std::floor(songLength / 60.0), std::fmod(songLength, 60.0));
+			s += FormatSongLength(songLength);
 		} else
 		{
 			s += _T("Song too long!");
@@ -2169,7 +2179,7 @@ void CModDoc::OnEstimateSongLength()
 	}
 	if(lengths.size() > 1 && totalLength != std::numeric_limits<double>::infinity())
 	{
-		s.AppendFormat(_T("\n\nTotal length:\t%.0fmn%02.0fs"), std::floor(totalLength / 60.0), std::fmod(totalLength, 60.0));
+		s += _T("\n\nTotal length:\t") + FormatSongLength(totalLength);
 	}
 
 	Reporting::Information(s);
