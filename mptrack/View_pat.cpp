@@ -886,6 +886,37 @@ void CViewPattern::OnShrinkSelection()
 
 		for(CHANNELINDEX chn = startSel.GetChannel(); chn <= endSel.GetChannel(); chn++)
 		{
+			ModCommand *dest = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
+			ModCommand src;
+
+			if(row <= finalDest)
+			{
+				// Normal shrink operation
+				src = *pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow, chn);
+
+				// If source command is empty, try next source row (so we don't lose all the stuff that's on odd rows).
+				if(srcRow < pSndFile->Patterns[m_nPattern].GetNumRows() - 1)
+				{
+					const ModCommand &srcNext = *pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow + 1, chn);
+					if(src.note == NOTE_NONE) src.note = srcNext.note;
+					if(src.instr == 0) src.instr = srcNext.instr;
+					if(src.volcmd == VOLCMD_NONE)
+					{
+						src.volcmd = srcNext.volcmd;
+						src.vol = srcNext.vol;
+					}
+					if(src.command == CMD_NONE)
+					{
+						src.command = srcNext.command;
+						src.param = srcNext.param;
+					}
+				}
+			} else
+			{
+				// Clean up rows that are now supposed to be empty.
+				src = ModCommand::Empty();
+			}
+
 			for(int i = PatternCursor::firstColumn; i <= PatternCursor::lastColumn; i++)
 			{
 				PatternCursor cell(row, chn, static_cast<PatternCursor::Columns>(i));
@@ -893,37 +924,6 @@ void CViewPattern::OnShrinkSelection()
 				{
 					// We might have to skip the first / last few entries.
 					continue;
-				}
-
-				ModCommand *dest = pSndFile->Patterns[m_nPattern].GetpModCommand(row, chn);
-				ModCommand src;
-
-				if(row <= finalDest)
-				{
-					// Normal shrink operation
-					src = *pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow, chn);
-
-					// If source command is empty, try next source row (so we don't lose all the stuff that's on odd rows).
-					if(srcRow < pSndFile->Patterns[m_nPattern].GetNumRows() - 1)
-					{
-						const ModCommand *srcNext = pSndFile->Patterns[m_nPattern].GetpModCommand(srcRow + 1, chn);
-						if(src.note == NOTE_NONE) src.note = srcNext->note;
-						if(src.instr == 0) src.instr = srcNext->instr;
-						if(src.volcmd == VOLCMD_NONE)
-						{
-							src.volcmd = srcNext->volcmd;
-							src.vol = srcNext->vol;
-						}
-						if(src.command == CMD_NONE)
-						{
-							src.command = srcNext->command;
-							src.param = srcNext->param;
-						}
-					}
-				} else
-				{
-					// Clean up rows that are now supposed to be empty.
-					src = ModCommand::Empty();
 				}
 
 				switch(i)
@@ -937,7 +937,7 @@ void CViewPattern::OnShrinkSelection()
 					break;
 
 				case PatternCursor::volumeColumn:
-					dest->vol = src.vol;      
+					dest->vol = src.vol;
 					dest->volcmd = src.volcmd;
 					break;
 
