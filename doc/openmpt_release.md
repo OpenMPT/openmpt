@@ -9,9 +9,7 @@ OpenMPT release process
    * Update version number in all files
    * Check if any files have to be added to or removed from the listing in
      `readme.txt`
-   * If year changed: Check MPTRACK.RC2, readme.txt, LICENSE, version.cpp,
-     in_openmpt.cpp, libopenmpt_impl.cpp, xmp-openmpt.cpp, openmpt123.cpp,
-     libopenmpt_version.rc and https://wiki.openmpt.org/Manual:_Acknowledgments
+   * If year changed, see `doc/year_changed.md`
 2. Compile OpenMPT.
 3. Install latest InnoSetup.
 4. Run `build/auto/build_openmpt_release_packages.py` to build the manual and
