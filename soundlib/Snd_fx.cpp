@@ -312,6 +312,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		playState.m_nRow = playState.m_nNextRow;
 		playState.m_nCurrentOrder = playState.m_nNextOrder;
 
+		if(orderList.IsValidPat(playState.m_nCurrentOrder) && playState.m_nRow >= Patterns[orderList[playState.m_nCurrentOrder]].GetNumRows())
+		{
+			playState.m_nRow = 0;
+			if(m_playBehaviour[kFT2LoopE60Restart])
+			{
+				playState.m_nRow = playState.m_nNextPatStartRow;
+				playState.m_nNextPatStartRow = 0;
+			}
+			playState.m_nCurrentOrder = ++playState.m_nNextOrder;
+		}
+
 		// Check if pattern is valid
 		playState.m_nPattern = playState.m_nCurrentOrder < orderList.size() ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
 		bool positionJumpOnThisRow = false;
@@ -426,11 +437,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		// Update next position
 		playState.m_nNextRow = playState.m_nRow + 1;
-		if(playState.m_nNextRow >= Patterns[playState.m_nPattern].GetNumRows())
-		{
-			playState.m_nNextRow = 0;
-			playState.m_nNextOrder++;
-		}
 
 		// Jumped to invalid pattern row?
 		if(playState.m_nRow >= Patterns[playState.m_nPattern].GetNumRows())
