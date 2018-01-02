@@ -795,12 +795,6 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_madeWithTracker += "old version)";
 
-	if(mainChunk.minPeriod < mainChunk.maxPeriod)
-	{
-		m_nMinPeriod = mainChunk.minPeriod / 4u;
-		m_nMaxPeriod = mainChunk.maxPeriod / 4u;
-	}
-
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
