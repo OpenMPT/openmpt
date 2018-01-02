@@ -102,22 +102,12 @@ struct AMFFMainChunk
 	uint8le  channels;
 	uint8le  speed;
 	uint8le  tempo;
-	uint16le minPeriod;
-	uint16le maxPeriod;
+	uint16le minPeriod;	// 16x Amiga periods, but we should ignore them - otherwise some high notes in Medivo.j2b won't sound correct.
+	uint16le maxPeriod;	// Ditto
 	uint8le  globalvolume;
 };
 
 MPT_BINARY_STRUCT(AMFFMainChunk, 73)
-
-
-// AMFF instrument envelope point (old format)
-struct AMFFEnvelopePoint
-{
-	uint16le tick;
-	uint8le  value;	// 0...64
-};
-
-MPT_BINARY_STRUCT(AMFFEnvelopePoint, 3)
 
 
 // AMFF instrument envelope (old format)
@@ -131,16 +121,22 @@ struct AMFFEnvelope
 		envLoop		= 0x04,
 	};
 
+	struct EnvPoint
+	{
+		uint16le tick;
+		uint8le  value;	// 0...64
+	};
+
 	uint8le envFlags;			// high nibble = pan env flags, low nibble = vol env flags (both nibbles work the same way)
 	uint8le envNumPoints;		// high nibble = pan env length, low nibble = vol env length
 	uint8le envSustainPoints;	// you guessed it... high nibble = pan env sustain point, low nibble = vol env sustain point
 	uint8le envLoopStarts;		// I guess you know the pattern now.
 	uint8le envLoopEnds;		// same here.
-	AMFFEnvelopePoint volEnv[10];
-	AMFFEnvelopePoint panEnv[10];
+	EnvPoint volEnv[10];
+	EnvPoint panEnv[10];
 
 	// Convert weird envelope data to OpenMPT's internal format.
-	void ConvertEnvelope(uint8 flags, uint8 numPoints, uint8 sustainPoint, uint8 loopStart, uint8 loopEnd, const AMFFEnvelopePoint *points, InstrumentEnvelope &mptEnv) const
+	void ConvertEnvelope(uint8 flags, uint8 numPoints, uint8 sustainPoint, uint8 loopStart, uint8 loopEnd, const EnvPoint (&points)[10], InstrumentEnvelope &mptEnv) const
 	{
 		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
 		mptEnv.resize(std::min(numPoints, static_cast<uint8>(10)));
@@ -180,6 +176,7 @@ struct AMFFEnvelope
 	}
 };
 
+MPT_BINARY_STRUCT(AMFFEnvelope::EnvPoint, 3)
 MPT_BINARY_STRUCT(AMFFEnvelope, 65)
 
 
@@ -292,25 +289,21 @@ struct AMFFSampleHeader
 MPT_BINARY_STRUCT(AMFFSampleHeader, 64)
 
 
-// AM instrument envelope point (new format)
-struct AMEnvelopePoint
-{
-	uint16le tick;
-	uint16le value;
-};
-
-MPT_BINARY_STRUCT(AMEnvelopePoint, 4)
-
-
 // AM instrument envelope (new format)
 struct AMEnvelope
 {
+	struct EnvPoint
+	{
+		uint16le tick;
+		uint16le value;
+	};
+
 	uint16le flags;
 	uint8le  numPoints;		// actually, it's num. points - 1, and 0xFF if there is no envelope
 	uint8le  sustainPoint;
 	uint8le  loopStart;
 	uint8le  loopEnd;
-	AMEnvelopePoint values[10];
+	EnvPoint values[10];
 	uint16le fadeout;		// why is this here? it's only needed for the volume envelope...
 
 	// Convert envelope data to OpenMPT's internal format.
@@ -357,6 +350,7 @@ struct AMEnvelope
 	}
 };
 
+MPT_BINARY_STRUCT(AMEnvelope::EnvPoint, 4)
 MPT_BINARY_STRUCT(AMEnvelope, 48)
 
 
@@ -744,13 +738,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 		m_madeWithTracker += MPT_USTRING("new version)");
 	else
 		m_madeWithTracker += MPT_USTRING("old version)");
-
-	if(mainChunk.minPeriod < mainChunk.maxPeriod)
-	{
-		m_nMinPeriod = mainChunk.minPeriod / 4u;
-		m_nMaxPeriod = mainChunk.maxPeriod / 4u;
-	}
-
+	
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
