@@ -609,7 +609,7 @@ LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data,
  * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \param error Pointer to an integer where an error may get stored. May be NULL.
  * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
- * \remarks It is recommended to use openmpt_prove_file_header() and provide the acutal file's size as a parameter if at all possible. libopenmpt can provide more accurate answers if the filesize is known.
+ * \remarks It is recommended to use openmpt_probe_file_header() and provide the acutal file's size as a parameter if at all possible. libopenmpt can provide more accurate answers if the filesize is known.
  * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
  * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
  * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
