@@ -97,6 +97,12 @@ static std::string format_exception( const char * const function ) {
 		err += "ERROR: ";
 		const char * what = e.what();
 		err += what ? what : "";
+	} catch ( const std::bad_alloc & e ) {
+		err += function;
+		err += ": ";
+		err += "OUT OF MEMORY: ";
+		const char * what = e.what();
+		err += what ? what : "";
 	} catch ( const std::exception & e ) {
 		err += function;
 		err += ": ";
