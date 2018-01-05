@@ -44,7 +44,7 @@
  *   Use the following to check for availability:
  *   \code
  *   #include <libopenmpt/libopenmpt.h>
- *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE) || ((OPENMPT_API_VERSION_MAJOR == 0) && ((OPENMPT_API_VERSION_MINOR == 2) || (OPENMPT_API_VERSION_MINOR == 1))
+ *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE) || ((OPENMPT_API_VERSION_MAJOR == 0) && ((OPENMPT_API_VERSION_MINOR == 2) || (OPENMPT_API_VERSION_MINOR == 1)))
  *   #include <libopenmpt/libopenmpt_stream_callbacks_file.h>
  *   #endif
  *   \endcode
