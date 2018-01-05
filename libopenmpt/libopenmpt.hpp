@@ -288,7 +288,7 @@ enum probe_file_header_result {
   \param size Size of the beginning of the file data.
   \param filesize Full size of the file data on disk.
   \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
-  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
+  \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
   \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
   \retval probe_file_header_result_failure The file is not supported by libopenmpt.
   \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
@@ -305,7 +305,7 @@ LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_
   \param size Size of the beginning of the file data.
   \remarks It is recommended to use the overload of this function that also takes the filesize as parameter if at all possile. libopenmpt can provide more accurate answers if the filesize is known.
   \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
-  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
+  \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
   \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
   \retval probe_file_header_result_failure The file is not supported by libopenmpt.
   \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
@@ -320,7 +320,7 @@ LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_
   \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
   \param stream Input stream to scan.
   \remarks stream is left in an unspecified state when this function returns.
-  \remarks openmpt::could_open_probability() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
+  \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
   \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
   \retval probe_file_header_result_failure The file is not supported by libopenmpt.
   \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
