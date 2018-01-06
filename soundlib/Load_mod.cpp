@@ -1259,10 +1259,10 @@ template<size_t N>
 static uint32 CountInvalidChars(const char (&name)[N])
 {
 	uint32 invalidChars = 0;
-	for(auto c : name)
+	for(uint8 c : name)  // char can be signed or unsigned
 	{
 		// Check for any Extended ASCII and control characters
-		if(c != 0 && c < ' ')
+		if((c != 0 && c < ' ') || c > 127)
 			invalidChars++;
 	}
 	return invalidChars;
