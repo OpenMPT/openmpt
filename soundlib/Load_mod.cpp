@@ -1455,7 +1455,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Let's see if the file is too small (including some overhead for broken files like sll7.mod or ghostbus.mod)
-	if(file.BytesLeft() + 65536 < numPatterns * 64u * 4u + totalSampleLen)
+	if(file.BytesLeft() + 65536 < numPatterns * 64u * 4u * 4u + totalSampleLen)
 		return false;
 
 	if(loadFlags == onlyVerifyHeader)
