@@ -1387,6 +1387,42 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 }
 
 
+static uint32 CountIllegalM15PatternBytes(const uint8 (&patternData)[64][4][4])
+{
+	uint32 illegalBytes = 0;
+	for(uint8 row = 0; row < 64; ++row)
+	{
+		for(uint8 channel = 0; channel < 4; ++channel)
+		{
+			if(patternData[row][channel][0] & 0xF0u)
+			{
+				illegalBytes++;
+			}
+		}
+	}
+	return illegalBytes;
+}
+
+
+template <typename TFileReader>
+static bool ValidateFirstM15Pattern(TFileReader &file)
+{
+	uint8 patternData[64][4][4];
+	if(!file.ReadArray(patternData))
+	{
+		return false;
+	}
+	file.SkipBack(64*4*4);
+	uint32 invalidBytes = CountIllegalM15PatternBytes(patternData);
+	// [threshold for all patterns combined] / [max patterns] * [margin, do not reject too much]
+	if(invalidBytes > 512 / 64 * 2)
+	{
+		return false;
+	}
+	return true;
+}
+
+
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderM15(MemoryFileReader file, const uint64 *pfilesize)
 {
 	M15FileHeaders fileHeaders;
@@ -1395,6 +1431,14 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderM15(MemoryFileReader file, co
 		return ProbeWantMoreData;
 	}
 	if(!ValidateHeader(fileHeaders))
+	{
+		return ProbeFailure;
+	}
+	if(!file.CanRead(64*4*4))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateFirstM15Pattern(file))
 	{
 		return ProbeFailure;
 	}
@@ -1413,6 +1457,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 	if(!ValidateHeader(fileHeaders))
+	{
+		return false;
+	}
+	if(!ValidateFirstM15Pattern(file))
 	{
 		return false;
 	}
@@ -1520,30 +1568,31 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		bool patternInUse = std::find(Order().cbegin(), Order().cend(), pat) != Order().cend();
 		uint8 numDxx = 0;
 		uint8 emptyCmds = 0;
+		uint8 patternData[64][4][4];
+		file.ReadArray(patternData);
+		if(patternInUse)
+		{
+			illegalBytes += CountIllegalM15PatternBytes(patternData);
+			// Reject files that contain a lot of illegal pattern data.
+			// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
+			// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
+			// This also allows to play some rather damaged files like
+			// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
+			// but naturally we cannot recover the broken data.
+
+			// We only check patterns that are actually being used in the order list, because some bad rips of the
+			// "operation wolf" soundtrack have 15 patterns for several songs, but the last few patterns are just garbage.
+			// Apart from those hidden patterns, the files play fine.
+			// Example: operation wolf - wolf1.mod (MD5 739acdbdacd247fbefcac7bc2d8abe6b, SHA1 e6b4813daacbf95f41ce9ec3b22520a2ae07eed8)
+			if(illegalBytes > 512)
+				return false;
+		}
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
-				uint8 data[4];
-				file.ReadArray(data);
+				uint8 (&data)[4] = patternData[row][chn];
 				const uint8 eff = data[2] & 0x0F, param = data[3];
-				if((data[0] & 0xF0) && patternInUse)
-				{
-					illegalBytes++;
-					// Reject files that contain a lot of illegal pattern data.
-					// STK.the final remix (MD5 5ff13cdbd77211d1103be7051a7d89c9, SHA1 e94dba82a5da00a4758ba0c207eb17e3a89c3aa3)
-					// has one illegal byte, so we only reject after an arbitrary threshold has been passed.
-					// This also allows to play some rather damaged files like
-					// crockets.mod (MD5 995ed9f44cab995a0eeb19deb52e2a8b, SHA1 6c79983c3b7d55c9bc110b625eaa07ce9d75f369)
-					// but naturally we cannot recover the broken data.
-
-					// We only check patterns that are actually being used in the order list, because some bad rips of the
-					// "operation wolf" soundtrack have 15 patterns for several songs, but the last few patterns are just garbage.
-					// Apart from those hidden patterns, the files play fine.
-					// Example: operation wolf - wolf1.mod (MD5 739acdbdacd247fbefcac7bc2d8abe6b, SHA1 e6b4813daacbf95f41ce9ec3b22520a2ae07eed8)
-					if(illegalBytes > 512)
-						return false;
-				}
 				// Check for empty space between the last Dxx command and the beginning of another pattern
 				if(emptyCmds != 0 && !memcmp(data, "\0\0\0\0", 4))
 				{
