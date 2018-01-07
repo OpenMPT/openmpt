@@ -103,8 +103,8 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	UpdateDialog();
 
 #define ScalePixels(x) Util::ScalePixels(x, m_hWnd)
-	int offsetx = ScalePixels(108), offsety = ScalePixels(30), separatorx = ScalePixels(4), separatory = ScalePixels(2);
-	int height = ScalePixels(18), widthMacro = ScalePixels(30), widthVal = ScalePixels(90), widthType = ScalePixels(135), widthBtn = ScalePixels(70);
+	int offsetx = ScalePixels(19), offsety = ScalePixels(30), separatorx = ScalePixels(4), separatory = ScalePixels(2);
+	int height = ScalePixels(18), widthMacro = ScalePixels(30), widthVal = ScalePixels(179), widthType = ScalePixels(135), widthBtn = ScalePixels(70);
 #undef ScalePixels
 
 	for(UINT m = 0; m < NUM_MACROS; m++)
@@ -206,14 +206,14 @@ void CMidiMacroSetup::UpdateDialog()
 
 	sfx = m_CbnSFx.GetCurSel();
 	sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
-	if(sfx < 16)
+	if(sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[sfx]));
 	}
 
 	zxx = m_CbnZxx.GetCurSel();
-	if(zxx < 0x80)
+	if(zxx < mpt::size(m_MidiCfg.szMidiZXXExt))
 	{
 		m_EditZxx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiZXXExt[zxx]));
 	}
@@ -392,7 +392,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 	} else
 	{
 		Reporting::Notification("Only parameters 0 to 383 can be controlled using MIDI Macros. Use Parameter Control Events to automate higher parameters.");
-	}	
+	}
 }
 
 void CMidiMacroSetup::OnCCChanged()
@@ -442,21 +442,20 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 	std::string macroStr = mpt::ToCharset(mpt::CharsetASCII, macroStrT);
 
 	bool allowed = true, caseChange = false;
-	for(std::size_t i = 0; i < macroStr.length(); i++)
+	for(char &c : macroStr)
 	{
-		char c = macroStr[i];
 		if(c == 'k' || c == 'K')			// Previously, 'K' was used for MIDI channel
 		{
 			caseChange = true;
-			macroStr[i] = 'c';
+			c = 'c';
 		} else if(c >= 'd' && c <= 'f')	// abc have special meanings, but def can be fixed
 		{
 			caseChange = true;
-			macroStr[i] = c - 'a' + 'A';
+			c = c - 'a' + 'A';
 		} else if(c == 'N' || c == 'V' || c == 'U' || c == 'X' || c == 'Y' || c == 'Z' || c == 'P')
 		{
 			caseChange = true;
-			macroStr[i] = c - 'A' + 'a';
+			c = c - 'A' + 'a';
 		} else if(!(
 			(c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'c') ||
 			(c == 'v' || c == 'u' || c == 'x' || c == 'y' || c == 'p' || c == 'n' || c == ' ') ||
