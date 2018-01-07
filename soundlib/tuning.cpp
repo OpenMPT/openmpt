@@ -731,7 +731,7 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::CharsetISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
 	mpt::IO::WriteTextCRLF(f, "!");
 	std::string name = mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetName());
-	for(auto & c : name) { if(c < 32) c = ' '; } // remove control characters
+	for(auto & c : name) { if(static_cast<uint8>(c) < 32) c = ' '; } // remove control characters
 	if(name.length() >= 1 && name[0] == '!') name[0] = '?'; // do not confuse description with comment
 	mpt::IO::WriteTextCRLF(f, name);
 	if(GetType() == TT_GEOMETRIC)
