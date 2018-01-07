@@ -271,6 +271,7 @@ public:
 	{
 		return m_Traits;
 	}
+	virtual bool IsBitrateSupported(int samplerate, int channels, int bitrate) const;
 	virtual mpt::ustring DescribeQuality(float quality) const;
 	virtual mpt::ustring DescribeBitrateVBR(int bitrate) const;
 	virtual mpt::ustring DescribeBitrateABR(int bitrate) const;
