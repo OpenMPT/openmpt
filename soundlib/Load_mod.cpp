@@ -708,6 +708,14 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult *result)
 			r->m_nChannels = magic[2] - '0';
 			r->m_madeWithTracker = MPT_USTRING("Octalyser (Atari)");
 		}
+	} else if(IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0"))
+	{
+		// Inconexia demo by Iguana, delta samples (https://www.pouet.net/prod.php?which=830)
+		if(r)
+		{
+			r->m_nChannels = (magic[0] == '8') ? 8 : 4;
+			r->m_madeWithTracker = MPT_USTRING("Inconexia demo (delta samples)");
+		}
 	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
 	{
 		// Digital Tracker on Atari Falcon
@@ -819,6 +827,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
 	bool isStartrekker = modMagicResult.isStartrekker;
 	bool isGenericMultiChannel = modMagicResult.isGenericMultiChannel;
+	bool isInconexia = IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0");
 	if(modMagicResult.setMODVBlankTiming)
 	{
 		m_playBehaviour.set(kMODVBlankTiming);
@@ -1124,6 +1133,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_SongFlags.set(SONG_ISAMIGA);
 	}
+	if(isInconexia)
+	{
+		m_playBehaviour.set(kMODIgnorePanning);
+	}
 
 	// Reading samples
 	if(loadFlags & loadSampleData)
@@ -1134,7 +1147,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[smp];
 			if(sample.nLength)
 			{
-				SampleIO::Encoding encoding = file.ReadMagic("ADPCM") ? SampleIO::ADPCM : SampleIO::signedPCM;
+				SampleIO::Encoding encoding = SampleIO::signedPCM;
+				if(isInconexia)
+					encoding = SampleIO::deltaPCM;
+				else if(file.ReadMagic("ADPCM"))
+					encoding = SampleIO::ADPCM;
 
 				SampleIO sampleIO(
 					SampleIO::_8bit,
