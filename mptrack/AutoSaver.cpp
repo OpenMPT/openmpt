@@ -79,8 +79,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 		theApp.BeginWaitCursor(); //display hour glass
 
-		auto docs = theApp.GetOpenDocuments();
-		for(auto &modDoc : docs)
+		for(auto &modDoc : theApp.GetOpenDocuments())
 		{
 			if(modDoc->ModifiedSinceLastAutosave())
 			{
@@ -112,8 +111,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 bool CAutoSaver::CheckTimer(DWORD curTime)
 {
-	DWORD curInterval = curTime - m_nLastSave;
-	return (curInterval >= GetSaveIntervalMilliseconds());
+	return (curTime - m_nLastSave) >= GetSaveIntervalMilliseconds();
 }
 
 
@@ -141,8 +139,8 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		name = GetPath() + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
-	const mpt::ustring timeStamp = mpt::ToUnicode((CTime::GetCurrentTime()).Format(_T(".AutoSave.%Y%m%d.%H%M%S.")));
-	name += mpt::PathString::FromUnicode(timeStamp);			//append backtup tag + timestamp
+	const CString timeStamp = CTime::GetCurrentTime().Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
+	name += mpt::PathString::FromCString(timeStamp);			//append backtup tag + timestamp
 	name += mpt::PathString::FromUTF8(modDoc.GetSoundFile().GetModSpecifications().fileExtension);
 
 	return name;
@@ -195,7 +193,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	
 	if(GetUseOriginalPath())
 	{
-		if (modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
+		if(modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
 		{
 			// File has a user-chosen path - remove filename
 			path = path.GetPath();
@@ -209,9 +207,10 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 		path = GetPath();
 	}
 
-	std::vector<mpt::PathString> foundfiles;
+	std::vector<mpt::RawPathString> foundfiles;
 	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
+	// Find all autosave files for this document, and delete the oldest ones if there are more than the user wants.
 	WIN32_FIND_DATAW findData;
 	MemsetZero(findData);
 	HANDLE hFindFile = FindFirstFileW(searchPattern.AsNative().c_str(), &findData);
@@ -221,7 +220,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 		{
 			if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
-				foundfiles.push_back(path + mpt::PathString::FromNative(findData.cFileName));
+				foundfiles.push_back(findData.cFileName);
 			}
 		} while(FindNextFileW(hFindFile, &findData));
 		FindClose(hFindFile);
@@ -229,10 +228,10 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	}
 	std::sort(foundfiles.begin(), foundfiles.end());
 	
-	while(foundfiles.size() > static_cast<size_t>(GetHistoryDepth()))
+	size_t filesToDelete = std::max(static_cast<size_t>(GetHistoryDepth()), foundfiles.size()) - GetHistoryDepth();
+	for(size_t i = 0; i < filesToDelete; i++)
 	{
-		DeleteFileW(foundfiles[0].AsNative().c_str());
-		foundfiles.erase(foundfiles.begin());
+		DeleteFileW((path + mpt::PathString::FromNative(foundfiles[i])).AsNative().c_str());
 	}
 	
 }
