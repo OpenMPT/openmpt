@@ -228,6 +228,16 @@ std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::
 }
 
 
+bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate) const
+{
+	vorbis_info vi;
+	vorbis_info_init(&vi);
+	bool result = (0 == vorbis_encode_init(&vi, channels, samplerate, -1, bitrate * 1000, -1));
+	vorbis_info_clear(&vi);
+	return result;
+}
+
+
 mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
 	static const int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis

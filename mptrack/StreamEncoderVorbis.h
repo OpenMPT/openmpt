@@ -22,6 +22,7 @@ class VorbisEncoder : public EncoderFactoryBase
 public:
 
 	std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const override;
+	bool IsBitrateSupported(int samplerate, int channels, int bitrate) const override;
 	mpt::ustring DescribeQuality(float quality) const override;
 	bool IsAvailable() const override;
 

@@ -97,6 +97,15 @@ void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits)
 }
 
 
+bool EncoderFactoryBase::IsBitrateSupported(int samplerate, int channels, int bitrate) const
+{
+	MPT_UNREFERENCED_PARAMETER(samplerate);
+	MPT_UNREFERENCED_PARAMETER(channels);
+	MPT_UNREFERENCED_PARAMETER(bitrate);
+	return true;
+}
+
+
 mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
 {
 	return mpt::format(MPT_USTRING("VBR %1%%"))(static_cast<int>(quality * 100.0f));
