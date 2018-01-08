@@ -323,6 +323,13 @@ struct MODSampleHeader
 
 	// Suggested threshold for rejecting invalid files based on cumulated score returned by GetInvalidByteScore
 	static const uint32 INVALID_BYTE_THRESHOLD = 40;
+	
+	// This threshold is used for files where the file magic only gives a
+	// fragile result which alone would lead to too many false positives.
+	// In particular, the files from Inconexia demo by Iguana
+	// (https://www.pouet.net/prod.php?which=830) which have 3 \0 bytes in
+	// the file magic tend to cause misdetection of random files.
+	static const uint32 INVALID_BYTE_FRAGILE_THRESHOLD = 1;
 
 	// Retrieve the internal sample format flags for this sample.
 	static SampleIO GetSampleFormat()
@@ -666,9 +673,12 @@ struct MODMagicResult
 };
 
 
-static bool CheckMODMagic(const char magic[4], MODMagicResult *result)
+static bool CheckMODMagic(const char magic[4], bool &isFragile, MODMagicResult *result)
 {
+	// Semantics of isFragile is documented above.
+	// See INVALID_BYTE_FRAGILE_THRESHOLD.
 	MODMagicResult *r = result;
+	isFragile = false;
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (>64 patterns)
 		|| IsMagic(magic, "PATT")	// ProTracker 3.6
@@ -710,7 +720,8 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult *result)
 		}
 	} else if(IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0"))
 	{
-		// Inconexia demo by Iguana, delta samples (https://www.pouet.net/prod.php?which=830)
+		// Inconexia demo by Iguana, delta samples (https://www.pouet<.net/prod.php?which=830)
+		isFragile = true;
 		if(r)
 		{
 			r->m_nChannels = (magic[0] == '8') ? 8 : 4;
@@ -778,7 +789,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 	file.Seek(1080);
 	char magic[4];
 	file.ReadArray(magic);
-	if(!CheckMODMagic(magic, nullptr))
+	bool isFragile = false;
+	if(!CheckMODMagic(magic, isFragile, nullptr))
 	{
 		return ProbeFailure;
 	}
@@ -791,7 +803,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 		file.ReadStruct(sampleHeader);
 		invalidBytes += sampleHeader.GetInvalidByteScore();
 	}
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD || (isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
 	{
 		return ProbeFailure;
 	}
@@ -812,7 +824,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 
 	MODMagicResult modMagicResult;
-	if(!CheckMODMagic(magic, &modMagicResult))
+	bool isFragile = false;
+	if(!CheckMODMagic(magic, isFragile, &modMagicResult))
 	{
 		return false;
 	}
@@ -865,7 +878,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD || (isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
 	{
 		return false;
 	}
