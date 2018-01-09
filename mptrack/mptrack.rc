@@ -1717,7 +1717,6 @@ BEGIN
     PUSHBUTTON      "Set as default",IDC_BUTTON1,300,42,50,14
     PUSHBUTTON      "Reset",IDC_BUTTON2,300,60,50,14
     GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,6,6,288,272
-    LTEXT           "Current Macros:",IDC_STATIC,18,18,54,8
     LTEXT           "Modify macro:",IDC_STATIC,13,221,47,8
     COMBOBOX        IDC_COMBO1,13,231,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Type:",IDC_STATIC,64,221,47,8
