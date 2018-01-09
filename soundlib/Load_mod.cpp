@@ -664,114 +664,82 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 
 struct MODMagicResult
 {
-	CHANNELINDEX m_nChannels       = 4;
-	mpt::ustring m_madeWithTracker = mpt::ustring();
-	bool isNoiseTracker            = false;
-	bool isStartrekker             = false;
-	bool isGenericMultiChannel     = false;
-	bool setMODVBlankTiming        = false;
+	const MPT_UCHAR_TYPE *madeWithTracker = nullptr;
+	CHANNELINDEX numChannels   = 0;
+	bool isFragile             = false; // Semantics of isFragile is documented above. See INVALID_BYTE_FRAGILE_THRESHOLD.
+	bool isNoiseTracker        = false;
+	bool isStartrekker         = false;
+	bool isGenericMultiChannel = false;
+	bool setMODVBlankTiming    = false;
 };
 
 
-static bool CheckMODMagic(const char magic[4], bool &isFragile, MODMagicResult *result)
+static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 {
-	// Semantics of isFragile is documented above.
-	// See INVALID_BYTE_FRAGILE_THRESHOLD.
-	MODMagicResult *r = result;
-	isFragile = false;
+	result.isFragile = false;
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (>64 patterns)
 		|| IsMagic(magic, "PATT")	// ProTracker 3.6
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
-		if(r)
-		{
-			r->m_nChannels = 4;
-			r->m_madeWithTracker = MPT_USTRING("Generic ProTracker or compatible");
-		}
+		result.madeWithTracker = MPT_ULITERAL("Generic ProTracker or compatible");
+		result.numChannels = 4;
 	} else if(IsMagic(magic, "M&K!")	// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "FEST")		// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "N.T."))
 	{
-		if(r)
-		{
-			r->m_nChannels = 4;
-			r->m_madeWithTracker = MPT_USTRING("NoiseTracker");
-			r->isNoiseTracker = true;
-		}
+		result.madeWithTracker = MPT_ULITERAL("NoiseTracker");
+		result.isNoiseTracker = true;
+		result.numChannels = 4;
 	} else if(IsMagic(magic, "OKTA")
 		|| IsMagic(magic, "OCTA"))
 	{
 		// Oktalyzer
-		if(r)
-		{
-			r->m_nChannels = 8;
-			r->m_madeWithTracker = MPT_USTRING("Oktalyzer");
-		}
+		result.madeWithTracker = MPT_ULITERAL("Oktalyzer");
+		result.numChannels = 8;
 	} else if(IsMagic(magic, "CD81")
 		|| IsMagic(magic, "CD61"))
 	{
 		// Octalyser on Atari STe/Falcon
-		if(r)
-		{
-			r->m_nChannels = magic[2] - '0';
-			r->m_madeWithTracker = MPT_USTRING("Octalyser (Atari)");
-		}
+		result.madeWithTracker = MPT_ULITERAL("Octalyser (Atari)");
+		result.numChannels = magic[2] - '0';
 	} else if(IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0"))
 	{
-		// Inconexia demo by Iguana, delta samples (https://www.pouet<.net/prod.php?which=830)
-		isFragile = true;
-		if(r)
-		{
-			r->m_nChannels = (magic[0] == '8') ? 8 : 4;
-			r->m_madeWithTracker = MPT_USTRING("Inconexia demo (delta samples)");
-		}
+		// Inconexia demo by Iguana, delta samples (https://www.pouet.net/prod.php?which=830)
+		result.madeWithTracker = MPT_ULITERAL("Inconexia demo (delta samples)");
+		result.isFragile = true;
+		result.numChannels = (magic[0] == '8') ? 8 : 4;
 	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
 	{
 		// Digital Tracker on Atari Falcon
-		if(r)
-		{
-			r->m_nChannels = magic[3] - '0';
-			r->m_madeWithTracker = MPT_USTRING("Digital Tracker");
-		}
+		result.madeWithTracker = MPT_ULITERAL("Digital Tracker");
+		result.numChannels = magic[3] - '0';
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
-		if(r)
-		{
-			r->m_nChannels = magic[3] - '0';
-			r->m_madeWithTracker = MPT_USTRING("Startrekker");
-			r->isStartrekker = true;
-			r->setMODVBlankTiming = true;
-		}
+		result.madeWithTracker = MPT_ULITERAL("Startrekker");
+		result.isStartrekker = true;
+		result.setMODVBlankTiming = true;
+		result.numChannels = magic[3] - '0';
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
-		if(r)
-		{
-			r->m_nChannels = magic[0] - '0';
-			r->m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
-			r->isGenericMultiChannel = true;
-		}
+		result.madeWithTracker = MPT_ULITERAL("Generic MOD-compatible Tracker");
+		result.isGenericMultiChannel = true;
+		result.numChannels = magic[0] - '0';
 	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1]>='0' && magic[1] <= '9'
 		&& (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
-		if(r)
-		{
-			r->m_nChannels = (magic[0] - '0') * 10 + magic[1] - '0';
-			r->m_madeWithTracker = MPT_USTRING("Generic MOD-compatible Tracker");
-			r->isGenericMultiChannel = true;
-		}
+		result.madeWithTracker = MPT_ULITERAL("Generic MOD-compatible Tracker");
+		result.isGenericMultiChannel = true;
+		result.numChannels = (magic[0] - '0') * 10 + magic[1] - '0';
 	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker
-		if(r)
-		{
-			r->m_nChannels = magic[3] - '0';
-			r->m_madeWithTracker = MPT_USTRING("TakeTracker");
-		}
+		result.madeWithTracker = MPT_ULITERAL("TakeTracker");
+		result.numChannels = magic[3] - '0';
 	} else
 	{
 		return false;
@@ -789,8 +757,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 	file.Seek(1080);
 	char magic[4];
 	file.ReadArray(magic);
-	bool isFragile = false;
-	if(!CheckMODMagic(magic, isFragile, nullptr))
+	MODMagicResult modMagicResult;
+	if(!CheckMODMagic(magic, modMagicResult))
 	{
 		return ProbeFailure;
 	}
@@ -803,7 +771,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 		file.ReadStruct(sampleHeader);
 		invalidBytes += sampleHeader.GetInvalidByteScore();
 	}
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD || (isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD
+		|| (modMagicResult.isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
 	{
 		return ProbeFailure;
 	}
@@ -824,8 +793,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 
 	MODMagicResult modMagicResult;
-	bool isFragile = false;
-	if(!CheckMODMagic(magic, isFragile, &modMagicResult))
+	if(!CheckMODMagic(magic, modMagicResult)
+		|| modMagicResult.numChannels < 1
+		|| modMagicResult.numChannels > MAX_BASECHANNELS)
 	{
 		return false;
 	}
@@ -835,8 +805,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	m_nChannels = modMagicResult.m_nChannels;
-	m_madeWithTracker = modMagicResult.m_madeWithTracker;
+	m_nChannels = modMagicResult.numChannels;
+	if(modMagicResult.madeWithTracker)
+	{
+		m_madeWithTracker = modMagicResult.madeWithTracker;
+	}
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
 	bool isStartrekker = modMagicResult.isStartrekker;
 	bool isGenericMultiChannel = modMagicResult.isGenericMultiChannel;
@@ -845,8 +818,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_playBehaviour.set(kMODVBlankTiming);
 	}
-
-	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
 	const bool isFLT8 = isStartrekker && m_nChannels == 8;
@@ -878,7 +849,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD || (isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
+	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD
+		|| (modMagicResult.isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
 	{
 		return false;
 	}
@@ -1289,10 +1261,10 @@ template<size_t N>
 static uint32 CountInvalidChars(const char (&name)[N])
 {
 	uint32 invalidChars = 0;
-	for(uint8 c : name)  // char can be signed or unsigned
+	for(int8 c : name)  // char can be signed or unsigned
 	{
 		// Check for any Extended ASCII and control characters
-		if((c != 0 && c < ' ') || c > 127)
+		if(c != 0 && c < ' ')
 			invalidChars++;
 	}
 	return invalidChars;
@@ -1301,7 +1273,7 @@ static uint32 CountInvalidChars(const char (&name)[N])
 
 // We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
 // or if it was made with the newer Soundtracker versions.
-// Thanks for Fraggie for this information! (http://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)
+// Thanks for Fraggie for this information! (https://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)
 enum STVersions
 {
 	UST1_00,				// Ultimate Soundtracker 1.0-1.21 (K. Obarski)
@@ -1323,6 +1295,8 @@ struct M15FileHeaders
 };
 
 MPT_BINARY_STRUCT(M15FileHeaders, 20 + 15 * 30 + 130)
+
+typedef uint8 M15PatternData[64][4][4];
 
 
 static bool ValidateHeader(const M15FileHeaders &fileHeaders)
@@ -1400,7 +1374,7 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 }
 
 
-static uint32 CountIllegalM15PatternBytes(const uint8 (&patternData)[64][4][4])
+static uint32 CountIllegalM15PatternBytes(const M15PatternData &patternData)
 {
 	uint32 illegalBytes = 0;
 	for(uint8 row = 0; row < 64; ++row)
@@ -1425,7 +1399,7 @@ static bool ValidateFirstM15Pattern(TFileReader &file)
 	{
 		return false;
 	}
-	file.SkipBack(64*4*4);
+	file.SkipBack(sizeof(patternData));
 	uint32 invalidBytes = CountIllegalM15PatternBytes(patternData);
 	// [threshold for all patterns combined] / [max patterns] * [margin, do not reject too much]
 	if(invalidBytes > 512 / 64 * 2)
@@ -1447,7 +1421,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderM15(MemoryFileReader file, co
 	{
 		return ProbeFailure;
 	}
-	if(!file.CanRead(64*4*4))
+	if(!file.CanRead(sizeof(M15PatternData)))
 	{
 		return ProbeWantMoreData;
 	}
@@ -1563,8 +1537,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			minVersion = std::max(minVersion, hasDiskNames ? UST1_80 : ST2_00_Exterminator);
 		}
 	}
-	m_nMinPeriod = 14 * 4;
-	m_nMaxPeriod = 3424 * 4;
+	m_nMinPeriod = 113 * 4;
+	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_PT_MODE);
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, songname);
@@ -1581,7 +1555,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		bool patternInUse = std::find(Order().cbegin(), Order().cend(), pat) != Order().cend();
 		uint8 numDxx = 0;
 		uint8 emptyCmds = 0;
-		uint8 patternData[64][4][4];
+		M15PatternData patternData;
 		file.ReadArray(patternData);
 		if(patternInUse)
 		{
@@ -1604,7 +1578,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
-				uint8 (&data)[4] = patternData[row][chn];
+				const uint8 (&data)[4] = patternData[row][chn];
 				const uint8 eff = data[2] & 0x0F, param = data[3];
 				// Check for empty space between the last Dxx command and the beginning of another pattern
 				if(emptyCmds != 0 && !memcmp(data, "\0\0\0\0", 4))
@@ -1679,9 +1653,11 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		Patterns.ResizeArray(numPatterns);
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
+		M15PatternData patternData;
+		file.ReadArray(patternData);
+
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
-			file.Skip(64 * 4 * 4);
 			continue;
 		}
 
@@ -1692,7 +1668,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				ReadMODPatternEntry(file, m);
+				ReadMODPatternEntry(patternData[row][chn], m);
 
 				if(!m.param || m.command == 0x0E)
 				{
