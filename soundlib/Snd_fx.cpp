@@ -368,6 +368,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					playState.m_nCurrentOrder = playState.m_nNextOrder;
 					playState.m_nPattern = orderList[playState.m_nCurrentOrder];
+					playState.m_nNextRow = playState.m_nRow;
 					break;
 				}
 			}
@@ -396,6 +397,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					retval.startRow = playState.m_nRow;
 					retval.startOrder = playState.m_nNextOrder;
 					memory.Reset();
+					playState.m_nNextRow = playState.m_nRow;
 					continue;
 				}
 			}
@@ -427,6 +429,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				retval.startRow = playState.m_nRow;
 				retval.startOrder = playState.m_nNextOrder;
 				memory.Reset();
+				playState.m_nNextRow = playState.m_nRow;
 				continue;
 			}
 		}
@@ -4360,7 +4363,6 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				{
 					pChn->nFineTune = MOD2XMFineTune(param - 8);
 					if(pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
-
 				}
 				break;
 	// E6x: Pattern Loop

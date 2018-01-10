@@ -665,18 +665,17 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 struct MODMagicResult
 {
 	const MPT_UCHAR_TYPE *madeWithTracker = nullptr;
-	CHANNELINDEX numChannels   = 0;
-	bool isFragile             = false; // Semantics of isFragile is documented above. See INVALID_BYTE_FRAGILE_THRESHOLD.
-	bool isNoiseTracker        = false;
-	bool isStartrekker         = false;
-	bool isGenericMultiChannel = false;
-	bool setMODVBlankTiming    = false;
+	uint32 invalidByteThreshold = MODSampleHeader::INVALID_BYTE_THRESHOLD;
+	CHANNELINDEX numChannels    = 0;
+	bool isNoiseTracker         = false;
+	bool isStartrekker          = false;
+	bool isGenericMultiChannel  = false;
+	bool setMODVBlankTiming     = false;
 };
 
 
 static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 {
-	result.isFragile = false;
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (>64 patterns)
 		|| IsMagic(magic, "PATT")	// ProTracker 3.6
@@ -708,7 +707,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	{
 		// Inconexia demo by Iguana, delta samples (https://www.pouet.net/prod.php?which=830)
 		result.madeWithTracker = MPT_ULITERAL("Inconexia demo (delta samples)");
-		result.isFragile = true;
+		result.invalidByteThreshold = MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD;
 		result.numChannels = (magic[0] == '8') ? 8 : 4;
 	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
 	{
@@ -771,8 +770,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 		file.ReadStruct(sampleHeader);
 		invalidBytes += sampleHeader.GetInvalidByteScore();
 	}
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD
-		|| (modMagicResult.isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
+	if(invalidBytes > modMagicResult.invalidByteThreshold)
 	{
 		return ProbeFailure;
 	}
@@ -849,8 +847,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD
-		|| (modMagicResult.isFragile && invalidBytes > MODSampleHeader::INVALID_BYTE_FRAGILE_THRESHOLD))
+	if(invalidBytes > modMagicResult.invalidByteThreshold)
 	{
 		return false;
 	}
