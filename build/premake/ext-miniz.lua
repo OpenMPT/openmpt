@@ -17,3 +17,5 @@
    "../../include/miniz/miniz.c",
    "../../include/miniz/miniz.h",
   }
+  filter { "action:vs*" }
+    buildoptions { "/wd4244" }
