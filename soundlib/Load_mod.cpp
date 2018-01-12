@@ -1301,7 +1301,7 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 	// In theory, sample and song names should only ever contain printable ASCII chars and null.
 	// However, there are quite a few SoundTracker modules in the wild with random
 	// characters. To still be able to distguish them from other formats, we just reject
-	// files with *too* many bogus characters. Arbitrary threshold: 20 bogus characters in total
+	// files with *too* many bogus characters. Arbitrary threshold: 48 bogus characters in total
 	// or more than 5 invalid characters just in the title alone.
 	uint32 invalidChars = CountInvalidChars(fileHeaders.songname);
 	if(invalidChars > 5)
@@ -1345,24 +1345,15 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 		return false;
 	}
 
-	for(uint8 ord : fileHeaders.fileHeader.orderList)
+	uint8 maxPattern = *std::max_element(std::begin(fileHeaders.fileHeader.orderList), std::end(fileHeaders.fileHeader.orderList));
+	// Sanity check: 64 patterns max.
+	if(maxPattern > 63)
 	{
-		// Sanity check: 64 patterns max.
-		if(ord > 63)
-		{
-			return false;
-		}
+		return false;
 	}
 	
-	bool allPatternsNull = true;
-	for(uint8 pat : fileHeaders.fileHeader.orderList)
-	{
-		if(pat != 0 && pat < 128)
-		{
-			allPatternsNull = false;
-		}
-	}
-	if(fileHeaders.fileHeader.restartPos == 0 && fileHeaders.fileHeader.numOrders == 0 && allPatternsNull)
+	// No playable song, and lots of null values => most likely a sparse binary file but not a module
+	if(fileHeaders.fileHeader.restartPos == 0 && fileHeaders.fileHeader.numOrders == 0 && maxPattern == 0)
 	{
 		return false;
 	}
@@ -1391,7 +1382,7 @@ static uint32 CountIllegalM15PatternBytes(const M15PatternData &patternData)
 template <typename TFileReader>
 static bool ValidateFirstM15Pattern(TFileReader &file)
 {
-	uint8 patternData[64][4][4];
+	M15PatternData patternData;
 	if(!file.ReadArray(patternData))
 	{
 		return false;
