@@ -82,7 +82,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const unsigned char *mp3, int mp3_bytes, 
 #define MINIMP3_MIN(a, b)           ((a) > (b) ? (b) : (a))
 #define MINIMP3_MAX(a, b)           ((a) < (b) ? (b) : (a))
 
-#if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
+#if defined(_MSC_VER) || ((defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__))
 #   include <immintrin.h>
 #   define HAVE_SSE 1
 #   define HAVE_SIMD 1
@@ -97,8 +97,10 @@ int mp3dec_decode_frame(mp3dec_t *dec, const unsigned char *mp3, int mp3_bytes, 
 #   define VMUL_S(x, s)  _mm_mul_ps(x, _mm_set1_ps(s))
 #   define VREV(x) _mm_shuffle_ps(x, x, _MM_SHUFFLE(0, 1, 2, 3))
 typedef __m128 f4;
-#ifndef _MSC_VER
-static __inline__ __attribute__((always_inline)) void __cpuid(int CPUInfo[], const int InfoType)
+#ifdef _MSC_VER
+#define minimp3_cpuid __cpuid
+#else
+static __inline__ __attribute__((always_inline)) void minimp3_cpuid(int CPUInfo[], const int InfoType)
 {
 #if defined(__PIC__)
     __asm__ __volatile__(
@@ -125,10 +127,10 @@ static __inline__ __attribute__((always_inline)) void __cpuid(int CPUInfo[], con
 static int have_simd()
 {
     int CPUInfo[4];
-    __cpuid(CPUInfo, 0);
+    minimp3_cpuid(CPUInfo, 0);
     if (CPUInfo[0] > 0)
     {
-        __cpuid(CPUInfo, 1);
+        minimp3_cpuid(CPUInfo, 1);
         return (CPUInfo[3] & (1 << 26)); // SSE2
     }
     return 0;
