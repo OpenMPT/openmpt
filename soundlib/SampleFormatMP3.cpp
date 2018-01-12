@@ -284,28 +284,34 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	{
 		int16 sample_buf[MINIMP3_MAX_SAMPLES_PER_FRAME];
 		int frame_samples = mp3dec_decode_frame(&mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf, &info);
-		if(frame_samples < 0 || info.frame_bytes < 0) break; // error
-		if(frame_samples == 0 && info.frame_bytes == 0) break; // no progress
-		if(rate != 0 && rate != info.hz) break; // inconsistent stream
-		if(channels != 0 && channels != info.channels) break; // inconsistent stream
-		rate = info.hz;
-		channels = info.channels;
-		if(rate <= 0) break; // broken stream
-		if(channels != 1 && channels != 2) break; // broken stream
-		stream_pos += info.frame_bytes;
-		bytes_left -= info.frame_bytes;
-		if(frame_samples >= 0)
+		if(frame_samples < 0 || info.frame_bytes < 0) break; // internal error in minimp3
+		if(frame_samples > 0 && info.frame_bytes == 0) break; // internal error in minimp3
+		if(frame_samples == 0 && info.frame_bytes == 0) break; // end of stream, no progress
+		if(frame_samples == 0 && info.frame_bytes > 0) MPT_DO { } MPT_WHILE_0; // decoder skipped non-mp3 data
+		if(frame_samples > 0 && info.frame_bytes > 0) MPT_DO { } MPT_WHILE_0; // normal
+		if(info.frame_bytes > 0)
 		{
-			try
+			if(rate != 0 && rate != info.hz) break; // inconsistent stream
+			if(channels != 0 && channels != info.channels) break; // inconsistent stream
+			rate = info.hz;
+			channels = info.channels;
+			if(rate <= 0) break; // broken stream
+			if(channels != 1 && channels != 2) break; // broken stream
+			stream_pos += mpt::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
+			bytes_left -= mpt::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
+			if(frame_samples > 0)
 			{
-				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + frame_samples);
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-				break;
+				try
+				{
+					raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + frame_samples);
+				} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+				{
+					MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+					break;
+				}
 			}
 		}
-	} while(bytes_left >= 0);
+	} while(bytes_left > 0);
 
 	if(rate == 0 || channels == 0 || raw_sample_data.empty())
 	{
@@ -319,7 +325,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
-	Samples[sample].nLength = raw_sample_data.size() / channels;
+	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
