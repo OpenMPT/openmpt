@@ -1,5 +1,5 @@
 minimp3 library from https://github.com/lieff/minimp3
-commit 1142850b71877b4ef37581bdeb8fd6886c4b9c73 (2018-01-12) 
+commit a6e6ad09fefad8f58a9a5ac0370946cb659282e9 (2018-01-12) 
 The following changes have been made:
  *  minimp3.c has been added
 
