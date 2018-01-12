@@ -672,9 +672,8 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 #ifdef MPT_WITH_MINIMP3
-		"Fabrice Bellard, FFMPEG contributors\n"
-		"and Martin J. Fiedler (KeyJ/kakiarts) for minimp3\n"
-		"http://keyj.emphy.de/minimp3/\n"
+		"Lion (github.com/lieff) for minimp3\n"
+		"https://github.com/lieff/minimp3/\n"
 		"\n"
 #endif
 #ifdef MPT_WITH_STBVORBIS

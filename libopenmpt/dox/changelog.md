@@ -13,10 +13,17 @@ is just a high-level summary.
     this variable will be put in `libopenmpt.pc` `Libs.private` and used for
     nothing else. See \ref libopenmpt_c_staticlinking .
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
+ *  [**New**] libopenmpt Emscwripten builds noe ship with mp3 support by
+    default, based on minimp3 by Lion (github.com/lieff).
 
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
 
+ *  [**Change**] minimp3: Instead of the LGPL-2.1-licensed minimp3 by KeyJ,
+    libopenmpt now uses the CC0-1.0-licensed minimp3 by Lion (github.com/lieff)
+    as a fallback if libmpg123 is unavailable. The `USE_MINIMP3` `Makefile`
+    option is gone and minimp3 will be used automatically in the `Makefile`
+    build system if libmpg123 is not available.
  *  [**Change**] openmpt123: openmpt123 now rejects `--output-type` in `--ui`
     and `--batch` modes and also rejects `--output` in `--render` mode. These
     combinations of options really made no sense and were rather confusing.

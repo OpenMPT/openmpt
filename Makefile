@@ -69,10 +69,8 @@
 #  NO_VORBIS=1      Avoid using libvorbis, even if found
 #  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
+#  NO_MINIMP3=1     Do not fallback to minimp3
 #  NO_STBVORBIS=1   Do not fallback to stb_vorbis
-#
-#  USE_MINIMP3=1    Use minimp3.
-#                   Beware that minimp3 is LGPL 2.1 licensed.
 #
 # Build flags for libopenmpt examples and openmpt123
 #  (provide on each `make` invocation)
@@ -717,7 +715,8 @@ endif
 include/minimp3/minimp3.o : CFLAGS+=$(CFLAGS_SILENT)
 include/minimp3/minimp3.test.o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(NO_MPG123),1)
-ifeq ($(USE_MINIMP3),1)
+ifeq ($(NO_MINIMP3),1)
+else
 LIBOPENMPT_C_SOURCES += include/minimp3/minimp3.c
 LIBOPENMPTTEST_C_SOURCES += include/minimp3/minimp3.c
 CPPFLAGS += -DMPT_WITH_MINIMP3

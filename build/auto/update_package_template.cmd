@@ -8,6 +8,7 @@ copy /y ..\include\flac\COPYING.Xiph                      .\Licenses\License.FLA
 rem copy /y ..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 rem copy /y ..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 copy /y ..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
+rem copy /y ..\..\include\minimp3\LICENSE                     .\Licenses\License.minimp3.txt || goto error
 rem copy /y ..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
 copy /y ..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
