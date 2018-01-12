@@ -4,7 +4,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   mpt_projectname = "minimp3"
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
@@ -19,7 +19,6 @@
    "../../include/minimp3/minimp3.c",
    "../../include/minimp3/minimp3.h",
   }
-  filter { "action:vs*" }
+  filter { "action:vs*", "kind:SharedLib" }
     files { "../../build/premake/def/ext-minimp3.def" }
-    buildoptions { "/wd4244" }
   filter {}

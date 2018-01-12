@@ -26,9 +26,7 @@
 #include "MPEGFrame.h"
 #endif // MPT_ENABLE_MP3_SAMPLES
 #if defined(MPT_WITH_MINIMP3)
-extern "C" {
 #include <minimp3/minimp3.h>
-}
 #endif // MPT_WITH_MINIMP3
 
 // mpg123 must be last because of mpg123 large file support insanity
@@ -273,39 +271,41 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 	std::vector<int16> raw_sample_data;
 
-	mp3_decoder_t *mp3 = mp3_create();
+	mp3dec_t mp3;
+	std::memset(&mp3, 0, sizeof(mp3dec_t));
+	mp3dec_init(&mp3);
 	
 	int rate = 0;
 	int channels = 0;
 
-	mp3_info_t info;
-	int frame_size = 0;
+	mp3dec_frame_info_t info;
+	std::memset(&info, 0, sizeof(mp3dec_frame_info_t));
 	do
 	{
-		int16 sample_buf[MP3_MAX_SAMPLES_PER_FRAME];
-		frame_size = mp3_decode(mp3, const_cast<uint8 *>(stream_pos), mpt::saturate_cast<int>(bytes_left), sample_buf, &info); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
-		if(rate != 0 && rate != info.sample_rate) break; // inconsistent stream
+		int16 sample_buf[MINIMP3_MAX_SAMPLES_PER_FRAME];
+		int frame_samples = mp3dec_decode_frame(&mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf, &info);
+		if(frame_samples < 0 || info.frame_bytes < 0) break; // error
+		if(frame_samples == 0 && info.frame_bytes == 0) break; // no progress
+		if(rate != 0 && rate != info.hz) break; // inconsistent stream
 		if(channels != 0 && channels != info.channels) break; // inconsistent stream
-		rate = info.sample_rate;
+		rate = info.hz;
 		channels = info.channels;
 		if(rate <= 0) break; // broken stream
 		if(channels != 1 && channels != 2) break; // broken stream
-		stream_pos += frame_size;
-		bytes_left -= frame_size;
-		if(info.audio_bytes >= 0)
+		stream_pos += info.frame_bytes;
+		bytes_left -= info.frame_bytes;
+		if(frame_samples >= 0)
 		{
 			try
 			{
-				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
+				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + frame_samples);
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
 				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 				break;
 			}
 		}
-	} while((bytes_left >= 0) && (frame_size > 0));
-
-	mp3_free(mp3);
+	} while(bytes_left >= 0);
 
 	if(rate == 0 || channels == 0 || raw_sample_data.empty())
 	{

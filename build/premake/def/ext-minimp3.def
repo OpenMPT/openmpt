@@ -1,6 +1,5 @@
 LIBRARY
 EXPORTS
 ;
-mp3_create
-mp3_decode
-mp3_done
+mp3dec_init
+mp3dec_decode_frame
