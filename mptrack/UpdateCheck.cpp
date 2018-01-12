@@ -159,6 +159,7 @@ void CUpdateCheck::ThreadFunc::operator () ()
 CUpdateCheck::CUpdateCheck()
 	: internetHandle(nullptr)
 	, connectionHandle(nullptr)
+	, requestHandle(nullptr)
 {
 	return;
 }
@@ -399,6 +400,11 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 
 CUpdateCheck::~CUpdateCheck()
 {
+	if(requestHandle != nullptr)
+	{
+		InternetCloseHandle(requestHandle);
+		connectionHandle = nullptr;	
+	}
 	if(connectionHandle != nullptr)
 	{
 		InternetCloseHandle(connectionHandle);
