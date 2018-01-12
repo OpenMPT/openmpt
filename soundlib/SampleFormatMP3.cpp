@@ -187,9 +187,15 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		return false;
 	}
 
-	mpg123_handle *mh;
-	int err;
-	if((mh = mpg123_new(0, &err)) == nullptr)
+	struct MPG123Handle
+	{
+		mpg123_handle *mh;
+		MPG123Handle() : mh(mpg123_new(0, nullptr)) { }
+		~MPG123Handle() { mpg123_delete(mh); }
+		operator mpg123_handle *() { return mh; }
+	};
+	MPG123Handle mh;
+	if(!mh)
 	{
 		return false;
 	}
@@ -200,38 +206,31 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	// Set up decoder...
 	if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	if(mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	if(mpg123_open_handle(mh, &file))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	if(mpg123_scan(mh))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	if(mpg123_getformat(mh, &rate, &nchannels, &encoding))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	if(!nchannels || nchannels > 2 || (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED))
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 	length = mpg123_length(mh);
 	if(length == 0)
 	{
-		mpg123_delete(mh);
 		return false;
 	}
 
@@ -253,7 +252,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		mpg123_size_t ndecoded = 0;
 		mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	}
-	mpg123_delete(mh);
 
 	if(!mo3Decode)
 	{
@@ -325,7 +323,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
-	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
+	Samples[sample].nLength = raw_sample_data.size() / channels;
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
