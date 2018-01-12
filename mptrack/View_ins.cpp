@@ -702,17 +702,17 @@ int CViewInstrument::ScreenToValue(int y) const
 int CViewInstrument::ScreenToPoint(int x0, int y0) const
 {
 	int nPoint = -1;
-	int ydist = 0xFFFF, xdist = 0xFFFF;
-	int maxpoint = EnvGetLastPoint();
-	for (int i=0; i<=maxpoint; i++)
+	int64 ydist = int64_max, xdist = int64_max;
+	int numPoints = EnvGetNumPoints();
+	for(int i = 0; i < numPoints; i++)
 	{
 		int dx = x0 - PointToScreen(i);
-		int dx2 = dx*dx;
-		if (dx2 <= xdist)
+		int64 dx2 = Util::mul32to64(dx, dx);
+		if(dx2 <= xdist)
 		{
 			int dy = y0 - ValueToScreen(EnvGetValue(i));
-			int dy2 = dy*dy;
-			if ((dx2 < xdist) || ((dx2 == xdist) && (dy2 < ydist)))
+			int64 dy2 = Util::mul32to64(dy, dy);
+			if(dx2 < xdist || (dx2 == xdist && dy2 < ydist))
 			{
 				nPoint = i;
 				xdist = dx2;
@@ -1722,9 +1722,12 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 void CViewInstrument::OnMButtonDown(UINT, CPoint pt)
 {
 	// Middle mouse button: Remove envelope point
-	if(EnvGetLastPoint() == 0) return;
-	m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
-	EnvRemovePoint(m_nDragItem - 1);
+	int point = ScreenToPoint(pt.x, pt.y);
+	if(point >= 0)
+	{
+		EnvRemovePoint(point);
+		m_nDragItem = point + 1;
+	}
 }
 
 
