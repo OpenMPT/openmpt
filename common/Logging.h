@@ -283,6 +283,8 @@ public:
 
 #else // !MODPLUG_TRACKER
 
+#define MPT_TRACE_SCOPE() MPT_DO { } MPT_WHILE_0
+
 #define MPT_TRACE() MPT_DO { } MPT_WHILE_0
 
 #endif // MODPLUG_TRACKER
