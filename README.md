@@ -5,6 +5,13 @@ README
 OpenMPT and libopenmpt
 ======================
 
+This repository contains OpenMPT, a free Windows/Wine-based
+[tracker](https://en.wikipedia.org/wiki/Music_tracker) and libopenmpt,
+a library to render tracker music (MOD, XM, S3M, IT MPTM and dozens of other
+legacy formats) to a PCM audio stream. libopenmpt is directly based on OpenMPT,
+offering the same playback quality and format support, and development of the
+two happens in parallel.
+
 
 How to compile
 --------------
