@@ -1557,7 +1557,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
 #if defined(MPT_WITH_STBVORBIS)
-			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
+			std::size_t initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
 #endif // MPT_WITH_STBVORBIS
 
 #endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
@@ -1650,7 +1650,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(sharedHeader)
 			{
 				FileReader::PinnedRawDataView headChunkView = headerChunk.GetPinnedRawDataView(initialRead);
-				vorb = stb_vorbis_open_pushdata(headChunkView.data(), headChunkView.size(), &consumed, &error, nullptr);
+				vorb = stb_vorbis_open_pushdata(headChunkView.data(), mpt::saturate_cast<int>(headChunkView.size()), &consumed, &error, nullptr);
 				headerChunk.Skip(consumed);
 			}
 			FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
