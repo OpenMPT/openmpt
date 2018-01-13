@@ -319,7 +319,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
-	Samples[sample].nLength = raw_sample_data.size() / channels;
+	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
