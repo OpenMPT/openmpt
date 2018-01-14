@@ -4,7 +4,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
   mpt_projectname = "miniz"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
@@ -19,3 +19,7 @@
   }
   filter { "action:vs*" }
     buildoptions { "/wd4244" }
+	filter {}
+  filter { "kind:SharedLib" }
+   files { "../../build/premake/def/ext-miniz.def" }
+	filter {}
