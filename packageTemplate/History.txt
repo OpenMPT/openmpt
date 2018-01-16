@@ -20,7 +20,7 @@ Developers:
    <sp>    pelya      / Sergiy Pylypenko [pelya]
    <tn>    plastik_s  / Trevor Nunes     [plastik_s]
 Patch submitters:
-   <cm>    kode54     / Christopher Snowhill
+   <cs>    kode54     / Christopher Snowhill
    <da>    Revenant   / Devin Acker
    <ih>    xaimus     / Imran Hameed
    <ks>    coda       / Ken Snyder
@@ -30,12 +30,38 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.04.00 (* January 2017, revision 9381)
+v1.27.04.00 (* January 2017, revision 9429)
 -------------------------------------------
+Pattern tab
+   [Fix] <js> Shrinking a selection did not work as intended when merging an effect command for the second row of two merged rows.
+   [Fix] <js> It was possible to interpolate columns even if pattern editing was disabled. 
+
 Sample tab
    [Imp] <js> When dropping a sample with no filename from another module, copy the module name to the filename field instead.
    [Fix] <js> Dropping a sample from another module did not adjust its parameters to the new module format.
    [Fix] <js> When reading an ITI file as a sample, the middle-C sample was not used as intended in ITIs written with old versions of Schism Tracker.
+
+MPTM::Custom Tuning
+   [Fix] <jh> SCL: Do not replace ISO 8859-1 characters with space when writing the name.
+
+XM
+   [Fix] <js> E60 bug was not considered in song lenght calucation.
+
+MOD
+   [New] <js> Support MOD files from the Inconexia demo by Iguana.
+   [Mod] <jh & js> Tighten M15 and MOD file rejection heuristics.
+
+Other formats
+   [Fix] <js> J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken since OpenMPT 1.26.
+
+Stream Export
+   [Fix] <js> Vorbis: Do not show ABR bitrates that are not supported (http://bugs.openmpt.org/view.php?id=1074).
+
+Misc
+   [Fix] <js> The total song length was sometimes estimated as "0mn60s" instead of "1mn00s" or similar.
+
+Bundled plugins
+   [Fix] <js> LFO Plugin: Closing the plugin editor while the pattern editor was open could lead to the LFO waveform being changed unintentionally.
 
 
 v1.27.03.00 (17 December 2017, revision 9370)
@@ -4054,7 +4080,7 @@ Misc
    [Imp] <js> Autosave: If a module has not been changed since the last autosave, it will not be autosaved.
    [Imp] <js> Module loader: If plugins are missing, a single message box is shown.
    [Imp] <js> Slight redesign of the WAV / MP3 export dialogs.
-   [Imp] <cm> LHA Decoder: Several fixes
+   [Imp] <cs> LHA Decoder: Several fixes
    [Mod] <al> Default keybindings are now included in the executable, so default keybindings are available even without external keybinding file.
    [Fix] <js> Menus: Added mnemonic keys again and replaced the last(?) remaining "Midi" labels by "MIDI".
    [Fix] <js> Wav Export / Channel Manager / Pattern Editor: Channel names with leading space char are now accepted.
