@@ -2238,7 +2238,9 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName)
 {
 	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
-	if(addDeviceName && friendlyName != deviceName)
+	if(friendlyName.empty())
+		return deviceName;
+	else if(addDeviceName && friendlyName != deviceName)
 		return friendlyName + MPT_ULITERAL(" (") + deviceName + MPT_ULITERAL(")");
 	else
 		return friendlyName;
