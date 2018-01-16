@@ -33,7 +33,7 @@ struct STMSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
 
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
