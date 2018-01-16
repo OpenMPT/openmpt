@@ -23,6 +23,7 @@ project "pfc"
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd4091", "/wd4356", "/wd4995", "/wd4996" }
+		buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
 	filter {}
 	files {
 "../../include/foobar2000sdk/pfc/alloc.h",
@@ -113,6 +114,7 @@ project "foobar2000_SDK"
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd4091", "/wd4356", "/wd4995", "/wd4996" }
+		buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
 	filter {}
 	files {
 "../../include/foobar2000sdk/foobar2000/SDK/abort_callback.cpp",
@@ -267,6 +269,7 @@ project "foobar2000_sdk_helpers"
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd4091", "/wd4356", "/wd4995", "/wd4996" }
+		buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
 	filter {}
 	files {
 "../../include/foobar2000sdk/foobar2000/helpers/bitreader_helper.h",
@@ -358,6 +361,7 @@ project "foobar2000_component_client"
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd4091", "/wd4356", "/wd4995", "/wd4996" }
+		buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
 	filter {}
 	files {
 "../../include/foobar2000sdk/foobar2000/foobar2000_component_client/component_client.cpp",
