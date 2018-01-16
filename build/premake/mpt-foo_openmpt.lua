@@ -46,6 +46,7 @@
 	filter {}
 
   characterset "Unicode"
+	buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123" }
 	links { "delayimp" }
    linkoptions {
