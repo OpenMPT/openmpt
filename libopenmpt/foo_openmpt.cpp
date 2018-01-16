@@ -260,7 +260,7 @@ public:
 		std::transform( ext.begin(), ext.end(), ext.begin(), tolower );
 		return std::find( extensions.begin(), extensions.end(), ext ) != extensions.end();
 	}
-public:
+private:
 	service_ptr_t<file> m_file;
 	static const std::size_t buffersize = 1024;
 	foo_openmpt_settings settings;
@@ -270,6 +270,7 @@ public:
 	std::vector<float> rear_left;
 	std::vector<float> rear_right;
 	std::vector<float> buffer;
+public:
 	input_openmpt() : mod(0), left(buffersize), right(buffersize), rear_left(buffersize), rear_right(buffersize), buffer(4*buffersize) {}
 	~input_openmpt() { delete mod; mod = 0; }
 };
