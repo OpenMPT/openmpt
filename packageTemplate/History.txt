@@ -20,7 +20,7 @@ Developers:
    <sp>    pelya      / Sergiy Pylypenko [pelya]
    <tn>    plastik_s  / Trevor Nunes     [plastik_s]
 Patch submitters:
-   <cm>    kode54     / Chris Moeller
+   <cs>    kode54     / Christopher Snowhill
    <da>    Revenant   / Devin Acker
    <ih>    xaimus     / Imran Hameed
    <ks>    coda       / Ken Snyder
@@ -3984,7 +3984,7 @@ Misc
    [Imp] <js> Autosave: If a module has not been changed since the last autosave, it will not be autosaved.
    [Imp] <js> Module loader: If plugins are missing, a single message box is shown.
    [Imp] <js> Slight redesign of the WAV / MP3 export dialogs.
-   [Imp] <cm> LHA Decoder: Several fixes
+   [Imp] <cs> LHA Decoder: Several fixes
    [Mod] <al> Default keybindings are now included in the executable, so default keybindings are available even without external keybinding file.
    [Fix] <js> Menus: Added mnemonic keys again and replaced the last(?) remaining "Midi" labels by "MIDI".
    [Fix] <js> Wav Export / Channel Manager / Pattern Editor: Channel names with leading space char are now accepted.
