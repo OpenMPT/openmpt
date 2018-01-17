@@ -785,9 +785,8 @@ public:
 	mpt::ustring GetSchismTrackerVersion(uint16 cwtv);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
-	// If no errors occur and song extension tag is found, returns pointer to the beginning
-	// of the tag, else returns NULL.
-	void LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade = nullptr);
+	// Returns true if extended instrument properties were found.
+	bool LoadExtendedInstrumentProperties(FileReader &file);
 
 	void SetDefaultPlaybackBehaviour(MODTYPE type);
 	static PlayBehaviourSet GetSupportedPlaybackBehaviour(MODTYPE type);
@@ -1086,11 +1085,10 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 ///////////////////////////////////////////////////////////
 // Low-level Mixing functions
 
-#define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define FADESONGDELAY		100
 
-#define MOD2XMFineTune(k)	((int)( (signed char)((k)<<4) ))
-#define XM2MODFineTune(k)	((int)( (k>>4)&0x0f ))
+static constexpr int8 MOD2XMFineTune(int v) { return static_cast<int8>(static_cast<uint8>(v) << 4); }
+static constexpr int8 XM2MODFineTune(int v) { return static_cast<int8>(static_cast<uint8>(v) >> 4); }
 
 // Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file);

@@ -677,16 +677,12 @@ void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file)
 }
 
 
-void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade)
+bool CSoundFile::LoadExtendedInstrumentProperties(FileReader &file)
 {
 	if(!file.ReadMagic("XTPM"))	// 'MPTX'
 	{
-		return;
+		return false;
 	}
-
-	// Found MPTX, interpret the file MPT made.
-	if(pInterpretMptMade != nullptr)
-		*pInterpretMptMade = true;
 
 	while(file.CanRead(6))
 	{
@@ -697,7 +693,7 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 			|| (code & 0x80808080) || !(code & 0x60606060))	// Non-ASCII chunk ID
 		{
 			file.SkipBack(4);
-			return;
+			break;
 		}
 
 		// Read size of this property for *one* instrument
@@ -711,6 +707,7 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 			}
 		}
 	}
+	return true;
 }
 
 
