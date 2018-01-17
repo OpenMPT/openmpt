@@ -966,7 +966,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Load instrument and song extensions.
-	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
+	interpretModPlugMade |= LoadExtendedInstrumentProperties(file);
 	if(interpretModPlugMade && m_madeWithTracker != MPT_USTRING("BeRoTracker"))
 	{
 		m_playBehaviour.reset();
@@ -1161,7 +1161,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
 				m_madeWithTracker = MPT_USTRING("OpenSPC conversion");
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
@@ -2237,9 +2237,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 				// with the amount of samples that OpenMPT supports.
 				WRITEMODULARHEADER(MagicLE("CUES"), 2 + CountOf(sample.cues) * 4);
 				mpt::IO::WriteIntLE<uint16>(f, smp);
-				for(std::size_t i = 0; i < CountOf(sample.cues); i++)
+				for(auto cue : sample.cues)
 				{
-					mpt::IO::WriteIntLE<uint32>(f, sample.cues[i]);
+					mpt::IO::WriteIntLE<uint32>(f, cue);
 				}
 			}
 		}

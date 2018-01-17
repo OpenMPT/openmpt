@@ -547,7 +547,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 	case audioMasterGetDirectory:
 		//Log("VST plugin to host: Get Directory\n");
 		// Need to allocate space for path only, but I guess noone relies on this anyway.
-		//return ToVstPtr(pVstPlugin->GetPluginFactory().szDllPath);
+		//return ToVstPtr(pVstPlugin->GetPluginFactory().dllPath.GetPath().ToLocale());
 		//return ToVstPtr(TrackerSettings::Instance().PathPlugins.GetDefaultDir());
 		break;
 
@@ -882,7 +882,7 @@ void CVstPlugin::Initialize()
 
 		// For some reason, this call crashes in a call to free() in AdmiralQuality NaiveLPF / SCAMP 1.2 (newer versions are fine).
 		// This does not happen when running the plugin in pretty much any host, or when running in OpenMPT 1.22 and older
-		// (EXCEPT when recompiling those old versions with VS2010), so I do not really know what's going on here.
+		// (EXCEPT when recompiling those old versions with VS2010), so it sounds like an ASLR issue to me.
 		// AdmiralQuality also doesn't know what to do.
 		if(GetUID() != CCONST('C', 'S', 'I', '4'))
 		{
@@ -1299,23 +1299,23 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
 		CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(plugin);
 		// Add all events to the plugin's queue.
-		for(VstInt32 i = 0; i < events->numEvents; i++)
+		for(const auto &ev : mpt::as_span(events->events, events->numEvents))
 		{
 			if(vstPlugin != nullptr)
 			{
 				// Directly enqueue the message and preserve as much of the event data as possible (e.g. delta frames, which are currently not used by OpenMPT but might be by plugins)
-				vstPlugin->vstEvents.Enqueue(events->events[i]);
+				vstPlugin->vstEvents.Enqueue(ev);
 			} else if(plugin != nullptr)
 			{
-				if(events->events[i]->type == kVstMidiType)
+				if(ev->type == kVstMidiType)
 				{
-					VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
+					auto event = reinterpret_cast<const VstMidiEvent *>(ev);
 					uint32 midiData;
 					memcpy(&midiData, event->midiData, 4);
 					plugin->MidiSend(midiData);
-				} else if(events->events[i]->type == kVstSysExType)
+				} else if(ev->type == kVstSysExType)
 				{
-					VstMidiSysexEvent *event = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
+					auto event = reinterpret_cast<const VstMidiSysexEvent *>(ev);
 					plugin->MidiSysexSend(event->sysexDump, event->dumpBytes);
 				}
 			}
@@ -1326,11 +1326,11 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 	if(m_recordMIDIOut)
 	{
 		// Spam MIDI data to all views
-		for(VstInt32 i = 0; i < events->numEvents; i++)
+		for(const auto &ev : mpt::as_span(events->events, events->numEvents))
 		{
-			if(events->events[i]->type == kVstMidiType)
+			if(ev->type == kVstMidiType)
 			{
-				VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
+				VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(ev);
 				::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, *reinterpret_cast<uint32 *>(event->midiData), reinterpret_cast<LPARAM>(this));
 			}
 		}
@@ -1488,6 +1488,7 @@ bool CVstPlugin::MidiSysexSend(const void *message, uint32 length)
 
 void CVstPlugin::HardAllNotesOff()
 {
+	static const uint32 SCRATCH_BUFFER_SIZE = 64;
 	float out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// The JUCE framework doesn't like processing while being suspended.

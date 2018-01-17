@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "../common/version.h"
-#include "../common/misc_util.h"
 #include "XMTools.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
@@ -705,7 +704,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	bool interpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
 	if(GetNumInstruments())
 	{
-		LoadExtendedInstrumentProperties(file, &interpretOpenMPTMade);
+		interpretOpenMPTMade = LoadExtendedInstrumentProperties(file);
 	}
 
 	LoadExtendedSongProperties(file, &interpretOpenMPTMade);
