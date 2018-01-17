@@ -2168,8 +2168,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MagicLE("DTFR"), tempo);
 	}
 
-	WRITEMODULAR(MagicBE("RPB."), m_nDefaultRowsPerBeat);
-	WRITEMODULAR(MagicBE("RPM."), m_nDefaultRowsPerMeasure);
+	if(m_nDefaultRowsPerBeat > 255 || m_nDefaultRowsPerMeasure > 255 || GetType() == MOD_TYPE_XM)
+	{
+		WRITEMODULAR(MagicBE("RPB."), m_nDefaultRowsPerBeat);
+		WRITEMODULAR(MagicBE("RPM."), m_nDefaultRowsPerMeasure);
+	}
 
 	if(GetType() != MOD_TYPE_XM)
 	{
