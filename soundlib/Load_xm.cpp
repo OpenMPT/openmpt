@@ -256,6 +256,7 @@ enum TrackerVersions
 	verFT2Clone		= 0x80,		// NOT FT2: itype changed between instruments, or \0 found in song title
 	verDigiTrakker	= 0x100,	// Probably DigiTrakker
 	verUNMO3		= 0x200,	// TODO: UNMO3-ed XMs are detected as MPT 1.16
+	verEmptyOrders	= 0x400,	// Allow empty order list like in OpenMPT (FT2 just plays pattern 0 if the order list is empty according to the header)
 };
 DECLARE_FLAGSET(TrackerVersions)
 
@@ -329,7 +330,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				madeWith = verFT2Generic | verConfirmed;
 			else if(memchr(fileHeader.songName, '\0', 20) != nullptr)
 				// FT2 pads the song title with spaces, some other trackers use null chars
-				madeWith = verFT2Clone | verNewModPlug;
+				madeWith = verFT2Clone | verNewModPlug | verEmptyOrders;
 			else
 				madeWith = verFT2Generic | verNewModPlug;
 		} else if(!memcmp(fileHeader.trackerName + 12, "v 2.00  ", 8))
@@ -349,7 +350,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 		mpt::String::Read<mpt::String::spacePadded>(m_madeWithTracker, mpt::CharsetCP437, fileHeader.trackerName);
 
-		if(!memcmp(fileHeader.trackerName, "MilkyTracker ", 12))
+		if(!memcmp(fileHeader.trackerName, "OpenMPT ", 8))
+		{
+			madeWith = verOpenMPT | verConfirmed | verEmptyOrders;
+		} else if(!memcmp(fileHeader.trackerName, "MilkyTracker ", 12))
 		{
 			// MilkyTracker prior to version 0.90.87 doesn't set a version string.
 			// Luckily, starting with v0.90.87, MilkyTracker also implements the FT2 panning scheme.
@@ -394,7 +398,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	ReadOrderFromFile<uint8>(Order(), file, fileHeader.orders);
-	if(fileHeader.orders == 0 && madeWith[verFT2Generic])
+	if(fileHeader.orders == 0 && !madeWith[verEmptyOrders])
 	{
 		// Fix lamb_-_dark_lighthouse.xm, which only contains one pattern and an empty order list
 		Order().assign(1, 0);
