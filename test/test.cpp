@@ -2923,7 +2923,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeClassic);
-	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 27, 00, 00));
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 
 	// Channels
@@ -3263,6 +3263,19 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
 
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
+
+		// Test GetLength code, in particular with subsongs
+		VERIFY_EQUAL_EPS(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(3, 1)).back().duration, 19.237, 0.01);
+		VERIFY_EQUAL_NONCONT(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(2, 0).StartPos(0, 1, 0)).back().targetReached, false);
+
+		auto allSubSongs = GetSoundFile(sndFileContainer).GetLength(eNoAdjust, GetLengthTarget(true));
+		VERIFY_EQUAL_NONCONT(allSubSongs.size(), 3);
+		double totalDuration = 0.0;
+		for(const auto &subSong : allSubSongs)
+		{
+			totalDuration += subSong.duration;
+		}
+		VERIFY_EQUAL_EPS(totalDuration, 2505.53, 0.01);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
