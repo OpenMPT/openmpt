@@ -292,56 +292,58 @@ std::string GetBuildFeaturesString()
 {
 	std::string retval;
 	#ifdef LIBOPENMPT_BUILD
+		retval = ""
 		#if defined(MPT_CHARSET_WIN32)
-			retval += " +WINAPI";
+			" +WINAPI"
 		#endif
 		#if defined(MPT_CHARSET_ICONV)
-			retval += " +ICONV";
+			" +ICONV"
 		#endif
 		#if defined(MPT_CHARSET_CODECVTUTF8)
-			retval += " +CODECVTUTF8";
+			" +CODECVTUTF8"
 		#endif
 		#if defined(MPT_CHARSET_INTERNAL)
-			retval += " +INTERNALCHARSETS";
+			" +INTERNALCHARSETS"
 		#endif
 		#if defined(MPT_WITH_ZLIB)
-			retval += " +ZLIB";
+			" +ZLIB"
 		#endif
 		#if defined(MPT_WITH_MINIZ)
-			retval += " +MINIZ";
+			" +MINIZ"
 		#endif
 		#if !defined(MPT_WITH_ZLIB) && !defined(MPT_WITH_MINIZ)
-			retval += " -INFLATE";
+			" -INFLATE"
 		#endif
 		#if defined(MPT_WITH_MPG123)
-			retval += " +MPG123";
+			" +MPG123"
 		#endif
 		#if defined(MPT_WITH_MINIMP3)
-			retval += " +MINIMP3";
+			" +MINIMP3"
 		#endif
 		#if defined(MPT_WITH_MEDIAFOUNDATION)
-			retval += " +MF";
+			" +MF"
 		#endif
 		#if !defined(MPT_WITH_MPG123) && !defined(MPT_WITH_MINIMP3) && !defined(MPT_WITH_MEDIAFOUNDATION)
-			retval += " -MP3";
+			" -MP3"
 		#endif
 		#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
-			retval += " +VORBIS";
+			" +VORBIS"
 		#endif
 		#if defined(MPT_WITH_STBVORBIS)
-			retval += " +STBVORBIS";
+			" +STBVORBIS"
 		#endif
 		#if !(defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) && !defined(MPT_WITH_STBVORBIS)
-			retval += " -VORBIS";
+			" -VORBIS"
 		#endif
 		#if !defined(NO_PLUGINS)
-			retval += " +PLUGINS";
+			" +PLUGINS"
 		#else
-			retval += " -PLUGINS";
+			" -PLUGINS"
 		#endif
 		#if !defined(NO_DMO)
-			retval += " +DMO";
+			" +DMO"
 		#endif
+		;
 	#endif
 	#ifdef MODPLUG_TRACKER
 		#if (MPT_ARCH_BITS == 64)
@@ -359,26 +361,28 @@ std::string GetBuildFeaturesString()
 				retval += " WIN32OLD";
 			}
 		#endif
+			retval += ""
 		#if defined(UNICODE)
-			retval += " UNICODE";
+			" UNICODE"
 		#else
-			retval += " ANSI";
+			" ANSI"
 		#endif
 		#ifdef NO_VST
-			retval += " NO_VST";
+			" NO_VST"
 		#endif
 		#ifdef NO_DMO
-			retval += " NO_DMO";
+			" NO_DMO"
 		#endif
 		#ifdef NO_PLUGINS
-			retval += " NO_PLUGINS";
+			" NO_PLUGINS"
 		#endif
 		#ifndef MPT_WITH_ASIO
-			retval += " NO_ASIO";
+			" NO_ASIO"
 		#endif
 		#ifndef MPT_WITH_DSOUND
-			retval += " NO_DSOUND";
+			" NO_DSOUND"
 		#endif
+			;
 	#endif
 	return retval;
 }
@@ -668,7 +672,7 @@ mpt::ustring GetFullCreditsString()
 #endif
 #if defined(MPT_WITH_MPG123)
 		"The mpg123 project for libmpg123\n"
-		"http://mpg123.de/\n"
+		"https://mpg123.de/\n"
 		"\n"
 #endif
 #ifdef MPT_WITH_MINIMP3
