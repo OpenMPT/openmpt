@@ -3265,10 +3265,10 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		// Test GetLength code, in particular with subsongs
-		VERIFY_EQUAL_EPS(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(3, 1)).back().duration, 19.237, 0.01);
-		VERIFY_EQUAL_NONCONT(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(2, 0).StartPos(0, 1, 0)).back().targetReached, false);
+		VERIFY_EQUAL_EPS(GetrSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(3, 1)).back().duration, 19.237, 0.01);
+		VERIFY_EQUAL_NONCONT(GetrSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(2, 0).StartPos(0, 1, 0)).back().targetReached, false);
 
-		auto allSubSongs = GetSoundFile(sndFileContainer).GetLength(eNoAdjust, GetLengthTarget(true));
+		auto allSubSongs = GetrSoundFile(sndFileContainer).GetLength(eNoAdjust, GetLengthTarget(true));
 		VERIFY_EQUAL_NONCONT(allSubSongs.size(), 3);
 		double totalDuration = 0.0;
 		for(const auto &subSong : allSubSongs)
