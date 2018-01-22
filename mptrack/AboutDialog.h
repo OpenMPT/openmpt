@@ -31,8 +31,8 @@ public:
 	bool Animate();
 
 protected:
-	virtual void OnPaint();
-	virtual BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+	void OnPaint();
+	BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 
 	DECLARE_MESSAGE_MAP()
 	void OnMouseMove(UINT nFlags, CPoint point);
@@ -47,22 +47,21 @@ protected:
 	CRippleBitmap m_bmp;
 	CTabCtrl m_Tab;
 	CEdit m_TabEdit;
-	UINT_PTR m_TimerID;
+	UINT_PTR m_TimerID = 0;
 	static const UINT_PTR TIMERID_ABOUT_DEFAULT = 3;
 
 public:
 	static CAboutDlg *instance;
 
-	CAboutDlg();
 	~CAboutDlg();
 
 	// Implementation
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnCancel() override;
 	DECLARE_MESSAGE_MAP();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchange(CDataExchange* pDX) override;
 	afx_msg void OnTabChange(NMHDR *pNMHDR, LRESULT *pResult);
 	void OnTimer(UINT_PTR nIDEvent);
 public:
