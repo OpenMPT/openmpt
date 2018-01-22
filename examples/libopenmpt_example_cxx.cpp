@@ -69,6 +69,7 @@ int main( int argc, char * argv[] ) {
 		stream.stop();
 	} catch ( const std::bad_alloc & ) {
 		std::cerr << "Error: " << std::string( "out of memory" ) << std::endl;
+		return 1;
 	} catch ( const std::exception & e ) {
 		std::cerr << "Error: " << std::string( e.what() ? e.what() : "unknown error" ) << std::endl;
 		return 1;
