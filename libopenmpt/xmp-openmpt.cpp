@@ -44,19 +44,6 @@
 
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
-#ifdef LIBOPENMPT_QUIRK_NO_CSTDINT
-#include <stdint.h>
-namespace std {
-typedef ::int8_t   int8_t;
-typedef ::int16_t  int16_t;
-typedef ::int32_t  int32_t;
-typedef ::int64_t  int64_t;
-typedef ::uint8_t  uint8_t; 
-typedef ::uint16_t uint16_t; 
-typedef ::uint32_t uint32_t;
-typedef ::uint64_t uint64_t;
-}
-#endif
 
 #include "libopenmpt_plugin_gui.hpp"
 
@@ -132,14 +119,14 @@ class xmp_openmpt_settings
  : public libopenmpt::plugin::settings
 {
 protected:
-	virtual void read_setting( const std::string & key, const std::wstring & keyW, int & val ) {
+	void read_setting( const std::string & key, const std::wstring & keyW, int & val ) override {
 		libopenmpt::plugin::settings::read_setting( key, keyW, val );
 		int storedVal = 0;
 		if ( xmpfregistry->GetInt( "OpenMPT", key.c_str(), &storedVal ) ) {
 			val = storedVal;
 		}
 	}
-	virtual void write_setting( const std::string & key, const std::wstring & /* keyW */ , int val ) {
+	void write_setting( const std::string & key, const std::wstring & /* keyW */ , int val ) override {
 		if ( !xmpfregistry->SetInt( "OpenMPT", key.c_str(), &val ) ) {
 			// error
 		}
@@ -159,23 +146,14 @@ public:
 
 struct self_xmplay_t {
 	std::vector<float> subsong_lengths;
-	std::size_t samplerate;
-	std::size_t num_channels;
+	std::size_t samplerate = 48000;
+	std::size_t num_channels = 2;
 	xmp_openmpt_settings settings;
-	openmpt::module_ext * mod;
-	openmpt::ext::pattern_vis * pattern_vis;
-	std::int32_t tempo_factor, pitch_factor;
-	bool single_subsong_mode;
-	self_xmplay_t()
-		: samplerate(48000)
-		, num_channels(2)
-		, settings()
-		, mod(0)
-		, pattern_vis(0)
-		, tempo_factor(0)
-		, pitch_factor(0)
-		, single_subsong_mode(false)
-	{
+	openmpt::module_ext * mod = nullptr;
+	openmpt::ext::pattern_vis * pattern_vis = nullptr;
+	std::int32_t tempo_factor = 0, pitch_factor = 0;
+	bool single_subsong_mode = false;
+	self_xmplay_t() {
 		settings.changed = apply_and_save_options;
 	}
 	void on_new_mod() {
@@ -454,7 +432,7 @@ static void WINAPI openmpt_About( HWND win ) {
 	credits << "Additional thanks to:" << std::endl;
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
-	credits << "http://pugixml.org/" << std::endl;
+	credits << "https://pugixml.org/" << std::endl;
 	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
 }
 
@@ -658,7 +636,7 @@ static char * build_xmplay_tags( const openmpt::module & mod ) {
 	tags.append( 1, '\0' );
 	char * result = static_cast<char*>( xmpfmisc->Alloc( tags.size() ) );
 	if ( !result ) {
-		return NULL;
+		return nullptr;
 	}
 	std::copy( tags.data(), tags.data() + tags.size(), result );
 	return result;
@@ -667,7 +645,7 @@ static char * build_xmplay_tags( const openmpt::module & mod ) {
 static float * build_xmplay_length( const openmpt::module & mod ) {
 	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * self->subsong_lengths.size() ) );
 	if ( !result ) {
-		return NULL;
+		return nullptr;
 	}
 	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
 		result[i] = self->subsong_lengths[i];
@@ -1172,9 +1150,9 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 }
 
 static DWORD WINAPI openmpt_GetSubSongs( float * length ) {
-	*length = 0.0;
-	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-		*length += self->subsong_lengths[i];
+	*length = 0.0f;
+	for ( auto sub_length : self->subsong_lengths ) {
+		*length += sub_length;
 	}
 
 	return static_cast<DWORD>( self->subsong_lengths.size() );
