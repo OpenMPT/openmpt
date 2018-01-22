@@ -2017,12 +2017,17 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.uFlags.set(CHN_PINGPONGSUSTAIN, sample.uFlags[CHN_PINGPONGLOOP]);
 			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
+
+		// Loop cross-fade
 		SmpLength fadeSamples = Util::Round<SmpLength>(region.loopCrossfade * origSampleRate);
+		LimitMax(fadeSamples, sample.uFlags[CHN_SUSTAINLOOP] ? sample.nSustainStart : sample.nLoopStart);
 		if(fadeSamples > 0)
 		{
 			ctrlSmp::XFadeSample(sample, fadeSamples, 50000, true, sample.uFlags[CHN_SUSTAINLOOP], *this);
 			sample.uFlags.set(SMP_MODIFIED);
 		}
+
+		// Sample offset
 		if(region.offset && region.offset < sample.nLength)
 		{
 			auto offset = region.offset * sample.GetBytesPerSample();
