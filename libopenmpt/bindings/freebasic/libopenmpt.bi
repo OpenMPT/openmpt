@@ -872,7 +872,7 @@ Declare Function openmpt_module_set_render_param(ByVal module As openmpt_module 
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -888,7 +888,7 @@ Declare Function openmpt_module_read_mono(ByVal module As openmpt_module Ptr, By
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -906,7 +906,7 @@ Declare Function openmpt_module_read_stereo(ByVal module As openmpt_module Ptr, 
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -921,7 +921,7 @@ Declare Function openmpt_module_read_quad(ByVal module As openmpt_module Ptr, By
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -937,7 +937,7 @@ Declare Function openmpt_module_read_float_mono(ByVal module As openmpt_module P
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -955,7 +955,7 @@ Declare Function openmpt_module_read_float_stereo(ByVal module As openmpt_module
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -970,7 +970,7 @@ Declare Function openmpt_module_read_float_quad(ByVal module As openmpt_module P
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -985,7 +985,7 @@ Declare Function openmpt_module_read_interleaved_stereo(ByVal module As openmpt_
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -1000,7 +1000,7 @@ Declare Function openmpt_module_read_interleaved_quad(ByVal module As openmpt_mo
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
@@ -1015,7 +1015,7 @@ Declare Function openmpt_module_read_interleaved_float_stereo(ByVal module As op
   \return The number of frames actually rendered.
   \retval 0 The end of song has been reached.
   \remarks The output buffers are only written to up to the returned number of elements.
-  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
+  \remarks You can freely switch between any of the "openmpt_module_read*" variants if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
   \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
   \sa \ref libopenmpt_freebasic_outputformat
 '/
