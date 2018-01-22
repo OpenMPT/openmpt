@@ -20,7 +20,8 @@
    "../../include/rtmidi/RtMidi.h"
   }
   defines {
-   "__WINDOWS_MM__"
+   "__WINDOWS_MM__",
+   "RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES"
   }
   links {
    "winmm"

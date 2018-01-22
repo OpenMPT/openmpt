@@ -529,13 +529,7 @@ double MidiInOut::GetOutputTimestamp() const
 // Get a device name
 std::string MidiDevice::GetPortName(MidiDevice::ID port)
 {
-	std::string portName = stream.getPortName(port);
-#if MPT_OS_WINDOWS
-	// Remove auto-appended port number
-	if(portName.length() >= 2)
-		return portName.substr(0, portName.find_last_of(' '));
-#endif
-	return portName;
+	return stream.getPortName(port);
 }
 
 
