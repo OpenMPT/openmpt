@@ -213,13 +213,13 @@ std::string Context::EscapePosixShell(std::string line)
 	const char escape_chars [] = { '|', '&', ';', '<', '>', '(', ')', '$', '`', '"', '\'', ' ', '\t' };
 	const char maybe_escape_chars [] = { '*', '?', '[', '#', '~', '=', '%' };
 	line = mpt::String::Replace(line, "\\", "\\\\");
-	for(std::size_t i = 0; i < mpt::size(escape_chars); ++i)
+	for(char c : escape_chars)
 	{
-		line = mpt::String::Replace(line, std::string(1, escape_chars[i]), "\\" + std::string(1, escape_chars[i]));
+		line = mpt::String::Replace(line, std::string(1, c), "\\" + std::string(1, c));
 	}
-	for(std::size_t i = 0; i < mpt::size(maybe_escape_chars); ++i)
+	for(char c : maybe_escape_chars)
 	{
-		line = mpt::String::Replace(line, std::string(1, maybe_escape_chars[i]), "\\" + std::string(1, maybe_escape_chars[i]));
+		line = mpt::String::Replace(line, std::string(1, c), "\\" + std::string(1, c));
 	}
 	return line;
 }
@@ -326,11 +326,11 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		{
 			cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "out" + "\n";
 		}
-		cleanupscript += std::string() + "rm -r " + EscapePosixShell(dirPosix) + "filetree" + "\n";			
-		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "script.sh" + "\n";			
-		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "wrapper.sh" + "\n";			
-		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "wrapperstarter.sh" + "\n";			
-		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "terminal.sh" + "\n";			
+		cleanupscript += std::string() + "rm -r " + EscapePosixShell(dirPosix) + "filetree" + "\n";
+		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "script.sh" + "\n";
+		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "wrapper.sh" + "\n";
+		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "wrapperstarter.sh" + "\n";
+		cleanupscript += std::string() + "rm " + EscapePosixShell(dirPosix) + "terminal.sh" + "\n";
 		if(flags[ExecFlagAsync])
 		{
 			wrapperscript += cleanupscript;
@@ -389,33 +389,26 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		// NOTE:
 		// Modern terminals detach themselves from the invoking shell if another instance is already present.
 		// This means we cannot rely on terminal invocation being syncronous.
-		std::vector<std::string> terminals;
-		terminals.push_back("x-terminal-emulator");
-		terminals.push_back("konsole");
-		terminals.push_back("mate-terminal");
-		terminals.push_back("xfce4-terminal");
-		terminals.push_back("gnome-terminal");
-		terminals.push_back("uxterm");
-		terminals.push_back("xterm");
-		terminals.push_back("rxvt");
-		std::map<std::string, std::string> terminalLanchers;
-		for(std::size_t i = 0; i < terminals.size(); ++i)
+		static constexpr char *terminals[] =
+		{
+			"x-terminal-emulator",
+			"konsole",
+			"mate-terminal",
+			"xfce4-terminal",
+			"gnome-terminal",
+			"uxterm",
+			"xterm",
+			"rxvt",
+		};
+		std::string terminalscript = "\n";
+		for(const std::string terminal : terminals)
 		{
 			// mate-terminal on Debian 8 cannot execute commands with arguments,
 			// thus we use a separate script that requires no arguments to execute.
-			terminalLanchers[terminals[i]] += std::string() + "if command -v " + terminals[i] + " 2>/dev/null 1>/dev/null ; then" + "\n";
-			terminalLanchers[terminals[i]] += std::string() + " chmod u+x " + EscapePosixShell(dirPosix) + "wrapperstarter.sh" + "\n";
-			terminalLanchers[terminals[i]] += std::string() + " exec `command -v " + terminals[i] + "` -e \"" + EscapePosixShell(dirPosix) + "wrapperstarter.sh\"" + "\n";
-			terminalLanchers[terminals[i]] += std::string() + "fi" + "\n";
-		}
-
-		std::string terminalscript;
-
-		terminalscript += std::string() + "\n";
-
-		for(std::size_t i = 0; i < terminals.size(); ++i)
-		{
-			terminalscript += terminalLanchers[terminals[i]];
+			terminalscript += "if command -v " + terminal + " 2>/dev/null 1>/dev/null ; then" "\n";
+			terminalscript += " chmod u+x " + EscapePosixShell(dirPosix) + "wrapperstarter.sh" "\n";
+			terminalscript += " exec `command -v " + terminal + "` -e \"" + EscapePosixShell(dirPosix) + "wrapperstarter.sh\"" "\n";
+			terminalscript += "fi" "\n";
 		}
 
 		tempfile << terminalscript;
@@ -508,7 +501,8 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	if(!createProcessSuccess)
 	{
 
-		if(flags[ExecFlagSilent]) {
+		if(flags[ExecFlagSilent])
+		{
 			unixcommand = "/bin/bash \"" + EscapePosixShell(dirPosix) + "wrapper.sh\"";
 		} else
 		{

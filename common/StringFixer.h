@@ -105,15 +105,6 @@ namespace mpt { namespace String
 	};
 
 
-	namespace detail
-	{
-		static inline char NullToSpace(const char &c)
-		{
-			return (c != '\0') ? c : ' ';
-		}
-	}
-
-
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
@@ -155,7 +146,7 @@ namespace mpt { namespace String
 				dest.assign(src, src + srcSize);
 
 				// Convert null characters to spaces.
-				std::transform(dest.begin(), dest.end(), dest.begin(), detail::NullToSpace);
+				std::transform(dest.begin(), dest.end(), dest.begin(), [] (char c) -> char { return (c != '\0') ? c : ' '; });
 
 				// Trim trailing spaces.
 				dest = mpt::String::RTrim(dest, std::string(" "));
