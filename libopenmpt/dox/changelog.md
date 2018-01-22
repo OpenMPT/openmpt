@@ -9,9 +9,16 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.4 (2017-12-17)
 
+ *  [**New**] Support MOD files from the Inconexia demo by Iguana.
+
  *  IT: Fix broken volume envelopes with negative values as found in breakdwn.it
     by Elysis.
- 
+ *  XM E60 loop bug was not considered in song length calucation.
+ *  Tighten M15 and MOD file rejection heuristics.
+ *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
+    since libopenmpt-0.2.6401-beta17.
+ *  STM: Last character of sample name was missing.
+
 ### libopenmpt 0.3.3 (2017-11-19)
 
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.

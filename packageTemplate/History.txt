@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.04.00 (* January 2017, revision 9429)
+v1.27.04.00 (* January 2017, revision 9475)
 -------------------------------------------
 Pattern tab
    [Fix] <js> Shrinking a selection did not work as intended when merging an effect command for the second row of two merged rows.
@@ -41,11 +41,15 @@ Sample tab
    [Fix] <js> Dropping a sample from another module did not adjust its parameters to the new module format.
    [Fix] <js> When reading an ITI file as a sample, the middle-C sample was not used as intended in ITIs written with old versions of Schism Tracker.
 
+Instrument tab
+   [New] <js> SFZ: Support loop_crossfade opcode for creating crossfaded loops when importing samples.
+   [Fix] <js> With extremely long envelopes (>= 46300 ticks), the closest envelope point to the cursor was not computed correctly, leading to some mouse actions not working on the intended envelope node.
+
 MPTM::Custom Tuning
    [Fix] <jh> SCL: Do not replace ISO 8859-1 characters with space when writing the name.
 
 XM
-   [Fix] <js> E60 bug was not considered in song lenght calucation.
+   [Fix] <js> E60 loop bug was not considered in song length calucation.
 
 MOD
    [New] <js> Support MOD files from the Inconexia demo by Iguana.
@@ -53,6 +57,7 @@ MOD
 
 Other formats
    [Fix] <js> J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken since OpenMPT 1.26.
+   [Fix] <js> STM: Last character of sample name was missing.
 
 Stream Export
    [Fix] <js> Vorbis: Do not show ABR bitrates that are not supported (http://bugs.openmpt.org/view.php?id=1074).
