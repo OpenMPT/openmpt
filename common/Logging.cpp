@@ -359,9 +359,8 @@ bool Dump(const mpt::PathString &filename)
 		f << "Events/second: " << mpt::fmt::fix(eventsPerSecond) << std::endl;
 	}
 
-	for(std::size_t i = 0; i < Entries.size(); ++i)
+	for(auto &entry : Entries)
 	{
-		mpt::log::Trace::Entry & entry = Entries[i];
 		if(!entry.Function) entry.Function = "";
 		if(!entry.File) entry.File = "";
 		std::string time;
