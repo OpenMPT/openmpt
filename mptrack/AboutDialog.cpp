@@ -35,7 +35,7 @@ CRippleBitmap::CRippleBitmap()
 	// Pre-fill first and last row of output bitmap, since those won't be touched.
 	const PNG::Pixel *in1 = bitmapSrc->GetPixels(), *in2 = bitmapSrc->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
 	PNG::Pixel *out1 = bitmapTarget->GetPixels(), *out2 = bitmapTarget->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
-	for(uint32_t i = 0; i < bitmapSrc->width; i++)
+	for(uint32 i = 0; i < bitmapSrc->width; i++)
 	{
 		*(out1++) = *(in1++);
 		*(out2++) = *(in2++);
@@ -44,7 +44,7 @@ CRippleBitmap::CRippleBitmap()
 	MemsetZero(bi);
 	bi.biSize = sizeof(BITMAPINFOHEADER);
 	bi.biWidth = bitmapSrc->width;
-	bi.biHeight = -(int32_t)bitmapSrc->height;
+	bi.biHeight = -(int32)bitmapSrc->height;
 	bi.biPlanes = 1;
 	bi.biBitCount = 32;
 	bi.biCompression = BI_RGB;
@@ -76,11 +76,11 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	// Initiate ripples at cursor location
 	Limit(point.x, 1, int(bitmapSrc->width) - 2);
 	Limit(point.y, 2, int(bitmapSrc->height) - 3);
-	int32_t *p = backBuf + point.x + point.y * bitmapSrc->width;
+	int32 *p = backBuf + point.x + point.y * bitmapSrc->width;
 	p[0] += (nFlags & MK_LBUTTON) ? 50 : 150;
 	p[0] += (nFlags & MK_MBUTTON) ? 150 : 0;
 
-	int32_t w = bitmapSrc->width;
+	int32 w = bitmapSrc->width;
 	// Make the initial point of this ripple a bit "fatter".
 	p[-1] += p[0] / 2;     p[1] += p[0] / 2;
 	p[-w] += p[0] / 2;     p[w] += p[0] / 2;
@@ -151,39 +151,39 @@ bool CRippleBitmap::Animate()
 	lastFrame = now;
 	activity = false;
 
-	frontBuf = &(frame ? offset2 : offset1)[0];
-	backBuf = &(frame ? offset1 : offset2)[0];
+	frontBuf = (frame ? offset2 : offset1).data();
+	backBuf = (frame ? offset1 : offset2).data();
 
 	// Spread the ripples...
-	const int32_t w = bitmapSrc->width, h = bitmapSrc->height;
-	const int32_t numPixels = w * (h - 2);
-	const int32_t *back = backBuf + w;
-	int32_t *front = frontBuf + w;
-	for(int32_t i = numPixels; i != 0; i--, back++, front++)
+	const int32 w = bitmapSrc->width, h = bitmapSrc->height;
+	const int32 numPixels = w * (h - 2);
+	const int32 *back = backBuf + w;
+	int32 *front = frontBuf + w;
+	for(int32 i = numPixels; i != 0; i--, back++, front++)
 	{
 		(*front) = (back[-1] + back[1] + back[w] + back[-w]) / 2 - (*front);
 		if(damp) (*front) -= (*front) >> 5;
 	}
 
 	// ...and compute the final picture.
-	const int32_t *offset = frontBuf + w;
+	const int32 *offset = frontBuf + w;
 	const PNG::Pixel *pixelIn = bitmapSrc->GetPixels() + w;
 	PNG::Pixel *pixelOut = bitmapTarget->GetPixels() + w;
 	PNG::Pixel *limitMin = bitmapSrc->GetPixels(), *limitMax = bitmapSrc->GetPixels() + bitmapSrc->GetNumPixels() - 1;
-	for(int32_t i = numPixels; i != 0; i--, pixelIn++, pixelOut++, offset++)
+	for(int32 i = numPixels; i != 0; i--, pixelIn++, pixelOut++, offset++)
 	{
 		// Compute pixel displacement
-		const int32_t xOff = offset[-1] - offset[1];
-		const int32_t yOff = offset[-w] - offset[w];
+		const int32 xOff = offset[-1] - offset[1];
+		const int32 yOff = offset[-w] - offset[w];
 
 		if(xOff | yOff)
 		{
 			const PNG::Pixel *p = pixelIn + xOff + yOff * w;
 			Limit(p, limitMin, limitMax);
 			// Add a bit of shading depending on how far we're displacing the pixel...
-			pixelOut->r = (uint8_t)Clamp(p->r + (p->r * xOff) / 32, 0, 255);
-			pixelOut->g = (uint8_t)Clamp(p->g + (p->g * xOff) / 32, 0, 255);
-			pixelOut->b = (uint8_t)Clamp(p->b + (p->b * xOff) / 32, 0, 255);
+			pixelOut->r = mpt::saturate_cast<uint8>(p->r + (p->r * xOff) / 32);
+			pixelOut->g = mpt::saturate_cast<uint8>(p->g + (p->g * xOff) / 32);
+			pixelOut->b = mpt::saturate_cast<uint8>(p->b + (p->b * xOff) / 32);
 			// ...and mix it with original picture
 			pixelOut->r = (pixelOut->r + pixelIn->r) / 2u;
 			pixelOut->g = (pixelOut->g + pixelIn->g) / 2u;
@@ -210,22 +210,15 @@ bool CRippleBitmap::Animate()
 }
 
 
-CAboutDlg::CAboutDlg()
-{
-	m_TimerID = 0;
-
-}
-
-
 CAboutDlg::~CAboutDlg()
 {
-	instance = NULL;
+	instance = nullptr;
 }
 
 
 void CAboutDlg::OnOK()
 {
-	instance = NULL;
+	instance = nullptr;
 	if(m_TimerID != 0)
 	{
 		KillTimer(m_TimerID);
@@ -347,37 +340,52 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += cpuFeatures.second;
 				auto procSupport = cpuFeatures.first;
 				std::vector<mpt::ustring> features;
-				#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
-					#if defined(ENABLE_X86)
-						features.push_back(MPT_USTRING("x86"));
-						if(procSupport & PROCSUPPORT_CMOV) features.push_back(MPT_USTRING("cmov"));
-					#endif
-					#if defined(ENABLE_X64)
-						features.push_back(MPT_USTRING("x86-64"));
-					#endif
-					#if defined(ENABLE_MMX)
-						if(procSupport & PROCSUPPORT_MMX) features.push_back(MPT_USTRING("mmx"));
-					#endif
-					#if defined(ENABLE_SSE)
-						if(procSupport & PROCSUPPORT_SSE) features.push_back(MPT_USTRING("sse"));
-					#endif
-					#if defined(ENABLE_SSE2)
-						if(procSupport & PROCSUPPORT_SSE2) features.push_back(MPT_USTRING("sse2"));
-					#endif
-					#if defined(ENABLE_SSE3)
-						if(procSupport & PROCSUPPORT_SSE3) features.push_back(MPT_USTRING("sse3"));
-						if(procSupport & PROCSUPPORT_SSSE3) features.push_back(MPT_USTRING("ssse3"));
-					#endif
-					#if defined(ENABLE_SSE4)
-						if(procSupport & PROCSUPPORT_SSE4_1) features.push_back(MPT_USTRING("sse4.1"));
-						if(procSupport & PROCSUPPORT_SSE4_2) features.push_back(MPT_USTRING("sse4.2"));
-					#endif
-					#if defined(ENABLE_X86_AMD)
-						if(procSupport & PROCSUPPORT_AMD_MMXEXT) features.push_back(MPT_USTRING("mmxext"));
-						if(procSupport & PROCSUPPORT_AMD_3DNOW) features.push_back(MPT_USTRING("3dnow"));
-						if(procSupport & PROCSUPPORT_AMD_3DNOWEXT) features.push_back(MPT_USTRING("3dnowext"));
-					#endif
-				#endif
+#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
+#if defined(ENABLE_X86)
+				features.push_back(MPT_USTRING("x86"));
+#endif
+#if defined(ENABLE_X64)
+				features.push_back(MPT_USTRING("x86-64"));
+#endif
+				struct ProcFlag
+				{
+					decltype(procSupport) flag;
+					const char *name;
+				};
+				static constexpr ProcFlag flags[] =
+				{
+					{ 0, "" },
+#if defined(ENABLE_X86)
+					{ PROCSUPPORT_CMOV, "cmov" },
+#endif
+#if defined(ENABLE_MMX)
+					{ PROCSUPPORT_MMX, "mmx" },
+#endif
+#if defined(ENABLE_SSE)
+					{ PROCSUPPORT_SSE, "sse" },
+#endif
+#if defined(ENABLE_SSE2)
+					{ PROCSUPPORT_SSE2, "sse2" },
+#endif
+#if defined(ENABLE_SSE3)
+					{ PROCSUPPORT_SSE3, "sse3" },
+					{ PROCSUPPORT_SSSE3, "ssse3" },
+#endif
+#if defined(ENABLE_SSE4)
+					{ PROCSUPPORT_SSE4_1, "sse4.1" },
+					{ PROCSUPPORT_SSE4_2, "sse4.2" },
+#endif
+#if defined(ENABLE_X86_AMD)
+					{ PROCSUPPORT_AMD_MMXEXT, "mmxext" },
+					{ PROCSUPPORT_AMD_3DNOW, "3dnow" },
+					{ PROCSUPPORT_AMD_3DNOWEXT, "3dnowext" },
+#endif
+				};
+				for(const auto &f : flags)
+				{
+					if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::CharsetASCII, f.name));
+				}
+#endif
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
@@ -396,14 +404,14 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			break;
 		case 1:
 			{
-				if(!TrackerSettings::Instance().ComponentsKeepLoaded)
+			std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
+			if(!TrackerSettings::Instance().ComponentsKeepLoaded)
 				{
 					text += MPT_USTRING("Components are loaded and unloaded as needed.") + lf;
 					text += lf;
-					std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
-					for(std::size_t i = 0; i < components.size(); ++i)
+					for(const auto &component : components)
 					{
-						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(components[i]);
+						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
 						mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
 						if(!info.settingsKey.empty())
 						{
@@ -413,7 +421,6 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					}
 				} else
 				{
-					std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
 					for(int available = 1; available >= 0; --available)
 					{
 						if(available)
@@ -424,9 +431,9 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							text += lf;
 							text += MPT_USTRING("Unloaded Components:") + lf;
 						}
-						for(std::size_t i = 0; i < components.size(); ++i)
+						for(const auto &component : components)
 						{
-							ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(components[i]);
+							ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
 							if(available  && info.state != ComponentStateAvailable) continue;
 							if(!available && info.state == ComponentStateAvailable) continue;
 							mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);

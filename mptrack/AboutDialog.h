@@ -15,8 +15,8 @@ protected:
 
 	BITMAPINFOHEADER bi;
 	PNG::Bitmap *bitmapSrc, *bitmapTarget;
-	std::vector<int32_t> offset1, offset2;
-	int32_t *frontBuf, *backBuf;
+	std::vector<int32> offset1, offset2;
+	int32 *frontBuf, *backBuf;
 	DWORD lastFrame = 0;	// Time of last frame
 	DWORD lastRipple = 0;	// Time of last added ripple
 	bool frame = false;		// Backbuffer toggle
