@@ -778,7 +778,8 @@ static void amdmmxext_or_sse_findminmax8(const void *p, SmpLength scanlen, int c
 	_mm_empty();
 }
 
-#elif defined(ENABLE_SSE2)
+#endif
+#if defined(ENABLE_SSE2)
 
 #include <emmintrin.h>
 
@@ -920,6 +921,65 @@ static void sse2_findminmax8(const void *p, SmpLength scanlen, int channels, int
 #endif // defined(ENABLE_SSE)
 
 
+std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples, int numChannels)
+{
+	int minVal = 127;
+	int maxVal = -128;
+#if defined(ENABLE_SSE2)
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	{
+		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+	if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE))
+	{
+		amdmmxext_or_sse_findminmax8(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+	{
+		while(numSamples--)
+		{
+
+			int s = *p;
+			if(s < minVal) minVal = s;
+			if(s > maxVal) maxVal = s;
+			p += numChannels;
+		}
+	}
+	return std::make_pair(minVal, maxVal);
+}
+
+
+std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples, int numChannels)
+{
+	int minVal = 32767;
+	int maxVal = -32768;
+#if defined(ENABLE_SSE2)
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	{
+		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+	if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE))
+	{
+		amdmmxext_or_sse_findminmax16(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+	{
+		while(numSamples--)
+		{
+			int s = *p;
+			if(s < minVal) minVal = s;
+			if(s > maxVal) maxVal = s;
+			p += numChannels;
+		}
+	}
+	return std::make_pair(minVal, maxVal);
+}
+
+
 // Draw one channel of zoomed-out sample data
 void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData)
 {
@@ -971,59 +1031,16 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		if (uFlags & CHN_16BIT)
 		{
 			signed short *p = (signed short *)(psample + poshi*smplsize);
-			smin = 32767;
-			smax = -32768;
-#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
-			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
-			{
-				amdmmxext_or_sse_findminmax16(p, scanlen, numChannels, smin, smax);
-			} else
-#elif defined(ENABLE_SSE2)
-			if(GetProcSupport() & PROCSUPPORT_SSE2)
-			{
-				sse2_findminmax16(p, scanlen, numChannels, smin, smax);
-			} else
-#endif
-			{
-				for (SmpLength i = 0; i < scanlen; i++)
-				{
-					int s = *p;
-					if (s < smin) smin = s;
-					if (s > smax) smax = s;
-					p += numChannels;
-				}
-			}
-			smin = YCVT(smin,15);
-			smax = YCVT(smax,15);
+			auto minMax = FindMinMax(p, scanlen, numChannels);
+			smin = YCVT(minMax.first, 15);
+			smax = YCVT(minMax.second, 15);
 		} else
 		// 8-bit
 		{
 			const int8 *p = psample + poshi * smplsize;
-			smin = 127;
-			smax = -128;
-#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
-			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
-			{
-				amdmmxext_or_sse_findminmax8(p, scanlen, numChannels, smin, smax);
-			} else
-#elif defined(ENABLE_SSE2)
-			if(GetProcSupport() & PROCSUPPORT_SSE2)
-			{
-				sse2_findminmax8(p, scanlen, numChannels, smin, smax);
-			} else
-#endif
-			{
-				for (SmpLength i = 0; i < scanlen; i++)
-				{
-
-					int s = *p;
-					if (s < smin) smin = s;
-					if (s > smax) smax = s;
-					p += numChannels;
-				}
-			}
-			smin = YCVT(smin,7);
-			smax = YCVT(smax,7);
+			auto minMax = FindMinMax(p, scanlen, numChannels);
+			smin = YCVT(minMax.first, 7);
+			smax = YCVT(minMax.second, 7);
 		}
 		if (smin > oldsmax)
 		{
