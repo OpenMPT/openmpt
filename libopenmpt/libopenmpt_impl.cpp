@@ -1076,19 +1076,20 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	return m_currentPositionSeconds;
 }
 std::vector<std::string> module_impl::get_metadata_keys() const {
-	std::vector<std::string> retval;
-	retval.push_back("type");
-	retval.push_back("type_long");
-	retval.push_back("container");
-	retval.push_back("container_long");
-	retval.push_back("tracker");
-	retval.push_back("artist");
-	retval.push_back("title");
-	retval.push_back("date");
-	retval.push_back("message");
-	retval.push_back("message_raw");
-	retval.push_back("warnings");
-	return retval;
+	return
+	{
+		"type",
+		"type_long",
+		"container",
+		"container_long",
+		"tracker",
+		"artist",
+		"title",
+		"date",
+		"message",
+		"message_raw",
+		"warnings",
+	};
 }
 std::string module_impl::get_metadata( const std::string & key ) const {
 	if ( key == std::string("type") ) {
@@ -1261,7 +1262,9 @@ std::vector<std::string> module_impl::get_channel_names() const {
 }
 std::vector<std::string> module_impl::get_order_names() const {
 	std::vector<std::string> retval;
-	for ( ORDERINDEX i = 0; i < m_sndFile->Order().GetLengthTailTrimmed(); ++i ) {
+	ORDERINDEX num_orders = m_sndFile->Order().GetLengthTailTrimmed();
+	retval.reserve( num_orders );
+	for ( ORDERINDEX i = 0; i < num_orders; ++i ) {
 		PATTERNINDEX pat = m_sndFile->Order()[i];
 		if ( m_sndFile->Patterns.IsValidIndex( pat ) ) {
 			retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[ m_sndFile->Order()[i] ].GetName() ) );
@@ -1279,6 +1282,7 @@ std::vector<std::string> module_impl::get_order_names() const {
 }
 std::vector<std::string> module_impl::get_pattern_names() const {
 	std::vector<std::string> retval;
+	retval.reserve( m_sndFile->Patterns.GetNumPatterns() );
 	for ( PATTERNINDEX i = 0; i < m_sndFile->Patterns.GetNumPatterns(); ++i ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[i].GetName() ) );
 	}
@@ -1286,6 +1290,7 @@ std::vector<std::string> module_impl::get_pattern_names() const {
 }
 std::vector<std::string> module_impl::get_instrument_names() const {
 	std::vector<std::string> retval;
+	retval.reserve( m_sndFile->GetNumInstruments() );
 	for ( INSTRUMENTINDEX i = 1; i <= m_sndFile->GetNumInstruments(); ++i ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->GetInstrumentName( i ) ) );
 	}
@@ -1293,6 +1298,7 @@ std::vector<std::string> module_impl::get_instrument_names() const {
 }
 std::vector<std::string> module_impl::get_sample_names() const {
 	std::vector<std::string> retval;
+	retval.reserve( m_sndFile->GetNumSamples() );
 	for ( SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->GetSampleName( i ) ) );
 	}
@@ -1479,18 +1485,19 @@ std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int
 }
 
 std::vector<std::string> module_impl::get_ctls() const {
-	std::vector<std::string> retval;
-	retval.push_back( "load.skip_samples" );
-	retval.push_back( "load.skip_patterns" );
-	retval.push_back( "load.skip_plugins" );
-	retval.push_back( "load.skip_subsongs_init" );
-	retval.push_back( "seek.sync_samples" );
-	retval.push_back( "subsong" );
-	retval.push_back( "play.tempo_factor" );
-	retval.push_back( "play.pitch_factor" );
-	retval.push_back( "render.resampler.emulate_amiga" );
-	retval.push_back( "dither" );
-	return retval;
+	return
+	{
+		"load.skip_samples",
+		"load.skip_patterns",
+		"load.skip_plugins",
+		"load.skip_subsongs_init",
+		"seek.sync_samples",
+		"subsong",
+		"play.tempo_factor",
+		"play.pitch_factor",
+		"render.resampler.emulate_amiga",
+		"dither",
+	};
 }
 std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
 	if ( !ctl.empty() ) {
