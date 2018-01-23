@@ -527,7 +527,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMED(MemoryFileReader file, co
 }
 
 
-bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	MEDMODULEHEADER pmmh;

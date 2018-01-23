@@ -42,7 +42,7 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 }
 
 
-bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 {
 	WAVReader wavFile(file);
 

@@ -362,7 +362,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderULT(MemoryFileReader file, co
 }
 
 
-bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 

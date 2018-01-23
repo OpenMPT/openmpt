@@ -780,7 +780,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 }
 
 
-bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 {
 	char magic[4];
 	if(!file.Seek(1080) || !file.ReadArray(magic))
@@ -2106,7 +2106,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		
 		case PT36IffChunk::idPTDT:
-			ok = ReadMod(chunk, loadFlags);
+			ok = ReadMOD(chunk, loadFlags);
 			break;
 		}
 	} while(file.ReadStruct(iffHead));
