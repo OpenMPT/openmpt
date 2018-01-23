@@ -66,21 +66,19 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct ID3v2Header
 {
-	uint8     signature[3];
-	uint8     version[2];
+	uint8    signature[3];
+	uint8    version[2];
 	uint8be  flags;
 	uint32be size;
-	// Total: 10 bytes
 };
 
 MPT_BINARY_STRUCT(ID3v2Header, 10)
 
 struct ID3v2Frame
 {
-	char      frameid[4];
+	char     frameid[4];
 	uint32be size;
 	uint16be flags;
-	// Total: 10 bytes
 };
 
 MPT_BINARY_STRUCT(ID3v2Frame, 10)
@@ -187,7 +185,6 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 	totalID3v2Size += sizeof(tHeader);
 
-	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
 	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::CharsetUTF8, tags.title), s);
 	WriteID3v2Frame("TPE1", mpt::ToCharset(mpt::CharsetUTF8, tags.artist), s);
 	WriteID3v2Frame("TCOM", mpt::ToCharset(mpt::CharsetUTF8, tags.artist), s);
@@ -337,7 +334,7 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 	if(!memcmp(cFrameID, "COMM", 4))
 	{
 		// English language for comments - no description following (hence the text ending nullchar(s))
-		// For language IDs, see http://en.wikipedia.org/wiki/ISO-639-2
+		// For language IDs, see https://en.wikipedia.org/wiki/ISO-639-2
 		sFramecontent = "eng" + (ID3v2_TEXTENDING + sFramecontent);
 	}
 	if(!memcmp(cFrameID, "WXXX", 4))
@@ -1534,7 +1531,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(MPT_USTRING("9.999"), q_table[q]);
 		} else
 		{
-			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
+			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(q, q_table[q]);
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME
