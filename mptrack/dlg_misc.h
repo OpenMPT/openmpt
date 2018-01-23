@@ -20,12 +20,13 @@ class CDLSBank;
 
 class CModTypeDlg: public CDialog
 {
-public:
+protected:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp, m_CheckBoxAmigaLimits;
 	HICON m_warnIcon;
 
 	CSoundFile &sndFile;
+public:
 	TempoSwing m_tempoSwing;
 	PlayBehaviourSet m_playBehaviour;
 	CHANNELINDEX m_nChannels;
@@ -48,10 +49,9 @@ protected:
 
 protected:
 	//{{AFX_VIRTUAL(CModTypeDlg)
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	//}}AFX_VIRTUAL
 
 	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
@@ -75,9 +75,9 @@ public:
 	{ }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 
 	afx_msg void OnSelectDefaults();
 	afx_msg void UpdateSelectDefaults();
@@ -96,7 +96,7 @@ public:
 	UINT ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle=NULL);
 
 protected:
-	virtual BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 };
 
 
@@ -106,7 +106,7 @@ public:
 	CSoundFile &sndFile;
 	std::vector<bool> m_bKeepMask;
 	CHANNELINDEX m_nChannels, m_nRemove;
-	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
+	CListBox m_RemChansList;
 	bool m_ShowCancel;
 
 public:
@@ -120,9 +120,9 @@ public:
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
-	virtual void DoDataExchange(CDataExchange* pDX); //rewbs.removeChansDlgCleanup
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange *pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CRemoveChannelsDlg)
 	afx_msg void OnChannelChanged();
@@ -142,7 +142,7 @@ protected:
 
 public:
 	CSoundBankProperties(const CDLSBank &bank, CWnd *parent = nullptr);
-	virtual BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 };
 
 
@@ -220,9 +220,9 @@ public:
 		{ m_nInstrument = nInstr; }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	afx_msg void OnUpdateSamples();
 	afx_msg void OnUpdateKeyboard();
 	afx_msg void OnUpdateOctave();
@@ -239,14 +239,13 @@ class CEditHistoryDlg: public CDialog
 {
 
 protected:
-	CModDoc *m_pModDoc;
+	CModDoc &m_modDoc;
 
 public:
-	CEditHistoryDlg(CWnd *parent, CModDoc *pModDoc) : CDialog(IDD_EDITHISTORY, parent) { m_pModDoc = pModDoc; }
+	CEditHistoryDlg(CWnd *parent, CModDoc &modDoc) : CDialog(IDD_EDITHISTORY, parent), m_modDoc(modDoc) { }
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
 	afx_msg void OnClearHistory();
 	DECLARE_MESSAGE_MAP()
 };
@@ -296,9 +295,9 @@ public:
 	{ }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange *pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 };
 
 
