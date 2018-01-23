@@ -67,6 +67,9 @@ public:
 	~CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
+	static std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChannels);
+	static std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChannels);
+
 protected:
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
@@ -113,14 +116,14 @@ protected:
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)
-	virtual void OnDraw(CDC *);
-	virtual void OnInitialUpdate();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
-	virtual LRESULT OnPlayerNotify(Notification *);
-	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
-	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
+	void OnDraw(CDC *) override;
+	void OnInitialUpdate() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
+	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
+	LRESULT OnPlayerNotify(Notification *) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
+	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
 	//}}AFX_VIRTUAL
 
 protected:
