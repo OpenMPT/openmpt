@@ -139,11 +139,11 @@ void ModSequence::RemovePattern(PATTERNINDEX pat)
 {
 	// First, calculate the offset that needs to be applied to jump commands
 	const ORDERINDEX orderLength = GetLengthTailTrimmed();
-	std::vector<ORDERINDEX> jumpOffset(orderLength, 0);
+	std::vector<ORDERINDEX> newPosition(orderLength);
 	ORDERINDEX maxJump = 0;
 	for(ORDERINDEX i = 0; i < orderLength; i++)
 	{
-		jumpOffset[i] = i - maxJump;
+		newPosition[i] = i - maxJump;
 		if(at(i) == pat)
 		{
 			maxJump++;
@@ -154,22 +154,22 @@ void ModSequence::RemovePattern(PATTERNINDEX pat)
 		return;
 	}
 
-	erase(std::remove_if(begin(), end(), [pat](PATTERNINDEX p) { return p == pat; }), end());
+	erase(std::remove(begin(), end(), pat), end());
 
 	// Only apply to patterns actually found in this sequence
 	for(auto p : *this) if(m_sndFile.Patterns.IsValidPat(p))
 	{
 		for(auto &m : m_sndFile.Patterns[p])
 		{
-			if(m.command == CMD_POSITIONJUMP && m.param < jumpOffset.size())
+			if(m.command == CMD_POSITIONJUMP && m.param < newPosition.size())
 			{
-				m.param = static_cast<ModCommand::PARAM>(jumpOffset[m.param]);
+				m.param = static_cast<ModCommand::PARAM>(newPosition[m.param]);
 			}
 		}
 	}
-	if(m_restartPos < jumpOffset.size())
+	if(m_restartPos < newPosition.size())
 	{
-		m_restartPos = jumpOffset[m_restartPos];
+		m_restartPos = newPosition[m_restartPos];
 	}
 }
 
