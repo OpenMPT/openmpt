@@ -196,18 +196,17 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 	case CMD_MODCMDEX:
 		switch(param & 0xF0)
 		{
-		case 0x00:	// set filter
-			command = CMD_NONE;
+		case 0x00:	// Set filter
 			break;
-		case 0x30:	// play backwards
+		case 0x30:	// Play backwards
 			command = CMD_S3MCMDEX;
 			param = 0x9F;
 			break;
-		case 0x40:	// turn off sound in channel (volume / portamento commands after this can't pick up the note anymore)
+		case 0x40:	// Turn off sound in channel (volume / portamento commands after this can't pick up the note anymore)
 			command = CMD_S3MCMDEX;
 			param = 0xC0;
 			break;
-		case 0x50:	// turn on/off channel
+		case 0x50:	// Turn on/off channel
 			// TODO: Apparently this should also kill the playing note.
 			if((param & 0x0F) <= 0x01)
 			{
@@ -215,10 +214,10 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 				param = (param == 0x50) ? 0x00 : 0x40;
 			}
 			break;
-		case 0x60:	// set loop begin / loop
+		case 0x60:	// Set loop begin / loop
 			// TODO
 			break;
-		case 0x70:	// set offset
+		case 0x70:	// Set offset
 			// TODO
 			break;
 		default:
@@ -234,7 +233,7 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 	case CMD_KEYOFF:
 		if (param == 0)
 		{
-			// TODO key of at tick 0
+			// TODO key off at tick 0
 		}
 		break;
 

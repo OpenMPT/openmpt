@@ -10,7 +10,6 @@
 #pragma once
 
 #include <cmath>
-#include "../common/misc_util.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

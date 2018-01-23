@@ -147,7 +147,7 @@ BOOL COptionsColors::OnInitDialog()
 	m_ComboPreset.InitStorage(2 + mpt::size(ColorSchemes), 20 * sizeof(TCHAR));
 	m_ComboPreset.AddString(_T("Choose a Colour Scheme..."));
 	m_ComboPreset.AddString(_T("OpenMPT (Default)"));
-	for(auto &preset : ColorSchemes)
+	for(const auto &preset : ColorSchemes)
 	{
 		m_ComboPreset.SetItemDataPtr(m_ComboPreset.AddString(preset.name), const_cast<ColorScheme *>(&preset));
 	}
@@ -538,7 +538,7 @@ void COptionsColors::OnPresetChange()
 	auto scheme = static_cast<const ColorScheme *>(m_ComboPreset.GetItemDataPtr(curSel));
 	if(scheme != nullptr)
 	{
-		for(auto &c : scheme->colors)
+		for(const auto &c : scheme->colors)
 		{
 			CustomColors[c.id] = c.color;
 		}
@@ -563,7 +563,7 @@ void COptionsColors::OnLoadColorScheme()
 		{
 			TCHAR sKeyName[16];
 			wsprintf(sKeyName, _T("Color%02u"), i);
-			CustomColors[i] = file.Read<int32>("Colors", sKeyName, CustomColors[i]);
+			CustomColors[i] = file.Read<int32>(_T("Colors"), sKeyName, CustomColors[i]);
 		}
 	}
 	OnPreviewChanged();
@@ -583,7 +583,7 @@ void COptionsColors::OnSaveColorScheme()
 		{
 			TCHAR sKeyName[16];
 			wsprintf(sKeyName, _T("Color%02u"), i);
-			file.Write<int32>("Colors", sKeyName, CustomColors[i]);
+			file.Write<int32>(_T("Colors"), sKeyName, CustomColors[i]);
 		}
 	}
 }

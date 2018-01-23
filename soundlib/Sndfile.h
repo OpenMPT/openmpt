@@ -95,20 +95,14 @@ struct PatternCuePoint
 // Return values for GetLength()
 struct GetLengthType
 {
-	double duration;		// total time in seconds
-	ROWINDEX lastRow;		// last parsed row (if no target is specified, this is the first row that is parsed twice, i.e. not the *last* played order)
-	ROWINDEX endRow;		// last row before module loops (UNDEFINED if a target is specified)
-	ROWINDEX startRow;		// first row of parsed subsong
-	ORDERINDEX lastOrder;	// last parsed order (see lastRow remark)
-	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
-	ORDERINDEX startOrder;	// first order of parsed subsong
-	bool targetReached;		// true if the specified order/row combination or duration has been reached while going through the module
-
-	GetLengthType()
-		: duration(0.0)
-		, lastRow(ROWINDEX_INVALID), endRow(ROWINDEX_INVALID), startRow(0)
-		, lastOrder(ORDERINDEX_INVALID), endOrder(ORDERINDEX_INVALID), startOrder(0)
-		, targetReached(false) { }
+	double     duration = 0.0;                 // Total time in seconds
+	ROWINDEX   lastRow = ROWINDEX_INVALID;     // Last parsed row (if no target is specified, this is the first row that is parsed twice, i.e. not the *last* played order)
+	ROWINDEX   endRow = ROWINDEX_INVALID;      // Last row before module loops (UNDEFINED if a target is specified)
+	ROWINDEX   startRow = 0;                   // First row of parsed subsong
+	ORDERINDEX lastOrder = ORDERINDEX_INVALID; // Last parsed order (see lastRow remark)
+	ORDERINDEX endOrder = ORDERINDEX_INVALID;  // Last order before module loops (UNDEFINED if a target is specified)
+	ORDERINDEX startOrder = 0;                 // First order of parsed subsong
+	bool       targetReached = false;          // True if the specified order/row combination or duration has been reached while going through the module
 };
 
 
@@ -238,20 +232,11 @@ struct FileHistory
 
 struct TimingInfo
 {
-	double InputLatency; // seconds
-	double OutputLatency; // seconds
-	int64 StreamFrames;
-	uint64 SystemTimestamp; // nanoseconds
-	double Speed;
-	TimingInfo()
-		: InputLatency(0.0)
-		, OutputLatency(0.0)
-		, StreamFrames(0)
-		, SystemTimestamp(0)
-		, Speed(1.0)
-	{
-		return;
-	}
+	double InputLatency = 0.0; // seconds
+	double OutputLatency = 0.0; // seconds
+	int64 StreamFrames = 0;
+	uint64 SystemTimestamp = 0; // nanoseconds
+	double Speed = 1.0;
 };
 
 

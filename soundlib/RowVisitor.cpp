@@ -58,9 +58,9 @@ void RowVisitor::Initialize(bool reset)
 		if(m_visitOrder.capacity() < MAX_PATTERN_ROWS)
 		{
 			ROWINDEX maxRows = 0;
-			for(PATTERNINDEX pat = 0; pat < m_sndFile.Patterns.Size(); pat++)
+			for(const auto &pat :m_sndFile.Patterns)
 			{
-				maxRows = std::max(maxRows, m_sndFile.Patterns[pat].GetNumRows());
+				maxRows = std::max(maxRows, pat.GetNumRows());
 			}
 			m_visitOrder.reserve(maxRows);
 		}
