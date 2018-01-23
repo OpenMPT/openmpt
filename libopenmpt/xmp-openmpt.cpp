@@ -323,6 +323,7 @@ static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
 	reset_options();
 	if ( config ) {
 		load_settings_from_xml( self->settings, std::string( (char*)config, (char*)config + size ) );
+		apply_options();
 	}
 }
 
