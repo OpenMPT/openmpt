@@ -633,7 +633,9 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 
+OPENMPT_NAMESPACE_END
 #include <mmintrin.h>
+OPENMPT_NAMESPACE_BEGIN
 
 // AMD MMX/SSE implementation for min/max finder, packs 4*int16 in a 64-bit MMX register.
 // scanlen = How many samples to process on this channel
@@ -766,10 +768,12 @@ static void amdmmxext_or_sse_findminmax8(const void *p, SmpLength scanlen, int c
 	_mm_empty();
 }
 
-#endif
+#endif // defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 #if defined(ENABLE_SSE2)
 
+OPENMPT_NAMESPACE_END
 #include <emmintrin.h>
+OPENMPT_NAMESPACE_BEGIN
 
 // SSE2 implementation for min/max finder, packs 8*int16 in a 128-bit XMM register.
 // scanlen = How many samples to process on this channel
@@ -906,7 +910,7 @@ static void sse2_findminmax8(const void *p, SmpLength scanlen, int channels, int
 }
 
 
-#endif // defined(ENABLE_SSE)
+#endif // defined(ENABLE_SSE2)
 
 
 std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples, int numChannels)
