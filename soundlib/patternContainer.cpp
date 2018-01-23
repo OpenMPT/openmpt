@@ -144,15 +144,11 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 
 PATTERNINDEX CPatternContainer::GetNumPatterns() const
 {
-	if(Size() == 0)
+	for(PATTERNINDEX pat = Size(); pat > 0; pat--)
 	{
-		return 0;
-	}
-	for(PATTERNINDEX nPat = Size(); nPat > 0; nPat--)
-	{
-		if(IsValidPat(nPat - 1))
+		if(IsValidPat(pat - 1))
 		{
-			return nPat;
+			return pat;
 		}
 	}
 	return 0;
