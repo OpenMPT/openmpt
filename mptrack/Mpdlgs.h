@@ -59,10 +59,10 @@ private:
 	void UpdateControls();
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
 	void UpdateStereoSep();
 
 	afx_msg void OnDeviceChanged();
@@ -116,10 +116,10 @@ protected:
 	void UpdateRamping();
 	void UpdateStereoSep();
 
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
 
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnResamplerChanged();
@@ -171,10 +171,10 @@ public:
 	{ }
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 
@@ -205,7 +205,7 @@ public:
 
 protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
-	CComboBox m_ATBehaviour, m_Quantize;
+	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize;
 
 public:
 	CMidiSetupDlg(DWORD d, UINT n)
@@ -215,10 +215,12 @@ public:
 		{ }
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+	void RefreshDeviceList(UINT currentDevice);
+	afx_msg void OnRenameDevice();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	DECLARE_MESSAGE_MAP()
 };
@@ -236,10 +238,10 @@ public:
 	COptionsWine();
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
 
 	afx_msg void OnSettingsChanged();
 	
