@@ -461,7 +461,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleReverse, 1381, _T("Reverse Sample"));
 	DefineKeyCommand(kcSampleDelete, 1382, _T("Delete Sample Selection"));
 	DefineKeyCommand(kcSampleSilence, 1383, _T("Silence Sample Selection"));
-	DefineKeyCommand(kcSampleNormalize, 1384, _T("Normalise Sample"));
+	DefineKeyCommand(kcSampleNormalize, 1384, _T("Normalize Sample"));
 	DefineKeyCommand(kcSampleAmplify, 1385, _T("Amplify Sample"));
 	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom In"));
 	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom Out"));

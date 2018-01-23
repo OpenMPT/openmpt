@@ -161,16 +161,16 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_EditPatName.SetParent(this);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME - 1);
 	// Spin controls
-	m_SpinSpacing.SetRange(0, MAX_SPACING);
+	m_SpinSpacing.SetRange32(0, MAX_SPACING);
 	m_SpinSpacing.SetPos(TrackerSettings::Instance().gnPatternSpacing);
 
-	m_SpinInstrument.SetRange(-1, 1);
+	m_SpinInstrument.SetRange32(-1, 1);
 	m_SpinInstrument.SetPos(0);
 
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));
 
-	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
+	m_SpinSequence.SetRange32(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
 	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
 
@@ -487,16 +487,8 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				setLoop = (lParam != 0);
 			}
 
-			if (setLoop)
-			{
-				m_sndFile.m_SongFlags.set(SONG_PATTERNLOOP);
-				CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
-			} else
-			{
-				m_sndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
-				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);
-			}
-
+			m_sndFile.m_SongFlags.set(SONG_PATTERNLOOP, setLoop);
+			CheckDlgButton(IDC_PATTERN_LOOP, setLoop ? BST_CHECKED : BST_UNCHECKED);
 			break;
 		}
 	case CTRLMSG_PAT_NEWPATTERN:

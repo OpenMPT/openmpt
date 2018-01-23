@@ -145,7 +145,7 @@ void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoi
 		if(i > 0 && mptEnv[i].tick < mptEnv[i - 1].tick)
 		{
 			// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
-			// value. Try to compensate by adding the missing high byte" - I guess that's what this code is for.
+			// value. Try to compensate by adding the missing high byte."
 			// Note: It appears that MPT 1.07's XI instrument saver omitted the high byte of envelope nodes.
 			// This might be the source for some broken envelopes in IT and XM files.
 
@@ -409,8 +409,6 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
 		}
 	}
-
-	mptSmp.SanitizeLoops();
 
 	strcpy(mptSmp.filename, "");
 }
