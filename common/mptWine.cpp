@@ -389,7 +389,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		// NOTE:
 		// Modern terminals detach themselves from the invoking shell if another instance is already present.
 		// This means we cannot rely on terminal invocation being syncronous.
-		static const char * constexpr terminals[] =
+		static constexpr const char * terminals[] =
 		{
 			"x-terminal-emulator",
 			"konsole",
