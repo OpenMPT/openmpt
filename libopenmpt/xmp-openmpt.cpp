@@ -62,6 +62,7 @@ enum {
 	openmpt_shortcut_tempo_increase,
 	openmpt_shortcut_pitch_decrease,
 	openmpt_shortcut_pitch_increase,
+	openmpt_shortcut_switch_interpolation,
 	openmpt_shortcut_last = 0x21fff,
 
 	openmpt_shortcut_ex = 0x80000000,	// Use extended version of the shortcut callback
@@ -336,6 +337,24 @@ static void WINAPI ShortcutHandler( DWORD id ) {
 	case openmpt_shortcut_tempo_increase: self->tempo_factor++; tempo_changed = true; break;
 	case openmpt_shortcut_pitch_decrease: self->pitch_factor--; pitch_changed = true; break;
 	case openmpt_shortcut_pitch_increase: self->pitch_factor++; pitch_changed = true; break;
+	case openmpt_shortcut_switch_interpolation:
+		self->settings.interpolationfilterlength *= 2;
+		if ( self->settings.interpolationfilterlength > 8 ) {
+			self->settings.interpolationfilterlength = 1;
+		}
+		apply_and_save_options();
+		const char *s = nullptr;
+		switch ( self->settings.interpolationfilterlength )
+		{
+		case 1: s = "Interpolation: Off"; break;
+		case 2: s = "Interpolation: Linear"; break;
+		case 4: s = "Interpolation: Cubic"; break;
+		case 8: s = "Interpolation: Polyphase"; break;
+		}
+		if ( s ) {
+			xmpfmisc->ShowBubble( s, 0 );
+		}
+		break;
 	}
 	
 	self->tempo_factor = std::min ( 48, std::max( -48, self->tempo_factor ) );
@@ -557,11 +576,11 @@ static std::string extract_date( const openmpt::module & mod ) {
 		// be considered.
 		std::string s = " " + mod.get_metadata("message");
 		auto names = mod.get_sample_names();
-		for ( auto &name : names ) {
+		for ( const auto & name : names ) {
 			s += " " + name;
 		}
 		names = mod.get_instrument_names();
-		for ( auto &name : names ) {
+		for ( const auto & name : names ) {
 			s += " " + name;
 		}
 		s += " ";
@@ -756,9 +775,11 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 
 static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * * length, char * * tags ) {
 	try {
-		std::map< std::string, std::string > ctls;
-		ctls[ "load.skip_plugins" ] = "1";
-		ctls[ "load.skip_samples" ] = "1";
+		std::map< std::string, std::string > ctls
+		{
+			{ "load.skip_plugins", "1" },
+			{ "load.skip_samples", "1" },
+		};
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
@@ -832,8 +853,10 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 	xmpopenmpt_lock guard;
 	reset_options();
 	try {
-		std::map< std::string, std::string > ctls;
-		ctls["seek.sync_samples"] = "1";
+		std::map< std::string, std::string > ctls
+		{
+			{ "seek.sync_samples", "1" },
+		};
 		self->delete_mod();
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
@@ -1653,6 +1676,9 @@ static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
 	xmpfmisc->RegisterShortcut( &cut );
 	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_increase;
 	cut.text = "OpenMPT - Increase Pitch";
+	xmpfmisc->RegisterShortcut( &cut );
+	cut.id = openmpt_shortcut_ex | openmpt_shortcut_switch_interpolation;
+	cut.text = "OpenMPT - Switch Interpolation";
 	xmpfmisc->RegisterShortcut( &cut );
 
 	self->settings.load();
