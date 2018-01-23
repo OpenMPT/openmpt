@@ -380,7 +380,6 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments
 	WritePropertyIfNeeded(*this, &ModInstrument::nMidiProgram, MagicBE("MP.."), sizeof(ModInstrument::nMidiProgram), f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::wMidiBank,    MagicBE("MB.."), sizeof(ModInstrument::wMidiBank),    f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nPan,         MagicBE("P..."), sizeof(ModInstrument::nPan),         f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nFadeOut,     MagicBE("FO.."), sizeof(ModInstrument::nFadeOut),     f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nResampling,  MagicBE("R..."), sizeof(ModInstrument::nResampling),  f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing,    MagicBE("CS.."), sizeof(ModInstrument::nCutSwing),    f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nResSwing,    MagicBE("RS.."), sizeof(ModInstrument::nResSwing),    f, numInstruments);
@@ -396,6 +395,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments
 	if(!(GetType() & MOD_TYPE_XM))
 	{
 		// XM instrument headers already have support for this
+		WritePropertyIfNeeded(*this, &ModInstrument::nFadeOut, MagicBE("FO.."), sizeof(ModInstrument::nFadeOut), f, numInstruments);
 		WritePropertyIfNeeded(*this, &ModInstrument::midiPWD, MagicBE("MPWD"), sizeof(ModInstrument::midiPWD), f, numInstruments);
 	}
 
