@@ -1059,7 +1059,8 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "MIDI Recording",IDC_STATIC,6,6,276,108
     LTEXT           "MIDI &Input Device:",IDC_STATIC,18,18,67,8
-    COMBOBOX        IDC_COMBO1,18,30,252,74,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO1,18,30,198,74,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Re&name",IDC_BUTTON1,222,30,50,14
     CONTROL         "&Apply Octave Transpose to incoming MIDI Notes",IDC_CHECK4,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,48,237,12
     CONTROL         "&Respond to Play / Continue / Stop Song messages",IDC_MIDIPLAYCONTROL,

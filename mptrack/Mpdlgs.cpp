@@ -15,6 +15,7 @@
 #include "ImageLists.h"
 #include "Moddoc.h"
 #include "Mpdlgs.h"
+#include "dlg_misc.h"
 #include "../common/StringFixer.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
@@ -1681,6 +1682,7 @@ BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO1,			OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,			OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,			OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1,					OnRenameDevice)
 	ON_COMMAND(IDC_CHECK1,					OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,					OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,					OnSettingsChanged)
@@ -1705,6 +1707,7 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN1,		m_SpinSpd);
 	DDX_Control(pDX, IDC_SPIN2,		m_SpinPat);
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinAmp);
+	DDX_Control(pDX, IDC_COMBO1,	m_InputDevice);
 	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
 	DDX_Control(pDX, IDC_COMBO3,	m_Quantize);
 	//}}AFX_DATA_MAP
@@ -1713,9 +1716,6 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CMidiSetupDlg::OnInitDialog()
 {
-	MIDIINCAPS mic;
-	CComboBox *combo;
-
 	CPropertyPage::OnInitDialog();
 	// Flags
 	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
@@ -1730,17 +1730,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	if (m_dwMidiSetup & MIDISETUP_MIDIMACROPITCHBEND) CheckDlgButton(IDC_CHECK5, BST_CHECKED);
 
 	// Midi In Device
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		UINT ndevs = midiInGetNumDevs();
-		for (UINT i=0; i<ndevs; i++)
-		{
-			mic.szPname[0] = 0;
-			if (midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
-				combo->SetItemData(combo->AddString(theApp.GetFriendlyMIDIPortName(CString(mic.szPname), true)), i);
-		}
-		combo->SetCurSel((m_nMidiDevice == MIDI_MAPPER) ? 0 : m_nMidiDevice);
-	}
+	RefreshDeviceList(m_nMidiDevice);
 
 	// Aftertouch behaviour
 	m_ATBehaviour.ResetContent();
@@ -1787,9 +1777,55 @@ BOOL CMidiSetupDlg::OnInitDialog()
 }
 
 
+void CMidiSetupDlg::RefreshDeviceList(UINT currentDevice)
+{
+	m_InputDevice.SetRedraw(FALSE);
+	m_InputDevice.ResetContent();
+	UINT ndevs = midiInGetNumDevs();
+	for(UINT i = 0; i < ndevs; i++)
+	{
+		MIDIINCAPS mic;
+		mic.szPname[0] = 0;
+		if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
+		{
+			int item = m_InputDevice.AddString(theApp.GetFriendlyMIDIPortName(mpt::ToCString(mic.szPname), true));
+			m_InputDevice.SetItemData(item, i);
+			if(i == currentDevice)
+			{
+				m_InputDevice.SetCurSel(item);
+			}
+		}
+	}
+	m_InputDevice.SetRedraw(TRUE);
+	m_InputDevice.Invalidate(FALSE);
+}
+
+
+void CMidiSetupDlg::OnRenameDevice()
+{
+	int n = m_InputDevice.GetCurSel();
+	if(n >= 0)
+	{
+		UINT device = static_cast<UINT>(m_InputDevice.GetItemData(n));
+		MIDIINCAPS mic;
+		mic.szPname[0] = 0;
+		midiInGetDevCaps(device, &mic, sizeof(mic));
+		CString name = mic.szPname, friendlyName = theApp.GetSettings().Read("MIDI Input Ports", name, name);
+		CInputDlg dlg(this, _T("New name for ") + name + _T(":"), friendlyName);
+		if(dlg.DoModal() == IDOK)
+		{
+			if(dlg.resultAsString.IsEmpty() || dlg.resultAsString == name)
+				theApp.GetSettings().Remove("MIDI Input Ports", name);
+			else
+				theApp.GetSettings().Write("MIDI Input Ports", name, dlg.resultAsString);
+			RefreshDeviceList(device);
+		}
+	}
+}
+
+
 void CMidiSetupDlg::OnOK()
 {
-	CComboBox *combo;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	m_dwMidiSetup = 0;
 	m_nMidiDevice = MIDI_MAPPER;
@@ -1804,11 +1840,8 @@ void CMidiSetupDlg::OnOK()
 	if (IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN)) m_dwMidiSetup |= MIDISETUP_PLAYPATTERNONMIDIIN;
 	if (IsDlgButtonChecked(IDC_CHECK5)) m_dwMidiSetup |= MIDISETUP_MIDIMACROPITCHBEND;
 
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		int n = combo->GetCurSel();
-		if (n >= 0) m_nMidiDevice = static_cast<UINT>(combo->GetItemData(n));
-	}
+	int n = m_InputDevice.GetCurSel();
+	if (n >= 0) m_nMidiDevice = static_cast<UINT>(m_InputDevice.GetItemData(n));
 
 	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
 
@@ -1870,9 +1903,9 @@ BOOL COptionsWine::OnInitDialog()
 	GetDlgItem(IDC_CHECK_WINE_ENABLE)->EnableWindow(mpt::Windows::IsWine() ? TRUE : FALSE);
 	CheckDlgButton(IDC_CHECK_WINE_ENABLE, TrackerSettings::Instance().WineSupportEnabled ? BST_CHECKED : BST_UNCHECKED);
 	int index;
-	index = m_CbnPulseAudio.AddString(TEXT("Auto"    )); m_CbnPulseAudio.SetItemData(index, 1);
-	index = m_CbnPulseAudio.AddString(TEXT("Enabled" )); m_CbnPulseAudio.SetItemData(index, 2);
-	index = m_CbnPulseAudio.AddString(TEXT("Disabled")); m_CbnPulseAudio.SetItemData(index, 0);
+	index = m_CbnPulseAudio.AddString(_T("Auto"    )); m_CbnPulseAudio.SetItemData(index, 1);
+	index = m_CbnPulseAudio.AddString(_T("Enabled" )); m_CbnPulseAudio.SetItemData(index, 2);
+	index = m_CbnPulseAudio.AddString(_T("Disabled")); m_CbnPulseAudio.SetItemData(index, 0);
 	m_CbnPulseAudio.SetCurSel(0);
 	for(index = 0; index < 3; ++index)
 	{
@@ -1881,9 +1914,9 @@ BOOL COptionsWine::OnInitDialog()
 			m_CbnPulseAudio.SetCurSel(index);
 		}
 	}
-	index = m_CbnPortAudio.AddString(TEXT("Auto"    )); m_CbnPortAudio.SetItemData(index, 1);
-	index = m_CbnPortAudio.AddString(TEXT("Enabled" )); m_CbnPortAudio.SetItemData(index, 2);
-	index = m_CbnPortAudio.AddString(TEXT("Disabled")); m_CbnPortAudio.SetItemData(index, 0);
+	index = m_CbnPortAudio.AddString(_T("Auto"    )); m_CbnPortAudio.SetItemData(index, 1);
+	index = m_CbnPortAudio.AddString(_T("Enabled" )); m_CbnPortAudio.SetItemData(index, 2);
+	index = m_CbnPortAudio.AddString(_T("Disabled")); m_CbnPortAudio.SetItemData(index, 0);
 	for(index = 0; index < 3; ++index)
 	{
 		if(m_CbnPortAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnablePortAudio))
