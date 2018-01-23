@@ -429,8 +429,8 @@ module_impl::subsongs_type module_impl::get_subsongs() const {
 	}
 	for ( SEQUENCEINDEX seq = 0; seq < m_sndFile->Order.GetNumSequences(); ++seq ) {
 		const std::vector<GetLengthType> lengths = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( true ).StartPos( seq, 0, 0 ) );
-		for ( std::vector<GetLengthType>::const_iterator l = lengths.begin(); l != lengths.end(); ++l ) {
-			subsongs.push_back( subsong_data( l->duration, l->startRow, l->startOrder, seq ) );
+		for ( const auto & l : lengths ) {
+			subsongs.push_back( subsong_data( l.duration, l.startRow, l.startOrder, seq ) );
 		}
 	}
 	return subsongs;
@@ -456,8 +456,8 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_ctl_load_skip_subsongs_init = false;
 	m_ctl_seek_sync_samples = false;
 	// init member variables that correspond to ctls
-	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
-		ctl_set( i->first, i->second, false );
+	for ( const auto & ctl : ctls ) {
+		ctl_set( ctl.first, ctl.second, false );
 	}
 }
 void module_impl::load( const FileReader & file, const std::map< std::string, std::string > & ctls ) {
@@ -484,13 +484,13 @@ void module_impl::load( const FileReader & file, const std::map< std::string, st
 	}
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	std::vector<std::pair<LogLevel,std::string> > loaderMessages = loaderlog.GetMessages();
-	for ( std::vector<std::pair<LogLevel,std::string> >::iterator i = loaderMessages.begin(); i != loaderMessages.end(); ++i ) {
-		PushToCSoundFileLog( i->first, i->second );
-		m_loaderMessages.push_back( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( i->first ) ) + std::string(": ") + i->second );
+	for ( const auto & msg : loaderMessages ) {
+		PushToCSoundFileLog( msg.first, msg.second );
+		m_loaderMessages.push_back( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( msg.first ) ) + std::string(": ") + msg.second );
 	}
 	// init CSoundFile state that corresponds to ctls
-	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
-		ctl_set( i->first, i->second, false );
+	for ( const auto & ctl : ctls ) {
+		ctl_set( ctl.first, ctl.second, false );
 	}
 }
 bool module_impl::is_loaded() const {
@@ -997,8 +997,8 @@ double module_impl::get_duration_seconds() const {
 	if ( m_current_subsong == all_subsongs ) {
 		// Play all subsongs consecutively.
 		double total_duration = 0.0;
-		for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
-			total_duration += subsongs[i].duration;
+		for ( const auto & subsong : subsongs ) {
+			total_duration += subsong.duration;
 		}
 		return total_duration;
 	}
@@ -1110,7 +1110,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		if ( m_sndFile->GetFileHistory().empty() ) {
 			return std::string();
 		}
-		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->GetFileHistory()[m_sndFile->GetFileHistory().size() - 1].AsISO8601() );
+		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->GetFileHistory().back().AsISO8601() );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->m_songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {
@@ -1150,13 +1150,13 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("warnings") ) {
 		std::string retval;
 		bool first = true;
-		for ( std::vector<std::string>::const_iterator i = m_loaderMessages.begin(); i != m_loaderMessages.end(); ++i ) {
+		for ( const auto & msg : m_loaderMessages ) {
 			if ( !first ) {
 				retval += "\n";
 			} else {
 				first = false;
 			}
-			retval += *i;
+			retval += msg;
 		}
 		return retval;
 	}
@@ -1248,8 +1248,8 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
-	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
+	for ( const auto & subsong : subsongs ) {
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) ).GetName() ) );
 	}
 	return retval;
 }
