@@ -21,25 +21,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Functor for fixing hacked patterns
-struct FixHackedPatterns
-{
-	FixHackedPatterns(const CModSpecifications *originalSpecs, MODTYPE type, bool autofix, bool *foundHacks)
-	{
-		this->originalSpecs = originalSpecs;
-		this->type = type;
-		this->autofix = autofix;
-		this->foundHacks = foundHacks;
-		*foundHacks = false;
-	}
-
-	const CModSpecifications *originalSpecs;
-	MODTYPE type;
-	bool autofix;
-	bool *foundHacks;
-};
-
-
 // Find and fix envelopes where two nodes are on the same tick.
 bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 {
@@ -144,11 +125,11 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 	// Check for too big/small patterns
 	foundHere = false;
-	for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
+	for(auto &pat : m_SndFile.Patterns)
 	{
-		if(m_SndFile.Patterns.IsValidPat(i))
+		if(pat.IsValid())
 		{
-			const ROWINDEX patSize = m_SndFile.Patterns[i].GetNumRows();
+			const ROWINDEX patSize = pat.GetNumRows();
 			if(patSize > originalSpecs->patternRowsMax)
 			{
 				foundHacks = foundHere = true;
@@ -164,8 +145,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				foundHacks = foundHere = true;
 				if(autofix)
 				{
-					m_SndFile.Patterns[i].Resize(originalSpecs->patternRowsMin);
-					m_SndFile.Patterns[i].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(patSize - 1).RetryNextRow());
+					pat.Resize(originalSpecs->patternRowsMin);
+					pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(patSize - 1).RetryNextRow());
 				} else
 				{
 					break;
@@ -398,16 +379,15 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	if(!originalSpecs->hasPatternSignatures)
 	{
 		foundHere = false;
-		const PATTERNINDEX numPats = m_SndFile.Patterns.GetNumPatterns();
-		for(PATTERNINDEX i = 0; i < numPats; i++)
+		for(auto &pat : m_SndFile.Patterns)
 		{
-			if(m_SndFile.Patterns[i].GetOverrideSignature())
+			if(pat.GetOverrideSignature())
 			{
 				if(!foundHere)
 					AddToLog("Found pattern-specific time signatures");
 
 				if(autofix)
-					m_SndFile.Patterns[i].RemoveSignature();
+					pat.RemoveSignature();
 
 				foundHacks = foundHere = true;
 				if(!autofix)
