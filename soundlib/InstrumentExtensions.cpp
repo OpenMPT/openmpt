@@ -338,72 +338,105 @@ if(!writeAll)
 }
 
 
+template<typename TIns, typename PropType>
+static bool IsPropertyNeeded(const TIns &Instruments, PropType ModInstrument::*Prop)
+{
+	const ModInstrument defaultIns;
+	for(const auto &ins : Instruments)
+	{
+		if(ins != nullptr && defaultIns.*Prop != ins->*Prop)
+			return true;
+	}
+	return false;
+}
+
+
+template<typename PropType>
+static void WritePropertyIfNeeded(const CSoundFile &sndFile, PropType ModInstrument::*Prop, uint32 code, uint16 size, FILE *f, INSTRUMENTINDEX numInstruments)
+{
+	if(IsPropertyNeeded(sndFile.Instruments, Prop))
+	{
+		sndFile.WriteInstrumentPropertyForAllInstruments(code, size, f, numInstruments);
+	}
+}
+
+
 // Used only when saving IT, XM and MPTM.
 // ITI, ITP saves using Ericus' macros etc...
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
-void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE *f) const
+void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments, FILE *f) const
 {
 	uint32 code = MagicBE("MPTX");	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
 
-	if (nInstruments == 0)
+	if (numInstruments == 0)
 		return;
 
-	WriteInstrumentPropertyForAllInstruments(MagicBE("VR.."), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("MiP."), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("MC.."), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("MP.."), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("MB.."), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("P..."), sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("FO.."), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("R..."), sizeof(ModInstrument().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("CS.."), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("RS.."), sizeof(ModInstrument().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("FM.."), sizeof(ModInstrument().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("PERN"), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("AERN"), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("VERN"), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("PVEH"), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MagicBE("PVOH"), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nVolRampUp,   MagicBE("VR.."), sizeof(ModInstrument().nVolRampUp),   f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nMixPlug,     MagicBE("MiP."), sizeof(ModInstrument().nMixPlug),     f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nMidiChannel, MagicBE("MC.."), sizeof(ModInstrument().nMidiChannel), f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nMidiProgram, MagicBE("MP.."), sizeof(ModInstrument().nMidiProgram), f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::wMidiBank,    MagicBE("MB.."), sizeof(ModInstrument().wMidiBank),    f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nPan,         MagicBE("P..."), sizeof(ModInstrument().nPan),         f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nFadeOut,     MagicBE("FO.."), sizeof(ModInstrument().nFadeOut),     f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nResampling,  MagicBE("R..."), sizeof(ModInstrument().nResampling),  f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing,    MagicBE("CS.."), sizeof(ModInstrument().nCutSwing),    f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nResSwing,    MagicBE("RS.."), sizeof(ModInstrument().nResSwing),    f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nFilterMode,  MagicBE("FM.."), sizeof(ModInstrument().nFilterMode),  f, numInstruments);
+	if(IsPropertyNeeded(Instruments, &ModInstrument::pitchToTempoLock))
+	{
+		WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16), f, numInstruments);
+		WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16), f, numInstruments);
+	}
+	WritePropertyIfNeeded(*this, &ModInstrument::nPluginVelocityHandling, MagicBE("PVEH"), sizeof(ModInstrument().nPluginVelocityHandling), f, numInstruments);
+	WritePropertyIfNeeded(*this, &ModInstrument::nPluginVolumeHandling, MagicBE("PVOH"), sizeof(ModInstrument().nPluginVolumeHandling), f, numInstruments);
 
 	if(!(GetType() & MOD_TYPE_XM))
 	{
 		// XM instrument headers already have support for this
-		WriteInstrumentPropertyForAllInstruments(MagicBE("MPWD"), sizeof(ModInstrument().midiPWD), f, nInstruments);
+		WritePropertyIfNeeded(*this, &ModInstrument::midiPWD, MagicBE("MPWD"), sizeof(ModInstrument().midiPWD), f, numInstruments);
 	}
 
 	if(GetType() & MOD_TYPE_MPT)
 	{
-		uint32 maxNodes[3] = { 0 };
-		for(INSTRUMENTINDEX i = 1; i <= m_nInstruments; i++) if(Instruments[i] != nullptr)
+		uint32 maxNodes[3] = { 0, 0, 0 };
+		bool hasReleaseNode[3] = { false, false, false };
+		for(INSTRUMENTINDEX i = 1; i <= numInstruments; i++) if(Instruments[i] != nullptr)
 		{
 			maxNodes[0] = std::max(maxNodes[0], Instruments[i]->VolEnv.size());
 			maxNodes[1] = std::max(maxNodes[1], Instruments[i]->PanEnv.size());
 			maxNodes[2] = std::max(maxNodes[2], Instruments[i]->PitchEnv.size());
+			hasReleaseNode[0] |= (Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
+			hasReleaseNode[1] |= (Instruments[i]->PanEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
+			hasReleaseNode[2] |= (Instruments[i]->PitchEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
 		}
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes[0] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VE.."), sizeof(ModInstrument().VolEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VP[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VE[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VE.."), sizeof(ModInstrument().VolEnv.size()), f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VP[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().tick)),  f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VE[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().value)), f, numInstruments);
 		}
 		if(maxNodes[1] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PE.."), sizeof(ModInstrument().PanEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PP[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PE[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PE.."), sizeof(ModInstrument().PanEnv.size()), f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PP[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().tick)),  f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PE[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().value)), f, numInstruments);
 		}
 		if(maxNodes[2] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE."), sizeof(ModInstrument().PitchEnv.size()), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiP["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().value)), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE."), sizeof(ModInstrument().PitchEnv.size()), f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiP["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().tick)),  f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().value)), f, numInstruments);
 		}
+		if(hasReleaseNode[0])
+			WriteInstrumentPropertyForAllInstruments(MagicBE("VERN"), sizeof(ModInstrument().VolEnv.nReleaseNode), f, numInstruments);
+		if(hasReleaseNode[1])
+			WriteInstrumentPropertyForAllInstruments(MagicBE("AERN"), sizeof(ModInstrument().PanEnv.nReleaseNode), f, numInstruments);
+		if(hasReleaseNode[2])
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PERN"), sizeof(ModInstrument().PitchEnv.nReleaseNode), f, numInstruments);
 	}
 }
 
