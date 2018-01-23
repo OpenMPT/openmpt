@@ -9,7 +9,6 @@
 
 #ifndef NO_XMPLAY
 
-#if defined(_MFC_VER) || 1
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -17,11 +16,13 @@
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <afxwin.h>
 #include <afxcmn.h>
 #include <windows.h>
-#endif // _MFC_VER
+#include <WindowsX.h>
 
 #ifdef LIBOPENMPT_BUILD_DLL
 #undef LIBOPENMPT_BUILD_DLL
@@ -35,12 +36,6 @@
 #define _SCL_SECURE_NO_WARNINGS
 #endif
 #endif // _MSC_VER
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#include <WindowsX.h>
 
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
@@ -100,12 +95,12 @@ public:
 	}
 };
 
-static XMPFUNC_IN * xmpfin = NULL;
-static XMPFUNC_MISC * xmpfmisc = NULL;
-static XMPFUNC_REGISTRY * xmpfregistry = NULL;
-static XMPFUNC_FILE * xmpffile = NULL;
-static XMPFUNC_TEXT * xmpftext = NULL;
-static XMPFUNC_STATUS * xmpfstatus = NULL;
+static XMPFUNC_IN * xmpfin = nullptr;
+static XMPFUNC_MISC * xmpfmisc = nullptr;
+static XMPFUNC_REGISTRY * xmpfregistry = nullptr;
+static XMPFUNC_FILE * xmpffile = nullptr;
+static XMPFUNC_TEXT * xmpftext = nullptr;
+static XMPFUNC_STATUS * xmpfstatus = nullptr;
 
 struct self_xmplay_t;
 
@@ -183,19 +178,19 @@ static std::string convert_to_native( const std::string & str ) {
 
 static std::string StringEncode( const std::wstring &src, UINT codepage )
 {
-	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, NULL, 0, NULL, NULL );
+	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
 	if(required_size <= 0)
 	{
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), NULL, NULL );
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), nullptr, nullptr);
 	return &encoded_string[0];
 }
 
 static std::wstring StringDecode( const std::string & src, UINT codepage )
 {
-	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, NULL, 0 );
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, nullptr, 0 );
 	if(required_size <= 0)
 	{
 		return std::wstring();
@@ -824,8 +819,8 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 			}
 		#endif
 	} catch ( ... ) {
-		if ( length ) *length = NULL;
-		if ( tags ) *tags = NULL;
+		if ( length ) *length = nullptr;
+		if ( tags ) *tags = nullptr;
 		return 0;
 	}
 	return self->subsong_lengths.size() + XMPIN_INFO_NOSUBTAGS;
@@ -1551,14 +1546,14 @@ static XMPIN xmpin = {
 #endif
 	XMPIN_FLAG_CONFIG,// 0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
 	xmp_openmpt_string,
-	NULL, // "libopenmpt\0mptm/mptmz",
+	nullptr, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,
 	openmpt_Config,
 	openmpt_CheckFile,
 	openmpt_GetFileInfo,
 	openmpt_Open,
 	openmpt_Close,
-	NULL, // reserved
+	nullptr, // reserved
 	openmpt_SetFormat,
 	openmpt_GetTags,
 	openmpt_GetInfoText,
@@ -1566,25 +1561,25 @@ static XMPIN xmpin = {
 	openmpt_GetMessage,
 	openmpt_SetPosition,
 	openmpt_GetGranularity,
-	NULL, // GetBuffering
+	nullptr, // GetBuffering
 	openmpt_Process,
-	NULL, // WriteFile
+	nullptr, // WriteFile
 	openmpt_GetSamples,
 	openmpt_GetSubSongs, // GetSubSongs
-	NULL, // GetCues
-	NULL, // GetDownloaded
+	nullptr, // GetCues
+	nullptr, // GetDownloaded
 
 	"OpenMPT Pattern Display",
 	VisOpen,
 	VisClose,
 	VisSize,
-	/*VisRender,*/NULL,
+	/*VisRender,*/nullptr,
 	VisRenderDC,
-	/*VisButton,*/NULL,
+	/*VisButton,*/nullptr,
 
-	NULL, // reserved2
-	openmpt_GetConfig,// NULL, // GetConfig
-	openmpt_SetConfig// NULL  // SetConfig
+	nullptr, // reserved2
+	openmpt_GetConfig,
+	openmpt_SetConfig
 };
 
 static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
@@ -1627,16 +1622,16 @@ static void xmp_openmpt_on_dll_unload() {
 		return;
 	}
 	if ( xmpin.exts == xmp_openmpt_default_exts ) {
-		xmpin.exts = NULL;
+		xmpin.exts = nullptr;
 		return;
 	}
 	HeapFree( GetProcessHeap(), 0, (LPVOID)xmpin.exts );
-	xmpin.exts = NULL;
+	xmpin.exts = nullptr;
 	DeleteCriticalSection( &xmpopenmpt_mutex );
 }
 
 static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
-	if (face!=XMPIN_FACE) return NULL;
+	if ( face != XMPIN_FACE ) return nullptr;
 	xmpfin=(XMPFUNC_IN*)faceproc(XMPFUNC_IN_FACE);
 	xmpfmisc=(XMPFUNC_MISC*)faceproc(XMPFUNC_MISC_FACE);
 	xmpfregistry=(XMPFUNC_REGISTRY*)faceproc(XMPFUNC_REGISTRY_FACE);
