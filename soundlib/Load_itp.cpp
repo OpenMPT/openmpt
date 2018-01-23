@@ -105,7 +105,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderITP(MemoryFileReader file, co
 }
 
 
-bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 {
 #if !defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_FUZZ_TRACKER)
 	// Doesn't really make sense to support this format when there's no support for external files...
