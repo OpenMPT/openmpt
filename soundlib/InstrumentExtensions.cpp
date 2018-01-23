@@ -379,24 +379,26 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments
 	WritePropertyIfNeeded(*this, &ModInstrument::nMidiChannel, MagicBE("MC.."), sizeof(ModInstrument::nMidiChannel), f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nMidiProgram, MagicBE("MP.."), sizeof(ModInstrument::nMidiProgram), f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::wMidiBank,    MagicBE("MB.."), sizeof(ModInstrument::wMidiBank),    f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nPan,         MagicBE("P..."), sizeof(ModInstrument::nPan),         f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nResampling,  MagicBE("R..."), sizeof(ModInstrument::nResampling),  f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing,    MagicBE("CS.."), sizeof(ModInstrument::nCutSwing),    f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nResSwing,    MagicBE("RS.."), sizeof(ModInstrument::nResSwing),    f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nFilterMode,  MagicBE("FM.."), sizeof(ModInstrument::nFilterMode),  f, numInstruments);
-	if(IsPropertyNeeded(Instruments, &ModInstrument::pitchToTempoLock))
-	{
-		WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16), f, numInstruments);
-		WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16), f, numInstruments);
-	}
 	WritePropertyIfNeeded(*this, &ModInstrument::nPluginVelocityHandling, MagicBE("PVEH"), sizeof(ModInstrument::nPluginVelocityHandling), f, numInstruments);
 	WritePropertyIfNeeded(*this, &ModInstrument::nPluginVolumeHandling, MagicBE("PVOH"), sizeof(ModInstrument::nPluginVolumeHandling), f, numInstruments);
 
 	if(!(GetType() & MOD_TYPE_XM))
 	{
-		// XM instrument headers already have support for this
+		// XM instrument headers already stores full-precision fade-out
 		WritePropertyIfNeeded(*this, &ModInstrument::nFadeOut, MagicBE("FO.."), sizeof(ModInstrument::nFadeOut), f, numInstruments);
+		// XM instrument headers already have support for this
 		WritePropertyIfNeeded(*this, &ModInstrument::midiPWD, MagicBE("MPWD"), sizeof(ModInstrument::midiPWD), f, numInstruments);
+		// We never supported these as hacks in XM (luckily!)
+		WritePropertyIfNeeded(*this, &ModInstrument::nPan, MagicBE("P..."), sizeof(ModInstrument::nPan), f, numInstruments);
+		WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing, MagicBE("CS.."), sizeof(ModInstrument::nCutSwing), f, numInstruments);
+		WritePropertyIfNeeded(*this, &ModInstrument::nResSwing, MagicBE("RS.."), sizeof(ModInstrument::nResSwing), f, numInstruments);
+		WritePropertyIfNeeded(*this, &ModInstrument::nFilterMode, MagicBE("FM.."), sizeof(ModInstrument::nFilterMode), f, numInstruments);
+		if(IsPropertyNeeded(Instruments, &ModInstrument::pitchToTempoLock))
+		{
+			WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16), f, numInstruments);
+			WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16), f, numInstruments);
+		}
 	}
 
 	if(GetType() & MOD_TYPE_MPT)
