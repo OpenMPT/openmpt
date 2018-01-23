@@ -502,7 +502,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 					}
 				}
 
-				if(commandCategories[cat].separatorAt(com))
+				if(commandCategories[cat].SeparatorAt(com))
 					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(_T("------------------------------------------------------")), DWORD_PTR(-1));
 			}
 		}

@@ -24,7 +24,7 @@ class CommandCategory
 public:
 	CommandCategory(const TCHAR *n, InputTargetContext d) : name(n), id(d) { }
 
-	bool separatorAt(int c) const
+	bool SeparatorAt(CommandID c) const
 	{
 		return std::find(separators.begin(), separators.end(), c) != separators.end();
 	}
@@ -33,8 +33,8 @@ public:
 
 	CString name;
 	InputTargetContext id;
-	std::vector<int> separators;
-	std::vector<int> commands;
+	std::vector<CommandID> separators;
+	std::vector<CommandID> commands;
 };
 
 
