@@ -640,14 +640,10 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 static void amdmmxext_or_sse_findminmax16(const void *p, SmpLength scanlen, int channels, int &smin, int &smax)
 {
 	scanlen *= channels;
-	__m64 minVal = _mm_cvtsi32_si64(smin);
-	__m64 maxVal = _mm_cvtsi32_si64(smax);
 
 	// Put minimum / maximum in 4 packed int16 values
-	minVal = _mm_unpacklo_pi16(minVal, minVal);
-	maxVal = _mm_unpacklo_pi16(maxVal, maxVal);
-	minVal = _mm_unpacklo_pi32(minVal, minVal);
-	maxVal = _mm_unpacklo_pi32(maxVal, maxVal);
+	__m64 minVal = _mm_set1_pi16(static_cast<int16>(smin));
+	__m64 maxVal = _mm_set1_pi16(static_cast<int16>(smax));
 
 	SmpLength scanlen4 = scanlen / 4;
 	if(scanlen4)
@@ -704,20 +700,12 @@ static void amdmmxext_or_sse_findminmax8(const void *p, SmpLength scanlen, int c
 {
 	scanlen *= channels;
 
-	__m64 minVal = _mm_cvtsi32_si64(smin);
-	__m64 maxVal = _mm_cvtsi32_si64(smax);
-
-	// For signed <-> unsigned conversion
-	__m64 xorVal = _mm_cvtsi32_si64(0x80808080);
-	xorVal = _mm_unpacklo_pi32(xorVal, xorVal);
+	// For signed <-> unsigned conversion (min/max only exists for unsigned 8-bit values)
+	__m64 xorVal = _mm_set1_pi8(0x80u);
 
 	// Put minimum / maximum in 8 packed uint8 values
-	minVal = _mm_unpacklo_pi8(minVal, minVal);
-	maxVal = _mm_unpacklo_pi8(maxVal, maxVal);
-	minVal = _mm_unpacklo_pi16(minVal, minVal);
-	maxVal = _mm_unpacklo_pi16(maxVal, maxVal);
-	minVal = _mm_unpacklo_pi32(minVal, minVal);
-	maxVal = _mm_unpacklo_pi32(maxVal, maxVal);
+	__m64 minVal = _mm_set1_pi8(static_cast<int8>(smin));
+	__m64 maxVal = _mm_set1_pi8(static_cast<int8>(smax));
 	minVal = _mm_xor_si64(minVal, xorVal);
 	maxVal = _mm_xor_si64(maxVal, xorVal);
 
