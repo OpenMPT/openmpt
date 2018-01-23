@@ -812,11 +812,7 @@ void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
 	
 	// Point size to pixels
 	int fontSize = -MulDiv(60, Util::GetDPIy(m_hWnd), 720);
-#if _WIN32_WINNT >= 0x0501
 	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
-#else
-	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
-#endif
 }
 
 
@@ -1258,49 +1254,46 @@ BOOL CEditHistoryDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	if(m_pModDoc == nullptr)
-		return TRUE;
-
 	CString s;
 	uint64 totalTime = 0;
-	const size_t num = m_pModDoc->GetSoundFile().GetFileHistory().size();
-	
-	for(size_t n = 0; n < num; n++)
+	const auto &editHistory = m_modDoc.GetSoundFile().GetFileHistory();
+	const bool isEmpty = editHistory.empty();
+
+	for(const auto &entry : editHistory)
 	{
-		const FileHistory *hist = &(m_pModDoc->GetSoundFile().GetFileHistory().at(n));
-		totalTime += hist->openTime;
+		totalTime += entry.openTime;
 
 		// Date
 		TCHAR szDate[32];
-		if(hist->loadDate.tm_mday != 0)
-			_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
+		if(entry.loadDate.tm_mday != 0)
+			_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
 		else
 			_tcscpy(szDate, _T("<unknown date>"));
 		// Time + stuff
-		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
+		uint32 duration = Util::Round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);
 		s.AppendFormat(_T("Loaded %s, open for %luh %02lum %02lus\r\n"),
 			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
 	}
-	if(num == 0)
+	if(isEmpty)
 	{
 		s = _T("No information available about the previous edit history of this module.");
 	}
 	SetDlgItemText(IDC_EDIT_HISTORY, s);
 
 	// Total edit time
-	s = "";
+	s.Empty();
 	if(totalTime)
 	{
-		totalTime = (uint64)((double)(totalTime) / HISTORY_TIMER_PRECISION);
+		totalTime = Util::Round<uint64>(totalTime / HISTORY_TIMER_PRECISION);
 
-		s.Format(_T("Total edit time: %lluh %02llum %02llus (%u session%s)"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60, num, (num != 1) ? _T("s") : _T(""));
+		s.Format(_T("Total edit time: %lluh %02llum %02llus (%zu session%s)"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60, editHistory.size(), (editHistory.size() != 1) ? _T("s") : _T(""));
 		SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
 		// Window title
-		s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle().GetString());
+		s.Format(_T("Edit History for %s"), m_modDoc.GetTitle().GetString());
 		SetWindowText(s);
 	}
 	// Enable or disable Clear button
-	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetSoundFile().GetFileHistory().empty()) ? FALSE : TRUE);
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow(isEmpty ? FALSE : TRUE);
 
 	return TRUE;
 
@@ -1309,18 +1302,12 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 void CEditHistoryDlg::OnClearHistory()
 {
-	if(m_pModDoc != nullptr && !m_pModDoc->GetSoundFile().GetFileHistory().empty())
+	if(!m_modDoc.GetSoundFile().GetFileHistory().empty())
 	{
-		m_pModDoc->GetSoundFile().GetFileHistory().clear();
-		m_pModDoc->SetModified();
+		m_modDoc.GetSoundFile().GetFileHistory().clear();
+		m_modDoc.SetModified();
 		OnInitDialog();
 	}
-}
-
-
-void CEditHistoryDlg::OnOK()
-{
-	CDialog::OnOK();
 }
 
 
@@ -1421,31 +1408,31 @@ void CInputDlg::OnOK()
 class CMsgBoxHidable : public CDialog
 {
 public:
-	CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus = true, CWnd* pParent = NULL);
+	CMsgBoxHidable(const TCHAR *strMsg, bool checkStatus = true, CWnd* pParent = NULL);
 	enum { IDD = IDD_MSGBOX_HIDABLE };
 
+	const TCHAR *m_StrMsg;
 	int m_nCheckStatus;
-	LPCTSTR m_StrMsg;
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);   // DDX/DDV support
-	virtual BOOL OnInitDialog();
+	void DoDataExchange(CDataExchange* pDX) override;   // DDX/DDV support
+	BOOL OnInitDialog() override;
 };
 
 
 struct MsgBoxHidableMessage
 {
-	LPCTSTR strMsg;
-	uint32 nMask;
-	bool bDefaultDontShowAgainStatus; // true for don't show again, false for show again.
+	const TCHAR *message;
+	uint32 mask;
+	bool defaultDontShowAgainStatus; // true for don't show again, false for show again.
 };
 
-const MsgBoxHidableMessage HidableMessages[] =
+static constexpr MsgBoxHidableMessage HidableMessages[] =
 {
-	{_T("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true},
-	{_T("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
-	{_T("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
-	{_T("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true},
-	{_T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
+	{ _T("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true },
+	{ _T("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true },
+	{ _T("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false },
+	{ _T("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true },
+	{ _T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true },
 };
 
 STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
@@ -1456,18 +1443,15 @@ STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 {
 	// Check whether the message should be shown.
-	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].nMask) == 0)
+	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].mask) == 0)
 		return;
 
-	const LPCTSTR strMsg = HidableMessages[enMsg].strMsg;
-	const uint32 mask = HidableMessages[enMsg].nMask;
-	const bool defaulCheckStatus = HidableMessages[enMsg].bDefaultDontShowAgainStatus;
-
 	// Show dialog.
-	CMsgBoxHidable dlg(strMsg, defaulCheckStatus);
+	CMsgBoxHidable dlg(HidableMessages[enMsg].message, HidableMessages[enMsg].defaultDontShowAgainStatus);
 	dlg.DoModal();
 
 	// Update visibility flags.
+	const uint32 mask = HidableMessages[enMsg].mask;
 	if(dlg.m_nCheckStatus == BST_CHECKED)
 		TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~mask;
 	else
@@ -1475,10 +1459,10 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 }
 
 
-CMsgBoxHidable::CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus, CWnd* pParent)
-	:	CDialog(CMsgBoxHidable::IDD, pParent),
-		m_StrMsg(strMsg),
-		m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
+CMsgBoxHidable::CMsgBoxHidable(const  TCHAR *strMsg, bool checkStatus, CWnd* pParent)
+	: CDialog(CMsgBoxHidable::IDD, pParent)
+	, m_StrMsg(strMsg)
+	, m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
 {}
 
 BOOL CMsgBoxHidable::OnInitDialog()

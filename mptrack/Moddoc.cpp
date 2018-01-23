@@ -2457,7 +2457,7 @@ void CModDoc::OnPatternPlayNoLoop()
 
 void CModDoc::OnViewEditHistory()
 {
-	CEditHistoryDlg dlg(CMainFrame::GetMainFrame(), this);
+	CEditHistoryDlg dlg(CMainFrame::GetMainFrame(), *this);
 	dlg.DoModal();
 }
 
