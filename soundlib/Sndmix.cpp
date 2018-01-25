@@ -207,13 +207,16 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		// Update Channel Data
 		if(!m_PlayState.m_nBufferCount)
-		{ // last tick or fade completely processed, find out what to do next
+		{
+			// Last tick or fade completely processed, find out what to do next
 
 			if(m_SongFlags[SONG_FADINGSONG])
-			{ // song was faded out
+			{
+				// Song was faded out
 				m_SongFlags.set(SONG_ENDREACHED);
 			} else if(ReadNote())
-			{ // render next tick (normal progress)
+			{
+				// Render next tick (normal progress)
 				MPT_ASSERT(m_PlayState.m_nBufferCount > 0);
 				#ifdef MODPLUG_TRACKER
 					// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
@@ -227,7 +230,8 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 					}
 				#endif
 			} else
-			{ // no new pattern data
+			{
+				// No new pattern data
 				#ifdef MODPLUG_TRACKER
 					if((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition))
 					{
@@ -235,7 +239,8 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 					}
 				#endif // MODPLUG_TRACKER
 				if(IsRenderingToDisc())
-				{ // rewbs: disable song fade when rendering.
+				{
+					// Disable song fade when rendering or when requested in libopenmpt.
 					m_SongFlags.set(SONG_ENDREACHED);
 				} else
 				{ // end of song reached, fade it out
@@ -254,12 +259,18 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		if(m_SongFlags[SONG_ENDREACHED])
 		{
-			break; // mix done
+			// Mix done.
+
+			// If we decide to continue the mix (possible in libopenmpt), the tick count
+			// is valid right now (0), meaning that no new row data will be processed.
+			// This would effectively prolong the last played row.
+			m_PlayState.m_nTickCount = GetNumTicksOnCurrentRow();
+			break;
 		}
 
 		MPT_ASSERT(m_PlayState.m_nBufferCount > 0); // assert that we have actually something to do
 
-		const samplecount_t countChunk = std::min<samplecount_t>(MIXBUFFERSIZE, std::min<samplecount_t>(m_PlayState.m_nBufferCount, countToRender));
+		const samplecount_t countChunk = std::min<samplecount_t>({ MIXBUFFERSIZE, m_PlayState.m_nBufferCount, countToRender });
 
 		CreateStereoMix(countChunk);
 

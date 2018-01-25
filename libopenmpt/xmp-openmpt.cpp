@@ -857,6 +857,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		std::map< std::string, std::string > ctls
 		{
 			{ "seek.sync_samples", "1" },
+			{ "play.at_end", "continue" },
 		};
 		self->delete_mod();
 		#ifdef USE_XMPLAY_FILE_IO
@@ -1067,6 +1068,16 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	if ( !self->mod ) {
 		return -1.0;
 	}
+	if ( pos == XMPIN_POS_LOOP ) {
+		// If the time of the loop start position is known, that should be returned, otherwise -2 can be returned to let the time run on.
+		// There is currently no way to easily figure out at which time the loop restarts.
+		return -2;
+	} else if ( pos == XMPIN_POS_AUTOLOOP ) {
+		// In the auto-looping case, the function should only loop when a loop has been detected, and otherwise return -1
+		// If the time of the loop start position is known, that should be returned, otherwise -2 can be returned to let the time run on.
+		// There is currently no way to easily figure out at which time the loop restarts.
+		return -2;
+	}
 	if ( pos & XMPIN_POS_SUBSONG ) {
 		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
 		try {
@@ -1103,7 +1114,7 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	std::size_t frames_to_render = frames;
 	std::size_t frames_rendered = 0;
 	while ( frames_to_render > 0 ) {
-		std::size_t frames_chunk = std::min<std::size_t>( frames_to_render, self->samplerate / 100 ); // 100 Hz timing info update interval
+		std::size_t frames_chunk = std::min<std::size_t>( frames_to_render, ( self->samplerate + 99 ) / 100 ); // 100 Hz timing info update interval
 		switch ( self->num_channels ) {
 		case 1:
 			{
@@ -1568,7 +1579,7 @@ static XMPIN xmpin = {
 #else
 	XMPIN_FLAG_NOXMPFILE |
 #endif
-	XMPIN_FLAG_CONFIG,// 0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
+	XMPIN_FLAG_CONFIG | XMPIN_FLAG_LOOP,
 	xmp_openmpt_string,
 	nullptr, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,

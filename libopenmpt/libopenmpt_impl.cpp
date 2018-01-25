@@ -450,6 +450,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
 	m_Gain = 1.0f;
+	m_ctl_play_at_end = song_end_action::fadeout_song;
 	m_ctl_load_skip_samples = false;
 	m_ctl_load_skip_patterns = false;
 	m_ctl_load_skip_plugins = false;
@@ -498,6 +499,7 @@ bool module_impl::is_loaded() const {
 }
 std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
 	m_sndFile->ResetMixStat();
+	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
@@ -512,10 +514,15 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 		count -= count_chunk;
 		count_read += count_chunk;
 	}
+	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
+		// This is the song end, but allow the song or loop to restart on the next call
+		m_sndFile->m_SongFlags.reset(SONG_ENDREACHED);
+	}
 	return count_read;
 }
 std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
 	m_sndFile->ResetMixStat();
+	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
@@ -530,10 +537,15 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 		count -= count_chunk;
 		count_read += count_chunk;
 	}
+	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
+		// This is the song end, but allow the song or loop to restart on the next call
+		m_sndFile->m_SongFlags.reset(SONG_ENDREACHED);
+	}
 	return count_read;
 }
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved ) {
 	m_sndFile->ResetMixStat();
+	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
@@ -547,10 +559,15 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 		count -= count_chunk;
 		count_read += count_chunk;
 	}
+	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
+		// This is the song end, but allow the song or loop to restart on the next call
+		m_sndFile->m_SongFlags.reset(SONG_ENDREACHED);
+	}
 	return count_read;
 }
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved ) {
 	m_sndFile->ResetMixStat();
+	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		AudioReadTargetGainBuffer<float> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
@@ -563,6 +580,10 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 		}
 		count -= count_chunk;
 		count_read += count_chunk;
+	}
+	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
+		// This is the song end, but allow the song or loop to restart on the next call
+		m_sndFile->m_SongFlags.reset(SONG_ENDREACHED);
 	}
 	return count_read;
 }
@@ -1495,6 +1516,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 		"subsong",
 		"play.tempo_factor",
 		"play.pitch_factor",
+		"play.at_end",
 		"render.resampler.emulate_amiga",
 		"dither",
 	};
@@ -1525,6 +1547,18 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		return mpt::fmt::val( m_ctl_seek_sync_samples );
 	} else if ( ctl == "subsong" ) {
 		return mpt::fmt::val( get_selected_subsong() );
+	} else if ( ctl == "play.at_end" ) {
+		switch ( m_ctl_play_at_end )
+		{
+		case song_end_action::fadeout_song:
+			return "fadeout";
+		case song_end_action::continue_song:
+			return "continue";
+		case song_end_action::stop_song:
+			return "stop";
+		default:
+			return std::string();
+		}
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return "1.0";
@@ -1573,6 +1607,16 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "subsong" ) {
 		select_subsong( ConvertStrTo<int32>( value ) );
+	} else if ( ctl == "play.at_end" ) {
+		if ( value == "fadeout" ) {
+			m_ctl_play_at_end = song_end_action::fadeout_song;
+		} else if(value == "continue") {
+			m_ctl_play_at_end = song_end_action::continue_song;
+		} else if(value == "stop") {
+			m_ctl_play_at_end = song_end_action::stop_song;
+		} else {
+			throw openmpt::exception("unknown song end action:" + value);
+		}
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return;

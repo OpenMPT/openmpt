@@ -79,8 +79,17 @@ protected:
 		std::int32_t sequence;
 		subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence );
 	}; // struct subsong_data
+
 	typedef std::vector<subsong_data> subsongs_type;
+
+	enum class song_end_action {
+		fadeout_song,
+		continue_song,
+		stop_song,
+	};
+
 	static const std::int32_t all_subsongs = -1;
+
 	std::unique_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	std::int32_t m_current_subsong;
@@ -90,6 +99,7 @@ protected:
 	std::unique_ptr<OpenMPT::Dither> m_Dither;
 	subsongs_type m_subsongs;
 	float m_Gain;
+	song_end_action m_ctl_play_at_end;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
 	bool m_ctl_load_skip_plugins;
