@@ -126,13 +126,26 @@ static __inline__ __attribute__((always_inline)) void minimp3_cpuid(int CPUInfo[
 #endif
 static int have_simd()
 {
+    static int g_have_simd;
     int CPUInfo[4];
+#ifdef MINIMP3_TEST
+    static int g_counter;
+    if (g_counter++ > 100)
+        goto test_nosimd;
+#endif
+    if (g_have_simd)
+        return g_have_simd - 1;
     minimp3_cpuid(CPUInfo, 0);
     if (CPUInfo[0] > 0)
     {
         minimp3_cpuid(CPUInfo, 1);
-        return (CPUInfo[3] & (1 << 26)); // SSE2
+        g_have_simd = (CPUInfo[3] & (1 << 26)) + 1; // SSE2
+        return g_have_simd - 1;
     }
+#ifdef MINIMP3_TEST
+test_nosimd:
+#endif
+    g_have_simd = 1;
     return 0;
 }
 #elif defined(__arm)
@@ -285,6 +298,7 @@ static int hdr_padding(const uint8_t *h)
     return HDR_TEST_PADDING(h) ? (HDR_IS_LAYER_1(h) ? 4 : 1) : 0;
 }
 
+#ifndef MINIMP3_ONLY_MP3
 static const L12_subband_alloc_t * L12_subband_alloc_table(const uint8_t *hdr, L12_scale_info *sci)
 {
     const L12_subband_alloc_t *alloc;
@@ -450,6 +464,7 @@ static void L12_apply_scf_384(L12_scale_info *sci, const float *scf, float *dst)
         }
     }
 }
+#endif
 
 static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
 {
@@ -688,7 +703,6 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
         scf[i] = gain*L3_ldexp_q2(iscf[i] << scf_shift);
     }
 }
-
 
 static float L3_pow_43(int x)
 {
@@ -1577,7 +1591,7 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
             }
 
             if (frame_bytes && i + frame_and_padding <= mp3_bytes &&
-                mp3d_match_frame(mp3, MINIMP3_MIN((frame_bytes + 1)*4, mp3_bytes - i), frame_bytes))
+                mp3d_match_frame(mp3, mp3_bytes - i, frame_bytes))
             {
                 *ptr_frame_bytes = frame_and_padding;
                 return i;
@@ -1655,13 +1669,16 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, short 
         L3_save_reservoir(dec, &scratch);
     } else
     {
+#ifdef MINIMP3_ONLY_MP3
+        return 0;
+#else
         L12_scale_info sci[1];
         L12_read_scale_info(hdr, bs_frame, sci);
 
         memset(scratch.grbuf[0], 0, 576*2*sizeof(float));
         for (i = 0, igr = 0; igr < 3; igr++)
         {
-            if (12 == (i += L12_dequantize_granule(scratch.grbuf[0] + i, bs_frame, sci, info->layer|1)))
+            if (12 == (i += L12_dequantize_granule(scratch.grbuf[0] + i, bs_frame, sci, info->layer | 1)))
             {
                 i = 0;
                 L12_apply_scf_384(sci, sci->scf + igr, scratch.grbuf[0]);
@@ -1675,6 +1692,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, short 
                 return 0;
             }
         }
+#endif
     }
     return success*hdr_frame_samples(dec->header);
 }
