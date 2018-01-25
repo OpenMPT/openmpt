@@ -3530,7 +3530,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		{
 			totalDuration += subSong.duration;
 		}
-		VERIFY_EQUAL_EPS(totalDuration, 2505.53, 0.01);
+		VERIFY_EQUAL_EPS(totalDuration, 2505.53, 1.0);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
