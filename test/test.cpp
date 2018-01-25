@@ -2358,26 +2358,26 @@ static MPT_NOINLINE void TestCharsets()
 	// here.
 
 	char src_char[256];
-	wchar_t src_wchar[256];
-	TCHAR src_tchar[256];
+	wchar_t src_wchar_t[256];
+	TCHAR src_TCHAR[256];
 
 	char dst_char[256];
-	wchar_t dst_wchar[256];
-	TCHAR dst_tchar[256];
+	wchar_t dst_wchar_t[256];
+	TCHAR dst_TCHAR[256];
 
 	MemsetZero(src_char);
-	MemsetZero(src_wchar);
-	MemsetZero(src_tchar);
+	MemsetZero(src_wchar_t);
+	MemsetZero(src_TCHAR);
 
 	strcpy(src_char, "ab");
-	wcscpy(src_wchar, L"ab");
-	_tcscpy(src_tchar, _T("ab"));
+	wcscpy(src_wchar_t, L"ab");
+	_tcscpy(src_TCHAR, _T("ab"));
 
 #define MPT_TEST_PRINTF(dst_type, function, format, src_type) \
 	MPT_DO { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, format, src_ ## src_type); \
-		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
+		VERIFY_EQUAL(std::char_traits< dst_type >::compare(dst_ ## dst_type, src_ ## dst_type, std::char_traits< dst_type >::length( src_ ## dst_type ) + 1), 0); \
 	} MPT_WHILE_0 \
 /**/
 
@@ -2385,52 +2385,52 @@ static MPT_NOINLINE void TestCharsets()
 	MPT_DO { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, 255, format, src_ ## src_type); \
-		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
+		VERIFY_EQUAL(std::char_traits< dst_type >::compare(dst_ ## dst_type, src_ ## dst_type, std::char_traits< dst_type >::length( src_ ## dst_type ) + 1), 0); \
 	} MPT_WHILE_0 \
 /**/
 
 	// CRT narrow
 	MPT_TEST_PRINTF(char, sprintf, "%s", char);
-	MPT_TEST_PRINTF(char, sprintf, "%S", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%S", wchar_t);
 	MPT_TEST_PRINTF(char, sprintf, "%hs", char);
 	MPT_TEST_PRINTF(char, sprintf, "%hS", char);
-	MPT_TEST_PRINTF(char, sprintf, "%ls", wchar);
-	MPT_TEST_PRINTF(char, sprintf, "%lS", wchar);
-	MPT_TEST_PRINTF(char, sprintf, "%ws", wchar);
-	MPT_TEST_PRINTF(char, sprintf, "%wS", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%ls", wchar_t);
+	MPT_TEST_PRINTF(char, sprintf, "%lS", wchar_t);
+	MPT_TEST_PRINTF(char, sprintf, "%ws", wchar_t);
+	MPT_TEST_PRINTF(char, sprintf, "%wS", wchar_t);
 
 	// CRT wide
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%s", wchar);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%S", char);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%hs", char);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%hS", char);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%ls", wchar);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%lS", wchar);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%ws", wchar);
-	MPT_TEST_PRINTF_N(wchar, swprintf, L"%wS", wchar);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%s", wchar_t);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%S", char);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%hs", char);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%hS", char);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%ls", wchar_t);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%lS", wchar_t);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%ws", wchar_t);
+	MPT_TEST_PRINTF_N(wchar_t, swprintf, L"%wS", wchar_t);
 
 	// WinAPI TCHAR
-	MPT_TEST_PRINTF(tchar, wsprintf, _T("%s"), tchar);
-	MPT_TEST_PRINTF(tchar, wsprintf, _T("%hs"), char);
-	MPT_TEST_PRINTF(tchar, wsprintf, _T("%hS"), char);
-	MPT_TEST_PRINTF(tchar, wsprintf, _T("%ls"), wchar);
-	MPT_TEST_PRINTF(tchar, wsprintf, _T("%lS"), wchar);
+	MPT_TEST_PRINTF(TCHAR, wsprintf, _T("%s"), TCHAR);
+	MPT_TEST_PRINTF(TCHAR, wsprintf, _T("%hs"), char);
+	MPT_TEST_PRINTF(TCHAR, wsprintf, _T("%hS"), char);
+	MPT_TEST_PRINTF(TCHAR, wsprintf, _T("%ls"), wchar_t);
+	MPT_TEST_PRINTF(TCHAR, wsprintf, _T("%lS"), wchar_t);
 
 	// WinAPI CHAR
 	MPT_TEST_PRINTF(char, wsprintfA, "%s", char);
-	MPT_TEST_PRINTF(char, wsprintfA, "%S", wchar);
+	MPT_TEST_PRINTF(char, wsprintfA, "%S", wchar_t);
 	MPT_TEST_PRINTF(char, wsprintfA, "%hs", char);
 	MPT_TEST_PRINTF(char, wsprintfA, "%hS", char);
-	MPT_TEST_PRINTF(char, wsprintfA, "%ls", wchar);
-	MPT_TEST_PRINTF(char, wsprintfA, "%lS", wchar);
+	MPT_TEST_PRINTF(char, wsprintfA, "%ls", wchar_t);
+	MPT_TEST_PRINTF(char, wsprintfA, "%lS", wchar_t);
 
 	// WinAPI WCHAR
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%s", wchar);
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%S", char);
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%hs", char);
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%hS", char);
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%ls", wchar);
-	MPT_TEST_PRINTF(wchar, wsprintfW, L"%lS", wchar);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%s", wchar_t);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%S", char);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%hs", char);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%hS", char);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%ls", wchar_t);
+	MPT_TEST_PRINTF(wchar_t, wsprintfW, L"%lS", wchar_t);
 
 #undef MPT_TEST_PRINTF
 #undef MPT_TEST_PRINTF_n
