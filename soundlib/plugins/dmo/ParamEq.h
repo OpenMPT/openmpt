@@ -38,6 +38,7 @@ protected:
 	// Equalizer memory
 	float x1[2], x2[2];
 	float y1[2], y2[2];
+	float m_maxFreqParam;
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
