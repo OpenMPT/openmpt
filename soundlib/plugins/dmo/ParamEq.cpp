@@ -30,8 +30,9 @@ IMixPlugin* ParamEq::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPL
 
 ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
+	, m_maxFreqParam(1.0f)
 {
-	m_param[kEqCenter] = 0.497487f;
+	m_param[kEqCenter] = (8000.0f - 80.0f) / 15920.0f;
 	m_param[kEqBandwidth] = 0.314286f;
 	m_param[kEqGain] = 0.5f;
 
@@ -99,6 +100,8 @@ void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value)
 void ParamEq::Resume()
 {
 	m_isResumed = true;
+	// Limit center frequency to a third of the sampling rate.
+	m_maxFreqParam = Clamp((m_SndFile.GetSampleRate() / 3.0f - 80.0f) / 15920.0f, 0.0f, 1.0f);
 	RecalculateEqParams();
 	PositionChanged();
 }
@@ -165,7 +168,8 @@ CString ParamEq::GetParamDisplay(PlugParamIndex param)
 
 void ParamEq::RecalculateEqParams()
 {
-	const float freq = std::min(FreqInHertz() / m_SndFile.GetSampleRate(), 0.5f);
+	LimitMax(m_param[kEqCenter], m_maxFreqParam);
+	const float freq = FreqInHertz() / m_SndFile.GetSampleRate();
 	const float a = std::pow(10.0f, GainInDecibel() / 40.0f);
 	const float w0 = 2.0f * float(M_PI) * freq;
 	const float sinW0 = std::sin(w0);
