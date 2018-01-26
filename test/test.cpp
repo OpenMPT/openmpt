@@ -3516,25 +3516,29 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Test S3M file loading
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
+		auto &sndFile = GetSoundFile(sndFileContainer);
 
-		TestLoadS3MFile(GetSoundFile(sndFileContainer), false);
+		TestLoadS3MFile(sndFile, false);
 
 		// Test GetLength code, in particular with subsongs
-		VERIFY_EQUAL_EPS(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(3, 1)).back().duration, 19.237, 0.01);
-		VERIFY_EQUAL_NONCONT(GetSoundFile(sndFileContainer).GetLength(eAdjustSamplePositions, GetLengthTarget(2, 0).StartPos(0, 1, 0)).back().targetReached, false);
+		sndFile.ChnSettings[1].dwFlags.reset(CHN_MUTE);
+		
+		VERIFY_EQUAL_EPS(sndFile.GetLength(eAdjustSamplePositions, GetLengthTarget(3, 1)).back().duration, 19.237, 0.01);
+		VERIFY_EQUAL_NONCONT(sndFile.GetLength(eAdjustSamplePositions, GetLengthTarget(2, 0).StartPos(0, 1, 0)).back().targetReached, false);
 
-		auto allSubSongs = GetSoundFile(sndFileContainer).GetLength(eNoAdjust, GetLengthTarget(true));
+		auto allSubSongs = sndFile.GetLength(eNoAdjust, GetLengthTarget(true));
 		VERIFY_EQUAL_NONCONT(allSubSongs.size(), 3);
 		double totalDuration = 0.0;
 		for(const auto &subSong : allSubSongs)
 		{
 			totalDuration += subSong.duration;
 		}
-		VERIFY_EQUAL_EPS(totalDuration, 2505.53, 1.0);
+		VERIFY_EQUAL_EPS(totalDuration, 3674.38, 1.0);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			sndFile.ChnSettings[1].dwFlags.set(CHN_MUTE);
+			sndFile.m_dwLastSavedWithVersion = MptVersion::num;
 			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 
