@@ -59,9 +59,9 @@ public:
 
 	// Find the first row that has not been played yet.
 	// The order and row is stored in the order and row variables on success, on failure they contain invalid values.
-	// If fastSearch is true (default), only the first row of each pattern is looked at, otherwise every row is examined.
+	// If onlyUnplayedPatterns is true (default), only completely unplayed patterns are considered, otherwise a song can start anywhere.
 	// Function returns true on success.
-	bool GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch) const;
+	bool GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool onlyUnplayedPatterns) const;
 
 	// Retrieve visited rows vector from another RowVisitor object.
 	void Set(const RowVisitor &other)
