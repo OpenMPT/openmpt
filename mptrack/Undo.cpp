@@ -351,8 +351,8 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	case sundo_replace:
 		if(oldSample.pSample != nullptr)
 		{
-			const size_t bytesPerSample = oldSample.GetBytesPerSample();
-			const size_t changeLen = changeEnd - changeStart;
+			const uint8 bytesPerSample = oldSample.GetBytesPerSample();
+			const SmpLength changeLen = changeEnd - changeStart;
 
 			undo.samplePtr = ModSample::AllocateSample(changeLen, bytesPerSample);
 			if(undo.samplePtr == nullptr) return false;
