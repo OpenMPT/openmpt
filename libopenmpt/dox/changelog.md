@@ -16,6 +16,7 @@ is just a high-level summary.
     since libopenmpt-0.2.6401-beta17.
  *  STM: Last character of sample name was missing.
  *  ParamEq plugin center frequency was not limited correctly.
+ *  libopenmpt_ext C API was not included in the documentation.
 
 ### libopenmpt 0.3.4 (2017-12-17)
 
