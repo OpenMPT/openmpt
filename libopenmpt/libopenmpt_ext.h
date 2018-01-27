@@ -17,6 +17,23 @@
 extern "C" {
 #endif
 
+/*!
+ * \page libopenmpt_ext_c_overview libopenmpt_ext C API
+ *
+ * libopenmpt_ext is included in all builds by default.
+ *
+ * \section libopenmpt-ext-c-detailed Detailed documentation
+ *
+ * \ref libopenmpt_ext_c
+ *
+ */
+
+/*! \defgroup libopenmpt_ext_c libopenmpt_ext C */
+
+/*! \addtogroup libopenmpt_ext_c
+ * @{
+ */
+
 /*! \brief Opaque type representing a libopenmpt extension module
  */
 typedef struct openmpt_module_ext openmpt_module_ext;
@@ -60,7 +77,7 @@ LIBOPENMPT_API openmpt_module_ext * openmpt_module_ext_create_from_memory( const
 
 /*! \brief Unload a previously created openmpt_module_ext from memory.
  *
- * \param mod The module to unload.
+ * \param mod_ext The module to unload.
  */
 LIBOPENMPT_API void openmpt_module_ext_destroy( openmpt_module_ext * mod_ext );
 
@@ -292,6 +309,10 @@ typedef struct openmpt_module_ext_interface_interactive {
 #ifdef __cplusplus
 }
 #endif
+
+/*!
+ * @}
+ */
 
 #endif /* LIBOPENMPT_EXT_H */
 
