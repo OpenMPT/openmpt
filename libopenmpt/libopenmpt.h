@@ -167,8 +167,8 @@
 /*! \defgroup libopenmpt_c libopenmpt C */
 
 /*! \addtogroup libopenmpt_c
-  @{
-*/
+ * @{
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1436,8 +1436,8 @@ LIBOPENMPT_API int openmpt_module_ctl_set( openmpt_module * mod, const char * ct
 #endif
 
 /*!
-  @}
-*/
+ * @}
+ */
 
 #endif /* LIBOPENMPT_H */
 
