@@ -795,7 +795,8 @@ INPUT                  = libopenmpt/dox/index.dox \
                          libopenmpt/libopenmpt_stream_callbacks_file.h \
                          libopenmpt/libopenmpt_config.h \
                          libopenmpt/libopenmpt_version.h \
-                         libopenmpt/libopenmpt_ext.hpp
+                         libopenmpt/libopenmpt_ext.hpp \
+                         libopenmpt/libopenmpt_ext.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
