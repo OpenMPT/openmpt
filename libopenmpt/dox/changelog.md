@@ -11,6 +11,11 @@ is just a high-level summary.
     option `/Zc:threadSafeInit-` which could cause at least the player plugins
     `in_openmpt` and `xmp-openmpt` to fail to load.
 
+ *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
+    since libopenmpt-0.2.6401-beta17.
+ *  STM: Last character of sample name was missing.
+ *  ParamEq plugin center frequency was not limited correctly.
+
 ### libopenmpt 0.2-beta28 (2017-11-04)
 
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
