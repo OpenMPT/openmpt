@@ -831,7 +831,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 			if(midiByte2 & 0x7F)
 			{
 				vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-				PlayNote(note, ins, 0, vol);
+				PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol));
 			}
 			return;
 		} else if(plugin != nullptr)
@@ -863,14 +863,14 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 }
 
 
-CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, int32 nVol, SmpLength loopStart, SmpLength loopEnd, CHANNELINDEX nCurrentChn, const SmpLength sampleOffset)
+CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CHANNELINDEX nChn = GetNumChannels();
+	CHANNELINDEX channel = GetNumChannels();
 
-	if (pMainFrm == nullptr || note == NOTE_NONE) return FALSE;
-	if (nVol > 256) nVol = 256;
-	if (ModCommand::IsNote(ModCommand::NOTE(note)))
+	ModCommand::NOTE note = params.m_note;
+	if(pMainFrm == nullptr || note == NOTE_NONE) return FALSE;
+	if(ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
 
 		if (pMainFrm->GetModPlaying() != this)
@@ -885,8 +885,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		CriticalSection cs;
 
 		// Find a channel to play on
-		nChn = FindAvailableChannel();
-		ModChannel &chn = m_SndFile.m_PlayState.Chn[nChn];
+		channel = FindAvailableChannel();
+		ModChannel &chn = m_SndFile.m_PlayState.Chn[channel];
 
 		// reset channel properties; in theory the chan is completely unused anyway.
 		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
@@ -894,14 +894,14 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
 		chn.nVolume = 256;
 
-		if (nins)
+		if(params.m_instr)
 		{
-			// Set instrument
+			// Set instrument (or sample if there are no instruments)
 			chn.ResetEnvelopes();
-			m_SndFile.InstrumentChange(&chn, nins);
-		} else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
+			m_SndFile.InstrumentChange(&chn, params.m_instr);
+		} else if(params.m_sample > 0 && params.m_sample <= GetNumSamples())	// Or set sample explicitely
 		{
-			ModSample &sample = m_SndFile.GetSample(nsmp);
+			ModSample &sample = m_SndFile.GetSample(params.m_sample);
 			chn.pCurrentSample = sample.pSample;
 			chn.pModInstrument = nullptr;
 			chn.pModSample = &sample;
@@ -917,43 +917,43 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		chn.nFadeOutVol = 0x10000;
 
 		m_SndFile.NoteChange(&chn, note, false, true, true);
-		if (nVol >= 0) chn.nVolume = nVol;
+		if(params.m_volume >= 0) chn.nVolume = std::min(params.m_volume, 256);
 
 		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pchn.nLength))
-		if ((loopStart + 16 < loopEnd) && (loopStart >= 0) && (chn.pModSample != nullptr))
+		if ((params.m_loopStart + 16 < params.m_loopEnd) && (params.m_loopStart >= 0) && (chn.pModSample != nullptr))
 		{
-			chn.position.Set(loopStart);
-			chn.nLoopStart = loopStart;
-			chn.nLoopEnd = loopEnd;
-			chn.nLength = std::min(loopEnd, chn.pModSample->nLength);
+			chn.position.Set(params.m_loopStart);
+			chn.nLoopStart = params.m_loopStart;
+			chn.nLoopEnd = params.m_loopEnd;
+			chn.nLength = std::min(params.m_loopEnd, chn.pModSample->nLength);
 		}
 
 		// Handle extra-loud flag
-		chn.dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && nsmp);
+		chn.dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && params.m_sample);
 
 		// Handle custom start position
-		if(sampleOffset > 0 && chn.pModSample)
+		if(params.m_sampleOffset > 0 && chn.pModSample)
 		{
-			chn.position.Set(sampleOffset);
+			chn.position.Set(params.m_sampleOffset);
 			// If start position is after loop end, set loop end to sample end so that the sample starts
 			// playing.
-			if(chn.nLoopEnd < sampleOffset)
+			if(chn.nLoopEnd < params.m_sampleOffset)
 				chn.nLength = chn.nLoopEnd = chn.pModSample->nLength;
 		}
 
 		// VSTi preview
-		if (nins <= m_SndFile.GetNumInstruments())
+		if(params.m_instr > 0 && params.m_instr <= m_SndFile.GetNumInstruments())
 		{
-			const ModInstrument *pIns = m_SndFile.Instruments[nins];
+			const ModInstrument *pIns = m_SndFile.Instruments[params.m_instr];
 			if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 			{
 				PLUGINDEX nPlugin = 0;
 				if (chn.pModInstrument)
 					nPlugin = chn.pModInstrument->nMixPlug;					// First try instrument plugin
-				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && nCurrentChn != CHANNELINDEX_INVALID)
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try channel plugin
+				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && params.m_currentChannel != CHANNELINDEX_INVALID)
+					nPlugin = m_SndFile.ChnSettings[params.m_currentChannel].nMixPlugin;	// Then try channel plugin
 
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
@@ -961,7 +961,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 
 					if(pPlugin != nullptr)
 					{
-						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(chn.nVolume), MAX_BASECHANNELS);
+						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, params.m_currentChannel), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(chn.nVolume), MAX_BASECHANNELS);
 					}
 				}
 			}
@@ -970,7 +970,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 	{
 		CriticalSection cs;
 		// Apply note cut / off / fade (also on preview channels)
-		m_SndFile.NoteChange(&m_SndFile.m_PlayState.Chn[nChn], note);
+		m_SndFile.NoteChange(&m_SndFile.m_PlayState.Chn[channel], note);
 		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
 		{
 			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
@@ -980,7 +980,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			}
 		}
 	}
-	return nChn;
+	return channel;
 }
 
 

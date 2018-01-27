@@ -1441,7 +1441,7 @@ void CCtrlSamples::OnSamplePlay()
 		m_modDoc.NoteOff(0, true);
 	} else
 	{
-		m_modDoc.PlayNote(NOTE_MIDDLEC, 0, m_nSample);
+		m_modDoc.PlayNote(PlayNoteParam(NOTE_MIDDLEC).Sample(m_nSample));
 	}
 	SwitchToView();
 }

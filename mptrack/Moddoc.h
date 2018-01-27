@@ -86,6 +86,28 @@ public:
 };
 
 
+struct PlayNoteParam
+{
+	SmpLength m_loopStart = 0, m_loopEnd = 0, m_sampleOffset = 0;
+	int32 m_volume = -1;
+	SAMPLEINDEX m_sample = 0;
+	INSTRUMENTINDEX m_instr = 0;
+	CHANNELINDEX m_currentChannel = CHANNELINDEX_INVALID;
+	ModCommand::NOTE m_note;
+
+	PlayNoteParam(ModCommand::NOTE note) : m_note(note) { }
+
+	PlayNoteParam& LoopStart(SmpLength loopStart) { m_loopStart = loopStart; return *this; }
+	PlayNoteParam& LoopEnd(SmpLength loopEnd) { m_loopEnd = loopEnd; return *this; }
+	PlayNoteParam& Offset(SmpLength sampleOffset) { m_sampleOffset = sampleOffset; return *this; }
+
+	PlayNoteParam& Volume(int32 volume) { m_volume = volume; return *this; }
+	PlayNoteParam& Sample(SAMPLEINDEX sample) { m_sample = sample; return *this; }
+	PlayNoteParam& Instrument(INSTRUMENTINDEX instr) { m_instr = instr; return *this; }
+	PlayNoteParam& Channel(CHANNELINDEX channel) { m_currentChannel = channel; return *this; }
+};
+
+
 class CModDoc: public CDocument
 {
 protected:
@@ -209,7 +231,7 @@ public:
 	bool RemoveInstrument(INSTRUMENTINDEX nIns);
 
 	void ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx);
-	CHANNELINDEX PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, int32 nVol = -1, SmpLength loopStart = 0, SmpLength loopEnd = 0, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID, const SmpLength sampleOffset = 0);
+	CHANNELINDEX PlayNote(PlayNoteParam &params);
 	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID, CHANNELINDEX stopChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
 	void CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<128> &playingNotes);
 

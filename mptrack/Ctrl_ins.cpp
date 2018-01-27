@@ -792,7 +792,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 void CNoteMapWnd::PlayNote(int note)
 {
 	if(m_nPlayingNote >= 0) return; //no polyphony in notemap window
-	m_modDoc.PlayNote(note + NOTE_MIN, m_nInstrument, 0);
+	m_modDoc.PlayNote(PlayNoteParam(static_cast<ModCommand::NOTE>(note + NOTE_MIN)).Instrument(m_nInstrument));
 	m_nPlayingNote = note;
 }
 
@@ -2063,7 +2063,7 @@ void CCtrlInstruments::OnInstrumentPlay()
 		m_modDoc.NoteOff(NOTE_MIDDLEC, true, m_nInstrument);
 	} else
 	{
-		m_modDoc.PlayNote(NOTE_MIDDLEC, m_nInstrument, 0);
+		m_modDoc.PlayNote(PlayNoteParam(NOTE_MIDDLEC).Instrument(m_nInstrument));
 	}
 	SwitchToView();
 }
