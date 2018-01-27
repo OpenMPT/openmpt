@@ -1431,7 +1431,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 				} else
 				{
 					modDoc->NoteOff(0, true); // cut previous playing samples
-					modDoc->PlayNote(nParam & 0x7F, 0, static_cast<SAMPLEINDEX>(modItemID), volume);
+					modDoc->PlayNote(PlayNoteParam(nParam & 0x7F).Sample(static_cast<SAMPLEINDEX>(modItemID)).Volume(volume));
 				}
 			}
 			return TRUE;
@@ -1448,7 +1448,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 				} else
 				{
 					modDoc->NoteOff(0, true);
-					modDoc->PlayNote(nParam & 0x7F, static_cast<INSTRUMENTINDEX>(modItemID), 0, volume);
+					modDoc->PlayNote(PlayNoteParam(nParam & 0x7F).Instrument(static_cast<INSTRUMENTINDEX>(modItemID)).Volume(volume));
 				}
 			}
 			return TRUE;

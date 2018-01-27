@@ -1961,7 +1961,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				}
 				CriticalSection cs;
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
-				pModDoc->PlayNote(note, m_nInstrument, 0);
+				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument));
 			}
 			CString noteName;
 			if(ModCommand::IsNote(note))
@@ -1972,7 +1972,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 		}
 	} else
 	{
-		pModDoc->PlayNote(note, m_nInstrument, 0);
+		pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument));
 	}
 }
 

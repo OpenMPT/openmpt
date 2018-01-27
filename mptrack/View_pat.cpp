@@ -4990,7 +4990,7 @@ void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int 
 {
 	CModDoc *modDoc = GetDocument();
 	modDoc->CheckNNA(note, instr, m_baPlayingNote);
-	modDoc->PlayNote(note, instr, 0, volume, 0, 0, channel);
+	modDoc->PlayNote(PlayNoteParam(note).Instrument(instr).Volume(volume).Channel(channel));
 }
 
 
@@ -5190,7 +5190,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			for(auto chordNote : chordNotes)
 			{
 				pModDoc->CheckNNA(chordNote, nPlayIns, m_baPlayingNote);
-				pModDoc->PlayNote(chordNote, nPlayIns, 0, -1, 0, 0, chn);
+				pModDoc->PlayNote(PlayNoteParam(chordNote).Instrument(nPlayIns).Channel(chn));
 			}
 		}
 	} // end play note
