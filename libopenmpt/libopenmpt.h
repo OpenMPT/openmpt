@@ -26,15 +26,16 @@
  * failure, a NULL pointer is returned.
  * - Functions that return integer values signal error condition by returning
  * an invalid value (-1 in most cases, 0 in some cases).
- * - All functions that work on an openmpt_module object will call an
- * openmpt_error_func and depending on the value returned by this function log
- * the error code and/xor/or store it inside the openmpt_module object. Stored
- * error codes can be accessed with the openmpt_module_error_get_last() and
- * openmpt_module_error_get_last_message(). Stored errors will not get cleared
- * automatically and should be reset with openmpt_module_error_clear().
- * - Some functions not directly related to an openmpt_module object take an
- * explicit openmpt_error_func error function callback and a pointer to an int
- * and behave analog to the functions working on an openmpt_module object.
+ * - All functions that work on an \ref openmpt_module object will call an
+ * \ref openmpt_error_func and depending on the value returned by this function
+ * log the error code and/xor/or store it inside the openmpt_module object.
+ * Stored error codes can be accessed with the openmpt_module_error_get_last()
+ * and openmpt_module_error_get_last_message(). Stored errors will not get
+ * cleared automatically and should be reset with openmpt_module_error_clear().
+ * - Some functions not directly related to an \ref openmpt_module object take
+ * an explicit \ref openmpt_error_func error function callback and a pointer to
+ * an int and behave analog to the functions working on an \ref openmpt_module
+ * object.
  *
  * \section libopenmpt_c_strings Strings
  *
