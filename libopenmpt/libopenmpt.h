@@ -56,24 +56,24 @@
  *
  * libopenmpt can use 3 different strategies for file I/O.
  *
- * - openmpt_module_create_from_memory() will load the module from the provided
+ * - openmpt_module_create_from_memory2() will load the module from the provided
  * memory buffer, which will require loading all data upfront by the library
  * caller.
- * - openmpt_module_create() with a seekable stream will load the module via
+ * - openmpt_module_create2() with a seekable stream will load the module via
  * callbacks to the stream interface. libopenmpt will not implement an
  * additional buffering layer in this case which means the callbacks are assumed
  * to be performant even with small i/o sizes.
- * - openmpt_module_create() with an unseekable stream will load the module via
+ * - openmpt_module_create2() with an unseekable stream will load the module via
  * callbacks to the stream interface. libopempt will make an internal copy as
  * it goes along, and sometimes have to pre-cache the whole file in case it
  * needs to know the complete file size. This strategy is intended to be used
  * if the file is located on a high latency network.
  *
- * | create function                                | speed  | memory consumption |
- * | ---------------------------------------------: | :----: | :----------------: |
- * | openmpt_module_create_from_memory()            | <p style="background-color:green" >fast  </p> | <p style="background-color:yellow">medium</p> | 
- * | openmpt_module_create() with seekable stream   | <p style="background-color:red"   >slow  </p> | <p style="background-color:green" >low   </p> |
- * | openmpt_module_create() with unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
+ * | create function                                 | speed  | memory consumption |
+ * | ----------------------------------------------: | :----: | :----------------: |
+ * | openmpt_module_create_from_memory2()            | <p style="background-color:green" >fast  </p> | <p style="background-color:yellow">medium</p> | 
+ * | openmpt_module_create2() with seekable stream   | <p style="background-color:red"   >slow  </p> | <p style="background-color:green" >low   </p> |
+ * | openmpt_module_create2() with unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
  *
  * In all cases, the data or stream passed to the create function is no longer
  * needed after the openmpt_module has been created and can be freed by the
