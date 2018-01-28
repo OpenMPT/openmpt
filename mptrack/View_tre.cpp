@@ -3255,7 +3255,7 @@ void CModTree::InsertOrDupItem(bool insert)
 			{
 				modDoc.SetModified();
 				modDoc.UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
-				modDoc.UpdateAllViews(nullptr, PatternHint());
+				modDoc.UpdateAllViews(nullptr, PatternHint().Data());
 			} else
 			{
 				Reporting::Error("Maximum number of samples reached.");
@@ -3267,7 +3267,7 @@ void CModTree::InsertOrDupItem(bool insert)
 			if(modDoc.ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
 				modDoc.UpdateAllViews(NULL, InstrumentHint().Info().Envelope().Names());
-				modDoc.UpdateAllViews(nullptr, PatternHint());
+				modDoc.UpdateAllViews(nullptr, PatternHint().Data());
 				modDoc.SetModified();
 			} else
 			{
