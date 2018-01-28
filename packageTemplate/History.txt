@@ -30,6 +30,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.05.00 (* February 2018, revision 9548)
+--------------------------------------------
+Tree view
+   [Fix] <js> Duplicating or inserting instruments or samples did not refresh the pattern view properly.
+
+
 v1.27.04.00 (28 January 2018, revision 9537)
 --------------------------------------------
 Pattern tab
