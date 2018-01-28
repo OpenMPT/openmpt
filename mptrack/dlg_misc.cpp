@@ -597,6 +597,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
 		case kMODOutOfRangeNoteDelay: desc = _T("Out-of-range note delay is played on next row."); break;
 		case kMODTempoOnSecondTick: desc = _T("Tempo changes are handled on second tick instead of first."); break;
+		case kFT2PanSustainRelease: desc = _T("If the sustain point of the panning envelope is reached before key-off, it is never released."); break;
 
 		default: MPT_ASSERT(0);
 		}
