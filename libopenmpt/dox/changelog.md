@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.6-pre
+
 ### libopenmpt 0.3.5 (2018-01-28)
 
  *  [**New**] Support MOD files from the Inconexia demo by Iguana.
