@@ -2,8 +2,9 @@
 Steps to make a libopenmpt 0.2 release
 ======================================
 
- *  replace $REV by the revision number (i.e. '1234') and $NAME by the release name (i.e. 'beta23.42') in all following steps
+ *  ensure OpenMPT version number is 1.26.xx.00 in `common/versionNumber.h`, and increment xx if any playback engine changes.
  *  update `libopenmpt/dox/changelog.md` and in particular add the release date
+ *  replace $REV by the revision number (i.e. '1234') and $NAME by the release name (i.e. 'beta23.42') in all following steps
  *  tag release `# svn cp -m "tag libopenmpt 0.2-$NAME" https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26@$REV https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.2.$REV-$NAME`
  *  update `libopenmpt/dox/changelog.md`, `common/versionNumber.h` and `-version-info` in `build/autotools/Makefile.am` for new version
  *  have a checkout of `https://source.openmpt.org/svn/libopenmpt-website/trunk` available as `website`
