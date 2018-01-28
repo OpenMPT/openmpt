@@ -537,6 +537,7 @@ void CSoundFile::UpgradeModule()
 			{ kRowDelayWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2TremoloRampWaveform,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2PortaUpDownMemory,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
+			{ kFT2PanSustainRelease,			MAKE_VERSION_NUMERIC(1, 28, 00, 09) },
 		};
 
 		for(const auto &b : behaviours)

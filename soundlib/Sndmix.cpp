@@ -987,8 +987,9 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) c
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(env);
 
 	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
-	// Test cases: s77.it, EnvLoops.xm
-	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && m_playBehaviour[kITEnvelopePositionHandling]))
+	// Test cases: s77.it, EnvLoops.xm, PanSustainRelease.xm
+	bool playIfPaused = m_playBehaviour[kITEnvelopePositionHandling] || m_playBehaviour[kFT2PanSustainRelease];
+	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && playIfPaused))
 		&& !insEnv.empty());
 }
 
@@ -1179,6 +1180,12 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 			if(position == insEnv[insEnv.nSustainEnd].tick + 1u)
 			{
 				position = insEnv[insEnv.nSustainStart].tick;
+				// FT2 compatibility: If the panning envelope reaches its sustain point before key-off, it stays there forever.
+				// Test case: PanSustainRelease.xm
+				if(m_playBehaviour[kFT2PanSustainRelease] && envType == ENV_PANNING && !pChn->dwFlags[CHN_KEYOFF])
+				{
+					chnEnv.flags.reset(ENV_ENABLED);
+				}
 			}
 		} else
 		{

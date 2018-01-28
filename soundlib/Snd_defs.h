@@ -467,6 +467,8 @@ enum PlayBehaviour
 	kMODOutOfRangeNoteDelay,		// ProTracker behaviour for out-of-range note delays
 	kMODTempoOnSecondTick,			// ProTracker sets tempo after the first tick
 
+	kFT2PanSustainRelease,			// If the sustain point of a panning envelope is reached before key-off, FT2 does not escape it anymore
+
 	// Add new play behaviours here.
 
 	kMaxPlayBehaviours,
