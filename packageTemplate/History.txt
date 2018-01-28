@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.04.00 (* January 2017, revision 9475)
--------------------------------------------
+v1.27.04.00 (28 January 2018, revision 9537)
+--------------------------------------------
 Pattern tab
    [Fix] <js> Shrinking a selection did not work as intended when merging an effect command for the second row of two merged rows.
    [Fix] <js> It was possible to interpolate columns even if pattern editing was disabled. 
@@ -67,6 +67,7 @@ Misc
 
 Bundled plugins
    [Fix] <js> LFO Plugin: Closing the plugin editor while the pattern editor was open could lead to the LFO waveform being changed unintentionally.
+   [Fix] <js> ParamEq: Center frequency should be capped at a third of the sampling rate, not half.
 
 
 v1.27.03.00 (17 December 2017, revision 9370)
