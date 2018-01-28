@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta29
+### libopenmpt 0.2-beta29 (2018-01-28)
 
  *  [**Bug**] VS2015 project files targetting Windows XP did not set compiler
     option `/Zc:threadSafeInit-` which could cause at least the player plugins
