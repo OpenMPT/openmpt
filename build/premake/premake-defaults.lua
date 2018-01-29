@@ -23,6 +23,10 @@
 			filter {}
 		end
 
+	filter { "not action:vs2015", "action:vs*" }
+		buildoptions { "/Qspectre" }
+	filter {}
+
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86" }
