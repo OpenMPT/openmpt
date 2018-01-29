@@ -270,7 +270,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		forbiddenCommands.set(CMD_NOTESLIDEDOWN);        forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
 		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
 		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
-		forbiddenVolCommands.set(VOLCMD_FINEVOLUP);      forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
 
 		// Optimize away channels for which it's pointless to adjust sample positions
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
@@ -1032,8 +1031,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							{
 							case 0x10:
 							case 0x20:
-							case 0xA0:
-							case 0xB0:
 								stopNote = true;
 							}
 						}
@@ -1071,6 +1068,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 						break;
 
+					case CMD_MODCMDEX:
+						if((m.param & 0x0F) || (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
+						{
+							pChn->isFirstTick = true;
+							switch(m.param & 0xF0)
+							{
+							case 0xA0: FineVolumeUp(pChn, m.param & 0x0F, false); break;
+							case 0xB0: FineVolumeDown(pChn, m.param & 0x0F, false); break;
+							}
+						}
+						break;
+
 					case CMD_S3MCMDEX:
 						if(m.param == 0x9E)
 						{
@@ -1092,6 +1101,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							//ExtendedS3MCommands(nChn, param);
 						}
 						break;
+					}
+					pChn->isFirstTick = true;
+					switch(m.volcmd)
+					{
+					case VOLCMD_FINEVOLUP:		FineVolumeUp(pChn, m.vol, m_playBehaviour[kITVolColMemory]); break;
+					case VOLCMD_FINEVOLDOWN:	FineVolumeDown(pChn, m.vol, m_playBehaviour[kITVolColMemory]); break;
 					}
 
 					if(porta)
@@ -5441,13 +5456,10 @@ TEMPO CSoundFile::ConvertST2Tempo(uint8 tempo)
 	static const uint32 st2MixingRate = 23863; // Highest possible setting in ST2
 
 	// This underflows at tempo 06...0F, and the resulting tick lengths depend on the mixing rate.
-	int32 val = 49 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u);
-	if(val == 0)
-		val = st2MixingRate;
-	val = st2MixingRate / val;
-	if(val <= 0)
-		val += 65536;
-	return TEMPO().SetRaw(Util::muldivrfloor(st2MixingRate, 5 * TEMPO::fractFact, val * 2));
+	int32 samplesPerTick = st2MixingRate / (49 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u));
+	if(samplesPerTick <= 0)
+		samplesPerTick += 65536;
+	return TEMPO().SetRaw(Util::muldivrfloor(st2MixingRate, 5 * TEMPO::fractFact, samplesPerTick * 2));
 }
 
 
