@@ -921,9 +921,9 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		// If there are too many sequences, delete them.
 		for(size_t nSeq = sndFile.Order.GetNumSequences(); nSeq < info.tiSequences.size(); nSeq++) if (info.tiSequences[nSeq])
 		{
-			for(size_t nOrd = 0; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
+			for(auto &ord : info.tiOrders[nSeq]) if (ord)
 			{
-				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = nullptr;
+				DeleteItem(ord); ord = nullptr;
 			}
 			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = nullptr;
 		}
