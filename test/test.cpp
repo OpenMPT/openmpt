@@ -257,7 +257,7 @@ static MPT_NOINLINE void TestVersion()
 		DWORD dwVerInfoSize;
 
 		// Get version information from the application
-		::GetModuleFileNameW(NULL, szFullPath, mpt::size(szFullPath));
+		::GetModuleFileNameW(NULL, szFullPath, mpt::saturate_cast<DWORD>(mpt::size(szFullPath)));
 		dwVerInfoSize = ::GetFileVersionInfoSizeW(szFullPath, &dwVerHnd);
 		if (!dwVerInfoSize)
 			throw std::runtime_error("!dwVerInfoSize is true");
@@ -1555,7 +1555,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 	
 	{
-		auto TestAdaptive16 = [](uint16 value, std::size_t expected_size, std::size_t fixedSize, const char * bytes)
+		auto TestAdaptive16 = [](uint16 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
 			mpt::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt16LE(f, value, fixedSize), true);
@@ -1563,7 +1563,7 @@ static MPT_NOINLINE void TestMisc2()
 			if(bytes)
 			{
 				mpt::IO::SeekBegin(f);
-				for(std::size_t i = 0; i < expected_size; ++i)
+				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
 				{
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
@@ -1575,7 +1575,7 @@ static MPT_NOINLINE void TestMisc2()
 			VERIFY_EQUAL(mpt::IO::ReadAdaptiveInt16LE(f, result), true);
 			VERIFY_EQUAL(result, value);
 		};
-		auto TestAdaptive32 = [](uint32 value, std::size_t expected_size, std::size_t fixedSize, const char * bytes)
+		auto TestAdaptive32 = [](uint32 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
 			mpt::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt32LE(f, value, fixedSize), true);
@@ -1583,7 +1583,7 @@ static MPT_NOINLINE void TestMisc2()
 			if(bytes)
 			{
 				mpt::IO::SeekBegin(f);
-				for(std::size_t i = 0; i < expected_size; ++i)
+				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
 				{
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
@@ -1595,7 +1595,7 @@ static MPT_NOINLINE void TestMisc2()
 			VERIFY_EQUAL(mpt::IO::ReadAdaptiveInt32LE(f, result), true);
 			VERIFY_EQUAL(result, value);
 		};
-		auto TestAdaptive64 = [](uint64 value, std::size_t expected_size, std::size_t fixedSize, const char * bytes)
+		auto TestAdaptive64 = [](uint64 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
 			mpt::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt64LE(f, value, fixedSize), true);
@@ -1603,7 +1603,7 @@ static MPT_NOINLINE void TestMisc2()
 			if(bytes)
 			{
 				mpt::IO::SeekBegin(f);
-				for(std::size_t i = 0; i < expected_size; ++i)
+				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
 				{
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
