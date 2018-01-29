@@ -45,11 +45,24 @@ is just a high-level summary.
     by Elysis.
  *  MOD: Slides and delayed notes are executed on every repetition of a row with
     row delay (fixes "ode to protracker").
+ *  XM: If the sustain point of the panning envelope is reached before key-off,
+    it is never released.
  *  XM E60 loop bug was not considered in song length calucation.
  *  Tighten M15 and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
+ *  STM: More accurate tempo calculation.
+ *  STM: Better support for early format revisions (no such files have been
+    found in the wild, though).
  *  STM: Last character of sample name was missing.
+ *  IMF: Filter cutoff was upside down and the cutoff range was too small.
+ *  ParamEq plugin center frequency was not limited correctly.
+ *  Subsong search is now less thorough. It could previously find many subsongs
+    that are technically correct (unplayed rows at the beginning of patterns
+    that have been jumped over due to pattern breaks), but so far no real-world
+    module that would require such a thorough subsong detection was found. The
+    old mechanism caused way more false positives than intended with real-world
+    modules, though.
 
 ### libopenmpt 0.3 (2017-09-27)
 
