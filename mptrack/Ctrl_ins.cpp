@@ -822,6 +822,8 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_INSTRUMENT_NEW,		OnInstrumentNew)
 	ON_COMMAND(IDC_INSTRUMENT_OPEN,		OnInstrumentOpen)
 	ON_COMMAND(IDC_INSTRUMENT_SAVEAS,	OnInstrumentSave)
+	ON_COMMAND(IDC_SAVE_ONE,			OnInstrumentSaveOne)
+	ON_COMMAND(IDC_SAVE_ALL,			OnInstrumentSaveAll)
 	ON_COMMAND(IDC_INSTRUMENT_PLAY,		OnInstrumentPlay)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
@@ -960,7 +962,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_OPEN, TIMAGE_OPEN);
-	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, TIMAGE_SAVE);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, TIMAGE_SAVE, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_PLAY, TIMAGE_PREVIEW);
 	m_SpinInstrument.SetRange(0, 0);
 	m_SpinInstrument.EnableWindow(FALSE);
@@ -1049,20 +1051,29 @@ void CCtrlInstruments::RecalcLayout()
 }
 
 
-void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
+void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	CInputHandler *ih = CMainFrame::GetInputHandler();
-	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
+	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
 	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
+	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
+	CMenu menu;
 	switch(pToolBar->iItem)
 	{
 	case IDC_INSTRUMENT_NEW:
 		{
-			CMenu menu;
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, ID_INSTRUMENT_DUPLICATE, ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate, _T("Duplicate &Instrument")));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
+			menu.DestroyMenu();
+		}
+		break;
+	case IDC_INSTRUMENT_SAVEAS:
+		{
+			menu.CreatePopupMenu();
+			menu.AppendMenu(MF_STRING, IDC_SAVE_ALL, _T("Save &All..."));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
 			menu.DestroyMenu();
 		}
 		break;
@@ -1957,8 +1968,12 @@ void CCtrlInstruments::OnInstrumentOpen()
 
 void CCtrlInstruments::OnInstrumentSave()
 {
-	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
+	SaveInstrument(CMainFrame::GetInputHandler()->ShiftPressed());
+}
 
+
+void CCtrlInstruments::SaveInstrument(bool doBatchSave)
+{
 	if(!doBatchSave && m_sndFile.Instruments[m_nInstrument] == nullptr)
 	{
 		SwitchToView();
@@ -2821,7 +2836,7 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	switch(wParam)
 	{
 		case kcInstrumentCtrlLoad: OnInstrumentOpen(); return wParam;
-		case kcInstrumentCtrlSave: OnInstrumentSave(); return wParam;
+		case kcInstrumentCtrlSave: OnInstrumentSaveOne(); return wParam;
 		case kcInstrumentCtrlNew:  InsertInstrument(false); return wParam;
 		case kcInstrumentCtrlDuplicate:	InsertInstrument(true); return wParam;
 	}

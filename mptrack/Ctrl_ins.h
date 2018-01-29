@@ -137,6 +137,7 @@ public:
 	bool InsertInstrument(bool duplicate);
 	bool OpenInstrument(const mpt::PathString &fileName);
 	bool OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
+	void SaveInstrument(bool doBatchSave);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
@@ -169,6 +170,8 @@ protected:
 	afx_msg void OnInstrumentDuplicate() { InsertInstrument(true); }
 	afx_msg void OnInstrumentOpen();
 	afx_msg void OnInstrumentSave();
+	afx_msg void OnInstrumentSaveOne() { SaveInstrument(false); }
+	afx_msg void OnInstrumentSaveAll() { SaveInstrument(true); }
 	afx_msg void OnInstrumentPlay();
 	afx_msg void OnNameChanged();
 	afx_msg void OnFileNameChanged();

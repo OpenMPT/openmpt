@@ -613,6 +613,7 @@
 #define IDC_SAMPLE_SIGN_UNSIGN          2056
 #define IDC_EDIT_SEQNUM                 2057
 #define IDC_SPIN_SEQNUM                 2058
+#define IDC_SAVE_ALL                    2059
 #define IDC_INSTRUMENT_NEW              2060
 #define IDC_INSTRUMENT_OPEN             2061
 #define IDC_INSTRUMENT_SAVEAS           2062
@@ -635,6 +636,7 @@
 #define IDC_LIST6                       2076
 #define IDC_KEYBOARD1                   2078
 #define IDC_SPLASH                      2079
+#define IDC_SAVE_ONE                    2080
 #define IDC_TREEVIEW                    2081
 #define IDC_COMMANDKEY                  2081
 #define IDC_VUMETER_LEFT                2082

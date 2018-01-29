@@ -64,6 +64,8 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_OPENKNOWN,	OnSampleOpenKnown)
 	ON_COMMAND(IDC_SAMPLE_OPENRAW,		OnSampleOpenRaw)
 	ON_COMMAND(IDC_SAMPLE_SAVEAS,		OnSampleSave)
+	ON_COMMAND(IDC_SAVE_ONE,			OnSampleSaveOne)
+	ON_COMMAND(IDC_SAVE_ALL,			OnSampleSaveAll)
 	ON_COMMAND(IDC_SAMPLE_PLAY,			OnSamplePlay)
 	ON_COMMAND(IDC_SAMPLE_NORMALIZE,	OnNormalize)
 	ON_COMMAND(IDC_SAMPLE_AMPLIFY,		OnAmplify)
@@ -236,7 +238,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar1.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
-	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE);
+	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	// Edit ToolBar
 	m_ToolBar2.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, TIMAGE_PREVIEW);
@@ -1070,29 +1072,38 @@ void CCtrlSamples::OnZoomChanged()
 }
 
 
-void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
+void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
+	CInputHandler *ih = CMainFrame::GetInputHandler();
+	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
 	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
+	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
+	CMenu menu;
 	switch(pToolBar->iItem)
 	{
 	case IDC_SAMPLE_NEW:
 		{
-			CMenu menu;
 			menu.CreatePopupMenu();
-			menu.AppendMenu(MF_STRING, IDC_SAMPLE_DUPLICATE, _T("&Duplicate Sample"));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_DUPLICATE, ih->GetKeyTextFromCommand(kcSampleDuplicate, _T("&Duplicate Sample")));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
 			menu.DestroyMenu();
 		}
 		break;
 	case IDC_SAMPLE_OPEN:
 		{
-			CMenu menu;
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &Sample..."));
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW Sample..."));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
+			menu.DestroyMenu();
+		}
+		break;
+	case IDC_SAMPLE_SAVEAS:
+		{
+			menu.CreatePopupMenu();
+			menu.AppendMenu(MF_STRING, IDC_SAVE_ALL, _T("Save &All..."));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
 			menu.DestroyMenu();
 		}
 		break;
@@ -1294,8 +1305,13 @@ void CCtrlSamples::OpenSamples(const std::vector<mpt::PathString> &files, FlagSe
 
 void CCtrlSamples::OnSampleSave()
 {
+	SaveSample(CMainFrame::GetInputHandler()->ShiftPressed());
+}
+
+
+void CCtrlSamples::SaveSample(bool doBatchSave)
+{
 	mpt::PathString fileName, defaultPath = TrackerSettings::Instance().PathSamples.GetWorkingDir();
-	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
 	SampleEditorDefaultFormat defaultFormat = TrackerSettings::Instance().m_defaultSampleFormat;
 
 	if(!doBatchSave)
@@ -3287,7 +3303,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	switch(wParam)
 	{
 	case kcSampleLoad:		OnSampleOpen(); return wParam;
-	case kcSampleSave:		OnSampleSave(); return wParam;
+	case kcSampleSave:		OnSampleSaveOne(); return wParam;
 	case kcSampleNew:		InsertSample(false); return wParam;
 	case kcSampleDuplicate:	InsertSample(true); return wParam;
 

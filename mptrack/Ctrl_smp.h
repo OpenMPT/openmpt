@@ -78,6 +78,8 @@ public:
 	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
 	void OpenSamples(const std::vector<mpt::PathString> &files, FlagSet<OpenSampleTypes> types);
+	void SaveSample(bool doBatchSave);
+
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:
@@ -107,6 +109,8 @@ protected:
 	afx_msg void OnSampleOpenKnown();
 	afx_msg void OnSampleOpenRaw();
 	afx_msg void OnSampleSave();
+	afx_msg void OnSampleSaveOne() { SaveSample(false); }
+	afx_msg void OnSampleSaveAll() { SaveSample(true); }
 	afx_msg void OnSamplePlay();
 	afx_msg void OnNormalize();
 	afx_msg void OnAmplify();
