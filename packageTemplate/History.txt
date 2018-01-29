@@ -35,6 +35,8 @@ v1.27.05.00 (* February 2018, revision 9548)
 Tree view
    [Fix] <js> Duplicating or inserting instruments or samples did not refresh the pattern view properly.
 
+Other formats
+   [Fix] <js> STM: More accurate tempo calculation.
 
 v1.27.04.00 (28 January 2018, revision 9537)
 --------------------------------------------
@@ -103,7 +105,7 @@ Misc
    [Fix] <js> Autosave was broken in OpenMPT 1.27.02.00.
 
 Third-Party Libraries
-   [Mod] Update libopusenc (v0.1.1), mpg123 (v1.25.7), ogg (v1.3.3), opusfile (v0.10).
+   [Mod] Update libopusenc (v0.1.1), mpg123 (v1.25.8), ogg (v1.3.3), opusfile (v0.10).
 
 
 v1.27.02.00 (4 November 2017, revision 9221)

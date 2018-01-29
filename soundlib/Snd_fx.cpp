@@ -478,22 +478,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			switch(p->command)
 			{
 			case CMD_SPEED:
-#ifdef MODPLUG_TRACKER
-				// FT2 appears to be decrementing the tick count before checking for zero,
-				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
-				if(GetType() == MOD_TYPE_XM && !p->param)
-				{
-					playState.m_nMusicSpeed = uint16_max;
-				}
-#endif	// MODPLUG_TRACKER
-				if(p->param > 0) playState.m_nMusicSpeed = p->param;
+				SetSpeed(playState, p->param);
 				break;
 
 			case CMD_TEMPO:
 				if(m_playBehaviour[kMODVBlankTiming])
 				{
 					// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
-					if(p->param != 0) playState.m_nMusicSpeed = p->param;
+					if(p->param != 0) SetSpeed(playState, p->param);
 				}
 				break;
 
@@ -2249,12 +2241,6 @@ bool CSoundFile::ProcessEffects()
 	ROWINDEX nPatLoopRow = ROWINDEX_INVALID;	// Is changed if a pattern loop jump-back is executed
 	ORDERINDEX nPosJump = ORDERINDEX_INVALID;
 
-	// ScreamTracker 2 only updates effects on every 16th tick.
-	if((m_PlayState.m_nTickCount & 0x0F) != 0 && GetType() == MOD_TYPE_STM)
-	{
-		return true;
-	}
-
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
@@ -3018,7 +3004,7 @@ bool CSoundFile::ProcessEffects()
 		// Set Speed
 		case CMD_SPEED:
 			if(m_SongFlags[SONG_FIRSTTICK])
-				SetSpeed(param);
+				SetSpeed(m_PlayState, param);
 			break;
 
 		// Set Tempo
@@ -3026,7 +3012,7 @@ bool CSoundFile::ProcessEffects()
 			if(m_playBehaviour[kMODVBlankTiming])
 			{
 				// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
-				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(param);
+				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(m_PlayState, param);
 				break;
 			}
 			{
@@ -5421,7 +5407,6 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 			pChn->VolEnv.nEnvValueAtReleaseJump = pIns->VolEnv.GetValueFromPosition(pChn->VolEnv.nEnvPosition, 256);
 			pChn->VolEnv.nEnvPosition = pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick;
 		}
-
 	}
 }
 
@@ -5430,17 +5415,39 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 // CSoundFile: Global Effects
 
 
-void CSoundFile::SetSpeed(uint32 param)
+void CSoundFile::SetSpeed(PlayState &playState, uint32 param) const
 {
 #ifdef MODPLUG_TRACKER
 	// FT2 appears to be decrementing the tick count before checking for zero,
 	// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
 	if(GetType() == MOD_TYPE_XM && !param)
 	{
-		m_PlayState.m_nMusicSpeed = uint16_max;
+		playState.m_nMusicSpeed = uint16_max;
 	}
 #endif	// MODPLUG_TRACKER
-	if(param > 0) m_PlayState.m_nMusicSpeed = param;
+	if(param > 0) playState.m_nMusicSpeed = param;
+	if(GetType() == MOD_TYPE_STM && param > 0)
+	{
+		playState.m_nMusicSpeed = std::max<uint32>(param >> 4u, 1);
+		playState.m_nMusicTempo = ConvertST2Tempo(static_cast<uint8>(param));
+	}
+}
+
+
+// Convert a ST2 tempo byte to classic tempo and speed combination
+TEMPO CSoundFile::ConvertST2Tempo(uint8 tempo)
+{
+	static const uint8 ST2TempoFactor[] = { 140, 50, 25, 15, 10, 7, 6, 4, 3, 3, 2, 2, 2, 2, 1, 1 };
+	static const uint32 st2MixingRate = 23863; // Highest possible setting in ST2
+
+	// This underflows at tempo 06...0F, and the resulting tick lengths depend on the mixing rate.
+	int32 val = 49 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u);
+	if(val == 0)
+		val = st2MixingRate;
+	val = st2MixingRate / val;
+	if(val <= 0)
+		val += 65536;
+	return TEMPO().SetRaw(Util::muldivrfloor(st2MixingRate, 5 * TEMPO::fractFact, val * 2));
 }
 
 

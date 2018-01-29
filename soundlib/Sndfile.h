@@ -851,7 +851,8 @@ public:
 	void KeyOff(ModChannel *pChn) const;
 	// Global Effects
 	void SetTempo(TEMPO param, bool setAsNonModcommand = false);
-	void SetSpeed(uint32 param);
+	void SetSpeed(PlayState &playState, uint32 param) const;
+	static TEMPO ConvertST2Tempo(uint8 tempo);
 
 protected:
 	// Global variable initializer for loader functions
