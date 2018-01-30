@@ -13,73 +13,75 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-FolderScanner::FolderScanner(const mpt::PathString &path, bool findInSubDirs) : paths(1, path), findInSubDirs(findInSubDirs), hFind(INVALID_HANDLE_VALUE)
+FolderScanner::FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type)
+	: m_paths(1, path)
+	, m_hFind(INVALID_HANDLE_VALUE)
+	, m_type(type)
 {
-	MemsetZero(wfd);
+	MemsetZero(m_wfd);
 }
 
 
 FolderScanner::~FolderScanner()
 {
-	FindClose(hFind);
+	FindClose(m_hFind);
 }
 
 
-// Return one file at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found.
-bool FolderScanner::NextFileOrDirectory(mpt::PathString &file, bool allowDirectories)
+bool FolderScanner::Next(mpt::PathString &file)
 {
-	bool foundFile = false;
+	bool found = false;
 	do
 	{
-		if(hFind == INVALID_HANDLE_VALUE)
+		if(m_hFind == INVALID_HANDLE_VALUE)
 		{
-			if(paths.empty())
+			if(m_paths.empty())
 			{
 				return false;
 			}
 
-			currentPath = paths.back();
-			paths.pop_back();
-			currentPath.EnsureTrailingSlash();
-			hFind = FindFirstFileW((currentPath + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
+			m_currentPath = m_paths.back();
+			m_paths.pop_back();
+			m_currentPath.EnsureTrailingSlash();
+			m_hFind = FindFirstFileW((m_currentPath + MPT_PATHSTRING("*.*")).AsNative().c_str(), &m_wfd);
 		}
 
 		BOOL nextFile = FALSE;
-		if(hFind != INVALID_HANDLE_VALUE)
+		if(m_hFind != INVALID_HANDLE_VALUE)
 		{
 			do
 			{
-				file = currentPath + mpt::PathString::FromNative(wfd.cFileName);
-				if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				file = m_currentPath + mpt::PathString::FromNative(m_wfd.cFileName);
+				if(m_wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if(wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
+					if(wcscmp(m_wfd.cFileName, L"..") && wcscmp(m_wfd.cFileName, L"."))
 					{
-						if(findInSubDirs)
+						if(m_type[kFindInSubDirectories])
 						{
 							// Add sub directory
-							paths.push_back(file);
+							m_paths.push_back(file);
 						}
-						if(allowDirectories)
+						if(m_type[kOnlyDirectories])
 						{
-							foundFile = true;
+							found = true;
 						}
 					}
-				} else
+				} else if(m_type[kOnlyFiles])
 				{
-					foundFile = true;
+					found = true;
 				}
-			} while((nextFile = FindNextFileW(hFind, &wfd)) != FALSE && !foundFile);
+			} while((nextFile = FindNextFileW(m_hFind, &m_wfd)) != FALSE && !found);
 		}
 		if(nextFile == FALSE)
 		{
 			// Done with this directory, advance to next
-			if(hFind != INVALID_HANDLE_VALUE)
+			if(m_hFind != INVALID_HANDLE_VALUE)
 			{
-				FindClose(hFind);
+				FindClose(m_hFind);
 			}
-			hFind = INVALID_HANDLE_VALUE;
+			m_hFind = INVALID_HANDLE_VALUE;
 		}
-	} while(!foundFile);
+	} while(!found);
 	return true;
 }
 

@@ -2602,9 +2602,9 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			if(!basePath.IsDirectory())
 				continue;
 
-			FolderScanner scanner(basePath, false);
+			FolderScanner scanner(basePath, FolderScanner::kOnlyFiles);
 			mpt::PathString fileName;
-			while(filesAdded < nMaxCount && scanner.NextFile(fileName))
+			while(filesAdded < nMaxCount && scanner.Next(fileName))
 			{
 				vPaths.push_back(fileName);
 				AppendMenu(hMenu, MF_STRING, nIdRangeBegin + filesAdded, fileName.GetFullFileName().ToCString());

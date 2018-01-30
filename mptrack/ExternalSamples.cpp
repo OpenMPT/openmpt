@@ -125,7 +125,7 @@ void ExternalSamplesDlg::OnScanFolder()
 	{
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetDirectory());
 
-		FolderScanner scan(dlg.GetDirectory(), true);
+		FolderScanner scan(dlg.GetDirectory(), FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 		mpt::PathString fileName;
 
 		isScanning = true;
@@ -137,7 +137,7 @@ void ExternalSamplesDlg::OnScanFolder()
 		int foundFiles = 0;
 
 		bool anyMissing = true;
-		while(scan.NextFile(fileName) && isScanning && anyMissing)
+		while(scan.Next(fileName) && isScanning && anyMissing)
 		{
 			anyMissing = false;
 			for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
