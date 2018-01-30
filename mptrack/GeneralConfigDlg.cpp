@@ -112,9 +112,9 @@ BOOL COptionsGeneral::OnInitDialog()
 	}
 
 	const mpt::PathString basePath = theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\");
-	FolderScanner scanner(basePath, true);
+	FolderScanner scanner(basePath, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 	mpt::PathString file;
-	while(scanner.NextFile(file))
+	while(scanner.Next(file))
 	{
 		std::wstring fileW = file.AsNative();
 		fileW = fileW.substr(basePath.Length());

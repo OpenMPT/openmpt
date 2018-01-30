@@ -2107,9 +2107,9 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 				}
 				m_InstrLibHighlightPath = MPT_PATHSTRING("..");	// Highlight first entry
 
-				FolderScanner scan(dir, false);
+				FolderScanner scan(dir, FolderScanner::kFilesAndDirectories);
 				mpt::PathString name;
-				if(scan.NextFileOrDirectory(name) && !scan.NextFileOrDirectory(name) && name.IsDirectory())
+				if(scan.Next(name) && !scan.Next(name) && name.IsDirectory())
 				{
 					// There is only one directory and nothing else in the path,
 					// so skip this directory and automatically descend further down into the tree.

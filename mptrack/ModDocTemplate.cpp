@@ -107,10 +107,10 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 
 	if(filename.IsDirectory())
 	{
-		FolderScanner scanner(filename, true);
+		FolderScanner scanner(filename, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 		mpt::PathString file;
 		CDocument *pDoc = nullptr;
-		while(scanner.NextFile(file))
+		while(scanner.Next(file))
 		{
 			pDoc = OpenDocumentFile(file.ToCString(), bAddToMRU);
 		}

@@ -688,10 +688,10 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	pluginScanDlg.ModifyStyle(0, WS_SYSMENU, WS_SYSMENU);
 	pluginScanDlg.ShowWindow(SW_SHOW);
 
-	FolderScanner scan(path, true);
+	FolderScanner scan(path, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 	mpt::PathString fileName;
 	int files = 0;
-	while(scan.NextFile(fileName) && pluginScanDlg.IsWindowVisible())
+	while(scan.Next(fileName) && pluginScanDlg.IsWindowVisible())
 	{
 		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 		{
