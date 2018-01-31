@@ -8,14 +8,14 @@ Packaging
 
 ### Packaging recommendations for distribution package maintainers
 
- *  libopenmpt (since 0.3) uses SemVer versioning. See
-    [semver.org](http://semver.org/). Clause 4 is ignored for libopenmpt, which
-    means that libopenmpt will also provide API/ABI compatbility semantics for
-    pre-1.0.0 versions as required by SemVer only for post-1.0.0 versions. The
-    SemVer versioning scheme is incompatible with Debian/Ubuntu package
-    versions, however it can easily be processed to be compatible by replacing
-    '-' (hyphen) with '~' (tilde). It is recommended that you use this exact
-    transformation if required.
+ *  libopenmpt (since 0.3) uses SemVer 2.0.0 versioning. See
+    [semver.org](https://semver.org/spec/v2.0.0.html). Clause 4 is ignored for
+    libopenmpt, which means that libopenmpt will also provide API/ABI
+    compatbility semantics for pre-1.0.0 versions as required by SemVer 2.0.0
+    only for post-1.0.0 versions. The SemVer versioning scheme is incompatible
+    with Debian/Ubuntu package versions, however it can easily be processed to
+    be compatible by replacing '-' (hyphen) with '~' (tilde). It is recommended
+    that you use this exact transformation if required.
  *  Use the autotools source package.
  *  Use the default set of dependencies required by the autotools package.
  *  Read \ref libopenmpt_c_staticlinking and thus possibly pass
