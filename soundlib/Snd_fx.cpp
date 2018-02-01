@@ -131,12 +131,13 @@ public:
 			bool updateInc = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
 			if(i >= portaStart)
 			{
-				const ModCommand *p = sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
-				if(p->command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(&chn, p->param);
-				else if(p->command == CMD_TONEPORTAVOL) sndFile.TonePortamento(&chn, 0);
-				if(p->volcmd == VOLCMD_TONEPORTAMENTO)
+				chn.isFirstTick = false;
+				const ModCommand &p = *sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
+				if(p.command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(&chn, p.param);
+				else if(p.command == CMD_TONEPORTAVOL) sndFile.TonePortamento(&chn, 0);
+				if(p.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
-					uint32 param = p->vol;
+					uint32 param = p.vol;
 					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 					{
 						param = ImpulseTrackerPortaVolCmd[param & 0x0F];
