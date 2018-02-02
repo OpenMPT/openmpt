@@ -138,9 +138,9 @@ ice="IT10"
 pt36="CMNT"
 pt36="PTDT"
 sfx="SO31"
-# There is currently no way to fuzz external Startrekker instrument files.
-#stam="ST1.3 ModuleINFO"
-#stam="AudioSculpture10"
+# External Startrekker instrument files.
+stam="ST1.3 ModuleINFO"
+stam="AudioSculpture10"
 
 mptm="->MPT_ORIGINAL_IT<-"
 mptm=".tpm"
@@ -204,10 +204,9 @@ ptm="\x1A\x03\x02"
 s3m="SCRM"
 s3m="SCRS"
 
-stm="!Scream!\x1A\x02"
-#stm="BMOD2STM\x1A\x02"
+stm="\x1A\x02\x15"
 
-stp="STP3\x00"
+stp="STP3\x02"
 
 ult="MAS_UTrack_V004"
 
@@ -217,7 +216,7 @@ umx="sound"
 
 xm="Extended Module: "
 xm="OpenMPT "
-xm="FastTracker v 2.00  "
+#xm="FastTracker v 2.00  "
 xm="MilkyTracker        "
 xm="text"
 xm="MIDI"
