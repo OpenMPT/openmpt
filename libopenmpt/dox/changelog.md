@@ -7,6 +7,15 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.6-pre
 
+ *  [**Bug**] Small memory leak with malformed STP files.
+ *  [**Bug**] Possible out-of-bounds memory read with malformed STP files.
+
+ *  STM: Accurate emulation of Scream Tracker 2 tempo mode.
+ *  STM: Better support for early format revisions (no such files have been
+    found in the wild, though).
+ *  Fine volume slides are now supported when seeking with seek.sync_samples=1
+    enabled.
+
 ### libopenmpt 0.3.5 (2018-01-28)
 
  *  [**New**] Support MOD files from the Inconexia demo by Iguana.
