@@ -206,7 +206,7 @@ size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerS
 	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
 	const SmpLength lookaheadBufferSize = (MaxSamplingPointSize + 1 + 4 + 4) * InterpolationMaxLookahead;
 
-	if(numSamples > MAX_SAMPLE_LENGTH || lookaheadBufferSize > maxSize - numSamples)
+	if(numSamples == 0 || numSamples > MAX_SAMPLE_LENGTH || lookaheadBufferSize > maxSize - numSamples)
 	{
 		return 0;
 	}
