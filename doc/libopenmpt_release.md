@@ -11,7 +11,10 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
 0.3
 ---
 
- 1. from a clean checkout, run (requires xpath!!!)
+ 1. ensure that the OpenMPT version is preferrably at a aa.bb.cc.00 version,
+    otherwise increment the minorminor part to a new value used specifically for
+    the libopenmpt release
+ 2. from a clean checkout, run (requires xpath!!!)
         svn up
         build/update_libopenmpt_version.sh release
         svn ci -m "[Mod] libopenmpt: Prepare for release."
@@ -23,12 +26,15 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
         build/update_libopenmpt_version.sh bumpltrev
         svn ci -m "[Mod] libopenmpt: Bump patch version."
         svn checkout https://source.openmpt.org/svn/libopenmpt-website/trunk build/release/libopenmpt-website
- 2. website: add release announcement
- 3. website: update download links
- 4. wait for buildbot
- 5. run
+ 3. website: add release announcement
+ 4. website: update download links
+ 5. wait for buildbot
+ 6. run
         cd build/release/libopenmpt-website
         ./release-0.3.sh $NEWVER +release
         cd ../../..
- 6. post announcement to mailing list
+ 7. post announcement to mailing list
+ 8. increment OpenMPT version minorminor in `common/versionNumber.h` when all
+    releases are done on the svn side (either libopenmpt only, or both
+    libopenmpt and OpenMPT)
 
