@@ -19,7 +19,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.5 (2018-01-28)
 
  *  [**New**] Support MOD files from the Inconexia demo by Iguana.
- *  [**Bug**] xmp-openmpt: Saved settings were not applied instantly. 
+ *  [**Bug**] xmp-openmpt: Saved settings were not applied instantly.
 
  *  XM E60 loop bug was not considered in song length calucation.
  *  Tighten M15 and MOD file rejection heuristics.
