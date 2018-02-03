@@ -453,7 +453,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 					uint16 ciaTempo = (static_cast<uint16>(m.command & 0x0F) << 8) | m.param;
 					if(ciaTempo)
 					{
-						m.param = mpt::saturate_cast<ModCommand::PARAM>(Util::Round(ConvertTempo(ciaTempo).ToDouble()));
+						m.param = Util::Round<ModCommand::PARAM>(ConvertTempo(ciaTempo).ToDouble());
 						m.command = CMD_TEMPO;
 					} else
 					{

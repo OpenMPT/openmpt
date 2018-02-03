@@ -863,23 +863,18 @@ namespace Util
 	inline float Round(const float& val) { return std::round(val); }
 #endif
 
-	/// Rounds given double value to nearest integer value of type T.
+	// Rounds given double value to nearest integer value of type T.
+	// Out-of-range values are saturated to the specified integer type's limits.
 	template <class T> inline T Round(const double& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		const double valRounded = Round(val);
-		MPT_ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
-		const T intval = static_cast<T>(valRounded);
-		return intval;
+		return mpt::saturate_cast<T>(Round(val));
 	}
 
 	template <class T> inline T Round(const float& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		const float valRounded = Round(val);
-		MPT_ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
-		const T intval = static_cast<T>(valRounded);
-		return intval;
+		return mpt::saturate_cast<T>(Round(val));
 	}
 
 	template<typename T>
