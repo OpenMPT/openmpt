@@ -108,7 +108,12 @@ static TEMPO ConvertTempo(uint16 ciaSpeed)
 
 static void ConvertLoopSlice(ModSample &src, ModSample &dest, SmpLength start, SmpLength len, bool loop)
 {
-	if(!src.HasSampleData()) return;
+	if(!src.HasSampleData()
+		|| start >= src.nLength
+		|| src.nLength - start < len)
+	{
+		return;
+	}
 
 	dest.FreeSample();
 	dest = src;
@@ -156,9 +161,9 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 
 		// If adding this loop would cause the sample length to exceed maximum,
 		// then limit and bail out
-		if((newSmp.nLength + info.loopLength > MAX_SAMPLE_LENGTH) ||
-		   (info.loopLength > MAX_SAMPLE_LENGTH) ||
-		   (info.loopStart + info.loopLength > smp.nLength))
+		if(info.loopStart >= smp.nLength
+			|| smp.nLength - info.loopStart < info.loopLength
+			|| newSmp.nLength > MAX_SAMPLE_LENGTH - info.loopLength)
 		{
 			numLoops = i;
 			break;
