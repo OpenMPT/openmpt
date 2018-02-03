@@ -7,8 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.6-pre
 
+ *  [**Sec**] Possible out-of-bounds memory read with malformed STP files.
+    (r9576)
+
  *  [**Bug**] Small memory leak with malformed STP files.
- *  [**Bug**] Possible out-of-bounds memory read with malformed STP files.
 
  *  STM: Accurate emulation of Scream Tracker 2 tempo mode.
  *  STM: Better support for early format revisions (no such files have been
