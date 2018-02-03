@@ -437,10 +437,6 @@ static const uint32 CharsetTableCP437AMS2[256] = {
 
 #undef C
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4428) // universal-character-name encountered in source
-#endif
-
 static std::wstring From8bit(const std::string &str, const uint32 (&table)[256], wchar_t replacement = L'\uFFFD')
 {
 	std::wstring res;
@@ -574,13 +570,13 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 // Note:
 //
 //  std::codecvt::out in LLVM libc++ does not advance in and out pointers when
-// running into a non-convertible cahracter. This can happen when no locale is
+// running into a non-convertible character. This can happen when no locale is
 // set on FreeBSD or MacOSX. This behaviour violates the C++ standard.
 //
 //  We apply the following (albeit costly, even on other platforms) work-around:
 //  If the conversion errors out and does not advance the pointers at all, we
 // retry the conversion with a space character prepended to the string. If it
-// still does error our, we retry the whole conversion character by character.
+// still does error out, we retry the whole conversion character by character.
 //  This is costly even on other platforms in one single case: The first
 // character is an invalid Unicode code point or otherwise not convertible. Any
 // following non-convertible characters are not a problem.
