@@ -20,7 +20,7 @@ extern const uint8 ImpulseTrackerPortaVolCmd[16];
 extern const uint16 ProTrackerPeriodTable[6*12];
 extern const uint16 ProTrackerTunedPeriods[16*12];
 extern const uint8 ModEFxTable[16];
-extern const uint16 FreqS3MTable[16];
+extern const uint16 FreqS3MTable[12];
 extern const uint16 S3MFineTuneTable[16];
 extern const int8 ModSinusTable[64];
 extern const int8 ModRandomTable[64];
