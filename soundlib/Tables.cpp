@@ -400,11 +400,9 @@ const uint8 ModEFxTable[16] =
 };
 
 // S3M C-4 periods
-const uint16 FreqS3MTable[16] =
+const uint16 FreqS3MTable[12] =
 {
-	1712,1616,1524,1440,1356,1280,
-	1208,1140,1076,1016,960,907,
-	0,0,0,0
+	1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
 
 // S3M FineTune frequencies
