@@ -1,3 +1,4 @@
+
 Things to update when the year has changed
 ==========================================
 
@@ -10,3 +11,4 @@ Things to update when the year has changed
  *  `libopenmpt/in_openmpt.cpp` (1 occurrence)
  *  [https://wiki.openmpt.org/Manual:_Acknowledgments](https://wiki.openmpt.org/Manual:_Acknowledgments)
  *  [https://lib.openmpt.org/libopenmpt/license/](https://lib.openmpt.org/libopenmpt/license/)
+
