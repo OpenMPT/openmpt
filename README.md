@@ -250,6 +250,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 Coding conventions
 ------------------
 
-See [OpenMPT style guide](doc/openmpt_stleguide.md) and
-[libopenmpt style guide](doc/openmpt_stleguide.md).
+See [OpenMPT style guide](doc/openmpt_styleguide.md) and
+[libopenmpt style guide](doc/openmpt_styleguide.md).
 
