@@ -9,7 +9,7 @@ Patches can be provided either against this Subversion repository or against our
 Github mirror at
 [https://github.com/OpenMPT/openmpt/](https://github.com/OpenMPT/openmpt/).
 
-We do not have a developer mailing list. Fiscussions about new feature or
+We do not have a developer mailing list. Discussions about new features or
 problems can happen at:
  *  [Issue Tracker](https://bugs.openmpt.org/), preferred for specific bug
     reports or bud fixes and feature development discussion
