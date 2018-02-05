@@ -247,9 +247,9 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
 
 
-Coding conventions
-------------------
+Contributing to OpenMPT/libopenmpt
+----------------------------------
 
-See [OpenMPT style guide](doc/openmpt_styleguide.md) and
-[libopenmpt style guide](doc/openmpt_styleguide.md).
+
+See [contributing](doc/contributing.md).
 
