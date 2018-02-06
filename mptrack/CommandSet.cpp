@@ -1556,15 +1556,15 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-static mpt::istringstream GetDefaultKeymap()
+static std::istringstream GetDefaultKeymap()
 {
 	const char *pData = nullptr;
 	HGLOBAL hglob = nullptr;
 	size_t nSize = 0;
 	if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
-		return mpt::istringstream(std::string(pData, nSize));
+		return std::istringstream(std::string(pData, nSize));
 	else
-		return mpt::istringstream();
+		return std::istringstream();
 }
 
 
