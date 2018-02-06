@@ -833,12 +833,12 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			tracks = pmb->numtracks;
 			if (!tracks) tracks = m_nChannels;
 			if(!Patterns.Insert(iBlk, lines)) continue;
-			auto p = Patterns[iBlk].begin();
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 2);
 			uint32 maxlen = tracks*lines*3;
 			if (maxlen + dwPos > dwMemLength - 2) break;
 			for (uint32 y=0; y<lines; y++)
 			{
+				ModCommand *p = Patterns[iBlk].GetpModCommand(y, 0);
 				for (uint32 x=0; x<tracks; x++, s+=3) if (x < m_nChannels)
 				{
 					uint8 note = s[0] & 0x3F;
@@ -901,9 +901,9 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 8);
 			uint32 maxlen = tracks*lines*4;
 			if (maxlen + dwPos > dwMemLength - 8 || !Patterns.IsValidPat(iBlk)) break;
-			auto p = Patterns[iBlk].begin();
 			for (uint32 y=0; y<lines; y++)
 			{
+				ModCommand *p = Patterns[iBlk].GetpModCommand(y, 0);
 				for (uint32 x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
 				{
 					uint8 note = s[0];
