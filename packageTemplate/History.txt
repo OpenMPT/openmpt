@@ -30,13 +30,29 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.05.00 (* February 2018, revision 9548)
+v1.27.05.00 (* February 2018, revision 9596)
 --------------------------------------------
+Pattern tab
+   [Imp] <js> Seeking with sample sync now supports fine volume slides.
+
+Sample tab
+   [Imp] <js> Add drop-down menu for saving all samples.
+
+Instrument tab
+   [Imp] <js> Add drop-down menu for saving all instruments.
+
 Tree view
+   [Mod] <js> Do not enforce dragged-over items to be completely visible when using drag and drop (tx sincx).
    [Fix] <js> Duplicating or inserting instruments or samples did not refresh the pattern view properly.
 
 Other formats
-   [Fix] <js> STM: More accurate tempo calculation.
+   [Fix] <js> STM: More accurate tempo calculation and better support for old format versions.
+   [Fix] <js> Possible small memory leaks and crashes with malformed STP files.
+   [Fix] <js> MED: Correctly import patterns with less channels than the maximum used amount.
+
+Misc
+   [Fix] <js> Loading the default keyboard configuration didn't load all default keys since OpenMPT 1.27.01.00, causing issues such as making instrument number entry with the regular number keys impossible.
+
 
 v1.27.04.00 (28 January 2018, revision 9537)
 --------------------------------------------
