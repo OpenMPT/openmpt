@@ -1683,7 +1683,8 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	if(!fillExistingSet)
 	{
 		// Add the default command set to our freshly loaded command set.
-		LoadFile(GetDefaultKeymap(), std::wstring(), pTempCS);
+		std::istringstream ss{ GetDefaultKeymap() };
+		LoadFile(ss, std::wstring(), pTempCS);
 	} else
 	{
 		// We were just adding stuff to an existing command set - don't delete it!
@@ -1720,7 +1721,8 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	return LoadFile(GetDefaultKeymap(), L"\"executable resource\"");
+	std::istringstream ss{ GetDefaultKeymap() };
+	return LoadFile(ss, L"\"executable resource\"");
 }
 
 
