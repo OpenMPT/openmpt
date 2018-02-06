@@ -3041,8 +3041,7 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 						HTREEITEM hprev = GetPrevVisibleItem(hfirst);
 						if (hprev != NULL) SelectSetFirstVisible(hprev);
 					}
-				} else
-				if (point.y >= rect.bottom-1)
+				} else if (point.y >= rect.bottom-1)
 				{
 					hItem = HitTest(point, &flags);
 					HTREEITEM hNext = GetNextItem(hItem, TVGN_NEXTVISIBLE);
@@ -3055,7 +3054,6 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 			if ((hItem = HitTest(point, &flags)) != NULL)
 			{
 				SelectDropTarget(hItem);
-				EnsureVisible(hItem);
 				m_hItemDrop = hItem;
 			}
 		}
