@@ -1556,6 +1556,18 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
+static mpt::istringstream GetDefaultKeymap()
+{
+	const char *pData = nullptr;
+	HGLOBAL hglob = nullptr;
+	size_t nSize = 0;
+	if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
+		return mpt::istringstream(std::string(pData, nSize));
+	else
+		return mpt::istringstream();
+}
+
+
 bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription, CCommandSet *commandSet)
 {
 	KeyCombination kc;
@@ -1671,14 +1683,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	if(!fillExistingSet)
 	{
 		// Add the default command set to our freshly loaded command set.
-		const char *pData = nullptr;
-		HGLOBAL hglob = nullptr;
-		size_t nSize = 0;
-		if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
-		{
-			mpt::istringstream intStrm(std::string(pData, nSize));
-			LoadFile(intStrm, std::wstring(), pTempCS);
-		}
+		LoadFile(GetDefaultKeymap(), std::wstring(), pTempCS);
 	} else
 	{
 		// We were just adding stuff to an existing command set - don't delete it!
@@ -1715,8 +1720,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	mpt::istringstream s;
-	return LoadFile(s, L"\"executable resource\"");
+	return LoadFile(GetDefaultKeymap(), L"\"executable resource\"");
 }
 
 
