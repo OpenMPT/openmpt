@@ -17,7 +17,13 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
+/*
+ * Gets resource as raw byte data.
+ * [in] lpName and lpType: parameters passed to FindResource().
+ * Return: span representing the resource data, valid as long as hInstance is valid.
+ */
+mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType);
+
 
 CString GetErrorMessage(DWORD nErrorCode);
 

@@ -166,15 +166,12 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 
 PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 {
-	const char *pData = nullptr;
-	HGLOBAL hglob = nullptr;
-	size_t nSize = 0;
-	if(LoadResource(resource, TEXT("PNG"), pData, nSize, hglob) == nullptr)
+	mpt::const_byte_span data = GetResource(resource, TEXT("PNG"));
+	if(!data.data())
 	{
 		return nullptr;
 	}
-
-	FileReader file(mpt::as_span(pData, nSize));
+	FileReader file(data);
 	return ReadPNG(file);
 }
 

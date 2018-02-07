@@ -13,31 +13,22 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-/*
- * Loads resource.
- * [in] lpName and lpType: parameters passed to FindResource().
- * [out] pData: Pointer to loaded resource data, nullptr if load not successful.
- * [out] nSize: Size of the data in bytes, zero if load not succesfull.
- * [out] hglob: HGLOBAL returned by LoadResource-function.
- * Return: pData.
- */
-LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob)
+
+mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 {
-	pData = nullptr;
-	nSize = 0;
-	hglob = nullptr;
 	HINSTANCE hInstance = AfxGetInstanceHandle();
-	HRSRC hrsrc = FindResource(hInstance, lpName, lpType); 
-	if (hrsrc != NULL)
+	HRSRC hRsrc = FindResource(hInstance, lpName, lpType); 
+	if(hRsrc == NULL)
 	{
-		hglob = LoadResource(hInstance, hrsrc);
-		if (hglob != NULL)
-		{
-			pData = reinterpret_cast<const char*>(LockResource(hglob));
-			nSize = SizeofResource(hInstance, hrsrc);
-		}
+		return mpt::const_byte_span();
 	}
-	return pData;
+	HGLOBAL hGlob = LoadResource(hInstance, hRsrc);
+	if(hGlob == NULL)
+	{
+		return mpt::const_byte_span();
+	}
+	return mpt::const_byte_span(mpt::void_cast<const mpt::byte *>(LockResource(hGlob)), SizeofResource(hInstance, hRsrc));
+	// no need to call FreeResource(hGlob) or free hRsrc, according to MSDN
 }
 
 

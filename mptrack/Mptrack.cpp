@@ -1502,20 +1502,19 @@ void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MOD
 
 MODPLUGDIB *LoadDib(LPCTSTR lpszName)
 {
-	HINSTANCE hInstance = AfxGetInstanceHandle();
-	HRSRC hrsrc = FindResource(hInstance, lpszName, RT_BITMAP);
-	HGLOBAL hglb = LoadResource(hInstance, hrsrc);
-	LPBITMAPINFO p = (LPBITMAPINFO)LockResource(hglb);
-	if (p)
+	mpt::const_byte_span data = GetResource(lpszName, RT_BITMAP);
+	if(!data.data())
 	{
-		MODPLUGDIB *pmd = new MODPLUGDIB;
-		pmd->bmiHeader = p->bmiHeader;
-		for (int i=0; i<16; i++) pmd->bmiColors[i] = p->bmiColors[i];
-		LPBYTE lpDibBits = (LPBYTE)p;
-		lpDibBits += p->bmiHeader.biSize + 16 * sizeof(RGBQUAD);
-		pmd->lpDibBits = lpDibBits;
-		return pmd;
-	} else return NULL;
+		return nullptr;
+	}
+	LPBITMAPINFO p = (LPBITMAPINFO)data.data();
+	MODPLUGDIB *pmd = new MODPLUGDIB;
+	pmd->bmiHeader = p->bmiHeader;
+	for (int i=0; i<16; i++) pmd->bmiColors[i] = p->bmiColors[i];
+	LPBYTE lpDibBits = (LPBYTE)p;
+	lpDibBits += p->bmiHeader.biSize + 16 * sizeof(RGBQUAD);
+	pmd->lpDibBits = lpDibBits;
+	return pmd;
 }
 
 
