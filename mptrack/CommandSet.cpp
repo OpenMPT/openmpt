@@ -1556,15 +1556,15 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-static std::istringstream GetDefaultKeymap()
+static std::string GetDefaultKeymap()
 {
 	const char *pData = nullptr;
 	HGLOBAL hglob = nullptr;
 	size_t nSize = 0;
 	if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
-		return std::istringstream(std::string(pData, nSize));
+		return std::string(pData, nSize);
 	else
-		return std::istringstream();
+		return std::string();
 }
 
 
@@ -1683,7 +1683,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	if(!fillExistingSet)
 	{
 		// Add the default command set to our freshly loaded command set.
-		std::istringstream ss{ GetDefaultKeymap() };
+		mpt::istringstream ss{ GetDefaultKeymap() };
 		LoadFile(ss, std::wstring(), pTempCS);
 	} else
 	{
@@ -1721,7 +1721,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	std::istringstream ss{ GetDefaultKeymap() };
+	mpt::istringstream ss{ GetDefaultKeymap() };
 	return LoadFile(ss, L"\"executable resource\"");
 }
 
