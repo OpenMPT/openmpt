@@ -10,12 +10,6 @@
 
 #include "stdafx.h"
 #include "MPTrackUtil.h"
-#include "Mptrack.h"
-#include "../common/misc_util.h"
-
-#include <io.h> // for _taccess
-#include <time.h>
-
 
 OPENMPT_NAMESPACE_BEGIN
 
