@@ -2324,7 +2324,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					{
 						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->note = static_cast<ModCommand::NOTE>(note);
-						pcmd->instr = static_cast<ModCommand::VOLCMD>(vcmd);
+						if(pcmd->instr == 0) pcmd->instr = static_cast<ModCommand::VOLCMD>(vcmd);
 					}
 					break;
 
@@ -3565,7 +3565,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		const INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
 		IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
 		if(plug)
-		{	
+		{
 			plug->MidiSend(dwMidiData);
 			// Sending MIDI may modify the plugin. For now, if MIDI data
 			// is not active sensing, set modified.
@@ -3666,7 +3666,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 				}
 			} else
 			{
-//				Sleep(1);
 				Sleep(0);
 				PostMessage(WM_MOD_VIEWMSG, VIEWMSG_DOMIDISPACING, lParam);
 			}
@@ -4221,7 +4220,7 @@ void CViewPattern::TempEnterVol(int v)
 	{
 		return;
 	}
-		
+
 	PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
 
 	ModCommand &target = GetCursorCommand();
@@ -4260,10 +4259,16 @@ void CViewPattern::TempEnterVol(int v)
 			}
 		}
 
-		UINT max = 64;
-		if(volcmd > VOLCMD_PANNING)
+		uint16 max;
+		switch(volcmd)
 		{
+		case VOLCMD_VOLUME:
+		case VOLCMD_PANNING:
+			max = 64;
+			break;
+		default:
 			max = (pSndFile->GetType() == MOD_TYPE_XM) ? 0x0F : 9;
+			break;
 		}
 
 		if(vol > max) vol %= 10;
@@ -4426,6 +4431,10 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 		return;
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
+	{
+		return;
+	}
 	const CModSpecifications &specs = sndFile.GetModSpecifications();
 
 	if(!ModCommand::IsSpecialNote(note))
@@ -4702,6 +4711,10 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		return;
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
+	{
+		return;
+	}
 
 	if(note < NOTE_MIN_SPECIAL)
 	{
