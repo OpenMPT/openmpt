@@ -1590,6 +1590,10 @@ CString CViewPattern::GetCursorDescription() const
 {
 	const CSoundFile &sndFile = *GetSoundFile();
 	CString s;
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
+	{
+		return s;
+	}
 	ROWINDEX row = m_Cursor.GetRow();
 	CHANNELINDEX channel = m_Cursor.GetChannel();
 	const ModCommand *m = sndFile.Patterns[m_nPattern].GetpModCommand(row, channel);
