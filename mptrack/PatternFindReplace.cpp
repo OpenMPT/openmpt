@@ -43,15 +43,22 @@ void CViewPattern::OnEditFind()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		FindReplace settings = FindReplace::instance;
+		ModCommand m = ModCommand::Empty();
 		if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
 		{
 			settings.findFlags.set(FindReplace::InPatSelection);
 			settings.findFlags.reset(FindReplace::FullSearch);
+		} else if(sndFile.Patterns.IsValidPat(m_nPattern))
+		{
+			const CPattern &pat = sndFile.Patterns[m_nPattern];
+			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels());
+			m = *pat.GetpModCommand(m_Cursor.GetRow(), m_Cursor.GetChannel());
 		}
 
-		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetSoundFile(), settings);
-		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetSoundFile(), settings);
+		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, sndFile, settings, m);
+		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, sndFile, settings, m);
 		CPropertySheet dlg(_T("Find/Replace"));
 
 		dlg.AddPage(&pageFind);
