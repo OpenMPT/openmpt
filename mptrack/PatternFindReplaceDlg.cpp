@@ -188,6 +188,33 @@ BOOL CFindReplaceTab::OnInitDialog()
 		SetDlgItemInt(IDC_EDIT2, m_settings.findChnMax + 1);
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, m_sndFile.GetNumChannels());
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, m_sndFile.GetNumChannels());
+
+		// Pre-fill with selected pattern data
+		if(!flags[FindReplace::Note] && m_initialValues.note != NOTE_NONE)
+		{
+			m_settings.findNoteMin = m_settings.findNoteMax = m_initialValues.note;
+		}
+		if(!flags[FindReplace::Instr] && m_initialValues.instr != 0)
+		{
+			m_settings.findInstrMin = m_settings.findInstrMax = m_initialValues.instr;
+		}
+		if(IsPCEvent())
+		{
+			if(!flags[FindReplace::PCParam] && m_initialValues.GetValueVolCol() != 0)
+				m_settings.findParamMin = m_settings.findParamMax = m_initialValues.GetValueVolCol();
+			if(!flags[FindReplace::PCValue] && m_initialValues.GetValueEffectCol() != 0)
+				m_settings.findVolumeMin = m_settings.findVolumeMax = m_initialValues.GetValueEffectCol();
+		} else
+		{
+			if(!flags[FindReplace::VolCmd] && m_initialValues.volcmd != VOLCMD_NONE)
+				m_settings.findVolCmd = m_initialValues.volcmd;
+			if(!flags[FindReplace::Volume] && m_initialValues.volcmd != VOLCMD_NONE)
+				m_settings.findVolumeMin = m_settings.findVolumeMax = m_initialValues.vol;
+			if(!flags[FindReplace::Command] && m_initialValues.command != CMD_NONE)
+				m_settings.findCommand = m_initialValues.command;
+			if(!flags[FindReplace::Param] && m_initialValues.command != CMD_NONE)
+				m_settings.findParamMin = m_settings.findParamMax = m_initialValues.param;
+		}
 	}
 
 	// Note
