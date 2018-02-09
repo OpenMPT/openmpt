@@ -1051,15 +1051,14 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 	// Add Patterns
-	if (info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES] && sndFile.Patterns.Size() > 0)
+	if (info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES])
 	{
 		const PATTERNINDEX nPat = patternHint.GetPattern();
-		info.tiPatterns.resize(sndFile.Patterns.Size(), NULL);
-		PATTERNINDEX imin = 0, imax = sndFile.Patterns.Size()-1;
+		info.tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
+		PATTERNINDEX imin = 0, imax = sndFile.Patterns.Size() - 1;
 		if (patternHint.GetType()[HINT_PATNAMES] && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
 		bool bDelPat = false;
 
-		ASSERT(info.tiPatterns.size() == sndFile.Patterns.Size());
 		CString patName;
 		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
 		{
