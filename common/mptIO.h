@@ -201,6 +201,13 @@ inline bool Write(Tfile & f, const Tbinary & v)
 	return IO::WriteRaw(f, mpt::as_raw_memory(v), sizeof(Tbinary));
 }
 
+template <typename Tbinary, typename Tfile>
+inline bool Write(Tfile & f, const std::vector<Tbinary> & v)
+{
+	STATIC_ASSERT(mpt::is_binary_safe<Tbinary>::value);
+	return IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(v.data()), sizeof(Tbinary) * v.size());
+}
+
 template <typename T, typename Tfile>
 inline bool WritePartial(Tfile & f, const T & v, size_t size = sizeof(T))
 {
