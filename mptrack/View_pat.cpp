@@ -2324,7 +2324,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					{
 						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->note = static_cast<ModCommand::NOTE>(note);
-						pcmd->instr = static_cast<ModCommand::VOLCMD>(vcmd);
+						if(pcmd->instr == 0) pcmd->instr = static_cast<ModCommand::VOLCMD>(vcmd);
 					}
 					break;
 
