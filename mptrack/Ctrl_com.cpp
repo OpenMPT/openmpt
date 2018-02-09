@@ -331,7 +331,10 @@ BOOL CCtrlComments::PreTranslateMessage(MSG *pMsg)
 			m_EditComments.SetSel(0, -1);
 	} else if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && CMainFrame::GetMainFrame()->GetInputHandler()->GetModifierMask() == ModNone)
 	{
-		CString tabs(_T(' '), 4 - (m_EditComments.LineIndex() % 4));
+		int selStart, selEnd;
+		m_EditComments.GetSel(selStart, selEnd);
+		int posInLine = (selStart - m_EditComments.LineIndex(m_EditComments.LineFromChar(selStart)));
+		CString tabs(_T(' '), 4 - (posInLine % 4));
 		m_EditComments.ReplaceSel(tabs, TRUE);
 		m_EditComments.SetSel(-1, -1, TRUE);
 		return TRUE;
