@@ -690,7 +690,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		}
 	}
 
-	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
+	mpt::IO::Write(f, fileHeader);
 	Order().WriteAsByte(f, writeOrders);
 
 	// Comment about parapointers stolen from Schism Tracker:
@@ -702,7 +702,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// The "practical standard order" listed in TECH.DOC is sample headers, patterns, then sample data.
 
 	// Calculate offset of first sample header...
-	size_t sampleHeaderOffset = ftell(f) + (writeSamples + writePatterns) * 2 + 32;
+	mpt::IO::Offset sampleHeaderOffset = mpt::IO::TellWrite(f) + (writeSamples + writePatterns) * 2 + 32;
 	// ...which must be a multiple of 16, because parapointers omit the lowest 4 bits.
 	sampleHeaderOffset = (sampleHeaderOffset + 15) & ~15;
 
@@ -712,21 +712,14 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		STATIC_ASSERT((sizeof(S3MSampleHeader) % 16) == 0);
 		sampleOffsets[smp] = static_cast<uint16>((sampleHeaderOffset + smp * sizeof(S3MSampleHeader)) / 16);
 	}
-
-	if(writeSamples != 0)
-	{
-		fwrite(sampleOffsets.data(), 2, writeSamples, f);
-	}
+	mpt::IO::Write(f, sampleOffsets);
 
 	size_t patternPointerOffset = ftell(f);
 	size_t firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
 	std::vector<uint16le> patternOffsets(writePatterns);
 
 	// Need to calculate the real offsets later.
-	if(writePatterns != 0)
-	{
-		fwrite(patternOffsets.data(), 2, writePatterns, f);
-	}
+	mpt::IO::Write(f, patternOffsets);
 
 	// Write channel panning
 	uint8 chnPan[32];
@@ -737,18 +730,18 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		else
 			chnPan[chn] = 0x08;
 	}
-	fwrite(chnPan, 32, 1, f);
+	mpt::IO::Write(f, chnPan);
 
 	// Do we need to fill up the file with some padding bytes for 16-Byte alignment?
-	size_t curPos = ftell(f);
+	mpt::IO::Offset curPos = mpt::IO::TellWrite(f);
 	if(curPos < sampleHeaderOffset)
 	{
 		MPT_ASSERT(sampleHeaderOffset - curPos < 16);
-		fwrite(filler, sampleHeaderOffset - curPos, 1, f);
+		mpt::IO::WriteRaw(f, filler, sampleHeaderOffset - curPos);
 	}
 
 	// Don't write sample headers for now, we are lacking the sample offset data.
-	fseek(f, firstPatternOffset, SEEK_SET);
+	mpt::IO::SeekAbsolute(f, firstPatternOffset);
 
 	// Write patterns
 	for(PATTERNINDEX pat = 0; pat < writePatterns; pat++)
@@ -759,7 +752,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			continue;
 		}
 
-		long patOffset = ftell(f);
+		mpt::IO::Offset patOffset = mpt::IO::TellWrite(f);
 		if(patOffset > 0xFFFF0)
 		{
 			AddToLog(LogError, mpt::format(MPT_USTRING("Too much pattern data! Writing patterns failed starting from pattern %1."))(pat));
@@ -884,10 +877,10 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			buffer.insert(buffer.end(), 16 - (buffer.size() % 16u), 0);
 		}
 
-		fwrite(buffer.data(), buffer.size(), 1, f);
+		mpt::IO::Write(f, buffer);
 	}
 
-	size_t sampleDataOffset = ftell(f);
+	mpt::IO::Offset sampleDataOffset = mpt::IO::TellWrite(f);
 
 	// Write samples
 	std::vector<S3MSampleHeader> sampleHeader(writeSamples);
@@ -944,15 +937,15 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// Now we know where the patterns are.
 	if(writePatterns != 0)
 	{
-		fseek(f, patternPointerOffset, SEEK_SET);
-		fwrite(patternOffsets.data(), 2, writePatterns, f);
+		mpt::IO::SeekAbsolute(f, patternPointerOffset);
+		mpt::IO::Write(f, patternOffsets);
 	}
 
 	// And we can finally write the sample headers.
 	if(writeSamples != 0)
 	{
-		fseek(f, sampleHeaderOffset, SEEK_SET);
-		fwrite(sampleHeader.data(), sizeof(sampleHeader[0]), writeSamples, f);
+		mpt::IO::SeekAbsolute(f, sampleHeaderOffset);
+		mpt::IO::Write(f, sampleHeader);
 	}
 
 	fclose(f);
