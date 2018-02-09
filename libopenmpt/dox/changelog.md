@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.7-pre
 
+ *  IMF: Filter cutoff was upside down and the cutoff range was too small.
  *  MED: Correctly import patterns with less channels than the maximum used
     amount.
 
