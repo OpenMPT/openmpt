@@ -365,7 +365,7 @@
 
 
 
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)
 
 	// Use wide strings for MSVC because this is the native encoding on 
 	// microsoft platforms.

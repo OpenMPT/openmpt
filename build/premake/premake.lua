@@ -354,7 +354,37 @@ end
 
 if _OPTIONS["group"] == "OpenMPT" then
 
+charset = "Unicode"
+stringmode = "UTF8"
+layout = ""
+solution "OpenMPT-UTF8"
+ location ( "../../build/" .. mpt_projectpathname )
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ platforms ( trkplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
+
+ dofile "../../build/premake/mpt-OpenMPT.lua"
+ dofile "../../build/premake/mpt-PluginBridge.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lame.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-opus.lua"
+ dofile "../../build/premake/ext-opusenc.lua"
+ dofile "../../build/premake/ext-opusfile.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-rtmidi.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
 charset = "MBCS"
+stringmode = "WCHAR"
 layout = ""
 solution "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
@@ -383,6 +413,7 @@ solution "OpenMPT-ANSI"
  dofile "../../build/premake/ext-zlib.lua"
 
 charset = "Unicode"
+stringmode = "WCHAR"
 layout = "custom"
 solution "OpenMPT-custom"
  location ( "../../build/" .. mpt_projectpathname )
@@ -411,6 +442,7 @@ solution "OpenMPT-custom"
  dofile "../../build/premake/ext-zlib.lua"
 
 charset = "Unicode"
+stringmode = "WCHAR"
 layout = ""
 solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )

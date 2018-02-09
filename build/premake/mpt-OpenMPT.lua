@@ -5,9 +5,15 @@ if layout == "custom" then
    uuid "6b9af880-af37-4268-bb91-2b982ff6499a"
 else
 if charset == "Unicode" then
+if stringmode == "WCHAR" then
   project "OpenMPT"
   mpt_projectname = "OpenMPT"
-   uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
+	uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
+else
+  project "OpenMPT-UTF8"
+  mpt_projectname = "OpenMPT-UTF8"
+	uuid "e89507fa-a251-457e-9957-f6b453c77daf"
+end
 else
 	project "OpenMPT-ANSI"
 	mpt_projectname = "OpenMPT-ANSI"
@@ -28,7 +34,12 @@ end
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
-if charset == "MBCS" then
+if stringmode == "UTF8" then
+  filter { "configurations:*Shared" }
+   targetname "OpenMPT-UTF8"
+  filter { "not configurations:*Shared" }
+   targetname "mptrack-UTF8"
+elseif charset == "MBCS" then
   filter { "configurations:*Shared" }
    targetname "OpenMPT-ANSI"
   filter { "not configurations:*Shared" }
@@ -107,6 +118,9 @@ end
   defines { "MODPLUG_TRACKER" }
   largeaddressaware ( true )
   characterset(charset)
+if stringmode == "UTF8" then
+	defines { "MPT_USTRING_MODE_UTF8_FORCE" }
+end
   flags { "MFC" }
   warnings "Extra"
   links {
