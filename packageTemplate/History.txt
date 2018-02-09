@@ -30,10 +30,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.05.00 (* February 2018, revision 9596)
+v1.27.05.00 (* February 2018, revision 9613)
 --------------------------------------------
 Pattern tab
    [Imp] <js> Seeking with sample sync now supports fine volume slides.
+   [Mod] <js> Interpolating the note column no longer overwrites existing instrument numbers.
+   [Fix] <js> Possible crash when trying to enter notes after deleting all patterns.
 
 Sample tab
    [Imp] <js> Add drop-down menu for saving all samples.
@@ -41,9 +43,13 @@ Sample tab
 Instrument tab
    [Imp] <js> Add drop-down menu for saving all instruments.
 
+Comments tab
+   [Fix] <js> Soft tabs did not have the correct size most of the time (http://bugs.openmpt.org/view.php?id=1083). 
+
 Tree view
    [Mod] <js> Do not enforce dragged-over items to be completely visible when using drag and drop (tx sincx).
    [Fix] <js> Duplicating or inserting instruments or samples did not refresh the pattern view properly.
+   [Fix] <js> Even after removing all patterns, they were still visible.
 
 Other formats
    [Fix] <js> STM: More accurate tempo calculation and better support for old format versions.
