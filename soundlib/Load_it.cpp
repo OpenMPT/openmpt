@@ -1381,9 +1381,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	itHeader.patnum = std::min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
-	std::vector<uint32> patpos(itHeader.patnum, 0);
-	std::vector<uint32> smppos(itHeader.smpnum, 0);
-	std::vector<uint32> inspos(itHeader.insnum, 0);
+	std::vector<uint32le> patpos(itHeader.patnum);
+	std::vector<uint32le> smppos(itHeader.smpnum);
+	std::vector<uint32le> inspos(itHeader.insnum);
 
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
@@ -1502,18 +1502,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	mpt::IO::Write(f, itHeader);
 
 	Order().WriteAsByte(f, itHeader.ordnum);
-	for(uint16 i = 0; i < itHeader.insnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, inspos[i]);
-	}
-	for(uint16 i = 0; i < itHeader.smpnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, smppos[i]);
-	}
-	for(uint16 i = 0; i < itHeader.patnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, patpos[i]);
-	}
+	mpt::IO::Write(f, inspos);
+	mpt::IO::Write(f, smppos);
+	mpt::IO::Write(f, patpos);
 
 	// Writing edit history information
 	SaveITEditHistory(*this, f);
@@ -1850,18 +1841,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
-	for(uint16 i = 0; i < itHeader.insnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, inspos[i]);
-	}
-	for(uint16 i = 0; i < itHeader.smpnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, smppos[i]);
-	}
-	for(uint16 i = 0; i < itHeader.patnum; ++i)
-	{
-		mpt::IO::WriteIntLE<uint32>(f, patpos[i]);
-	}
+	mpt::IO::Write(f, inspos);
+	mpt::IO::Write(f, smppos);
+	mpt::IO::Write(f, patpos);
 
 	if(GetType() == MOD_TYPE_IT)
 	{
