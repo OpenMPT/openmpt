@@ -503,7 +503,7 @@ void CFindReplaceTab::UpdateVolumeList()
 	{
 		rangeMin = 0;
 		rangeMax = ModCommand::maxColumnValue;
-		curVal = (m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin);
+		curVal = (m_isReplaceTab ? m_settings.replaceVolume : m_settings.findVolumeMin);
 	} else
 	{
 		int effectIndex = static_cast<int>(m_cbnVolCmd.GetItemData(m_cbnVolCmd.GetCurSel()));
