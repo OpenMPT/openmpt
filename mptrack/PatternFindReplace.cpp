@@ -43,15 +43,22 @@ void CViewPattern::OnEditFind()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		FindReplace settings = FindReplace::instance;
+		ModCommand m = ModCommand::Empty();
 		if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
 		{
 			settings.findFlags.set(FindReplace::InPatSelection);
 			settings.findFlags.reset(FindReplace::FullSearch);
+		} else if(sndFile.Patterns.IsValidPat(m_nPattern))
+		{
+			const CPattern &pat = sndFile.Patterns[m_nPattern];
+			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels());
+			m = *pat.GetpModCommand(m_Cursor.GetRow(), m_Cursor.GetChannel());
 		}
 
-		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetrSoundFile(), settings);
-		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetrSoundFile(), settings);
+		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, sndFile, settings, m);
+		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, sndFile, settings, m);
 		CPropertySheet dlg(_T("Find/Replace"));
 
 		dlg.AddPage(&pageFind);
@@ -206,21 +213,25 @@ void CViewPattern::OnEditFindNext()
 				if(!m->IsPcNote())
 				{
 					if((FindReplace::instance.findFlags[FindReplace::VolCmd] && (!findWhere.volume || m->volcmd != FindReplace::instance.findVolCmd))
-					|| (FindReplace::instance.findFlags[FindReplace::Volume] && (!findWhere.volume || m->volcmd == VOLCMD_NONE || m->vol < FindReplace::instance.findVolumeMin || m->vol > FindReplace::instance.findVolumeMax))
-					|| (FindReplace::instance.findFlags[FindReplace::Command] && (!findWhere.command || m->command != FindReplace::instance.findCommand))
-					|| (FindReplace::instance.findFlags[FindReplace::Param] && (!findWhere.parameter || m->command == CMD_NONE ||  m->param < FindReplace::instance.findParamMin || m->param > FindReplace::instance.findParamMax)))
+						|| (FindReplace::instance.findFlags[FindReplace::Volume] && (!findWhere.volume || m->volcmd == VOLCMD_NONE || m->vol < FindReplace::instance.findVolumeMin || m->vol > FindReplace::instance.findVolumeMax))
+						|| (FindReplace::instance.findFlags[FindReplace::Command] && (!findWhere.command || m->command != FindReplace::instance.findCommand))
+						|| (FindReplace::instance.findFlags[FindReplace::Param] && (!findWhere.parameter || m->command == CMD_NONE ||  m->param < FindReplace::instance.findParamMin || m->param > FindReplace::instance.findParamMax))
+						|| FindReplace::instance.findFlags[FindReplace::PCParam]
+						|| FindReplace::instance.findFlags[FindReplace::PCValue])
 					{
 						continue;
 					}
-					MPT_ASSERT(!FindReplace::instance.findFlags[FindReplace::PCParam | FindReplace::PCValue]);
 				} else
 				{
 					if((FindReplace::instance.findFlags[FindReplace::PCParam] && (!findWhere.volume || m->GetValueVolCol() < FindReplace::instance.findParamMin || m->GetValueVolCol() > FindReplace::instance.findParamMax))
-						|| (FindReplace::instance.findFlags[FindReplace::PCValue] && (!(findWhere.command || findWhere.parameter) || m->GetValueVolCol() < FindReplace::instance.findVolumeMin || m->GetValueVolCol() > FindReplace::instance.findVolumeMax)))
+						|| (FindReplace::instance.findFlags[FindReplace::PCValue] && (!(findWhere.command || findWhere.parameter) || m->GetValueEffectCol() < FindReplace::instance.findVolumeMin || m->GetValueEffectCol() > FindReplace::instance.findVolumeMax))
+						|| FindReplace::instance.findFlags[FindReplace::VolCmd]
+						|| FindReplace::instance.findFlags[FindReplace::Volume]
+						|| FindReplace::instance.findFlags[FindReplace::Command]
+						|| FindReplace::instance.findFlags[FindReplace::Param])
 					{
 						continue;
 					}
-					MPT_ASSERT(!FindReplace::instance.findFlags[FindReplace::VolCmd | FindReplace::Volume | FindReplace::Command | FindReplace::Param]);
 				}
 
 				if((FindReplace::instance.findFlags & (FindReplace::Command | FindReplace::Param)) == FindReplace::Command && isExtendedEffect)
@@ -506,6 +517,11 @@ EndSearch:
 				result.AppendChar(specs.GetVolEffectLetter(FindReplace::instance.findVolCmd));
 			else
 				result.AppendChar(_T('.'));
+		} else if(FindReplace::instance.findFlags[FindReplace::PCParam])
+		{
+			result.AppendFormat(_T("%03d"), FindReplace::instance.findParamMin);
+			if(FindReplace::instance.findParamMax > FindReplace::instance.findParamMin)
+				result.AppendFormat(_T("-%03d"), FindReplace::instance.findParamMax);
 		} else
 		{
 			result.AppendChar(_T('?'));
@@ -517,7 +533,7 @@ EndSearch:
 			result.AppendFormat(_T("%02d"), FindReplace::instance.findVolumeMin);
 			if(FindReplace::instance.findVolumeMax > FindReplace::instance.findVolumeMin)
 				result.AppendFormat(_T("-%02d"), FindReplace::instance.findVolumeMax);
-		} else
+		} else if(!FindReplace::instance.findFlags[FindReplace::PCParam])
 		{
 			result.AppendFormat(_T("??"));
 		}
@@ -530,6 +546,11 @@ EndSearch:
 				result.AppendChar(specs.GetEffectLetter(FindReplace::instance.findCommand));
 			else
 				result.AppendChar(_T('.'));
+		} else if(FindReplace::instance.findFlags[FindReplace::PCValue])
+		{
+			result.AppendFormat(_T("%03d"), FindReplace::instance.findVolumeMin);
+			if(FindReplace::instance.findVolumeMax > FindReplace::instance.findVolumeMin)
+				result.AppendFormat(_T("-%03d"), FindReplace::instance.findVolumeMax);
 		} else
 		{
 			result.AppendChar(_T('?'));
@@ -541,7 +562,7 @@ EndSearch:
 			result.AppendFormat(_T("%02X"), FindReplace::instance.findParamMin);
 			if(FindReplace::instance.findParamMax > FindReplace::instance.findParamMin)
 				result.AppendFormat(_T("-%02X"), FindReplace::instance.findParamMax);
-		} else
+		} else if(!FindReplace::instance.findFlags[FindReplace::PCValue])
 		{
 			result.AppendFormat(_T("??"));
 		}
@@ -551,6 +572,5 @@ EndSearch:
 		Reporting::Information(result, _T("Find/Replace"));
 	}
 }
-
 
 OPENMPT_NAMESPACE_END

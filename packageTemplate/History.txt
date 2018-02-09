@@ -37,6 +37,13 @@ Pattern tab
    [Mod] <js> Interpolating the note column no longer overwrites existing instrument numbers.
    [Fix] <js> Possible crash when trying to enter notes after deleting all patterns.
 
+Pattern tab::Find/Replace
+   [Imp] <js> If no pattern selection is made, pre-fill the Find fields with values from the current pattern cell if they have not been used in a previous search (http://bugs.openmpt.org/view.php?id=1082).
+   [Fix] <js> After an unsuccessful search, show the correct search strings when searching for PC events.
+   [Fix] <js> When repeating a search for PC events, the previous parameter value was not filled in correctly.
+   [Fix] <js> Searching for specific plugin parameter values did not work correctly.
+   [Fix] <js> Searching for PC events sometimes found normal events and vice versa.
+
 Sample tab
    [Imp] <js> Add drop-down menu for saving all samples.
 

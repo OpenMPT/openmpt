@@ -28,6 +28,7 @@ protected:
 	CSoundFile &m_sndFile;
 	FindReplace &m_settings;
 	EffectInfo m_effectInfo;
+	ModCommand m_initialValues;
 	bool m_isReplaceTab;
 
 	// Special ItemData values
@@ -49,11 +50,12 @@ protected:
 	};
 
 public:
-	CFindReplaceTab(UINT nIDD, bool isReplaceTab, CSoundFile &sf, FindReplace &settings)
+	CFindReplaceTab(UINT nIDD, bool isReplaceTab, CSoundFile &sf, FindReplace &settings, const ModCommand &initialValues)
 		: CPropertyPage(nIDD)
 		, m_sndFile(sf)
 		, m_settings(settings)
 		, m_effectInfo(sf)
+		, m_initialValues(initialValues)
 		, m_isReplaceTab(isReplaceTab)
 	{ }
 
