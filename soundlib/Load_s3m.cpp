@@ -714,8 +714,8 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	}
 	mpt::IO::Write(f, sampleOffsets);
 
-	size_t patternPointerOffset = ftell(f);
-	size_t firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
+	mpt::IO::Offset patternPointerOffset = mpt::IO::TellWrite(f);
+	mpt::IO::Offset firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
 	std::vector<uint16le> patternOffsets(writePatterns);
 
 	// Need to calculate the real offsets later.
@@ -737,7 +737,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	if(curPos < sampleHeaderOffset)
 	{
 		MPT_ASSERT(sampleHeaderOffset - curPos < 16);
-		mpt::IO::WriteRaw(f, filler, sampleHeaderOffset - curPos);
+		mpt::IO::WriteRaw(f, filler, static_cast<std::size_t>(sampleHeaderOffset - curPos));
 	}
 
 	// Don't write sample headers for now, we are lacking the sample offset data.
