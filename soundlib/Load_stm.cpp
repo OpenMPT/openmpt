@@ -162,7 +162,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo = ConvertST2Tempo(initTempo);
 	m_nDefaultSpeed = initTempo >> 4;
 	if(fileHeader.verMinor > 10)
-		m_nDefaultGlobalVolume = fileHeader.globalVolume * 4u;
+		m_nDefaultGlobalVolume = std::min<uint8>(fileHeader.globalVolume, 64) * 4u;
 
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)
