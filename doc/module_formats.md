@@ -65,6 +65,27 @@ General hints
   course Ultimate SoundTracker modules, which have no magic bytes at all.
 * Avoid use of functions tagged with MPT_DEPRECATED.
 
+Probing
+-------
+libopenmpt provides fast probing functions that can be used by library users
+to quickly check if a file is most likely playable with libopenmpt, even if only
+a fraction of the file is available (e.g. when streaming from the internet).
+
+In order to satisfy these requirements, probing functions should do as little
+work as possible (e.g. only parse the header of the file), but as much as
+required to tell with some certainty that the file is really of a certain mod
+format. However, probing functions should not rely on having access to more than
+the first `CSoundFile::ProbeRecommendedSize` bytes of the file.
+
+* Probing functions **must not** allocate any memory on the heap.
+* Probing functions **must not** return ProbeFailure or ProbeWantMoreData for
+  any file that would normally be accepted by the loader. In particular, this
+  means that any header checks must not be any more aggressive than they would
+  be in the real loader (hence it is a good idea to not copy-paste this code but
+  rather put it in a separate function), and the minimum additional size passed
+  to `CSoundFile::ProbeAdditionalSize` must not be higher than the biggest size
+  that would cause a hard failure (i.e. returning `false`) in the module loader.
+
 Adding loader to the build systems and various other locations
 --------------------------------------------------------------
 Apart from writing the module loader itself, there are a couple of other places

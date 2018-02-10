@@ -22,7 +22,7 @@ problems can happen at:
 
 For patch submissions, please also see
 [OpenMPT style guide](openmpt_styleguide.md) and
-[libopenmpt style guide](openmpt_styleguide.md).
+[libopenmpt style guide](libopenmpt_styleguide.md).
 
 ### Contributing via GitHub
 
@@ -41,4 +41,3 @@ is not how it usually works in Subversion. We will thus add an additional line
 to the commit message in the form of `Patch-by: John Doe <user@example.com>`. If
 you prefer to be attributed with your nickname and/or without your email
 address, that would also be fine for us.
-
