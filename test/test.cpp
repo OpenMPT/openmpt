@@ -3592,6 +3592,25 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		mpt::IO::Write(f, data);
 		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78"));
 	}
+	{
+		mpt::ostringstream f;
+		std::vector<int16be> data;
+		data.resize(3);
+		data[0] = 0x1234;
+		data[1] = 0x5678;
+		data[2] = 0x1234;
+		mpt::IO::Write(f, data);
+		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78\x12\x34"));
+	}
+	{
+		mpt::ostringstream f;
+		int16be data[3];
+		data[0] = 0x1234;
+		data[1] = 0x5678;
+		data[2] = 0x1234;
+		mpt::IO::Write(f, data);
+		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78\x12\x34"));
+	}
 
 #ifdef MODPLUG_TRACKER
 	TrackerSettings::Instance().MiscSaveChannelMuteStatus = saveMutedChannels;
