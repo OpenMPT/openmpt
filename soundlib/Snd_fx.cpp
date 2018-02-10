@@ -261,7 +261,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		forbiddenCommands.set(CMD_NOTESLIDEUP);          forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);
 		forbiddenCommands.set(CMD_NOTESLIDEDOWN);        forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
 		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
-		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
 
 		// Optimize away channels for which it's pointless to adjust sample positions
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
@@ -550,7 +549,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 			}
 
-			if (pChn->rowCommand.volcmd == VOLCMD_VOLUME)	{ memory.chnSettings[nChn].vol = pChn->rowCommand.vol; }
+			switch(pChn->rowCommand.volcmd)
+			{
+			case VOLCMD_VOLUME:
+				memory.chnSettings[nChn].vol = pChn->rowCommand.vol;
+				break;
+			case VOLCMD_VOLSLIDEUP:
+			case VOLCMD_VOLSLIDEDOWN:
+				if(pChn->rowCommand.vol != 0)
+					pChn->nOldVolParam = pChn->rowCommand.vol;
+				break;
+			}
 
 			switch(command)
 			{
@@ -1099,6 +1108,27 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 					case VOLCMD_FINEVOLUP:		FineVolumeUp(pChn, m.vol, m_playBehaviour[kITVolColMemory]); break;
 					case VOLCMD_FINEVOLDOWN:	FineVolumeDown(pChn, m.vol, m_playBehaviour[kITVolColMemory]); break;
+					case VOLCMD_VOLSLIDEUP:
+					case VOLCMD_VOLSLIDEDOWN:
+						{
+							// IT Compatibility: Volume column volume slides have their own memory
+							// Test case: VolColMemory.it
+							ModCommand::VOL vol = m.vol;
+							if(vol == 0 && m_playBehaviour[kITVolColMemory])
+							{
+								vol = pChn->nOldVolParam;
+								if(vol == 0)
+									break;
+							}
+							if(m.volcmd == VOLCMD_VOLSLIDEUP)
+								vol <<= 4;
+							for(uint32 i = 0; i < numTicks; i++)
+							{
+								pChn->isFirstTick = (i == 0);
+								VolumeSlide(pChn, vol);
+							}
+						}
+						break;
 					}
 
 					if(porta)
