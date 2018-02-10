@@ -57,21 +57,12 @@ public:
 	std::unique_ptr<CSoundFile::PlayState> state;
 	struct ChnSettings
 	{
-		double patLoop;
-		CSoundFile::samplecount_t patLoopSmp;
-		ROWINDEX patLoopStart;
-		uint32 ticksToRender;	// When using sample sync, we still need to render this many ticks
-		bool incChanged;		// When using sample sync, note frequency has changed
-		uint8 vol;
-
-		ChnSettings()
-			: patLoop(0.0)
-			, patLoopSmp(0)
-			, patLoopStart(0)
-			, ticksToRender(0)
-			, incChanged(false)
-			, vol(0xFF)
-		{ }
+		double patLoop = 0.0;
+		CSoundFile::samplecount_t patLoopSmp = 0;
+		ROWINDEX patLoopStart = 0;
+		uint32 ticksToRender = 0;	// When using sample sync, we still need to render this many ticks
+		bool incChanged = false;	// When using sample sync, note frequency has changed
+		uint8 vol = 0xFF;
 	};
 
 #ifndef NO_PLUGINS
@@ -1158,6 +1149,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(memory.chnSettings[nChn].patLoop == i.first)
 					{
 						playState.m_lTotalSampleCount += (playState.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i.second - 1);
+						if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
+						{
+							memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+							memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
+							memory.chnSettings[nChn].patLoopStart = playState.m_nRow + 1;
+						}
 						break;
 					}
 				}
