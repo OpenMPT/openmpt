@@ -1950,9 +1950,6 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 				sample.nC5Speed = newRate;
 				sample.FrequencyToTranspose();
 			}
-		} else
-		{
-			SetSelectionPoints(selection.nStart, newSelEnd);
 		}
 
 		ctrlSmp::ReplaceSample(sample, newSample, newTotalLength, m_sndFile);
@@ -1960,6 +1957,11 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 		sample.PrecomputeLoops(m_sndFile);
 
 		SetModified(SampleHint().Info().Data(), true, true);
+
+		if(selection.selectionActive)
+		{
+			SetSelectionPoints(selection.nStart, newSelEnd);
+		}
 	}
 
 	EndWaitCursor();
