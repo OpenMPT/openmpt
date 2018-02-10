@@ -61,6 +61,7 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 	}
 }
 
+#ifndef MODPLUG_NO_FILESAVE
 
 void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport) const
 {
@@ -154,6 +155,7 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 	command &= ~0x40;
 }
 
+#endif // MODPLUG_NO_FILESAVE
 
 // Pattern decoding flags
 enum S3MPattern
@@ -621,7 +623,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 	// Samples
 	SAMPLEINDEX writeSamples = static_cast<SAMPLEINDEX>(GetNumInstruments());
-	if(fileHeader.smpNum == 0)
+	if(writeSamples == 0)
 	{
 		writeSamples = GetNumSamples();
 	}
@@ -891,11 +893,11 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		if(GetNumInstruments() != 0 && Instruments[smp] != nullptr)
 		{
 			// Find some valid sample associated with this instrument.
-			for(size_t i = 0; i < CountOf(Instruments[smp]->Keyboard); i++)
+			for(SAMPLEINDEX keySmp : Instruments[smp]->Keyboard)
 			{
-				if(Instruments[smp]->Keyboard[i] > 0 && Instruments[smp]->Keyboard[i] <= GetNumSamples())
+				if(keySmp > 0 && keySmp <= GetNumSamples())
 				{
-					realSmp = Instruments[smp]->Keyboard[i];
+					realSmp = keySmp;
 					break;
 				}
 			}
@@ -928,7 +930,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			if((writtenLength % 16u) != 0)
 			{
 				size_t fillSize = 16 - (writtenLength % 16u);
-				fwrite(filler, fillSize, 1, f);
+				mpt::IO::WriteRaw(f, filler, fillSize);
 				sampleDataOffset += fillSize;
 			}
 		}
