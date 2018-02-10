@@ -80,8 +80,7 @@ static bool ValidateHeader(const STMFileHeader &fileHeader)
 		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
 		|| fileHeader.verMajor != 2
 		|| (fileHeader.verMinor != 0 && fileHeader.verMinor != 10 && fileHeader.verMinor != 20 && fileHeader.verMinor != 21)
-		|| fileHeader.numPatterns > 64
-		|| fileHeader.globalVolume > 64)
+		|| fileHeader.numPatterns > 64)
 	{
 		return false;
 	}
@@ -161,6 +160,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nDefaultTempo = ConvertST2Tempo(initTempo);
 	m_nDefaultSpeed = initTempo >> 4;
+
+	m_nDefaultGlobalVolume = 0x40 * 4u;
 	if(fileHeader.verMinor > 10)
 		m_nDefaultGlobalVolume = fileHeader.globalVolume * 4u;
 
