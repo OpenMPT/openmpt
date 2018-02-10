@@ -1226,7 +1226,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			m_madeWithTracker = MPT_USTRING("BeRoTracker");
 			break;
 		case 7:
-			m_madeWithTracker = mpt::format(MPT_USTRING("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			if(fileHeader.cwtv == 0x7FFF && fileHeader.cmwt == 0x0215)
+				m_madeWithTracker = MPT_USTRING("munch.py");
+			else
+				m_madeWithTracker = mpt::format(MPT_USTRING("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
 			m_madeWithTracker = MPT_USTRING("spc2it");
