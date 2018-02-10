@@ -204,7 +204,7 @@ inline bool WriteRaw(Tfile & f, mpt::span<const Tbyte> data)
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
 {
-	return IO::ReadRaw(f, mpt::as_raw_memory(v)) == mpt::as_raw_memory(v).size();
+	return IO::ReadRaw(f, mpt::as_raw_memory(v)) == mpt::saturate_cast<mpt::IO::Offset>(mpt::as_raw_memory(v).size());
 }
 
 template <typename Tbinary, typename Tfile>
