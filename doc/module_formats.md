@@ -85,6 +85,11 @@ the first `CSoundFile::ProbeRecommendedSize` bytes of the file.
   rather put it in a separate function), and the minimum additional size passed
   to `CSoundFile::ProbeAdditionalSize` must not be higher than the biggest size
   that would cause a hard failure (i.e. returning `false`) in the module loader.
+* Probing functions **may** return ProbeSuccess for files that would be rejected
+  by a loader after a more thorough inspection. For example, probing functions
+  do not need to verify that all required chunks of an IFF-like file format are
+  actually present, if the header makes it obvious enough that the file is
+  highly likely to be a module.
 
 Adding loader to the build systems and various other locations
 --------------------------------------------------------------
