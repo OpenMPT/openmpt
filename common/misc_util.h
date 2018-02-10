@@ -479,6 +479,88 @@ MPT_CONSTEXPR14_FUN mpt::byte as_byte(T src) noexcept
 
 
 
+template <typename T>
+struct GetRawBytesFunctor
+{
+	inline mpt::const_byte_span operator () (const T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const mpt::byte *>(&v), sizeof(T));
+	}
+	inline mpt::byte_span operator () (T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<mpt::byte *>(&v), sizeof(T));
+	}
+};
+
+template <typename T, std::size_t N>
+struct GetRawBytesFunctor<T[N]>
+{
+	inline mpt::const_byte_span operator () (const T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v), N * sizeof(T));
+	}
+	inline mpt::byte_span operator () (T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<mpt::byte *>(v), N * sizeof(T));
+	}
+};
+
+template <typename T, std::size_t N>
+struct GetRawBytesFunctor<const T[N]>
+{
+	inline mpt::const_byte_span operator () (const T (&v)[N]) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v), N * sizeof(T));
+	}
+};
+
+template <typename T>
+struct GetRawBytesFunctor<std::vector<T>>
+{
+	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v.data()), v.size() * sizeof(T));
+	}
+	inline mpt::byte_span operator () (std::vector<T> & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<mpt::byte *>(v.data()), v.size() * sizeof(T));
+	}
+};
+
+template <typename T>
+struct GetRawBytesFunctor<const std::vector<T>>
+{
+	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v.data()), v.size() * sizeof(T));
+	}
+};
+
+// In order to be able to partially specialize it,
+// as_raw_memory is implemented via a class template.
+// Do not overload or specialize as_raw_memory directly.
+// Using a wrapper (by default just around a cast to const mpt::byte *),
+// allows for implementing raw memory access
+// via on-demand generating a cached serialized representation.
+template <typename T> inline mpt::const_byte_span as_raw_memory(const T & v)
+{
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+template <typename T> inline mpt::byte_span as_raw_memory(T & v)
+{
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+
+
+
 // Saturate the value of src to the domain of Tdst
 template <typename Tdst, typename Tsrc>
 inline Tdst saturate_cast(Tsrc src)

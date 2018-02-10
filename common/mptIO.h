@@ -184,35 +184,47 @@ inline IO::Offset ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
 }
 
 template <typename Tbyte, typename Tfile>
+inline IO::Offset ReadRaw(Tfile & f, mpt::span<Tbyte> data)
+{
+	return IO::ReadRawImpl(f, mpt::byte_cast<mpt::byte*>(data.data()), data.size());
+}
+
+template <typename Tbyte, typename Tfile>
 inline bool WriteRaw(Tfile & f, const Tbyte * data, std::size_t size)
 {
 	return IO::WriteRawImpl(f, mpt::byte_cast<const mpt::byte*>(data), size);
 }
 
+template <typename Tbyte, typename Tfile>
+inline bool WriteRaw(Tfile & f, mpt::span<const Tbyte> data)
+{
+	return IO::WriteRawImpl(f, mpt::byte_cast<const mpt::byte*>(data.data()), data.size());
+}
+
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
 {
-	return IO::ReadRaw(f, mpt::as_raw_memory(v), sizeof(Tbinary)) == sizeof(Tbinary);
+	return IO::ReadRaw(f, mpt::as_raw_memory(v)) == mpt::as_raw_memory(v).size();
 }
 
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const Tbinary & v)
 {
-	return IO::WriteRaw(f, mpt::as_raw_memory(v), sizeof(Tbinary));
+	return IO::WriteRaw(f, mpt::as_raw_memory(v));
 }
 
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const std::vector<Tbinary> & v)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<Tbinary>::value);
-	return IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(v.data()), sizeof(Tbinary) * v.size());
+	return IO::WriteRaw(f, mpt::as_raw_memory(v));
 }
 
 template <typename T, typename Tfile>
 inline bool WritePartial(Tfile & f, const T & v, size_t size = sizeof(T))
 {
 	MPT_ASSERT(size <= sizeof(T));
-	return IO::WriteRaw(f, mpt::as_raw_memory(v), size);
+	return IO::WriteRaw(f, mpt::as_span(mpt::as_raw_memory(v).data(), size));
 }
 
 template <typename Tfile>

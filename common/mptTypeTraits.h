@@ -13,13 +13,10 @@
 #include <type_traits>
 
 
-
 OPENMPT_NAMESPACE_BEGIN
 
 
-
 namespace mpt {
-
 
 
 template <std::size_t size> struct int_of_size { };
@@ -84,62 +81,6 @@ template <> struct is_binary_safe<mpt::byte> : public std::true_type { };
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
 template <typename T, std::size_t N> struct is_binary_safe<const T[N]> : public is_binary_safe<T> { };
 
-template <typename T>
-struct GetRawBytesFunctor
-{
-	inline const mpt::byte * operator () (const T & v) const
-	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return reinterpret_cast<const mpt::byte *>(&v);
-	}
-	inline mpt::byte * operator () (T & v) const
-	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return reinterpret_cast<mpt::byte *>(&v);
-	}
-};
-
-template <typename T, std::size_t N>
-struct GetRawBytesFunctor<T[N]>
-{
-	inline const mpt::byte * operator () (const T (&v)[N]) const
-	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return reinterpret_cast<const mpt::byte *>(v);
-	}
-	inline mpt::byte * operator () (T (&v)[N]) const
-	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return reinterpret_cast<mpt::byte *>(v);
-	}
-};
-
-template <typename T, std::size_t N>
-struct GetRawBytesFunctor<const T[N]>
-{
-	inline const mpt::byte * operator () (const T (&v)[N]) const
-	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return reinterpret_cast<const mpt::byte *>(v);
-	}
-};
-
-// In order to be able to partially specialize it,
-// as_raw_memory is implemented via a class template.
-// Do not overload or specialize as_raw_memory directly.
-// Using a wrapper (by default just around a cast to const mpt::byte *),
-// allows for implementing raw memory access
-// via on-demand generating a cached serialized representation.
-template <typename T> inline const mpt::byte * as_raw_memory(const T & v)
-{
-	STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-	return mpt::GetRawBytesFunctor<T>()(v);
-}
-template <typename T> inline mpt::byte * as_raw_memory(T & v)
-{
-	STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-	return mpt::GetRawBytesFunctor<T>()(v);
-}
 
 } // namespace mpt
 
