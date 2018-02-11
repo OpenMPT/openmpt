@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.05.00 (* February 2018, revision 9618)
---------------------------------------------
+v1.27.05.00 (11 February 2018, revision 9643)
+---------------------------------------------
 Pattern tab
    [Imp] <js> Seeking with sample sync now supports fine volume slides.
    [Mod] <js> Interpolating the note column no longer overwrites existing instrument numbers.
@@ -46,6 +46,7 @@ Pattern tab::Find/Replace
 
 Sample tab
    [Imp] <js> Add drop-down menu for saving all samples.
+   [Fix] <js> Upsampling a sample selection did not scale the new selection correctly if its end exceeded the old sample length (tx Xemogasa).
 
 Instrument tab
    [Imp] <js> Add drop-down menu for saving all instruments.
@@ -66,6 +67,7 @@ Other formats
 
 Misc
    [Fix] <js> Loading the default keyboard configuration didn't load all default keys since OpenMPT 1.27.01.00, causing issues such as making instrument number entry with the regular number keys impossible.
+   [Fix] <js> More accurate song length calculation for pattern loops that have no start command (SB0).
 
 
 v1.27.04.00 (28 January 2018, revision 9537)
