@@ -19,6 +19,7 @@
 #include "Globals.h"
 #include "Ctrl_pat.h"
 #include "PatternClipboard.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

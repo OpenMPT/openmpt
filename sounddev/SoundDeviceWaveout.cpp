@@ -17,6 +17,7 @@
 #include "SoundDeviceWaveout.h"
 
 #include "../common/misc_util.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
