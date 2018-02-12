@@ -24,7 +24,7 @@
 #include "ChannelManagerDlg.h"
 #include "SelectPluginDialog.h"
 #include "../soundlib/mod_specifications.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "AbstractVstEditor.h"
 
 // This is used for retrieving the correct background colour for the

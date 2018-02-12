@@ -14,7 +14,7 @@
 #include "Settings.h"
 
 #include "../common/misc_util.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 

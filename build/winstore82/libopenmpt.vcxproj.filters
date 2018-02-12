@@ -84,6 +84,9 @@
     <ClInclude Include="..\..\common\mptString.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptStringBuffer.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptStringFormat.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -112,9 +115,6 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\stdafx.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\StringFixer.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\typedefs.h">

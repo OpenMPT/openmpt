@@ -18,7 +18,7 @@
 
 #include "../common/misc_util.h"
 #include "../common/mptUUID.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

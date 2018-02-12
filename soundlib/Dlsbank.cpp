@@ -16,7 +16,7 @@
 #include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
 #include "../common/Endianness.h"
 #include "SampleIO.h"

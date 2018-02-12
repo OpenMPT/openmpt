@@ -20,7 +20,7 @@
 #include "../common/version.h"
 #include "../test/test.h"
 #include "UpdateCheck.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "ExceptionHandler.h"
 #include "CloseMainDialog.h"
 #include "AboutDialog.h"

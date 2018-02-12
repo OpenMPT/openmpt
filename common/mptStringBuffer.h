@@ -1,6 +1,6 @@
 /*
- * StringFixer.h
- * -------------
+ * mptStringBuffer.h
+ * -----------------
  * Purpose: Various functions for "fixing" char array strings for writing to or
  *          reading from module files, or for securing char arrays in general.
  * Notes  : (currently none)

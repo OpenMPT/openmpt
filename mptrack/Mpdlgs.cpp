@@ -16,7 +16,7 @@
 #include "Moddoc.h"
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 

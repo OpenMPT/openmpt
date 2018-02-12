@@ -12,7 +12,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
 #include "mod2midi.h"
 #include "../soundlib/plugins/PlugInterface.h"

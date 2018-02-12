@@ -24,7 +24,7 @@
 #include "dlg_misc.h"
 #include "tuningDialog.h"
 #include "../common/misc_util.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "SelectPluginDialog.h"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"

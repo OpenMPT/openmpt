@@ -19,7 +19,7 @@
 #include "Globals.h"
 #include "Ctrl_com.h"
 #include "ChannelManagerDlg.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "view_com.h"
 #include "../soundlib/mod_specifications.h"
 #include <set>

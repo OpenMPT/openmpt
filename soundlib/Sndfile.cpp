@@ -30,7 +30,7 @@
 #include "tuningcollection.h"
 #include "plugins/PluginManager.h"
 #include "plugins/PlugInterface.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
 #include "Container.h"
 #include <sstream>

@@ -19,7 +19,7 @@
 #include "Vstplug.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "MIDIMacros.h"
 #include "VstPresets.h"
 #include "../common/FileReader.h"

@@ -666,6 +666,7 @@
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />
+    <ClInclude Include="..\..\common\mptStringBuffer.h" />
     <ClInclude Include="..\..\common\mptStringFormat.h" />
     <ClInclude Include="..\..\common\mptStringParse.h" />
     <ClInclude Include="..\..\common\mptThread.h" />
@@ -676,7 +677,6 @@
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
-    <ClInclude Include="..\..\common\StringFixer.h" />
     <ClInclude Include="..\..\common\typedefs.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />

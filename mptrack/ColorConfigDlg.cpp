@@ -14,7 +14,7 @@
 #include "Settings.h"
 #include "FileDialog.h"
 #include "ColorSchemes.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

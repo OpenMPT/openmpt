@@ -18,7 +18,7 @@
 #include "../common/version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"

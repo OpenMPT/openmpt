@@ -18,7 +18,7 @@
 #include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptThread.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/misc_util.h"
 
 

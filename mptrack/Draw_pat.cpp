@@ -22,7 +22,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "EffectInfo.h"
 #include "PatternFont.h"
 

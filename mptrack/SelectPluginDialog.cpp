@@ -18,7 +18,7 @@
 #include "InputHandler.h"
 #include "ImageLists.h"
 #include "Moddoc.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "FileDialog.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "../soundlib/plugins/PlugInterface.h"

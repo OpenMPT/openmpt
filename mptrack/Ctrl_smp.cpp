@@ -28,7 +28,7 @@
 #include <smbPitchShift/smbPitchShift.h>
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "../soundbase/SampleFormatConverters.h"

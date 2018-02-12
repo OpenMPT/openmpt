@@ -21,7 +21,7 @@
 
 #include "../soundbase/SampleFormatConverters.h"
 #include "../common/misc_util.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 #include <deque>
 

@@ -13,7 +13,7 @@
 
 #include "typedefs.h"
 #include "mptTypeTraits.h"
-#include "StringFixer.h"
+#include "mptStringBuffer.h"
 #include "misc_util.h"
 #include "Endianness.h"
 #include "mptIO.h"

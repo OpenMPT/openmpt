@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "../mptrack/Reporting.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "Mainfrm.h"
 #include "mptrack.h"
 #include "resource.h"

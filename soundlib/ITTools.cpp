@@ -12,7 +12,7 @@
 #include "Loaders.h"
 #include "ITTools.h"
 #include "Tables.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/version.h"
 
 

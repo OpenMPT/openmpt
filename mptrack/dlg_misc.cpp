@@ -20,7 +20,7 @@
 #include "TempoSwingDialog.h"
 #include "../soundlib/mod_specifications.h"
 #include "../common/version.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

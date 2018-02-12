@@ -23,7 +23,7 @@
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/MIDIEvents.h"
 #include "MIDIMappingDialog.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "FileDialog.h"
 #include "../pluginBridge/BridgeWrapper.h"
 #include "../pluginBridge/BridgeOpCodes.h"

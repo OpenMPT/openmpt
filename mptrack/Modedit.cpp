@@ -18,7 +18,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/tuning.h"
 #include "../common/misc_util.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptBufferIO.h"
 // Plugin cloning

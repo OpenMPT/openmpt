@@ -18,7 +18,7 @@
 #include "../common/version.h"
 #include "../common/misc_util.h"
 #include "../common/mptCRC.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/serialization_utils.h"
 #include "../common/mptUUID.h"
 #include "../soundlib/Sndfile.h"

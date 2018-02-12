@@ -16,7 +16,7 @@
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 #ifndef NO_PLUGINS
 

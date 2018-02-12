@@ -54,9 +54,6 @@
     <ClInclude Include="..\..\common\Profiler.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\StringFixer.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\WriteMemoryDump.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -94,6 +91,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringBuffer.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptStringFormat.h">

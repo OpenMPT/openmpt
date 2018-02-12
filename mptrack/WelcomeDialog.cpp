@@ -12,7 +12,7 @@
 #include "WelcomeDialog.h"
 #include "resource.h"
 #include "Mainfrm.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "InputHandler.h"
 #include "CommandSet.h"
 #include "SelectPluginDialog.h"

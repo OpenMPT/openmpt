@@ -35,7 +35,7 @@
 #include "../common/version.h"
 #include "../soundlib/modsmp_ctrl.h"
 #include "CleanupSong.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptBufferIO.h"
 #include "../common/FileReader.h"

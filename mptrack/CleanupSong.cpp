@@ -14,7 +14,7 @@
 #include "Mainfrm.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
 
 

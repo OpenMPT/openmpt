@@ -22,7 +22,7 @@
 #include "View_pat.h"
 #include "PatternEditorDialogs.h"
 #include "ChannelManagerDlg.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

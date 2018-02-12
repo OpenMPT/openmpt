@@ -14,7 +14,7 @@
 #include "MainFrm.h"
 #include "modsmp_ctrl.h"
 #include "Undo.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

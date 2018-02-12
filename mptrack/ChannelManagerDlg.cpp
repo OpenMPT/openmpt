@@ -13,7 +13,7 @@
 #include "Mainfrm.h"
 #include "ChannelManagerDlg.h"
 #include "dlg_misc.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

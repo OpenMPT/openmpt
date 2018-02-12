@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "../common/version.h"
 
 

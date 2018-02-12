@@ -24,7 +24,7 @@
 #include "ScaleEnvPointsDlg.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "FileDialog.h"
 
 

@@ -35,7 +35,7 @@
 #include "../../mptrack/plugins/MidiInOut.h"
 #endif // MODPLUG_TRACKER
 
-#include "../../common/StringFixer.h"
+#include "../../common/mptStringBuffer.h"
 #include "../Sndfile.h"
 #include "../Loaders.h"
 

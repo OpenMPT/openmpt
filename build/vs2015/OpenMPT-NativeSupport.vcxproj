@@ -556,7 +556,6 @@
     <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
-    <ClInclude Include="..\..\common\StringFixer.h" />
     <ClInclude Include="..\..\common\WriteMemoryDump.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
     <ClInclude Include="..\..\common\mptBufferIO.h" />
@@ -570,6 +569,7 @@
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />
+    <ClInclude Include="..\..\common\mptStringBuffer.h" />
     <ClInclude Include="..\..\common\mptStringFormat.h" />
     <ClInclude Include="..\..\common\mptStringParse.h" />
     <ClInclude Include="..\..\common\mptThread.h" />

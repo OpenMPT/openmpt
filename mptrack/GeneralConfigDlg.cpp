@@ -13,7 +13,7 @@
 #include "GeneralConfigDlg.h"
 #include "Settings.h"
 #include "FileDialog.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 #include "FolderScanner.h"
 
 

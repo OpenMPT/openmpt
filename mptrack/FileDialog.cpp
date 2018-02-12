@@ -13,7 +13,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
-#include "../common/StringFixer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
