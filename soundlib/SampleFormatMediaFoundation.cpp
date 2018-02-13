@@ -353,7 +353,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	SmpLength length = 0;
 
 	MPT_MF_CHECKED(MFCreateSourceResolver(&sourceResolver));
-	MPT_MF_CHECKED(sourceResolver->CreateObjectFromURL(diskfile.GetFilename().AsNative().c_str(), MF_RESOLUTION_MEDIASOURCE | MF_RESOLUTION_CONTENT_DOES_NOT_HAVE_TO_MATCH_EXTENSION_OR_MIME_TYPE | MF_RESOLUTION_READ, NULL, &objectType, &unknownMediaSource));
+	MPT_MF_CHECKED(sourceResolver->CreateObjectFromURL(diskfile.GetFilename().ToWide().c_str(), MF_RESOLUTION_MEDIASOURCE | MF_RESOLUTION_CONTENT_DOES_NOT_HAVE_TO_MATCH_EXTENSION_OR_MIME_TYPE | MF_RESOLUTION_READ, NULL, &objectType, &unknownMediaSource));
 	if(objectType != MF_OBJECT_MEDIASOURCE) goto fail;
 	MPT_MF_CHECKED(unknownMediaSource->QueryInterface(&mediaSource));
 
