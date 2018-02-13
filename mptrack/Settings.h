@@ -313,11 +313,11 @@ inline T FromSettingValue(const SettingValue &val)
 // You may use the SettingValue(value, typeTag) constructor in ToSettingValue
 // and check the typeTag FromSettingsValue to implement runtime type-checking for custom types.
 
-template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(mpt::ToWide(val)); }
-template<> inline CString FromSettingValue(const SettingValue &val) { return mpt::ToCString(val.as<std::wstring>()); }
+template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(mpt::ToUnicode(val)); }
+template<> inline CString FromSettingValue(const SettingValue &val) { return mpt::ToCString(val.as<mpt::ustring>()); }
 
-template<> inline SettingValue ToSettingValue(const mpt::PathString &val) { return SettingValue(val.AsNative()); }
-template<> inline mpt::PathString FromSettingValue(const SettingValue &val) { return mpt::PathString::FromNative(val); }
+template<> inline SettingValue ToSettingValue(const mpt::PathString &val) { return SettingValue(val.ToUnicode()); }
+template<> inline mpt::PathString FromSettingValue(const SettingValue &val) { return mpt::PathString::FromUnicode(val); }
 
 template<> inline SettingValue ToSettingValue(const float &val) { return SettingValue(double(val)); }
 template<> inline float FromSettingValue(const SettingValue &val) { return float(val.as<double>()); }
