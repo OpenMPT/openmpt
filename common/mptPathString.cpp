@@ -382,21 +382,31 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-} // namespace mpt
 
-
-
-namespace mpt
+bool PathString::IsPathSeparator(RawPathString::value_type c)
 {
-
-
-bool IsPathSeparator(mpt::RawPathString::value_type c) {
 #if MPT_OS_WINDOWS
 	return (c == MPT_PATHSTRING_LITERAL('\\')) || (c == MPT_PATHSTRING_LITERAL('/'));
 #else
 	return c == MPT_PATHSTRING_LITERAL('/');
 #endif
 }
+
+RawPathString::value_type PathString::GetDefaultPathSeparator()
+{
+#if MPT_OS_WINDOWS
+	return L'\\';
+#else
+	return '/';
+#endif
+}
+
+
+} // namespace mpt
+
+
+namespace mpt
+{
 
 bool PathIsAbsolute(const mpt::PathString &path) {
 	mpt::RawPathString rawpath = path.AsNative();
@@ -417,9 +427,9 @@ bool PathIsAbsolute(const mpt::PathString &path) {
 	{
 		return true; // UNC
 	}
-	return (rawpath.length()) >= 3 && (rawpath[1] == ':') && IsPathSeparator(rawpath[2]);
+	return (rawpath.length()) >= 3 && (rawpath[1] == ':') && mpt::PathString::IsPathSeparator(rawpath[2]);
 #else
-	return (rawpath.length() >= 1) && IsPathSeparator(rawpath[0]);
+	return (rawpath.length() >= 1) && mpt::PathString::IsPathSeparator(rawpath[0]);
 #endif
 }
 

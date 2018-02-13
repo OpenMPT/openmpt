@@ -145,26 +145,23 @@ public:
 	// Note that this also removes path component separators, so this should only be used on single-component PathString objects.
 	PathString SanitizeComponent() const;
 
+	static bool IsPathSeparator(RawPathString::value_type c);
+	static RawPathString::value_type GetDefaultPathSeparator();
+
 	bool HasTrailingSlash() const
 	{
-		if(empty())
+		if(path.empty())
+		{
 			return false;
+		}
 		RawPathString::value_type c = path[path.length() - 1];
-#if MPT_OS_WINDOWS
-		return (c == L'\\' || c == L'/');
-#else
-		return (c == '/');
-#endif
+		return IsPathSeparator(c);
 	}
 	mpt::PathString &EnsureTrailingSlash()
 	{
 		if(!path.empty() && !HasTrailingSlash())
 		{
-#if MPT_OS_WINDOWS
-			path += L'\\';
-#else
-			path += '/';
-#endif
+			path += GetDefaultPathSeparator();
 		}
 		return *this;
 	}
@@ -297,9 +294,6 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 
 namespace mpt
 {
-
-bool IsPathSeparator(mpt::RawPathString::value_type c);
-
 
 
 bool PathIsAbsolute(const mpt::PathString &path);
