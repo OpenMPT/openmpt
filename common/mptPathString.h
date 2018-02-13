@@ -135,6 +135,9 @@ public:
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
+	static bool IsPathSeparator(RawPathString::value_type c);
+	static RawPathString::value_type GetDefaultPathSeparator();
+
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
@@ -144,9 +147,6 @@ public:
 	// Returns the result.
 	// Note that this also removes path component separators, so this should only be used on single-component PathString objects.
 	PathString SanitizeComponent() const;
-
-	static bool IsPathSeparator(RawPathString::value_type c);
-	static RawPathString::value_type GetDefaultPathSeparator();
 
 	bool HasTrailingSlash() const
 	{
