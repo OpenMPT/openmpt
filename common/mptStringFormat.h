@@ -185,6 +185,9 @@ template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline
 #if MPT_WSTRING_FORMAT && MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
 #endif
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <> struct ToStringTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x) { return mpt::ToLocale(mpt::CharsetLocale, ToString(x)); } };
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCStringHelper(x); } };
 #endif
