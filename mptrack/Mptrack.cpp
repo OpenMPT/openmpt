@@ -748,6 +748,23 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 
 	// The first step of InitInstance, always executed without any crash handler.
 
+	#ifndef UNICODE
+		if(MessageBox(NULL,
+			_T("STOP!!!") _T("\n")
+			_T("This is an ANSI (as opposed to a UNICODE) build of OpenMPT.") _T("\n")
+			_T("\n")
+			_T("ANSI builds are NOT SUPPORTED and WILL CAUSE CORRUPTION of the OpenMPT configuration and exibit other unintended behaviour.") _T("\n")
+			_T("\n")
+			_T("Please use an official build of OpenMPT or compile 'OpenMPT.sln' instead of 'OpenMPT-ANSI.sln'.") _T("\n")
+			_T("\n")
+			_T("Continue starting OpenMPT anyway?") _T("\n"),
+			_T("OpenMPT"), MB_ICONSTOP | MB_YESNO| MB_DEFBUTTON2)
+			!= IDYES)
+		{
+			ExitProcess(1);
+		}
+	#endif
+
 	// We probably should call the base class version here,
 	// but we historically did not do that.
 	//if(!CWinApp::InitInstance())
