@@ -116,7 +116,7 @@ CRarArchive::CRarArchive(FileReader &file)
 	RARHandle rar;
 	int RARResult = 0;
 
-	std::wstring ArcName = diskFile->GetFilename().AsNative();
+	std::wstring ArcName = diskFile->GetFilename().ToWide();
 	std::vector<wchar_t> ArcNameBuf(ArcName.c_str(), ArcName.c_str() + ArcName.length() + 1);
 	std::vector<char> CmtBuf(65536);
 	RAROpenArchiveDataEx ArchiveData;
@@ -230,7 +230,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 	RARHandle rar;
 	int RARResult = 0;
 
-	std::wstring ArcName = diskFile->GetFilename().AsNative();
+	std::wstring ArcName = diskFile->GetFilename().ToWide();
 	std::vector<wchar_t> ArcNameBuf(ArcName.c_str(), ArcName.c_str() + ArcName.length() + 1);
 	RAROpenArchiveDataEx ArchiveData;
 	MemsetZero(ArchiveData);
