@@ -136,7 +136,7 @@ std::string Context::PathToPosix(mpt::PathString windowsPath)
 		throw mpt::Wine::Exception("Path too long.");
 	}
 	LPSTR tmp = nullptr;
-	tmp = wine_get_unix_file_name(windowsPath.AsNative().c_str());
+	tmp = wine_get_unix_file_name(windowsPath.ToWide().c_str());
 	if(!tmp)
 	{
 		throw mpt::Wine::Exception("Wine kernel32.dll:wine_get_unix_file_name failed.");
@@ -164,7 +164,7 @@ mpt::PathString Context::PathToWindows(std::string hostPath)
 	{
 		throw mpt::Wine::Exception("Wine kernel32.dll:wine_get_dos_file_name failed.");
 	}
-	result = mpt::PathString::FromNative(tmp);
+	result = mpt::PathString::FromWide(tmp);
 	HeapFree(GetProcessHeap(), 0, tmp);
 	tmp = nullptr;
 	return result;
@@ -346,7 +346,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	progress(userdata);
 
-	::CreateDirectoryW((dirWindows + MPT_PATHSTRING("filetree")).AsNative().c_str(), NULL);
+	::CreateDirectory((dirWindows + MPT_PATHSTRING("filetree")).AsNative().c_str(), NULL);
 	for(const auto &file : filetree)
 	{
 		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::CharsetUTF8, file.first), MPT_USTRING("/"));
@@ -362,7 +362,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 				combinedPath += mpt::PathString::FromUnicode(path[singlepath]);
 				if(!combinedPath.IsDirectory())
 				{
-					if(::CreateDirectoryW(combinedPath.AsNative().c_str(), NULL) == 0)
+					if(::CreateDirectory(combinedPath.AsNative().c_str(), NULL) == 0)
 					{
 						throw mpt::Wine::Exception("Error writing filetree.");
 					}
@@ -658,9 +658,9 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		paths.pop_front();
 		path.EnsureTrailingSlash();
 		HANDLE hFind = NULL;
-		WIN32_FIND_DATAW wfd;
+		WIN32_FIND_DATA wfd;
 		MemsetZero(wfd);
-		hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
+		hFind = FindFirstFile((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
 		if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
 		{
 			do
@@ -687,7 +687,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 						}
 					}
 				}
-			} while(FindNextFileW(hFind, &wfd));
+			} while(FindNextFile(hFind, &wfd));
 			FindClose(hFind);
 		}
 	}

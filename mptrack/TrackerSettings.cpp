@@ -774,15 +774,15 @@ void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
 	
 	if(!PathTunings.GetDefaultDir().IsDirectory())
 	{
-		CreateDirectoryW(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
+		CreateDirectory(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
 	}
 	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).IsDirectory())
 	{
-		CreateDirectoryW((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).AsNative().c_str(), 0);
+		CreateDirectory((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).AsNative().c_str(), 0);
 	}
 	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Locale\\")).IsDirectory())
 	{
-		CreateDirectoryW((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\")).AsNative().c_str(), 0);
+		CreateDirectory((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\")).AsNative().c_str(), 0);
 	}
 	{
 		mpt::PathString fn = PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\12TET.tun");

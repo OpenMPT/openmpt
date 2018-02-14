@@ -479,9 +479,9 @@ BOOL CModDoc::DoSave(LPCTSTR lpszPathName, BOOL)
 			mpt::PathString backupFileName = saveFileName.ReplaceExt(MPT_PATHSTRING(".bak"));
 			if(backupFileName.IsFile())
 			{
-				DeleteFileW(backupFileName.AsNative().c_str());
+				DeleteFile(backupFileName.AsNative().c_str());
 			}
-			MoveFileW(saveFileName.AsNative().c_str(), backupFileName.AsNative().c_str());
+			MoveFile(saveFileName.AsNative().c_str(), backupFileName.AsNative().c_str());
 		}
 	}
 	if(OnSaveDocument(saveFileName))
@@ -1697,7 +1697,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			{
 				thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
 				// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
-				::CloseHandle(::CreateFileW(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
+				::CloseHandle(::CreateFile(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 			}
 
 			// Render song (or current channel, or current sample/instrument)
@@ -1752,7 +1752,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				for(int retry = 0; retry < 10; retry++)
 				{
 					// stupid virus scanners
-					if(DeleteFileW(thisName.AsNative().c_str()) != EACCES)
+					if(DeleteFile(thisName.AsNative().c_str()) != EACCES)
 					{
 						break;
 					}
@@ -2860,7 +2860,7 @@ void CModDoc::OnSaveTemplateModule()
 	const mpt::PathString templateFolder = TrackerSettings::Instance().PathUserTemplates.GetDefaultDir();
 	if (!templateFolder.IsDirectory())
 	{
-		if (!CreateDirectoryW(templateFolder.AsNative().c_str(), nullptr))
+		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
 		{
 			Reporting::Notification(L"Error: Unable to create template folder '" + templateFolder.ToWide() + L"'");
 			return;

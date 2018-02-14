@@ -193,7 +193,7 @@ public:
 	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
 	void EmptyInstrumentLibrary();
-	void FillInstrumentLibrary(const WCHAR *selectedItem = nullptr);
+	void FillInstrumentLibrary(const TCHAR *selectedItem = nullptr);
 	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
@@ -236,7 +236,7 @@ public:
 protected:
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	void ModTreeInsert(const WCHAR *name, int image, const WCHAR *selectIfMatch);
+	void ModTreeInsert(const TCHAR *name, int image, const TCHAR *selectIfMatch);
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);

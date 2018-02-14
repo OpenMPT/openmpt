@@ -2585,13 +2585,13 @@ void CViewSample::NoteOff(ModCommand::NOTE note)
 // Drop files from Windows
 void CViewSample::OnDropFiles(HDROP hDropInfo)
 {
-	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0) + 1;
-		std::vector<WCHAR> fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
+		UINT size = ::DragQueryFile(hDropInfo, f, nullptr, 0) + 1;
+		std::vector<TCHAR> fileName(size, _T('\0'));
+		if(::DragQueryFile(hDropInfo, f, fileName.data(), size))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file) && f < nFiles - 1)

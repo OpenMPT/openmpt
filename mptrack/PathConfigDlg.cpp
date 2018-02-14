@@ -71,7 +71,7 @@ BOOL PathConfigDlg::OnInitDialog()
 	// Default paths
 	for(const auto &path : PathSettings)
 	{
-		::SetDlgItemTextW(m_hWnd, path.second, (settings.*path.first).GetDefaultDir().AsNative().c_str());
+		SetDlgItemText(path.second, (settings.*path.first).GetDefaultDir().AsNative().c_str());
 	}
 
 	// Autosave
@@ -127,7 +127,7 @@ void PathConfigDlg::BrowseFolder(UINT nID)
 	BrowseForFolder dlg(GetPath(nID), prompt);
 	if(dlg.Show(this))
 	{
-		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
+		SetDlgItemText(nID, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
 	}
 }

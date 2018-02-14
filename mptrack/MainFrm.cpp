@@ -462,9 +462,9 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0) + 1;
-		std::vector<WCHAR> fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
+		UINT size = ::DragQueryFile(hDropInfo, f, nullptr, 0) + 1;
+		std::vector<TCHAR> fileName(size, L'\0');
+		if(::DragQueryFile(hDropInfo, f, fileName.data(), size))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 			theApp.OpenDocumentFile(file.ToCString());
@@ -2564,7 +2564,7 @@ void CMainFrame::OnHelp()
 	}
 
 	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
-	if(!::HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
+	if(!::HtmlHelp(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
 		return;

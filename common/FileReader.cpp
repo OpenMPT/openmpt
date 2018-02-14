@@ -74,7 +74,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 			#if MPT_OS_WINDOWS_WINRT
 				hFile = CreateFile2(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, NULL);
 			#else
-				hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+				hFile = CreateFile(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 			#endif
 			if(hFile == NULL || hFile == INVALID_HANDLE_VALUE)
 			{
@@ -123,7 +123,7 @@ OnDiskFileWrapper::~OnDiskFileWrapper()
 {
 	if(m_IsTempFile)
 	{
-		DeleteFileW(m_Filename.AsNative().c_str());
+		DeleteFile(m_Filename.AsNative().c_str());
 		m_IsTempFile = false;
 	}
 	m_Filename = mpt::PathString();

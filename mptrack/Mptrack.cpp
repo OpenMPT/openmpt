@@ -205,8 +205,8 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
 	if(UltraSndPath.empty())
 	{
-		WCHAR curDir[MAX_PATH];
-		GetCurrentDirectoryW(CountOf(curDir), curDir);
+		TCHAR curDir[MAX_PATH];
+		GetCurrentDirectory(CountOf(curDir), curDir);
 		UltraSndPath = mpt::PathString::FromNative(curDir);
 	}
 	for (uint32 iMidi=0; iMidi<256; iMidi++)
@@ -300,17 +300,17 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	}
 
 	HKEY key;
-	if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("Software\\Microsoft\\DirectMusic"), 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		DWORD dwRegType = REG_SZ;
 		DWORD dwSize = 0;
-		if(RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, nullptr, &dwSize) == ERROR_SUCCESS && dwSize > 0)
+		if(RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, nullptr, &dwSize) == ERROR_SUCCESS && dwSize > 0)
 		{
-			std::vector<WCHAR> filenameW(dwSize / sizeof(WCHAR));
-			if (RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameW.data()), &dwSize) == ERROR_SUCCESS)
+			std::vector<TCHAR> filenameT(dwSize / sizeof(WCHAR));
+			if (RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameT.data()), &dwSize) == ERROR_SUCCESS)
 			{
-				std::vector<WCHAR> filenameExpanded(::ExpandEnvironmentStringsW(filenameW.data(), nullptr, 0));
-				::ExpandEnvironmentStringsW(filenameW.data(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
+				std::vector<TCHAR> filenameExpanded(::ExpandEnvironmentStrings(filenameT.data(), nullptr, 0));
+				::ExpandEnvironmentStrings(filenameT.data(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
 				auto filename = mpt::PathString::FromNative(filenameExpanded.data());
 				AddDLSBank(filename);
 				ImportMidiConfig(filename, TRUE);
@@ -536,7 +536,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 
 	if(!sNewPath.IsFile() && sOldPath.IsFile())
 	{
-		return (MoveFileW(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
+		return (MoveFile(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
 	}
 	return false;
 }
@@ -545,7 +545,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 // Set up paths were configuration data is written to. Set overridePortable to true if application's own directory should always be used.
 void CTrackApp::SetupPaths(bool overridePortable)
 {
-	WCHAR dir[MAX_PATH] = { 0 };
+	TCHAR dir[MAX_PATH] = { 0 };
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
 
@@ -553,8 +553,8 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	mpt::PathString configPathGlobal; // config path in default non-portable mode
 	{
 		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
-		if((SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
-			|| (SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
+		if((SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+			|| (SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
 		{
 			// Store our app settings in %APPDATA% or "My Documents"
 			configPathGlobal = mpt::PathString::FromNative(dir) + MPT_PATHSTRING("\\OpenMPT\\");
@@ -570,7 +570,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Check if the user prefers to use the app's directory
-	bool configAppPortable = (GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str()) == 0);
+	bool configAppPortable = (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str()) == 0);
 	if(configAppPortable)
 	{
 		portableMode = true;
@@ -596,15 +596,15 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Create missing diretories
 	if(!m_szConfigDirectory.IsDirectory())
 	{
-		CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
+		CreateDirectory(m_szConfigDirectory.AsNative().c_str(), 0);
 	}
 	if(!(GetConfigPath() + MPT_PATHSTRING("Components")).IsDirectory())
 	{
-		CreateDirectoryW((GetConfigPath() + MPT_PATHSTRING("Components")).AsNative().c_str(), 0);
+		CreateDirectory((GetConfigPath() + MPT_PATHSTRING("Components")).AsNative().c_str(), 0);
 	}
 	if(!(GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
 	{
-		CreateDirectoryW((GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
+		CreateDirectory((GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
 	}
 
 	// Handle updates from old versions.
@@ -626,18 +626,18 @@ void CTrackApp::SetupPaths(bool overridePortable)
 			mpt::PathString sSearchPattern;
 			sSearchPattern = sOldTunings;
 			sSearchPattern += MPT_PATHSTRING("*.*");
-			WIN32_FIND_DATAW FindFileData;
+			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind;
-			hFind = FindFirstFileW(sSearchPattern.AsNative().c_str(), &FindFileData);
+			hFind = FindFirstFile(sSearchPattern.AsNative().c_str(), &FindFileData);
 			if(hFind != INVALID_HANDLE_VALUE)
 			{
 				do
 				{
 					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), MPT_PATHSTRING("tunings\\"));
-				} while(FindNextFileW(hFind, &FindFileData) != 0);
+				} while(FindNextFile(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
-			RemoveDirectoryW(sOldTunings.AsNative().c_str());
+			RemoveDirectory(sOldTunings.AsNative().c_str());
 		}
 	}
 
@@ -1848,7 +1848,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	// Restructured plugin cache
 	if(TrackerSettings::Instance().PreviousSettingsVersion < MAKE_VERSION_NUMERIC(1,27,00,15))
 	{
-		DeleteFileW(m_szPluginCacheFileName.AsNative().c_str());
+		DeleteFile(m_szPluginCacheFileName.AsNative().c_str());
 		GetPluginCache().ForgetAll();
 	}
 
@@ -1977,9 +1977,9 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 {
 	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
-		if(reinterpret_cast<INT_PTR>(ShellExecuteW(
+		if(reinterpret_cast<INT_PTR>(ShellExecute(
 			theApp.m_pMainWnd->m_hWnd,
-			L"open",
+			_T("open"),
 			lpszURL.AsNative().c_str(),
 			NULL,
 			NULL,

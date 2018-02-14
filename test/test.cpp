@@ -146,7 +146,7 @@ void DoTests()
 			pathprefix = L"../../";
 		}
 
-		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
+		PathPrefix = new mpt::PathString(mpt::PathString::FromWide(pathprefix));
 
 	#else
 
@@ -201,7 +201,7 @@ static void RemoveFile(const mpt::PathString &filename)
 	#if MPT_OS_WINDOWS
 		for(int retry=0; retry<10; retry++)
 		{
-			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)
+			if(DeleteFile(filename.AsNative().c_str()) != FALSE)
 			{
 				break;
 			}

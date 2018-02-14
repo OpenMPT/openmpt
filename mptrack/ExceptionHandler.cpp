@@ -88,7 +88,7 @@ struct CrashOutputDirectory
 		path = mpt::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
 		if(!path.IsDirectory())
 		{
-			CreateDirectoryW(path.AsNative().c_str(), nullptr);
+			CreateDirectory(path.AsNative().c_str(), nullptr);
 		}
 		// Set compressed attribute in order to save disk space.
 		// Debugging information should clutter the users computer as little as possible.
@@ -99,7 +99,7 @@ struct CrashOutputDirectory
 		path += timestampDir;
 		if(!path.IsDirectory())
 		{
-			if(!CreateDirectoryW(path.AsNative().c_str(), nullptr))
+			if(!CreateDirectory(path.AsNative().c_str(), nullptr))
 			{
 				valid = false;
 			}
@@ -285,7 +285,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	{
-		CopyFileW
+		CopyFile
 			( theApp.GetConfigFileName().AsNative().c_str()
 			, (crashDirectory.path + MPT_PATHSTRING("stored-mptrack.ini")).AsNative().c_str()
 			, FALSE

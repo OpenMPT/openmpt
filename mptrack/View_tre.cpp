@@ -27,6 +27,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/MIDIEvents.h"
+#include <tchar.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -200,12 +201,12 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		std::vector<WCHAR> curDir;
-		DWORD size = GetCurrentDirectoryW(0, nullptr);
+		std::vector<TCHAR> curDir;
+		DWORD size = GetCurrentDirectory(0, nullptr);
 		if(size)
 		{
 			curDir.resize(size + 1);
-			GetCurrentDirectoryW(size + 1, curDir.data());
+			GetCurrentDirectory(size + 1, curDir.data());
 		}
 		const mpt::PathString dirs[] =
 		{
@@ -747,11 +748,11 @@ void CModTree::RefreshInstrumentLibrary()
 {
 	SetRedraw(FALSE);
 	// Check if the currently selected item should be selected after refreshing
-	std::wstring oldItem;
+	mpt::winstring oldItem;
 	if((IsSampleBrowser() || GetParentRootItem(GetSelectedItem()) == m_hInsLib)
-		&& GetItemTextW(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToWide())
+		&& GetItemText(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToCString())
 	{
-		oldItem = GetItemTextW(GetSelectedItem());
+		oldItem = GetItemText(GetSelectedItem());
 	}
 	EmptyInstrumentLibrary();
 	FillInstrumentLibrary(oldItem.c_str());
@@ -1750,7 +1751,7 @@ void CModTree::EmptyInstrumentLibrary()
 
 
 // Refresh Instrument Library
-void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
+void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 {
 	if (!m_hInsLib) return;
 
@@ -1765,8 +1766,8 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 			ModInstrument *pIns = m_SongFile->Instruments[ins];
 			if(pIns)
 			{
-				WCHAR s[MAX_INSTRUMENTNAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", ins, mpt::ToWide(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
+				TCHAR s[MAX_INSTRUMENTNAME + 10];
+				_sntprintf(s, CountOf(s), _T("%3d: %s"), ins, mpt::ToWin(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
 				ModTreeInsert(s, IMAGE_INSTRUMENTS, selectedItem);
 			}
 		}
@@ -1775,8 +1776,8 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 			const ModSample &sample = m_SongFile->GetSample(smp);
 			if(sample.pSample)
 			{
-				WCHAR s[MAX_SAMPLENAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", smp, mpt::ToWide(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
+				TCHAR s[MAX_SAMPLENAME + 10];
+				_sntprintf(s, CountOf(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
 				ModTreeInsert(s, IMAGE_SAMPLES, selectedItem);
 			}
 		}
@@ -1800,16 +1801,16 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 			// Avoid adding the same images again and again...
 			images.SetImageCount(IMGLIST_NUMIMAGES);
 
-			WCHAR s[16];
-			wcscpy(s, L"?:\\");
+			TCHAR s[16];
+			_tcscpy(s, _T("?:\\"));
 			for(UINT iDrive = 'A'; iDrive <= 'Z'; iDrive++)
 			{
-				s[0] = (WCHAR)iDrive;
-				UINT nDriveType = GetDriveTypeW(s);
+				s[0] = (TCHAR)iDrive;
+				UINT nDriveType = GetDriveType(s);
 				if(nDriveType != DRIVE_UNKNOWN && nDriveType != DRIVE_NO_ROOT_DIR)
 				{
-					SHFILEINFOW fileInfo;
-					SHGetFileInfoW(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
+					SHFILEINFO fileInfo;
+					SHGetFileInfo(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
 					ModTreeInsert(s, images.Add(fileInfo.hIcon), selectedItem);
 					DestroyIcon(fileInfo.hIcon);
 				}
@@ -1821,9 +1822,9 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser, showInstrs = IsSampleBrowser();
 
 		HANDLE hFind;
-		WIN32_FIND_DATAW wfd;
+		WIN32_FIND_DATA wfd;
 		MemsetZero(wfd);
-		if((hFind = FindFirstFileW(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
+		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
 			auto modExts = CSoundFile::GetSupportedExtensions(false);
 			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
@@ -1833,7 +1834,7 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 			do
 			{
 				// Up Directory
-				if(!wcscmp(wfd.cFileName, L".."))
+				if(!_tcscmp(wfd.cFileName, _T("..")))
 				{
 					if(showDirs)
 					{
@@ -1846,7 +1847,7 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 				} else if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					// Directory
-					if(wcscmp(wfd.cFileName, L".") && showDirs)
+					if(_tcscmp(wfd.cFileName, _T(".")) && showDirs)
 					{
 						ModTreeInsert(wfd.cFileName, IMAGE_FOLDER, selectedItem);
 					}
@@ -1862,7 +1863,7 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 						extPS = mpt::PathString::FromUTF8(ext);
 					}
 					// Amiga-style extensions (i.e. mod.songname)
-					std::string prefixExt = mpt::ToCharset(mpt::CharsetUTF8, wfd.cFileName);
+					std::string prefixExt = mpt::ToCharset(mpt::CharsetUTF8, mpt::winstring(wfd.cFileName));
 					auto dotPos = prefixExt.find('.');
 					if(dotPos != std::string::npos)
 						prefixExt.erase(dotPos);
@@ -1900,7 +1901,7 @@ void CModTree::FillInstrumentLibrary(const WCHAR *selectedItem)
 						}
 					}
 				}
-			} while (FindNextFileW(hFind, &wfd));
+			} while (FindNextFile(hFind, &wfd));
 			FindClose(hFind);
 		}
 	}
@@ -1949,7 +1950,7 @@ void CModTree::MonitorInstrumentLibrary()
 				}
 				if(!m_WatchDir.empty())
 				{
-					hWatchDir = FindFirstChangeNotificationW(m_WatchDir.AsNative().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME);
+					hWatchDir = FindFirstChangeNotification(m_WatchDir.AsNative().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME);
 					lastWatchDir = m_WatchDir;
 				}
 			}
@@ -1997,7 +1998,7 @@ void CModTree::MonitorInstrumentLibrary()
 
 
 // Insert sample browser item.
-void CModTree::ModTreeInsert(const WCHAR *name, int image, const WCHAR *selectIfMatch)
+void CModTree::ModTreeInsert(const TCHAR *name, int image, const TCHAR *selectIfMatch)
 {
 	DWORD dwId = 0;
 	switch(image)
@@ -2024,7 +2025,7 @@ void CModTree::ModTreeInsert(const WCHAR *name, int image, const WCHAR *selectIf
 		(LPARAM)dwId,
 		(!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT,
 		TVI_LAST);
-	if(selectIfMatch != nullptr && !wcscmp(name, selectIfMatch))
+	if(selectIfMatch != nullptr && !_tcscmp(name, selectIfMatch))
 	{
 		SelectItem(item);
 	}
@@ -3503,12 +3504,12 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 	if (stgm.tymed != TYMED_HGLOBAL) return FALSE;
 	if (stgm.hGlobal == NULL) return FALSE;
 	hDropInfo = (HDROP)stgm.hGlobal;
-	nFiles = DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	nFiles = DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 	if (nFiles)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, 0, nullptr, 0) + 1;
-		std::vector<WCHAR> fileName(size, L'\0');
-		if(DragQueryFileW(hDropInfo, 0, fileName.data(), size))
+		UINT size = ::DragQueryFile(hDropInfo, 0, nullptr, 0) + 1;
+		std::vector<TCHAR> fileName(size, _T('\0'));
+		if(DragQueryFile(hDropInfo, 0, fileName.data(), size))
 		{
 			switch(m_itemDrag.type)
 			{
@@ -3942,13 +3943,13 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 void CModTree::OnDropFiles(HDROP hDropInfo)
 {
 	bool refreshDLS = false;
-	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0) + 1;
-		std::vector<WCHAR> fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
+		UINT size = ::DragQueryFile(hDropInfo, f, nullptr, 0) + 1;
+		std::vector<TCHAR> fileName(size, _T('\0'));
+		if(::DragQueryFile(hDropInfo, f, fileName.data(), size))
 		{
 			mpt::PathString file(mpt::PathString::FromNative(fileName.data()));
 			if(IsSampleBrowser())

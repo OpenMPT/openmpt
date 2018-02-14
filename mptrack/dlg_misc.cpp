@@ -783,7 +783,7 @@ BOOL CSoundBankProperties::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	::SetDlgItemTextA(m_hWnd, IDC_EDIT1, m_szInfo.c_str());
-	::SetWindowTextW(m_hWnd, (fileName.AsNative() + L" - Sound Bank Information").c_str());
+	SetWindowText((fileName.AsNative() + _T(" - Sound Bank Information")).c_str());
 	return TRUE;
 }
 

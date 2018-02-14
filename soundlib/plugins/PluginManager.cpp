@@ -250,33 +250,33 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 	};
 
 	HKEY hkEnum;
-	WCHAR keyname[128];
+	TCHAR keyname[128];
 
 	LONG cr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb"), 0, KEY_READ, &hkEnum);
 	DWORD index = 0;
 	while (cr == ERROR_SUCCESS)
 	{
-		if ((cr = RegEnumKeyW(hkEnum, index, keyname, CountOf(keyname))) == ERROR_SUCCESS)
+		if ((cr = RegEnumKey(hkEnum, index, keyname, CountOf(keyname))) == ERROR_SUCCESS)
 		{
 			CLSID clsid;
-			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
-			if(Util::VerifyStringToCLSID(formattedKey, clsid))
+			mpt::winstring formattedKey = mpt::winstring(_T("{")) + mpt::winstring(keyname) + mpt::winstring(_T("}"));
+			if(Util::VerifyStringToCLSID(mpt::ToWide(formattedKey), clsid))
 			{
 				if(std::find(std::begin(knownDMOs), std::end(knownDMOs), clsid) == std::end(knownDMOs))
 				{
 					HKEY hksub;
-					formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
-					if (RegOpenKeyW(HKEY_LOCAL_MACHINE, formattedKey.c_str(), &hksub) == ERROR_SUCCESS)
+					formattedKey = mpt::winstring(_T("software\\classes\\DirectShow\\MediaObjects\\")) + mpt::winstring(keyname);
+					if (RegOpenKey(HKEY_LOCAL_MACHINE, formattedKey.c_str(), &hksub) == ERROR_SUCCESS)
 					{
-						WCHAR name[64];
+						TCHAR name[64];
 						DWORD datatype = REG_SZ;
 						DWORD datasize = sizeof(name);
 
-						if(ERROR_SUCCESS == RegQueryValueExW(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
+						if(ERROR_SUCCESS == RegQueryValueEx(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 						{
 							mpt::String::SetNullTerminator(name);
 
-							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
+							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromWide(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
 							if(plug != nullptr)
 							{
 								try

@@ -427,15 +427,15 @@ bool CPortaudioDevice::OpenDriverSettings()
 	}
 	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	mpt::PathString controlEXE;
-	WCHAR systemDir[MAX_PATH];
+	TCHAR systemDir[MAX_PATH];
 	MemsetZero(systemDir);
-	if(GetSystemDirectoryW(systemDir, mpt::saturate_cast<UINT>(mpt::size(systemDir))) > 0)
+	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(mpt::size(systemDir))) > 0)
 	{
 		controlEXE += mpt::PathString::FromNative(systemDir);
 		controlEXE += MPT_PATHSTRING("\\");
 	}
 	controlEXE += MPT_PATHSTRING("control.exe");
-	return (reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, L"open", controlEXE.AsNative().c_str(), (hasVista ? L"/name Microsoft.Sound" : L"mmsys.cpl"), NULL, SW_SHOW)) >= 32);
+	return (reinterpret_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.AsNative().c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
 #else // !MPT_OS_WINDOWS
 	return false;
 #endif // MPT_OS_WINDOWS

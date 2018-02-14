@@ -960,7 +960,7 @@ void CDoWaveConvert::Run()
 	if(m_Settings.normalize)
 	{
 		// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
-		::CloseHandle(::CreateFileW(normalizeFileName.AsNative().c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
+		::CloseHandle(::CreateFile(normalizeFileName.AsNative().c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 
 		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
@@ -1306,7 +1306,7 @@ void CDoWaveConvert::Run()
 		for(int retry=0; retry<10; retry++)
 		{
 			// stupid virus scanners
-			if(DeleteFileW(normalizeFileName.AsNative().c_str()) != EACCES)
+			if(DeleteFile(normalizeFileName.AsNative().c_str()) != EACCES)
 			{
 				break;
 			}

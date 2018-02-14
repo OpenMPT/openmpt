@@ -61,7 +61,7 @@ bool ComponentPluginBridge::DoInitialize()
 		exePath.resize(exePath.size() * 2);
 	}
 	uint64 mptVersion = BridgeWrapper::GetFileVersion(exePath.data());
-	uint64 bridgeVersion = BridgeWrapper::GetFileVersion(exeName.AsNative().c_str());
+	uint64 bridgeVersion = BridgeWrapper::GetFileVersion(exeName.ToWide().c_str());
 	if(bridgeVersion != mptVersion)
 	{
 		availability = AvailabilityWrongVersion;
@@ -230,7 +230,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		PROCESS_INFORMATION processInfo;
 		MemsetZero(processInfo);
 
-		if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
+		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
 		{
 			throw BridgeException("Failed to launch plugin bridge.");
 		}

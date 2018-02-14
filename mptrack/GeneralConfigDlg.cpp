@@ -116,16 +116,16 @@ BOOL COptionsGeneral::OnInitDialog()
 	mpt::PathString file;
 	while(scanner.Next(file))
 	{
-		std::wstring fileW = file.AsNative();
+		mpt::RawPathString fileW = file.AsNative();
 		fileW = fileW.substr(basePath.Length());
-		::SendMessageW(m_defaultTemplate.m_hWnd, CB_ADDSTRING, 0, (LPARAM)fileW.c_str());
+		::SendMessage(m_defaultTemplate.m_hWnd, CB_ADDSTRING, 0, (LPARAM)fileW.c_str());
 	}
 	file = TrackerSettings::Instance().defaultTemplateFile;
 	if(file.GetPath() == basePath)
 	{
 		file = file.GetFullFileName();
 	}
-	::SetWindowTextW(m_defaultTemplate.m_hWnd, file.AsNative().c_str());
+	m_defaultTemplate.SetWindowText(file.AsNative().c_str());
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().defaultNewFileAction);
 
@@ -217,7 +217,7 @@ void COptionsGeneral::OnBrowseTemplate()
 		{
 			defaultFile = defaultFile.GetFullFileName();
 		}
-		::SetWindowTextW(m_defaultTemplate.m_hWnd, defaultFile.AsNative().c_str());
+		m_defaultTemplate.SetWindowText(defaultFile.AsNative().c_str());
 		OnTemplateChanged();
 	}
 }

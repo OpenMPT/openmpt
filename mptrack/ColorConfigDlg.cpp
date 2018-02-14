@@ -595,7 +595,7 @@ void COptionsColors::OnClearWindowCache()
 	// First, forget all settings...
 	settings.ForgetAll();
 	// Then make sure they are gone for good.
-	::DeleteFileW(theApp.GetSongSettingsFilename().AsNative().c_str());
+	::DeleteFile(theApp.GetSongSettingsFilename().AsNative().c_str());
 }
 
 

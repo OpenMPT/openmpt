@@ -44,7 +44,7 @@ static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HMODULE &librar
 {
 	__try
 	{
-		library = LoadLibraryW(pluginPath.c_str());
+		library = LoadLibrary(pluginPath.c_str());
 		return true;
 	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -610,7 +610,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 				return 0;
 			}
 			path.EnsureTrailingSlash();
-			::SHCreateDirectoryExW(NULL, path.AsNative().c_str(), nullptr);
+			::SHCreateDirectoryEx(NULL, path.AsNative().c_str(), nullptr);
 			path += projectFile;
 			strcpy(ptr, path.ToLocale().c_str());
 			return 1;

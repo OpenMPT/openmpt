@@ -34,7 +34,7 @@ bool FileDialog::Show(const CWnd *parent)
 	wcscpy(filenameBuffer.data(), defaultFilename.c_str());
 
 	preview = preview && TrackerSettings::Instance().previewInFileDialogs;
-	const std::wstring workingDirectoryNative = workingDirectory.AsNative();
+	const std::wstring workingDirectoryNative = workingDirectory.ToWide();
 
 	// First, set up the dialog...
 	OPENFILENAMEW ofn;
@@ -95,12 +95,12 @@ bool FileDialog::Show(const CWnd *parent)
 			filePath.resize(ofn.nFileOffset + len);
 			lstrcpyW(&filePath[ofn.nFileOffset], currentFile);
 			currentFile += len + 1;
-			filenames.push_back(mpt::PathString::FromNative(filePath));
+			filenames.push_back(mpt::PathString::FromWide(filePath));
 		}
 	} else
 	{
 		// Only one file
-		filenames.push_back(mpt::PathString::FromNative(ofn.lpstrFile));
+		filenames.push_back(mpt::PathString::FromWide(ofn.lpstrFile));
 	}
 
 	if(filenames.empty())
@@ -130,7 +130,7 @@ UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM /*wParam
 			if(path[0] && that->lastPreviewFile != path.data())
 			{
 				that->lastPreviewFile = path.data();
-				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromNative(path.data()), NOTE_MIDDLEC))
+				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromWide(path.data()), NOTE_MIDDLEC))
 				{
 					that->stopPreview = true;
 				}
@@ -147,7 +147,7 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 	if(uMsg == BFFM_INITIALIZED && lpData != NULL)
 	{
 		const BrowseForFolder *that = reinterpret_cast<BrowseForFolder *>(lpData);
-		std::wstring startPath = that->workingDirectory.AsNative();
+		std::wstring startPath = that->workingDirectory.ToWide();
 		SendMessage(hwnd, BFFM_SETSELECTIONW, TRUE, reinterpret_cast<LPARAM>(startPath.c_str()));
 	}
 	return 0;
@@ -170,7 +170,7 @@ bool BrowseForFolder::Show(const CWnd *parent)
 	LPITEMIDLIST pid = SHBrowseForFolderW(&bi);
 	if(pid != NULL && SHGetPathFromIDListW(pid, path))
 	{
-		workingDirectory = mpt::PathString::FromNative(path);
+		workingDirectory = mpt::PathString::FromWide(path);
 		return true;
 	}
 	return false;

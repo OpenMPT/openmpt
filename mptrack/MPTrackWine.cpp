@@ -312,7 +312,7 @@ void Initialize()
 				{
 					return;
 				}
-				if(CreateDirectoryW(path.AsNative().c_str(), NULL) == 0)
+				if(CreateDirectory(path.AsNative().c_str(), NULL) == 0)
 				{
 					throw mpt::Wine::Exception(std::string() + "Failed to create directory: " +  path.ToUTF8());
 				}

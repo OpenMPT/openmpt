@@ -128,7 +128,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		{
 			// if it doesn't, put it in settings dir
 			name = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
-			if(!CreateDirectoryW(name.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
+			if(!CreateDirectory(name.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
 			{
 				name = theApp.GetConfigPath();
 			}
@@ -211,9 +211,9 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
 	// Find all autosave files for this document, and delete the oldest ones if there are more than the user wants.
-	WIN32_FIND_DATAW findData;
+	WIN32_FIND_DATA findData;
 	MemsetZero(findData);
-	HANDLE hFindFile = FindFirstFileW(searchPattern.AsNative().c_str(), &findData);
+	HANDLE hFindFile = FindFirstFile(searchPattern.AsNative().c_str(), &findData);
 	if(hFindFile != INVALID_HANDLE_VALUE)
 	{
 		do
@@ -222,7 +222,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 			{
 				foundfiles.push_back(findData.cFileName);
 			}
-		} while(FindNextFileW(hFindFile, &findData));
+		} while(FindNextFile(hFindFile, &findData));
 		FindClose(hFindFile);
 		hFindFile = INVALID_HANDLE_VALUE;
 	}
@@ -231,7 +231,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	size_t filesToDelete = std::max(static_cast<size_t>(GetHistoryDepth()), foundfiles.size()) - GetHistoryDepth();
 	for(size_t i = 0; i < filesToDelete; i++)
 	{
-		DeleteFileW((path + mpt::PathString::FromNative(foundfiles[i])).AsNative().c_str());
+		DeleteFile((path + mpt::PathString::FromNative(foundfiles[i])).AsNative().c_str());
 	}
 	
 }

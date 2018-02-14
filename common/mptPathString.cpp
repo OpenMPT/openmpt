@@ -19,6 +19,7 @@
 #if defined(MODPLUG_TRACKER)
 #include <shlwapi.h>
 #endif
+#include <tchar.h>
 #endif
 
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
@@ -33,7 +34,11 @@ WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength
 OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_OS_WINDOWS
+#ifdef UNICODE
 #define MPT_PATHSTRING_LITERAL(x) ( L ## x )
+#else
+#define MPT_PATHSTRING_LITERAL(x) ( x )
+#endif
 #else
 #define MPT_PATHSTRING_LITERAL(x) ( x )
 #endif
@@ -68,7 +73,7 @@ RawPathString PathString::AsNativePrefixed() const
 
 int PathString::CompareNoCase(const PathString & a, const PathString & b)
 {
-	return lstrcmpiW(a.path.c_str(), b.path.c_str());
+	return lstrcmpi(a.path.c_str(), b.path.c_str());
 }
 
 #endif // !MPT_OS_WINDOWS_WINRT
@@ -285,7 +290,7 @@ bool PathString::IsDirectory() const
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
 	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+		DWORD dwAttrib = ::GetFileAttributes(path.c_str());
 	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
@@ -301,7 +306,7 @@ bool PathString::IsFile() const
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
 	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+		DWORD dwAttrib = ::GetFileAttributes(path.c_str());
 	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
@@ -313,7 +318,7 @@ bool PathString::IsFile() const
 
 bool PathString::FileOrDirectoryExists() const
 {
-	return ::PathFileExistsW(path.c_str()) != FALSE;
+	return ::PathFileExists(path.c_str()) != FALSE;
 }
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
@@ -343,12 +348,12 @@ PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(!_wcsnicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), relativeTo.AsNative().length()))
+	if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), relativeTo.AsNative().length()))
 	{
 		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
 		result = MPT_PATHSTRING(".\\"); // ".\"
 		result += mpt::PathString::FromNative(AsNative().substr(relativeTo.AsNative().length()));
-	} else if(!_wcsnicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), 2))
+	} else if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), 2))
 	{
 		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
 		result = mpt::PathString::FromNative(AsNative().substr(2));
@@ -395,9 +400,9 @@ bool PathString::IsPathSeparator(RawPathString::value_type c)
 RawPathString::value_type PathString::GetDefaultPathSeparator()
 {
 #if MPT_OS_WINDOWS
-	return L'\\';
+	return MPT_PATHSTRING_LITERAL('\\');
 #else
-	return '/';
+	return MPT_PATHSTRING_LITERAL('/');
 #endif
 }
 
@@ -438,13 +443,13 @@ bool PathIsAbsolute(const mpt::PathString &path) {
 
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 {
-	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
+	DWORD size = GetFullPathName(path.AsNative().c_str(), 0, nullptr, nullptr);
 	if(size == 0)
 	{
 		return path;
 	}
-	std::vector<WCHAR> fullPathName(size, L'\0');
-	if(GetFullPathNameW(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0)
+	std::vector<TCHAR> fullPathName(size, _T('\0'));
+	if(GetFullPathName(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0)
 	{
 		return path;
 	}
@@ -459,7 +464,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	{
 		return false;
 	}
-	if(PathIsRelativeW(path.AsNative().c_str()) == TRUE)
+	if(PathIsRelative(path.AsNative().c_str()) == TRUE)
 	{
 		return false;
 	}
@@ -473,9 +478,9 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	}
 	path.EnsureTrailingSlash();
 	HANDLE hFind = NULL;
-	WIN32_FIND_DATAW wfd;
+	WIN32_FIND_DATA wfd;
 	MemsetZero(wfd);
-	hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
+	hFind = FindFirstFile((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
 	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
 	{
 		do
@@ -492,16 +497,16 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 					}
 				} else if(filename.IsFile())
 				{
-					if(DeleteFileW(filename.AsNative().c_str()) == 0)
+					if(DeleteFile(filename.AsNative().c_str()) == 0)
 					{
 						return false;
 					}
 				}
 			}
-		} while(FindNextFileW(hFind, &wfd));
+		} while(FindNextFile(hFind, &wfd));
 		FindClose(hFind);
 	}
-	if(RemoveDirectoryW(path.AsNative().c_str()) == 0)
+	if(RemoveDirectory(path.AsNative().c_str()) == 0)
 	{
 		return false;
 	}
@@ -520,8 +525,8 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 
 mpt::PathString GetAppPath()
 {
-	std::vector<WCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileNameW(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
+	std::vector<TCHAR> exeFileName(MAX_PATH);
+	while(GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
 	{
 		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 		{
@@ -541,9 +546,9 @@ mpt::PathString GetAppPath()
 
 mpt::PathString GetSystemPath()
 {
-	DWORD size = GetSystemDirectoryW(nullptr, 0);
-	std::vector<WCHAR> path(size + 1);
-	if(!GetSystemDirectoryW(path.data(), size + 1))
+	DWORD size = GetSystemDirectory(nullptr, 0);
+	std::vector<TCHAR> path(size + 1);
+	if(!GetSystemDirectory(path.data(), size + 1))
 	{
 		return mpt::PathString();
 	}
@@ -563,11 +568,11 @@ mpt::PathString GetSystemPath()
 
 mpt::PathString GetTempDirectory()
 {
-	DWORD size = GetTempPathW(0, nullptr);
+	DWORD size = GetTempPath(0, nullptr);
 	if(size)
 	{
-		std::vector<WCHAR> tempPath(size + 1);
-		if(GetTempPathW(size + 1, tempPath.data()))
+		std::vector<TCHAR> tempPath(size + 1);
+		if(GetTempPath(size + 1, tempPath.data()))
 		{
 			return mpt::PathString::FromNative(tempPath.data());
 		}
@@ -600,7 +605,7 @@ TempFileGuard::~TempFileGuard()
 {
 	if(!filename.empty())
 	{
-		DeleteFileW(filename.AsNative().c_str());
+		DeleteFile(filename.AsNative().c_str());
 	}
 }
 
@@ -613,7 +618,7 @@ TempDirGuard::TempDirGuard(const mpt::PathString &dirname_)
 	{
 		return;
 	}
-	if(::CreateDirectoryW(dirname.AsNative().c_str(), NULL) == 0)
+	if(::CreateDirectory(dirname.AsNative().c_str(), NULL) == 0)
 	{ // fail
 		dirname = mpt::PathString();
 	}

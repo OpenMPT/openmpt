@@ -165,9 +165,9 @@ void CAbstractVstEditor::OnDropFiles(HDROP hDropInfo)
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0) + 1;
-		std::vector<WCHAR> fileName(size, L'\0');
-		if(::DragQueryFileW(hDropInfo, f, fileName.data(), size))
+		UINT size = ::DragQueryFile(hDropInfo, f, nullptr, 0) + 1;
+		std::vector<TCHAR> fileName(size, _T('\0'));
+		if(::DragQueryFile(hDropInfo, f, fileName.data(), size))
 		{
 			m_VstPlugin.LoadProgram(mpt::PathString::FromNative(fileName.data()));
 		}

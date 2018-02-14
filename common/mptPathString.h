@@ -27,7 +27,7 @@ namespace mpt
 {
 
 #if MPT_OS_WINDOWS
-typedef std::wstring RawPathString;
+typedef mpt::winstring RawPathString;
 #else // !MPT_OS_WINDOWS
 typedef std::string RawPathString;
 #endif // if MPT_OS_WINDOWS
@@ -205,15 +205,15 @@ public:
 	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::ToCharset(mpt::CharsetLocale, path); }
 #endif
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, path); }
-	std::wstring ToWide() const { return path; }
+	std::wstring ToWide() const { return mpt::ToWide(path); }
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
-	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
+	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWin(mpt::CharsetLocale, path)); }
+	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToWin(mpt::CharsetLocale, path)); }
 #endif
-	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
-	static PathString FromWide(const std::wstring &path) { return PathString(path); }
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWide(path)); }
+	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWin(mpt::CharsetUTF8, path)); }
+	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToWin(path)); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWin(path)); }
 	RawPathString AsNative() const { return path; }
 	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
 	RawPathString AsNativePrefixed() const;
@@ -221,7 +221,7 @@ public:
 #if defined(_MFC_VER)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	CString ToCString() const { return mpt::ToCString(path); }
-	static PathString FromCString(const CString &path) { return PathString(mpt::ToWide(path)); }
+	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
 #endif
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
@@ -284,7 +284,11 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 
 #if MPT_OS_WINDOWS
 
+#ifdef UNICODE
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( L ## x )
+#else
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
+#endif
 
 #else // !MPT_OS_WINDOWS
 

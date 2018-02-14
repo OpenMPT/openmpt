@@ -25,18 +25,18 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
 	);
 
-static bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const WCHAR *filename, bool fullMemDump)
+static bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *filename, bool fullMemDump)
 {
 	bool result = false;
 
-	HMODULE hDll = ::LoadLibraryW(L"DBGHELP.DLL");
+	HMODULE hDll = ::LoadLibrary(_T("DBGHELP.DLL"));
 	if (hDll)
 	{
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if (pDump)
 		{
 
-			HANDLE hFile = ::CreateFileW(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE)
 			{
 				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;

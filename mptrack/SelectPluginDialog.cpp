@@ -377,7 +377,7 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 				if(!matches) continue;
 			}
 
-			std::wstring title = plug.libraryName.AsNative();
+			std::wstring title = plug.libraryName.ToWide();
 			if(!plug.IsNativeFromCache())
 			{
 				title += mpt::format(L" (%1-Bit)")(plug.GetDllBits());

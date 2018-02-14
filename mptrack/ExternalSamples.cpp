@@ -54,7 +54,7 @@ BOOL ExternalSamplesDlg::OnInitDialog()
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	GenerateList();
-	::SetWindowTextW(m_hWnd, (L"Missing External Samples - " + modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
+	SetWindowText((_T("Missing External Samples - ") + modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
 
 	return TRUE;
 }
@@ -161,7 +161,7 @@ void ExternalSamplesDlg::OnScanFolder()
 			if(tick < lastTick || tick > lastTick + 100)
 			{
 				lastTick = tick;
-				::SetDlgItemTextW(m_hWnd, IDC_STATIC1, fileName.AsNative().c_str());
+				SetDlgItemText(IDC_STATIC1, fileName.AsNative().c_str());
 				MSG msg;
 				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
@@ -196,7 +196,7 @@ bool ExternalSamplesDlg::SetSample(SAMPLEINDEX smp, const mpt::PathString &fileN
 	const mpt::PathString oldPath = sndFile.GetSamplePath(smp);
 	if(!sndFile.LoadExternalSample(smp, fileName))
 	{
-		Reporting::Information(L"Unable to load sample:\n" + fileName.AsNative());
+		Reporting::Information(_T("Unable to load sample:\n") + fileName.AsNative());
 		modDoc.GetSampleUndo().RemoveLastUndoStep(smp);
 		return false;
 	} else

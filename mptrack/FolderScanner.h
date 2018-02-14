@@ -29,7 +29,7 @@ protected:
 	std::vector<mpt::PathString> m_paths;
 	mpt::PathString m_currentPath;
 	HANDLE m_hFind;
-	WIN32_FIND_DATAW m_wfd;
+	WIN32_FIND_DATA m_wfd;
 	FlagSet<ScanType> m_type;
 
 public:

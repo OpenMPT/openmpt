@@ -46,15 +46,15 @@ BOOL WelcomeDlg::OnInitDialog()
 
 #ifndef NO_VST
 	HKEY hkEnum = NULL;
-	WCHAR str[MAX_PATH];
+	TCHAR str[MAX_PATH];
 	DWORD datasize = sizeof(str);
 	DWORD datatype = REG_SZ;
-	if(RegOpenKeyW(HKEY_LOCAL_MACHINE, L"Software\\VST", &hkEnum) == ERROR_SUCCESS
-		&& RegQueryValueExW(hkEnum, L"VSTPluginsPath", 0, &datatype, (LPBYTE)str, &datasize) == ERROR_SUCCESS)
+	if(RegOpenKey(HKEY_LOCAL_MACHINE, _T("Software\\VST"), &hkEnum) == ERROR_SUCCESS
+		&& RegQueryValueEx(hkEnum, _T("VSTPluginsPath"), 0, &datatype, (LPBYTE)str, &datasize) == ERROR_SUCCESS)
 	{
 		mpt::String::SetNullTerminator(str);
 		vstPath = mpt::PathString::FromNative(str);
-	} else if(SHGetSpecialFolderPathW(0, str, CSIDL_PROGRAM_FILES, FALSE))
+	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
 		mpt::String::SetNullTerminator(str);
 		vstPath = mpt::PathString::FromNative(str) + MPT_PATHSTRING("\\Steinberg\\VstPlugins\\");
@@ -65,7 +65,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	}
 	if(!vstPath.empty())
 	{
-		::SetDlgItemTextW(m_hWnd, IDC_EDIT1, vstPath.AsNative().c_str());
+		SetDlgItemText(IDC_EDIT1, vstPath.AsNative().c_str());
 		if(TrackerSettings::Instance().PathPlugins.GetDefaultDir().empty())
 		{
 			TrackerSettings::Instance().PathPlugins.SetDefaultDir(vstPath);

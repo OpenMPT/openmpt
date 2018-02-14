@@ -773,8 +773,8 @@ private:
 	void WriteSettingRaw(const SettingPath &path, int32 val);
 	void WriteSettingRaw(const SettingPath &path, bool val);
 	void RemoveSettingRaw(const SettingPath &path);
-	static std::wstring GetSection(const SettingPath &path);
-	static std::wstring GetKey(const SettingPath &path);
+	static mpt::winstring GetSection(const SettingPath &path);
+	static mpt::winstring GetKey(const SettingPath &path);
 public:
 	IniFileSettingsBackend(const mpt::PathString &filename);
 	~IniFileSettingsBackend();

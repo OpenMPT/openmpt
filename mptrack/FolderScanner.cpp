@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "FolderScanner.h"
+#include <tchar.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -43,7 +44,7 @@ bool FolderScanner::Next(mpt::PathString &file)
 			m_currentPath = m_paths.back();
 			m_paths.pop_back();
 			m_currentPath.EnsureTrailingSlash();
-			m_hFind = FindFirstFileW((m_currentPath + MPT_PATHSTRING("*.*")).AsNative().c_str(), &m_wfd);
+			m_hFind = FindFirstFile((m_currentPath + MPT_PATHSTRING("*.*")).AsNative().c_str(), &m_wfd);
 		}
 
 		BOOL nextFile = FALSE;
@@ -54,7 +55,7 @@ bool FolderScanner::Next(mpt::PathString &file)
 				file = m_currentPath + mpt::PathString::FromNative(m_wfd.cFileName);
 				if(m_wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if(wcscmp(m_wfd.cFileName, L"..") && wcscmp(m_wfd.cFileName, L"."))
+					if(_tcscmp(m_wfd.cFileName, _T("..")) && _tcscmp(m_wfd.cFileName, _T(".")))
 					{
 						if(m_type[kFindInSubDirectories])
 						{
@@ -70,7 +71,7 @@ bool FolderScanner::Next(mpt::PathString &file)
 				{
 					found = true;
 				}
-			} while((nextFile = FindNextFileW(m_hFind, &m_wfd)) != FALSE && !found);
+			} while((nextFile = FindNextFile(m_hFind, &m_wfd)) != FALSE && !found);
 		}
 		if(nextFile == FALSE)
 		{
