@@ -27,6 +27,9 @@
 // MinGW-w64 headers do not declare this for WinRT, which is wrong.
 extern "C" {
 WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart);
+#ifndef GetFullPathName
+#define GetFullPathName GetFullPathNameW
+#endif
 }
 #endif
 #endif
