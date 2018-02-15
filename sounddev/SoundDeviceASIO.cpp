@@ -326,7 +326,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 			break;
 		}
 		const mpt::winstring keyname = mpt::WinStringBuf(keynameBuf);
-		Log(mpt::format(MPT_USTRING("ASIO: Found '%1':"))(mpt::ToUnicode(keyname)));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Found '%1':"))(mpt::ToUnicode(keyname)));
 
 		HKEY hksub = NULL;
 		if(RegOpenKeyEx(hkEnum, keyname.c_str(), 0, KEY_READ, &hksub) != ERROR_SUCCESS)
@@ -341,7 +341,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("Description"), 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
 			description = mpt::ToUnicode(mpt::WinStringBuf(descriptionBuf));
-			Log(mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
+			MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
 		} else
 		{
 			description = mpt::ToUnicode(keyname);
@@ -355,7 +355,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 			const mpt::ustring internalID = mpt::ToUnicode(mpt::WinStringBuf(idBuf));
 			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
-				Log(mpt::format(MPT_USTRING("ASIO:   clsid=%1"))(internalID));
+				MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO:   clsid=%1"))(internalID));
 				SoundDevice::Info info;
 				info.type = TypeASIO;
 				info.internalID = internalID;
@@ -462,7 +462,7 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	Log(mpt::format(MPT_USTRING("ASIO: Open('%1'): %2-bit, (%3,%4) channels, %5Hz, hw-timing=%6"))
+	MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Open('%1'): %2-bit, (%3,%4) channels, %5Hz, hw-timing=%6"))
 		( GetDeviceInternalID()
 		, m_Settings.sampleFormat.GetBitsPerSample()
 		, m_Settings.InputChannels
@@ -486,7 +486,7 @@ bool CASIODevice::InternalOpen()
 		long inputChannels = 0;
 		long outputChannels = 0;
 		asioCall(getChannels(&inputChannels, &outputChannels));
-		Log(mpt::format(MPT_USTRING("ASIO: getChannels() => inputChannels=%1 outputChannel=%2"))(inputChannels, outputChannels));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: getChannels() => inputChannels=%1 outputChannel=%2"))(inputChannels, outputChannels));
 		if(inputChannels <= 0 && outputChannels <= 0)
 		{
 			m_DeviceUnavailableOnOpen = true;
@@ -509,7 +509,7 @@ bool CASIODevice::InternalOpen()
 			throw ASIOException("Channel mapping requires more channels than available.");
 		}
 
-		Log(mpt::format(MPT_USTRING("ASIO: setSampleRate(sampleRate=%1)"))(m_Settings.Samplerate));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: setSampleRate(sampleRate=%1)"))(m_Settings.Samplerate));
 		asioCall(setSampleRate(m_Settings.Samplerate));
 
 		long minSize = 0;
@@ -517,7 +517,7 @@ bool CASIODevice::InternalOpen()
 		long preferredSize = 0;
 		long granularity = 0;
 		asioCall(getBufferSize(&minSize, &maxSize, &preferredSize, &granularity));
-		Log(mpt::format(MPT_USTRING("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4"))(
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4"))(
 			minSize, maxSize, preferredSize, granularity));
 		m_nAsioBufferLen = Util::Round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(minSize <= 0 || maxSize <= 0 || minSize > maxSize)
@@ -600,7 +600,7 @@ bool CASIODevice::InternalOpen()
 		m_Callbacks.bufferSwitchTimeInfo = CallbackBufferSwitchTimeInfo;
 		MPT_ASSERT_ALWAYS(g_CallbacksInstance == nullptr);
 		g_CallbacksInstance = this;
-		Log(mpt::format(MPT_USTRING("ASIO: createBuffers(numChannels=%1, bufferSize=%2)"))(m_Settings.Channels.GetNumHostChannels(), m_nAsioBufferLen));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: createBuffers(numChannels=%1, bufferSize=%2)"))(m_Settings.Channels.GetNumHostChannels(), m_nAsioBufferLen));
 		asioCall(createBuffers(m_BufferInfo.data(), m_Settings.GetTotalChannels(), m_nAsioBufferLen, &m_Callbacks));
 		m_BuffersCreated = true;
 
@@ -620,7 +620,7 @@ bool CASIODevice::InternalOpen()
 			asioCall(getChannelInfo(&m_ChannelInfo[channel]));
 			MPT_ASSERT(m_ChannelInfo[channel].isActive);
 			mpt::String::SetNullTerminator(m_ChannelInfo[channel].name);
-			Log(mpt::format(MPT_USTRING("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"))
+			MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"))
 				( (channel < m_Settings.InputChannels) ? ASIOTrue : ASIOFalse
 				, m_Settings.Channels.ToDevice(channel)
 				, m_ChannelInfo[channel].isActive
@@ -702,10 +702,10 @@ bool CASIODevice::InternalOpen()
 
 	} catch(const std::exception &e)
 	{
-		Log(mpt::format(MPT_USTRING("ASIO: Error opening device: %1!"))(mpt::ToUnicode(mpt::CharsetASCII, e.what() ? e.what() : "")));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Error opening device: %1!"))(mpt::ToUnicode(mpt::CharsetASCII, e.what() ? e.what() : "")));
 	} catch(...)
 	{
-		Log(mpt::format(MPT_USTRING("ASIO: Unknown error opening device!"))());
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Unknown error opening device!"))());
 	}
 	InternalClose();
 	return false;
@@ -934,13 +934,13 @@ void CASIODevice::OpenDriver()
 	{
 		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)
 		{
-			Log(mpt::format(MPT_USTRING("ASIO: CoCreateInstance failed!"))());
+			MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: CoCreateInstance failed!"))());
 			m_pAsioDrv = nullptr;
 			return;
 		}
 	} catch(...)
 	{
-		Log(mpt::format(MPT_USTRING("ASIO: CoCreateInstance crashed!"))());
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: CoCreateInstance crashed!"))());
 		m_pAsioDrv = nullptr;
 		return;
 	}
@@ -949,12 +949,12 @@ void CASIODevice::OpenDriver()
 		asioCallCheckedBool(init(reinterpret_cast<void *>(m_AppInfo.GetHWND())));
 	} catch(const ASIOException &)
 	{
-		Log(mpt::format(MPT_USTRING("ASIO: init() failed!"))());
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: init() failed!"))());
 		CloseDriver();
 		return;
 	} catch(...)
 	{
-		Log(mpt::format(MPT_USTRING("ASIO: init() crashed!"))());
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: init() crashed!"))());
 		CloseDriver();
 		return;
 	}
@@ -1692,7 +1692,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		result = 0;
 		break;
 	}
-	Log(mpt::format(MPT_USTRING("ASIO: AsioMessage(selector=%1, value=%2, message=%3, opt=%4) => result=%5"))
+	MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: AsioMessage(selector=%1, value=%2, message=%3, opt=%4) => result=%5"))
 		( selector
 		, value
 		, reinterpret_cast<std::size_t>(message)
