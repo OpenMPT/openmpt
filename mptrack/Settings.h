@@ -253,6 +253,14 @@ inline T FromSettingValue(const SettingValue &val)
 template<> inline SettingValue ToSettingValue(const std::string &val) { return SettingValue(mpt::ToUnicode(mpt::CharsetLocale, val)); }
 template<> inline std::string FromSettingValue(const SettingValue &val) { return mpt::ToCharset(mpt::CharsetLocale, val.as<mpt::ustring>()); }
 
+template<> inline SettingValue ToSettingValue(const mpt::lstring &val) { return SettingValue(mpt::ToUnicode(val)); }
+template<> inline mpt::lstring FromSettingValue(const SettingValue &val) { return mpt::ToLocale(val.as<mpt::ustring>()); }
+
+#if !MPT_USTRING_MODE_WIDE
+template<> inline SettingValue ToSettingValue(const std::wstring &val) { return SettingValue(mpt::ToUnicode(val)); }
+template<> inline std::wstring FromSettingValue(const SettingValue &val) { return mpt::ToWide(val.as<mpt::ustring>()); }
+#endif
+
 template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(mpt::ToUnicode(val)); }
 template<> inline CString FromSettingValue(const SettingValue &val) { return mpt::ToCString(val.as<mpt::ustring>()); }
 
@@ -703,12 +711,12 @@ private:
 	const mpt::PathString filename;
 private:
 	std::vector<mpt::byte> ReadSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &def) const;
-	std::wstring ReadSettingRaw(const SettingPath &path, const std::wstring &def) const;
+	mpt::ustring ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const;
 	double ReadSettingRaw(const SettingPath &path, double def) const;
 	int32 ReadSettingRaw(const SettingPath &path, int32 def) const;
 	bool ReadSettingRaw(const SettingPath &path, bool def) const;
 	void WriteSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &val);
-	void WriteSettingRaw(const SettingPath &path, const std::wstring &val);
+	void WriteSettingRaw(const SettingPath &path, const mpt::ustring &val);
 	void WriteSettingRaw(const SettingPath &path, double val);
 	void WriteSettingRaw(const SettingPath &path, int32 val);
 	void WriteSettingRaw(const SettingPath &path, bool val);

@@ -277,7 +277,7 @@ std::vector<mpt::byte> IniFileSettingsBackend::ReadSettingRaw(const SettingPath 
 	return result;
 }
 
-std::wstring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::wstring &def) const
+mpt::ustring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const
 {
 	std::vector<TCHAR> buf(128);
 	while(::GetPrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(def).c_str(), buf.data(), static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
@@ -288,7 +288,7 @@ std::wstring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, con
 		}
 		buf.resize(Util::ExponentialGrow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
-	return mpt::ToWide(mpt::winstring(buf.data()));
+	return mpt::ToUnicode(mpt::winstring(buf.data()));
 }
 
 double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double def) const
@@ -322,15 +322,15 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std:
 	::WritePrivateProfileStruct(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)val.data(), static_cast<UINT>(val.size()), filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::wstring &val)
+void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt::ustring &val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
 
-	if(mpt::ToWide(mpt::CharsetLocale, mpt::ToCharset(mpt::CharsetLocale, val)) != val) // explicit round-trip
+	if(mpt::ToUnicode(mpt::CharsetLocale, mpt::ToCharset(mpt::CharsetLocale, val)) != val) // explicit round-trip
 	{
 		// Value is not representable in ANSI CP.
 		// Now check if the string got stored correctly.
-		if(ReadSettingRaw(path, std::wstring()) != val)
+		if(ReadSettingRaw(path, mpt::ustring()) != val)
 		{
 			// The ini file is probably ANSI encoded.
 			ConvertToUnicode();
@@ -432,7 +432,7 @@ SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const 
 	case SettingTypeBool: return SettingValue(ReadSettingRaw(path, def.as<bool>()), def.GetTypeTag()); break;
 	case SettingTypeInt: return SettingValue(ReadSettingRaw(path, def.as<int32>()), def.GetTypeTag()); break;
 	case SettingTypeFloat: return SettingValue(ReadSettingRaw(path, def.as<double>()), def.GetTypeTag()); break;
-	case SettingTypeString: return SettingValue(ReadSettingRaw(path, def.as<std::wstring>()), def.GetTypeTag()); break;
+	case SettingTypeString: return SettingValue(ReadSettingRaw(path, def.as<mpt::ustring>()), def.GetTypeTag()); break;
 	case SettingTypeBinary: return SettingValue(ReadSettingRaw(path, def.as<std::vector<mpt::byte> >()), def.GetTypeTag()); break;
 	default: return SettingValue(); break;
 	}
@@ -446,7 +446,7 @@ void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const Setting
 	case SettingTypeBool: WriteSettingRaw(path, val.as<bool>()); break;
 	case SettingTypeInt: WriteSettingRaw(path, val.as<int32>()); break;
 	case SettingTypeFloat: WriteSettingRaw(path, val.as<double>()); break;
-	case SettingTypeString: WriteSettingRaw(path, val.as<std::wstring>()); break;
+	case SettingTypeString: WriteSettingRaw(path, val.as<mpt::ustring>()); break;
 	case SettingTypeBinary: WriteSettingRaw(path, val.as<std::vector<mpt::byte> >()); break;
 	default: break;
 	}

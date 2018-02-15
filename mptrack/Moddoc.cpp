@@ -3024,7 +3024,7 @@ void CModDoc::DeserializeViews()
 		if(s.size() < 2)
 		{
 			// Try searching for filename instead of full path name
-			const std::wstring altName = settings.Read<std::wstring>("WindowSettings", pathName.GetFullFileName().ToWide());
+			const mpt::ustring altName = settings.Read<mpt::ustring>("WindowSettings", pathName.GetFullFileName().ToUnicode());
 			s = settings.Read<mpt::ustring>("WindowSettings", altName);
 			if(s.size() < 2) return;
 		}
