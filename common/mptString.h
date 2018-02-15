@@ -484,8 +484,8 @@ private:
 public:
 
 	// 8 bit
-	BasicAnyString(const char *str) : mpt::ustring(str ? mpt::ToUnicode(charset, str) : mpt::ustring()) { }
-	BasicAnyString(const std::string str) : mpt::ustring(mpt::ToUnicode(charset, str)) { }
+	BasicAnyString(const char *str) : mpt::ustring(From8bit(str ? str : std::string())) { }
+	BasicAnyString(const std::string str) : mpt::ustring(From8bit(str)) { }
 
 	// locale
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
