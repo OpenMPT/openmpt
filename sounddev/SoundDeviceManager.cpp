@@ -236,7 +236,7 @@ void Manager::ReEnumerate()
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Name      : %1"))(device.name));
 		for(const auto &extra : device.extraData)
 		{
-			Log(LogDebug, mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extra.first, extra.second));
+			MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extra.first, extra.second));
 		}
 	}
 	
