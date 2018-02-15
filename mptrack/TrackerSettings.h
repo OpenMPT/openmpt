@@ -304,7 +304,7 @@ template<> inline std::bitset<128> FromSettingValue(const SettingValue &val)
 
 template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &val)
 {
-	const char *format;
+	std::string format;
 	switch(val)
 	{
 	case dfWAV:
@@ -427,7 +427,7 @@ template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 	{
 		outDate.Format(_T("%04d-%02d-%02d %02d:%02d"), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
 	}
-	return SettingValue(outDate, "UTC");
+	return SettingValue(mpt::ToUnicode(outDate), "UTC");
 }
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {

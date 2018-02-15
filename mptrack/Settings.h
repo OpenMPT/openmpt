@@ -114,23 +114,11 @@ public:
 		type = SettingTypeFloat;
 		valueFloat = val;
 	}
-	SettingValue(const char *val)
-	{
-		Init();
-		type = SettingTypeString;
-		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
 	SettingValue(const std::string &val)
 	{
 		Init();
 		type = SettingTypeString;
 		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
-	SettingValue(const wchar_t *val)
-	{
-		Init();
-		type = SettingTypeString;
-		valueString = mpt::ToUnicode(val);
 	}
 	SettingValue(const std::wstring &val)
 	{
@@ -173,26 +161,12 @@ public:
 		typeTag = typeTag_;
 		valueFloat = val;
 	}
-	SettingValue(const char *val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeString;
-		typeTag = typeTag_;
-		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
 	SettingValue(const std::string &val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
 		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
-	SettingValue(const wchar_t *val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeString;
-		typeTag = typeTag_;
-		valueString = mpt::ToUnicode(val);
 	}
 	SettingValue(const std::wstring &val, const std::string &typeTag_)
 	{
@@ -217,6 +191,11 @@ public:
 		typeTag = typeTag_;
 		valueBinary =  val;
 	}
+	// these need to be explicitly deleted because otherwise the bool overload will catch the pointers
+	SettingValue(const char *val) = delete;
+	SettingValue(const wchar_t *val) = delete;
+	SettingValue(const char *val, const std::string &typeTag_) = delete;
+	SettingValue(const wchar_t *val, const std::string &typeTag_) = delete;
 	SettingType GetType() const
 	{
 		return type;
