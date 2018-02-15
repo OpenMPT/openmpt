@@ -250,8 +250,8 @@ template<> inline SampleUndoBufferSize FromSettingValue(const SettingValue &val)
 mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
 std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in);
 
-std::string SettingsModTypeToString(MODTYPE modtype);
-MODTYPE SettingsStringToModType(const std::string &str);
+mpt::ustring SettingsModTypeToString(MODTYPE modtype);
+MODTYPE SettingsStringToModType(const mpt::ustring &str);
 
 
 template<> inline SettingValue ToSettingValue(const RecordAftertouchOptions &val) { return SettingValue(int32(val)); }
@@ -261,7 +261,7 @@ template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &va
 template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
-template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<std::string>()); }
+template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const PLUGVOLUMEHANDLING &val)
 {
@@ -283,7 +283,7 @@ template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
 
-template<> inline SettingValue ToSettingValue(const SoundDevice::ChannelMapping &val) { return SettingValue(val.ToString(), "ChannelMapping"); }
+template<> inline SettingValue ToSettingValue(const SoundDevice::ChannelMapping &val) { return SettingValue(val.ToUString(), "ChannelMapping"); }
 template<> inline SoundDevice::ChannelMapping FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "ChannelMapping"); return SoundDevice::ChannelMapping::FromString(val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const ResamplingMode &val) { return SettingValue(int32(val)); }
@@ -304,29 +304,29 @@ template<> inline std::bitset<128> FromSettingValue(const SettingValue &val)
 
 template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &val)
 {
-	std::string format;
+	mpt::ustring format;
 	switch(val)
 	{
 	case dfWAV:
-		format = "wav";
+		format = MPT_USTRING("wav");
 		break;
 	case dfFLAC:
 	default:
-		format = "flac";
+		format = MPT_USTRING("flac");
 		break;
 	case dfRAW:
-		format = "raw";
+		format = MPT_USTRING("raw");
 	}
 	return SettingValue(format);
 }
 template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
 {
-	std::string format = mpt::ToLowerCaseAscii(val.as<std::string>());
-	if(format == "wav")
+	mpt::ustring format = mpt::ToLowerCase(val.as<mpt::ustring>());
+	if(format == MPT_USTRING("wav"))
 		return dfWAV;
-	if(format == "raw")
+	if(format == MPT_USTRING("raw"))
 		return dfRAW;
-	else // if(format == "flac")
+	else // if(format == MPT_USTRING("flac"))
 		return dfFLAC;
 }
 
@@ -432,7 +432,7 @@ template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "UTC");
-	std::string s = val.as<std::string>();
+	std::string s = mpt::ToCharset(mpt::CharsetLocale, val.as<mpt::ustring>());
 	tm lastUpdate;
 	MemsetZero(lastUpdate);
 	if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)

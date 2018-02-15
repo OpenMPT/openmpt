@@ -1366,7 +1366,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	}
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(ToSettingValue(defaultFormat).as<std::string>())
+		.DefaultExtension(ToSettingValue(defaultFormat).as<mpt::ustring>())
 		.DefaultFilename(fileName)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"

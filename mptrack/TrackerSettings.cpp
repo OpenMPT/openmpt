@@ -65,14 +65,14 @@ static MptVersion::VersionNum GetPreviousSettingsVersion(const mpt::ustring &ini
 }
 
 
-std::string SettingsModTypeToString(MODTYPE modtype)
+mpt::ustring SettingsModTypeToString(MODTYPE modtype)
 {
-	return CSoundFile::GetModSpecifications(modtype).fileExtension;
+	return mpt::ToUnicode(mpt::CharsetUTF8, CSoundFile::GetModSpecifications(modtype).fileExtension);
 }
 
-MODTYPE SettingsStringToModType(const std::string &str)
+MODTYPE SettingsStringToModType(const mpt::ustring &str)
 {
-	return CModSpecifications::ExtensionToType(str);
+	return CModSpecifications::ExtensionToType(mpt::ToCharset(mpt::CharsetUTF8, str));
 }
 
 

@@ -114,26 +114,12 @@ public:
 		type = SettingTypeFloat;
 		valueFloat = val;
 	}
-	SettingValue(const std::string &val)
-	{
-		Init();
-		type = SettingTypeString;
-		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
-	SettingValue(const std::wstring &val)
-	{
-		Init();
-		type = SettingTypeString;
-		valueString = mpt::ToUnicode(val);
-	}
-#if MPT_USTRING_MODE_UTF8
 	SettingValue(const mpt::ustring &val)
 	{
 		Init();
 		type = SettingTypeString;
 		valueString = val;
 	}
-#endif
 	SettingValue(const std::vector<mpt::byte> &val)
 	{
 		Init();
@@ -161,21 +147,6 @@ public:
 		typeTag = typeTag_;
 		valueFloat = val;
 	}
-	SettingValue(const std::string &val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeString;
-		typeTag = typeTag_;
-		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
-	}
-	SettingValue(const std::wstring &val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeString;
-		typeTag = typeTag_;
-		valueString = mpt::ToUnicode(val);
-	}
-#if MPT_USTRING_MODE_UTF8
 	SettingValue(const mpt::ustring &val, const std::string &typeTag_)
 	{
 		Init();
@@ -183,7 +154,6 @@ public:
 		typeTag = typeTag_;
 		valueString = val;
 	}
-#endif
 	SettingValue(const std::vector<mpt::byte> &val, const std::string &typeTag_)
 	{
 		Init();
@@ -228,23 +198,11 @@ public:
 		MPT_ASSERT(type == SettingTypeFloat);
 		return valueFloat;
 	}
-	operator std::string () const
-	{
-		MPT_ASSERT(type == SettingTypeString);
-		return mpt::ToCharset(mpt::CharsetLocale, valueString);
-	}
-	operator std::wstring () const
-	{
-		MPT_ASSERT(type == SettingTypeString);
-		return mpt::ToWide(valueString);
-	}
-#if MPT_USTRING_MODE_UTF8
 	operator mpt::ustring () const
 	{
 		MPT_ASSERT(type == SettingTypeString);
 		return valueString;
 	}
-#endif
 	operator std::vector<mpt::byte> () const
 	{
 		MPT_ASSERT(type == SettingTypeBinary);
@@ -291,6 +249,9 @@ inline T FromSettingValue(const SettingValue &val)
 // just provide specializations of ToSettingsValue<Tcustom> and FromSettingValue<Tcustom>.
 // You may use the SettingValue(value, typeTag) constructor in ToSettingValue
 // and check the typeTag FromSettingsValue to implement runtime type-checking for custom types.
+
+template<> inline SettingValue ToSettingValue(const std::string &val) { return SettingValue(mpt::ToUnicode(mpt::CharsetLocale, val)); }
+template<> inline std::string FromSettingValue(const SettingValue &val) { return mpt::ToCharset(mpt::CharsetLocale, val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(mpt::ToUnicode(val)); }
 template<> inline CString FromSettingValue(const SettingValue &val) { return mpt::ToCString(val.as<mpt::ustring>()); }

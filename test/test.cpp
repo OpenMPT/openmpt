@@ -2479,21 +2479,21 @@ template <>
 inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "myType");
-	std::string xy = val.as<std::string>();
+	mpt::ustring xy = val.as<mpt::ustring>();
 	if(xy.empty())
 	{
 		return Test::CustomSettingsTestType(0.0f, 0.0f);
 	}
-	std::size_t pos = xy.find("|");
-	std::string x = xy.substr(0, pos);
-	std::string y = xy.substr(pos + 1);
-	return Test::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
+	std::size_t pos = xy.find(MPT_USTRING("|"));
+	mpt::ustring x = xy.substr(0, pos);
+	mpt::ustring y = xy.substr(pos + 1);
+	return Test::CustomSettingsTestType(ConvertStrTo<float>(x), ConvertStrTo<float>(y));
 }
 
 template <>
 inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 {
-	return SettingValue(mpt::fmt::val(val.x) + "|" + mpt::fmt::val(val.y), "myType");
+	return SettingValue(mpt::ufmt::val(val.x) + MPT_USTRING("|") + mpt::ufmt::val(val.y), "myType");
 }
 
 namespace Test {
