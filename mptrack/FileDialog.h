@@ -28,13 +28,13 @@ protected:
 	mpt::PathString workingDirectory;
 	mpt::PathString extension;
 	PathList filenames;
-	int *filterIndex;
+	int *filterIndex = nullptr;
 	bool load;
-	bool multiSelect;
-	bool preview, stopPreview;
+	bool multiSelect = false;
+	bool preview = false;
 
 protected:
-	FileDialog(bool load) : filterIndex(nullptr), load(load), multiSelect(false), preview(false), stopPreview(false) { }
+	FileDialog(bool load) : load(load) { }
 
 public:
 	// Default extension to use if none is specified.
@@ -57,7 +57,7 @@ public:
 	FileDialog &EnableAudioPreview() { preview = true; return *this; }
 
 	// Show the file selection dialog.
-	bool Show(const CWnd *parent = nullptr);
+	bool Show(CWnd *parent = nullptr);
 
 	// Get some selected file. Mostly useful when only one selected file is possible anyway.
 	mpt::PathString GetFirstFile() const
@@ -76,9 +76,6 @@ public:
 	mpt::PathString GetWorkingDirectory() const { return workingDirectory; }
 	// Gets the extension of the first selected file, without dot.
 	mpt::PathString GetExtension() const { return extension; }
-
-protected:
-	static UINT_PTR CALLBACK OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
 };
 
 
@@ -105,17 +102,17 @@ public:
 class BrowseForFolder
 {
 protected:
-	mpt::PathString workingDirectory;
-	std::wstring caption;
+	mpt::PathString m_workingDirectory;
+	CString m_caption;
 
 public:
-	BrowseForFolder(const mpt::PathString &dir, const CString &caption) : workingDirectory(dir), caption(mpt::ToWide(caption)) { }
+	BrowseForFolder(const mpt::PathString &dir, const CString &caption) : m_workingDirectory(dir), m_caption(caption) { }
 
 	// Show the folder selection dialog.
-	bool Show(const CWnd *parent = nullptr);
+	bool Show(CWnd *parent = nullptr);
 
 	// Gets selected directory.
-	mpt::PathString GetDirectory() const { return workingDirectory; }
+	mpt::PathString GetDirectory() const { return m_workingDirectory; }
 
 protected:
 	static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
