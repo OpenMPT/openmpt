@@ -82,7 +82,11 @@ bool FileDialog::Show(CWnd *parent)
 		preview && TrackerSettings::Instance().previewInFileDialogs);
 	OPENFILENAME &ofn = dlg.GetOFN();
 	ofn.nFilterIndex = filterIndex != nullptr ? *filterIndex : 0;
-	ofn.lpstrInitialDir = workingDirectory.empty() ? nullptr : workingDirectory.AsNative().c_str();
+	auto workdirNative = workingDirectory.AsNative();
+	if(!workdirNative.empty())
+	{
+		ofn.lpstrInitialDir = workdirNative.c_str();
+	}
 
 	// Do it!
 	BypassInputHandler bih;
