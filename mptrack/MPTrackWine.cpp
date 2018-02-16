@@ -162,7 +162,6 @@ bool WineSetupIsSupported(mpt::Wine::VersionContext & wineVersion)
 		}
 	}
 	if(!wineVersion.Version().IsValid()) supported = false;
-	if(!wineVersion.Version().IsAtLeast(mpt::Wine::Version(1,4,0))) supported = false;
 	return supported;
 }
 
