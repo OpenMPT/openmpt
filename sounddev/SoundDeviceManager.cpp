@@ -174,12 +174,12 @@ void Manager::ReEnumerate()
 	{ // Wine
 		typePriorities[MPT_USTRING("Wine-Native-PulseAudio")] = 32;
 		typePriorities[MPT_USTRING("Wine-Native-PulseAudio-Simple")] = 31;
-		typePriorities[SoundDevice::TypeDSOUND] = 29;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
-		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 27;
 		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
+		typePriorities[SoundDevice::TypeDSOUND] = 18;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
 		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::WinVista))
