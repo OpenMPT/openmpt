@@ -39,7 +39,6 @@ protected:
 	std::string m_script;
 	FlagSet<mpt::Wine::ExecFlags> m_Flags;
 	std::map<std::string, std::vector<char> > m_Filetree;
-	int percent;
 	mpt::Wine::ExecResult m_ExecResult;
 	std::string m_ExceptionString;
 
@@ -58,8 +57,6 @@ public:
 	static void ProgressCallback(void *userdata);
 
 	mpt::Wine::ExecuteProgressResult Progress(bool allowCancel);
-
-	void SetProgressPercent(int p);
 	
 	void MessageLoop();
 
@@ -87,7 +84,6 @@ CExecutePosixShellScriptProgressDialog::CExecutePosixShellScriptProgressDialog(m
 	, m_script(script)
 	, m_Flags(flags)
 	, m_Filetree(filetree)
-	, percent(0)
 	, m_ExecResult(mpt::Wine::ExecResult::Error())
 {
 	return;
@@ -109,17 +105,6 @@ mpt::Wine::ExecuteProgressResult CExecutePosixShellScriptProgressDialog::Progres
 void CExecutePosixShellScriptProgressDialog::ProgressCallback(void *userdata)
 {
 	reinterpret_cast<CExecutePosixShellScriptProgressDialog*>(userdata)->Progress(false);
-}
-
-
-void CExecutePosixShellScriptProgressDialog::SetProgressPercent(int p)
-{
-	percent = p;
-	#if _WIN32_WINNT >= 0x0501
-		// nothing
-	#else
-		::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETPOS, p, 0);
-	#endif
 }
 
 
@@ -151,10 +136,8 @@ BOOL CExecutePosixShellScriptProgressDialog::OnInitDialog()
 	CDialog::OnInitDialog();
 	SetWindowText(mpt::ToCString(mpt::CharsetUTF8, m_Title));
 	SetDlgItemText(IDCANCEL, _T("Cancel"));
-	#if _WIN32_WINNT >= 0x0501
-		SetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE, GetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE) | PBS_MARQUEE);
-		::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETMARQUEE, 1, 30); // 30 is Windows default, but Wine < 1.7.15 defaults to 0
-	#endif
+	SetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE, GetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE) | PBS_MARQUEE);
+	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETMARQUEE, 1, 30); // 30 is Windows default, but Wine < 1.7.15 defaults to 0
 	PostMessage(WM_COMMAND, IDC_BUTTON1);
 	return TRUE;
 }
@@ -167,8 +150,6 @@ mpt::Wine::ExecuteProgressResult CExecutePosixShellScriptProgressDialog::Progres
 		return mpt::Wine::ExecuteProgressAsyncCancel;
 	}
 	::ShowWindow(::GetDlgItem(m_hWnd, IDCANCEL), allowCancel ? SW_SHOW : SW_HIDE);
-	percent = (percent + 1) % 100;
-	SetProgressPercent(percent);
 	MessageLoop();
 	if(m_bAbort)
 	{
@@ -188,7 +169,6 @@ void CExecutePosixShellScriptProgressDialog::OnButton1()
 	}
 
 	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetUTF8, m_Status));
-	SetProgressPercent(0);
 	MessageLoop();
 	if(m_bAbort)
 	{
@@ -207,7 +187,6 @@ void CExecutePosixShellScriptProgressDialog::OnButton1()
 		return;
 	}
 
-	SetProgressPercent(100);
 	MessageLoop();
 	if(m_bAbort)
 	{
