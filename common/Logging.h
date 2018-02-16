@@ -158,12 +158,6 @@ class Logger
 public:
 	// facility:ASCII
 	void SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text);
-public:
-	// facility:ASCII, text:ASCII (only string literals)
-	template <std::size_t size> MPT_FORCEINLINE void SendLogMessage(const Context &context, LogLevel level, const char *facility, const char (&text)[size])
-	{
-		SendLogMessage(context, level, facility, mpt::ToUnicode(mpt::CharsetASCII, text));
-	}
 };
 
 #define MPT_LOG(level, facility, text) \
