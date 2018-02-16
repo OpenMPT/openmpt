@@ -167,13 +167,14 @@ bool BrowseForFolder::Show(const CWnd *parent)
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 	bi.lpfn = BrowseCallbackProc;
 	bi.lParam = reinterpret_cast<LPARAM>(this);
-	LPITEMIDLIST pid = SHBrowseForFolderW(&bi);
-	if(pid != NULL && SHGetPathFromIDListW(pid, path))
+	ITEMIDLIST *pid = SHBrowseForFolderW(&bi);
+	bool success = pid != nullptr && SHGetPathFromIDListW(pid, path);
+	CoTaskMemFree(pid);
+	if(success)
 	{
 		workingDirectory = mpt::PathString::FromNative(path);
-		return true;
 	}
-	return false;
+	return success;
 }
 
 
