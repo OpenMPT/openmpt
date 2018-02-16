@@ -47,20 +47,19 @@ protected:
 
 	void OnFileNameChange() override
 	{
-		if(!m_bOpenFileDialog || !doPreview)
+		if(doPreview)
 		{
-			CFileDialog::OnFileNameChange();
-			return;
-		}
-		CString name = GetPathName();
-		if(!name.IsEmpty() && name != oldName)
-		{
-			oldName = name;
-			if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromCString(name), NOTE_MIDDLEC))
+			CString name = GetPathName();
+			if(!name.IsEmpty() && name != oldName)
 			{
-				played = true;
+				oldName = name;
+				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromCString(name), NOTE_MIDDLEC))
+				{
+					played = true;
+				}
 			}
 		}
+		CFileDialog::OnFileNameChange();
 	}
 };
 
@@ -145,6 +144,7 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 // Display the folder dialog.
 bool BrowseForFolder::Show(CWnd *parent)
 {
+	// Note: MFC's CFolderPickerDialog won't work on pre-Vista systems, as it tries to use OPENFILENAME.
 	BypassInputHandler bih;
 	TCHAR path[MAX_PATH];
 	BROWSEINFO bi;
