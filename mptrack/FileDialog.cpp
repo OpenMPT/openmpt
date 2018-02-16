@@ -87,6 +87,11 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = workdirNative.c_str();
 	}
+	dlg.AddPlace(TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().ToWide().c_str());
+	dlg.AddPlace(TrackerSettings::Instance().PathPlugins.GetDefaultDir().ToWide().c_str());
+	dlg.AddPlace(TrackerSettings::Instance().PathSamples.GetDefaultDir().ToWide().c_str());
+	dlg.AddPlace(TrackerSettings::Instance().PathInstruments.GetDefaultDir().ToWide().c_str());
+	dlg.AddPlace(TrackerSettings::Instance().PathSongs.GetDefaultDir().ToWide().c_str());
 
 	// Do it!
 	BypassInputHandler bih;
