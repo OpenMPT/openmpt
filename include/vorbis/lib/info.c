@@ -583,7 +583,8 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   oggpack_buffer opb;
   private_state *b=v->backend_state;
 
-  if(!b||vi->channels<=0){
+  if(!b||vi->channels<=0||vi->channels>256){
+    b = NULL;
     ret=OV_EFAULT;
     goto err_out;
   }
