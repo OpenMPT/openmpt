@@ -86,11 +86,20 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = workdirNative.c_str();
 	}
-	dlg.AddPlace(TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().ToWide().c_str());
-	dlg.AddPlace(TrackerSettings::Instance().PathPlugins.GetDefaultDir().ToWide().c_str());
-	dlg.AddPlace(TrackerSettings::Instance().PathSamples.GetDefaultDir().ToWide().c_str());
-	dlg.AddPlace(TrackerSettings::Instance().PathInstruments.GetDefaultDir().ToWide().c_str());
-	dlg.AddPlace(TrackerSettings::Instance().PathSongs.GetDefaultDir().ToWide().c_str());
+#if NTDDI_VERSION >= NTDDI_VISTA
+	const auto places =
+	{
+		&TrackerSettings::Instance().PathPluginPresets,
+		&TrackerSettings::Instance().PathPlugins,
+		&TrackerSettings::Instance().PathSamples,
+		&TrackerSettings::Instance().PathInstruments,
+		&TrackerSettings::Instance().PathSongs,
+	};
+	for(const auto place : places)
+	{
+		dlg.AddPlace(place->GetDefaultDir().ToWide().c_str());
+	}
+#endif
 
 	// Do it!
 	BypassInputHandler bih;
