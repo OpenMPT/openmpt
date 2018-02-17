@@ -67,24 +67,23 @@ protected:
 // Display the file dialog.
 bool FileDialog::Show(CWnd *parent)
 {
-	filenames.clear();
+	m_filenames.clear();
 
 	// First, set up the dialog...
-	CFileDialogEx dlg(load,
-		defaultExtension.empty() ? nullptr : defaultExtension.c_str(),
-		defaultFilename.c_str(),
-		OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN)),
-		extFilter.c_str(),
+	CFileDialogEx dlg(m_load,
+		m_defaultExtension.empty() ? nullptr : m_defaultExtension.c_str(),
+		m_defaultFilename.c_str(),
+		OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (m_multiSelect ? OFN_ALLOWMULTISELECT : 0) | (m_load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN)),
+		m_extFilter.c_str(),
 		parent != nullptr ? parent : CMainFrame::GetMainFrame(),
 		0,
 		TRUE,
-		preview && TrackerSettings::Instance().previewInFileDialogs);
+		m_preview && TrackerSettings::Instance().previewInFileDialogs);
 	OPENFILENAME &ofn = dlg.GetOFN();
-	ofn.nFilterIndex = filterIndex != nullptr ? *filterIndex : 0;
-	auto workdirNative = workingDirectory.AsNative();
-	if(!workdirNative.empty())
+	ofn.nFilterIndex = m_filterIndex != nullptr ? *m_filterIndex : 0;
+	if(!m_workingDirectory.empty())
 	{
-		ofn.lpstrInitialDir = workdirNative.c_str();
+		ofn.lpstrInitialDir = m_workingDirectory.c_str();
 	}
 #if NTDDI_VERSION >= NTDDI_VISTA
 	const auto places =
@@ -109,30 +108,30 @@ bool FileDialog::Show(CWnd *parent)
 	}
 
 	// Retrieve variables
-	if(filterIndex != nullptr)
-		*filterIndex = ofn.nFilterIndex;
+	if(m_filterIndex != nullptr)
+		*m_filterIndex = ofn.nFilterIndex;
 
-	if(multiSelect)
+	if(m_multiSelect)
 	{
 		// Multiple files might have been selected
 		POSITION pos = dlg.GetStartPosition();
 		while(pos != nullptr)
 		{
-			filenames.push_back(mpt::PathString::FromCString(dlg.GetNextPathName(pos)));
+			m_filenames.push_back(mpt::PathString::FromCString(dlg.GetNextPathName(pos)));
 		}
 	} else
 	{
 		// Only one file
-		filenames.push_back(mpt::PathString::FromCString(dlg.GetPathName()));
+		m_filenames.push_back(mpt::PathString::FromCString(dlg.GetPathName()));
 	}
 
-	if(filenames.empty())
+	if(m_filenames.empty())
 	{
 		return false;
 	}
 
-	workingDirectory = mpt::PathString::FromNative(filenames.front().AsNative().substr(0, ofn.nFileOffset));
-	extension = mpt::PathString::FromNative(filenames.front().AsNative().substr(ofn.nFileExtension));
+	m_workingDirectory = m_filenames.front().AsNative().substr(0, ofn.nFileOffset);
+	m_extension = m_filenames.front().AsNative().substr(ofn.nFileExtension);
 
 	return true;
 }

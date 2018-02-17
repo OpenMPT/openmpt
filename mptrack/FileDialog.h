@@ -21,40 +21,40 @@ public:
 	typedef std::vector<mpt::PathString> PathList;
 
 protected:
-	std::wstring defaultExtension;
-	std::wstring defaultFilename;
-	std::wstring extFilter;
-	std::wstring lastPreviewFile;
-	mpt::PathString workingDirectory;
-	mpt::PathString extension;
-	PathList filenames;
-	int *filterIndex = nullptr;
-	bool load;
-	bool multiSelect = false;
-	bool preview = false;
+	mpt::RawPathString m_defaultExtension;
+	mpt::RawPathString m_defaultFilename;
+	mpt::RawPathString m_extFilter;
+	mpt::RawPathString m_lastPreviewFile;
+	mpt::RawPathString m_workingDirectory;
+	mpt::RawPathString m_extension;
+	PathList m_filenames;
+	int *m_filterIndex = nullptr;
+	bool m_load;
+	bool m_multiSelect = false;
+	bool m_preview = false;
 
 protected:
-	FileDialog(bool load) : load(load) { }
+	FileDialog(bool load) : m_load(load) { }
 
 public:
 	// Default extension to use if none is specified.
-	FileDialog &DefaultExtension(const mpt::PathString &ext) { defaultExtension = ext.ToWide(); return *this; }
-	FileDialog &DefaultExtension(const std::wstring &ext) { defaultExtension = ext; return *this; }
-	FileDialog &DefaultExtension(const AnyStringLocale &ext) { defaultExtension = mpt::ToWide(ext); return *this; }
+	FileDialog &DefaultExtension(const mpt::PathString &ext) { m_defaultExtension = ext.AsNative(); return *this; }
+	FileDialog &DefaultExtension(const std::wstring &ext) { m_defaultExtension = mpt::ToWin(ext); return *this; }
+	FileDialog &DefaultExtension(const AnyStringLocale &ext) { m_defaultExtension = mpt::ToWin(ext); return *this; }
 	// Default suggested filename.
-	FileDialog &DefaultFilename(const mpt::PathString &name) { defaultFilename = name.ToWide(); return *this; }
-	FileDialog &DefaultFilename(const std::wstring &name) { defaultFilename = name; return *this; }
-	FileDialog &DefaultFilename(const AnyStringLocale &name) { defaultFilename = mpt::ToWide(name); return *this; }
+	FileDialog &DefaultFilename(const mpt::PathString &name) { m_defaultFilename = name.AsNative(); return *this; }
+	FileDialog &DefaultFilename(const std::wstring &name) { m_defaultFilename = mpt::ToWin(name); return *this; }
+	FileDialog &DefaultFilename(const AnyStringLocale &name) { m_defaultFilename = mpt::ToWin(name); return *this; }
 	// List of possible extensions. Format: "description|extensions|...|description|extensions||"
-	FileDialog &ExtensionFilter(const mpt::PathString &filter) { extFilter = filter.ToWide(); return *this; }
-	FileDialog &ExtensionFilter(const std::wstring &filter) { extFilter = filter; return *this; }
-	FileDialog &ExtensionFilter(const AnyStringLocale &filter) { extFilter = mpt::ToWide(filter); return *this; }
+	FileDialog &ExtensionFilter(const mpt::PathString &filter) { m_extFilter = filter.AsNative(); return *this; }
+	FileDialog &ExtensionFilter(const std::wstring &filter) { m_extFilter = mpt::ToWin(filter); return *this; }
+	FileDialog &ExtensionFilter(const AnyStringLocale &filter) { m_extFilter = mpt::ToWin(filter); return *this; }
 	// Default directory of the dialog.
-	FileDialog &WorkingDirectory(const mpt::PathString &dir) { workingDirectory = dir; return *this; }
+	FileDialog &WorkingDirectory(const mpt::PathString &dir) { m_workingDirectory = dir.AsNative(); return *this; }
 	// Pointer to a variable holding the index of the last extension filter to use. Holds the selected filter after the dialog has been closed.
-	FileDialog &FilterIndex(int *index) { filterIndex = index; return *this; }
+	FileDialog &FilterIndex(int *index) { m_filterIndex = index; return *this; }
 	// Enable preview of instrument files (if globally enabled).
-	FileDialog &EnableAudioPreview() { preview = true; return *this; }
+	FileDialog &EnableAudioPreview() { m_preview = true; return *this; }
 
 	// Show the file selection dialog.
 	bool Show(CWnd *parent = nullptr);
@@ -62,20 +62,20 @@ public:
 	// Get some selected file. Mostly useful when only one selected file is possible anyway.
 	mpt::PathString GetFirstFile() const
 	{
-		if(!filenames.empty())
+		if(!m_filenames.empty())
 		{
-			return filenames.front();
+			return m_filenames.front();
 		} else
 		{
 			return mpt::PathString();
 		}
 	}
 	// Gets a reference to all selected filenames.
-	const PathList &GetFilenames() const { return filenames; }
+	const PathList &GetFilenames() const { return m_filenames; }
 	// Gets directory in which the selected files are placed.
-	mpt::PathString GetWorkingDirectory() const { return workingDirectory; }
+	mpt::PathString GetWorkingDirectory() const { return mpt::PathString::FromNative(m_workingDirectory); }
 	// Gets the extension of the first selected file, without dot.
-	mpt::PathString GetExtension() const { return extension; }
+	mpt::PathString GetExtension() const { return mpt::PathString::FromNative(m_extension); }
 };
 
 
@@ -86,7 +86,7 @@ public:
 	OpenFileDialog() : FileDialog(true) { }
 
 	// Enable selection of multiple files
-	OpenFileDialog &AllowMultiSelect() { multiSelect = true; return *this; }
+	OpenFileDialog &AllowMultiSelect() { m_multiSelect = true; return *this; }
 };
 
 
