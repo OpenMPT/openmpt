@@ -97,30 +97,6 @@ public:
 
 #endif // UNICODE
 
-	std::wstring GetItemTextW(HTREEITEM item) const
-	{
-#ifdef UNICODE
-		return mpt::ToWide(GetItemText(item));
-#else
-		TVITEMW tvi;
-		tvi.hItem = item;
-		tvi.mask = TVIF_TEXT;
-		CStringW str;
-		int nLen = 128;
-		size_t nRes;
-		do
-		{
-			nLen *= 2;
-			tvi.pszText = str.GetBufferSetLength(nLen);
-			tvi.cchTextMax = nLen;
-			::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)&tvi);
-			nRes = wcslen(tvi.pszText);
-		} while (nRes >= size_t(nLen - 1));
-		str.ReleaseBuffer();
-		return mpt::ToWide(str);
-#endif // UNICODE
-	}
-
 	using CTreeCtrl::GetItem;
 	using CTreeCtrl::SetItem;
 	using CTreeCtrl::SetItemText;

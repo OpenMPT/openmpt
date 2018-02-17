@@ -382,7 +382,7 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 {
 	mpt::PathString fullPath = m_InstrLibPath;
 	fullPath.EnsureTrailingSlash();
-	return fullPath + mpt::PathString::FromWide(GetItemTextW(hItem));
+	return fullPath + mpt::PathString::FromCString(GetItemText(hItem));
 }
 
 
@@ -782,20 +782,20 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	if(generalHint.GetType()[HINT_MODTYPE | HINT_MODGENERAL] || (!info.hSong))
 	{
 		// Module folder + sub folders
-		std::wstring name = modDoc.GetPathNameMpt().GetFullFileName().ToWide();
-		if(name.empty()) name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToWide();
+		CString name = modDoc.GetPathNameMpt().GetFullFileName().ToCString();
+		if(name.IsEmpty()) name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToCString();
 
 		if(!info.hSong)
 		{
-			info.hSong = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (LPARAM)(DocInfo.size() - 1), TVI_ROOT, TVI_FIRST);
+			info.hSong = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, name, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (LPARAM)(DocInfo.size() - 1), TVI_ROOT, TVI_FIRST);
 			info.hOrders = InsertItem(_T("Sequence"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hPatterns = InsertItem(_T("Patterns"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 		} else if(generalHint.GetType()[HINT_MODGENERAL | HINT_MODTYPE])
 		{
-			if(name.c_str() != GetItemTextW(info.hSong))
+			if(name != GetItemText(info.hSong))
 			{
-				SetItemText(info.hSong, name.c_str());
+				SetItemText(info.hSong, name);
 			}
 		}
 	}
@@ -1060,7 +1060,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		if (patternHint.GetType()[HINT_PATNAMES] && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
 		bool bDelPat = false;
 
-		CString patName;
+		mpt::winstring patName;
 		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
 		{
 			if ((bDelPat) && (info.tiPatterns[iPat]))
@@ -1070,12 +1070,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			}
 			if (sndFile.Patterns.IsValidPat(iPat))
 			{
-				patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[iPat].GetName());
+				patName = mpt::ToWin(sndFile.GetCharsetInternal(), sndFile.Patterns[iPat].GetName());
 				wsprintf(s, _T("%u"), iPat);
-				if(!patName.IsEmpty())
+				if(!patName.empty())
 				{
 					_tcscat(s, _T(": "));
-					_tcscat(s, patName.GetString());
+					_tcscat(s, patName.c_str());
 				}
 				if (info.tiPatterns[iPat])
 				{
@@ -1380,7 +1380,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 
 		case MODITEM_INSLIB_SONG:
 		case MODITEM_INSLIB_FOLDER:
-			InstrumentLibraryChDir(mpt::PathString::FromWide(GetItemTextW(hItem)), modItem.type == MODITEM_INSLIB_SONG);
+			InstrumentLibraryChDir(mpt::PathString::FromCString(GetItemText(hItem)), modItem.type == MODITEM_INSLIB_SONG);
 			return TRUE;
 
 		case MODITEM_HDR_SONG:
@@ -3550,7 +3550,7 @@ void CModTree::OnRefreshInstrLib()
 			HTREEITEM hItem = GetChildItem(m_hInsLib);
 			while (hItem != NULL)
 			{
-				const mpt::PathString str = mpt::PathString::FromWide(GetItemTextW(hItem));
+				const mpt::PathString str = mpt::PathString::FromCString(GetItemText(hItem));
 				if(!mpt::PathString::CompareNoCase(str, m_InstrLibHighlightPath))
 				{
 					hActive = hItem;
