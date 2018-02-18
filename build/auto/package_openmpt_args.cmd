@@ -6,7 +6,7 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call "build\auto\setup_arguments.cmd" %1 %2 %3 %4
+call "build\auto\setup_arguments.cmd" %1 %2 %3 %4 %5 %6
 
 call build\auto\setup_vs_any.cmd
 
@@ -14,12 +14,6 @@ call build\auto\helper_get_svnversion.cmd
 call build\auto\helper_get_openmpt_version.cmd
 
 set MPT_REVISION=%OPENMPT_VERSION%-%SVNVERSION%
-
-set MPT_PKG_FORMAT=%5
-if "%MPT_PKG_FORMAT%" == "" set MPT_PKG_FORMAT=zip
-if "%MPT_PKG_FORMAT%" == "7z" set MPT_PKG_FORMAT_SYMBOLS=xz
-if "%MPT_PKG_FORMAT%" == "zip" set MPT_PKG_FORMAT_SYMBOLS=zip
-if "%MPT_PKG_FORMAT_SYMBOLS%" == "" set MPT_PKG_FORMAT_SYMBOLS=zip
 
 
 
@@ -44,8 +38,8 @@ copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
 rmdir /s /q extraKeymaps
 mkdir extraKeymaps
 copy /y ..\..\packageTemplate\extraKeymaps\*.* .\extraKeymaps\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack.exe .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack.pdb .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack%MPT_VS_FLAVOUR%.exe .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\mptrack%MPT_VS_FLAVOUR%.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\OpenMPT_SoundTouch_f32.dll .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\OpenMPT_SoundTouch_f32.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%MPT_BIN_TARGET%\openmpt-mpg123.dll .\ || goto error
@@ -58,7 +52,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
 "C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT% -mx=9 ..\openmpt\bin.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- mptrack.exe ^
+ mptrack%MPT_VS_FLAVOUR%.exe ^
  OpenMPT_SoundTouch_f32.dll ^
  openmpt-mpg123.dll ^
  PluginBridge32.exe ^
@@ -67,7 +61,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH%-%
  extraKeymaps ^
  || goto error
 mkdir ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols\mptrack.pdb.%MPT_PKG_FORMAT_SYMBOLS% mptrack.pdb || goto error
+"C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols\mptrack%MPT_VS_FLAVOUR%.pdb.%MPT_PKG_FORMAT_SYMBOLS% mptrack%MPT_VS_FLAVOUR%.pdb || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols\OpenMPT_SoundTouch_f32.pdb.%MPT_PKG_FORMAT_SYMBOLS% OpenMPT_SoundTouch_f32.pdb || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols\openmpt-mpg123.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-mpg123.pdb || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT%-%MPT_REVISION%-symbols\PluginBridge32.pdb.%MPT_PKG_FORMAT_SYMBOLS% PluginBridge32.pdb || goto error

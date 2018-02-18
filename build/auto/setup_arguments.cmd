@@ -4,11 +4,14 @@ set MPT_VS_VER=%1
 set MPT_VS_TARGET=%2
 set MPT_VS_ARCH=%3
 set MPT_VS_CONF=%4
+set MPT_PKG_FORMAT=%5
+set MPT_VS_FLAVOUR=%6
 
 if "%MPT_VS_VER%" == "" goto setupargumentserror
 if "%MPT_VS_TARGET%" == "" goto setupargumentserror
 if "%MPT_VS_ARCH%" == "" goto setupargumentserror
 if "%MPT_VS_CONF%" == "" goto setupargumentserror
+if "%MPT_PKG_FORMAT%" == "" goto setupargumentserror
 
 goto setupargumentsstart
 
@@ -85,3 +88,12 @@ if "%PROCESSOR_ARCHITECTURE%" == "x86" (
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
 	set MPT_HOST_BITNESS=64
 )
+
+
+if "%MPT_PKG_FORMAT%" == "" set MPT_PKG_FORMAT=zip
+if "%MPT_PKG_FORMAT%" == "7z" set MPT_PKG_FORMAT_SYMBOLS=xz
+if "%MPT_PKG_FORMAT%" == "zip" set MPT_PKG_FORMAT_SYMBOLS=zip
+if "%MPT_PKG_FORMAT_SYMBOLS%" == "" set MPT_PKG_FORMAT_SYMBOLS=zip
+
+
+if "%MPT_VS_FLAVOUR%" == "default" set MPT_VS_FLAVOUR=

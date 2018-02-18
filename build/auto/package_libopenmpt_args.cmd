@@ -6,7 +6,7 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call "build\auto\setup_arguments.cmd" %1 %2 %3 %4
+call "build\auto\setup_arguments.cmd" %1 %2 %3 %4 %5 %6
 
 call build\auto\setup_vs_any.cmd
 
@@ -18,9 +18,6 @@ if "x%LIBOPENMPT_VERSION_PREREL%" == "x" (
 	set MPT_REVISION=%LIBOPENMPT_VERSION_STRING%+release
 )
 
-
-set MPT_PKG_FORMAT=%5
-if "%MPT_PKG_FORMAT%" == "" set MPT_PKG_FORMAT=zip
 
 set MPT_PKG_TAG=win%MPT_DIST_VARIANT_SUFFIX%
 

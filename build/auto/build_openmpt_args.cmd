@@ -6,7 +6,7 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call "build\auto\setup_arguments.cmd" %1 %2 %3 %4
+call "build\auto\setup_arguments.cmd" %1 %2 %3 %4 %5 %6
 
 call "build\auto\setup_%MPT_VS_VER%.cmd"
 
@@ -14,7 +14,7 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
-devenv OpenMPT.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH%" || goto error
+devenv OpenMPT%MPT_VS_FLAVOUR%.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH%" || goto error
 devenv PluginBridge.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH_OTHER%" || goto error
 
 cd ..\.. || goto error
