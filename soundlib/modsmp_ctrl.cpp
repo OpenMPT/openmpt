@@ -778,7 +778,7 @@ static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
 	{
-		*pDest = mpt::rshift_signed(pSource[0] + pSource[1] + 1, 1);
+		*pDest = static_cast<T>(mpt::rshift_signed(pSource[0] + pSource[1] + 1, 1));
 	}
 }
 
@@ -885,9 +885,10 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
 
 	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16> > >(smp.pSample8, smp.nLength * smp.GetNumChannels(), 1, smp.pSample16, smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.reset(CHN_16BIT);
-	for(auto &chn : sndFile.m_PlayState.Chn) if(chn.pModSample == &smp)
+	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
-		chn.dwFlags.reset(CHN_16BIT);
+		if(chn.pModSample == &smp)
+			chn.dwFlags.reset(CHN_16BIT);
 	}
 
 	smp.PrecomputeLoops(sndFile, false);
