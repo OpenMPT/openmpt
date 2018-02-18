@@ -181,13 +181,13 @@ BOOL COptionsGeneral::OnSetActive()
 
 void COptionsGeneral::OnOptionSelChanged()
 {
-	LPCSTR pszDesc = NULL;
+	const char *desc = "";
 	const int sel = m_CheckList.GetCurSel();
 	if ((sel >= 0) && (sel < CountOf(generalOptionsList)))
 	{
-		pszDesc = generalOptionsList[sel].description;
+		desc = generalOptionsList[sel].description;
 	}
-	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetASCII, (pszDesc) ? pszDesc : ""));
+	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetASCII, desc));
 }
 
 
@@ -203,7 +203,7 @@ void COptionsGeneral::OnBrowseTemplate()
 		dlg.WorkingDirectory(basePath);
 	} else
 	{
-		if(defaultFile.ToWide().find_first_of(L"/\\") == std::wstring::npos)
+		if(defaultFile.AsNative().find_first_of(_T("/\\")) == mpt::RawPathString::npos)
 		{
 			// Relative path
 			defaultFile = basePath + defaultFile;
