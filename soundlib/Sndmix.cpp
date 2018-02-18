@@ -1028,7 +1028,10 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 			} else
 			{
 				// New behaviour, truly relative to release node
-				envval = envValueAtReleaseJump * envval / envValueAtReleaseNode;
+				if(envValueAtReleaseNode > 0)
+					envval = envValueAtReleaseJump * envval / envValueAtReleaseNode;
+				else
+					envval = 0;
 			}
 		}
 		vol = (vol * Clamp(envval, 0, 512)) / 256;
