@@ -289,9 +289,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -318,9 +320,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -356,9 +360,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -393,9 +399,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -423,9 +431,11 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -452,9 +462,11 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -490,9 +502,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -527,9 +541,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -557,9 +573,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -586,9 +604,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -622,9 +642,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -657,9 +679,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
