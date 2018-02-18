@@ -1,8 +1,8 @@
 /*
- * ModSmp_Ctrl.cpp
+ * modsmp_ctrl.cpp
  * ---------------
  * Purpose: Basic sample editing code (resizing, adding silence, normalizing, ...).
- * Notes  : Could be merged with ModSample.h / ModSample.cpp at some point.
+ * Notes  : Most of this stuff is not required in libopenmpt and should be moved to tracker-specific files. The rest could be merged into struct ModSample.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace ctrlSmp
 {
 
-void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength, CSoundFile &sndFile)
+void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength newLength, CSoundFile &sndFile)
 {
 	void * const pOldSmp = smp.pSample;
 	FlagSet<ChannelFlags> setFlags, resetFlags;
@@ -33,20 +33,20 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile, smp, pNewSample, nNewLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile, smp, pNewSample, newLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
-	smp.nLength = nNewLength;
+	smp.nLength = newLength;
 	ModSample::FreeSample(pOldSmp);
 }
 
 
-SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile &sndFile)
+SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, CSoundFile &sndFile)
 {
-	if(nSilenceLength == 0 || nSilenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength || nStartFrom > smp.nLength)
+	if(silenceLength == 0 || silenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - silenceLength || startFrom > smp.nLength)
 		return smp.nLength;
 
-	const bool wasEmpty = smp.nLength == 0 || smp.pSample == nullptr;
-	const SmpLength newLength = smp.nLength + nSilenceLength;
+	const bool wasEmpty = !smp.HasSampleData();
+	const SmpLength newLength = smp.nLength + silenceLength;
 
 	char *pNewSmp = nullptr;
 
@@ -57,25 +57,25 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	if(!wasEmpty)
 	{
 		// Copy over old sample
-		const SmpLength silenceOffset = nStartFrom * smp.GetBytesPerSample();
-		const SmpLength silenceBytes = nSilenceLength * smp.GetBytesPerSample();
-		if(nStartFrom > 0)
+		const SmpLength silenceOffset = startFrom * smp.GetBytesPerSample();
+		const SmpLength silenceBytes = silenceLength * smp.GetBytesPerSample();
+		if(startFrom > 0)
 		{
 			memcpy(pNewSmp, smp.pSample, silenceOffset);
 		}
-		if(nStartFrom < smp.nLength)
+		if(startFrom < smp.nLength)
 		{
 			memcpy(pNewSmp + silenceOffset + silenceBytes, static_cast<const char *>(smp.pSample) + silenceOffset, smp.GetSampleSizeInBytes() - silenceOffset);
 		}
 
 		// Update loop points if necessary.
-		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
-		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
-		if(smp.nSustainStart >= nStartFrom) smp.nSustainStart += nSilenceLength;
-		if(smp.nSustainEnd >= nStartFrom) smp.nSustainEnd += nSilenceLength;
-		for(std::size_t i = 0; i < CountOf(smp.cues); i++)
+		if(smp.nLoopStart >= startFrom) smp.nLoopStart += silenceLength;
+		if(smp.nLoopEnd >= startFrom) smp.nLoopEnd += silenceLength;
+		if(smp.nSustainStart >= startFrom) smp.nSustainStart += silenceLength;
+		if(smp.nSustainEnd >= startFrom) smp.nSustainEnd += silenceLength;
+		for(auto &cue : smp.cues)
 		{
-			if(smp.cues[i] >= nStartFrom) smp.cues[i] += nSilenceLength;
+			if(cue >= startFrom) cue += silenceLength;
 		}
 	} else
 	{
@@ -135,41 +135,41 @@ SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSou
 }
 
 
-SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &sndFile)
+SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sndFile)
 {
 	// Invalid sample size
-	if(nNewLength > MAX_SAMPLE_LENGTH || nNewLength == smp.nLength)
+	if(newLength > MAX_SAMPLE_LENGTH || newLength == smp.nLength)
 		return smp.nLength;
 
 	// New sample will be bigger so we'll just use "InsertSilence" as it's already there.
-	if(nNewLength > smp.nLength)
-		return InsertSilence(smp, nNewLength - smp.nLength, smp.nLength, sndFile);
+	if(newLength > smp.nLength)
+		return InsertSilence(smp, newLength - smp.nLength, smp.nLength, sndFile);
 
 	// Else: Shrink sample
 
-	const SmpLength nNewSmpBytes = nNewLength * smp.GetBytesPerSample();
+	const SmpLength newSmpBytes = newLength * smp.GetBytesPerSample();
 
-	void *pNewSmp = ModSample::AllocateSample(nNewLength, smp.GetBytesPerSample());
+	void *pNewSmp = ModSample::AllocateSample(newLength, smp.GetBytesPerSample());
 	if(pNewSmp == nullptr)
 		return smp.nLength; //Sample allocation failed.
 
 	// Copy over old data and replace sample by the new one
-	memcpy(pNewSmp, smp.pSample, nNewSmpBytes);
-	ReplaceSample(smp, pNewSmp, nNewLength, sndFile);
+	memcpy(pNewSmp, smp.pSample, newSmpBytes);
+	ReplaceSample(smp, pNewSmp, newLength, sndFile);
 
 	// Adjust loops
-	if(smp.nLoopStart > nNewLength)
+	if(smp.nLoopStart > newLength)
 	{
 		smp.nLoopStart = smp.nLoopEnd = 0;
 		smp.uFlags.reset(CHN_LOOP);
 	}
-	if(smp.nLoopEnd > nNewLength) smp.nLoopEnd = nNewLength;
-	if(smp.nSustainStart > nNewLength)
+	if(smp.nLoopEnd > newLength) smp.nLoopEnd = newLength;
+	if(smp.nSustainStart > newLength)
 	{
 		smp.nSustainStart = smp.nSustainEnd = 0;
 		smp.uFlags.reset(CHN_SUSTAINLOOP);
 	}
-	if(smp.nSustainEnd > nNewLength) smp.nSustainEnd = nNewLength;
+	if(smp.nSustainEnd > newLength) smp.nSustainEnd = newLength;
 
 	PrecomputeLoops(smp, sndFile);
 
@@ -300,7 +300,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 
 bool PrecomputeLoops(ModSample &smp, CSoundFile &sndFile, bool updateChannels)
 {
-	if(smp.nLength == 0 || smp.pSample == nullptr)
+	if(!smp.HasSampleData())
 		return false;
 
 	smp.SanitizeLoops();
@@ -554,24 +554,24 @@ static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
 }
 
 // Reverse sample data
-bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
+bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData()) return false;
-	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
 	{
-		iStart = 0;
-		iEnd = smp.nLength;
+		start = 0;
+		end = smp.nLength;
 	}
 
-	if(iEnd - iStart < 2) return false;
+	if(end - start < 2) return false;
 
 	STATIC_ASSERT(MaxSamplingPointSize <= 4);
 	if(smp.GetBytesPerSample() == 4)	// 16 bit stereo
-		ReverseSampleImpl(static_cast<int32 *>(smp.pSample) + iStart, iEnd - iStart);
+		ReverseSampleImpl(static_cast<int32 *>(smp.pSample) + start, end - start);
 	else if(smp.GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
-		ReverseSampleImpl(smp.pSample16 + iStart, iEnd - iStart);
+		ReverseSampleImpl(smp.pSample16 + start, end - start);
 	else if(smp.GetBytesPerSample() == 1)	// 8 bit mono
-		ReverseSampleImpl(smp.pSample8 + iStart, iEnd - iStart);
+		ReverseSampleImpl(smp.pSample8 + start, end - start);
 	else
 		return false;
 
@@ -581,30 +581,30 @@ bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 
 
 template <class T>
-static void UnsignSampleImpl(T *pStart, const SmpLength nLength)
+static void UnsignSampleImpl(T *pStart, const SmpLength length)
 {
 	const T offset = (std::numeric_limits<T>::min)();
-	for(SmpLength i = 0; i < nLength; i++)
+	for(SmpLength i = 0; i < length; i++)
 	{
 		pStart[i] += offset;
 	}
 }
 
 // Virtually unsign sample data
-bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
+bool UnsignSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData()) return false;
-	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
 	{
-		iStart = 0;
-		iEnd = smp.nLength;
+		start = 0;
+		end = smp.nLength;
 	}
-	iStart *= smp.GetNumChannels();
-	iEnd *= smp.GetNumChannels();
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
 	if(smp.GetElementarySampleSize() == 2)
-		UnsignSampleImpl(smp.pSample16 + iStart, iEnd - iStart);
+		UnsignSampleImpl(smp.pSample16 + start, end - start);
 	else if(smp.GetElementarySampleSize() == 1)
-		UnsignSampleImpl(smp.pSample8 + iStart, iEnd - iStart);
+		UnsignSampleImpl(smp.pSample8 + start, end - start);
 	else
 		return false;
 
@@ -614,29 +614,29 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 
 template <class T>
-static void InvertSampleImpl(T *pStart, const SmpLength nLength)
+static void InvertSampleImpl(T *pStart, const SmpLength length)
 {
-	for(SmpLength i = 0; i < nLength; i++)
+	for(SmpLength i = 0; i < length; i++)
 	{
 		pStart[i] = ~pStart[i];
 	}
 }
 
 // Invert sample data (flip by 180 degrees)
-bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile)
+bool InvertSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData()) return false;
-	if(iEnd == 0 || iStart > smp.nLength || iEnd > smp.nLength)
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
 	{
-		iStart = 0;
-		iEnd = smp.nLength;
+		start = 0;
+		end = smp.nLength;
 	}
-	iStart *= smp.GetNumChannels();
-	iEnd *= smp.GetNumChannels();
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
 	if(smp.GetElementarySampleSize() == 2)
-		InvertSampleImpl(smp.pSample16 + iStart, iEnd - iStart);
+		InvertSampleImpl(smp.pSample16 + start, end - start);
 	else if(smp.GetElementarySampleSize() == 1)
-		InvertSampleImpl(smp.pSample8 + iStart, iEnd - iStart);
+		InvertSampleImpl(smp.pSample8 + start, end - start);
 	else
 		return false;
 
@@ -778,7 +778,7 @@ static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
 	{
-		*pDest = (pSource[0] + pSource[1] + 1) >> 1;
+		*pDest = mpt::rshift_signed(pSource[0] + pSource[1] + 1, 1);
 	}
 }
 
@@ -923,41 +923,40 @@ namespace ctrlChn
 void ReplaceSample( CSoundFile &sndFile,
 					const ModSample &sample,
 					const void * const pNewSample,
-					const SmpLength nNewLength,
+					const SmpLength newLength,
 					FlagSet<ChannelFlags> setFlags,
 					FlagSet<ChannelFlags> resetFlags)
 {
 	const bool periodIsFreq = sndFile.PeriodsAreFrequencies();
-	auto begin = sndFile.m_PlayState.Chn, end = sndFile.m_PlayState.Chn + CountOf(sndFile.m_PlayState.Chn);
-	for (auto chn = begin; chn != end; chn++)
+	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
-		if (chn->pModSample == &sample)
+		if(chn.pModSample == &sample)
 		{
-			if (chn->pCurrentSample != nullptr)
-				chn->pCurrentSample = pNewSample;
-			if (chn->position.GetUInt() > nNewLength)
-				chn->position.Set(0);
-			if (chn->nLength > 0)
-				LimitMax(chn->nLength, nNewLength);
-			if(chn->InSustainLoop())
+			if(chn.pCurrentSample != nullptr)
+				chn.pCurrentSample = pNewSample;
+			if(chn.position.GetUInt() > newLength)
+				chn.position.Set(0);
+			if(chn.nLength > 0)
+				LimitMax(chn.nLength, newLength);
+			if(chn.InSustainLoop())
 			{
-				chn->nLoopStart = sample.nSustainStart;
-				chn->nLoopEnd = sample.nSustainEnd;
+				chn.nLoopStart = sample.nSustainStart;
+				chn.nLoopEnd = sample.nSustainEnd;
 			} else
 			{
-				chn->nLoopStart = sample.nLoopStart;
-				chn->nLoopEnd = sample.nLoopEnd;
+				chn.nLoopStart = sample.nLoopStart;
+				chn.nLoopEnd = sample.nLoopEnd;
 			}
-			chn->dwFlags.set(setFlags);
-			chn->dwFlags.reset(resetFlags);
-			if(chn->nC5Speed && sample.nC5Speed && !sndFile.UseFinetuneAndTranspose())
+			chn.dwFlags.set(setFlags);
+			chn.dwFlags.reset(resetFlags);
+			if(chn.nC5Speed && sample.nC5Speed && !sndFile.UseFinetuneAndTranspose())
 			{
 				if(periodIsFreq)
-					chn->nPeriod = Util::muldivr_unsigned(chn->nPeriod, sample.nC5Speed, chn->nC5Speed);
+					chn.nPeriod = Util::muldivr_unsigned(chn.nPeriod, sample.nC5Speed, chn.nC5Speed);
 				else
-					chn->nPeriod = Util::muldivr_unsigned(chn->nPeriod, chn->nC5Speed, sample.nC5Speed);
+					chn.nPeriod = Util::muldivr_unsigned(chn.nPeriod, chn.nC5Speed, sample.nC5Speed);
 			}
-			chn->nC5Speed = sample.nC5Speed;
+			chn.nC5Speed = sample.nC5Speed;
 		}
 	}
 }
