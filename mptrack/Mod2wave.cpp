@@ -982,14 +982,14 @@ void CDoWaveConvert::Run()
 	if(m_Settings.silencePlugBuffers)
 	{
 		SetText(_T("Clearing plugin buffers"));
-		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		for(auto &plug : m_SndFile.m_MixPlugins)
 		{
-			if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
+			if(plug.pMixPlugin != nullptr)
 			{
 				// Render up to 20 seconds per plugin
 				for(int j = 0; j < 20; j++)
 				{
-					const float maxVal = m_SndFile.m_MixPlugins[i].pMixPlugin->RenderSilence(samplerate);
+					const float maxVal = plug.pMixPlugin->RenderSilence(samplerate);
 					if(maxVal <= FLT_EPSILON)
 					{
 						break;
@@ -1041,7 +1041,7 @@ void CDoWaveConvert::Run()
 
 	// Calculate maximum samples
 	uint64 max = m_dwSongLimit ? ullMaxSamples : uint64_max;
-	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_SndFile.GetRepeatCount());
+	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate;
 
 	// Reset song position tracking
 	m_SndFile.ResetPlayPos();
@@ -1053,7 +1053,7 @@ void CDoWaveConvert::Run()
 		m_SndFile.m_nMaxOrderPosition = m_Settings.maxOrder + 1;
 		m_SndFile.SetRepeatCount(0);
 
-		// Weird calculations ahead...
+		// This is all but accurate.
 		ORDERINDEX dwOrds = m_SndFile.Order().GetLengthFirstEmpty();
 		PATTERNINDEX maxPatterns = m_Settings.maxOrder - m_Settings.minOrder + 1;
 		if((maxPatterns < dwOrds) && (dwOrds > 0)) l = (l * maxPatterns) / dwOrds;
@@ -1061,6 +1061,8 @@ void CDoWaveConvert::Run()
 	{
 		m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
 	}
+	l *= std::max(1, 1 + m_SndFile.GetRepeatCount());
+
 	m_SndFile.SetCurrentOrder(startOrder);
 	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
 	m_SndFile.m_PlayState.m_nCurrentOrder = startOrder;
