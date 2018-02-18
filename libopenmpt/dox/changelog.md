@@ -11,7 +11,7 @@ is just a high-level summary.
     start command and are following another pattern loop.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
  *  MED: Correctly import patterns with less channels than the maximum used
-    amount.
+    amount. Import "STP" note stop command.
 
 ### libopenmpt 0.3.6 (2018-02-03)
 

@@ -30,6 +30,26 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.06.00 (* March 2018, revision 9713)
+-----------------------------------------
+Sample tab
+   [Fix] <js> Shortcuts with Shift key for Normalize and DC Removal no longer clash with the Shift modifier for applying those actions to all samples.
+
+Other formats
+   [Imp] <js> MED: Import "STP" note stop command.
+
+Stream Export
+   [Imp] <js> More accurate estimation of export duration for order list selections.
+   [Fix] <js> Spin buttons for sequence and order selection export were not enabled correctly.
+   [Fix] <js> Correctly estimate song length when the song is played more than one time (http://bugs.openmpt.org/view.php?id=1088).
+
+Misc
+   [Fix] <js> Small memory leak when browsing for folders.
+
+Third-Party Libraries
+   [Mod] Update libvorbis (v1.3.5+x TODO)
+
+
 v1.27.05.00 (11 February 2018, revision 9643)
 ---------------------------------------------
 Pattern tab
