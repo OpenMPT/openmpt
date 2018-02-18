@@ -164,16 +164,16 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2017xp/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017xp/PluginBridge.vcxproj")
 
-  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT.vcxproj")
-  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT.vcxproj")
-  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-custom.vcxproj")
-  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-custom.vcxproj")
-  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-ANSI.vcxproj")
-  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-ANSI.vcxproj")
-  --postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-UTF8.vcxproj")
-  --postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-UTF8.vcxproj")
-  --postprocess_vs2010_nonxcompat("build/vs2017win10/PluginBridge.vcxproj")
-  --postprocess_vs2010_disabledpiaware("build/vs2017win10/PluginBridge.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2017win10/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2017win10/PluginBridge.vcxproj")
 
  end
 }

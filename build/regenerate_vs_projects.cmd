@@ -79,17 +79,17 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=OpenMPT vs2017 --xp || goto err
 %PREMAKE% --group=all-externals vs2017 --xp || goto err
 
-rem %PREMAKE% --group=libopenmpt_test vs2017 --win10 || goto err
-rem %PREMAKE% --group=foo_openmpt vs2017 --win10 || goto err
-rem %PREMAKE% --group=in_openmpt vs2017 --win10 || goto err
-rem %PREMAKE% --group=xmp-openmpt vs2017 --win10 || goto err
-rem %PREMAKE% --group=libopenmpt-full vs2017 --win10 || goto err
-rem %PREMAKE% --group=libopenmpt-small vs2017 --win10 || goto err
-rem %PREMAKE% --group=libopenmpt vs2017 --win10 || goto err
-rem %PREMAKE% --group=openmpt123 vs2017 --win10 || goto err
-rem %PREMAKE% --group=PluginBridge vs2017 --win10 || goto err
-rem %PREMAKE% --group=OpenMPT vs2017 --win10 || goto err
-rem %PREMAKE% --group=all-externals vs2017 --win10 || goto err
+%PREMAKE% --group=libopenmpt_test vs2017 --win10 || goto err
+%PREMAKE% --group=foo_openmpt vs2017 --win10 || goto err
+%PREMAKE% --group=in_openmpt vs2017 --win10 || goto err
+%PREMAKE% --group=xmp-openmpt vs2017 --win10 || goto err
+%PREMAKE% --group=libopenmpt-full vs2017 --win10 || goto err
+%PREMAKE% --group=libopenmpt-small vs2017 --win10 || goto err
+%PREMAKE% --group=libopenmpt vs2017 --win10 || goto err
+%PREMAKE% --group=openmpt123 vs2017 --win10 || goto err
+%PREMAKE% --group=PluginBridge vs2017 --win10 || goto err
+%PREMAKE% --group=OpenMPT vs2017 --win10 || goto err
+%PREMAKE% --group=all-externals vs2017 --win10 || goto err
 
 %PREMAKE% postprocess || goto err
 
