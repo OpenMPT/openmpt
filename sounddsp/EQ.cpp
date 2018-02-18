@@ -10,7 +10,6 @@
 
 
 #include "stdafx.h"
-#include "../soundlib/Sndfile.h"
 #include "../soundlib/MixerLoops.h"
 #include "../sounddsp/EQ.h"
 
