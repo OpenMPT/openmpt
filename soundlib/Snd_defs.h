@@ -468,6 +468,7 @@ enum PlayBehaviour
 	kMODTempoOnSecondTick,			// ProTracker sets tempo after the first tick
 
 	kFT2PanSustainRelease,			// If the sustain point of a panning envelope is reached before key-off, FT2 does not escape it anymore
+	kLegacyReleaseNode,				// Legacy release node volume processing
 
 	// Add new play behaviours here.
 

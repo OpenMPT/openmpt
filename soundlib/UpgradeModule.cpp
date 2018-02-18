@@ -402,6 +402,18 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 28, 00, 12))
+	{
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			if(Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
+			{
+				m_playBehaviour.set(kLegacyReleaseNode);
+				break;
+			}
+		}
+	}
+
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
 
 	// Convert compatibility flags

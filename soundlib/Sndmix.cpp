@@ -1020,8 +1020,16 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 			if(envpos == pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick)
 				envval = envValueAtReleaseNode;
 
-			int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
-			envval = envValueAtReleaseJump + relativeVolumeChange;
+			if(m_playBehaviour[kLegacyReleaseNode])
+			{
+				// Old, hard to grasp release node behaviour (additive)
+				int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
+				envval = envValueAtReleaseJump + relativeVolumeChange;
+			} else
+			{
+				// New behaviour, truly relative to release node
+				envval = envValueAtReleaseJump * envval / envValueAtReleaseNode;
+			}
 		}
 		vol = (vol * Clamp(envval, 0, 512)) / 256;
 	}
@@ -1496,6 +1504,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 					{
 						// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
 						// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
+						// Note that ScreamTracker 2.24 handles arpeggio slightly differently: It only considers the lower
+						// nibble, and switches to that note halfway through the row.
 						pChn->nPeriod = period;
 					} else if(m_playBehaviour[KST3PortaAfterArpeggio])
 					{
