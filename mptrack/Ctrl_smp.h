@@ -80,6 +80,9 @@ public:
 	void OpenSamples(const std::vector<mpt::PathString> &files, FlagSet<OpenSampleTypes> types);
 	void SaveSample(bool doBatchSave);
 
+	void Normalize(bool allSamples);
+	void RemoveDCOffset(bool allSamples);
+
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:

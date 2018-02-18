@@ -510,11 +510,11 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case IDC_SAMPLE_DCOFFSET:
-		OnRemoveDCOffset();
+		RemoveDCOffset(false);
 		break;
 
 	case IDC_SAMPLE_NORMALIZE:
-		OnNormalize();
+		Normalize(false);
 		break;
 
 	case IDC_SAMPLE_AMPLIFY:
@@ -1481,15 +1481,14 @@ static bool DoNormalize(T *p, SmpLength selStart, SmpLength selEnd)
 }
 
 
-void CCtrlSamples::OnNormalize()
+void CCtrlSamples::Normalize(bool allSamples)
 {
 	//Default case: Normalize current sample
 	SAMPLEINDEX minSample = m_nSample, maxSample = m_nSample;
 	//If only one sample is selected, parts of it may be amplified
 	SmpLength selStart = 0, selEnd = 0;
 
-	//Shift -> Normalize all samples
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(allSamples)
 	{
 		if(Reporting::Confirm(_T("This will normalize all samples independently. Continue?"), _T("Normalize")) == cnfNo)
 			return;
@@ -1498,7 +1497,6 @@ void CCtrlSamples::OnNormalize()
 	} else
 	{
 		SampleSelectionPoints selection = GetSelectionPoints();
-
 		selStart = selection.nStart;
 		selEnd = selection.nEnd;
 	}
@@ -1560,12 +1558,18 @@ void CCtrlSamples::OnNormalize()
 }
 
 
-void CCtrlSamples::OnRemoveDCOffset()
+void CCtrlSamples::OnNormalize()
+{
+	Normalize(CMainFrame::GetInputHandler()->ShiftPressed());
+}
+
+
+void CCtrlSamples::RemoveDCOffset(bool allSamples)
 {
 	SAMPLEINDEX minSample = m_nSample, maxSample = m_nSample;
 
 	//Shift -> Process all samples
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(allSamples)
 	{
 		if(Reporting::Confirm(_T("This will process all samples independently. Continue?"), _T("DC Offset Removal")) == cnfNo)
 			return;
@@ -1633,6 +1637,12 @@ void CCtrlSamples::OnRemoveDCOffset()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	pMainFrm->SetXInfoText(dcInfo);
 
+}
+
+
+void CCtrlSamples::OnRemoveDCOffset()
+{
+	RemoveDCOffset(CMainFrame::GetInputHandler()->ShiftPressed());
 }
 
 
