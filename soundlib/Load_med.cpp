@@ -942,12 +942,15 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				for (uint32 x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
 				{
 					uint8 note = s[0];
-					if ((note) && (note <= 132))
+					if(note & 0x7F)
 					{
 						int rnote = note + playtransp;
 						if (rnote < 1) rnote = 1;
 						if (rnote > NOTE_MAX) rnote = NOTE_MAX;
 						p->note = (uint8)rnote;
+					} else if(note == 0x80)
+					{
+						p->note = NOTE_NOTECUT;
 					}
 					p->instr = s[1];
 					p->command = s[2];

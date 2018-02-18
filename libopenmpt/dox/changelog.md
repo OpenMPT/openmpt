@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta30
 
+ *  MED: Correctly import patterns with less channels than the maximum used
+    amount. Import "STP" note stop command.
+
 ### libopenmpt 0.2-beta29 (2018-01-28)
 
  *  [**Bug**] VS2015 project files targetting Windows XP did not set compiler
