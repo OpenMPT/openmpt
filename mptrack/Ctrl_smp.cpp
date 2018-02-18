@@ -1581,7 +1581,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 
 	// for report / SetModified
 	SAMPLEINDEX numModified = 0;
-	float fReportOffset = 0;
+	double reportOffset = 0;
 
 	for(SAMPLEINDEX smp = minSample; smp <= maxSample; smp++)
 	{
@@ -1603,12 +1603,12 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 
 		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_update, "Remove DC Offset", selStart, selEnd);
 
-		const float fOffset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(smp), selStart, selEnd, m_sndFile.GetType(), m_sndFile);
+		const double offset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(smp), selStart, selEnd, m_sndFile);
 
-		if(fOffset == 0.0f) // No offset removed.
+		if(offset == 0.0f) // No offset removed.
 			continue;
 
-		fReportOffset += fOffset;
+		reportOffset += offset;
 		numModified++;
 		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data());
 	}
@@ -1624,10 +1624,10 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 		SetModified(SampleHint().Info().Data(), true, true);
 		if(numModified == 1)
 		{
-			dcInfo.Format(_T("Removed DC offset (%.1f%%)"), fReportOffset * 100);
+			dcInfo.Format(_T("Removed DC offset (%.1f%%)"), reportOffset * 100);
 		} else
 		{
-			dcInfo.Format(_T("Removed DC offset from %u samples (avg %0.1f%%)"), numModified, fReportOffset / numModified * 100);
+			dcInfo.Format(_T("Removed DC offset from %u samples (avg %0.1f%%)"), numModified, reportOffset / numModified * 100);
 		}
 	} else
 	{

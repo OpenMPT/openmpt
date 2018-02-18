@@ -59,13 +59,7 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 
 // Remove DC offset and normalize.
 // Return: If DC offset was removed, returns original offset value, zero otherwise.
-float RemoveDCOffset(ModSample &smp,
-					 SmpLength iStart,		// Start position (for partial DC offset removal).
-					 SmpLength iEnd,		// End position (for partial DC offset removal).
-					 const MODTYPE modtype,	// Used to determine whether to adjust global or default volume
-											// to keep volume level the same given the normalization.
-											// Volume adjustment is not done if this param is MOD_TYPE_NONE.
-					 CSoundFile &sndFile);	// Passed to AdjustEndOfSample.
+double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
 
 // Amplify / fade  sample data
 bool AmplifySample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile, double amplifyStart, double amplifyEnd);

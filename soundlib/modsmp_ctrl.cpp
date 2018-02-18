@@ -428,7 +428,7 @@ namespace
 {
 	struct OffsetData
 	{
-		double dMax, dMin, dOffset;
+		double max = 0.0, min = 0.0, offset = 0.0;
 	};
 
 	// Returns maximum sample amplitude for given sample type (int8/int16).
@@ -438,102 +438,97 @@ namespace
 	// Calculates DC offset and returns struct with DC offset, max and min values.
 	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
 	template<class T>
-	OffsetData CalculateOffset(const T *pStart, const SmpLength nLength)
+	OffsetData CalculateOffset(const T *pStart, const SmpLength length)
 	{
-		OffsetData offsetVals = {0,0,0};
+		OffsetData offsetVals;
 
-		if(nLength < 1)
+		if(length < 1)
 			return offsetVals;
 
-		const double dMaxAmplitude = GetMaxAmplitude<T>();
-
-		double dMax = -1, dMin = 1, dSum = 0;
+		const double maxAmplitude = GetMaxAmplitude<T>();
+		double max = -1, min = 1, sum = 0;
 
 		const T *p = pStart;
-		for(SmpLength i = 0; i < nLength; i++, p++)
+		for(SmpLength i = 0; i < length; i++, p++)
 		{
-			const double dVal = double(*p) / dMaxAmplitude;
-			dSum += dVal;
-			if(dVal > dMax) dMax = dVal;
-			if(dVal < dMin) dMin = dVal;
+			const double val = double(*p) / maxAmplitude;
+			sum += val;
+			if(val > max) max = val;
+			if(val < min) min = val;
 		}
 
-		offsetVals.dMax = dMax;
-		offsetVals.dMin = dMin;
-		offsetVals.dOffset = (-dSum / (double)(nLength));
+		offsetVals.max = max;
+		offsetVals.min = min;
+		offsetVals.offset = (-sum / (double)(length));
 		return offsetVals;
 	}
 
 	template <class T>
-	void RemoveOffsetAndNormalize(T *pStart, const SmpLength nLength, const double dOffset, const double dAmplify)
+	void RemoveOffsetAndNormalize(T *pStart, const SmpLength length, const double offset, const double amplify)
 	{
 		T *p = pStart;
-		for(SmpLength i = 0; i < nLength; i++, p++)
+		for(SmpLength i = 0; i < length; i++, p++)
 		{
-			double dVal = (*p) * dAmplify + dOffset;
-			*p = mpt::saturate_cast<T>(dVal);
+			double var = (*p) * amplify + offset;
+			*p = Util::Round<T>(var);
 		}
 	}
 }
 
 
 // Remove DC offset
-float RemoveDCOffset(ModSample &smp,
-					 SmpLength iStart,
-					 SmpLength iEnd,
-					 const MODTYPE modtype,
-					 CSoundFile &sndFile)
+double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData())
 		return 0;
 
-	if (iEnd > smp.nLength) iEnd = smp.nLength;
-	if (iStart > iEnd) iStart = iEnd;
-	if (iStart == iEnd)
+	if(end > smp.nLength) end = smp.nLength;
+	if(start > end) start = end;
+	if(start == end)
 	{
-		iStart = 0;
-		iEnd = smp.nLength;
+		start = 0;
+		end = smp.nLength;
 	}
 
-	iStart *= smp.GetNumChannels();
-	iEnd *= smp.GetNumChannels();
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
 
-	const double dMaxAmplitude = (smp.GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
+	const double maxAmplitude = (smp.GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
 
 	// step 1: Calculate offset.
-	OffsetData oData = {0,0,0};
+	OffsetData oData;
 	if(smp.GetElementarySampleSize() == 2)
-		oData = CalculateOffset(smp.pSample16 + iStart, iEnd - iStart);
+		oData = CalculateOffset(smp.pSample16 + start, end - start);
 	else if(smp.GetElementarySampleSize() == 1)
-		oData = CalculateOffset(smp.pSample8 + iStart, iEnd - iStart);
+		oData = CalculateOffset(smp.pSample8 + start, end - start);
+	else
+		return 0;
 
-	double dMin = oData.dMin, dMax = oData.dMax, dOffset = oData.dOffset;
+	double offset = oData.offset;
 
-	const float fReportOffset = (float)dOffset;
-
-	if((int)(dOffset * dMaxAmplitude) == 0)
+	if((int)(offset * maxAmplitude) == 0)
 		return 0;
 
 	// those will be changed...
-	dMax += dOffset;
-	dMin += dOffset;
+	oData.max += offset;
+	oData.min += offset;
 
 	// ... and that might cause distortion, so we will normalize this.
-	const double dAmplify = 1 / std::max(dMax, -dMin);
+	const double amplify = 1 / std::max(oData.max, -oData.min);
 
 	// step 2: centralize + normalize sample
-	dOffset *= dMaxAmplitude * dAmplify;
+	offset *= maxAmplitude * amplify;
 	if(smp.GetElementarySampleSize() == 2)
-		RemoveOffsetAndNormalize(smp.pSample16 + iStart, iEnd - iStart, dOffset, dAmplify);
+		RemoveOffsetAndNormalize(smp.pSample16 + start, end - start, offset, amplify);
 	else if(smp.GetElementarySampleSize() == 1)
-		RemoveOffsetAndNormalize(smp.pSample8 + iStart, iEnd - iStart, dOffset, dAmplify);
+		RemoveOffsetAndNormalize(smp.pSample8 + start, end - start, offset, amplify);
 
 	// step 3: adjust global vol (if available)
-	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == smp.nLength * smp.GetNumChannels()))
+	if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (start == 0) && (end == smp.nLength * smp.GetNumChannels()))
 	{
 		CriticalSection cs;
 
-		smp.nGlobalVol = std::min(Util::Round<uint16>(smp.nGlobalVol / dAmplify), uint16(64));
+		smp.nGlobalVol = std::min(Util::Round<uint16>(smp.nGlobalVol / amplify), uint16(64));
 		for(auto &chn : sndFile.m_PlayState.Chn)
 		{
 			if(chn.pModSample == &smp)
@@ -545,7 +540,7 @@ float RemoveDCOffset(ModSample &smp,
 
 	PrecomputeLoops(smp, sndFile, false);
 
-	return fReportOffset;
+	return oData.offset;
 }
 
 
