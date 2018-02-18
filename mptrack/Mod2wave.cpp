@@ -592,7 +592,7 @@ void CWaveConvert::OnFormatChanged()
 void CWaveConvert::UpdateDialog()
 {
 	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? BST_CHECKED : 0);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
+	GetDlgItem(IDC_EDIT2)->EnableWindow(m_dwSongLimit ? TRUE : FALSE);
 
 	// Repeat / selection play
 	int sel = IDC_RADIO1;
@@ -601,6 +601,8 @@ void CWaveConvert::UpdateDialog()
 
 	GetDlgItem(IDC_EDIT3)->EnableWindow(sel == IDC_RADIO2);
 	GetDlgItem(IDC_EDIT4)->EnableWindow(sel == IDC_RADIO2);
+	m_SpinMinOrder.EnableWindow(sel == IDC_RADIO2);
+	m_SpinMaxOrder.EnableWindow(sel == IDC_RADIO2);
 
 	GetDlgItem(IDC_EDIT5)->EnableWindow(sel == IDC_RADIO1);
 	m_SpinLoopCount.EnableWindow(sel == IDC_RADIO1);
@@ -609,8 +611,8 @@ void CWaveConvert::UpdateDialog()
 	const BOOL enableSeq = (numSequences > 1 && sel == IDC_RADIO3) ? TRUE : FALSE;
 	GetDlgItem(IDC_EDIT12)->EnableWindow(enableSeq);
 	GetDlgItem(IDC_EDIT13)->EnableWindow(enableSeq);
-	m_SpinMinOrder.EnableWindow(enableSeq);
-	m_SpinMaxOrder.EnableWindow(enableSeq);
+	m_SpinMinSequence.EnableWindow(enableSeq);
+	m_SpinMaxSequence.EnableWindow(enableSeq);
 
 	// No free slots => Cannot do instrument- or channel-based export to sample
 	BOOL canDoMultiExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
@@ -1044,27 +1046,32 @@ void CDoWaveConvert::Run()
 
 	// Calculate maximum samples
 	uint64 max = m_dwSongLimit ? ullMaxSamples : uint64_max;
-	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate;
 
 	// Reset song position tracking
 	m_SndFile.ResetPlayPos();
 	m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
 	ORDERINDEX startOrder = 0;
+	GetLengthTarget target;
 	if(m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID)
 	{
-		startOrder = m_Settings.minOrder;
-		m_SndFile.m_nMaxOrderPosition = m_Settings.maxOrder + 1;
 		m_SndFile.SetRepeatCount(0);
-
-		// This is all but accurate.
-		ORDERINDEX dwOrds = m_SndFile.Order().GetLengthFirstEmpty();
-		PATTERNINDEX maxPatterns = m_Settings.maxOrder - m_Settings.minOrder + 1;
-		if((maxPatterns < dwOrds) && (dwOrds > 0)) l = (l * maxPatterns) / dwOrds;
+		startOrder = m_Settings.minOrder;
+		ORDERINDEX endOrder = m_Settings.maxOrder;
+		while(!m_SndFile.Order().IsValidPat(endOrder) && endOrder > startOrder)
+		{
+			endOrder--;
+		}
+		if(m_SndFile.Order().IsValidPat(endOrder))
+		{
+			target = GetLengthTarget(endOrder, m_SndFile.Patterns[m_SndFile.Order()[endOrder]].GetNumRows() - 1);
+		}
+		target.StartPos(m_SndFile.Order.GetCurrentSequenceIndex(), startOrder, 0);
+		m_SndFile.m_nMaxOrderPosition = endOrder + 1;
 	} else
 	{
 		m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
 	}
-	l *= std::max(1, 1 + m_SndFile.GetRepeatCount());
+	uint64 l = Util::Round<uint64>(m_SndFile.GetLength(eNoAdjust, target).front().duration * samplerate * (1 + m_SndFile.GetRepeatCount()));
 
 	m_SndFile.SetCurrentOrder(startOrder);
 	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
