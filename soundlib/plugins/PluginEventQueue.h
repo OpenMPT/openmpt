@@ -133,7 +133,7 @@ public:
 		if(numEvents)
 		{
 			// Release temporarily allocated buffer for SysEx messages
-			for(typename std::deque<Event>::iterator e = eventQueue.begin(); e != eventQueue.begin() + numEvents; e++)
+			for(auto e = eventQueue.begin(); e != eventQueue.begin() + numEvents; ++e)
 			{
 				if(e->event.type == kVstSysExType)
 				{
