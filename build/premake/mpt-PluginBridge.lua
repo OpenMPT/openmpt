@@ -49,7 +49,20 @@
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter {}
 
-	if _OPTIONS["xp"] then
+	if _OPTIONS["win10"] then
+		filter { "architecture:x86" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-64-win10\" mkdir \"$(TargetDir)\\..\\x86-64-win10\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win10\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-win10\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86_64" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\x86-32-win10\" mkdir \"$(TargetDir)\\..\\x86-32-win10\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win10\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-win10\\$(TargetName).pdb\"",
+			}
+	elseif _OPTIONS["xp"] then
 		filter { "architecture:x86" }
 			postbuildcommands {
 				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
