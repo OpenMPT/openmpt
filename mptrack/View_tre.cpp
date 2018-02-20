@@ -635,9 +635,8 @@ void CModTree::RefreshDlsBanks()
 				TV_SORTCB tvs;
 				CDLSBank *pDlsBank = CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
-				std::wstring name = pDlsBank->GetFileName().GetFullFileName().ToWide();
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
+					pDlsBank->GetFileName().GetFullFileName().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
@@ -1656,14 +1655,14 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_INSLIB_INSTRUMENT:
 		{
 			// Create double-null-terminated path
-			const std::wstring fullPath = InsLibGetFullPath(hItem).ToWide() + L'\0';
-			SHFILEOPSTRUCTW fos;
+			const mpt::winstring fullPath = InsLibGetFullPath(hItem).AsNative() + _T('\0');
+			SHFILEOPSTRUCT fos;
 			MemsetZero(fos);
 			fos.hwnd = m_hWnd;
 			fos.wFunc = FO_DELETE;
 			fos.pFrom = fullPath.c_str();
 			fos.fFlags = CMainFrame::GetInputHandler()->ShiftPressed() ? 0 : FOF_ALLOWUNDO;
-			if ((0 == SHFileOperationW(&fos)) && (!fos.fAnyOperationsAborted)) RefreshInstrumentLibrary();
+			if ((0 == SHFileOperation(&fos)) && (!fos.fAnyOperationsAborted)) RefreshInstrumentLibrary();
 		}
 		break;
 	}
@@ -2085,14 +2084,14 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		if(dir == MPT_PATHSTRING(".."))
 		{
 			// Go one dir up.
-			std::wstring prevDir = m_InstrLibPath.GetPath().ToWide();
-			std::wstring::size_type pos = prevDir.find_last_of(L"\\/", prevDir.length() - 2);
-			if(pos != std::wstring::npos)
+			mpt::winstring prevDir = m_InstrLibPath.GetPath().AsNative();
+			mpt::winstring::size_type pos = prevDir.find_last_of(_T("\\/"), prevDir.length() - 2);
+			if(pos != mpt::winstring::npos)
 			{
-				m_InstrLibHighlightPath = mpt::PathString::FromWide(prevDir.substr(pos + 1, prevDir.length() - pos - 2));	// Highlight previously accessed directory
+				m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));	// Highlight previously accessed directory
 				prevDir = prevDir.substr(0, pos + 1);
 			}
-			dir = mpt::PathString::FromWide(prevDir);
+			dir = mpt::PathString::FromNative(prevDir);
 		} else
 		{
 			// Drives are formatted like "E:\", folders are just folder name without slash.
@@ -2136,7 +2135,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		m_WatchDir = mpt::PathString();
 	} else
 	{
-		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
+		mpt::winstring s = _T("Unable to browse to \"") + dir.AsNative() + _T("\"");
 		Reporting::Error(s, L"Instrument Library");
 	}
 }
