@@ -355,38 +355,22 @@ typedef uint32 tick_t;
 struct TrackState
 {
 	FileReader track;
-	tick_t nextEvent;
-	uint8 command;
-	bool finished;
-
-	TrackState()
-		: nextEvent(0)
-		, command(0)
-		, finished(false)
-	{ }
+	tick_t nextEvent = 0;
+	uint8 command = 0;
+	bool finished = false;
 };
 
 struct ModChannelState
 {
 	static const uint8 NOMIDI = 0xFF;	// No MIDI channel assigned.
 
-	tick_t age;				// At which MIDI tick the channel was triggered
-	int32 porta;			// Current portamento position in extra-fine slide units (1/64th of a semitone)
-	uint8 vol;				// MIDI note volume (0...127)
-	uint8 pan;				// MIDI channel panning (0...256)
-	uint8 midiCh;			// MIDI channel that was last played on this channel
-	ModCommand::NOTE note;	// MIDI note that was last played on this channel
-	bool sustained : 1;		// If true, the note was already released by a note-off event, but sustain pedal CC is still active
-
-	ModChannelState()
-		: age(0)
-		, porta(0)
-		, vol(100)
-		, pan(128)
-		, midiCh(NOMIDI)
-		, note(NOTE_NONE)
-		, sustained(false)
-	{ }
+	tick_t age = 0;						// At which MIDI tick the channel was triggered
+	int32 porta = 0;					// Current portamento position in extra-fine slide units (1/64th of a semitone)
+	uint8 vol = 100;					// MIDI note volume (0...127)
+	uint8 pan = 128;					// MIDI channel panning (0...256)
+	uint8 midiCh = NOMIDI;				// MIDI channel that was last played on this channel
+	ModCommand::NOTE note = NOTE_NONE;	// MIDI note that was last played on this channel
+	bool sustained = false;				// If true, the note was already released by a note-off event, but sustain pedal CC is still active
 };
 
 struct MidiChannelState
@@ -405,7 +389,7 @@ struct MidiChannelState
 	bool  monoMode : 1;    // Mono/Poly operation       126/127  n/a        Poly
 	bool  sustain : 1;     // Sustain pedal             64       on/off     off
 
-	CHANNELINDEX noteOn[128];	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
+	std::array<CHANNELINDEX, 128> noteOn;	// Value != CHANNELINDEX_INVALID: Note is active and mapped to mod channel in value
 
 	MidiChannelState()
 		: pitchbendMod(0)
@@ -421,10 +405,7 @@ struct MidiChannelState
 		, monoMode(false)
 		, sustain(false)
 	{
-		for(auto &note : noteOn)
-		{
-			note = CHANNELINDEX_INVALID;
-		}
+		noteOn.assign(CHANNELINDEX_INVALID);
 	}
 
 	void SetPitchbend(uint16 value)
@@ -827,16 +808,20 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		} else
 		{
+			uint8 command = tracks[t].command;
 			if(data1 & 0x80)
 			{
-				// Command byte (if not present, repeat previous command byte)
-				tracks[t].command = data1;
+				// Command byte (if not present, use running status for channel messages)
+				command = data1;
 				if(data1 < 0xF0)
+				{
+					tracks[t].command = data1;
 					data1 = track.ReadUint8();
+				}
 			}
-			uint8 midiCh = tracks[t].command & 0x0F;
+			uint8 midiCh = command & 0x0F;
 
-			switch(tracks[t].command & 0xF0)
+			switch(command & 0xF0)
 			{
 			case 0x80: // Note Off
 			case 0x90: // Note On
@@ -844,7 +829,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					data1 &= 0x7F;
 					ModCommand::NOTE note = static_cast<ModCommand::NOTE>(Clamp(data1 + NOTE_MIN, NOTE_MIN, NOTE_MAX));
 					uint8 data2 = track.ReadUint8();
-					if(data2 > 0 && (tracks[t].command & 0xF0) == 0x90)
+					if(data2 > 0 && (command & 0xF0) == 0x90)
 					{
 						// Note On
 						CHANNELINDEX chn = FindUnusedChannel(midiCh, note, modChnStatus, midiChnStatus[midiCh].monoMode, patRow);
