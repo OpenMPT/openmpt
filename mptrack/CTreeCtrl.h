@@ -85,22 +85,10 @@ public:
 		return InsertItem(tvi);
 	}
 
-	void SetItemText(HTREEITEM item, const WCHAR *text)
-	{
-		TVITEMW tvi;
-		MemsetZero(tvi);
-		tvi.hItem = item;
-		tvi.mask = TVIF_TEXT;
-		tvi.pszText = const_cast<WCHAR *>(text);
-		::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)&tvi);
-	}
-
-#endif // UNICODE
-
 	using CTreeCtrl::GetItem;
 	using CTreeCtrl::SetItem;
-	using CTreeCtrl::SetItemText;
 	using CTreeCtrl::InsertItem;
+#endif // UNICODE
 };
 
 

@@ -1783,14 +1783,12 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		}
 	} else
 	{
-		std::wstring text;
 		if(!IsSampleBrowser())
 		{
-			text = L"Instrument Library (" + m_InstrLibPath.ToWide() + L")";
-			SetItemText(m_hInsLib, text.c_str());
+			SetItemText(m_hInsLib, _T("Instrument Library (") + m_InstrLibPath.ToCString() + _T(")"));
 		} else
 		{
-			SetItemText(m_hInsLib, m_InstrLibPath.ToWide().c_str());
+			SetItemText(m_hInsLib, m_InstrLibPath.ToCString());
 			SetItemImage(m_hInsLib, IMAGE_FOLDER, IMAGE_FOLDER);
 		}
 
