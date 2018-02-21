@@ -368,7 +368,7 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
-		Reporting::Error(mpt::ToUnicode(mpt::CharsetUTF8, error.what() ? std::string(error.what()) : std::string()), MPT_USTRING("OpenMPT Internet Update Error"));
+		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), MPT_USTRING("OpenMPT Internet Update Error"));
 	}
 }
 

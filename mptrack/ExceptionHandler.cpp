@@ -551,7 +551,7 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 		errorMessage = mpt::format(MPT_USTRING("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
 			( mpt::ToUnicode(mpt::CharsetASCII, typeid(e).name())
 			, mpt::ufmt::hex0<sizeof(void*)*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
-			, mpt::ToUnicode(mpt::CharsetUTF8, e.what() ? e.what() : "")
+			, mpt::get_exception_text<mpt::ustring>(e)
 			);
 	} else
 	{

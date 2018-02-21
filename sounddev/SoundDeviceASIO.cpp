@@ -702,7 +702,7 @@ bool CASIODevice::InternalOpen()
 
 	} catch(const std::exception &e)
 	{
-		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Error opening device: %1!"))(mpt::ToUnicode(mpt::CharsetASCII, e.what() ? e.what() : "")));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Error opening device: %1!"))(mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(...)
 	{
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Unknown error opening device!"))());

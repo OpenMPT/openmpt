@@ -182,7 +182,7 @@ void CExecutePosixShellScriptProgressDialog::OnButton1()
 		m_ExecResult = wine.ExecutePosixShellScript(m_script, m_Flags, m_Filetree, m_Title, &ProgressCallback, &ProgressCancelCallback, this);
 	} catch(const mpt::Wine::Exception &e)
 	{
-		m_ExceptionString = e.what();
+		m_ExceptionString = mpt::get_exception_text<std::string>(e);
 		EndDialog(IDCANCEL);
 		return;
 	}

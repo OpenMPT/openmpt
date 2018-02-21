@@ -572,7 +572,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				}
 			} catch(const mpt::Wine::Exception & e)
 			{
-				text += MPT_USTRING("Exception: ") + mpt::ToUnicode(mpt::CharsetASCII, e.what()) + MPT_USTRING("\n");
+				text += MPT_USTRING("Exception: ") + mpt::get_exception_text<mpt::ustring>(e) + MPT_USTRING("\n");
 			}
 			break;
 	}
