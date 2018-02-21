@@ -25,6 +25,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt
 {
+
+
 namespace String
 {
 
@@ -46,12 +48,7 @@ namespace String
 
 
 } // namespace String
-} // namespace mpt
 
-
-
-namespace mpt
-{
 
 
 template <typename Tstring, typename Tchar>
@@ -265,13 +262,9 @@ inline CStringBufRefImpl<Tchar> CStringBuf(Tchar (&buf)[size])
 
 
 
-} // nameswpace mpt
 
 
-
-
-
-namespace mpt { namespace String
+namespace String
 {
 
 
@@ -634,7 +627,10 @@ namespace mpt { namespace String
 #endif // MPT_COMPILER_MSVC
 
 
-} } // namespace mpt::String
+} // namespace String
+
+
+} // namespace mpt
 
 
 
