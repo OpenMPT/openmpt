@@ -162,7 +162,7 @@ heuristic.
  *  AnyString (OpenMPT, libopenmpt)
     Tries to do the smartest auto-magic we can do.
 
- *  AnyLocaleString (OpenMPT, libopenmpt)
+ *  AnyStringLocale (OpenMPT, libopenmpt)
     char-based strings are assumed to be in locale encoding.
 
  *  AnyStringUTF8orLocale (OpenMPT, libopenmpt)
