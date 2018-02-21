@@ -405,7 +405,7 @@ struct MidiChannelState
 		, monoMode(false)
 		, sustain(false)
 	{
-		noteOn.assign(CHANNELINDEX_INVALID);
+		noteOn.fill(CHANNELINDEX_INVALID);
 	}
 
 	void SetPitchbend(uint16 value)
