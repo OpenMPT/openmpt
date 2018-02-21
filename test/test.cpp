@@ -1294,7 +1294,6 @@ static MPT_NOINLINE void TestMisc2()
 	{
 		mpt::UUID uuid = mpt::UUID::Generate();
 		VERIFY_EQUAL(uuid, mpt::UUID::FromString(mpt::UUID(uuid).ToUString()));
-		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToUUID(Util::UUIDToString(uuid))));
 		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToGUID(Util::GUIDToString(uuid))));
 		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToIID(Util::IIDToString(uuid))));
 		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToCLSID(Util::CLSIDToString(uuid))));
@@ -1302,13 +1301,10 @@ static MPT_NOINLINE void TestMisc2()
 	{
 		GUID guid = mpt::UUID::Generate();
 		VERIFY_EQUAL(IsEqualGUID(guid, static_cast<GUID>(mpt::UUID::FromString(mpt::UUID(guid).ToUString()))), TRUE);
-		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToUUID(Util::UUIDToString(guid))), TRUE);
 		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToGUID(Util::GUIDToString(guid))), TRUE);
 		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToIID(Util::IIDToString(guid))), TRUE);
 		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToCLSID(Util::CLSIDToString(guid))), TRUE);
 	}
-	VERIFY_EQUAL("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid, mpt::UUID(Util::StringToUUID(MPT_USTRING("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"))));
-	VERIFY_EQUAL(Util::UUIDToString("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid), MPT_USTRING("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
 #endif
 	VERIFY_EQUAL(mpt::UUID::Generate().IsValid(), true);
 	VERIFY_EQUAL(mpt::UUID::GenerateLocalUseOnly().IsValid(), true);
