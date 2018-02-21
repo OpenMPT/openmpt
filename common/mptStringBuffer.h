@@ -45,6 +45,15 @@ namespace String
 		// Writing: A space-padded string with a trailing null is written.
 		spacePaddedNull
 	};
+	
+	namespace detail
+	{
+
+	std::string ReadStringBuffer(String::ReadWriteMode mode, const char *srcBuffer, std::size_t srcSize);
+
+	void WriteStringBuffer(String::ReadWriteMode mode, char *destBuffer, const std::size_t destSize, const char *srcBuffer, const std::size_t srcSize);
+
+	} // namespace detail
 
 
 } // namespace String
@@ -347,46 +356,12 @@ namespace String
 
 		dest.clear();
 
-		if(mode == nullTerminated || mode == spacePaddedNull)
+		try
 		{
-			// We assume that the last character of the source buffer is null.
-			if(srcSize > 0)
-			{
-				srcSize -= 1;
-			}
-		}
-
-		if(mode == nullTerminated || mode == maybeNullTerminated)
+			dest = mpt::String::detail::ReadStringBuffer(mode, src, srcSize);
+		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
-
-			// Copy null-terminated string, stopping at null.
-			try
-			{
-				dest.assign(src, std::find(src, src + srcSize, '\0'));
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			}
-
-		} else if(mode == spacePadded || mode == spacePaddedNull)
-		{
-
-			try
-			{
-				// Copy string over.
-				dest.assign(src, src + srcSize);
-
-				// Convert null characters to spaces.
-				std::transform(dest.begin(), dest.end(), dest.begin(), [] (char c) -> char { return (c != '\0') ? c : ' '; });
-
-				// Trim trailing spaces.
-				dest = mpt::String::RTrim(dest, std::string(" "));
-				
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-			}
-
+			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		}
 	}
 
@@ -491,38 +466,8 @@ namespace String
 	{
 		MPT_ASSERT(destSize > 0);
 
-		const size_t maxSize = std::min(destSize, srcSize);
-		char *dst = destBuffer;
-		const char *src = srcBuffer;
+		mpt::String::detail::WriteStringBuffer(mode, destBuffer, destSize, srcBuffer, srcSize);
 
-		// First, copy over null-terminated string.
-		size_t pos = maxSize;
-		while(pos > 0)
-		{
-			if((*dst = *src) == '\0')
-			{
-				break;
-			}
-			pos--;
-			dst++;
-			src++;
-		}
-
-		if(mode == nullTerminated || mode == maybeNullTerminated)
-		{
-			// Fill rest of string with nulls.
-			std::fill(dst, dst + destSize - maxSize + pos, '\0');
-		} else if(mode == spacePadded || mode == spacePaddedNull)
-		{
-			// Fill the rest of the destination string with spaces.
-			std::fill(dst, dst + destSize - maxSize + pos, ' ');
-		}
-
-		if(mode == nullTerminated || mode == spacePaddedNull)
-		{
-			// Make sure that destination is really null-terminated.
-			SetNullTerminator(destBuffer, destSize);
-		}
 	}
 
 	// Copy a string from srcBuffer to a dynamically sized std::vector destBuffer using a given write mode.

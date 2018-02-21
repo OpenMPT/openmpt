@@ -513,6 +513,7 @@
     <ClCompile Include="..\..\common\mptPathString.cpp" />
     <ClCompile Include="..\..\common\mptRandom.cpp" />
     <ClCompile Include="..\..\common\mptString.cpp" />
+    <ClCompile Include="..\..\common\mptStringBuffer.cpp" />
     <ClCompile Include="..\..\common\mptStringFormat.cpp" />
     <ClCompile Include="..\..\common\mptStringParse.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />

@@ -425,6 +425,9 @@
     <ClCompile Include="..\..\common\mptString.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\mptStringBuffer.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\mptStringFormat.cpp">
       <Filter>common</Filter>
     </ClCompile>
