@@ -122,71 +122,90 @@ inline StringBufRefImpl<Tstring, Tchar> StringBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }
+template <typename Tstring, typename Tchar>
+inline StringBufRefImpl<Tstring, Tchar> StringBuf(Tchar * buf, std::size_t size)
+{
+	return StringBufRefImpl<Tstring, Tchar>(buf, size);
+}
 
 template <typename Tchar, std::size_t size>
 inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> AutoStringBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar>(buf, size);
 }
+template <typename Tchar>
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> AutoStringBuf(Tchar * buf, std::size_t size)
+{
+	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar>(buf, size);
+}
 
 
 template <typename Tchar>
-class CharsetStringBufRefImpl
+class StringModeBufRefImpl
 {
 private:
-	StringBufRefImpl<std::string, Tchar> strbuf;
-	mpt::Charset charset;
+	Tchar * buf;
+	std::size_t size;
+	String::ReadWriteMode mode;
 public:
-	explicit CharsetStringBufRefImpl(Tchar * buf, std::size_t size, mpt::Charset charset)
-		: strbuf(buf, size)
-		, charset(charset)
+	StringModeBufRefImpl(Tchar * buf, std::size_t size, String::ReadWriteMode mode)
+		: buf(buf)
+		, size(size)
+		, mode(mode)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
 		MPT_ASSERT(size > 0);
 	}
-	CharsetStringBufRefImpl(const CharsetStringBufRefImpl &) = delete;
-	CharsetStringBufRefImpl(CharsetStringBufRefImpl &&) = default;
-	CharsetStringBufRefImpl & operator = (const CharsetStringBufRefImpl &) = delete;
-	CharsetStringBufRefImpl & operator = (CharsetStringBufRefImpl &&) = delete;
-	operator mpt::ustring () const
+	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
+	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
+	StringModeBufRefImpl & operator = (const StringModeBufRefImpl &) = delete;
+	StringModeBufRefImpl & operator = (StringModeBufRefImpl &&) = delete;
+	operator std::string () const
 	{
-		return mpt::ToUnicode(charset, strbuf);
+		return String::detail::ReadStringBuffer(mode, buf, size);
 	}
-	CharsetStringBufRefImpl & operator = (const mpt::ustring & ustr)
+	StringModeBufRefImpl & operator = (const std::string & str)
 	{
-		strbuf = mpt::ToCharset(charset, ustr);
+		String::detail::WriteStringBuffer(mode, buf, size, str.data(), str.size());
 		return *this;
 	}
 };
 
 template <typename Tchar>
-class CharsetStringBufRefImpl<const Tchar>
+class StringModeBufRefImpl<const Tchar>
 {
 private:
-	StringBufRefImpl<std::string, const Tchar> strbuf;
-	mpt::Charset charset;
+	const Tchar * buf;
+	std::size_t size;
+	String::ReadWriteMode mode;
 public:
-	explicit CharsetStringBufRefImpl(const Tchar * buf, std::size_t size)
-		: strbuf(buf, size)
-		, charset(charset)
+	StringModeBufRefImpl(const Tchar * buf, std::size_t size, String::ReadWriteMode mode)
+		: buf(buf)
+		, size(size)
+		, mode(mode)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
 		MPT_ASSERT(size > 0);
 	}
-	CharsetStringBufRefImpl(const CharsetStringBufRefImpl &) = delete;
-	CharsetStringBufRefImpl(CharsetStringBufRefImpl &&) = default;
-	CharsetStringBufRefImpl & operator = (const CharsetStringBufRefImpl &) = delete;
-	CharsetStringBufRefImpl & operator = (CharsetStringBufRefImpl &&) = delete;
-	operator mpt::ustring () const
+	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
+	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
+	StringModeBufRefImpl & operator = (const StringModeBufRefImpl &) = delete;
+	StringModeBufRefImpl & operator = (StringModeBufRefImpl &&) = delete;
+	operator std::string () const
 	{
-		return mpt::ToUnicode(charset, strbuf);
+		return String::detail::ReadStringBuffer(mode, buf, size);
 	}
 };
 
 template <typename Tchar, std::size_t size>
-inline CharsetStringBufRefImpl<Tchar> StringBuf(mpt::Charset charset, Tchar (&buf)[size])
+inline StringModeBufRefImpl<Tchar> StringBuf(String::ReadWriteMode mode, Tchar (&buf)[size])
 {
-	return CharsetStringBufRefImpl<Tchar>(buf, size, charset);
+	return StringModeBufRefImpl<Tchar>(buf, size, mode);
+}
+template <typename Tchar>
+inline StringModeBufRefImpl<Tchar> StringBuf(String::ReadWriteMode mode, Tchar * buf, std::size_t size)
+{
+	return StringModeBufRefImpl<Tchar>(buf, size, mode);
 }
 
 
@@ -196,6 +215,11 @@ inline CharsetStringBufRefImpl<Tchar> StringBuf(mpt::Charset charset, Tchar (&bu
 
 template <typename Tchar, std::size_t size>
 inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WinStringBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar>(buf, size);
+}
+template <typename Tchar>
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WinStringBuf(Tchar * buf, std::size_t size)
 {
 	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar>(buf, size);
 }
@@ -259,6 +283,11 @@ public:
 
 template <typename Tchar, std::size_t size>
 inline CStringBufRefImpl<Tchar> CStringBuf(Tchar (&buf)[size])
+{
+	return CStringBufRefImpl<Tchar>(buf, size);
+}
+template <typename Tchar>
+inline CStringBufRefImpl<Tchar> CStringBuf(Tchar * buf, std::size_t size)
 {
 	return CStringBufRefImpl<Tchar>(buf, size);
 }
