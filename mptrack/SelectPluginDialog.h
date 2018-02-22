@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "CTreeCtrl.h"
 #include "../common/ComponentManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -27,7 +26,7 @@ class CSelectPluginDlg: public CDialog
 protected:
 	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
-	CTreeCtrlW m_treePlugins;
+	CTreeCtrl m_treePlugins;
 	CButton m_chkBridge, m_chkShare;
 	mpt::ustring m_nameFilter;
 #ifndef NO_VST
@@ -36,7 +35,7 @@ protected:
 #endif
 	PLUGINDEX m_nPlugSlot;
 
-	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *parent);
