@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <bitset>
+#include "../common/mptThread.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -28,7 +29,7 @@ class CSoundFile;
 struct ModTreeDocInfo
 {
 	// Tree state variables
-	std::vector<std::vector<HTREEITEM> > tiOrders;
+	std::vector<std::vector<HTREEITEM>> tiOrders;
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
 	CModDoc &modDoc;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
@@ -60,13 +61,7 @@ public:
 };
 
 
-OPENMPT_NAMESPACE_END
-#include "CTreeCtrl.h"
-#include "../common/mptThread.h"
-OPENMPT_NAMESPACE_BEGIN
-
-
-class CModTree: public CTreeCtrlW
+class CModTree: public CTreeCtrl
 {
 protected:
 

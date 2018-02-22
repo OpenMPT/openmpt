@@ -474,7 +474,7 @@ void CModTree::AddDocument(CModDoc &modDoc)
 	try
 	{
 		DocInfo.push_back(std::make_unique<ModTreeDocInfo>(modDoc));
-		auto & pInfo = DocInfo.back();
+		auto &pInfo = DocInfo.back();
 
 		UpdateView(*pInfo, UpdateHint().ModType());
 		if(pInfo->hSong)
@@ -635,7 +635,7 @@ void CModTree::RefreshDlsBanks()
 		{
 			if(!m_tiDLS[iDls])
 			{
-				TV_SORTCB tvs;
+				TVSORTCB tvs;
 				CDLSBank *pDlsBank = CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
@@ -770,7 +770,7 @@ void CModTree::RefreshInstrumentLibrary()
 void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 {
 	TCHAR s[256], stmp[256];
-	TV_ITEM tvi;
+	TVITEM tvi;
 	MemsetZero(tvi);
 	const FlagSet<HintType> hintType = hint.GetType();
 	if (IsSampleBrowser() || hintType == HINT_NONE) return;
@@ -1244,7 +1244,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	// Instrument Library
 	if(hRootParent == m_hInsLib || (IsSampleBrowser() && hItem != m_hInsLib))
 	{
-		TV_ITEM tvi;
+		TVITEM tvi;
 		tvi.mask = TVIF_IMAGE|TVIF_HANDLE;
 		tvi.hItem = hItem;
 		tvi.iImage = 0;
@@ -1907,7 +1907,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	}
 	
 	// Sort items
-	TV_SORTCB tvs;
+	TVSORTCB tvs;
 	tvs.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
 	tvs.lpfnCompare = ModTreeInsLibCompareProc;
 	tvs.lParam = (LPARAM)this;
@@ -3364,7 +3364,7 @@ void CModTree::OnReloadItem()
 		if(!sndFile.LoadExternalSample(smpID, sndFile.GetSamplePath(smpID)))
 		{
 			pModDoc->GetSampleUndo().RemoveLastUndoStep(smpID);
-			Reporting::Error(L"Unable to load sample:\n" + sndFile.GetSamplePath(smpID).ToWide());
+			Reporting::Error(_T("Unable to load sample:\n") + sndFile.GetSamplePath(smpID).AsNative());
 		} else
 		{
 			if(!sndFile.GetSample(smpID).uFlags[SMP_KEEPONDISK])
@@ -3697,7 +3697,7 @@ bool CModTree::IsItemExpanded(HTREEITEM hItem)
 {
 	// checks if a treeview item is expanded.
 	if(hItem == NULL) return false;
-	TV_ITEM tvi;
+	TVITEM tvi;
 	tvi.mask = TVIF_HANDLE | TVIF_STATE;
 	tvi.state = 0;
 	tvi.stateMask = TVIS_EXPANDED;

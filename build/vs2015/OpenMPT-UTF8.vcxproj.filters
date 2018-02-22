@@ -183,9 +183,6 @@
     <ClInclude Include="..\..\mptrack\CListCtrl.h">
       <Filter>mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mptrack\CTreeCtrl.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mptrack\ChannelManagerDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
