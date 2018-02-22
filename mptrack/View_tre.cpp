@@ -539,9 +539,9 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 
 void CModTree::RefreshMidiLibrary()
 {
-	std::wstring s;
-	WCHAR stmp[256];
-	TV_ITEMW tvi;
+	CString s;
+	CString stmp;
+	TVITEM tvi;
 	const MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
 
 	if (IsSampleBrowser()) return;
@@ -550,29 +550,30 @@ void CModTree::RefreshMidiLibrary()
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_INSTRMUTE;
-		s = mpt::wfmt::val(iMidi) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
+		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
 		{
-			s += L": " + midiLib.MidiMap[iMidi].GetFullFileName().ToWide();
+			s += _T(": ") + midiLib.MidiMap[iMidi].GetFullFileName().ToCString();
 			dwImage = IMAGE_INSTRUMENTS;
 		}
 		if (!m_tiMidi[iMidi])
 		{
 			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s.c_str(), dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
+							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiMidi[iMidi];
-			tvi.pszText = stmp;
-			tvi.cchTextMax = sizeof(stmp);
+			tvi.pszText = stmp.GetBuffer(s.GetLength() + 1);
+			tvi.cchTextMax = stmp.GetAllocLength();
 			tvi.iImage = tvi.iSelectedImage = dwImage;
 			GetItem(&tvi);
+			s.ReleaseBuffer();
 			if(s != stmp || tvi.iImage != (int)dwImage)
 			{
 				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-					s.c_str(), dwImage, dwImage, 0, 0, param);
+					s, dwImage, dwImage, 0, 0, param);
 			}
 		}
 		if((iMidi % 8u) == 7u)
@@ -584,29 +585,31 @@ void CModTree::RefreshMidiLibrary()
 	for (UINT iPerc=24; iPerc<=84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
-		s = mpt::ToWide(mpt::CharsetASCII, CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames())) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
+		s = mpt::ToCString(mpt::CharsetASCII, CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
+			+ _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib.MidiMap[iPerc | 0x80].empty())
 		{
-			s += L": " + midiLib.MidiMap[iPerc | 0x80].GetFullFileName().ToWide();
+			s += _T(": ") + midiLib.MidiMap[iPerc | 0x80].GetFullFileName().ToCString();
 			dwImage = IMAGE_SAMPLES;
 		}
 		if (!m_tiPerc[iPerc])
 		{
 			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s.c_str(), dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
+							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiPerc[iPerc];
-			tvi.pszText = stmp;
-			tvi.cchTextMax = sizeof(stmp);
+			tvi.pszText = stmp.GetBuffer(s.GetLength() + 1);
+			tvi.cchTextMax = stmp.GetAllocLength();
 			tvi.iImage = tvi.iSelectedImage = dwImage;
 			GetItem(&tvi);
+			s.ReleaseBuffer();
 			if(s != stmp || tvi.iImage != (int)dwImage)
 			{
-				SetItem(m_tiPerc[iPerc], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s.c_str(), dwImage, dwImage, 0, 0, param);
+				SetItem(m_tiPerc[iPerc], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
+							s, dwImage, dwImage, 0, 0, param);
 			}
 		}
 	}
@@ -747,14 +750,14 @@ void CModTree::RefreshInstrumentLibrary()
 {
 	SetRedraw(FALSE);
 	// Check if the currently selected item should be selected after refreshing
-	mpt::winstring oldItem;
+	CString oldItem;
 	if((IsSampleBrowser() || GetParentRootItem(GetSelectedItem()) == m_hInsLib)
 		&& GetItemText(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToCString())
 	{
 		oldItem = GetItemText(GetSelectedItem());
 	}
 	EmptyInstrumentLibrary();
-	FillInstrumentLibrary(oldItem.c_str());
+	FillInstrumentLibrary(oldItem);
 	SetRedraw(TRUE);
 	if(!IsSampleBrowser())
 	{
