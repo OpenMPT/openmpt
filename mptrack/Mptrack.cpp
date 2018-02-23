@@ -797,7 +797,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::handleStdUnexpected = true;
 		ExceptionHandler::handleMfcExceptions = true;
 		ExceptionHandler::debugExceptionHandler = true;
-	}	else if(IsDebuggerPresent() || cmdInfo.m_bNoCrashHandler)
+	} else if(IsDebuggerPresent() || cmdInfo.m_bNoCrashHandler)
 	{
 		ExceptionHandler::useAnyCrashHandler = false;
 		ExceptionHandler::useImplicitFallbackSEH = false;
@@ -1835,6 +1835,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
 	CDialog pluginScanDlg;
+	CWnd *textWnd = nullptr;
 	DWORD scanStart = GetTickCount();
 
 	// Read tags for built-in plugins
@@ -1853,9 +1854,12 @@ BOOL CTrackApp::InitializeDXPlugins()
 	}
 
 	m_pPluginManager->reserve(numPlugins);
+	auto plugIDFormat = mpt::format("Plugin%1");
+	auto scanFormat = mpt::cformat(_T("Scanning Plugin %1 / %2...\n%3"));
+	auto tagFormat = mpt::format("Plugin%1.Tags");
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), MPT_PATHSTRING(""));
+		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>("VST Plugins", plugIDFormat(plug), mpt::PathString());
 		if(!plugPath.empty())
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
@@ -1866,17 +1870,17 @@ BOOL CTrackApp::InitializeDXPlugins()
 				pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
 				pluginScanDlg.ShowWindow(SW_SHOW);
 				pluginScanDlg.CenterWindow(gpSplashScreen);
-			} else if(pluginScanDlg.m_hWnd)
+				textWnd = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+			} else if(pluginScanDlg.m_hWnd && GetTickCount() >= scanStart + 30)
 			{
-				CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-				CString scanStr = mpt::format(CString(_T("Scanning Plugin %1 / %2...\n%3")))(plug + 1, numPlugins + 1, plugPath);
-				text->SetWindowText(scanStr);
+				textWnd->SetWindowText(scanFormat(plug + 1, numPlugins + 1, plugPath));
 				MSG msg;
 				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
 					::TranslateMessage(&msg);
 					::DispatchMessage(&msg);
 				}
+				scanStart = GetTickCount();
 			}
 
 			if(plugPath == failedPlugin)
@@ -1889,12 +1893,12 @@ BOOL CTrackApp::InitializeDXPlugins()
 				}
 			}
 
-			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>("VST Plugins", mpt::format("Plugin%1.Tags")(plug), mpt::ustring());
+			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>("VST Plugins", tagFormat(plug), mpt::ustring());
 
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
 			{
-				// This appears to be an old version of our MIDI I/O plugin, which is not built right into the main executable.
+				// This appears to be an old version of our MIDI I/O plugin, which is now built right into the main executable.
 				m_pPluginManager->RemovePlugin(lib);
 			}
 		}
