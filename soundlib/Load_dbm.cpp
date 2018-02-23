@@ -650,8 +650,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#if defined(MPT_ENABLE_MP3_SAMPLES)
-	// Compressed samples
+#if defined(MPT_ENABLE_MP3_SAMPLES) && 0
+	// Compressed samples - this does not quite work yet...
 	FileReader mpegChunk = chunks.GetChunk(DBMChunk::idMPEG);
 	if(mpegChunk.IsValid() && (loadFlags & loadSampleData))
 	{
