@@ -86,7 +86,7 @@ BOOL COptionsGeneral::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	::SetWindowTextW(m_defaultArtist.m_hWnd, mpt::ToWide(TrackerSettings::Instance().defaultArtist).c_str());
+	m_defaultArtist.SetWindowText(mpt::ToCString(TrackerSettings::Instance().defaultArtist));
 
 	const struct
 	{

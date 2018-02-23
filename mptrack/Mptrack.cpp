@@ -1869,8 +1869,8 @@ BOOL CTrackApp::InitializeDXPlugins()
 			} else if(pluginScanDlg.m_hWnd)
 			{
 				CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-				std::wstring scanStr = mpt::format(L"Scanning Plugin %1 / %2...\n%3")(plug + 1, numPlugins + 1, plugPath);
-				SetWindowTextW(text->m_hWnd, scanStr.c_str());
+				CString scanStr = mpt::format(CString(_T("Scanning Plugin %1 / %2...\n%3")))(plug + 1, numPlugins + 1, plugPath);
+				text->SetWindowText(scanStr);
 				MSG msg;
 				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{

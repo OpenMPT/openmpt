@@ -696,8 +696,8 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 		{
 			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-			std::wstring scanStr = L"Scanning Plugin...\n" + fileName.ToWide();
-			::SetWindowTextW(text->m_hWnd, scanStr.c_str());
+			CString scanStr = _T("Scanning Plugin...\n") + fileName.ToCString();
+			text->SetWindowText(scanStr);
 			MSG msg;
 			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{

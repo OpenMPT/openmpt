@@ -492,7 +492,7 @@ void CAbstractVstEditor::SetTitle()
 			title += mpt::format(L" (%1-Bit Bridged)")(m_VstPlugin.GetPluginFactory().GetDllBits());
 #endif // NO_VST
 
-		::SetWindowTextW(m_hWnd, title.c_str());
+		SetWindowText(mpt::ToCString(title));
 	}
 }
 
