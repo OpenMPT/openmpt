@@ -1054,49 +1054,48 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	if (info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES])
 	{
 		const PATTERNINDEX nPat = patternHint.GetPattern();
+		PATTERNINDEX minPat = 0, maxPat = sndFile.Patterns.Size();
+		if(patternHint.GetType()[HINT_PATNAMES] && nPat < sndFile.Patterns.Size())
+		{
+			minPat = nPat;
+			maxPat = nPat + 1;
+		}
+
+		for(size_t pat = sndFile.Patterns.Size(); pat < info.tiPatterns.size(); pat++)
+		{
+			DeleteItem(info.tiPatterns[pat]);
+		}
 		info.tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
-		PATTERNINDEX imin = 0, imax = sndFile.Patterns.Size() - 1;
-		if (patternHint.GetType()[HINT_PATNAMES] && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
-		bool bDelPat = false;
 
 		CString patName;
-		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
+		for(PATTERNINDEX pat = minPat; pat < maxPat; pat++)
 		{
-			if ((bDelPat) && (info.tiPatterns[iPat]))
+			if(sndFile.Patterns.IsValidPat(pat))
 			{
-				DeleteItem(info.tiPatterns[iPat]);
-				info.tiPatterns[iPat] = NULL;
-			}
-			if (sndFile.Patterns.IsValidPat(iPat))
-			{
-				patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[iPat].GetName());
-				wsprintf(s, _T("%u"), iPat);
+				patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[pat].GetName());
+				wsprintf(s, _T("%u"), pat);
 				if(!patName.IsEmpty())
 				{
 					_tcscat(s, _T(": "));
 					_tcscat(s, patName.GetString());
 				}
-				if (info.tiPatterns[iPat])
+				if (info.tiPatterns[pat])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE;
-					tvi.hItem = info.tiPatterns[iPat];
+					tvi.hItem = info.tiPatterns[pat];
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if (_tcscmp(s, stmp)) SetItem(info.tiPatterns[iPat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
+					if (_tcscmp(s, stmp)) SetItem(info.tiPatterns[pat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
 				} else
 				{
-					info.tiPatterns[iPat] = InsertItem(s, IMAGE_PATTERNS, IMAGE_PATTERNS, info.hPatterns, TVI_LAST);
+					info.tiPatterns[pat] = InsertItem(s, IMAGE_PATTERNS, IMAGE_PATTERNS, info.hPatterns, TVI_LAST);
 				}
-				SetItemData(info.tiPatterns[iPat], iPat);
-			} else
+				SetItemData(info.tiPatterns[pat], pat);
+			} else if(pat < info.tiPatterns.size() && info.tiPatterns[pat])
 			{
-				if (info.tiPatterns[iPat])
-				{
-					DeleteItem(info.tiPatterns[iPat]);
-					info.tiPatterns[iPat] = NULL;
-					bDelPat = true;
-				}
+				DeleteItem(info.tiPatterns[pat]);
+				info.tiPatterns[pat] = nullptr;
 			}
 		}
 	}
