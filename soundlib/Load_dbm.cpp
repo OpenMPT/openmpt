@@ -354,6 +354,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_madeWithTracker = mpt::format(MPT_USTRING("DigiBooster Pro %1.%2"))(mpt::ufmt::hex(fileHeader.trkVerHi), mpt::ufmt::hex(fileHeader.trkVerLo));
 	m_playBehaviour.set(kSlidesAtSpeed1);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
+	m_playBehaviour.reset(kITArpeggio);
 
 	// Name chunk
 	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);
