@@ -1,8 +1,8 @@
 
-CC  = clang 
-CXX = clang++
-LD  = clang++
-AR  = ar 
+CC  = clang$(TOOLCHAIN_SUFFIX) 
+CXX = clang++$(TOOLCHAIN_SUFFIX) 
+LD  = clang++$(TOOLCHAIN_SUFFIX) 
+AR  = ar$(TOOLCHAIN_SUFFIX) 
 
 ifneq ($(STDCXX),)
 

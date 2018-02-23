@@ -154,7 +154,8 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
             make CONFIG=mingw64-win64    # for win64
 
-     -  gcc or clang (on Unix-like systems, including Mac OS X with MacPorts):
+     -  gcc or clang (on Unix-like systems, including Mac OS X with MacPorts,
+        and Haiku (32-bit Hybrid and 64-bit)):
 
         The minimum required compiler versions are:
 
@@ -195,12 +196,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         might or might not work. Depending on how your distribution calls the
         `node.js` binary, you might have to edit
         `build/make/config-emscripten.mk`.
-
-     -  Haiku:
-
-        To compile libopenmpt on Haiku (using the 32-bit gcc2h), run:
-
-            make CONFIG=haiku
 
      -  American Fuzzy Lop:
 

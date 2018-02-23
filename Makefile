@@ -234,6 +234,9 @@ endif
 ifeq ($(UNAME_S),FreeBSD)
 HOST_FLAVOUR=FREEBSD
 endif
+ifeq ($(UNAME_S),Haiku)
+HOST_FLAVOUR=HAIKU
+endif
 
 endif
 

@@ -1,8 +1,8 @@
 
-CC  = gcc 
-CXX = g++
-LD  = g++
-AR  = ar
+CC  = gcc$(TOOLCHAIN_SUFFIX) 
+CXX = g++$(TOOLCHAIN_SUFFIX) 
+LD  = g++($TOOLCHAIN_SUFFIX) 
+AR  = ar$(TOOLCHAIN_SUFFIX) 
 
 ifneq ($(STDCXX),)
 
