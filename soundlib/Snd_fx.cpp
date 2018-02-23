@@ -3315,8 +3315,6 @@ bool CSoundFile::ProcessEffects()
 		case CMD_SETENVPOSITION:
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
-				if(m_playBehaviour[kITEnvelopePositionHandling])
-					param++;
 				pChn->VolEnv.nEnvPosition = param;
 
 				// FT2 compatibility: FT2 only sets the position of the panning envelope if the volume envelope's sustain flag is set
@@ -5449,12 +5447,8 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET && pChn->VolEnv.nEnvValueAtReleaseJump == NOT_YET_RELEASED)
 		{
-			if(m_playBehaviour[kITEnvelopePositionHandling] && pChn->VolEnv.nEnvPosition > 0)
-				pChn->VolEnv.nEnvPosition--;
 			pChn->VolEnv.nEnvValueAtReleaseJump = pIns->VolEnv.GetValueFromPosition(pChn->VolEnv.nEnvPosition, 256);
 			pChn->VolEnv.nEnvPosition = pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick;
-			if(m_playBehaviour[kITEnvelopePositionHandling])
-				pChn->VolEnv.nEnvPosition++;
 		}
 	}
 }
