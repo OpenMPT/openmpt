@@ -2538,26 +2538,28 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 			else
 				pModDoc->NoteOff(0, true);
 
+			const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+			const ModSample &sample = sndFile.GetSample(m_nSample);
+
 			SmpLength loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			// If selection is too small -> no loop
-			if(m_nZoom >= 0 && loopend - loopstart < (SmpLength)(4 << m_nZoom))
+			if((m_nZoom >= 0 && loopend - loopstart < (SmpLength)(4 << m_nZoom))
+				|| (m_nZoom < 0 && loopend - loopstart < 4)
+				|| (loopstart >= sample.nLength))
+			{
 				loopend = loopstart = 0;
-			else if(m_nZoom < 0 && loopend - loopstart < 4)
-				loopend = loopstart = 0;
+			}
 
 			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, volume, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 
-			CSoundFile &sndFile = pModDoc->GetrSoundFile();
-			ModSample &sample = sndFile.GetSample(m_nSample);
 			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-			const mpt::ustring s = mpt::format(MPT_USTRING("%1 (%2.%3 Hz)"))(
+			pMainFrm->SetInfoText(mpt::cformat(_T("%1 (%2.%3 Hz)"))(
 				mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.GetNoteName((ModCommand::NOTE)note)),
 				freq >> FREQ_FRACBITS,
-				mpt::ufmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS)));
-			pMainFrm->SetInfoText(mpt::ToCString(s));
+				mpt::ufmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS))));
 		}
 	}
 }
@@ -3253,8 +3255,8 @@ int CViewSample::GetZoomLevel(SmpLength length) const
 	// With auto-zoom setting the whole sample is fitted to screen:
 	// ViewScreenWidthInPixels * samplesPerPixel = sampleLength (approximately)  [2].
 	// Solve samplesPerPixel from [2], then "m_nZoom" from [1].
-	float zoom = static_cast<float>(length) / static_cast<float>(m_rcClient.Width());
-	zoom = 1 + (log10(zoom) / log10(2.0f));
+	double zoom = static_cast<double>(length) / m_rcClient.Width();
+	zoom = 1 + (std::log10(zoom) / std::log10(2.0));
 	if(zoom <= 0) zoom -= 2;
 
 	return static_cast<int>(zoom + sgn(zoom));
