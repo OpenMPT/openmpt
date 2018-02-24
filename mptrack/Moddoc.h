@@ -287,6 +287,7 @@ public:
 	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
 	void LearnMacro(int macro, PlugParamIndex param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos);
+	void SetLoopSong(bool loop);
 
 	// Global settings to pattern effect conversion
 	bool GlobalVolumeToPattern();

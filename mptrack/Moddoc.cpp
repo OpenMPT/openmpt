@@ -2531,6 +2531,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromPattern: OnPatternRestart(false); break;
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
+		case kcToggleLoopSong: SetLoopSong(!TrackerSettings::Instance().gbLoopSong); break;
 	}
 
 	return wParam;
@@ -2570,6 +2571,14 @@ void CModDoc::TogglePluginEditor(UINT plugin, bool onlyThisEditor)
 			pPlugin->ToggleEditor();
 		}
 	}
+}
+
+
+void CModDoc::SetLoopSong(bool loop)
+{
+	TrackerSettings::Instance().gbLoopSong = loop;
+	m_SndFile.SetRepeatCount(loop ? -1 : 0);
+	CMainFrame::GetMainFrame()->UpdateAllViews(UpdateHint().MPTOptions());
 }
 
 

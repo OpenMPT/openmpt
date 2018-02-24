@@ -4068,6 +4068,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			if(m_nSpacing < MAX_SPACING) SetSpacing(m_nSpacing + 1);
 			return wParam;
 
+		case kcChordEditor:
+			{
+				CChordEditor dlg(this);
+				dlg.DoModal();
+				return wParam;
+			}
+
 		// Clipboard Manager
 		case kcToggleClipboardManager:
 			PatternClipboardDialog::Toggle();

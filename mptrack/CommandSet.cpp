@@ -704,6 +704,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPrevEntryInColumn, 1971, _T("Jump to previous entry in column"));
 	DefineKeyCommand(kcNextEntryInColumn, 1972, _T("Jump to next entry in column"));
 	DefineKeyCommand(kcViewTempoSwing, 1973, _T("View Global Tempo Swing Settings"));
+	DefineKeyCommand(kcChordEditor, 1974, _T("Show Chord Editor"));
+	DefineKeyCommand(kcToggleLoopSong, 1975, _T("Toggle Loop Song"));
 
 	// Add new key commands here.
 

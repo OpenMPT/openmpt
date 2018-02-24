@@ -606,8 +606,7 @@ void CCtrlGeneral::OnSongProperties()
 
 void CCtrlGeneral::OnLoopSongChanged()
 {
-	TrackerSettings::Instance().gbLoopSong = (IsDlgButtonChecked(IDC_CHECK_LOOPSONG) != 0);
-	m_sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
+	m_modDoc.SetLoopSong(IsDlgButtonChecked(IDC_CHECK_LOOPSONG) != BST_UNCHECKED);
 }
 
 
