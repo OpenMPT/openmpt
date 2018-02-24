@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.06.00 (* March 2018, revision 9764)
+v1.27.06.00 (* March 2018, revision 9766)
 -----------------------------------------
 Sample tab
    [Fix] <js> Shortcuts with Shift key for Normalize and DC Removal no longer clash with the Shift modifier for applying those actions to all samples.
@@ -41,7 +41,7 @@ Tree view
 
 Other formats
    [Imp] <js> MED: Import "STP" note stop command.
-   [Fix] <js> DBM: Key Off and Set Envelope Position were imported incorrectly.
+   [Fix] <js> DBM: Key Off and Set Envelope Position were imported incorrectly. High sample offset (E7x) is now supported.
 
 Stream Export
    [Imp] <js> More accurate estimation of export duration for order list selections.

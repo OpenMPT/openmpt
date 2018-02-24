@@ -215,11 +215,11 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 				param = (param == 0x50) ? 0x00 : 0x40;
 			}
 			break;
-		case 0x60:	// set loop begin / loop
-			// TODO
+		case 0x60:	// Pattern loop
 			break;
-		case 0x70:	// set offset
-			// TODO
+		case 0x70:	// Coarse offset
+			command = CMD_S3MCMDEX;
+			param = 0xA0 | (param & 0x0F);
 			break;
 		default:
 			// Rest will be converted later from CMD_MODCMDEX to CMD_S3MCMDEX.
@@ -355,6 +355,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_madeWithTracker = mpt::format(MPT_USTRING("DigiBooster Pro %1.%2"))(mpt::ufmt::hex(fileHeader.trkVerHi), mpt::ufmt::hex(fileHeader.trkVerLo));
 	m_playBehaviour.set(kSlidesAtSpeed1);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
+	m_playBehaviour.reset(kITArpeggio);
 
 	// Name chunk
 	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);

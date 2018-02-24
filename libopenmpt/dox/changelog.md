@@ -12,6 +12,9 @@ is just a high-level summary.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
  *  MED: Correctly import patterns with less channels than the maximum used
     amount. Import "STP" note stop command.
+ *  DBM: Key Off and Set Envelope Position were imported incorrectly.
+    High sample offset (E7x) is now supported.
+ *  DIGI / DBM: Arpeggio should not return to base note at end of row.
 
 ### libopenmpt 0.3.6 (2018-02-03)
 
