@@ -4264,6 +4264,10 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeITPortaDown:	volcmd = VOLCMD_PORTADOWN; break;
 			case kcSetVolumeITOffset:		volcmd = VOLCMD_OFFSET; break;
 			}
+			if(target.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
+			{
+				vol = m_cmdOld.vol;
+			}
 		}
 
 		uint16 max;
@@ -4281,8 +4285,8 @@ void CViewPattern::TempEnterVol(int v)
 		if(vol > max) vol %= 10;
 		if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
 		{
-			target.volcmd = volcmd;
-			target.vol = static_cast<ModCommand::VOL>(vol);
+			m_cmdOld.volcmd = target.volcmd = volcmd;
+			m_cmdOld.vol = target.vol = static_cast<ModCommand::VOL>(vol);
 		}
 	}
 
