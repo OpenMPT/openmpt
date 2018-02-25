@@ -96,7 +96,9 @@ bool FileDialog::Show(CWnd *parent)
 	};
 	for(const auto place : places)
 	{
-		dlg.AddPlace(place->GetDefaultDir().ToWide().c_str());
+		// Despite being declared as throw(), AddPlace will throw an exception if the specified place does not exist - unless it's an empty string, which is apparently okay.
+		if(place->GetDefaultDir().IsDirectory())
+			dlg.AddPlace(place->GetDefaultDir().ToWide().c_str());
 	}
 #endif
 
