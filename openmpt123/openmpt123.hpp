@@ -418,8 +418,8 @@ struct commandlineflags {
 		if ( !output_filename.empty() && ( device != commandlineflags().device || use_stdout ) ) {
 			throw args_error_exception();
 		}
-		for ( std::vector<std::string>::iterator i = filenames.begin(); i != filenames.end(); ++i ) {
-			if ( *i == "-" ) {
+		for ( const auto & filename : filenames ) {
+			if ( filename == "-" ) {
 				canUI = false;
 			}
 		}

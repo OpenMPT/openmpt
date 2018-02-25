@@ -220,11 +220,11 @@ public:
 
 static std::string ctls_to_string( const std::map<std::string, std::string> & ctls ) {
 	std::string result;
-	for ( std::map<std::string, std::string>::const_iterator it = ctls.begin(); it != ctls.end(); ++it ) {
+	for ( const auto & ctl : ctls ) {
 		if ( !result.empty() ) {
 			result += "; ";
 		}
-		result += it->first + "=" + it->second;
+		result += ctl.first + "=" + ctl.second;
 	}
 	return result;
 }
@@ -285,8 +285,8 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	s << "Ctls: " << ctls_to_string( flags.ctls ) << std::endl;
 	s << std::endl;
 	s << "Files: " << std::endl;
-	for ( std::vector<std::string>::const_iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-		s << " " << *filename << std::endl;
+	for ( const auto & filename : flags.filenames ) {
+		s << " " << filename << std::endl;
 	}
 	s << std::endl;
 	return s;
@@ -468,13 +468,13 @@ static void show_info( std::ostream & log, bool verbose ) {
 			fields.push_back( field );
 		}
 		bool first = true;
-		for ( std::vector<std::string>::const_iterator it = fields.begin(); it != fields.end(); ++it ) {
+		for ( const auto & field : fields ) {
 			if ( first ) {
 				first = false;
 			} else {
 				log << ", ";
 			}
-			log << (*it);
+			log << field;
 		}
 	}
 	log << std::endl;
@@ -665,13 +665,13 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 			log << "    ";
 			std::vector<std::string> extensions = openmpt::get_supported_extensions();
 			bool first = true;
-			for ( std::vector<std::string>::iterator i = extensions.begin(); i != extensions.end(); ++i ) {
+			for ( const auto & extension : extensions ) {
 				if ( first ) {
 					first = false;
 				} else {
 					log << ", ";
 				}
-				log << *i;
+				log << extension;
 			}
 			log << std::endl;
 		}
@@ -1394,8 +1394,8 @@ template < typename Tmod >
 std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 	std::map<std::string,std::string> result;
 	const std::vector<std::string> metadata_keys = mod.get_metadata_keys();
-	for ( std::vector<std::string>::const_iterator key = metadata_keys.begin(); key != metadata_keys.end(); ++key ) {
-		result[ *key ] = mod.get_metadata( *key );
+	for ( const auto & key : metadata_keys ) {
+		result[ key ] = mod.get_metadata( key );
 	}
 	return result;
 }
@@ -1419,9 +1419,9 @@ public:
 
 static void show_fields( textout & log, const std::vector<field> & fields ) {
 	const std::size_t fw = 11;
-	for ( std::vector<field>::const_iterator it = fields.begin(); it != fields.end(); ++it ) {
-		std::string key = it->key;
-		std::string val = it->val;
+	for ( const auto & field :fields ) {
+		std::string key = field.key;
+		std::string val = field.val;
 		if ( key.length() < fw ) {
 			key += std::string( fw - key.length(), '.' );
 		}
@@ -1962,7 +1962,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 	commandlineflags flags;
 
 	bool files_only = false;
-	for ( std::vector<std::string>::const_iterator i = args.begin(); i != args.end(); ++i ) {
+	for ( auto i = args.begin(); i != args.end(); ++i ) {
 		if ( i == args.begin() ) {
 			// skip program name
 			continue;
@@ -2348,8 +2348,8 @@ static int main( int argc, char * argv [] ) {
 	try {
 
 		bool stdin_can_ui = true;
-		for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-			if ( *filename == "-" ) {
+		for ( const auto & filename : flags.filenames ) {
+			if ( filename == "-" ) {
 				stdin_can_ui = false;
 				break;
 			}
@@ -2397,8 +2397,8 @@ static int main( int argc, char * argv [] ) {
 
 		switch ( flags.mode ) {
 			case ModeProbe: {
-				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-					probe_file( flags, *filename, log );
+				for ( const auto & filename : flags.filenames ) {
+					probe_file( flags, filename, log );
 					flags.playlist_index++;
 				}
 			} break;
@@ -2450,10 +2450,10 @@ static int main( int argc, char * argv [] ) {
 				}
 			} break;
 			case ModeRender: {
-				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+				for ( const auto & filename : flags.filenames ) {
 					flags.apply_default_buffer_sizes();
-					file_audio_stream_raii file_audio_stream( flags, *filename + std::string(".") + flags.output_extension, log );
-					render_file( flags, *filename, log, file_audio_stream );
+					file_audio_stream_raii file_audio_stream( flags, filename + std::string(".") + flags.output_extension, log );
+					render_file( flags, filename, log, file_audio_stream );
 					flags.playlist_index++;
 				}
 			} break;
