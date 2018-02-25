@@ -2247,7 +2247,7 @@ bool CSoundFile::ReadNote()
 		if (pChn->nRightVU > VUMETER_DECAY) pChn->nRightVU -= VUMETER_DECAY; else pChn->nRightVU = 0;
 
 		pChn->newLeftVol = pChn->newRightVol = 0;
-		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->pSample && pChn->nLength && pChn->IsSamplePlaying()) ? pChn->pModSample->pSample : nullptr;
+		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->HasSampleMem() && pChn->nLength && pChn->IsSamplePlaying()) ? pChn->pModSample->samplev() : nullptr;
 		if (pChn->pCurrentSample || (pChn->HasMIDIOutput() && !pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE]))
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)

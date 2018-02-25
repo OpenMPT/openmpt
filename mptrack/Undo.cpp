@@ -349,14 +349,14 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	case sundo_update:
 	case sundo_delete:
 	case sundo_replace:
-		if(oldSample.pSample != nullptr)
+		if(oldSample.HasSampleMem())
 		{
 			const uint8 bytesPerSample = oldSample.GetBytesPerSample();
 			const SmpLength changeLen = changeEnd - changeStart;
 
 			undo.samplePtr = ModSample::AllocateSample(changeLen, bytesPerSample);
 			if(undo.samplePtr == nullptr) return false;
-			memcpy(undo.samplePtr, oldSample.pSample8 + changeStart * bytesPerSample, changeLen * bytesPerSample);
+			memcpy(undo.samplePtr, oldSample.sampleb() + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
 #ifdef _DEBUG
 			TCHAR s[64];
@@ -415,7 +415,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	PrepareBuffer(toBuf, smp, redoType, undo.description, undo.changeStart, undo.changeEnd);
 
 	ModSample &sample = sndFile.GetSample(smp);
-	int8 *pCurrentSample = sample.pSample8;
+	char *pCurrentSample = mpt::void_cast<char*>(sample.samplev());
 	int8 *pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
 	bool keepOnDisk = sample.uFlags[SMP_KEEPONDISK];
 	bool replace = false;
@@ -481,7 +481,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	// Restore old sample header
 	sample = undo.OldSample;
-	sample.pSample = pCurrentSample; // select the "correct" old sample
+	sample.pData.pSample = mpt::void_cast<void*>(pCurrentSample); // select the "correct" old sample
 	mpt::String::Copy(sndFile.m_szNames[smp], undo.oldName);
 
 	if(replace)

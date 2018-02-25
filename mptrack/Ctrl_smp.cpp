@@ -1318,7 +1318,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	{
 		// Save this sample
 		const ModSample &sample = m_sndFile.GetSample(m_nSample);
-		if((!m_nSample) || (sample.pSample == nullptr))
+		if((!m_nSample) || (!sample.HasSampleMem()))
 		{
 			SwitchToView();
 			return;
@@ -1393,7 +1393,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	for(SAMPLEINDEX smp = minSmp; smp <= maxSmp; smp++)
 	{
 		ModSample &sample = m_sndFile.GetSample(smp);
-		if (sample.pSample)
+		if (sample.HasSampleMem())
 		{
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
@@ -1507,7 +1507,7 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 	for(SAMPLEINDEX smp = minSample; smp <= maxSample; smp++)
 	{
-		if(m_sndFile.GetSample(smp).pSample)
+		if(m_sndFile.GetSample(smp).HasSampleMem())
 		{
 			ModSample &sample = m_sndFile.GetSample(smp);
 
@@ -1535,10 +1535,10 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 			if(sample.uFlags[CHN_16BIT])
 			{
-				modified |= DoNormalize(sample.pSample16, selStart, selEnd);
+				modified |= DoNormalize(sample.sample16(), selStart, selEnd);
 			} else
 			{
-				modified |= DoNormalize(sample.pSample8, selStart, selEnd);
+				modified |= DoNormalize(sample.sample8(), selStart, selEnd);
 			}
 
 			if(modified)
@@ -1587,7 +1587,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 	{
 		SmpLength selStart, selEnd;
 
-		if(m_sndFile.GetSample(smp).pSample == nullptr)
+		if(!m_sndFile.GetSample(smp).HasSampleMem())
 			continue;
 
 		if (minSample != maxSample)
@@ -1685,7 +1685,7 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLengt
 
 void CCtrlSamples::ApplyAmplify(int32 lAmp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
 {
-	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
 
 	BeginWaitCursor();
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
@@ -1698,10 +1698,10 @@ void CCtrlSamples::ApplyAmplify(int32 lAmp, int32 fadeIn, int32 fadeOut, Fade::L
 	selection.nEnd *= sample.GetNumChannels();
 	if (sample.uFlags[CHN_16BIT])
 	{
-		ApplyAmplifyImpl(sample.pSample16, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+		ApplyAmplifyImpl(sample.sample16(), selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
 	} else
 	{
-		ApplyAmplifyImpl(sample.pSample8, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+		ApplyAmplifyImpl(sample.sample8(), selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
 	}
 	sample.PrecomputeLoops(m_sndFile, false);
 	SetModified(SampleHint().Data(), false, true);
@@ -1725,7 +1725,7 @@ void CCtrlSamples::OnAmplify()
 // Fade-Out is applied if the selection ends and the end of the sample.
 void CCtrlSamples::OnQuickFade()
 {
-	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
 
 	SampleSelectionPoints sel = GetSelectionPoints();
 	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == m_sndFile.GetSample(m_nSample).nLength))
@@ -1742,7 +1742,7 @@ void CCtrlSamples::OnQuickFade()
 void CCtrlSamples::OnResample()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(sample.pSample == nullptr) return;
+	if(!sample.HasSampleMem()) return;
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
@@ -1760,7 +1760,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	BeginWaitCursor();
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(sample.pSample == nullptr) return;
+	if(!sample.HasSampleMem()) return;
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 	LimitMax(selection.nEnd, sample.nLength);
@@ -1789,8 +1789,8 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	{
 		// First, copy parts of the sample that are not affected by partial upsampling
 		const SmpLength bps = sample.GetBytesPerSample();
-		std::memcpy(newSample, sample.pSample, selection.nStart * bps);
-		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, static_cast<char *>(sample.pSample) + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
+		std::memcpy(newSample, sample.sampleb(), selection.nStart * bps);
+		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, sample.sampleb() + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
 
 		if(mode == SRCMODE_DEFAULT)
 		{
@@ -1816,12 +1816,12 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						firstVal = SC::Convert<double, int8>()(sample.pSample8[readOffset]);
-						lastVal = SC::Convert<double, int8>()(sample.pSample8[readOffset + selLength - numChannels]);
+						firstVal = SC::Convert<double, int8>()(sample.sample8()[readOffset]);
+						lastVal = SC::Convert<double, int8>()(sample.sample8()[readOffset + selLength - numChannels]);
 						break;
 					case 2:
-						firstVal = SC::Convert<double, int16>()(sample.pSample16[readOffset]);
-						lastVal = SC::Convert<double, int16>()(sample.pSample16[readOffset + selLength - numChannels]);
+						firstVal = SC::Convert<double, int16>()(sample.sample16()[readOffset]);
+						lastVal = SC::Convert<double, int16>()(sample.sample16()[readOffset + selLength - numChannels]);
 						break;
 					default:
 						// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
@@ -1854,10 +1854,10 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 						switch(sample.GetElementarySampleSize())
 						{
 						case 1:
-							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(convBuffer.data(), smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(convBuffer.data(), smpCount, 1, sample.sample8() + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 							break;
 						case 2:
-							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(convBuffer.data(), smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(convBuffer.data(), smpCount, 1, sample.sample16() + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 							break;
 						}
 						readOffset += smpCount * numChannels;
@@ -1893,7 +1893,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 			if(sample.uFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
 			if(sample.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
 			ModChannel chn{};
-			chn.pCurrentSample = sample.pSample;
+			chn.pCurrentSample = sample.samplev();
 			chn.increment = SamplePosition::Ratio(oldRate, newRate);
 			chn.position.Set(selection.nStart);
 			chn.leftVol = chn.rightVol = (1 << 8);
@@ -2010,7 +2010,7 @@ void CCtrlSamples::OnEnableStretchToSize()
 
 void CCtrlSamples::OnEstimateSampleSize()
 {
-	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
 
 	//rewbs.timeStretchMods
 	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
@@ -2239,10 +2239,10 @@ public:
 			switch(smpsize)
 			{
 			case 1:
-				CopyInterleavedSampleStreams(buffer.data(), sample.pSample8 + inPos * nChn, inChunkSize, nChn, conv8f32);
+				CopyInterleavedSampleStreams(buffer.data(), sample.sample8() + inPos * nChn, inChunkSize, nChn, conv8f32);
 				break;
 			case 2:
-				CopyInterleavedSampleStreams(buffer.data(), sample.pSample16 + inPos * nChn, inChunkSize, nChn, convf32);
+				CopyInterleavedSampleStreams(buffer.data(), sample.sample16() + inPos * nChn, inChunkSize, nChn, convf32);
 				break;
 			}
 			soundtouch_putSamples(handleSt, buffer.data(), inChunkSize);
@@ -2426,7 +2426,7 @@ public:
 				}
 
 				// Convert current channel's data chunk to float
-				int8 *ptr = sample.pSample8 + pos * smpsize * nChn + i * smpsize;
+				int8 *ptr = sample.sample8() + pos * smpsize * nChn + i * smpsize;
 
 				switch(smpsize)
 				{
@@ -2587,7 +2587,7 @@ void CCtrlSamples::OnInvert()
 
 void CCtrlSamples::OnSignUnSign()
 {
-	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
 
 	if(m_modDoc.IsNotePlaying(0, m_nSample, 0))
 		MsgBoxHidable(ConfirmSignUnsignWhenPlaying);
@@ -2611,7 +2611,7 @@ void CCtrlSamples::OnSignUnSign()
 
 void CCtrlSamples::OnSilence()
 {
-	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
 	BeginWaitCursor();
 	SampleSelectionPoints selection = GetSelectionPoints();
 
@@ -3070,7 +3070,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	TCHAR s[256];
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
+	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
 	const uint32 inc = sample.GetBytesPerSample();
 	SmpLength i;
 	int pos;
@@ -3407,7 +3407,7 @@ void CCtrlSamples::OnXFade()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(sample.pSample == nullptr || sample.nLength == 0)
+	if(!sample.HasSampleMem() || sample.nLength == 0)
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
@@ -3457,7 +3457,7 @@ void CCtrlSamples::OnStereoSeparation()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(sample.pSample == nullptr
+	if(!sample.HasSampleMem()
 		|| !sample.nLength
 		|| sample.GetNumChannels() != 2)
 	{

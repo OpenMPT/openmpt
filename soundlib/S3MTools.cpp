@@ -62,7 +62,7 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 	SmpLength smpLength = 0;
 	mpt::String::Write<mpt::String::maybeNullTerminated>(filename, mptSmp.filename);
 
-	if(mptSmp.pSample != nullptr)
+	if(mptSmp.HasSampleMem())
 	{
 		sampleType = typePCM;
 		length = static_cast<uint32>(MIN(mptSmp.nLength, uint32_max));

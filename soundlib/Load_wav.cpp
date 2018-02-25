@@ -37,7 +37,7 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 	}
 
 	const mpt::byte *inBuf = file.GetRawData<mpt::byte>();
-	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.pSample), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
+	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.samplev()), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
 	return true;
 }
 

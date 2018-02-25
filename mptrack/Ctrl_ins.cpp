@@ -2450,7 +2450,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 						bool hasSamples = false;
 						for(auto sample : referencedSamples)
 						{
-							if(sample > 0 && sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(sample).pSample != nullptr)
+							if(sample > 0 && sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(sample).HasSampleMem())
 							{
 								hasSamples = true;
 								break;

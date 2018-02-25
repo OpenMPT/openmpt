@@ -126,11 +126,11 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	switch(sample.GetElementarySampleSize())
 	{
 	case 1:
-		CopySamples(sample.pSample8 + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(sample.sample8() + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 
 	case 2:
-		CopySamples(sample.pSample16 + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(sample.sample16() + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 	}
 
@@ -141,7 +141,7 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 bool Autotune::CanApply() const
 {
-	return (sample.pSample != nullptr && sample.nLength >= MIN_SAMPLE_LENGTH);
+	return (sample.HasSampleMem() && sample.nLength >= MIN_SAMPLE_LENGTH);
 }
 
 

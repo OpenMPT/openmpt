@@ -2698,11 +2698,11 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	// Sample Data
 	for(size_t i = 0; i < 6; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sample.pSample8[i], 18);
+		VERIFY_EQUAL_NONCONT(sample.sample8()[i], 18);
 	}
 	for(size_t i = 6; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sample.pSample8[i], 0);
+		VERIFY_EQUAL_NONCONT(sample.sample8()[i], 0);
 	}
 
 	// Instruments
@@ -2925,11 +2925,11 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		// Sample Data
 		for(size_t i = 0; i < 6; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 18);
+			VERIFY_EQUAL_NONCONT(sample.sample8()[i], 18);
 		}
 		for(size_t i = 6; i < 16; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 0);
+			VERIFY_EQUAL_NONCONT(sample.sample8()[i], 0);
 		}
 
 		VERIFY_EQUAL_NONCONT(sample.cues[0], 2);
@@ -2949,7 +2949,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(sample.sample16()[4 + i], int16(-32768));
 		}
 
 		VERIFY_EQUAL_NONCONT(sample.cues[0], 3);
@@ -2987,7 +2987,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 #ifdef MPT_EXTERNAL_SAMPLES
 		for(size_t i = 0; i < 16; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample8[i], int8(45));
+			VERIFY_EQUAL_NONCONT(sample.sample8()[i], int8(45));
 		}
 #endif // MPT_EXTERNAL_SAMPLES
 
@@ -3214,11 +3214,11 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 		// Sample Data
 		for(size_t i = 0; i < 30; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 127);
+			VERIFY_EQUAL_NONCONT(sample.sample8()[i], 127);
 		}
 		for(size_t i = 31; i < 60; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample8[i], -128);
+			VERIFY_EQUAL_NONCONT(sample.sample8()[i], -128);
 		}
 	}
 
@@ -3247,7 +3247,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(sample.sample16()[4 + i], int16(-32768));
 		}
 	}
 
@@ -3660,7 +3660,7 @@ static MPT_NOINLINE void TestEditing()
 	sndFile.GetSample(2).nLength = 16;
 	sndFile.GetSample(2).AllocateSample();
 	modDoc->ReArrangeSamples({ 2, SAMPLEINDEX_INVALID, 1 });
-	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).pSample != nullptr, true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).HasSampleMem(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).filename, std::string("2"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_szNames[1], std::string("2"));
 	VERIFY_EQUAL_NONCONT(sndFile.GetSample(2).filename, std::string());
@@ -3696,7 +3696,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
-	smp.pSample = const_cast<int8 *>(sampleData.data());
+	smp.pData.pSample = const_cast<int8 *>(sampleData.data());
 	smp.nLength = mpt::saturate_cast<SmpLength>(sampleData.size() / smp.GetBytesPerSample());
 
 	std::string data;
@@ -3711,7 +3711,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 		FileReader file(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
-		smp.pSample = sampleDataNew.data();
+		smp.pData.pSample = sampleDataNew.data();
 
 		ITDecompression decompression(file, smp, it215);
 		VERIFY_EQUAL_NONCONT(memcmp(sampleData.data(), sampleDataNew.data(), sampleData.size()), 0);
@@ -4221,13 +4221,13 @@ static MPT_NOINLINE void TestSampleConversion()
 		sample.Initialize();
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
-		sample.pSample = (static_cast<int16 *>(targetBuf) + 65536);
+		sample.pData.pSample = (static_cast<int16 *>(targetBuf) + 65536);
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, mpt::byte_cast<const mpt::byte *>(source24), 3*65536);
 		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source24), 65536 * 3, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			VERIFY_EQUAL_QUIET_NONCONT(sample.pSample16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(sample.sample16()[i], static_cast<int16>(i));
 			VERIFY_EQUAL_QUIET_NONCONT(truncated16[i], static_cast<int16>(i));
 		}
 	}
@@ -4249,13 +4249,13 @@ static MPT_NOINLINE void TestSampleConversion()
 		sample.Initialize();
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
-		sample.pSample = static_cast<int16 *>(targetBuf) + 65536;
+		sample.pData.pSample = static_cast<int16 *>(targetBuf) + 65536;
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, mpt::byte_cast<const mpt::byte *>(source32), 4*65536);
 		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source32), 65536 * 4, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			VERIFY_EQUAL_QUIET_NONCONT(sample.pSample16[i], static_cast<int16>(i - 0x8000u));
+			VERIFY_EQUAL_QUIET_NONCONT(sample.sample16()[i], static_cast<int16>(i - 0x8000u));
 			if(mpt::abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
 			{
 				VERIFY_EQUAL_QUIET_NONCONT(true, false);

@@ -522,7 +522,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 #endif // MPT_EXTERNAL_SAMPLES
 
-		if(sample.pSample)
+		if(sample.HasSampleMem())
 		{
 			sample.PrecomputeLoops(*this, false);
 		} else if(!sample.uFlags[SMP_KEEPONDISK])
@@ -1340,7 +1340,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	}
 	for (SAMPLEINDEX ichk = GetNumSamples(); ichk >= 1; ichk--)
 	{
-		if ((!sampleUsed[ichk]) && (Samples[ichk].pSample)) unused++;
+		if ((!sampleUsed[ichk]) && (Samples[ichk].HasSampleMem())) unused++;
 	}
 
 	return unused;
@@ -1387,7 +1387,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	{
 		return false;
 	}
-	if(Samples[nSample].pSample == nullptr)
+	if(!Samples[nSample].HasSampleMem())
 	{
 		return true;
 	}
@@ -1702,7 +1702,7 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 		{
 			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
 			if((i > GetNumSamples() && passes == 1)
-				|| (Samples[i].pSample == nullptr && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
+				|| (!Samples[i].HasSampleMem() && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
 				|| (targetInstrument != INSTRUMENTINDEX_INVALID && IsSampleReferencedByInstrument(i, targetInstrument)))	// Not empty, but already used by this instrument. XXX this should only be done when replacing an instrument with a single sample! Otherwise it will use an inconsistent sample map!
 			{
 				// Empty slot, so it's a good candidate already.
@@ -1827,12 +1827,12 @@ bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &file
 			// Copy over old attributes, but keep new sample data
 			ModSample &sample = GetSample(smp);
 			SmpLength newLength = sample.nLength;
-			void *newData = sample.pSample;
+			void *newData = sample.samplev();
 			SampleFlags newFlags = sample.uFlags;
 
 			sample = origSample;
 			sample.nLength = newLength;
-			sample.pSample = newData;
+			sample.pData.pSample = newData;
 			sample.uFlags.set(CHN_16BIT, newFlags[CHN_16BIT]);
 			sample.uFlags.set(CHN_STEREO, newFlags[CHN_STEREO]);
 			sample.uFlags.reset(SMP_MODIFIED);

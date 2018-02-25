@@ -80,9 +80,9 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 			byteVal = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Compress<IT16BitParams>(sample.pSample16 + chn, offset, remain);
+				Compress<IT16BitParams>(sample.sample16() + chn, offset, remain);
 			else
-				Compress<IT8BitParams>(sample.pSample8 + chn, offset, remain);
+				Compress<IT8BitParams>(sample.sample8() + chn, offset, remain);
 
 			if(file) mpt::IO::WriteRaw(*file, packedData, packedLength);
 			packedTotalLength += packedLength;
@@ -331,9 +331,9 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 			mem1 = mem2 = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Uncompress<IT16BitParams>(mptSample.pSample16 + chn);
+				Uncompress<IT16BitParams>(mptSample.sample16() + chn);
 			else
-				Uncompress<IT8BitParams>(mptSample.pSample8 + chn);
+				Uncompress<IT8BitParams>(mptSample.sample8() + chn);
 		}
 	}
 }

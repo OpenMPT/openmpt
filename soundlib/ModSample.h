@@ -25,7 +25,7 @@ struct ModSample
 		void  *pSample;						// Pointer to sample data
 		int8  *pSample8;					// Pointer to 8-bit sample data
 		int16 *pSample16;					// Pointer to 16-bit sample data
-	};
+	} pData;
 	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
 	uint16 nPan;							// Default sample panning (if pan flag is set), 0...256
 	uint16 nVolume;							// Default volume, 0...256 (ignored if uFlags[SMP_NODEFAULTVOLUME] is set)
@@ -45,23 +45,62 @@ struct ModSample
 
 	ModSample(MODTYPE type = MOD_TYPE_NONE)
 	{
-		pSample = nullptr;
+		pData.pSample = nullptr;
 		Initialize(type);
 	}
 
-	bool HasSampleData() const { return pSample != nullptr && nLength != 0; }
+	bool HasSampleMem() const noexcept { return pData.pSample != nullptr; }
+
+	bool HasSampleData() const noexcept { return pData.pSample != nullptr && nLength != 0; }
+
+	MPT_FORCEINLINE const void *samplev() const noexcept
+	{
+		return pData.pSample;
+	}
+	MPT_FORCEINLINE void *samplev() noexcept
+	{
+		return pData.pSample;
+	}
+	MPT_FORCEINLINE const mpt::byte *sampleb() const noexcept
+	{
+		return mpt::void_cast<const mpt::byte*>(pData.pSample);
+	}
+	MPT_FORCEINLINE mpt::byte *sampleb() noexcept
+	{
+		return mpt::void_cast<mpt::byte*>(pData.pSample);
+	}
+	MPT_FORCEINLINE const int8 *sample8() const noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
+		return pData.pSample8;
+	}
+	MPT_FORCEINLINE int8 *sample8() noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
+		return pData.pSample8;
+	}
+	MPT_FORCEINLINE const int16 *sample16() const noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
+		return pData.pSample16;
+	}
+	MPT_FORCEINLINE int16 *sample16() noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
+		return pData.pSample16;
+	}
 
 	// Return the size of one (elementary) sample in bytes.
-	uint8 GetElementarySampleSize() const { return (uFlags & CHN_16BIT) ? 2 : 1; }
+	uint8 GetElementarySampleSize() const noexcept { return (uFlags & CHN_16BIT) ? 2 : 1; }
 
 	// Return the number of channels in the sample.
-	uint8 GetNumChannels() const { return (uFlags & CHN_STEREO) ? 2 : 1; }
+	uint8 GetNumChannels() const noexcept { return (uFlags & CHN_STEREO) ? 2 : 1; }
 
 	// Return the number of bytes per frame (Channels * Elementary Sample Size)
-	uint8 GetBytesPerSample() const { return GetElementarySampleSize() * GetNumChannels(); }
+	uint8 GetBytesPerSample() const noexcept { return GetElementarySampleSize() * GetNumChannels(); }
 
 	// Return the size which pSample is at least.
-	SmpLength GetSampleSizeInBytes() const { return nLength * GetBytesPerSample(); }
+	SmpLength GetSampleSizeInBytes() const noexcept { return nLength * GetBytesPerSample(); }
 
 	// Returns sample rate of the sample. The argument is needed because 
 	// the sample rate is obtained differently for different module types.

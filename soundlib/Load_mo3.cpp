@@ -1305,9 +1305,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			LimitMax(sample.nLength, smpFrom.nLength);
 			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
 			sample.uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
-			if(smpFrom.pSample != nullptr && sample.AllocateSample())
+			if(smpFrom.HasSampleMem() && sample.AllocateSample())
 			{
-				memcpy(sample.pSample, smpFrom.pSample, sample.GetSampleSizeInBytes());
+				memcpy(sample.sampleb(), smpFrom.sampleb(), sample.GetSampleSizeInBytes());
 			}
 		} else if(smpHeader.compressedSize > 0)
 		{
@@ -1322,18 +1322,18 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				if(sample.AllocateSample())
 				{
 					if(smpHeader.flags & MO3Sample::smp16Bit)
-						UnpackMO3DeltaSample<MO3Delta16BitParams>(sampleData, sample.pSample16, sample.nLength, numChannels);
+						UnpackMO3DeltaSample<MO3Delta16BitParams>(sampleData, sample.sample16(), sample.nLength, numChannels);
 					else
-						UnpackMO3DeltaSample<MO3Delta8BitParams>(sampleData, sample.pSample8, sample.nLength, numChannels);
+						UnpackMO3DeltaSample<MO3Delta8BitParams>(sampleData, sample.sample8(), sample.nLength, numChannels);
 				}
 			} else if(compression == MO3Sample::smpDeltaPrediction)
 			{
 				if(sample.AllocateSample())
 				{
 					if(smpHeader.flags & MO3Sample::smp16Bit)
-						UnpackMO3DeltaPredictionSample<MO3Delta16BitParams>(sampleData, sample.pSample16, sample.nLength, numChannels);
+						UnpackMO3DeltaPredictionSample<MO3Delta16BitParams>(sampleData, sample.sample16(), sample.nLength, numChannels);
 					else
-						UnpackMO3DeltaPredictionSample<MO3Delta8BitParams>(sampleData, sample.pSample8, sample.nLength, numChannels);
+						UnpackMO3DeltaPredictionSample<MO3Delta8BitParams>(sampleData, sample.sample8(), sample.nLength, numChannels);
 				}
 			} else if(compression == MO3Sample::smpCompressionOgg || compression == MO3Sample::smpSharedOgg)
 			{
@@ -1363,7 +1363,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					if(smpHeader.encoderDelay > 0 && smpHeader.encoderDelay < sample.GetSampleSizeInBytes())
 					{
 						SmpLength delay = smpHeader.encoderDelay / sample.GetBytesPerSample();
-						memmove(sample.pSample8, sample.pSample8 + smpHeader.encoderDelay, sample.GetSampleSizeInBytes() - smpHeader.encoderDelay);
+						memmove(sample.sampleb(), sample.sampleb() + smpHeader.encoderDelay, sample.GetSampleSizeInBytes() - smpHeader.encoderDelay);
 						sample.nLength -= delay;
 					}
 					LimitMax(sample.nLength, smpHeader.length);
@@ -1590,7 +1590,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						int current_section = 0;
 						long decodedSamples = 0;
 						bool eof = false;
-						while(!eof && offset < sample.nLength && sample.pSample != nullptr)
+						while(!eof && offset < sample.nLength && sample.HasSampleMem())
 						{
 							float **output = nullptr;
 							long ret = ov_read_float(&vf, &output, 1024, &current_section);
@@ -1610,10 +1610,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 									{
 										if(sample.uFlags[CHN_16BIT])
 										{
-											CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+											CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.sample16() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
 										} else
 										{
-											CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+											CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.sample8() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
 										}
 									}
 								}
@@ -1670,7 +1670,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				sample.AllocateSample();
 				SmpLength offset = 0;
 				while((error == VORBIS__no_error || (error == VORBIS_need_more_data && dataLeft > 0))
-					&& offset < sample.nLength && sample.pSample != nullptr)
+					&& offset < sample.nLength && sample.HasSampleMem())
 				{
 					int channels = 0, decodedSamples = 0;
 					float **output;
@@ -1684,9 +1684,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						for(int chn = 0; chn < channels; chn++)
 						{
 							if(sample.uFlags[CHN_16BIT])
-								CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+								CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.sample16() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
 							else
-								CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+								CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.sample8() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
 						}
 					}
 					offset += decodedSamples;

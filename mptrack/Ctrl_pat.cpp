@@ -303,7 +303,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 			{
 				// Show sample names
 				SAMPLEINDEX nmax = m_sndFile.GetNumSamples();
-				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_sndFile.GetSample(i).pSample)
+				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_sndFile.GetSample(i).HasSampleMem())
 				{
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
 						s.Format(szSplitFormat,

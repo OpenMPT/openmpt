@@ -1119,7 +1119,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			if (nSmp <= sndFile.GetNumSamples())
 			{
 				const ModSample &sample = sndFile.GetSample(nSmp);
-				const bool sampleExists = (sample.pSample != nullptr);
+				const bool sampleExists = (sample.HasSampleMem());
 				int nImage = (sampleExists) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
 				if(sampleExists && info.samplesPlaying[nSmp]) nImage = IMAGE_SAMPLEACTIVE;
 				if(info.modDoc.IsSampleMuted(nSmp)) nImage = IMAGE_SAMPLEMUTE;
@@ -1775,7 +1775,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		for(SAMPLEINDEX smp = 1; smp <= m_SongFile->GetNumSamples(); smp++)
 		{
 			const ModSample &sample = m_SongFile->GetSample(smp);
-			if(sample.pSample)
+			if(sample.HasSampleMem())
 			{
 				TCHAR s[MAX_SAMPLENAME + 10];
 				_sntprintf(s, CountOf(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());

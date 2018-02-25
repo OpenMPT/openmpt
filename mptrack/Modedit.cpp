@@ -327,7 +327,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	// Remove sample data references from now unused slots.
 	for(SAMPLEINDEX i = newNumSamples + 1; i <= oldNumSamples; i++)
 	{
-		m_SndFile.GetSample(i).pSample = nullptr;
+		m_SndFile.GetSample(i).pData.pSample = nullptr;
 		m_SndFile.GetSample(i).nLength = 0;
 		strcpy(m_SndFile.m_szNames[i], "");
 	}
@@ -342,13 +342,13 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		{
 			// Copy an original sample.
 			target = sampleHeaders[origSlot];
-			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].pSample != nullptr)
+			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].HasSampleMem())
 			{
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
-				target.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
-				if(target.pSample != nullptr)
+				target.pData.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
+				if(target.HasSampleMem())
 				{
-					memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetSampleSizeInBytes());
+					memcpy(target.sampleb(), sampleHeaders[origSlot].sampleb(), target.GetSampleSizeInBytes());
 					target.PrecomputeLoops(m_SndFile, false);
 				} else
 				{
@@ -361,7 +361,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		{
 			// Invalid sample reference.
 			target.Initialize(m_SndFile.GetType());
-			target.pSample = nullptr;
+			target.pData.pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[i + 1], "");
 			m_SndFile.ResetSamplePath(i + 1);
 		}
@@ -680,7 +680,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 		pDup = m_SndFile.Instruments[duplicateSource];
 	}
 
-	if(!m_SndFile.GetNumInstruments() && (m_SndFile.GetNumSamples() > 1 || m_SndFile.GetSample(1).pSample))
+	if(!m_SndFile.GetNumInstruments() && (m_SndFile.GetNumSamples() > 1 || m_SndFile.GetSample(1).HasSampleMem()))
 	{
 		bool doConvert = true;
 		if(!silent)
@@ -844,7 +844,7 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 		m_SndFile.m_szNames[nSmp][0] = 0;
 		while ((m_SndFile.GetNumSamples() > 1)
 			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
-			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).pSample))
+			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleMem()))
 		{
 			m_SndFile.m_nSamples--;
 		}

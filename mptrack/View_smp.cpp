@@ -205,7 +205,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	if ((m_nSample > 0) && (m_nSample <= sndFile.GetNumSamples()))
 	{
 		const ModSample &sample = sndFile.GetSample(m_nSample);
-		if (sample.pSample != nullptr) dwLen = sample.nLength;
+		if (sample.HasSampleMem()) dwLen = sample.nLength;
 	}
 	// Compute scroll size in pixels
 	if (newZoom == 0)		// Fit to display
@@ -1117,7 +1117,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			offScreenDC.LineTo(rcClient.right, ymed);
 		}
 		// Drawing sample
-		if ((sample.pSample) && (yrange) && (sample.nLength > 1) && (rect.right > 1))
+		if (sample.HasSampleMem() && (yrange) && (sample.nLength > 1) && (rect.right > 1))
 		{
 			// Loop Start/End
 			if ((sample.nLoopEnd > nSmpScrollPos) && (sample.nLoopEnd > sample.nLoopStart))
@@ -1160,7 +1160,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				// Draw sample data in 1:1 ratio or higher (zoom in)
 				SmpLength len = sample.nLength - nSmpScrollPos;
-				int8 *psample = sample.pSample8 + nSmpScrollPos * smplsize;
+				const mpt::byte *psample = sample.sampleb() + nSmpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -1179,7 +1179,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					xscroll = nSmpScrollPos;
 					len -= nSmpScrollPos;
 				}
-				int8 *psample = sample.pSample8 + xscroll * smplsize;
+				const mpt::byte *psample = sample.sampleb() + xscroll * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData2(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -1218,7 +1218,7 @@ void CViewSample::OnDraw(CDC *pDC)
 
 void CViewSample::DrawPositionMarks()
 {
-	if(GetDocument()->GetSoundFile().GetSample(m_nSample).pSample == nullptr)
+	if(!GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleMem())
 	{
 		return;
 	}
@@ -1509,7 +1509,7 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 	m_drawChannel = (point.y - m_rcClient.top) * smp.GetNumChannels() / m_rcClient.Height();
 	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
 
-	T *data = static_cast<T *>(smp.pSample) + m_drawChannel;
+	T *data = reinterpret_cast<T *>(smp.samplev()) + m_drawChannel;
 	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T, uT>(smp, point);
 }
 
@@ -1517,7 +1517,7 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 template<class T, class uT>
 void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old)
 {
-	T *data = static_cast<T *>(smp.pSample) + m_drawChannel + old * smp.GetNumChannels();
+	T *data = reinterpret_cast<T *>(smp.samplev()) + m_drawChannel + old * smp.GetNumChannels();
 	const int oldvalue = *data;
 	const int value = GetSampleValueFromPoint<T, uT>(smp, point);
 	const int inc = (m_dwEndDrag > old ? 1 : -1);
@@ -2000,7 +2000,7 @@ void CViewSample::OnEditDelete()
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if ((!sample.pSample) || (!sample.nLength)) return;
+	if ((!sample.HasSampleMem()) || (!sample.nLength)) return;
 	if (m_dwEndSel > sample.nLength) m_dwEndSel = sample.nLength;
 	if ((m_dwBeginSel >= m_dwEndSel)
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength))
@@ -2093,7 +2093,7 @@ void CViewSample::OnEditCopy()
 		file.StartChunk(RIFFChunk::iddata);
 		
 		uint8 *sampleData = static_cast<uint8 *>(p) + file.GetPosition();
-		memcpy(sampleData, sample.pSample8 + smpOffset, smpSize);
+		memcpy(sampleData, sample.sampleb() + smpOffset, smpSize);
 		if(sample.GetElementarySampleSize() == 1)
 		{
 			// 8-Bit samples have to be unsigned.
@@ -2162,10 +2162,10 @@ static void MixSample(const ModSample &sample, SmpLength offset, int amplify, ui
 	switch(sample.GetElementarySampleSize())
 	{
 	case 1:
-		MixSampleLoop(sample.nLength, sample.pSample8 + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
+		MixSampleLoop(sample.nLength, sample.sample8() + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
 		break;
 	case 2:
-		MixSampleLoop(sample.nLength, sample.pSample16 + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
+		MixSampleLoop(sample.nLength, sample.sample16() + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
 		break;
 	default:
 		MPT_ASSERT_NOTREACHED();
@@ -2190,7 +2190,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			CSoundFile &sndFile = pModDoc->GetSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
 
-			if(sample.pSample == nullptr)
+			if(!sample.HasSampleMem())
 				pasteMode = kReplace;
 			// Show mix paste dialog
 			if(pasteMode == kMixPaste)
@@ -2210,7 +2210,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 
 			if(pasteMode != kReplace)
 			{
-				sndFile.GetSample(m_nSample).pSample = nullptr;	// prevent old sample from being deleted.
+				sndFile.GetSample(m_nSample).pData.pSample = nullptr;	// prevent old sample from being deleted.
 			}
 
 			FileReader file(mpt::as_span(p, GlobalSize(hCpy)));
@@ -2291,13 +2291,13 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 						uint8 newChn = chn % sample.GetNumChannels();
 						if(oldSample.GetElementarySampleSize() == 1 && sample.GetElementarySampleSize() == 1)
 						{
-							CopySample(oldSample.pSample8 + offset + chn, sample.nLength, numChannels, sample.pSample8 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int8, int8>, SC::DecodeIdentity<int8> >());
+							CopySample(oldSample.sample8() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int8, int8>, SC::DecodeIdentity<int8> >());
 						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 1)
 						{
-							CopySample(oldSample.pSample16 + offset + chn, sample.nLength, numChannels, sample.pSample8 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> >());
+							CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> >());
 						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 2)
 						{
-							CopySample(oldSample.pSample16 + offset + chn, sample.nLength, numChannels, sample.pSample16 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16> >());
+							CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample16() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16> >());
 						} else
 						{
 							MPT_ASSERT_NOTREACHED();
@@ -2321,7 +2321,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			} else
 			{
 				if(pasteMode == kMixPaste)
-					ModSample::FreeSample(oldSample.pSample);
+					ModSample::FreeSample(oldSample.samplev());
 				pModDoc->GetSampleUndo().Undo(m_nSample);
 				mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
 			}
@@ -2362,7 +2362,7 @@ void CViewSample::On8BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
+		if(sample.uFlags[CHN_16BIT] && sample.HasSampleData())
 		{
 			ASSERT(sample.GetElementarySampleSize() == 2);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
@@ -2386,7 +2386,7 @@ void CViewSample::On16BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(!sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
+		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleMem() && sample.nLength != 0)
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
@@ -2411,7 +2411,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1 && sample.pSample != nullptr && sample.nLength != 0)
+		if(sample.GetNumChannels() > 1 && sample.HasSampleMem() && sample.nLength != 0)
 		{
 			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
 			if(convert == ctrlSmp::splitSample)
@@ -2500,14 +2500,14 @@ void CViewSample::TrimSample(bool trimToLoopEnd)
 	SmpLength nStart = m_dwBeginSel;
 	SmpLength nEnd = m_dwEndSel - m_dwBeginSel;
 
-	if ((sample.pSample) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
+	if ((sample.HasSampleMem()) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Trim");
 
 		CriticalSection cs;
 
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
-		memmove(sample.pSample8, sample.pSample8 + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
+		memmove(sample.sampleb(), sample.sampleb() + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
 
 		if (sample.nLoopStart >= nStart) sample.nLoopStart -= nStart;
 		if (sample.nLoopEnd >= nStart) sample.nLoopEnd -= nStart;
@@ -2874,10 +2874,10 @@ void CViewSample::OnDrawingToggle()
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	const ModSample &sample = sndFile.GetSample(m_nSample);
-	if(sample.pSample == nullptr)
+	if(!sample.HasSampleMem())
 	{
 		OnAddSilence();
-		if(sample.pSample == nullptr)
+		if(!sample.HasSampleMem())
 		{
 			return;
 		}
@@ -3224,12 +3224,12 @@ void CViewSample::OnSampleSlice()
 			ModSample &newSample = sndFile.GetSample(nextSmp);
 			newSample = sample;
 			newSample.nLength = cues[i + 1] - cues[i];
-			newSample.pSample = nullptr;
+			newSample.pData.pSample = nullptr;
 			mpt::String::Copy(sndFile.m_szNames[nextSmp], sndFile.m_szNames[m_nSample]);
 			if(newSample.AllocateSample() > 0)
 			{
 				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nLoopStart, newSample.nLoopEnd);
-				memcpy(newSample.pSample, sample.pSample8 + cues[i] * sample.GetBytesPerSample(), newSample.nLength * sample.GetBytesPerSample());
+				memcpy(newSample.sampleb(), sample.sampleb() + cues[i] * sample.GetBytesPerSample(), newSample.nLength * sample.GetBytesPerSample());
 				newSample.PrecomputeLoops(sndFile, false);
 
 				if(sndFile.GetNumInstruments() > 0)

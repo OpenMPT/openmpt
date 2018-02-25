@@ -422,7 +422,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	Samples[sample].uFlags.set(CHN_16BIT, bitsPerSample >= 16);
 	Samples[sample].uFlags.set(CHN_STEREO, numChannels == 2);
 	Samples[sample].AllocateSample();
-	if(Samples[sample].pSample == nullptr)
+	if(!Samples[sample].HasSampleMem())
 	{
 		result = false;
 		goto fail;
@@ -449,7 +449,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	} else
 	{
 		// just copy
-		std::copy(rawData.data(), rawData.data() + rawData.size(), mpt::void_cast<char*>(Samples[sample].pSample));
+		std::copy(rawData.data(), rawData.data() + rawData.size(), mpt::byte_cast<char*>(Samples[sample].sampleb()));
 	}
 
 	result = true;

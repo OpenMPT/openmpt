@@ -124,9 +124,6 @@ struct FLACDecoder
 		// Source bit depth
 		const unsigned int bps = frame->header.bits_per_sample;
 
-		int8 *sampleData8 = sample.pSample8 + offset;
-		int16 *sampleData16 = sample.pSample16 + offset;
-
 		MPT_ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		MPT_ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
 		MPT_ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
@@ -137,15 +134,19 @@ struct FLACDecoder
 		{
 			if(bps <= 8)
 			{
+				int8 *sampleData8 = sample.sample8() + offset;
 				CopySample<SC::ConversionChain<SC::ConvertShift< int8, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData8  + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 16)
 			{
+				int16 *sampleData16 = sample.sample16() + offset;
 				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 24)
 			{
+				int16 *sampleData16 = sample.sample16() + offset;
 				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  8>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 32)
 			{
+				int16 *sampleData16 = sample.sample16() + offset;
 				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			}
 		}
@@ -439,7 +440,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 	FLAC__stream_decoder_finish(decoder);
 	FLAC__stream_decoder_delete(decoder);
 
-	if(client.ready && Samples[sample].pSample != nullptr)
+	if(client.ready && Samples[sample].HasSampleMem())
 	{
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		Samples[sample].PrecomputeLoops(*this, false);
@@ -639,10 +640,10 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 	if(sample.GetElementarySampleSize() == 1)
 	{
-		SampleToFLAC32(sampleData, sample.pSample8, numSamples);
+		SampleToFLAC32(sampleData, sample.sample8(), numSamples);
 	} else if(sample.GetElementarySampleSize() == 2)
 	{
-		SampleToFLAC32(sampleData, sample.pSample16, numSamples);
+		SampleToFLAC32(sampleData, sample.sample16(), numSamples);
 	} else
 	{
 		MPT_ASSERT_NOTREACHED();

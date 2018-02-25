@@ -6003,7 +6003,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			} else
 			{
 				CString s;
-				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).pSample != nullptr)
+				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).HasSampleMem())
 				{
 					s.Format(_T("%02d: "), i);
 					s += sndFile->GetSampleName(i);

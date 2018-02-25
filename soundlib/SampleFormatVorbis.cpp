@@ -314,7 +314,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
-	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].sample16());
 
 	Samples[sample].Convert(MOD_TYPE_IT, GetType());
 	Samples[sample].PrecomputeLoops(*this, false);

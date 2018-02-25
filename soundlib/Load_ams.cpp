@@ -1005,7 +1005,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		SAMPLEINDEX sourceSample = ((sampleSettings[smp] & sampleIndexMask) >> sampleIndexShift) + firstSample[sourceInstr];
-		if(sourceSample > GetNumSamples() || Samples[sourceSample].pSample == nullptr)
+		if(sourceSample > GetNumSamples() || !Samples[sourceSample].HasSampleMem())
 		{
 			continue;
 		}
@@ -1017,7 +1017,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		sample.nLength = source.nLength;
 		if(sample.AllocateSample())
 		{
-			memcpy(sample.pSample, source.pSample, source.GetSampleSizeInBytes());
+			memcpy(sample.sampleb(), source.sampleb(), source.GetSampleSizeInBytes());
 		}
 	}
 

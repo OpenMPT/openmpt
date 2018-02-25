@@ -422,7 +422,7 @@ void CSoundFile::CreateStereoMix(int count)
 					// Test case: PTInstrSwap.mod
 					const ModSample &smp = Samples[chn.nNewIns];
 					chn.pModSample = &smp;
-					chn.pCurrentSample = smp.pSample;
+					chn.pCurrentSample = smp.samplev();
 					chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
 					chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
 					chn.nLoopStart = smp.nLoopStart;

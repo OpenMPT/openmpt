@@ -118,7 +118,7 @@ static void ConvertLoopSlice(ModSample &src, ModSample &dest, SmpLength start, S
 	dest.FreeSample();
 	dest = src;
 	dest.nLength = len;
-	dest.pSample = nullptr;
+	dest.pData.pSample = nullptr;
 
 	if(!dest.AllocateSample())
 	{
@@ -129,7 +129,7 @@ static void ConvertLoopSlice(ModSample &src, ModSample &dest, SmpLength start, S
 	if(len != src.nLength)
 		MemsetZero(dest.cues);
 
-	std::memcpy(dest.pSample8, src.pSample8 + start, len);
+	std::memcpy(dest.sampleb(), src.sampleb() + start, len);
 	dest.uFlags.set(CHN_LOOP, loop);
 	if(loop)
 	{
@@ -150,7 +150,7 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 
 	ModSample newSmp = smp;
 	newSmp.nLength = 0;
-	newSmp.pSample = nullptr;
+	newSmp.pData.pSample = nullptr;
 
 	size_t numLoops = loopList.size();
 
@@ -184,7 +184,7 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 	{
 		STPLoopInfo &info = loopList[i];
 
-		memcpy(newSmp.pSample8 + start, smp.pSample8 + info.loopStart, info.loopLength);
+		memcpy(newSmp.sampleb() + start, smp.sampleb() + info.loopStart, info.loopLength);
 
 		// update loop info based on position in edited sample
 		info.loopStart = start;

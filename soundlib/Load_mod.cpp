@@ -279,7 +279,7 @@ struct MODSampleHeader
 	// Convert OpenMPT's internal sample header to a MOD sample header.
 	SmpLength ConvertToMOD(const ModSample &mptSmp)
 	{
-		SmpLength writeLength = mptSmp.pSample != nullptr ? mptSmp.nLength : 0;
+		SmpLength writeLength = mptSmp.HasSampleMem() ? mptSmp.nLength : 0;
 		// If the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
 		if((writeLength % 2u) != 0)
 		{
@@ -383,10 +383,10 @@ struct AMInstrument
 				switch(waveform)
 				{
 				default:
-				case 0: sample.pSample8[i] = ModSinusTable[i * 2];				break;	// Sine
-				case 1: sample.pSample8[i] = static_cast<int8>(-128 + i * 8);	break;	// Saw
-				case 2: sample.pSample8[i] = i < 16 ? -128 : 127;				break;	// Square
-				case 3: sample.pSample8[i] = mpt::random<int8>(rng);			break;	// Noise
+				case 0: sample.sample8()[i] = ModSinusTable[i * 2];				break;	// Sine
+				case 1: sample.sample8()[i] = static_cast<int8>(-128 + i * 8);	break;	// Saw
+				case 2: sample.sample8()[i] = i < 16 ? -128 : 127;				break;	// Square
+				case 3: sample.sample8()[i] = mpt::random<int8>(rng);			break;	// Noise
 				}
 			}
 		}

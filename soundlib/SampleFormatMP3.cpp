@@ -247,10 +247,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	Samples[sample].uFlags.set(CHN_STEREO, nchannels == 2);
 	Samples[sample].AllocateSample();
 
-	if(Samples[sample].pSample != nullptr)
+	if(Samples[sample].HasSampleMem())
 	{
 		mpg123_size_t ndecoded = 0;
-		mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+		mpg123_read(mh, mpt::byte_cast<unsigned char *>(Samples[sample].sampleb()), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	}
 
 	if(!mo3Decode)
@@ -258,7 +258,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		Samples[sample].PrecomputeLoops(*this, false);
 	}
-	return Samples[sample].pSample != nullptr;
+	return Samples[sample].HasSampleMem();
 
 #elif defined(MPT_WITH_MINIMP3)
 
@@ -329,9 +329,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
 	Samples[sample].AllocateSample();
 
-	if(Samples[sample].pSample != nullptr)
+	if(Samples[sample].HasSampleMem())
 	{
-		std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+		std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].sample16());
 	}
 
 	if(!mo3Decode)
@@ -339,7 +339,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		Samples[sample].PrecomputeLoops(*this, false);
 	}
-	return Samples[sample].pSample != nullptr;
+	return Samples[sample].HasSampleMem();
 
 #else
 

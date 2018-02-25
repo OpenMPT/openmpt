@@ -292,13 +292,13 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	targetSmp = sourceSmp;
 	strcpy(m_szNames[targetSample], srcSong.m_szNames[sourceSample]);
 
-	if(sourceSmp.pSample)
+	if(sourceSmp.HasSampleMem())
 	{
-		targetSmp.pSample = nullptr;	// Don't want to delete the original sample!
+		targetSmp.pData.pSample = nullptr;	// Don't want to delete the original sample!
 		if(targetSmp.AllocateSample())
 		{
 			SmpLength nSize = sourceSmp.GetSampleSizeInBytes();
-			memcpy(targetSmp.pSample, sourceSmp.pSample, nSize);
+			memcpy(targetSmp.sampleb(), sourceSmp.sampleb(), nSize);
 			targetSmp.PrecomputeLoops(*this, false);
 		}
 		// Remember on-disk path (for MPTM files), but don't implicitely enable on-disk storage
@@ -444,7 +444,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		{
 			return false;
 		}
-		IMAADPCMUnpack16(sample.pSample16, sample.nLength, sampleChunk, wavFile.GetBlockAlign(), wavFile.GetNumChannels());
+		IMAADPCMUnpack16(sample.sample16(), sample.nLength, sampleChunk, wavFile.GetBlockAlign(), wavFile.GetNumChannels());
 		sample.PrecomputeLoops(*this, false);
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{
@@ -1904,7 +1904,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				mpt::String::Copy(m_szNames[smp], filename.GetFileName().ToLocale());
 			}
 		}
-		sample.uFlags.set(SMP_KEEPONDISK, sample.pSample != nullptr);
+		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleMem());
 
 		if(region.useSampleKeyRoot)
 		{
@@ -2031,7 +2031,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(region.offset && region.offset < sample.nLength)
 		{
 			auto offset = region.offset * sample.GetBytesPerSample();
-			memmove(sample.pSample8, sample.pSample8 + offset, sample.nLength * sample.GetBytesPerSample() - offset);
+			memmove(sample.sampleb(), sample.sampleb() + offset, sample.nLength * sample.GetBytesPerSample() - offset);
 			if(region.end > region.offset)
 				region.end -= region.offset;
 			sample.nLength -= region.offset;

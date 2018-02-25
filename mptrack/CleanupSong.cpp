@@ -512,7 +512,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	// Check if any samples are not referenced in the patterns (sample mode) or by an instrument (instrument mode).
 	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
-	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).pSample)
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).HasSampleMem())
 	{
 		if(!modDoc.IsSampleUsed(smp))
 		{
@@ -591,10 +591,10 @@ bool CModCleanupDlg::OptimizeSamples()
 			bool identicalChannels = false;
 			if(sample.GetElementarySampleSize() == 1)
 			{
-				identicalChannels = ComapreStereoChannels(loopLength, sample.pSample8);
+				identicalChannels = ComapreStereoChannels(loopLength, sample.sample8());
 			} else if(sample.GetElementarySampleSize() == 2)
 			{
-				identicalChannels = ComapreStereoChannels(loopLength, sample.pSample16);
+				identicalChannels = ComapreStereoChannels(loopLength, sample.sample16());
 			}
 			if(identicalChannels)
 			{
@@ -603,7 +603,7 @@ bool CModCleanupDlg::OptimizeSamples()
 			}
 		}
 
-		if(sample.pSample && sample.nLength > loopLength + 2) numLoopOpt++;
+		if(sample.HasSampleMem() && sample.nLength > loopLength + 2) numLoopOpt++;
 	}
 	if(!numLoopOpt && !numStereoOpt) return false;
 
@@ -678,7 +678,7 @@ bool CModCleanupDlg::RearrangeSamples()
 	// First, find out which sample slots are unused and create the new sample map only with used samples
 	for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
 	{
-		if(sndFile.GetSample(i).pSample != nullptr)
+		if(sndFile.GetSample(i).HasSampleMem())
 		{
 			sampleMap.push_back(i);
 		}

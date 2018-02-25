@@ -557,7 +557,7 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= m_sndFile.GetNumSamples(); nSmp++)
 		{
-			if (m_sndFile.GetSample(nSmp).pSample != nullptr && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
+			if (m_sndFile.GetSample(nSmp).HasSampleMem() && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
 			{
 				s.Format(_T("%02d: "), nSmp);
 				s += m_sndFile.m_szNames[nSmp];

@@ -164,7 +164,7 @@ size_t ModSample::AllocateSample()
 {
 	FreeSample();
 
-	if((pSample = AllocateSample(nLength, GetBytesPerSample())) == nullptr)
+	if((pData.pSample = AllocateSample(nLength, GetBytesPerSample())) == nullptr)
 	{
 		return 0;
 	} else
@@ -223,8 +223,8 @@ size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerS
 
 void ModSample::FreeSample()
 {
-	FreeSample(pSample);
-	pSample = nullptr;
+	FreeSample(pData.pSample);
+	pData.pSample = nullptr;
 }
 
 

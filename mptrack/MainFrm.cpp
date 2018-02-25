@@ -959,7 +959,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 	{
 		// Sample positions
 		const SAMPLEINDEX smp = notifyItem;
-		if(smp > 0 && smp <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(smp).pSample != nullptr)
+		if(smp > 0 && smp <= m_pSndFile->GetNumSamples() && m_pSndFile->GetSample(smp).HasSampleMem())
 		{
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
