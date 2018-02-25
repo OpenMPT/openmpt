@@ -118,12 +118,12 @@ public:
 };
 
 template <typename Tstring, typename Tchar, std::size_t size>
-inline StringBufRefImpl<Tstring, Tchar> StringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<Tstring, Tchar> TypedStringBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }
 template <typename Tstring, typename Tchar>
-inline StringBufRefImpl<Tstring, Tchar> StringBuf(Tchar * buf, std::size_t size)
+inline StringBufRefImpl<Tstring, Tchar> TypedStringBuf(Tchar * buf, std::size_t size)
 {
 	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }

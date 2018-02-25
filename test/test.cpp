@@ -2175,7 +2175,7 @@ static MPT_NOINLINE void TestCharsets()
 	{
 		char buf[4] = { 'x','x','x','x' };
 		char foobar[] = {'f','o','o','b','a','r','\0'};
-		mpt::StringBuf<std::string>(buf) = (char*)foobar;
+		mpt::TypedStringBuf<std::string>(buf) = (char*)foobar;
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2183,7 +2183,7 @@ static MPT_NOINLINE void TestCharsets()
 	}
 	{
 		char buf[4] = { 'x','x','x','x' };
-		mpt::StringBuf<std::string>(buf) = (const char*)"foobar";
+		mpt::TypedStringBuf<std::string>(buf) = (const char*)"foobar";
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2191,7 +2191,7 @@ static MPT_NOINLINE void TestCharsets()
 	}
 	{
 		char buf[4] = { 'x','x','x','x' };
-		mpt::StringBuf<std::string>(buf) = "foobar";
+		mpt::TypedStringBuf<std::string>(buf) = "foobar";
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
