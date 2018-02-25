@@ -41,6 +41,23 @@ public:
 		}
 	}
 
+#if NTDDI_VERSION >= NTDDI_VISTA
+	// MFC's AddPlace() is declared as throw() but can in fact throw if any of the COM calls fail, e.g. because the place does not exist.
+	// Avoid this by re-implementing our own version which doesn't throw.
+	void AddPlace(const mpt::PathString &path)
+	{
+		if(m_bVistaStyle && path.IsDirectory())
+		{
+			CComPtr<IShellItem> shellItem;
+			HRESULT hr = SHCreateItemFromParsingName(path.ToWide().c_str(), nullptr, IID_IShellItem, reinterpret_cast<void **>(&shellItem));
+			if(SUCCEEDED(hr))
+			{
+				static_cast<IFileDialog*>(m_pIFileDialog)->AddPlace(shellItem, FDAP_TOP);
+			}
+		}
+	}
+#endif
+
 protected:
 	CString oldName;
 	bool doPreview, played;
@@ -96,9 +113,7 @@ bool FileDialog::Show(CWnd *parent)
 	};
 	for(const auto place : places)
 	{
-		// Despite being declared as throw(), AddPlace will throw an exception if the specified place does not exist - unless it's an empty string, which is apparently okay.
-		if(place->GetDefaultDir().IsDirectory())
-			dlg.AddPlace(place->GetDefaultDir().ToWide().c_str());
+		dlg.AddPlace(place->GetDefaultDir());
 	}
 #endif
 
