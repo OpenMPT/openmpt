@@ -49,9 +49,17 @@ struct ModSample
 		Initialize(type);
 	}
 
-	bool HasSampleMem() const noexcept { return pData.pSample != nullptr; }
+	bool HasSampleMem() const noexcept
+	{
+		MPT_ASSERT(!pData.pSample || (pData.pSample && nLength > 0));  // having sample pointer implies non-zero sample length
+		return pData.pSample != nullptr;
+	}
 
-	bool HasSampleData() const noexcept { return pData.pSample != nullptr && nLength != 0; }
+	bool HasSampleData() const noexcept
+	{
+		MPT_ASSERT(!pData.pSample || (pData.pSample && nLength > 0));  // having sample pointer implies non-zero sample length
+		return pData.pSample != nullptr && nLength != 0;
+	}
 
 	MPT_FORCEINLINE const void *samplev() const noexcept
 	{
