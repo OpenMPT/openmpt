@@ -1305,7 +1305,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			LimitMax(sample.nLength, smpFrom.nLength);
 			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
 			sample.uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
-			if(smpFrom.HasSampleMem() && sample.AllocateSample())
+			if(smpFrom.HasSampleData() && sample.AllocateSample())
 			{
 				memcpy(sample.sampleb(), smpFrom.sampleb(), sample.GetSampleSizeInBytes());
 			}
@@ -1590,7 +1590,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						int current_section = 0;
 						long decodedSamples = 0;
 						bool eof = false;
-						while(!eof && offset < sample.nLength && sample.HasSampleMem())
+						while(!eof && offset < sample.nLength && sample.HasSampleData())
 						{
 							float **output = nullptr;
 							long ret = ov_read_float(&vf, &output, 1024, &current_section);
@@ -1670,7 +1670,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				sample.AllocateSample();
 				SmpLength offset = 0;
 				while((error == VORBIS__no_error || (error == VORBIS_need_more_data && dataLeft > 0))
-					&& offset < sample.nLength && sample.HasSampleMem())
+					&& offset < sample.nLength && sample.HasSampleData())
 				{
 					int channels = 0, decodedSamples = 0;
 					float **output;

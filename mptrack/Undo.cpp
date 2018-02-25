@@ -349,7 +349,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	case sundo_update:
 	case sundo_delete:
 	case sundo_replace:
-		if(oldSample.HasSampleMem())
+		if(oldSample.HasSampleData())
 		{
 			const uint8 bytesPerSample = oldSample.GetBytesPerSample();
 			const SmpLength changeLen = changeEnd - changeStart;

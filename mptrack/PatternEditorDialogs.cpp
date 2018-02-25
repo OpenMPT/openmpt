@@ -1114,7 +1114,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= sndFile.GetNumSamples(); nSmp++)
 		{
-			if(sndFile.GetSample(nSmp).HasSampleMem())
+			if(sndFile.GetSample(nSmp).HasSampleData())
 			{
 				s.Format(_T("%02d: "), nSmp);
 				s += sndFile.m_szNames[nSmp];

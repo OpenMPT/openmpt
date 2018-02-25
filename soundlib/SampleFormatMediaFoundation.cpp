@@ -422,7 +422,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	Samples[sample].uFlags.set(CHN_16BIT, bitsPerSample >= 16);
 	Samples[sample].uFlags.set(CHN_STEREO, numChannels == 2);
 	Samples[sample].AllocateSample();
-	if(!Samples[sample].HasSampleMem())
+	if(!Samples[sample].HasSampleData())
 	{
 		result = false;
 		goto fail;

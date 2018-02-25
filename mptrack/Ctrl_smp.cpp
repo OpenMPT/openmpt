@@ -1318,7 +1318,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	{
 		// Save this sample
 		const ModSample &sample = m_sndFile.GetSample(m_nSample);
-		if((!m_nSample) || (!sample.HasSampleMem()))
+		if((!m_nSample) || (!sample.HasSampleData()))
 		{
 			SwitchToView();
 			return;
@@ -1393,7 +1393,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	for(SAMPLEINDEX smp = minSmp; smp <= maxSmp; smp++)
 	{
 		ModSample &sample = m_sndFile.GetSample(smp);
-		if (sample.HasSampleMem())
+		if (sample.HasSampleData())
 		{
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
@@ -1507,7 +1507,7 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 	for(SAMPLEINDEX smp = minSample; smp <= maxSample; smp++)
 	{
-		if(m_sndFile.GetSample(smp).HasSampleMem())
+		if(m_sndFile.GetSample(smp).HasSampleData())
 		{
 			ModSample &sample = m_sndFile.GetSample(smp);
 
@@ -1587,7 +1587,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 	{
 		SmpLength selStart, selEnd;
 
-		if(!m_sndFile.GetSample(smp).HasSampleMem())
+		if(!m_sndFile.GetSample(smp).HasSampleData())
 			continue;
 
 		if (minSample != maxSample)
@@ -1685,7 +1685,7 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLengt
 
 void CCtrlSamples::ApplyAmplify(int32 lAmp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 
 	BeginWaitCursor();
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
@@ -1725,7 +1725,7 @@ void CCtrlSamples::OnAmplify()
 // Fade-Out is applied if the selection ends and the end of the sample.
 void CCtrlSamples::OnQuickFade()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 
 	SampleSelectionPoints sel = GetSelectionPoints();
 	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == m_sndFile.GetSample(m_nSample).nLength))
@@ -1742,7 +1742,7 @@ void CCtrlSamples::OnQuickFade()
 void CCtrlSamples::OnResample()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleMem()) return;
+	if(!sample.HasSampleData()) return;
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
@@ -1760,7 +1760,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	BeginWaitCursor();
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleMem()) return;
+	if(!sample.HasSampleData()) return;
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 	LimitMax(selection.nEnd, sample.nLength);
@@ -2010,7 +2010,7 @@ void CCtrlSamples::OnEnableStretchToSize()
 
 void CCtrlSamples::OnEstimateSampleSize()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 
 	//rewbs.timeStretchMods
 	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
@@ -2587,7 +2587,7 @@ void CCtrlSamples::OnInvert()
 
 void CCtrlSamples::OnSignUnSign()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 
 	if(m_modDoc.IsNotePlaying(0, m_nSample, 0))
 		MsgBoxHidable(ConfirmSignUnsignWhenPlaying);
@@ -2611,7 +2611,7 @@ void CCtrlSamples::OnSignUnSign()
 
 void CCtrlSamples::OnSilence()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleMem()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 	BeginWaitCursor();
 	SampleSelectionPoints selection = GetSelectionPoints();
 
@@ -3407,7 +3407,7 @@ void CCtrlSamples::OnXFade()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(!sample.HasSampleMem() || sample.nLength == 0)
+	if(!sample.HasSampleData() || sample.nLength == 0)
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
@@ -3457,7 +3457,7 @@ void CCtrlSamples::OnStereoSeparation()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(!sample.HasSampleMem()
+	if(!sample.HasSampleData()
 		|| !sample.nLength
 		|| sample.GetNumChannels() != 2)
 	{

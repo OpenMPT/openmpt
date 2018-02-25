@@ -3660,7 +3660,7 @@ static MPT_NOINLINE void TestEditing()
 	sndFile.GetSample(2).nLength = 16;
 	sndFile.GetSample(2).AllocateSample();
 	modDoc->ReArrangeSamples({ 2, SAMPLEINDEX_INVALID, 1 });
-	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).HasSampleMem(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).HasSampleData(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.GetSample(1).filename, std::string("2"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_szNames[1], std::string("2"));
 	VERIFY_EQUAL_NONCONT(sndFile.GetSample(2).filename, std::string());

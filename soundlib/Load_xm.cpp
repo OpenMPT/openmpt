@@ -42,7 +42,7 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 			// If too many sample slots are needed, try to fill some empty slots first.
 			for(SAMPLEINDEX j = 1; j <= sndFile.GetNumSamples(); j++)
 			{
-				if(sndFile.GetSample(j).HasSampleMem())
+				if(sndFile.GetSample(j).HasSampleData())
 				{
 					continue;
 				}

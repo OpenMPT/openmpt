@@ -141,7 +141,7 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 bool Autotune::CanApply() const
 {
-	return (sample.HasSampleMem() && sample.nLength >= MIN_SAMPLE_LENGTH);
+	return (sample.HasSampleData() && sample.nLength >= MIN_SAMPLE_LENGTH);
 }
 
 

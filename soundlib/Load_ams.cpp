@@ -1005,7 +1005,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		SAMPLEINDEX sourceSample = ((sampleSettings[smp] & sampleIndexMask) >> sampleIndexShift) + firstSample[sourceInstr];
-		if(sourceSample > GetNumSamples() || !Samples[sourceSample].HasSampleMem())
+		if(sourceSample > GetNumSamples() || !Samples[sourceSample].HasSampleData())
 		{
 			continue;
 		}

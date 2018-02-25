@@ -522,7 +522,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 #endif // MPT_EXTERNAL_SAMPLES
 
-		if(sample.HasSampleMem())
+		if(sample.HasSampleData())
 		{
 			sample.PrecomputeLoops(*this, false);
 		} else if(!sample.uFlags[SMP_KEEPONDISK])
@@ -1340,7 +1340,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	}
 	for (SAMPLEINDEX ichk = GetNumSamples(); ichk >= 1; ichk--)
 	{
-		if ((!sampleUsed[ichk]) && (Samples[ichk].HasSampleMem())) unused++;
+		if ((!sampleUsed[ichk]) && (Samples[ichk].HasSampleData())) unused++;
 	}
 
 	return unused;
@@ -1387,7 +1387,7 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	{
 		return false;
 	}
-	if(!Samples[nSample].HasSampleMem())
+	if(!Samples[nSample].HasSampleData())
 	{
 		return true;
 	}
@@ -1702,7 +1702,7 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 		{
 			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
 			if((i > GetNumSamples() && passes == 1)
-				|| (!Samples[i].HasSampleMem() && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
+				|| (!Samples[i].HasSampleData() && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
 				|| (targetInstrument != INSTRUMENTINDEX_INVALID && IsSampleReferencedByInstrument(i, targetInstrument)))	// Not empty, but already used by this instrument. XXX this should only be done when replacing an instrument with a single sample! Otherwise it will use an inconsistent sample map!
 			{
 				// Empty slot, so it's a good candidate already.

@@ -205,7 +205,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	if ((m_nSample > 0) && (m_nSample <= sndFile.GetNumSamples()))
 	{
 		const ModSample &sample = sndFile.GetSample(m_nSample);
-		if (sample.HasSampleMem()) dwLen = sample.nLength;
+		if (sample.HasSampleData()) dwLen = sample.nLength;
 	}
 	// Compute scroll size in pixels
 	if (newZoom == 0)		// Fit to display
@@ -1117,7 +1117,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			offScreenDC.LineTo(rcClient.right, ymed);
 		}
 		// Drawing sample
-		if (sample.HasSampleMem() && (yrange) && (sample.nLength > 1) && (rect.right > 1))
+		if (sample.HasSampleData() && (yrange) && (sample.nLength > 1) && (rect.right > 1))
 		{
 			// Loop Start/End
 			if ((sample.nLoopEnd > nSmpScrollPos) && (sample.nLoopEnd > sample.nLoopStart))
@@ -1218,7 +1218,7 @@ void CViewSample::OnDraw(CDC *pDC)
 
 void CViewSample::DrawPositionMarks()
 {
-	if(!GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleMem())
+	if(!GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleData())
 	{
 		return;
 	}
@@ -2000,7 +2000,7 @@ void CViewSample::OnEditDelete()
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if ((!sample.HasSampleMem()) || (!sample.nLength)) return;
+	if ((!sample.HasSampleData()) || (!sample.nLength)) return;
 	if (m_dwEndSel > sample.nLength) m_dwEndSel = sample.nLength;
 	if ((m_dwBeginSel >= m_dwEndSel)
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength))
@@ -2190,7 +2190,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			CSoundFile &sndFile = pModDoc->GetSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
 
-			if(!sample.HasSampleMem())
+			if(!sample.HasSampleData())
 				pasteMode = kReplace;
 			// Show mix paste dialog
 			if(pasteMode == kMixPaste)
@@ -2386,7 +2386,7 @@ void CViewSample::On16BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleMem() && sample.nLength != 0)
+		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleData() && sample.nLength != 0)
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
@@ -2411,7 +2411,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1 && sample.HasSampleMem() && sample.nLength != 0)
+		if(sample.GetNumChannels() > 1 && sample.HasSampleData() && sample.nLength != 0)
 		{
 			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
 			if(convert == ctrlSmp::splitSample)
@@ -2500,7 +2500,7 @@ void CViewSample::TrimSample(bool trimToLoopEnd)
 	SmpLength nStart = m_dwBeginSel;
 	SmpLength nEnd = m_dwEndSel - m_dwBeginSel;
 
-	if ((sample.HasSampleMem()) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
+	if ((sample.HasSampleData()) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Trim");
 
@@ -2874,10 +2874,10 @@ void CViewSample::OnDrawingToggle()
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	const ModSample &sample = sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleMem())
+	if(!sample.HasSampleData())
 	{
 		OnAddSilence();
-		if(!sample.HasSampleMem())
+		if(!sample.HasSampleData())
 		{
 			return;
 		}

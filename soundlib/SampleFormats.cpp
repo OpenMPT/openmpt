@@ -292,7 +292,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	targetSmp = sourceSmp;
 	strcpy(m_szNames[targetSample], srcSong.m_szNames[sourceSample]);
 
-	if(sourceSmp.HasSampleMem())
+	if(sourceSmp.HasSampleData())
 	{
 		targetSmp.pData.pSample = nullptr;	// Don't want to delete the original sample!
 		if(targetSmp.AllocateSample())
@@ -1904,7 +1904,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				mpt::String::Copy(m_szNames[smp], filename.GetFileName().ToLocale());
 			}
 		}
-		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleMem());
+		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleData());
 
 		if(region.useSampleKeyRoot)
 		{

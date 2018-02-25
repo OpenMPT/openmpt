@@ -342,11 +342,11 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		{
 			// Copy an original sample.
 			target = sampleHeaders[origSlot];
-			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].HasSampleMem())
+			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].HasSampleData())
 			{
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
 				target.pData.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
-				if(target.HasSampleMem())
+				if(target.HasSampleData())
 				{
 					memcpy(target.sampleb(), sampleHeaders[origSlot].sampleb(), target.GetSampleSizeInBytes());
 					target.PrecomputeLoops(m_SndFile, false);
@@ -680,7 +680,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 		pDup = m_SndFile.Instruments[duplicateSource];
 	}
 
-	if(!m_SndFile.GetNumInstruments() && (m_SndFile.GetNumSamples() > 1 || m_SndFile.GetSample(1).HasSampleMem()))
+	if(!m_SndFile.GetNumInstruments() && (m_SndFile.GetNumSamples() > 1 || m_SndFile.GetSample(1).HasSampleData()))
 	{
 		bool doConvert = true;
 		if(!silent)
@@ -844,7 +844,7 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 		m_SndFile.m_szNames[nSmp][0] = 0;
 		while ((m_SndFile.GetNumSamples() > 1)
 			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
-			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleMem()))
+			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleData()))
 		{
 			m_SndFile.m_nSamples--;
 		}

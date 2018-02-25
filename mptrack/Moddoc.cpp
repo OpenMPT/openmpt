@@ -1648,7 +1648,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					// Re-mute previously processed sample
 					if(i > 0) MuteSample(static_cast<SAMPLEINDEX>(i), true);
 
-					if(!m_SndFile.GetSample(static_cast<SAMPLEINDEX>(i + 1)).HasSampleMem() || !IsSampleUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
+					if(!m_SndFile.GetSample(static_cast<SAMPLEINDEX>(i + 1)).HasSampleData() || !IsSampleUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
 						continue;
 
 					// Add sample number & name (if available) to path string
@@ -2775,7 +2775,7 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 	if (instrumentName.IsEmpty())
 	{
 		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[NOTE_MIDDLEC - 1];
-		if (nSmp <= m_SndFile.GetNumSamples() && m_SndFile.GetSample(nSmp).HasSampleMem())
+		if (nSmp <= m_SndFile.GetNumSamples() && m_SndFile.GetSample(nSmp).HasSampleData())
 			instrumentName = _T("s: ") + mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.GetSampleName(nSmp));
 	}
 

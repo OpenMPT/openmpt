@@ -279,7 +279,7 @@ struct MODSampleHeader
 	// Convert OpenMPT's internal sample header to a MOD sample header.
 	SmpLength ConvertToMOD(const ModSample &mptSmp)
 	{
-		SmpLength writeLength = mptSmp.HasSampleMem() ? mptSmp.nLength : 0;
+		SmpLength writeLength = mptSmp.HasSampleData() ? mptSmp.nLength : 0;
 		// If the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
 		if((writeLength % 2u) != 0)
 		{

@@ -1532,7 +1532,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				SampleIO::signedPCM)
 				.ReadSample(sample, chunk);
 		}
-		bWaveForm = sample.HasSampleMem();
+		bWaveForm = sample.HasSampleData();
 	} else
 	{
 		FileReader file(mpt::as_span(pWaveForm.data(), dwLen));
@@ -1771,7 +1771,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				}
 			}
 			// Load the sample
-			if(!bDupRgn || !sndFile.GetSample(nSmp).HasSampleMem())
+			if(!bDupRgn || !sndFile.GetSample(nSmp).HasSampleData())
 			{
 				ExtractSample(sndFile, nSmp, nIns, nRgn, nTranspose);
 			} else if(sndFile.GetSample(nSmp).GetNumChannels() == 1)

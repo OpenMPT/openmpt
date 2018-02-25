@@ -512,7 +512,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	// Check if any samples are not referenced in the patterns (sample mode) or by an instrument (instrument mode).
 	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
-	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).HasSampleMem())
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).HasSampleData())
 	{
 		if(!modDoc.IsSampleUsed(smp))
 		{
@@ -603,7 +603,7 @@ bool CModCleanupDlg::OptimizeSamples()
 			}
 		}
 
-		if(sample.HasSampleMem() && sample.nLength > loopLength + 2) numLoopOpt++;
+		if(sample.HasSampleData() && sample.nLength > loopLength + 2) numLoopOpt++;
 	}
 	if(!numLoopOpt && !numStereoOpt) return false;
 
@@ -678,7 +678,7 @@ bool CModCleanupDlg::RearrangeSamples()
 	// First, find out which sample slots are unused and create the new sample map only with used samples
 	for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
 	{
-		if(sndFile.GetSample(i).HasSampleMem())
+		if(sndFile.GetSample(i).HasSampleData())
 		{
 			sampleMap.push_back(i);
 		}

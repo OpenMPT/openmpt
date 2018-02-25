@@ -912,7 +912,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 		mpt::String::Write<mpt::String::nullTerminated>(sampleHeader[smp].name, m_szNames[realSmp]);
 
-		if(Samples[realSmp].HasSampleMem())
+		if(Samples[realSmp].HasSampleData())
 		{
 			// Write sample data
 			if(sampleDataOffset > 0xFFFFFF0)
