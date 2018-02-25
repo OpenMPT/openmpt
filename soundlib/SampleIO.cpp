@@ -320,7 +320,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		const int16 *lut = GetEncoding() == uLaw ? uLawTable : aLawTable;
 
 		SmpLength readLength = sample.nLength * GetNumChannels();
-		LimitMax(readLength, file.BytesLeft());
+		LimitMax(readLength, mpt::saturate_cast<SmpLength>(file.BytesLeft()));
 		bytesRead = readLength;
 
 		const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf);

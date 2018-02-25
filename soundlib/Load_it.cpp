@@ -1933,7 +1933,8 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			{
 				plugin.pMixPlugin->SaveAllParameters();
 			}
-			nPluginSize += plugin.pluginData.size();
+			const uint32 dataSize = mpt::saturate_cast<uint32>(plugin.pluginData.size());
+			nPluginSize += dataSize;
 
 			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
 									 4 + sizeof(int32);			// Default Program
@@ -1952,7 +1953,6 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				// write plugin size:
 				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
 				mpt::IO::Write(f, m_MixPlugins[i].Info);
-				uint32 dataSize = mpt::saturate_cast<uint32>(m_MixPlugins[i].pluginData.size());
 				mpt::IO::WriteIntLE<uint32>(f, dataSize);
 				if(dataSize)
 				{

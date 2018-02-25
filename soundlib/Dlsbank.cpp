@@ -705,7 +705,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK
 					if (pDlsIns->nRegions >= DLSMAXREGIONS) break;
 				} else
 				{
-					pDlsIns->nMelodicEnv = m_Envelopes.size() + 1;
+					pDlsIns->nMelodicEnv = static_cast<uint32>(m_Envelopes.size() + 1);
 				}
 				if (p->cbSize+p->cConnectionBlocks*sizeof(CONNECTIONBLOCK) > p->len) break;
 				DLSENVELOPE dlsEnv;
@@ -815,7 +815,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_phdr:
 		if (m_Instruments.empty())
 		{
-			uint32 numIns = chunk.GetLength() / sizeof(SFPRESETHEADER);
+			uint32 numIns = static_cast<uint32>(chunk.GetLength() / sizeof(SFPRESETHEADER));
 			if(numIns <= 1)
 				break;
 			// The terminal sfPresetHeader record should never be accessed, and exists only to provide a terminal wPresetBagNdx with which to determine the number of zones in the last preset.
@@ -843,7 +843,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_pbag:
 		if (!m_Instruments.empty())
 		{
-			uint32 nBags = chunk.GetLength() / sizeof(SFPRESETBAG);
+			uint32 nBags = static_cast<uint32>(chunk.GetLength() / sizeof(SFPRESETBAG));
 			if (nBags)
 			{
 				sf2info.nPresetBags = nBags;
@@ -858,7 +858,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_pgen:
 		if (!m_Instruments.empty())
 		{
-			uint32 nGens = chunk.GetLength() / sizeof(SFGENLIST);
+			uint32 nGens = static_cast<uint32>(chunk.GetLength() / sizeof(SFGENLIST));
 			if (nGens)
 			{
 				sf2info.nPresetGens = nGens;
@@ -873,7 +873,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_inst:
 		if (!m_Instruments.empty())
 		{
-			uint32 nIns = chunk.GetLength() / sizeof(SFINST);
+			uint32 nIns = static_cast<uint32>(chunk.GetLength() / sizeof(SFINST));
 			sf2info.nInsts = nIns;
 			sf2info.pInsts = reinterpret_cast<const SFINST *>(chunk.GetRawData());
 		}
@@ -882,7 +882,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_ibag:
 		if (!m_Instruments.empty())
 		{
-			uint32 nBags = chunk.GetLength() / sizeof(SFINSTBAG);
+			uint32 nBags = static_cast<uint32>(chunk.GetLength() / sizeof(SFINSTBAG));
 			if (nBags)
 			{
 				sf2info.nInstBags = nBags;
@@ -894,7 +894,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_igen:
 		if (!m_Instruments.empty())
 		{
-			uint32 nGens = chunk.GetLength() / sizeof(SFINSTGENLIST);
+			uint32 nGens = static_cast<uint32>(chunk.GetLength() / sizeof(SFINSTGENLIST));
 			if (nGens)
 			{
 				sf2info.nInstGens = nGens;
@@ -906,7 +906,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 	case IFFID_shdr:
 		if (m_SamplesEx.empty())
 		{
-			uint32 numSmp = chunk.GetLength() / sizeof(SFSAMPLE);
+			uint32 numSmp = static_cast<uint32>(chunk.GetLength() / sizeof(SFSAMPLE));
 			if (numSmp < 1) break;
 			m_SamplesEx.resize(numSmp);
 			m_WaveForms.resize(numSmp);
@@ -1025,7 +1025,7 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LOADERINFO &sf2info)
 		if (!(dlsIns.ulBank & F_INSTRUMENT_DRUMS))
 		{
 			m_Envelopes.push_back(dlsEnv);
-			dlsIns.nMelodicEnv = m_Envelopes.size();
+			dlsIns.nMelodicEnv = static_cast<uint32>(m_Envelopes.size());
 		}
 		// Load Instrument Bags
 		if ((!nInstrNdx) || (nInstrNdx >= sf2info.nInsts) || (!sf2info.pInsts)) continue;
@@ -1161,8 +1161,8 @@ bool CDLSBank::Open(FileReader file)
 
 	file.Rewind();
 	const uint8 *lpMemFile = file.GetRawData<uint8>();
-	uint32 dwMemLength = file.GetLength();
-	uint32 dwMemPos = 0;
+	size_t dwMemLength = file.GetLength();
+	size_t dwMemPos = 0;
 	if(!file.CanRead(256))
 	{
 		return false;
@@ -1437,7 +1437,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 		return false;
 	}
 
-	uint32 dwOffset = m_WaveForms[nWaveLink] + m_dwWavePoolOffset;
+	long dwOffset = mpt::saturate_cast<long>(m_WaveForms[nWaveLink] + m_dwWavePoolOffset);
 	FILE *f = mpt_fopen(m_szFileName, "rb");
 	if(f == nullptr) return false;
 	if (fseek(f, dwOffset, SEEK_SET) == 0)

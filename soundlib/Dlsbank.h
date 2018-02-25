@@ -102,11 +102,11 @@ class CDLSBank
 protected:
 	SOUNDBANKINFO m_BankInfo;
 	mpt::PathString m_szFileName;
+	size_t m_dwWavePoolOffset;
 	uint32 m_nType;
-	uint32 m_dwWavePoolOffset;
 	// DLS Information
 	uint32 m_nMaxWaveLink;
-	std::vector<uint32> m_WaveForms;
+	std::vector<size_t> m_WaveForms;
 	std::vector<DLSINSTRUMENT> m_Instruments;
 	std::vector<DLSSAMPLEEX> m_SamplesEx;
 	std::vector<DLSENVELOPE> m_Envelopes;
