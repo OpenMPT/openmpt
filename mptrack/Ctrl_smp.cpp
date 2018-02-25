@@ -3407,7 +3407,7 @@ void CCtrlSamples::OnXFade()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(!sample.HasSampleData() || sample.nLength == 0)
+	if(!sample.HasSampleData())
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
@@ -3458,7 +3458,6 @@ void CCtrlSamples::OnStereoSeparation()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	if(!sample.HasSampleData()
-		|| !sample.nLength
 		|| sample.GetNumChannels() != 2)
 	{
 		MessageBeep(MB_ICONWARNING);

@@ -2000,7 +2000,7 @@ void CViewSample::OnEditDelete()
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if ((!sample.HasSampleData()) || (!sample.nLength)) return;
+	if (!sample.HasSampleData()) return;
 	if (m_dwEndSel > sample.nLength) m_dwEndSel = sample.nLength;
 	if ((m_dwBeginSel >= m_dwEndSel)
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength))
@@ -2386,7 +2386,7 @@ void CViewSample::On16BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleData() && sample.nLength != 0)
+		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleData())
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
@@ -2411,7 +2411,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1 && sample.HasSampleData() && sample.nLength != 0)
+		if(sample.GetNumChannels() > 1 && sample.HasSampleData())
 		{
 			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
 			if(convert == ctrlSmp::splitSample)
