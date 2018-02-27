@@ -404,7 +404,7 @@ void WAVWriter::FinalizeChunk()
 	if(chunkStartPos != 0)
 	{
 		const size_t chunkSize = position - (chunkStartPos + sizeof(RIFFChunk));
-		chunkHeader.length = chunkSize;
+		chunkHeader.length = mpt::saturate_cast<uint32>(chunkSize);
 
 		size_t curPos = position;
 		Seek(chunkStartPos);
@@ -534,9 +534,10 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext)
 {
 	std::string text = mpt::ToCharset(mpt::CharsetUTF8, utext);
+	text = text.substr(0, uint32_max - 1u);
 	if(!text.empty())
 	{
-		const size_t length = text.length() + 1;
+		const uint32 length = mpt::saturate_cast<uint32>(text.length() + 1);
 
 		RIFFChunk chunk;
 		chunk.id = static_cast<uint32>(id);
