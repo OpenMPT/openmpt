@@ -66,12 +66,54 @@ goto main
 exit /B 0
 goto error
 
+:unpack
+ set MPT_GET_DESTDIR="%~1"
+ set MPT_GET_URL="%~2"
+ set MPT_GET_FILE="%~3"
+ set MPT_GET_SUBDIR="%~4"
+ set MPT_GET_UNPACK_INTERMEDIATE="%~5"
+ copy /Y build\externals-mirror\%MPT_GET_URL% build\externals\%~3 || exit /B 1
+ cd build\externals || exit /B 1
+ if not "%~5" == "-" (
+  "C:\Program Files\7-Zip\7z.exe" x -y "%~3" || exit /B 1
+ )
+ cd ..\.. || exit /B 1
+ cd include || exit /B 1
+ if exist %MPT_GET_DESTDIR% rmdir /S /Q %MPT_GET_DESTDIR%
+ if "%~4" == "." (
+  mkdir %MPT_GET_DESTDIR%
+  cd %MPT_GET_DESTDIR% || exit /B 1
+  if "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~3" || exit /B 1
+  )
+  if not "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~5" || exit /B 1
+  )
+  cd .. || exit /B 1
+ )
+ if not "%~4" == "." (
+  if "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\build\externals\%~3" || exit /B 1
+  )
+  if not "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\build\externals\%~5" || exit /B 1
+  )
+  choice /C y /N /T 2 /D y
+  if not "%~4" == "%~1" (
+   move /Y "%~4" %MPT_GET_DESTDIR% || exit /B 1
+  )
+ )
+ cd .. || exit /B 1
+exit /B 0
+goto error
+
 :main
 if not exist "build\externals" mkdir "build\externals"
 
 
 
-call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
+rem call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
+call :unpack "genie" "genie\GENie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
 
 xcopy /E /I /Y build\genie\genie\build\vs2015 include\genie\build\vs2015 || goto error
 xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
@@ -112,7 +154,8 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
 
 
 
-call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12" "-" || goto error
+rem call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12" "-" || goto error
+call :unpack "premake" "premake\premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12" "-" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
