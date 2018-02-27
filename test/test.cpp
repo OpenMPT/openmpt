@@ -4028,12 +4028,22 @@ static MPT_NOINLINE void TestStringIO()
 #define ReadTest(mode, dst, src, expectedResult) \
 	mpt::String::Read<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
+	dst = mpt::StringBuf(mpt::String:: mode , src); \
+	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
+	/**/
 
 #define WriteTest(mode, dst, src, expectedResult) \
+	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+	std::memset(dst, 0x7f, sizeof(dst)); \
+	mpt::StringBuf(mpt::String:: mode , dst) = src; \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
+	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+	/**/
 
 		// Check reading of null-terminated string into std::string
 		ReadTest(nullTerminated, dststring, src0, "");
