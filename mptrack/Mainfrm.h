@@ -321,18 +321,18 @@ public:
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 
 	// from SoundDevice::ISource
-	uint64 SoundSourceGetReferenceClockNowNanoseconds() const;
-	void SoundSourcePreStartCallback();
-	void SoundSourcePostStopCallback();
-	bool SoundSourceIsLockedByCurrentThread() const;
-	void SoundSourceLock();
-	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer);
-	void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo);
-	void SoundSourceUnlock();
+	uint64 SoundSourceGetReferenceClockNowNanoseconds() const override;
+	void SoundSourcePreStartCallback() override;
+	void SoundSourcePostStopCallback() override;
+	bool SoundSourceIsLockedByCurrentThread() const override;
+	void SoundSourceLock() override;
+	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const override;
+	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) override;
+	void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) override;
+	void SoundSourceUnlock() override;
 
 	// from SoundDevice::IMessageReceiver
-	void SoundDeviceMessage(LogLevel level, const mpt::ustring &str);
+	void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) override;
 
 	bool InGuiThread() const { return theApp.InGuiThread(); }
 	bool InAudioThread() const { return GetCurrentThreadId() == m_AudioThreadId; }
