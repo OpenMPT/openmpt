@@ -454,20 +454,28 @@ namespace String
 		{
 
 			// Copy string and leave one character space in the destination buffer for null.
-			// Convert nulls to spaces while copying.
-			dst = std::replace_copy(src, src + std::min(srcSize, destSize - 1), dst, '\0', ' ');
-
-			// Rewind dst to the first of any trailing spaces.
-			while(dst - destBuffer > 0)
+			// Convert nulls to spaces while copying and counts the length that contains actual characters.
+			std::size_t lengthWithoutNullOrSpace = 0;
+			for(std::size_t pos = 0; pos < srcSize; ++pos)
 			{
-				dst--;
-				char c = *dst;
-				if(c != ' ')
+				char c = srcBuffer[pos];
+				if(c != '\0' && c != ' ')
 				{
-					dst++;
-					break;
+					lengthWithoutNullOrSpace = pos + 1;
+				}
+				if(c == '\0')
+				{
+					c = ' ';
+				}
+				if(pos < destSize - 1)
+				{
+					destBuffer[pos] = c;
 				}
 			}
+
+			std::size_t destLength = std::min(lengthWithoutNullOrSpace, destSize - 1);
+
+			dst += destLength;
 
 		}
 

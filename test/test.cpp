@@ -3943,7 +3943,7 @@ static MPT_NOINLINE void TestStringIO()
 
 	// Check reading of space-padded strings
 	ReadTest(spacePadded, dst2, src0, " X");
-	ReadTest(spacePadded, dst2, src1, "X");
+	ReadTest(spacePadded, dst2, src1, "X ");
 	ReadTest(spacePadded, dst2, src2, "XY");
 	ReadTest(spacePadded, dst2, src3, "XY");
 	ReadTest(spacePadded, dst2, src4, "xy");
