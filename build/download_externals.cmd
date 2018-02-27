@@ -71,7 +71,7 @@ if not exist "build\externals" mkdir "build\externals"
 
 call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."                "-" || goto error
 
-call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                    "xmp-sdk.zip"                        "."                "-" || goto error
+call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."                "-" || goto error
 
 call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
 
