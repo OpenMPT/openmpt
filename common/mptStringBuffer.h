@@ -87,7 +87,7 @@ public:
 	{
 		std::fill(buf, buf + size, Tchar('\0'));
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
-		buf[size - 1] = Tchar('\0');
+		std::fill(buf + std::min(str.length(), size - 1), buf + size, Tchar('\0'));
 		return *this;
 	}
 };
