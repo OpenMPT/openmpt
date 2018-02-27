@@ -3879,16 +3879,30 @@ static MPT_NOINLINE void TestStringIO()
 	char dst2[3];	// Destination buffer, smaller than source buffer
 
 #define ReadTest(mode, dst, src, expectedResult) \
+	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::Read<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+	std::memset(dst, 0x7f, sizeof(dst)); \
+	mpt::AutoStringBuf(dst) = mpt::StringBuf(mpt::String:: mode , src); \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
+	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
+		/* VERIFY_EQUAL_NONCONT(dst[i], '\0'); */ /* Ensure that rest of the buffer is completely nulled */ \
+	/**/
 
 #define WriteTest(mode, dst, src, expectedResult) \
+	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+	std::memset(dst, 0x7f, sizeof(dst)); \
+	mpt::StringBuf(mpt::String:: mode , dst) = mpt::AutoStringBuf(src); \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
+	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
+		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+	/**/
 
 	// Check reading of null-terminated string into larger buffer
 	ReadTest(nullTerminated, dst1, src0, "");
