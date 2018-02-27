@@ -14,15 +14,15 @@ echo "."
 pause
 
 echo "Enabling system default TLS versions for .NET 2.0 32bit"
-reg add HKLM\SOFTWARE\Microsoft.NETFramework\v2.0.50727 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:32
+reg add HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:32
 
 echo "Enabling system default TLS versions for .NET 4.0 64bit"
-reg add HKLM\SOFTWARE\Microsoft.NETFramework\v4.0.30319 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:32
+reg add HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:32
 
 echo "Enabling system default TLS versions for .NET 2.0 32bit"
-reg add HKLM\SOFTWARE\Microsoft.NETFramework\v2.0.50727 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:64
+reg add HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:64
 
 echo "Enabling system default TLS versions for .NET 4.0 64bit"
-reg add HKLM\SOFTWARE\Microsoft.NETFramework\v4.0.30319 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:64
+reg add HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319 /v SystemDefaultTlsVersions /t REG_DWORD /d 1 /f /reg:64
 
 pause
