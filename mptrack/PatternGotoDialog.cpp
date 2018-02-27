@@ -34,6 +34,11 @@ CPatternGotoDialog::CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX
 void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_SPIN1, m_SpinRow);
+	DDX_Control(pDX, IDC_SPIN2, m_SpinChannel);
+	DDX_Control(pDX, IDC_SPIN3, m_SpinPattern);
+	DDX_Control(pDX, IDC_SPIN4, m_SpinOrder);
+
 	UINT temp;
 	temp = m_nRow; DDX_Text(pDX, IDC_GOTO_ROW, temp); m_nRow = static_cast<ROWINDEX>(temp);
 	temp = m_nChannel; DDX_Text(pDX, IDC_GOTO_CHAN, temp); m_nChannel = static_cast<CHANNELINDEX>(temp);
@@ -48,12 +53,19 @@ BEGIN_MESSAGE_MAP(CPatternGotoDialog, CDialog)
 END_MESSAGE_MAP()
 
 
-// CPatternGotoDialog message handlers
+BOOL CPatternGotoDialog::OnInitDialog()
+{
+	m_SpinRow.SetRange32(0, MAX_PATTERN_ROWS - 1);
+	m_SpinChannel.SetRange32(1, MAX_BASECHANNELS);
+	m_SpinPattern.SetRange32(0, std::max(m_SndFile.Patterns.GetNumPatterns(), PATTERNINDEX(1)) - 1);
+	m_SpinOrder.SetRange32(0, std::max(m_SndFile.Order().GetLengthTailTrimmed(), ORDERINDEX(1)) - 1);
+	return TRUE;
+}
 
 void CPatternGotoDialog::OnOK()
 {
 	UpdateData();
-	auto &Order = m_SndFile.Order();
+	const auto &Order = m_SndFile.Order();
 
 	bool validated = true;
 	// Valid order item?
@@ -68,9 +80,8 @@ void CPatternGotoDialog::OnOK()
 	// Does pattern have enough rows?
 	else if(m_SndFile.Patterns[m_nPattern].GetNumRows() <= m_nRow)
 		validated = false;
-	// Does track have enough channels?
-	else if(m_SndFile.GetNumChannels() < m_nChannel)
-		validated = false;
+	
+	Limit(m_nChannel, CHANNELINDEX(1), m_SndFile.GetNumChannels());
 
 	if(validated)
 		CDialog::OnOK();

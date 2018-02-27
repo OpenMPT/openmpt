@@ -19,6 +19,8 @@ class CSoundFile;
 class CPatternGotoDialog : public CDialog
 {
 	const CSoundFile &m_SndFile;
+	CSpinButtonCtrl m_SpinRow, m_SpinChannel, m_SpinPattern, m_SpinOrder;
+
 public:
 	ROWINDEX m_nRow;
 	CHANNELINDEX m_nChannel;
@@ -27,6 +29,7 @@ public:
 
 public:
 	CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, const CSoundFile &sndFile);
+	BOOL OnInitDialog() override;
 
 protected:
 	bool m_bControlLock;
