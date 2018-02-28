@@ -180,7 +180,7 @@ bool BrowseForFolder::Show(CWnd *parent)
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 	bi.lpfn = BrowseCallbackProc;
 	bi.lParam = reinterpret_cast<LPARAM>(this);
-	ITEMIDLIST *pid = SHBrowseForFolder(&bi);
+	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
 	bool success = pid != nullptr && SHGetPathFromIDList(pid, path);
 	CoTaskMemFree(pid);
 	if(success)
