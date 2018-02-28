@@ -1450,7 +1450,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 {
 	file.Rewind();
 
-	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kUnknown } section = kNone;
+	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kCurve, kUnknown } section = kNone;
 	SFZControl control;
 	SFZRegion group, master, globals;
 	std::vector<SFZRegion> regions;
