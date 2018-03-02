@@ -22,6 +22,7 @@ copy /y ..\include\portaudio\LICENSE.txt                  .\Licenses\License.Por
 rem copy /y ..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 rem copy /y ..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error
 copy /y ..\include\r8brain\other\License.txt              .\Licenses\License.R8Brain.txt || goto error
+copy /y ..\include\rtaudio\readme                         .\Licenses\License.RtAudio.txt || goto error
 copy /y ..\include\rtkit\rtkit.h                          .\Licenses\License.RealtimeKit.txt || goto error
 copy /y ..\include\rtmidi\License.txt                     .\Licenses\License.RtMidi.txt || goto error
 copy /y ..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error

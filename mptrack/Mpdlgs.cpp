@@ -338,6 +338,12 @@ void COptionsSoundcard::UpdateEverything()
 					continue;
 				}
 			}
+			if(!TrackerSettings::Instance().m_MoreRtaudio)
+			{
+				// skip rtaudio apis that are already implemented via our own SoundDevice class
+				// can be overwritten via [Sound Settings]MoreRtaudio=1
+				continue;
+			}
 
 			if(!TrackerSettings::Instance().m_SoundShowDeprecatedDevices)
 			{
@@ -359,15 +365,15 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS)
+				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS || it.type == MPT_USTRING("RtAudio-WINDOWS_DS"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_DIRECTX;
-				} else if(it.type == SoundDevice::TypeASIO)
+				} else if(it.type == SoundDevice::TypeASIO || it.type == MPT_USTRING("RtAudio-WINDOWS_ASIO"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_ASIO;
-				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI)
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == MPT_USTRING("RtAudio-WINDOWS_WASAPI"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_SAMPLEMUTE; // // No real image available for now,
@@ -1877,6 +1883,7 @@ BEGIN_MESSAGE_MAP(COptionsWine, CPropertyPage)
 	ON_COMMAND(IDC_CHECK_WINE_ENABLE, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_WINE_PULSEAUDIO, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_WINE_PORTAUDIO, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_WINE_RTAUDIO, OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -1893,6 +1900,7 @@ void COptionsWine::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(COptionsWine)
 	DDX_Control(pDX, IDC_COMBO_WINE_PULSEAUDIO, m_CbnPulseAudio);
 	DDX_Control(pDX, IDC_COMBO_WINE_PORTAUDIO, m_CbnPortAudio);
+	DDX_Control(pDX, IDC_COMBO_WINE_RTAUDIO, m_CbnRtAudio);
 	//}}AFX_DATA_MAP
 }
 
@@ -1924,6 +1932,16 @@ BOOL COptionsWine::OnInitDialog()
 			m_CbnPortAudio.SetCurSel(index);
 		}
 	}
+	index = m_CbnRtAudio.AddString(_T("Auto"    )); m_CbnRtAudio.SetItemData(index, 1);
+	index = m_CbnRtAudio.AddString(_T("Enabled" )); m_CbnRtAudio.SetItemData(index, 2);
+	index = m_CbnRtAudio.AddString(_T("Disabled")); m_CbnRtAudio.SetItemData(index, 0);
+	for(index = 0; index < 3; ++index)
+	{
+		if(m_CbnRtAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnablePortAudio))
+		{
+			m_CbnRtAudio.SetCurSel(index);
+		}
+	}
 	return TRUE;
 }
 
@@ -1939,6 +1957,7 @@ void COptionsWine::OnOK()
 	TrackerSettings::Instance().WineSupportEnabled = IsDlgButtonChecked(IDC_CHECK_WINE_ENABLE) ? true : false;
 	TrackerSettings::Instance().WineSupportEnablePulseAudio = m_CbnPulseAudio.GetItemData(m_CbnPulseAudio.GetCurSel());
 	TrackerSettings::Instance().WineSupportEnablePortAudio = m_CbnPortAudio.GetItemData(m_CbnPortAudio.GetCurSel());
+	TrackerSettings::Instance().WineSupportEnableRtAudio = m_CbnRtAudio.GetItemData(m_CbnRtAudio.GetCurSel());
 	CPropertyPage::OnOK();
 }
 

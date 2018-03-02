@@ -970,6 +970,8 @@
 #define IDC_COMBO_WINE_PULSEAUDIO       2499
 #define IDC_BUTTON_TUNING_NEW           2500
 #define IDC_BUTTON_TUNING_REMOVE        2501
+#define IDC_STATIC_WINE_RTAUDIO         2502
+#define IDC_COMBO_WINE_RTAUDIO          2503
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1266,7 +1268,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        542
 #define _APS_NEXT_COMMAND_VALUE         44646
-#define _APS_NEXT_CONTROL_VALUE         2502
+#define _APS_NEXT_CONTROL_VALUE         2504
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

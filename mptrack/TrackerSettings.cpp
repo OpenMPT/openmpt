@@ -229,6 +229,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundShowNotRecommendedDeviceWarning(conf, "Sound Settings", "ShowNotRecommendedDeviceWarning", true)
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
+	, m_MoreRtaudio(conf, "Sound Settings", "MoreRtaudio", false)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
 	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
@@ -348,6 +349,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, WineSupportAllowUnknownHost(conf, "WineSupport", "AllowUnknownHost", false)
 	, WineSupportEnablePulseAudio(conf, "WineSupport", "EnablePulseAudio", 1)
 	, WineSupportEnablePortAudio(conf, "WineSupport", "EnablePortAudio", 1)
+	, WineSupportEnableRtAudio(conf, "WineSupport", "EnableRtAudio", 1)
 {
 
 	// Effects

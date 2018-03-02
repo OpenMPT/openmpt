@@ -33,6 +33,7 @@ class ComponentWaveOut;
 class ComponentDirectSound;
 class ComponentASIO;
 class ComponentPortAudio;
+class ComponentRtAudio;
 
 
 class Manager
@@ -71,6 +72,9 @@ private:
 #ifdef MPT_WITH_PORTAUDIO
 	ComponentHandle<ComponentPortAudio> m_PortAudio;
 #endif // MPT_WITH_PORTAUDIO
+#ifdef MPT_WITH_RTAUDIO
+	ComponentHandle<ComponentRtAudio> m_RtAudio;
+#endif // MPT_WITH_RTAUDIO
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;

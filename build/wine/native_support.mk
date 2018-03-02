@@ -77,6 +77,7 @@ MPT_TARGET?=
 MPT_TRY_DBUS?=1
 MPT_TRY_PORTAUDIO?=1
 MPT_TRY_PULSEAUDIO?=1
+MPT_TRY_RTAUDIO?=1
 
 CPPFLAGS += $(MPT_ARCH_TARGET) -Icommon -Iinclude
 CXXFLAGS += $(MPT_ARCH_TARGET) -std=c++11 -fPIC -fvisibility=hidden
@@ -168,6 +169,28 @@ CPPFLAGS += $(shell $(MPT_TARGET)pkg-config --cflags-only-I libpulse ) -DMPT_WIT
 LDFLAGS  += $(shell $(MPT_TARGET)pkg-config --libs-only-L   libpulse ) $(shell $(MPT_TARGET)pkg-config --libs-only-other libpulse )
 LDLIBS   += $(shell $(MPT_TARGET)pkg-config --libs-only-l   libpulse )
 endif
+endif
+
+endif
+endif
+
+ifeq ($(MPT_TRY_RTAUDIO),2)
+
+ifeq ($(shell $(MPT_TARGET)pkg-config --exists rtaudio && echo yes),yes)
+CPPFLAGS += $(shell $(MPT_TARGET)pkg-config --cflags-only-I rtaudio ) -DMPT_WITH_RTAUDIO
+LDFLAGS  += $(shell $(MPT_TARGET)pkg-config --libs-only-L   rtaudio ) $(shell $(MPT_TARGET)pkg-config --libs-only-other rtaudio )
+LDLIBS   += $(shell $(MPT_TARGET)pkg-config --libs-only-l   rtaudio )
+else
+$(error RtAudio not found.)
+endif
+
+else
+ifeq ($(MPT_TRY_RTAUDIO),1)
+
+ifeq ($(shell $(MPT_TARGET)pkg-config --exists rtaudio && echo yes),yes)
+CPPFLAGS += $(shell $(MPT_TARGET)pkg-config --cflags-only-I rtaudio ) -DMPT_WITH_RTAUDIO
+LDFLAGS  += $(shell $(MPT_TARGET)pkg-config --libs-only-L   rtaudio ) $(shell $(MPT_TARGET)pkg-config --libs-only-other rtaudio )
+LDLIBS   += $(shell $(MPT_TARGET)pkg-config --libs-only-l   rtaudio )
 endif
 
 endif

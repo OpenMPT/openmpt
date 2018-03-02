@@ -665,6 +665,11 @@ mpt::ustring GetFullCreditsString()
 		"http://www.portaudio.com/\n"
 		"\n"
 #endif
+#ifdef MPT_WITH_RTAUDIO
+		"Gary P. Scavone, McGill University\n"
+		"https://www.music.mcgill.ca/~gary/rtaudio/\n"
+		"\n"
+#endif
 #ifdef MPT_WITH_FLAC
 		"Josh Coalson / Xiph.Org Foundation for libFLAC\n"
 		"https://xiph.org/flac/\n"

@@ -65,6 +65,7 @@ end
    "../../include/opusenc/include",
    "../../include/opusfile/include",
    "../../include/portaudio/include",
+   "../../include/rtaudio",
    "../../include/vorbis/include",
    "../../include/zlib",
   }
@@ -137,6 +138,7 @@ end
    "opusfile",
    "portaudio",
    "r8brain",
+   "rtaudio",
    "rtmidi",
    "soundtouch",
    "vorbis",
@@ -179,6 +181,7 @@ end
    "../../include/msinttypes/inttypes",
    "../../include/ASIOSDK2/common",
    "../../include/portaudio/include",
+   "../../include/rtaudio",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
@@ -201,6 +204,7 @@ end
   warnings "Extra"
   links {
    "portaudio",
+   "rtaudio",
   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

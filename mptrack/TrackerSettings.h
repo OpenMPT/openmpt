@@ -637,6 +637,7 @@ public:
 	Setting<bool> m_SoundShowNotRecommendedDeviceWarning;
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
+	Setting<bool> m_MoreRtaudio;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
 	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
 
@@ -827,6 +828,7 @@ public:
 	Setting<bool> WineSupportAllowUnknownHost;
 	Setting<int32> WineSupportEnablePulseAudio; // 0==off 1==auto 2==on
 	Setting<int32> WineSupportEnablePortAudio; // 0==off 1==auto 2==on
+	Setting<int32> WineSupportEnableRtAudio; // 0==off 1==auto 2==on
 
 public:
 

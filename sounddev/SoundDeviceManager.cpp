@@ -17,6 +17,7 @@
 #include "SoundDeviceASIO.h"
 #include "SoundDeviceDirectSound.h"
 #include "SoundDevicePortAudio.h"
+#include "SoundDeviceRtAudio.h"
 #include "SoundDeviceWaveout.h"
 #include "SoundDeviceStub.h"
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
@@ -129,6 +130,13 @@ void Manager::ReEnumerate()
 	}
 #endif // MPT_WITH_PORTAUDIO
 
+#ifdef MPT_WITH_RTAUDIO
+	if(IsComponentAvailable(m_RtAudio))
+	{
+		EnumerateDevices<CRtAudioDevice>(GetSysInfo());
+	}
+#endif // MPT_WITH_RTAUDIO
+
 #ifndef MPT_BUILD_WINESUPPORT
 	{
 		EnumerateDevices<SoundDeviceStub>(GetSysInfo());
@@ -139,23 +147,29 @@ void Manager::ReEnumerate()
 #ifdef MPT_BUILD_WINESUPPORT
 	MPT_CONSTANT_IF(true)
 	{
-		typePriorities[MPT_USTRING("PulseAudio")] = 32;
-		typePriorities[MPT_USTRING("PulseAudio-Simple")] = 31;
-#ifdef MPT_WITH_PORTAUDIO
+		typePriorities[MPT_USTRING("PulseAudio")] = 42;
+		typePriorities[MPT_USTRING("PulseAudio-Simple")] = 41;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("LINUX_PULSE"))] = 32;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("MACOSX_CORE"))] = 31;
 		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paAL)] = 29;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paALSA)] = 28;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paJACK)] = 19;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paOSS)] = 18;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paAudioScienceHPI)] = 9;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("LINUX_ALSA"))] = 28;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paOSS)] = 27;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paCoreAudio)] = 22;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("UNIX_JACK"))] = 21;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paALSA)] = 18;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("LINUX_OSS"))] = 17;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paJACK)] = 11;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paAudioScienceHPI)] = 1;
 		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paBeOS)] = -1;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paCoreAudio)] = -2;
 		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paWASAPI)] = -3;
 		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paMME)] = -4;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paDirectSound)] = -5;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paSoundManager)] = -6;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paWDMKS)] = -7;
-		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paASIO)] = -8;
-#endif // MPT_WITH_PORTAUDIO
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("WINDOWS_DS"))] = -5;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paDirectSound)] = -6;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paSoundManager)] = -7;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paWDMKS)] = -8;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("WINDOWS_ASIO"))] = -9;
+		typePriorities[mpt::format(MPT_USTRING("PortAudio-%1"))(paASIO)] = -10;
+		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("WINDOWS_WASAPI"))] = -30;
 	} else
 #endif
 	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux && GetSysInfo().WineVersion.IsAtLeast(mpt::Wine::Version(1,8,0)))
@@ -168,8 +182,9 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-		typePriorities[SoundDevice::TypeDSOUND] = -2;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -3;
+		typePriorities[MPT_USTRING("RtAudio-WINDOWS_DS")] = -2;
+		typePriorities[SoundDevice::TypeDSOUND] = -3;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -4;
 	} else if(GetSysInfo().IsWine)
 	{ // Wine
 		typePriorities[MPT_USTRING("Wine-Native-PulseAudio")] = 32;
@@ -178,18 +193,20 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
 		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
-		typePriorities[SoundDevice::TypeDSOUND] = 18;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
+		typePriorities[MPT_USTRING("RtAudio-WINDOWS_DS")] = 18;
+		typePriorities[SoundDevice::TypeDSOUND] = 17;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 16;
 		typePriorities[MPT_USTRING("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::WinVista))
 	{ // WinXP
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeASIO] = 28;
-		typePriorities[SoundDevice::TypeDSOUND] = 27;
+		typePriorities[MPT_USTRING("RtAudio-WINDOWS_DS")] = 27;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
+		typePriorities[SoundDevice::TypeDSOUND] = 17;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 7;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -1;
 	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::Win7))
 	{ // Vista
@@ -198,8 +215,9 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeASIO] = 27;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
-		typePriorities[SoundDevice::TypeDSOUND] = -1;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -2;
+		typePriorities[MPT_USTRING("RtAudio-WINDOWS_DS")] = -1;
+		typePriorities[SoundDevice::TypeDSOUND] = -2;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -3;
 	} else
 	{ // >=Win7
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
@@ -207,8 +225,9 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeASIO] = 27;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
-		typePriorities[SoundDevice::TypeDSOUND] = -1;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -2;
+		typePriorities[MPT_USTRING("RtAudio-WINDOWS_DS")] = -1;
+		typePriorities[SoundDevice::TypeDSOUND] = -2;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -3;
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 

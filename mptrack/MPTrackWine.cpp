@@ -571,6 +571,7 @@ void Initialize()
 		}
 		features += std::string() + " " + "MPT_TRY_PORTAUDIO=" + mpt::fmt::dec(TrackerSettings::Instance().WineSupportEnablePortAudio.Get());
 		features += std::string() + " " + "MPT_TRY_PULSEAUDIO=" + mpt::fmt::dec(TrackerSettings::Instance().WineSupportEnablePulseAudio.Get());
+		features += std::string() + " " + "MPT_TRY_RTAUDIO=" + mpt::fmt::dec(TrackerSettings::Instance().WineSupportEnableRtAudio.Get());
 		
 		int makeverbosity = Clamp(TrackerSettings::Instance().WineSupportCompileVerbosity.Get(), 0, 6);
 

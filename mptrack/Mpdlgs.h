@@ -233,6 +233,7 @@ class COptionsWine: public CPropertyPage
 protected:
 	CComboBox m_CbnPulseAudio;
 	CComboBox m_CbnPortAudio;
+	CComboBox m_CbnRtAudio;
 
 public:
 	COptionsWine();

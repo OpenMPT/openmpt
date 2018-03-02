@@ -51,82 +51,82 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{563A631D-FE07-47BC-A98F-9FE5B3EBABFA}</ProjectGuid>
+    <ProjectGuid>{4886456B-1342-4EC8-AD3F-D92AEB8C1097}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>OpenMPT-NativeSupport</RootNamespace>
+    <RootNamespace>rtaudio</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
@@ -172,95 +172,82 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\Debug\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\Debug\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\Debug\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\Debug\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\Debug\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\Release\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\Release\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\Release\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\Release\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\Release\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\Release\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\DebugMDd\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\DebugMDd\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug-MDd\vs2017-static\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\DebugMDd\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\DebugMDd\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\DebugMDd\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\ReleaseLTCG\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\ReleaseLTCG\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release-LTCG\vs2017-static\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\ReleaseLTCG\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\ReleaseLTCG\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\ReleaseLTCG\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\DebugShared\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\DebugShared\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\DebugShared\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\DebugShared\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\DebugShared\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\DebugShared\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-32-winxp\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86\ReleaseShared\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86\ReleaseShared\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-64-winxp64\</OutDir>
-    <IntDir>..\obj\vs2017xp\OpenMPT-NativeSupport\x86_64\ReleaseShared\</IntDir>
-    <TargetName>OpenMPT-NativeSupport</TargetName>
-    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\lib\vs2017xp\x86_64\ReleaseShared\</OutDir>
+    <IntDir>..\..\obj\vs2017xp\rtaudio\x86_64\ReleaseShared\</IntDir>
+    <TargetName>openmpt-rtaudio</TargetName>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -270,19 +257,16 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2017-static\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -291,19 +275,16 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2017-static\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -321,19 +302,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2017-static\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -350,19 +328,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2017-static\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
@@ -372,19 +347,16 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug-MDd\vs2017-static\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
@@ -393,19 +365,16 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug-MDd\vs2017-static\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -423,19 +392,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release-LTCG\vs2017-static\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -452,19 +418,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release-LTCG\vs2017-static\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -475,19 +438,16 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2017-shared\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -497,19 +457,16 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2017-shared\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0501;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -526,19 +483,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2017-shared\x86-32-winxp\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;MPT_BUILD_WINESUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\ASIOSDK2\common;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MPT_BUILD_TARGET_XP;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0502;__WINDOWS_DS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -554,117 +508,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2017-shared\x86-64-winxp64\OpenMPT-NativeSupport.lib</ImportLibrary>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
-    <PreBuildEvent>
-      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
-    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\BuildSettings.h" />
-    <ClInclude Include="..\..\common\CompilerDetect.h" />
-    <ClInclude Include="..\..\common\ComponentManager.h" />
-    <ClInclude Include="..\..\common\Endianness.h" />
-    <ClInclude Include="..\..\common\FileReader.h" />
-    <ClInclude Include="..\..\common\FileReaderFwd.h" />
-    <ClInclude Include="..\..\common\FlagSet.h" />
-    <ClInclude Include="..\..\common\Logging.h" />
-    <ClInclude Include="..\..\common\Profiler.h" />
-    <ClInclude Include="..\..\common\WriteMemoryDump.h" />
-    <ClInclude Include="..\..\common\misc_util.h" />
-    <ClInclude Include="..\..\common\mptBufferIO.h" />
-    <ClInclude Include="..\..\common\mptCPU.h" />
-    <ClInclude Include="..\..\common\mptCRC.h" />
-    <ClInclude Include="..\..\common\mptFileIO.h" />
-    <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptLibrary.h" />
-    <ClInclude Include="..\..\common\mptMutex.h" />
-    <ClInclude Include="..\..\common\mptOS.h" />
-    <ClInclude Include="..\..\common\mptPathString.h" />
-    <ClInclude Include="..\..\common\mptRandom.h" />
-    <ClInclude Include="..\..\common\mptString.h" />
-    <ClInclude Include="..\..\common\mptStringBuffer.h" />
-    <ClInclude Include="..\..\common\mptStringFormat.h" />
-    <ClInclude Include="..\..\common\mptStringParse.h" />
-    <ClInclude Include="..\..\common\mptThread.h" />
-    <ClInclude Include="..\..\common\mptTime.h" />
-    <ClInclude Include="..\..\common\mptTypeTraits.h" />
-    <ClInclude Include="..\..\common\mptUUID.h" />
-    <ClInclude Include="..\..\common\mptWine.h" />
-    <ClInclude Include="..\..\common\serialization_utils.h" />
-    <ClInclude Include="..\..\common\stdafx.h" />
-    <ClInclude Include="..\..\common\typedefs.h" />
-    <ClInclude Include="..\..\common\version.h" />
-    <ClInclude Include="..\..\common\versionNumber.h" />
-    <ClInclude Include="..\..\mptrack\wine\Native.h" />
-    <ClInclude Include="..\..\mptrack\wine\NativeConfig.h" />
-    <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />
-    <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
-    <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
-    <ClInclude Include="..\..\soundbase\SampleFormat.h" />
-    <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
-    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevice.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceManager.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
+    <ClInclude Include="..\..\..\include\rtaudio\RtAudio.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\ComponentManager.cpp" />
-    <ClCompile Include="..\..\common\FileReader.cpp" />
-    <ClCompile Include="..\..\common\Logging.cpp" />
-    <ClCompile Include="..\..\common\Profiler.cpp" />
-    <ClCompile Include="..\..\common\misc_util.cpp" />
-    <ClCompile Include="..\..\common\mptCPU.cpp" />
-    <ClCompile Include="..\..\common\mptFileIO.cpp" />
-    <ClCompile Include="..\..\common\mptIO.cpp" />
-    <ClCompile Include="..\..\common\mptLibrary.cpp" />
-    <ClCompile Include="..\..\common\mptOS.cpp" />
-    <ClCompile Include="..\..\common\mptPathString.cpp" />
-    <ClCompile Include="..\..\common\mptRandom.cpp" />
-    <ClCompile Include="..\..\common\mptString.cpp" />
-    <ClCompile Include="..\..\common\mptStringBuffer.cpp" />
-    <ClCompile Include="..\..\common\mptStringFormat.cpp" />
-    <ClCompile Include="..\..\common\mptStringParse.cpp" />
-    <ClCompile Include="..\..\common\mptTime.cpp" />
-    <ClCompile Include="..\..\common\mptUUID.cpp" />
-    <ClCompile Include="..\..\common\mptWine.cpp" />
-    <ClCompile Include="..\..\common\serialization_utils.cpp" />
-    <ClCompile Include="..\..\common\stdafx.cpp" />
-    <ClCompile Include="..\..\common\typedefs.cpp" />
-    <ClCompile Include="..\..\common\version.cpp" />
-    <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
-    <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />
-    <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="ext\portaudio.vcxproj">
-      <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
-    </ProjectReference>
-    <ProjectReference Include="ext\rtaudio.vcxproj">
-      <Project>{4886456B-1342-4EC8-AD3F-D92AEB8C1097}</Project>
-    </ProjectReference>
+    <ClCompile Include="..\..\..\include\rtaudio\RtAudio.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
