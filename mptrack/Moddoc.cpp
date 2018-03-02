@@ -86,7 +86,6 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	//{{AFX_MSG_MAP(CModDoc)
 	ON_COMMAND(ID_FILE_SAVEASTEMPLATE,	OnSaveTemplateModule)
 	ON_COMMAND(ID_FILE_SAVEASWAVE,		OnFileWaveConvert)
-	ON_COMMAND(ID_FILE_SAVEASMP3,		OnFileMP3Convert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		OnFileMidiConvert)
 	ON_COMMAND(ID_FILE_SAVECOMPAT,		OnFileCompatibilitySave)
 	ON_COMMAND(ID_FILE_APPENDMODULE,	OnAppendModule)
@@ -1497,16 +1496,6 @@ void CModDoc::OnFileWaveConvert()
 	OnFileWaveConvert(ORDERINDEX_INVALID, ORDERINDEX_INVALID);
 }
 
-void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
-{
-	WAVEncoder wavencoder;
-	FLACEncoder flacencoder;
-	AUEncoder auencoder;
-	RAWEncoder rawencoder;
-	std::vector<EncoderFactoryBase*> encFactories{ &wavencoder, &flacencoder, &auencoder, &rawencoder };
-	MPT_ASSERT(encFactories.size() == MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS);
-	OnFileWaveConvert(nMinOrder, nMaxOrder, encFactories);
-}
 
 void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, const std::vector<EncoderFactoryBase*> &encFactories)
 {
@@ -1793,12 +1782,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 }
 
 
-void CModDoc::OnFileMP3Convert()
-{
-	OnFileMP3Convert(ORDERINDEX_INVALID, ORDERINDEX_INVALID);
-}
-
-void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
+void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 {
 	WAVEncoder wavencoder;
 	FLACEncoder flacencoder;
@@ -1814,7 +1798,6 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	if(flacencoder.IsAvailable()) encoders.push_back(&flacencoder);
 	if(auencoder.IsAvailable()) encoders.push_back(&auencoder);
 	if(rawencoder.IsAvailable()) encoders.push_back(&rawencoder);
-	MPT_ASSERT(encoders.size() == MPT_STREAMEXPORT_NUM_LOSSLESS_ENCODERS);
 	if(opusencoder.IsAvailable()) encoders.push_back(&opusencoder);
 	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
 	if(mp3lame.IsAvailable())
@@ -2512,7 +2495,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcViewChannelManager: OnChannelManager(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
-		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
+		case kcFileSaveAsMP3:	OnFileWaveConvert(); break;
 		case kcFileSaveMidi:	OnFileMidiConvert(); break;
 		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;

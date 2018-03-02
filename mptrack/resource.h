@@ -1055,7 +1055,6 @@
 #define ID_ORDERLIST_NEW                32856
 #define ID_ORDERLIST_COPY               32857
 #define ID_PATTERN_SETINSTRUMENT        32858
-#define ID_FILE_SAVEASMP3               32859
 #define ID_MODTREE_SHOWALLFILES         32860
 #define ID_MODTREE_SOUNDFILESONLY       32861
 #define ID_ENVSEL_VOLUME                32862

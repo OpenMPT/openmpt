@@ -1229,7 +1229,7 @@ void COrderList::OnInsertSeparatorPattern()
 void COrderList::OnRenderOrder()
 {
 	OrdSelection selection = GetCurSel(false);
-	m_pModDoc.OnFileMP3Convert(selection.firstOrd, selection.lastOrd);
+	m_pModDoc.OnFileWaveConvert(selection.firstOrd, selection.lastOrd);
 }
 
 
