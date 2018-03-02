@@ -38,6 +38,8 @@ is just a high-level summary.
  *  [**Change**] openmpt123: openmpt123 now rejects `--output-type` in `--ui`
     and `--batch` modes and also rejects `--output` in `--render` mode. These
     combinations of options really made no sense and were rather confusing.
+ *  [**Change**] Android NDK build system now uses libc++ (`c++_shared`) instead
+    of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.
