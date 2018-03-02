@@ -1794,7 +1794,7 @@ void CMidiSetupDlg::RefreshDeviceList(UINT currentDevice)
 		mic.szPname[0] = 0;
 		if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
 		{
-			int item = m_InputDevice.AddString(theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::WinStringBuf(mic.szPname)), true));
+			int item = m_InputDevice.AddString(theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::String::ReadWinBuf(mic.szPname)), true));
 			m_InputDevice.SetItemData(item, i);
 			if(i == currentDevice)
 			{

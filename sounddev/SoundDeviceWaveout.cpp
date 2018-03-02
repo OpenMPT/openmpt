@@ -293,7 +293,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
 		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1: %2"))
 			( mpt::ufmt::hex0<8>(result)
-			, mpt::ToUnicode(mpt::WinStringBuf(errortext))
+			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
 	}
 	RequestClose();
@@ -316,7 +316,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1 (param 0x%2): %3"))
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ufmt::hex0<8>(param)
-			, mpt::ToUnicode(mpt::WinStringBuf(errortext))
+			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
 	}
 	RequestClose();
@@ -556,7 +556,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		MemsetZero(woc);
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
-			info.name = mpt::ToUnicode(mpt::WinStringBuf(woc.szPname));
+			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
 			info.extraData[MPT_USTRING("DriverID")] = mpt::format(MPT_USTRING("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
 			info.extraData[MPT_USTRING("DriverVersion")] = mpt::format(MPT_USTRING("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		} else if(index == 0)

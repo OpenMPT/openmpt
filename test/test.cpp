@@ -2166,7 +2166,7 @@ static MPT_NOINLINE void TestCharsets()
 
 	{
 		char buf[4] = { 'x','x','x','x' };
-		mpt::AutoStringBuf(buf) = std::string("foobar");
+		mpt::String::WriteAutoBuf(buf) = std::string("foobar");
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2175,7 +2175,7 @@ static MPT_NOINLINE void TestCharsets()
 	{
 		char buf[4] = { 'x','x','x','x' };
 		char foobar[] = {'f','o','o','b','a','r','\0'};
-		mpt::TypedStringBuf<std::string>(buf) = (char*)foobar;
+		mpt::String::WriteTypedBuf<std::string>(buf) = (char*)foobar;
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2183,7 +2183,7 @@ static MPT_NOINLINE void TestCharsets()
 	}
 	{
 		char buf[4] = { 'x','x','x','x' };
-		mpt::TypedStringBuf<std::string>(buf) = (const char*)"foobar";
+		mpt::String::WriteTypedBuf<std::string>(buf) = (const char*)"foobar";
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2191,7 +2191,7 @@ static MPT_NOINLINE void TestCharsets()
 	}
 	{
 		char buf[4] = { 'x','x','x','x' };
-		mpt::TypedStringBuf<std::string>(buf) = "foobar";
+		mpt::String::WriteTypedBuf<std::string>(buf) = "foobar";
 		VERIFY_EQUAL(buf[0], 'f');
 		VERIFY_EQUAL(buf[1], 'o');
 		VERIFY_EQUAL(buf[2], 'o');
@@ -2199,7 +2199,7 @@ static MPT_NOINLINE void TestCharsets()
 	}
 	{
 		const char buf[4] = { 'f','o','o','b' };
-		std::string foo = mpt::AutoStringBuf(buf);
+		std::string foo = mpt::String::ReadAutoBuf(buf);
 		VERIFY_EQUAL(foo, std::string("foob"));
 	}
 
@@ -3885,7 +3885,7 @@ static MPT_NOINLINE void TestStringIO()
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::AutoStringBuf(dst) = mpt::StringBuf(mpt::String:: mode , src); \
+	mpt::String::WriteAutoBuf(dst) = mpt::String::ReadBuf(mpt::String:: mode , src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		/* VERIFY_EQUAL_NONCONT(dst[i], '\0'); */ /* Ensure that rest of the buffer is completely nulled */ \
@@ -3898,7 +3898,7 @@ static MPT_NOINLINE void TestStringIO()
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::StringBuf(mpt::String:: mode , dst) = mpt::AutoStringBuf(src); \
+	mpt::String::WriteBuf(mpt::String:: mode , dst) = mpt::String::ReadAutoBuf(src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
@@ -4028,7 +4028,7 @@ static MPT_NOINLINE void TestStringIO()
 #define ReadTest(mode, dst, src, expectedResult) \
 	mpt::String::Read<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
-	dst = mpt::StringBuf(mpt::String:: mode , src); \
+	dst = mpt::String::ReadBuf(mpt::String:: mode , src); \
 	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
 	/**/
 
@@ -4039,7 +4039,7 @@ static MPT_NOINLINE void TestStringIO()
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::StringBuf(mpt::String:: mode , dst) = src; \
+	mpt::String::WriteBuf(mpt::String:: mode , dst) = src; \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \

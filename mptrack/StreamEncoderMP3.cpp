@@ -1050,11 +1050,11 @@ private:
 
 			if(add.szLongName[0])
 			{
-				driverNameLong = mpt::ToUnicode(mpt::WinStringBuf(add.szLongName));
+				driverNameLong = mpt::ToUnicode(mpt::String::ReadWinBuf(add.szLongName));
 			}
 			if(add.szShortName[0])
 			{
-				driverNameShort = mpt::ToUnicode(mpt::WinStringBuf(add.szShortName));
+				driverNameShort = mpt::ToUnicode(mpt::String::ReadWinBuf(add.szShortName));
 			}
 			if(driverNameShort.empty())
 			{
@@ -1076,11 +1076,11 @@ private:
 				}
 			}
 
-			AppendField(driverDescription, MPT_USTRING("Driver"), mpt::ToUnicode(mpt::WinStringBuf(add.szShortName)));
-			AppendField(driverDescription, MPT_USTRING("Description"), mpt::ToUnicode(mpt::WinStringBuf(add.szLongName)));
-			AppendField(driverDescription, MPT_USTRING("Copyright"), mpt::ToUnicode(mpt::WinStringBuf(add.szCopyright)));
-			AppendField(driverDescription, MPT_USTRING("Licensing"), mpt::ToUnicode(mpt::WinStringBuf(add.szLicensing)));
-			AppendField(driverDescription, MPT_USTRING("Features"), mpt::ToUnicode(mpt::WinStringBuf(add.szFeatures)));
+			AppendField(driverDescription, MPT_USTRING("Driver"), mpt::ToUnicode(mpt::String::ReadWinBuf(add.szShortName)));
+			AppendField(driverDescription, MPT_USTRING("Description"), mpt::ToUnicode(mpt::String::ReadWinBuf(add.szLongName)));
+			AppendField(driverDescription, MPT_USTRING("Copyright"), mpt::ToUnicode(mpt::String::ReadWinBuf(add.szCopyright)));
+			AppendField(driverDescription, MPT_USTRING("Licensing"), mpt::ToUnicode(mpt::String::ReadWinBuf(add.szLicensing)));
+			AppendField(driverDescription, MPT_USTRING("Features"), mpt::ToUnicode(mpt::String::ReadWinBuf(add.szFeatures)));
 
 			for(std::size_t i = 0; i < mpt::size(layer3_samplerates); ++i)
 			{
@@ -1089,7 +1089,7 @@ private:
 
 					mpt::ustring formatName;
 
-					formatName = mpt::ToUnicode(mpt::WinStringBuf(pafd->szFormat));
+					formatName = mpt::ToUnicode(mpt::String::ReadWinBuf(pafd->szFormat));
 					
 					if(!driverNameCombined.empty())
 					{

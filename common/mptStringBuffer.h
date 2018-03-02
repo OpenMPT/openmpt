@@ -117,28 +117,51 @@ public:
 	}
 };
 
+namespace String {
 template <typename Tstring, typename Tchar, std::size_t size>
-inline StringBufRefImpl<Tstring, Tchar> TypedStringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<Tstring, typename std::add_const<Tchar>::type> ReadTypedBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<Tstring, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tstring, typename Tchar>
+inline StringBufRefImpl<Tstring, typename std::add_const<Tchar>::type> ReadTypedBuf(Tchar * buf, std::size_t size)
+{
+	return StringBufRefImpl<Tstring, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tstring, typename Tchar, std::size_t size>
+inline StringBufRefImpl<Tstring, Tchar> WriteTypedBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }
 template <typename Tstring, typename Tchar>
-inline StringBufRefImpl<Tstring, Tchar> TypedStringBuf(Tchar * buf, std::size_t size)
+inline StringBufRefImpl<Tstring, Tchar> WriteTypedBuf(Tchar * buf, std::size_t size)
 {
 	return StringBufRefImpl<Tstring, Tchar>(buf, size);
 }
+} // namespace String
 
+namespace String {
 template <typename Tchar, std::size_t size>
-inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> AutoStringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, typename std::add_const<Tchar>::type> ReadAutoBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar>
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, typename std::add_const<Tchar>::type> ReadAutoBuf(Tchar * buf, std::size_t size)
+{
+	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar, std::size_t size>
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> WriteAutoBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar>(buf, size);
 }
 template <typename Tchar>
-inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> AutoStringBuf(Tchar * buf, std::size_t size)
+inline StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar> WriteAutoBuf(Tchar * buf, std::size_t size)
 {
 	return StringBufRefImpl<typename std::basic_string<typename std::remove_const<Tchar>::type>, Tchar>(buf, size);
 }
-
+} // namespace String
 
 template <typename Tchar>
 class StringModeBufRefImpl
@@ -197,32 +220,56 @@ public:
 	}
 };
 
+namespace String {
 template <typename Tchar, std::size_t size>
-inline StringModeBufRefImpl<Tchar> StringBuf(String::ReadWriteMode mode, Tchar (&buf)[size])
+inline StringModeBufRefImpl<typename std::add_const<Tchar>::type> ReadBuf(String::ReadWriteMode mode, Tchar (&buf)[size])
+{
+	return StringModeBufRefImpl<typename std::add_const<Tchar>::type>(buf, size, mode);
+}
+template <typename Tchar>
+inline StringModeBufRefImpl<typename std::add_const<Tchar>::type> ReadBuf(String::ReadWriteMode mode, Tchar * buf, std::size_t size)
+{
+	return StringModeBufRefImpl<typename std::add_const<Tchar>::type>(buf, size, mode);
+}
+template <typename Tchar, std::size_t size>
+inline StringModeBufRefImpl<Tchar> WriteBuf(String::ReadWriteMode mode, Tchar (&buf)[size])
 {
 	return StringModeBufRefImpl<Tchar>(buf, size, mode);
 }
 template <typename Tchar>
-inline StringModeBufRefImpl<Tchar> StringBuf(String::ReadWriteMode mode, Tchar * buf, std::size_t size)
+inline StringModeBufRefImpl<Tchar> WriteBuf(String::ReadWriteMode mode, Tchar * buf, std::size_t size)
 {
 	return StringModeBufRefImpl<Tchar>(buf, size, mode);
 }
+} // namespace String
 
 
 #ifdef MODPLUG_TRACKER
 
 #if MPT_OS_WINDOWS
 
+namespace String {
 template <typename Tchar, std::size_t size>
-inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WinStringBuf(Tchar (&buf)[size])
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, typename std::add_const<Tchar>::type> ReadWinBuf(Tchar (&buf)[size])
+{
+	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar>
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, typename std::add_const<Tchar>::type> ReadWinBuf(Tchar * buf, std::size_t size)
+{
+	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar, std::size_t size>
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WriteWinBuf(Tchar (&buf)[size])
 {
 	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar>(buf, size);
 }
 template <typename Tchar>
-inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WinStringBuf(Tchar * buf, std::size_t size)
+inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar> WriteWinBuf(Tchar * buf, std::size_t size)
 {
 	return StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_const<Tchar>::type>::string_type, Tchar>(buf, size);
 }
+} // namespace String
 
 #if defined(_MFC_VER)
 
@@ -281,16 +328,28 @@ public:
 	}
 };
 
+namespace String {
 template <typename Tchar, std::size_t size>
-inline CStringBufRefImpl<Tchar> CStringBuf(Tchar (&buf)[size])
+inline CStringBufRefImpl<typename std::add_const<Tchar>::type> ReadCStringBuf(Tchar (&buf)[size])
+{
+	return CStringBufRefImpl<typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar>
+inline CStringBufRefImpl<typename std::add_const<Tchar>::type> ReadCStringBuf(Tchar * buf, std::size_t size)
+{
+	return CStringBufRefImpl<typename std::add_const<Tchar>::type>(buf, size);
+}
+template <typename Tchar, std::size_t size>
+inline CStringBufRefImpl<Tchar> WriteCStringBuf(Tchar (&buf)[size])
 {
 	return CStringBufRefImpl<Tchar>(buf, size);
 }
 template <typename Tchar>
-inline CStringBufRefImpl<Tchar> CStringBuf(Tchar * buf, std::size_t size)
+inline CStringBufRefImpl<Tchar> WriteCStringBuf(Tchar * buf, std::size_t size)
 {
 	return CStringBufRefImpl<Tchar>(buf, size);
 }
+} // namespace String
 
 #endif // _MFC_VER
 

@@ -325,7 +325,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		{
 			break;
 		}
-		const mpt::winstring keyname = mpt::WinStringBuf(keynameBuf);
+		const mpt::winstring keyname = mpt::String::ReadWinBuf(keynameBuf);
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: Found '%1':"))(mpt::ToUnicode(keyname)));
 
 		HKEY hksub = NULL;
@@ -340,7 +340,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		mpt::ustring description;
 		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("Description"), 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
-			description = mpt::ToUnicode(mpt::WinStringBuf(descriptionBuf));
+			description = mpt::ToUnicode(mpt::String::ReadWinBuf(descriptionBuf));
 			MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO:   description='%1'"))(description));
 		} else
 		{
@@ -352,7 +352,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		datasize = sizeof(idBuf);
 		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("CLSID"), 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
-			const mpt::ustring internalID = mpt::ToUnicode(mpt::WinStringBuf(idBuf));
+			const mpt::ustring internalID = mpt::ToUnicode(mpt::String::ReadWinBuf(idBuf));
 			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
 				MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO:   clsid=%1"))(internalID));
