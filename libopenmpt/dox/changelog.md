@@ -15,17 +15,17 @@ is just a high-level summary.
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
  *  [**New**] libopenmpt Emscripten builds now ship with MP3 support by
     default, based on minimp3 by Lion (github.com/lieff).
- *  [**New**] New ctl `play.at_end` can be used to change what happens when the
-    song end is reached:
-    * "fadeout": Fades the module out for a short while. Subsequent reads after
-      the fadeout will return 0 rendered frames. This is the default and
-      identical to the behaviour in previous libopenmpt versions. 
-    * "continue": Returns 0 rendered frames when the song end is reached.
-      Subsequent reads will continue playing from the song start or loop start.
-      This can be used for custom loop logic, such as loop auto-detection and
-      longer fadeouts.
-    * "stop": Returns 0 rendered frames when the song end is reached. Subsequent
-      reads will return 0 rendered frames.
+ *  [**New**] libopenmpt New ctl `play.at_end` can be used to change what
+    happens when the song end is reached:
+     *  "fadeout": Fades the module out for a short while. Subsequent reads
+        after the fadeout will return 0 rendered frames. This is the default and
+        identical to the behaviour in previous libopenmpt versions. 
+     *  "continue": Returns 0 rendered frames when the song end is reached.
+        Subsequent reads will continue playing from the song start or loop
+        start. This can be used for custom loop logic, such as loop
+        auto-detection and longer fadeouts.
+     *  "stop": Returns 0 rendered frames when the song end is reached.
+        Subsequent reads will return 0 rendered frames.
 
  *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
     other versions between 12b and 15c as well).
