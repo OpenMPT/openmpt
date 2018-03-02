@@ -246,7 +246,7 @@ public:
 	operator CString () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
-		return CString(buf, len);
+		return CString(buf, mpt::saturate_cast<int>(len));
 	}
 	CStringBufRefImpl & operator = (const CString & str)
 	{
@@ -277,7 +277,7 @@ public:
 	operator CString () const
 	{
 		std::size_t len = std::find(buf, buf + size, Tchar('\0')) - buf; // terminate at \0
-		return CString(buf, buf + len);
+		return CString(buf, mpt::saturate_cast<int>(len));
 	}
 };
 
