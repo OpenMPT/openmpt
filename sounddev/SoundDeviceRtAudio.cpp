@@ -161,7 +161,7 @@ bool CRtAudioDevice::InternalOpen()
 		if(m_Settings.BoostThreadPriority)
 		{
 			m_StreamOptions.flags |= RTAUDIO_SCHEDULE_REALTIME;
-			m_StreamOptions.priority = 10;
+			m_StreamOptions.priority = m_AppInfo.BoostedThreadPriorityXP;
 		}
 		if(m_Settings.ExclusiveMode)
 		{
