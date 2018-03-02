@@ -49,7 +49,7 @@
 #define MPT_MUTEX_WIN32   1
 #else
 #define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_PTHREAD 1
 #define MPT_MUTEX_WIN32   0
 #endif
 
