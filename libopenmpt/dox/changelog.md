@@ -15,7 +15,7 @@ is just a high-level summary.
  *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
  *  [**New**] libopenmpt Emscripten builds now ship with MP3 support by
     default, based on minimp3 by Lion (github.com/lieff).
- *  [**New**] libopenmpt New ctl `play.at_end` can be used to change what
+ *  [**New**] libopenmpt: New ctl `play.at_end` can be used to change what
     happens when the song end is reached:
      *  "fadeout": Fades the module out for a short while. Subsequent reads
         after the fadeout will return 0 rendered frames. This is the default and
@@ -27,8 +27,8 @@ is just a high-level summary.
      *  "stop": Returns 0 rendered frames when the song end is reached.
         Subsequent reads will return 0 rendered frames.
 
- *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
-    other versions between 12b and 15c as well).
+ *  [**Bug**] libopenmpt did not build on Android NDK r15c (and possibly
+    other versions between r12b and r15c as well).
 
  *  [**Change**] minimp3: Instead of the LGPL-2.1-licensed minimp3 by KeyJ,
     libopenmpt now uses the CC0-1.0-licensed minimp3 by Lion (github.com/lieff)
@@ -40,6 +40,10 @@ is just a high-level summary.
     combinations of options really made no sense and were rather confusing.
  *  [**Change**] Android NDK build system now uses libc++ (`c++_shared`) instead
     of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16.
+
+ *  [**Regression**] Building with Android NDK r12b through r15b now requires
+    setting `APP_STL=gnustl_shared` to override the new libopenmpt default of
+    `APP_STL=c++_shared`.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.
