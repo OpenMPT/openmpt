@@ -41,7 +41,7 @@
 #error "clang version 3.4 required"
 #endif
 
-#if defined(__clang_analyzer__) 
+#if defined(__clang_analyzer__)
 #ifndef MPT_BUILD_ANALYZED
 #define MPT_BUILD_ANALYZED
 #endif
