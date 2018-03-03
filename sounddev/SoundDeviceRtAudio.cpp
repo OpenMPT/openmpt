@@ -331,7 +331,7 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
 	caps.CanUseHardwareTiming = false;
-	caps.CanChannelMapping = true;
+	caps.CanChannelMapping = false; // only base channel is supported, and that does not make too much sense for non-ASIO backends
 	caps.CanInput = (rtinfo.inputChannels > 0);
 	caps.HasNamedInputSources = true;
 	caps.CanDriverPanel = false;
