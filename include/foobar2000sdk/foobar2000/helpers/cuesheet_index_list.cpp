@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "cuesheet_index_list.h"
 
 #ifndef _MSC_VER
 #define sprintf_s sprintf
@@ -74,4 +75,71 @@ bool t_cuesheet_index_list::from_infos(file_info const & p_in,double p_base)
 bool t_cuesheet_index_list::is_empty() const {
 	for(unsigned n=0;n<count;n++) if (m_positions[n] != m_positions[1]) return false;
 	return true;
+}
+
+
+
+
+
+
+cuesheet_format_index_time::cuesheet_format_index_time(double p_time)
+{
+	t_uint64 ticks = audio_math::time_to_samples(p_time,75);
+	t_uint64 seconds = ticks / 75; ticks %= 75;
+	t_uint64 minutes = seconds / 60; seconds %= 60;
+	m_buffer << pfc::format_uint(minutes,2) << ":" << pfc::format_uint(seconds,2) << ":" << pfc::format_uint(ticks,2);
+}
+
+double cuesheet_parse_index_time_e(const char * p_string,t_size p_length)
+{
+	return (double) cuesheet_parse_index_time_ticks_e(p_string,p_length) / 75.0;
+}
+
+unsigned cuesheet_parse_index_time_ticks_e(const char * p_string,t_size p_length)
+{
+	p_length = pfc::strlen_max(p_string,p_length);
+	t_size ptr = 0;
+	t_size splitmarks[2];
+	t_size splitptr = 0;
+	for(ptr=0;ptr<p_length;ptr++)
+	{
+		if (p_string[ptr] == ':')
+		{
+			if (splitptr >= 2) throw std::runtime_error("invalid INDEX time syntax");
+			splitmarks[splitptr++] = ptr;
+		}
+		else if (!pfc::char_is_numeric(p_string[ptr])) throw std::runtime_error("invalid INDEX time syntax");
+	}
+	
+	t_size minutes_base = 0, minutes_length = 0, seconds_base = 0, seconds_length = 0, frames_base = 0, frames_length = 0;
+
+	switch(splitptr)
+	{
+	case 0:
+		frames_base = 0;
+		frames_length = p_length;
+		break;
+	case 1:
+		seconds_base = 0;
+		seconds_length = splitmarks[0];
+		frames_base = splitmarks[0] + 1;
+		frames_length = p_length - frames_base;
+		break;
+	case 2:
+		minutes_base = 0;
+		minutes_length = splitmarks[0];
+		seconds_base = splitmarks[0] + 1;
+		seconds_length = splitmarks[1] - seconds_base;
+		frames_base = splitmarks[1] + 1;
+		frames_length = p_length - frames_base;
+		break;
+	}
+
+	unsigned ret = 0;
+
+	if (frames_length > 0) ret += pfc::atoui_ex(p_string + frames_base,frames_length);
+	if (seconds_length > 0) ret += 75 * pfc::atoui_ex(p_string + seconds_base,seconds_length);
+	if (minutes_length > 0) ret += 60 * 75 * pfc::atoui_ex(p_string + minutes_base,minutes_length);
+
+	return ret;	
 }

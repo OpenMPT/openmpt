@@ -5,7 +5,7 @@
 typedef pfc::avltree_t<pfc::string8,pfc::io::path::comparator> t_fnList;
 
 static void formatMaskList(pfc::string_base & out, t_fnList const & in) {
-	pfc::const_iterator<pfc::string8> walk = in.first();
+	auto walk = in.cfirst();
 	if (walk.is_valid()) {
 		out << *walk; ++walk;
 		while(walk.is_valid()) {
@@ -37,7 +37,7 @@ void input_file_type::make_filetype_support_fingerprint(pfc::string_base & str) 
 
 	
 	make_extension_support_fingerprint(out);
-	for(pfc::const_iterator<pfc::string8> walk = names.first(); walk.is_valid(); ++walk) {
+	for(auto walk = names.cfirst(); walk.is_valid(); ++walk) {
 		if (!out.is_empty()) str << "|";
 		out << *walk;
 	}
@@ -60,7 +60,7 @@ void input_file_type::make_extension_support_fingerprint(pfc::string_base & str)
 		}
 	}
 	pfc::string_formatter out;
-	for(pfc::const_iterator<pfc::string8> walk = masks.first(); walk.is_valid(); ++walk) {
+	for(auto walk = masks.cfirst(); walk.is_valid(); ++walk) {
 		if (!out.is_empty()) out << "|";
 		out << *walk;
 	}
@@ -105,7 +105,7 @@ void input_file_type::build_openfile_mask(pfc::string_base & out, bool b_include
 	outBuf << "All files|*.*|";
 	formatMaskList(outBuf, extensionsAll, "All supported types");
 	formatMaskList(outBuf, extensionsPl, "Playlists");
-	for(t_masks::const_iterator walk = masks.first(); walk.is_valid(); ++walk) {
+	for(auto walk = masks.cfirst(); walk.is_valid(); ++walk) {
 		formatMaskList(outBuf,walk->m_value,walk->m_key);			
 	}
 	out = outBuf;

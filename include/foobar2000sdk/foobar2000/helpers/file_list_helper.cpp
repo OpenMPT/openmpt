@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "file_list_helper.h"
+
 #ifndef _MSC_VER
 #define _strdup strdup
 #endif
@@ -8,7 +10,7 @@ static void file_list_remove_duplicates(pfc::ptr_list_t<char> & out)
 {
 	t_size n, m = out.get_count();
 	out.sort_t(metadb::path_compare);
-	bit_array_bittable mask(m);
+	pfc::bit_array_bittable mask(m);
 	t_size duplicates = 0;
 	for(n=1;n<m;n++) {
 		if (!metadb::path_compare(out[n-1],out[n])) {duplicates++;mask.set(n,true);}

@@ -1,7 +1,16 @@
 #include "foobar2000.h"
 
+
+// For reasons unknown, MS linker will not throw these global constants out if the code using them is not referenced
+// To verify, flip the #if and search your DLL for "unpack://"
+// Using #defines instead fixes it
+#if 1
+#define unpack_prefix "unpack://"
+#define unpack_prefix_len 9
+#else
 static const char unpack_prefix[] = "unpack://";
 static const unsigned unpack_prefix_len = 9;
+#endif
 
 void unpacker::g_open(service_ptr_t<file> & p_out,const service_ptr_t<file> & p,abort_callback & p_abort)
 {
@@ -120,6 +129,9 @@ filesystem::ptr filesystem::g_get_interface(const char * path) {
 }
 bool filesystem::g_get_interface(service_ptr_t<filesystem> & p_out,const char * path)
 {
+	PFC_ASSERT( path != nullptr );
+	PFC_ASSERT( path[0] != 0 );
+
 	service_enum_t<filesystem> e;
 	service_ptr_t<filesystem> ptr;
 	if (e.first(ptr)) do {
@@ -478,6 +490,7 @@ bool filesystem::g_is_empty_directory(const char * path,abort_callback & p_abort
 }
 
 bool filesystem::g_is_valid_directory(const char * path,abort_callback & p_abort) {
+	if ( path == NULL || path[0] == 0 ) return false;
 	try {
         directory_callback_dummy cb;
 		g_list_directory(path,cb,p_abort);
@@ -824,6 +837,9 @@ PFC_NORETURN void foobar2000_io::exception_io_from_win32(DWORD p_code) {
 		throw exception_io("Insufficient system resources");
 	case ERROR_IO_DEVICE:
 		throw exception_io("Device error");
+	case ERROR_BAD_NETPATH:
+		// known to be inflicted by momentary net connectivity issues - NOT the same as exception_io_not_found
+		throw exception_io("Network path not found");
 	default:
 		throw exception_io_win32_ex(p_code);
 	}
@@ -892,7 +908,7 @@ void file::g_transfer_object(service_ptr_t<file> p_src,service_ptr_t<file> p_dst
 void foobar2000_io::generate_temp_location_for_file(pfc::string_base & p_out, const char * p_origpath,const char * p_extension,const char * p_magic) {
 	hasher_md5_result hash;
 	{
-		static_api_ptr_t<hasher_md5> hasher;
+		auto hasher = hasher_md5::get();
 		hasher_md5_state state;
 		hasher->initialize(state);
 		hasher->process(state,p_origpath,strlen(p_origpath));
@@ -1054,7 +1070,11 @@ t_filesize stream_reader::skip_till_eof(abort_callback & abort) {
 	return done;
 }
 
-
+uint8_t stream_reader::read_byte( abort_callback & abort ) {
+	uint8_t b;
+	read_object(&b, 1, abort );
+	return b;
+}
 
 bool foobar2000_io::matchContentType(const char * fullString, const char * ourType) {
     t_size lim = pfc::string_find_first(fullString, ';');
@@ -1063,6 +1083,69 @@ bool foobar2000_io::matchContentType(const char * fullString, const char * ourTy
     }
     return pfc::stricmp_ascii_ex(fullString,lim, ourType, ~0) == 0;
 }
+
+const char * foobar2000_io::contentTypeFromExtension( const char * ext ) {
+    if ( pfc::stringEqualsI_ascii( ext, "mp3" ) ) return "audio/mpeg";
+    if ( pfc::stringEqualsI_ascii( ext, "flac" ) ) return "audio/flac";
+    if ( pfc::stringEqualsI_ascii( ext, "mp4" ) || pfc::stringEqualsI_ascii( ext, "m4a" ) ) return "audio/mp4";
+    if ( pfc::stringEqualsI_ascii( ext, "mpc" ) ) return "audio/musepack";
+    if ( pfc::stringEqualsI_ascii( ext, "ogg" ) ) return "audio/ogg";
+    if ( pfc::stringEqualsI_ascii( ext, "opus" ) ) return "audio/opus";
+    if ( pfc::stringEqualsI_ascii( ext, "wav" ) ) return "audio/vnd.wave";
+    if ( pfc::stringEqualsI_ascii( ext, "wv" ) ) return "audio/wavpack";
+    if ( pfc::stringEqualsI_ascii( ext, "txt" ) || pfc::stringEqualsI_ascii( ext, "cue" ) || pfc::stringEqualsI_ascii( ext, "log" ) ) return "text/plain";
+    return "application/binary";
+}
+
+const char * foobar2000_io::extensionFromContentType( const char * contentType ) {
+    if (matchContentType_MP3( contentType )) return "mp3";
+    if (matchContentType_FLAC( contentType )) return "flac";
+    if (matchContentType_MP4( contentType)) return "mp4";
+    if (matchContentType_Musepack( contentType )) return "mpc";
+    if (matchContentType_Ogg( contentType )) return "ogg";
+    if (matchContentType_Opus( contentType )) return "opus";
+    if (matchContentType_WAV( contentType )) return "wav";
+    if (matchContentType_WavPack( contentType )) return "wv";
+    if (matchContentType(contentType, "image/jpeg")) return "jpg";
+    if (matchContentType(contentType, "image/png")) return "png";
+    return "";
+}
+
+bool foobar2000_io::matchContentType_MP3( const char * type) {
+    return matchContentType(type,"audio/mp3") || matchContentType(type,"audio/mpeg") || matchContentType(type,"audio/mpg") || matchContentType(type,"audio/x-mp3") || matchContentType(type,"audio/x-mpeg") || matchContentType(type,"audio/x-mpg");
+}
+bool foobar2000_io::matchContentType_MP4( const char * type ) {
+    return matchContentType(type, "audio/mp4") || matchContentType(type, "audio/x-mp4");
+}
+bool foobar2000_io::matchContentType_Ogg( const char * type) {
+    return matchContentType(type, "application/ogg") || matchContentType(type, "application/x-ogg") || matchContentType(type, "audio/ogg") || matchContentType(type, "audio/x-ogg");
+}
+bool foobar2000_io::matchContentType_Opus( const char * type) {
+    return matchContentType(type, "audio/opus") || matchContentType(type, "audio/x-opus");
+}
+bool foobar2000_io::matchContentType_WAV( const char * type ) {
+    return matchContentType(type, "audio/vnd.wave" ) || matchContentType(type, "audio/wav") || matchContentType(type, "audio/wave") || matchContentType(type, "audio/x-wav") || matchContentType(type, "audio/x-wave");
+}
+bool foobar2000_io::matchContentType_FLAC( const char * type) {
+    return matchContentType(type, "audio/flac") || matchContentType(type, "audio/x-flac") || matchContentType(type, "application/flac") || matchContentType(type, "application/x-flac");
+}
+bool foobar2000_io::matchContentType_WavPack( const char * type) {
+    return matchContentType( type, "audio/wavpack" ) || matchContentType( type, "audio/x-wavpack");
+}
+bool foobar2000_io::matchContentType_Musepack( const char * type) {
+    return matchContentType(type,"audio/musepack") || matchContentType(type,"audio/x-musepack");
+}
+
+const char * foobar2000_io::afterProtocol( const char * fullString ) {
+	const char * s = strstr( fullString, "://" );
+	if (s == nullptr) {
+		PFC_ASSERT(!"Should not get here");
+	} else {
+		s += 3;
+	}
+	return s;
+}
+
 bool foobar2000_io::matchProtocol(const char * fullString, const char * protocolName) {
     const t_size len = strlen(protocolName);
     if (pfc::stricmp_ascii_ex(fullString, len, protocolName, len) != 0) return false;
@@ -1077,3 +1160,4 @@ void foobar2000_io::substituteProtocol(pfc::string_base & out, const char * full
         out = fullString;
     }
 }
+

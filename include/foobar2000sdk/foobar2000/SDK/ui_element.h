@@ -118,19 +118,9 @@ struct ui_element_min_max_info {
 	ui_element_min_max_info() : m_min_width(0), m_max_width(~0), m_min_height(0), m_max_height(~0) {}
 	t_uint32 m_min_width, m_max_width, m_min_height, m_max_height;
 
-	const ui_element_min_max_info & operator|=(const ui_element_min_max_info & p_other) {
-		m_min_width = pfc::max_t(m_min_width,p_other.m_min_width);
-		m_min_height = pfc::max_t(m_min_height,p_other.m_min_height);
-		m_max_width = pfc::min_t(m_max_width,p_other.m_max_width);
-		m_max_height = pfc::min_t(m_max_height,p_other.m_max_height);
-		return *this;
-	}
-	ui_element_min_max_info operator|(const ui_element_min_max_info & p_other) const {
-		ui_element_min_max_info ret(*this);
-		ret |= p_other;
-		return ret;
-	}
-	
+	const ui_element_min_max_info & operator|=(const ui_element_min_max_info & p_other);
+	ui_element_min_max_info operator|(const ui_element_min_max_info & p_other) const;
+	void adjustForWindow(HWND wnd);
 };
 
 //! Callback class passed by a UI element host to a UI element instance, allowing each UI element instance to communicate with its host. \n
@@ -300,18 +290,7 @@ public:
 	}
 
 	//! Retrieves element's minimum/maximum window size. Default implementation will fall back to WM_GETMINMAXINFO.
-	virtual ui_element_min_max_info get_min_max_info() {
-		ui_element_min_max_info ret;
-		MINMAXINFO temp = {};
-		temp.ptMaxTrackSize.x = 1024*1024;//arbitrary huge number
-		temp.ptMaxTrackSize.y = 1024*1024;
-		SendMessage(get_wnd(),WM_GETMINMAXINFO,0,(LPARAM)&temp);
-		if (temp.ptMinTrackSize.x >= 0) ret.m_min_width = temp.ptMinTrackSize.x;
-		if (temp.ptMaxTrackSize.x > 0) ret.m_max_width = temp.ptMaxTrackSize.x;
-		if (temp.ptMinTrackSize.y >= 0) ret.m_min_height = temp.ptMinTrackSize.y;
-		if (temp.ptMaxTrackSize.y > 0) ret.m_max_height = temp.ptMaxTrackSize.y;
-		return ret;
-	}
+	virtual ui_element_min_max_info get_min_max_info();
 
 	//! Used by host to notify the element about various events. See ui_element_notify_* GUIDs for possible p_what parameter; meaning of other parameters depends on p_what value. Container classes should dispatch all notifications to their children.
 	virtual void notify(const GUID & p_what, t_size p_param1, const void * p_param2, t_size p_param2size) {}
@@ -436,7 +415,7 @@ public:
 	//! Override to use another description for our menu command. Relevant only when KFlagHavePopupCommand is set.
 	virtual bool get_menu_command_description(pfc::string_base & out) {
 		pfc::string8 name; get_name(name);
-		out = pfc::string_formatter() << "Activates " << name << " window.";
+		out = PFC_string_formatter() << "Activates " << name << " window.";
 		return true;
 	}
 
@@ -479,8 +458,9 @@ public:
 	virtual void allow_element_specified_title(bool allow) = 0;
 };
 
-//! For use with static_api_ptr_t<>
+//! Shared implementation of common UI Element methods. Use ui_element_common_methods::get() to obtain an instance.
 class NOVTABLE ui_element_common_methods : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(ui_element_common_methods);
 public:
 	virtual void copy(ui_element_config::ptr cfg) = 0;
 	virtual void cut(ui_element_instance_ptr & p_instance,HWND p_parent,ui_element_instance_callback_ptr p_callback) = 0;
@@ -499,11 +479,12 @@ public:
 
 	void copy(ui_element_instance_ptr p_instance) {copy(p_instance->get_configuration());}
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_element_common_methods);
+	
 };
 
-//! For use with static_api_ptr_t<>
+//! Shared implementation of common UI Element methods. Use ui_element_common_methods_v2::get() to obtain an instance.
 class NOVTABLE ui_element_common_methods_v2 : public ui_element_common_methods {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(ui_element_common_methods_v2, ui_element_common_methods);
 public:
 	virtual void spawn_host_simple(HWND parent, ui_element::ptr elem, bool fullScreenMode) = 0;
 
@@ -516,17 +497,14 @@ public:
 	void toggle_fullscreen(const GUID & elem, HWND parent) {
 		toggle_fullscreen(service_by_guid<ui_element>(elem), parent);
 	}
-
-	FB2K_MAKE_SERVICE_INTERFACE(ui_element_common_methods_v2, ui_element_common_methods);
 };
 
 class NOVTABLE ui_element_typable_window_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(ui_element_typable_window_manager)
 public:
 	virtual void add(HWND wnd) = 0;
 	virtual void remove(HWND wnd) = 0;
 	virtual bool is_registered(HWND wnd) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_element_typable_window_manager)
 };
 
 //! Dispatched through ui_element_instance::notify() when host changes color settings. Other parameters are not used and should be set to zero.
@@ -586,33 +564,3 @@ bool ui_element_subclass_description(const GUID & id, pfc::string_base & out);
 #define AddNewUIElementCommand "Add New UI Element..."
 #define AddNewUIElementDescription "Replaces the selected empty space with a new UI Element."
 
-
-
-
-template<typename TImpl, typename TInterface = ui_element> class ui_element_impl : public TInterface {
-public:
-	GUID get_guid() { return TImpl::g_get_guid();}
-	GUID get_subclass() { return TImpl::g_get_subclass();}
-	void get_name(pfc::string_base & out) { TImpl::g_get_name(out); }
-	ui_element_instance::ptr instantiate(HWND parent,ui_element_config::ptr cfg,ui_element_instance_callback::ptr callback) {
-		PFC_ASSERT( cfg->get_guid() == get_guid() );
-		service_nnptr_t<ui_element_instance_impl_helper> item = new window_service_impl_t<ui_element_instance_impl_helper>(cfg,callback);
-		item->initialize_window(parent);
-		return item;
-	}
-	ui_element_config::ptr get_default_configuration() { return TImpl::g_get_default_configuration(); }
-	ui_element_children_enumerator_ptr enumerate_children(ui_element_config::ptr cfg) {return NULL;}
-	bool get_description(pfc::string_base & out) {out = TImpl::g_get_description(); return true;}
-private:
-	class ui_element_instance_impl_helper : public TImpl {
-	public:
-		ui_element_instance_impl_helper(ui_element_config::ptr cfg, ui_element_instance_callback::ptr callback) : TImpl(cfg,callback) {}
-
-		GUID get_guid() {return TImpl::g_get_guid();}
-		GUID get_subclass() {return TImpl::g_get_subclass();}
-		HWND get_wnd() {return *this;}
-	};
-public:
-	typedef ui_element_instance_impl_helper TInstance;
-	static TInstance const & instanceGlobals() {return *reinterpret_cast<const TInstance*>(NULL);}
-};

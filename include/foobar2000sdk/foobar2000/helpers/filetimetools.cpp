@@ -5,6 +5,8 @@
 #error PORTME
 #endif
 
+#include "filetimetools.h"
+
 static bool is_spacing(char c) {return c == ' ' || c==10 || c==13 || c == '\t';}
 
 static bool is_spacing(const char * str, t_size len) {

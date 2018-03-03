@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
-#ifdef _WIN32
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
+
+#include "window_placement_helper.h"
 
 static bool g_is_enabled()
 {
@@ -213,4 +215,4 @@ void cfg_window_size::set_data_raw(stream_reader * p_stream,t_size p_sizehint,ab
 
 	m_width = width; m_height = height;
 }
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

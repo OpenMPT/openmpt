@@ -1,3 +1,7 @@
+#pragma once
+
+#include "cuesheet_index_list.h"
+
 namespace cue_creator
 {
 	struct t_entry

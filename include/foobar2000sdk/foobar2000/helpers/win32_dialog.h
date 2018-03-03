@@ -1,7 +1,6 @@
-#ifdef _WIN32
+#pragma once
 
-#ifndef _FOOBAR2000_HELPERS_WIN32_DIALOG_H_
-#define _FOOBAR2000_HELPERS_WIN32_DIALOG_H_
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 //DEPRECATED dialog helpers - kept only for compatibility with old code - do not use in new code, use WTL instead.
 
@@ -120,7 +119,4 @@ HWND uCreateDialog(UINT id,HWND parent,DLGPROC proc,LPARAM param = 0);
 int uDialogBox(UINT id,HWND parent,DLGPROC proc,LPARAM param = 0);
 
 
-#endif
-
-
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

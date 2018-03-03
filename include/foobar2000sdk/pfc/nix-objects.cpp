@@ -120,6 +120,7 @@ namespace pfc {
             auto & f = v[walk++];
             f.fd = fd;
             f.events = (Reads[fd] ? POLLIN : 0) | (Writes[fd] ? POLLOUT : 0);
+            // POLLERR ignored in events, only used in revents
             f.revents = 0;
         }
         int status = poll(v.get_ptr(), (int)count, timeOutMS);
@@ -131,8 +132,8 @@ namespace pfc {
             for(walk = 0; walk < count; ++walk) {
                 auto & f = v[walk];
                 if (f.revents & POLLIN) Reads += f.fd;
-                if (f.events & POLLOUT) Writes += f.fd;
-                if (f.events & POLLERR) Errors += f.fd;
+                if (f.revents & POLLOUT) Writes += f.fd;
+                if (f.revents & POLLERR) Errors += f.fd;
             }
         }
         
@@ -205,6 +206,13 @@ namespace pfc {
     
     void nixSleep(double seconds) {
         fdSelect sel; sel.Select( seconds );
+    }
+    void sleepSeconds(double seconds) {
+        return nixSleep(seconds);
+    }
+    
+    void yield() {
+        return nixSleep(0.001);
     }
 
     double nixGetTime() {

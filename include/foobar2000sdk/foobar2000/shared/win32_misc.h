@@ -31,8 +31,8 @@ public:
 	bool is_valid() const {return m_font != NULL;}
 
 private:
-	win32_font(const win32_font&);
-	const win32_font & operator=(const win32_font &);
+	win32_font(const win32_font&) = delete;
+	void operator=(const win32_font &) = delete;
 
 	HFONT m_font;
 };

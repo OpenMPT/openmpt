@@ -1,9 +1,13 @@
 #include "stdafx.h"
 
+#include "inplace_edit.h"
+#include "AutoComplete.h"
+#include "misc.h"
+#include "WTL-PP.h"
+
 #ifndef WM_MOUSEHWHEEL
 #define WM_MOUSEHWHEEL 0x20E
 #endif
-
 
 using namespace InPlaceEdit;
 
@@ -26,7 +30,7 @@ static void GAbortEditing(HWND edit, t_uint32 code) {
 }
 
 static void GAbortEditing(t_uint32 code) {
-	for(pfc::const_iterator<HWND> walk = g_editboxes.first(); walk.is_valid(); ++walk ) {
+	for(auto walk = g_editboxes.cfirst(); walk.is_valid(); ++walk ) {
 		GAbortEditing(*walk, code);
 	}
 }
@@ -36,7 +40,7 @@ static bool IsSamePopup(CWindow wnd1, CWindow wnd2) {
 }
 
 static void MouseEventTest(HWND target, CPoint pt, bool isWheel) {
-	for(pfc::const_iterator<HWND> walk = g_editboxes.first(); walk.is_valid(); ++walk) {
+	for(auto walk = g_editboxes.cfirst(); walk.is_valid(); ++walk) {
 		CWindow edit ( *walk );
 		bool cancel = false;
 		if (target != edit && IsSamePopup(target, edit)) {
@@ -119,14 +123,14 @@ static void on_editbox_destruction(HWND p_editbox) {
 
 class CInPlaceEditBox : public CContainedWindowSimpleT<CEdit> {
 public:
-	CInPlaceEditBox() : m_selfDestruct() {}
+	CInPlaceEditBox() : m_selfDestruct(), m_suppressChar() {}
 	BEGIN_MSG_MAP_EX(CInPlaceEditBox)
 		//MSG_WM_CREATE(OnCreate)
 		MSG_WM_DESTROY(OnDestroy)
 		MSG_WM_GETDLGCODE(OnGetDlgCode)
 		MSG_WM_KILLFOCUS(OnKillFocus)
 		MSG_WM_CHAR(OnChar)
-		MSG_WM_KEYDOWN(OnChar)
+		MSG_WM_KEYDOWN(OnKeyDown)
 	END_MSG_MAP()
 	void OnCreation() {
 		m_typableScope.Set(m_hWnd);
@@ -145,7 +149,25 @@ private:
 		return 0;
 	}
 	UINT OnGetDlgCode(LPMSG lpMsg) {
-		return DLGC_WANTALLKEYS;
+		if (lpMsg == NULL) {
+			return DLGC_WANTALLKEYS;
+		} else {
+			switch(lpMsg->message) {
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+				switch(lpMsg->wParam) {
+				case VK_TAB:
+				case VK_ESCAPE:
+				case VK_RETURN:
+					return DLGC_WANTALLKEYS;
+				default:
+					SetMsgHandled(FALSE); return 0;
+				}
+			default:
+				SetMsgHandled(FALSE); return 0;
+
+			}
+		}
 	}
 	void OnKillFocus(CWindow wndFocus) {
 		ForwardCompletion(KEditLostFocus);
@@ -153,7 +175,26 @@ private:
 	}
 
 	void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) {
+		if (m_suppressChar != 0) {
+			UINT code = nFlags & 0xFF;
+			if (code == m_suppressChar) return;
+		}
+		SetMsgHandled(FALSE);
+	}
+	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
+		m_suppressChar = nFlags & 0xFF;
 		switch(nChar) {
+			case VK_BACK:
+				if (GetHotkeyModifierFlags() == MOD_CONTROL) {
+					CEditPPHooks::DeleteLastWord( * this );
+					return;
+				}
+				break;
+			case 'A':
+				if (GetHotkeyModifierFlags() == MOD_CONTROL) {
+					this->SetSelAll(); return;
+				}
+				break;
 			case VK_RETURN:
 				if (!IsKeyPressed(VK_LCONTROL) && !IsKeyPressed(VK_RCONTROL)) {
 					ForwardCompletion(KEditEnter);
@@ -167,6 +208,7 @@ private:
 				ForwardCompletion(KEditAborted);
 				return;
 		}
+		m_suppressChar = 0;
 		SetMsgHandled(FALSE);
 	}
 
@@ -181,6 +223,7 @@ private:
 	
 	CTypableWindowScope m_typableScope;
 	bool m_selfDestruct;
+	UINT m_suppressChar;
 };
 
 class InPlaceEditContainer : public CWindowImpl<InPlaceEditContainer> {

@@ -65,7 +65,7 @@ public:
 		PFC_ASSERT( is_our_path(p_path, pfc::string_extension(p_path) ) );
 		file_ptr l_file ( p_filehint );
 		if (l_file.is_empty()) filesystem::g_open_read(l_file, p_path, p_abort);
-		return static_api_ptr_t<tag_processor_album_art_utils>()->open( l_file, p_abort );
+		return tag_processor_album_art_utils::get()->open( l_file, p_abort );
 	}
 private:
 	pfc::avltree_t<pfc::string,pfc::string::comparatorCaseInsensitiveASCII> m_extensions;
@@ -87,7 +87,7 @@ public:
 		PFC_ASSERT( is_our_path(p_path, pfc::string_extension(p_path) ) );
 		file_ptr l_file ( p_filehint );
 		if (l_file.is_empty()) filesystem::g_open(l_file, p_path, filesystem::open_mode_write_existing, p_abort);
-		return static_api_ptr_t<tag_processor_album_art_utils>()->edit( l_file, p_abort );
+		return tag_processor_album_art_utils::get()->edit( l_file, p_abort );
 	}
 private:
 	pfc::avltree_t<pfc::string,pfc::string::comparatorCaseInsensitiveASCII> m_extensions;

@@ -1,4 +1,8 @@
 #include "stdafx.h"
+#include "cue_parser.h"
+
+
+#define maximumCueTrackNumber 999
 
 namespace {
 	PFC_DECLARE_EXCEPTION(exception_cue,pfc::exception,"Invalid cuesheet");
@@ -433,7 +437,7 @@ static void g_parse_cue_line(const char * p_line,t_size p_line_length,cue_parser
 		while(ptr < p_line_length && is_spacing(p_line[ptr])) ptr++;
 		if (ptr != p_line_length || type_length == 0) pfc::throw_exception_with_message< exception_cue > ("invalid TRACK syntax");
 		unsigned track = pfc::atoui_ex(p_line+track_base,track_length);
-		if (track < 1 || track > 99) pfc::throw_exception_with_message< exception_cue > ("invalid track number");
+		if (track < 1 || track > maximumCueTrackNumber) pfc::throw_exception_with_message< exception_cue > ("invalid track number");
 
 		p_callback.on_track(track,p_line + type_base, type_length);
 	}
@@ -466,7 +470,7 @@ static void g_parse_cue_line(const char * p_line,t_size p_line_length,cue_parser
 			pfc::throw_exception_with_message< exception_cue > ("invalid INDEX syntax");
 
 		unsigned index = pfc::atoui_ex(p_line+index_base,index_length);
-		if (index > 99) pfc::throw_exception_with_message< exception_cue > ("invalid INDEX syntax");
+		if (index > maximumCueTrackNumber) pfc::throw_exception_with_message< exception_cue > ("invalid INDEX syntax");
 		unsigned time = cuesheet_parse_index_time_ticks_e(p_line + time_base,time_length);
 		
 		p_callback.on_index(index,time);
@@ -715,7 +719,7 @@ namespace {
 	private:
 		void finalize_track()
 		{
-			if (m_track < 1 || m_track > 99) pfc::throw_exception_with_message< exception_cue > ("track number out of range");
+			if (m_track < 1 || m_track > maximumCueTrackNumber) pfc::throw_exception_with_message< exception_cue > ("track number out of range");
 			if (!m_index1_set) pfc::throw_exception_with_message< exception_cue > ("INDEX 01 not set");
 			if (!m_index0_set) m_indexes.m_positions[0] = m_indexes.m_positions[1] - m_pregap;
 			if (!m_indexes.is_valid()) pfc::throw_exception_with_message< exception_cue > ("invalid index list");
@@ -761,4 +765,114 @@ void cue_parser::parse_full(const char * p_cuesheet,cue_creator::t_entry_list & 
 	} catch(exception_cue const & e) {
         pfc::throw_exception_with_message< exception_bad_cuesheet > (PFC_string_formatter() << "Error parsing cuesheet: " << e.what());
 	}
+}
+
+namespace file_info_record_helper {
+	namespace {
+		class __file_info_record__info__enumerator {
+		public:
+			__file_info_record__info__enumerator(file_info & p_out) : m_out(p_out) {}
+			void operator() (const char * p_name, const char * p_value) { m_out.__info_add_unsafe(p_name, p_value); }
+		private:
+			file_info & m_out;
+		};
+
+		class __file_info_record__meta__enumerator {
+		public:
+			__file_info_record__meta__enumerator(file_info & p_out) : m_out(p_out) {}
+			template<typename t_value> void operator() (const char * p_name, const t_value & p_value) {
+				t_size index = ~0;
+				for (typename t_value::const_iterator iter = p_value.first(); iter.is_valid(); ++iter) {
+					if (index == ~0) index = m_out.__meta_add_unsafe(p_name, *iter);
+					else m_out.meta_add_value(index, *iter);
+				}
+			}
+		private:
+			file_info & m_out;
+		};
+	}
+
+	void file_info_record::from_info(const file_info & p_info) {
+		reset();
+		m_length = p_info.get_length();
+		m_replaygain = p_info.get_replaygain();
+		from_info_overwrite_meta(p_info);
+		from_info_overwrite_info(p_info);
+	}
+	void file_info_record::to_info(file_info & p_info) const {
+		p_info.reset();
+		p_info.set_length(m_length);
+		p_info.set_replaygain(m_replaygain);
+
+		{
+			__file_info_record__info__enumerator e(p_info);
+			m_info.enumerate(e);
+		}
+		{
+			__file_info_record__meta__enumerator e(p_info);
+			m_meta.enumerate(e);
+		}
+	}
+
+	void file_info_record::reset() {
+		m_meta.remove_all(); m_info.remove_all();
+		m_length = 0;
+		m_replaygain = replaygain_info_invalid;
+	}
+
+	void file_info_record::from_info_overwrite_info(const file_info & p_info) {
+		for (t_size infowalk = 0, infocount = p_info.info_get_count(); infowalk < infocount; ++infowalk) {
+			m_info.set(p_info.info_enum_name(infowalk), p_info.info_enum_value(infowalk));
+		}
+	}
+	void file_info_record::from_info_overwrite_meta(const file_info & p_info) {
+		for (t_size metawalk = 0, metacount = p_info.meta_get_count(); metawalk < metacount; ++metawalk) {
+			const t_size valuecount = p_info.meta_enum_value_count(metawalk);
+			if (valuecount > 0) {
+				t_meta_value & entry = m_meta.find_or_add(p_info.meta_enum_name(metawalk));
+				entry.remove_all();
+				for (t_size valuewalk = 0; valuewalk < valuecount; ++valuewalk) {
+					entry.add_item(p_info.meta_enum_value(metawalk, valuewalk));
+				}
+			}
+		}
+	}
+
+	void file_info_record::from_info_overwrite_rg(const file_info & p_info) {
+		m_replaygain = replaygain_info::g_merge(m_replaygain, p_info.get_replaygain());
+	}
+
+	void file_info_record::merge_overwrite(const file_info & p_info) {
+		from_info_overwrite_info(p_info);
+		from_info_overwrite_meta(p_info);
+		from_info_overwrite_rg(p_info);
+	}
+
+	void file_info_record::transfer_meta_entry(const char * p_name, const file_info & p_info, t_size p_index) {
+		const t_size count = p_info.meta_enum_value_count(p_index);
+		if (count == 0) {
+			m_meta.remove(p_name);
+		} else {
+			t_meta_value & val = m_meta.find_or_add(p_name);
+			val.remove_all();
+			for (t_size walk = 0; walk < count; ++walk) {
+				val.add_item(p_info.meta_enum_value(p_index, walk));
+			}
+		}
+	}
+
+	void file_info_record::meta_set(const char * p_name, const char * p_value) {
+		m_meta.find_or_add(p_name).set_single(p_value);
+	}
+
+	const file_info_record::t_meta_value * file_info_record::meta_query_ptr(const char * p_name) const {
+		return m_meta.query_ptr(p_name);
+	}
+
+
+	void file_info_record::from_info_set_meta(const file_info & p_info) {
+		m_meta.remove_all();
+		from_info_overwrite_meta(p_info);
+	}
+
 }

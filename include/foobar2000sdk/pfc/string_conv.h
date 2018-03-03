@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 
 	namespace stringcvt {
@@ -45,6 +47,10 @@ namespace pfc {
         t_size estimate_win1252_to_utf8( const char * p_source, t_size p_source_size );
         t_size convert_win1252_to_utf8( char * p_out, t_size p_out_size, const char * p_source, t_size p_source_size );
 
+		// 2016-05-16 additions
+		// Explicit UTF-16 converters
+		t_size estimate_utf16_to_utf8( const char16_t * p_source, size_t p_source_size );
+		t_size convert_utf16_to_utf8( char * p_out, size_t p_out_size, const char16_t * p_source, size_t p_source_size );
 
     
         //! estimate_utf8_to_wide_quick() functions use simple math to determine buffer size required for the conversion. The result is not accurate length of output string - it's just a safe estimate of required buffer size, possibly bigger than what's really needed. \n
@@ -271,6 +277,26 @@ namespace pfc {
         private:
             char_buffer_t<char, pfc::alloc_fast_aggressive> m_buffer;
         };
+
+		class string_utf8_from_utf16 {
+		public:
+			string_utf8_from_utf16() {}
+			string_utf8_from_utf16( const char16_t * p_source, size_t p_source_size = ~0) {convert(p_source, p_source_size);}
+
+			void convert( const char16_t * p_source, size_t p_source_size = ~0) {
+				size_t size = estimate_utf16_to_utf8(p_source, p_source_size);
+				m_buffer.set_size(size);
+				convert_utf16_to_utf8(m_buffer.get_ptr_var(), size, p_source, p_source_size );
+			}
+
+            operator const char * () const {return get_ptr();}
+            const char * get_ptr() const {return m_buffer.get_ptr();}
+            bool is_empty() const {return string_is_empty_t(get_ptr());}
+            t_size length() const {return strlen_t(get_ptr());}
+            
+        private:
+            char_buffer_t<char, pfc::alloc_fast_aggressive> m_buffer;
+		};
         
     }
 #ifdef _WINDOWS
@@ -555,4 +581,4 @@ namespace pfc {
 #endif
 };
 
-inline pfc::string_base & operator<<(pfc::string_base & p_fmt, const wchar_t * p_str) { p_fmt.add_string(pfc::stringcvt::string_utf8_from_wide(p_str) ); return p_fmt; }
+pfc::string_base & operator<<(pfc::string_base & p_fmt, const wchar_t * p_str);

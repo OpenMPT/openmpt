@@ -51,7 +51,7 @@ void file_info_impl::meta_remove_values(t_size p_index,const bit_array & p_mask)
 {
 	m_meta.remove_values(p_index,p_mask);
 	if (m_meta.get_value_count(p_index) == 0)
-		m_meta.remove_mask(bit_array_one(p_index));
+		m_meta.remove_mask(pfc::bit_array_one(p_index));
 }
 
 t_size file_info_impl::info_get_count() const

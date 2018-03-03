@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	PFC_DECLARE_EXCEPTION( exception_invalid_permutation, exception_invalid_params, "Invalid permutation" );
 	t_size permutation_find_reverse(t_size const * order, t_size count, t_size value);
@@ -9,6 +11,8 @@ namespace pfc {
 
 	//! Creates a permutation that moves selected items in a list box by the specified delta-offset.
 	void create_move_items_permutation(t_size * p_output,t_size p_count,const class bit_array & p_selection,int p_delta);
+    
+    void create_move_item_permutation( size_t * p_output, size_t p_count, size_t from, size_t to );
 }
 
 class order_helper

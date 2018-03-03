@@ -100,6 +100,19 @@ void output_impl::process_samples(const audio_chunk & p_chunk) {
 	m_incoming_ptr = 0;
 }
 
+void output_v3::get_injected_dsps( dsp_chain_config & dsps ) {
+#ifdef FOOBAR2000_HAVE_DSP
+	dsps.remove_all();
+	unsigned rate = this->get_forced_sample_rate();
+	if (rate != 0) {
+		dsp_preset_impl temp;
+		if (resampler_entry::g_create_preset( temp, 0, rate, 0 )) {
+			dsps.insert_item( temp, dsps.get_count() );
+		}
+	}
+#endif // FOOBAR2000_HAVE_DSP
+}
+
 
 // {EEEB07DE-C2C8-44c2-985C-C85856D96DA1}
 const GUID output_id_null = 
@@ -116,4 +129,41 @@ outputCoreConfig_t outputCoreConfig_t::defaults() {
 	cfg.m_output = output_id_default;
 	// remaining fields nulled by {}
 	return cfg;
+}
+namespace {
+	class output_device_list_callback_impl : public output_device_list_callback {
+	public:
+		void onDevice( const char * fullName, const GUID & output, const GUID & device ) {
+			f(fullName, output, device);
+		}
+		std::function< void ( const char*, const GUID&, const GUID&) > f;
+	};
+
+	class output_config_change_callback_impl : public output_config_change_callback {
+	public:
+		void outputConfigChanged() {
+			f();
+		}
+		std::function<void () > f;
+	};
+}
+void output_manager_v2::listDevices( std::function< void ( const char*, const GUID&, const GUID&) > f ) {
+	output_device_list_callback_impl cb; cb.f = f;
+	this->listDevices( cb );
+}
+
+service_ptr output_manager_v2::addCallback( std::function<void() > f ) {
+	output_config_change_callback_impl * obj = new output_config_change_callback_impl();
+	obj->f = f;
+ 	this->addCallback( obj ); 
+	service_ptr_t<output_manager_v2> selfRef ( this );
+	return fb2k::callOnRelease( [obj, selfRef] {
+		selfRef->removeCallback( obj ); delete obj;
+	} );
+}
+
+void output_manager_v2::addCallbackPermanent( std::function<void()> f ) {
+	output_config_change_callback_impl * obj = new output_config_change_callback_impl();
+	obj->f = f;
+	addCallback( obj );
 }

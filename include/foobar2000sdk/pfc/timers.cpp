@@ -44,7 +44,7 @@ profiler_static::~profiler_static()
         m_start = t;
         return r;
     }
-    pfc::string8 hires_timer::queryString(unsigned precision) {
+    pfc::string8 hires_timer::queryString(unsigned precision) const {
         return format_time_ex( query(), precision ).get_ptr();
     }
 #endif

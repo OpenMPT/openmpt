@@ -1,3 +1,5 @@
+#pragma once
+
 #define FB2K_COM_CATCH catch(exception_com const & e) {return e.get_code();} catch(std::bad_alloc) {return E_OUTOFMEMORY;} catch(pfc::exception_invalid_params) {return E_INVALIDARG;} catch(...) {return E_UNEXPECTED;}
 
 #define COM_QI_BEGIN() HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void ** ppvObject) { if (ppvObject == NULL) return E_INVALIDARG;

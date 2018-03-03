@@ -50,6 +50,12 @@ namespace pfc {
         return false;
 #endif
     }
+
+	void inAutoReleasePool(std::function<void()> f) {
+		@autoreleasepool {		
+			f();
+		}
+	}
 }
 
 #endif

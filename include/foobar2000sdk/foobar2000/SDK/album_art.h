@@ -1,3 +1,5 @@
+#pragma once
+
 //! Common class for handling picture data. \n
 //! Type of contained picture data is unknown and to be determined according to memory block contents by code parsing/rendering the picture. Commonly encountered types are: BMP, PNG, JPEG and GIF. \n
 //! Implementation: use album_art_data_impl.
@@ -126,6 +128,7 @@ public:
 
 //! Helper API for extracting album art from APEv2 tags - introduced in 0.9.5.
 class NOVTABLE tag_processor_album_art_utils : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(tag_processor_album_art_utils)
 public:
 
 	//! Throws one of I/O exceptions on failure; exception_album_art_not_found when the file has no album art record at all.
@@ -134,8 +137,6 @@ public:
 	//! \since 1.1.6
 	//! Throws exception_not_implemented on earlier than 1.1.6.
 	virtual album_art_editor_instance_ptr edit(file_ptr p_file,abort_callback & p_abort) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(tag_processor_album_art_utils)
 };
 
 
@@ -159,7 +160,7 @@ public:
 //! Provides methods for interfacing with the foobar2000 core album art loader. \n
 //! Use this when you need to load album art for a specific group of tracks.
 class NOVTABLE album_art_manager_v2 : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(album_art_manager_v2)
+	FB2K_MAKE_SERVICE_COREAPI(album_art_manager_v2)
 public:
 	//! Instantiates an album art extractor object for the specified group of items.
 	virtual album_art_extractor_instance_v2::ptr open(metadb_handle_list_cref items, pfc::list_base_const_t<GUID> const & ids, abort_callback & abort) = 0;
@@ -189,7 +190,7 @@ public:
 
 //! \since 1.1.7
 class NOVTABLE album_art_manager_v3 : public album_art_manager_v2 {
-	FB2K_MAKE_SERVICE_INTERFACE(album_art_manager_v3, album_art_manager_v2)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(album_art_manager_v3, album_art_manager_v2)
 public:
 	//! @param config An optional album_art_manager_config object to override global settings. Pass null to use global settings.
 	virtual album_art_extractor_instance_v2::ptr open_v3(metadb_handle_list_cref items, pfc::list_base_const_t<GUID> const & ids, album_art_manager_config::ptr config, abort_callback & abort) = 0;

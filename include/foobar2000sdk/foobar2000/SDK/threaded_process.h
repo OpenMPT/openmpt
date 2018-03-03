@@ -33,6 +33,9 @@ public:
 	void set_progress_float(double p_state);
 	//! Helper; sets secondary progress with a float 0..1 scale.
 	void set_progress_secondary_float(double p_state);
+	//! Helper; gracefully reports multiple items being concurrently worked on.
+	void set_items( metadb_handle_list_cref items );
+	void set_items( pfc::list_base_const_t<const char*> const & paths );
 protected:
 	threaded_process_status() {}
 	~threaded_process_status() {}
@@ -103,7 +106,7 @@ public:
 	//! Queries user settings; returns whether various timeconsuming tasks should be blocking machine standby.
 	static bool g_query_preventStandby();
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(threaded_process);
+	FB2K_MAKE_SERVICE_COREAPI(threaded_process);
 };
 
 

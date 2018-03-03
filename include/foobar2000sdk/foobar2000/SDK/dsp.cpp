@@ -1,5 +1,24 @@
 #include "foobar2000.h"
+
+#ifdef FOOBAR2000_HAVE_DSP
+
 #include <math.h>
+
+audio_chunk * dsp_chunk_list::add_item(t_size hint_size) { return insert_item(get_count(), hint_size); }
+
+void dsp_chunk_list::remove_all() { remove_mask(pfc::bit_array_true()); }
+
+double dsp_chunk_list::get_duration() {
+	double rv = 0;
+	t_size n, m = get_count();
+	for (n = 0; n<m; n++) rv += get_item(n)->get_duration();
+	return rv;
+}
+
+void dsp_chunk_list::add_chunk(const audio_chunk * chunk) {
+	audio_chunk * dst = insert_item(get_count(), chunk->get_used_size());
+	if (dst) dst->copy(*chunk);
+}
 
 t_size dsp_chunk_list_impl::get_count() const {return m_data.get_count();}
 
@@ -75,6 +94,26 @@ void dsp_chunk_list::remove_bad_chunks()
 	if (blah) console::info("one or more bad chunks removed from dsp chunk list");
 }
 
+bool dsp_entry_hidden::g_dsp_exists(const GUID & p_guid) {
+	dsp_entry_hidden::ptr p;
+	return g_get_interface(p, p_guid);
+}
+
+bool dsp_entry_hidden::g_get_interface( dsp_entry_hidden::ptr & out, const GUID & guid ) {
+	service_enum_t<dsp_entry_hidden> e; service_ptr_t<dsp_entry_hidden> p;
+	while( e.next(p) ) {
+		if (p->get_guid() == guid) {
+			out = p; return true;
+		}
+	}
+	return false;
+}
+
+bool dsp_entry_hidden::g_instantiate( dsp::ptr & out, const dsp_preset & preset ) {
+	dsp_entry_hidden::ptr i;
+	if (!g_get_interface(i, preset.get_owner())) return false;
+	return i->instantiate(out, preset);
+}
 
 bool dsp_entry::g_instantiate(service_ptr_t<dsp> & p_out,const dsp_preset & p_preset)
 {
@@ -114,7 +153,7 @@ bool dsp_entry::g_get_default_preset(dsp_preset & p_out,const GUID & p_guid)
 }
 
 void dsp_chain_config::contents_to_stream(stream_writer * p_stream,abort_callback & p_abort) const {
-	t_size n, count = get_count();
+    uint32_t n, count = pfc::downcast_guarded<uint32_t>( get_count() );
 	p_stream->write_lendian_t(count,p_abort);
 	for(n=0;n<count;n++) {
 		get_item(n).contents_to_stream(p_stream,p_abort);
@@ -160,7 +199,7 @@ void cfg_dsp_chain_config::set_data_raw(stream_reader * p_stream,t_size,abort_ca
 
 void dsp_chain_config::remove_item(t_size p_index)
 {
-	remove_mask(bit_array_one(p_index));
+	remove_mask(pfc::bit_array_one(p_index));
 }
 
 void dsp_chain_config::add_item(const dsp_preset & p_data)
@@ -170,7 +209,7 @@ void dsp_chain_config::add_item(const dsp_preset & p_data)
 
 void dsp_chain_config::remove_all()
 {
-	remove_mask(bit_array_true());
+	remove_mask(pfc::bit_array_true());
 }
 
 void dsp_chain_config::instantiate(service_list_t<dsp> & p_out)
@@ -180,9 +219,15 @@ void dsp_chain_config::instantiate(service_list_t<dsp> & p_out)
 	for(n=0;n<m;n++)
 	{
 		service_ptr_t<dsp> temp;
-		if (dsp_entry::g_instantiate(temp,get_item(n)))
+		auto const & preset = this->get_item(n);
+		if (dsp_entry::g_instantiate(temp,preset) || dsp_entry_hidden::g_instantiate(temp, preset))
 			p_out.add_item(temp);
 	}
+}
+
+void dsp_chain_config_impl::reorder(const size_t * order, size_t count) {
+	PFC_ASSERT( count == m_data.get_count() );
+	m_data.reorder( order );
 }
 
 t_size dsp_chain_config_impl::get_count() const
@@ -216,7 +261,7 @@ dsp_chain_config_impl::~dsp_chain_config_impl()
 }
 
 void dsp_preset::contents_to_stream(stream_writer * p_stream,abort_callback & p_abort) const {
-	t_size size = get_data_size();
+    t_uint32 size = pfc::downcast_guarded<t_uint32>(get_data_size());
 	p_stream->write_lendian_t(get_owner(),p_abort);
 	p_stream->write_lendian_t(size,p_abort);
 	if (size > 0) {
@@ -289,13 +334,9 @@ void dsp_entry::g_show_config_popup_v2(const dsp_preset & p_preset,HWND p_parent
 
 bool dsp_entry::g_get_interface(service_ptr_t<dsp_entry> & p_out,const GUID & p_guid)
 {
-	service_ptr_t<dsp_entry> ptr;
-	service_enum_t<dsp_entry> e;
-	e.reset();
-	while(e.next(ptr))
-	{
-		if (ptr->get_guid() == p_guid)
-		{
+	service_ptr_t<dsp_entry> ptr; service_enum_t<dsp_entry> e;
+	while(e.next(ptr)) {
+		if (ptr->get_guid() == p_guid) {
 			p_out = ptr;
 			return true;
 		}
@@ -404,3 +445,5 @@ bool dsp_entry_v2::show_config_popup(dsp_preset & p_data,HWND p_parent) {
 	p_data = temp;
 	return true;
 }
+
+#endif // FOOBAR2000_HAVE_DSP

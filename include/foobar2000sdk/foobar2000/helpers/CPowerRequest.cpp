@@ -1,6 +1,9 @@
 #include "stdafx.h"
 
-#ifdef _WIN32
+#include "CPowerRequest.h"
+
+#ifdef CPowerRequestAPI_Avail
+
 
 // win32 API declaration duplicate - not always defined on some of the Windows versions we target
 namespace winapi_substitute {

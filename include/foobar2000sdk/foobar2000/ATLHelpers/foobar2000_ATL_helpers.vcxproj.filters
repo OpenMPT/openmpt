@@ -33,6 +33,9 @@
     <ClCompile Include="misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CEditWithButtons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ATLHelpers.h">
@@ -56,16 +59,37 @@
     <ClInclude Include="inplace_edit_v2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="misc.h">
+    <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="WTL-PP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ATLHelpersLean.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowPositionUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WTL-PP.h">
+    <ClInclude Include="misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CFlashWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CEditWithButtons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CButtonLite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CIconOverlayWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMiddleDragImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

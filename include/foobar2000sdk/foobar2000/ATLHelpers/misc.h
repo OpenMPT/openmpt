@@ -1,3 +1,9 @@
+#pragma once
+
+#include "../helpers/win32_misc.h"
+#include "WTL-PP.h"
+#include <utility>
+
 class CMenuSelectionReceiver : public CWindowImpl<CMenuSelectionReceiver> {
 public:
 	CMenuSelectionReceiver(HWND p_parent) {
@@ -23,7 +29,8 @@ private:
 				m_status.release();
 			} else {
 				pfc::string8 msg;
-				if (!QueryHint(LOWORD(p_wp),msg)) {
+				UINT cmd = LOWORD(p_wp);
+				if ( cmd == 0 || !QueryHint(cmd,msg)) {
 					m_status.release();
 				} else {
 					if (m_status.is_empty()) {
@@ -98,20 +105,14 @@ template<typename _parentClass> class CWindowFixSEH : public _parentClass { publ
 			return _parentClass::ProcessWindowMessage(hWnd, uMsg, wParam, lParam, lResult, dwMsgMapID);
 		} __except(uExceptFilterProc(GetExceptionInformation())) { return FALSE; /* should not get here */ }
 	}
-	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(CWindowFixSEH, _parentClass);
+	template<typename ... arg_t> CWindowFixSEH( arg_t && ... arg ) : _parentClass( std::forward<arg_t>(arg) ... ) {}
 };
 
 template<typename TClass>
 class CWindowAutoLifetime : public CWindowFixSEH<TClass> {
 public:
 	typedef CWindowFixSEH<TClass> TBase;
-	CWindowAutoLifetime(HWND parent) : TBase() {Init(parent);}
-	template<typename TParam1> CWindowAutoLifetime(HWND parent, const TParam1 & p1) : TBase(p1) {Init(parent);}
-	template<typename TParam1,typename TParam2> CWindowAutoLifetime(HWND parent, const TParam1 & p1,const TParam2 & p2) : TBase(p1,p2) {Init(parent);}
-	template<typename TParam1,typename TParam2, typename TParam3> CWindowAutoLifetime(HWND parent, const TParam1 & p1,const TParam2 & p2,const TParam3 & p3) : TBase(p1,p2,p3) {Init(parent);}
-	template<typename TParam1,typename TParam2, typename TParam3, typename TParam4> CWindowAutoLifetime(HWND parent, const TParam1 & p1,const TParam2 & p2,const TParam3 & p3,const TParam4 & p4) : TBase(p1,p2,p3,p4) {Init(parent);}
-	template<typename TParam1,typename TParam2, typename TParam3, typename TParam4,typename TParam5> CWindowAutoLifetime(HWND parent, const TParam1 & p1,const TParam2 & p2,const TParam3 & p3,const TParam4 & p4, const TParam5 & p5) : TBase(p1,p2,p3,p4,p5) {Init(parent);}
-	template<typename TParam1,typename TParam2, typename TParam3, typename TParam4,typename TParam5,typename TParam6> CWindowAutoLifetime(HWND parent, const TParam1 & p1,const TParam2 & p2,const TParam3 & p3,const TParam4 & p4, const TParam5 & p5, const TParam6 & p6) : TBase(p1,p2,p3,p4,p5,p6) {Init(parent);}
+	template<typename ... arg_t> CWindowAutoLifetime(HWND parent, arg_t && ... arg) : TBase( std::forward<arg_t>(arg) ... ) {Init(parent);}
 private:
 	void Init(HWND parent) {WIN32_OP(this->Create(parent) != NULL);}
 	void OnFinalMessage(HWND wnd) {PFC_ASSERT_NO_EXCEPTION( TBase::OnFinalMessage(wnd) ); PFC_ASSERT_NO_EXCEPTION(delete this);}
@@ -120,7 +121,7 @@ private:
 template<typename TClass>
 class ImplementModelessTracking : public TClass {
 public:
-	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(ImplementModelessTracking, TClass);
+	template<typename ... arg_t> ImplementModelessTracking(arg_t && ... arg ) : TClass(std::forward<arg_t>(arg) ... ) {}
 	
 	BEGIN_MSG_MAP_EX(ImplementModelessTracking)
 		MSG_WM_INITDIALOG(OnInitDialog)
@@ -132,6 +133,15 @@ private:
 	void OnDestroy() {m_modeless.Set(NULL); SetMsgHandled(FALSE); }
 	CModelessDialogEntry m_modeless;
 };
+
+namespace fb2k {
+	template<typename dialog_t, typename ... arg_t> dialog_t * newDialogEx( HWND parent, arg_t && ... arg ) {
+		return new CWindowAutoLifetime<ImplementModelessTracking< dialog_t > > ( parent, std::forward<arg_t>(arg) ... );
+	}
+	template<typename dialog_t, typename ... arg_t> dialog_t * newDialog(arg_t && ... arg) {
+		return new CWindowAutoLifetime<ImplementModelessTracking< dialog_t > > (core_api::get_main_window(), std::forward<arg_t>(arg) ...);
+	}
+}
 
 class CMenuSelectionReceiver_UiElement : public CMenuSelectionReceiver {
 public:
@@ -145,127 +155,12 @@ private:
 	const service_ptr_t<ui_element_instance> m_owner;
 };
 
-static void ui_element_instance_standard_context_menu(service_ptr_t<ui_element_instance> p_elem, LPARAM p_pt) {
-	CPoint pt;
-	bool fromKeyboard;
-	if (p_pt == -1) {
-		fromKeyboard = true;
-		if (!p_elem->edit_mode_context_menu_get_focus_point(pt)) {
-			CRect rc;
-			WIN32_OP_D( GetWindowRect(p_elem->get_wnd(), rc) );
-			pt = rc.CenterPoint();
-		}
-	} else {
-		fromKeyboard = false;
-		pt = p_pt;
-	}
-	if (p_elem->edit_mode_context_menu_test(pt,fromKeyboard)) {
-		const unsigned idBase = 1;
-		CMenu menu;
-		WIN32_OP( menu.CreatePopupMenu() );
-		p_elem->edit_mode_context_menu_build(pt,fromKeyboard,menu,idBase);
-		
-		int cmd;
-		{
-			CMenuSelectionReceiver_UiElement receiver(p_elem,idBase);
-			cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON|TPM_NONOTIFY|TPM_RETURNCMD,pt.x,pt.y,receiver);
-		}
-		if (cmd > 0) p_elem->edit_mode_context_menu_command(pt,fromKeyboard,cmd,idBase);
-	}
-}
-static void ui_element_instance_standard_context_menu_eh(service_ptr_t<ui_element_instance> p_elem, LPARAM p_pt) {
-	try {
-		ui_element_instance_standard_context_menu(p_elem, p_pt);
-	} catch(std::exception const & e) {
-		console::complain("Context menu failure", e);
-	}
-}
-
+void ui_element_instance_standard_context_menu(service_ptr_t<ui_element_instance> p_elem, LPARAM p_pt);
+void ui_element_instance_standard_context_menu_eh(service_ptr_t<ui_element_instance> p_elem, LPARAM p_pt);
 
 #if _WIN32_WINNT >= 0x501
-static void HeaderControl_SetSortIndicator(CHeaderCtrl header, int column, bool isUp) {
-	const int total = header.GetItemCount();
-	for(int walk = 0; walk < total; ++walk) {
-		HDITEM item = {}; item.mask = HDI_FORMAT;
-		if (header.GetItem(walk,&item)) {
-			DWORD newFormat = item.fmt;
-			newFormat &= ~( HDF_SORTUP | HDF_SORTDOWN );
-			if (walk == column) {
-				newFormat |= isUp ? HDF_SORTUP : HDF_SORTDOWN;
-			}
-			if (newFormat != item.fmt) {
-				item.fmt = newFormat;
-				header.SetItem(walk,&item);
-			}
-		}
-	}
-}
+void HeaderControl_SetSortIndicator(CHeaderCtrl header, int column, bool isUp);
 #endif
-
-typedef CWinTraits<WS_POPUP,WS_EX_TRANSPARENT|WS_EX_LAYERED|WS_EX_TOPMOST|WS_EX_TOOLWINDOW> CFlashWindowTraits;
-
-class CFlashWindow : public CWindowImpl<CFlashWindow,CWindow,CFlashWindowTraits> {
-public:
-	void Activate(CWindow parent) {
-		ShowAbove(parent);
-		m_tickCount = 0;
-		SetTimer(KTimerID, 500);
-	}
-	void Deactivate() throw() {
-		ShowWindow(SW_HIDE); KillTimer(KTimerID);
-	}
-
-	void ShowAbove(CWindow parent) {
-		if (m_hWnd == NULL) {
-			WIN32_OP( Create(NULL) != NULL );
-		}
-		CRect rect;
-		WIN32_OP_D( parent.GetWindowRect(rect) );
-		WIN32_OP_D( SetWindowPos(NULL,rect,SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW) );
-		m_parent = parent;
-	}
-
-	void CleanUp() throw() {
-		if (m_hWnd != NULL) DestroyWindow();
-	}
-
-	BEGIN_MSG_MAP_EX(CFlashWindow)
-		MSG_WM_CREATE(OnCreate)
-		MSG_WM_TIMER(OnTimer)
-		MSG_WM_DESTROY(OnDestroy)
-	END_MSG_MAP()
-
-	DECLARE_WND_CLASS_EX(TEXT("{2E124D52-131F-4004-A569-2316615BE63F}"),0,COLOR_HIGHLIGHT);
-private:
-	void OnDestroy() throw() {
-		KillTimer(KTimerID);
-	}
-	enum {
-		KTimerID = 0x47f42dd0
-	};
-	void OnTimer(WPARAM id) {
-		if (id == KTimerID) {
-			switch(++m_tickCount) {
-				case 1:
-					ShowWindow(SW_HIDE);
-					break;
-				case 2:
-					ShowAbove(m_parent);
-					break;
-				case 3:
-					ShowWindow(SW_HIDE);
-					KillTimer(KTimerID);
-					break;
-			}
-		}
-	}
-	LRESULT OnCreate(LPCREATESTRUCT) throw() {
-		SetLayeredWindowAttributes(*this,0,128,LWA_ALPHA);
-		return 0;
-	}
-	CWindow m_parent;
-	t_uint32 m_tickCount;
-};
 
 class CTypableWindowScope {
 public:
@@ -304,10 +199,10 @@ static bool window_service_trait_defer_destruction(const service_base *) {return
 
 //! Special service_impl_t replacement for service classes that also implement ATL/WTL windows.
 template<typename _t_base>
-class window_service_impl_t : public CWindowFixSEH<_t_base> {
+class window_service_impl_t : public implement_service_query< CWindowFixSEH<_t_base> > {
 private:
 	typedef window_service_impl_t<_t_base> t_self;
-	typedef CWindowFixSEH<_t_base> t_base;
+	typedef implement_service_query< CWindowFixSEH<_t_base> > t_base;
 public:
 	BEGIN_MSG_MAP_EX(window_service_impl_t)
 		MSG_WM_DESTROY(OnDestroyPassThru)
@@ -331,7 +226,8 @@ public:
 	}
 	int FB2KAPI service_add_ref() throw() {return ++m_counter;}
 
-	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD_WITH_INITIALIZER(window_service_impl_t,t_base,{m_destroyWindowInProgress = false; m_delayedDestroyInProgress = 0; })
+	template<typename ... arg_t>
+	window_service_impl_t( arg_t && ... arg ) : t_base( std::forward<arg_t>(arg) ... ) {};
 private:
 	void OnDestroyPassThru() {
 		SetMsgHandled(FALSE); m_destroyWindowInProgress = true;
@@ -340,8 +236,8 @@ private:
 		t_base::OnFinalMessage(p_wnd);
 		service_ptr_t<service_base> bump(this);
 	}
-	volatile bool m_destroyWindowInProgress;
-	volatile LONG m_delayedDestroyInProgress;
+	volatile bool m_destroyWindowInProgress = false;
+	volatile LONG m_delayedDestroyInProgress = 0;
 	pfc::refcounter m_counter;
 };
 
@@ -398,9 +294,14 @@ public:
 	}
 private:
 	void ShowInternal(const TCHAR * message, CWindow wndParent, CRect rect) {
+
 		PFC_ASSERT( !m_shutDown );
 		PFC_ASSERT( message != NULL );
 		PFC_ASSERT( wndParent != NULL );
+		
+		if ( _tcschr( message, '\n') != nullptr ) {
+			m_tooltip.SetMaxTipWidth( rect.Width() );
+		}
 		m_toolinfo.cbSize = sizeof(m_toolinfo);
 		m_toolinfo.uFlags = TTF_TRACK|TTF_IDISHWND|TTF_ABSOLUTE|TTF_TRANSPARENT|TTF_CENTERTIP;
 		m_toolinfo.hwnd = wndParent;
@@ -507,161 +408,33 @@ public:
 };
 
 
-void PaintSeparatorControl(CWindow wnd);
 
-class CStaticSeparator : public CContainedWindowT<CStatic>, private CMessageMap {
+
+// here because of window_service_impl_t
+template<typename TImpl, typename TInterface = ui_element> class ui_element_impl : public TInterface {
 public:
-	CStaticSeparator() : CContainedWindowT<CStatic>(this, 0) {}
-	BEGIN_MSG_MAP_EX(CSeparator)
-		MSG_WM_PAINT(OnPaint)
-		MSG_WM_SETTEXT(OnSetText)
-	END_MSG_MAP()
+	GUID get_guid() { return TImpl::g_get_guid(); }
+	GUID get_subclass() { return TImpl::g_get_subclass(); }
+	void get_name(pfc::string_base & out) { TImpl::g_get_name(out); }
+	ui_element_instance::ptr instantiate(HWND parent, ui_element_config::ptr cfg, ui_element_instance_callback::ptr callback) {
+		PFC_ASSERT(cfg->get_guid() == get_guid());
+		service_nnptr_t<ui_element_instance_impl_helper> item = new window_service_impl_t<ui_element_instance_impl_helper>(cfg, callback);
+		item->initialize_window(parent);
+		return item;
+	}
+	ui_element_config::ptr get_default_configuration() { return TImpl::g_get_default_configuration(); }
+	ui_element_children_enumerator_ptr enumerate_children(ui_element_config::ptr cfg) { return NULL; }
+	bool get_description(pfc::string_base & out) { out = TImpl::g_get_description(); return true; }
 private:
-	int OnSetText(LPCTSTR lpstrText) {
-		Invalidate();
-		SetMsgHandled(FALSE);
-		return 0;
-	}
-	void OnPaint(CDCHandle) {
-		PaintSeparatorControl(*this);
-	}
-};
+	class ui_element_instance_impl_helper : public TImpl {
+	public:
+		ui_element_instance_impl_helper(ui_element_config::ptr cfg, ui_element_instance_callback::ptr callback) : TImpl(cfg, callback) {}
 
-
-
-template<typename TClass>
-class CTextControl : public CWindowRegisteredT<TClass> {
+		GUID get_guid() { return TImpl::g_get_guid(); }
+		GUID get_subclass() { return TImpl::g_get_subclass(); }
+		HWND get_wnd() { return *this; }
+	};
 public:
-	BEGIN_MSG_MAP_EX(CTextControl)
-		MSG_WM_SETFONT(OnSetFont)
-		MSG_WM_GETFONT(OnGetFont)
-		MSG_WM_SETTEXT(OnSetText)
-		CHAIN_MSG_MAP(__super)
-	END_MSG_MAP()
-private:
-	HFONT OnGetFont() {
-		return m_font;
-	}
-	void OnSetFont(HFONT font, BOOL bRedraw) {
-		m_font = font;
-		if (bRedraw) Invalidate();
-	}
-	int OnSetText(LPCTSTR lpstrText) {
-		Invalidate();SetMsgHandled(FALSE); return 0;
-	}
-	CFontHandle m_font;
+	typedef ui_element_instance_impl_helper TInstance;
+	static TInstance const & instanceGlobals() { return *reinterpret_cast<const TInstance*>(NULL); }
 };
-
-#ifndef VSCLASS_TEXTSTYLE
-//
-//  TEXTSTYLE class parts and states 
-//
-#define VSCLASS_TEXTSTYLE	L"TEXTSTYLE"
-
-enum TEXTSTYLEPARTS {
-	TEXT_MAININSTRUCTION = 1,
-	TEXT_INSTRUCTION = 2,
-	TEXT_BODYTITLE = 3,
-	TEXT_BODYTEXT = 4,
-	TEXT_SECONDARYTEXT = 5,
-	TEXT_HYPERLINKTEXT = 6,
-	TEXT_EXPANDED = 7,
-	TEXT_LABEL = 8,
-	TEXT_CONTROLLABEL = 9,
-};
-
-enum HYPERLINKTEXTSTATES {
-	TS_HYPERLINK_NORMAL = 1,
-	TS_HYPERLINK_HOT = 2,
-	TS_HYPERLINK_PRESSED = 3,
-	TS_HYPERLINK_DISABLED = 4,
-};
-
-enum CONTROLLABELSTATES {
-	TS_CONTROLLABEL_NORMAL = 1,
-	TS_CONTROLLABEL_DISABLED = 2,
-};
-
-#endif
-
-
-class CStaticThemed : public CContainedWindowT<CStatic>, private CMessageMap {
-public:
-	CStaticThemed() : CContainedWindowT<CStatic>(this, 0), m_id(), m_fallback() {}
-	BEGIN_MSG_MAP_EX(CStaticThemed)
-		MSG_WM_PAINT(OnPaint)
-		MSG_WM_THEMECHANGED(OnThemeChanged)
-		MSG_WM_SETTEXT(OnSetText)
-	END_MSG_MAP()
-
-	void SetThemePart(int id) {m_id = id; if (m_hWnd != NULL) Invalidate();}
-private:
-	int OnSetText(LPCTSTR lpstrText) {
-		Invalidate();
-		SetMsgHandled(FALSE);
-		return 0;
-	}
-	void OnThemeChanged() {
-		m_theme.Release();
-		m_fallback = false;
-	}
-	void OnPaint(CDCHandle) {
-		if (m_fallback) {
-			SetMsgHandled(FALSE); return;
-		}
-		if (m_theme == NULL) {
-			m_theme.OpenThemeData(*this, L"TextStyle");
-			if (m_theme == NULL) {
-				m_fallback = true; SetMsgHandled(FALSE); return;
-			}
-		}
-		CPaintDC dc(*this);
-		TCHAR buffer[512] = {};
-		GetWindowText(buffer, _countof(buffer));
-		const int txLen = pfc::strlen_max_t(buffer, _countof(buffer));
-		CRect contentRect;
-		WIN32_OP_D( GetClientRect(contentRect) );
-		SelectObjectScope scopeFont(dc, GetFont());
-		dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-		dc.SetBkMode(TRANSPARENT);
-		
-		if (txLen > 0) {
-			CRect rcText(contentRect);
-			DWORD flags = 0;
-			DWORD style = GetStyle();
-			if (style & SS_LEFT) flags |= DT_LEFT;
-			else if (style & SS_RIGHT) flags |= DT_RIGHT;
-			else if (style & SS_CENTER) flags |= DT_CENTER;
-			if (style & SS_ENDELLIPSIS) flags |= DT_END_ELLIPSIS;
-
-			HRESULT retval = DrawThemeText(m_theme, dc, m_id, 0, buffer, txLen, flags, 0, rcText);
-			PFC_ASSERT( SUCCEEDED( retval ) );
-		}		
-	}
-	int m_id;
-	CTheme m_theme;
-	bool m_fallback;
-};
-class CStaticMainInstruction : public CStaticThemed {
-public:
-	CStaticMainInstruction() { SetThemePart(TEXT_MAININSTRUCTION); }
-};
-
-
-
-class CSeparator : public CTextControl<CSeparator> {
-public:
-	BEGIN_MSG_MAP_EX(CSeparator)
-		MSG_WM_PAINT(OnPaint)
-		CHAIN_MSG_MAP(__super)
-	END_MSG_MAP()
-
-	static const TCHAR * GetClassName() {
-		return _T("foobar2000:separator");
-	}
-private:
-	void OnPaint(CDCHandle dc) {
-		PaintSeparatorControl(*this);
-	}
-};
-

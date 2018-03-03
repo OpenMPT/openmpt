@@ -1,3 +1,7 @@
+#pragma once
+
+#include "../helpers/listview_helper.h"
+
 namespace InPlaceEdit {
 	class NOVTABLE CTableEditHelperV2 : protected completion_notify_receiver {
 	public:

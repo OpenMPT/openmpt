@@ -18,29 +18,23 @@ public:
     virtual void add_idle_handler(idle_handler * ptr) = 0;
     virtual void remove_idle_handler(idle_handler * ptr) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(message_loop);
+	FB2K_MAKE_SERVICE_COREAPI(message_loop);
 };
 
 class NOVTABLE message_loop_v2 : public message_loop {
 public:
 	virtual void add_message_filter_ex(message_filter * ptr, t_uint32 lowest, t_uint32 highest) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE(message_loop_v2, message_loop);
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(message_loop_v2, message_loop);
 };
 
 class message_filter_impl_base : public message_filter {
 public:
-	message_filter_impl_base() {static_api_ptr_t<message_loop>()->add_message_filter(this);}
+	message_filter_impl_base() {message_loop::get()->add_message_filter(this);}
 	message_filter_impl_base(t_uint32 lowest, t_uint32 highest) {
-		static_api_ptr_t<message_loop> api;
-		message_loop_v2::ptr apiV2;
-		if (api->service_query_t(apiV2)) {
-			apiV2->add_message_filter_ex(this, lowest, highest);
-		} else {
-			api->add_message_filter(this);
-		}
+		message_loop_v2::get()->add_message_filter_ex(this, lowest, highest);
 	}
-	~message_filter_impl_base() {static_api_ptr_t<message_loop>()->remove_message_filter(this);}
+	~message_filter_impl_base() {message_loop::get()->remove_message_filter(this);}
 	bool pretranslate_message(MSG * p_msg) {return false;}
 	
 	PFC_CLASS_NOT_COPYABLE(message_filter_impl_base,message_filter_impl_base);
@@ -89,8 +83,8 @@ private:
 
 class idle_handler_impl_base : public idle_handler {
 public:
-	idle_handler_impl_base() {static_api_ptr_t<message_loop>()->add_idle_handler(this);}
-	~idle_handler_impl_base() {static_api_ptr_t<message_loop>()->remove_idle_handler(this);}
+	idle_handler_impl_base() {message_loop::get()->add_idle_handler(this);}
+	~idle_handler_impl_base() { message_loop::get()->remove_idle_handler(this);}
 	bool on_idle() {return true;}
 
 	PFC_CLASS_NOT_COPYABLE_EX(idle_handler_impl_base)

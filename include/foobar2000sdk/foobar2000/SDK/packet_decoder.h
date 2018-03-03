@@ -1,3 +1,4 @@
+#pragma once
 //! Provides interface to decode various audio data types to PCM. Use packet_decoder_factory_t template to register.
 
 class NOVTABLE packet_decoder : public service_base {
@@ -84,6 +85,9 @@ public:
     //property_allow_delayed_output : p_param1 = bool flag indicating whether the decoder than delay outputting audio data at will; essential for Apple AQ decoder
     static const GUID property_allow_delayed_output;
     
+    // property_mp3_delayless : return non-zero if this codec drops MP3 delay by itself
+    static const GUID property_mp3_delayless;
+    
 	size_t initPadding();
 	void setEventLogger(event_logger::ptr logger);
 	void setCheckingIntegrity(bool checkingIntegrity);
@@ -119,7 +123,7 @@ public:
 		return T::g_is_our_setup(p_owner,p_param1,p_param2,p_param2size);
 	}
 	void open(service_ptr_t<packet_decoder> & p_out,bool p_decode,const GUID & p_owner,t_size p_param1,const void * p_param2,t_size p_param2size,abort_callback & p_abort) {
-		assert(is_our_setup(p_owner,p_param1,p_param2,p_param2size));
+		PFC_ASSERT(is_our_setup(p_owner,p_param1,p_param2,p_param2size));
 		service_ptr_t<T> instance = new service_impl_t<T>();
 		instance->open(p_owner,p_decode,p_param1,p_param2,p_param2size,p_abort);
 		p_out = instance.get_ptr();

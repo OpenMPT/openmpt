@@ -1,7 +1,3 @@
-#ifdef _MSC_VER // OpenMPT
-#pragma warning(push) // OpenMPT
-#pragma warning(disable:4838) // OpenMPT
-#endif // OpenMPT
 extern "C"
 {
 	LPCSTR SHARED_EXPORT uGetCallStackPath();
@@ -23,7 +19,7 @@ public:
 
 
 
-#if 1
+#if FB2K_SUPPORT_CRASH_LOGS
 #define TRACK_CALL(X) uCallStackTracker TRACKER__##X(#X)
 #define TRACK_CALL_TEXT(X) uCallStackTracker TRACKER__BLAH(X)
 #define TRACK_CODE(description,code) {uCallStackTracker __call_tracker(description); code;}
@@ -33,17 +29,23 @@ public:
 #define TRACK_CODE(description,code) {code;}
 #endif
 
+#if FB2K_SUPPORT_CRASH_LOGS
 static int uExceptFilterProc_inline(LPEXCEPTION_POINTERS param) {
 	uDumpCrashInfo(param);
 	TerminateProcess(GetCurrentProcess(), 0);
 	return 0;// never reached
 }
+#endif
 
 
 #define FB2K_DYNAMIC_ASSERT( X ) { if (!(X)) uBugCheck(); }
 
 #define __except_instacrash __except(uExceptFilterProc(GetExceptionInformation()))
+#if FB2K_SUPPORT_CRASH_LOGS
 #define fb2k_instacrash_scope(X) __try { X; } __except_instacrash {}
+#else
+#define fb2k_instacrash_scope(X) {X;}
+#endif
 
 PFC_NORETURN static void fb2kCriticalError(DWORD code, DWORD argCount = 0, const ULONG_PTR * args = NULL) {
 	fb2k_instacrash_scope( RaiseException(code,EXCEPTION_NONCONTINUABLE,argCount,args); );
@@ -81,7 +83,7 @@ static void fb2kWaitForThreadCompletion2(HANDLE hWaitFor, HANDLE hThread, DWORD 
 
 
 static void __cdecl _OverrideCrtAbort_handler(int signal) {
-	const ULONG_PTR args[] = {signal};
+	const ULONG_PTR args[] = {(ULONG_PTR)signal};
 	RaiseException(0x6F8E1DC8 /* random GUID */, EXCEPTION_NONCONTINUABLE, _countof(args), args);
 }
 
@@ -107,6 +109,3 @@ static void OverrideCrtAbort() {
 	_set_purecall_handler(_PureCallHandler);
 	_set_invalid_parameter_handler(_InvalidParameter);
 }
-#ifdef _MSC_VER // OpenMPT
-#pragma warning(pop) // OpenMPT
-#endif // OpenMPT

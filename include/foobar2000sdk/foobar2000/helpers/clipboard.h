@@ -1,4 +1,9 @@
-#ifdef _WIN32
+#pragma once
+
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
+
+#include "win32_misc.h"
+
 namespace ClipboardHelper {
 
 	class OpenScope {
@@ -39,4 +44,4 @@ namespace ClipboardHelper {
 	}
 	bool IsTextAvailable();
 };
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

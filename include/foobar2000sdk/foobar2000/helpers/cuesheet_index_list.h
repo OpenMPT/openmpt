@@ -1,3 +1,18 @@
+#pragma once
+
+unsigned cuesheet_parse_index_time_ticks_e(const char * p_string,t_size p_length);
+double cuesheet_parse_index_time_e(const char * p_string,t_size p_length);
+
+class cuesheet_format_index_time
+{
+public:
+	cuesheet_format_index_time(double p_time);
+	inline operator const char*() const {return m_buffer;}
+private:
+	pfc::string_formatter m_buffer;
+};
+
+
 struct t_cuesheet_index_list
 {
 	enum {count = 100};

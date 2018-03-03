@@ -48,8 +48,8 @@ protected:
 	~play_callback() {}
 };
 
-//! Standard API (always present); manages registrations of dynamic play_callbacks.
-//! Usage: use static_api_ptr_t<play_callback_manager>.
+//! Standard API (always present); manages registrations of dynamic play_callbacks. \n
+//! Usage: use play_callback_manager::get() to obtain on instance. \n
 //! Do not reimplement.
 class NOVTABLE play_callback_manager : public service_base
 {
@@ -63,20 +63,20 @@ public:
 	//! @p_callback Previously registered interface to unregister.
 	virtual void FB2KAPI unregister_callback(play_callback * p_callback) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(play_callback_manager);
+	FB2K_MAKE_SERVICE_COREAPI(play_callback_manager);
 };
 
 //! Implementation helper.
 class play_callback_impl_base : public play_callback {
 public:
 	play_callback_impl_base(unsigned p_flags = ~0) {
-		static_api_ptr_t<play_callback_manager>()->register_callback(this,p_flags,false);
+		play_callback_manager::get()->register_callback(this,p_flags,false);
 	}
 	~play_callback_impl_base() {
-		static_api_ptr_t<play_callback_manager>()->unregister_callback(this);
+		play_callback_manager::get()->unregister_callback(this);
 	}
 	void play_callback_reregister(unsigned flags, bool refresh = false) {
-		static_api_ptr_t<play_callback_manager> api;
+		auto api = play_callback_manager::get();
 		api->unregister_callback(this);
 		api->register_callback(this,flags,refresh);
 	}

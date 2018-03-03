@@ -21,5 +21,5 @@ public:
 
 
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(audio_postprocessor);
+	FB2K_MAKE_SERVICE_COREAPI(audio_postprocessor);
 };

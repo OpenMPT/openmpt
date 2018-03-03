@@ -5,6 +5,9 @@ int playable_location::g_compare(const playable_location & p_item1,const playabl
 	if (ret != 0) return ret;
 	return pfc::compare_t(p_item1.get_subsong(),p_item2.get_subsong());
 }
+int playable_location::path_compare( const char * p1, const char * p2 ) {
+	return metadb::path_compare(p1, p2);
+}
 
 bool playable_location::g_equals( const playable_location & p_item1, const playable_location & p_item2) {
     return g_compare(p_item1, p_item2) == 0;

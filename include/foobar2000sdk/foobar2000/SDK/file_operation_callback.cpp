@@ -3,17 +3,19 @@
 
 static void g_on_files_deleted_sorted(const pfc::list_base_const_t<const char *> & p_items)
 {
-	//static_api_ptr_t<library_manager>()->on_files_deleted_sorted(p_items);
-	static_api_ptr_t<playlist_manager>()->on_files_deleted_sorted(p_items);
+	//library_manager::get()->on_files_deleted_sorted(p_items);
+	playlist_manager::get()->on_files_deleted_sorted(p_items);
 
 	FB2K_FOR_EACH_SERVICE(file_operation_callback,  on_files_deleted_sorted(p_items));
 }
 
 static void g_on_files_moved_sorted(const pfc::list_base_const_t<const char *> & p_from,const pfc::list_base_const_t<const char *> & p_to)
 {
-	static_api_ptr_t<playlist_manager>()->on_files_moved_sorted(p_from,p_to);
-	static_api_ptr_t<playlist_manager>()->on_files_deleted_sorted(p_from);
-
+	{
+		auto api = playlist_manager::get();
+		api->on_files_moved_sorted(p_from,p_to);
+		api->on_files_deleted_sorted(p_from);
+	}
 	FB2K_FOR_EACH_SERVICE(file_operation_callback, on_files_moved_sorted(p_from,p_to));
 }
 
@@ -81,7 +83,7 @@ bool file_operation_callback::g_search_sorted_list(const pfc::list_base_const_t<
 }
 
 bool file_operation_callback::g_update_list_on_moved_ex(metadb_handle_list_ref p_list,t_pathlist p_from,t_pathlist p_to, metadb_handle_list_ref itemsAdded, metadb_handle_list_ref itemsRemoved) {
-	static_api_ptr_t<metadb> api;
+	auto api = metadb::get();
 	bool changed = false;
 	itemsAdded.remove_all(); itemsRemoved.remove_all();
 	for(t_size walk = 0; walk < p_list.get_count(); ++walk) {
@@ -98,7 +100,7 @@ bool file_operation_callback::g_update_list_on_moved_ex(metadb_handle_list_ref p
 	return changed;
 }
 bool file_operation_callback::g_update_list_on_moved(metadb_handle_list_ref p_list,const pfc::list_base_const_t<const char *> & p_from,const pfc::list_base_const_t<const char *> & p_to) {
-	static_api_ptr_t<metadb> api;
+	auto api = metadb::get();
 	bool changed = false;
 	for(t_size walk = 0; walk < p_list.get_count(); ++walk) {
 		metadb_handle_ptr item = p_list[walk];

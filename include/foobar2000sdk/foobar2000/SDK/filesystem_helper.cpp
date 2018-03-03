@@ -86,26 +86,6 @@ void stream_reader_chunk::g_skip(stream_reader * p_stream,abort_callback & p_abo
 	stream_reader_chunk(p_stream).flush(p_abort);
 }
 
-t_size reader_membuffer_base::read(void * p_buffer,t_size p_bytes,abort_callback & p_abort) {
-	p_abort.check_e();
-	t_size max = get_buffer_size();
-	if (max < m_offset) uBugCheck();
-	max -= m_offset;
-	t_size delta = p_bytes;
-	if (delta > max) delta = max;
-	memcpy(p_buffer,(char*)get_buffer() + m_offset,delta);
-	m_offset += delta;
-	return delta;
-}
-
-void reader_membuffer_base::seek(t_filesize position,abort_callback & p_abort) {
-	p_abort.check_e();
-	t_filesize max = get_buffer_size();
-	if (position == filesize_invalid || position > max) throw exception_io_seek_out_of_range();
-	m_offset = (t_size)position;
-}
-
-
 
 
 static void fileSanitySeek(file::ptr f, pfc::array_t<uint8_t> const & content, size_t offset, abort_callback & aborter) {
@@ -219,4 +199,34 @@ namespace foobar2000_io {
         listDirectoryCallback cb; cb.m_func = func;
         filesystem::g_list_directory(path, cb, aborter);
     }
+
+	pfc::string8 stripParentFolders( const char * inPath ) {
+		size_t prefixLen = pfc::string_find_first(inPath, "://");
+		if ( prefixLen != pfc_infinite ) prefixLen += 3;
+		else prefixLen = 0;
+
+		pfc::chain_list_v2_t<pfc::string_part_ref> segments;
+		pfc::splitStringByChar(segments, inPath + prefixLen, '\\' );
+		for ( auto i = segments.first(); i.is_valid(); ) {
+			auto n = i; ++n;
+			if ( i->equals( "." ) ) {
+				segments.remove_single( i );
+			} else if ( i->equals( ".." ) ) {
+				auto p = i; --p;
+				if ( p.is_valid() ) segments.remove_single( p );
+				segments.remove_single( i );
+			}
+			i = n;
+		}
+		pfc::string8 ret;
+		if ( prefixLen > 0 ) ret.add_string( inPath, prefixLen );
+		bool bFirst = true;
+		for ( auto i = segments.first(); i.is_valid(); ++ i ) {
+			if (!bFirst) ret << "\\";
+			ret << *i;		
+			bFirst = false;
+		}
+		return ret;
+	}
+
 }

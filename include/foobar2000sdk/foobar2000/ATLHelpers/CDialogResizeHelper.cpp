@@ -1,5 +1,8 @@
 #include "stdafx.h"
 
+#include "../helpers/win32_misc.h"
+#include "CDialogResizeHelper.h"
+
 bool CDialogResizeHelper::EvalRect(UINT id, CRect & out) const {
 	for(t_size walk = 0; walk < m_table.get_size(); ++walk) {
 		if (m_table[walk].id == id) {

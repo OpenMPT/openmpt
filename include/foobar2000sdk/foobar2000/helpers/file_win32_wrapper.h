@@ -1,3 +1,6 @@
+#pragma once
+
+#ifdef _WIN32
 namespace file_win32_helpers {
 	t_filesize get_size(HANDLE p_handle);
 	void seek(HANDLE p_handle,t_sfilesize p_position,file::t_seek_mode p_mode);
@@ -57,7 +60,7 @@ public:
 			while(bytes_written_total < p_bytes) {
 				p_abort.check_e();
 				DWORD bytes_written = 0;
-				DWORD delta = (DWORD) pfc::min_t<t_size>(p_bytes - bytes_written_total, 0x80000000);
+				DWORD delta = (DWORD) pfc::min_t<t_size>(p_bytes - bytes_written_total, 0x80000000u);
 				SetLastError(ERROR_SUCCESS);
 				if (!WriteFile(m_handle,(const t_uint8*)p_buffer + bytes_written_total,delta,&bytes_written,0)) exception_io_from_win32(GetLastError());
 				if (bytes_written != delta) throw exception_io("Write failure");
@@ -82,7 +85,7 @@ public:
 			while(bytes_read_total < p_bytes) {
 				p_abort.check_e();
 				DWORD bytes_read = 0;
-				DWORD delta = (DWORD) pfc::min_t<t_size>(p_bytes - bytes_read_total, 0x80000000);
+				DWORD delta = (DWORD) pfc::min_t<t_size>(p_bytes - bytes_read_total, 0x80000000u);
 				SetLastError(ERROR_SUCCESS);
 				if (!ReadFile(m_handle,(t_uint8*)p_buffer + bytes_read_total,delta,&bytes_read,0)) exception_io_from_win32(GetLastError());
 				bytes_read_total += bytes_read;
@@ -237,3 +240,4 @@ protected:
 	HANDLE m_event, m_handle;
 	t_filesize m_position;
 };
+#endif // _WIN32

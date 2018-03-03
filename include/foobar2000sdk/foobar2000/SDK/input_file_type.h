@@ -30,7 +30,7 @@ public:
 		pfc::chain_list_v2_t<pfc::string> exts; pfc::splitStringSimple_toList(exts,";",temp);
 		if (exts.get_count() == 0) return false;//should not happen
 		temp.reset();
-		for(pfc::const_iterator<pfc::string> walk = exts.first(); walk.is_valid(); ++walk) {
+		for(auto walk = exts.cfirst(); walk.is_valid(); ++walk) {
 			if (!temp.is_empty()) temp << ";";
 			temp << "*." << walk->get_ptr();
 		}

@@ -48,7 +48,7 @@ GUID contextmenu_item::get_parent_fallback() {
 		this->get_item_default_path(walk, path);
 		if (strcmp(path, base) != 0) return contextmenu_groups::legacy;
 	}
-	return static_api_ptr_t<contextmenu_group_manager>()->path_to_group(base);
+	return contextmenu_group_manager::get()->path_to_group(base);
 }
 
 GUID contextmenu_item::get_parent_() {

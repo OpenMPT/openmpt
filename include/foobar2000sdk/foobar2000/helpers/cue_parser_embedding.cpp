@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "cue_parser.h"
 
 using namespace cue_parser;
 using namespace file_info_record_helper;

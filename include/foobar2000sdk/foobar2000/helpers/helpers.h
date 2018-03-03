@@ -1,6 +1,7 @@
-#ifndef _FOOBAR2000_SDK_HELPERS_H_
-#define _FOOBAR2000_SDK_HELPERS_H_
+#pragma once
+// #pragma message("Avoid using this header. #include individual ones instead.")
 
+#include "duration_counter.h"
 #include "input_helpers.h"
 #include "create_directory_helper.h"
 #include "dialog_resize_helper.h"
@@ -20,7 +21,6 @@
 #include "file_move_helper.h"
 #include "file_cached.h"
 #include "seekabilizer.h"
-#include "string_filter.h"
 #include "bitreader_helper.h"
 #include "mp3_utils.h"
 #include "win32_misc.h"
@@ -42,5 +42,5 @@
 #include "fullFileBuffer.h"
 #include "CPowerRequest.h"
 #include "writer_wav.h"
-
-#endif //_FOOBAR2000_SDK_HELPERS_H_
+#include "TypeFind.h"
+#include "readers.h"

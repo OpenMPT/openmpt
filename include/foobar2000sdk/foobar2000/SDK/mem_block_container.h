@@ -1,3 +1,4 @@
+#pragma once
 //! Generic interface for a memory block; used by various other interfaces to return memory blocks while allowing caller to allocate.
 class NOVTABLE mem_block_container {
 public:

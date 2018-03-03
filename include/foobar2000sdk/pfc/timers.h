@@ -1,5 +1,4 @@
-#ifndef _PFC_PROFILER_H_
-#define _PFC_PROFILER_H_
+#pragma once
 
 #if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 
@@ -67,7 +66,7 @@ public:
 		m_start = current;
 		return ret;
 	}
-	pfc::string8 queryString(unsigned precision = 6) {
+	pfc::string8 queryString(unsigned precision = 6) const {
 		return pfc::format_time_ex( query(), precision ).get_ptr();
 	}
 private:
@@ -103,7 +102,7 @@ public:
 		_start(time);
 		return ret;
 	}
-	pfc::string8 queryString(unsigned precision = 3) {
+	pfc::string8 queryString(unsigned precision = 3) const {
 		return pfc::format_time_ex( query(), precision ).get_ptr();
 	}
 private:
@@ -139,7 +138,7 @@ public:
     void start();
     double query() const;
     double query_reset();
-	pfc::string8 queryString(unsigned precision = 3);
+	pfc::string8 queryString(unsigned precision = 3) const;
 private:
     double m_start;
 };
@@ -162,5 +161,3 @@ namespace pfc {
 #endif
 	uint64_t fileTimeNow();
 }
-
-#endif

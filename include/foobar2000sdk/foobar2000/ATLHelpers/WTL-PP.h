@@ -1,3 +1,4 @@
+#pragma once
 // Various WTL extensions that are not fb2k specific and can be reused in other WTL based software
 
 #define ATLASSERT_SUCCESS(X) {auto RetVal = (X); ATLASSERT( RetVal ); }
@@ -117,6 +118,108 @@ public:
 
 	CCheckBox(HWND hWnd = NULL) : CButton(hWnd) { }
 	CCheckBox & operator=(HWND wnd) {m_hWnd = wnd; return *this; }
+};
+
+class CEditPPHooks : public CContainedWindowT<CEdit>, private CMessageMap {
+public:
+	bool HandleCtrlA, NoEscSteal, NoEnterSteal;
+	
+	CEditPPHooks(CMessageMap * hookMM = nullptr, int hookMMID = 0) : CContainedWindowT<CEdit>(this, 0), HandleCtrlA(true), NoEscSteal(), NoEnterSteal(), m_suppressChar(), m_hookMM(hookMM), m_hookMMID(hookMMID) {}
+
+	BEGIN_MSG_MAP_EX(CEditPPHooks)
+		MSG_WM_KEYDOWN(OnKeyDown)
+		MSG_WM_CHAR(OnChar)
+		MSG_WM_GETDLGCODE(OnEditGetDlgCode)
+
+		if ( m_hookMM != nullptr ) {
+
+			CHAIN_MSG_MAP_ALT_MEMBER( ( * m_hookMM ), m_hookMMID );
+
+		}
+
+	END_MSG_MAP()
+
+	static void DeleteLastWord( CEdit wnd ) {
+		if ( wnd.GetWindowLong(GWL_STYLE) & ES_READONLY ) return;
+		int len = wnd.GetWindowTextLength();
+		if ( len <= 0 ) return;
+		TCHAR * buffer = new TCHAR [ len + 1 ];
+		if ( wnd.GetWindowText( buffer, len + 1 ) <= 0 ) {
+			delete[] buffer;
+			return;
+		}
+		buffer[len] = 0;
+		int selStart = len, selEnd = len;
+		wnd.GetSel(selStart, selEnd);
+		if ( selStart < 0 || selStart > len ) selStart = len; // sanity
+		if ( selEnd < selStart ) selEnd = selStart; // sanity
+		int work = selStart;
+		if ( work == selEnd ) {
+			// Only do our stuff if there is nothing yet selected. Otherwise first delete selection.
+			while( work > 0 && isWordDelimiter(buffer[work-1]) ) --work;
+			while( work > 0 && !isWordDelimiter(buffer[work-1] ) ) --work;
+		}
+		delete[] buffer;
+		if ( selEnd > work ) {
+			wnd.SetSel(work, selEnd, TRUE );
+			wnd.ReplaceSel( TEXT(""), TRUE );
+		}
+	}
+private:
+	static bool isWordDelimiter( TCHAR c ) {
+		return (unsigned) c <= ' ' || c == ',' || c == '.' || c == ';' || c == ':';
+	}
+	void OnChar(UINT nChar, UINT, UINT nFlags) {
+		if (m_suppressChar != 0) {
+			UINT code = nFlags & 0xFF;
+			if (code == m_suppressChar) return;
+		}
+		SetMsgHandled(FALSE);
+	}
+	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
+		m_suppressChar = 0;
+		if (HandleCtrlA) {
+			if (nChar == 'A') {
+				if (GetHotkeyModifierFlags() == MOD_CONTROL) {
+					m_suppressChar = nFlags & 0xFF;
+					this->SetSelAll(); return;
+				}
+			}
+			if ( nChar == VK_BACK ) {
+				if (GetHotkeyModifierFlags() == MOD_CONTROL) {
+					m_suppressChar = nFlags & 0xFF;
+					DeleteLastWord( *this ) ; return;
+				}
+			}
+		}
+		SetMsgHandled(FALSE);
+	}
+	UINT OnEditGetDlgCode(LPMSG lpMsg) {
+		if (lpMsg == NULL) {
+			SetMsgHandled(FALSE); return 0;
+		} else {
+			switch(lpMsg->message) {
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+				switch(lpMsg->wParam) {
+				case VK_ESCAPE:
+					SetMsgHandled(!!NoEscSteal);
+					return 0;
+				case VK_RETURN:
+					SetMsgHandled(!!NoEnterSteal);
+					return 0;
+				default:
+					SetMsgHandled(FALSE); return 0;
+				}
+			default:
+				SetMsgHandled(FALSE); return 0;
+
+			}
+		}
+	}
+	UINT m_suppressChar;
+	CMessageMap * const m_hookMM;
+	const int m_hookMMID;
 };
 
 

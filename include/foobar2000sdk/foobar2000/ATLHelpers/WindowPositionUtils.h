@@ -1,3 +1,7 @@
+#pragma once
+
+#include "../helpers/win32_misc.h"
+
 static BOOL AdjustWindowRectHelper(CWindow wnd, CRect & rc) {
 	const DWORD style = wnd.GetWindowLong(GWL_STYLE), exstyle = wnd.GetWindowLong(GWL_EXSTYLE);
 	return AdjustWindowRectEx(&rc,style,(style & WS_POPUP) ? wnd.GetMenu() != NULL : FALSE, exstyle);
@@ -218,7 +222,7 @@ private:
 		return TRUE;
 	}
 	void TryFetchConfig() {
-		for(pfc::const_iterator<CWindow> walk = m_windows.first(); walk.is_valid(); ++walk) {
+		for(auto walk = m_windows.cfirst(); walk.is_valid(); ++walk) {
 			if (StoreConfig(*walk)) break;
 		}
 	}

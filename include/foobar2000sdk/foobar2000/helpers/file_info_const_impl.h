@@ -1,3 +1,5 @@
+#pragma once
+
 #define __file_info_const_impl_have_hintmap__
 
 //! Special implementation of file_info that implements only const and copy methods. The difference between this and regular file_info_impl is amount of resources used and speed of the copy operation.

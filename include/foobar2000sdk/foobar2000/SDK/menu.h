@@ -25,7 +25,7 @@ public:
 		//! Replaces the old return-false-from-get_display() behavior - use this to make your command hidden by default but accessible when holding shift.
 		flag_defaulthidden = 1<<3,
 		sort_priority_base = 0x10000,
-		sort_priority_dontcare = 0x80000000,
+		sort_priority_dontcare = 0x80000000u,
 		sort_priority_last = ~0,
 	};
 
@@ -79,7 +79,7 @@ public:
 
 	virtual bool get_description(t_uint32 p_id,pfc::string_base & p_out) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(mainmenu_manager);
+	FB2K_MAKE_SERVICE_COREAPI(mainmenu_manager);
 };
 
 class mainmenu_groups {

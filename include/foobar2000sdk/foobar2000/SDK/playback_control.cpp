@@ -50,7 +50,7 @@ double playback_control::playback_get_length_ex() {
 		if (rv <= 0) {
 			pfc::string8 temp;
 			titleformat_object::ptr script;
-			static_api_ptr_t<titleformat_compiler>()->compile_force(script, "[%length_ex%]");
+			titleformat_compiler::get()->compile_force(script, "[%length_ex%]");
 			this->playback_format_title(NULL, temp, script, NULL, display_level_titles);
 			if (temp.length() > 0) rv = parse_time(temp);
 		}

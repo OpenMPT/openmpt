@@ -150,6 +150,9 @@ string getIllegalNameChars(bool allowWC) {
 static bool isIllegalTrailingChar(char c) {
 	return c == ' ' || c == '.';
 }
+static const char * const specialIllegalNames[] = {
+	"con", "aux", "lst", "prn", "nul", "eof", "inp", "out"
+};
 #endif
 
 string validateFileName(string name, bool allowWC) {
@@ -157,7 +160,11 @@ string validateFileName(string name, bool allowWC) {
 		if (name[walk] == '?') {
 			t_size end = walk;
 			do { ++end; } while(name[end] == '?');
-			name = name.subString(0, walk) + name.subString(end);
+			if ( walk == 0 && name[end] == '.' ) {
+				name = string("[unnamed]") + name.subString(end);
+			} else {
+				name = name.subString(0, walk) + name.subString(end);
+			}			
 		} else {
 			++walk;
 		}
@@ -177,6 +184,14 @@ string validateFileName(string name, bool allowWC) {
 		}
 		if (end < name.length() || begin > 0) name = name.subString(begin,end - begin);
 	}
+
+	for( unsigned w = 0; w < _countof(specialIllegalNames); ++w ) {
+		if (pfc::stringEqualsI_ascii( name.c_str(), specialIllegalNames[w] ) ) {
+			name += "-";
+			break;
+		}
+	}
+
 	if (name.isEmpty()) name = "_";
 	return name;
 #else

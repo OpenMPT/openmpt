@@ -1,3 +1,5 @@
+#pragma once
+
 namespace ProfileCache {
 	inline file::ptr FetchFile(const char * context, const char * name, const char * webURL, t_filetimestamp acceptableAge, abort_callback & abort) {
 		const double timeoutVal = 5;

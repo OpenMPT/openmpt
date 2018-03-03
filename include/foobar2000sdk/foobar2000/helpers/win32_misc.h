@@ -1,42 +1,33 @@
-#ifdef _MSC_VER // OpenMPT
-#pragma warning(push) // OpenMPT
-#pragma warning(disable:4302) // OpenMPT
-#pragma warning(disable:4996) // OpenMPT
-#endif // OpenMPT
-PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL();
-PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL_CRITICAL(const char * what);
+#pragma once
 
-#ifdef _DEBUG
-void WIN32_OP_D_FAIL(const wchar_t * _Message, const wchar_t *_File, unsigned _Line);
-#endif
+#ifdef _WIN32
 
-//Throws an exception when (OP) evaluates to false/zero.
-#define WIN32_OP(OP)	\
-	{	\
-		SetLastError(NO_ERROR);	\
-		if (!(OP)) WIN32_OP_FAIL();	\
-	}
 
-// Kills the application with appropriate debug info when (OP) evaluates to false/zero.
-#define WIN32_OP_CRITICAL(WHAT, OP)	\
-	{	\
-		SetLastError(NO_ERROR);	\
-		if (!(OP)) WIN32_OP_FAIL_CRITICAL(WHAT);	\
-	}
+#include "win32_op.h"
 
-//WIN32_OP_D() acts like an assert specialized for win32 operations in debug build, ignores the return value / error codes in release build.
-//Use WIN32_OP_D() instead of WIN32_OP() on operations that are extremely unlikely to fail, so failure condition checks are performed in the debug build only, to avoid bloating release code with pointless error checks.
-#ifdef _DEBUG
-#define WIN32_OP_D(OP)	\
-	{	\
-		SetLastError(NO_ERROR); \
-		if (!(OP)) WIN32_OP_D_FAIL(PFC_WIDESTRING(#OP), PFC_WIDESTRING(__FILE__), __LINE__); \
-	}
+class CloseHandleScope {
+public:
+	CloseHandleScope(HANDLE handle) throw() : m_handle(handle) {}
+	~CloseHandleScope() throw() { CloseHandle(m_handle); }
+	HANDLE Detach() throw() { return pfc::replace_t(m_handle, INVALID_HANDLE_VALUE); }
+	HANDLE Get() const throw() { return m_handle; }
+	void Close() throw() { CloseHandle(Detach()); }
+	PFC_CLASS_NOT_COPYABLE_EX(CloseHandleScope)
+private:
+	HANDLE m_handle;
+};
 
-#else
-#define WIN32_OP_D(OP) (void)( (OP), 0);
-#endif
 
+class mutexScope {
+public:
+	mutexScope(HANDLE hMutex_, abort_callback & abort);
+	~mutexScope();
+private:
+	PFC_CLASS_NOT_COPYABLE_EX(mutexScope);
+	HANDLE hMutex;
+};
+
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 class registerclass_scope_delayed {
 public:
@@ -59,7 +50,7 @@ private:
 
 typedef CGlobalLockScope CGlobalLock;//for compatibility, implementation moved elsewhere
 
-bool SetClipboardDataBlock(UINT p_format,const void * p_block,t_size p_block_size);
+bool SetClipboardDataBlock(UINT p_format, const void * p_block, t_size p_block_size);
 
 template<typename t_array>
 static bool SetClipboardDataBlock(UINT p_format,const t_array & p_array) {
@@ -97,35 +88,28 @@ static bool GetClipboardDataBlock(UINT p_format,t_array & p_array) {
 
 class OleInitializeScope {
 public:
-	OleInitializeScope() {
-		if (FAILED(OleInitialize(NULL))) throw pfc::exception("OleInitialize() failure");
-	}
-	~OleInitializeScope() {
-		OleUninitialize();
-	}
+	OleInitializeScope();
+	~OleInitializeScope();
 
 private:
-	PFC_CLASS_NOT_COPYABLE(OleInitializeScope,OleInitializeScope);
+	PFC_CLASS_NOT_COPYABLE_EX(OleInitializeScope);
 };
 
 class CoInitializeScope {
 public:
-	CoInitializeScope() {
-		if (FAILED(CoInitialize(NULL))) throw pfc::exception("CoInitialize() failed");
-	}
-	CoInitializeScope(DWORD params) {
-		if (FAILED(CoInitializeEx(NULL, params))) throw pfc::exception("CoInitialize() failed");
-	}
-	~CoInitializeScope() {
-		CoUninitialize();
-	}
+	CoInitializeScope();
+	CoInitializeScope(DWORD params);
+	~CoInitializeScope();
+private:
 	PFC_CLASS_NOT_COPYABLE_EX(CoInitializeScope)
 };
 
 
-unsigned QueryScreenDPI();
+unsigned QueryScreenDPI(HWND wnd = NULL);
+unsigned QueryScreenDPI_X(HWND wnd = NULL);
+unsigned QueryScreenDPI_Y(HWND wnd = NULL);
 
-SIZE QueryScreenDPIEx();
+SIZE QueryScreenDPIEx(HWND wnd = NULL);
 
 static WORD GetOSVersion() {
 	const DWORD ver = GetVersion();
@@ -161,44 +145,13 @@ private:
 
 bool IsMenuNonEmpty(HMENU menu);
 
-class SetTextColorScope {
-public:
-	SetTextColorScope(HDC dc, COLORREF col) throw() : m_dc(dc) {
-		m_oldCol = SetTextColor(dc,col);
-	}
-	~SetTextColorScope() throw() {
-		SetTextColor(m_dc,m_oldCol);
-	}
-	PFC_CLASS_NOT_COPYABLE_EX(SetTextColorScope)
-private:
-	HDC m_dc;
-	COLORREF m_oldCol;
-};
-
-class CloseHandleScope {
-public:
-	CloseHandleScope(HANDLE handle) throw() : m_handle(handle) {}
-	~CloseHandleScope() throw() {CloseHandle(m_handle);}
-	HANDLE Detach() throw() {return pfc::replace_t(m_handle,INVALID_HANDLE_VALUE);}
-	HANDLE Get() const throw() {return m_handle;}
-	void Close() throw() {CloseHandle(Detach());}
-	PFC_CLASS_NOT_COPYABLE_EX(CloseHandleScope)
-private:
-	HANDLE m_handle;
-};
-
 class CModelessDialogEntry {
 public:
-	inline CModelessDialogEntry() : m_wnd() {}
-	inline CModelessDialogEntry(HWND p_wnd) : m_wnd() {Set(p_wnd);}
-	inline ~CModelessDialogEntry() {Set(NULL);}
+	CModelessDialogEntry() : m_wnd() {}
+	CModelessDialogEntry(HWND p_wnd) : m_wnd() {Set(p_wnd);}
+	~CModelessDialogEntry() {Set(NULL);}
 
-	void Set(HWND p_new) {
-		static_api_ptr_t<modeless_dialog_manager> api;
-		if (m_wnd) api->remove(m_wnd);
-		m_wnd = p_new;
-		if (m_wnd) api->add(m_wnd);
-	}
+	void Set(HWND p_new);
 private:
 	PFC_CLASS_NOT_COPYABLE_EX(CModelessDialogEntry);
 	HWND m_wnd;
@@ -207,93 +160,8 @@ private:
 void GetOSVersionString(pfc::string_base & out);
 void GetOSVersionStringAppend(pfc::string_base & out);
 
-
-
 void SetDefaultMenuItem(HMENU p_menu,unsigned p_id);
 
-
-
-
-class TypeFind {
-public:
-	static LRESULT Handler(NMHDR* hdr, int subItemFrom = 0, int subItemCnt = 1) {
-		NMLVFINDITEM * info = reinterpret_cast<NMLVFINDITEM*>(hdr);
-		const HWND wnd = hdr->hwndFrom;
-		if (info->lvfi.flags & LVFI_NEARESTXY) return -1;
-		const size_t count = _ItemCount(wnd);
-		if (count == 0) return -1;
-		const size_t base = (size_t) info->iStart % count;
-		for(size_t walk = 0; walk < count; ++walk) {
-			const size_t index = (walk + base) % count;
-			for(int subItem = subItemFrom; subItem < subItemFrom + subItemCnt; ++subItem) {
-				if (StringPrefixMatch(info->lvfi.psz, _ItemText(wnd, index, subItem))) return (LRESULT) index;
-			}
-		}
-		for(size_t walk = 0; walk < count; ++walk) {
-			const size_t index = (walk + base) % count;
-			for(int subItem = subItemFrom; subItem < subItemFrom + subItemCnt; ++subItem) {
-				if (StringPartialMatch(info->lvfi.psz, _ItemText(wnd, index, subItem))) return (LRESULT) index;
-			}
-		}
-		return -1;
-	}
-
-	static wchar_t myCharLower(wchar_t c) {
-		return (wchar_t) CharLower((wchar_t*)c);
-	}
-	static bool StringPrefixMatch(const wchar_t * part, const wchar_t * str) {
-		unsigned walk = 0;
-		for(;;) {
-			wchar_t c1 = part[walk], c2 = str[walk];
-			if (c1 == 0) return true;
-			if (c2 == 0) return false;
-			if (myCharLower(c1) != myCharLower(c2)) return false;
-			++walk;
-		}
-	}
-
-	static bool StringPartialMatch(const wchar_t * part, const wchar_t * str) {
-		unsigned base = 0;
-		for(;;) {
-			unsigned walk = 0;
-			for(;;) {
-				wchar_t c1 = part[walk], c2 = str[base + walk];
-				if (c1 == 0) return true;
-				if (c2 == 0) return false;
-				if (myCharLower(c1) != myCharLower(c2)) break;
-				++walk;
-			}
-			++ base;
-		}
-	}
-
-	static size_t _ItemCount(HWND wnd) {
-		return ListView_GetItemCount(wnd);
-	}
-	static const wchar_t * _ItemText(HWND wnd, size_t index, int subItem = 0) {
-		NMLVDISPINFO info = {};
-		info.hdr.code = LVN_GETDISPINFO;
-		info.hdr.idFrom = GetDlgCtrlID(wnd);
-		info.hdr.hwndFrom = wnd;
-		info.item.iItem = index;
-		info.item.iSubItem = subItem;
-		info.item.mask = LVIF_TEXT;
-		::SendMessage(::GetParent(wnd), WM_NOTIFY, info.hdr.idFrom, reinterpret_cast<LPARAM>(&info));
-		if (info.item.pszText == NULL) return L"";
-		return info.item.pszText;
-	}
-	
-};
-
-
-class mutexScope {
-public:
-	mutexScope(HANDLE hMutex_, abort_callback & abort);
-	~mutexScope();
-private:
-	PFC_CLASS_NOT_COPYABLE_EX(mutexScope);
-	HANDLE hMutex;
-};
 
 class CDLL {
 public:
@@ -334,24 +202,25 @@ public:
 
 class winLocalFileScope {
 public:
-	void open( const char * inPath, file::ptr inReader, abort_callback & aborter);
+	void open(const char * inPath, file::ptr inReader, abort_callback & aborter);
 	void close();
 
 	winLocalFileScope() : m_isTemp() {}
-	winLocalFileScope( const char * inPath, file::ptr inReader, abort_callback & aborter ) : m_isTemp() {
-		open( inPath, inReader, aborter );
+	winLocalFileScope(const char * inPath, file::ptr inReader, abort_callback & aborter) : m_isTemp() {
+		open(inPath, inReader, aborter);
 	}
 
 	~winLocalFileScope() {
 		close();
 	}
 
-	const wchar_t * Path() const {return m_path.c_str();}
+	const wchar_t * Path() const { return m_path.c_str(); }
 private:
 	bool m_isTemp;
 	std::wstring m_path;
 };
 
+#endif // FOOBAR2000_DESKTOP_WINDOWS
 
 
 class CMutex {
@@ -377,6 +246,7 @@ private:
 	CMutexScope(const CMutexScope &); void operator=(const CMutexScope&);
 	CMutex & m_mutex;
 };
-#ifdef _MSC_VER // OpenMPT
-#pragma warning(pop) // OpenMPT
-#endif // OpenMPT
+
+LRESULT RelayEraseBkgnd(HWND p_from, HWND p_to, HDC p_dc);
+
+#endif // _WIN32

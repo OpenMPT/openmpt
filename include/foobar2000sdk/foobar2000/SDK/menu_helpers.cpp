@@ -58,8 +58,7 @@ bool menu_helpers::is_command_checked_context(const GUID & p_command,const GUID 
 bool menu_helpers::is_command_checked_context_playlist(const GUID & p_command,const GUID & p_subcommand)
 {
 	metadb_handle_list temp;
-	static_api_ptr_t<playlist_manager> api;
-	api->activeplaylist_get_selected_items(temp);
+	playlist_manager::get()->activeplaylist_get_selected_items(temp);
 	return g_is_checked(p_command,p_subcommand,temp,contextmenu_item::caller_playlist);
 }
 
@@ -72,15 +71,14 @@ bool menu_helpers::is_command_checked_context_playlist(const GUID & p_command,co
 bool menu_helpers::run_command_context_playlist(const GUID & p_command,const GUID & p_subcommand)
 {
 	metadb_handle_list temp;
-	static_api_ptr_t<playlist_manager> api;
-	api->activeplaylist_get_selected_items(temp);
+	playlist_manager::get()->activeplaylist_get_selected_items(temp);
 	return run_command_context_ex(p_command,p_subcommand,temp,contextmenu_item::caller_playlist);
 }
 
 bool menu_helpers::run_command_context_now_playing(const GUID & p_command,const GUID & p_subcommand)
 {
 	metadb_handle_ptr item;
-	if (!static_api_ptr_t<playback_control>()->get_now_playing(item)) return false;//not playing
+	if (!playback_control::get()->get_now_playing(item)) return false;//not playing
 	return run_command_context_ex(p_command,p_subcommand,pfc::list_single_ref_t<metadb_handle_ptr>(item),contextmenu_item::caller_now_playing);
 }
 
@@ -290,8 +288,8 @@ bool standard_commands::run_main(const GUID & p_guid) {
 }
 
 bool menu_item_resolver::g_resolve_context_command(const GUID & id, contextmenu_item::ptr & out, t_uint32 & out_index) {
-	return static_api_ptr_t<menu_item_resolver>()->resolve_context_command(id, out, out_index);
+	return menu_item_resolver::get()->resolve_context_command(id, out, out_index);
 }
 bool menu_item_resolver::g_resolve_main_command(const GUID & id, mainmenu_commands::ptr & out, t_uint32 & out_index) {
-	return static_api_ptr_t<menu_item_resolver>()->resolve_main_command(id, out, out_index);
+	return menu_item_resolver::get()->resolve_main_command(id, out, out_index);
 }

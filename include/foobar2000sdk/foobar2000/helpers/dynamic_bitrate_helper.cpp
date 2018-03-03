@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "dynamic_bitrate_helper.h"
+
 static unsigned g_query_settings()
 {
 	t_int32 temp;

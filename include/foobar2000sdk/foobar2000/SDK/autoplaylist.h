@@ -2,7 +2,7 @@
 	Autoplaylist APIs
 	These APIs were introduced in foobar2000 0.9.5, to reduce amount of code required to create your own autoplaylists. Creation of autoplaylists is was also possible before through playlist lock APIs.
 	In most cases, you'll want to turn regular playlists into autoplaylists using the following code:
-	static_api_ptr_t<autoplaylist_manager>()->add_client_simple(querypattern, sortpattern, playlistindex, forceSort ? autoplaylist_flag_sort : 0);
+	autoplaylist_manager::get()->add_client_simple(querypattern, sortpattern, playlistindex, forceSort ? autoplaylist_flag_sort : 0);
 	If you require more advanced functionality, such as using your own code to filter which part of user's Media Library should be placed in specific autoplaylist, you must implement autoplaylist_client (to let autoplaylist manager invoke your handlers when needed) / autoplaylist_client_factory (to re-instantiate your autoplaylist_client after a foobar2000 restart cycle).
 */
 
@@ -69,8 +69,9 @@ PFC_DECLARE_EXCEPTION(exception_autoplaylist_not_owned,exception_autoplaylist,"T
 PFC_DECLARE_EXCEPTION(exception_autoplaylist_lock_failure,exception_autoplaylist,"Playlist could not be locked")
 
 
-//! Primary class for managing autoplaylists. Implemented by core, do not reimplement; instantiate using static_api_ptr_t<autoplaylist_manager>.
+//! Primary class for managing autoplaylists. Implemented by core, do not reimplement; instantiate using autoplaylist_manager::get().
 class NOVTABLE autoplaylist_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(autoplaylist_manager)
 public:
 	//! Throws exception_autoplaylist or one of its subclasses on failure.
 	//! @param p_flags See autoplaylist_flag_* constants.
@@ -83,14 +84,12 @@ public:
 	//! Throws exception_autoplaylist or one of its subclasses on failure.
 	//! @param p_flags See autoplaylist_flag_* constants.
 	virtual void add_client_simple(const char * p_query,const char * p_sort,t_size p_playlist,t_uint32 p_flags) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(autoplaylist_manager)
 };
 
 //! \since 0.9.5.4
 //! Extended version of autoplaylist_manager, available from 0.9.5.4 up, with methods allowing modification of autoplaylist flags.
 class NOVTABLE autoplaylist_manager_v2 : public autoplaylist_manager {
-	FB2K_MAKE_SERVICE_INTERFACE(autoplaylist_manager_v2, autoplaylist_manager)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(autoplaylist_manager_v2, autoplaylist_manager)
 public:
 	virtual t_uint32 get_client_flags(t_size playlist) = 0;
 	virtual void set_client_flags(t_size playlist, t_uint32 newFlags) = 0;

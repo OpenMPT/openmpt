@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include "text_file_loader.h"
+
 // FIX ME non working on non Windows due to ANSI nonsense
 
 static const unsigned char utf8_header[3] = {0xEF,0xBB,0xBF};

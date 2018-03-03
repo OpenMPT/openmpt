@@ -110,10 +110,30 @@ public:
 class NOVTABLE input_decoder_v3 : public input_decoder_v2 {
 	FB2K_MAKE_SERVICE_INTERFACE(input_decoder_v3, input_decoder_v2);
 public:
-	//! OPTIONAL, in case your input cares about paused/unpaused state, handle this to do any necessary additional processing. Valid only after initialize() with input_flag_playback.
+	//! OBSOLETE, functionality implemented by core.
 	virtual void set_pause(bool paused) = 0;
 	//! OPTIONAL, should return false in most cases; return true to force playback buffer flush on unpause. Valid only after initialize() with input_flag_playback.
 	virtual bool flush_on_pause() = 0;
+};
+
+class NOVTABLE input_decoder_v4 : public input_decoder_v3 {
+    FB2K_MAKE_SERVICE_INTERFACE( input_decoder_v4, input_decoder_v3 );
+public:
+    //! OPTIONAL, return 0 if not implemented. \n
+    //! Provides means for communication of context specific data with the decoder. The decoder should do nothing and return 0 if it does not recognize the passed arguments.
+    virtual size_t extended_param( const GUID & type, size_t arg1, void * arg2, size_t arg2size) = 0;
+};
+
+//! Parameter GUIDs for input_decoder_v3::extended_param().
+class input_params {
+public:
+    //! Signals whether unnecessary seeking should be avoided with this decoder for performance reasons. \n
+    //! Arguments disregarded, return value 1 or 0.
+    static const GUID seeking_expensive;
+
+	//! Tells the decoder to output at this sample rate if the decoder's sample rate is adjustable. \n
+	//! Sample rate signaled in arg1.
+	static const GUID set_preferred_sample_rate;
 };
 
 //! Class providing interface for writing metadata and replaygain info to files. Also see: file_info. \n
@@ -144,8 +164,8 @@ public:
 	FB2K_MAKE_SERVICE_INTERFACE(input_info_writer_v2, input_info_writer);
 };
 
-class NOVTABLE input_entry : public service_base
-{
+class NOVTABLE input_entry : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_entry);
 public:
 	//! Determines whether specified content type can be handled by this input.
 	//! @param p_type Content type string to test.
@@ -200,11 +220,70 @@ public:
 	static void g_open_for_info_write(service_ptr_t<input_info_writer> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect = false);
 	static void g_open_for_info_write_timeout(service_ptr_t<input_info_writer> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,double p_timeout,bool p_from_redirect = false);
 	static bool g_is_supported_path(const char * p_path);
-
+	static bool g_find_inputs_by_content_type(pfc::list_base_t<service_ptr_t<input_entry> > & p_out, const char * p_content_type, bool p_from_redirect);
+	static bool g_find_inputs_by_path(pfc::list_base_t<service_ptr_t<input_entry> > & p_out, const char * p_path, bool p_from_redirect);
+	static service_ptr g_open(const GUID & whatFor, file::ptr hint, const char * path, abort_callback & aborter, bool fromRedirect = false);
 
 	void open(service_ptr_t<input_decoder> & p_instance,service_ptr_t<file> const & p_filehint,const char * p_path,abort_callback & p_abort) {open_for_decoding(p_instance,p_filehint,p_path,p_abort);}
 	void open(service_ptr_t<input_info_reader> & p_instance,service_ptr_t<file> const & p_filehint,const char * p_path,abort_callback & p_abort) {open_for_info_read(p_instance,p_filehint,p_path,p_abort);}
 	void open(service_ptr_t<input_info_writer> & p_instance,service_ptr_t<file> const & p_filehint,const char * p_path,abort_callback & p_abort) {open_for_info_write(p_instance,p_filehint,p_path,p_abort);}
+	service_ptr open(const GUID & whatFor, file::ptr hint, const char * path, abort_callback & aborter);
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_entry);
+	typedef pfc::list_base_const_t< input_entry::ptr > input_entry_list_t;
+
+	static service_ptr g_open_from_list(input_entry_list_t const & list, const GUID & whatFor, file::ptr hint, const char * path, abort_callback & aborter, GUID * outGUID = nullptr);
+	
 };
+
+//! \since 1.4
+class input_entry_v2 : public input_entry {
+	FB2K_MAKE_SERVICE_INTERFACE(input_entry_v2, input_entry);
+public:
+#ifdef FOOBAR2000_DESKTOP // none of this is used in fb2k mobile
+	//! @returns GUID used to identify us among other deciders in the decoder priority table.
+	virtual GUID get_guid() = 0;
+	//! @returns Name to present to the user in the decoder priority table.
+	virtual const char * get_name() = 0;
+	//! @returns GUID of this decoder's preferences page (optional), null guid if there's no page to present
+	virtual GUID get_preferences_guid() = 0;
+	//! @returns true if the decoder should be put at the end of the list when it's first sighted, false otherwise (will be put at the beginning of the list).
+	virtual bool is_low_merit() = 0;
+#endif
+};
+
+#ifdef FOOBAR2000_DESKTOP
+//! \since 1.4
+class input_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(input_manager);
+public:
+	virtual service_ptr open(const GUID & whatFor, file::ptr hint, const char * path, bool fromRedirect, abort_callback & aborter, GUID * outUsedEntry = nullptr) = 0;
+};
+
+//! \since 1.4
+class input_stream_selector : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_stream_selector);
+public:
+	//! Returns index of stream that should be presented for this file. \n
+	//! If not set by user, 0xFFFFFFFF will be returned and the default stream should be presented. \n
+	//! @param guid GUID of the input asking for the stream.
+	virtual uint32_t select_stream( const GUID & guid, const char * path ) = 0;
+};
+
+class input_stream_info_reader : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE(input_stream_info_reader, service_base);
+public:
+	virtual uint32_t get_stream_count() = 0;
+	virtual void get_stream_info(uint32_t index, file_info & out, abort_callback & aborter) = 0;
+	virtual uint32_t get_default_stream() = 0;
+};
+
+class input_stream_info_reader_entry : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_stream_info_reader_entry);
+public:
+	virtual input_stream_info_reader::ptr open( const char * path, file::ptr fileHint, abort_callback & abort ) = 0;
+
+	//! Return GUID of the matching input_entry.
+	virtual GUID get_guid() = 0;
+
+};
+#endif

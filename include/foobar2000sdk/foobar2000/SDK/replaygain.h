@@ -70,5 +70,5 @@ public:
 	//! Helper; queries scale value for specified item according to core playback settings.
 	audio_sample core_settings_query_scale(const metadb_handle_ptr & info);
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(replaygain_manager);
+	FB2K_MAKE_SERVICE_COREAPI(replaygain_manager);
 };

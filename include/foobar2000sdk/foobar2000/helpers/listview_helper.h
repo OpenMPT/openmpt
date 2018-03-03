@@ -1,4 +1,6 @@
-#ifdef _WIN32
+#pragma once
+
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 namespace listview_helper
 {
@@ -46,4 +48,4 @@ void ListView_GetContextMenuPoint(HWND p_list,POINT p_coords,POINT & p_point,int
 
 int ListView_GetColumnCount(HWND listView);
 
-#endif
+#endif // FOOBAR2000_DESKTOP_WINDOWS

@@ -1,8 +1,43 @@
 #include "foobar2000.h"
 
+service_ptr input_entry::open(const GUID & whatFor, file::ptr hint, const char * path, abort_callback & aborter) {
+	if (whatFor == input_decoder::class_guid) {
+		input_decoder::ptr obj;
+		open(obj, hint, path, aborter);
+		return obj;
+	}
+	if (whatFor == input_info_reader::class_guid) {
+		input_info_reader::ptr obj;
+		open(obj, hint, path, aborter);
+		return obj;
+	}
+	if (whatFor == input_info_writer::class_guid) {
+		input_info_writer::ptr obj;
+		open(obj, hint, path, aborter);
+		return obj;
+	}
+#ifdef FOOBAR2000_DESKTOP
+	if ( whatFor == input_stream_info_reader::class_guid ) {
+		input_entry_v2::ptr v2;
+		if ( v2 &= this ) {
+			GUID g = v2->get_guid();
+			service_enum_t<input_stream_info_reader_entry> e;
+			service_ptr_t<input_stream_info_reader_entry> p;
+			while (e.next(p)) {
+				if (p->get_guid() == g) {
+					return p->open( path, hint, aborter );
+				}
+			}
+		}
+		throw exception_io_unsupported_format();
+	}
+#endif
+	uBugCheck();
+}
+
 bool input_entry::g_find_service_by_path(service_ptr_t<input_entry> & p_out,const char * p_path)
 {
-    pfc::string_extension ext(p_path);
+    auto ext = pfc::string_extension(p_path);
     return g_find_service_by_path(p_out, p_path, ext );
 }
 
@@ -70,134 +105,144 @@ static void prepare_for_open(service_ptr_t<input_entry> & p_service,service_ptr_
 }
 #endif
 
-namespace {
-
-	bool g_find_inputs_by_content_type(pfc::list_base_t<service_ptr_t<input_entry> > & p_out,const char * p_content_type,bool p_from_redirect) {
-		service_enum_t<input_entry> e;
-		service_ptr_t<input_entry> ptr;
-		bool ret = false;
-		while(e.next(ptr)) {
-			if (!(p_from_redirect && ptr->is_redirect())) {
-				if (ptr->is_our_content_type(p_content_type)) {p_out.add_item(ptr); ret = true;}
-			}
-		}
-		return ret;
-	}
-
-	bool g_find_inputs_by_path(pfc::list_base_t<service_ptr_t<input_entry> > & p_out,const char * p_path,bool p_from_redirect) {
-		service_enum_t<input_entry> e;
-		service_ptr_t<input_entry> ptr;
-		pfc::string_extension extension(p_path);
-		bool ret = false;
-		while(e.next(ptr)) {
-			if (!(p_from_redirect && ptr->is_redirect())) {
-				if (ptr->is_our_path(p_path,extension)) {p_out.add_item(ptr); ret = true;}
-			}
-		}
-		return ret;
-	}
-
-	template<typename t_service> void g_open_from_list(service_ptr_t<t_service> & p_instance,pfc::list_base_const_t<service_ptr_t<input_entry> > const & p_list,service_ptr_t<file> const & p_filehint,const char * p_path,abort_callback & p_abort) {
-		const t_size count = p_list.get_count();
-		if (count == 1) {
-			p_list[0]->open(p_instance,p_filehint,p_path,p_abort);
-		} else {
-			unsigned bad_data_count = 0;
-			pfc::string8 bad_data_message;
-			for(t_size n=0;n<count;n++) {
-				try {
-					p_list[n]->open(p_instance,p_filehint,p_path,p_abort);
-					return;
-				} catch(exception_io_unsupported_format) {
-					//do nothing, skip over
-				} catch(exception_io_data const & e) {
-					if (bad_data_count ++ == 0) bad_data_message = e.what();
-				}
-			}
-			if (bad_data_count > 1) throw exception_io_data();
-			else if (bad_data_count == 0) pfc::throw_exception_with_message<exception_io_data>(bad_data_message);
-			else throw exception_io_unsupported_format();
+bool input_entry::g_find_inputs_by_content_type(pfc::list_base_t<service_ptr_t<input_entry> > & p_out, const char * p_content_type, bool p_from_redirect) {
+	service_enum_t<input_entry> e;
+	service_ptr_t<input_entry> ptr;
+	bool ret = false;
+	while (e.next(ptr)) {
+		if (!(p_from_redirect && ptr->is_redirect())) {
+			if (ptr->is_our_content_type(p_content_type)) { p_out.add_item(ptr); ret = true; }
 		}
 	}
+	return ret;
+}
 
-	template<typename t_service> bool needs_write_access() {return false;}
-	template<> bool needs_write_access<input_info_writer>() {return true;}
-
-	template<typename t_service> void g_open_t(service_ptr_t<t_service> & p_instance,service_ptr_t<file> const & p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect) {
-		service_ptr_t<file> l_file = p_filehint;
-		if (l_file.is_empty()) {
-			service_ptr_t<filesystem> fs;
-			if (filesystem::g_get_interface(fs,p_path)) {
-				if (fs->supports_content_types()) {
-					fs->open(l_file,p_path,needs_write_access<t_service>() ? filesystem::open_mode_write_existing : filesystem::open_mode_read,p_abort);
-				}
-			}
+bool input_entry::g_find_inputs_by_path(pfc::list_base_t<service_ptr_t<input_entry> > & p_out, const char * p_path, bool p_from_redirect) {
+	service_enum_t<input_entry> e;
+	service_ptr_t<input_entry> ptr;
+	auto extension = pfc::string_extension(p_path);
+	bool ret = false;
+	while (e.next(ptr)) {
+		if (!(p_from_redirect && ptr->is_redirect())) {
+			if (ptr->is_our_path(p_path, extension)) { p_out.add_item(ptr); ret = true; }
 		}
+	}
+	return ret;
+}
 
-		if (l_file.is_valid()) {
-			pfc::string8 content_type;
-			if (l_file->get_content_type(content_type)) {
-				pfc::list_hybrid_t<service_ptr_t<input_entry>,4> list;
-				if (g_find_inputs_by_content_type(list,content_type,p_from_redirect)) {
-					g_open_from_list(p_instance,list,l_file,p_path,p_abort);
-					return;
-				}
-			}
-		}
+static GUID input_get_guid( input_entry::ptr e ) {
+#ifdef FOOBAR2000_DESKTOP
+	input_entry_v2::ptr p;
+	if ( p &= e ) return p->get_guid();
+#endif
+	return pfc::guid_null;
+}
 
-		{
-			pfc::list_hybrid_t<service_ptr_t<input_entry>,4> list;
-			if (g_find_inputs_by_path(list,p_path,p_from_redirect)) {
-				g_open_from_list(p_instance,list,l_file,p_path,p_abort);
-				return;
-			}
-		}
-
+service_ptr input_entry::g_open_from_list(input_entry_list_t const & p_list, const GUID & whatFor, service_ptr_t<file> p_filehint, const char * p_path, abort_callback & p_abort, GUID * outGUID) {
+	const t_size count = p_list.get_count();
+	if ( count == 0 ) {
+		// sanity
 		throw exception_io_unsupported_format();
+	} else if (count == 1) {
+		auto ret = p_list[0]->open(whatFor, p_filehint, p_path, p_abort);
+		if ( outGUID != nullptr ) * outGUID = input_get_guid( p_list[0] );
+		return ret;
+	} else {
+		unsigned bad_data_count = 0;
+		pfc::string8 bad_data_message;
+		for (t_size n = 0; n < count; n++) {
+			try {
+				auto ret = p_list[n]->open(whatFor, p_filehint, p_path, p_abort);
+				if (outGUID != nullptr) * outGUID = input_get_guid(p_list[n]);
+				return ret;
+			} catch (exception_io_no_handler_for_path) {
+				//do nothing, skip over
+			} catch (exception_io_unsupported_format) {
+				//do nothing, skip over
+			} catch (exception_io_data const & e) {
+				if (bad_data_count++ == 0) bad_data_message = e.what();
+			}
+		}
+		if (bad_data_count > 1) throw exception_io_data();
+		else if (bad_data_count == 0) pfc::throw_exception_with_message<exception_io_data>(bad_data_message);
+		else throw exception_io_unsupported_format();
 	}
-};
+}
+
+service_ptr input_entry::g_open(const GUID & whatFor, file::ptr p_filehint, const char * p_path, abort_callback & p_abort, bool p_from_redirect) {
+
+#ifdef FOOBAR2000_DESKTOP
+
+#if FOOBAR2000_TARGET_VERSION >= 79
+	return input_manager::get()->open(whatFor, p_filehint, p_path, p_from_redirect, p_abort);
+#endif
+
+	{
+		input_manager::ptr m;
+		service_enum_t<input_manager> e;
+		if (e.next(m)) {
+			return m->open(whatFor, p_filehint, p_path, p_from_redirect, p_abort);
+		}
+	}
+#endif
+
+	const bool needWriteAcecss = !!(whatFor == input_info_writer::class_guid);
+
+	service_ptr_t<file> l_file = p_filehint;
+	if (l_file.is_empty()) {
+		service_ptr_t<filesystem> fs;
+		if (filesystem::g_get_interface(fs, p_path)) {
+			if (fs->supports_content_types()) {
+				fs->open(l_file, p_path, needWriteAcecss ? filesystem::open_mode_write_existing : filesystem::open_mode_read, p_abort);
+			}
+		}
+	}
+
+	if (l_file.is_valid()) {
+		pfc::string8 content_type;
+		if (l_file->get_content_type(content_type)) {
+			pfc::list_t< input_entry::ptr > list;
+#if PFC_DEBUG
+			FB2K_DebugLog() << "attempting input open by content type: " << content_type;
+#endif
+			if (g_find_inputs_by_content_type(list, content_type, p_from_redirect)) {
+				try {
+					return g_open_from_list(list, whatFor, l_file, p_path, p_abort);
+				} catch (exception_io_unsupported_format) {
+#if PFC_DEBUG
+					FB2K_DebugLog() << "Failed to open by content type, using fallback";
+#endif
+				}
+			}
+		}
+	}
+
+#if PFC_DEBUG
+	FB2K_DebugLog() << "attempting input open by path: " << p_path;
+#endif
+	{
+		pfc::list_t< input_entry::ptr > list;
+		if (g_find_inputs_by_path(list, p_path, p_from_redirect)) {
+			return g_open_from_list(list, whatFor, l_file, p_path, p_abort);
+		}
+	}
+
+	throw exception_io_unsupported_format();
+}
 
 void input_entry::g_open_for_decoding(service_ptr_t<input_decoder> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect) {
 	TRACK_CALL_TEXT("input_entry::g_open_for_decoding");
-#if 1
-	g_open_t(p_instance,p_filehint,p_path,p_abort,p_from_redirect);
-#else
-	service_ptr_t<file> filehint = p_filehint;
-	service_ptr_t<input_entry> entry;
-
-	prepare_for_open(entry,filehint,p_path,filesystem::open_mode_read,p_abort,p_from_redirect);
-
-	entry->open_for_decoding(p_instance,filehint,p_path,p_abort);
-#endif
-
+	p_instance ^= g_open(input_decoder::class_guid, p_filehint, p_path, p_abort, p_from_redirect);
 }
 
 void input_entry::g_open_for_info_read(service_ptr_t<input_info_reader> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect) {
 	TRACK_CALL_TEXT("input_entry::g_open_for_info_read");
-#if 1
-	g_open_t(p_instance,p_filehint,p_path,p_abort,p_from_redirect);
-#else
-	service_ptr_t<file> filehint = p_filehint;
-	service_ptr_t<input_entry> entry;
-
-	prepare_for_open(entry,filehint,p_path,filesystem::open_mode_read,p_abort,p_from_redirect);
-
-	entry->open_for_info_read(p_instance,filehint,p_path,p_abort);
-#endif
+	p_instance ^= g_open(input_info_reader::class_guid, p_filehint, p_path, p_abort, p_from_redirect);
 }
 
 void input_entry::g_open_for_info_write(service_ptr_t<input_info_writer> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect) {
 	TRACK_CALL_TEXT("input_entry::g_open_for_info_write");
-#if 1
-	g_open_t(p_instance,p_filehint,p_path,p_abort,p_from_redirect);
-#else
-	service_ptr_t<file> filehint = p_filehint;
-	service_ptr_t<input_entry> entry;
-
-	prepare_for_open(entry,filehint,p_path,filesystem::open_mode_write_existing,p_abort,p_from_redirect);
-
-	entry->open_for_info_write(p_instance,filehint,p_path,p_abort);
-#endif
+	p_instance ^= g_open(input_info_writer::class_guid, p_filehint, p_path, p_abort, p_from_redirect);
 }
 
 void input_entry::g_open_for_info_write_timeout(service_ptr_t<input_info_writer> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,double p_timeout,bool p_from_redirect) {
@@ -218,7 +263,7 @@ bool input_entry::g_is_supported_path(const char * p_path)
 {
 	service_ptr_t<input_entry> ptr;
 	service_enum_t<input_entry> e;
-	pfc::string_extension ext(p_path);
+	auto ext = pfc::string_extension (p_path);
 	while(e.next(ptr))
 	{
 		if (ptr->is_our_path(p_path,ext)) return true;

@@ -1,38 +1,6 @@
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
+#pragma once
 
 namespace pfc {
-	class counter {
-	public:
-		typedef long t_val;
-        
-		counter(t_val p_val = 0) : m_val(p_val) {}
-		long operator++() throw() {return inc();}
-		long operator--() throw() {return dec();}
-		long operator++(int) throw() {return inc()-1;}
-		long operator--(int) throw() {return dec()+1;}
-		operator t_val() const throw() {return m_val;}
-	private:
-		t_val inc() {
-#ifdef _MSC_VER
-			return _InterlockedIncrement(&m_val);
-#else
-			return __sync_add_and_fetch(&m_val, 1);
-#endif
-		}
-		t_val dec() {
-#ifdef _MSC_VER
-			return _InterlockedDecrement(&m_val);
-#else
-			return __sync_sub_and_fetch(&m_val, 1);
-#endif
-		}
-        
-		volatile t_val m_val;
-	};
-	
-    typedef counter refcounter;
 
 	class NOVTABLE refcounted_object_root
 	{

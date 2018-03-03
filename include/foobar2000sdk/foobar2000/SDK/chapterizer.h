@@ -1,3 +1,8 @@
+#pragma once
+
+// Not everything is on #ifdef FOOBAR2000_HAVE_CHAPTERIZER
+// Some things use chapter_list internally even if chapterizer is disabled
+
 //! Interface for object storing list of chapters.
 class NOVTABLE chapter_list {
 public:
@@ -54,6 +59,7 @@ private:
 
 typedef chapter_list_impl_t<> chapter_list_impl;
 
+#ifdef FOOBAR2000_HAVE_CHAPTERIZER
 
 //! This service implements chapter list editing operations for various file formats, e.g. for MP4 chapters or CD images with embedded cuesheets. Used by converter "encode single file with chapters" feature.
 class NOVTABLE chapterizer : public service_base {
@@ -82,16 +88,4 @@ public:
 	static bool g_is_pregap_capable(const char * p_path);
 };
 
-
-
-unsigned cuesheet_parse_index_time_ticks_e(const char * p_string,t_size p_length);
-double cuesheet_parse_index_time_e(const char * p_string,t_size p_length);
-
-class cuesheet_format_index_time
-{
-public:
-	cuesheet_format_index_time(double p_time);
-	inline operator const char*() const {return m_buffer;}
-private:
-	pfc::string_formatter m_buffer;
-};
+#endif

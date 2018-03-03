@@ -9,35 +9,11 @@
 #include <sys/stat.h>
 #endif
 
-#ifndef PFC_WINDOWS_DESKTOP_APP
 #include <thread>
-#endif
 
 namespace pfc {
 	t_size getOptimalWorkerThreadCount() {
-#ifdef PFC_WINDOWS_DESKTOP_APP
-		DWORD_PTR mask,system;
-		t_size ret = 0;
-		GetProcessAffinityMask(GetCurrentProcess(),&mask,&system);
-		for(t_size n=0;n<sizeof(mask)*8;n++) {
-			if (mask & ((DWORD_PTR)1<<n)) ret++;
-		}
-		if (ret == 0) return 1;
-		return ret;
-#else
 		return std::thread::hardware_concurrency();
-#endif
-
-
-#if 0 // OSX
-        size_t len;
-        unsigned int ncpu;
-        
-        len = sizeof(ncpu);
-        sysctlbyname ("hw.ncpu",&ncpu,&len,NULL,0);
-        
-        return ncpu;
-#endif
 	}
 
 	t_size getOptimalWorkerThreadCountEx(t_size taskCountLimit) {
@@ -51,6 +27,11 @@ namespace pfc {
             threadProc();
         } catch(...) {}
     }
+
+	void thread::couldNotCreateThread() {
+		// Something terminally wrong, better crash leaving a good debug trace
+		crash();
+	}
     
 #ifdef _WIN32
     thread::thread() : m_thread(INVALID_HANDLE_VALUE)
@@ -63,25 +44,29 @@ namespace pfc {
 			int ctxPriority = GetThreadPriority( GetCurrentThread() );
 			if (ctxPriority > GetThreadPriority( m_thread ) ) SetThreadPriority( m_thread, ctxPriority );
             
-            if (WaitForSingleObject(m_thread,INFINITE) != WAIT_OBJECT_0) crash();
+            if (WaitForSingleObject(m_thread,INFINITE) != WAIT_OBJECT_0) couldNotCreateThread();
             CloseHandle(m_thread); m_thread = INVALID_HANDLE_VALUE;
         }
     }
     bool thread::isActive() const {
         return m_thread != INVALID_HANDLE_VALUE;
     }
-	void thread::winStart(int priority, DWORD * outThreadID) {
-		close();
+
+	static HANDLE MyBeginThread( unsigned (__stdcall * proc)(void *) , void * arg, DWORD * outThreadID, int priority) {
 		HANDLE thread;
 #ifdef PFC_WINDOWS_DESKTOP_APP
-		thread = (HANDLE)_beginthreadex(NULL, 0, g_entry, reinterpret_cast<void*>(this), CREATE_SUSPENDED, (unsigned int*)outThreadID);
+		thread = (HANDLE)_beginthreadex(NULL, 0, proc, arg, CREATE_SUSPENDED, (unsigned int*)outThreadID);
 #else
-		thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) g_entry, reinterpret_cast<void*>(this), CREATE_SUSPENDED, outThreadID);
+		thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)proc, arg, CREATE_SUSPENDED, outThreadID);
 #endif
-		if (thread == NULL) throw exception_creation();
+		if (thread == NULL) thread::couldNotCreateThread();
 		SetThreadPriority(thread, priority);
 		ResumeThread(thread);
-		m_thread = thread;
+		return thread;
+	}
+	void thread::winStart(int priority, DWORD * outThreadID) {
+		close();
+		m_thread = MyBeginThread(g_entry, reinterpret_cast<void*>(this), outThreadID, priority);
 	}
     void thread::startWithPriority(int priority) {
 		winStart(priority, NULL);
@@ -128,7 +113,7 @@ namespace pfc {
         
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
         
-        if (pthread_create(&thread, &attr, g_entry, reinterpret_cast<void*>(this)) < 0) throw exception_creation();
+        if (pthread_create(&thread, &attr, g_entry, reinterpret_cast<void*>(this)) < 0) couldNotCreateThread();
         
         pthread_attr_destroy(&attr);
         m_threadValid = true;
@@ -162,4 +147,64 @@ namespace pfc {
         return m_threadValid;
     }
 #endif
+#ifdef _WIN32
+    unsigned CALLBACK winSplitThreadProc(void* arg) {
+		auto f = reinterpret_cast<std::function<void() > *>(arg);
+		(*f)();
+		delete f;
+		return 0;
+    }
+#else
+	void * nixSplitThreadProc(void * arg) {
+		auto f = reinterpret_cast<std::function<void() > *>(arg);
+#ifdef __APPLE__
+		inAutoReleasePool([f] {
+			(*f)();
+			delete f;
+		});
+#else
+		(*f)();
+		delete f;
+#endif
+		return NULL;
+	}
+#endif
+
+	void splitThread(std::function<void() > f) {
+		ptrholder_t< std::function<void() > > arg ( new std::function<void() >(f) );
+#ifdef _WIN32
+		HANDLE h = MyBeginThread(winSplitThreadProc, arg.get_ptr(), NULL, GetThreadPriority(GetCurrentThread()));
+		CloseHandle(h);
+#else
+#ifdef __APPLE__
+		thread::appleStartThreadPrologue();
+#endif
+		pthread_t thread;
+		
+        if (pthread_create(&thread, NULL, nixSplitThreadProc, arg.get_ptr()) < 0) thread::couldNotCreateThread();
+
+		pthread_detach(thread);
+#endif
+		arg.detach();
+	}
+#ifndef __APPLE__
+	// Stub for non Apple
+	void inAutoReleasePool(std::function<void()> f) { f(); }
+#endif
+
+
+	void thread2::startHereWithPriority(std::function<void()> e, int priority) {
+		setEntry(e); startWithPriority(priority);
+	}
+	void thread2::startHere(std::function<void()> e) {
+		setEntry(e); start();
+	}
+	void thread2::setEntry(std::function<void()> e) {
+		PFC_ASSERT(!isActive());
+		m_entryPoint = e;
+	}
+
+	void thread2::threadProc() {
+		m_entryPoint();
+	}
 }

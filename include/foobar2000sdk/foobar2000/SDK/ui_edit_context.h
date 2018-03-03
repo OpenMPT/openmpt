@@ -1,3 +1,4 @@
+#pragma once
 
 class NOVTABLE ui_edit_context : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(ui_edit_context, service_base)
@@ -26,19 +27,18 @@ public:
 	bool can_reorder() {return test_flags(flag_reorderable);}
 	bool can_search() {return test_flags(flag_searchable);}
 
-	virtual void select_all() {update_selection(bit_array_true(), bit_array_true());}
-	virtual void select_none() {update_selection(bit_array_true(), bit_array_false());}
-	virtual void get_selected_items(metadb_handle_list_ref out) {bit_array_bittable mask(get_item_count()); get_selection_mask(mask); get_items(out, mask);}
-	virtual void remove_selection() {bit_array_bittable mask(get_item_count()); get_selection_mask(mask); remove_items(mask);}
-	virtual void crop_selection() {bit_array_bittable mask(get_item_count()); get_selection_mask(mask); remove_items(bit_array_not(mask));}
-	virtual void clear() {remove_items(bit_array_true());}
-	virtual void get_all_items(metadb_handle_list_ref out) {get_items(out, bit_array_true());}
+	virtual void select_all();
+	virtual void select_none();
+	virtual void get_selected_items(metadb_handle_list_ref out);
+	virtual void remove_selection();
+	virtual void crop_selection();
+	virtual void clear();
+	virtual void get_all_items(metadb_handle_list_ref out);
 	virtual GUID get_selection_type() = 0;
 
 	// available if flag_linearlist is set
-	virtual void get_selection_mask(pfc::bit_array_var & out) {
-		const t_size count = get_item_count(); for(t_size walk = 0; walk < count; ++walk) out.set(walk, is_item_selected(walk));
-	}
+	virtual void get_selection_mask(pfc::bit_array_var & out);
+
 	virtual void update_selection(const pfc::bit_array & mask, const pfc::bit_array & newVals) = 0;
 	virtual t_size get_item_count(t_size max = ~0) = 0;
 	virtual metadb_handle_ptr get_item(t_size index) = 0;
@@ -46,12 +46,7 @@ public:
 	virtual bool is_item_selected(t_size item) = 0;
 	virtual void remove_items(pfc::bit_array const & mask) = 0;
 	virtual void reorder_items(const t_size * order, t_size count) = 0;
-	virtual t_size get_selection_count(t_size max = ~0) {
-		t_size count = 0;
-		const t_size total = get_item_count();
-		for(t_size walk = 0; walk < total && count < max; ++walk) if (is_item_selected(walk)) ++count;
-		return count;
-	}
+	virtual t_size get_selection_count(t_size max = ~0);
 
 	virtual void search() = 0;
 
@@ -63,51 +58,7 @@ public:
 
 	virtual t_size query_insert_mark() = 0;
 
-	void sort_by_format(const char * spec, bool onlySelection) {
-		const t_size count = get_item_count();
-		pfc::array_t<t_size> order; order.set_size(count);
-		pfc::array_t<t_size> sel_map;
-		if (onlySelection) {
-			sel_map.set_size(count);
-			t_size sel_count = 0;
-			for(t_size n=0;n<count;n++) if (is_item_selected(n)) sel_map[sel_count++]=n;
-			sel_map.set_size(sel_count);
-		}
-
-		{
-			metadb_handle_list temp;
-			pfc::array_t<t_size> order_temp;
-			if (onlySelection) {
-				get_selected_items(temp);
-				order_temp.set_size(count);
-			} else {
-				get_all_items(temp);
-			}
-
-			
-			if (spec != NULL) {
-				temp.sort_by_format_get_order(onlySelection ? order_temp.get_ptr() : order.get_ptr(),spec,0);
-			} else {
-				static_api_ptr_t<genrand_service> api; api->seed((unsigned)__rdtsc());
-				api->generate_random_order(onlySelection ? order_temp.get_ptr() : order.get_ptr(),temp.get_count());
-			}
-
-			if (onlySelection) {
-				t_size n,ptr;
-				for(n=0,ptr=0;n<count;n++) {
-					if (!is_item_selected(n)) {
-						order[n] = n;
-					} else {
-						t_size v = order_temp[ptr++];
-						order[n] = sel_map[v];
-					}
-				}
-			}
-		}
-
-		reorder_items(order.get_ptr(), count);
-	}
-
+	void sort_by_format(const char * spec, bool onlySelection);
 };
 
 class ui_edit_context_playlist : public ui_edit_context {

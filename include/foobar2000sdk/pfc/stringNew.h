@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	//helper, const methods only
 	class __stringEmpty : public string_base {

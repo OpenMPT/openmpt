@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "create_directory_helper.h"
 
 namespace create_directory_helper
 {
@@ -145,7 +146,7 @@ void create_directory_helper::format_filename(const metadb_handle_ptr & handle,t
 void create_directory_helper::format_filename(const metadb_handle_ptr & handle,titleformat_hook * p_hook,const char * spec,pfc::string_base & out)
 {
 	service_ptr_t<titleformat_object> script;
-	if (static_api_ptr_t<titleformat_compiler>()->compile(script,spec)) {
+	if (titleformat_compiler::get()->compile(script,spec)) {
 		format_filename(handle, p_hook, script, out);
 	} else {
 		out.reset();

@@ -1,5 +1,4 @@
-#ifndef _PFC_GUID_H_
-#define _PFC_GUID_H_
+#pragma once
 
 namespace pfc {
 
@@ -45,6 +44,3 @@ namespace pfc {
     
     GUID createGUID();
 }
-
-
-#endif

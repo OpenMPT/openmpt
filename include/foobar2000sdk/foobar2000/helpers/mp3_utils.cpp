@@ -1,10 +1,13 @@
 #include "stdafx.h"
 
+#include "mp3_utils.h"
+#include "bitreader_helper.h"
+
 using namespace bitreader_helper;
 
 static unsigned extract_header_bits(const t_uint8 p_header[4],unsigned p_base,unsigned p_bits)
 {
-	assert(p_base+p_bits<=32);
+	PFC_ASSERT(p_base+p_bits<=32);
 	return (unsigned) extract_bits(p_header,p_base,p_bits);
 }
 
@@ -31,13 +34,6 @@ namespace {
 
 typedef t_uint16 uint16;
 
-static const uint16 bitrate_table_l1v1[16]  = {  0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,  0};
-static const uint16 bitrate_table_l2v1[16]  = {  0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,  0};
-static const uint16 bitrate_table_l3v1[16]  = {  0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,  0};
-static const uint16 bitrate_table_l1v2[16]  = {  0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,  0};
-static const uint16 bitrate_table_l23v2[16] = {  0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0};
-static const uint16 sample_rate_table[] = {11025,12000,8000};
-
 unsigned mp3_utils::QueryMPEGFrameSize(const t_uint8 p_header[4])
 {
 	TMPEGFrameInfo info;
@@ -49,6 +45,12 @@ bool mp3_utils::ParseMPEGFrameHeader(TMPEGFrameInfo & p_info,const t_uint8 p_hea
 {
 	enum {MPEG_LAYER_1 = 3, MPEG_LAYER_2 = 2, MPEG_LAYER_3 = 1};
 	enum {_MPEG_1 = 3, _MPEG_2 = 2, _MPEG_25 = 0};
+	static const uint16 bitrate_table_l1v1[16] = { 0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,  0 };
+	static const uint16 bitrate_table_l2v1[16] = { 0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,  0 };
+	static const uint16 bitrate_table_l3v1[16] = { 0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,  0 };
+	static const uint16 bitrate_table_l1v2[16] = { 0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,  0 };
+	static const uint16 bitrate_table_l23v2[16] = { 0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,  0 };
+	static const uint16 sample_rate_table[] = { 11025,12000,8000 };
 
 	header_parser parser(p_header);
 	if (parser.read(11) != 0x7FF) return false;
@@ -62,7 +64,7 @@ bool mp3_utils::ParseMPEGFrameHeader(TMPEGFrameInfo & p_info,const t_uint8 p_hea
 	int paddingdelta = 0;
 	parser.read(1);//private
 	unsigned channel_mode = parser.read(2);
-	parser.read(2);//channel_mode_extension
+	unsigned channel_mode_ext = parser.read(2);//channel_mode_extension
 	parser.read(1);//copyright
 	parser.read(1);//original
 	parser.read(2);//emphasis
@@ -159,10 +161,15 @@ bool mp3_utils::ParseMPEGFrameHeader(TMPEGFrameInfo & p_info,const t_uint8 p_hea
 		break;
 	}
 
+	
 	p_info.m_channel_mode = channel_mode;
+	p_info.m_channel_mode_ext = channel_mode_ext;
 
 	p_info.m_sample_rate = sample_rate;
+	p_info.m_sample_rate_idx = sample_rate_index;
 
+	p_info.m_bitrate = bitrate;
+	p_info.m_bitrate_idx = bitrate_index;
 
 	p_info.m_bytes = ( bitrate /*kbps*/ * (1000/8) /* kbps-to-bytes*/ * p_info.m_duration /*samples-per-frame*/ ) / sample_rate + paddingdelta;
 
@@ -258,4 +265,10 @@ bool mp3_utils::ValidateFrameCRC(const t_uint8 * frameData, t_size frameSize) {
 	TMPEGFrameInfo info;
 	if (!ParseMPEGFrameHeader(info, frameData)) return false; //FAIL, not a valid frame
 	return ValidateFrameCRC(frameData, frameSize, info);
+}
+
+
+bool mp3_utils::ParseMPEGFrameHeader(TMPEGFrameInfo & p_info, const void * bytes, size_t bytesAvail) {
+	if (bytesAvail < 4) return false; //FAIL, not a valid frame
+	return ParseMPEGFrameHeader(p_info, reinterpret_cast<const t_uint8*>(bytes));
 }

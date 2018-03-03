@@ -1,3 +1,7 @@
+#pragma once
+
+#ifdef FOOBAR2000_HAVE_DSP
+
 class NOVTABLE resampler_entry : public dsp_entry
 {
 public:
@@ -23,3 +27,5 @@ public:
 
 template<typename T>
 class resampler_factory_t : public service_factory_single_t<resampler_entry_impl_t<T> > {};
+
+#endif // FOOBAR2000_HAVE_DSP

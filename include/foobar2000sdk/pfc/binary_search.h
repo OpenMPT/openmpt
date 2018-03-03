@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	class comparator_default;
 

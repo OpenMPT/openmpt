@@ -1,3 +1,4 @@
+#pragma once
 //! Container of ReplayGain scan results from one or more tracks.
 class replaygain_result : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(replaygain_result, service_base);
@@ -16,7 +17,7 @@ public:
 };
 
 //! Instance of a ReplayGain scanner. \n
-//! Use static_api_ptr_t<replaygain_scanner_entry>()->instantiate() to create a replaygain_scanner object; see replaygain_scanner_entry for more info. \n
+//! Use replaygain_scanner_entry::instantiate() to create a replaygain_scanner object; see replaygain_scanner_entry for more info. \n
 //! Typical use: call process_chunk() with each chunk read from your track, call finalize() to obtain results for this track and reset replaygain_scanner's state for scanning another track; to obtain album gain/peak values, merge results (replaygain_result::merge) from all tracks. \n
 class replaygain_scanner : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(replaygain_scanner, service_base);
@@ -30,11 +31,18 @@ public:
 };
 
 
-//! Entrypoint class for instantiating replaygain_scanner objects. Use static_api_ptr_t<replaygain_scanner_entry>()->instantiate() to create replaygain_scanner instances. \n
+//! Entrypoint class for instantiating replaygain_scanner objects. \n
 //! This service is OPTIONAL; it's available from foobar2000 0.9.5.3 up but only if the ReplayGain Scanner component is installed. \n
-//! It is recommended that you use replaygain_scanner like this: try { myInstance = static_api_ptr_t<replaygain_scanner_entry>()->instantiate(); } catch(exception_service_not_found) { /* too old foobar2000 version or no foo_rgscan installed - complain/fail/etc */ }
+//! It is recommended that you use replaygain_scanner like this: \n
+//! replaygain_scanner_entry::ptr theAPI; \n
+//! if (replaygain_scanner_entry::tryGet(theAPI)) { \n
+//!     myInstance = theAPI->instantiate(); \n
+//! } else { \n
+//!     no foo_rgscan installed - complain/fail/etc \n
+//! } \n
+//! Note that replaygain_scanner_entry::get() is provided for convenience - it WILL crash with no foo_rgscan present. Use it only after prior checks.
 class replaygain_scanner_entry : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(replaygain_scanner_entry);
+	FB2K_MAKE_SERVICE_COREAPI(replaygain_scanner_entry);
 public:
 	//! Instantiates a replaygain_scanner object.
 	virtual replaygain_scanner::ptr instantiate() = 0;

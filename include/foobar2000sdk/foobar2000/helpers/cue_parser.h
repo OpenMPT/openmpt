@@ -1,29 +1,12 @@
+#pragma once
+
+#include "cue_creator.h"
+
 //HINT: for info on how to generate an embedded cuesheet enabled input, see the end of this header.
 
-//to be moved somewhere else later
+
+
 namespace file_info_record_helper {
-
-	class __file_info_record__info__enumerator {
-	public:
-		__file_info_record__info__enumerator(file_info & p_out) : m_out(p_out) {}
-		void operator() (const char * p_name,const char * p_value) {m_out.__info_add_unsafe(p_name,p_value);}
-	private:
-		file_info & m_out;
-	};
-
-	class __file_info_record__meta__enumerator {
-	public:
-		__file_info_record__meta__enumerator(file_info & p_out) : m_out(p_out) {}
-		template<typename t_value> void operator() (const char * p_name,const t_value & p_value) {
-			t_size index = ~0;
-			for(typename t_value::const_iterator iter = p_value.first(); iter.is_valid(); ++iter) {
-				if (index == ~0) index = m_out.__meta_add_unsafe(p_name,*iter);
-				else m_out.meta_add_value(index,*iter);
-			}
-		}
-	private:
-		file_info & m_out;
-	};
 
 	class file_info_record {
 	public:
@@ -38,33 +21,10 @@ namespace file_info_record_helper {
 		double get_length() const {return m_length;}
 		void set_length(double p_length) {m_length = p_length;}
 
-		void reset() {
-			m_meta.remove_all(); m_info.remove_all();
-			m_length = 0;
-			m_replaygain = replaygain_info_invalid;
-		}
-
-		void from_info_overwrite_info(const file_info & p_info) {
-			for(t_size infowalk = 0, infocount = p_info.info_get_count(); infowalk < infocount; ++infowalk) {
-				m_info.set(p_info.info_enum_name(infowalk),p_info.info_enum_value(infowalk));
-			}
-		}
-		void from_info_overwrite_meta(const file_info & p_info) {
-			for(t_size metawalk = 0, metacount = p_info.meta_get_count(); metawalk < metacount; ++metawalk) {
-				const t_size valuecount = p_info.meta_enum_value_count(metawalk);
-				if (valuecount > 0) {
-					t_meta_value & entry = m_meta.find_or_add(p_info.meta_enum_name(metawalk));
-					entry.remove_all();
-					for(t_size valuewalk = 0; valuewalk < valuecount; ++valuewalk) {
-						entry.add_item(p_info.meta_enum_value(metawalk,valuewalk));
-					}
-				}
-			}
-		}
-
-		void from_info_overwrite_rg(const file_info & p_info) {
-			m_replaygain = replaygain_info::g_merge(m_replaygain,p_info.get_replaygain());
-		}
+		void reset();
+		void from_info_overwrite_info(const file_info & p_info);
+		void from_info_overwrite_meta(const file_info & p_info);
+		void from_info_overwrite_rg(const file_info & p_info);
 
 		template<typename t_source>
 		void overwrite_meta(const t_source & p_meta) {
@@ -75,60 +35,16 @@ namespace file_info_record_helper {
 			m_info.overwrite(p_info);
 		}
 
-		void merge_overwrite(const file_info & p_info) {
-			from_info_overwrite_info(p_info);
-			from_info_overwrite_meta(p_info);
-			from_info_overwrite_rg(p_info);
-		}
+		void merge_overwrite(const file_info & p_info);
+		void transfer_meta_entry(const char * p_name,const file_info & p_info,t_size p_index);
 
-		void transfer_meta_entry(const char * p_name,const file_info & p_info,t_size p_index) {
-			const t_size count = p_info.meta_enum_value_count(p_index);
-			if (count == 0) {
-				m_meta.remove(p_name);
-			} else {
-				t_meta_value & val = m_meta.find_or_add(p_name);
-				val.remove_all();
-				for(t_size walk = 0; walk < count; ++walk) {
-					val.add_item(p_info.meta_enum_value(p_index,walk));
-				}
-			}
-		}
+		void meta_set(const char * p_name,const char * p_value);
+		const t_meta_value * meta_query_ptr(const char * p_name) const;
 
-		void meta_set(const char * p_name,const char * p_value) {
-			m_meta.find_or_add(p_name).set_single(p_value);
-		}
+		void from_info_set_meta(const file_info & p_info);
 
-		const t_meta_value * meta_query_ptr(const char * p_name) const {
-			return m_meta.query_ptr(p_name);
-		}
-
-
-		void from_info_set_meta(const file_info & p_info) {
-			m_meta.remove_all();
-			from_info_overwrite_meta(p_info);
-		}
-
-		void from_info(const file_info & p_info) {
-			reset();
-			m_length = p_info.get_length();
-			m_replaygain = p_info.get_replaygain();
-			from_info_overwrite_meta(p_info);
-			from_info_overwrite_info(p_info);
-		}
-		void to_info(file_info & p_info) const {
-			p_info.reset();
-			p_info.set_length(m_length);
-			p_info.set_replaygain(m_replaygain);
-            
-            {
-                __file_info_record__info__enumerator e(p_info);
-                m_info.enumerate( e );
-            }
-            {
-                __file_info_record__meta__enumerator e(p_info);
-                m_meta.enumerate( e );
-            }
-		}
+		void from_info(const file_info & p_info);
+		void to_info(file_info & p_info) const;
 
 		template<typename t_callback> void enumerate_meta(t_callback & p_callback) const {m_meta.enumerate(p_callback);}
 		template<typename t_callback> void enumerate_meta(t_callback & p_callback) {m_meta.enumerate(p_callback);}
@@ -193,11 +109,9 @@ namespace cue_parser
 
 
 	template<typename t_base>
-	class input_wrapper_cue_t {
+	class input_wrapper_cue_t : public input_forward_static_methods<t_base> {
 	public:
-		input_wrapper_cue_t() {}
-		~input_wrapper_cue_t() {}
-
+		typedef input_info_writer_v2 interface_info_writer_t; // remove_tags supplied
 		void open(service_ptr_t<file> p_filehint,const char * p_path,t_input_open_reason p_reason,abort_callback & p_abort) {
 			m_impl.open( p_filehint, p_path, p_reason, p_abort );
 			file_info_impl info;
@@ -232,6 +146,7 @@ namespace cue_parser
 				m_meta.query_track_offsets(p_subsong,start,length);
 				unsigned flags2 = p_flags;
 				if (start > 0) flags2 &= ~input_flag_no_seeking;
+				flags2 &= ~input_flag_allow_inaccurate_seeking;
 				m_impl.decode_initialize(flags2, p_abort);
 				m_impl.decode_seek(start, p_abort);
 				m_decodeFrom = start; m_decodeLength = length; m_decodePos = 0;
@@ -256,6 +171,13 @@ namespace cue_parser
 		void set_logger(event_logger::ptr ptr) {
 			m_impl.set_logger(ptr);
 		}
+		bool flush_on_pause() {
+			return m_impl.flush_on_pause();
+		}
+		void set_pause(bool) {} // obsolete
+		size_t extended_param(const GUID & type, size_t arg1, void * arg2, size_t arg2size) {
+			return m_impl.extended_param(type, arg1, arg2, arg2size);
+		}
 
 		bool decode_get_dynamic_info(file_info & p_out, double & p_timestamp_delta) {
 			return m_impl.decode_get_dynamic_info(p_out, p_timestamp_delta);
@@ -267,6 +189,13 @@ namespace cue_parser
 
 		void decode_on_idle(abort_callback & p_abort) {
 			m_impl.decode_on_idle(p_abort);
+		}
+
+		void remove_tags(abort_callback & abort) {
+			m_impl.remove_tags( abort );
+			file_info_impl info;
+			m_impl.get_info(info, abort);
+			m_meta.set_tag( info );
 		}
 
 		void retag_set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort) {
@@ -285,10 +214,6 @@ namespace cue_parser
 			m_impl.get_info(info, p_abort);
 			m_meta.set_tag( info );
 		}
-
-		inline static bool g_is_our_content_type(const char * p_content_type) {return t_base::g_is_our_content_type(p_content_type);}
-		inline static bool g_is_our_path(const char * p_path,const char * p_extension) {return t_base::g_is_our_path(p_path,p_extension);}
-
 	private:
 		bool _run(audio_chunk & chunk, mem_block_container * raw, abort_callback & aborter) {
 			if (m_decodeLength >= 0 && m_decodePos >= m_decodeLength) return false;
@@ -326,7 +251,7 @@ namespace cue_parser
 
 		embeddedcue_metadata_manager m_meta;
 	};
-#ifndef APP_IS_BOOM
+#ifdef FOOBAR2000_HAVE_CHAPTERIZER
 	template<typename I>
 	class chapterizer_impl_t : public chapterizer
 	{
@@ -404,8 +329,8 @@ namespace cue_parser
 template<typename t_input_impl, unsigned t_flags = 0>
 class input_cuesheet_factory_t {
 public:
-	input_factory_ex_t<cue_parser::input_wrapper_cue_t<t_input_impl>,t_flags,input_decoder_v2> m_input_factory;
-#ifndef APP_IS_BOOM
+	input_factory_t<cue_parser::input_wrapper_cue_t<t_input_impl>,t_flags > m_input_factory;
+#ifdef FOOBAR2000_HAVE_CHAPTERIZER
 	service_factory_single_t<cue_parser::chapterizer_impl_t<t_input_impl> > m_chapterizer_factory;	
 #endif
 };

@@ -1,5 +1,4 @@
-#ifndef _PFC_STRING_LIST_H_
-#define _PFC_STRING_LIST_H_
+#pragma once
 
 namespace pfc {
 
@@ -40,5 +39,3 @@ namespace pfc {
 		pfc::array_t<pfc::string8,pfc::alloc_fast> m_data;
 	};
 }
-
-#endif //_PFC_STRING_LIST_H_

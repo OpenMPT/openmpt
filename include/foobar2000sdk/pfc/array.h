@@ -1,5 +1,4 @@
-#ifndef _PFC_ARRAY_H_
-#define _PFC_ARRAY_H_
+#pragma once
 
 namespace pfc {
 
@@ -20,18 +19,29 @@ namespace pfc {
 		array_staticsize_t(const t_self & p_source) : m_size(0), m_array(NULL) {
 			*this = p_source;
 		}
+        array_staticsize_t(t_self && p_source) {
+            move_(p_source);
+        }
 
 		//! Copy operator nonfunctional when data type is not copyable.
 		const t_self & operator=(const t_self & p_source) {
 			release_();
 			
-			//m_array = pfc::malloc_copy_t(p_source.get_size(),p_source.get_ptr());
 			const t_size newsize = p_source.get_size();
-			m_array = new t_item[newsize];
-			m_size = newsize;
-			for(t_size n = 0; n < newsize; n++) m_array[n] = p_source[n];
+            if (newsize > 0) {
+                m_array = new t_item[newsize];
+                m_size = newsize;
+                for(t_size n = 0; n < newsize; n++) m_array[n] = p_source[n];
+            }
 			return *this;
 		}
+        
+        //! Move operator.
+        const t_self & operator=(t_self && p_source) {
+            release_();
+            move_(p_source);
+            return *this;
+        }
 
 		void set_size_discard(t_size p_size) {
 			release_();
@@ -40,12 +50,25 @@ namespace pfc {
 				m_size = p_size;
 			}
 		}
-		//! Warning: buffer pointer must not point to buffer allocated by this array (fixme).
 		template<typename t_source>
 		void set_data_fromptr(const t_source * p_buffer,t_size p_count) {
-			set_size_discard(p_count);
-			pfc::copy_array_loop_t(*this,p_buffer,p_count);
+            if (p_count == m_size) {
+                pfc::copy_array_loop_t(*this,p_buffer,p_count);
+            } else {
+                t_item * arr = new t_item[p_count];
+                try {
+                    pfc::copy_array_loop_t(arr, p_buffer, p_count);
+                } catch(...) { delete[] arr; throw; }
+                delete[] m_array;
+                m_array = arr;
+                m_size = p_count;
+            }
 		}
+        
+        template<typename t_source>
+        void assign(t_source const * items, size_t count) {
+            set_data_fromptr( items, count );
+        }
 
 		
 		t_size get_size() const {return m_size;}
@@ -63,6 +86,12 @@ namespace pfc {
 			m_size = 0;
 			delete[] pfc::replace_null_t(m_array);
 		}
+        void move_(t_self & from) {
+            m_size = from.m_size;
+            m_array = from.m_array;
+            from.m_size = 0;
+            from.m_array = NULL;
+        }
 		t_item * m_array;
 		t_size m_size;
 	};
@@ -321,5 +350,3 @@ namespace pfc {
 
 }
 
-
-#endif //_PFC_ARRAY_H_

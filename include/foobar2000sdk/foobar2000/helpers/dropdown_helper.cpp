@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "dropdown_helper.h"
 
-#ifdef _WIN32
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
+
+#include "dropdown_helper.h"
 
 void _cfg_dropdown_history_base::build_list(pfc::ptr_list_t<char> & out)
 {
@@ -160,4 +161,4 @@ bool _cfg_dropdown_history_base::on_context(HWND wnd,LPARAM coords) {
 	return false;
 }
 
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

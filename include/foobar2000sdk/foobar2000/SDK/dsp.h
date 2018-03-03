@@ -1,3 +1,7 @@
+#pragma once
+
+#ifdef FOOBAR2000_HAVE_DSP
+
 //! Interface to a DSP chunk list. A DSP chunk list object is passed to the DSP chain each time, since DSPs are allowed to remove processed chunks or insert new ones.
 class NOVTABLE dsp_chunk_list {
 public:
@@ -7,21 +11,13 @@ public:
 	virtual void remove_mask(const bit_array & mask) = 0;
 	virtual audio_chunk * insert_item(t_size idx,t_size hint_size=0) = 0;
 
-	audio_chunk * add_item(t_size hint_size=0) {return insert_item(get_count(),hint_size);}
+	audio_chunk * add_item(t_size hint_size=0);
 
-	void remove_all() {remove_mask(bit_array_true());}
+	void remove_all();
 
-	double get_duration() {
-		double rv = 0;
-		t_size n,m = get_count();
-		for(n=0;n<m;n++) rv += get_item(n)->get_duration();
-		return rv;
-	}
+	double get_duration();
 
-	void add_chunk(const audio_chunk * chunk) {
-		audio_chunk * dst = insert_item(get_count(),chunk->get_used_size());
-		if (dst) dst->copy(*chunk);
-	}
+	void add_chunk(const audio_chunk * chunk);
 
 	void remove_bad_chunks();
 protected:
@@ -80,7 +76,8 @@ public:
 	virtual void run_v2(dsp_chunk_list * p_chunk_list,const metadb_handle_ptr & p_cur_file,int p_flags,abort_callback & p_abort) = 0;
 private:
 	void run(dsp_chunk_list * p_chunk_list,const metadb_handle_ptr & p_cur_file,int p_flags) {
-		run_v2(p_chunk_list,p_cur_file,p_flags,abort_callback_dummy());
+		abort_callback_dummy dummy;
+		run_v2(p_chunk_list,p_cur_file,p_flags,dummy);
 	}
 
 	FB2K_MAKE_SERVICE_INTERFACE(dsp_v2,dsp);
@@ -290,6 +287,8 @@ public:
 	virtual bool have_config_popup() = 0;
 	virtual bool show_config_popup(dsp_preset & p_data,HWND p_parent) = 0;
 
+	//! Obsolete method, hidden DSPs now use a different entry class.
+	bool is_user_accessible() { return true; }
 
 	static bool g_get_interface(service_ptr_t<dsp_entry> & p_out,const GUID & p_guid);
 	static bool g_instantiate(service_ptr_t<dsp> & p_out,const dsp_preset & p_preset);
@@ -314,6 +313,20 @@ private:
 	bool show_config_popup(dsp_preset & p_data,HWND p_parent);
 
 	FB2K_MAKE_SERVICE_INTERFACE(dsp_entry_v2,dsp_entry);
+};
+
+class NOVTABLE dsp_entry_hidden : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(dsp_entry_hidden);
+public:
+	//! Obsolete method, hidden DSPs now use a different entry class from ordinary ones.
+	bool is_user_accessible() {return false; }
+
+	static bool g_get_interface( dsp_entry_hidden::ptr & out, const GUID & guid );
+	static bool g_instantiate( dsp::ptr & out, const dsp_preset & preset );
+	static bool g_dsp_exists(const GUID & p_guid);
+
+	virtual bool instantiate(service_ptr_t<dsp> & p_out,const dsp_preset & p_preset) = 0;	
+	virtual GUID get_guid() = 0;
 };
 
 template<class T,class t_entry = dsp_entry>
@@ -379,12 +392,35 @@ public:
 	void show_config_popup_v2(const dsp_preset & p_data,HWND p_parent,dsp_preset_edit_callback & p_callback) {T::g_show_config_popup(p_data,p_parent,p_callback);}
 };
 
+template<typename T>
+class dsp_entry_hidden_t : public dsp_entry_hidden {
+public:
+	bool instantiate(service_ptr_t<dsp> & p_out,const dsp_preset & p_preset) {
+		if (p_preset.get_owner() == T::g_get_guid()) {
+			p_out = new service_impl_t<T>(p_preset);
+			return true;
+		} else return false;
+	}
+	GUID get_guid() {return T::g_get_guid();}
+#if 0
+	void get_name( pfc::string_base& out ) {out = ""; }
+	bool get_default_preset(dsp_preset & p_out) { return false; }
+	bool have_config_popup() { return false; }
+	bool show_config_popup(dsp_preset & p_data,HWND p_parent) { uBugCheck(); }
+	void show_config_popup_v2(const dsp_preset & p_data,HWND p_parent,dsp_preset_edit_callback & p_callback) { uBugCheck(); }
+
+	bool is_user_accessible() { return false; }
+#endif
+};
 
 template<class T>
 class dsp_factory_nopreset_t : public service_factory_single_t<dsp_entry_impl_nopreset_t<T> > {};
 
 template<class T>
 class dsp_factory_t : public service_factory_single_t<dsp_entry_v2_impl_t<T> > {};
+
+template<class T>
+class dsp_factory_hidden_t : public service_factory_single_t< dsp_entry_hidden_t<T> > {};
 
 class NOVTABLE dsp_chain_config
 {
@@ -439,6 +475,8 @@ public:
 	const dsp_chain_config_impl & operator=(const dsp_chain_config_impl & p_source) {copy(p_source); return *this;}
 
 	~dsp_chain_config_impl();
+
+	void reorder( const size_t * order, size_t count );
 private:
 	pfc::ptr_list_t<dsp_preset_impl> m_data;
 };
@@ -496,3 +534,5 @@ private:
 	abort_callback_dummy _m_abort;
 	stream_writer_buffer_simple _m_stream;
 };
+
+#endif

@@ -248,6 +248,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -263,6 +264,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -278,6 +280,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -302,6 +305,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -325,6 +329,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 /d2notypeopt %(AdditionalOptions)</AdditionalOptions>
@@ -340,6 +345,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>/wd4091 /wd4356 /wd4995 /wd4996 /d2notypeopt %(AdditionalOptions)</AdditionalOptions>
@@ -355,6 +361,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -379,6 +386,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -402,6 +410,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -418,6 +427,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -434,6 +444,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -457,6 +468,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\foobar2000sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -477,13 +489,20 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\COM_utils.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CPowerRequest.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CPropVariant.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CSingleThreadWrapper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CallForwarder.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CmdThread.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\IDataObjectUtils.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\ProcessUtils.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\ProfileCache.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\SmartStrStr.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\StdAfx.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\ThreadUtils.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\TypeFind.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\VisUtils.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\advconfig_runtime.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\album_art_helpers.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\bitreader_helper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\cfg_guidlist.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\clipboard.h" />
@@ -493,8 +512,11 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\cuesheet_index_list.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\dialog_resize_helper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\dropdown_helper.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\duration_counter.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\dynamic_bitrate_helper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\fb2k_threads.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\fb2k_wfx.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\fileReadAhead.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\file_cached.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\file_info_const_impl.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\file_list_helper.h" />
@@ -502,26 +524,35 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\file_win32_wrapper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\filetimetools.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\fullFileBuffer.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\gdiplus_helpers.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\helpers.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\icon_remapping_wildcard.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\input_fix_seeking.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\input_helpers.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\input_stream_info_reader.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\listview_helper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\meta_table_builder.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\metadb_io_hintlist.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\mp3_utils.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\playlist_position_reference_tracker.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\reader_pretend_nonseekable.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\readers.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\rethrow.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\seekabilizer.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\stream_buffer_helper.h" />
-    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\string_filter.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\tag_write_callback_impl.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\text_file_loader.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\win32_dialog.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\win32_misc.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\win32_op.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\window_placement_helper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\writer_wav.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\CPowerRequest.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\IDataObjectUtils.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\SmartStrStr.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\ThreadUtils.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\VisUtils.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\clipboard.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\create_directory_helper.cpp" />
@@ -539,8 +570,8 @@
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\filetimetools.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\input_helpers.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\listview_helper.cpp" />
-    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\metadb_io_hintlist.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\mp3_utils.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\readers.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\seekabilizer.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\stream_buffer_helper.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\text_file_loader.cpp" />

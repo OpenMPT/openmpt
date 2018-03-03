@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	namespace io {
 		namespace path {

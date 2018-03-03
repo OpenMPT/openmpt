@@ -1,9 +1,9 @@
-//! Provides control for various playback-related operations.
-//! All methods provided by this interface work from main app thread only. Calling from another thread will do nothing or trigger an exception. If you need to trigger one of playback_control methods from another thread, see main_thread_callback.
-//! Do not call playback_control methods from inside any kind of global callback (e.g. playlist callback), otherwise race conditions may occur.
-//! Use static_api_ptr_t to instantiate. See static_api_ptr_t documentation for more info.
+//! Provides control for various playback-related operations. \n
+//! All methods provided by this interface work from main app thread only. Calling from another thread will do nothing or trigger an exception. If you need to trigger one of playback_control methods from another thread, see main_thread_callback. \n
+//! Do not call playback_control methods from inside any kind of global callback (e.g. playlist callback), otherwise race conditions may occur. \n
+//! Use playback_control::get() to obtain an instance.
 class NOVTABLE playback_control : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playback_control);
+	FB2K_MAKE_SERVICE_COREAPI(playback_control);
 public:
 
 	// Playback stop reason enum.
@@ -140,7 +140,7 @@ public:
 };
 
 class playback_control_v2 : public playback_control {
-	FB2K_MAKE_SERVICE_INTERFACE(playback_control_v2,playback_control);
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playback_control_v2,playback_control);
 public:
 	//! Returns user-specified the step dB value for volume decrement/increment.
 	virtual float get_volume_step() = 0;
@@ -148,7 +148,7 @@ public:
 
 //! \since 1.2
 class playback_control_v3 : public playback_control_v2 {
-	FB2K_MAKE_SERVICE_INTERFACE(playback_control_v3, playback_control_v2);
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playback_control_v3, playback_control_v2);
 public:
 	//! Custom volume API - for use with specific output devices only. \n
 	//! Note that custom volume SHOULD NOT EVER be presented as a slider where the user can immediately go to the maximum value. \n

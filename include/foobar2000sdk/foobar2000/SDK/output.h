@@ -1,5 +1,6 @@
-#ifndef _FOOBAR2000_SDK_OUTPUT_H_
-#define _FOOBAR2000_SDK_OUTPUT_H_
+#pragma once
+
+#include <functional>
 
 PFC_DECLARE_EXCEPTION(exception_output_device_not_found, pfc::exception, "Audio device not found")
 PFC_DECLARE_EXCEPTION(exception_output_module_not_found, exception_output_device_not_found, "Output module not found")
@@ -124,6 +125,15 @@ public:
 	virtual void flush_changing_track() {flush();}
 };
 
+class dsp_chain_config;
+
+class NOVTABLE output_v3 : public output_v2 {
+	FB2K_MAKE_SERVICE_INTERFACE(output_v3, output_v2);
+public:
+	virtual unsigned get_forced_sample_rate() { return 0; } 
+	virtual void get_injected_dsps( dsp_chain_config & );
+};
+
 class NOVTABLE output_entry : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(output_entry);
 public:
@@ -185,7 +195,7 @@ public:
 template<class T>
 class output_factory_t : public service_factory_single_t<output_entry_impl_t<T> > {};
 
-class output_impl : public output_v2 {
+class output_impl : public output_v3 {
 protected:
 	output_impl() : m_incoming_ptr(0) {}
 	virtual void on_update() = 0;
@@ -271,7 +281,7 @@ struct outputCoreConfig_t {
 //! \since 1.3.5
 //! Allows components to access foobar2000 core's output settings.
 class NOVTABLE output_manager : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(output_manager);
+	FB2K_MAKE_SERVICE_COREAPI(output_manager);
 public:
 	//! Instantiates an output instance with core settings.
 	//! @param overrideBufferLength Specify non zero to override user-configured buffer length in core settings.
@@ -282,8 +292,33 @@ public:
 	void getCoreConfig(outputCoreConfig_t & out ) { getCoreConfig(&out, sizeof(out) ); }
 };
 
+//! \since 1.3.16
+class NOVTABLE output_device_list_callback {
+public:
+	virtual void onDevice( const char * fullName, const GUID & output, const GUID & device ) = 0;
+};
+
+//! \since 1.3.16
+class NOVTABLE output_config_change_callback {
+public:
+	virtual void outputConfigChanged() = 0;
+};
+
+//! \since 1.4
+class NOVTABLE output_manager_v2 : public output_manager {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(output_manager_v2, output_manager);
+public:
+	virtual void setCoreConfig( const void * in, size_t inSize, bool bSuppressPlaybackRestart = false ) = 0;
+	void setCoreConfig( const outputCoreConfig_t & in ) { setCoreConfig(&in, sizeof(in) ); }
+	virtual void setCoreConfigDevice( const GUID & output, const GUID & device ) = 0;
+	virtual void listDevices( output_device_list_callback & callback ) = 0;
+	void listDevices( std::function< void ( const char*, const GUID&, const GUID&) > f );
+	virtual void addCallback( output_config_change_callback * ) = 0;
+	virtual void removeCallback( output_config_change_callback * ) = 0;
+
+	service_ptr addCallback( std::function<void()> f );
+	void addCallbackPermanent( std::function<void()> f );
+};
 
 extern const GUID output_id_null;
 extern const GUID output_id_default;
-
-#endif //_FOOBAR2000_SDK_OUTPUT_H_

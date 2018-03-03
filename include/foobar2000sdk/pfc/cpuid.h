@@ -1,3 +1,4 @@
+#pragma once
 
 // CPUID stuff supported only on MSVC for now, irrelevant for non x86
 #if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))

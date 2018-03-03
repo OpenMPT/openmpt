@@ -1,3 +1,7 @@
+#pragma once
+
+#ifdef FOOBAR2000_HAVE_DSP
+
 //! Helper class for running audio data through a DSP chain.
 class dsp_manager {
 public:
@@ -16,6 +20,7 @@ public:
 
 	//! Returns whether there's at least one active DSP in the configuration.
 	bool is_active() const;
+	bool need_track_change_mark() const;
 
 private:
 	struct t_dsp_chain_entry {
@@ -31,14 +36,14 @@ private:
 	
 	void dsp_run(t_dsp_chain::const_iterator p_iter,dsp_chunk_list * list,const metadb_handle_ptr & cur_file,unsigned flags,double & latency,abort_callback&);
 
-	dsp_manager(const dsp_manager &) {throw pfc::exception_not_implemented();}
-	const dsp_manager & operator=(const dsp_manager&) {throw pfc::exception_not_implemented();}
+	dsp_manager(const dsp_manager &) = delete;
+	const dsp_manager & operator=(const dsp_manager&) = delete;
 };
 
 //! Core API for accessing core playback DSP settings as well as spawning DSP configuration dialogs. \n
-//! Use static_api_ptr_t<dsp_config_manager>() to instantiate.
+//! Use dsp_config_manager::get() to obtain an instance.
 class dsp_config_manager : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(dsp_config_manager);
+	FB2K_MAKE_SERVICE_COREAPI(dsp_config_manager);
 public:
 	//! Retrieves current core playback DSP settings.
 	virtual void get_core_settings(dsp_chain_config & p_out) = 0;
@@ -62,8 +67,12 @@ public:
 	virtual void configure_embedded_change(HWND wnd,const dsp_chain_config & p_data) = 0;
 
 
+	enum default_insert_t {
+		default_insert_last,
+		default_insert_first,
+	};
 	//! Helper - enables a DSP in core playback settings.
-	void core_enable_dsp(const dsp_preset & preset);
+	void core_enable_dsp(const dsp_preset & preset, default_insert_t insertWhere = default_insert_first );
 	//! Helper - disables a DSP in core playback settings.
 	void core_disable_dsp(const GUID & id);
 	//! Helper - if a DSP with the specified identifier is present in playback settings, retrieves its configuration and returns true, otherwise returns false.
@@ -79,3 +88,5 @@ public:
 	//! Note: you must not try to alter core playback DSP settings inside this callback, or call anything else that possibly alters core playback DSP settings.
 	virtual void on_core_settings_change(const dsp_chain_config & p_newdata) = 0;
 };
+
+#endif // FOOBAR2000_HAVE_DSP

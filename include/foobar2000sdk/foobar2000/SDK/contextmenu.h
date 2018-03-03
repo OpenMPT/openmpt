@@ -250,6 +250,7 @@ class contextmenu_item_factory_t : public service_factory_single_t<T> {};
 //! New in 0.9.5.1. Static methods safe to use in prior versions as it will use slow fallback mode when the service isn't present. \n
 //! Functionality provided by menu_item_resolver methods isn't much different from just walking all registered contextmenu_item / mainmenu_commands implementations to find the command we want, but it uses a hint map to locate the service we're looking for without walking all of them which may be significantly faster in certain scenarios.
 class menu_item_resolver : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(menu_item_resolver)
 public:
 	virtual bool resolve_context_command(const GUID & id, service_ptr_t<class contextmenu_item> & out, t_uint32 & out_index) = 0;
 	virtual bool resolve_main_command(const GUID & id, service_ptr_t<class mainmenu_commands> & out, t_uint32 & out_index) = 0;
@@ -257,7 +258,7 @@ public:
 	static bool g_resolve_context_command(const GUID & id, service_ptr_t<class contextmenu_item> & out, t_uint32 & out_index);
 	static bool g_resolve_main_command(const GUID & id, service_ptr_t<class mainmenu_commands> & out, t_uint32 & out_index);
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(menu_item_resolver)
+	
 };
 
 //! \since 1.0

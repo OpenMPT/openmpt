@@ -415,6 +415,47 @@ namespace pfc {
             return writer.finalize();
         }
 
+
+
+		// 2016-05-16 additions
+		// Explicit UTF-16 converters
+		t_size estimate_utf16_to_utf8( const char16_t * p_in, size_t p_in_size ) {
+			const t_size insize = p_in_size;
+			t_size inptr = 0;
+			t_size retval = 1;//1 for null terminator
+			while(inptr < insize) {
+				unsigned newchar = 0;
+				t_size delta = utf16_decode_char(p_in + inptr,&newchar,insize - inptr);
+				if (delta == 0 || newchar == 0) break;
+				PFC_ASSERT(inptr + delta <= insize);
+				inptr += delta;
+
+				{
+					char temp[6];
+					delta = utf8_encode_char(newchar,temp);
+					if (delta == 0) break;
+					retval += delta;
+				}
+			}
+			return retval;
+		}
+		t_size convert_utf16_to_utf8( char * p_out, size_t p_out_size, const char16_t * p_in, size_t p_in_size ) {
+			const t_size insize = p_in_size;
+			t_size inptr = 0;
+			string_writer_t<char> writer(p_out,p_out_size);
+
+			while(inptr < insize && !writer.is_overrun()) {
+				unsigned newchar = 0;
+				t_size delta = utf16_decode_char(p_in + inptr,&newchar,insize - inptr);
+				if (delta == 0 || newchar == 0) break;
+				PFC_ASSERT(inptr + delta <= insize);
+				inptr += delta;
+				writer.write_as_utf8(newchar);
+			}
+
+			return writer.finalize();
+		}
+
     }
 }
 
@@ -452,3 +493,7 @@ namespace pfc {
 }
 
 #endif //_WINDOWS
+
+pfc::string_base & operator<<(pfc::string_base & p_fmt, const wchar_t * p_str) { 
+	p_fmt.add_string(pfc::stringcvt::string_utf8_from_wide(p_str) ); return p_fmt; 
+}

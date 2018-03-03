@@ -1,5 +1,7 @@
 #include "foobar2000.h"
 
+#ifdef FOOBAR2000_HAVE_DSP
+
 void dsp_manager::close() {
 	m_chain.remove_all();
 	m_config_changed = true;
@@ -10,6 +12,13 @@ void dsp_manager::set_config( const dsp_chain_config & p_data )
 	//dsp_chain_config::g_instantiate(m_dsp_list,p_data);
 	m_config.copy(p_data);
 	m_config_changed = true;
+}
+
+bool dsp_manager::need_track_change_mark() const {
+	for ( auto i = this->m_chain.first(); i.is_valid(); ++ i ) {
+		if ( i->m_dsp->need_track_change_mark() ) return true;
+	}
+	return false;
 }
 
 void dsp_manager::dsp_run(t_dsp_chain::const_iterator p_iter,dsp_chunk_list * p_list,const metadb_handle_ptr & cur_file,unsigned flags,double & latency,abort_callback & p_abort)
@@ -46,7 +55,8 @@ double dsp_manager::run(dsp_chunk_list * p_list,const metadb_handle_ptr & p_cur_
 				service_ptr_t<dsp> temp;
 
 				const dsp_preset & preset = m_config.get_item(n);
-				if (dsp_entry::g_dsp_exists(preset.get_owner())) {
+				const GUID owner = preset.get_owner();
+				if (dsp_entry::g_dsp_exists(owner) || dsp_entry_hidden::g_dsp_exists(owner)) {
 					t_dsp_chain::iterator iter = newchain.insert_last();
 					iter->m_preset = m_config.get_item(n);
 					iter->m_recycle_flag = false;
@@ -87,7 +97,7 @@ double dsp_manager::run(dsp_chunk_list * p_list,const metadb_handle_ptr & p_cur_
 
 			for(t_dsp_chain::iterator iter = newchain.first(); iter.is_valid(); ++iter) {
 				if (iter->m_dsp.is_empty()) {
-					if (!dsp_entry::g_instantiate(iter->m_dsp,iter->m_preset)) uBugCheck();
+					if (!dsp_entry::g_instantiate(iter->m_dsp,iter->m_preset) && !dsp_entry_hidden::g_instantiate(iter->m_dsp, iter->m_preset)) uBugCheck();
 				}
 			}
 
@@ -137,7 +147,7 @@ void dsp_manager::flush()
 
 bool dsp_manager::is_active() const {return m_config.get_count()>0;}
 
-void dsp_config_manager::core_enable_dsp(const dsp_preset & preset) {
+void dsp_config_manager::core_enable_dsp(const dsp_preset & preset, default_insert_t insertWhere ) {
 	dsp_chain_config_impl cfg;
 	get_core_settings(cfg);
 
@@ -154,7 +164,15 @@ void dsp_config_manager::core_enable_dsp(const dsp_preset & preset) {
 			break;
 		}
 	}
-	if (!found) {cfg.insert_item(preset,0); changed = true;}
+	if (!found) {
+		if ( insertWhere == default_insert_last ) {
+			cfg.add_item( preset );
+		} else {
+			cfg.insert_item(preset,0); 
+		}
+		
+		changed = true;
+	}
 
 	if (changed) set_core_settings(cfg);
 }
@@ -163,7 +181,7 @@ void dsp_config_manager::core_disable_dsp(const GUID & id) {
 	get_core_settings(cfg);
 
 	t_size n,m = cfg.get_count();
-	bit_array_bittable mask(m);
+	pfc::bit_array_bittable mask(m);
 	bool changed = false;
 	for(n=0;n<m;n++) {
 		bool axe = (cfg.get_item(n).get_owner() == id) ? true : false;
@@ -187,3 +205,5 @@ bool dsp_config_manager::core_query_dsp(const GUID & id, dsp_preset & out) {
 	}
 	return false;
 }
+
+#endif

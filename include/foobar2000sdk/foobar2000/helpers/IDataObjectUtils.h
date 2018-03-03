@@ -1,5 +1,8 @@
-#ifdef _WIN32
+#pragma once
+
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 #include <shlobj.h>
+#include "../helpers/COM_utils.h"
 
 namespace IDataObjectUtils {
 
@@ -149,10 +152,10 @@ namespace IDataObjectUtils {
 
 		virtual void EnumFormats(TFormatList & out) const {
 			pfc::avltree_t<UINT> formats;
-			for(t_entries::const_iterator walk = m_entries.first(); walk.is_valid(); ++walk) {
+			for(auto walk = m_entries.cfirst(); walk.is_valid(); ++walk) {
 				formats.add_item( walk->m_key.cfFormat );
 			}
-			for(pfc::const_iterator<UINT> walk = formats.first(); walk.is_valid(); ++walk) {
+			for(auto walk = formats.cfirst(); walk.is_valid(); ++walk) {
 				AddFormat(out, *walk);
 			}
 		}
@@ -180,4 +183,4 @@ namespace IDataObjectUtils {
 	};
 }
 
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

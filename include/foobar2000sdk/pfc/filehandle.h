@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 #ifdef _WIN32
     typedef HANDLE fileHandle_t;

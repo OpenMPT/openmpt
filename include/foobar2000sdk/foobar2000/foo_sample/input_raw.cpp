@@ -9,8 +9,10 @@ enum {
 	raw_total_sample_width = raw_bytes_per_sample * raw_channels,
 };
 
-// No inheritance. Our methods get called over input framework templates. See input_singletrack_impl for descriptions of what each method does.
-class input_raw {
+// Note that input class does *not* implement virtual methods or derive from interface classes.
+// Our methods get called over input framework templates. See input_singletrack_impl for descriptions of what each method does.
+// input_stubs just provides stub implementations of mundane methods that are irrelevant for most implementations.
+class input_raw : public input_stubs {
 public:
 	void open(service_ptr_t<file> p_filehint,const char * p_path,t_input_open_reason p_reason,abort_callback & p_abort) {
 		if (p_reason == input_open_info_write) throw exception_io_unsupported_format();//our input does not support retagging.
@@ -71,6 +73,12 @@ public:
 	
 	static bool g_is_our_content_type(const char * p_content_type) {return false;} // match against supported mime types here
 	static bool g_is_our_path(const char * p_path,const char * p_extension) {return stricmp_utf8(p_extension,"raw") == 0;}
+	static const char * g_get_name() { return "foo_sample raw input"; }
+	static const GUID g_get_guid() {
+		// GUID of the decoder. Replace with your own when reusing code.
+		static const GUID I_am_foo_sample_and_this_is_my_decoder_GUID = { 0xd9c01c8d, 0x69c5, 0x4eec,{ 0xa2, 0x1c, 0x1d, 0x14, 0xef, 0x65, 0xbf, 0x8b } };
+		return I_am_foo_sample_and_this_is_my_decoder_GUID;
+	}
 public:
 	service_ptr_t<file> m_file;
 	pfc::array_t<t_uint8> m_buffer;

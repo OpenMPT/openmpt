@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "cue_creator.h"
 
 
 namespace {
@@ -36,8 +37,7 @@ static bool is_meta_same_everywhere(const cue_creator::t_entry_list & p_list,con
 	return true;
 }
 
-static const char g_eol[] = "\r\n";
-
+#define g_eol "\r\n"
 
 namespace cue_creator
 {

@@ -21,7 +21,7 @@ static void noopt_convert_to_32bit(const audio_sample * p_source,t_size p_count,
 	for(;num;--num)
 	{
 		t_int64 val = pfc::audio_math::rint64( *(p_source++) * p_scale );
-		if (val < -(t_int64)0x80000000) val = -(t_int64)0x80000000;
+		if (val < -2147483648ll) val = -2147483648ll;
 		else if (val > 0x7FFFFFFF) val = 0x7FFFFFFF;
 		*(p_output++) = (t_int32) val;
 	}
@@ -33,7 +33,7 @@ inline static void noopt_convert_to_16bit(const audio_sample * p_source,t_size p
 	}
 }
 
-inline static void noopt_convert_from_int16(const t_int16 * p_source,t_size p_count,audio_sample * p_output,float p_scale)
+inline static void noopt_convert_from_int16(const t_int16 * __restrict p_source,t_size p_count, audio_sample * __restrict p_output,float p_scale)
 {
 	t_size num = p_count;
 	for(;num;num--)
@@ -42,7 +42,7 @@ inline static void noopt_convert_from_int16(const t_int16 * p_source,t_size p_co
 
 
 
-inline static void noopt_convert_from_int32(const t_int32 * p_source,t_size p_count,audio_sample * p_output,float p_scale)
+inline static void noopt_convert_from_int32(const t_int32 * __restrict p_source,t_size p_count,audio_sample * __restrict p_output,float p_scale)
 {
 	t_size num = p_count;
 	for(;num;num--)
@@ -84,7 +84,7 @@ namespace pfc {
 
 	void audio_math::convert_to_int32(const audio_sample * p_source,t_size p_count,t_int32 * p_output,audio_sample p_scale)
 	{
-		audio_sample scale = (audio_sample)(p_scale * 0x80000000);
+		audio_sample scale = (audio_sample)(p_scale * 0x80000000ul);
 		{
 			noopt_convert_to_32bit(p_source,p_count,p_output,scale);
 		}
@@ -98,7 +98,7 @@ namespace pfc {
 
 	void audio_math::convert_from_int32(const t_int32 * p_source,t_size p_count,audio_sample * p_output,audio_sample p_scale)
 	{
-		audio_sample scale = (audio_sample) ( p_scale / (double) 0x80000000 );
+		audio_sample scale = (audio_sample) ( p_scale / (double) 0x80000000ul );
 		noopt_convert_from_int32(p_source,p_count,p_output,scale);
 	}
 

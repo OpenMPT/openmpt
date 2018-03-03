@@ -416,6 +416,26 @@ int stricmp_ascii_ex(const char * const s1,t_size const len1,const char * const 
 	}
 
 }
+
+int wstricmp_ascii( const wchar_t * s1, const wchar_t * s2 ) throw() {
+	for(;;) {
+		wchar_t c1 = *s1, c2 = *s2;
+
+		if (c1 > 0 && c2 > 0 && c1 < 128 && c2 < 128) {
+			c1 = ascii_tolower_lookup((char)c1);
+			c2 = ascii_tolower_lookup((char)c2);
+		} else {
+			if (c1 == 0 && c2 == 0) return 0;
+		}
+		if (c1<c2) return -1;
+		else if (c1>c2) return 1;
+		else if (c1 == 0) return 0;
+
+		s1++;
+		s2++;
+	}
+}
+
 int stricmp_ascii(const char * s1,const char * s2) throw() {
 	for(;;) {
 		char c1 = *s1, c2 = *s2;
@@ -1216,4 +1236,29 @@ void string_base::fix_dir_separator(char c) {
 		return strdup(src);
 #endif
 	}
+
+
+	string_part_ref string_part_ref::make(const char * ptr, t_size len) {
+		string_part_ref val = {ptr, len}; return val;
+	}
+
+	string_part_ref string_part_ref::substring(t_size base) const {
+		PFC_ASSERT( base <= m_len );
+		return make(m_ptr + base, m_len - base);
+	}
+	string_part_ref string_part_ref::substring(t_size base, t_size len) const {
+		PFC_ASSERT( base <= m_len && base + len <= m_len );
+		return make(m_ptr + base, len);
+	}
+
+	string_part_ref string_part_ref::make( const char * str ) {return make( str, strlen(str) ); }
+
+	bool string_part_ref::equals( string_part_ref other ) const {
+		if ( other.m_len != this->m_len ) return false;
+		return memcmp( other.m_ptr, this->m_ptr, m_len ) == 0;
+	}
+	bool string_part_ref::equals( const char * str ) const {
+		return equals(make(str) );
+	}
+
 } //namespace pfc

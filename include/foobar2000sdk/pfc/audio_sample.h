@@ -1,3 +1,4 @@
+#pragma once
 #include <math.h>
 
 #define audio_sample_size 32
@@ -78,6 +79,8 @@ namespace pfc {
 		static audio_sample decodeFloat24ptr(const void * sourcePtr);
 		static audio_sample decodeFloat24ptrbs(const void * sourcePtr);
 		static audio_sample decodeFloat16(uint16_t source);
+
+		static unsigned bitrate_kbps( uint64_t fileSize, double duration );
 	}; // class audio_math
 
 } // namespace pfc

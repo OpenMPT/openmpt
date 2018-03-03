@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <MMReg.h>
+#endif
 //! Thrown when audio_chunk sample rate or channel mapping changes in mid-stream and the code receiving audio_chunks can't deal with that scenario.
 PFC_DECLARE_EXCEPTION(exception_unexpected_audio_format_change, exception_io_data, "Unexpected audio format change" );
 
@@ -126,6 +129,14 @@ public:
 	
 	//! Returns whether the chunk contents are valid (for bug check purposes).
 	bool is_valid() const;
+
+	void debugChunkSpec() const;
+#if PFC_DEBUG
+	void assert_valid(const char * ctx) const;
+#else
+	void assert_valid(const char * ctx) const {}
+#endif
+	
     
     //! Returns whether the chunk contains valid sample rate & channel info (but allows an empty chunk).
     bool is_spec_valid() const;
@@ -134,7 +145,9 @@ public:
 	size_t get_used_size() const {return get_sample_count() * get_channels();}
 	//! Same as get_used_size(); old confusingly named version.
 	size_t get_data_length() const {return get_sample_count() * get_channels();}
+#ifdef _MSC_VER
 #pragma deprecated( get_data_length )
+#endif
 
 	//! Resets all audio_chunk data.
 	inline void reset() {
@@ -226,9 +239,24 @@ public:
 		bool operator==(const spec_t & other) const { return equals(*this, other);}
 		bool operator!=(const spec_t & other) const { return !equals(*this, other);}
 		bool is_valid() const;
+		void clear() { sampleRate = 0; chanCount = 0; chanMask = 0; }
+
+#ifdef _WIN32
+		//! Creates WAVE_FORMAT_IEEE_FLOAT WAVEFORMATEX structure
+		WAVEFORMATEX toWFX() const;
+		//! Creates WAVE_FORMAT_IEEE_FLOAT WAVEFORMATEXTENSIBLE structure
+		WAVEFORMATEXTENSIBLE toWFXEX() const;
+		//! Creates WAVE_FORMAT_PCM WAVEFORMATEX structure
+		WAVEFORMATEX toWFXWithBPS(uint32_t bps) const;
+		//! Creates WAVE_FORMAT_PCM WAVEFORMATEXTENSIBLE structure
+		WAVEFORMATEXTENSIBLE toWFXEXWithBPS(uint32_t bps) const;
+#endif
+
+		pfc::string8 toString() const;
 	};
 	static spec_t makeSpec(uint32_t rate, uint32_t channels);
 	static spec_t makeSpec(uint32_t rate, uint32_t channels, uint32_t chanMask);
+	static spec_t emptySpec() { return makeSpec(0, 0, 0); }
 
 	spec_t get_spec() const;
 	void set_spec(const spec_t &);
@@ -242,14 +270,14 @@ template<typename container_t = pfc::mem_block_aligned_t<audio_sample, 16> >
 class audio_chunk_impl_t : public audio_chunk {
 	typedef audio_chunk_impl_t<container_t> t_self;
 	container_t m_data;
-	unsigned m_srate,m_nch,m_setup;
-	t_size m_samples;
+	unsigned m_srate = 0, m_nch = 0, m_setup = 0;
+	t_size m_samples = 0;
+	
 public:
-	audio_chunk_impl_t() : m_srate(0), m_nch(0), m_samples(0), m_setup(0) {}
-	audio_chunk_impl_t(const audio_sample * src,unsigned samples,unsigned nch,unsigned srate) : m_srate(0), m_nch(0), m_samples(0)
-	{set_data(src,samples,nch,srate);}
-	audio_chunk_impl_t(const audio_chunk & p_source) : m_srate(0), m_nch(0), m_samples(0), m_setup(0) {copy(p_source);}
-	audio_chunk_impl_t(const t_self & p_source) : m_srate(0), m_nch(0), m_samples(0), m_setup(0) {copy(p_source);}
+	audio_chunk_impl_t() {}
+	audio_chunk_impl_t(const audio_sample * src,unsigned samples,unsigned nch,unsigned srate) {set_data(src,samples,nch,srate);}
+	audio_chunk_impl_t(const audio_chunk & p_source) {copy(p_source);}
+	
 	
 	virtual audio_sample * get_data() {return m_data.get_ptr();}
 	virtual const audio_sample * get_data() const {return m_data.get_ptr();}
@@ -267,7 +295,12 @@ public:
 	virtual void set_sample_count(t_size val) {m_samples = val;}
 
 	const t_self & operator=(const audio_chunk & p_source) {copy(p_source);return *this;}
+
+	/*
+	Disabled to get compiler generated ones
+	audio_chunk_impl_t(const t_self & p_source) : m_srate(0), m_nch(0), m_setup(0), m_samples(0) { copy(p_source); }
 	const t_self & operator=(const t_self & p_source) {copy(p_source);return *this;}
+	*/
 };
 
 typedef audio_chunk_impl_t<> audio_chunk_impl;
@@ -277,9 +310,11 @@ typedef audio_chunk_impl_t<pfc::mem_block_aligned_incremental_t<audio_sample, 16
 class audio_chunk_memref_impl : public audio_chunk {
 public:
 	audio_chunk_memref_impl(const audio_sample * p_data,t_size p_samples,t_uint32 p_sample_rate,t_uint32 p_channels,t_uint32 p_channel_config) :
-	m_data(p_data), m_samples(p_samples), m_sample_rate(p_sample_rate), m_channels(p_channels), m_channel_config(p_channel_config)
+	m_samples(p_samples), m_sample_rate(p_sample_rate), m_channels(p_channels), m_channel_config(p_channel_config), m_data(p_data)
 	{
-		PFC_ASSERT(is_valid());
+#if PFC_DEBUG
+		assert_valid(__FUNCTION__);
+#endif
 	}
 
 	audio_sample * get_data() {throw pfc::exception_not_implemented();}
@@ -308,72 +343,6 @@ private:
 typedef audio_chunk_fast_impl audio_chunk_impl_temporary;
 typedef audio_chunk_impl audio_chunk_i;
 typedef audio_chunk_memref_impl audio_chunk_temp_impl;
-
-//! Duration counter class - accumulates duration using sample values, without any kind of rounding error accumulation.
-class duration_counter {
-public:
-	duration_counter() : m_offset() {
-	}
-	void set(double v) {
-		m_sampleCounts.remove_all();
-		m_offset = v;
-	}
-	void reset() {
-		set(0);
-	}
-
-	void add(double v) {m_offset += v;}
-	void subtract(double v) {m_offset -= v;}
-
-	double query() const;
-	uint64_t queryAsSampleCount( uint32_t rate );
-
-	void add(const audio_chunk & c) {
-		add(c.get_sample_count(), c.get_sample_rate());
-	}
-	void add(t_uint64 sampleCount, t_uint32 sampleRate) {
-		PFC_ASSERT( sampleRate > 0 );
-		if (sampleRate > 0 && sampleCount > 0) {
-			m_sampleCounts.find_or_add(sampleRate) += sampleCount;
-		}
-	}
-	void add(const duration_counter & other) {
-		add(other.m_offset);
-		for(t_map::const_iterator walk = other.m_sampleCounts.first(); walk.is_valid(); ++walk) {
-			add(walk->m_value, walk->m_key);
-		}
-	}
-	void subtract(const duration_counter & other) {
-		subtract(other.m_offset);
-		for(t_map::const_iterator walk = other.m_sampleCounts.first(); walk.is_valid(); ++walk) {
-			subtract(walk->m_value, walk->m_key);
-		}
-	}
-	void subtract(t_uint64 sampleCount, t_uint32 sampleRate) {
-		PFC_ASSERT( sampleRate > 0 );
-		if (sampleRate > 0 && sampleCount > 0) {
-			t_uint64 * val = m_sampleCounts.query_ptr(sampleRate);
-			if (val == NULL) throw pfc::exception_invalid_params();
-			if (*val < sampleCount) throw pfc::exception_invalid_params();
-			else if (*val == sampleCount) {
-				m_sampleCounts.remove(sampleRate);
-			} else {
-				*val -= sampleCount;
-			}
-			
-		}
-	}
-	void subtract(const audio_chunk & c) {
-		subtract(c.get_sample_count(), c.get_sample_rate());
-	}
-	template<typename t_source> duration_counter & operator+=(const t_source & source) {add(source); return *this;}
-	template<typename t_source> duration_counter & operator-=(const t_source & source) {subtract(source); return *this;}
-	template<typename t_source> duration_counter & operator=(const t_source & source) {reset(); add(source); return *this;}
-private:
-	double m_offset;
-	typedef pfc::map_t<t_uint32, t_uint64> t_map;
-	t_map m_sampleCounts;
-};
 
 class audio_chunk_partial_ref : public audio_chunk_temp_impl {
 public:

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "stream_buffer_helper.h"
+
 stream_reader_buffered::stream_reader_buffered(stream_reader * p_base,t_size p_buffer) : m_base(p_base)
 {
 	m_buffer.set_size_in_range(pfc::min_t<size_t>(1024, p_buffer), p_buffer);

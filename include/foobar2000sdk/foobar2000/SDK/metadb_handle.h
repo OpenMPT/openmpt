@@ -163,13 +163,15 @@ namespace metadb_handle_list_helper {
 	t_filesize calc_total_size_ex(metadb_handle_list_cref list, bool & foundUnknown);
 
 	bool extract_single_path(metadb_handle_list_cref list, const char * &path);
+	bool extract_folder_path(metadb_handle_list_cref list, pfc::string_base & path);
+
 };
 
 template<template<typename> class t_alloc = pfc::alloc_fast >
 class metadb_handle_list_t : public service_list_t<metadb_handle,t_alloc> {
 private:
 	typedef metadb_handle_list_t<t_alloc> t_self;
-	typedef list_base_const_t<metadb_handle_ptr> t_interface;
+	typedef pfc::list_base_const_t<metadb_handle_ptr> t_interface;
 public:
 	inline void sort_by_format(const char * spec,titleformat_hook * p_hook) {
 		return metadb_handle_list_helper::sort_by_format(*this, spec, p_hook);
@@ -203,17 +205,17 @@ public:
 
 	inline void sort_by_path() {metadb_handle_list_helper::sort_by_path(*this);}
 
-	const t_self & operator=(const t_self & p_source) {remove_all(); add_items(p_source);return *this;}
-	const t_self & operator=(const t_interface & p_source) {remove_all(); add_items(p_source);return *this;}
-	const t_self & operator=(t_self && p_source) {move_from(p_source); return *this; }
-	metadb_handle_list_t(const t_self & p_source) {add_items(p_source);}
-	metadb_handle_list_t(const t_interface & p_source) {add_items(p_source);}
+	const t_self & operator=(const t_self & p_source) { this->remove_all(); this->add_items(p_source);return *this;}
+	const t_self & operator=(const t_interface & p_source) {this->remove_all(); this->add_items(p_source);return *this;}
+	const t_self & operator=(t_self && p_source) {this->move_from(p_source); return *this; }
+	metadb_handle_list_t(const t_self & p_source) { this->add_items(p_source);}
+	metadb_handle_list_t(const t_interface & p_source) { this->add_items(p_source);}
 	metadb_handle_list_t() {}
 
-	metadb_handle_list_t(t_self && p_source) {move_from(p_source);}
+	metadb_handle_list_t(t_self && p_source) { this->move_from(p_source);}
 
-	t_self & operator+=(const t_interface & source) {add_items(source); return *this;}
-	t_self & operator+=(const metadb_handle_ptr & source) {add_item(source); return *this;}
+	t_self & operator+=(const t_interface & source) { this->add_items(source); return *this;}
+	t_self & operator+=(const metadb_handle_ptr & source) { this->add_item(source); return *this;}
 
 	bool extract_single_path(const char * &path) const {return metadb_handle_list_helper::extract_single_path(*this, path);}
 };

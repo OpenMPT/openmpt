@@ -70,7 +70,7 @@ struct t_playback_queue_item {
 
 //! This service provides methods for all sorts of playlist interaction.\n
 //! All playlist_manager methods are valid only from main app thread.\n
-//! Usage: static_api_ptr_t<playlist_manager>.
+//! Usage: playlist_manager::get() to obtain an instance.
 class NOVTABLE playlist_manager : public service_base
 {
 public:
@@ -232,7 +232,7 @@ public:
 
 	
 	//! Helper; removes all items from the playback queue.
-	void queue_flush() {queue_remove_mask(bit_array_true());}
+	void queue_flush() {queue_remove_mask(pfc::bit_array_true());}
 	//! Helper; returns whether there are items in the playback queue.
 	bool queue_is_active() {return queue_get_count() > 0;}
 
@@ -370,7 +370,12 @@ public:
 
 	static void g_make_selection_move_permutation(t_size * p_output,t_size p_count,const bit_array & p_selection,int p_delta);
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playlist_manager);
+	//! Helper to update playlists after rechaptering a file. \n
+	//! You typically want to call metadb_io_v2::on_file_rechaptered() instead, as it will forcibly reload info first.
+	void on_file_rechaptered(const char * path, metadb_handle_list_cref items);
+	void on_files_rechaptered( metadb_handle_list_cref newHandles );
+
+	FB2K_MAKE_SERVICE_COREAPI(playlist_manager);
 };
 
 //! Extension of the playlist_manager service that manages playlist properties.
@@ -482,12 +487,12 @@ public:
 		return true;
 	}
 
-	FB2K_MAKE_SERVICE_INTERFACE(playlist_manager_v2,playlist_manager)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playlist_manager_v2,playlist_manager)
 };
 
 //! \since 0.9.5
 class NOVTABLE playlist_manager_v3 : public playlist_manager_v2 {
-	FB2K_MAKE_SERVICE_INTERFACE(playlist_manager_v3,playlist_manager_v2)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playlist_manager_v3,playlist_manager_v2)
 public:
 	virtual t_size recycler_get_count() = 0;
 	virtual void recycler_get_content(t_size which, metadb_handle_list_ref out) = 0;
@@ -502,7 +507,7 @@ public:
 
 //! \since 0.9.5.4
 class NOVTABLE playlist_manager_v4 : public playlist_manager_v3 {
-	FB2K_MAKE_SERVICE_INTERFACE(playlist_manager_v4, playlist_manager_v3)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playlist_manager_v4, playlist_manager_v3)
 public:
 	virtual void playlist_get_sideinfo(t_size which, stream_writer * stream, abort_callback & abort) = 0;
 	virtual t_size create_playlist_ex(const char * p_name,t_size p_name_length,t_size p_index, metadb_handle_list_cref content, stream_reader * sideInfo, abort_callback & abort) = 0;
@@ -628,13 +633,13 @@ protected:
 class playlist_callback_impl_base : public playlist_callback {
 public:
 	playlist_callback_impl_base(t_uint32 p_flags = 0) {
-		static_api_ptr_t<playlist_manager>()->register_callback(this,p_flags);
+		playlist_manager::get()->register_callback(this,p_flags);
 	}
 	~playlist_callback_impl_base() {
-		static_api_ptr_t<playlist_manager>()->unregister_callback(this);
+		playlist_manager::get()->unregister_callback(this);
 	}
 	void set_callback_flags(t_uint32 p_flags) {
-		static_api_ptr_t<playlist_manager>()->modify_callback(this,p_flags);
+		playlist_manager::get()->modify_callback(this,p_flags);
 	}
 	//dummy implementations - avoid possible pure virtual function calls!
 	void on_items_added(t_size p_playlist,t_size p_start, const pfc::list_base_const_t<metadb_handle_ptr> & p_data,const bit_array & p_selection) {}
@@ -667,13 +672,13 @@ public:
 class playlist_callback_single_impl_base : public playlist_callback_single {
 protected:
 	playlist_callback_single_impl_base(t_uint32 p_flags = 0) {
-		static_api_ptr_t<playlist_manager>()->register_callback(this,p_flags);
+		playlist_manager::get()->register_callback(this,p_flags);
 	}
 	void set_callback_flags(t_uint32 p_flags) {
-		static_api_ptr_t<playlist_manager>()->modify_callback(this,p_flags);
+		playlist_manager::get()->modify_callback(this,p_flags);
 	}
 	~playlist_callback_single_impl_base() {
-		static_api_ptr_t<playlist_manager>()->unregister_callback(this);
+		playlist_manager::get()->unregister_callback(this);
 	}
 
 	//dummy implementations - avoid possible pure virtual function calls!
@@ -720,6 +725,7 @@ protected:
 
 
 class NOVTABLE playlist_incoming_item_filter : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(playlist_incoming_item_filter);
 public:
 	//! Pre-sorts incoming items according to user-configured settings, removes duplicates. \n
 	//! @param in Items to process.
@@ -763,8 +769,6 @@ public:
 	bool process_location(const char * url,pfc::list_base_t<metadb_handle_ptr> & out,bool filter,const char * p_mask,const char * p_exclude,HWND p_parentwnd);
 	//! Helper - returns a pfc::com_ptr_t<> rather than a raw pointer.
 	pfc::com_ptr_t<interface IDataObject> create_dataobject_ex(metadb_handle_list_cref data);
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playlist_incoming_item_filter);
 };
 
 //! For use with playlist_incoming_item_filter_v2::process_locations_async().
@@ -781,6 +785,7 @@ typedef service_ptr_t<process_locations_notify> process_locations_notify_ptr;
 
 //! \since 0.9.3
 class NOVTABLE playlist_incoming_item_filter_v2 : public playlist_incoming_item_filter {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playlist_incoming_item_filter_v2, playlist_incoming_item_filter)
 public:
 	enum {
 		//! Set this to disable presorting (according to user settings) and duplicate removal in output list. Should be unset in most cases.
@@ -806,16 +811,13 @@ public:
 	//! @param p_parentwnd Parent window for spawned progress dialogs.
 	//! @param p_notify Callback receiving notifications about success/abort of the operation as well as output item list.
 	virtual void process_dropped_files_async(interface IDataObject * p_dataobject,t_uint32 p_op_flags,HWND p_parentwnd,process_locations_notify_ptr p_notify) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE(playlist_incoming_item_filter_v2,playlist_incoming_item_filter);
 };
 
 //! \since 0.9.5
 class playlist_incoming_item_filter_v3 : public playlist_incoming_item_filter_v2 {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(playlist_incoming_item_filter_v3, playlist_incoming_item_filter_v2)
 public:
 	virtual bool auto_playlist_name(metadb_handle_list_cref data,pfc::string_base & out) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE(playlist_incoming_item_filter_v3,playlist_incoming_item_filter_v2)
 };
 
 //! Implementation of dropped_files_data.
@@ -862,7 +864,7 @@ public:
 protected:
 	virtual void on_lock_state_change() {}
 	bool is_playlist_command_available(t_uint32 what) const {
-		static_api_ptr_t<playlist_manager> api;
+		auto api = playlist_manager::get();
 		const t_size active = api->get_active_playlist();
 		if (active == ~0) return false;
 		return (api->playlist_lock_get_filter_mask(active) & what) == 0;

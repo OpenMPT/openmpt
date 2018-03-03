@@ -1,3 +1,5 @@
+#pragma once
+
 class _critical_section_base {
 protected:
 	CRITICAL_SECTION sec;

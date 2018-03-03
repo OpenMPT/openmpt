@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 // Read/write lock guarded object store for safe concurrent access
 template<typename t_object>

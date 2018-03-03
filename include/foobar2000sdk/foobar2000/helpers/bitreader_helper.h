@@ -1,3 +1,5 @@
+#pragma once
+
 namespace bitreader_helper {
 
 	inline static size_t extract_bit(const t_uint8 * p_stream,size_t p_offset) {

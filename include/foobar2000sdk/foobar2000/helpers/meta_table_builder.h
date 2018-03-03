@@ -1,3 +1,5 @@
+#pragma once
+
 class _meta_table_enum_wrapper {
 public:
 	_meta_table_enum_wrapper(file_info & p_info) : m_info(p_info) {}

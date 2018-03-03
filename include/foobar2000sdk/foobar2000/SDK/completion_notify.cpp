@@ -16,12 +16,12 @@ namespace {
 
 void completion_notify::g_signal_completion_async(completion_notify_ptr p_notify,unsigned p_code) {
 	if (p_notify.is_valid()) {
-		static_api_ptr_t<main_thread_callback_manager>()->add_callback(new service_impl_t<main_thread_callback_myimpl>(p_notify,p_code));
+		main_thread_callback_manager::get()->add_callback(new service_impl_t<main_thread_callback_myimpl>(p_notify,p_code));
 	}
 }
 
 void completion_notify::on_completion_async(unsigned p_code) {
-	static_api_ptr_t<main_thread_callback_manager>()->add_callback(new service_impl_t<main_thread_callback_myimpl>(this,p_code));
+	main_thread_callback_manager::get()->add_callback(new service_impl_t<main_thread_callback_myimpl>(this,p_code));
 }
 
 

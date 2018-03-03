@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 
 	struct _rcptr_null;
@@ -24,7 +26,8 @@ namespace pfc {
 	template<typename t_object>
 	class rc_container_t : public rc_container_base {
 	public:
-		TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(rc_container_t,m_object)
+		template<typename ... arg_t>
+        rc_container_t(arg_t && ... arg) : m_object(std::forward<arg_t>(arg) ...) {}
 
 		t_object m_object;
 	};
@@ -102,34 +105,9 @@ namespace pfc {
 			on_new(new t_container_impl());
 		}
 
-		template<typename t_param1>
-		void new_t(t_param1 const & p_param1) {
-			on_new(new t_container_impl(p_param1));
-		}
-
-		template<typename t_param1,typename t_param2>
-		void new_t(t_param1 const & p_param1, t_param2 const & p_param2) {
-			on_new(new t_container_impl(p_param1,p_param2));
-		}
-
-		template<typename t_param1,typename t_param2,typename t_param3>
-		void new_t(t_param1 const & p_param1, t_param2 const & p_param2,t_param3 const & p_param3) {
-			on_new(new t_container_impl(p_param1,p_param2,p_param3));
-		}
-
-		template<typename t_param1,typename t_param2,typename t_param3,typename t_param4>
-		void new_t(t_param1 const & p_param1, t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4) {
-			on_new(new t_container_impl(p_param1,p_param2,p_param3,p_param4));
-		}
-		
-		template<typename t_param1,typename t_param2,typename t_param3,typename t_param4,typename t_param5>
-		void new_t(t_param1 const & p_param1, t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4,t_param5 const & p_param5) {
-			on_new(new t_container_impl(p_param1,p_param2,p_param3,p_param4,p_param5));
-		}
-		
-		template<typename t_param1,typename t_param2,typename t_param3,typename t_param4,typename t_param5,typename t_param6>
-		void new_t(t_param1 const & p_param1, t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4,t_param5 const & p_param5,t_param6 const & p_param6) {
-			on_new(new t_container_impl(p_param1,p_param2,p_param3,p_param4,p_param5,p_param6));
+		template<typename ... arg_t>
+		void new_t(arg_t && ... arg) {
+            on_new(new t_container_impl(std::forward<arg_t>(arg) ...));
 		}
 
 		static t_self g_new_t() {
@@ -138,38 +116,10 @@ namespace pfc {
 			return temp;
 		}
 
-		template<typename t_param1>
-		static t_self g_new_t(t_param1 const & p_param1) {
+		template<typename ... arg_t>
+		static t_self g_new_t(arg_t && ... arg) {
 			t_self temp;
-			temp.new_t(p_param1);
-			return temp;
-		}
-
-		template<typename t_param1,typename t_param2>
-		static t_self g_new_t(t_param1 const & p_param1,t_param2 const & p_param2) {
-			t_self temp;
-			temp.new_t(p_param1,p_param2);
-			return temp;
-		}
-
-		template<typename t_param1,typename t_param2,typename t_param3>
-		static t_self g_new_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3) {
-			t_self temp;
-			temp.new_t(p_param1,p_param2,p_param3);
-			return temp;
-		}
-
-		template<typename t_param1,typename t_param2,typename t_param3,typename t_param4>
-		static t_self g_new_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4) {
-			t_self temp;
-			temp.new_t(p_param1,p_param2,p_param3,p_param4);
-			return temp;
-		}
-
-		template<typename t_param1,typename t_param2,typename t_param3,typename t_param4,typename t_param5>
-		static t_self g_new_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4,t_param5 const & p_param5) {
-			t_self temp;
-			temp.new_t(p_param1,p_param2,p_param3,p_param4,p_param5);
+            temp.new_t(std::forward<arg_t>(arg) ...);
 			return temp;
 		}
 
@@ -211,53 +161,11 @@ namespace pfc {
 		t_object * m_ptr;
 	};
 
-	template<typename t_object>
-	rcptr_t<t_object> rcnew_t() {
+	template<typename t_object, typename ... arg_t>
+	rcptr_t<t_object> rcnew_t(arg_t && ... arg) {
 		rcptr_t<t_object> temp;
-		temp.new_t();
+        temp.new_t(std::forward<arg_t>(arg) ...);
 		return temp;		
-	}
-
-	template<typename t_object,typename t_param1>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1);
-		return temp;		
-	}
-
-	template<typename t_object,typename t_param1,typename t_param2>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1,t_param2 const & p_param2) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1,p_param2);
-		return temp;		
-	}
-
-	template<typename t_object,typename t_param1,typename t_param2,typename t_param3>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1,p_param2,p_param3);
-		return temp;		
-	}
-
-	template<typename t_object,typename t_param1,typename t_param2,typename t_param3,typename t_param4>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1,p_param2,p_param3,p_param4);
-		return temp;		
-	}
-
-	template<typename t_object,typename t_param1,typename t_param2,typename t_param3,typename t_param4,typename t_param5>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4,t_param5 const & p_param5) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1,p_param2,p_param3,p_param4,p_param5);
-		return temp;
-	}
-
-	template<typename t_object,typename t_param1,typename t_param2,typename t_param3,typename t_param4,typename t_param5,typename t_param6>
-	rcptr_t<t_object> rcnew_t(t_param1 const & p_param1,t_param2 const & p_param2,t_param3 const & p_param3,t_param4 const & p_param4,t_param5 const & p_param5,t_param6 const & p_param6) {
-		rcptr_t<t_object> temp;
-		temp.new_t(p_param1,p_param2,p_param3,p_param4,p_param5,p_param6);
-		return temp;
 	}
 
 	class traits_rcptr : public traits_default {

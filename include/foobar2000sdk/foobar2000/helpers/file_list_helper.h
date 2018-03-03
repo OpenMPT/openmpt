@@ -1,6 +1,4 @@
-#ifndef _foobar2000_helpers_file_list_helper_
-#define _foobar2000_helpers_file_list_helper_
-
+#pragma once
 
 namespace file_list_helper
 {
@@ -26,5 +24,3 @@ namespace file_list_helper
 
 };
 
-
-#endif //_foobar2000_helpers_file_list_helper_

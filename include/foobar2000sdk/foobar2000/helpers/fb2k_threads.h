@@ -1,3 +1,5 @@
+#pragma once
+
 inline static t_size GetOptimalWorkerThreadCount() throw() {
 	return pfc::getOptimalWorkerThreadCount();
 }

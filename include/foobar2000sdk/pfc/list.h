@@ -1,5 +1,4 @@
-#ifndef _PFC_LIST_H_
-#define _PFC_LIST_H_
+#pragma once
 
 namespace pfc {
 
@@ -425,9 +424,9 @@ public:
 
 	void get_items_mask(list_impl_t<T,t_storage> & out,const bit_array & mask)
 	{
-		t_size n,count = get_size();
-		for_each_bit_array(n,mask,true,0,count)
+		mask.walk( get_size(), [&] (size_t n) {
 			out.add_item(m_buffer[n]);
+		} );
 	}
 
 	void filter_mask(const bit_array & mask)
@@ -639,4 +638,3 @@ private:
 template<typename item, template<typename> class alloc> class traits_t<list_t<item, alloc> > : public combine_traits<traits_t<alloc<item> >, traits_vtable> {};
 
 }
-#endif //_PFC_LIST_H_

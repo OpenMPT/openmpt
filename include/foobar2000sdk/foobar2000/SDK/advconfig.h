@@ -22,7 +22,7 @@ public:
 	}
 
 	static const GUID guid_root;
-	static const GUID guid_branch_tagging,guid_branch_decoding,guid_branch_tools,guid_branch_playback,guid_branch_display;
+	static const GUID guid_branch_tagging,guid_branch_decoding,guid_branch_tools,guid_branch_playback,guid_branch_display,guid_branch_debug;
 
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(advconfig_entry);
 };
@@ -190,52 +190,73 @@ public:
 
 
 //! Special advconfig_entry_string implementation - implements integer entries. Use advconfig_integer_factory to register your own integer entries in Advanced Preferences instead of using this class directly.
-class advconfig_entry_integer_impl : public advconfig_entry_string_v2 {
+template<typename int_t_>
+class advconfig_entry_integer_impl_ : public advconfig_entry_string_v2 {
 public:
-	advconfig_entry_integer_impl(const char * p_name,const GUID & p_guid,const GUID & p_parent,double p_priority,t_uint64 p_initialstate,t_uint64 p_min,t_uint64 p_max, t_uint32 p_prefFlags)
-		: m_name(p_name), m_parent(p_parent), m_priority(p_priority), m_initval(p_initialstate), m_min(p_min), m_max(p_max), m_state(p_guid,p_initialstate), m_prefFlags(p_prefFlags) {}
+	typedef int_t_ int_t;
+	advconfig_entry_integer_impl_(const char * p_name,const GUID & p_guid,const GUID & p_parent,double p_priority,int_t p_initialstate,int_t p_min,int_t p_max, t_uint32 p_prefFlags)
+		: m_name(p_name), m_parent(p_parent), m_priority(p_priority), m_initval(p_initialstate), m_min(p_min), m_max(p_max), m_state(p_guid,p_initialstate), m_prefFlags(p_prefFlags) {
+			PFC_ASSERT( p_min < p_max );
+	}
 	void get_name(pfc::string_base & p_out) {p_out = m_name;}
 	GUID get_guid() {return m_state.get_guid();}
 	GUID get_parent() {return m_parent;}
 	void reset() {m_state = m_initval;}
 	double get_sort_priority() {return m_priority;}
-	void get_state(pfc::string_base & p_out) {p_out = pfc::format_uint(m_state.get_value());}
-	void set_state(const char * p_string,t_size p_length) {set_state_int(pfc::atoui64_ex(p_string,p_length));}
-	t_uint32 get_flags() {return advconfig_entry_string::flag_is_integer;}
+	void get_state(pfc::string_base & p_out) {format(p_out, m_state.get_value());}
+	void set_state(const char * p_string,t_size p_length) {set_state_int(myATOI(p_string,p_length));}
+	t_uint32 get_flags() {return advconfig_entry_string::flag_is_integer | (is_signed() ? flag_is_signed : 0);}
 
-	t_uint64 get_state_int() const {return m_state;}
-	void set_state_int(t_uint64 val) {m_state = pfc::clip_t<t_uint64>(val,m_min,m_max);}
+	int_t get_state_int() const {return m_state;}
+	void set_state_int(int_t val) {m_state = pfc::clip_t<int_t>(val,m_min,m_max);}
 
 	void get_default_state(pfc::string_base & out) {
-		out = pfc::format_uint(m_initval);
+		format(out, m_initval);
 	}
 	void validate(pfc::string_base & val) {
-		val = pfc::format_uint( pfc::clip_t<t_uint64>(pfc::atoui64_ex(val,~0), m_min, m_max) );
+		format(val, pfc::clip_t<int_t>(myATOI(val,~0), m_min, m_max) );
 	}
 	t_uint32 get_preferences_flags() {return m_prefFlags;}
 private:
-	cfg_int_t<t_uint64> m_state;
+	static void format( pfc::string_base & out, int_t v ) {
+		if (is_signed()) out = pfc::format_int( v ).get_ptr();
+		else out = pfc::format_uint( v ).get_ptr();
+	}
+	static int_t myATOI( const char * s, size_t l ) {
+		if (is_signed()) return pfc::atoi64_ex(s,l);
+		else return pfc::atoui64_ex(s,l);
+	}
+	static bool is_signed() {
+		return ((int_t)-1) < ((int_t)0);
+	}
+	cfg_int_t<int_t> m_state;
 	const double m_priority;
-	const t_uint64 m_initval, m_min, m_max;
+	const int_t m_initval, m_min, m_max;
 	const GUID m_parent;
 	const pfc::string8 m_name;
 	const t_uint32 m_prefFlags;
 };
 
+typedef advconfig_entry_integer_impl_<uint64_t> advconfig_entry_integer_impl;
+
 //! Service factory helper around integer-specialized advconfig_entry_string implementation. Use this class to register your own integer entries in Advanced Preferences. \n
 //! Usage: static advconfig_integer_factory myint(name, itemID, parentID, priority, initialValue, minValue, maxValue);
-class advconfig_integer_factory : public service_factory_single_t<advconfig_entry_integer_impl> {
+template<typename int_t_>
+class advconfig_integer_factory_ : public service_factory_single_t<advconfig_entry_integer_impl_<int_t_> > {
 public:
-	advconfig_integer_factory(const char * p_name,const GUID & p_guid,const GUID & p_parent,double p_priority,t_uint64 p_initialstate,t_uint64 p_min,t_uint64 p_max, t_uint32 p_prefFlags = 0) 
-		: service_factory_single_t<advconfig_entry_integer_impl>(p_name,p_guid,p_parent,p_priority,p_initialstate,p_min,p_max,p_prefFlags) {}
+	typedef int_t_ int_t;
+	advconfig_integer_factory_(const char * p_name,const GUID & p_guid,const GUID & p_parent,double p_priority,t_uint64 p_initialstate,t_uint64 p_min,t_uint64 p_max, t_uint32 p_prefFlags = 0) 
+		: service_factory_single_t<advconfig_entry_integer_impl_<int_t_> >(p_name,p_guid,p_parent,p_priority,p_initialstate,p_min,p_max,p_prefFlags) {}
 
-	t_uint64 get() const {return get_static_instance().get_state_int();}
-	void set(t_uint64 val) {get_static_instance().set_state_int(val);}
+	int_t get() const {return get_static_instance().get_state_int();}
+	void set(int_t val) {get_static_instance().set_state_int(val);}
 
-	operator t_uint64() const {return get();}
-	t_uint64 operator=(t_uint64 val) {set(val); return val;}
+	operator int_t() const {return get();}
+	int_t operator=(int_t val) {set(val); return val;}
 };
 
+typedef advconfig_integer_factory_<uint64_t> advconfig_integer_factory;
+typedef advconfig_integer_factory_<int64_t> advconfig_signed_integer_factory;
 
 //! Not currently used, reserved for future use.
 class NOVTABLE advconfig_entry_enum : public advconfig_entry {

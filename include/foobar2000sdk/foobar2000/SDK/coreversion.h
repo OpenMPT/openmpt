@@ -1,8 +1,9 @@
 class NOVTABLE core_version_info : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(core_version_info);
 public:
 	virtual const char * get_version_string() = 0;
-	static const char * g_get_version_string() {return static_api_ptr_t<core_version_info>()->get_version_string();}
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(core_version_info);
+	static const char * g_get_version_string() {return core_version_info::get()->get_version_string();}
+	
 };
 
 struct t_core_version_data {
@@ -11,6 +12,7 @@ struct t_core_version_data {
 
 //! New (0.9.4.2)
 class NOVTABLE core_version_info_v2 : public core_version_info {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(core_version_info_v2, core_version_info);
 public:
 	virtual const char * get_name() = 0;//"foobar2000"
 	virtual const char * get_version_as_text() = 0;//"N.N.N.N"
@@ -32,5 +34,4 @@ public:
 		else return true;
 	}
 
-	FB2K_MAKE_SERVICE_INTERFACE(core_version_info_v2, core_version_info);
 };

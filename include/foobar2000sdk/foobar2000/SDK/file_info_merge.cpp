@@ -148,11 +148,21 @@ void file_info::merge_fallback(const file_info & source) {
 
 static const char _tagtype[] = "tagtype";
 
+static bool isSC( const char * n ) {
+	return pfc::string_has_prefix_i(n, "Apple SoundCheck" );
+}
+
 void file_info::_set_tag(const file_info & tag) {
 	this->copy_meta(tag);
 	this->set_replaygain( replaygain_info::g_merge( this->get_replaygain(), tag.get_replaygain() ) );
-	const char * tt = tag.info_get(_tagtype);
-	if (tt) this->info_set(_tagtype, tt);
+
+	const size_t iCount = tag.info_get_count();
+	for( size_t iWalk = 0; iWalk < iCount; ++iWalk ) {
+		auto n = tag.info_enum_name(iWalk);
+		if ( pfc::stringEqualsI_ascii( n, _tagtype ) || isSC(n) ) {
+			this->info_set(n, tag.info_enum_value( iWalk ) );
+		}
+	}
 }
 
 void file_info::_add_tag(const file_info & otherTag) {
@@ -168,4 +178,13 @@ void file_info::_add_tag(const file_info & otherTag) {
 		}
 	}
 
+	{
+		const size_t iCount = otherTag.info_get_count();
+		for( size_t w = 0; w < iCount; ++ w ) {
+			auto n = otherTag.info_enum_name(w);
+			if (isSC(n) && !this->info_get(n)) {
+				this->info_set( n, otherTag.info_enum_value(w) );
+			}
+		}
+	}
 }

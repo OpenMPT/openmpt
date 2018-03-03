@@ -1,4 +1,6 @@
-#ifdef _WIN32
+#pragma once
+
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 namespace ProcessUtils {
 	class PipeIO : public stream_reader, public stream_writer {
@@ -206,7 +208,7 @@ namespace ProcessUtils {
 				if (!bDetach) {
 					if (WaitForSingleObject(hProcess, TimeOutMS) != WAIT_OBJECT_0) {
 						//PFC_ASSERT( !"Should not get here - worker stuck" );
-						console::formatter() << pfc::string_filename_ext(ExePath) << " unresponsive - terminating";
+						FB2K_console_formatter() << pfc::string_filename_ext(ExePath) << " unresponsive - terminating";
 						TerminateProcess(hProcess, -1);
 					}
 				}
@@ -271,5 +273,5 @@ namespace ProcessUtils {
 	};
 }
 
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS
 

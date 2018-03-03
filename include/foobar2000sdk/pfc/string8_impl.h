@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 
 template<template<typename> class t_alloc>

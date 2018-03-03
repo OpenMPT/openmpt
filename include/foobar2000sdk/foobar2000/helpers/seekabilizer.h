@@ -1,3 +1,5 @@
+#pragma once
+
 class seekabilizer_backbuffer
 {
 public:

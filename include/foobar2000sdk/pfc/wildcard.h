@@ -1,3 +1,5 @@
+#pragma once
+
 namespace wildcard_helper
 {
 	bool test_path(const char * path,const char * pattern,bool b_separate_by_semicolon = false);//will extract filename from path first

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "file_info_const_impl.h"
+
 // presorted - do not change without a proper strcmp resort
 static const char * const standard_fieldnames[] = {
 	"ALBUM","ALBUM ARTIST","ARTIST","Album","Album Artist","Artist","COMMENT","Comment","DATE","DISCNUMBER","Date",
@@ -122,7 +124,7 @@ void file_info_const_impl::copy(const file_info & p_source)
 			{
 				const char * name = p_source.meta_enum_name(index);
 				const char * opt = optimize_fieldname(name);
-				if (optwalk < _countof(optbuf)) optbuf[optwalk++] = opt;
+				if (optwalk < PFC_TABSIZE(optbuf)) optbuf[optwalk++] = opt;
 				if (opt == NULL) stringbuffer_size += strlen(name) + 1;
 			}
 
@@ -149,7 +151,7 @@ void file_info_const_impl::copy(const file_info & p_source)
 		{
 			const char * name = p_source.info_enum_name(index);
 			const char * opt = optimize_infoname(name);
-			if (optwalk < _countof(optbuf)) optbuf[optwalk++] = opt;
+			if (optwalk < PFC_TABSIZE(optbuf)) optbuf[optwalk++] = opt;
 			if (opt == NULL) stringbuffer_size += strlen(name) + 1;
 			stringbuffer_size += strlen(p_source.info_enum_value(index)) + 1;
 		}
@@ -197,7 +199,7 @@ void file_info_const_impl::copy(const file_info & p_source)
 				const char * name = p_source.meta_enum_name(index);
 				const char * name_opt;
 
-				if (optwalk < _countof(optbuf)) name_opt = optbuf[optwalk++];
+				if (optwalk < PFC_TABSIZE(optbuf)) name_opt = optbuf[optwalk++];
 				else name_opt = optimize_fieldname(name);
 
 				if (name_opt == NULL)
@@ -225,7 +227,7 @@ void file_info_const_impl::copy(const file_info & p_source)
 			const char * name = p_source.info_enum_name(index);
 			const char * name_opt;
 
-			if (optwalk < _countof(optbuf)) name_opt = optbuf[optwalk++];
+			if (optwalk < PFC_TABSIZE(optbuf)) name_opt = optbuf[optwalk++];
 			else name_opt = optimize_infoname(name);
 
 			if (name_opt == NULL)
@@ -241,8 +243,9 @@ void file_info_const_impl::copy(const file_info & p_source)
 #ifdef __file_info_const_impl_have_hintmap__
 	if (hintmap != NULL) {
 //		profiler(file_info_const_impl__copy__hintmap);
-		for(t_size n=0;n<m_meta_count;n++) hintmap[n]=n;
-		pfc::sort(sort_callback_hintmap_impl(meta,hintmap),m_meta_count);
+		for(t_size n=0;n<m_meta_count;n++) hintmap[n]= (t_index) n;
+        sort_callback_hintmap_impl cb(meta,hintmap);
+		pfc::sort(cb,m_meta_count);
 	}
 #endif//__file_info_const_impl_have_hintmap__
 }

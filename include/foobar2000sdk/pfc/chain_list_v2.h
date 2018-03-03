@@ -1,10 +1,12 @@
+#pragma once
+
 namespace pfc {	
 
 	template<typename t_item>
 	class __chain_list_elem : public _list_node<t_item> {
 	public:
 		typedef _list_node<t_item> t_node;
-		TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD_WITH_INITIALIZER(__chain_list_elem,t_node, {m_prev = m_next = NULL;});
+        template<typename ... arg_t > __chain_list_elem( arg_t && ... args ) : t_node( std::forward<arg_t>(args) ... ) {m_prev = m_next = NULL;}
 
 		typedef __chain_list_elem<t_item> t_self;
 
@@ -31,8 +33,8 @@ namespace pfc {
 		typedef ::pfc::const_iterator<t_item> const_iterator;
 		typedef __chain_list_elem<t_item> t_elem;
 
-		chain_list_v2_t() : m_first(), m_last(), m_count() {}
-		chain_list_v2_t(const t_self & p_source) : m_first(), m_last(), m_count() {
+		chain_list_v2_t() {}
+		chain_list_v2_t(const t_self & p_source) {
 			try {
 				*this = p_source;
 			} catch(...) {
@@ -40,6 +42,11 @@ namespace pfc {
 				throw;
 			}
 		}
+
+		chain_list_v2_t(t_self && p_source) {
+			append_move_from( p_source );
+		}
+
 		template<typename t_in> void _set(const t_in & in) {
 			remove_all(); _add(in);
 		}
@@ -55,6 +62,10 @@ namespace pfc {
 			}
 			return *this;
 		}
+		t_self & operator=(t_self && p_other) {
+			move_from(p_other); return *this;
+		}
+
 		// templated constructors = spawn of satan
 		// template<typename t_other> chain_list_v2_t(const t_other & in) { try {_add(in);} catch(...) {remove_all(); throw;} }
 
@@ -64,6 +75,8 @@ namespace pfc {
 		iterator last() {return iterator(m_last);}
 		const_iterator first() const {return const_iterator(m_first);}
 		const_iterator last() const {return const_iterator(m_last);}
+		const_iterator cfirst() const {return const_iterator(m_first);}
+		const_iterator clast() const {return const_iterator(m_last);}
 
 		void remove_single(const_iterator const & p_iter) {
 			PFC_ASSERT(p_iter.is_valid());
@@ -104,22 +117,22 @@ namespace pfc {
 
 		~chain_list_v2_t() {remove_all();}
 
-		template<typename t_source>
-		inline void add_item(const t_source & p_source) {
-			__link_last(new t_elem(p_source));
+		template<typename ... arg_t>
+		inline void add_item(arg_t && ... arg) {
+            __link_last(new t_elem(std::forward<arg_t>(arg) ... ));
 		}
 		template<typename t_source>
-		inline t_self & operator+=(const t_source & p_source) {
-			add_item(p_source); return *this;
+		inline t_self & operator+=(t_source && p_source) {
+            add_item(std::forward<t_source>(p_source)); return *this;
 		}
 		iterator insert_last() {return __link_last(new t_elem);}
 		iterator insert_first() {return __link_first(new t_elem);}
 		iterator insert_after(const_iterator const & p_iter) {return __link_next(_elem(p_iter),new t_elem);}
 		iterator insert_before(const_iterator const & p_iter) {return __link_prev(_elem(p_iter),new t_elem);}
-		template<typename t_source> iterator insert_last(const t_source & p_source) {return __link_last(new t_elem(p_source));}
-		template<typename t_source> iterator insert_first(const t_source & p_source) {return __link_first(new t_elem(p_source));}
-		template<typename t_source> iterator insert_after(const_iterator const & p_iter,const t_source & p_source) {return __link_next(_elem(p_iter),new t_elem(p_source));}
-		template<typename t_source> iterator insert_before(const_iterator const & p_iter,const t_source & p_source) {return __link_prev(_elem(p_iter),new t_elem(p_source));}
+        template<typename ... arg_t> iterator insert_last(arg_t && ... arg) {return __link_last(new t_elem(std::forward<arg_t>(arg) ...));}
+        template<typename ... arg_t> iterator insert_first(arg_t && ... arg) {return __link_first(new t_elem(std::forward<arg_t>(arg) ...));}
+        template<typename ... arg_t> iterator insert_after(const_iterator const & p_iter,arg_t && ... arg) {return __link_next(_elem(p_iter),new t_elem(std::forward<arg_t>(arg) ... ));}
+		template<typename ... arg_t> iterator insert_before(const_iterator const & p_iter,arg_t && ... arg) {return __link_prev(_elem(p_iter),new t_elem(std::forward<arg_t>(arg) ... ));}
 
 		template<typename t_source> const_iterator find_item(const t_source & p_item) const {
 			t_elem * elem;
@@ -169,6 +182,15 @@ namespace pfc {
 			PFC_ASSERT(iter.is_valid());
 			PFC_ASSERT( _elem(iter)->m_prev == NULL && _elem(iter)->m_next == NULL );
 			__link_first(_elem(iter));
+		}
+		void append_move_from( t_self & p_other ) {
+			while (p_other.m_first != NULL) {
+				__link_last(p_other.__unlink_temporary(p_other.m_first));
+			}
+		}
+		void move_from( t_self & p_other ) {
+			remove_all();
+			append_move_from( p_other );
 		}
 	private:
 		static t_elem * _elem(const_iterator const & iter) {
@@ -253,8 +275,8 @@ namespace pfc {
 			p_next->m_prev = p_elem;
 			return p_elem;
 		}
-		t_elem * m_first, * m_last;
-		t_size m_count;
+		t_elem * m_first = nullptr, * m_last = nullptr;
+		t_size m_count = 0;
 	};
 
 

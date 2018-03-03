@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -92,6 +90,17 @@ BEGIN
     CTEXT           "N dB",IDC_SLIDER_LABEL,120,44,44,8
 END
 
+IDD_UI_ELEMENT DIALOGEX 0, 0, 221, 113
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Lock min width @ 200 units",IDC_LOCK_MIN_WIDTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,20,104,10
+    CONTROL         "Lock min height @ 200 units",IDC_LOCK_MIN_HEIGHT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,32,107,10
+    LTEXT           "Current size: XXX x XXX units / XXX x XXX pixels",IDC_STATIC_SIZE,8,4,168,8
+    CONTROL         "Lock max width @ 400 units",IDC_LOCK_MAX_WIDTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,48,106,10
+    CONTROL         "Lock max height @ 400 units",IDC_LOCK_MAX_HEIGHT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,60,108,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -99,7 +108,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MYPREFERENCES, DIALOG
     BEGIN
@@ -124,10 +133,29 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 76
     END
+
+    IDD_UI_ELEMENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 214
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.S.) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_UI_ELEMENT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

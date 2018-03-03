@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "VisUtils.h"
+
 namespace VisUtils {
 	void PrepareFFTChunk(audio_chunk const & source, audio_chunk & out, double centerOffset) {
 		const t_uint32 channels = source.get_channel_count();

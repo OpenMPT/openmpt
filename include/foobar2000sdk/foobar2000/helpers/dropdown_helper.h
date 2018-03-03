@@ -1,7 +1,6 @@
-#ifdef _WIN32
+#pragma once
 
-#ifndef _DROPDOWN_HELPER_H_
-#define _DROPDOWN_HELPER_H_
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 class _cfg_dropdown_history_base
 {
@@ -53,6 +52,4 @@ private:
 		}	\
 	}
 
-#endif //_DROPDOWN_HELPER_H_
-
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

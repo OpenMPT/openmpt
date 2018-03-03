@@ -65,4 +65,9 @@ namespace pfc {
 		else output |= (out_t) (fraction << shift);
 		return *(retval_t*)&output / pfc::audio_math::float16scale;
 	}
+
+	unsigned audio_math::bitrate_kbps(uint64_t fileSize, double duration) {
+		if (fileSize > 0 && duration > 0) return (unsigned)floor((double)fileSize * 8 / (duration * 1000) + 0.5);
+		return 0;
+	}
 }

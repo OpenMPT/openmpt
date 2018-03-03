@@ -1,7 +1,6 @@
-#ifdef _WIN32
+#pragma once
 
-#ifndef _WINDOW_PLACEMENT_HELPER_H_
-#define _WINDOW_PLACEMENT_HELPER_H_
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
 
 class cfg_window_placement : public cfg_var
 {
@@ -32,7 +31,4 @@ private:
 	t_uint32 m_width,m_height;
 };
 
-
-#endif //_WINDOW_PLACEMENT_HELPER_H_
-
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

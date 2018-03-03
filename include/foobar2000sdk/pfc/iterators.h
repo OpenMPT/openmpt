@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	//! Base class for list nodes. Implemented by list implementers.
 	template<typename t_item> class _list_node : public refcounted_object_root {
@@ -112,4 +114,26 @@ namespace pfc {
 			++iter1; ++iter2;
 		}
 	}
+
+	template<typename comparator_t = comparator_default>
+	class comparator_stdlist { 
+	public:
+		template<typename t_list1, typename t_list2>
+		static int compare(const t_list1 & p_list1, const t_list2 & p_list2) {
+			auto iter1 = p_list1.begin();
+			auto iter2 = p_list2.begin();
+			for(;;) {
+				const bool end1 = iter1 == p_list1.end();
+				const bool end2 = iter2 == p_list2.end();
+				if ( end1 && end2 ) return 0;
+				else if ( end1 ) return -1;
+				else if ( end2 ) return 1;
+				else {
+					int state = comparator_t::compare(*iter1,*iter2);
+					if (state != 0) return state;
+				}
+				++iter1; ++iter2;
+			}
+		}
+	};
 }

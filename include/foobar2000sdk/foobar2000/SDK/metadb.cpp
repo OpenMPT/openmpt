@@ -32,15 +32,15 @@ metadb_io::t_update_info_state metadb_io::update_info(metadb_handle_ptr p_item,f
 void metadb_io::hint_async(metadb_handle_ptr p_item,const file_info & p_info,const t_filestats & p_stats,bool p_fresh)
 {
 	const file_info * blargh = &p_info;
-	hint_multi_async(pfc::list_single_ref_t<metadb_handle_ptr>(p_item),pfc::list_single_ref_t<const file_info *>(blargh),pfc::list_single_ref_t<t_filestats>(p_stats),bit_array_val(p_fresh));
+	hint_multi_async(pfc::list_single_ref_t<metadb_handle_ptr>(p_item),pfc::list_single_ref_t<const file_info *>(blargh),pfc::list_single_ref_t<t_filestats>(p_stats), pfc::bit_array_val(p_fresh));
 }
 
 
 bool metadb::g_get_random_handle(metadb_handle_ptr & p_out) {
-	if (static_api_ptr_t<playback_control>()->get_now_playing(p_out)) return true;
+	if (playback_control::get()->get_now_playing(p_out)) return true;
 
 	{
-		static_api_ptr_t<playlist_manager> api;	
+		auto api = playlist_manager::get();
 
 		t_size playlist_count = api->get_playlist_count();
 		t_size active_playlist = api->get_active_playlist();
@@ -73,4 +73,23 @@ bool metadb::g_get_random_handle(metadb_handle_ptr & p_out) {
 
 void metadb_io_v2::update_info_async_simple(const pfc::list_base_const_t<metadb_handle_ptr> & p_list,const pfc::list_base_const_t<const file_info*> & p_new_info, HWND p_parent_window,t_uint32 p_op_flags,completion_notify_ptr p_notify) {
 	update_info_async(p_list,new service_impl_t<file_info_filter_impl>(p_list,p_new_info),p_parent_window,p_op_flags,p_notify);
+}
+
+void metadb_io_v2::on_file_rechaptered( const char * path, metadb_handle_list_cref newItems ) {
+	metadb_handle_list handles( newItems );
+	pfc::string8 pathLocal( path );
+	auto notify = fb2k::makeCompletionNotify( [handles, pathLocal] (unsigned) {
+		playlist_manager::get()->on_file_rechaptered( pathLocal, handles );
+	} );
+
+	load_info_async( handles, metadb_io::load_info_force, core_api::get_main_window(), metadb_io_v3::op_flag_delay_ui, notify );
+}
+
+void metadb_io_v2::on_files_rechaptered( metadb_handle_list_cref newHandles ) {
+	metadb_handle_list local ( newHandles );
+	auto notify = fb2k::makeCompletionNotify( [local] (unsigned) {
+		playlist_manager::get()->on_files_rechaptered(local);
+	} );
+
+	load_info_async( newHandles, metadb_io::load_info_force, core_api::get_main_window(), metadb_io_v3::op_flag_delay_ui, notify );
 }

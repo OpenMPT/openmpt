@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef _WIN32
 namespace pfc {
 
@@ -13,9 +15,11 @@ namespace pfc {
 	public:
 		typedef com_ptr_t<T> t_self;
 
-		inline com_ptr_t() throw() : m_ptr() {}
+		com_ptr_t( nullptr_t ) throw() : m_ptr() {}
+
+		com_ptr_t() throw() : m_ptr() {}
 		template<typename source> inline com_ptr_t(source * p_ptr) throw() : m_ptr(p_ptr) {_COM_AddRef(m_ptr);}
-		inline com_ptr_t(const t_self & p_source) throw() : m_ptr(p_source.m_ptr) {_COM_AddRef(m_ptr);}
+		com_ptr_t(const t_self & p_source) throw() : m_ptr(p_source.m_ptr) {_COM_AddRef(m_ptr);}
 		template<typename source> inline com_ptr_t(const com_ptr_t<source> & p_source) throw() : m_ptr(p_source.get_ptr()) {_COM_AddRef(m_ptr);}
 
 		inline ~com_ptr_t() throw() {_COM_Release(m_ptr);}

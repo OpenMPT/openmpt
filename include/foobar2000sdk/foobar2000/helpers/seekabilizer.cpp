@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "seekabilizer.h"
+
 enum {backread_on_seek = 1024};
 
 void seekabilizer_backbuffer::initialize(t_size p_size)
@@ -40,8 +42,8 @@ void seekabilizer_backbuffer::write(const void * p_buffer,t_size p_bytes)
 
 void seekabilizer_backbuffer::read(t_size p_backlogdepth,void * p_buffer,t_size p_bytes) const
 {
-	assert(p_backlogdepth <= m_depth);
-	assert(p_backlogdepth >= p_bytes);
+	PFC_ASSERT(p_backlogdepth <= m_depth);
+	PFC_ASSERT(p_backlogdepth >= p_bytes);
 
 		
 	t_uint8* targetptr = (t_uint8*) p_buffer;
@@ -159,7 +161,7 @@ t_filesize seekabilizer::get_position(abort_callback & p_abort) {
 }
 
 void seekabilizer::seek(t_filesize p_position,abort_callback & p_abort) {
-	assert(m_position_base >= m_buffer.get_depth());
+	PFC_ASSERT(m_position_base >= m_buffer.get_depth());
 	p_abort.check_e();
 
 	if (m_size != filesize_invalid && p_position > m_size) throw exception_io_seek_out_of_range();

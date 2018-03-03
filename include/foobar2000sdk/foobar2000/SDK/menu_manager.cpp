@@ -311,8 +311,7 @@ bool keyboard_shortcut_manager::on_keydown_auto(WPARAM wp)
 bool keyboard_shortcut_manager::on_keydown_auto_playlist(WPARAM wp)
 {
 	metadb_handle_list data;
-	static_api_ptr_t<playlist_manager> api;
-	api->activeplaylist_get_selected_items(data);
+	playlist_manager::get()->activeplaylist_get_selected_items(data);
 	return on_keydown_auto_context(data,wp,contextmenu_item::caller_playlist);
 }
 
@@ -349,9 +348,10 @@ bool keyboard_shortcut_manager::on_keydown_restricted_auto_context(const pfc::li
 
 static bool filterTypableWindowMessage(const MSG * msg, t_uint32 modifiers) {
 	if (keyboard_shortcut_manager::is_typing_key_combo((t_uint32)msg->wParam, modifiers)) {
-		try {
-			if (static_api_ptr_t<ui_element_typable_window_manager>()->is_registered(msg->hwnd)) return false;
-		} catch(exception_service_not_found) {}
+		ui_element_typable_window_manager::ptr api;
+		if (ui_element_typable_window_manager::tryGet(api)) {
+			if (api->is_registered(msg->hwnd)) return false;
+		}
 	}
 	return true;
 }

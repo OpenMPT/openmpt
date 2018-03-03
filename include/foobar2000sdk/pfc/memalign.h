@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _MSC_VER
 #include <stdlib.h>
 #endif
@@ -99,10 +101,6 @@ namespace pfc {
 		obj_t * get_ptr() { return reinterpret_cast<obj_t*>(m.ptr()); }
 		const obj_t * get_ptr() const { return reinterpret_cast<const obj_t*>(m.ptr()); }
 		mem_block_aligned_t() {}
-		mem_block_aligned_t(self_t const & other) : m(other.m) {}
-		mem_block_aligned_t(self_t && other) : m(std::move(other.m)) {}
-		self_t const & operator=(self_t const & other) {m = other.m; return *this;}
-		self_t const & operator=(self_t && other) {m = std::move(other.m); return *this;}
 	private:
 		mem_block_aligned<alignBytes> m;
 	};

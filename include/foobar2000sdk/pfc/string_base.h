@@ -1,5 +1,4 @@
-#ifndef _PFC_STRING_H_
-#define _PFC_STRING_H_
+#pragma once
 
 #include <string>
 
@@ -14,18 +13,12 @@ namespace pfc {
 		t_size m_len;
 
 
-		static string_part_ref make(const char * ptr, t_size len) {
-			string_part_ref val = {ptr, len}; return val;
-		}
-
-		string_part_ref substring(t_size base) const {
-			PFC_ASSERT( base <= m_len );
-			return make(m_ptr + base, m_len - base);
-		}
-		string_part_ref substring(t_size base, t_size len) const {
-			PFC_ASSERT( base <= m_len && base + len <= m_len );
-			return make(m_ptr + base, len);
-		}
+		static string_part_ref make(const char * ptr, t_size len);
+		string_part_ref substring(t_size base) const;
+		string_part_ref substring(t_size base, t_size len) const;
+		static string_part_ref make( const char * str );
+		bool equals( string_part_ref other ) const;
+		bool equals( const char * str ) const;
 	};
 
 	inline string_part_ref string_part(const char * ptr, t_size len) {
@@ -165,6 +158,7 @@ namespace pfc {
 
 	t_size skip_utf8_chars(const char * ptr,t_size count) throw();
 	char * strdup_n(const char * src,t_size len);
+	int wstricmp_ascii( const wchar_t * s1, const wchar_t * s2 ) throw();
 	int stricmp_ascii(const char * s1,const char * s2) throw();
 	int stricmp_ascii_ex(const char * s1,t_size len1,const char * s2,t_size len2) throw();
     int naturalSortCompare( const char * s1, const char * s2) throw();
@@ -264,6 +258,8 @@ namespace pfc {
         bool has_prefix_i( const char * prefix ) const { return string_has_prefix_i( get_ptr(), prefix); }
         bool has_suffix( const char * suffix ) const { return string_has_suffix( get_ptr(), suffix); }
         bool has_suffix_i( const char * suffix ) const { return string_has_suffix_i( get_ptr(), suffix); }
+
+		bool equals( const char * other ) const { return strcmp(*this, other) == 0; }
 	protected:
 		string_base() {}
 		~string_base() {}
@@ -1017,7 +1013,7 @@ namespace pfc {
 	bool stringEqualsI_ascii(const char * p1,const char * p2) throw();
 	char ascii_tolower_lookup(char c);
 
-	template<typename T> inline const char * stringToPtr(T const& val) {return val.c_str();}
+	template<typename T> inline const char * stringToPtr(T const& val) {return val.get_ptr();}
 	inline const char * stringToPtr(const char* val) {return val;}
 
 	template<typename T> static string_part_ref stringToRef(T const & val) {return string_part(stringToPtr(val), val.length());}
@@ -1097,5 +1093,3 @@ namespace pfc {
 
 	char * strDup(const char * src); // POSIX strdup() clone, prevent MSVC complaining
 }
-
-#endif //_PFC_STRING_H_

@@ -56,8 +56,9 @@ public:
 };
 
 //! Serivce providing various UI-related commands. Implemented by core; do not reimplement.
-//! Instantiation: use static_api_ptr_t<ui_control>.
+//! Instantiation: use ui_control::get() to obtain an instance.
 class NOVTABLE ui_control : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(ui_control);
 public:
 	//! Returns whether primary UI is visible/unminimized.
 	virtual bool is_visible()=0;
@@ -77,8 +78,6 @@ public:
 	//! @param p_out receives new ui_status_text_override instance.
 	//! @returns true on success, false on failure (out of memory / no GUI loaded / etc)
 	virtual bool override_status_text_create(service_ptr_t<ui_status_text_override> & p_out) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_control);
 };
 
 //! Service called from the UI when some object is dropped into the UI. Usable for modifying drag&drop behaviors such as adding custom handlers for object types other than supported media files.\n
@@ -142,6 +141,7 @@ public:
 };
 
 class NOVTABLE ui_selection_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(ui_selection_manager);
 public:
 	//! Retrieves the current selection.
 	virtual void get_selection(metadb_handle_list_ref p_selection) = 0;
@@ -154,13 +154,11 @@ public:
 
 	//! Retrieves type of the active selection holder. Values same as contextmenu_item caller IDs.
 	virtual GUID get_selection_type() = 0;
-	
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_selection_manager);
 };
 
 //! \since 1.0
 class NOVTABLE ui_selection_manager_v2 : public ui_selection_manager {
-	FB2K_MAKE_SERVICE_INTERFACE(ui_selection_manager_v2, ui_selection_manager)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(ui_selection_manager_v2, ui_selection_manager)
 public:
 	enum { flag_no_now_playing = 1 };
 	virtual void get_selection(metadb_handle_list_ref out, t_uint32 flags) = 0;
@@ -185,7 +183,7 @@ protected:
 	void ui_selection_callback_activate(bool state = true) {
 		if (state != m_active) {
 			m_active = state;
-			static_api_ptr_t<ui_selection_manager> api;
+			auto api = ui_selection_manager::get();
 			if (state) api->register_callback(this);
 			else api->unregister_callback(this);
 		}
@@ -213,7 +211,7 @@ protected:
 	void ui_selection_callback_activate(bool state = true) {
 		if (state != m_active) {
 			m_active = state;
-			static_api_ptr_t<ui_selection_manager_v2> api;
+			auto api = ui_selection_manager_v2::get();
 			if (state) api->register_callback(this, flags);
 			else api->unregister_callback(this);
 		}

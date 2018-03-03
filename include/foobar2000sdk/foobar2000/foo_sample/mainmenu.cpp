@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+// I am foo_sample and these are *my* GUIDs
+// Make your own when reusing code or else
 static const GUID g_mainmenu_group_id = { 0x44963e7a, 0x4b2a, 0x4588, { 0xb0, 0x17, 0xa8, 0x69, 0x18, 0xcb, 0x8a, 0xa5 } };
 
 static mainmenu_group_popup_factory g_mainmenu_group(g_mainmenu_group_id, mainmenu_groups::file, mainmenu_commands::sort_priority_dontcare, "Sample component");

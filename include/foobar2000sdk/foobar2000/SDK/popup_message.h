@@ -1,6 +1,6 @@
 
 //! This interface allows you to show generic nonmodal noninteractive dialog with a text message. This should be used instead of MessageBox where possible.\n
-//! Usage: use popup_message::g_show / popup_message::g_show_ex static helpers, or static_api_ptr_t<popup_message>.\n
+//! Usage: use popup_message::g_show / popup_message::g_show_ex static helpers, or popup_message::get() to obtain an instance.\n
 //! Note that all strings are UTF-8.
 
 class NOVTABLE popup_message : public service_base {
@@ -29,7 +29,7 @@ public:
 	static void g_complain(const char * p_whatFailed, const std::exception & p_exception);
 	static void g_complain(const char * p_whatFailed, const char * msg);
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(popup_message);
+	FB2K_MAKE_SERVICE_COREAPI(popup_message);
 };
 
 #define EXCEPTION_TO_POPUP_MESSAGE(CODE,LABEL) try { CODE; } catch(std::exception const & e) {popup_message::g_complain(LABEL,e);}

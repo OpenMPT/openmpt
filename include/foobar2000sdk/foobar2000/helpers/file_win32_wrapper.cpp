@@ -1,6 +1,9 @@
 #include "stdafx.h"
 
 #ifdef _WIN32
+
+#include "file_win32_wrapper.h"
+
 namespace file_win32_helpers {
 	t_filesize get_size(HANDLE p_handle) {
 		union {

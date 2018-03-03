@@ -17,7 +17,7 @@ public:
 
 	virtual void unregister_callback(system_time_callback * callback) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(system_time_keeper)
+	FB2K_MAKE_SERVICE_COREAPI(system_time_keeper)
 };
 
 class system_time_callback_impl : public system_time_callback {
@@ -27,14 +27,14 @@ public:
 
 	void stop_timer() {
 		if (m_registered) {
-			static_api_ptr_t<system_time_keeper>()->unregister_callback(this);
+			system_time_keeper::get()->unregister_callback(this);
 			m_registered = false;
 		}
 	}
 	//! You get a on_changed() call inside the initialize_timer() call.
 	void initialize_timer(t_filetimestamp period) {
 		stop_timer();
-		static_api_ptr_t<system_time_keeper>()->register_callback(this, period);
+		system_time_keeper::get()->register_callback(this, period);
 		m_registered = true;
 	}
 

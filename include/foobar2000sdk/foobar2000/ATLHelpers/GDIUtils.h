@@ -1,3 +1,5 @@
+#pragma once
+
 static HBITMAP CreateDIB24(CSize size) {
 	struct {
 		BITMAPINFOHEADER bmi;
@@ -234,4 +236,18 @@ private:
 	const CRect m_rcPaint;
 	CDCHandle m_dcOrig;
 	CRgn m_clipRgnOld;
+};
+
+class SetTextColorScope {
+public:
+	SetTextColorScope(HDC dc, COLORREF col) throw() : m_dc(dc) {
+		m_oldCol = SetTextColor(dc, col);
+	}
+	~SetTextColorScope() throw() {
+		SetTextColor(m_dc, m_oldCol);
+	}
+	PFC_CLASS_NOT_COPYABLE_EX(SetTextColorScope)
+private:
+	HDC m_dc;
+	COLORREF m_oldCol;
 };

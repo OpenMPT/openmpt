@@ -19,5 +19,5 @@ public:
 	virtual void remove_callback(playback_stream_capture_callback * ) = 0;
 	
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playback_stream_capture)
+	FB2K_MAKE_SERVICE_COREAPI(playback_stream_capture)
 };

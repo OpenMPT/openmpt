@@ -1,5 +1,6 @@
-#ifndef _foobar2000_sdk_service_h_included_
-#define _foobar2000_sdk_service_h_included_
+#pragma once
+
+#include <utility> // std::forward
 
 typedef const void* service_class_ref;
 
@@ -165,17 +166,27 @@ public:
     //! Forced cast operator - obtains a valid service pointer to the expected class or crashes the app if such pointer cannot be obtained.
     template<typename otherPtr_t>
     void operator ^= ( otherPtr_t other ) {
-        PFC_ASSERT( other.is_valid() );
-        if (!other->cast(*this)) uBugCheck();
+        if (other.is_empty()) release(); // allow null ptr, get upset only on type mismatch
+        else if (!other->cast(*this)) uBugCheck();
     }
-        
-    //! Conditional cast operator - attempts to obtain a vaild service pointer to the expected class; returns true on success, false on failure.
+    template<typename otherObj_t>
+    void operator ^= ( otherObj_t * other ) {
+        if (other == nullptr) release();
+        else forcedCastFrom( other );
+    }
+
+	//! Conditional cast operator - attempts to obtain a vaild service pointer to the expected class; returns true on success, false on failure.
     template<typename otherPtr_t>
     bool operator &= ( otherPtr_t other ) {
         PFC_ASSERT( other.is_valid() );
         return other->cast(*this);
     }
-    
+    template<typename otherObj_t>
+    bool operator &= ( otherObj_t * other ) {
+        if (other == nullptr) return false;
+        return other->cast( *this );
+    }
+ 
 };
 
 //! Autopointer class to be used with all services. Manages reference counter calls behind-the-scenes. \n
@@ -271,61 +282,82 @@ class service_list_t : public pfc::list_t<service_ptr_t<T>, t_alloc >
 {
 };
 
-//! Helper macro for use when defining a service class. Generates standard features of a service, without ability to register using service_factory / enumerate using service_enum_t. \n
-//! This is used for declaring services that are meant to be instantiated by means other than service_enum_t (or non-entrypoint services), or extensions of services (including extension of entrypoint services).	\n
-//! Sample non-entrypoint declaration: class myclass : public service_base {...; FB2K_MAKE_SERVICE_INTERFACE(myclass, service_base); };	\n
-//! Sample extension declaration: class myclass : public myotherclass {...; FB2K_MAKE_SERVICE_INTERFACE(myclass, myotherclass); };	\n
-//! This macro is intended for use ONLY WITH INTERFACE CLASSES, not with implementation classes.
-#define FB2K_MAKE_SERVICE_INTERFACE(THISCLASS,PARENTCLASS) \
+//! For internal use, see FB2K_MAKE_SERVICE_INTERFACE
+#define FB2K_MAKE_SERVICE_INTERFACE_EX(THISCLASS,PARENTCLASS,IS_CORE_API) \
 	public:	\
 		typedef THISCLASS t_interface;	\
 		typedef PARENTCLASS t_interface_parent;	\
 			\
 		static const GUID class_guid;	\
 			\
-		virtual bool service_query(service_ptr_t<service_base> & p_out,const GUID & p_guid) {	\
-			if (p_guid == class_guid) {p_out = this; return true;}	\
-			else return PARENTCLASS::service_query(p_out,p_guid);	\
-		}	\
 		typedef service_ptr_t<t_interface> ptr;	\
 		typedef service_nnptr_t<t_interface> nnptr;	\
 		typedef ptr ref; \
 		typedef nnptr nnref; \
+		enum { _is_core_api = IS_CORE_API }; \
 	protected:	\
 		THISCLASS() {}	\
 		~THISCLASS() {}	\
 	private:	\
-		const THISCLASS & operator=(const THISCLASS &) {throw pfc::exception_not_implemented();}	\
-		THISCLASS(const THISCLASS &) {throw pfc::exception_not_implemented();}	\
+		const THISCLASS & operator=(const THISCLASS &) = delete;	\
+		THISCLASS(const THISCLASS &) = delete;	\
 	private:	\
-		void __private__service_declaration_selftest() {	\
-			pfc::assert_same_type<PARENTCLASS,PARENTCLASS::t_interface>(); /*parentclass must be an interface*/	\
-			__validate_service_class_helper<THISCLASS>(); /*service_base must be reachable by walking t_interface_parent*/	\
+		void _private_service_declaration_selftest() {	\
+			static_assert( pfc::is_same_type<PARENTCLASS,PARENTCLASS::t_interface>::value, "t_interface sanity" ); \
+			static_assert( ! pfc::is_same_type<PARENTCLASS, THISCLASS>::value, "parent class sanity"); \
+			static_assert( pfc::is_same_type<PARENTCLASS, service_base>::value || IS_CORE_API == PARENTCLASS::_is_core_api, "is_core_api sanity" ); \
+			_validate_service_class_helper<THISCLASS>(); /*service_base must be reachable by walking t_interface_parent*/	\
 			pfc::implicit_cast<service_base*>(this); /*this class must derive from service_base, directly or indirectly, and be implictly castable to it*/ \
 		}
+
+#define FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT_EX(THISCLASS, IS_CORE_API)	\
+	public:	\
+		typedef THISCLASS t_interface_entrypoint;	\
+	FB2K_MAKE_SERVICE_INTERFACE_EX(THISCLASS,service_base, IS_CORE_API)
+
+//! Helper macro for use when defining a service class. Generates standard features of a service, without ability to register using service_factory / enumerate using service_enum_t. \n
+//! This is used for declaring services that are meant to be instantiated by means other than service_enum_t (or non-entrypoint services), or extensions of services (including extension of entrypoint services).	\n
+//! Sample non-entrypoint declaration: class myclass : public service_base {...; FB2K_MAKE_SERVICE_INTERFACE(myclass, service_base); };	\n
+//! Sample extension declaration: class myclass : public myotherclass {...; FB2K_MAKE_SERVICE_INTERFACE(myclass, myotherclass); };	\n
+//! This macro is intended for use ONLY WITH INTERFACE CLASSES, not with implementation classes.
+#define FB2K_MAKE_SERVICE_INTERFACE(THISCLASS, PARENTCLASS) FB2K_MAKE_SERVICE_INTERFACE_EX(THISCLASS, PARENTCLASS, false)
 
 //! Helper macro for use when defining an entrypoint service class. Generates standard features of a service, including ability to register using service_factory and enumerate using service_enum.	\n
 //! Sample declaration: class myclass : public service_base {...; FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(myclass); };	\n
 //! Note that entrypoint service classes must directly derive from service_base, and not from another service class.
 //! This macro is intended for use ONLY WITH INTERFACE CLASSES, not with implementation classes.
-#define FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(THISCLASS)	\
-	public:	\
-		typedef THISCLASS t_interface_entrypoint;	\
-	FB2K_MAKE_SERVICE_INTERFACE(THISCLASS,service_base)
-		
-	
+#define FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(THISCLASS) FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT_EX(THISCLASS, false)
+
+
+#define FB2K_MAKE_SERVICE_COREAPI(THISCLASS) \
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT_EX( THISCLASS, true ) \
+	public: static ptr get() { return fb2k::std_api_get<THISCLASS>(); } static bool tryGet(ptr & out) { return fb2k::std_api_try_get(out); }
+
+#define FB2K_MAKE_SERVICE_COREAPI_EXTENSION(THISCLASS, BASECLASS) \
+	FB2K_MAKE_SERVICE_INTERFACE_EX( THISCLASS, BASECLASS, true ) \
+	public: static ptr get() { return fb2k::std_api_get<THISCLASS>(); } static bool tryGet(ptr & out) { return fb2k::std_api_try_get(out); }
+
+
+
+//! Alternate way of declaring services, begin/end macros wrapping the whole class declaration
 #define FB2K_DECLARE_SERVICE_BEGIN(THISCLASS,BASECLASS) \
 	class NOVTABLE THISCLASS : public BASECLASS	{	\
 		FB2K_MAKE_SERVICE_INTERFACE(THISCLASS,BASECLASS);	\
 	public:
 
+//! Alternate way of declaring services, begin/end macros wrapping the whole class declaration
 #define FB2K_DECLARE_SERVICE_END() \
 	};
 
+//! Alternate way of declaring services, begin/end macros wrapping the whole class declaration
 #define FB2K_DECLARE_SERVICE_ENTRYPOINT_BEGIN(THISCLASS) \
 	class NOVTABLE THISCLASS : public service_base {	\
 		FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(THISCLASS)	\
 	public:
+
+class service_base;
+typedef service_ptr_t<service_base> service_ptr;
+typedef service_nnptr_t<service_base> service_nnptr;
 		
 
 //! Base class for all service classes.\n
@@ -333,15 +365,19 @@ class service_list_t : public pfc::list_t<service_ptr_t<T>, t_alloc >
 class NOVTABLE service_base
 {
 public:	
-	//! Decrements reference count; deletes the object if reference count reaches zero. This is normally not called directly but managed by service_ptr_t<> template.
+	//! Decrements reference count; deletes the object if reference count reaches zero. This is normally not called directly but managed by service_ptr_t<> template. \n
+	//! Implemented by service_impl_* classes.
 	//! @returns New reference count. For debug purposes only, in certain conditions return values may be unreliable.
 	virtual int service_release() throw() = 0;
-	//! Increments reference count. This is normally not called directly but managed by service_ptr_t<> template.
+	//! Increments reference count. This is normally not called directly but managed by service_ptr_t<> template. \n
+	//! Implemented by service_impl_* classes.
 	//! @returns New reference count. For debug purposes only, in certain conditions return values may be unreliable.
 	virtual int service_add_ref() throw() = 0;
-	//! Queries whether the object supports specific interface and retrieves a pointer to that interface. This is normally not called directly but managed by service_query_t<> function template.
-	//! Typical implementation checks the parameter against GUIDs of interfaces supported by this object, if the GUID is one of supported interfaces, p_out is set to service_base pointer that can be static_cast<>'ed to queried interface and the method returns true; otherwise the method returns false.
-	virtual bool service_query(service_ptr_t<service_base> & p_out,const GUID & p_guid) {return false;}
+	//! Queries whether the object supports specific interface and retrieves a pointer to that interface. This is normally not called directly but managed by service_query_t<> function template. \n
+	//! Checks the parameter against GUIDs of interfaces supported by this object, if the GUID is one of supported interfaces, p_out is set to service_base pointer that can be static_cast<>'ed to queried interface and the method returns true; otherwise the method returns false. \n
+	//! Implemented by service_impl_* classes. \n
+	//! Note that service_query() implementation semantics (but not usage semantics) changed in SDK for foobar2000 1.4; they used to be auto-implemented by each service interface (via FB2K_MAKE_SERVICE_INTERFACE macro); they're now implemented in service_impl_* instead. See SDK readme for more details. \n
+	virtual bool service_query(service_ptr & p_out,const GUID & p_guid) = 0;
 
 	//! Queries whether the object supports specific interface and retrieves a pointer to that interface.
 	//! @param p_out Receives pointer to queried interface on success.
@@ -357,66 +393,41 @@ public:
 	bool cast( outPtr_t & outPtr ) { return service_query_t( outPtr ); }
 
 	typedef service_base t_interface;
-	
+	enum { _is_core_api = false };
 protected:
 	service_base() {}
 	~service_base() {}
+
+	static bool service_query_walk(service_ptr &, const GUID &, service_base *) {
+		return false;
+	}
+
+	template<typename interface_t> static bool service_query_walk(service_ptr & out, const GUID & guid, interface_t * in) {
+		if (guid == interface_t::class_guid) {
+			out = in; return true;
+		}
+		typename interface_t::t_interface_parent * chain = in;
+		return service_query_walk(out, guid, chain);
+	}
+	template<typename class_t> static bool handle_service_query(service_ptr & out, const GUID & guid, class_t * in) {
+		typename class_t::t_interface * in2 = in;
+		return service_query_walk( out, guid, in2 );
+	}
+
 private:
-	service_base(const service_base&) {throw pfc::exception_not_implemented();}
-	const service_base & operator=(const service_base&) {throw pfc::exception_not_implemented();}
+	service_base(const service_base&) = delete;
+	const service_base & operator=(const service_base&) = delete;
 };
 
-typedef service_ptr_t<service_base> service_ptr;
-typedef service_nnptr_t<service_base> service_nnptr;
 
 template<typename T>
-inline void __validate_service_class_helper() {
-	__validate_service_class_helper<typename T::t_interface_parent>();
+inline void _validate_service_class_helper() {
+	_validate_service_class_helper<typename T::t_interface_parent>();
 }
 
 template<>
-inline void __validate_service_class_helper<service_base>() {}
+inline void _validate_service_class_helper<service_base>() {}
 
-
-#include "service_impl.h"
-
-class NOVTABLE service_factory_base {
-protected:
-	inline service_factory_base(const GUID & p_guid, service_factory_base * & factoryList) : m_guid(p_guid) {PFC_ASSERT(!core_api::are_services_available());__internal__next=factoryList;factoryList=this;}
-	inline ~service_factory_base() {PFC_ASSERT(!core_api::are_services_available());}
-public:
-	inline const GUID & get_class_guid() const {return m_guid;}
-
-	static service_class_ref enum_find_class(const GUID & p_guid);
-	static bool enum_create(service_ptr_t<service_base> & p_out,service_class_ref p_class,t_size p_index);
-	static t_size enum_get_count(service_class_ref p_class);
-
-	inline static bool is_service_present(const GUID & g) {return enum_get_count(enum_find_class(g))>0;}
-
-	//! Throws std::bad_alloc or another exception on failure.
-	virtual void instance_create(service_ptr_t<service_base> & p_out) = 0;
-
-	//! FOR INTERNAL USE ONLY
-	static service_factory_base *__internal__list;
-	//! FOR INTERNAL USE ONLY
-	service_factory_base * __internal__next;
-private:
-	const GUID & m_guid;
-};
-
-template<typename B>
-class service_factory_traits {
-public:
-	static service_factory_base * & factory_list() {return service_factory_base::__internal__list;}
-};
-
-template<typename B>
-class service_factory_base_t : public service_factory_base {
-public:
-	service_factory_base_t() : service_factory_base(B::class_guid, service_factory_traits<B>::factory_list()) {
-		pfc::assert_same_type<B,typename B::t_interface_entrypoint>();
-	}
-};
 
 template<typename T> static void _validate_service_ptr(service_ptr_t<T> const & ptr) {
 	PFC_ASSERT( ptr.is_valid() );
@@ -488,6 +499,8 @@ private:
 };
 
 void _standard_api_create_internal(service_ptr & out, const GUID & classID);
+void _standard_api_get_internal(service_ptr & out, const GUID & classID);
+bool _standard_api_try_get_internal(service_ptr & out, const GUID & classID);
 
 template<typename T> inline void standard_api_create_t(service_ptr_t<T> & p_out) {
 	if (pfc::is_same_type<T,typename T::t_interface_entrypoint>::value) {
@@ -526,9 +539,10 @@ inline bool static_api_test_t() {
 #define FB2K_API_AVAILABLE(API) static_api_test_t<API>()
 
 //! Helper template used to easily access core services. \n
-//! Usage: static_api_ptr_t<myclass> api; api->dosomething();
-//! Can be used at any point of code, WITH EXCEPTION of static objects that are initialized during the DLL loading process before the service system is initialized; such as static static_api_ptr_t objects or having static_api_ptr_t instances as members of statically created objects.
-//! Throws exception_service_not_found if service could not be reached (which can be ignored for core APIs that are always present unless there is some kind of bug in the code).
+//! Usage: static_api_ptr_t<myclass> api; api->dosomething(); \n
+//! Can be used at any point of code, WITH EXCEPTION of static objects that are initialized during the DLL loading process before the service system is initialized; such as static static_api_ptr_t objects or having static_api_ptr_t instances as members of statically created objects. \n
+//! Throws exception_service_not_found if service could not be reached (which can be ignored for core APIs that are always present unless there is some kind of bug in the code). \n
+//! This class is provided for backwards compatibility. The recommended way to do this stuff is now someclass::get() / someclass::tryGet().
 template<typename t_interface>
 class static_api_ptr_t {
 private:
@@ -587,10 +601,10 @@ public:
 	bool next(service_ptr_t<t_query> & p_out) {
 		pfc::assert_same_type<typename t_query::t_interface_entrypoint,t_interface>();
 		if (pfc::is_same_type<t_query,t_interface>::value) {
-			return __next(reinterpret_cast<service_ptr_t<t_interface>&>(p_out));
+			return _next(reinterpret_cast<service_ptr_t<t_interface>&>(p_out));
 		} else {
 			service_ptr_t<t_interface> temp;
-			while(__next(temp)) {
+			while(_next(temp)) {
 				if (temp->service_query_t(p_out)) return true;
 			}
 			return false;
@@ -598,173 +612,41 @@ public:
 	}
 
 private:
-	bool __next(service_ptr_t<t_interface> & p_out) {
+	bool _next(service_ptr_t<t_interface> & p_out) {
 		return m_helper.create(p_out,m_index++);
 	}
 	unsigned m_index;
 	service_class_helper_t<t_interface> m_helper;
 };
 
-        
-        
-template<typename T>
-class service_factory_t : public service_factory_base_t<typename T::t_interface_entrypoint> {
-public:
-    void instance_create(service_ptr_t<service_base> & p_out) {
-        p_out = pfc::implicit_cast<service_base*>(pfc::implicit_cast<typename T::t_interface_entrypoint*>(pfc::implicit_cast<T*>(  new service_impl_t<T>  )));
-    }
-};
 
-        
-template<typename T>
-class service_factory_single_t : public service_factory_base_t<typename T::t_interface_entrypoint> {
-    service_impl_single_t<T> g_instance;
-public:
-    TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(service_factory_single_t,g_instance)
-    
-    void instance_create(service_ptr_t<service_base> & p_out) {
-        p_out = pfc::implicit_cast<service_base*>(pfc::implicit_cast<typename T::t_interface_entrypoint*>(pfc::implicit_cast<T*>(&g_instance)));
-    }
-    
-    inline T& get_static_instance() {return g_instance;}
-    inline const T& get_static_instance() const {return g_instance;}
-};
-
-template<typename T>
-class service_factory_single_ref_t : public service_factory_base_t<typename T::t_interface_entrypoint>
-{
-private:
-    T & instance;
-public:
-    service_factory_single_ref_t(T& param) : instance(param) {}
-    
-    void instance_create(service_ptr_t<service_base> & p_out) {
-        p_out = pfc::implicit_cast<service_base*>(pfc::implicit_cast<typename T::t_interface_entrypoint*>(pfc::implicit_cast<T*>(&instance)));
-    }
-    
-    inline T& get_static_instance() {return instance;}
-};
-
-
-template<typename T>
-class service_factory_single_transparent_t : public service_factory_base_t<typename T::t_interface_entrypoint>, public service_impl_single_t<T>
-{
-public:
-    TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(service_factory_single_transparent_t,service_impl_single_t<T>)
-    
-    void instance_create(service_ptr_t<service_base> & p_out) {
-        p_out = pfc::implicit_cast<service_base*>(pfc::implicit_cast<typename T::t_interface_entrypoint*>(pfc::implicit_cast<T*>(this)));
-    }
-    
-    inline T& get_static_instance() {return *(T*)this;}
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-template<typename what>
-static bool service_by_guid_fallback(service_ptr_t<what> & out, const GUID & id) {
-	service_enum_t<what> e;
-	service_ptr_t<what> ptr;
-	while(e.next(ptr)) {
-		if (ptr->get_guid() == id) {out = ptr; return true;}
-	}
-	return false;
-}
-
-template<typename what>
-class service_by_guid_data {
-public:
-	service_by_guid_data() : m_servClass(), m_inited() {}
-
-	bool ready() const {return m_inited;}
-
-	// Caller must ensure initialize call before create() as well as thread safety of initialize() calls. The rest of this class is thread safe (only reads member data).
-	void initialize() {
-		if (m_inited) return;
-		pfc::assert_same_type< what, typename what::t_interface_entrypoint >();
-		m_servClass = service_factory_base::enum_find_class(what::class_guid);
-		const t_size servCount = service_factory_base::enum_get_count(m_servClass);
-		for(t_size walk = 0; walk < servCount; ++walk) {
-			service_ptr_t<what> temp;
-			if (_service_instantiate_helper(temp, m_servClass, walk)) {
-				m_order.set(temp->get_guid(), walk);
-			}
+namespace fb2k {
+	//! Modern get-std-api helper. \n
+	//! Does not throw exceptions, crashes on failure. \n
+	//! If failure is possible, use std_api_try_get() instead and handle false return value.
+	template<typename api_t>
+	service_ptr_t<api_t> std_api_get() {
+		typedef typename api_t::t_interface_entrypoint entrypoint_t;
+		service_ptr_t<api_t> ret;
+		if (pfc::is_same_type<api_t, entrypoint_t>::value) {
+			_standard_api_get_internal(ret._as_base_ptr(), api_t::class_guid);
+		} else {
+			ret ^= std_api_get<entrypoint_t>();
 		}
-		m_inited = true;
+		return ret;
 	}
 
-	bool create(service_ptr_t<what> & out, const GUID & theID) const {
-		PFC_ASSERT(m_inited);
-		t_size index;
-		if (!m_order.query(theID,index)) return false;
-		return _service_instantiate_helper(out, m_servClass, index);
+	//! Modern get-std-api helper. \n
+	//! Returns true on scucess (ret ptr is valid), false on failure (API not found).
+	template<typename api_t>
+	bool std_api_try_get( service_ptr_t<api_t> & ret ) {
+		typedef typename api_t::t_interface_entrypoint entrypoint_t;
+		if (pfc::is_same_type<api_t, entrypoint_t>::value) {
+			return _standard_api_try_get_internal(ret._as_base_ptr(), api_t::class_guid);
+		} else {
+			service_ptr_t<entrypoint_t> temp;
+			if (! std_api_try_get( temp ) ) return false;
+			return ret &= temp;
+		}
 	}
-	service_ptr_t<what> create(const GUID & theID) const {
-		service_ptr_t<what> temp; if (!crete(temp,theID)) throw exception_service_not_found(); return temp;
-	}
-
-private:
-	volatile bool m_inited;
-	pfc::map_t<GUID,t_size> m_order;
-	service_class_ref m_servClass;
-};
-
-template<typename what>
-class _service_by_guid_data_container {
-public:
-	static service_by_guid_data<what> data;
-};
-template<typename what> service_by_guid_data<what> _service_by_guid_data_container<what>::data;
-
-
-template<typename what>
-static void service_by_guid_init() {
-	service_by_guid_data<what> & data = _service_by_guid_data_container<what>::data;
-	data.initialize();
 }
-template<typename what>
-static bool service_by_guid(service_ptr_t<what> & out, const GUID & theID) {
-	pfc::assert_same_type< what, typename what::t_interface_entrypoint >();
-	service_by_guid_data<what> & data = _service_by_guid_data_container<what>::data;
-	if (data.ready()) {
-		//fall-thru
-	} else if (core_api::is_main_thread()) {
-		data.initialize();
-	} else {
-#ifdef _DEBUG
-		FB2K_DebugLog() << "Warning: service_by_guid() used in non-main thread without initialization, using fallback";
-#endif
-		return service_by_guid_fallback(out,theID);
-	}
-	return data.create(out,theID);
-}
-template<typename what>
-static service_ptr_t<what> service_by_guid(const GUID & theID) {
-	service_ptr_t<what> temp;
-	if (!service_by_guid(temp,theID)) throw exception_service_not_found();
-	return temp;
-}
-
-#define FB2K_FOR_EACH_SERVICE(type, call) {service_enum_t<typename type::t_interface_entrypoint> e; service_ptr_t<type> ptr; while(e.next(ptr)) {ptr->call;} }
-
-
-
-class comparator_service_guid {
-public:
-	template<typename what> static int compare(const what & v1, const what & v2) { return pfc::compare_t(v1->get_guid(), v2->get_guid()); }
-};
-
-
-#endif //_foobar2000_sdk_service_h_included_

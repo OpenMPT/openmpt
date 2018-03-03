@@ -1,5 +1,11 @@
 #include "stdafx.h"
 
+#include "../helpers/win32_misc.h"
+#include "inplace_edit.h"
+#include "inplace_edit_v2.h"
+#include "AutoComplete.h"
+
+
 namespace InPlaceEdit {
 
 	t_size CTableEditHelperV2::ColumnToPosition(t_size col) const {

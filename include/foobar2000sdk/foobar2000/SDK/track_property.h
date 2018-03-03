@@ -8,12 +8,19 @@ public:
 	//! @param p_value Value of the property.
 	virtual void set_property(const char * p_group,double p_sortpriority,const char * p_name,const char * p_value) = 0;
 protected:
-	track_property_callback const & operator=(track_property_callback const &) {return *this;}
+	track_property_callback() {}
 	~track_property_callback() {}
+private:
+	track_property_callback(track_property_callback const &) = delete;
+	track_property_callback const & operator=(track_property_callback const &) = delete;
+	
 };
 
+//! Extended version of track_property_callback
 class NOVTABLE track_property_callback_v2 : public track_property_callback {
 public:
+	//! Returns a boolean value indicating whether the specified group is wanted; can be used to suppress expensive processing of information that will not be actually shown. \n
+	//! See also set_property() p_group parameter.
 	virtual bool is_group_wanted(const char * p_group) = 0;
 protected:
 	~track_property_callback_v2() {}

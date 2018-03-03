@@ -19,7 +19,7 @@ t_filesize metadb_handle::get_filesize()
 bool metadb_handle::format_title_legacy(titleformat_hook * p_hook,pfc::string_base & p_out,const char * p_spec,titleformat_text_filter * p_filter)
 {
 	service_ptr_t<titleformat_object> script;
-	if (static_api_ptr_t<titleformat_compiler>()->compile(script,p_spec)) {
+	if (titleformat_compiler::get()->compile(script,p_spec)) {
 		return format_title(p_hook,p_out,script,p_filter);
 	} else {
 		p_out.reset();

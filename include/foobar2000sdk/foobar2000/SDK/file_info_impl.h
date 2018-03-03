@@ -1,5 +1,4 @@
-#ifndef _FOOBAR2000_SDK_FILE_INFO_IMPL_H_
-#define _FOOBAR2000_SDK_FILE_INFO_IMPL_H_
+#pragma once
 
 namespace file_info_impl_utils {
 
@@ -140,5 +139,3 @@ private:
 
 	replaygain_info m_replaygain;
 };
-
-#endif

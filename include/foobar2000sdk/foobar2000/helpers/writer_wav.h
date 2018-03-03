@@ -1,9 +1,9 @@
-#ifndef _foobar2000_wav_writer_h_
-#define _foobar2000_wav_writer_h_
+#pragma once
 
 #ifdef _WIN32
 #include <mmreg.h>
 #endif
+
 
 struct wavWriterSetup_t
 {
@@ -30,6 +30,7 @@ public:
 	void open(const char * p_path, const wavWriterSetup_t & p_setup, abort_callback & p_abort);
 	void open(service_ptr_t<file> p_file, const wavWriterSetup_t & p_setup, abort_callback & p_abort);
 	void write(const audio_chunk & p_chunk,abort_callback & p_abort);
+	void write_raw( const void * raw, size_t rawSize, abort_callback & p_abort );
 	void finalize(abort_callback & p_abort);
 	void close();
 	bool is_open() const { return m_file.is_valid(); }
@@ -49,4 +50,4 @@ private:
 	mem_block_container_aligned_incremental_impl<16> m_postprocessor_output;
 };
 
-#endif //_foobar2000_wav_writer_h_
+file::ptr makeLiveWAVFile( const wavWriterSetup_t & setup, file::ptr data );

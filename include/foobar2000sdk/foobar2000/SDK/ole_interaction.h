@@ -38,7 +38,7 @@ public:
 	}
 
 	void set_from_playlist_manager(bit_array const & mask) {
-		static_api_ptr_t<playlist_manager_v4> api;
+		auto api = playlist_manager_v4::get();
 		const t_size pltotal = api->get_playlist_count();
 		const t_size total = mask.calc_count(true,0,pltotal);
 		set_entry_count(total);
@@ -100,10 +100,10 @@ private:
 };
 
 //! \since 0.9.5
-//! Provides various methods for interaction between foobar2000 and OLE IDataObjects, Windows Clipboard, drag&drop and such.
-//! To instantiate, use static_api_ptr_t<ole_interaction>.
+//! Provides various methods for interaction between foobar2000 and OLE IDataObjects, Windows Clipboard, drag&drop and such. \n
+//! To instantiate, use ole_interaction::get().
 class NOVTABLE ole_interaction : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ole_interaction)
+	FB2K_MAKE_SERVICE_COREAPI(ole_interaction)
 public:
 	enum {
 		KClipboardFormatSimpleLocations,
@@ -139,7 +139,7 @@ public:
 
 //! \since 0.9.5.4
 class NOVTABLE ole_interaction_v2 : public ole_interaction {
-	FB2K_MAKE_SERVICE_INTERFACE(ole_interaction_v2, ole_interaction)
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(ole_interaction_v2, ole_interaction)
 public:
 	//! Creates an IDataObject from one or more playlists, including playlist name info for re-creating those playlists later.
 	virtual pfc::com_ptr_t<IDataObject> create_dataobject(const playlist_dataobject_desc_v2 & source) = 0;

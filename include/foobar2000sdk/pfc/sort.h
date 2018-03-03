@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 
 	void swap_void(void * item1,void * item2,t_size width);
@@ -71,7 +73,8 @@ namespace pfc {
 	template<typename T>
 	void reorder_ptr_t(T* p_data,const t_size * p_order,t_size p_count)
 	{
-		reorder(reorder_callback_impl_ptr_t<T>(p_data),p_order,p_count);
+        reorder_callback_impl_ptr_t<T> cb(p_data);
+		reorder(cb,p_order,p_count);
 	}
 
 

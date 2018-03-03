@@ -2,11 +2,11 @@
 
 
 void main_thread_callback::callback_enqueue() {
-    static_api_ptr_t< main_thread_callback_manager >()->add_callback( this );
+	main_thread_callback_manager::get()->add_callback(this);
 }
 
 void main_thread_callback_add(main_thread_callback::ptr ptr) {
-    static_api_ptr_t<main_thread_callback_manager>()->add_callback(ptr);
+	main_thread_callback_manager::get()->add_callback(ptr);
 }
 
 namespace {
@@ -26,4 +26,12 @@ namespace {
 
 void fb2k::inMainThread( std::function<void () > f ) {
     main_thread_callback_add( new service_impl_t<mtcallback_func>(f));
+}
+
+void fb2k::inMainThread2( std::function<void () > f ) {
+	if ( core_api::is_main_thread() ) {
+		f();
+	} else {
+		inMainThread(f);
+	}
 }

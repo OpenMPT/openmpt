@@ -50,7 +50,7 @@ public:
 
 	void show_manual();
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(search_filter_manager);
+	FB2K_MAKE_SERVICE_COREAPI(search_filter_manager);
 };
 
 //! New in 0.9.5.3.
@@ -67,5 +67,5 @@ public:
 	//! Opens the search query syntax reference document, typically an external HTML in user's default web browser.
 	virtual void show_manual() = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE(search_filter_manager_v2, search_filter_manager);
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(search_filter_manager_v2, search_filter_manager);
 };

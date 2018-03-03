@@ -48,3 +48,35 @@ void console::printfv(const char* p_format,va_list p_arglist)
 	uPrintfV(temp,p_format,p_arglist);
 	print(temp);
 }
+
+
+
+namespace {
+
+	class event_logger_recorder_impl : public event_logger_recorder {
+	public:
+		void playback( event_logger::ptr playTo ) {
+			for(auto i = m_entries.first(); i.is_valid(); ++i ) {
+				playTo->log_entry( i->line.get_ptr(), i->severity );
+			}
+		}
+
+		void log_entry( const char * line, unsigned severity ) {
+			auto rec = m_entries.insert_last();
+			rec->line = line;
+			rec->severity = severity;
+		}
+	private:
+
+		struct entry_t {
+			pfc::string_simple line;
+			unsigned severity;
+		};
+		pfc::chain_list_v2_t< entry_t > m_entries;
+	};
+
+}
+
+event_logger_recorder::ptr event_logger_recorder::create() {
+	return new service_impl_t<event_logger_recorder_impl>();
+}

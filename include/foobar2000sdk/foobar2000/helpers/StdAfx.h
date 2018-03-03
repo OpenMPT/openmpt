@@ -10,9 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-
 #include "../SDK/foobar2000.h"
-#include "helpers.h"
 
 // TODO: reference additional headers your program requires here
 

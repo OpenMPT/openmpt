@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "dialog_resize_helper.h"
 
-#ifdef _WIN32
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
+#include "dialog_resize_helper.h"
 
 BOOL GetChildWindowRect(HWND wnd,UINT id,RECT* child)
 {
@@ -161,4 +161,4 @@ dialog_resize_helper::~dialog_resize_helper()
 {
 }
 
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

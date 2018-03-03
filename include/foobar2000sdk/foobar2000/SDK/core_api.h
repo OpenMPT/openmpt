@@ -7,7 +7,7 @@ namespace core_api {
 	HINSTANCE get_my_instance();
 	//! Retrieves filename of calling dll, excluding extension, e.g. "foo_asdf"
 	const char * get_my_file_name();
-	//! Retrieves full path of calling dll, e.g. file://c:\blah\foobar2000\foo_asdf.dll
+	//! Retrieves full path of calling dll, e.g. c:\blah\foobar2000\foo_asdf.dll . No file:// prefix, this path can interop with win32 API calls.
 	const char * get_my_full_path();
 	//! Retrieves main app window. WARNING: this is provided for parent of dialog windows and such only; using it for anything else (such as hooking windowproc to alter app behaviors) is absolutely illegal.
 	HWND get_main_window();

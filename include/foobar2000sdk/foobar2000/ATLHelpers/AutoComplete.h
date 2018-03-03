@@ -1,3 +1,9 @@
+#pragma once
+
+#include <ShlDisp.h>
+
+class cfg_dropdown_history_mt;
+
 HRESULT InitializeDropdownAC(HWND comboBox, cfg_dropdown_history_mt & var, const char * initVal);
 HRESULT InitializeEditAC(HWND edit, const char * values, DWORD opts = ACO_AUTOAPPEND|ACO_AUTOSUGGEST);
 HRESULT InitializeEditAC(HWND edit, pfc::const_iterator<pfc::string8> valueEnum, DWORD opts = ACO_AUTOAPPEND|ACO_AUTOSUGGEST);

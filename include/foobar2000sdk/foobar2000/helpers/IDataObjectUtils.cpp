@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
-#ifdef _WIN32
+#ifdef FOOBAR2000_DESKTOP_WINDOWS
+
+#include "IDataObjectUtils.h"
 
 HRESULT IDataObjectUtils::DataBlockToSTGMEDIUM(const void * blockPtr, t_size blockSize, STGMEDIUM * medium, DWORD tymed, bool bHere) throw() {
 	try {
@@ -186,4 +188,4 @@ HRESULT IDataObjectUtils::PasteSucceeded(pfc::com_ptr_t<IDataObject> obj, DWORD 
 	return SetDataObjectDWORD(obj, RegisterClipboardFormat(CFSTR_PASTESUCCEEDED), effect);
 }
 
-#endif // _WIN32
+#endif // FOOBAR2000_DESKTOP_WINDOWS

@@ -34,8 +34,23 @@ namespace pfc {
 		}
 		return ~0;
 	}
-
-	void create_move_items_permutation(t_size * p_output,t_size p_count,const bit_array & p_selection,int p_delta) {
+    
+    void create_move_item_permutation( size_t * order, size_t count, size_t from, size_t to ) {
+        PFC_ASSERT( from < count );
+        PFC_ASSERT( to < count );
+        for ( size_t w = 0; w < count; ++w ) {
+            size_t i = w;
+            if ( w == to ) i = from;
+            else if ( w < to && w >= from ) {
+                ++i;
+            } else if ( w > to && w <= from ) {
+                --i;
+            }
+            order[w] = i;
+        }
+    }
+    
+    void create_move_items_permutation(t_size * p_output,t_size p_count,const bit_array & p_selection,int p_delta) {
 		t_size * const order = p_output;
 		const t_size count = p_count;
 
@@ -109,18 +124,31 @@ void order_helper::g_reverse(t_size * order,t_size base,t_size count)
 }
 
 
-void pfc::crash() {
-#ifdef _MSC_VER
-	__debugbreak();
+namespace pfc {
+#ifdef PFC_FOOBAR2000_CLASSIC
+	void crashHook();
+#endif
+
+	void crashImpl() {
+#if defined(_MSC_VER)
+		__debugbreak();
 #else
-
 #if defined(__ANDROID__) && PFC_DEBUG
-	nixSleep(1);
+		nixSleep(1);
 #endif
+		raise(SIGINT);
+#endif
+	}
 
-    raise(SIGINT);
+	void crash() {
+#ifdef PFC_FOOBAR2000_CLASSIC
+		crashHook();
+#else
+		crashImpl();
 #endif
-}
+	}
+} // namespace pfc
+
 
 
 void pfc::byteswap_raw(void * p_buffer,const t_size p_bytes) {
@@ -144,6 +172,8 @@ void pfc::outputDebugLine(const char * msg) {
 #ifdef _WIN32
 void pfc::myassert_win32(const wchar_t * _Message, const wchar_t *_File, unsigned _Line) {
 	if (IsDebuggerPresent()) pfc::crash();
+	PFC_DEBUGLOG << "PFC_ASSERT failure: " << _Message;
+	PFC_DEBUGLOG << "PFC_ASSERT location: " << _File << " : " << _Line;
 	_wassert(_Message,_File,_Line);
 }
 #else
@@ -208,3 +238,64 @@ double pfc::exp_int( const double base, const int expS ) {
 
 t_int32 pfc::rint32(double p_val) { return (t_int32)floor(p_val + 0.5); }
 t_int64 pfc::rint64(double p_val) { return (t_int64)floor(p_val + 0.5); }
+
+
+namespace pfc {
+	// bigmem impl
+
+	void bigmem::resize(size_t newSize) {
+		clear();
+		m_data.set_size((newSize + slice - 1) / slice);
+		m_data.fill_null();
+		for (size_t walk = 0; walk < m_data.get_size(); ++walk) {
+			size_t thisSlice = slice;
+			if (walk + 1 == m_data.get_size()) {
+				size_t cut = newSize % slice;
+				if (cut) thisSlice = cut;
+			}
+			void* ptr = malloc(thisSlice);
+			if (ptr == NULL) { clear(); throw std::bad_alloc(); }
+			m_data[walk] = (uint8_t*)ptr;
+		}
+		m_size = newSize;
+	}
+	void bigmem::clear() {
+		for (size_t walk = 0; walk < m_data.get_size(); ++walk) free(m_data[walk]);
+		m_data.set_size(0);
+		m_size = 0;
+	}
+	void bigmem::read(void * ptrOut, size_t bytes, size_t offset) {
+		PFC_ASSERT(offset + bytes <= size());
+		uint8_t * outWalk = (uint8_t*)ptrOut;
+		while (bytes > 0) {
+			size_t o1 = offset / slice, o2 = offset % slice;
+			size_t delta = slice - o2; if (delta > bytes) delta = bytes;
+			memcpy(outWalk, m_data[o1] + o2, delta);
+			offset += delta;
+			bytes -= delta;
+			outWalk += delta;
+		}
+	}
+	void bigmem::write(const void * ptrIn, size_t bytes, size_t offset) {
+		PFC_ASSERT(offset + bytes <= size());
+		const uint8_t * inWalk = (const uint8_t*)ptrIn;
+		while (bytes > 0) {
+			size_t o1 = offset / slice, o2 = offset % slice;
+			size_t delta = slice - o2; if (delta > bytes) delta = bytes;
+			memcpy(m_data[o1] + o2, inWalk, delta);
+			offset += delta;
+			bytes -= delta;
+			inWalk += delta;
+		}
+	}
+	uint8_t * bigmem::_slicePtr(size_t which) { return m_data[which]; }
+	size_t bigmem::_sliceCount() { return m_data.get_size(); }
+	size_t bigmem::_sliceSize(size_t which) {
+		if (which + 1 == _sliceCount()) {
+			size_t s = m_size % slice;
+			if (s) return s;
+		}
+		return slice;
+	}
+
+}

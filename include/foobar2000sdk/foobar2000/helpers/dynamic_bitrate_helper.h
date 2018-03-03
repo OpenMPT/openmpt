@@ -1,3 +1,5 @@
+#pragma once
+
 class dynamic_bitrate_helper
 {
 public:

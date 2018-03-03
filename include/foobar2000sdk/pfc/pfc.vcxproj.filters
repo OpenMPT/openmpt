@@ -74,6 +74,15 @@
     <ClInclude Include="nix-objects.h" />
     <ClInclude Include="pp-gettickcount.h" />
     <ClInclude Include="pp-winapi.h" />
+    <ClInclude Include="lockless.h" />
+    <ClInclude Include="synchro.h" />
+    <ClInclude Include="splitString.h" />
+    <ClInclude Include="ptrholder.h" />
+    <ClInclude Include="event.h" />
+    <ClInclude Include="wait_queue.h" />
+    <ClInclude Include="pool.h" />
+    <ClInclude Include="pocket_char_ops.h" />
+    <ClInclude Include="suppress_fb2k_hooks.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="pfc-license.txt">

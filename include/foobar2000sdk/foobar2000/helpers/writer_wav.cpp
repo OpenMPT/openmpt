@@ -1,4 +1,12 @@
-#include "stdafx.h"
+#include "StdAfx.h"
+
+#include <vector>
+
+#ifndef _WIN32
+#include "winmm-types.h"
+#endif
+
+#include "writer_wav.h"
 
 
 static const GUID guid_RIFF = pfc::GUID_from_text("66666972-912E-11CF-A5D6-28DB04C10000");
@@ -193,6 +201,11 @@ void CWavWriter::open(service_ptr_t<file> p_file, const wavWriterSetup_t & p_set
 	}
 }
 
+void CWavWriter::write_raw( const void * raw, size_t rawSize, abort_callback & p_abort ) {
+	m_file->write_object(raw,rawSize,p_abort);
+	m_bytes_written += rawSize;
+}
+
 void CWavWriter::write(const audio_chunk & p_chunk, abort_callback & p_abort)
 {
 	if (p_chunk.get_channels() != m_setup.m_channels 
@@ -209,8 +222,7 @@ void CWavWriter::write(const audio_chunk & p_chunk, abort_callback & p_abort)
 			{
 #if audio_sample_size == 32
 				t_size bytes = p_chunk.get_sample_count() * p_chunk.get_channels() * sizeof(audio_sample);
-				m_file->write_object(p_chunk.get_data(),bytes,p_abort);
-				m_bytes_written += bytes;
+				write_raw( p_chunk.get_data(),bytes,p_abort );
 #else
 				enum {tempsize = 256};
 				float temp[tempsize];
@@ -223,8 +235,7 @@ void CWavWriter::write(const audio_chunk & p_chunk, abort_callback & p_abort)
                     for(n=0;n<delta;n++)
 						temp[n] = (float)(*(readptr++));
 					unsigned bytes = delta * sizeof(float);
-					m_file->write_object_e(temp,bytes,p_abort);
-					m_bytes_written += bytes;
+					write_raw(temp,bytes,p_abort);
 					todo -= delta;
 				}
 #endif
@@ -246,8 +257,7 @@ void CWavWriter::write(const audio_chunk & p_chunk, abort_callback & p_abort)
 	else
 	{
 		m_postprocessor->run(p_chunk,m_postprocessor_output,m_setup.m_bpsValid,m_setup.m_bps,m_setup.m_dither,1.0f);
-		m_file->write_object(m_postprocessor_output.get_ptr(),m_postprocessor_output.get_size(),p_abort);
-		m_bytes_written += m_postprocessor_output.get_size();
+		write_raw( m_postprocessor_output.get_ptr(),m_postprocessor_output.get_size(), p_abort );
 	}
 }
 
@@ -280,4 +290,98 @@ audio_chunk::spec_t CWavWriter::get_spec() const {
 	spec.chanCount = m_setup.m_channels;
 	spec.chanMask = m_setup.m_channel_mask;
 	return spec;
+}
+
+namespace {
+class fileWav : public foobar2000_io::file {
+public:
+	size_t read( void * buffer, size_t bytes, abort_callback & aborter ) {
+		aborter.check();
+		uint8_t * out = (uint8_t*) buffer;
+		size_t ret = 0;
+		if (m_position < m_header.size()) {
+			size_t delta = (size_t) ( m_header.size() - m_position );
+			if (delta > bytes) delta = bytes;
+			memcpy( out, &m_header[(size_t)m_position], delta );
+			m_position += delta;
+			out += delta; ret += delta; bytes -= delta; 
+		}
+		if (bytes > 0) {
+			m_data->seek( m_position, aborter );
+			size_t didRead = m_data->read( out, bytes, aborter );
+			m_position += didRead;
+			ret += didRead;
+		}
+		return ret;
+	}
+	void write( const void * buffer, size_t bytes, abort_callback & aborter ) {
+		throw exception_io_denied();
+	}
+	// old fb2k SDK workaround
+	fileWav( std::vector<uint8_t> const & header, file::ptr data) {
+		m_data = data;
+		m_position = 0;
+		m_header = header;
+	}
+	fileWav( std::vector<uint8_t> && header, file::ptr data) {
+		m_data = data;
+		m_position = 0;
+		m_header = std::move(header);
+	}
+	t_filesize get_size(abort_callback & p_abort) {
+		t_filesize s = m_data->get_size( p_abort );
+		if (s != filesize_invalid) s += m_header.size();
+		return s;
+	}
+	t_filesize get_position(abort_callback & p_abort) {
+		return m_position;
+	}
+	void resize(t_filesize p_size,abort_callback & p_abort) {
+		throw exception_io_denied();
+	}
+	void seek(t_filesize p_position,abort_callback & p_abort) {
+		if (p_position > get_size(p_abort)) throw exception_io_seek_out_of_range();
+		m_position = p_position;
+	}
+	bool can_seek() {
+		return true;
+	}
+	bool get_content_type(pfc::string_base & p_out) { return false; }
+	void reopen(abort_callback & p_abort) { seek(0, p_abort); }
+	bool is_remote() {
+		return m_data->is_remote();
+	}
+	t_filestats get_stats(abort_callback & p_abort) {
+		t_filestats s = m_data->get_stats( p_abort );
+		if (s.m_size != filesize_invalid) s.m_size += m_header.size();
+		return s;
+	}
+private:
+	std::vector<uint8_t> m_header;
+	t_filesize m_position;
+	file::ptr m_data;
+};
+}
+
+static std::vector<uint8_t> makeWavHeader( const wavWriterSetup_t & setup, t_filesize dataSize, abort_callback & aborter ) {
+	std::vector<uint8_t> ret;
+	file::ptr temp; filesystem::g_open_tempmem( temp, aborter );
+	{
+		CWavWriter w;
+		w.open( temp, setup, aborter );
+	}
+	const size_t s = pfc::downcast_guarded<size_t>( temp->get_size( aborter ) );
+	if (s > 0) {
+		ret.resize( s );
+		temp->seek( 0, aborter );
+		temp->read_object( &ret[0], s, aborter );
+	}		
+	return std::move(ret);
+}
+
+file::ptr makeLiveWAVFile( const wavWriterSetup_t & setup, file::ptr data ) {
+	abort_callback_dummy aborter;
+	t_filesize size = data->get_size( aborter );
+	auto vec = makeWavHeader( setup, size, aborter );
+	return new service_impl_t< fileWav >( std::move(vec), data );
 }

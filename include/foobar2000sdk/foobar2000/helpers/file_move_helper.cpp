@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "file_move_helper.h"
+
 bool file_move_helper::g_on_deleted(const pfc::list_base_const_t<const char *> & p_files)
 {
 	file_operation_callback::g_on_files_deleted(p_files);
@@ -22,7 +24,7 @@ t_size file_move_helper::g_filter_dead_files_sorted_make_mask(pfc::list_base_t<m
 
 t_size file_move_helper::g_filter_dead_files_sorted(pfc::list_base_t<metadb_handle_ptr> & p_data,const pfc::list_base_const_t<const char*> & p_dead)
 {
-	bit_array_bittable mask(p_data.get_count());
+	pfc::bit_array_bittable mask(p_data.get_count());
 	t_size found = g_filter_dead_files_sorted_make_mask(p_data,p_dead,mask);
 	if (found > 0) p_data.remove_mask(mask);
 	return found;

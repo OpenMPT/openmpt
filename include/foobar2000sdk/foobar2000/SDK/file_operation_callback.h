@@ -1,6 +1,4 @@
-#ifndef _FILE_OPERATION_CALLBACK_H_
-#define _FILE_OPERATION_CALLBACK_H_
-
+#pragma once
 //! Interface to notify component system about files being deleted or moved. Operates in app's main thread only.
 
 class NOVTABLE file_operation_callback : public service_base {
@@ -47,14 +45,14 @@ public:
 	virtual void register_callback(file_operation_callback_dynamic * p_callback) = 0;
 	virtual void unregister_callback(file_operation_callback_dynamic * p_callback) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(file_operation_callback_dynamic_manager);
+	FB2K_MAKE_SERVICE_COREAPI(file_operation_callback_dynamic_manager);
 };
 
 //! New in 0.9.5.
 class file_operation_callback_dynamic_impl_base : public file_operation_callback_dynamic {
 public:
-	file_operation_callback_dynamic_impl_base() {static_api_ptr_t<file_operation_callback_dynamic_manager>()->register_callback(this);}
-	~file_operation_callback_dynamic_impl_base() {static_api_ptr_t<file_operation_callback_dynamic_manager>()->unregister_callback(this);}
+	file_operation_callback_dynamic_impl_base() {file_operation_callback_dynamic_manager::get()->register_callback(this);}
+	~file_operation_callback_dynamic_impl_base() {file_operation_callback_dynamic_manager::get()->unregister_callback(this);}
 
 	void on_files_deleted_sorted(const pfc::list_base_const_t<const char *> & p_items) {}
 	void on_files_moved_sorted(const pfc::list_base_const_t<const char *> & p_from,const pfc::list_base_const_t<const char *> & p_to) {}
@@ -62,5 +60,3 @@ public:
 
 	PFC_CLASS_NOT_COPYABLE_EX(file_operation_callback_dynamic_impl_base);
 };
-
-#endif //_FILE_OPERATION_CALLBACK_H_

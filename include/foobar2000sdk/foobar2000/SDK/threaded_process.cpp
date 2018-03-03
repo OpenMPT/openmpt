@@ -27,12 +27,12 @@ void threaded_process_status::set_progress_secondary_float(double p_state)
 
 bool threaded_process::g_run_modal(service_ptr_t<threaded_process_callback> p_callback,unsigned p_flags,HWND p_parent,const char * p_title,t_size p_title_len)
 {
-	return static_api_ptr_t<threaded_process>()->run_modal(p_callback,p_flags,p_parent,p_title,p_title_len);
+	return threaded_process::get()->run_modal(p_callback,p_flags,p_parent,p_title,p_title_len);
 }
 
 bool threaded_process::g_run_modeless(service_ptr_t<threaded_process_callback> p_callback,unsigned p_flags,HWND p_parent,const char * p_title,t_size p_title_len)
 {
-	return static_api_ptr_t<threaded_process>()->run_modeless(p_callback,p_flags,p_parent,p_title,p_title_len);
+	return threaded_process::get()->run_modeless(p_callback,p_flags,p_parent,p_title,p_title_len);
 }
 
 bool threaded_process::g_query_preventStandby() {
@@ -43,4 +43,46 @@ bool threaded_process::g_query_preventStandby() {
 	} else {
 		return false;
 	}
+}
+
+enum {
+	set_items_max_characters = 80
+};
+
+void threaded_process_status::set_items(pfc::list_base_const_t<const char*> const & items) {
+	const size_t count = items.get_count();
+	if (count == 0) return;
+	if (count == 1) { set_item_path(items[0]); }
+	pfc::string8 acc;
+
+	for (size_t w = 0; w < count; ++w) {
+		pfc::string8 name = pfc::string_filename_ext(items[w]);
+		if (w > 0 && acc.length() + name.length() > set_items_max_characters) {
+			acc << " and " << (count - w) << " more";
+			break;
+		}
+		if (w > 0) acc << ", ";
+		acc << name;
+	}
+
+	set_item(acc);
+}
+
+void threaded_process_status::set_items(metadb_handle_list_cref items) {
+	const size_t count = items.get_count();
+	if ( count == 0 ) return;
+	if ( count == 1 ) { set_item_path(items[0]->get_path()); }
+	pfc::string8 acc;
+	
+	for( size_t w = 0; w < count; ++w ) {
+		pfc::string8 name = pfc::string_filename_ext(items[w]->get_path());
+		if ( w > 0 && acc.length() + name.length() > set_items_max_characters) {
+			acc << " and " << (count-w) << " more";
+			break;
+		}
+		if (w > 0) acc << ", ";
+		acc << name;
+	}
+
+	set_item(acc);
 }

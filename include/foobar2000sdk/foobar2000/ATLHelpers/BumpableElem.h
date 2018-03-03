@@ -1,9 +1,15 @@
+#pragma once
+#include "CFlashWindow.h"
+#include "misc.h"
+
+#include <utility>
+
 template<typename TClass>
 class ImplementBumpableElem : public TClass {
 private:
 	typedef ImplementBumpableElem<TClass> TSelf;
 public:
-	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD_WITH_INITIALIZER(ImplementBumpableElem, TClass, {_init();} )
+	template<typename ... arg_t> ImplementBumpableElem( arg_t && ... arg ) : TClass(std::forward<arg_t>(arg) ... ) {_init(); }
 
 	BEGIN_MSG_MAP_EX(ImplementBumpableElem)
 		MSG_WM_DESTROY(OnDestroy)
@@ -11,12 +17,12 @@ public:
 	END_MSG_MAP_HOOK()
 
 	void notify(const GUID & p_what, t_size p_param1, const void * p_param2, t_size p_param2size) {
-		if (p_what == ui_element_notify_visibility_changed && p_param2 == 0 && m_flash.m_hWnd != NULL) m_flash.Deactivate();
+		if (p_what == ui_element_notify_visibility_changed && p_param1 == 0 && m_flash.m_hWnd != NULL) m_flash.Deactivate();
 		__super::notify(p_what, p_param1, p_param2, p_param2size);
 	}
 
 	static bool Bump() {
-		for(pfc::const_iterator<TSelf*> walk = instances.first(); walk.is_valid(); ++walk) {
+		for(auto walk = instances.cfirst(); walk.is_valid(); ++walk) {
 			if ((*walk)->_bump()) return true;
 		}
 		return false;

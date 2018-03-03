@@ -51,8 +51,9 @@ public:
 
 //! Entrypoint service for visualisation processing; use this to create visualisation_stream objects that can be used to retrieve properties of currently played audio. \n
 //! Implemented by core; do not reimplement.\n
-//! Use static_api_ptr_t to access it, e.g. static_api_ptr_t<visualisation_manager>()->create_stream(mystream,0);
+//! Use visualisation_manager::get() to obtain an instance, e.g. visualisation_manager::get()->create_stream(mystream,0);
 class NOVTABLE visualisation_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(visualisation_manager);
 public:
 	//! Creates a visualisation_stream object. See visualisation_stream for more info.
 	//! @param p_out Receives newly created visualisation_stream instance.
@@ -73,6 +74,4 @@ public:
 		visualisation_stream::ptr temp; create_stream(temp, flags);
 		if (!temp->service_query_t(out)) throw exception_service_extension_not_found();
 	}
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(visualisation_manager);
 };

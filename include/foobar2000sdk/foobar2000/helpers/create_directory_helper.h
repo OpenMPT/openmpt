@@ -1,5 +1,4 @@
-#ifndef _CREATE_DIRECTORY_HELPER_H_
-#define _CREATE_DIRECTORY_HELPER_H_
+#pragma once
 
 namespace create_directory_helper {
 	void create_path(const char * p_path,abort_callback & p_abort);
@@ -16,5 +15,3 @@ namespace create_directory_helper {
 	};
 
 };
-
-#endif//_CREATE_DIRECTORY_HELPER_H_

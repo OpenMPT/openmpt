@@ -1,3 +1,5 @@
+#pragma once
+
 namespace pfc {
 	template<typename t_list1, typename t_list2>
 	static bool guess_reorder_pattern(pfc::array_t<t_size> & out, const t_list1 & from, const t_list2 & to) {

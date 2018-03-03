@@ -40,7 +40,7 @@ namespace {
 }
 namespace service_impl_helper {
 	void release_object_delayed(service_ptr obj) {
-		static_api_ptr_t<main_thread_callback_manager>()->add_callback(new service_impl_t<main_thread_callback_release_object>(obj));
+		main_thread_callback_manager::get()->add_callback(new service_impl_t<main_thread_callback_release_object>(obj));
 	}
 };
 
@@ -56,4 +56,19 @@ void _standard_api_create_internal(service_ptr & out, const GUID & classID) {
 		default:
 			throw exception_service_duplicated();
 	}
+}
+
+bool _standard_api_try_get_internal(service_ptr & out, const GUID & classID) {
+	service_class_ref c = service_factory_base::enum_find_class(classID);
+	switch (service_factory_base::enum_get_count(c)) {
+	case 1:
+		PFC_ASSERT_SUCCESS(service_factory_base::enum_create(out, c, 0));
+		return true;
+	default:
+		return false;
+	}
+}
+
+void _standard_api_get_internal(service_ptr & out, const GUID & classID) {
+	if (!_standard_api_try_get_internal(out, classID) ) uBugCheck();
 }

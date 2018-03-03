@@ -59,7 +59,7 @@ public:
 	__declspec(deprecated) t_load_info_state load_info(metadb_handle_ptr p_item,t_load_info_type p_type,HWND p_parent_window,bool p_show_errors);
 	__declspec(deprecated) t_update_info_state update_info(metadb_handle_ptr p_item,file_info & p_info,HWND p_parent_window,bool p_show_errors);
 	
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(metadb_io);
+	FB2K_MAKE_SERVICE_COREAPI(metadb_io);
 };
 
 //! Implementing this class gives you direct control over which part of file_info gets altered during a tag update uperation. To be used with metadb_io_v2::update_info_async().
@@ -159,7 +159,12 @@ public:
 	//! @param p_new_info New infos to write to specified items.
 	void update_info_async_simple(metadb_handle_list_cref p_list,const pfc::list_base_const_t<const file_info*> & p_new_info, HWND p_parent_window,t_uint32 p_op_flags,completion_notify_ptr p_notify);
 
-	FB2K_MAKE_SERVICE_INTERFACE(metadb_io_v2,metadb_io);
+	//! Helper to be called after a file has been rechaptered. \n
+	//! Forcibly reloads info then tells playlist_manager to update all affected playlists.
+	void on_file_rechaptered( const char * path, metadb_handle_list_cref newItems );
+	void on_files_rechaptered( metadb_handle_list_cref newHandles );
+
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(metadb_io_v2,metadb_io);
 };
 
 
@@ -175,7 +180,7 @@ public:
 	virtual void register_callback(metadb_io_callback_dynamic * p_callback) = 0;
 	virtual void unregister_callback(metadb_io_callback_dynamic * p_callback) = 0;
 
-	FB2K_MAKE_SERVICE_INTERFACE(metadb_io_v3,metadb_io_v2);
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(metadb_io_v3,metadb_io_v2);
 };
 
 //! metadb_io_callback_dynamic implementation helper.
@@ -212,7 +217,7 @@ public:
 
 //! Entrypoint service for metadb_handle related operations.\n
 //! Implemented only by core, do not reimplement.\n
-//! Use static_api_ptr_t template to access it, e.g. static_api_ptr_t<metadb>()->handle_create(myhandle,mylocation);
+//! Use metadb::get() to obtain an instance.
 class NOVTABLE metadb : public service_base
 {
 protected:	
@@ -248,7 +253,7 @@ public:
 	metadb_handle_ptr handle_create(playable_location const & l) {metadb_handle_ptr temp; handle_create(temp, l); return temp;}
 	metadb_handle_ptr handle_create(const char * path, uint32_t subsong) {return handle_create(make_playable_location(path, subsong));}
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(metadb);
+	FB2K_MAKE_SERVICE_COREAPI(metadb);
 };
 
 class titleformat_text_out;
@@ -322,11 +327,17 @@ private:
 
 
 //! \since 1.1
-// typedef hasher_md5_result metadb_index_hash;
+//! metadb_index_manager hash, currently a 64bit int, typically made from halving MD5 hash.
 typedef t_uint64 metadb_index_hash;
 
 
 //! \since 1.1
+//! A class that transforms track information (location+metadata) to a hash for metadb_index_manager. \n
+//! You need to implement your own when using metadb_index_manager to pin your data to user's tracks. \n
+//! Possible routes to take when implementing: \n
+//! Rely on location only - pinning lost when user moves, but survives editing tags\n
+//! Rely on metadata - pinning survives moving files, but lost when editing tags\n
+//! If you do the latter, you can implement metadb_io_edit_callback to respond to tag edits and avoid data loss.
 class NOVTABLE metadb_index_client : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(metadb_index_client, service_base)
 public:
@@ -343,33 +354,53 @@ public:
 };
 
 //! \since 1.1
+//! This service lets you pin your data to user's music library items, typically to be presented as title formatting %fields% via metadb_display_field_provider. \n
+//! Implement metadb_index_client to define how your data gets pinned to the songs.
 class NOVTABLE metadb_index_manager : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(metadb_index_manager)
+	FB2K_MAKE_SERVICE_COREAPI(metadb_index_manager)
 public:
+	//! Install a metadb_index_client. \n
+	//! This is best done from init_stage_callback::on_init_stage(init_stages::before_config_read) to avoid hammering already loaded UI & playlists with refresh requests. \n
+	//! If you provide your own title formatting fields, call dispatch_global_refresh() after a successful add() to signal all components to refresh all tracks \n
+	//! - which is expensive, hence it should be done in early app init phase for minimal performance penalty. \n
+	//! Always put a try/catch around add() as it may fail with an exception in an unlikely scenario of corrupted files holding your previously saved data. \n
+	//! @param client your metadb_index_client object.
+	//! @param index_id Your GUID that you will pass to other methods when referring to your index.
+	//! @param userDataRetentionPeriod Time for which the data should be retained if no matching tracks are present. \n
+	//! If this was set to zero, the data could be lost immediately if a library folder disappers for some reason. \n
+	//! Hint: use system_time_periods::* constants, for an example, system_time_periods::week.
 	virtual void add(metadb_index_client::ptr client, const GUID & index_id, t_filetimestamp userDataRetentionPeriod) = 0;
+	//! Uninstalls a previously installed index.
 	virtual void remove(const GUID & index_id) = 0;
+	//! Sets your data for the specified index+hash.
 	virtual void set_user_data(const GUID & index_id, const metadb_index_hash & hash, const void * data, t_size dataSize) = 0;
+	//! Gets your data for the specified index+hash.
 	virtual void get_user_data(const GUID & index_id, const metadb_index_hash & hash, mem_block_container & out) = 0;
 
 
+	//! Helper
 	template<typename t_array> void get_user_data_t(const GUID & index_id, const metadb_index_hash & hash, t_array & out) {
 		mem_block_container_ref_impl<t_array> ref(out);
 		get_user_data(index_id, hash, ref);
 	}
 
+	//! Helper
 	t_size get_user_data_here(const GUID & index_id, const metadb_index_hash & hash, void * out, t_size outSize) {
 		mem_block_container_temp_impl ref(out, outSize);
 		get_user_data(index_id, hash, ref);
 		return ref.get_size();
 	}
 
+	//! Signals all components that your data for the tracks matching the specified hashes has been altered; this will redraw the affected tracks in playlists and such.
 	virtual void dispatch_refresh(const GUID & index_id, const pfc::list_base_const_t<metadb_index_hash> & hashes) = 0;
 	
+	//! Helper
 	void dispatch_refresh(const GUID & index_id, const metadb_index_hash & hash) {
 		pfc::list_single_ref_t<metadb_index_hash> l(hash);
 		dispatch_refresh(index_id, l);
 	}
 
+	//! Dispatches a global refresh, asks all components to refresh all tracks. To be calling after adding/removing indexes. Expensive!
 	virtual void dispatch_global_refresh() = 0;
 
 	//! Efficiently retrieves metadb_handles of items present in the Media Library matching the specified index value. \n

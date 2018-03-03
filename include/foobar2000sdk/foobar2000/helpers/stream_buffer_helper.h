@@ -1,3 +1,5 @@
+#pragma once
+
 class stream_reader_buffered : public stream_reader
 {
 public:

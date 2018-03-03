@@ -29,17 +29,17 @@ void file_info::meta_remove_field_ex(const char * p_name,t_size p_name_length)
 
 void file_info::meta_remove_index(t_size p_index)
 {
-	meta_remove_mask(bit_array_one(p_index));
+	meta_remove_mask(pfc::bit_array_one(p_index));
 }
 
 void file_info::meta_remove_all()
 {
-	meta_remove_mask(bit_array_true());
+	meta_remove_mask(pfc::bit_array_true());
 }
 
 void file_info::meta_remove_value(t_size p_index,t_size p_value)
 {
-	meta_remove_values(p_index,bit_array_one(p_value));
+	meta_remove_values(p_index, pfc::bit_array_one(p_value));
 }
 
 t_size file_info::meta_get_count_by_name_ex(const char * p_name,t_size p_name_length) const
@@ -65,12 +65,12 @@ bool file_info::info_exists_ex(const char * p_name,t_size p_name_length) const
 
 void file_info::info_remove_index(t_size p_index)
 {
-	info_remove_mask(bit_array_one(p_index));
+	info_remove_mask(pfc::bit_array_one(p_index));
 }
 
 void file_info::info_remove_all()
 {
-	info_remove_mask(bit_array_true());
+	info_remove_mask(pfc::bit_array_true());
 }
 
 bool file_info::info_remove_ex(const char * p_name,t_size p_name_length)
@@ -352,6 +352,19 @@ void file_info::info_set_replaygain_auto_ex(const char * p_name,t_size p_name_le
 		info_set_ex(p_name,p_name_len,p_value,p_value_len);
 }
 
+static bool _matchGain(float g1, float g2) {
+	if (g1 == replaygain_info::gain_invalid && g2 == replaygain_info::gain_invalid) return true;
+	else if (g1 == replaygain_info::gain_invalid || g2 == replaygain_info::gain_invalid) return false;
+	else return fabs(g1-g2) < 0.1;
+}
+static bool _matchPeak(float p1, float p2) {
+	if (p1 == replaygain_info::peak_invalid && p2 == replaygain_info::peak_invalid) return true;
+	else if (p1 == replaygain_info::peak_invalid || p2 == replaygain_info::peak_invalid) return false;
+	else return fabs(p1-p2) < 0.01;
+}
+bool replaygain_info::g_equalLoose( const replaygain_info & i1, const replaygain_info & i2) {
+	return _matchGain(i1.m_track_gain, i2.m_track_gain) && _matchGain(i1.m_album_gain, i2.m_album_gain) && _matchPeak(i1.m_track_peak, i2.m_track_peak) && _matchPeak(i1.m_album_peak, i2.m_album_peak);
+}
 bool replaygain_info::g_equal(const replaygain_info & item1,const replaygain_info & item2)
 {
 	return	item1.m_album_gain == item2.m_album_gain &&
@@ -394,7 +407,8 @@ bool file_info::meta_format(const char * p_name,pfc::string_base & p_out, const 
 
 void file_info::info_calculate_bitrate(t_filesize p_filesize,double p_length)
 {
-	if (p_filesize > 0 && p_length > 0) info_set_bitrate((unsigned)floor((double)p_filesize * 8 / (p_length * 1000) + 0.5));
+	unsigned b = audio_math::bitrate_kbps( p_filesize, p_length );
+	if ( b > 0 ) info_set_bitrate(b);
 }
 
 bool file_info::is_encoding_lossy() const {
@@ -514,6 +528,12 @@ void file_info::to_formatter(pfc::string_formatter& out) const {
 	for(t_size infoWalk = 0; infoWalk < info_get_count(); ++infoWalk) {
 		out << "Info: " << info_enum_name(infoWalk) << " = " << info_enum_value(infoWalk) << "\n";
 	}
+    auto rg = this->get_replaygain();
+    replaygain_info::t_text_buffer rgbuf;
+    if (rg.format_track_gain(rgbuf)) out << "RG track gain: " << rgbuf << "\n";
+    if (rg.format_track_peak(rgbuf)) out << "RG track peak: " << rgbuf << "\n";
+    if (rg.format_album_gain(rgbuf)) out << "RG album gain: " << rgbuf << "\n";
+    if (rg.format_album_peak(rgbuf)) out << "RG album peak: " << rgbuf << "\n";
 }
 
 void file_info::to_console() const {
@@ -521,8 +541,16 @@ void file_info::to_console() const {
 	if (get_length() > 0) FB2K_console_formatter() << "Duration: " << pfc::format_time_ex(get_length(), 6);
 	pfc::string_formatter temp;
 	for(t_size metaWalk = 0; metaWalk < meta_get_count(); ++metaWalk) {
+		const char * name = meta_enum_name( metaWalk );
+		const auto valCount = meta_enum_value_count( metaWalk );
+		for ( size_t valWalk = 0; valWalk < valCount; ++valWalk ) {
+			FB2K_console_formatter() << "Meta: " << name << " = " << meta_enum_value( metaWalk, valWalk );
+		}
+
+		/*
 		meta_format_entry(metaWalk, temp);
 		FB2K_console_formatter() << "Meta: " << meta_enum_name(metaWalk) << " = " << temp;
+		*/
 	}
 	for(t_size infoWalk = 0; infoWalk < info_get_count(); ++infoWalk) {
 		FB2K_console_formatter() << "Info: " << info_enum_name(infoWalk) << " = " << info_enum_value(infoWalk);

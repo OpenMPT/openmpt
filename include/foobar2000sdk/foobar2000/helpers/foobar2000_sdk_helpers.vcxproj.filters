@@ -59,9 +59,6 @@
     <ClCompile Include="listview_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="metadb_io_hintlist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mp3_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,6 +93,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="writer_wav.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="readers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SmartStrStr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,9 +199,6 @@
     <ClInclude Include="stream_buffer_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="string_filter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="text_file_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -227,6 +230,60 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="writer_wav.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeFind.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="readers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="album_art_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gdiplus_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="advconfig_runtime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k_wfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPropVariant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSingleThreadWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_fix_seeking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rethrow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fileReadAhead.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="win32_op.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartStrStr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tag_write_callback_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_stream_info_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="duration_counter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="reader_pretend_nonseekable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

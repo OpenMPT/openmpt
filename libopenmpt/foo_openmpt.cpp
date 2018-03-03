@@ -3,8 +3,15 @@
 #pragma warning(disable:4091)
 #endif
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
 #include "foobar2000/SDK/foobar2000.h"
 #include "foobar2000/helpers/helpers.h"
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #include "libopenmpt.hpp"
 
@@ -136,8 +143,10 @@ struct foo_openmpt_settings {
 
 
 
-// No inheritance. Our methods get called over input framework templates. See input_singletrack_impl for descriptions of what each method does.
-class input_openmpt {
+// Note that input class does *not* implement virtual methods or derive from interface classes.
+// Our methods get called over input framework templates. See input_singletrack_impl for descriptions of what each method does.
+// input_stubs just provides stub implementations of mundane methods that are irrelevant for most implementations.
+class input_openmpt : public input_stubs {
 public:
 	void open(service_ptr_t<file> p_filehint,const char * p_path,t_input_open_reason p_reason,abort_callback & p_abort) {
 		if ( p_reason == input_open_info_write ) {
@@ -259,6 +268,14 @@ public:
 		std::string ext = p_extension;
 		std::transform( ext.begin(), ext.end(), ext.begin(), tolower );
 		return std::find( extensions.begin(), extensions.end(), ext ) != extensions.end();
+	}
+	static GUID g_get_guid() {
+		// {B0B7CCC3-4520-44D3-B5F9-22EB9EBA7575}
+		static const GUID foo_openmpt_guid = { 0xb0b7ccc3, 0x4520, 0x44d3, { 0xb5, 0xf9, 0x22, 0xeb, 0x9e, 0xba, 0x75, 0x75 } };
+		return foo_openmpt_guid;
+	}
+	static const char * g_get_name() {
+		return "OpenMPT Module Decoder";
 	}
 private:
 	service_ptr_t<file> m_file;

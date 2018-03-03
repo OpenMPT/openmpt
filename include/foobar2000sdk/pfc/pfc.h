@@ -19,6 +19,10 @@
 
 #define PFC_DLL_EXPORT
 
+// Suppress this line when using PFC outside classic foobar2000
+// When enabled, certain shared.dll methods are referenced
+#define PFC_FOOBAR2000_CLASSIC
+
 #ifdef _WINDOWS
 
 #ifndef STRICT
@@ -29,6 +33,8 @@
 #define _NO_SYS_GUID_OPERATOR_EQ_	//fix retarded warning with operator== on GUID returning int
 #endif
 
+// WinSock2.h *before* Windows.h or else VS2017 15.3 breaks
+#include <WinSock2.h>
 #include <windows.h>
 
 #if !defined(PFC_WINDOWS_STORE_APP) && !defined(PFC_WINDOWS_DESKTOP_APP)
@@ -173,6 +179,7 @@ namespace pfc {
 #include "ptr_list.h"
 #include "string_base.h"
 #include "string_list.h"
+#include "lockless.h"
 #include "ref_counter.h"
 #include "iterators.h"
 #include "avltree.h"

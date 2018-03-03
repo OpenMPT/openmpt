@@ -1,5 +1,4 @@
-#ifndef _FOOBAR2000_PLAYABLE_LOCATION_H_
-#define _FOOBAR2000_PLAYABLE_LOCATION_H_
+#pragma once
 
 //playable_location stores location of a playable resource, currently implemented as file path and integer for indicating multiple playable "subsongs" per file
 //also see: file_info.h
@@ -41,6 +40,7 @@ public:
 	public:
 		static int compare(const playable_location & v1, const playable_location & v2) {return g_compare(v1,v2);}
 	};
+	static int path_compare( const char * p1, const char * p2 );
 
 protected:
 	playable_location() {}
@@ -87,5 +87,3 @@ public:
 };
 
 pfc::string_base & operator<<(pfc::string_base & p_fmt,const playable_location & p_location);
-
-#endif //_FOOBAR2000_PLAYABLE_LOCATION_H_

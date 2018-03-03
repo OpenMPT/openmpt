@@ -1,3 +1,6 @@
+#pragma once
+
+#ifdef FOOBAR2000_HAVE_DSP
 //! \since 1.1
 //! This service is essentially a special workaround to easily decode DTS/HDCD content stored in files pretending to contain plain PCM data. \n
 //! Callers: Instead of calling this directly, you probably want to use input_postprocessed template. \n
@@ -159,3 +162,9 @@ private:
 	double m_toSkip;
 	decode_postprocessor m_postproc;
 };
+
+#else // FOOBAR2000_HAVE_DSP
+
+template<typename baseclass> class input_postprocessed : public baseclass {};
+
+#endif // FOOBAR2000_HAVE_DSP

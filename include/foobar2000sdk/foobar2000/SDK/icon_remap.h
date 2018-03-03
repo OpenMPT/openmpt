@@ -1,3 +1,5 @@
+#pragma once
+
 //! New in 0.9.5; allows your file format to use another icon than <extension>.ico when registering the file type with Windows shell. \n
 //! Implementation: use icon_remapping_impl, or simply: static service_factory_single_t<icon_remapping_impl> myicon("ext","iconname.ico");
 class icon_remapping : public service_base {
