@@ -21,14 +21,6 @@ public:
 template<typename input_t>
 class input_stream_info_reader_entry_impl : public input_stream_info_reader_entry {
 public:
-	/*
-	bool is_our_content_type(const char * p_type) {
-		return input_t::g_is_our_content_type(p_type);
-	}
-	bool is_our_path(const char * p_full_path, const char * p_extension) {
-		return input_t::g_is_our_path(p_full_path, p_extension);
-	}
-	*/
 	input_stream_info_reader::ptr open(const char * path, file::ptr fileHint, abort_callback & abort) {
 		typedef input_stream_info_reader_impl<input_t> obj_t;
 		service_ptr_t<obj_t> p = new service_impl_t<obj_t>();

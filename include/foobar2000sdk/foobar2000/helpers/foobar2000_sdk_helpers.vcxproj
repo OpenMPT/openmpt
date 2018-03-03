@@ -139,6 +139,8 @@
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <ClCompile Include="mp3_utils.cpp" />
+    <ClCompile Include="packet_decoder_aac_common.cpp" />
+    <ClCompile Include="packet_decoder_mp3_common.cpp" />
     <ClCompile Include="readers.cpp" />
     <ClCompile Include="seekabilizer.cpp" />
     <ClCompile Include="SmartStrStr.cpp" />
@@ -210,6 +212,8 @@
     <ClInclude Include="meta_table_builder.h" />
     <ClInclude Include="metadb_io_hintlist.h" />
     <ClInclude Include="mp3_utils.h" />
+    <ClInclude Include="packet_decoder_aac_common.h" />
+    <ClInclude Include="packet_decoder_mp3_common.h" />
     <ClInclude Include="playlist_position_reference_tracker.h" />
     <ClInclude Include="ProcessUtils.h" />
     <ClInclude Include="ProfileCache.h" />

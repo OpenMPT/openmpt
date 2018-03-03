@@ -114,8 +114,9 @@ public:
 class cfg_string_mt : public cfg_var {
 protected:
 	void get_data_raw(stream_writer * p_stream,abort_callback & p_abort) {
-		insync(m_sync);
-		p_stream->write_object(m_val.get_ptr(),m_val.length(),p_abort);
+		pfc::string8 temp;
+		get(temp);
+		p_stream->write_object(temp.get_ptr(), temp.length(),p_abort);
 	}
 	void set_data_raw(stream_reader * p_stream,t_size p_sizehint,abort_callback & p_abort) {
 		pfc::string8_fastalloc temp;
@@ -125,15 +126,15 @@ protected:
 public:
 	cfg_string_mt(const GUID & id, const char * defVal) : cfg_var(id), m_val(defVal) {}
 	void get(pfc::string_base & out) const {
-		insync(m_sync);
+		inReadSync( m_sync );
 		out = m_val;
 	}
 	void set(const char * val, t_size valLen = ~0) {
-		insync(m_sync);
+		inWriteSync( m_sync );
 		m_val.set_string(val, valLen);
 	}
 private:
-	mutable critical_section m_sync;
+	mutable pfc::readWriteLock m_sync;
 	pfc::string8 m_val;
 };
 

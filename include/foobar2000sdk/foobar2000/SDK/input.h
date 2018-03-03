@@ -139,7 +139,6 @@ public:
 //! Class providing interface for writing metadata and replaygain info to files. Also see: file_info. \n
 //! Instantiating: see input_entry.\n
 //! Implementing: see input_impl.
-
 class NOVTABLE input_info_writer : public input_info_reader
 {
 public:
@@ -149,16 +148,19 @@ public:
 	//! @param p_abort abort_callback object signaling user aborting the operation. WARNING: abort_callback object is provided for consistency; if writing tags actually gets aborted, user will be likely left with corrupted file. Anything calling this should make sure that aborting is either impossible, or gives appropriate warning to the user first.
 	virtual void set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort) = 0;
 	
-	//! Commits pending updates. In case of multisubsong inputs, set_info should queue the update and perform actual file access in commit(). Otherwise, actual writing can be done in set_info() and then Commit() can just do nothing and always succeed.
+	//! Commits pending updates. In case of multisubsong inputs, set_info should queue the update and perform actual file access in commit(). Otherwise, actual writing can be done in set_info() and then commit() can just do nothing and always succeed.
 	//! @param p_abort abort_callback object signaling user aborting the operation. WARNING: abort_callback object is provided for consistency; if writing tags actually gets aborted, user will be likely left with corrupted file. Anything calling this should make sure that aborting is either impossible, or gives appropriate warning to the user first.
 	virtual void commit(abort_callback & p_abort) = 0;
 
 	FB2K_MAKE_SERVICE_INTERFACE(input_info_writer,input_info_reader);
 };
 
+//! Extended input_info_writer. Not every input implements it. \n
+//! Provides an explicit remove_tags(), which erases all supported tags from the file.
 class NOVTABLE input_info_writer_v2 : public input_info_writer {
 public:
 	//! Removes all tags from this file. Cancels any set_info() requests on this object. Does not require a commit() afterwards.
+	//! If no input_info_writer_v2 is provided, similar affect can be achieved by set_info()+commit() with blank file_info, but may not be as thorough; will typically result in blank tags rather than total removal fo tags.
 	virtual void remove_tags(abort_callback & abort) = 0;
 
 	FB2K_MAKE_SERVICE_INTERFACE(input_info_writer_v2, input_info_writer);
@@ -236,6 +238,8 @@ public:
 };
 
 //! \since 1.4
+//! Extended input_entry methods provided by decoders. \n
+//! Can be implemented by 1.3-compatible components but will not be called in fb2k versions prior to 1.4.
 class input_entry_v2 : public input_entry {
 	FB2K_MAKE_SERVICE_INTERFACE(input_entry_v2, input_entry);
 public:
@@ -253,6 +257,8 @@ public:
 
 #ifdef FOOBAR2000_DESKTOP
 //! \since 1.4
+//! Core API to perform input open operations respecting user settings for decoder priority. \n
+//! Unavailable prior to 1.4.
 class input_manager : public service_base {
 	FB2K_MAKE_SERVICE_COREAPI(input_manager);
 public:
@@ -260,8 +266,12 @@ public:
 };
 
 //! \since 1.4
+//! Core API for determining which audio stream to decode, in a multi-stream enabled input. \n
+//! Unavailable prior to 1.4 - decode the default stream if input_stream_selector isn't present. \n
+//! In foobar2000 v1.4 and up, this API allows decoders to determine which stream the user opted to decode for a specific file. \n
+//! Use input_stream_selector::tryGet() to safely instantiate.
 class input_stream_selector : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_stream_selector);
+	FB2K_MAKE_SERVICE_COREAPI(input_stream_selector);
 public:
 	//! Returns index of stream that should be presented for this file. \n
 	//! If not set by user, 0xFFFFFFFF will be returned and the default stream should be presented. \n
@@ -269,21 +279,69 @@ public:
 	virtual uint32_t select_stream( const GUID & guid, const char * path ) = 0;
 };
 
+//! \since 1.4
+//! Interface provided by multi-stream enabled inputs to let the stream picker dialog show available streams. \n
+//! Can be implemented by 1.3-compatible components but will not be called in fb2k versions prior to 1.4.
 class input_stream_info_reader : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(input_stream_info_reader, service_base);
 public:
+	//! @returns Number of audio streams found.
 	virtual uint32_t get_stream_count() = 0;
+	//! Retrieves information about the specified stream; most importantly the codec name and bitrate.
 	virtual void get_stream_info(uint32_t index, file_info & out, abort_callback & aborter) = 0;
+	//! @returns Index of default stream to decode if there is no user preference.
 	virtual uint32_t get_default_stream() = 0;
 };
 
+//! \since 1.4
+//! Entrypoint interface for spawning input_stream_info_reader. \n
+//! Can be implemented by 1.3-compatible components but will not be called in fb2k versions prior to 1.4.
 class input_stream_info_reader_entry : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_stream_info_reader_entry);
 public:
+	//! Open file for reading stream infos.
 	virtual input_stream_info_reader::ptr open( const char * path, file::ptr fileHint, abort_callback & abort ) = 0;
 
 	//! Return GUID of the matching input_entry.
 	virtual GUID get_guid() = 0;
 
+};
+
+//! \since 1.4
+class input_stream_manipulator_callback : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE(input_stream_manipulator_callback, service_base);
+public:
+	//! Called first before other methods. Throw an exception if the file cannot be processed. \n
+	//! The arguments are the same as packet_decoder open() arguments.
+	virtual void set_decode_info(const GUID & p_owner, t_size p_param1, const void * p_param2, t_size p_param2size ) = 0;
+
+	virtual void first_frame( const void * data, size_t bytes ) = 0;
+	//! Called with progress value, in 0..1 range.
+	virtual void on_progress( float progress ) = 0;
+	//! @returns true if the frame has been altered and should be written back, false otherwise.
+	virtual bool process_frame( void * data, size_t size ) = 0;
+};
+
+//! \since 1.4
+class input_stream_manipulator : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(input_stream_manipulator);
+public:
+	enum op_t {
+		//! Probe the file for codec information; calls set_decode_info() + first_frame() only.
+		op_probe = 0,
+		//! Read the entire stream - same as op_probe but then calls on_progress() + process_frame() with the entire file payload. \n
+		//! No writing to the file is performed - process_frame() results are disregarded.
+		op_read,
+		//! Rewrite the stream. Similar to op_read, but frames altered by process_frame() are written back to the file.
+		op_rewrite
+	};
+	//! @param path Path of file to process.
+	//! @param fileHint optional file object, must be opened for read+write if bWalk is true.
+	//! @param callback Callback object for this operation.
+	//! @param opType Operation to perform, see op_t enum for details.
+	//! @param abort abort_callback object for this operating. Aborting with bWalk set to true will leave the file partially altered, use with caution!
+	virtual void process( const char * path, file::ptr fileHint, input_stream_manipulator_callback::ptr callback, op_t opType, abort_callback & abort ) = 0;
+	//! Return GUID of the matching input_entry.
+	virtual GUID get_guid() = 0;
 };
 #endif

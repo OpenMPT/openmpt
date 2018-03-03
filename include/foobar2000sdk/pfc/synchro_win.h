@@ -77,8 +77,8 @@ public:
 private:
 	critical_section m_obj;
 
-	readWriteLock( const readWriteLock & );
-	void operator=( const readWriteLock & );
+	readWriteLock( const readWriteLock & ) = delete;
+	void operator=( const readWriteLock & ) = delete;
 };
 
 #else
@@ -101,8 +101,8 @@ public:
 	}
 
 private:
-	readWriteLock(const readWriteLock&);
-	void operator=(const readWriteLock&);
+	readWriteLock(const readWriteLock&) = delete;
+	void operator=(const readWriteLock&) = delete;
 
 	SRWLOCK theLock;
 };
@@ -113,8 +113,8 @@ public:
 	_readWriteLock_scope_read( readWriteLock & lock ) : m_lock( lock ) { m_lock.enterRead(); }
 	~_readWriteLock_scope_read() {m_lock.leaveRead();}
 private:
-	_readWriteLock_scope_read( const _readWriteLock_scope_read &);
-	void operator=( const _readWriteLock_scope_read &);
+	_readWriteLock_scope_read( const _readWriteLock_scope_read &) = delete;
+	void operator=( const _readWriteLock_scope_read &) = delete;
 	readWriteLock & m_lock;
 };
 class _readWriteLock_scope_write {
@@ -122,8 +122,8 @@ public:
 	_readWriteLock_scope_write( readWriteLock & lock ) : m_lock( lock ) { m_lock.enterWrite(); }
 	~_readWriteLock_scope_write() {m_lock.leaveWrite();}
 private:
-	_readWriteLock_scope_write( const _readWriteLock_scope_write &);
-	void operator=( const _readWriteLock_scope_write &);
+	_readWriteLock_scope_write( const _readWriteLock_scope_write &) = delete;
+	void operator=( const _readWriteLock_scope_write &) = delete;
 	readWriteLock & m_lock;
 };
 

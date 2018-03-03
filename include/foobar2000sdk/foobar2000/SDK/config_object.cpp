@@ -180,7 +180,7 @@ void config_object::get_data_string(pfc::string_base & p_out) {
 
 
 void config_object_impl::get_data(stream_writer * p_stream,abort_callback & p_abort) const {
-	insync(m_sync);
+	inReadSync(m_sync);
 	p_stream->write_object(m_data.get_ptr(),m_data.get_size(),p_abort);
 }
 
@@ -188,7 +188,7 @@ void config_object_impl::set_data(stream_reader * p_stream,abort_callback & p_ab
 	core_api::ensure_main_thread();
 
 	{
-		insync(m_sync);
+		inWriteSync(m_sync);
 		m_data.set_size(0);
 		enum {delta = 1024};
 		t_uint8 buffer[delta];

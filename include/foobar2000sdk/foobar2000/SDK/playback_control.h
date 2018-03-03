@@ -137,6 +137,23 @@ public:
 	bool is_muted() {return get_volume() == volume_mute;}
 
 	static const int volume_mute = -100;
+
+
+
+	// new fb2k mobile specific user command handlers
+	void userPrev();
+	void userNext();
+	void userMute();
+	void userStop();
+	void userPlay();
+	void userPause();
+	void userStart();
+	void userFastForward();
+	void userRewind();
+	void nonUserPause();
+
+	// #$@! FiiO hack $!#@
+	void userActionHook() {}
 };
 
 class playback_control_v2 : public playback_control {

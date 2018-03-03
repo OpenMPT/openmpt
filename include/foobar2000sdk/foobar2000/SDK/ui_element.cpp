@@ -66,6 +66,8 @@ bool ui_element_subclass_description(const GUID & id, pfc::string_base & p_out) 
 		p_out = "Utility"; return true;
 	} else if (id == ui_element_subclass_containers) {
 		p_out = "Containers"; return true;
+	} else if ( id == ui_element_subclass_dsp ) {
+		p_out = "DSP"; return true;
 	} else {
 		return false;
 	}

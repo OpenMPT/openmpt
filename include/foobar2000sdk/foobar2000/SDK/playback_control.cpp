@@ -57,3 +57,83 @@ double playback_control::playback_get_length_ex() {
 	}
 	return rv;
 }
+
+
+
+
+
+
+void playback_control::userPrev() {
+	userActionHook();
+	if (this->is_playing() && this->playback_can_seek() && this->playback_get_position() > 5) {
+		this->playback_seek(0);
+	} else {
+		this->previous();
+	}
+}
+
+void playback_control::userNext() {
+	userActionHook();
+	this->start(track_command_next);
+}
+
+void playback_control::userMute() {
+	userActionHook();
+	this->volume_mute_toggle();
+}
+
+void playback_control::userStop() {
+	userActionHook();
+	this->stop();
+}
+
+void playback_control::userPlay() {
+	userActionHook();
+	this->play_or_pause();
+}
+
+void playback_control::userPause() {
+	userActionHook();
+	nonUserPause();
+}
+
+void playback_control::nonUserPause() {
+	if (this->is_playing()) {
+		this->pause(true);
+	}
+}
+
+void playback_control::userStart() {
+	userActionHook();
+	if (this->is_playing()) {
+		this->pause(false);
+	} else {
+		this->start();
+	}
+}
+static const double seekDelta = 30;
+void playback_control::userFastForward() {
+	userActionHook();
+	if (!this->playback_can_seek()) {
+		this->userNext(); return;
+	}
+	this->playback_seek_delta(seekDelta);
+}
+
+void playback_control::userRewind() {
+	userActionHook();
+	if (!this->playback_can_seek()) {
+		this->userPrev(); return;
+	}
+	double p = this->playback_get_position();
+	if (p < 0) return;
+	if (p < seekDelta) {
+		if (p < seekDelta / 3) {
+			this->userPrev();
+		} else {
+			this->playback_seek(0);
+		}
+	} else {
+		this->playback_seek_delta(-30);
+	}
+}

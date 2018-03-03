@@ -281,16 +281,16 @@ public:
 	GUID get_guid() {return m_state.get_guid();}
 	GUID get_parent() {return m_parent;}
 	void reset() {
-		insync(m_sync);
+		inWriteSync(m_sync);
 		m_state = m_initialstate;
 	}
 	double get_sort_priority() {return m_priority;}
 	void get_state(pfc::string_base & p_out) {
-		insync(m_sync);
+		inReadSync(m_sync);
 		p_out = m_state;
 	}
 	void set_state(const char * p_string,t_size p_length = ~0) {
-		insync(m_sync);
+		inWriteSync(m_sync);
 		m_state.set_string(p_string,p_length);
 	}
 	t_uint32 get_flags() {return 0;}
@@ -299,7 +299,7 @@ public:
 private:
 	const pfc::string8 m_initialstate, m_name;
 	cfg_string m_state;
-	critical_section m_sync;
+	pfc::readWriteLock m_sync;
 	const double m_priority;
 	const GUID m_parent;
 	const t_uint32 m_prefFlags;

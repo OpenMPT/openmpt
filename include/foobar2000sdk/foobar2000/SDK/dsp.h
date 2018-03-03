@@ -249,9 +249,11 @@ private:
 class dsp_preset_impl : public dsp_preset
 {
 public:
-	dsp_preset_impl() {}
+	dsp_preset_impl() : m_owner() {}
 	dsp_preset_impl(const dsp_preset_impl & p_source) {copy(p_source);}
 	dsp_preset_impl(const dsp_preset & p_source) {copy(p_source);}
+	void clear() {m_owner = pfc::guid_null; m_data.set_size(0);}
+	bool is_valid() const { return m_owner != pfc::guid_null; }
 
 	const dsp_preset_impl& operator=(const dsp_preset_impl & p_source) {copy(p_source); return *this;}
 	const dsp_preset_impl& operator=(const dsp_preset & p_source) {copy(p_source); return *this;}
@@ -490,11 +492,24 @@ public:
 	inline cfg_dsp_chain_config(const GUID & p_guid) : cfg_var(p_guid) {}
 	t_size get_count() const {return m_data.get_count();}
 	const dsp_preset & get_item(t_size p_index) const {return m_data.get_item(p_index);}
-	bool get_data(dsp_chain_config & p_data) const;
+	void get_data(dsp_chain_config & p_data) const;
 	void set_data(const dsp_chain_config & p_data);
 private:
 	dsp_chain_config_impl m_data;
-	
+};
+
+class cfg_dsp_chain_config_mt : private cfg_var {
+public:
+	cfg_dsp_chain_config_mt( const GUID & id ) : cfg_var(id) {}
+	void reset();
+	void get_data(dsp_chain_config & p_data);
+	void set_data(const dsp_chain_config & p_data);
+protected:
+	void get_data_raw(stream_writer * p_stream, abort_callback & p_abort);
+	void set_data_raw(stream_reader * p_stream, t_size p_sizehint, abort_callback & p_abort);
+private:
+	pfc::readWriteLock m_sync;
+	dsp_chain_config_impl m_data;
 };
 
 

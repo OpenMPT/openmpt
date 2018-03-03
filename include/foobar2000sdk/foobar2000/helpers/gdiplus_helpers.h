@@ -37,6 +37,7 @@ static HBITMAP GdiplusLoadBitmap(UINT id, const TCHAR * resType, CSize size) {
 		if (resource.is_empty()) throw pfc::exception_bug_check();
 
 		pfc::com_ptr_t<IStream> stream; stream.attach( SHCreateMemStream((const BYTE*)resource->GetPointer(), resource->GetSize()) );
+		if ( stream.is_empty() ) throw std::bad_alloc();
 				
 		GdiplusErrorHandler EH;
 		pfc::ptrholder_t<Image> source = new Image(stream.get_ptr());
@@ -55,7 +56,6 @@ static HBITMAP GdiplusLoadBitmap(UINT id, const TCHAR * resType, CSize size) {
 
 		HBITMAP bmp = NULL;
 		EH << resized->GetHBITMAP(Gdiplus::Color::White, & bmp );
-		HICON icon = NULL;
 		return bmp;
 	} catch(...) {
 		PFC_ASSERT( !"Should not get here");
@@ -72,7 +72,8 @@ static HICON GdiplusLoadIcon(UINT id, const TCHAR * resType, CSize size) {
 		if (resource.is_empty()) throw pfc::exception_bug_check();
 
 		pfc::com_ptr_t<IStream> stream; stream.attach( SHCreateMemStream((const BYTE*)resource->GetPointer(), resource->GetSize()) );
-				
+		if (stream.is_empty()) throw std::bad_alloc();
+
 		GdiplusErrorHandler EH;
 		pfc::ptrholder_t<Image> source = new Image(stream.get_ptr());
 		

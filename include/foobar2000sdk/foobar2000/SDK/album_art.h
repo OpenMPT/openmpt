@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 //! Common class for handling picture data. \n
 //! Type of contained picture data is unknown and to be determined according to memory block contents by code parsing/rendering the picture. Commonly encountered types are: BMP, PNG, JPEG and GIF. \n
 //! Implementation: use album_art_data_impl.
@@ -194,4 +196,32 @@ class NOVTABLE album_art_manager_v3 : public album_art_manager_v2 {
 public:
 	//! @param config An optional album_art_manager_config object to override global settings. Pass null to use global settings.
 	virtual album_art_extractor_instance_v2::ptr open_v3(metadb_handle_list_cref items, pfc::list_base_const_t<GUID> const & ids, album_art_manager_config::ptr config, abort_callback & abort) = 0;
+};
+
+//! \since 1.4
+//! A notification about a newly loaded album art being ready to display. \n
+//! See: now_playing_album_art_notify_manager.
+class NOVTABLE now_playing_album_art_notify {
+public:
+	//! Called when album art has finished loading for the now playing track.
+	//! @param data The newly loaded album art. Never a null object - the callbacks are simply not called when there is nothing to show.
+	virtual void on_album_art( album_art_data::ptr data ) = 0;
+};
+
+//! \since 1.4
+//! Since various components require the album art of the now-playing track, a centralized loader has been provided, so the file isn't hammered independently by different components. \n
+//! Use this in conjunction with play_callback notifications to render now-playing track information.
+class NOVTABLE now_playing_album_art_notify_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(now_playing_album_art_notify_manager)
+public:
+	//! Register a notification to be told when the album art has been loaded.
+	virtual void add(now_playing_album_art_notify*) = 0;
+	//! Unregister a previously registered notification.
+	virtual void remove(now_playing_album_art_notify*) = 0;
+	//! Retrieves the album art for the currently playing track.
+	//! @returns The current album art (front cover), or null if there is no art or the art is being loaded and is not yet available.
+	virtual album_art_data::ptr current() = 0;
+
+	//! Helper; register a lambda notification. Pass the returned obejct to remove() to unregister.
+	now_playing_album_art_notify* add( std::function<void (album_art_data::ptr) > );
 };

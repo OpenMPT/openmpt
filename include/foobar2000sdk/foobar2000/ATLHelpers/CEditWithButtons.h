@@ -51,20 +51,29 @@ public:
 		auto condition = [] ( const wchar_t * txt ) -> bool {
 			return * txt != 0;
 		};
-		AddButton(L"x", handler, condition);
+		// Present "clear" to accessibility APIs but actually draw a multiplication x sign
+		AddButton(L"clear", handler, condition, L"\x00D7");
 	}
 
-	void AddButton( const wchar_t * str, handler_t handler, condition_t condition = nullptr ) {
+	void AddButton( const wchar_t * str, handler_t handler, condition_t condition = nullptr, const wchar_t * drawAlternateText = nullptr ) {
 		Button_t btn;
 		btn.handler = handler;
 		btn.title = str;
 		btn.condition = condition;
 		btn.visible = EvalCondition( btn, nullptr );
+
+		if ( drawAlternateText != nullptr ) {
+			btn.titleDraw = drawAlternateText;
+		}
+
 		m_buttons.push_back(std::move(btn) );
 		RefreshButtons();
 	}
 
-	void SetFixedWidth(unsigned fw = GetSystemMetrics(SM_CXVSCROLL) ) {
+	static unsigned DefaultFixedWidth() {
+		return GetSystemMetrics(SM_CXVSCROLL) * 3 / 4;
+	}
+	void SetFixedWidth(unsigned fw = DefaultFixedWidth() ) {
 		m_fixedWidth = fw;
 		RefreshButtons();
 	}
@@ -136,11 +145,12 @@ private:
 	}
 	UINT OnGetDlgCode(UINT, WPARAM wp, LPARAM lp) {
 		if ( wp == VK_TAB && !IsShiftPressed() && m_buttons.size() > 0 ) {
-			auto i = m_buttons.begin();
-			if ( i != m_buttons.end() ) {
-				TabFocusThis(i->wnd);
+			for (auto i = m_buttons.begin(); i != m_buttons.end(); ++ i ) {
+				if ( i->visible ) {
+					TabFocusThis(i->wnd);
+					return DLGC_WANTTAB;
+				}
 			}
-			return DLGC_WANTTAB;
 		}
 		SetMsgHandled(FALSE); return 0;
 	}
@@ -163,7 +173,7 @@ private:
 	}
 	
 	struct Button_t {
-		std::wstring title;
+		std::wstring title, titleDraw;
 		handler_t handler;
 		std::shared_ptr<CButtonLite> buttonImpl;
 		CWindow wnd;
@@ -206,20 +216,31 @@ private:
 			if ( i->wnd == wnd ) {
 				if (IsShiftPressed()) {
 					// back
-					if ( i == m_buttons.begin() ) {
-						TabFocusThis(m_hWnd);
-					} else {
-						--i;
-						TabFocusThis(i->wnd);
+					for ( ;; ) {
+						if (i == m_buttons.begin()) {
+							TabFocusThis(m_hWnd); break;
+						} else {
+							--i;
+							if ( i->visible ) {
+								TabFocusThis(i->wnd);
+								break;
+							}
+						}
 					}
 				} else {
 					// forward
-					++i;
-					if ( i == m_buttons.end() ) {
-						TabFocusThis(m_hWnd);
-						TabFocusPrevNext(false);
-					} else {
-						TabFocusThis( i->wnd);
+					for ( ;; ) {
+						++i;
+						if (i == m_buttons.end()) {
+							TabFocusThis(m_hWnd);
+							TabFocusPrevNext(false);
+							break;
+						} else {
+							if ( i->visible ) {
+								TabFocusThis(i->wnd);
+								break;
+							}
+						}
 					}
 				}
 
@@ -273,6 +294,7 @@ private:
 				auto b = std::make_shared< CButtonLite > ( );
 				iter->buttonImpl = b;
 				b->Create( *this, NULL, iter->title.c_str() );
+				if ( iter->titleDraw.length() > 0 ) b->DrawAlternateText( iter->titleDraw.c_str() );
 				CFontHandle font = fontSetMe;
 				if ( font == NULL ) font = GetFont();
 				b->SetFont( font );

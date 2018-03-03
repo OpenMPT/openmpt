@@ -46,3 +46,21 @@ album_art_extractor_instance_ptr album_art_extractor::g_open_allowempty(file_ptr
 		return new service_impl_t<album_art_extractor_instance_simple>();
 	}
 }
+
+namespace {
+	class now_playing_album_art_notify_lambda : public now_playing_album_art_notify {
+	public:
+		void on_album_art(album_art_data::ptr data) {
+			f(data);
+		}
+		std::function<void(album_art_data::ptr) > f;
+	};
+}
+
+now_playing_album_art_notify * now_playing_album_art_notify_manager::add(std::function<void (album_art_data::ptr) > f ) {
+	PFC_ASSERT ( f != nullptr );
+	auto obj = new now_playing_album_art_notify_lambda;
+	obj->f = f;
+	add(obj);
+	return obj;
+}

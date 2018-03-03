@@ -23,6 +23,7 @@ public:
 		MESSAGE_HANDLER_EX(WM_GETDLGCODE, OnGetDlgCode)
 		MSG_WM_SETFONT(OnSetFont)
 		MSG_WM_GETFONT(OnGetFont)
+		MSG_WM_CREATE(OnCreate)
 	END_MSG_MAP()
 	std::function<void () > ClickHandler;
 
@@ -37,12 +38,11 @@ public:
 		auto oldFont = dc.SelectFont( bold );
 		CSize size (0,0);
 		CSize sizeSpace (0,0);
-		wchar_t text[256] = {};
-		if (GetWindowText( text, 256 )) {
-			text[255] = 0;
-			dc.GetTextExtent( text, (int)wcslen(text), &size );
-			dc.GetTextExtent( L" ", 1, &sizeSpace );
-		}
+
+
+		dc.GetTextExtent(m_textDrawMe, m_textDrawMe.GetLength(), &size);
+		dc.GetTextExtent(L" ", 1, &sizeSpace);
+
 		dc.SelectFont( oldFont );
 
 		return size.cx + sizeSpace.cx;
@@ -51,6 +51,13 @@ public:
 	std::function< HBRUSH (CDCHandle) > CtlColorHandler;
 	std::function< bool (HWND) > WantTabCheck;
 	CWindow WndCtlColorTarget;
+
+	// Rationale: sometimes you want a different text to be presented to accessibility APIs than actually drawn
+	// For an example, a clear button looks best with a multiplication sign, but the narrator should say "clear" or so when focused
+	void DrawAlternateText( const wchar_t * textDrawMe ) {
+		m_textDrawMe = textDrawMe;
+	}
+
 protected:
 	CFontHandle m_font;
 	void OnSetFont(HFONT font, BOOL bRedraw) {
@@ -139,11 +146,7 @@ protected:
 		} else if ( m_focused ) {
 			pdc.SetTextColor( ::GetSysColor(COLOR_HIGHLIGHT) );
 		}
-		TCHAR text[256] = {};
-		if (GetWindowText( text, 256 )) {
-			text[255] = 0;
-			pdc.DrawText( text, (int) _tcslen(text), &rcClient, DT_VCENTER | DT_CENTER | DT_SINGLELINE | DT_NOPREFIX );
-		}
+		pdc.DrawText( m_textDrawMe, m_textDrawMe.GetLength(), &rcClient, DT_VCENTER | DT_CENTER | DT_SINGLELINE | DT_NOPREFIX );
 
 		pdc.SelectFont( oldFont );
 	}
@@ -156,6 +159,10 @@ protected:
 	}
 	bool IsPressed() {return m_pressed; }
 private:
+	int OnCreate(LPCREATESTRUCT lpCreateStruct) {
+		if ( lpCreateStruct->lpszName != nullptr ) this->m_textDrawMe = lpCreateStruct->lpszName;
+		SetMsgHandled(FALSE); return 0;
+	}
 	void OnEnable(BOOL bEnable) {
 		Invalidate(); SetMsgHandled(FALSE);
 	}
@@ -191,8 +198,10 @@ private:
 		}
 	}
 	int OnSetText(LPCTSTR lpstrText) {
+		m_textDrawMe = lpstrText;
 		Invalidate(); SetMsgHandled(FALSE);
 		return 0;
 	}
 	bool m_pressed, m_captured, m_focused;
+	CString m_textDrawMe;
 };

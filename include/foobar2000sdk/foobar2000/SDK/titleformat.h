@@ -223,3 +223,19 @@ private:
 	titleformat_text_out * const m_out;
 	const GUID m_inputType;
 };
+
+
+class titleformat_object_cache {
+public:
+	titleformat_object_cache(const char * pattern) : m_pattern(pattern) {}
+	operator titleformat_object::ptr() {
+		PFC_ASSERT(core_api::assert_main_thread());
+		if (m_obj.is_empty()) {
+			titleformat_compiler::get()->compile_force(m_obj, m_pattern);
+		}
+		return m_obj;
+	}
+private:
+	const char * const m_pattern;
+	titleformat_object::ptr m_obj;
+};

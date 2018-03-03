@@ -717,11 +717,13 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\album_art_helpers.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\app_close_blocker.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_chunk.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_chunk_impl.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\audio_postprocessor.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\autoplaylist.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\cfg_var.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\chapterizer.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\commandline.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\commonObjects.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\completion_notify.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\component.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\componentversion.h" />
@@ -738,11 +740,15 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp_manager.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\event_logger.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\exceptions.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_format_sanitizer.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_info_impl.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_operation_callback.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem_helper.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-dsp.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-pfc.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-winver.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\genrand.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\hasher_md5.h" />
@@ -780,6 +786,8 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\resampler.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\search_tools.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service_by_guid.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service_factory.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\service_impl.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\system_time_keeper.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\tag_processor.h" />
@@ -847,6 +855,7 @@
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\titleformat.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\ui_element.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

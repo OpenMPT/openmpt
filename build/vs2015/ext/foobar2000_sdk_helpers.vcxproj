@@ -534,6 +534,8 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\meta_table_builder.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\metadb_io_hintlist.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\mp3_utils.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\packet_decoder_aac_common.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\packet_decoder_mp3_common.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\playlist_position_reference_tracker.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\reader_pretend_nonseekable.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\readers.h" />
@@ -571,6 +573,8 @@
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\input_helpers.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\listview_helper.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\mp3_utils.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\packet_decoder_aac_common.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\packet_decoder_mp3_common.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\readers.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\seekabilizer.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\helpers\stream_buffer_helper.cpp" />

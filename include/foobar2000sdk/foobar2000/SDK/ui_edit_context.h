@@ -1,5 +1,7 @@
 #pragma once
 
+//! A class used to redirect actions coming from the 'edit' menu, typically provided by the UI Element having focus. \n
+//! Use ui_edit_context_manager to register and manipulate.
 class NOVTABLE ui_edit_context : public service_base {
 	FB2K_MAKE_SERVICE_INTERFACE(ui_edit_context, service_base)
 public:
@@ -61,19 +63,44 @@ public:
 	void sort_by_format(const char * spec, bool onlySelection);
 };
 
+//! Special case of ui_edit_context operating on a specific playlist (see playlist_manager). \n
+//! Use this to let everyone know that your methods operate on a playlist, \n
+//! in case some component wishes to provide additional functionality based on that.
 class ui_edit_context_playlist : public ui_edit_context {
 	FB2K_MAKE_SERVICE_INTERFACE(ui_edit_context_playlist, ui_edit_context)
 public:
 	virtual t_size get_playlist_number() = 0;
 };
 
+//! Entrypoint class for registering and manipulating ui_edit_context objects. \n
+//! Implemented by core.
 class NOVTABLE ui_edit_context_manager : public service_base {
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_edit_context_manager)
+	FB2K_MAKE_SERVICE_COREAPI(ui_edit_context_manager)
 public:
+	//! Sets the current edit context. \n
+	//! Typically called when a part of your UI receives focus. \n
+	//! @returns An identifier than can later be passed to unset_context when focus is lost.
 	virtual t_uint32 set_context(ui_edit_context::ptr context) = 0;
+	//! Removes an edit context. \n
+	//! @param id The value returned by matching set_context() call.
 	virtual void unset_context(t_uint32 id) = 0;
+	//! Retrieves the current context object. May return null when there's no context.
+	//! @returns The currently active context object, possibly null if none.
 	virtual ui_edit_context::ptr get_context() = 0;
+	//! Creates a context wrapping a specific playlist; see also playlist_manager.
+	//! @param playlist_number Number of wrapped playlist, per playlist_manager numbering.
+	//! @returns Newly creted context object.
 	virtual ui_edit_context::ptr create_playlist_context(t_size playlist_number) = 0;
+	//! By default, when no context is registered, \n
+	//! for an example, if the active user interface component is not ui_edit_context-aware, \n
+	//! a fallback context is automatically set; it follows the active playlist,\n
+	//! so the edit menu does something meaningful. \n
+	//! This method is intended to be called during initialiation of an user interface component; \n
+	//! it tells foobar2000 core to suppress the active playlist fallback-\n
+	//! but then entire edit menu becomes non-functional if no context is provided.
 	virtual void disable_autofallback() = 0;
+	//! Helper, sets the current context to an implemented-by-core context that tracks the active playlist. \n
+	//! Typically called when a part of your UI receives focus.
+	//! @returns Identifier value to pass to unset_context() when your focus is gone.
 	virtual t_uint32 set_context_active_playlist() = 0;
 };

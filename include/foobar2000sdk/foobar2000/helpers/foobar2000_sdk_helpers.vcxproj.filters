@@ -104,6 +104,12 @@
     <ClCompile Include="SmartStrStr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="packet_decoder_mp3_common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_decoder_aac_common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitreader_helper.h">
@@ -284,6 +290,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="reader_pretend_nonseekable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_decoder_mp3_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_decoder_aac_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

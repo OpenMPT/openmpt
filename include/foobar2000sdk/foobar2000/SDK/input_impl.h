@@ -300,7 +300,7 @@ public:
 	}
 
 	void get_info(t_uint32 p_subsong,file_info & p_info,abort_callback & p_abort) {
-		if (p_subsong != 0) throw exception_io_data();
+		if (p_subsong != 0) throw exception_io_bad_subsong_index();
 		m_instance.get_info(p_info,p_abort);
 	}
 
@@ -318,7 +318,7 @@ public:
 	}
 
 	void decode_initialize(t_uint32 p_subsong,unsigned p_flags,abort_callback & p_abort) {
-		if (p_subsong != 0) throw exception_io_data();
+		if (p_subsong != 0) throw exception_io_bad_subsong_index();
 		m_instance.decode_initialize(p_flags,p_abort);
 	}
 
@@ -330,7 +330,7 @@ public:
 	void decode_on_idle(abort_callback & p_abort) {m_instance.decode_on_idle(p_abort);}
 
 	void retag_set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort) {
-		if (p_subsong != 0) throw exception_io_data();
+		if (p_subsong != 0) throw exception_io_bad_subsong_index();
 		m_instance.retag(p_info,p_abort);
 	}
 	

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef _WIN32
 #include <MMReg.h>
 #endif
@@ -192,13 +194,41 @@ public:
 
 	inline void set_data_32(const float * src,t_size samples,unsigned nch,unsigned srate) {return set_data(src,samples,nch,srate);}
 
+	//! Appends silent samples at the end of the chunk. \n
+	//! The chunk may be empty prior to this call, its sample rate & channel count will be set to the specified values then. \n
+	//! The chunk may have different sample rate than requested; silent sample count will be recalculated to the used sample rate retaining actual duration.
+	//! @param samples Number of silent samples to append.
+	//! @param hint_nch If no channel count is set on this chunk, it will be set to this value.
+	//! @param hint_srate The sample rate of silent samples being inserted. If no sampler ate is set on this chunk, it will be set to this value.\n
+	//! Otherwise if chunk's sample rate doesn't match hint_srate, sample count will be recalculated to chunk's actual sample rate.
 	void pad_with_silence_ex(t_size samples,unsigned hint_nch,unsigned hint_srate);
+	//! Appends silent samples at the end of the chunk. \n
+	//! The chunk must have valid sample rate & channel count prior to this call.
+	//! @param Number of silent samples to append.s
 	void pad_with_silence(t_size samples);
+	//! Inserts silence at the beginning of the audio chunk.
+	//! @param Number of silent samples to insert.
 	void insert_silence_fromstart(t_size samples);
+	//! Helper; removes N first samples from the chunk. \n
+	//! If the chunk contains fewer samples than requested, it becomes empty.
+	//! @returns Number of samples actually removed.
 	t_size skip_first_samples(t_size samples);
+	//! Produces a chunk of silence, with the specified duration. \n
+	//! Any existing audio sdata will be discarded. \n
+	//! Expects sample rate and channel count to be set first. \n
+	//! Also allocates memory for the requested amount of data see: set_data_size().
+	//! @param samples Desired number of samples.
 	void set_silence(t_size samples);
+	//! Produces a chunk of silence, with the specified duration. \n
+	//! Any existing audio sdata will be discarded. \n
+	//! Expects sample rate and channel count to be set first. \n
+	//! Also allocates memory for the requested amount of data see: set_data_size().
+	//! @param samples Desired duration in seconds.
 	void set_silence_seconds( double seconds );
 
+	//! Helper; skips first samples of the chunk updating a remaining to-skip counter.
+	//! @param skipDuration Reference to the duration of audio remining to be skipped, in seconds. Updated by each call.
+	//! @returns False if the chunk became empty, true otherwise.
 	bool process_skip(double & skipDuration);
 
 	//! Simple function to get original PCM stream back. Assumes host's endianness, integers are signed - including the 8bit mode; 32bit mode assumed to be float.
@@ -295,12 +325,6 @@ public:
 	virtual void set_sample_count(t_size val) {m_samples = val;}
 
 	const t_self & operator=(const audio_chunk & p_source) {copy(p_source);return *this;}
-
-	/*
-	Disabled to get compiler generated ones
-	audio_chunk_impl_t(const t_self & p_source) : m_srate(0), m_nch(0), m_setup(0), m_samples(0) { copy(p_source); }
-	const t_self & operator=(const t_self & p_source) {copy(p_source);return *this;}
-	*/
 };
 
 typedef audio_chunk_impl_t<> audio_chunk_impl;

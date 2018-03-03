@@ -31,6 +31,8 @@ namespace foobar2000_io
 	PFC_DECLARE_EXCEPTION(exception_io_data_truncation,		exception_io_data,"Unsupported format or corrupted file");
 	//! Unsupported format (a subclass of "unsupported format or corrupted file" exception).
 	PFC_DECLARE_EXCEPTION(exception_io_unsupported_format,	exception_io_data,"Unsupported file format");
+	//! Decode error - subsong index out of expected range
+	PFC_DECLARE_EXCEPTION(exception_io_bad_subsong_index,	exception_io_data,"Unexpected subsong index");
 	//! Object is remote, while specific operation is supported only for local objects.
 	PFC_DECLARE_EXCEPTION(exception_io_object_is_remote,	exception_io,"This operation is not supported on remote objects");
 	//! Sharing violation.

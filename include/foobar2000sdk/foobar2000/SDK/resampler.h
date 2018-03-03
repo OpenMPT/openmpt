@@ -28,4 +28,16 @@ public:
 template<typename T>
 class resampler_factory_t : public service_factory_single_t<resampler_entry_impl_t<T> > {};
 
+#ifdef FOOBAR2000_DESKTOP
+
+//! \since 1.4
+//! Supersedes resampler_entry::get_priority, allows the user to specify which resampler should be preferred when a component asks for one.
+class resampler_manager : public service_base {
+	FB2K_MAKE_SERVICE_COREAPI(resampler_manager);
+public:
+	virtual resampler_entry::ptr get_resampler( unsigned rateFrom, unsigned rateTo ) = 0;
+};
+
+#endif
+
 #endif // FOOBAR2000_HAVE_DSP
