@@ -46,6 +46,9 @@ is just a high-level summary.
  *  [**Regression**] Building with Android NDK r12b through r15b now requires
     setting `APP_STL=gnustl_shared` to override the new libopenmpt default of
     `APP_STL=c++_shared`.
+ *  [**Regression**] Using MediaFoundation to decode MP3 samples is only
+    supported with Visual Studio (MSVC or Clang) from now on. MinGW-W64 is not
+    supported for MediaFoundation any more.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.

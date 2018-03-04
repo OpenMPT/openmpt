@@ -494,6 +494,10 @@
 #undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows
 #endif
 
+#if !MPT_COMPILER_MSVC && !MPT_COMPILER_CLANG && defined(MPT_WITH_MEDIAFOUNDATION)
+#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires MSVC or Clang due to ATL (no MinGW support)
+#endif
+
 #if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_TEMPFILE)
 #define MPT_ENABLE_TEMPFILE
 #endif

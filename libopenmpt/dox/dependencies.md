@@ -55,11 +55,13 @@ Dependencies
      *  **libogg**
      *  **libvorbis**
      *  **libvorbisfile**
-     *  Alternatively, **Media Foundation** can be used on Windows 7 or later
-        instead of libmpg123 to decode mp3 samples. It's also possible to use
-        **minimp3 by Lion (github.com/lieff)**.
+     *  Instead of libmpg123, **minimp3 by Lion (github.com/lieff)** can be used
+        internally to decode MP3 samples.
      *  Instead of libogg, libvorbis and libvorbisfile, **stb_vorbis** can be
         used internally to decode Vorbis samples.
+     *  Alternatively, when building with Visual Studio (MSVC or Clang),
+        **Media Foundation** can be used on Windows 7 or later instead of
+        libmpg123 to decode mp3 samples.
  *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
