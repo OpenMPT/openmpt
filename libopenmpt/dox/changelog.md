@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.7-pre
 
+ *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi duo to missing
+    `-latomic`.
+
  *  IT: More accurate song length calculation for pattern loops that have no
     start command and are following another pattern loop.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
