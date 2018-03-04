@@ -27,11 +27,6 @@ is just a high-level summary.
      *  "stop": Returns 0 rendered frames when the song end is reached.
         Subsequent reads will return 0 rendered frames.
 
- *  [**Bug**] libopenmpt did not build on Android NDK r15c (and possibly
-    other versions between r12b and r15c as well).
- *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi duo to missing
-    `-latomic`.
-
  *  [**Change**] minimp3: Instead of the LGPL-2.1-licensed minimp3 by KeyJ,
     libopenmpt now uses the CC0-1.0-licensed minimp3 by Lion (github.com/lieff)
     as a fallback if libmpg123 is unavailable. The `USE_MINIMP3` `Makefile`
@@ -41,11 +36,10 @@ is just a high-level summary.
     and `--batch` modes and also rejects `--output` in `--render` mode. These
     combinations of options really made no sense and were rather confusing.
  *  [**Change**] Android NDK build system now uses libc++ (`c++_shared`) instead
-    of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16.
+    of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16b.
 
- *  [**Regression**] Building with Android NDK r12b through r15b now requires
-    setting `APP_STL=gnustl_shared` to override the new libopenmpt default of
-    `APP_STL=c++_shared`.
+ *  [**Regression**] Building with Android NDK older than NDK r16b is not
+    supported any more.
  *  [**Regression**] Using MediaFoundation to decode MP3 samples is only
     supported with Visual Studio (MSVC or Clang) from now on. MinGW-W64 is not
     supported for MediaFoundation any more.

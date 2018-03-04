@@ -645,21 +645,9 @@
 
 #define _USE_MATH_DEFINES
 
-#if MPT_OS_ANDROID
-// NDK r15c has problems with 64bit file offsets on 32bit targets. See
-// <https://bugs.openmpt.org/view.php?id=1051>.
-// On NDK r16b, we switched to libc++. As we cannot detect the NDK version
-// directly, just re-enable 64bit file offsets when using libc++.
-#if defined(_LIBCPP_VERSION)
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif
-#endif
-#else // !MPT_OS_ANDROID
-#ifndef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64
-#endif
-#endif // MPT_OS_ANDROID
 
 
 

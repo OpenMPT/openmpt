@@ -302,14 +302,6 @@
 	//#endif
 #elif defined(__ANDROID__) || defined(ANDROID)
 	#define MPT_OS_ANDROID 1
-	#include <vector>
-	#if defined(_LIBCPP_VERSION)
-		#if (_LIBCPP_VERSION < 6000)
-			// NDK r16b has _LIBCPP_VERSION==6000. Older versions are not considered stable and especially do not properly support exception handling on all platforms, which is required for libopenmpt.
-			// On NDK r16b or later, it is highly recommended to use libc++ ('APP_STL=c++_shared'), as is the default in the libopenmpt Android NDK build system.
-			#error "Building libopenmpt with this Android NDK version and libc++ is unsupported. Please upgrade the NDK to at least r16b, or specify APP_STL=gnustl_shared for older NDK versions down to and including r12b."
-		#endif
-	#endif
 #elif defined(__linux__)
 	#define MPT_OS_LINUX 1
 #elif defined(__DragonFly__)
