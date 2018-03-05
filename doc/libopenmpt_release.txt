@@ -12,5 +12,4 @@ Steps to make a libopenmpt 0.2 release
  *  wait for automated builds to show up, then run `cd website && ./release-0.2.sh 0.2 $TAGREV $REV -$NAME`
  *  commit `website`
  *  run `cd website && cd v2 && ./update.sh`
- *  post announcement to mailing list
 
