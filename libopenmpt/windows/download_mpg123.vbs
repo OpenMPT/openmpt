@@ -100,13 +100,13 @@ CreateFolder "download.tmp"
 ' Using SHA512 from VBScript fails for unknown reasons.
 ' We check HTTPS certificate, file size, MD5 and SHA1 instead.
 
-mpg123version = "1.25.8.openmpt1"
-mpg123x86size = 132555
-mpg123x86md5  = "fe36bcb01d88e0106f792003fc6c9a4c"
-mpg123x86sha1 = "69f1e8eecedf70f6940596d6307be93df36d712b"
-mpg123x64size = 138085
-mpg123x64md5  = "cb096afb1e7bc79b31fb92576a8d7f63"
-mpg123x64sha1 = "ef533febf5ee610596fd48adf6b3e77baf51e2f3"
+mpg123version = "1.25.10.openmpt1"
+mpg123x86size = 132565
+mpg123x86md5  = "307da56b084cddd8278a6e3adfdd7eea"
+mpg123x86sha1 = "c3c7afac4115b3c0c08d213e9e5004d42823187d"
+mpg123x64size = 138097
+mpg123x64md5  = "d59a3007aaf336080eed1d56c88a72bf"
+mpg123x64sha1 = "8644bbc1242f1f5460c6f5ff86ed8668775dee1d"
 
 Download httpprotocol & "://lib.openmpt.org/files/libopenmpt/contrib/mpg123/libopenmpt-0.2-contrib-mpg123-" & mpg123version & "-x86.zip", mpg123x86size, mpg123x86md5, mpg123x86sha1, "download.tmp\mpg123-" & mpg123version & "-x86.zip"
 DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "download.tmp\libopenmpt-0.2-contrib-mpg123-" & mpg123version & "-x86")
