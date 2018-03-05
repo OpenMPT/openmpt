@@ -41,9 +41,8 @@ is just a high-level summary.
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
     supported any more.
- *  [**Regression**] Using MediaFoundation to decode MP3 samples is only
-    supported with Visual Studio (MSVC or Clang) from now on. MinGW-W64 is not
-    supported for MediaFoundation any more.
+ *  [**Regression**] Using MediaFoundation to decode MP3 samples is no longer
+    supported. Use libmpg123 or minimp3 instead.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.

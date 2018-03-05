@@ -58,13 +58,6 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #else
 #pragma comment(lib, "rpcrt4.lib")
 #endif
-#if defined(MPT_WITH_MEDIAFOUNDATION)
-#pragma comment(lib, "mf.lib")
-#pragma comment(lib, "mfplat.lib")
-#pragma comment(lib, "mfreadwrite.lib")
-#pragma comment(lib, "mfuuid.lib") // static lib
-#pragma comment(lib, "propsys.lib")
-#endif // MPT_WITH_MEDIAFOUNDATION
 #ifndef NO_DMO
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")

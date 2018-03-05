@@ -143,27 +143,7 @@
 #error "only one of LIBOPENMPT_BUILD_FULL or LIBOPENMPT_BUILD_SMALL can be defined"
 #endif // LIBOPENMPT_BUILD_FULL && LIBOPENMPT_BUILD_SMALL
 
-#if defined(LIBOPENMPT_BUILD_FULL)
-
-//#define MPT_WITH_DL
-//#define MPT_WITH_FLAC
-//#define MPT_WITH_ICONV
-//#define MPT_WITH_LTDL
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-#if (_WIN32_WINNT >= 0x0601)
-#define MPT_WITH_MEDIAFOUNDATION
-#endif
-#endif
-//#define MPT_WITH_MINIMP3
-//#define MPT_WITH_MINIZ
-#define MPT_WITH_MPG123
-#define MPT_WITH_OGG
-//#define MPT_WITH_STBVORBIS
-#define MPT_WITH_VORBIS
-#define MPT_WITH_VORBISFILE
-#define MPT_WITH_ZLIB
-
-#elif defined(LIBOPENMPT_BUILD_SMALL)
+#if defined(LIBOPENMPT_BUILD_SMALL)
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
