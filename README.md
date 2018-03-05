@@ -161,7 +161,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
          -  gcc 4.8
 
-         -  clang 3.4
+         -  clang 3.6
 
         The Makefile requires pkg-config for native builds.
         For sound output in openmpt123, PortAudio or SDL is required.

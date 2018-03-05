@@ -11,11 +11,11 @@ Dependencies
  *  Supported compilers for building libopenmpt:
      *  **Microsoft Visual Studio 2015** or higher
      *  **GCC 4.8** or higher
-     *  **Clang 3.4** or higher
+     *  **Clang 3.6** or higher
      *  **MinGW-W64 4.8** or higher
      *  **emscripten 1.31** or higher
      *  any other **C++11 compliant** compiler (full standard compliant mode is
-        known to work with GCC >= 5.1 and Clang >= 3.5)
+        known to work with GCC >= 5.1 and Clang)
         
         libopenmpt makes the following assumptions about the C++ implementation
         used for building:
@@ -75,7 +75,7 @@ Dependencies
  *  Supported compilers for building openmpt123:
      *  **Microsoft Visual Studio 2015** or higher
      *  **GCC 4.8** or higher
-     *  **Clang 3.4** or higher
+     *  **Clang 3.6** or higher
      *  **MinGW-W64 4.8** or higher
      *  any **C++11 compliant** compiler
  *  Live sound output requires one of:

@@ -38,6 +38,7 @@ is just a high-level summary.
  *  [**Change**] Android NDK build system now uses libc++ (`c++_shared`) instead
     of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16b.
 
+ *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
     supported any more.
  *  [**Regression**] Using MediaFoundation to decode MP3 samples is only

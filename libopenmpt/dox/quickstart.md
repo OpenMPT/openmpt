@@ -7,7 +7,7 @@ Quick Start {#quickstart}
 
  1. Grab a `libopenmpt-VERSION.autotools.tar.gz` tarball.
  2. Get dependencies:
-     -  **gcc >= 4.8** or **clang >= 3.4**
+     -  **gcc >= 4.8** or **clang >= 3.6**
      -  **pkg-config >= 0.24**
      -  **zlib**
      -  **libogg**, **libvorbis**, **libvorbisfile**
@@ -42,7 +42,7 @@ Quick Start {#quickstart}
 
  1. Get dependencies:
      -  **GNU make**
-     -  **gcc >= 4.8** or **clang >= 3.4**
+     -  **gcc >= 4.8** or **clang >= 3.6**
      -  **pkg-config**
      -  **zlib**
      -  **libogg**, **libvorbis**, **libvorbisfile**
