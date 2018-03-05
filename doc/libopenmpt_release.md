@@ -33,8 +33,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
         cd build/release/libopenmpt-website
         ./release-0.3.sh $NEWVER +release
         cd ../../..
- 7. post announcement to mailing list
- 8. increment OpenMPT version minorminor in `common/versionNumber.h` when all
+ 7. increment OpenMPT version minorminor in `common/versionNumber.h` when all
     releases are done on the svn side (either libopenmpt only, or both
     libopenmpt and OpenMPT)
 
