@@ -15,7 +15,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_v
 
 LOCAL_CFLAGS   += -fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
 LOCAL_CPPFLAGS +=#-fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
-LOCAL_LDLIBS   += -latomic -lz
+LOCAL_LDLIBS   += -lz
 
 MPT_SVNURL?=
 MPT_SVNVERSION?=
