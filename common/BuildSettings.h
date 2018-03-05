@@ -688,16 +688,6 @@
 
 #endif // MPT_COMPILER_MSVC
 
-#if MPT_COMPILER_MSVCCLANGC2
-
-#if MPT_OS_WINDOWS
-// As Clang defines __STDC__ 1, Windows headers will use named union fields. The MediaFoundation headers do not support this, though.
-// Clang supports nameless union fields just fine, and luckily there is a way to override the Windows headers behaviour.
-#define _FORCENAMELESSUNION
-#endif // MPT_OS_WINDOWS
-
-#endif // MPT_COMPILER_MSVCCLANGC2
-
 
 
 // third-party library configuration

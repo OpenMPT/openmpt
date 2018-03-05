@@ -49,11 +49,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_MPG123)
 
-#if MPT_COMPILER_MSVCCLANGC2
-typedef _off_t mpg123_off_t;
-#else // !MPT_COMPILER_MSVCCLANGC2
 typedef off_t mpg123_off_t;
-#endif // MPT_COMPILER_MSVCCLANGC2
 
 typedef size_t mpg123_size_t;
 

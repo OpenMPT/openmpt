@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline
 #define MPT_NOINLINE    __declspec(noinline)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_FORCEINLINE __attribute__((always_inline)) inline
 #define MPT_NOINLINE    __attribute__((noinline))
 #else
@@ -75,7 +75,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Use MPT_RESTRICT to indicate that a pointer is guaranteed to not be aliased.
-#if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_RESTRICT __restrict
 #else
 #define MPT_RESTRICT
@@ -87,7 +87,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Tag them with "MPT_DEPRECATED".
 #if MPT_COMPILER_MSVC
 #define MPT_DEPRECATED __declspec(deprecated)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_DEPRECATED __attribute__((deprecated))
 #else
 #define MPT_DEPRECATED
@@ -152,7 +152,7 @@ std::unique_ptr<T> make_unique(Args&&... args)
 /**/
 #endif
 
-#if MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#if MPT_COMPILER_CLANG
 #define MPT_MAYBE_CONSTANT_IF(x) \
   _Pragma("clang diagnostic push") \
   _Pragma("clang diagnostic ignored \"-Wunknown-pragmas\"") \
@@ -238,7 +238,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
 #endif
 
-#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_CLANG
 
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #ifdef NDEBUG
@@ -351,7 +351,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 	#define MPT_FALLTHROUGH [[fallthrough]]
 #elif MPT_COMPILER_MSVC
 	#define MPT_FALLTHROUGH __fallthrough
-#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_CLANG
 	#define MPT_FALLTHROUGH [[clang::fallthrough]]
 #elif MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(7,1,0)
 	#define MPT_FALLTHROUGH __attribute__((fallthrough))
@@ -479,7 +479,7 @@ MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 		#define MPT_ARCH_BITS_64 0
 	#endif
 
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 	#if defined(__SIZEOF_POINTER__)
 		#if (__SIZEOF_POINTER__ == 8)
@@ -516,7 +516,7 @@ MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 
 
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
 #else
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex)

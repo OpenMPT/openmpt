@@ -41,7 +41,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if (_WIN32_WINNT < 0x0602)
 #if MPT_COMPILER_MSVC
 #pragma message("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602.")
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #warning "Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602."
 #else
 // There is no portable way to display a warning.
@@ -74,7 +74,7 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
 #if MPT_COMPILER_MSVC
 #pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #warning "Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available."
 #else
 // There is no portable way to display a warning.

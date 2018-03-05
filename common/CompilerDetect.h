@@ -25,10 +25,7 @@
 
 #elif defined(__clang__) && defined(_MSC_VER) && defined(__c2__)
 
-#define MPT_COMPILER_MSVCCLANGC2                     1
-#define MPT_COMPILER_MSVCCLANGC2_VERSION             (__c2_version__)
-#define MPT_MSVCCLANGC2_AT_LEAST(major,minor,build)  (MPT_COMPILER_MSVCCLANGC2_VERSION >= MPT_COMPILER_MAKE_VERSION3_BUILD((major),(minor),(build)))
-#define MPT_MSVCCLANGC2_BEFORE(major,minor,build)    (MPT_COMPILER_MSVCCLANGC2_VERSION <  MPT_COMPILER_MAKE_VERSION3_BUILD((major),(minor),(build)))
+#error "Clang/C2 is not supported. Please use Clang/LLVM for Windows instead."
 
 #elif defined(__clang__)
 
@@ -104,11 +101,6 @@
 #ifndef MPT_COMPILER_GENERIC
 #define MPT_COMPILER_GENERIC                  0
 #endif
-#ifndef MPT_COMPILER_MSVCCLANGC2
-#define MPT_COMPILER_MSVCCLANGC2                    0
-#define MPT_MSVCCLANGC2_AT_LEAST(major,minor,build) 0
-#define MPT_MSVCCLANGC2_BEFORE(major,minor,build)   0
-#endif
 #ifndef MPT_COMPILER_CLANG
 #define MPT_COMPILER_CLANG                    0
 #define MPT_CLANG_AT_LEAST(major,minor,patch) 0
@@ -173,7 +165,7 @@
 	#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 		#define MPT_PLATFORM_LITTLE_ENDIAN
 	#endif
-#elif MPT_COMPILER_CLANG || MPT_COMPILER_MSVCCLANGC2
+#elif MPT_COMPILER_CLANG
 	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 		#define MPT_PLATFORM_BIG_ENDIAN
 	#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
