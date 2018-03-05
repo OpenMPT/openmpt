@@ -340,9 +340,12 @@ void COptionsSoundcard::UpdateEverything()
 			}
 			if(!TrackerSettings::Instance().m_MoreRtaudio)
 			{
-				// skip rtaudio apis that are already implemented via our own SoundDevice class
-				// can be overwritten via [Sound Settings]MoreRtaudio=1
-				continue;
+				if(it.type == MPT_USTRING("RtAudio-WINDOWS_DS") || it.type == MPT_USTRING("RtAudio-WINDOWS_WASAPI") || it.type == MPT_USTRING("RtAudio-WINDOWS_ASIO"))
+				{
+					// skip rtaudio apis that are already implemented via our own SoundDevice class
+					// can be overwritten via [Sound Settings]MoreRtaudio=1
+					continue;
+				}
 			}
 
 			if(!TrackerSettings::Instance().m_SoundShowDeprecatedDevices)
