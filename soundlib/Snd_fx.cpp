@@ -4850,12 +4850,6 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		outPos++;
 	}
 
-	if(outPos == 0)
-	{
-		// Nothing there to send!
-		return;
-	}
-
 	// Macro string has been parsed and translated, now send the message(s)...
 	uint32 sendPos = 0;
 	uint8 runningStatus = 0;
@@ -4955,8 +4949,17 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		return 0;
 	}
 
-	ModChannel *pChn = &m_PlayState.Chn[nChn];
+	if(macro[0] == 0xFA || macro[0] == 0xFC || macro[0] == 0xFF)
+	{
+		// Start Song, Stop Song, MIDI Reset - both interpreted internally and sent to plugins
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+		{
+			m_PlayState.Chn[chn].nCutOff = 0x7F;
+			m_PlayState.Chn[chn].nResonance = 0x00;
+		}
+	}
 
+	ModChannel &chn = m_PlayState.Chn[nChn];
 	if(macro[0] == 0xF0 && (macro[1] == 0xF0 || macro[1] == 0xF1))
 	{
 		// Internal device.
@@ -4971,24 +4974,24 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		if(macroCode == 0x00 && !isExtended)
 		{
 			// F0.F0.00.xx: Set CutOff
-			int oldcutoff = pChn->nCutOff;
+			int oldcutoff = chn.nCutOff;
 			if(param < 0x80)
 			{
 				if(!isSmooth)
 				{
-					pChn->nCutOff = param;
+					chn.nCutOff = param;
 				} else
 				{
-					pChn->nCutOff = (uint8)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
+					chn.nCutOff = Util::Round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
 				}
-				pChn->nRestoreCutoffOnNewNote = 0;
+				chn.nRestoreCutoffOnNewNote = 0;
 			}
 
-			oldcutoff -= pChn->nCutOff;
+			oldcutoff -= chn.nCutOff;
 			if(oldcutoff < 0) oldcutoff = -oldcutoff;
-			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
-				|| !pChn->dwFlags[CHN_FILTER] || (!(pChn->rightVol | pChn->leftVol)))
-				SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+			if((chn.nVolume > 0) || (oldcutoff < 0x10)
+				|| !chn.dwFlags[CHN_FILTER] || (!(chn.rightVol | chn.leftVol)))
+				SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
 			return 4;
 
@@ -4997,17 +5000,17 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			// F0.F0.01.xx: Set Resonance
 			if(param < 0x80)
 			{
-				pChn->nRestoreResonanceOnNewNote = 0;
+				chn.nRestoreResonanceOnNewNote = 0;
 				if(!isSmooth)
 				{
-					pChn->nResonance = param;
+					chn.nResonance = param;
 				} else
 				{
-					pChn->nResonance = (uint8)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
+					chn.nResonance = (uint8)CalculateSmoothParamChange((float)chn.nResonance, (float)param);
 				}
 			}
 
-			SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
 			return 4;
 
@@ -5016,8 +5019,8 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
 			if(param < 0x20)
 			{
-				pChn->nFilterMode = (param >> 4);
-				SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+				chn.nFilterMode = (param >> 4);
+				SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 			}
 
 			return 4;
@@ -5029,7 +5032,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
 			{
-				const float newRatio = 1.0f - (static_cast<float>(param & 0x7F) / 127.0f);
+				const float newRatio = (0x7F - (param & 0x7F)) / 127.0f;
 				if(!isSmooth)
 				{
 					m_MixPlugins[nPlug - 1].fDryRatio = newRatio;
@@ -5073,11 +5076,11 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 	{
 #ifndef NO_PLUGINS
 		// Not an internal device. Pass on to appropriate plugin.
-		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
+		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : chn.nMasterChn;
 		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern... Or when using this mechanism for volume/panning!
 		{
 			PLUGINDEX nPlug = 0;
-			if(!pChn->dwFlags[CHN_NOFX])
+			if(!chn.dwFlags[CHN_NOFX])
 			{
 				nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			}
