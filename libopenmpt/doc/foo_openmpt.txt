@@ -6,11 +6,4 @@ foo_openmpt is a module file (https://en.wikipedia.org/wiki/Module_file) decoder
 component for foobar2000 >= 1.3.0. foo_openmpt is based on libopenmpt.
 
 
-Installation
-------------
-
-"foo_openmpt.dll" and "openmpt-mpg123.dll" must both be placed into a
-"foo_openmpt" subdirectory inside the foobar2000 "user-components" directory.
-
-
 See https://lib.openmpt.org/ for documentation, FAQ and other details.

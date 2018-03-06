@@ -79,6 +79,10 @@
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>if exist $(OutDir)foo_openmpt.fb2k-component del /Q $(OutDir)foo_openmpt.fb2k-component
+"C:\Program Files\7-Zip\7z.exe" a -tzip -mx=9 $(OutDir)foo_openmpt.fb2k-component $(OutDir)foo_openmpt.dll $(OutDir)openmpt-mpg123.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -113,6 +117,10 @@
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>if exist $(OutDir)foo_openmpt.fb2k-component del /Q $(OutDir)foo_openmpt.fb2k-component
+"C:\Program Files\7-Zip\7z.exe" a -tzip -mx=9 $(OutDir)foo_openmpt.fb2k-component $(OutDir)foo_openmpt.dll $(OutDir)openmpt-mpg123.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\libopenmpt\foo_openmpt.cpp" />
