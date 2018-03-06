@@ -468,7 +468,7 @@ std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
 	std::string sanitizedMacro = macro;
 
 	std::string::size_type pos;
-	while((pos = sanitizedMacro.find_first_not_of("0123456789ABCDEFabpcnuvxyz")) != std::string::npos)
+	while((pos = sanitizedMacro.find_first_not_of("0123456789ABCDEFabchmnopsuvxyz")) != std::string::npos)
 	{
 		sanitizedMacro.erase(pos, 1);
 	}

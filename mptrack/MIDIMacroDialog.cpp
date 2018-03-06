@@ -149,7 +149,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 // macro == -1 for updating all macros at once
 void CMidiMacroSetup::UpdateMacroList(int macro)
 {
-	if (!m_EditMacro[0])
+	if(!m_EditMacro[0])
 	{
 		// GUI not yet initialized
 		return;
@@ -157,7 +157,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 
 	int start, end;
 
-	if (macro >= 0 && macro < 16)
+	if(macro >= 0 && macro < 16)
 	{
 		start = end = macro;
 	} else
@@ -169,7 +169,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 	CString s;
 	const int selectedMacro = m_CbnSFx.GetCurSel();
 
-	for (int m = start; m <= end; m++)
+	for(int m = start; m <= end; m++)
 	{
 		// SFx
 		s.Format(_T("SF%X"), m);
@@ -181,7 +181,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 
 		// Macro Type:
 		const parameteredMacroType macroType = m_MidiCfg.GetParameteredMacroType(m);
-		switch (macroType)
+		switch(macroType)
 		{
 		case sfx_plug:
 			s.Format(_T("Control Plugin Param %u"), m_MidiCfg.MacroToPlugParam(m));
@@ -202,17 +202,15 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 
 void CMidiMacroSetup::UpdateDialog()
 {
-	UINT sfx, sfx_preset, zxx;
-
-	sfx = m_CbnSFx.GetCurSel();
-	sfx_preset = m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel());
+	UINT sfx = m_CbnSFx.GetCurSel();
+	UINT sfx_preset = static_cast<UINT>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
 	if(sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[sfx]));
 	}
 
-	zxx = m_CbnZxx.GetCurSel();
+	UINT zxx = m_CbnZxx.GetCurSel();
 	if(zxx < mpt::size(m_MidiCfg.szMidiZXXExt))
 	{
 		m_EditZxx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiZXXExt[zxx]));
@@ -248,6 +246,10 @@ void CMidiMacroSetup::OnMacroHelp()
 		"a - High byte of bank select\n"
 		"b - Low byte of bank select\n"
 		"p - Program select\n\n"
+		"h - Pattern channel\n"
+		"m - Sample loop direction\n"
+		"o - Last sample offset (Oxx / 9xx)\n"
+		"s - SysEx checksum (Roland)\n\n"
 		"z - Zxx parameter (00-7F)\n\n"
 		"Macros can be up to 31 characters long and contain multiple MIDI messages. SysEx messages are automatically terminated if not specified by the user."),
 		_T("OpenMPT MIDI Macro quick reference"));
@@ -271,7 +273,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 	UINT sfx = m_CbnSFx.GetCurSel();
 	parameteredMacroType sfx_preset = static_cast<parameteredMacroType>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
 
-	if (sfx < 16)
+	if (sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
 	{
 		if(sfx_preset != sfx_custom)
 		{
@@ -297,7 +299,7 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 void CMidiMacroSetup::OnSFxEditChanged()
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
-	if (sfx < 16)
+	if (sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
 	{
 		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
@@ -317,7 +319,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 void CMidiMacroSetup::OnZxxEditChanged()
 {
 	UINT zxx = m_CbnZxx.GetCurSel();
-	if (zxx < 128)
+	if (zxx < mpt::size(m_MidiCfg.szMidiZXXExt))
 	{
 		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
 		{
@@ -354,16 +356,16 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 		}
 	}
 
-	Reporting::Notification(message, _T("Macro -> Params"));
+	Reporting::Notification(message, _T("Macro -> Parameters"));
 #endif // NO_PLUGINS
 }
 
 void CMidiMacroSetup::OnPlugChanged()
 {
 #ifndef NO_PLUGINS
-	int plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
+	DWORD_PTR plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
 
-	if (plug < 0 || plug > MAX_MIXPLUGINS)
+	if(plug > MAX_MIXPLUGINS)
 		return;
 
 	IMixPlugin *pVstPlugin = m_SndFile.m_MixPlugins[plug].pMixPlugin;
@@ -383,7 +385,7 @@ void CMidiMacroSetup::OnPlugChanged()
 
 void CMidiMacroSetup::OnPlugParamChanged()
 {
-	UINT param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
+	int param = static_cast<int>(m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel()));
 
 	if(param < 384)
 	{
@@ -397,7 +399,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 
 void CMidiMacroSetup::OnCCChanged()
 {
-	UINT cc = m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel());
+	int cc = static_cast<int>(m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel()));
 	const std::string macroText = m_MidiCfg.CreateParameteredMacro(sfx_cc, cc);
 	m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
 }
@@ -444,7 +446,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 	bool allowed = true, caseChange = false;
 	for(char &c : macroStr)
 	{
-		if(c == 'k' || c == 'K')			// Previously, 'K' was used for MIDI channel
+		if(c == 'k' || c == 'K')		// Previously, 'K' was used for MIDI channel
 		{
 			caseChange = true;
 			c = 'c';
@@ -452,13 +454,13 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		{
 			caseChange = true;
 			c = c - 'a' + 'A';
-		} else if(c == 'N' || c == 'V' || c == 'U' || c == 'X' || c == 'Y' || c == 'Z' || c == 'P')
+		} else if(c == 'M' || c == 'N' || c == 'O' || c == 'P' || c == 'S' || c == 'U' || c == 'V' || c == 'X' || c == 'Y' || c == 'Z')
 		{
 			caseChange = true;
 			c = c - 'A' + 'a';
 		} else if(!(
 			(c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'c') ||
-			(c == 'v' || c == 'u' || c == 'x' || c == 'y' || c == 'p' || c == 'n' || c == ' ') ||
+			(c == 'h' || c == 'm' || c == 'n' || c == 'o' || c == 'p' || c == 's' ||c == 'u' || c == 'v' || c == 'x' || c == 'y' || c == ' ') ||
 			(c == 'z' && isParametric)))
 		{
 			allowed = false;
