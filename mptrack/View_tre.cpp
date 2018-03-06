@@ -3713,7 +3713,7 @@ void CModTree::OnCloseItem()
 	if(pModDoc == nullptr) return;
 	// Spam our message to the first available view
 	POSITION pos = pModDoc->GetFirstViewPosition();
-	if(pos == NULL) return;
+	if(pos == nullptr) return;
 	CView* pView = pModDoc->GetNextView(pos);
 	if (pView) pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
 }
@@ -3753,14 +3753,11 @@ HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
 // A root item is considered to be its own parent, i.e. the returned value is only ever NULL if the input value was NULL.
 HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem)
 {
-	if(hItem != nullptr)
+	while(hItem != nullptr)
 	{
-		for(;;)
-		{
-			const HTREEITEM h = GetParentItem(hItem);
-			if(h == nullptr || h == hItem) break;
-			hItem = h;
-		}
+		const HTREEITEM h = GetParentItem(hItem);
+		if(h == nullptr || h == hItem) break;
+		hItem = h;
 	}
 	return hItem;
 }
@@ -3869,7 +3866,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		switch(modItem.type)
 		{
 		case MODITEM_ORDER:
-			if(itemText[0])
+			if(!itemText.empty())
 			{
 				PATTERNINDEX pat = ConvertStrTo<PATTERNINDEX>(itemText);
 				bool valid = true;
@@ -3886,13 +3883,16 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				{
 					valid = (pat < sndFile.Patterns.GetNumPatterns());
 				}
-				PATTERNINDEX &target = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
+				PATTERNINDEX &target = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2))[static_cast<ORDERINDEX>(modItem.val1)];
 				if(valid && pat != target)
 				{
 					target = pat;
 					modDoc->SetModified();
 					modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 				}
+			} else
+			{
+				MessageBeep(MB_ICONWARNING);
 			}
 			break;
 
@@ -3902,7 +3902,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(itemText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, SequenceHint((SEQUENCEINDEX)modItem.val1).Data().Names());
+				modDoc->UpdateAllViews(nullptr, SequenceHint(static_cast<SEQUENCEINDEX>(modItem.val1)).Data().Names());
 			}
 			break;
 
@@ -3911,25 +3911,25 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Patterns[modItem.val1].SetName(itemText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, PatternHint((PATTERNINDEX)modItem.val1).Data().Names());
+				modDoc->UpdateAllViews(nullptr, PatternHint(static_cast<PATTERNINDEX>(modItem.val1)).Data().Names());
 			}
 			break;
 
 		case MODITEM_SAMPLE:
-			if(modItem.val1 <= sndFile.GetNumSamples() && strcmp(sndFile.m_szNames[modItem.val1], itemText.c_str()))
+			if(modItem.val1 <= sndFile.GetNumSamples() && sndFile.m_szNames[modItem.val1] != itemText)
 			{
 				mpt::String::CopyN(sndFile.m_szNames[modItem.val1], itemText.c_str(), modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, SampleHint((SAMPLEINDEX)modItem.val1).Info().Names());
+				modDoc->UpdateAllViews(nullptr, SampleHint(static_cast<SAMPLEINDEX>(modItem.val1)).Info().Names());
 			}
 			break;
 
 		case MODITEM_INSTRUMENT:
-			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && strcmp(sndFile.Instruments[modItem.val1]->name, itemText.c_str()))
+			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && sndFile.Instruments[modItem.val1]->name != itemText)
 			{
 				mpt::String::CopyN(sndFile.Instruments[modItem.val1]->name, itemText.c_str(), modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, InstrumentHint((INSTRUMENTINDEX)modItem.val1).Info().Names());
+				modDoc->UpdateAllViews(nullptr, InstrumentHint(static_cast<INSTRUMENTINDEX>(modItem.val1)).Info().Names());
 			}
 			break;
 		}
