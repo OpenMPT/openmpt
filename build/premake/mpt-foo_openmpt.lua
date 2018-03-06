@@ -48,10 +48,6 @@
   characterset "Unicode"
 	buildoptions { "/d2notypeopt" } -- https://hydrogenaud.io/index.php/topic,108411.0.html
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123" }
-	links { "delayimp" }
-   linkoptions {
-    "/DELAYLOAD:openmpt-mpg123.dll",
-   }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

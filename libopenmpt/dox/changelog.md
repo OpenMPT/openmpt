@@ -37,6 +37,12 @@ is just a high-level summary.
     combinations of options really made no sense and were rather confusing.
  *  [**Change**] Android NDK build system now uses libc++ (`c++_shared`) instead
     of GNU libstdc++ (`gnustl_shared`), as recommended by Android NDK r16b.
+ *  [**Change**] xmp-openmpt: `openmpt-mpg123.dll` is no longer optional and
+    must be placed into the same directory as `xmp-openmpt.dll`.
+ *  [**Change**] in_openmpt: `openmpt-mpg123.dll` is no longer optional and must
+    be placed into the same directory as `in_openmpt.dll`.
+ *  [**Change**] foo_openmpt: `openmpt-mpg123.dll` is no longer optional and
+    must be placed into the same directory as `foo_openmpt.dll`.
 
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not

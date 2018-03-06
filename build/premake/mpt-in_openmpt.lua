@@ -54,9 +54,5 @@
   characterset "Unicode"
   flags { "MFC" }
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123" }
-	links { "delayimp" }
-   linkoptions {
-    "/DELAYLOAD:openmpt-mpg123.dll",
-   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
