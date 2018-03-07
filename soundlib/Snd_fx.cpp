@@ -4873,7 +4873,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		return 0;
 	}
 
-	ModChannel *pChn = &m_PlayState.Chn[nChn];
+	ModChannel &chn = m_PlayState.Chn[nChn];
 
 	if(macro[0] == 0xF0 && (macro[1] == 0xF0 || macro[1] == 0xF1))
 	{
@@ -4886,60 +4886,44 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		const uint8 macroCode = macro[2];
 		const uint8 param = macro[3];
 
-		if(macroCode == 0x00 && !isExtended)
+		if(macroCode == 0x00 && !isExtended && param < 0x80)
 		{
 			// F0.F0.00.xx: Set CutOff
-			int oldcutoff = pChn->nCutOff;
-			if(param < 0x80)
+			if(!isSmooth)
 			{
-				if(!isSmooth)
-				{
-					pChn->nCutOff = param;
-				} else
-				{
-					pChn->nCutOff = (uint8)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
-				}
-				pChn->nRestoreCutoffOnNewNote = 0;
+				chn.nCutOff = param;
+			} else
+			{
+				chn.nCutOff = Util::Round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
 			}
-
-			oldcutoff -= pChn->nCutOff;
-			if(oldcutoff < 0) oldcutoff = -oldcutoff;
-			if((pChn->nVolume > 0) || (oldcutoff < 0x10)
-				|| !pChn->dwFlags[CHN_FILTER] || (!(pChn->rightVol | pChn->leftVol)))
-				SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+			chn.nRestoreCutoffOnNewNote = 0;
+			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
 			return 4;
-
-		} else if(macroCode == 0x01 && !isExtended)
+		} else if(macroCode == 0x01 && !isExtended && param < 0x80)
 		{
 			// F0.F0.01.xx: Set Resonance
-			if(param < 0x80)
+			if(!isSmooth)
 			{
-				pChn->nRestoreResonanceOnNewNote = 0;
-				if(!isSmooth)
-				{
-					pChn->nResonance = param;
-				} else
-				{
-					pChn->nResonance = (uint8)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
-				}
+				chn.nResonance = param;
+			} else
+			{
+				chn.nResonance = (uint8)CalculateSmoothParamChange((float)chn.nResonance, (float)param);
 			}
-
-			SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+			chn.nRestoreResonanceOnNewNote = 0;
+			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
 			return 4;
-
 		} else if(macroCode == 0x02 && !isExtended)
 		{
 			// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
 			if(param < 0x20)
 			{
-				pChn->nFilterMode = (param >> 4);
-				SetupChannelFilter(pChn, !pChn->dwFlags[CHN_FILTER]);
+				chn.nFilterMode = (param >> 4);
+				SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 			}
 
 			return 4;
-
 #ifndef NO_PLUGINS
 		} else if(macroCode == 0x03 && !isExtended)
 		{
@@ -4958,7 +4942,6 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			}
 
 			return 4;
-
 		} else if((macroCode & 0x80) || isExtended)
 		{
 			// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
@@ -4982,7 +4965,6 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 			return 4;
 #endif // NO_PLUGINS
-
 		}
 
 		// If we reach this point, the internal macro was invalid.
@@ -4991,11 +4973,11 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 	{
 #ifndef NO_PLUGINS
 		// Not an internal device. Pass on to appropriate plugin.
-		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
+		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : chn.nMasterChn;
 		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern... Or when using this mechanism for volume/panning!
 		{
 			PLUGINDEX nPlug = 0;
-			if(!pChn->dwFlags[CHN_NOFX])
+			if(!chn.dwFlags[CHN_NOFX])
 			{
 				nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			}
