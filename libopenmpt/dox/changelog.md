@@ -51,6 +51,9 @@ is just a high-level summary.
  *  [**Regression**] Using MediaFoundation to decode MP3 samples is no longer
     supported. Use libmpg123 or minimp3 instead.
 
+ *  [**Bug**] xmp-openmpt: Sample rate and number of output channels were not
+    applied correctly when using per-file settings.
+
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.
  *  IT: Fix broken volume envelopes with negative values as found in breakdwn.it
