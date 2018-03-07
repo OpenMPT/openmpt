@@ -51,6 +51,10 @@
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
+  postbuildcommands {
+    "if exist $(OutDir)foo_openmpt.fb2k-component del /Q $(OutDir)foo_openmpt.fb2k-component", 
+    "\"C:\\Program Files\\7-Zip\\7z.exe\" a -tzip -mx=9 $(OutDir)foo_openmpt.fb2k-component $(OutDir)foo_openmpt.dll $(OutDir)openmpt-mpg123.dll",
+  }
   filter { "configurations:Release" }
    flags { "LinkTimeOptimization" }
   filter {}
