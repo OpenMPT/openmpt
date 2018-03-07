@@ -41,8 +41,8 @@ is just a high-level summary.
     must be placed into the same directory as `xmp-openmpt.dll`.
  *  [**Change**] in_openmpt: `openmpt-mpg123.dll` is no longer optional and must
     be placed into the same directory as `in_openmpt.dll`.
- *  [**Change**] foo_openmpt: `openmpt-mpg123.dll` is no longer optional and
-    must be placed into the same directory as `foo_openmpt.dll`.
+ *  [**Change**] foo_openmpt: foo_openmpt is now packaged as a fb2k-component
+    package for easier installation.
 
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
