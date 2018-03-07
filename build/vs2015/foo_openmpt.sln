@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_openmpt", "foo_openmpt.vcxproj", "{749102D3-B183-420C-A7D7-D8FF343C1A0C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt-nodelayload", "libopenmpt-nodelayload.vcxproj", "{F328CE15-F251-4BF8-BD99-823C78A82BEB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pfc", "ext\pfc.vcxproj", "{FA172403-6C7E-484B-B20B-E22C8789E92C}"
 EndProject
@@ -31,10 +31,10 @@ Global
 		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Debug|Win32.Build.0 = Debug|Win32
 		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Release|Win32.ActiveCfg = Release|Win32
 		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Release|Win32.Build.0 = Release|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
+		{F328CE15-F251-4BF8-BD99-823C78A82BEB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F328CE15-F251-4BF8-BD99-823C78A82BEB}.Debug|Win32.Build.0 = Debug|Win32
+		{F328CE15-F251-4BF8-BD99-823C78A82BEB}.Release|Win32.ActiveCfg = Release|Win32
+		{F328CE15-F251-4BF8-BD99-823C78A82BEB}.Release|Win32.Build.0 = Release|Win32
 		{FA172403-6C7E-484B-B20B-E22C8789E92C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{FA172403-6C7E-484B-B20B-E22C8789E92C}.Debug|Win32.Build.0 = Debug|Win32
 		{FA172403-6C7E-484B-B20B-E22C8789E92C}.Release|Win32.ActiveCfg = Release|Win32

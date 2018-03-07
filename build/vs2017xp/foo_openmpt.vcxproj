@@ -73,9 +73,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>delayimp.lib;..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2017-static\x86-32-winxp\foo_openmpt.lib</ImportLibrary>
-      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -108,9 +107,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>delayimp.lib;..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2017-static\x86-32-winxp\foo_openmpt.lib</ImportLibrary>
-      <AdditionalOptions>/DELAYLOAD:openmpt-mpg123.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -123,8 +121,8 @@
     <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="libopenmpt.vcxproj">
-      <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
+    <ProjectReference Include="libopenmpt-nodelayload.vcxproj">
+      <Project>{F328CE15-F251-4BF8-BD99-823C78A82BEB}</Project>
     </ProjectReference>
     <ProjectReference Include="ext\zlib.vcxproj">
       <Project>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</Project>
