@@ -802,7 +802,7 @@ enum CommandID
 	kcSampEndNoteStops=kcSampNoteStopA_3,
 
 	kcInstrumentStartNotes,
-	kcInstrumentNoteC_0=kcInstrumentStartNotes,
+	kcInstrumentNoteC_0 = kcInstrumentStartNotes,
 	kcInstrumentNoteCS0,
 	kcInstrumentNoteD_0,
 	kcInstrumentNoteDS0,
@@ -836,11 +836,11 @@ enum CommandID
 	kcInstrumentNoteG_2,
 	kcInstrumentNoteGS2,
 	kcInstrumentNoteA_3,
-	kcInstrumentEndNotes=kcInstrumentNoteA_3,
+	kcInstrumentEndNotes = kcInstrumentNoteA_3,
 
 	//Note stops
 	kcInstrumentStartNoteStops,
-	kcInstrumentNoteStopC_0=kcInstrumentStartNoteStops,
+	kcInstrumentNoteStopC_0 = kcInstrumentStartNoteStops,
 	kcInstrumentNoteStopCS0,
 	kcInstrumentNoteStopD_0,
 	kcInstrumentNoteStopDS0,
@@ -874,7 +874,7 @@ enum CommandID
 	kcInstrumentNoteStopG_2,
 	kcInstrumentNoteStopGS2,
 	kcInstrumentNoteStopA_3,
-	kcInstrumentEndNoteStops=kcInstrumentNoteStopA_3,
+	kcInstrumentEndNoteStops = kcInstrumentNoteStopA_3,
 
 	kcTreeViewStartNotes,
 	kcTreeViewNoteC_0=kcTreeViewStartNotes,
@@ -1316,7 +1316,7 @@ protected:
 	bool IsDummyCommand(CommandID cmd) const;
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
-	int FindCmd(int uid) const;
+	CommandID FindCmd(UINT uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
 	const CModSpecifications *oldSpecs;

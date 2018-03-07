@@ -2364,7 +2364,6 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		case kcFileSaveAs:
 		case kcFileSaveAsWave:
-		case kcFileSaveAsMP3:
 		case kcFileSaveMidi:
 		case kcFileExportCompat:
 		case kcFileClose:

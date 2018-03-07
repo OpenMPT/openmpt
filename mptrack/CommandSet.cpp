@@ -428,8 +428,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFileClose, 1348, _T("File/Close"));
 	DefineKeyCommand(kcFileSave, 1349, _T("File/Save"));
 	DefineKeyCommand(kcFileSaveAs, 1350, _T("File/Save As"));
-	DefineKeyCommand(kcFileSaveAsWave, 1351, _T("File/Export as PCM"));
-	DefineKeyCommand(kcFileSaveAsMP3, 1352, _T("File/Export as PCM (old)"));
+	DefineKeyCommand(kcFileSaveAsWave, 1351, _T("File/Stream Export"));
+	DefineKeyCommand(kcFileSaveAsMP3, 1352, _T("File/Stream Export"), kcHidden);
 	DefineKeyCommand(kcFileSaveMidi, 1353, _T("File/Export as MIDI"));
 	DefineKeyCommand(kcFileImportMidiLib, 1354, _T("File/Import MIDI Library"));
 	DefineKeyCommand(kcFileAddSoundBank, 1355, _T("File/Add Sound Bank"));
@@ -1607,7 +1607,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		tokens = mpt::String::Split<std::string>(curLine, ":");
 		if(tokens.size() == 2 && !mpt::CompareNoCaseAscii(tokens[0], "version"))
 		{
-			// This line indicates the version of this keymap file instead. (e.g. "version:1")
+			// This line indicates the version of this keymap file (e.g. "version:1")
 			int fileVersion = ConvertStrTo<int>(tokens[1]);
 			if(fileVersion > KEYMAP_VERSION)
 			{
@@ -1620,7 +1620,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		if(tokens.size() >= 5)
 		{
 			kc.Context(static_cast<InputTargetContext>(ConvertStrTo<int>(tokens[0])));
-			cmd = static_cast<CommandID>(FindCmd(ConvertStrTo<int>(tokens[1])));
+			cmd = FindCmd(ConvertStrTo<UINT>(tokens[1]));
 
 			// Modifier
 			kc.Modifier(static_cast<Modifiers>(ConvertStrTo<int>(tokens[2])));
@@ -1689,11 +1689,14 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		return true;
 	}
 
+	// Fix up old keymaps
+	commands[kcFileSaveAsWave].kcList.insert(commands[kcFileSaveAsWave].kcList.end(), commands[kcFileSaveAsMP3].kcList.begin(), commands[kcFileSaveAsMP3].kcList.end());
+	commands[kcFileSaveAsMP3].kcList.clear();
+
 	if(!errText.IsEmpty())
 	{
-		std::wstring err = L"The following problems have been encountered while trying to load the key binding file " + filenameDescription + L":\n";
-		err += mpt::ToWide(errText);
-		Reporting::Warning(err);
+		Reporting::Warning(mpt::cformat(_T("The following problems have been encountered while trying to load the key binding file %1:\n%2"))
+			(mpt::ToCString(filenameDescription), errText));
 	}
 
 	Copy(pTempCS);
@@ -1708,7 +1711,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 	mpt::ifstream fin(filename);
 	if(fin.fail())
 	{
-		Reporting::Warning(L"Can't open key bindings file " + filename.ToWide() + L" for reading. Default key bindings will be used.");
+		Reporting::Warning(mpt::format(_T("Can't open key bindings file %1 for reading. Default key bindings will be used."))(filename.AsNative()));
 		return false;
 	} else
 	{
@@ -1724,16 +1727,15 @@ bool CCommandSet::LoadDefaultKeymap()
 }
 
 
-//Could do better search algo but this is not perf critical.
-int CCommandSet::FindCmd(int uid) const
+CommandID CCommandSet::FindCmd(UINT uid) const
 {
 	for (int i=0; i<kcNumCommands; i++)
 	{
-		if (commands[i].UID == static_cast<UINT>(uid))
-			return i;
+		if (commands[i].UID == uid)
+			return static_cast<CommandID>(i);
 	}
 
-	return -1;
+	return kcNull;
 }
 
 

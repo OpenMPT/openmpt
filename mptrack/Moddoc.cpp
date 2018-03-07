@@ -2294,12 +2294,12 @@ void CModDoc::OnPatternRestart(bool loop)
 		CriticalSection cs;
 
 		// Cut instruments/samples
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		for(auto &chn : m_SndFile.m_PlayState.Chn)
 		{
-			m_SndFile.m_PlayState.Chn[i].nPatternLoopCount = 0;
-			m_SndFile.m_PlayState.Chn[i].nPatternLoop = 0;
-			m_SndFile.m_PlayState.Chn[i].nFadeOutVol = 0;
-			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			chn.nPatternLoopCount = 0;
+			chn.nPatternLoop = 0;
+			chn.nFadeOutVol = 0;
+			chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
@@ -2495,7 +2495,6 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcViewChannelManager: OnChannelManager(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
-		case kcFileSaveAsMP3:	OnFileWaveConvert(); break;
 		case kcFileSaveMidi:	OnFileMidiConvert(); break;
 		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
