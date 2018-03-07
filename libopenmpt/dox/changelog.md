@@ -7,7 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.7-pre
 
- *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi duo to missing
+ *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi due to missing
     `-latomic`.
  *  [**Bug**] xmp-openmpt: Sample rate and number of output channels were not
     applied correctly when using per-file settings.

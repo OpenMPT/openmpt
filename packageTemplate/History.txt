@@ -30,11 +30,14 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.06.00 (* March 2018, revision 9766)
+v1.27.06.00 (* March 2018, revision 9868)
 -----------------------------------------
 Sample tab
    [Fix] <js> Shortcuts with Shift key for Normalize and DC Removal no longer clash with the Shift modifier for applying those actions to all samples.
    [Fix] <js> Fix previewing of notes after replacing a sample with an active sample selection by a shorter sample (http://bugs.openmpt.org/view.php?id=1093).
+
+Instrument tab
+   [Fix] <js> SFZ: Do not reject files with <curve> sections, import region_label as sample name and set release node for volume envelopes in MPTM format.
 
 Tree view
    [Fix] <js> Crash after removing patterns (http://bugs.openmpt.org/view.php?id=1091).
@@ -42,6 +45,7 @@ Tree view
 Other formats
    [Imp] <js> MED: Import "STP" note stop command.
    [Fix] <js> DBM: Key Off and Set Envelope Position were imported incorrectly. High sample offset (E7x) is now supported.
+   [Fix] <js> MID: GS drum channel enable and disable messages unconditionally enabled drum channels.
 
 Stream Export
    [Imp] <js> More accurate estimation of export duration for order list selections.
@@ -49,10 +53,12 @@ Stream Export
    [Fix] <js> Correctly estimate song length when the song is played more than one time (http://bugs.openmpt.org/view.php?id=1088).
 
 Misc
+   [Fix] <jh> Welcome Dialog: FT2 and IT classic keymaps were mixed up.
+   [Fix] <js> Bogus error messages were shown when loading the default keymap.
    [Fix] <js> Small memory leak when browsing for folders.
 
 Third-Party Libraries
-   [Mod] Update libvorbis (security patches for v1.3.5)
+   [Mod] Update libvorbis (security patches for v1.3.5) and mpg123 (v1.25.10)
 
 
 v1.27.05.00 (11 February 2018, revision 9643)
