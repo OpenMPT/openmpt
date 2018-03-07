@@ -1587,7 +1587,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
 	const std::string whitespace(" \n\r\t");
-	while(iStrm.getline(s, MPT_ARRAY_COUNT(s)))
+	while(iStrm.getline(s, mpt::size(s)))
 	{
 		curLine = s;
 		l++;
@@ -1596,7 +1596,8 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		auto pos = curLine.find("//");
 		if(pos != std::string::npos) curLine.resize(pos);
 		pos = curLine.find_first_not_of(whitespace);
-		if(pos != std::string::npos) curLine.erase(0, pos);
+		if(pos == std::string::npos) continue;
+		curLine.erase(0, pos);
 		pos = curLine.find_last_not_of(whitespace);
 		if(pos != std::string::npos) curLine.resize(pos + 1);
 
