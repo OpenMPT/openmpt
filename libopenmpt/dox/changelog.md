@@ -10,6 +10,9 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi duo to missing
     `-latomic`.
 
+ *  [**Change**] foo_openmpt: foo_openmpt is now packaged as a fb2k-component
+    package for easier installation.
+
  *  IT: More accurate song length calculation for pattern loops that have no
     start command and are following another pattern loop.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
