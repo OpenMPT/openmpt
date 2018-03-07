@@ -4771,10 +4771,6 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		{
 			// Offset (ignoring high offset)
 			data = static_cast<uint8>((chn.oldOffset >> 8) & 0xFF);
-			if(data > 0x7F)
-			{
-				continue;
-			}
 		} else if(macro[pos] == 'h')
 		{
 			// Host channel number
