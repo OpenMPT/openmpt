@@ -80,7 +80,7 @@ MPG123_PKG=
 AC_ARG_WITH([mpg123], AS_HELP_STRING([--without-mpg123], [Disable use of libmpg123.]))
 AS_IF([test "x$with_mpg123" != "xno"],
  [
-  PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.13.0],
+  PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.14.0],
    [
     MPG123_PKG=libmpg123
     AC_DEFINE([MPT_WITH_MPG123], [], [with mpg123])

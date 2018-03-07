@@ -11,7 +11,7 @@ Quick Start {#quickstart}
      -  **pkg-config >= 0.24**
      -  **zlib**
      -  **libogg**, **libvorbis**, **libvorbisfile**
-     -  **libmpg123 >= 1.13.0**
+     -  **libmpg123 >= 1.14.0**
      -  **doxygen >= 1.8**
      -  **libpulse**, **libpulse-simple** (required only by openmpt123)
      -  **portaudio-v19** (required only by openmpt123)
@@ -46,7 +46,7 @@ Quick Start {#quickstart}
      -  **pkg-config**
      -  **zlib**
      -  **libogg**, **libvorbis**, **libvorbisfile**
-     -  **libmpg123 >= 1.13.0**
+     -  **libmpg123 >= 1.14.0**
      -  **libpulse**, **libpulse-simple** (required only by openmpt123)
      -  **portaudio-v19** (required only by openmpt123)
      -  **libFLAC** (required only by openmpt123)
