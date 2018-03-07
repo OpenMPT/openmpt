@@ -4971,49 +4971,34 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		const uint8 macroCode = macro[2];
 		const uint8 param = macro[3];
 
-		if(macroCode == 0x00 && !isExtended)
+		if(macroCode == 0x00 && !isExtended && param < 0x80)
 		{
 			// F0.F0.00.xx: Set CutOff
-			int oldcutoff = chn.nCutOff;
-			if(param < 0x80)
+			if(!isSmooth)
 			{
-				if(!isSmooth)
-				{
-					chn.nCutOff = param;
-				} else
-				{
-					chn.nCutOff = Util::Round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
-				}
-				chn.nRestoreCutoffOnNewNote = 0;
-			}
-
-			oldcutoff -= chn.nCutOff;
-			if(oldcutoff < 0) oldcutoff = -oldcutoff;
-			if((chn.nVolume > 0) || (oldcutoff < 0x10)
-				|| !chn.dwFlags[CHN_FILTER] || (!(chn.rightVol | chn.leftVol)))
-				SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
-
-			return 4;
-
-		} else if(macroCode == 0x01 && !isExtended)
-		{
-			// F0.F0.01.xx: Set Resonance
-			if(param < 0x80)
+				chn.nCutOff = param;
+			} else
 			{
-				chn.nRestoreResonanceOnNewNote = 0;
-				if(!isSmooth)
-				{
-					chn.nResonance = param;
-				} else
-				{
-					chn.nResonance = (uint8)CalculateSmoothParamChange((float)chn.nResonance, (float)param);
-				}
+				chn.nCutOff = Util::Round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
 			}
-
+			chn.nRestoreCutoffOnNewNote = 0;
 			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
 			return 4;
+		} else if(macroCode == 0x01 && !isExtended && param < 0x80)
+		{
+			// F0.F0.01.xx: Set Resonance
+			if(!isSmooth)
+			{
+				chn.nResonance = param;
+			} else
+			{
+				chn.nResonance = (uint8)CalculateSmoothParamChange((float)chn.nResonance, (float)param);
+			}
+			chn.nRestoreResonanceOnNewNote = 0;
+			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);
 
+			return 4;
 		} else if(macroCode == 0x02 && !isExtended)
 		{
 			// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
@@ -5024,7 +5009,6 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			}
 
 			return 4;
-
 #ifndef NO_PLUGINS
 		} else if(macroCode == 0x03 && !isExtended)
 		{
@@ -5043,7 +5027,6 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			}
 
 			return 4;
-
 		} else if((macroCode & 0x80) || isExtended)
 		{
 			// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
@@ -5067,7 +5050,6 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 			return 4;
 #endif // NO_PLUGINS
-
 		}
 
 		// If we reach this point, the internal macro was invalid.
