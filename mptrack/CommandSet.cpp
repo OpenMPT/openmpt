@@ -1711,7 +1711,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 	mpt::ifstream fin(filename);
 	if(fin.fail())
 	{
-		Reporting::Warning(mpt::format(_T("Can't open key bindings file %1 for reading. Default key bindings will be used."))(filename.AsNative()));
+		Reporting::Warning(mpt::tformat(_T("Can't open key bindings file %1 for reading. Default key bindings will be used."))(filename));
 		return false;
 	} else
 	{
