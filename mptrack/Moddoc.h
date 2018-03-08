@@ -74,15 +74,16 @@ class ScopedLogCapturer
 private:
 	CModDoc &m_modDoc;
 	LogMode m_oldLogMode;
-	std::string m_title;
+	CString m_title;
 	CWnd *m_pParent;
 	bool m_showLog;
 public:
-	ScopedLogCapturer(CModDoc &modDoc, const std::string &title = "", CWnd *parent = nullptr, bool showLog = true);
+	ScopedLogCapturer(CModDoc &modDoc, const CString &title = _T(""), CWnd *parent = nullptr, bool showLog = true);
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
-	void ShowLog(const std::string &preamble, bool force = false);
-	void ShowLog(const std::wstring &preamble, bool force = false);
+	void ShowLog(const CString &preamble, bool force = false);
+	MPT_DEPRECATED void ShowLog(const std::string &preamble, bool force = false);
+	void ShowLog(const mpt::ustring &preamble, bool force = false);
 };
 
 
@@ -168,9 +169,8 @@ protected:
 	LogMode GetLogMode() const { return m_LogMode; }
 	void SetLogMode(LogMode mode) { m_LogMode = mode; }
 	void ClearLog();
-	UINT ShowLog(const std::string &preamble, const std::string &title = "", CWnd *parent = nullptr);
-	UINT ShowLog(const std::wstring &preamble, const std::wstring &title = std::wstring(), CWnd *parent = nullptr);
-	UINT ShowLog(const std::string &title = "", CWnd *parent = nullptr) { return ShowLog("", title, parent); }
+	UINT ShowLog(const CString &preamble, const CString &title = "", CWnd *parent = nullptr);
+	UINT ShowLog(const CString &title = "", CWnd *parent = nullptr) { return ShowLog(_T(""), title, parent); }
 
 public:
 

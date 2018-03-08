@@ -498,8 +498,8 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 		if(pPlug->dllPath.empty())
 			SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T("Built-in plugin"));
 		else
-			::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
-		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, mpt::ToWide(pPlug->tags).c_str());
+			SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToCString());
+		SetDlgItemText(IDC_PLUGINTAGS, mpt::ToCString(pPlug->tags));
 		enableRemoveButton = pPlug->isBuiltIn ? FALSE : TRUE;
 #ifndef NO_VST
 		if(pPlug->pluginId1 == kEffectMagic && !pPlug->isBuiltIn)

@@ -156,7 +156,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	mpt::PathString fileName = BuildFileName(modDoc);
 
 	// We are actually not going to show the log for autosaved files.
-	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
+	ScopedLogCapturer logcapturer(modDoc, _T(""), nullptr, false);
 
 	bool success = false;
 	switch(modDoc.GetSoundFile().GetBestSaveFormat())

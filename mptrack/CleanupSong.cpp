@@ -126,7 +126,7 @@ BOOL CModCleanupDlg::OnInitDialog()
 
 void CModCleanupDlg::OnOK()
 {
-	ScopedLogCapturer logcapturer(modDoc, "cleanup", this);
+	ScopedLogCapturer logcapturer(modDoc, _T("cleanup"), this);
 	for(int i = 0; i < kMaxCleanupOptions; i++)
 	{
 		m_CheckBoxes[i] = IsDlgButtonChecked(m_CleanupIDtoDlgID[i]) != BST_UNCHECKED;

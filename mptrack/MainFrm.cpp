@@ -2160,7 +2160,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 		}
 		if(!pDoc)
 		{
-			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read." : L"does not exist."));
+			Reporting::Notification(_T("The file '") + sPath.ToCString() + _T("' ") + (bExists ? _T("exists but can't be read.") : _T("does not exist.")));
 		}
 	} else
 	{
@@ -2566,7 +2566,7 @@ void CMainFrame::OnHelp()
 	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
 	if(!::HtmlHelp(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
-		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
+		Reporting::Error(_T("Could not find help file:\n") + helpFile.ToCString());
 		return;
 	}
 	//::ShowWindow(hwndHelp, SW_SHOWMAXIMIZED);

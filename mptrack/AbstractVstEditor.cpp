@@ -477,22 +477,22 @@ void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
 	{
-		std::wstring title = mpt::format(L"FX %1: ")(mpt::wfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
+		CString title = mpt::cformat(_T("FX %1: "))(mpt::cfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
 
 		bool hasCustomName = strcmp(m_VstPlugin.m_pMixStruct->GetName(), "") != 0 && strcmp(m_VstPlugin.m_pMixStruct->GetName(), m_VstPlugin.m_pMixStruct->GetLibraryName()) != 0;
 		if(hasCustomName)
-			title += mpt::ToWide(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()) + L" (";
-		title += mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
+			title += mpt::ToCString(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()) + _T(" (");
+		title += mpt::ToCString(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
-			title += L")";
+			title += _T(")");
 
 #ifndef NO_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
-			title += mpt::format(L" (%1-Bit Bridged)")(m_VstPlugin.GetPluginFactory().GetDllBits());
+			title += mpt::cformat(_T(" (%1-Bit Bridged)"))(m_VstPlugin.GetPluginFactory().GetDllBits());
 #endif // NO_VST
 
-		SetWindowText(mpt::ToCString(title));
+		SetWindowText(title);
 	}
 }
 

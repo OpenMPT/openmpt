@@ -649,7 +649,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			notFoundText = "The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
-		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
+		if(Reporting::Confirm(mpt::ToUnicode(mpt::CharsetUTF8, notFoundText), MPT_USTRING("OpenMPT - Plugins missing"), false, true) == cnfYes)
 		{
 			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
 			for(auto &id : notFoundIDs)

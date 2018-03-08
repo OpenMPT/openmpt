@@ -1565,7 +1565,7 @@ static std::string GetDefaultKeymap()
 }
 
 
-bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription, CCommandSet *commandSet)
+bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet)
 {
 	KeyCombination kc;
 	CommandID cmd = kcNumCommands;
@@ -1715,7 +1715,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 		return false;
 	} else
 	{
-		return LoadFile(fin, filename.ToWide());
+		return LoadFile(fin, filename.ToUnicode());
 	}
 }
 
@@ -1723,7 +1723,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 bool CCommandSet::LoadDefaultKeymap()
 {
 	mpt::istringstream ss{ GetDefaultKeymap() };
-	return LoadFile(ss, L"\"executable resource\"");
+	return LoadFile(ss, MPT_USTRING("\"executable resource\""));
 }
 
 

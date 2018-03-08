@@ -2672,7 +2672,7 @@ void CViewInstrument::OnEnvSave()
 
 	if(!GetDocument()->SaveEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{
-		Reporting::Error(L"Unable to save file " + dlg.GetFirstFile().ToWide(), L"OpenMPT", this);
+		Reporting::Error(mpt::cformat(_T("Unable to save file %1"))(dlg.GetFirstFile()), _T("OpenMPT"), this);
 	}
 }
 

@@ -111,9 +111,10 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 			// If there was some error, don't try normal loading as well... unless the user really wants it.
 			if(isNative)
 			{
-				const std::wstring msg = L"The following error occurred while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::get_exception_text<std::wstring>(e)
-					+ L"\n\nDo you want to try to load the plugin natively?";
-				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge") == cnfNo)
+				const CString msg =
+					mpt::cformat(_T("The following error occurred while trying to load\n%1\n\n%2\n\nnDo you want to try to load the plugin natively?"))
+					(plugin.dllPath, mpt::get_exception_text<mpt::ustring>(e));
+				if(Reporting::Confirm(msg, _T("OpenMPT Plugin Bridge")) == cnfNo)
 				{
 					return nullptr;
 				}

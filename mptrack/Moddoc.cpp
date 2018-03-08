@@ -209,10 +209,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	EndWaitCursor();
 
-	logcapturer.ShowLog(std::wstring()
-		+ L"File: " + filename.ToWide() + L"\n"
-		+ L"Last saved with: " + mpt::ToWide(m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(MptVersion::AsUString()) + L"\n"
-		+ L"\n"
+	logcapturer.ShowLog(
+		mpt::cformat(_T("File: %1\n"))(filename) +
+		mpt::cformat(_T("Last saved with: %1, you are using OpenMPT %2\n"))(m_SndFile.m_madeWithTracker, MptVersion::AsUString()) +
+		_T("\n")
 		);
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
@@ -388,7 +388,7 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 			if(success)
 				m_SndFile.GetSample(smp).uFlags.reset(SMP_MODIFIED);
 			else
-				Reporting::Error(L"Unable to save sample:\n" + filename.ToWide());
+				Reporting::Error(mpt::cformat(_T("Unable to save sample:\n"))(filename));
 		}
 	}
 	return success;
@@ -502,7 +502,7 @@ void CModDoc::OnAppendModule()
 	FileDialog::PathList files;
 	CTrackApp::OpenModulesDialog(files);
 
-	ScopedLogCapturer logcapture(*this, "Append Failures");
+	ScopedLogCapturer logcapture(*this, _T("Append Failures"));
 	try
 	{
 		auto source = mpt::make_unique<CSoundFile>();
@@ -653,7 +653,7 @@ void CModDoc::ViewInstrument(UINT nIns)
 }
 
 
-ScopedLogCapturer::ScopedLogCapturer(CModDoc &modDoc, const std::string &title, CWnd *parent, bool showLog) :
+ScopedLogCapturer::ScopedLogCapturer(CModDoc &modDoc, const CString &title, CWnd *parent, bool showLog) :
 m_modDoc(modDoc), m_oldLogMode(m_modDoc.GetLogMode()), m_title(title), m_pParent(parent), m_showLog(showLog)
 {
 	m_modDoc.SetLogMode(LogModeGather);
@@ -674,17 +674,27 @@ void ScopedLogCapturer::ShowLog(const std::string &preamble, bool force)
 {
 	if(force || m_oldLogMode == LogModeInstantReporting)
 	{
+		m_modDoc.ShowLog(mpt::ToCString(mpt::CharsetLocale, preamble), m_title, m_pParent);
+		m_modDoc.ClearLog();
+	}
+}
+
+
+void ScopedLogCapturer::ShowLog(const CString &preamble, bool force)
+{
+	if(force || m_oldLogMode == LogModeInstantReporting)
+	{
 		m_modDoc.ShowLog(preamble, m_title, m_pParent);
 		m_modDoc.ClearLog();
 	}
 }
 
 
-void ScopedLogCapturer::ShowLog(const std::wstring &preamble, bool force)
+void ScopedLogCapturer::ShowLog(const mpt::ustring &preamble, bool force)
 {
 	if(force || m_oldLogMode == LogModeInstantReporting)
 	{
-		m_modDoc.ShowLog(preamble, mpt::ToWide(mpt::CharsetLocale, m_title), m_pParent);
+		m_modDoc.ShowLog(mpt::ToCString(preamble), m_title, m_pParent);
 		m_modDoc.ClearLog();
 	}
 }
@@ -745,13 +755,7 @@ void CModDoc::ClearLog()
 }
 
 
-UINT CModDoc::ShowLog(const std::string &preamble, const std::string &title, CWnd *parent)
-{
-	return ShowLog(mpt::ToWide(mpt::CharsetLocale, preamble), mpt::ToWide(mpt::CharsetLocale, title), parent);
-}
-
-
-UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, CWnd *parent)
+UINT CModDoc::ShowLog(const CString &preamble, const CString &title, CWnd *parent)
 {
 	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
@@ -759,8 +763,8 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 		LogLevel level = GetMaxLogLevel();
 		if(level < LogDebug)
 		{
-			std::wstring text = preamble + mpt::ToWide(GetLogString());
-			std::wstring actualTitle = (title.length() == 0) ? mpt::ToWide(CString(MAINFRAME_TITLE)) : title;
+			CString text = preamble + mpt::ToCString(GetLogString());
+			CString actualTitle = (title.GetLength() == 0) ? CString(MAINFRAME_TITLE) : title;
 			Reporting::Message(level, text, actualTitle, parent);
 			return IDOK;
 		}
@@ -2668,7 +2672,7 @@ void CModDoc::OnSongProperties()
 	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
 	{
-		ScopedLogCapturer logcapturer(*this, "Conversion Status");
+		ScopedLogCapturer logcapturer(*this, _T("Conversion Status"));
 		bool bShowLog = false;
 		if(dlg.m_nType != GetModType())
 		{
@@ -2853,7 +2857,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
 		{
-			Reporting::Notification(L"Error: Unable to create template folder '" + templateFolder.ToWide() + L"'");
+			Reporting::Notification(mpt::cformat(_T("Error: Unable to create template folder '%1'"))( templateFolder));
 			return;
 		}
 	}
