@@ -2934,6 +2934,7 @@ void CViewPattern::UndoRedo(bool undo)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
+		CHANNELINDEX oldNumChannels = pModDoc->GetNumChannels();
 		PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
 		const CSoundFile &sndFile = pModDoc->GetSoundFile();
 		if(pat < sndFile.Patterns.Size())
@@ -2954,6 +2955,10 @@ void CViewPattern::UndoRedo(bool undo)
 			SetModified(false);
 			SanitizeCursor();
 			UpdateScrollSize();
+		}
+		if(oldNumChannels != pModDoc->GetNumChannels())
+		{
+			pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
 		}
 	}
 }
