@@ -273,7 +273,15 @@ public:
 
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
+#if MPT_OS_WINDOWS
+#ifdef UNICODE
+MPT_DEPRECATED static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
+#else
+MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.AsNative()); }
+#endif
+#else
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
+#endif
 #endif
 static inline mpt::ustring ToUString(const mpt::PathString & x) { return x.ToUnicode(); }
 #if MPT_WSTRING_FORMAT
