@@ -2797,7 +2797,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				if ((!instr) && (pChn->nNewIns) && (note < 0x80))
 				{
-					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
+					InstrumentChange(pChn, pChn->nNewIns, bPorta, pChn->pModSample == nullptr && pChn->pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
 					pChn->nNewIns = 0;
 				}
 				NoteChange(pChn, note, bPorta, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
