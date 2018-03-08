@@ -334,7 +334,7 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 
 #ifdef MODPLUG_TRACKER
 // Add a plugin to the list of known plugins.
-VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
+VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache, const bool checkFileExistence, mpt::ustring *const errStr)
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
@@ -346,7 +346,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 
 	if(checkFileExistence && errStr != nullptr && !dllPath.IsFile())
 	{
-		*errStr += L"\nUnable to find " + dllPath.ToWide();
+		*errStr += mpt::format(MPT_USTRING("\nUnable to find %1"))(dllPath);
 	}
 
 	// Look if the plugin info is stored in the PluginCache

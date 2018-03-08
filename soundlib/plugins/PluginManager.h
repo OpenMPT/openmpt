@@ -150,7 +150,7 @@ public:
 	void reserve(size_t num) { pluginList.reserve(num); }
 
 	bool IsValidPlugin(const VSTPluginLib *pLib) const;
-	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags = mpt::ustring(), bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
+	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags = mpt::ustring(), bool fromCache = true, const bool checkFileExistence = false, mpt::ustring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();

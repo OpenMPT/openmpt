@@ -1831,7 +1831,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 	const size_t numPlugins = GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
-	std::wstring nonFoundPlugs;
+	mpt::ustring nonFoundPlugs;
 	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
 	CDialog pluginScanDlg;
@@ -1910,7 +1910,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	}
 	if(!nonFoundPlugs.empty())
 	{
-		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs, L"OpenMPT", CWnd::GetDesktopWindow());
+		Reporting::Notification(mpt::cformat(_T("Problems were encountered with plugins:\n%1"))(nonFoundPlugs), _T("OpenMPT"), CWnd::GetDesktopWindow());
 	}
 	return FALSE;
 }
