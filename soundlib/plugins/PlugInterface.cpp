@@ -744,12 +744,12 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 
 IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-	, m_MidiCh{}
+	, m_MidiCh{{}}
 {
-	for(int ch = 0; ch < 16; ch++)
+	for(auto &chn : m_MidiCh)
 	{
-		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels
-		m_MidiCh[ch].ResetProgram();
+		chn.midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels
+		chn.ResetProgram();
 	}
 }
 
