@@ -223,7 +223,7 @@ public:
 
 inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff)
 {
-	float val = GetParameter(nIndex) + diff;
+	PlugParamValue val = GetParameter(nIndex) + diff;
 	Limit(val, PlugParamValue(0), PlugParamValue(1));
 	SetParameter(nIndex, val);
 }
@@ -252,7 +252,7 @@ protected:
 		void ResetProgram() { currentProgram = 0; currentBank = 0; }
 	};
 
-	PlugInstrChannel m_MidiCh[16];	// MIDI channel state
+	std::array<PlugInstrChannel, 16> m_MidiCh;	// MIDI channel state
 
 public:
 	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
@@ -269,9 +269,9 @@ protected:
 	virtual void ReceiveSysex(const void *message, uint32 length);
 
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
-	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
+	static constexpr int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
 	// Converts the internal pitch bend position to a 14-bit MIDI pitch bend position
-	static int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
+	static constexpr int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
 	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
 	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
 

@@ -20,10 +20,8 @@ namespace MidiExport
 {
 	struct Mod2MidiInstr
 	{
-		uint8 nChannel; // See enum MidiChannel
-		uint8 nProgram;
-
-		Mod2MidiInstr() : nChannel(MidiMappedChannel), nProgram(0) { }
+		uint8 channel = MidiMappedChannel; // See enum MidiChannel
+		uint8 program = 0;
 	};
 	typedef std::vector<Mod2MidiInstr> InstrMap;
 }
@@ -39,18 +37,20 @@ protected:
 	bool m_bPerc;
 public:
 	MidiExport::InstrMap m_instrMap;
+	static bool s_overlappingInstruments;
 
 public:
 	CModToMidi(CSoundFile &sndFile, CWnd *pWndParent = nullptr);
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange *pDX);
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange *pDX) override;
 	void FillProgramBox(bool percussion);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void UpdateDialog();
 	afx_msg void OnChannelChanged();
 	afx_msg void OnProgramChanged();
+	afx_msg void OnOverlapChanged();
 	DECLARE_MESSAGE_MAP();
 };
 
@@ -69,7 +69,7 @@ public:
 		, m_fileName(filename)
 		, m_instrMap(instrMap)
 	{ }
-	void Run();
+	void Run() override;
 };
 
 

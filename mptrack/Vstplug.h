@@ -60,7 +60,7 @@ public:
 
 public:
 	CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
-	virtual ~CVstPlugin();
+	~CVstPlugin();
 
 	static AEffect *LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
 
@@ -68,73 +68,73 @@ protected:
 	void Initialize();
 
 public:
-	virtual int32 GetUID() const;
-	virtual int32 GetVersion() const;
-	virtual void Idle();
-	virtual uint32 GetLatency() const { return m_Effect.initialDelay; }
+	int32 GetUID() const override;
+	int32 GetVersion() const override;
+	void Idle() override;
+	uint32 GetLatency() const override { return m_Effect.initialDelay; }
 
 	// Check if programs should be stored as chunks or parameters
-	virtual bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
-	virtual ChunkData GetChunk(bool isBank);
-	virtual void SetChunk(const ChunkData &chunk, bool isBank);
+	bool ProgramsAreChunks() const override { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
+	ChunkData GetChunk(bool isBank) override;
+	void SetChunk(const ChunkData &chunk, bool isBank) override;
 	// If true, the plugin produces an output even if silence is being fed into it.
-	//virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	//bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1) override; }
 	// Old JUCE versions set effFlagsNoSoundInStop even when the shouldn't (see various ValhallaDSP reverb plugins). While the user cannot change the plugin bypass setting manually yet, play safe with VST plugins and do not optimize.
-	virtual bool ShouldProcessSilence() { return true; }
+	bool ShouldProcessSilence() override { return true; }
 
-	virtual int32 GetNumPrograms() const;
-	virtual int32 GetCurrentProgram();
-	virtual void SetCurrentProgram(int32 nIndex);
+	int32 GetNumPrograms() const override;
+	int32 GetCurrentProgram() override;
+	void SetCurrentProgram(int32 nIndex) override;
 
-	virtual PlugParamIndex GetNumParameters() const;
-	virtual PlugParamValue GetParameter(PlugParamIndex nIndex);
-	virtual void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
+	PlugParamIndex GetNumParameters() const override;
+	PlugParamValue GetParameter(PlugParamIndex nIndex) override;
+	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) override;
 
-	virtual CString GetCurrentProgramName();
-	virtual void SetCurrentProgramName(const CString &name);
-	virtual CString GetProgramName(int32 program);
+	CString GetCurrentProgramName() override;
+	void SetCurrentProgramName(const CString &name) override;
+	CString GetProgramName(int32 program) override;
 
-	virtual CString GetParamName(PlugParamIndex param);
-	virtual CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
-	virtual CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
+	CString GetParamName(PlugParamIndex param) override;
+	CString GetParamLabel(PlugParamIndex param) override { return GetParamPropertyString(param, effGetParamLabel); };
+	CString GetParamDisplay(PlugParamIndex param) override { return GetParamPropertyString(param, effGetParamDisplay); };
 
 	static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception);
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
-	virtual bool HasEditor() const { return (m_Effect.flags & effFlagsHasEditor) != 0; }
-	virtual CAbstractVstEditor *OpenEditor();
-	virtual CString GetDefaultEffectName();
+	bool HasEditor() const override { return (m_Effect.flags & effFlagsHasEditor) != 0; }
+	CAbstractVstEditor *OpenEditor() override;
+	CString GetDefaultEffectName() override;
 
-	virtual void Bypass(bool bypass = true);
+	void Bypass(bool bypass = true) override;
 
-	virtual bool IsInstrument() const;
-	virtual bool CanRecieveMidiEvents();
+	bool IsInstrument() const override;
+	bool CanRecieveMidiEvents() override;
 
-	virtual void CacheProgramNames(int32 firstProg, int32 lastProg);
-	virtual void CacheParameterNames(int32 firstParam, int32 lastParam);
+	void CacheProgramNames(int32 firstProg, int32 lastProg) override;
+	void CacheParameterNames(int32 firstParam, int32 lastParam) override;
 
 public:
-	virtual void Release();
-	virtual void SaveAllParameters();
-	virtual void RestoreAllParameters(int32 program);
-	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
-	virtual bool MidiSend(uint32 dwMidiCode);
-	virtual bool MidiSysexSend(const void *message, uint32 length);
-	virtual void HardAllNotesOff();
-	virtual void NotifySongPlaying(bool playing);
+	void Release() override;
+	void SaveAllParameters() override;
+	void RestoreAllParameters(int32 program) override;
+	void Process(float *pOutL, float *pOutR, uint32 numFrames) override;
+	bool MidiSend(uint32 dwMidiCode) override;
+	bool MidiSysexSend(const void *message, uint32 length) override;
+	void HardAllNotesOff() override;
+	void NotifySongPlaying(bool playing) override;
 
-	virtual void Resume();
-	virtual void Suspend();
-	virtual void PositionChanged() { m_positionChanged = true; }
+	void Resume() override;
+	void Suspend() override;
+	void PositionChanged() override { m_positionChanged = true; }
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
 
-	virtual int GetNumInputChannels() const { return m_Effect.numInputs; }
-	virtual int GetNumOutputChannels() const { return m_Effect.numOutputs; }
+	int GetNumInputChannels() const override { return m_Effect.numInputs; }
+	int GetNumOutputChannels() const override { return m_Effect.numOutputs; }
 
-	virtual void BeginSetProgram(int32 program);
-	virtual void EndSetProgram();
+	void BeginSetProgram(int32 program) override;
+	void EndSetProgram() override;
 
 protected:
 	// Helper function for retreiving parameter name / label / display

@@ -744,8 +744,8 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 
 IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
+	, m_MidiCh{}
 {
-	MemsetZero(m_MidiCh);
 	for(int ch = 0; ch < 16; ch++)
 	{
 		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels

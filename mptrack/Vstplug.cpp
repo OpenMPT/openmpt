@@ -170,7 +170,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 	MPT_UNREFERENCED_PARAMETER(opt);
 #endif
 
-	enum enmHostCanDo
+	enum
 	{
 		HostDoNotKnow	= 0,
 		HostCanDo		= 1,
@@ -256,7 +256,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 			if((value & kVstNanosValid))
 			{
 				timeInfo.flags |= kVstNanosValid;
-				timeInfo.nanoSeconds = timeGetTime() * 1000000;
+				timeInfo.nanoSeconds = static_cast<double>(Util::mul32to64_unsigned(timeGetTime(), 1000000));
 			}
 			if((value & kVstPpqPosValid))
 			{
@@ -1499,15 +1499,15 @@ void CVstPlugin::HardAllNotesOff()
 		Resume();
 	}
 
-	for(uint8 mc = 0; mc < CountOf(m_MidiCh); mc++)		//all midi chans
+	const bool isWavestation = GetUID() == CCONST('K', 'L', 'W', 'V');
+	const bool isSawer = GetUID() == CCONST('S', 'a', 'W', 'R');
+	for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
 		channel.ResetProgram();
 
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
 
-		const bool isWavestation = GetUID() == CCONST('K', 'L', 'W', 'V');
-		const bool isSawer = GetUID() == CCONST('S', 'a', 'W', 'R');
 		if(!isWavestation && !isSawer)
 		{
 			// Korg Wavestation doesn't seem to like this CC, it can introduce ghost notes or
@@ -1664,7 +1664,7 @@ bool CVstPlugin::CanRecieveMidiEvents()
 
 void CVstPlugin::ReportPlugException(const mpt::ustring &text) const
 {
-	CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("%1 (Plugin=%2)"))(text, m_Factory.libraryName));
+	CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("%1 (Plugin: %2)"))(text, m_Factory.libraryName));
 }
 
 
