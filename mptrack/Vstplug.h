@@ -147,7 +147,7 @@ protected:
 	void ProcessVSTEvents();
 	void ReceiveVSTEvents(const VstEvents *events);
 
-	void ReportPlugException(std::wstring text) const;
+	void ReportPlugException(const mpt::ustring &text) const;
 
 public:
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);

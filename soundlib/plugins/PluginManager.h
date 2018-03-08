@@ -154,8 +154,7 @@ public:
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
-	static void ReportPlugException(const std::wstring &msg);
-	static void ReportPlugException(const std::string &msg);
+	static void ReportPlugException(const mpt::ustring &msg);
 
 protected:
 	void EnumerateDirectXDMOs();

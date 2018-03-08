@@ -291,7 +291,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 									delete plug;
 								}
 #ifdef DMO_LOG
-								Log(mpt::format(L"Found \"%1\" clsid=%2\n")(plug->libraryName, plug->dllPath));
+								Log(mpt::format(MPT_USTRING("Found \"%1\" clsid=%2\n"))(plug->libraryName, plug->dllPath));
 #endif
 							}
 						}
@@ -446,7 +446,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	FreeLibrary(hLib);
 	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(mpt::format(L"Exception %1 while trying to load plugin \"%2\"!\n")(mpt::wfmt::HEX<8>(exception), plug->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Exception %1 while trying to load plugin \"%2\"!\n"))(mpt::ufmt::HEX<8>(exception), plug->libraryName));
 	}
 #endif // NO_VST
 
@@ -603,7 +603,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(!validPlugin)
 		{
 			FreeLibrary(hLibrary);
-			CVstPluginManager::ReportPlugException(mpt::format(L"Unable to create plugin \"%1\"!\n")(pFound->libraryName));
+			CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Unable to create plugin \"%1\"!\n"))(pFound->libraryName));
 		}
 		return validPlugin;
 	} else
@@ -645,21 +645,14 @@ void CVstPluginManager::OnIdle()
 }
 
 
-void CVstPluginManager::ReportPlugException(const std::string &msg)
-{
-	Reporting::Notification(msg.c_str());
-#ifdef VST_LOG
-	Log("%s", msg.c_str());
-#endif
-}
-
-void CVstPluginManager::ReportPlugException(const std::wstring &msg)
+void CVstPluginManager::ReportPlugException(const mpt::ustring &msg)
 {
 	Reporting::Notification(msg);
 #ifdef VST_LOG
 	Log(mpt::ToUnicode(msg));
 #endif
 }
+
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_END
