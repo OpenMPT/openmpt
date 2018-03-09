@@ -726,7 +726,7 @@ private:
 public:
 	IniFileSettingsBackend(const mpt::PathString &filename);
 	~IniFileSettingsBackend();
-	void ConvertToUnicode(const std::wstring &backupTag = std::wstring());
+	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val);
 	virtual void RemoveSetting(const SettingPath &path);

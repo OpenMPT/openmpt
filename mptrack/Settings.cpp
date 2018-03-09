@@ -408,7 +408,7 @@ static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring
 	inifile.close();
 }
 
-void IniFileSettingsBackend::ConvertToUnicode(const std::wstring &backupTag)
+void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 {
 	// Force ini file to be encoded in UTF16.
 	// This causes WINAPI ini file functions to keep it in UTF16 encoding
@@ -420,7 +420,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const std::wstring &backupTag)
 	{
 		return;
 	}
-	const mpt::PathString backupFilename = filename + mpt::PathString::FromWide(backupTag.empty() ? L".ansi.bak" : L".ansi." + backupTag + L".bak");
+	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? MPT_USTRING(".ansi.bak") : MPT_USTRING(".ansi.") + backupTag + MPT_USTRING(".bak"));
 	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
 	WriteFileUTF16LE(filename, mpt::ToWide(mpt::CharsetLocale, std::string(data.data(), data.data() + data.size())));
 }
