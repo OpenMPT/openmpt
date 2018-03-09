@@ -13,9 +13,7 @@
 
 #include <vector> // some C++ header in order to have the C++ standard library version information available
 
-#if defined(MPT_QUIRK_NO_CPP_THREAD)
-#define MPT_STD_THREAD 0
-#elif MPT_COMPILER_GENERIC
+#if MPT_COMPILER_GENERIC
 #define MPT_STD_THREAD 1
 #elif MPT_COMPILER_MSVC
 #define MPT_STD_THREAD 1
