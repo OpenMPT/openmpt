@@ -740,30 +740,30 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 					:
 						manager.GetDeviceCaps(newIdentifier).DefaultSettings
 					;
-				const std::wstring newIdentifierW = mpt::ToWide(newIdentifier) + L"_";
-				const std::wstring oldIdentifierW = mpt::ToWide(oldIdentifier) + L"_";
-				conf.Write(L"Sound Settings", newIdentifierW + L"Latency",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0)));
-				conf.Write(L"Sound Settings", newIdentifierW + L"UpdateInterval",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0)));
-				conf.Write(L"Sound Settings", newIdentifierW + L"SampleRate",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"SampleRate", defaults.Samplerate));
-				conf.Write(L"Sound Settings", newIdentifierW + L"Channels",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"Channels", defaults.Channels.GetNumHostChannels()));
-				conf.Write(L"Sound Settings", newIdentifierW + L"SampleFormat",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"SampleFormat", defaults.sampleFormat));
-				conf.Write(L"Sound Settings", newIdentifierW + L"ExclusiveMode",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"ExclusiveMode", defaults.ExclusiveMode));
-				conf.Write(L"Sound Settings", newIdentifierW + L"BoostThreadPriority",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"BoostThreadPriority", defaults.BoostThreadPriority));
-				conf.Write(L"Sound Settings", newIdentifierW + L"KeepDeviceRunning",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"KeepDeviceRunning", defaults.KeepDeviceRunning));
-				conf.Write(L"Sound Settings", newIdentifierW + L"UseHardwareTiming",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"UseHardwareTiming", defaults.UseHardwareTiming));
-				conf.Write(L"Sound Settings", newIdentifierW + L"DitherType",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"DitherType", defaults.DitherType));
-				conf.Write(L"Sound Settings", newIdentifierW + L"ChannelMapping",
-					conf.Read(L"Sound Settings", oldIdentifierW + L"ChannelMapping", defaults.Channels));
+				const mpt::ustring newIdentifierW = newIdentifier + MPT_USTRING("_");
+				const mpt::ustring oldIdentifierW = oldIdentifier + MPT_USTRING("_");
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Latency"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Latency"), Util::Round<int32>(defaults.Latency * 1000000.0)));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("UpdateInterval"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UpdateInterval"), Util::Round<int32>(defaults.UpdateInterval * 1000000.0)));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("SampleRate"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("SampleRate"), defaults.Samplerate));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Channels"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Channels"), defaults.Channels.GetNumHostChannels()));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("SampleFormat"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("SampleFormat"), defaults.sampleFormat));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("ExclusiveMode"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("ExclusiveMode"), defaults.ExclusiveMode));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("BoostThreadPriority"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("BoostThreadPriority"), defaults.BoostThreadPriority));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("KeepDeviceRunning"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("KeepDeviceRunning"), defaults.KeepDeviceRunning));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("UseHardwareTiming"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UseHardwareTiming"), defaults.UseHardwareTiming));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("DitherType"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("DitherType"), defaults.DitherType));
+				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("ChannelMapping"),
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("ChannelMapping"), defaults.Channels));
 			}
 		}
 	}
@@ -862,17 +862,17 @@ public:
 	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
-		, LatencyUS(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0))
-		, UpdateIntervalUS(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0))
-		, Samplerate(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"SampleRate", defaults.Samplerate)
-		, ChannelsOld(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Channels", mpt::saturate_cast<uint8>((int)defaults.Channels))
-		, ChannelMapping(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ChannelMapping", defaults.Channels)
-		, sampleFormat(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"SampleFormat", defaults.sampleFormat)
-		, ExclusiveMode(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
-		, BoostThreadPriority(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
-		, KeepDeviceRunning(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning)
-		, UseHardwareTiming(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
-		, DitherType(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"DitherType", defaults.DitherType)
+		, LatencyUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Latency"), Util::Round<int32>(defaults.Latency * 1000000.0))
+		, UpdateIntervalUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UpdateInterval"), Util::Round<int32>(defaults.UpdateInterval * 1000000.0))
+		, Samplerate(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("SampleRate"), defaults.Samplerate)
+		, ChannelsOld(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Channels"), mpt::saturate_cast<uint8>((int)defaults.Channels))
+		, ChannelMapping(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("ChannelMapping"), defaults.Channels)
+		, sampleFormat(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("SampleFormat"), defaults.sampleFormat)
+		, ExclusiveMode(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("ExclusiveMode"), defaults.ExclusiveMode)
+		, BoostThreadPriority(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("BoostThreadPriority"), defaults.BoostThreadPriority)
+		, KeepDeviceRunning(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("KeepDeviceRunning"), defaults.KeepDeviceRunning)
+		, UseHardwareTiming(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UseHardwareTiming"), defaults.UseHardwareTiming)
+		, DitherType(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("DitherType"), defaults.DitherType)
 	{
 		if(ChannelMapping.Get().GetNumHostChannels() != ChannelsOld)
 		{
@@ -881,10 +881,10 @@ public:
 			ChannelMapping = SoundDevice::ChannelMapping(ChannelsOld);
 		}
 		// store informational data (not read back, just to allow the user to mock with the raw ini file)
-		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Type", deviceInfo.type);
-		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"InternalID", deviceInfo.internalID);
-		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"API", deviceInfo.apiName);
-		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Name", deviceInfo.name);
+		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Type"), deviceInfo.type);
+		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("InternalID"), deviceInfo.internalID);
+		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("API"), deviceInfo.apiName);
+		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Name"), deviceInfo.name);
 	}
 
 	StoredSoundDeviceSettings & operator = (const SoundDevice::Settings &settings)
