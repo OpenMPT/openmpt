@@ -552,7 +552,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return false;
-	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
+	if(nPoint < 0 || nPoint >= (int)EnvGetNumPoints()) return false;
 
 	// Don't allow release nodes in IT/XM. GetDocument()/... nullptr check is done in GetEnvelopePtr, so no need to check twice.
 	if(!GetDocument()->GetrSoundFile().GetModSpecifications().hasReleaseNode)

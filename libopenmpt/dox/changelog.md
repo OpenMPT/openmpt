@@ -23,6 +23,8 @@ is just a high-level summary.
  *  DBM: Key Off and Set Envelope Position were imported incorrectly.
     High sample offset (E7x) is now supported.
  *  DIGI / DBM: Arpeggio should not return to base note at end of row.
+ *  Some filter changes through MIDI macros were not applied if the note volume
+    was set to 0 on the same row.
 
 ### libopenmpt 0.3.6 (2018-02-03)
 

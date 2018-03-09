@@ -1885,6 +1885,8 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				int32 lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
 				int32 lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
 				lReleaseTime -= lDecayEndTime;
+				if(pIns->VolEnv.nSustainEnd > 0)
+					pIns->VolEnv.nReleaseNode = pIns->VolEnv.nSustainEnd;
 				for (uint32 i=0; i<5; i++)
 				{
 					int32 lFactor = 1 + ((lStartFactor * 3) >> (i+2));

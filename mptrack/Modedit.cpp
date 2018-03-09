@@ -1051,7 +1051,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	env.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	if(pos < length)
 	{
-		uint8 r = static_cast<uint8>(atoi(&s[pos]));
+		auto r = static_cast<decltype(env.nReleaseNode)>(atoi(&s[pos]));
 		if(r == 0 || r >= nPoints || !specs.hasReleaseNode)
 			r = ENV_RELEASE_NODE_UNSET;
 		env.nReleaseNode = r;
