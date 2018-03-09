@@ -1682,7 +1682,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 	{
 		// Add the default command set to our freshly loaded command set.
 		mpt::istringstream ss{ GetDefaultKeymap() };
-		LoadFile(ss, std::wstring(), pTempCS);
+		LoadFile(ss, mpt::ustring(), pTempCS);
 	} else
 	{
 		// We were just adding stuff to an existing command set - don't delete it!

@@ -803,7 +803,7 @@ public:
 	Setting<bool> bridgeAllPlugins;
 	Setting<bool> enableAutoSuspend;
 	CachedSetting<bool> midiMappingInPluginEditor;
-	Setting<std::wstring> pluginProjectPath;
+	Setting<mpt::ustring> pluginProjectPath;
 	CachedSetting<mpt::lstring> vstHostProductString;
 	CachedSetting<mpt::lstring> vstHostVendorString;
 	CachedSetting<int32> vstHostVendorVersion;
