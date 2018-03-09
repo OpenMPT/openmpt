@@ -2137,8 +2137,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		m_WatchDir = mpt::PathString();
 	} else
 	{
-		mpt::winstring s = _T("Unable to browse to \"") + dir.AsNative() + _T("\"");
-		Reporting::Error(s, L"Instrument Library");
+		Reporting::Error(mpt::cformat(_T("Unable to browse to \"%1\""))(dir), _T("Instrument Library"));
 	}
 }
 
