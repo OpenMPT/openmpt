@@ -172,8 +172,8 @@ void Manager::ReEnumerate()
 		typePriorities[mpt::format(MPT_USTRING("RtAudio-%1"))(MPT_USTRING("WINDOWS_WASAPI"))] = -30;
 	} else
 #endif
-	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux && GetSysInfo().WineVersion.IsAtLeast(mpt::Wine::Version(1,8,0)))
-	{ // Wine >= 1.8 on Linux
+	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux)
+	{ // Wine on Linux
 		typePriorities[MPT_USTRING("Wine-Native-PulseAudio")] = 31;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
