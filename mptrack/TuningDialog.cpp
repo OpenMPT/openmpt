@@ -683,14 +683,14 @@ void CTuningDialog::OnBnClickedButtonExport()
 			{
 				tuningName = MPT_USTRING("untitled");
 			}
-			std::wstring fileNameW = fileName.ToWide();
-			std::wstring numberW = mpt::wfmt::fmt(i + 1, numberFmt);
+			mpt::ustring fileNameW = fileName.ToUnicode();
+			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
 			SanitizeFilename(numberW);
-			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_number%", numberW);
-			std::wstring nameW = mpt::ToWide(tuningName);
+			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_number%"), numberW);
+			mpt::ustring nameW = mpt::ToWide(tuningName);
 			SanitizeFilename(nameW);
-			fileNameW = mpt::String::Replace(fileNameW, L"%tuning_name%", nameW);
-			fileName = mpt::PathString::FromWide(fileNameW);
+			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_name%"), nameW);
+			fileName = mpt::PathString::FromUnicode(fileNameW);
 			mpt::ofstream fout(fileName, std::ios::binary);
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
@@ -766,7 +766,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 	TrackerSettings::Instance().PathTunings.SetWorkingDir(dlg.GetWorkingDirectory());
 
-	std::wstring sLoadReport;
+	mpt::ustring sLoadReport;
 
 	const auto &files = dlg.GetFilenames();
 	for(const auto &file : files)
@@ -774,7 +774,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		mpt::PathString fileName;
 		mpt::PathString fileExt;
 		file.SplitPath(nullptr, nullptr, &fileName, &fileExt);
-		const std::wstring fileNameExt = (fileName + fileExt).ToWide();
+		const mpt::ustring fileNameExt = (fileName + fileExt).ToUnicode();
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
 		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
@@ -880,10 +880,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 				pT = nullptr;
 				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
-					sLoadReport += mpt::format(L"- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
+					sLoadReport += mpt::format(MPT_USTRING("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, CTuningCollection::s_nMaxTuningCount);
 				} else 
 				{
-					sLoadReport += mpt::format(L"- Unable to import file \"%1\": unknown reason.\n")(fileNameExt);
+					sLoadReport += mpt::format(MPT_USTRING("- Unable to import file \"%1\": unknown reason.\n"))(fileNameExt);
 				}
 			} else
 			{
@@ -903,7 +903,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		if(!pT && !pTC)
 		{
-			sLoadReport += mpt::format(L"- Unable to load \"%1\": unrecognized file format.\n")(fileNameExt);
+			sLoadReport += mpt::format(MPT_USTRING("- Unable to load \"%1\": unrecognized file format.\n"))(fileNameExt);
 		}
 	}
 

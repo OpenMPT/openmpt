@@ -2043,16 +2043,16 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				instrName = pIns->name[0] ? pIns->name : "untitled";
-				instrFilename = pIns->filename[0] ? pIns->filename : pIns->name;
+				instrName = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->name[0] ? pIns->name : "untitled");
+				instrFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->filename[0] ? pIns->filename : pIns->name);
 				SanitizeFilename(instrName);
 				SanitizeFilename(instrFilename);
 
-				std::wstring fileNameW = fileName.ToWide();
-				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_number%", mpt::wfmt::fmt(ins, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_filename%", mpt::ToWide(instrFilename));
-				fileNameW = mpt::String::Replace(fileNameW, L"%instrument_name%", mpt::ToWide(instrName));
-				fileName = mpt::PathString::FromWide(fileNameW);
+				mpt::ustring fileNameW = fileName.ToUnicode();
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_filename%"), mpt::ToUnicode(instrFilename));
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_name%"), mpt::ToUnicode(instrName));
+				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
 
 			if(saveXI)

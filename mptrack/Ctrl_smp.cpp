@@ -1398,16 +1398,16 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				sSampleName = (strcmp(m_sndFile.m_szNames[smp], "")) ? m_sndFile.m_szNames[smp] : "untitled";
-				sSampleFilename = strcmp(sample.filename, "") ? sample.filename : m_sndFile.m_szNames[smp];
+				sSampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (strcmp(m_sndFile.m_szNames[smp], "")) ? m_sndFile.m_szNames[smp] : "untitled");
+				sSampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), strcmp(sample.filename, "") ? sample.filename : m_sndFile.m_szNames[smp]);
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				std::wstring fileNameW = fileName.ToWide();
-				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", mpt::wfmt::fmt(smp, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, L"%sample_filename%", mpt::ToWide(sSampleFilename));
-				fileNameW = mpt::String::Replace(fileNameW, L"%sample_name%", mpt::ToWide(sSampleName));
-				fileName = mpt::PathString::FromWide(fileNameW);
+				mpt::ustring fileNameW = fileName.ToUnicode();
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_filename%"), mpt::ToUnicode(sSampleFilename));
+				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_name%"), mpt::ToUnicode(sSampleName));
+				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
 			if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("raw")))
 				ok = m_sndFile.SaveRAWSample(smp, fileName);
