@@ -260,7 +260,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		{
 			CLSID clsid;
 			mpt::winstring formattedKey = mpt::winstring(_T("{")) + mpt::winstring(keyname) + mpt::winstring(_T("}"));
-			if(Util::VerifyStringToCLSID(mpt::ToWide(formattedKey), clsid))
+			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
 				if(std::find(std::begin(knownDMOs), std::end(knownDMOs), clsid) == std::end(knownDMOs))
 				{

@@ -353,7 +353,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("CLSID"), 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
 			const mpt::ustring internalID = mpt::ToUnicode(mpt::String::ReadWinBuf(idBuf));
-			if(Util::IsCLSID(mpt::ToWide(internalID)))
+			if(Util::IsCLSID(mpt::ToWin(internalID)))
 			{
 				MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO:   clsid=%1"))(internalID));
 				SoundDevice::Info info;
@@ -929,7 +929,7 @@ void CASIODevice::OpenDriver()
 	{
 		return;
 	}
-	CLSID clsid = Util::StringToCLSID(mpt::ToWide(GetDeviceInternalID()));
+	CLSID clsid = Util::StringToCLSID(mpt::ToWin(GetDeviceInternalID()));
 	try
 	{
 		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)

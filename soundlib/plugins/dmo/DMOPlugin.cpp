@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 {
 	CLSID clsid;
-	if (Util::VerifyStringToCLSID(factory.dllPath.ToWide(), clsid))
+	if(Util::VerifyStringToCLSID(factory.dllPath.AsNative(), clsid))
 	{
 		IMediaObject *pMO = nullptr;
 		IMediaObjectInPlace *pMOIP = nullptr;

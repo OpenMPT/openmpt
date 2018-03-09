@@ -39,7 +39,7 @@ namespace Util
 #if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 
 
-std::wstring CLSIDToString(CLSID clsid)
+mpt::winstring CLSIDToString(CLSID clsid)
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
@@ -80,12 +80,13 @@ std::wstring CLSIDToString(CLSID clsid)
 	}
 	::CoTaskMemFree(tmp);
 	tmp = nullptr;
-	return str;
+	return mpt::ToWin(str);
 }
 
 
-CLSID StringToCLSID(const std::wstring &str)
+CLSID StringToCLSID(const mpt::winstring &str_)
 {
+	const std::wstring str = mpt::ToWide(str_);
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
 	switch(::CLSIDFromString(tmp.data(), &clsid))
@@ -115,8 +116,9 @@ CLSID StringToCLSID(const std::wstring &str)
 }
 
 
-bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
+bool VerifyStringToCLSID(const mpt::winstring &str_, CLSID &clsid)
 {
+	const std::wstring str = mpt::ToWide(str_);
 	bool result = false;
 	clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -145,8 +147,9 @@ bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
 }
 
 
-bool IsCLSID(const std::wstring &str)
+bool IsCLSID(const mpt::winstring &str_)
 {
+	const std::wstring str = mpt::ToWide(str_);
 	bool result = false;
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -177,7 +180,7 @@ bool IsCLSID(const std::wstring &str)
 }
 
 
-std::wstring IIDToString(IID iid)
+mpt::winstring IIDToString(IID iid)
 {
 	std::wstring str;
 	LPOLESTR tmp = nullptr;
@@ -216,12 +219,13 @@ std::wstring IIDToString(IID iid)
 		MPT_UNUSED_VARIABLE(e);
 		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
 	}
-	return str;
+	return mpt::ToWin(str);
 }
 
 
-IID StringToIID(const std::wstring &str)
+IID StringToIID(const mpt::winstring &str_)
 {
+	const std::wstring str = mpt::ToWide(str_);
 	IID iid = IID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
 	switch(::IIDFromString(tmp.data(), &iid))
@@ -245,18 +249,18 @@ IID StringToIID(const std::wstring &str)
 }
 
 
-std::wstring GUIDToString(GUID guid)
+mpt::winstring GUIDToString(GUID guid)
 {
 	std::vector<OLECHAR> tmp(256);
 	if(::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size())) <= 0)
 	{
 		throw std::logic_error("StringFromGUID2() failed.");
 	}
-	return tmp.data();
+	return mpt::ToWin(tmp.data());
 }
 
 
-GUID StringToGUID(const std::wstring &str)
+GUID StringToGUID(const mpt::winstring &str)
 {
 	return StringToIID(str);
 }

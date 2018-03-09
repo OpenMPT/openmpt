@@ -34,19 +34,19 @@ namespace Util
 // A CLSID string is not necessarily a standard UUID string,
 // it might also be a symbolic name for the interface.
 // (see CLSIDFromString ( http://msdn.microsoft.com/en-us/library/windows/desktop/ms680589%28v=vs.85%29.aspx ))
-std::wstring CLSIDToString(CLSID clsid);
-CLSID StringToCLSID(const std::wstring &str);
-bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid);
-bool IsCLSID(const std::wstring &str);
+mpt::winstring CLSIDToString(CLSID clsid);
+CLSID StringToCLSID(const mpt::winstring &str);
+bool VerifyStringToCLSID(const mpt::winstring &str, CLSID &clsid);
+bool IsCLSID(const mpt::winstring &str);
 
 // COM IID<->string conversion
-IID StringToIID(const std::wstring &str);
-std::wstring IIDToString(IID iid);
+IID StringToIID(const mpt::winstring &str);
+mpt::winstring IIDToString(IID iid);
 
 // General GUID<->string conversion.
 // The string must/will be in standard GUID format: {4F9A455D-E7EF-4367-B2F0-0C83A38A5C72}
-GUID StringToGUID(const std::wstring &str);
-std::wstring GUIDToString(GUID guid);
+GUID StringToGUID(const mpt::winstring &str);
+mpt::winstring GUIDToString(GUID guid);
 
 // Create a COM GUID
 GUID CreateGUID();
