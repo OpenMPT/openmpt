@@ -402,13 +402,6 @@
 
 // fixing stuff up
 
-#if defined(MPT_BUILD_TARGET_XP)
-// Also support Wine 1.6 in addition to Windows XP
-#ifndef MPT_QUIRK_NO_CPP_THREAD
-#define MPT_QUIRK_NO_CPP_THREAD
-#endif
-#endif
-
 #if defined(MPT_BUILD_ANALYZED) || defined(MPT_BUILD_CHECKED) 
 #ifdef NO_ASSERTS
 #undef NO_ASSERTS // static or dynamic analyzers want assertions on
