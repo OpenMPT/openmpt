@@ -141,7 +141,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 			Reporting::Notification(mpt::cformat(_T("Opening \"%1\" failed. This can happen if ")
 				_T("no more modules can be opened or if the file type was not ")
 				_T("recognised (currently there %2 %3 document%4 open)."))(
-					filename.ToCString(), (numDocs == 1) ? _T("is") : _T("are"), numDocs, (numDocs == 1) ? _T("") : _T("s")));
+					filename.ToCString(), (numDocs == 1) ? CString(_T("is")) : CString(_T("are")), numDocs, (numDocs == 1) ? CString(_T("")) : CString(_T("s"))));
 		}
 	}
 	return pDoc;
