@@ -1486,7 +1486,7 @@ struct SFZEnvelope
 		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
 		if(sustainLevel != 0)
 		{
-			if(envType == ENV_VOLUME)
+			if(envType == ENV_VOLUME && env.nSustainEnd > 0)
 				env.nReleaseNode = env.nSustainEnd;
 			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType));
 			env.dwFlags.set(ENV_SUSTAIN);
