@@ -59,7 +59,7 @@ RawPathString PathString::AsNativePrefixed() const
 		// Path is short enough or already in prefixed form
 		return path;
 	}
-	const RawPathString absPath = mpt::GetAbsolutePath(path).AsNative();
+	const RawPathString absPath = mpt::GetAbsolutePath(*this).AsNative();
 	if(absPath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
 	{
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
@@ -147,7 +147,7 @@ PathString PathString::Simplify() const
 	}
 	if(!components.empty())
 		result.pop_back();
-	return result;
+	return mpt::PathString(result);
 }
 
 } // namespace mpt
@@ -346,7 +346,7 @@ PathString PathString::SanitizeComponent() const
 // Convert an absolute path to a path that's relative to "&relativeTo".
 PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
 {
-	mpt::PathString result = path;
+	mpt::PathString result = *this;
 	if(path.empty())
 	{
 		return result;
@@ -368,7 +368,7 @@ PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) cons
 // Convert a path that is relative to "&relativeTo" to an absolute path.
 PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) const
 {
-	mpt::PathString result = path;
+	mpt::PathString result = *this;
 	if(path.empty())
 	{
 		return result;
@@ -377,7 +377,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
-		result += path;
+		result += mpt::PathString(path);
 	} else if(path.length() >= 2 && path.substr(0, 2) == MPT_PATHSTRING_LITERAL(".\\"))
 	{
 		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")

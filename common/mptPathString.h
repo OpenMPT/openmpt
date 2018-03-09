@@ -43,7 +43,7 @@ private:
 
 private:
 
-	PathString(const RawPathString & path)
+	explicit PathString(const RawPathString & path)
 		: path(path)
 	{
 		return;
@@ -175,7 +175,7 @@ public:
 			{
 				return result;
 			}
-			result = result.AsNative().substr(0, result.AsNative().length() - 1);
+			result = mpt::PathString(result.AsNative().substr(0, result.AsNative().length() - 1));
 		}
 		return result;
 	}
@@ -253,7 +253,7 @@ public:
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
 #endif
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetUTF8, path); }
-	static PathString FromUTF8(const std::string &path) { return path; }
+	static PathString FromUTF8(const std::string &path) { return PathString(path); }
 #if MPT_WSTRING_CONVERT
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
 #endif
@@ -264,7 +264,7 @@ public:
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 	// Convert a path to its simplified form (currently only implemented on Windows)
-	MPT_DEPRECATED mpt::PathString Simplify() const { return path; }
+	MPT_DEPRECATED mpt::PathString Simplify() const { return PathString(path); }
 
 #endif // MPT_OS_WINDOWS
 
