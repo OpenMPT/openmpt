@@ -172,7 +172,7 @@ template <typename T> static inline CString ToCStringHelper(const T & x) { retur
 #endif
 #else
 namespace detail {
-template <typename T> struct CstringToStdStringImpl { CString operator () (const T & v) { return mpt::ToCString(mpt::CharsetLocale, ToString(v)); } };
+template <typename T> struct CstringToStdStringImpl { CString operator () (const T & v) { return mpt::ToCString(ToUString(v)); } };
 template <> struct CstringToStdStringImpl<CString> { CString operator () (const CString & v) { return v; } };
 }
 template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::detail::CstringToStdStringImpl<T>()(x); }
