@@ -64,6 +64,18 @@ static int Warning_libopenmpt_for_WinRT_is_built_with_reduced_functionality_Plea
 #endif // !NO_DMO
 #endif // MPT_BUILD_MSVC
 
+#if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
+#if MPT_COMPILER_MSVC
+#pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#warning "Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available."
+#else
+// There is no portable way to display a warning.
+// Try to provoke a warning with an unused variable.
+static int Warning_libopenmpt_built_in_non_thread_safe_mode_because_mutexes_are_not_supported_by_the_CPlusPlus_standard_library_available;
+#endif
+#endif // MPT_MUTEX_NONE
+
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
 MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
