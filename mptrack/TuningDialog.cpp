@@ -687,7 +687,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
 			SanitizeFilename(numberW);
 			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_number%"), numberW);
-			mpt::ustring nameW = mpt::ToWide(tuningName);
+			mpt::ustring nameW = mpt::ToUnicode(tuningName);
 			SanitizeFilename(nameW);
 			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
