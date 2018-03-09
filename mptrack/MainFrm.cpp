@@ -2704,35 +2704,35 @@ void CMainFrame::UpdateMRUList()
 
 		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
 		{
-			std::wstring s = mpt::wfmt::val(i + 1) + L" ";
+			mpt::winstring s = mpt::tfmt::val(i + 1) + _T(" ");
 			// Add mnemonics
 			if(i < 9)
 			{
-				s = L"&" + s;
+				s = _T("&") + s;
 			} else if(i == 9)
 			{
-				s = L"1&0 ";
+				s = _T("1&0 ");
 			}
 
 			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
-			std::wstring path = pathMPT.ToWide();
+			mpt::winstring path = pathMPT.AsNative();
 			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetPath()))
 			{
 				// Only show filename
-				path = path.substr(workDir.ToWide().length());
+				path = path.substr(workDir.AsNative().length());
 			} else if(path.length() > 30)	// Magic number experimentally determined to be equal to MFC's behaviour
 			{
 				// Shorten path ("C:\Foo\VeryLongString...\Bar.it" => "C:\Foo\...\Bar.it")
-				size_t start = path.find_first_of(L"\\/", path.find_first_of(L"\\/") + 1);
-				size_t end = path.find_last_of(L"\\/");
+				size_t start = path.find_first_of(_T("\\/"), path.find_first_of(_T("\\/")) + 1);
+				size_t end = path.find_last_of(_T("\\/"));
 				if(start < end)
 				{
 					path = path.substr(0, start + 1) + L"..." + path.substr(end);
 				}
 			}
-			path = mpt::String::Replace(path, L"&", L"&&");
+			path = mpt::String::Replace(path, _T("&"), _T("&&"));
 			s += path;
-			::InsertMenuW(pMenu->m_hMenu, firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, s.c_str());
+			pMenu->InsertMenu(firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, mpt::ToCString(s));
 		}
 	}
 }
