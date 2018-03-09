@@ -2491,7 +2491,7 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 		firstShow = false;
 		WINDOWPLACEMENT wpl;
 		GetWindowPlacement(&wpl);
-		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
+		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>(MPT_USTRING("Display"), MPT_USTRING("WindowPlacement"), wpl);
 		SetWindowPlacement(&wpl);
 	}
 }

@@ -200,8 +200,8 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 {
 	mpt::PathString UltraSndPath;
 
-	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
-	if(forgetSettings) file.Forget("Ultrasound", "PatchDir");
+	UltraSndPath = file.Read<mpt::PathString>(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"), mpt::PathString());
+	if(forgetSettings) file.Forget(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"));
 	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
 	if(UltraSndPath.empty())
 	{
@@ -212,21 +212,20 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 	for (uint32 iMidi=0; iMidi<256; iMidi++)
 	{
 		mpt::PathString filename;
-		char section[32];
-		sprintf(section, (iMidi < 128) ? "Midi%d" : "Perc%d", iMidi & 0x7f);
-		filename = file.Read<mpt::PathString>("Midi Library", section, mpt::PathString());
+		mpt::ustring key = mpt::format(MPT_USTRING("%1%2"))((iMidi < 128) ? MPT_USTRING("Midi") : MPT_USTRING("Perc"), iMidi & 0x7f);
+		filename = file.Read<mpt::PathString>(MPT_USTRING("Midi Library"), key, mpt::PathString());
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
-			const char *pszSection = (iMidi < 128) ? "Melodic Patches" : "Drum Patches";
-			sprintf(section, "%d", iMidi & 0x7f);
-			filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
-			if(forgetSettings) file.Forget(pszSection, section);
+			mpt::ustring section = (iMidi < 128) ? MPT_USTRING("Melodic Patches") : MPT_USTRING("Drum Patches");
+			key = mpt::ufmt::val(iMidi & 0x7f);
+			filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
+			if(forgetSettings) file.Forget(section, key);
 			if(filename.empty())
 			{
-				pszSection = (iMidi < 128) ? "Melodic Bank 0" : "Drum Bank 0";
-				filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
-				if(forgetSettings) file.Forget(pszSection, section);
+				section = (iMidi < 128) ? MPT_USTRING("Melodic Bank 0") : MPT_USTRING("Drum Bank 0");
+				filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
+				if(forgetSettings) file.Forget(section, key);
 			}
 			if(!filename.empty())
 			{
@@ -269,13 +268,8 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 			if(theApp.IsPortableMode())
 				szFileName = theApp.AbsolutePathToRelative(szFileName);
 
-			char s[16];
-			if (iMidi < 128)
-				sprintf(s, "Midi%d", iMidi);
-			else
-				sprintf(s, "Perc%d", iMidi & 0x7F);
-
-			file.Write<mpt::PathString>("Midi Library", s, szFileName);
+			mpt::ustring key = mpt::format(MPT_USTRING("%1%2"))((iMidi < 128) ? MPT_USTRING("Midi") : MPT_USTRING("Perc"), iMidi & 0x7f);
+			file.Write<mpt::PathString>(MPT_USTRING("Midi Library"), key, szFileName);
 		}
 	}
 	return TRUE;
@@ -290,11 +284,11 @@ std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 BOOL CTrackApp::LoadDefaultDLSBanks()
 {
-	uint32 numBanks = theApp.GetSettings().Read<uint32>("DLS Banks", "NumBanks", 0);
+	uint32 numBanks = theApp.GetSettings().Read<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), 0);
 	gpDLSBanks.reserve(numBanks);
 	for(uint32 i = 0; i < numBanks; i++)
 	{
-		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", mpt::format("Bank%1")(i + 1), mpt::PathString());
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(MPT_USTRING("DLS Banks"), mpt::format(MPT_USTRING("Bank%1"))(i + 1), mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
 	}
@@ -337,13 +331,12 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 			path = theApp.AbsolutePathToRelative(path);
 		}
 
-		char s[16];
-		sprintf(s, "Bank%d", nBanks + 1);
-		theApp.GetSettings().Write<mpt::PathString>("DLS Banks", s, path);
+		mpt::ustring key = mpt::format(MPT_USTRING("Bank%1"))(nBanks + 1);
+		theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("DLS Banks"), key, path);
 		nBanks++;
 
 	}
-	theApp.GetSettings().Write<uint32>("DLS Banks", "NumBanks", nBanks);
+	theApp.GetSettings().Write<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), nBanks);
 	return TRUE;
 }
 
@@ -1829,10 +1822,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 {
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
-	const size_t numPlugins = GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
+	const size_t numPlugins = GetSettings().Read<int32>(MPT_USTRING("VST Plugins"), MPT_USTRING("NumPlugins"), 0);
 
 	mpt::ustring nonFoundPlugs;
-	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
+	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), MPT_PATHSTRING(""));
 
 	CDialog pluginScanDlg;
 	CWnd *textWnd = nullptr;
@@ -1841,9 +1834,8 @@ BOOL CTrackApp::InitializeDXPlugins()
 	// Read tags for built-in plugins
 	for(auto plug : *m_pPluginManager)
 	{
-		char tmp[32];
-		sprintf(tmp, "Plugin%08X%08X.Tags", plug->pluginId1, plug->pluginId2);
-		plug->tags = GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+		mpt::ustring key = mpt::format(MPT_USTRING("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+		plug->tags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), key, mpt::ustring());
 	}
 
 	// Restructured plugin cache
@@ -1854,12 +1846,12 @@ BOOL CTrackApp::InitializeDXPlugins()
 	}
 
 	m_pPluginManager->reserve(numPlugins);
-	auto plugIDFormat = mpt::format("Plugin%1");
+	auto plugIDFormat = mpt::format(MPT_USTRING("Plugin%1"));
 	auto scanFormat = mpt::cformat(_T("Scanning Plugin %1 / %2...\n%3"));
-	auto tagFormat = mpt::format("Plugin%1.Tags");
+	auto tagFormat = mpt::format(MPT_USTRING("Plugin%1.Tags"));
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>("VST Plugins", plugIDFormat(plug), mpt::PathString());
+		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(MPT_USTRING("VST Plugins"), plugIDFormat(plug), mpt::PathString());
 		if(!plugPath.empty())
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
@@ -1885,7 +1877,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 			if(plugPath == failedPlugin)
 			{
-				GetSettings().Remove("VST Plugins", "FailedPlugin");
+				GetSettings().Remove(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"));
 				const CString text = _T("The following plugin has previously crashed OpenMPT during initialisation:\n\n") + failedPlugin.ToCString() + _T("\n\nDo you still want to load it?");
 				if(Reporting::Confirm(text, false, true, &pluginScanDlg) == cnfNo)
 				{
@@ -1893,7 +1885,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 				}
 			}
 
-			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>("VST Plugins", tagFormat(plug), mpt::ustring());
+			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), tagFormat(plug), mpt::ustring());
 
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
@@ -1932,19 +1924,18 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
 			}
-			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plugIndex), plugPath);
+			theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("VST Plugins"), mpt::format(MPT_USTRING("Plugin%1"))(plugIndex), plugPath);
 
-			theApp.GetSettings().Write("VST Plugins", mpt::format("Plugin%1.Tags")(plugIndex), plug->tags);
+			theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), mpt::format(MPT_USTRING("Plugin%1.Tags"))(plugIndex), plug->tags);
 
 			plugIndex++;
 		} else
 		{
-			char tmp[32];
-			sprintf(tmp, "Plugin%08X%08X.Tags", plug->pluginId1, plug->pluginId2);
-			theApp.GetSettings().Write("VST Plugins", tmp, plug->tags);
+			mpt::ustring key = mpt::format(MPT_USTRING("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+			theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), key, plug->tags);
 		}
 	}
-	theApp.GetSettings().Write("VST Plugins", "NumPlugins", static_cast<uint32>(plugIndex));
+	theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), MPT_USTRING("NumPlugins"), static_cast<uint32>(plugIndex));
 #endif // NO_PLUGINS
 
 	delete m_pPluginManager;
@@ -2019,7 +2010,7 @@ const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
 
 mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName)
 {
-	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? "MIDI Input Ports" : "MIDI Output Ports", deviceName, deviceName);
+	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? MPT_USTRING("MIDI Input Ports") : MPT_USTRING("MIDI Output Ports"), deviceName, deviceName);
 	if(friendlyName.empty())
 		return deviceName;
 	else if(addDeviceName && friendlyName != deviceName)

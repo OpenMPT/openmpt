@@ -561,9 +561,7 @@ void COptionsColors::OnLoadColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			TCHAR sKeyName[16];
-			wsprintf(sKeyName, _T("Color%02u"), i);
-			CustomColors[i] = file.Read<int32>(_T("Colors"), sKeyName, CustomColors[i]);
+			CustomColors[i] = file.Read<int32>(MPT_USTRING("Colors"), mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 	OnPreviewChanged();
@@ -581,9 +579,7 @@ void COptionsColors::OnSaveColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			TCHAR sKeyName[16];
-			wsprintf(sKeyName, _T("Color%02u"), i);
-			file.Write<int32>(_T("Colors"), sKeyName, CustomColors[i]);
+			file.Write<int32>(MPT_USTRING("Colors"), mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 }

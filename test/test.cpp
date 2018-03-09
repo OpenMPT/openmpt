@@ -2503,39 +2503,39 @@ static MPT_NOINLINE void TestSettings()
 
 #ifdef MODPLUG_TRACKER
 
-	VERIFY_EQUAL(SettingPath("a","b") < SettingPath("a","c"), true);
-	VERIFY_EQUAL(!(SettingPath("c","b") < SettingPath("a","c")), true);
+	VERIFY_EQUAL(SettingPath(MPT_USTRING("a"),MPT_USTRING("b")) < SettingPath(MPT_USTRING("a"),MPT_USTRING("c")), true);
+	VERIFY_EQUAL(!(SettingPath(MPT_USTRING("c"),MPT_USTRING("b")) < SettingPath(MPT_USTRING("a"),MPT_USTRING("c"))), true);
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 23);
-		conf.Write("Test", "bar", 64);
-		conf.Write("Test", "bar", 42);
-		conf.Read("Test", "baz", 4711);
-		foobar = conf.Read("Test", "bar", 28);
+		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 23);
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 64);
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 42);
+		conf.Read(MPT_USTRING("Test"), MPT_USTRING("baz"), 4711);
+		foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 28);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 28);
+		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 28);
 		VERIFY_EQUAL(foobar, 42);
-		conf.Write("Test", "bar", 43);
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 43);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 123);
+		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 123);
 		VERIFY_EQUAL(foobar, 43);
-		conf.Write("Test", "bar", 88);
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 88);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		Setting<int> foo(conf, "Test", "bar", 99);
+		Setting<int> foo(conf, MPT_USTRING("Test"), MPT_USTRING("bar"), 99);
 
 		VERIFY_EQUAL(foo, 88);
 
@@ -2545,27 +2545,27 @@ static MPT_NOINLINE void TestSettings()
 
 	{
 		DefaultSettingsContainer conf;
-		Setting<int> foo(conf, "Test", "bar", 99);
+		Setting<int> foo(conf, MPT_USTRING("Test"), MPT_USTRING("bar"), 99);
 		VERIFY_EQUAL(foo, 7);
 	}
 
 
 	{
 		DefaultSettingsContainer conf;
-		conf.Read("Test", "struct", std::string(""));
-		conf.Write("Test", "struct", std::string(""));
+		conf.Read(MPT_USTRING("Test"), MPT_USTRING("struct"), std::string(""));
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("struct"), std::string(""));
 	}
 
 	{
 		DefaultSettingsContainer conf;
-		CustomSettingsTestType dummy = conf.Read("Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		CustomSettingsTestType dummy = conf.Read(MPT_USTRING("Test"), MPT_USTRING("struct"), CustomSettingsTestType(1.0f, 1.0f));
 		dummy = CustomSettingsTestType(0.125f, 32.0f);
-		conf.Write("Test", "struct", dummy);
+		conf.Write(MPT_USTRING("Test"), MPT_USTRING("struct"), dummy);
 	}
 
 	{
 		DefaultSettingsContainer conf;
-		Setting<CustomSettingsTestType> dummyVar(conf, "Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		Setting<CustomSettingsTestType> dummyVar(conf, MPT_USTRING("Test"), MPT_USTRING("struct"), CustomSettingsTestType(1.0f, 1.0f));
 		CustomSettingsTestType dummy = dummyVar;
 		VERIFY_EQUAL(dummy.x, 0.125f);
 		VERIFY_EQUAL(dummy.y, 32.0f);

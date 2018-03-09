@@ -2998,8 +2998,8 @@ void CModDoc::SerializeViews() const
 
 	SettingsContainer &settings = theApp.GetSongSettings();
 	const std::string s = f.str();
-	settings.Write("WindowSettings", pathName.GetFullFileName().ToWide(), pathName);
-	settings.Write("WindowSettings", pathName.ToWide(), Util::BinToHex(mpt::as_span(s)));
+	settings.Write(MPT_USTRING("WindowSettings"), pathName.GetFullFileName().ToUnicode(), pathName);
+	settings.Write(MPT_USTRING("WindowSettings"), pathName.ToUnicode(), Util::BinToHex(mpt::as_span(s)));
 }
 
 
@@ -3010,17 +3010,17 @@ void CModDoc::DeserializeViews()
 	if(pathName.empty()) return;
 
 	SettingsContainer &settings = theApp.GetSongSettings();
-	mpt::ustring s = settings.Read<mpt::ustring>("WindowSettings", pathName.ToWide());
+	mpt::ustring s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.ToUnicode());
 	if(s.size() < 2)
 	{
 		// Try relative path
 		pathName = pathName.RelativePathToAbsolute(theApp.GetAppDirPath());
-		s = settings.Read<mpt::ustring>("WindowSettings", pathName.ToWide());
+		s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.ToUnicode());
 		if(s.size() < 2)
 		{
 			// Try searching for filename instead of full path name
-			const mpt::ustring altName = settings.Read<mpt::ustring>("WindowSettings", pathName.GetFullFileName().ToUnicode());
-			s = settings.Read<mpt::ustring>("WindowSettings", altName);
+			const mpt::ustring altName = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.GetFullFileName().ToUnicode());
+			s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), altName);
 			if(s.size() < 2) return;
 		}
 	}

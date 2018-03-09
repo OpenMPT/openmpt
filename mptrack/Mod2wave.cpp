@@ -47,12 +47,12 @@ static mpt::ustring GetDefaultYear()
 
 
 StoredTags::StoredTags(SettingsContainer &conf)
-	: artist(conf, "Export", "TagArtist", TrackerSettings::Instance().defaultArtist)
-	, album(conf, "Export", "TagAlbum", MPT_USTRING(""))
-	, trackno(conf, "Export", "TagTrackNo", MPT_USTRING(""))
-	, year(conf, "Export", "TagYear", GetDefaultYear())
-	, url(conf, "Export", "TagURL", MPT_USTRING(""))
-	, genre(conf, "Export", "TagGenre", MPT_USTRING(""))
+	: artist(conf, MPT_USTRING("Export"), MPT_USTRING("TagArtist"), TrackerSettings::Instance().defaultArtist)
+	, album(conf, MPT_USTRING("Export"), MPT_USTRING("TagAlbum"), MPT_USTRING(""))
+	, trackno(conf, MPT_USTRING("Export"), MPT_USTRING("TagTrackNo"), MPT_USTRING(""))
+	, year(conf, MPT_USTRING("Export"), MPT_USTRING("TagYear"), GetDefaultYear())
+	, url(conf, MPT_USTRING("Export"), MPT_USTRING("TagURL"), MPT_USTRING(""))
+	, genre(conf, MPT_USTRING("Export"), MPT_USTRING("TagGenre"), MPT_USTRING(""))
 {
 	return;
 }
@@ -902,7 +902,7 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
 	: EncoderFactories(encFactories)
-	, EncoderName(conf, "Export", "Encoder", MPT_USTRING(""))
+	, EncoderName(conf, MPT_USTRING("Export"), MPT_USTRING("Encoder"), MPT_USTRING(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)

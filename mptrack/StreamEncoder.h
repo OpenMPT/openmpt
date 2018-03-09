@@ -183,15 +183,15 @@ namespace Encoder
 		Setting<int> Dither;
 		
 		Settings(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
-			: Cues(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Cues"), cues)
-			, Tags(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Tags"), tags)
-			, Samplerate(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Samplerate"), samplerate)
-			, Channels(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Channels"), channels)
-			, Mode(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Mode"), mode)
-			, Bitrate(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Bitrate"), bitrate)
-			, Quality(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Quality"), quality)
-			, Format(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Format"), format)
-			, Dither(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Dither"), dither)
+			: Cues(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Cues"), cues)
+			, Tags(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Tags"), tags)
+			, Samplerate(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Samplerate"), samplerate)
+			, Channels(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Channels"), channels)
+			, Mode(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Mode"), mode)
+			, Bitrate(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Bitrate"), bitrate)
+			, Quality(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Quality"), quality)
+			, Format(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Format"), format)
+			, Dither(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Dither"), dither)
 		{
 			return;
 		}

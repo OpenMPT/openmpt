@@ -28,17 +28,17 @@ StreamEncoderSettings &StreamEncoderSettings::Instance()
 
 
 StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
-	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
-	, AUPaddingAlignHint(conf, section, "AUPaddingAlignHint", 4096)
-	, MP3ID3v2MinPadding(conf, section, "MP3ID3v2MinPadding", 1024)
-	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
-	, MP3ID3v2WriteReplayGainTXXX(conf, section, "MP3ID3v2WriteReplayGainTXXX", true)
-	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
-	, MP3LameID3v2UseLame(conf, section, "MP3LameID3v2UseLame", false)
-	, MP3LameCalculateReplayGain(conf, section, "MP3LameCalculateReplayGain", true)
-	, MP3LameCalculatePeakSample(conf, section, "MP3LameCalculatePeakSample", true)
-	, MP3ACMFast(conf, section, "MP3ACMFast", false)
-	, OpusComplexity(conf, section, "OpusComplexity", -1)
+	: FLACCompressionLevel(conf, section, MPT_USTRING("FLACCompressionLevel"), 5)
+	, AUPaddingAlignHint(conf, section, MPT_USTRING("AUPaddingAlignHint"), 4096)
+	, MP3ID3v2MinPadding(conf, section, MPT_USTRING("MP3ID3v2MinPadding"), 1024)
+	, MP3ID3v2PaddingAlignHint(conf, section, MPT_USTRING("MP3ID3v2PaddingAlignHint"), 4096)
+	, MP3ID3v2WriteReplayGainTXXX(conf, section, MPT_USTRING("MP3ID3v2WriteReplayGainTXXX"), true)
+	, MP3LameQuality(conf, section, MPT_USTRING("MP3LameQuality"), 3)
+	, MP3LameID3v2UseLame(conf, section, MPT_USTRING("MP3LameID3v2UseLame"), false)
+	, MP3LameCalculateReplayGain(conf, section, MPT_USTRING("MP3LameCalculateReplayGain"), true)
+	, MP3LameCalculatePeakSample(conf, section, MPT_USTRING("MP3LameCalculatePeakSample"), true)
+	, MP3ACMFast(conf, section, MPT_USTRING("MP3ACMFast"), false)
+	, OpusComplexity(conf, section, MPT_USTRING("OpusComplexity"), -1)
 {
 	return;
 }

@@ -378,9 +378,9 @@ public:
 	{
 		return;
 	}
-	SettingPath(const AnyStringLocale &section_, const AnyStringLocale &key_)
-		: section(section_)
-		, key(key_)
+	SettingPath(mpt::ustring section_, mpt::ustring key_)
+		: section(std::move(section_))
+		, key(std::move(key_))
 	{
 		return;
 	}
@@ -483,17 +483,17 @@ public:
 		return FromSettingValue<T>(ReadSetting(path, ToSettingValue<T>(def)));
 	}
 	template <typename T>
-	T Read(const AnyStringLocale &section, const AnyStringLocale &key, const T &def = T()) const
+	T Read(mpt::ustring section, mpt::ustring key, const T &def = T()) const
 	{
-		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def)));
+		return FromSettingValue<T>(ReadSetting(SettingPath(std::move(section), std::move(key)), ToSettingValue<T>(def)));
 	}
 	bool IsDefault(const SettingPath &path) const
 	{
 		return IsDefaultSetting(path);
 	}
-	bool IsDefault(const AnyStringLocale &section, const AnyStringLocale &key) const
+	bool IsDefault(mpt::ustring section, mpt::ustring key) const
 	{
-		return IsDefaultSetting(SettingPath(section, key));
+		return IsDefaultSetting(SettingPath(std::move(section), std::move(key)));
 	}
 	template <typename T>
 	void Write(const SettingPath &path, const T &val, SettingFlushMode flushMode = SettingWriteBack)
@@ -501,26 +501,26 @@ public:
 		WriteSetting(path, ToSettingValue<T>(val), flushMode);
 	}
 	template <typename T>
-	void Write(const AnyStringLocale &section, const AnyStringLocale &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
+	void Write(mpt::ustring section, mpt::ustring key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
 	{
-		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val), flushMode);
+		WriteSetting(SettingPath(std::move(section), std::move(key)), ToSettingValue<T>(val), flushMode);
 	}
 	void Forget(const SettingPath &path)
 	{
 		ForgetSetting(path);
 	}
-	void Forget(const AnyStringLocale &section, const AnyStringLocale &key)
+	void Forget(mpt::ustring section, mpt::ustring key)
 	{
-		ForgetSetting(SettingPath(section, key));
+		ForgetSetting(SettingPath(std::move(section), std::move(key)));
 	}
 	void ForgetAll();
 	void Remove(const SettingPath &path)
 	{
 		RemoveSetting(path);
 	}
-	void Remove(const AnyStringLocale &section, const AnyStringLocale &key)
+	void Remove(mpt::ustring section, mpt::ustring key)
 	{
-		RemoveSetting(SettingPath(section, key));
+		RemoveSetting(SettingPath(std::move(section), std::move(key)));
 	}
 	void Flush();
 	~SettingsContainer();
@@ -567,9 +567,9 @@ public:
 		return;
 	}
 public:
-	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
+	Setting(SettingsContainer &conf_, mpt::ustring section, mpt::ustring key, const T&def)
 		: conf(conf_)
-		, path(section, key)
+		, path(std::move(section), std::move(key))
 	{
 		conf.Read(path, def); // set default value
 	}
@@ -628,10 +628,10 @@ public:
 		conf.Register(this, path);
 	}
 public:
-	CachedSetting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
+	CachedSetting(SettingsContainer &conf_, mpt::ustring section, mpt::ustring key, const T&def)
 		: value(def)
 		, conf(conf_)
-		, path(section, key)
+		, path(std::move(section), std::move(key))
 	{
 		{
 			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);

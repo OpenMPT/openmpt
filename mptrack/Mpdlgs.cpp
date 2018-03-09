@@ -1819,14 +1819,15 @@ void CMidiSetupDlg::OnRenameDevice()
 		MIDIINCAPS mic;
 		mic.szPname[0] = 0;
 		midiInGetDevCaps(device, &mic, sizeof(mic));
-		CString name = mic.szPname, friendlyName = theApp.GetSettings().Read("MIDI Input Ports", name, name);
+		CString name = mic.szPname;
+		CString friendlyName = theApp.GetSettings().Read(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name), name);
 		CInputDlg dlg(this, _T("New name for ") + name + _T(":"), friendlyName);
 		if(dlg.DoModal() == IDOK)
 		{
 			if(dlg.resultAsString.IsEmpty() || dlg.resultAsString == name)
-				theApp.GetSettings().Remove("MIDI Input Ports", name);
+				theApp.GetSettings().Remove(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name));
 			else
-				theApp.GetSettings().Write("MIDI Input Ports", name, dlg.resultAsString);
+				theApp.GetSettings().Write(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name), dlg.resultAsString);
 			RefreshDeviceList(device);
 		}
 	}
