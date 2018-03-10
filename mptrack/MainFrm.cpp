@@ -2727,7 +2727,7 @@ void CMainFrame::UpdateMRUList()
 				size_t end = path.find_last_of(_T("\\/"));
 				if(start < end)
 				{
-					path = path.substr(0, start + 1) + L"..." + path.substr(end);
+					path = path.substr(0, start + 1) + _T("...") + path.substr(end);
 				}
 			}
 			path = mpt::String::Replace(path, _T("&"), _T("&&"));
