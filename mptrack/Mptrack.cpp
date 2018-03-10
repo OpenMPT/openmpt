@@ -83,6 +83,12 @@ void CTrackApp::OnFileCloseAll()
 }
 
 
+void CTrackApp::OnUpdateAnyDocsOpen(CCmdUI *cmd)
+{
+	cmd->Enable(!GetModDocTemplate()->empty());
+}
+
+
 int CTrackApp::GetOpenDocumentCount() const
 {
 	return GetModDocTemplate()->size();
@@ -392,6 +398,7 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_FILE_CLOSEALL, OnFileCloseAll)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
+	ON_UPDATE_COMMAND_UI(ID_FILE_CLOSEALL, OnUpdateAnyDocsOpen)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1236,6 +1243,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
 		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
+			// Template file can be either a filename inside one of the preset and user TemplateModules folders, or a full path.
 			const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{

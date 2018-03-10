@@ -40,12 +40,12 @@ class Context;
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
-typedef struct MODPLUGDIB
+struct MODPLUGDIB
 {
 	BITMAPINFOHEADER bmiHeader;
 	RGBQUAD bmiColors[16];
 	LPBYTE lpDibBits;
-} MODPLUGDIB;
+};
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -302,6 +302,8 @@ public:
 	afx_msg void OnAppAbout();
 
 	afx_msg void OnFileCloseAll();
+	afx_msg void OnUpdateAnyDocsOpen(CCmdUI *cmd);
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
