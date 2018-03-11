@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  MED: Correctly import patterns with less channels than the maximum used
     amount. Import "STP" note stop command.
+ *  DBM: Key Off and Set Envelope Position were imported incorrectly.
 
 ### libopenmpt 0.2-beta29 (2018-01-28)
 
