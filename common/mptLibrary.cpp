@@ -544,6 +544,12 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 } // namespace mpt
 
 
+#else // !MPT_ENABLE_DYNBIND
+
+
+MPT_MSVC_WORKAROUND_LNK4221(mptLibrary)
+
+
 #endif // MPT_ENABLE_DYNBIND
 
 
