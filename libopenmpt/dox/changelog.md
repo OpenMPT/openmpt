@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta30
+### libopenmpt 0.2-beta30 (2018-03-11)
 
  *  MED: Correctly import patterns with less channels than the maximum used
     amount. Import "STP" note stop command.
