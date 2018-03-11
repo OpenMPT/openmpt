@@ -22,12 +22,17 @@
 
 #if !defined(MPT_BUILD_WINESUPPORT)
 
+#ifndef MPT_MFC_FULL
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS	// Do not include support for MFC controls in dialogs (reduces binary bloat; remove this #define if you want to use MFC controls)
+#endif // !MPT_MFC_FULL
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxcview.h>
 #include <afxdlgs.h>
+#ifdef MPT_MFC_FULL
+#include <afxlistctrl.h>
+#endif // MPT_MFC_FULL
 #include <afxole.h>
 
 #endif // !MPT_BUILD_WINESUPPORT

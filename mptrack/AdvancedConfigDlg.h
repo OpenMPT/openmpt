@@ -19,10 +19,30 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#ifdef MPT_MFC_FULL
+
+class CAdvancedSettingsList : public CMFCListCtrlEx
+{
+private:
+	std::vector<SettingPath> & m_indexToPath;
+public:
+	CAdvancedSettingsList(std::vector<SettingPath> & indexToPath) : m_indexToPath(indexToPath) {}
+	COLORREF OnGetCellBkColor(int nRow, int nColumn) override;
+	COLORREF OnGetCellTextColor(int nRow, int nColumn) override;
+};
+
+#endif // MPT_MFC_FULL
+
+
 class COptionsAdvanced: public CPropertyPage
 {
 protected:
+#ifdef MPT_MFC_FULL
+	CAdvancedSettingsList m_List;
+#else // MPT_MFC_FULL
 	CListCtrlEx m_List;
+#endif // !MPT_MFC_FULL
 #if MPT_USTRING_MODE_WIDE
 	typedef std::unordered_map<mpt::ustring, int> GroupMap;
 #else
@@ -33,7 +53,11 @@ protected:
 	bool m_listGrouped;
 
 public:
+#ifdef MPT_MFC_FULL
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_List(m_indexToPath), m_listGrouped(false) {}
+#else // !MPT_MFC_FULL
 	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_listGrouped(false) {}
+#endif // MPT_MFC_FULL
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -45,6 +69,9 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnFindStringChanged() { ReInit(); }
 	afx_msg void OnSaveNow();
+#ifndef MPT_MFC_FULL
+	afx_msg void OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult);
+#endif // !MPT_MFC_FULL
 
 	void ReInit();
 

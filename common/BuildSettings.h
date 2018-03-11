@@ -665,6 +665,10 @@
 
 // third-party library configuration
 
+#if defined(MODPLUG_TRACKER)
+//#define MPT_MFC_FULL  // use full MFC, including MFC controls
+#endif
+
 #ifdef MPT_WITH_FLAC
 #ifdef MPT_BUILD_MSVC_STATIC
 #define FLAC__NO_DLL

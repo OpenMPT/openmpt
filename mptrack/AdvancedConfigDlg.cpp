@@ -18,6 +18,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
 	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	OnOptionDblClick)
+#ifndef MPT_MFC_FULL
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST1, OnCustomDrawList)
+#endif
 	ON_EN_CHANGE(IDC_EDIT1,				OnFindStringChanged)
 	ON_COMMAND(IDC_BUTTON1, OnSaveNow)
 END_MESSAGE_MAP()
@@ -70,7 +73,11 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 	if(m_listGrouped)
 	{
+#ifdef MPT_MFC_FULL
+		const CMFCListCtrlEx::Header headers[] =
+#else // !MPT_MFC_FULL
 		const CListCtrlEx::Header headers[] =
+#endif // MPT_MFC_FULL
 		{
 			{ _T("Setting"), 150, LVCFMT_LEFT },
 			{ _T("Type"),    40, LVCFMT_LEFT },
@@ -80,7 +87,11 @@ BOOL COptionsAdvanced::OnInitDialog()
 		m_List.SetHeaders(headers);
 	} else
 	{
+#ifdef MPT_MFC_FULL
+		const CMFCListCtrlEx::Header headers[] =
+#else // !MPT_MFC_FULL
 		const CListCtrlEx::Header headers[] =
+#endif // MPT_MFC_FULL
 		{
 			{ _T("Setting"), 200, LVCFMT_LEFT },
 			{ _T("Type"),    40, LVCFMT_LEFT },
@@ -240,6 +251,53 @@ BOOL COptionsAdvanced::OnSetActive()
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_ADVANCED;
 	return CPropertyPage::OnSetActive();
 }
+
+
+#ifdef MPT_MFC_FULL
+
+
+COLORREF CAdvancedSettingsList::OnGetCellBkColor(int nRow, int /* nColumn */ )
+{
+	const bool isDefault = theApp.GetSettings().GetMap().find(m_indexToPath[GetItemData(nRow)])->second.IsDefault();
+	COLORREF defColor = GetBkColor();
+	COLORREF txtColor = GetTextColor();
+	COLORREF modColor = RGB(GetRValue(defColor) * 0.9 + GetRValue(txtColor) * 0.1, GetGValue(defColor) * 0.9 + GetGValue(txtColor) * 0.1, GetBValue(defColor) * 0.9 + GetBValue(txtColor) * 0.1);
+	return isDefault ? defColor : modColor;
+}
+
+
+COLORREF CAdvancedSettingsList::OnGetCellTextColor(int nRow, int nColumn)
+{
+	return CMFCListCtrlEx::OnGetCellTextColor(nRow, nColumn);
+}
+
+
+#else // !MPT_MFC_FULL
+
+
+void COptionsAdvanced::OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMLVCUSTOMDRAW *pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>(pNMHDR);
+	*pResult = CDRF_DODEFAULT;
+	switch(pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+	case CDDS_ITEMPREPAINT:
+		{
+			const bool isDefault = theApp.GetSettings().GetMap().find(m_indexToPath[pLVCD->nmcd.lItemlParam])->second.IsDefault();
+			COLORREF defColor = m_List.GetBkColor();
+			COLORREF txtColor = m_List.GetTextColor();
+			COLORREF modColor = RGB(GetRValue(defColor) * 0.9 + GetRValue(txtColor) * 0.1, GetGValue(defColor) * 0.9 + GetGValue(txtColor) * 0.1, GetBValue(defColor) * 0.9 + GetBValue(txtColor) * 0.1);
+			pLVCD->clrTextBk = isDefault ? defColor : modColor;
+		}
+		break;
+	}	
+}
+
+
+#endif // MPT_MFC_FULL
 
 
 void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
