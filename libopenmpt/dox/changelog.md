@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.8-pre
+
 ### libopenmpt 0.3.7 (2018-03-11)
 
  *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi due to missing
