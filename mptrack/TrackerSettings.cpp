@@ -1026,7 +1026,6 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 	colours[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
 	colours[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
 	colours[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
-	colours[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
 	// VU-Meters
 	colours[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	colours[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
@@ -1046,6 +1045,8 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 	colours[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
 	colours[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
 	colours[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
+	colours[MODCOLOR_ENVELOPE_RELEASE] = RGB(0xFF, 0xFF, 0x00);
 }
 
 

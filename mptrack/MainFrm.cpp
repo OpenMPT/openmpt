@@ -143,8 +143,6 @@ HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
 HPEN CMainFrame::penHalfDarkGray = NULL;
 HPEN CMainFrame::penSample = NULL;
-HPEN CMainFrame::penEnvelope = NULL;
-HPEN CMainFrame::penEnvelopeHighlight = NULL;
 HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
@@ -394,8 +392,6 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penLightGray);
 	DeleteGDIObject(penDarkGray);
 	DeleteGDIObject(penSample);
-	DeleteGDIObject(penEnvelope);
-	DeleteGDIObject(penEnvelopeHighlight);
 	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penScratch);
 	DeleteGDIObject(penGray00);
@@ -1129,10 +1125,6 @@ void CMainFrame::UpdateColors()
 	}
 	if (penSample) DeleteObject(penSample);
 	penSample = ::CreatePen(PS_SOLID, 0, colors[MODCOLOR_SAMPLE]);
-	if (penEnvelope) DeleteObject(penEnvelope);
-	penEnvelope = ::CreatePen(PS_SOLID, 0, colors[MODCOLOR_ENVELOPES]);
-	if (penEnvelopeHighlight) DeleteObject(penEnvelopeHighlight);
-	penEnvelopeHighlight = ::CreatePen(PS_SOLID, 0, RGB(0xFF, 0xFF, 0x00));
 
 	// Generel tab VU meters
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)

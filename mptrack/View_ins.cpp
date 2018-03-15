@@ -960,7 +960,8 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if (maxpoint)
 	{
 		maxpoint--;
-		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
+		m_dcMemMain.SelectObject(GetStockObject(DC_PEN));
+		m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPES]);
 		uint32 releaseNode = EnvGetReleaseNode();
 		RECT rect;
 		for (uint32 i = 0; i <= maxpoint; i++)
@@ -978,7 +979,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			if (i == releaseNode)
 			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
-				m_dcMemMain.SelectObject(CMainFrame::penEnvelopeHighlight);
+				m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPE_RELEASE]);
 			} else if (i == m_nDragItem - 1)
 			{
 				// currently selected env point

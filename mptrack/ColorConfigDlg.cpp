@@ -37,7 +37,7 @@ static const struct ColorDescriptions
 	{ _T("Channel Separator"),   0, MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, _T("Highlight:"), _T("Face:"), _T("Shadow:") },
 	{ _T("Next/Prev Pattern"),   0, MODCOLOR_BLENDCOLOR, 0, 0, _T("Blend Colour:"), nullptr, nullptr },
 	{ _T("Sample Editor"),       1, MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, _T("Sample Data:"), _T("Background:"), _T("Selection:") },
-	{ _T("Instrument Editor"),   2, MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, _T("Envelopes:"), _T("Background:"), nullptr },
+	{ _T("Instrument Editor"),   2, MODCOLOR_ENVELOPES, MODCOLOR_ENVELOPE_RELEASE, MODCOLOR_BACKENV, _T("Envelopes:"), _T("Envelopes (Release):"), _T("Background:") },
 	{ _T("VU-Meters"),           0, MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, _T("Hi:"), _T("Med:"), _T("Lo:") },
 	{ _T("VU-Meters (Plugins)"), 0, MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST, _T("Hi:"), _T("Med:"), _T("Lo:") }
 };
@@ -383,6 +383,7 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 		// Envelope Editor
 		case 10:
 			p[0] = rgb2quad(CustomColors[MODCOLOR_BACKENV]);
+			p[2] = rgb2quad(CustomColors[MODCOLOR_ENVELOPE_RELEASE]);
 			break;
 		}
 		HDC hdc = lpdis->hDC;
