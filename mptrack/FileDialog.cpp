@@ -31,7 +31,14 @@ public:
 		: CFileDialog(bOpenFileDialog ? TRUE : FALSE, lpszDefExt, lpszFileName, dwFlags, lpszFilter, pParentWnd, dwSize, bVistaStyle)
 		, doPreview(preview)
 		, played(false)
-	{ }
+		, m_fileNameBuf(65536)
+	{
+		// MFC's filename buffer is way too small for multi-selections of a large number of files.
+		_tcsncpy(m_fileNameBuf.data(), lpszFileName, m_fileNameBuf.size());
+		m_fileNameBuf.back() = '\0';
+		m_ofn.lpstrFile = m_fileNameBuf.data();
+		m_ofn.nMaxFile = m_fileNameBuf.size();
+	}
 
 	~CFileDialogEx()
 	{
@@ -59,6 +66,7 @@ public:
 #endif
 
 protected:
+	std::vector<TCHAR> m_fileNameBuf;
 	CString oldName;
 	bool doPreview, played;
 
