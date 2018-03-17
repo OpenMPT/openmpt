@@ -14,14 +14,14 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
- devenv libopenmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
- devenv openmpt123.sln /build "Release|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild openmpt123.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  if "%MPT_VS_ARCH%" == "Win32" (
-  devenv in_openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
-  devenv xmp-openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
-  devenv foo_openmpt.sln /build "Release|%MPT_VS_ARCH%" || goto error
+  msbuild in_openmpt.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild xmp-openmpt.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild foo_openmpt.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  )
- devenv libopenmpt.sln /build "ReleaseShared|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Build /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
 cd ..\.. || goto error
 
