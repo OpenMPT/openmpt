@@ -48,6 +48,9 @@
 #endif
 #include "../common/mptBufferIO.h"
 #include <limits>
+#ifdef LIBOPENMPT_BUILD
+#include <iostream>
+#endif // LIBOPENMPT_BUILD
 #include <istream>
 #include <ostream>
 #include <stdexcept>
@@ -122,6 +125,21 @@ mpt::PathString GetPathPrefix()
 
 void DoTests()
 {
+
+	#ifdef LIBOPENMPT_BUILD
+
+		std::cout << std::flush;
+		std::clog << std::flush;
+		std::cerr << std::flush;
+	
+		std::cout << "libopenmpt test suite" << std::endl;
+
+		std::cout << "Version: " << MptVersion::GetVersionString(MptVersion::StringVersion | MptVersion::StringRevision | MptVersion::StringBitness | MptVersion::StringSourceInfo | MptVersion::StringBuildFlags | MptVersion::StringBuildFeatures) << std::endl;
+		std::cout << "Compiler: " << MptVersion::GetBuildCompilerString() << std::endl;
+
+		std::cout << std::flush;
+
+	#endif
 
 	#if MPT_OS_WINDOWS
 
