@@ -134,8 +134,13 @@ void DoTests()
 	
 		std::cout << "libopenmpt test suite" << std::endl;
 
-		std::cout << "Version: " << MptVersion::GetVersionString(MptVersion::StringVersion | MptVersion::StringRevision | MptVersion::StringBitness | MptVersion::StringSourceInfo | MptVersion::StringBuildFlags | MptVersion::StringBuildFeatures) << std::endl;
+		std::cout << "Version.: " << MptVersion::GetVersionString(MptVersion::StringVersion | MptVersion::StringRevision | MptVersion::StringBitness | MptVersion::StringSourceInfo | MptVersion::StringBuildFlags | MptVersion::StringBuildFeatures) << std::endl;
 		std::cout << "Compiler: " << MptVersion::GetBuildCompilerString() << std::endl;
+		#if MPT_OS_WINDOWS
+			std::cout << "Required Windows Kernel Level: " << mpt::ToCharset(mpt::CharsetASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) << std::endl;
+			std::cout << "Required Windows API Level...: " << mpt::ToCharset(mpt::CharsetASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) << std::endl;
+			std::cout << "Windows.: " << mpt::ToCharset(mpt::CharsetASCII, mpt::Windows::Version::Current().GetName()) << std::endl;
+		#endif
 
 		std::cout << std::flush;
 
