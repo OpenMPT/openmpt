@@ -1,8 +1,5 @@
-libvorbis library version 1.3.5.
+libvorbis library version 1.3.6.
 The following changes have been made:
-- The following commits have been applied:
-  - https://github.com/xiph/vorbis/commit/a79ec216cd119069c68b8f3542c6a425a74ab993
-  - https://github.com/xiph/vorbis/commit/c1c2831fc7306d5fbd7bc800324efd12b28d327f
 - Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
   symbian, test, vq) have been removed.
 - For building, premake is used to generate Visual Studio project files.
