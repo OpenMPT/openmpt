@@ -14,9 +14,9 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_TARGET%" || goto error
 
- devenv libopenmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
- devenv libopenmpt.sln /clean "ReleaseShared|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
 cd ..\.. || goto error
 

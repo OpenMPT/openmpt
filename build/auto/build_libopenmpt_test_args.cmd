@@ -13,7 +13,7 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
- devenv libopenmpt_test.sln /build "Release|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt_test.sln /target:Build /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 cd ..\.. || goto error
 
 

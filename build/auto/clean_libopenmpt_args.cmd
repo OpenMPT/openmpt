@@ -14,16 +14,16 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
- devenv libopenmpt_test.sln /clean "Release|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt_test.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
- devenv libopenmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
- devenv openmpt123.sln /clean "Release|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild openmpt123.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  if "%MPT_VS_ARCH%" == "Win32" (
-  devenv in_openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
-  devenv xmp-openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
-  devenv foo_openmpt.sln /clean "Release|%MPT_VS_ARCH%" || goto error
+  msbuild in_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild xmp-openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild foo_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  )
- devenv libopenmpt.sln /clean "ReleaseShared|%MPT_VS_ARCH%" || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  
 cd ..\.. || goto error
 

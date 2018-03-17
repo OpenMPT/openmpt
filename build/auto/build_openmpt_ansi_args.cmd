@@ -14,8 +14,8 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
-devenv OpenMPT-ANSI.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH%" || goto error
-devenv PluginBridge.sln /build "%MPT_VS_CONF%|%MPT_VS_ARCH_OTHER%" || goto error
+msbuild OpenMPT-ANSI.sln /target:Build /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+msbuild PluginBridge.sln /target:Build /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH_OTHER% /maxcpucount /verbosity:minimal || goto error
 
 cd ..\.. || goto error
 
