@@ -16,23 +16,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#ifdef MODPLUG_TRACKER
-
-namespace Util
-{
-
-
-#if MPT_OS_WINDOWS
-
-
-#endif // MPT_OS_WINDOWS
-
-
-} // namespace Util
-
-#endif // MODPLUG_TRACKER
-
-
 namespace Util
 {
 
