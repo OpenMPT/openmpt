@@ -145,6 +145,7 @@ struct Context
 		, function(c.function)
 	{
 	}
+	Context & operator = (const Context &c) = delete;
 }; // class Context
 
 #define MPT_LOG_CURRENTCONTEXT() mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
