@@ -41,6 +41,7 @@ public:
 	MPT_CONSTEXPR11_FUN enum_value_type() noexcept : bits(0) { }
 	MPT_CONSTEXPR11_FUN enum_value_type(const enum_value_type &x) noexcept : bits(x.bits) { }
 	MPT_CONSTEXPR11_FUN enum_value_type(enum_type x) noexcept : bits(static_cast<store_type>(x)) { }
+	MPT_CONSTEXPR14_FUN enum_value_type & operator = (const enum_value_type &x) noexcept { bits = x.bits; return *this; }
 private:
 	explicit MPT_CONSTEXPR11_FUN enum_value_type(store_type x) noexcept : bits(x) { } // private in order to prevent accidental conversions. use from_bits.
 	MPT_CONSTEXPR11_FUN operator store_type () const noexcept { return bits; }  // private in order to prevent accidental conversions. use as_bits.
@@ -174,6 +175,10 @@ public:
 	}
 
 	MPT_CONSTEXPR11_FUN FlagSet(enum_type flag) noexcept : bits_(store_from_value(value_type(flag)))
+	{
+	}
+
+	MPT_CONSTEXPR14_FUN FlagSet(const FlagSet &flags) noexcept : bits_(flags.load())
 	{
 	}
 
