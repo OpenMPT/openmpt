@@ -18,6 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 {
 	setVSTiVolume(1.0f);
+	SetMixLevels(mixLevelsCompatible);
 }
 
 void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
