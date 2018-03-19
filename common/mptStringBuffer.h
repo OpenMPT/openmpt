@@ -67,6 +67,8 @@ private:
 	Tchar * buf;
 	std::size_t size;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	explicit StringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
@@ -99,6 +101,8 @@ private:
 	const Tchar * buf;
 	std::size_t size;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	explicit StringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
@@ -171,6 +175,8 @@ private:
 	std::size_t size;
 	String::ReadWriteMode mode;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	StringModeBufRefImpl(Tchar * buf, std::size_t size, String::ReadWriteMode mode)
 		: buf(buf)
 		, size(size)
@@ -202,6 +208,8 @@ private:
 	std::size_t size;
 	String::ReadWriteMode mode;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	StringModeBufRefImpl(const Tchar * buf, std::size_t size, String::ReadWriteMode mode)
 		: buf(buf)
 		, size(size)
@@ -280,6 +288,8 @@ private:
 	Tchar * buf;
 	std::size_t size;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	explicit CStringBufRefImpl(Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
@@ -311,6 +321,8 @@ private:
 	const Tchar * buf;
 	std::size_t size;
 public:
+	// cppcheck false-positive
+	// cppcheck-suppress uninitMemberVar
 	explicit CStringBufRefImpl(const Tchar * buf, std::size_t size)
 		: buf(buf)
 		, size(size)
