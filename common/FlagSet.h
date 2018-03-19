@@ -28,8 +28,8 @@ struct enum_traits
 
 // Type-safe wrapper around an enum, that can represent all enum values and bitwise compositions thereof.
 // Conversions to and from plain integers as well as conversions to the base enum are always explicit.
-// cppcheck-suppress copyCtorAndEqOperator
 template <typename enum_t>
+// cppcheck-suppress copyCtorAndEqOperator
 class enum_value_type
 {
 public:
@@ -143,8 +143,8 @@ public:
 };
 
 
-// cppcheck-suppress copyCtorAndEqOperator
 template <typename enum_t, typename store_t = typename enum_value_type<enum_t>::store_type >
+// cppcheck-suppress copyCtorAndEqOperator
 class FlagSet
 {
 public:
