@@ -156,6 +156,7 @@ module::module( const module & ) {
 	throw exception("openmpt::module is non-copyable");
 }
 
+// cppcheck-suppress operatorEqVarError
 void module::operator = ( const module & ) {
 	throw exception("openmpt::module is non-copyable");
 }
@@ -420,6 +421,7 @@ module_ext::~module_ext() {
 module_ext::module_ext( const module_ext & other ) : module(other) {
 	throw std::runtime_error("openmpt::module_ext is non-copyable");
 }
+// cppcheck-suppress operatorEqVarError
 void module_ext::operator = ( const module_ext & ) {
 	throw std::runtime_error("openmpt::module_ext is non-copyable");
 }
