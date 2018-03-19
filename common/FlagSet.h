@@ -178,7 +178,7 @@ public:
 	{
 	}
 
-	MPT_CONSTEXPR14_FUN FlagSet(const FlagSet &flags) noexcept : bits_(flags.load())
+	MPT_CONSTEXPR14_FUN FlagSet(const FlagSet &flags) noexcept : bits_(flags.bits_)
 	{
 	}
 
