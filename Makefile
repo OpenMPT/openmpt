@@ -203,6 +203,8 @@ HOST_FLAVOUR=
 
 TOOLCHAIN_SUFFIX=
 
+CPPCHECK = cppcheck
+
 RM = del /q /f
 RMTREE = del /q /f /s
 INSTALL = echo install
@@ -210,12 +212,16 @@ INSTALL_MAKE_DIR = echo install
 INSTALL_DIR = echo install
 FIXPATH = $(subst /,\,$1)
 
+NUMTHREADS:=$(NUMBER_OF_PROCESSORS)
+
 else
 
 HOST=unix
 HOST_FLAVOUR=
 
 TOOLCHAIN_SUFFIX=
+
+CPPCHECK = cppcheck
 
 RM = rm -f
 RMTREE = rm -rf
@@ -236,6 +242,12 @@ HOST_FLAVOUR=FREEBSD
 endif
 ifeq ($(UNAME_S),Haiku)
 HOST_FLAVOUR=HAIKU
+endif
+
+ifeq ($(HOST_FLAVOUR),LINUX)
+NUMTHREADS:=$(shell nproc)
+else
+NUMTHREADS:=1
 endif
 
 endif
@@ -587,6 +599,13 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
 endif
 
+CPPCHECK_FLAGS += -j $(NUMTHREADS)
+CPPCHECK_FLAGS += --std=c99 --std=c++11
+CPPCHECK_FLAGS += --quiet
+CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: {severity}: {message} [{id}]'
+CPPCHECK_FLAGS += --suppress=missingIncludeSystem
+
+CPPCHECK_FLAGS += $(CPPFLAGS)
 CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
 LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
 LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
@@ -1358,6 +1377,21 @@ ifeq ($(HOST),unix)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIOCPP) examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIOCPP) -o $@
 endif
+
+.PHONY: cppcheck-libopenmpt
+cppcheck-libopenmpt:
+	$(INFO) [CPPCHECK] libopenmpt
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) --check-config --suppress=unmatchedSuppression $(LIBOPENMPT_CXX_SOURCES) $(LIBOPENMPT_C_SOURCES)
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) $(LIBOPENMPT_CXX_SOURCES) $(LIBOPENMPT_C_SOURCES)
+
+.PHONY: cppcheck-libopenmpt-test
+cppcheck-libopenmpt-test:
+	$(INFO) [CPPCHECK] libopenmpt-test
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) --check-config --suppress=unmatchedSuppression $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
+
+.PHONY: cppcheck
+cppcheck: cppcheck-libopenmpt cppcheck-libopenmpt-test
 
 .PHONY: clean
 clean:
