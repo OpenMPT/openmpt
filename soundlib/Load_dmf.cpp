@@ -934,7 +934,6 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	FileHistory mptHistory;
-	MemsetZero(mptHistory);
 	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(1), uint8(31));
 	mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
 	mptHistory.loadDate.tm_year = fileHeader.creationYear;

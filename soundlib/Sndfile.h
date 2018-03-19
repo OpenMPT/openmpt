@@ -221,6 +221,7 @@ class CModDoc;
 
 struct FileHistory
 {
+	FileHistory() : openTime(0) { MemsetZero(loadDate); }
 	// Date when the file was loaded in the the tracker or created.
 	tm loadDate;
 	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).

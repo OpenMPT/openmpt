@@ -1204,7 +1204,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					}
 
 					FileHistory hist;
-					MemsetZero(hist);
 					hist.openTime = static_cast<uint32>(editTime * (HISTORY_TIMER_PRECISION / 18.2));
 					m_FileHistory.push_back(hist);
 				}
