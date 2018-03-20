@@ -500,7 +500,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				ModCommand dummy;
+				ModCommand dummy = ModCommand::Empty();
 				ModCommand &m = ch <= GetNumChannels() ? patRow[ch - 1] : dummy;
 
 				const uint8 b = chunk.ReadUint8();
