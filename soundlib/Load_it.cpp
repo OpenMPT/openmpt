@@ -974,7 +974,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Now we grab the data for this particular row/channel.
-			ModCommand dummy;
+			ModCommand dummy = ModCommand::Empty();
 			ModCommand &m = ch < m_nChannels ? patData[ch] : dummy;
 
 			if(chnMask[ch] & 0x10)
