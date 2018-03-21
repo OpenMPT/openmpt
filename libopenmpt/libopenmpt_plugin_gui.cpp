@@ -273,7 +273,7 @@ protected:
 };
 
 BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipText)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CSettingsDialog::OnToolTipText)
 END_MESSAGE_MAP()
 
 

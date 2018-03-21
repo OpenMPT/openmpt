@@ -491,10 +491,10 @@ namespace MidiExport
 bool CModToMidi::s_overlappingInstruments = false;
 
 BEGIN_MESSAGE_MAP(CModToMidi, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	UpdateDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnChannelChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,	OnProgramChanged)
-	ON_COMMAND(IDC_CHECK1,			OnOverlapChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&CModToMidi::UpdateDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&CModToMidi::OnChannelChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,	&CModToMidi::OnProgramChanged)
+	ON_COMMAND(IDC_CHECK1,			&CModToMidi::OnOverlapChanged)
 	ON_WM_VSCROLL()
 END_MESSAGE_MAP()
 

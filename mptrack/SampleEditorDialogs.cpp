@@ -193,10 +193,10 @@ void CRawSampleDlg::UpdateDialog()
 // Add silence / resize sample dialog
 
 BEGIN_MESSAGE_MAP(CAddSilenceDlg, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO1,				OnUnitChanged)
-	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		OnEditModeChanged)
-	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		OnEditModeChanged)
-	ON_COMMAND(IDC_RADIO_RESIZETO,				OnEditModeChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,				&CAddSilenceDlg::OnUnitChanged)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		&CAddSilenceDlg::OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		&CAddSilenceDlg::OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_RESIZETO,				&CAddSilenceDlg::OnEditModeChanged)
 END_MESSAGE_MAP()
 
 SmpLength CAddSilenceDlg::m_addSamples = 32;
@@ -365,10 +365,10 @@ bool CSampleXFadeDlg::m_useSustainLoop = false;
 
 BEGIN_MESSAGE_MAP(CSampleXFadeDlg, CDialog)
 	ON_WM_HSCROLL()
-	ON_COMMAND(IDC_RADIO1,	OnLoopTypeChanged)
-	ON_COMMAND(IDC_RADIO2,	OnLoopTypeChanged)
-	ON_EN_CHANGE(IDC_EDIT1,	OnFadeLengthChanged)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
+	ON_COMMAND(IDC_RADIO1,	&CSampleXFadeDlg::OnLoopTypeChanged)
+	ON_COMMAND(IDC_RADIO2,	&CSampleXFadeDlg::OnLoopTypeChanged)
+	ON_EN_CHANGE(IDC_EDIT1,	&CSampleXFadeDlg::OnFadeLengthChanged)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CSampleXFadeDlg::OnToolTipText)
 END_MESSAGE_MAP()
 
 
@@ -509,7 +509,7 @@ CResamplingDlg::ResamplingOption CResamplingDlg::lastChoice = CResamplingDlg::Up
 uint32 CResamplingDlg::lastFrequency = 0;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
-	ON_EN_SETFOCUS(IDC_EDIT1, OnFocusEdit)
+	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
 END_MESSAGE_MAP()
 
 BOOL CResamplingDlg::OnInitDialog()

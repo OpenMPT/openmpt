@@ -1014,9 +1014,9 @@ bool PatternClipboard::FromSystemClipboard(std::string &data)
 
 
 BEGIN_MESSAGE_MAP(PatternClipboardDialog, CDialog)
-	ON_EN_UPDATE(IDC_EDIT1,		OnNumClipboardsChanged)
-	ON_LBN_SELCHANGE(IDC_LIST1,	OnSelectClipboard)
-	ON_LBN_DBLCLK(IDC_LIST1,	OnEditName)
+	ON_EN_UPDATE(IDC_EDIT1,		&PatternClipboardDialog::OnNumClipboardsChanged)
+	ON_LBN_SELCHANGE(IDC_LIST1,	&PatternClipboardDialog::OnSelectClipboard)
+	ON_LBN_DBLCLK(IDC_LIST1,	&PatternClipboardDialog::OnEditName)
 END_MESSAGE_MAP()
 
 PatternClipboardDialog PatternClipboardDialog::instance;

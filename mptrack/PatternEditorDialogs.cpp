@@ -106,10 +106,10 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 // CPatternPropertiesDlg
 
 BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, CDialog)
-	ON_COMMAND(IDC_BUTTON_HALF,		OnHalfRowNumber)
-	ON_COMMAND(IDC_BUTTON_DOUBLE,	OnDoubleRowNumber)
-	ON_COMMAND(IDC_CHECK1,			OnOverrideSignature)
-	ON_COMMAND(IDC_BUTTON1,			OnTempoSwing)
+	ON_COMMAND(IDC_BUTTON_HALF,		&CPatternPropertiesDlg::OnHalfRowNumber)
+	ON_COMMAND(IDC_BUTTON_DOUBLE,	&CPatternPropertiesDlg::OnDoubleRowNumber)
+	ON_COMMAND(IDC_CHECK1,			&CPatternPropertiesDlg::OnOverrideSignature)
+	ON_COMMAND(IDC_BUTTON1,			&CPatternPropertiesDlg::OnTempoSwing)
 END_MESSAGE_MAP()
 
 BOOL CPatternPropertiesDlg::OnInitDialog()
@@ -302,11 +302,11 @@ BEGIN_MESSAGE_MAP(CEditCommand, CDialog)
 	ON_WM_ACTIVATE()
 	ON_WM_CLOSE()
 
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,	OnVolCmdChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO4,	OnCommandChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO5,	OnPlugParamChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&CEditCommand::OnNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&CEditCommand::OnNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,	&CEditCommand::OnVolCmdChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO4,	&CEditCommand::OnCommandChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO5,	&CEditCommand::OnPlugParamChanged)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -852,12 +852,12 @@ void CEditCommand::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
 // Chord Editor
 
 BEGIN_MESSAGE_MAP(CChordEditor, CDialog)
-	ON_MESSAGE(WM_MOD_KBDNOTIFY,	OnKeyboardNotify)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnChordChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnBaseNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,	OnNote1Changed)
-	ON_CBN_SELCHANGE(IDC_COMBO4,	OnNote2Changed)
-	ON_CBN_SELCHANGE(IDC_COMBO5,	OnNote3Changed)
+	ON_MESSAGE(WM_MOD_KBDNOTIFY,	&CChordEditor::OnKeyboardNotify)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&CChordEditor::OnChordChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&CChordEditor::OnBaseNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,	&CChordEditor::OnNote1Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO4,	&CChordEditor::OnNote2Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO5,	&CChordEditor::OnNote3Changed)
 END_MESSAGE_MAP()
 
 
@@ -1045,7 +1045,7 @@ void CChordEditor::OnNote3Changed()
 // Keyboard Split Settings (pattern editor)
 
 BEGIN_MESSAGE_MAP(CSplitKeyboadSettings, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER,	OnOctaveModifierChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER,	&CSplitKeyboadSettings::OnOctaveModifierChanged)
 END_MESSAGE_MAP()
 
 
@@ -1159,14 +1159,14 @@ void CSplitKeyboadSettings::OnOctaveModifierChanged()
 BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
 	ON_WM_HSCROLL()		// Sliders
 	ON_WM_ACTIVATE()	// Catch Window focus change
-	ON_EN_UPDATE(IDC_EDIT1,	OnVolChanged)
-	ON_EN_UPDATE(IDC_EDIT2,	OnPanChanged)
-	ON_EN_UPDATE(IDC_EDIT3,	OnNameChanged)
-	ON_COMMAND(IDC_CHECK1,	OnMuteChanged)
-	ON_COMMAND(IDC_CHECK2,	OnSurroundChanged)
-	ON_COMMAND(IDC_BUTTON1,	OnPrevChannel)
-	ON_COMMAND(IDC_BUTTON2,	OnNextChannel)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
+	ON_EN_UPDATE(IDC_EDIT1,	&QuickChannelProperties::OnVolChanged)
+	ON_EN_UPDATE(IDC_EDIT2,	&QuickChannelProperties::OnPanChanged)
+	ON_EN_UPDATE(IDC_EDIT3,	&QuickChannelProperties::OnNameChanged)
+	ON_COMMAND(IDC_CHECK1,	&QuickChannelProperties::OnMuteChanged)
+	ON_COMMAND(IDC_CHECK2,	&QuickChannelProperties::OnSurroundChanged)
+	ON_COMMAND(IDC_BUTTON1,	&QuickChannelProperties::OnPrevChannel)
+	ON_COMMAND(IDC_BUTTON2,	&QuickChannelProperties::OnNextChannel)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&QuickChannelProperties::OnCustomKeyMsg)
 END_MESSAGE_MAP()
 
 

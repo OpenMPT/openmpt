@@ -33,8 +33,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
-	ON_EN_UPDATE(IDC_EDIT_COMMENTS,		OnCommentsUpdated)
-	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		OnCommentsChanged)
+	ON_EN_UPDATE(IDC_EDIT_COMMENTS,		&CCtrlComments::OnCommentsUpdated)
+	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		&CCtrlComments::OnCommentsChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

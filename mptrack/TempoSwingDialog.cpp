@@ -31,10 +31,10 @@ TempoSwing::value_type CTempoSwingDlg::RowCtls::GetValue() const
 BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
 	//{{AFX_MSG_MAP(CTempoSwingDlg)
 	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_BUTTON1,	OnReset)
-	ON_COMMAND(IDC_BUTTON2,	OnUseGlobal)
-	ON_COMMAND(IDC_CHECK1,	OnToggleGroup)
-	ON_EN_CHANGE(IDC_EDIT1, OnGroupChanged)
+	ON_COMMAND(IDC_BUTTON1,	&CTempoSwingDlg::OnReset)
+	ON_COMMAND(IDC_BUTTON2,	&CTempoSwingDlg::OnUseGlobal)
+	ON_COMMAND(IDC_CHECK1,	&CTempoSwingDlg::OnToggleGroup)
+	ON_EN_CHANGE(IDC_EDIT1, &CTempoSwingDlg::OnGroupChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -358,7 +358,7 @@ void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, CDialog)
 	//{{AFX_MSG_MAP(CTempoSwingDlg::SliderContainer)
 	ON_WM_HSCROLL()
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CTempoSwingDlg::SliderContainer::OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

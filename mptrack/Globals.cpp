@@ -39,13 +39,13 @@ BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
 #ifdef WM_DPICHANGED
-	ON_MESSAGE(WM_DPICHANGED, OnDPIChanged)
+	ON_MESSAGE(WM_DPICHANGED, &CModControlDlg::OnDPIChanged)
 #else
-	ON_MESSAGE(0x02E0, OnDPIChanged)
+	ON_MESSAGE(0x02E0, &CModControlDlg::OnDPIChanged)
 #endif
-	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
+	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		&CModControlDlg::OnUnlockControls)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -194,17 +194,17 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	//{{AFX_MSG_MAP(CModControlView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
-	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,			OnActivateModView)
-	ON_MESSAGE(WM_MOD_CTRLMSG,				OnModCtrlMsg)
-	ON_MESSAGE(WM_MOD_GETTOOLTIPTEXT,		OnGetToolTipText)
-	ON_COMMAND(ID_EDIT_CUT,					OnEditCut)
-	ON_COMMAND(ID_EDIT_COPY,				OnEditCopy)
-	ON_COMMAND(ID_EDIT_PASTE,				OnEditPaste)
-	ON_COMMAND(ID_EDIT_MIXPASTE,			OnEditMixPaste)
-	ON_COMMAND(ID_EDIT_MIXPASTE_ITSTYLE,	OnEditMixPasteITStyle)
-	ON_COMMAND(ID_EDIT_FIND,				OnEditFind)
-	ON_COMMAND(ID_EDIT_FINDNEXT,			OnEditFindNext)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	&CModControlView::OnTabSelchange)
+	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,			&CModControlView::OnActivateModView)
+	ON_MESSAGE(WM_MOD_CTRLMSG,				&CModControlView::OnModCtrlMsg)
+	ON_MESSAGE(WM_MOD_GETTOOLTIPTEXT,		&CModControlView::OnGetToolTipText)
+	ON_COMMAND(ID_EDIT_CUT,					&CModControlView::OnEditCut)
+	ON_COMMAND(ID_EDIT_COPY,				&CModControlView::OnEditCopy)
+	ON_COMMAND(ID_EDIT_PASTE,				&CModControlView::OnEditPaste)
+	ON_COMMAND(ID_EDIT_MIXPASTE,			&CModControlView::OnEditMixPaste)
+	ON_COMMAND(ID_EDIT_MIXPASTE_ITSTYLE,	&CModControlView::OnEditMixPasteITStyle)
+	ON_COMMAND(ID_EDIT_FIND,				&CModControlView::OnEditFind)
+	ON_COMMAND(ID_EDIT_FINDNEXT,			&CModControlView::OnEditFindNext)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -542,13 +542,13 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	ON_WM_DESTROY()
 	ON_WM_MOUSEWHEEL()
 #ifdef WM_DPICHANGED
-	ON_MESSAGE(WM_DPICHANGED, OnDPIChanged)
+	ON_MESSAGE(WM_DPICHANGED, &CModScrollView::OnDPIChanged)
 #else
-	ON_MESSAGE(0x02E0, OnDPIChanged)
+	ON_MESSAGE(0x02E0, &CModScrollView::OnDPIChanged)
 #endif
-	ON_MESSAGE(WM_MOD_VIEWMSG,			OnReceiveModViewMsg)
-	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
-	ON_MESSAGE(WM_MOD_UPDATEPOSITION,	OnUpdatePosition)
+	ON_MESSAGE(WM_MOD_VIEWMSG,			&CModScrollView::OnReceiveModViewMsg)
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	&CModScrollView::OnDragonDropping)
+	ON_MESSAGE(WM_MOD_UPDATEPOSITION,	&CModScrollView::OnUpdatePosition)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -727,7 +727,7 @@ void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& si
 // 	CModControlBar
 
 BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
-	ON_MESSAGE(WM_HELPHITTEST,	OnHelpHitTest)
+	ON_MESSAGE(WM_HELPHITTEST,	&CModControlBar::OnHelpHitTest)
 END_MESSAGE_MAP()
 
 

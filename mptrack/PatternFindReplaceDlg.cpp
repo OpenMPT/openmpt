@@ -106,25 +106,25 @@ protected:
 
 
 BEGIN_MESSAGE_MAP(CFindReplaceTab, CPropertyPage)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnInstrChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,	OnVolCmdChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO4,	OnVolumeChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO5,	OnEffectChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,	OnParamChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO7,	OnPCParamChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&CFindReplaceTab::OnNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&CFindReplaceTab::OnInstrChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,	&CFindReplaceTab::OnVolCmdChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO4,	&CFindReplaceTab::OnVolumeChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO5,	&CFindReplaceTab::OnEffectChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6,	&CFindReplaceTab::OnParamChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO7,	&CFindReplaceTab::OnPCParamChanged)
 
-	ON_CBN_EDITCHANGE(IDC_COMBO4,	OnVolumeChanged)
-	ON_CBN_EDITCHANGE(IDC_COMBO6,	OnParamChanged)
+	ON_CBN_EDITCHANGE(IDC_COMBO4,	&CFindReplaceTab::OnVolumeChanged)
+	ON_CBN_EDITCHANGE(IDC_COMBO6,	&CFindReplaceTab::OnParamChanged)
 
-	ON_COMMAND(IDC_CHECK1,			OnCheckNote)
-	ON_COMMAND(IDC_CHECK2,			OnCheckInstr)
-	ON_COMMAND(IDC_CHECK3,			OnCheckVolCmd)
-	ON_COMMAND(IDC_CHECK4,			OnCheckVolume)
-	ON_COMMAND(IDC_CHECK5,			OnCheckEffect)
-	ON_COMMAND(IDC_CHECK6,			OnCheckParam)
+	ON_COMMAND(IDC_CHECK1,			&CFindReplaceTab::OnCheckNote)
+	ON_COMMAND(IDC_CHECK2,			&CFindReplaceTab::OnCheckInstr)
+	ON_COMMAND(IDC_CHECK3,			&CFindReplaceTab::OnCheckVolCmd)
+	ON_COMMAND(IDC_CHECK4,			&CFindReplaceTab::OnCheckVolume)
+	ON_COMMAND(IDC_CHECK5,			&CFindReplaceTab::OnCheckEffect)
+	ON_COMMAND(IDC_CHECK6,			&CFindReplaceTab::OnCheckParam)
 
-	ON_COMMAND(IDC_CHECK7,			OnCheckChannelSearch)
+	ON_COMMAND(IDC_CHECK7,			&CFindReplaceTab::OnCheckChannelSearch)
 END_MESSAGE_MAP()
 
 

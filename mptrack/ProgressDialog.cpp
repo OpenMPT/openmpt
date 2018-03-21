@@ -15,7 +15,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
-	ON_COMMAND(IDC_BUTTON1,	Run)
+	ON_COMMAND(IDC_BUTTON1,	&CProgressDialog::Run)
 END_MESSAGE_MAP()
 
 CProgressDialog::CProgressDialog(CWnd *parent)

@@ -32,12 +32,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
-	ON_CBN_SELCHANGE(IDC_COMBO1,			UpdateDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO_TEMPOMODE,	OnTempoModeChanged)
-	ON_COMMAND(IDC_CHECK_PT1X,				OnPTModeChanged)
-	ON_COMMAND(IDC_BUTTON1,					OnTempoSwing)
-	ON_COMMAND(IDC_BUTTON2,					OnLegacyPlaybackSettings)
-	ON_COMMAND(IDC_BUTTON3,					OnDefaultBehaviour)
+	ON_CBN_SELCHANGE(IDC_COMBO1,			&CModTypeDlg::UpdateDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO_TEMPOMODE,	&CModTypeDlg::OnTempoModeChanged)
+	ON_COMMAND(IDC_CHECK_PT1X,				&CModTypeDlg::OnPTModeChanged)
+	ON_COMMAND(IDC_BUTTON1,					&CModTypeDlg::OnTempoSwing)
+	ON_COMMAND(IDC_BUTTON2,					&CModTypeDlg::OnLegacyPlaybackSettings)
+	ON_COMMAND(IDC_BUTTON3,					&CModTypeDlg::OnDefaultBehaviour)
 
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 
@@ -480,8 +480,8 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 // CLegacyPlaybackSettings
 
 BEGIN_MESSAGE_MAP(CLegacyPlaybackSettingsDlg, CDialog)
-	ON_COMMAND(IDC_BUTTON1,			OnSelectDefaults)
-	ON_CLBN_CHKCHANGE(IDC_LIST1,	UpdateSelectDefaults)
+	ON_COMMAND(IDC_BUTTON1,			&CLegacyPlaybackSettingsDlg::OnSelectDefaults)
+	ON_CLBN_CHKCHANGE(IDC_LIST1,	&CLegacyPlaybackSettingsDlg::UpdateSelectDefaults)
 END_MESSAGE_MAP()
 
 void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
@@ -688,7 +688,7 @@ void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, CDialog)
-	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		OnChannelChanged)
+	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		&CRemoveChannelsDlg::OnChannelChanged)
 END_MESSAGE_MAP()
 
 
@@ -1035,10 +1035,10 @@ void CKeyboardControl::OnLButtonUp(UINT, CPoint)
 //
 
 BEGIN_MESSAGE_MAP(CSampleMapDlg, CDialog)
-	ON_MESSAGE(WM_MOD_KBDNOTIFY,	OnKeyboardNotify)
+	ON_MESSAGE(WM_MOD_KBDNOTIFY,	&CSampleMapDlg::OnKeyboardNotify)
 	ON_WM_HSCROLL()
-	ON_COMMAND(IDC_CHECK1,			OnUpdateSamples)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnUpdateKeyboard)
+	ON_COMMAND(IDC_CHECK1,			&CSampleMapDlg::OnUpdateSamples)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&CSampleMapDlg::OnUpdateKeyboard)
 END_MESSAGE_MAP()
 
 void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
@@ -1248,7 +1248,7 @@ void CSampleMapDlg::OnOK()
 // Edit history dialog
 
 BEGIN_MESSAGE_MAP(CEditHistoryDlg, CDialog)
-	ON_COMMAND(IDC_BTN_CLEAR,	OnClearHistory)
+	ON_COMMAND(IDC_BTN_CLEAR,	&CEditHistoryDlg::OnClearHistory)
 END_MESSAGE_MAP()
 
 

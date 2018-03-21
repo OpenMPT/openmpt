@@ -17,12 +17,12 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
-	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	OnOptionDblClick)
+	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&COptionsAdvanced::OnOptionDblClick)
 #ifndef MPT_MFC_FULL
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST1, OnCustomDrawList)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST1, &COptionsAdvanced::OnCustomDrawList)
 #endif
-	ON_EN_CHANGE(IDC_EDIT1,				OnFindStringChanged)
-	ON_COMMAND(IDC_BUTTON1, OnSaveNow)
+	ON_EN_CHANGE(IDC_EDIT1,				&COptionsAdvanced::OnFindStringChanged)
+	ON_COMMAND(IDC_BUTTON1, &COptionsAdvanced::OnSaveNow)
 END_MESSAGE_MAP()
 
 void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)

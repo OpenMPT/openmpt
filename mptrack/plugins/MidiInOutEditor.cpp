@@ -22,10 +22,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(MidiInOutEditor, CAbstractVstEditor)
 	//{{AFX_MSG_MAP(MidiInOutEditor)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnInputChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnOutputChanged)
-	ON_EN_CHANGE(IDC_EDIT1,			OnLatencyChanged)
-	ON_COMMAND(IDC_CHECK1,			OnTimingMessagesChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&MidiInOutEditor::OnInputChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&MidiInOutEditor::OnOutputChanged)
+	ON_EN_CHANGE(IDC_EDIT1,			&MidiInOutEditor::OnLatencyChanged)
+	ON_COMMAND(IDC_CHECK1,			&MidiInOutEditor::OnTimingMessagesChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

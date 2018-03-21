@@ -21,8 +21,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(ExternalSamplesDlg, CDialog)
 	//{{AFX_MSG_MAP(ExternalSamplesDlg)
-	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	OnSetPath)
-	ON_COMMAND(IDC_BUTTON1,				OnScanFolder)
+	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&ExternalSamplesDlg::OnSetPath)
+	ON_COMMAND(IDC_BUTTON1,				&ExternalSamplesDlg::OnScanFolder)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

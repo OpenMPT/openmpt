@@ -63,13 +63,13 @@ void CPSRatioCalc::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CPSRatioCalc, CDialog)
-	ON_EN_UPDATE(IDC_SAMPLE_LENGTH_NEW, OnEnChangeSamples)
-	ON_EN_UPDATE(IDC_MS_LENGTH_NEW, OnEnChangeMs)
-	ON_EN_UPDATE(IDC_SPEED, OnEnChangeSpeed)
-	ON_EN_UPDATE(IDC_TEMPO, OnEnChangeSpeed)
-	ON_EN_UPDATE(IDC_ROW_LENGTH_NEW2, OnEnChangeRows)
-	ON_EN_UPDATE(IDC_PSRATIO, OnEnChangeratio)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
+	ON_EN_UPDATE(IDC_SAMPLE_LENGTH_NEW, &CPSRatioCalc::OnEnChangeSamples)
+	ON_EN_UPDATE(IDC_MS_LENGTH_NEW, &CPSRatioCalc::OnEnChangeMs)
+	ON_EN_UPDATE(IDC_SPEED, &CPSRatioCalc::OnEnChangeSpeed)
+	ON_EN_UPDATE(IDC_TEMPO, &CPSRatioCalc::OnEnChangeSpeed)
+	ON_EN_UPDATE(IDC_ROW_LENGTH_NEW2, &CPSRatioCalc::OnEnChangeRows)
+	ON_EN_UPDATE(IDC_PSRATIO, &CPSRatioCalc::OnEnChangeratio)
+	ON_BN_CLICKED(IDOK, &CPSRatioCalc::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 

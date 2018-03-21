@@ -20,16 +20,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
-	ON_LBN_SELCHANGE(IDC_LIST1,		OnOptionSelChanged)
-	ON_CLBN_CHKCHANGE(IDC_LIST1,	OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO1,			OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO2,			OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO3,			OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT1,			OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnDefaultTypeChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnTemplateChanged)
-	ON_CBN_EDITCHANGE(IDC_COMBO2,	OnTemplateChanged)
-	ON_COMMAND(IDC_BUTTON1,			OnBrowseTemplate)
+	ON_LBN_SELCHANGE(IDC_LIST1,		&COptionsGeneral::OnOptionSelChanged)
+	ON_CLBN_CHKCHANGE(IDC_LIST1,	&COptionsGeneral::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO1,			&COptionsGeneral::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,			&COptionsGeneral::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,			&COptionsGeneral::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT1,			&COptionsGeneral::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	&COptionsGeneral::OnDefaultTypeChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&COptionsGeneral::OnTemplateChanged)
+	ON_CBN_EDITCHANGE(IDC_COMBO2,	&COptionsGeneral::OnTemplateChanged)
+	ON_COMMAND(IDC_BUTTON1,			&COptionsGeneral::OnBrowseTemplate)
 END_MESSAGE_MAP()
 
 

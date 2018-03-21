@@ -48,8 +48,8 @@ void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CPatternGotoDialog, CDialog)
-	ON_EN_CHANGE(IDC_GOTO_PAT, OnEnChangeGotoPat)
-	ON_EN_CHANGE(IDC_GOTO_ORD, OnEnChangeGotoOrd)
+	ON_EN_CHANGE(IDC_GOTO_PAT, &CPatternGotoDialog::OnEnChangeGotoPat)
+	ON_EN_CHANGE(IDC_GOTO_ORD, &CPatternGotoDialog::OnEnChangeGotoOrd)
 END_MESSAGE_MAP()
 
 

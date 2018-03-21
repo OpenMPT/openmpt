@@ -20,9 +20,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
-	ON_COMMAND(IDC_BUTTON1,			OnSaveAll)
-	ON_COMMAND(IDC_BUTTON2,			OnSaveNone)
-	ON_COMMAND(IDC_CHECK1,			OnSwitchFullPaths)
+	ON_COMMAND(IDC_BUTTON1,			&CloseMainDialog::OnSaveAll)
+	ON_COMMAND(IDC_BUTTON2,			&CloseMainDialog::OnSaveNone)
+	ON_COMMAND(IDC_CHECK1,			&CloseMainDialog::OnSwitchFullPaths)
 END_MESSAGE_MAP()
 
 

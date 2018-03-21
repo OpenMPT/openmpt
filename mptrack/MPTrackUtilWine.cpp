@@ -71,7 +71,7 @@ private:
 
 
 BEGIN_MESSAGE_MAP(CExecutePosixShellScriptProgressDialog, CDialog)
-	ON_COMMAND(IDC_BUTTON1,	OnButton1)
+	ON_COMMAND(IDC_BUTTON1,	&CExecutePosixShellScriptProgressDialog::OnButton1)
 END_MESSAGE_MAP()
 
 

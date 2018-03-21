@@ -422,14 +422,14 @@ CUpdateCheck::~CUpdateCheck()
 // CUpdateSetupDlg
 
 BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
-	ON_COMMAND(IDC_BUTTON1,			OnCheckNow)
-	ON_COMMAND(IDC_BUTTON2,			OnResetURL)
-	ON_COMMAND(IDC_RADIO1,			OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO2,			OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO3,			OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO4,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT1,			OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1,			&CUpdateSetupDlg::OnCheckNow)
+	ON_COMMAND(IDC_BUTTON2,			&CUpdateSetupDlg::OnResetURL)
+	ON_COMMAND(IDC_RADIO1,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO4,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT1,			&CUpdateSetupDlg::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
