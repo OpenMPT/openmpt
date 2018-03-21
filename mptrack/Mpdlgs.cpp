@@ -1349,12 +1349,12 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 
 	// DSP
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK6,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK7,			OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,			&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,			&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,			&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK6,			&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK7,			&COptionsPlayer::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
