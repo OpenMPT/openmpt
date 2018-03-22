@@ -59,10 +59,17 @@ std::vector<BuildVariant> BuildVariants::GetBuildVariants()
 		result.push_back(Win64);
 	#else
 		// VS2015
+#ifdef ENABLE_ASM
 		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), 32, PROCSUPPORT_i586    , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,6,0) };
 		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,6,0) };
 		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), 32, PROCSUPPORT_x86_SSE2, 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
 		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+#else
+		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), 32, 0                   , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,6,0) };
+		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), 64, 0                   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,6,0) };
+		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), 32, 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+#endif
 		result.push_back(Win32old);
 		result.push_back(Win64old);
 		result.push_back(Win32);
@@ -250,6 +257,7 @@ std::vector<mpt::ustring> BuildVariants::GetBuildNames(std::vector<BuildVariant>
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
 	BuildVariant build = GetCurrentBuildVariant();
+#ifdef ENABLE_ASM
 	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags) return false;
 	if(build.MinimumSSE >= 1)
 	{
@@ -259,6 +267,7 @@ bool BuildVariants::ProcessorCanRunCurrentBuild()
 	{
 		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2)) return false;
 	}
+#endif
 	return true;
 }
 
@@ -269,6 +278,7 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 	{
 		return false;
 	}
+#ifdef ENABLE_ASM
 	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags)
 	{
 		return false;
@@ -287,6 +297,7 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 			return false;
 		}
 	}
+#endif
 	if(IsKnownSystem())
 	{
 		if(mpt::Windows::IsOriginal())
