@@ -13,7 +13,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if MPT_COMPILER_MSVC
+#if defined(MPT_BUILD_MSVC)
+#if MPT_COMPILER_MSVC || MPT_COMPILER_CLANG
 
 #pragma comment(lib, "delayimp.lib")
 #pragma comment(lib, "version.lib")
@@ -45,7 +46,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #pragma comment( linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"" )
 
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVC
+#endif // MPT_BUILD_MSVC
 
 
 OPENMPT_NAMESPACE_END
