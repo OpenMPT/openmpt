@@ -176,15 +176,13 @@ public:
 		m_pTuningCollection = pTC;
 	}
 
-	operator void*()
+	operator bool () const
 	{
-		//Mimicing pointer behavior: if(CTuningTreeItemInstance) equals
-		//if(CTuningTreeItemInstance.m_pTuning != NULL ||
-		//	 CTuningTreeItemInstance.m_pTuningCollection != NULL)
-		if(m_pTuning)
-			return m_pTuning;
-		else
-			return m_pTuningCollection;
+		return m_pTuning || m_pTuningCollection;
+	}
+	bool operator ! () const
+	{
+		return !operator bool();
 	}
 
 	CTuningCollection* GetTC() {return m_pTuningCollection;}

@@ -89,7 +89,7 @@ CString Flanger::GetParamLabel(PlugParamIndex param)
 	case kFlangerFrequency:
 		return _T("Hz");
 	case kFlangerPhase:
-		return _T("°");
+		return mpt::ToCString(MPT_UTF8("\xC2\xB0"));  // U+00B0 DEGREE SIGN
 	case kFlangerDelay:
 		return _T("ms");
 	}

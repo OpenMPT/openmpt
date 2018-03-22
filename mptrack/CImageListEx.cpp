@@ -7,8 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#pragma once
-
 #include "stdafx.h"
 #include "CImageListEx.h"
 #include "PNG.h"
@@ -62,7 +60,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 				if(pixel->a != 0)
 				{
 					// Pixel not fully transparent - multiply with default background colour
-#define MIXCOLOR(c) (((pixel->##c) * pixel->a + (c) * (255 - pixel->a)) >> 8);
+#define MIXCOLOR(c) (((pixel-> c ) * pixel->a + (c) * (255 - pixel->a)) >> 8);
 					pixel->r = MIXCOLOR(r);
 					pixel->g = MIXCOLOR(g);
 					pixel->b = MIXCOLOR(b);

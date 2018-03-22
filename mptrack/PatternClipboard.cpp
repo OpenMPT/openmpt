@@ -1196,7 +1196,6 @@ END_MESSAGE_MAP()
 
 PatternClipboardDialog::CInlineEdit::CInlineEdit(PatternClipboardDialog &dlg) : parent(dlg)
 {
-	CEdit::CEdit();
 }
 
 

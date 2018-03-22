@@ -613,7 +613,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 			path.EnsureTrailingSlash();
 			::SHCreateDirectoryEx(NULL, path.AsNative().c_str(), nullptr);
 			path += projectFile;
-			strcpy(ptr, path.ToLocale().c_str());
+			strcpy(reinterpret_cast<char*>(ptr), path.ToLocale().c_str());
 			return 1;
 		}
 #endif

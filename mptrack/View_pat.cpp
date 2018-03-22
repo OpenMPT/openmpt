@@ -4212,12 +4212,12 @@ void CViewPattern::MoveCursor(bool moveRight)
 	{ \
 		if((v >= 0) && (v <= 9)) \
 		{	\
-			uint16 val = target.Get##method##(); \
+			uint16 val = target.Get##method(); \
 			/* Move existing digits to left, drop out leftmost digit and */ \
 			/* push new digit to the least meaning digit. */ \
 			val = (val % 100) * 10 + v; \
 			if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue; \
-			target.Set##method##(val); \
+			target.Set##method(val); \
 			m_PCNoteEditMemory = target; \
 		} \
 	} 

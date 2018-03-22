@@ -620,7 +620,7 @@ enum CommandID
 	kcSetFXsetEnvPos,	//l,?
 	kcSetFXmacro,		//z,z
 	kcFixedFXend=kcSetFXmacro,
-	kcSetFXmacroSlide,	//?,\ 
+	kcSetFXmacroSlide,	//?,\ ,
 	kcSetFXdelaycut,	//?,:
 	kcSetFXextension,	//?,#
 	kcSetFXEnd=kcSetFXextension,

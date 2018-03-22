@@ -1185,7 +1185,7 @@ void CTuningDialog::OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 
 CTuningCollection *CTuningDialog::CanDrop(HTREEITEM dragDestItem)
 {
-	if(m_DragItem == NULL)
+	if(!m_DragItem)
 		return nullptr;
 
 	TUNINGTREEITEM destTunItem = m_TreeItemTuningItemMap.GetMapping_12(dragDestItem);
@@ -1221,7 +1221,7 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
 {
 	SetCursor(CMainFrame::curArrow);
 	m_TreeCtrlTuning.SetDragging(false);
-	if(m_DragItem == NULL)
+	if(!m_DragItem)
 		return;
 
 	CTuningCollection* pTCdest = CanDrop(dragDestItem);

@@ -588,11 +588,11 @@ public:
 		conf.Write(path, val);
 		return *this;
 	}
-	operator const T () const
+	operator T () const
 	{
 		return conf.Read<T>(path);
 	}
-	const T Get() const
+	T Get() const
 	{
 		return conf.Read<T>(path);
 	}
@@ -672,7 +672,7 @@ public:
 		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
 		return value;
 	}
-	const T Get() const
+	T Get() const
 	{
 		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
 		return value;

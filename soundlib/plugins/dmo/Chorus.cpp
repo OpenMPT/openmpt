@@ -205,7 +205,7 @@ CString Chorus::GetParamLabel(PlugParamIndex param)
 	case kChorusFrequency:
 		return _T("Hz");
 	case kChorusPhase:
-		return _T("°");
+		return mpt::ToCString(MPT_UTF8("\xC2\xB0"));  // U+00B0 DEGREE SIGN
 	case kChorusDelay:
 		return _T("ms");
 	}

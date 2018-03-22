@@ -555,11 +555,11 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		if(index >= cachedParamInfoStart && index < cachedParamInfoStart + mpt::saturate_cast<int32>(cachedParamInfo.size()))
 		{
 			if(opcode == effGetParamLabel)
-				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].label);
+				strcpy(ptrC, cachedParamInfo[index - cachedParamInfoStart].label);
 			else if(opcode == effGetParamDisplay)
-				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].display);
+				strcpy(ptrC, cachedParamInfo[index - cachedParamInfoStart].display);
 			else if(opcode == effGetParamName)
-				strcpy(ptr, cachedParamInfo[index - cachedParamInfoStart].name);
+				strcpy(ptrC, cachedParamInfo[index - cachedParamInfoStart].name);
 			return 1;
 		}
 		MPT_FALLTHROUGH;
@@ -577,7 +577,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 			// First check if we have cached this program name
 			if(index >= cachedProgNameStart && index < cachedProgNameStart + mpt::saturate_cast<int32>(cachedProgNames.size() / kCachedProgramNameLength))
 			{
-				strcpy(ptr, &cachedProgNames[(index - cachedProgNameStart) * kCachedProgramNameLength]);
+				strcpy(ptrC, &cachedProgNames[(index - cachedProgNameStart) * kCachedProgramNameLength]);
 				return 1;
 			}
 		}
