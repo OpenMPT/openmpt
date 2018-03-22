@@ -39,7 +39,7 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	ON_COMMAND(IDC_BUTTON2,					&CModTypeDlg::OnLegacyPlaybackSettings)
 	ON_COMMAND(IDC_BUTTON3,					&CModTypeDlg::OnDefaultBehaviour)
 
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CModTypeDlg::OnToolTipNotify)
 
 	//}}AFX_MSG_MAP
 
