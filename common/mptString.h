@@ -359,6 +359,10 @@ typedef mpt::u8string    ustring;
 
 #endif // MPT_USTRING_MODE_UTF8
 
+#define UC_(x)           MPT_UCHAR(x)
+#define UL_(x)           MPT_ULITERAL(x)
+#define U_(x)            MPT_USTRING(x)
+
 #if MPT_USTRING_MODE_WIDE
 #if !(MPT_WSTRING_CONVERT)
 #error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"

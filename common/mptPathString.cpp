@@ -37,16 +37,6 @@ WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength
 OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_OS_WINDOWS
-#ifdef UNICODE
-#define MPT_PATHSTRING_LITERAL(x) ( L ## x )
-#else
-#define MPT_PATHSTRING_LITERAL(x) ( x )
-#endif
-#else
-#define MPT_PATHSTRING_LITERAL(x) ( x )
-#endif
-
-#if MPT_OS_WINDOWS
 
 namespace mpt
 {
