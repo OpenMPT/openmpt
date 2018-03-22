@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define OPUS_BUILD            1
 
+#if defined(_MSC_VER) && !defined(__clang__) /* OpenMPT */
 #if defined(_M_IX86) || defined(_M_X64)
 /* Can always compile SSE intrinsics (no special compiler flags necessary) */
 #define OPUS_X86_MAY_HAVE_SSE
@@ -58,6 +59,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #endif
+#endif /* OpenMPT */
 
 #include "version.h"
 

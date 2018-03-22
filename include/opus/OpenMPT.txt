@@ -2,6 +2,7 @@ libopus library version 1.2.1.
 The following changes have been made:
 - Obviously, unnecessary folders and files have been removed.
 - win32/version.h got added.
+- config.h has been fixed to support Clang/LLVM for Windows.
 - OpenMPT modifications are marked with "// OpenMPT".
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
