@@ -602,7 +602,7 @@ endif
 CPPCHECK_FLAGS += -j $(NUMTHREADS)
 CPPCHECK_FLAGS += --std=c99 --std=c++11
 CPPCHECK_FLAGS += --quiet
-CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: {severity}: {message} [{id}]'
+CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]'
 CPPCHECK_FLAGS += --suppress=missingIncludeSystem
 
 CPPCHECK_FLAGS += $(CPPFLAGS)

@@ -13,7 +13,7 @@ CPPCHECK_FILES="common/ soundbase/ sounddev/ sounddsp/ soundlib/ test/ unarchive
 NPROC=$(nproc)
 
 echo "Checking config ..."
-cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
+cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
 echo "Checking C++ ..."
-cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
+cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
 
