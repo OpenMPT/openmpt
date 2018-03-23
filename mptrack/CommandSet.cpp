@@ -30,7 +30,7 @@ enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
 	//
 #else
 	#undef Log
-	#define Log
+	#define Log(...) MPT_DO { } MPT_WHILE_0
 #endif
 
 
