@@ -49,6 +49,7 @@ struct Notification
 	Notification(FlagSet<Notification::Type> t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, uint32 tir = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), ticksOnRow(tir), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
 	{
 		MemsetZero(masterVU);
+		MemsetZero(pos);
 	}
 };
 
