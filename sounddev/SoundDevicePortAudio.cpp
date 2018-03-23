@@ -49,8 +49,13 @@ CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo 
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	MemsetZero(m_StreamParameters);
 	MemsetZero(m_InputStreamParameters);
+#if MPT_OS_WINDOWS
+	MemsetZero(m_WasapiStreamInfo);
+#endif // MPT_OS_WINDOWS
 	m_Stream = 0;
 	m_StreamInfo = 0;
+	m_CurrentFrameBuffer = nullptr;
+	m_CurrentFrameBufferInput = nullptr;
 	m_CurrentFrameCount = 0;
 	m_CurrentRealLatency = 0.0;
 }
