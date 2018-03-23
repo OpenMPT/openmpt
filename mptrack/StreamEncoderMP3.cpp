@@ -920,6 +920,7 @@ private:
 		formats.clear();
 		formats_driverids.clear();
 		formats_waveformats.clear();
+		drivers.clear();
 	}
 
 public:
@@ -927,7 +928,7 @@ public:
 	ComponentAcmMP3()
 		: ComponentBase(ComponentTypeSystemInstallable)
 	{
-		return;
+		Reset();
 	}
 
 protected:
