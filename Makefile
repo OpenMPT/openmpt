@@ -1387,11 +1387,17 @@ cppcheck-libopenmpt:
 .PHONY: cppcheck-libopenmpt-test
 cppcheck-libopenmpt-test:
 	$(INFO) [CPPCHECK] libopenmpt-test
-	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) --check-config --suppress=unmatchedSuppression $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
-	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) -DLIBOPENMPT_BUILD_TEST --check-config --suppress=unmatchedSuppression $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) -DLIBOPENMPT_BUILD_TEST $(LIBOPENMPTTEST_CXX_SOURCES) $(LIBOPENMPTTEST_C_SOURCES)
+
+.PHONY: cppcheck-openmpt123
+cppcheck-openmpt123:
+	$(INFO) [CPPCHECK] openmpt123
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) --check-config --suppress=unmatchedSuppression $(OPENMPT123_CXX_SOURCES)
+	$(SILENT)$(CPPCHECK) $(CPPCHECK_FLAGS) $(CPPCHECK_PLATFORM) $(OPENMPT123_CXX_SOURCES)
 
 .PHONY: cppcheck
-cppcheck: cppcheck-libopenmpt cppcheck-libopenmpt-test
+cppcheck: cppcheck-libopenmpt cppcheck-libopenmpt-test cppcheck-openmpt123
 
 .PHONY: clean
 clean:
