@@ -260,7 +260,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if defined(_MFC_VER) && !defined(CPPCHECK)
+#if defined(_MFC_VER) && !defined(MPT_CPPCHECK_CUSTOM)
 
 #if !defined(ASSERT)
 #error "MFC is expected to #define ASSERT"
