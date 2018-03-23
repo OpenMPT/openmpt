@@ -373,49 +373,49 @@ class ComponentLame
 
 public:
 
-	const char* (CDECL * get_lame_version)();
-	const char* (CDECL * get_lame_short_version)();
-	const char* (CDECL * get_lame_very_short_version)();
-	const char* (CDECL * get_psy_version)();
-	const char* (CDECL * get_lame_url)();
+	const char* (CDECL * get_lame_version)() = nullptr;
+	const char* (CDECL * get_lame_short_version)() = nullptr;
+	const char* (CDECL * get_lame_very_short_version)() = nullptr;
+	const char* (CDECL * get_psy_version)() = nullptr;
+	const char* (CDECL * get_lame_url)() = nullptr;
 
-	lame_global_flags * (CDECL * lame_init)(void);
+	lame_global_flags * (CDECL * lame_init)(void) = nullptr;
 
-	int  (CDECL * lame_set_in_samplerate)(lame_global_flags *, int);
-	int  (CDECL * lame_set_num_channels)(lame_global_flags *, int);
-	int  (CDECL * lame_get_num_channels)(const lame_global_flags *);
-	int  (CDECL * lame_get_quality)(const lame_global_flags *);
-	int  (CDECL * lame_set_quality)(lame_global_flags *, int);
-	int  (CDECL * lame_set_out_samplerate)(lame_global_flags *, int);
-	int  (CDECL * lame_set_brate)(lame_global_flags *, int);
-	int  (CDECL * lame_set_VBR_quality)(lame_global_flags *, float);
-	int  (CDECL * lame_set_VBR)(lame_global_flags *, vbr_mode);
-	int  (CDECL * lame_set_bWriteVbrTag)(lame_global_flags *, int);
-	int  (CDECL * lame_set_strict_ISO)(lame_global_flags *, int);
-	int  (CDECL * lame_set_disable_reservoir)(lame_global_flags *, int);
-	int  (CDECL * lame_set_decode_on_the_fly)(lame_global_flags *, int);
-	int  (CDECL * lame_set_findReplayGain)(lame_global_flags *, int);
+	int  (CDECL * lame_set_in_samplerate)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_num_channels)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_get_num_channels)(const lame_global_flags *) = nullptr;
+	int  (CDECL * lame_get_quality)(const lame_global_flags *) = nullptr;
+	int  (CDECL * lame_set_quality)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_out_samplerate)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_brate)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_VBR_quality)(lame_global_flags *, float) = nullptr;
+	int  (CDECL * lame_set_VBR)(lame_global_flags *, vbr_mode) = nullptr;
+	int  (CDECL * lame_set_bWriteVbrTag)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_strict_ISO)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_disable_reservoir)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_decode_on_the_fly)(lame_global_flags *, int) = nullptr;
+	int  (CDECL * lame_set_findReplayGain)(lame_global_flags *, int) = nullptr;
 
-	void (CDECL * id3tag_genre_list)(void (*handler)(int, const char *, void *), void* cookie);
-	void (CDECL * id3tag_init)     (lame_t gfp);
-	void (CDECL * id3tag_v1_only)  (lame_t gfp);
-	void (CDECL * id3tag_add_v2)   (lame_t gfp);
-	void (CDECL * id3tag_v2_only)  (lame_t gfp);
-	void (CDECL * id3tag_set_pad)  (lame_t gfp, size_t n);
-	void (CDECL * lame_set_write_id3tag_automatic)(lame_global_flags * gfp, int);
+	void (CDECL * id3tag_genre_list)(void (*handler)(int, const char *, void *), void* cookie) = nullptr;
+	void (CDECL * id3tag_init)     (lame_t gfp) = nullptr;
+	void (CDECL * id3tag_v1_only)  (lame_t gfp) = nullptr;
+	void (CDECL * id3tag_add_v2)   (lame_t gfp) = nullptr;
+	void (CDECL * id3tag_v2_only)  (lame_t gfp) = nullptr;
+	void (CDECL * id3tag_set_pad)  (lame_t gfp, size_t n) = nullptr;
+	void (CDECL * lame_set_write_id3tag_automatic)(lame_global_flags * gfp, int) = nullptr;
 
-	float (CDECL* lame_get_PeakSample)(const lame_global_flags *);
-	int  (CDECL * lame_get_RadioGain)(const lame_global_flags *);
+	float (CDECL* lame_get_PeakSample)(const lame_global_flags *) = nullptr;
+	int  (CDECL * lame_get_RadioGain)(const lame_global_flags *) = nullptr;
 
-	void (CDECL * id3tag_set_title)(lame_t gfp, const char* title);
-	void (CDECL * id3tag_set_artist)(lame_t gfp, const char* artist);
-	void (CDECL * id3tag_set_album)(lame_t gfp, const char* album);
-	void (CDECL * id3tag_set_year)(lame_t gfp, const char* year);
-	void (CDECL * id3tag_set_comment)(lame_t gfp, const char* comment);
-	int  (CDECL * id3tag_set_track)(lame_t gfp, const char* track);
-	int  (CDECL * id3tag_set_genre)(lame_t gfp, const char* genre);
+	void (CDECL * id3tag_set_title)(lame_t gfp, const char* title) = nullptr;
+	void (CDECL * id3tag_set_artist)(lame_t gfp, const char* artist) = nullptr;
+	void (CDECL * id3tag_set_album)(lame_t gfp, const char* album) = nullptr;
+	void (CDECL * id3tag_set_year)(lame_t gfp, const char* year) = nullptr;
+	void (CDECL * id3tag_set_comment)(lame_t gfp, const char* comment) = nullptr;
+	int  (CDECL * id3tag_set_track)(lame_t gfp, const char* track) = nullptr;
+	int  (CDECL * id3tag_set_genre)(lame_t gfp, const char* genre) = nullptr;
 
-	int  (CDECL * lame_init_params)(lame_global_flags *);
+	int  (CDECL * lame_init_params)(lame_global_flags *) = nullptr;
 
 	int  (CDECL * lame_encode_buffer_ieee_float)(
 	                                             lame_t          gfp,
@@ -423,18 +423,18 @@ public:
 	                                             const float     pcm_r [],
 	                                             const int       nsamples,
 	                                             unsigned char * mp3buf,
-	                                             const int       mp3buf_size);
+	                                             const int       mp3buf_size) = nullptr;
 	int  (CDECL * lame_encode_buffer_interleaved_ieee_float)(
 	                                                         lame_t          gfp,
 	                                                         const float     pcm[],
 	                                                         const int       nsamples,
 	                                                         unsigned char * mp3buf,
-	                                                         const int       mp3buf_size);
-	int  (CDECL * lame_encode_flush)(lame_global_flags * gfp, unsigned char* mp3buf, int size);
-	size_t(CDECL* lame_get_lametag_frame)(const lame_global_flags *, unsigned char* buffer, size_t size);
-	size_t(CDECL* lame_get_id3v2_tag)(lame_t gfp, unsigned char* buffer, size_t size);
+	                                                         const int       mp3buf_size) = nullptr;
+	int  (CDECL * lame_encode_flush)(lame_global_flags * gfp, unsigned char* mp3buf, int size) = nullptr;
+	size_t(CDECL* lame_get_lametag_frame)(const lame_global_flags *, unsigned char* buffer, size_t size) = nullptr;
+	size_t(CDECL* lame_get_id3v2_tag)(lame_t gfp, unsigned char* buffer, size_t size) = nullptr;
 
-	int  (CDECL * lame_close) (lame_global_flags *);
+	int  (CDECL * lame_close) (lame_global_flags *) = nullptr;
 
 private:
 
