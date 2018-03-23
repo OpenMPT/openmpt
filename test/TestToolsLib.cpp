@@ -45,14 +45,6 @@ Context::Context(const char * file, int line)
 }
 
 
-Context::Context(const Context &c)
-	: file(c.file)
-	, line(c.line)
-{
-	return;
-}
-
-
 Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context)
 	: fatality(fatality)
 	, verbosity(verbosity)

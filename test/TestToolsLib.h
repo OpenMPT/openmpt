@@ -56,7 +56,6 @@ public:
 	const int line;
 public:
 	Context(const char * file, int line);
-	Context(const Context &c);
 };
 
 #define MPT_TEST_CONTEXT_CURRENT() (Test::Context( __FILE__ , __LINE__ ))
