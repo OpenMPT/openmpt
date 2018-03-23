@@ -1962,6 +1962,8 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 	commandlineflags flags;
 
 	bool files_only = false;
+	// cppcheck false-positive
+	// cppcheck-suppress StlMissingComparison
 	for ( auto i = args.begin(); i != args.end(); ++i ) {
 		if ( i == args.begin() ) {
 			// skip program name
