@@ -71,46 +71,46 @@ class ComponentWineWrapper
 
 public:
 
-private: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_Init)(void);
-private: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_Fini)(void);
+private: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_Init)(void) = nullptr;
+private: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_Fini)(void) = nullptr;
 
-private: void (__cdecl * OpenMPT_Wine_Wrapper_String_Free)(char * str);
+private: void (__cdecl * OpenMPT_Wine_Wrapper_String_Free)(char * str) = nullptr;
 
-private: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_EnumerateDevices)(void);
+private: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_EnumerateDevices)(void) = nullptr;
 public: std::string SoundDevice_EnumerateDevices() const { return result_as_string(OpenMPT_Wine_Wrapper_SoundDevice_EnumerateDevices()); }
 
-public: OpenMPT_Wine_Wrapper_SoundDevice * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Construct)( const char * info );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Destruct)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
+public: OpenMPT_Wine_Wrapper_SoundDevice * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Construct)( const char * info ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Destruct)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetSource)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ISource * source );
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetSource)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ISource * source ) = nullptr;
 
-public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceDynamicCaps)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * baseSampleRates );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Init)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * appInfo );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Open)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * settings );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Close)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Start)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Stop)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetRequestFlags)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, uint32_t * result );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsInited)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsOpen)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsAvailable)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsPlaying)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_StopAndAvoidPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_EndPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_OnIdle)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetSettings)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetActualSampleFormat)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, int32_t * result );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetEffectiveBufferAttributes)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_BufferAttributes * result );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetTimeInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_TimeInfo * result );
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetStreamPosition)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_StreamPosition * result );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_DebugIsFragileDevice)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_DebugInRealtimeCallback)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetStatistics)( const OpenMPT_Wine_Wrapper_SoundDevice * sd );
-public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_OpenDriverSettings)( OpenMPT_Wine_Wrapper_SoundDevice * sd );
+public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceDynamicCaps)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * baseSampleRates ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Init)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * appInfo ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Open)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const char * settings ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Close)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Start)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Stop)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetRequestFlags)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, uint32_t * result ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsInited)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsOpen)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsAvailable)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsPlaying)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_IsPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_StopAndAvoidPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_EndPlayingSilence)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_OnIdle)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetSettings)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetActualSampleFormat)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, int32_t * result ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetEffectiveBufferAttributes)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_BufferAttributes * result ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetTimeInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_TimeInfo * result ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetStreamPosition)( const OpenMPT_Wine_Wrapper_SoundDevice * sd, OpenMPT_SoundDevice_StreamPosition * result ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_DebugIsFragileDevice)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_DebugInRealtimeCallback)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetStatistics)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_OpenDriverSettings)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 
 public: std::string result_as_string(char * str) const;
 
