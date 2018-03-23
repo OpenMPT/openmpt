@@ -560,12 +560,8 @@ private:
 	SettingsContainer &conf;
 	const SettingPath path;
 public:
-	Setting(const Setting &other)
-		: conf(other.conf)
-		, path(other.path)
-	{
-		return;
-	}
+	Setting(const Setting &other) = delete;
+	Setting & operator = (const Setting &other) = delete;
 public:
 	Setting(SettingsContainer &conf_, mpt::ustring section, mpt::ustring key, const T&def)
 		: conf(conf_)
@@ -620,13 +616,8 @@ private:
 	SettingsContainer &conf;
 	const SettingPath path;
 public:
-	CachedSetting(const CachedSetting &other)
-		: value(other.value)
-		, conf(other.conf)
-		, path(other.path)
-	{
-		conf.Register(this, path);
-	}
+	CachedSetting(const CachedSetting &other) = delete;
+	CachedSetting & operator = (const CachedSetting &other) = delete;
 public:
 	CachedSetting(SettingsContainer &conf_, mpt::ustring section, mpt::ustring key, const T&def)
 		: value(def)
