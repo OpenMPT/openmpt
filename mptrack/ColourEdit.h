@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "afxwin.h"
-
 OPENMPT_NAMESPACE_BEGIN
 
 class CColourEdit :

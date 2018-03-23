@@ -8,12 +8,29 @@ CPPCHECK_INCLUDES="-Iinclude -Iinclude/vstsdk2.4 -Iinclude/ASIOSDK2/common -Iinc
 
 CPPCHECK_DEFINES="-DMODPLUG_TRACKER -DMPT_BUILD_MSVC -DMPT_BUILD_MSVC_STATIC"
 
+case ${1} in
+win32W)
+	CPPCHECK_PLATFORM="--platform=win32W -D_WIN32 -DWIN32                  -D_UNICODE -DUNICODE -D_WINDOWS -DWINDOWS -D_MFC_VER"
+	;;
+win64)
+	CPPCHECK_PLATFORM="--platform=win64  -D_WIN32 -DWIN32 -D_WIN64 -DWIN64 -D_UNICODE -DUNICODE -D_WINDOWS -DWINDOWS -D_MFC_VER"
+	;;
+win32A)
+	CPPCHECK_PLATFORM="--platform=win32A -D_WIN32 -DWIN32                                       -D_WINDOWS -DWINDOWS -D_MFC_VER"
+	;;
+*)
+	CPPCHECK_PLATFORM=""
+	;;
+esac
+
 CPPCHECK_FILES="common/ soundbase/ sounddev/ sounddsp/ soundlib/ test/ unarchiver/ mptrack/ pluginBridge/"
 
 NPROC=$(nproc)
 
+echo "Platform: $CPPCHECK_PLATFORM"
+
 echo "Checking config ..."
-cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
 echo "Checking C++ ..."
-cppcheck -j $NPROC --platform=${1} --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
 
