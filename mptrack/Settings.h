@@ -351,6 +351,7 @@ private:
 	bool dirty;
 public:
 	SettingState()
+		: dirty(false)
 	{
 		return;
 	}
