@@ -12,7 +12,7 @@
 #include "../common/version.h"
 #include "../common/mptCPU.h"
 #include "../common/mptOS.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

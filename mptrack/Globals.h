@@ -1,5 +1,5 @@
 /*
- * globals.h
+ * Globals.h
  * ---------
  * Purpose: Implementation of various views of the tracker interface.
  * Notes  : (currently none)

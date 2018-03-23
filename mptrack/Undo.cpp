@@ -10,8 +10,8 @@
 
 
 #include "stdafx.h"
-#include "moddoc.h"
-#include "MainFrm.h"
+#include "Moddoc.h"
+#include "Mainfrm.h"
 #include "modsmp_ctrl.h"
 #include "Undo.h"
 #include "../common/mptStringBuffer.h"

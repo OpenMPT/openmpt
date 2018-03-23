@@ -20,7 +20,7 @@
 #include "Ctrl_ins.h"
 #include "View_ins.h"
 #include "Dlsbank.h"
-#include "channelManagerDlg.h"
+#include "ChannelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"

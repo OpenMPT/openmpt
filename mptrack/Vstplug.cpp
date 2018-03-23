@@ -17,7 +17,7 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "AbstractVstEditor.h"
-#include "VstEditor.h"
+#include "VSTEditor.h"
 #include "DefaultVstEditor.h"
 #endif // MODPLUG_TRACKER
 #include "../soundlib/Sndfile.h"

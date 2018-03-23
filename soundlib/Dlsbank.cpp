@@ -12,7 +12,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/mptrack.h"
+#include "../mptrack/Mptrack.h"
 #include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"

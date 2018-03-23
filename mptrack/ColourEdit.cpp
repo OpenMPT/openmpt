@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "colouredit.h"
+#include "ColourEdit.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -37,7 +37,7 @@
  */
 
 
-#include "Stdafx.h"
+#include "stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"

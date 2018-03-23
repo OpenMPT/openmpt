@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "Mptrack.h"
-#include "MainFrm.h"
+#include "Mainfrm.h"
 #include "ModDocTemplate.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
@@ -28,7 +28,7 @@
 #include "SampleConfigDlg.h"
 #include "AdvancedConfigDlg.h"
 #include "AutoSaver.h"
-#include "MainFrm.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Globals.h"
 #include "ChannelManagerDlg.h"

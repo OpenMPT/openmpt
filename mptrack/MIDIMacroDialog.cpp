@@ -12,7 +12,7 @@
 #include "../mptrack/Reporting.h"
 #include "../common/mptStringBuffer.h"
 #include "Mainfrm.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "resource.h"
 #include "MIDIMacroDialog.h"
 #include "../soundlib/MIDIEvents.h"

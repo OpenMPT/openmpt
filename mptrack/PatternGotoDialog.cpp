@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "PatternGotoDialog.h"
 #include "Sndfile.h"
 

@@ -1,5 +1,5 @@
 /*
- * tuningDialog.h
+ * TuningDialog.h
  * --------------
  * Purpose: Alternative sample tuning configuration dialog.
  * Notes  : (currently none)
@@ -10,12 +10,10 @@
 
 #pragma once
 
-#include "tuningratiomapwnd.h"
+#include "tuningRatioMapWnd.h"
 #include "tuningcollection.h"
 #include <vector>
 #include <string>
-#include "afxcmn.h"
-#include "afxwin.h"
 #include "resource.h"
 #include "CDecimalSupport.h"
 

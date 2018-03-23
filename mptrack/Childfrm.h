@@ -1,5 +1,5 @@
 /*
- * ChildFrm.h
+ * Childfrm.h
  * ----------
  * Purpose: Implementation of tab interface class.
  * Notes  : (currently none)

@@ -12,7 +12,7 @@
 
 #ifdef MPT_DISABLED_CODE
 
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "Mainfrm.h"
 #include "Sndfile.h"
 #include "../muParser/include/muParser.h"

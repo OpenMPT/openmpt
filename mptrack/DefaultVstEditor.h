@@ -12,7 +12,7 @@
 
 #ifndef NO_PLUGINS
 
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "AbstractVstEditor.h"
 
 OPENMPT_NAMESPACE_BEGIN

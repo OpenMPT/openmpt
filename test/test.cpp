@@ -36,7 +36,7 @@
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/ModDocTemplate.h"
-#include "../mptrack/MainFrm.h"
+#include "../mptrack/Mainfrm.h"
 #include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"

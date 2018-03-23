@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "globals.h"
+#include "Globals.h"
 #include "PatternCursor.h"
 
 OPENMPT_NAMESPACE_BEGIN

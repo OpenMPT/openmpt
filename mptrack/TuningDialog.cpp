@@ -1,5 +1,5 @@
 /*
- * tuningDialog.cpp
+ * TuningDialog.cpp
  * ----------------
  * Purpose: Alternative sample tuning configuration dialog.
  * Notes  : (currently none)
@@ -9,13 +9,13 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "TuningDialog.h"
 #include "TrackerSettings.h"
 #include <algorithm>
 #include "../common/mptFileIO.h"
 #include "../common/misc_util.h"
-#include "tuningdialog.h"
+#include "TuningDialog.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
 

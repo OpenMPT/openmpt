@@ -12,7 +12,7 @@
 #include <afxpriv.h>
 #include "Mptrack.h"
 #include "Mainfrm.h"
-#include "ChildFrm.h"
+#include "Childfrm.h"
 #include "Moddoc.h"
 #include "Globals.h"
 #include "View_gen.h"
@@ -22,7 +22,7 @@
 #include "View_smp.h"
 #include "Ctrl_ins.h"
 #include "View_ins.h"
-#include "View_com.h"
+#include "view_com.h"
 #include "Childfrm.h"
 #include "ChannelManagerDlg.h"
 

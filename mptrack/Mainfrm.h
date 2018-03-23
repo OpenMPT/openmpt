@@ -1,5 +1,5 @@
 /*
- * MainFrm.h
+ * Mainfrm.h
  * ---------
  * Purpose: Implementation of OpenMPT's main window code.
  * Notes  : (currently none)

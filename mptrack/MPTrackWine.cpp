@@ -15,8 +15,8 @@
 #endif // MPT_COMPILER_MSVC
 
 #include "MPTrackWine.h"
-#include "mptrack.h"
-#include "MainFrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "AboutDialog.h"
 #include "TrackerSettings.h"
 #include "../common/ComponentManager.h"

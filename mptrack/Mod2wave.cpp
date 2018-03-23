@@ -9,11 +9,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "Sndfile.h"
 #include "Dlsbank.h"
-#include "mainfrm.h"
-#include "mpdlgs.h"
+#include "Mainfrm.h"
+#include "Mpdlgs.h"
 #include "mod2wave.h"
 #include "WAVTools.h"
 #include "../common/mptString.h"

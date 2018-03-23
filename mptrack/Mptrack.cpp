@@ -9,10 +9,10 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "MainFrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
-#include "ChildFrm.h"
+#include "Childfrm.h"
 #include "Moddoc.h"
 #include "ModDocTemplate.h"
 #include "Globals.h"

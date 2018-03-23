@@ -28,7 +28,7 @@
 #include "../soundlib/Tables.h"
 #include "../common/mptUUID.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/tuningCollection.h"
+#include "../soundlib/tuningcollection.h"
 
 
 #include <algorithm>

@@ -9,7 +9,7 @@
 
 
 #pragma once
-#include "MainFrm.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
 
 OPENMPT_NAMESPACE_BEGIN

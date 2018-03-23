@@ -8,7 +8,7 @@
  */
 
 
-#include "Stdafx.h"
+#include "stdafx.h"
 #include "Reporting.h"
 #include "../mptrack/Mainfrm.h"
 #include "../mptrack/InputHandler.h"

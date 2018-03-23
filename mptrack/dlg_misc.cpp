@@ -14,7 +14,7 @@
 #include "Mainfrm.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
-#include "ChildFrm.h"
+#include "Childfrm.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "ChannelManagerDlg.h"
 #include "TempoSwingDialog.h"

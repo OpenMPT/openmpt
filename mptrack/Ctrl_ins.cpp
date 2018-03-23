@@ -22,7 +22,7 @@
 #include "Ctrl_ins.h"
 #include "View_ins.h"
 #include "dlg_misc.h"
-#include "tuningDialog.h"
+#include "TuningDialog.h"
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 #include "SelectPluginDialog.h"
