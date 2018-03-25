@@ -446,7 +446,7 @@ static uint8 DLSSustainLevelToLinear(int32 sustain)
 	if(sustain >= 0)
 	{
 		int32 l = sustain / (1000 * 512);
-		if(l >= 0 || l <= 128)
+		if(l >= 0 && l <= 128)
 			return static_cast<uint8>(l);
 	}
 	return 128;
