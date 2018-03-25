@@ -1981,12 +1981,10 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	//if (!pIns) return;
 	if (pChn->dwFlags[CHN_MUTE]) return CHANNELINDEX_INVALID;
 
-	bool applyDNAtoPlug;	//rewbs.VSTiNNA
-
 	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; p++, i++)
 	if(i >= m_nChannels || p == pChn)
 	{
-		applyDNAtoPlug = false; //rewbs.VSTiNNA
+		bool applyDNAtoPlug = false;
 		if((p->nMasterChn == nChn + 1 || p == pChn) && p->pModInstrument != nullptr)
 		{
 			bool bOk = false;
@@ -1996,7 +1994,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Note
 			case DCT_NOTE:
 				if(note && p->nNote == note && pIns == p->pModInstrument) bOk = true;
-				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
+				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Sample
 			case DCT_SAMPLE:
@@ -2005,7 +2003,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Instrument
 			case DCT_INSTRUMENT:
 				if(pIns == p->pModInstrument) bOk = true;
-				//rewbs.VSTiNNA
 				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
@@ -2015,7 +2012,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					applyDNAtoPlug = true;
 					bOk = true;
 				}
-				//end rewbs.VSTiNNA
 				break;
 
 			}
@@ -2113,8 +2109,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #endif // NO_PLUGINS
 
 	// New Note Action
-	//if ((pChn->nVolume) && (pChn->nLength))
-	if((pChn->nVolume != 0 && pChn->nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
+	if((pChn->nRealVolume > 0 && pChn->nLength > 0) || applyNNAtoPlug)
 	{
 		nnaChn = GetNNAChannel(nChn);
 		if(nnaChn != 0)
