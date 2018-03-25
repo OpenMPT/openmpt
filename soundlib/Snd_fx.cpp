@@ -2079,13 +2079,11 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	if (srcChn.dwFlags[CHN_MUTE])
 		return CHANNELINDEX_INVALID;
 
-	bool applyDNAtoPlug;	//rewbs.VSTiNNA
-
 	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; i++)
 	if(i >= m_nChannels || i == nChn)
 	{
 		ModChannel &chn = m_PlayState.Chn[i];
-		applyDNAtoPlug = false; //rewbs.VSTiNNA
+		bool applyDNAtoPlug = false;
 		if((chn.nMasterChn == nChn + 1 || i == nChn) && chn.pModInstrument != nullptr)
 		{
 			bool bOk = false;
@@ -2095,7 +2093,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Note
 			case DCT_NOTE:
 				if(note && chn.nNote == note && pIns == chn.pModInstrument) bOk = true;
-				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
+				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Sample
 			case DCT_SAMPLE:
@@ -2104,7 +2102,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Instrument
 			case DCT_INSTRUMENT:
 				if(pIns == chn.pModInstrument) bOk = true;
-				//rewbs.VSTiNNA
 				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
@@ -2114,7 +2111,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					applyDNAtoPlug = true;
 					bOk = true;
 				}
-				//end rewbs.VSTiNNA
 				break;
 
 			}
@@ -2175,7 +2171,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
 			if(pPlugin)
 			{
-				// apply NNA to this plugin iff it is currently playing a note on this tracking channel
+				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
 				// (and if it is playing a note, we know that would be the last note played on this chan).
 				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]), GetBestMidiChannel(nChn), nChn);
 			}
@@ -2184,8 +2180,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #endif // NO_PLUGINS
 
 	// New Note Action
-	//if ((pChn.nVolume) && (pChn.nLength))
-	if((srcChn.nVolume != 0 && srcChn.nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
+	if((srcChn.nRealVolume > 0 && srcChn.nLength > 0) || applyNNAtoPlug)
 	{
 		nnaChn = GetNNAChannel(nChn);
 		if(nnaChn != 0)
