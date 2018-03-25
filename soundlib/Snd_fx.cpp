@@ -485,7 +485,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					// Fine Pattern Delay
 					tickDelay += (p->param & 0x0F);
-				} if((p->param & 0xF0) == 0xE0 && !rowDelay)
+				} else if((p->param & 0xF0) == 0xE0 && !rowDelay)
 				{
 					// Pattern Delay
 					if(!(GetType() & MOD_TYPE_S3M) || (p->param & 0x0F) != 0)
@@ -665,12 +665,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						patternLoopStartedOnThisRow = true;
 					}
 					break;
+
+				case 0xF0:
+					// Active macro
+					pChn->nActiveMacro = param & 0x0F;
+					break;
 				}
 				break;
 
 			case CMD_MODCMDEX:
-				if ((param & 0xF0) == 0x60)
+				switch(param & 0xF0)
 				{
+				case 0x60:
 					// Pattern Loop
 					if (param & 0x0F)
 					{
@@ -683,6 +689,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
 						memory.chnSettings[nChn].patLoopStart = playState.m_nRow;
 					}
+					break;
+
+				case 0xF0:
+					// Active macro
+					pChn->nActiveMacro = param & 0x0F;
+					break;
 				}
 				break;
 
