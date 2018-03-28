@@ -71,7 +71,7 @@ public:
 			for(const auto &subSong : subSongs)
 			{
 				m_SndFile.GetLength(eAdjust, GetLengthTarget(subSong.startOrder, subSong.startRow));
-				m_SndFile.m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_PAUSED);
+				m_SndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
 				while(!m_abort)
 				{
 					size_t count = m_SndFile.Read(MIXBUFFERSIZE, target);
@@ -99,6 +99,7 @@ public:
 		m_SndFile.Order.SetSequence(currentSeq);
 		m_SndFile.SetRepeatCount(currentRepeatCount);
 		m_SndFile.ResetPlayPos();
+		m_SndFile.StopAllVsti();
 		m_SndFile.m_bIsRendering = false;
 
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
