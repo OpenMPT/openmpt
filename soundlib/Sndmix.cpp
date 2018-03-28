@@ -220,13 +220,13 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 				MPT_ASSERT(m_PlayState.m_nBufferCount > 0);
 				#ifdef MODPLUG_TRACKER
 					// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
-					if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_PlayState.m_nCurrentOrder != m_PatternCuePoints.back().order))
+					if(m_PatternCuePoints != nullptr && (m_PatternCuePoints->empty() || m_PlayState.m_nCurrentOrder != m_PatternCuePoints->back().order))
 					{
 						PatternCuePoint cue;
 						cue.offset = countRendered;
 						cue.order = m_PlayState.m_nCurrentOrder;
 						cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
-						m_PatternCuePoints.push_back(cue);
+						m_PatternCuePoints->push_back(cue);
 					}
 				#endif
 			} else

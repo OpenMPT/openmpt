@@ -375,14 +375,14 @@ void CSoundFile::CreateStereoMix(int count)
 				naddmix = 0;
 			}
 #ifdef MODPLUG_TRACKER
-			else if(!m_SamplePlayLengths.empty())
+			else if(m_SamplePlayLengths != nullptr)
 			{
 				// Detecting the longest play time for each sample for optimization
 				chn.position += chn.increment * nSmpCount;
 				size_t smp = std::distance<const ModSample *>(Samples, chn.pModSample);
-				if(smp < m_SamplePlayLengths.size())
+				if(smp < m_SamplePlayLengths->size())
 				{
-					m_SamplePlayLengths[smp] = std::max(m_SamplePlayLengths[smp], chn.position.GetUInt());
+					m_SamplePlayLengths->at(smp) = std::max(m_SamplePlayLengths->at(smp), chn.position.GetUInt());
 				}
 			}
 #endif

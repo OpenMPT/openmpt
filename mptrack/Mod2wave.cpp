@@ -1082,8 +1082,9 @@ void CDoWaveConvert::Run()
 	SetRange(0, static_cast<uint32>(max >> 14));
 
 	// No pattern cue points yet
-	m_SndFile.m_PatternCuePoints.clear();
-	m_SndFile.m_PatternCuePoints.reserve(m_SndFile.Order().size());
+	std::vector<PatternCuePoint> patternCuePoints;
+	patternCuePoints.reserve(m_SndFile.Order().size());
+	m_SndFile.m_PatternCuePoints = &patternCuePoints;
 
 	CString progressStr;
 	if(m_Settings.normalize)
@@ -1123,7 +1124,7 @@ void CDoWaveConvert::Run()
 		}
 
 		// Process cue points (add base offset), if there are any to process.
-		for(auto iter = m_SndFile.m_PatternCuePoints.rbegin(); iter != m_SndFile.m_PatternCuePoints.rend(); ++iter)
+		for(auto iter = patternCuePoints.rbegin(); iter != patternCuePoints.rend(); ++iter)
 		{
 			if(iter->processed)
 			{
@@ -1324,20 +1325,20 @@ void CDoWaveConvert::Run()
 
 	}
 
-	if(m_SndFile.m_PatternCuePoints.size() > 0)
+	if(!patternCuePoints.empty())
 	{
 		if(encSettings.Cues)
 		{
 			std::vector<uint64> cues;
-			cues.reserve(m_SndFile.m_PatternCuePoints.size());
-			for(const auto &cue : m_SndFile.m_PatternCuePoints)
+			cues.reserve(patternCuePoints.size());
+			for(const auto &cue : patternCuePoints)
 			{
 				cues.push_back(static_cast<uint32>(cue.offset));
 			}
 			fileEnc->WriteCues(cues);
 		}
-		m_SndFile.m_PatternCuePoints.clear();
 	}
+	m_SndFile.m_PatternCuePoints = nullptr;
 
 	fileEnc = nullptr;
 

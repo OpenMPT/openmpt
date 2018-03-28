@@ -470,8 +470,8 @@ public:
 #ifdef MODPLUG_TRACKER
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
-	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
-	std::vector<SmpLength> m_SamplePlayLengths;	// For storing the maximum play length of each sample for automatic sample trimming
+	std::vector<PatternCuePoint> *m_PatternCuePoints = nullptr;	// For WAV export (writing pattern positions to file)
+	std::vector<SmpLength> *m_SamplePlayLengths = nullptr;	// For storing the maximum play length of each sample for automatic sample trimming
 #endif // MODPLUG_TRACKER
 
 public:

@@ -28,14 +28,18 @@ class CRenderProgressDlg : public CProgressDialog
 	};
 
 public:
+	std::vector<SmpLength> m_SamplePlayLengths;
+
 	CRenderProgressDlg(CWnd *parent, CSoundFile &sndFile)
 		: CProgressDialog(parent)
 		, m_SndFile(sndFile)
-	{ }
+	{
+		m_SndFile.m_SamplePlayLengths = &m_SamplePlayLengths;
+	}
 
 	~CRenderProgressDlg()
 	{
-		m_SndFile.m_SamplePlayLengths.clear();
+		m_SndFile.m_SamplePlayLengths = nullptr;
 	}
 
 	void Run() override
@@ -48,7 +52,7 @@ public:
 			m_SndFile.m_MixPlugins[i].SetBypass(true);
 		}
 
-		m_SndFile.m_SamplePlayLengths.assign(m_SndFile.GetNumSamples() + 1, 0);
+		m_SamplePlayLengths.assign(m_SndFile.GetNumSamples() + 1, 0);
 
 		auto prevTime = timeGetTime();
 		auto currentSeq = m_SndFile.Order.GetCurrentSequenceIndex();
@@ -123,10 +127,10 @@ void CModDoc::OnShowSampleTrimmer()
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
 		SmpLength length = sample.nLength;
-		if(m_SndFile.m_SamplePlayLengths[smp] != 0 && length > m_SndFile.m_SamplePlayLengths[smp])
+		if(dlg.m_SamplePlayLengths[smp] != 0 && length > dlg.m_SamplePlayLengths[smp])
 		{
 			numTrimmed++;
-			numBytes += (length - m_SndFile.m_SamplePlayLengths[smp]) * sample.GetBytesPerSample();
+			numBytes += (length - dlg.m_SamplePlayLengths[smp]) * sample.GetBytesPerSample();
 		}
 	}
 	if(numTrimmed == 0)
@@ -150,10 +154,10 @@ void CModDoc::OnShowSampleTrimmer()
 		{
 			ModSample &sample = m_SndFile.GetSample(smp);
 			SmpLength length = sample.nLength;
-			if(m_SndFile.m_SamplePlayLengths[smp] != 0 && length > m_SndFile.m_SamplePlayLengths[smp])
+			if(dlg.m_SamplePlayLengths[smp] != 0 && length > dlg.m_SamplePlayLengths[smp])
 			{
-				GetSampleUndo().PrepareUndo(smp, sundo_delete, "Automatic Sample Trimming", m_SndFile.m_SamplePlayLengths[smp], length);
-				ctrlSmp::ResizeSample(sample, m_SndFile.m_SamplePlayLengths[smp], m_SndFile);
+				GetSampleUndo().PrepareUndo(smp, sundo_delete, "Automatic Sample Trimming", dlg.m_SamplePlayLengths[smp], length);
+				ctrlSmp::ResizeSample(sample, dlg.m_SamplePlayLengths[smp], m_SndFile);
 				sample.uFlags.set(SMP_MODIFIED);
 			}
 		}

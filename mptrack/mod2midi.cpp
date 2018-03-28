@@ -478,7 +478,7 @@ namespace MidiExport
 	class DummyAudioTarget : public IAudioReadTarget
 	{
 	public:
-		virtual void DataCallback(int *, std::size_t, std::size_t) { }
+		void DataCallback(int *, std::size_t, std::size_t) override { }
 	};
 }
 
@@ -778,7 +778,6 @@ void CDoMidiConvert::Run()
 	conv.Finalise();
 
 	m_sndFile.m_bIsRendering = false;
-	m_sndFile.m_PatternCuePoints.clear();
 	m_sndFile.SetRepeatCount(oldRepCount);
 
 	if(taskBarList)
