@@ -2432,6 +2432,7 @@ BEGIN
         MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
         MENUITEM "C&leanup...",                 ID_EDIT_CLEANUP
+        MENUITEM "Auto&matic Sample Trimmer",   ID_EDIT_SAMPLETRIMMER
         MENUITEM SEPARATOR
         MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
         MENUITEM "Find &Next\tF3",              ID_EDIT_FINDNEXT

@@ -1018,6 +1018,7 @@
     <ClCompile Include="..\..\mptrack\SampleConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\SampleEditorDialogs.cpp" />
     <ClCompile Include="..\..\mptrack\SampleGenerator.cpp" />
+    <ClCompile Include="..\..\mptrack\SampleTrimmer.cpp" />
     <ClCompile Include="..\..\mptrack\ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="..\..\mptrack\SelectPluginDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Settings.cpp" />

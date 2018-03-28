@@ -1134,6 +1134,7 @@
 #define ID_INFO_OUTPUTS                 36012
 #define ID_INFO_MACROS                  36013
 #define ID_INFO_OUPUTS                  36016
+#define ID_EDIT_SAMPLETRIMMER           36017
 #define ID_EDIT_GOTO                    36018
 #define ID_VIEW_GRAPH                   36019
 #define ID_PATTERN_TRANSITIONMUTE       36020

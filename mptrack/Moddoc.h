@@ -32,22 +32,13 @@ struct SplitKeyboardSettings
 		splitOctaveRange = 9,
 	};
 
-	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0); }
+	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument != 0) || (splitVolume != 0); }
 
-	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
-	ModCommand::NOTE splitNote;
-	ModCommand::INSTR splitInstrument;
-	ModCommand::VOL splitVolume;
-	bool octaveLink;	// apply octaveModifier
-
-	SplitKeyboardSettings()
-	{
-		splitInstrument = 0;
-		splitNote = NOTE_MIDDLEC - 1;
-		splitVolume = 0;
-		octaveModifier = 0;
-		octaveLink = false;
-	}
+	int octaveModifier = 0;	// determines by how many octaves the notes should be transposed up or down
+	ModCommand::NOTE splitNote = NOTE_MIDDLEC - 1;
+	ModCommand::INSTR splitInstrument = 0;
+	ModCommand::VOL splitVolume = 0;
+	bool octaveLink = false;	// apply octaveModifier
 };
 
 enum InputTargetContext : int8;
@@ -402,6 +393,7 @@ public:
 	afx_msg void OnEditInstruments();
 	afx_msg void OnEditComments();
 	afx_msg void OnShowCleanup();
+	afx_msg void OnShowSampleTrimmer();
 	afx_msg void OnSetupZxxMacros();
 	afx_msg void OnEstimateSongLength();
 	afx_msg void OnApproximateBPM();

@@ -1019,6 +1019,9 @@
     <ClCompile Include="..\..\mptrack\SampleGenerator.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\SampleTrimmer.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\ScaleEnvPointsDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>

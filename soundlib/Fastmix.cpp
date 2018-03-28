@@ -373,12 +373,25 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.nROfs = chn.nLOfs = 0;
 				pbuffer += nSmpCount * 2;
 				naddmix = 0;
-			} else
+			}
+#ifdef MODPLUG_TRACKER
+			else if(!m_SamplePlayLengths.empty())
+			{
+				// Detecting the longest play time for each sample for optimization
+				chn.position += chn.increment * nSmpCount;
+				size_t smp = std::distance<const ModSample *>(Samples, chn.pModSample);
+				if(smp < m_SamplePlayLengths.size())
+				{
+					m_SamplePlayLengths[smp] = std::max(m_SamplePlayLengths[smp], chn.position.GetUInt());
+				}
+			}
+#endif
+			else
 			{
 				// Do mixing
 				mixsample_t *pbufmax = pbuffer + (nSmpCount * 2);
-				chn.nROfs = - *(pbufmax-2);
-				chn.nLOfs = - *(pbufmax-1);
+				chn.nROfs = -*(pbufmax - 2);
+				chn.nLOfs = -*(pbufmax - 1);
 
 #ifdef _DEBUG
 				SamplePosition targetpos = chn.position + chn.increment * nSmpCount;
@@ -388,11 +401,12 @@ void CSoundFile::CreateStereoMix(int count)
 				MPT_ASSERT(chn.position.GetUInt() == targetpos.GetUInt());
 #endif
 
-				chn.nROfs += *(pbufmax-2);
-				chn.nLOfs += *(pbufmax-1);
+				chn.nROfs += *(pbufmax - 2);
+				chn.nLOfs += *(pbufmax - 1);
 				pbuffer = pbufmax;
 				naddmix = 1;
 			}
+
 			nsamples -= nSmpCount;
 			if (chn.nRampLength)
 			{
@@ -543,7 +557,7 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 			if(!plugin.IsMasterEffect() && !plugin.pMixPlugin->ShouldProcessSilence() && !(plugin.pMixPlugin->m_MixState.dwFlags & SNDMIXPLUGINSTATE::psfHasInput))
 			{
 				// If plugin has no inputs and isn't a master plugin, we shouldn't let it process silence if possible.
-				// I have yet to encounter a plugin which actually sets this flag.
+				// I have yet to encounter a VST plugin which actually sets this flag.
 				bool hasInput = false;
 				for(PLUGINDEX inPlug = 0; inPlug < plug; inPlug++)
 				{
