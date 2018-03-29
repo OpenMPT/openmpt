@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include <numeric>
+#include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
@@ -118,6 +119,7 @@ public:
 
 void CModDoc::OnShowSampleTrimmer()
 {
+	BypassInputHandler bih;
 	CMainFrame::GetMainFrame()->StopMod(this);
 	CRenderProgressDlg dlg(CMainFrame::GetMainFrame(), m_SndFile);
 	dlg.DoModal();
