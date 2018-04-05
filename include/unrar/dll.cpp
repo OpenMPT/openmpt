@@ -35,6 +35,8 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
   DataSet *Data=NULL;
   try
   {
+    ErrHandler.Clean();
+
     r->OpenResult=0;
     Data=new DataSet;
     Data->Cmd.DllError=0;
@@ -151,9 +153,16 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
 int PASCAL RARCloseArchive(HANDLE hArcData)
 {
   DataSet *Data=(DataSet *)hArcData;
-  bool Success=Data==NULL ? false:Data->Arc.Close();
-  delete Data;
-  return Success ? ERAR_SUCCESS : ERAR_ECLOSE;
+  try
+  {
+    bool Success=Data==NULL ? false:Data->Arc.Close();
+    delete Data;
+    return Success ? ERAR_SUCCESS : ERAR_ECLOSE;
+  }
+  catch (RAR_EXIT ErrCode)
+  {
+    return Data->Cmd.DllError!=0 ? Data->Cmd.DllError : RarErrorToDll(ErrCode);
+  }
 }
 
 
@@ -398,13 +407,13 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
 
 int PASCAL RARProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName)
 {
-  return(ProcessFile(hArcData,Operation,DestPath,DestName,NULL,NULL));
+  return ProcessFile(hArcData,Operation,DestPath,DestName,NULL,NULL);
 }
 
 
 int PASCAL RARProcessFileW(HANDLE hArcData,int Operation,wchar *DestPath,wchar *DestName)
 {
-  return(ProcessFile(hArcData,Operation,NULL,NULL,DestPath,DestName));
+  return ProcessFile(hArcData,Operation,NULL,NULL,DestPath,DestName);
 }
 
 

@@ -9,7 +9,6 @@ static bool DllVolNotify(RAROptions *Cmd,wchar *NextName);
 
 bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Command)
 {
-  return true;	// OPENMPT ADDITION
   RAROptions *Cmd=Arc.GetRAROptions();
 
   HEADER_TYPE HeaderType=Arc.GetHeaderType();
@@ -181,7 +180,6 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
 
 bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 {
-  return true;	// OPENMPT ADDITION
   bool DllVolChanged=false,DllVolAborted=false;
 
   if (Cmd->Callback!=NULL)
@@ -259,7 +257,6 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 #ifdef RARDLL
 bool DllVolNotify(RAROptions *Cmd,wchar *NextName)
 {
-  return true;	// OPENMPT ADDITION
   char NextNameA[NM];
   WideToChar(NextName,NextNameA,ASIZE(NextNameA));
   if (Cmd->Callback!=NULL)

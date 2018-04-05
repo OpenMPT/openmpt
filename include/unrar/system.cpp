@@ -103,7 +103,7 @@ void Wait()
 
 
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
-void Shutdown()
+void Shutdown(POWER_MODE Mode)
 {
   return; // OPENMPT ADDITION
   HANDLE hToken;
@@ -116,7 +116,14 @@ void Shutdown()
 
     AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0);
   }
-  ExitWindowsEx(EWX_SHUTDOWN|EWX_FORCE|EWX_POWEROFF,SHTDN_REASON_FLAG_PLANNED);
+  if (Mode==POWERMODE_OFF)
+    ExitWindowsEx(EWX_SHUTDOWN|EWX_FORCE,SHTDN_REASON_FLAG_PLANNED);
+  if (Mode==POWERMODE_SLEEP)
+    SetSuspendState(FALSE,FALSE,FALSE);
+  if (Mode==POWERMODE_HIBERNATE)
+    SetSuspendState(TRUE,FALSE,FALSE);
+  if (Mode==POWERMODE_RESTART)
+    ExitWindowsEx(EWX_REBOOT|EWX_FORCE,SHTDN_REASON_FLAG_PLANNED);
 }
 #endif
 

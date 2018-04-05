@@ -329,7 +329,7 @@ class Unpack:PackDef
     bool ReadEndOfBlock();
     bool ReadVMCode();
     bool ReadVMCodePPM();
-    bool AddVMCode(uint FirstByte,byte *Code,int CodeSize);
+    bool AddVMCode(uint FirstByte,byte *Code,uint CodeSize);
     int SafePPMDecodeChar();
     bool ReadTables30();
     bool UnpReadBuf30();

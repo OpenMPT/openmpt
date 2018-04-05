@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
   // Must be initialized, normal initialization can be skipped in case of
   // exception.
-  bool ShutdownOnClose=false;
+  POWER_MODE ShutdownOnClose=POWERMODE_KEEP;
 #endif
 
   try 
@@ -71,11 +71,17 @@ int main(int argc, char *argv[])
 #endif
 
     uiInit(Cmd->Sound);
-    InitConsoleOptions(Cmd->MsgStream,Cmd->RedirectCharset);
     InitLogOptions(Cmd->LogName,Cmd->ErrlogCharset);
     ErrHandler.SetSilent(Cmd->AllYes || Cmd->MsgStream==MSG_NULL);
 
     Cmd->OutTitle();
+/*
+    byte Buf[10000];
+    File Src;
+    Src.TOpen(L"123.rar");
+    int Size=Src.Read(Buf,sizeof(Buf));
+    Cmd->SetArcInMem(Buf,Size);
+*/
     Cmd->ProcessCommand();
     delete Cmd;
   }
@@ -94,8 +100,8 @@ int main(int argc, char *argv[])
   }
 
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
-  if (ShutdownOnClose && ErrHandler.IsShutdownEnabled())
-    Shutdown();
+  if (ShutdownOnClose!=POWERMODE_KEEP && ErrHandler.IsShutdownEnabled())
+    Shutdown(ShutdownOnClose);
 #endif
   ErrHandler.MainExit=true;
   return ErrHandler.GetErrorCode();

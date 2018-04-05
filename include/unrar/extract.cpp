@@ -226,18 +226,6 @@ EXTRACT_ARC_CODE CmdExtract::ExtractArchive()
 
 bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 {
-  // We can get negative sizes in corrupt archive and it is unacceptable
-  // for size comparisons in CmdExtract::UnstoreFile and ComprDataIO::UnpRead,
-  // where we cast sizes to size_t and can exceed another read or available
-  // size. We could fix it when reading an archive. But we prefer to do it
-  // here, because this function is called directly in unrar.dll, so we fix
-  // bad parameters passed to dll. Also we want to see real negative sizes
-  // in the listing of corrupt archive.
-  if (Arc.FileHead.PackSize<0)
-    Arc.FileHead.PackSize=0;
-  if (Arc.FileHead.UnpSize<0)
-    Arc.FileHead.UnpSize=0;
-
   wchar Command=Cmd->Command[0];
   if (HeaderSize==0)
     if (DataIO.UnpVolume)
@@ -245,8 +233,8 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 #ifdef NOVOLUME
       return false;
 #else
-      // Supposing we unpack an old RAR volume without end of archive record
-      // and last file is not split between volumes.
+      // Supposing we unpack an old RAR volume without the end of archive
+      // record and last file is not split between volumes.
       if (!MergeArchive(Arc,&DataIO,false,Command))
       {
         ErrHandler.SetErrorCode(RARX_WARNING);
@@ -256,11 +244,12 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
     }
     else
       return false;
+
   HEADER_TYPE HeaderType=Arc.GetHeaderType();
   if (HeaderType!=HEAD_FILE)
   {
 #ifndef SFX_MODULE
-    if (HeaderType==HEAD3_OLDSERVICE && PrevProcessed)
+    if (Arc.Format==RARFMT15 && HeaderType==HEAD3_OLDSERVICE && PrevProcessed)
       SetExtraInfo20(Cmd,Arc,DestFileName);
 #endif
     if (HeaderType==HEAD_SERVICE && PrevProcessed)
@@ -284,6 +273,19 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
     return true;
   }
   PrevProcessed=false;
+
+  // We can get negative sizes in corrupt archive and it is unacceptable
+  // for size comparisons in ComprDataIO::UnpRead, where we cast sizes
+  // to size_t and can exceed another read or available size. We could fix it
+  // when reading an archive. But we prefer to do it here, because this
+  // function is called directly in unrar.dll, so we fix bad parameters
+  // passed to dll. Also we want to see real negative sizes in the listing
+  // of corrupt archive. To prevent uninitialized data access perform
+  // these checks after rejecting zero length and non-file headers above.
+  if (Arc.FileHead.PackSize<0)
+    Arc.FileHead.PackSize=0;
+  if (Arc.FileHead.UnpSize<0)
+    Arc.FileHead.UnpSize=0;
 
   if (!Cmd->Recurse && MatchedArgs>=Cmd->FileArgs.ItemsCount() && AllMatchesExact)
     return false;
@@ -429,7 +431,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       return !Arc.Solid; // Can try extracting next file only in non-solid archive.
     }
 
-    while (true) // Repeat password prompt in case of wrong password here.
+    while (true) // Repeat the password prompt for wrong and empty passwords.
     {
       if (Arc.FileHead.Encrypted)
       {
@@ -447,20 +449,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           return false;
         }
 #endif
-        // Skip only the current encrypted file if empty password is entered.
-        // Actually our "cancel" code above intercepts empty passwords too now,
-        // so we keep the code below just in case we'll decide process empty
-        // and cancelled passwords differently sometimes.
-        if (!Cmd->Password.IsSet())
-        {
-          ErrHandler.SetErrorCode(RARX_WARNING);
-#ifdef RARDLL
-          Cmd->DllError=ERAR_MISSING_PASSWORD;
-#endif
-          ExtrFile=false;
-        }
       }
-
 
       // Set a password before creating the file, so we can skip creating
       // in case of wrong password.
@@ -481,12 +470,24 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           memcmp(Arc.FileHead.PswCheck,PswCheck,SIZE_PSWCHECK)!=0 &&
           !Arc.BrokenHeader)
       {
-        uiMsg(UIWAIT_BADPSW,ArcFileName);
-
-        if (!PasswordAll) // If entered manually and not through -p<pwd>.
+        if (PasswordAll) // For -p<pwd> or Ctrl+P.
         {
+          // This message is used by Android GUI to reset cached passwords.
+          // Update appropriate code if changed.
+          uiMsg(UIERROR_BADPSW,ArcFileName);
+        }
+        else // For passwords entered manually.
+        {
+          // This message is used by Android GUI and Windows GUI and SFX to
+          // reset cached passwords. Update appropriate code if changed.
+          uiMsg(UIWAIT_BADPSW,ArcFileName);
           Cmd->Password.Clean();
+
+          // Avoid new requests for unrar.dll to prevent the infinite loop
+          // if app always returns the same password.
+#ifndef RARDLL
           continue; // Request a password again.
+#endif
         }
 #ifdef RARDLL
         // If we already have ERAR_EOPEN as result of missing volume,
@@ -785,19 +786,18 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 
 void CmdExtract::UnstoreFile(ComprDataIO &DataIO,int64 DestUnpSize)
 {
-  // 512 KB and larger buffer reported to reduce performance on old XP
-  // computers with WDC WD2000JD HDD. According to test made by user
-  // 256 KB buffer is optimal.
-  Array<byte> Buffer(0x40000);
-  while (1)
+  Array<byte> Buffer(File::CopyBufferSize());
+  while (true)
   {
-    uint Code=DataIO.UnpRead(&Buffer[0],Buffer.Size());
-    if (Code==0 || (int)Code==-1)
+    int ReadSize=DataIO.UnpRead(&Buffer[0],Buffer.Size());
+    if (ReadSize<=0)
       break;
-    Code=Code<DestUnpSize ? Code:(uint)DestUnpSize;
-    DataIO.UnpWrite(&Buffer[0],Code);
-    if (DestUnpSize>=0)
-      DestUnpSize-=Code;
+    int WriteSize=ReadSize<DestUnpSize ? ReadSize:(int)DestUnpSize;
+    if (WriteSize>0)
+    {
+      DataIO.UnpWrite(&Buffer[0],WriteSize);
+      DestUnpSize-=WriteSize;
+    }
   }
 }
 
@@ -967,12 +967,10 @@ bool CmdExtract::ExtrGetPassword(Archive &Arc,const wchar *ArcFileName)
 {
   if (!Cmd->Password.IsSet())
   {
-    if (!uiGetPassword(UIPASSWORD_FILE,ArcFileName,&Cmd->Password) || !Cmd->Password.IsSet())
+    if (!uiGetPassword(UIPASSWORD_FILE,ArcFileName,&Cmd->Password)/* || !Cmd->Password.IsSet()*/)
     {
-      // Suppress "test is ok" message in GUI if user entered
-      // an empty password or cancelled a password prompt.
+      // Suppress "test is ok" message if user cancelled the password prompt.
       uiMsg(UIERROR_INCERRCOUNT);
-
       return false;
     }
     Cmd->ManualPassword=true;

@@ -30,6 +30,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.07.00 (* April 2018, revision 9934)
+-----------------------------------------
+Third-Party Libraries
+   [Mod] Update libvorbis (v1.3.6)
+
+
 v1.27.06.00 (11 March 2018, revision 9911)
 ------------------------------------------
 General tab
@@ -45,7 +51,7 @@ Instrument tab
    [Fix] <js> Allow to the first envelope node to be set as the release node.
 
 Tree view
-   [Fix] <js> Crash after removing patterns (http://bugs.openmpt.org/view.php?id=1091).
+   [Fix] <js> Crash after removing all patterns (http://bugs.openmpt.org/view.php?id=1091).
 
 Playback
    [Fix] <js> Some filter changes through MIDI macros were not applied if the note volume was set to 0 on the same row. 
@@ -58,7 +64,7 @@ Other formats
 Stream Export
    [Imp] <js> More accurate estimation of export duration for order list selections.
    [Fix] <js> Spin buttons for sequence and order selection export were not enabled correctly.
-   [Fix] <js> Correctly estimate song length when the song is played more than one time (http://bugs.openmpt.org/view.php?id=1088).
+   [Fix] <js> Correctly estimate song length when the song is played more than once (http://bugs.openmpt.org/view.php?id=1088).
 
 Misc
    [Fix] <jh> Welcome Dialog: FT2 and IT classic keymaps were mixed up.

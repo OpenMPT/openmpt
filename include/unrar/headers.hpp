@@ -11,12 +11,7 @@
 #define  SIZEOF_SUBBLOCKHEAD    14
 #define  SIZEOF_COMMHEAD        13
 #define  SIZEOF_PROTECTHEAD     26
-#define  SIZEOF_AVHEAD          14
-#define  SIZEOF_SIGNHEAD        15
 #define  SIZEOF_UOHEAD          18
-#define  SIZEOF_MACHEAD         22
-#define  SIZEOF_EAHEAD          24
-#define  SIZEOF_BEEAHEAD        24
 #define  SIZEOF_STREAMHEAD      26
 
 #define  VER_PACK               29
@@ -86,6 +81,8 @@ enum HEADER_TYPE {
   HEAD3_SERVICE=0x7a,HEAD3_ENDARC=0x7b
 };
 
+
+// RAR 2.9 and earlier.
 enum { EA_HEAD=0x100,UO_HEAD=0x101,MAC_HEAD=0x102,BEEA_HEAD=0x103,
        NTACL_HEAD=0x104,STREAM_HEAD=0x105 };
 
@@ -323,23 +320,6 @@ struct ProtectHeader:BlockHeader
 };
 
 
-struct AVHeader:BaseBlock
-{
-  byte UnpVer;
-  byte Method;
-  byte AVVer;
-  uint AVInfoCRC;
-};
-
-
-struct SignHeader:BaseBlock
-{
-  uint CreationTime;
-  ushort ArcNameSize;
-  ushort UserNameSize;
-};
-
-
 struct UnixOwnersHeader:SubBlockHeader
 {
   ushort OwnerNameSize;
@@ -367,13 +347,6 @@ struct StreamHeader:SubBlockHeader
   uint StreamCRC;
   ushort StreamNameSize;
   char StreamName[260];
-};
-
-
-struct MacFInfoHeader:SubBlockHeader
-{
-  uint fileType;
-  uint fileCreator;
 };
 
 

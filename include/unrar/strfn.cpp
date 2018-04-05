@@ -28,7 +28,8 @@ void IntToExt(const char *Src,char *Dest,size_t DestSize)
 }
 
 
-// Convert archived names to Unicode. Allow user to select a code page in GUI.
+// Convert archived names and comments to Unicode.
+// Allows user to select a code page in GUI.
 void ArcCharToWide(const char *Src,wchar *Dest,size_t DestSize,ACTW_ENCODING Encoding)
 {
 #if defined(_WIN_ALL) // Console Windows RAR.
@@ -36,11 +37,12 @@ void ArcCharToWide(const char *Src,wchar *Dest,size_t DestSize,ACTW_ENCODING Enc
     UtfToWide(Src,Dest,DestSize);
   else
   {
-    char NameA[NM];
+    Array<char> NameA;
     if (Encoding==ACTW_OEM)
     {
-      IntToExt(Src,NameA,ASIZE(NameA));
-      Src=NameA;
+      NameA.Alloc(DestSize+1);
+      IntToExt(Src,&NameA[0],NameA.Size());
+      Src=&NameA[0];
     }
     CharToWide(Src,Dest,DestSize);
   }
@@ -56,6 +58,8 @@ void ArcCharToWide(const char *Src,wchar *Dest,size_t DestSize,ACTW_ENCODING Enc
   if (DestSize>0)
     Dest[DestSize-1]=0;
 }
+
+
 
 
 int stricomp(const char *s1,const char *s2)
@@ -121,7 +125,8 @@ unsigned char loctolower(unsigned char ch)
 {
 #if defined(_WIN_ALL)
   // Convert to LPARAM first to avoid a warning in 64 bit mode.
-  return (int)(LPARAM)CharLowerA((LPSTR)ch);
+  // Convert to uintptr_t to avoid Clang/win error: cast to 'char *' from smaller integer type 'unsigned char' [-Werror,-Wint-to-pointer-cast]
+  return (int)(LPARAM)CharLowerA((LPSTR)(uintptr_t)ch);
 #else
   return tolower(ch);
 #endif
@@ -132,7 +137,8 @@ unsigned char loctoupper(unsigned char ch)
 {
 #if defined(_WIN_ALL)
   // Convert to LPARAM first to avoid a warning in 64 bit mode.
-  return (int)(LPARAM)CharUpperA((LPSTR)ch);
+  // Convert to uintptr_t to avoid Clang/win error: cast to 'char *' from smaller integer type 'unsigned char' [-Werror,-Wint-to-pointer-cast]
+  return (int)(LPARAM)CharUpperA((LPSTR)(uintptr_t)ch);
 #else
   return toupper(ch);
 #endif

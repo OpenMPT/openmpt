@@ -22,7 +22,8 @@ bool Archive::GetComment(Array<wchar> *CmtData)
       // Old style (RAR 2.9) archive comment embedded into the main 
       // archive header.
       Seek(SFXSize+SIZEOF_MARKHEAD3+SIZEOF_MAINHEAD3,SEEK_SET);
-      ReadHeader();
+      if (!ReadHeader() || GetHeaderType()!=HEAD3_CMT)
+        return false;
     }
     else
     {
@@ -67,6 +68,7 @@ bool Archive::GetComment(Array<wchar> *CmtData)
     DataIO.EnableShowProgress(false);
     DataIO.SetPackedSizeToRead(CmtLength);
     DataIO.UnpHash.Init(HASH_CRC32,1);
+    DataIO.SetNoFileHeader(true); // this->FileHead is not filled yet.
 
     Unpack CmtUnpack(&DataIO);
     CmtUnpack.Init(0x10000,false);
@@ -99,7 +101,12 @@ bool Archive::GetComment(Array<wchar> *CmtData)
     if (CmtLength==0)
       return false;
     Array<byte> CmtRaw(CmtLength);
-    Read(&CmtRaw[0],CmtLength);
+    int ReadSize=Read(&CmtRaw[0],CmtLength);
+    if (ReadSize>=0 && (uint)ReadSize<CmtLength) // Comment is shorter than declared.
+    {
+      CmtLength=ReadSize;
+      CmtRaw.Alloc(CmtLength);
+    }
 
     if (Format!=RARFMT14 && CommHead.CommCRC!=(~CRC32(0xffffffff,&CmtRaw[0],CmtLength)&0xffff))
     {
@@ -113,7 +120,7 @@ bool Archive::GetComment(Array<wchar> *CmtData)
     // 4x memory for OEM to UTF-8 output here.
     OemToCharA((char *)&CmtRaw[0],(char *)&CmtRaw[0]);
 #endif
-    CharToWide((char *)&CmtRaw[0],CmtData->Addr(0),CmtLength);
+    CharToWide((char *)&CmtRaw[0],CmtData->Addr(0),CmtData->Size());
     CmtData->Alloc(wcslen(CmtData->Addr(0)));
   }
 #endif

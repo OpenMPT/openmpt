@@ -124,6 +124,9 @@ void uiMsgStore::Msg()
     case UIERROR_FILEDELETE:
       Log(Str[0],St(MCannotDelete),Str[1]);
       break;
+    case UIERROR_RECYCLEFAILED:
+      Log(Str[0],St(MRecycleFailed));
+      break;
     case UIERROR_FILERENAME:
       Log(Str[0],St(MErrRename),Str[1],Str[2]);
       break;
@@ -339,7 +342,10 @@ void uiMsgStore::Msg()
 
 bool uiGetPassword(UIPASSWORD_TYPE Type,const wchar *FileName,SecPassword *Password)
 {
-  return GetConsolePassword(Type,FileName,Password);
+  // Unlike GUI we cannot provide Cancel button here, so we use the empty
+  // password to abort. Otherwise user not knowing a password would need to
+  // press Ctrl+C multiple times to quit from infinite password request loop.
+  return GetConsolePassword(Type,FileName,Password) && Password->IsSet();
 }
 
 
