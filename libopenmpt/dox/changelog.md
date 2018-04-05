@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.8-pre
 
+ *  Keep track of active SFx macro during seeking.
+ *  The "note cut" duplicate note action did not volume-ramp the previously playing sample.
+ *  DSM: Support restart position and 16-bit samples.
+ *  DTM: Import global volume.
+
 ### libopenmpt 0.3.7 (2018-03-11)
 
  *  [**Bug**] libopenmpt did not build with NDK r13b on armeabi due to missing

@@ -30,10 +30,26 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.07.00 (* April 2018, revision 9934)
------------------------------------------
+v1.27.07.00 (* April 2018, revision 10017)
+------------------------------------------
+Pattern tab
+   [Imp] <js> Keep track of active SFx macro during seeking.
+
+Instrument tab
+   [Fix] <js> Importing soundfont instruments into IT / XM files did not remove the release node settings.
+
+VST / DMO Plugins
+   [Mod] <js> Prepend plugin name to default filename when saving a plugin preset or bank (http://bugs.openmpt.org/view.php?id=1108).
+
+Playback
+   [Fix] <js> The "note cut" duplicate note action did not volume-ramp the previously playing sample.
+
+Other formats
+   [Imp] <js> DSM: Support restart position and 16-bit samples.
+   [Imp] <js> DTM: Import global volume.
+
 Third-Party Libraries
-   [Mod] Update libvorbis (v1.3.6)
+   [Mod] Update libvorbis (v1.3.6) and unrar (v5.6.2)
 
 
 v1.27.06.00 (11 March 2018, revision 9911)
