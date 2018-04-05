@@ -139,8 +139,12 @@ bool RecVolumes5::Restore(RAROptions *Cmd,const wchar *Name,bool Silent)
   wcsncpyz(ArcName,Name,ASIZE(ArcName));
 
   wchar *Num=GetVolNumPart(ArcName);
+  if (Num==ArcName)
+    return false; // Number part is missing in the name.
   while (Num>ArcName && IsDigit(*(Num-1)))
     Num--;
+  if (Num==ArcName)
+    return false; // Entire volume name is numeric, not possible for REV file.
   wcsncpyz(Num,L"*.*",ASIZE(ArcName)-(Num-ArcName));
   
   wchar FirstVolName[NM];

@@ -19,6 +19,7 @@ void ComprDataIO::Init()
   ShowProgress=true;
   TestMode=false;
   SkipUnpCRC=false;
+  NoFileHeader=false;
   PackVolume=false;
   UnpVolume=false;
   NextVolumeMissing=false;
@@ -95,7 +96,7 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
           return -1;
         ReadSize=SrcFile->Read(ReadAddr,SizeToRead);
         FileHeader *hd=SubHead!=NULL ? SubHead:&SrcArc->FileHead;
-        if (hd->SplitAfter)
+        if (!NoFileHeader && hd->SplitAfter)
           PackedDataHash.Update(ReadAddr,ReadSize);
       }
     }

@@ -13,6 +13,7 @@ void CommandData::Init()
   *Command=0;
   *ArcName=0;
   FileLists=false;
+  NoMoreSwitches=false;
 
   ListMode=RCLM_AUTO;
 
@@ -96,7 +97,7 @@ void CommandData::ParseArg(wchar *Arg)
   else
     if (*Command==0)
     {
-      wcsncpy(Command,Arg,ASIZE(Command));
+      wcsncpyz(Command,Arg,ASIZE(Command));
 
 
       *Command=toupperw(*Command);
@@ -133,17 +134,7 @@ void CommandData::ParseArg(wchar *Arg)
             {
               FileLists=true;
 
-              RAR_CHARSET Charset=FilelistCharset;
-
-#if defined(_WIN_ALL)
-              // for compatibility reasons we use OEM encoding
-              // in Win32 console version by default
-
-//              if (Charset==RCH_DEFAULT)
-//                Charset=RCH_OEM;
-#endif
-
-              ReadTextFile(Arg+1,&FileArgs,false,true,Charset,true,true,true);
+              ReadTextFile(Arg+1,&FileArgs,false,true,FilelistCharset,true,true,true);
 
             }
             else
@@ -424,6 +415,9 @@ void CommandData::ProcessSwitch(const wchar *Switch)
       if (wcsicomp(Switch+1,L"ERR")==0)
       {
         MsgStream=MSG_STDERR;
+        // Set it immediately when parsing the command line, so it also
+        // affects messages issued while parsing the command line.
+        SetConsoleMsgStream(MSG_STDERR);
         break;
       }
       if (wcsnicomp(Switch+1,L"EML",3)==0)
@@ -431,9 +425,15 @@ void CommandData::ProcessSwitch(const wchar *Switch)
         wcsncpyz(EmailTo,Switch[4]!=0 ? Switch+4:L"@",ASIZE(EmailTo));
         break;
       }
+      if (wcsicomp(Switch+1,L"M")==0)
+      {
+        MoreInfo=true;
+        break;
+      }
       if (wcsicomp(Switch+1,L"NUL")==0)
       {
         MsgStream=MSG_NULL;
+        SetConsoleMsgStream(MSG_NULL);
         break;
       }
       if (toupperw(Switch[1])=='D')
@@ -443,6 +443,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
           {
             case 'Q':
               MsgStream=MSG_ERRONLY;
+              SetConsoleMsgStream(MSG_ERRONLY);
               break;
             case 'C':
               DisableCopyright=true;
@@ -456,9 +457,24 @@ void CommandData::ProcessSwitch(const wchar *Switch)
           }
         break;
       }
-      if (wcsicomp(Switch+1,L"OFF")==0)
+      if (wcsnicomp(Switch+1,L"OFF",3)==0)
       {
-        Shutdown=true;
+        switch(Switch[4])
+        {
+          case 0:
+          case '1':
+            Shutdown=POWERMODE_OFF;
+            break;
+          case '2':
+            Shutdown=POWERMODE_HIBERNATE;
+            break;
+          case '3':
+            Shutdown=POWERMODE_SLEEP;
+            break;
+          case '4':
+            Shutdown=POWERMODE_RESTART;
+            break;
+        }
         break;
       }
       if (wcsicomp(Switch+1,L"VER")==0)
@@ -574,19 +590,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
       {
         StringList *Args=toupperw(Switch[0])=='N' ? &InclArgs:&ExclArgs;
         if (Switch[1]=='@' && !IsWildcard(Switch))
-        {
-          RAR_CHARSET Charset=FilelistCharset;
-
-#if defined(_WIN_ALL)
-          // for compatibility reasons we use OEM encoding
-          // in Win32 console version by default
-
-//          if (Charset==RCH_DEFAULT)
-//            Charset=RCH_OEM;
-#endif
-
-          ReadTextFile(Switch+2,Args,false,true,Charset,true,true,true);
-        }
+          ReadTextFile(Switch+2,Args,false,true,FilelistCharset,true,true,true);
         else
           Args->AddString(Switch+1);
       }
@@ -783,6 +787,9 @@ void CommandData::ProcessSwitch(const wchar *Switch)
                         AlreadyBad=true;
                         break;
                     }
+              // Set it immediately when parsing the command line, so it also
+              // affects messages issued while parsing the command line.
+              SetConsoleRedirectCharset(RedirectCharset);
             }
             break;
 
@@ -1190,8 +1197,8 @@ int CommandData::IsProcessFile(FileHeader &FileHead,bool *ExactMatch,int MatchTy
 {
   if (MatchedArg!=NULL && MatchedArgSize>0)
     *MatchedArg=0;
-  if (wcslen(FileHead.FileName)>=NM)
-    return 0;
+//  if (wcslen(FileHead.FileName)>=NM)
+//    return 0;
   bool Dir=FileHead.Dir;
   if (ExclCheck(FileHead.FileName,Dir,false,true))
     return 0;

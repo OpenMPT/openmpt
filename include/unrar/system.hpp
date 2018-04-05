@@ -22,7 +22,7 @@ void SetPriority(int Priority);
 clock_t MonoClock();
 void Wait();
 bool EmailFile(const wchar *FileName,const wchar *MailToW);
-void Shutdown();
+void Shutdown(POWER_MODE Mode);
 
 #ifdef _WIN_ALL
 HMODULE WINAPI LoadSysLibrary(const wchar *Name);

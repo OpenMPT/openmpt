@@ -44,6 +44,8 @@ struct IUnknown; // OPENMPT ADDITION
 #include <prsht.h>
 #include <shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
+#include <PowrProf.h>
+#pragma comment(lib, "PowrProf.lib")
 #include <shellapi.h>
 #include <shlobj.h>
 #include <winioctl.h>

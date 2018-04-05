@@ -61,14 +61,27 @@ void QuickOpen::Close()
 
 void QuickOpen::Load(uint64 BlockPos)
 {
-  if (!Loaded) // If loading the first time, perform additional intialization.
+  if (!Loaded)
   {
+    // If loading for the first time, perform additional intialization.
     SeekPos=Arc->Tell();
     UnsyncSeekPos=false;
 
     SaveFilePos SavePos(*Arc);
     Arc->Seek(BlockPos,SEEK_SET);
-    if (Arc->ReadHeader()==0 || Arc->GetHeaderType()!=HEAD_SERVICE ||
+
+    // If BlockPos points to original main header, we'll have the infinite
+    // recursion, because ReadHeader() for main header will attempt to load
+    // QOpen and call QuickOpen::Load again. If BlockPos points to long chain
+    // of other main headers, we'll have multiple recursive calls of this
+    // function wasting resources. So we prohibit QOpen temporarily to
+    // prevent this. ReadHeader() calls QOpen.Init and sets MainHead Locator
+    // and QOpenOffset fields, so we cannot use them to prohibit QOpen.
+    Arc->SetProhibitQOpen(true);
+    size_t ReadSize=Arc->ReadHeader();
+    Arc->SetProhibitQOpen(false);
+
+    if (ReadSize==0 || Arc->GetHeaderType()!=HEAD_SERVICE ||
         !Arc->SubHead.CmpName(SUBHEAD_TYPE_QOPEN))
       return;
     QLHeaderPos=Arc->CurBlockPos;
@@ -88,7 +101,10 @@ void QuickOpen::Load(uint64 BlockPos)
                          Arc->SubHead.HashKey,Arc->SubHead.PswCheck);
     else
 #endif
+    {
+      Loaded=false;
       return;
+    }
   }
 
   RawDataPos=0;

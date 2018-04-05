@@ -215,13 +215,13 @@ void* SubAllocator::AllocUnitsRare(int indx)
       GlueCount--;
       i=U2B(Indx2Units[indx]);
       int j=FIXED_UNIT_SIZE*Indx2Units[indx];
-      if (FakeUnitsStart-pText > j)
+      if (FakeUnitsStart - pText > j)
       {
-        FakeUnitsStart-=j;
+        FakeUnitsStart -= j;
         UnitsStart -= i;
-        return(UnitsStart);
+        return UnitsStart;
       }
-      return(NULL);
+      return NULL;
     }
   } while ( !FreeList[i].next );
   void* RetVal=RemoveNode(i);
