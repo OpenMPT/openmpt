@@ -161,6 +161,8 @@ std::wstring ToWString(const unsigned long long & x);
 std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
+// fallback to member function ToUString()
+template <typename T> auto ToWString(const T & x) -> decltype(x.ToUString()) { return mpt::ToWide(x.ToUString()); }
 #endif
 
 #if defined(_MFC_VER)
