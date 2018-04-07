@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta31
 
+ *  [**Sec**] Possible out-of-bounds memory read with IT / ITP / MO3 files
+    containing pattern loops (r10029).
+
+ *  Keep track of active SFx macro during seeking.
+ *  The "note cut" duplicate note action did not volume-ramp the previously playing sample.
+ *  A song starting with non-existing patterns could not be played.
+
 ### libopenmpt 0.2-beta30 (2018-03-11)
 
  *  MED: Correctly import patterns with less channels than the maximum used
