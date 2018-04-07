@@ -72,6 +72,12 @@ is just a high-level summary.
  *  STM: Last character of sample name was missing.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
  *  ParamEq plugin center frequency was not limited correctly.
+ *  Keep track of active SFx macro during seeking.
+ *  The "note cut" duplicate note action did not volume-ramp the previously
+    playing sample.
+ *  A song starting with non-existing patterns could not be played.
+ *  DSM: Support restart position and 16-bit samples.
+ *  DTM: Import global volume.
  *  Subsong search is now less thorough. It could previously find many subsongs
     that are technically correct (unplayed rows at the beginning of patterns
     that have been jumped over due to pattern breaks), but so far no real-world
