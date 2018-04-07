@@ -1078,7 +1078,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			if(GetType() == MOD_TYPE_IT)
 			{
 				// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
-				pChn = playState.Chn;
+				pChn = memory.state.Chn;
 				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 				{
 					if((pChn->rowCommand.command == CMD_S3MCMDEX && pChn->rowCommand.param >= 0xB1 && pChn->rowCommand.param <= 0xBF))
