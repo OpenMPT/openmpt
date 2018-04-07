@@ -320,9 +320,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
-		if(playState.m_nPattern == orderList.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && playState.m_nCurrentOrder == target.pos.order)
+		if(!Patterns.IsValidPat(playState.m_nPattern) && playState.m_nPattern != orderList.GetInvalidPatIndex() && target.mode == GetLengthTarget::SeekPosition && playState.m_nCurrentOrder == target.pos.order)
 		{
-			// Early test: Target is inside +++ pattern
+			// Early test: Target is inside +++ or non-existing pattern
 			retval.targetReached = true;
 			break;
 		}
