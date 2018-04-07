@@ -11,7 +11,8 @@ is just a high-level summary.
     containing pattern loops (r10028).
 
  *  Keep track of active SFx macro during seeking.
- *  The "note cut" duplicate note action did not volume-ramp the previously playing sample.
+ *  The "note cut" duplicate note action did not volume-ramp the previously
+    playing sample.
  *  A song starting with non-existing patterns could not be played.
  *  DSM: Support restart position and 16-bit samples.
  *  DTM: Import global volume.
