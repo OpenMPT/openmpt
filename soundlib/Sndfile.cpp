@@ -699,8 +699,11 @@ void CSoundFile::ResetPlayPos()
 void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 //-------------------------------------------------
 {
-	while ((nOrder < Order.size()) && (Order[nOrder] == Order.GetIgnoreIndex())) nOrder++;
-	if ((nOrder >= Order.size()) || (Order[nOrder] >= Patterns.Size())) return;
+	while(nOrder < Order.size() && !Patterns.IsValidPat(nOrder))
+		nOrder++;
+	if(nOrder >= Order.size())
+		return;
+
 	for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 	{
 		m_PlayState.Chn[j].nPeriod = 0;
