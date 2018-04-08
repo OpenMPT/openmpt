@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.07.00 (* April 2018, revision 10017)
+v1.27.07.00 (8 April 2018, revision 10044)
 ------------------------------------------
 Pattern tab
    [Imp] <js> Keep track of active SFx macro during seeking.
@@ -47,6 +47,9 @@ Playback
 Other formats
    [Imp] <js> DSM: Support restart position and 16-bit samples.
    [Imp] <js> DTM: Import global volume.
+
+Misc
+   [Fix] <js> Possible crash when calculating song length in patterns with many nested pattern loops.
 
 Third-Party Libraries
    [Mod] Update libvorbis (v1.3.6) and unrar (v5.6.2)
