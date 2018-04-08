@@ -52,7 +52,7 @@ Misc
    [Fix] <js> Possible crash when calculating song length in patterns with many nested pattern loops.
 
 Third-Party Libraries
-   [Mod] Update libvorbis (v1.3.6) and unrar (v5.6.2)
+   [Mod] Update libvorbis (v1.3.6) and UnRAR (v5.6.2)
 
 
 v1.27.06.00 (11 March 2018, revision 9911)
