@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.3.8-pre
+### libopenmpt 0.3.8 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT / ITP / MO3 files
     containing pattern loops (r10028).
