@@ -9,8 +9,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta31 (2018-04-08)
 
- *  [**Sec**] Possible out-of-bounds memory read with IT / ITP / MO3 files
-    containing pattern loops (r10029, r10030).
+ *  [**Sec**] Possible out-of-bounds memory read with IT / MO3 files containing
+    pattern loops (r10029, r10030).
 
  *  Keep track of active SFx macro during seeking.
  *  The "note cut" duplicate note action did not volume-ramp the previously
