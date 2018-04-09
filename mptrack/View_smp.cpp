@@ -410,10 +410,10 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 
-				auto fmt = &mpt::ufmt::dec<SmpLength>;
+				mpt::ustring (*fmt)(unsigned int, char, const SmpLength &) = &mpt::ufmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
 					fmt = &mpt::ufmt::HEX<SmpLength>;
-				s = mpt::format(MPT_USTRING("[%1,%2] (%3 sample%4, "))(fmt(m_dwBeginSel), fmt(m_dwEndSel), fmt(selLength), (selLength == 1) ? MPT_USTRING("") : MPT_USTRING("s"));
+				s = mpt::format(MPT_USTRING("[%1-%2] (%3 sample%4, "))(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? MPT_USTRING("") : MPT_USTRING("s"));
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
@@ -1547,10 +1547,13 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
-		CString s;
 		const SmpLength x = ScreenToSample(point.x);
-		s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Cusor: %IX") : _T("Cursor: %Iu"), x);
-		UpdateIndicator(s);
+
+		CString(*fmt)(unsigned int, char, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
+		if(TrackerSettings::Instance().cursorPositionInHex)
+			fmt = &mpt::cfmt::HEX<SmpLength>;
+		UpdateIndicator(mpt::cformat(_T("Cursor: %1"))(fmt(3, ',', x)));
+
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
@@ -1565,6 +1568,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				const bool bHasHighOffset = (sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
 				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
+				CString s;
 				if(xHigh == 0)
 					s.Format(_T("Offset: %c%02X"), cOffsetChar, xLow);
 				else if(bHasHighOffset && xHigh < 0x10)

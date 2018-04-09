@@ -758,7 +758,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
 
 		// Length / Type
-		s.Format(_T("%u-bit %s, len: %lu"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
+		s.Format(_T("%u-bit %s, len: %s"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), mpt::cfmt::dec(3, ',', sample.nLength));
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]);

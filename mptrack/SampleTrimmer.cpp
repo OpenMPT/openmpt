@@ -128,11 +128,10 @@ void CModDoc::OnShowSampleTrimmer()
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
-		SmpLength length = sample.nLength;
-		if(dlg.m_SamplePlayLengths[smp] != 0 && length > dlg.m_SamplePlayLengths[smp])
+		if(dlg.m_SamplePlayLengths[smp] != 0 && sample.nLength > dlg.m_SamplePlayLengths[smp])
 		{
 			numTrimmed++;
-			numBytes += (length - dlg.m_SamplePlayLengths[smp]) * sample.GetBytesPerSample();
+			numBytes += (sample.nLength - dlg.m_SamplePlayLengths[smp]) * sample.GetBytesPerSample();
 		}
 	}
 	if(numTrimmed == 0)
@@ -141,24 +140,22 @@ void CModDoc::OnShowSampleTrimmer()
 		return;
 	}
 
-	CString s;
-	s.Format(_T("%u sample%s can be trimmed, saving %u bytes."), numTrimmed, (numTrimmed == 1) ? _T("") : _T("s"), numBytes);
+	mpt::ustring s = mpt::uformat(MPT_USTRING("%1 sample%2 can be trimmed, saving %3 bytes."))(numTrimmed, (numTrimmed == 1) ? MPT_USTRING("") : MPT_USTRING("s"), mpt::ufmt::dec(3, ',', numBytes));
 	if(dlg.m_abort)
 	{
-		s += _T("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");
+		s += MPT_USTRING("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");
 	} else
 	{
-		s += _T(" Continue?");
+		s += MPT_USTRING(" Continue?");
 	}
 	if(Reporting::Confirm(s, false, dlg.m_abort) == cnfYes)
 	{
 		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 		{
 			ModSample &sample = m_SndFile.GetSample(smp);
-			SmpLength length = sample.nLength;
-			if(dlg.m_SamplePlayLengths[smp] != 0 && length > dlg.m_SamplePlayLengths[smp])
+			if(dlg.m_SamplePlayLengths[smp] != 0 && sample.nLength > dlg.m_SamplePlayLengths[smp])
 			{
-				GetSampleUndo().PrepareUndo(smp, sundo_delete, "Automatic Sample Trimming", dlg.m_SamplePlayLengths[smp], length);
+				GetSampleUndo().PrepareUndo(smp, sundo_delete, "Automatic Sample Trimming", dlg.m_SamplePlayLengths[smp], sample.nLength);
 				ctrlSmp::ResizeSample(sample, dlg.m_SamplePlayLengths[smp], m_SndFile);
 				sample.uFlags.set(SMP_MODIFIED);
 			}
