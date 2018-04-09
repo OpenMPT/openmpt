@@ -244,7 +244,7 @@ static void save_settings_to_map( std::map<std::string,int> & result, const libo
 }
 
 static inline void load_map_setting( const std::map<std::string,int> & map, const std::string & key, int & val ) {
-	std::map<std::string,int>::const_iterator it = map.find( key );
+	auto it = map.find( key );
 	if ( it != map.end() ) {
 		val = it->second;
 	}
@@ -266,8 +266,8 @@ static void load_settings_from_xml( libopenmpt::plugin::settings & s, const std:
 	doc.load_string( xml.c_str() );
 	pugi::xml_node settings_node = doc.child( "settings" );
 	std::map<std::string,int> map;
-	for ( pugi::xml_attribute_iterator it = settings_node.attributes_begin(); it != settings_node.attributes_end(); ++it ) {
-		map[ it->name() ] = it->as_int();
+	for ( const auto & attr : settings_node.attributes() ) {
+		map[ attr.name() ] = attr.as_int();
 	}
 	load_settings_from_map( s, map );
 }
@@ -277,7 +277,7 @@ static void save_settings_to_xml( std::string & xml, const libopenmpt::plugin::s
 	save_settings_to_map( map, s );
 	pugi::xml_document doc;
 	pugi::xml_node settings_node = doc.append_child( "settings" );
-	for ( const auto &setting : map ) {
+	for ( const auto & setting : map ) {
 		settings_node.append_attribute( setting.first.c_str() ).set_value( setting.second );
 	}
 	std::ostringstream buf;
@@ -1634,20 +1634,17 @@ static char * file_formats;
 static void xmp_openmpt_on_dll_load() {
 	ZeroMemory( &xmpopenmpt_mutex, sizeof( xmpopenmpt_mutex ) );
 	InitializeCriticalSection( &xmpopenmpt_mutex );
-	std::vector<char> filetypes_string;
-	filetypes_string.clear();
 	std::vector<std::string> extensions = openmpt::get_supported_extensions();
-	const char * openmpt_str = "OpenMPT";
-	std::copy( openmpt_str, openmpt_str + std::strlen(openmpt_str), std::back_inserter( filetypes_string ) );
+	std::string filetypes_string = "OpenMPT";
 	filetypes_string.push_back('\0');
 	bool first = true;
-	for ( std::vector<std::string>::iterator ext = extensions.begin(); ext != extensions.end(); ++ext ) {
+	for ( const auto & ext : extensions ) {
 		if ( first ) {
 			first = false;
 		} else {
 			filetypes_string.push_back('/');
 		}
-		std::copy( (*ext).begin(), (*ext).end(), std::back_inserter( filetypes_string ) );
+		filetypes_string += ext;
 	}
 	filetypes_string.push_back('\0');
 	file_formats = (char*)HeapAlloc( GetProcessHeap(), 0, filetypes_string.size() );
@@ -1662,15 +1659,10 @@ static void xmp_openmpt_on_dll_load() {
 
 static void xmp_openmpt_on_dll_unload() {
 	delete self;
-	self = 0;
-	if ( !xmpin.exts ) {
-		return;
+	self = nullptr;
+	if ( xmpin.exts != xmp_openmpt_default_exts ) {
+		HeapFree(GetProcessHeap(), 0, (LPVOID)xmpin.exts);
 	}
-	if ( xmpin.exts == xmp_openmpt_default_exts ) {
-		xmpin.exts = nullptr;
-		return;
-	}
-	HeapFree( GetProcessHeap(), 0, (LPVOID)xmpin.exts );
 	xmpin.exts = nullptr;
 	DeleteCriticalSection( &xmpopenmpt_mutex );
 }
@@ -1685,23 +1677,20 @@ static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
 	xmpfstatus=(XMPFUNC_STATUS*)faceproc(XMPFUNC_STATUS_FACE);
 
 	// Register keyboard shortcuts
+	static constexpr std::pair<DWORD, const char *> shortcuts[] = {
+		{ openmpt_shortcut_ex | openmpt_shortcut_tempo_decrease, "OpenMPT - Decrease Tempo" },
+		{ openmpt_shortcut_ex | openmpt_shortcut_tempo_increase, "OpenMPT - Increase Tempo" },
+		{ openmpt_shortcut_ex | openmpt_shortcut_pitch_decrease, "OpenMPT - Decrease Pitch" },
+		{ openmpt_shortcut_ex | openmpt_shortcut_pitch_increase, "OpenMPT - Increase Pitch" },
+		{ openmpt_shortcut_ex | openmpt_shortcut_switch_interpolation, "OpenMPT - Switch Interpolation" },
+	};
 	XMPSHORTCUT cut;
 	cut.procex = &ShortcutHandler;
-	cut.id = openmpt_shortcut_ex | openmpt_shortcut_tempo_decrease;
-	cut.text = "OpenMPT - Decrease Tempo";
-	xmpfmisc->RegisterShortcut( &cut );
-	cut.id = openmpt_shortcut_ex | openmpt_shortcut_tempo_increase;
-	cut.text = "OpenMPT - Increase Tempo";
-	xmpfmisc->RegisterShortcut( &cut );
-	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_decrease;
-	cut.text = "OpenMPT - Decrease Pitch";
-	xmpfmisc->RegisterShortcut( &cut );
-	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_increase;
-	cut.text = "OpenMPT - Increase Pitch";
-	xmpfmisc->RegisterShortcut( &cut );
-	cut.id = openmpt_shortcut_ex | openmpt_shortcut_switch_interpolation;
-	cut.text = "OpenMPT - Switch Interpolation";
-	xmpfmisc->RegisterShortcut( &cut );
+	for ( const auto & shortcut : shortcuts ) {
+		cut.id = shortcut.first;
+		cut.text = shortcut.second;
+		xmpfmisc->RegisterShortcut( &cut );
+	}
 
 	self->settings.load();
 
