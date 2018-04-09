@@ -1540,7 +1540,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	{
 		CString s;
 		const SmpLength x = ScreenToSample(point.x);
-		s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Cusor: %IX") : _T("Cursor: %Iu"), x);
+		s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Cursor: %IX") : _T("Cursor: %Iu"), x);
 		UpdateIndicator(s);
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
