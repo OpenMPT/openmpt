@@ -530,7 +530,16 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::val(58.65403492763), "58.654");
 	VERIFY_EQUAL(mpt::fmt::fmt(23.42, mpt::FormatSpec("%3.1f")), "23.4");
 	VERIFY_EQUAL(mpt::fmt::f("%3.1f", 23.42), "23.4");
+	
+	VERIFY_EQUAL(mpt::fmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
+	VERIFY_EQUAL(mpt::fmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
 
+	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), MPT_USTRING("12;34;56;78"));
+	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), MPT_USTRING("a2:345:678"));
+
+	//VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
+	//VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING(":0A2:345:678")); // GCC returns "00A2:345:678"
+	
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);

@@ -284,17 +284,23 @@ private:
 	FormatFlags flags;
 	std::size_t width;
 	int precision;
+	unsigned int group;
+	char group_sep;
 public:
-	MPT_CONSTEXPR11_FUN FormatSpec() noexcept : flags(0), width(0), precision(-1) {}
+	MPT_CONSTEXPR11_FUN FormatSpec() noexcept : flags(0), width(0), precision(-1), group(0), group_sep(',') {}
 	MPT_CONSTEXPR11_FUN FormatFlags GetFlags() const noexcept { return flags; }
 	MPT_CONSTEXPR11_FUN std::size_t GetWidth() const noexcept { return width; }
 	MPT_CONSTEXPR11_FUN int GetPrecision() const noexcept { return precision; }
+	MPT_CONSTEXPR11_FUN unsigned int GetGroup() const noexcept { return group; }
+	MPT_CONSTEXPR11_FUN char GetGroupSep() const noexcept { return group_sep; }
 	MPT_CONSTEXPR14_FUN FormatSpec & SetFlags(FormatFlags f) noexcept { flags = f; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & SetWidth(std::size_t w) noexcept { width = w; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & SetPrecision(int p) noexcept { precision = p; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & SetGroup(unsigned int g) noexcept { group = g; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & SetGroupSep(char s) noexcept { group_sep = s; return *this; }
 public:
 	// short-hand construction
-	MPT_CONSTEXPR11_FUN explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1) noexcept : flags(f), width(w), precision(p) {}
+	MPT_CONSTEXPR11_FUN explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1, unsigned int g = 0, char s = ',') noexcept : flags(f), width(w), precision(p), group(g), group_sep(s) {}
 public:
 	// parsing printf
 	explicit FormatSpec(const char * format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
@@ -320,6 +326,8 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & NotaSci() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & Width(std::size_t w) noexcept { width = w; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & Prec(int p) noexcept { precision = p; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & Group(unsigned int g) noexcept { group = g; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & GroupSep(char s) noexcept { group_sep = s; return *this; }
 public:
 	MPT_CONSTEXPR14_FUN FormatSpec & Dec() noexcept { return BaseDec(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Hex() noexcept { return BaseHex(); }
@@ -382,6 +390,25 @@ static inline Tstring dec0(const T& x)
 }
 
 template<typename T>
+static inline Tstring dec(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff().Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring dec(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillSpc().Width(width).Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring dec0(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillNul().Width(width).Group(g).GroupSep(s));
+}
+
+template<typename T>
 static inline Tstring hex(const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
@@ -416,6 +443,43 @@ static inline Tstring HEX0(const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width));
+}
+
+template<typename T>
+static inline Tstring hex(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillOff().Group(g).GroupSep(s));
+}
+template<typename T>
+static inline Tstring HEX(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff().Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring hex(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillSpc().Width(width).Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring HEX(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillSpc().Width(width).Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring hex0(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillNul().Width(width).Group(g).GroupSep(s));
+}
+template<int width, typename T>
+static inline Tstring HEX0(unsigned int g, char s, const T& x)
+{
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width).Group(g).GroupSep(s));
 }
 
 template<typename T>

@@ -149,9 +149,34 @@ std::wstring ToWString(const long double & x) { return ToWStringHelper(x); }
 #endif
 
 
+template <typename Tchar>
+struct NumPunct : std::numpunct<Tchar>
+{
+private:
+	unsigned int group;
+	char sep;
+public:
+	NumPunct(unsigned int g, char s)
+		: group(g)
+		, sep(s)
+	{}
+	std::string do_grouping() const override
+	{
+		return std::string(1, static_cast<char>(group));
+	}
+	Tchar do_thousands_sep() const override
+	{
+		return static_cast<Tchar>(sep);
+	}
+};
+
 template<typename Tostream>
 inline void ApplyFormat(Tostream & o, const FormatSpec & format)
 {
+	if(format.GetGroup() > 0)
+	{
+		o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep())));
+	}
 	FormatFlags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
 	int precision = format.GetPrecision();
