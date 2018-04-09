@@ -67,6 +67,12 @@
 #include <miniz/miniz.h>
 #endif
 
+#define MPT_TEST_HAS_FILESYSTEM 1
+#if defined(MPT_BUILD_WASM)
+#undef MPT_TEST_HAS_FILESYSTEM
+#define MPT_TEST_HAS_FILESYSTEM 0
+#endif
+
 #ifdef _DEBUG
 #if MPT_COMPILER_MSVC && defined(_MFC_VER)
 	#define new DEBUG_NEW
@@ -310,6 +316,7 @@ static MPT_NOINLINE void TestVersion()
 #endif
 
 #ifdef LIBOPENMPT_BUILD
+#if MPT_TEST_HAS_FILESYSTEM
 	mpt::PathString version_mk = GetPathPrefix() + MPT_PATHSTRING("libopenmpt/libopenmpt_version.mk");
 	mpt::ifstream f(version_mk, std::ios::in);
 	VERIFY_EQUAL(f ? true : false, true);
@@ -342,6 +349,7 @@ static MPT_NOINLINE void TestVersion()
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_CURRENT"].length() > 0, true);
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_REVISION"].length() > 0, true);
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_AGE"].length() > 0, true);
+#endif // MPT_TEST_HAS_FILESYSTEM
 #endif // LIBOPENMPT_BUILD
 
 }
@@ -3393,11 +3401,15 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 	theApp.RemoveMruItem(0);
 }
 
-#else
+#else // !MODPLUG_TRACKER
 
 static bool ShouldRunTests()
 {
-	return true;
+	#if MPT_TEST_HAS_FILESYSTEM
+		return true;
+	#else
+		return false;
+	#endif
 }
 
 static mpt::PathString GetTestFilenameBase()
@@ -3448,9 +3460,9 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 	sndFile->SaveS3M(filename);
 }
 
-#endif
+#endif // !MODPLUG_NO_FILESAVE
 
-#endif
+#endif // MODPLUG_TRACKER
 
 
 
