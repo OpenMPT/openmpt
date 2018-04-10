@@ -1754,10 +1754,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				{
 					//Set loop points
 					SmpLength loopEnd = (sample.nLoopEnd > 0) ? sample.nLoopEnd : sample.nLength;
-					wsprintf(s, _T("Set &Loop Start to:\t%s"), pos);
+					wsprintf(s, _T("Set &Loop Start to:\t%s"), pos.GetString());
 					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= loopEnd ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPSTART, s);
-					wsprintf(s, _T("Set &Loop End to:\t%s"), pos);
+					wsprintf(s, _T("Set &Loop End to:\t%s"), pos.GetString());
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 
@@ -1766,10 +1766,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						//Set sustain loop points
 						SmpLength sustainEnd = (sample.nSustainEnd > 0) ? sample.nSustainEnd : sample.nLength;
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-						wsprintf(s, _T("Set &Sustain Start to:\t%s"), pos);
+						wsprintf(s, _T("Set &Sustain Start to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sustainEnd ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINSTART, s);
-						wsprintf(s, _T("Set &Sustain End to:\t%s"), pos);
+						wsprintf(s, _T("Set &Sustain End to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
@@ -1783,11 +1783,11 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						for(int i = 0; i < CountOf(sample.cues); i++)
 						{
 							const SmpLength cue = sample.cues[i];
-							wsprintf(s, _T("Cue &%c: %s"), '1' + i, mpt::cfmt::dec(3, ',', cue));
+							wsprintf(s, _T("Cue &%c: %s"), '1' + i, mpt::cfmt::dec(3, ',', cue).GetString());
 							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
 							if(cue > 0 && cue < sample.nLength) hasValidCues = true;
 						}
-						wsprintf(s, _T("Set Sample Cu&e to:\t%s"), pos);
+						wsprintf(s, _T("Set Sample Cu&e to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
 						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSlice, _T("Slice &at cue points")));
 					}
