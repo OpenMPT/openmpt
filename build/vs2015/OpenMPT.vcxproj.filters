@@ -252,6 +252,9 @@
     <ClInclude Include="..\..\mptrack\Globals.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\Image.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\ImageLists.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -304,9 +307,6 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\Notification.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\PNG.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\PSRatioCalc.h">
@@ -914,6 +914,9 @@
     <ClCompile Include="..\..\mptrack\Globals.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\Image.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\InputHandler.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -975,9 +978,6 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mptrack.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\PNG.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp">

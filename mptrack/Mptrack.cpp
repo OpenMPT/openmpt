@@ -26,7 +26,7 @@
 #include "AboutDialog.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
-#include "PNG.h"
+#include "Image.h"
 #include "BuildVariants.h"
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"

@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "MPTrackUtil.h"
-#include "PNG.h"
+#include "Image.h"
 #include "../common/FileReader.h"
 #include "../common/ComponentManager.h"
 

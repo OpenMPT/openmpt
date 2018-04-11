@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "AboutDialog.h"
-#include "PNG.h"
+#include "Image.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 #include "BuildVariants.h"

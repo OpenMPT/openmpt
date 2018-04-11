@@ -9,7 +9,7 @@
 
 #include "stdafx.h"
 #include "CImageListEx.h"
-#include "PNG.h"
+#include "Image.h"
 
 #include "Mptrack.h"
 

@@ -758,6 +758,7 @@
     <ClInclude Include="..\..\mptrack\FolderScanner.h" />
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\Globals.h" />
+    <ClInclude Include="..\..\mptrack\Image.h" />
     <ClInclude Include="..\..\mptrack\ImageLists.h" />
     <ClInclude Include="..\..\mptrack\InputHandler.h" />
     <ClInclude Include="..\..\mptrack\KeyConfigDlg.h" />
@@ -776,7 +777,6 @@
     <ClInclude Include="..\..\mptrack\Mpdlgs.h" />
     <ClInclude Include="..\..\mptrack\Mptrack.h" />
     <ClInclude Include="..\..\mptrack\Notification.h" />
-    <ClInclude Include="..\..\mptrack\PNG.h" />
     <ClInclude Include="..\..\mptrack\PSRatioCalc.h" />
     <ClInclude Include="..\..\mptrack\PathConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\PatternClipboard.h" />
@@ -982,6 +982,7 @@
     <ClCompile Include="..\..\mptrack\FolderScanner.cpp" />
     <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\Globals.cpp" />
+    <ClCompile Include="..\..\mptrack\Image.cpp" />
     <ClCompile Include="..\..\mptrack\InputHandler.cpp" />
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\MIDIMacroDialog.cpp" />
@@ -1003,7 +1004,6 @@
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp" />
     <ClCompile Include="..\..\mptrack\Mpt_midi.cpp" />
     <ClCompile Include="..\..\mptrack\Mptrack.cpp" />
-    <ClCompile Include="..\..\mptrack\PNG.cpp" />
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp" />
     <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PatternClipboard.cpp" />
