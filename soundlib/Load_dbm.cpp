@@ -664,7 +664,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Read whole MPEG stream into one sample and then split it up.
 		FileReader chunk = mpegChunk.GetChunk(mpegChunk.BytesLeft());
-		if(ReadMP3Sample(0, chunk))
+		if(ReadMP3Sample(0, chunk, true))
 		{
 			ModSample &srcSample = Samples[0];
 			const int8 *smpData = srcSample.pSample8;

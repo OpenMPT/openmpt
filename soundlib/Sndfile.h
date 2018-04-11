@@ -997,8 +997,8 @@ public:
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadOpusSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadVorbisSample(SAMPLEINDEX sample, FileReader &file);
-	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
-	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
+	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw = false, bool mo3Decode = false);  //  raw: ignore all encoder-/decodr-delays, decode just raw frames  ;  mod3Decode: skip metadata and loop-precompute
+	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);  //  mod3Decode: skip metadata and loop-precompute
 #ifdef MODPLUG_TRACKER
 	static std::vector<FileType> GetMediaFoundationFileTypes();
 #endif // MODPLUG_TRACKER

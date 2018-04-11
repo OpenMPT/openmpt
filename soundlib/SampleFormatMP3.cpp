@@ -125,7 +125,7 @@ MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
 #endif // MPT_WITH_MPG123
 
 
-bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
+bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, bool mo3Decode)
 {
 #if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)
 
@@ -190,17 +190,214 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		~MPG123Handle() { mpg123_delete(mh); }
 		operator mpg123_handle *() { return mh; }
 	};
+
+	bool hasLameXingVbriHeader = false;
+
+	if(!raw)
+	{
+
+		mpg123_off_t length_raw = 0;
+		mpg123_off_t length_hdr = 0;
+
+		// libmpg123 provides no way to determine whether it parsed ID3V2 or VBR tags.
+		// Thus, we use a pre-scan with those disabled and compare the resulting length.
+		// We ignore ID3V2 stream length here, althrough we parse the ID3V2 header.
+		// libmpg123 only accounts for the VBR info frame if gapless &&!ignore_infoframe,
+		// thus we switch both of those for comparison.
+		{
+			MPG123Handle mh;
+			if(!mh)
+			{
+				return false;
+			}
+			file.Rewind();
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_AUTO_RESAMPLE, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_GAPLESS, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_IGNORE_INFOFRAME, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_SKIP_ID3V2, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_IGNORE_STREAMLENGTH, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_INDEX_SIZE, -1000, 0.0)) // auto-grow
+			{
+				return false;
+			}
+			if(mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
+			{
+				return false;
+			}
+			if(mpg123_open_handle(mh, &file))
+			{
+				return false;
+			}
+			if(mpg123_scan(mh))
+			{
+				return false;
+			}
+			long rate = 0;
+			int channels = 0;
+			int encoding = 0;
+			if(mpg123_getformat(mh, &rate, &channels, &encoding))
+			{
+				return false;
+			}
+			if((channels != 1 && channels != 2) || (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED))
+			{
+				return false;
+			}
+			mpg123_frameinfo frameinfo;
+			MemsetZero(frameinfo);
+			if(mpg123_info(mh, &frameinfo))
+			{
+				return false;
+			}
+			if(frameinfo.layer < 1 || frameinfo.layer > 3)
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_FORCE_RATE, rate, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, (channels > 1) ? MPG123_FORCE_STEREO : MPG123_FORCE_MONO, 0.0))
+			{
+				return false;
+			}
+			length_raw = mpg123_length(mh);
+		}
+
+		{
+			MPG123Handle mh;
+			if(!mh)
+			{
+				return false;
+			}
+			file.Rewind();
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_AUTO_RESAMPLE, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_GAPLESS, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_IGNORE_INFOFRAME, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_SKIP_ID3V2, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_IGNORE_STREAMLENGTH, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_INDEX_SIZE, -1000, 0.0)) // auto-grow
+			{
+				return false;
+			}
+			if(mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
+			{
+				return false;
+			}
+			if(mpg123_open_handle(mh, &file))
+			{
+				return false;
+			}
+			if(mpg123_scan(mh))
+			{
+				return false;
+			}
+			long rate = 0;
+			int channels = 0;
+			int encoding = 0;
+			if(mpg123_getformat(mh, &rate, &channels, &encoding))
+			{
+				return false;
+			}
+			if((channels != 1 && channels != 2) || (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED))
+			{
+				return false;
+			}
+			mpg123_frameinfo frameinfo;
+			MemsetZero(frameinfo);
+			if(mpg123_info(mh, &frameinfo))
+			{
+				return false;
+			}
+			if(frameinfo.layer < 1 || frameinfo.layer > 3)
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_FORCE_RATE, rate, 0.0))
+			{
+				return false;
+			}
+			if(mpg123_param(mh, MPG123_ADD_FLAGS, (channels > 1) ? MPG123_FORCE_STEREO : MPG123_FORCE_MONO, 0.0))
+			{
+				return false;
+			}
+			length_hdr = mpg123_length(mh);
+		}
+
+		hasLameXingVbriHeader = (length_raw != length_hdr);
+
+	}
+
+	// Set up decoder...
 	MPG123Handle mh;
 	if(!mh)
 	{
 		return false;
 	}
 	file.Rewind();
-
-	long rate; int nchannels, encoding;
-	SmpLength length;
-	// Set up decoder...
 	if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_AUTO_RESAMPLE, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, raw ? MPG123_REMOVE_FLAGS : MPG123_ADD_FLAGS, MPG123_GAPLESS, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, raw ? MPG123_ADD_FLAGS : MPG123_REMOVE_FLAGS, MPG123_IGNORE_INFOFRAME, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_SKIP_ID3V2, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, raw ? MPG123_ADD_FLAGS : MPG123_REMOVE_FLAGS, MPG123_IGNORE_STREAMLENGTH, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, MPG123_INDEX_SIZE, -1000, 0.0)) // auto-grow
 	{
 		return false;
 	}
@@ -216,18 +413,116 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	{
 		return false;
 	}
-	if(mpg123_getformat(mh, &rate, &nchannels, &encoding))
+	long rate = 0;
+	int channels = 0;
+	int encoding = 0;
+	if(mpg123_getformat(mh, &rate, &channels, &encoding))
 	{
 		return false;
 	}
-	if(!nchannels || nchannels > 2 || (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED))
+	if((channels != 1 && channels != 2) || (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED))
 	{
 		return false;
 	}
-	length = mpg123_length(mh);
-	if(length == 0)
+	mpg123_frameinfo frameinfo;
+	MemsetZero(frameinfo);
+	if(mpg123_info(mh, &frameinfo))
 	{
 		return false;
+	}
+	if(frameinfo.layer < 1 || frameinfo.layer > 3)
+	{
+		return false;
+	}
+	// We force samplerate, channels and sampleformat, which in
+	// combination with auto-resample (set above) will cause libmpg123
+	// to stay with the given format even for completely confused
+	// MPG123_FRANKENSTEIN streams.
+	// Note that we cannot rely on mpg123_length() for the way we
+	// decode the mpeg streams because it depends on the actual frame
+	// sample rate instead of the returned sample rate.
+	if(mpg123_param(mh, MPG123_FORCE_RATE, rate, 0.0))
+	{
+		return false;
+	}
+	if(mpg123_param(mh, MPG123_ADD_FLAGS, (channels > 1) ? MPG123_FORCE_STEREO : MPG123_FORCE_MONO, 0.0))
+	{
+		return false;
+	}
+
+	std::vector<int16> data;
+	std::size_t data_skip_frames = 0;
+#if 1
+	// decoder delay
+	if(!raw && !hasLameXingVbriHeader)
+	{
+		if(frameinfo.layer == 1)
+		{
+			data_skip_frames = 240 + 1;
+		} else if(frameinfo.layer == 2)
+		{
+			data_skip_frames = 240 + 1;
+		} else if(frameinfo.layer == 3)
+		{
+			data_skip_frames = 528 + 1;
+		}
+	}
+#endif
+
+	std::vector<mpt::byte> buf_bytes;
+	std::vector<int16> buf_samples;
+	bool decode_error = false;
+	bool decode_done = false;
+	while(!decode_error && !decode_done)
+	{
+#if 0
+		// Despite documented on the website, MPG123_ENC_DELAY,
+		// MPG123_ENC_PADDING, MPG123_DEC_DELAY do not exist in reality.
+		// Thus we cannot use them to account for decoder delay.
+		long statei = 0;
+		double statef = 0.0;
+		if(mpg123_getstate(mh, MPG123_FRESH_DECODER, &statei, &statef))
+		{
+			return false;
+		}
+		int new_decoder = statei;
+		if(new_decoder == 1)
+		{
+			// new decoder state, need to account for decoder delay
+		}
+#endif
+		buf_bytes.resize(mpg123_outblock(mh));
+		buf_samples.resize(buf_bytes.size() / sizeof(int16));
+		mpg123_size_t buf_bytes_decoded = 0;
+		int mpg123_read_result = mpg123_read(mh, mpt::byte_cast<unsigned char*>(buf_bytes.data()), buf_bytes.size(), &buf_bytes_decoded);
+		std::memcpy(buf_samples.data(), buf_bytes.data(), buf_bytes_decoded);
+		data.insert(data.end(), buf_samples.data(), buf_samples.data() + buf_bytes_decoded / sizeof(int16));
+#if 0
+		// This would work if libmpg123 would actually account for decoder
+		// delay if MPG123_GAPLESS also for files without info frame header.
+		mpg123_off_t frame_pos = mpg123_tell(mh);
+		if(data_skip_frames == 0)
+		{
+			// account for decoder delay
+			if(frame_pos > 0)
+			{
+				data_skip_frames = (data.size() / channels) - frame_pos;
+			}
+		}
+#endif
+		if(mpg123_read_result == MPG123_OK)
+		{
+			// continue
+		} else if(mpg123_read_result == MPG123_NEW_FORMAT)
+		{
+			// continue
+		} else if(mpg123_read_result == MPG123_DONE)
+		{
+			decode_done = true;
+		} else
+		{
+			decode_error = true;
+		}
 	}
 
 	DestroySampleThreadsafe(sample);
@@ -237,16 +532,15 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
-	Samples[sample].nLength = length;
+	Samples[sample].nLength = (data.size() / channels) - data_skip_frames;
 
 	Samples[sample].uFlags.set(CHN_16BIT);
-	Samples[sample].uFlags.set(CHN_STEREO, nchannels == 2);
+	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
 	Samples[sample].AllocateSample();
 
 	if(Samples[sample].HasSampleData())
 	{
-		mpg123_size_t ndecoded = 0;
-		mpg123_read(mh, mpt::byte_cast<unsigned char *>(Samples[sample].sampleb()), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+		std::memcpy(Samples[sample].sampleb(), data.data() + (data_skip_frames * channels), (data.size() - (data_skip_frames * channels)) * sizeof(int16));
 	}
 
 	if(!mo3Decode)

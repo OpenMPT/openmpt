@@ -56,7 +56,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadOpusSample(nSample, file)
 		&& !ReadVorbisSample(nSample, file)
-		&& !ReadMP3Sample(nSample, file)
+		&& !ReadMP3Sample(nSample, file, false)
 		&& !ReadMediaFoundationSample(nSample, file)
 		)
 	{
@@ -449,7 +449,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{
 		// MP3 in WAV
-		return ReadMP3Sample(nSample, sampleChunk, true) || ReadMediaFoundationSample(nSample, sampleChunk, true);
+		return ReadMP3Sample(nSample, sampleChunk, false, true) || ReadMediaFoundationSample(nSample, sampleChunk, true);
 	} else if(!wavFile.IsExtensibleFormat() && wavFile.MayBeCoolEdit16_8() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 32 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
 	{
 		// Syntrillium Cool Edit hack to store IEEE 32bit floating point
