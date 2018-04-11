@@ -295,53 +295,29 @@ public:
 static input_singletrack_factory_t<input_openmpt> g_input_openmpt_factory;
 
 
+class input_file_type_v2_impl_openmpt : public input_file_type_v2 {
+public:
+	input_file_type_v2_impl_openmpt()
+		: extensions( openmpt::get_supported_extensions() ) 
+	{ }
+	unsigned get_count() {
+		return static_cast<unsigned>( extensions.size() );
+	}
+	bool is_associatable( unsigned idx ) {
+		return true;
+	}
+	void get_format_name( unsigned idx, pfc::string_base & out, bool isPlural ) {
+		if ( isPlural ) {
+			out = "OpenMPT compatible module files";
+		} else {
+			out = "OpenMPT compatible module file";	
+		}
+	}
+	void get_extensions( unsigned idx, pfc::string_base & out ) {
+		out = extensions[idx].c_str();
+	}
+private:
+	std::vector<std::string> extensions;
+};
 
-// copied table from soundlib/Tables.cpp
-// the foobar2000 interface is stupid demanding to declare those statically
-
-DECLARE_FILE_TYPE("OpenMPT compatible module files",
-	"*.mod" ";"
-	"*.s3m" ";"
-	"*.xm" ";"
-	"*.it" ";"
-	"*.mptm" ";"
-	"*.stm" ";"
-	"*.nst" ";"
-	"*.m15" ";"
-	"*.stk" ";"
-	"*.st26" ";"
-	"*.pt36" ";"
-	"*.ice" ";"
-	"*.wow" ";"
-	"*.ult" ";"
-	"*.669" ";"
-	"*.mtm" ";"
-	"*.med" ";"
-	"*.far" ";"
-	"*.mdl" ";"
-	"*.ams" ";"
-	"*.ams" ";"
-	"*.dsm" ";"
-	"*.dtm" ";"
-	"*.amf" ";"
-	"*.amf" ";"
-	"*.okt" ";"
-	"*.dmf" ";"
-	"*.ptm" ";"
-	"*.psm" ";"
-	"*.mt2" ";"
-	"*.dbm" ";"
-	"*.digi" ";"
-	"*.imf" ";"
-	"*.j2b" ";"
-	"*.plm" ";"
-	"*.stp" ";"
-	"*.sfx" ";"
-	"*.sfx2" ";"
-	"*.mms" ";"
-	"*.gdm" ";"
-	"*.umx" ";"
-	"*.mo3" ";"
-	"*.xpk" ";"
-	"*.ppm" ";"
-	"*.mmcmp" );
+namespace { static service_factory_single_t<input_file_type_v2_impl_openmpt> g_filetypes; }

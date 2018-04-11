@@ -47,7 +47,6 @@ struct ModFormatInfo
 	const char *extension;       // "mod"
 };
 
-// remember to also update libopenmpt/foo_openmpt.cpp (all other plugins read these dynamically)
 static constexpr ModFormatInfo modFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,  MPT_ULITERAL("ProTracker"),              "mod" },

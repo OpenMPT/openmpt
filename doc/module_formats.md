@@ -100,6 +100,5 @@ that need to be updated:
 * Run `build/regenerate_vs_projects.sh` / `build/regenerate_vs_projects.cmd`
   (depending on your platform)
 * Add file extension to `installer/filetypes.iss` (in four places).
-* Add file extension to `libopenmpt/foo_openmpt.cpp`.
 * Add file extension to `CTrackApp::OpenModulesDialog` in `mptrack/Mptrack.cpp`.
 * Add file extension / `MODTYPE` to `soundlib/Tables.cpp`.
