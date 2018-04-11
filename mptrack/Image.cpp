@@ -236,7 +236,7 @@ static CComPtr<IStream> GetStream(mpt::const_byte_span data)
 	}
 	std::memcpy(mem, data.data(), data.size());
 	GlobalUnlock(hGlobal);
-	if(CreateStreamOnHGlobal(NULL, TRUE, &stream) != S_OK)
+	if(CreateStreamOnHGlobal(hGlobal, TRUE, &stream) != S_OK)
 	{
 		hGlobal = GlobalFree(hGlobal);
 		throw bad_image();
