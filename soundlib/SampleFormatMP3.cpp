@@ -522,6 +522,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 
 #elif defined(MPT_WITH_MINIMP3)
 
+	MPT_UNREFERENCED_PARAMETER(raw);
+
 	file.Rewind();
 	FileReader::PinnedRawDataView rawDataView = file.GetPinnedRawDataView();
 	int64 bytes_left = rawDataView.size();
@@ -605,6 +607,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(raw);
 	MPT_UNREFERENCED_PARAMETER(mo3Decode);
 
 #endif // MPT_WITH_MPG123 || MPT_WITH_MINIMP3
