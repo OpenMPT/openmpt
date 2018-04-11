@@ -502,7 +502,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
-	Samples[sample].nLength = (data.size() / channels) - data_skip_frames;
+	Samples[sample].nLength = mpt::saturate_cast<SmpLength>((data.size() / channels) - data_skip_frames);
 
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
