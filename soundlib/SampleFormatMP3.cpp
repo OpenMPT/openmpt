@@ -451,9 +451,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	}
 
 	std::vector<int16> data;
-	std::size_t data_skip_frames = 0;
-#if 1
+
 	// decoder delay
+	std::size_t data_skip_frames = 0;
 	if(!raw && !hasLameXingVbriHeader)
 	{
 		if(frameinfo.layer == 1)
@@ -467,7 +467,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 			data_skip_frames = 528 + 1;
 		}
 	}
-#endif
 
 	std::vector<mpt::byte> buf_bytes;
 	std::vector<int16> buf_samples;
@@ -475,41 +474,12 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	bool decode_done = false;
 	while(!decode_error && !decode_done)
 	{
-#if 0
-		// Despite documented on the website, MPG123_ENC_DELAY,
-		// MPG123_ENC_PADDING, MPG123_DEC_DELAY do not exist in reality.
-		// Thus we cannot use them to account for decoder delay.
-		long statei = 0;
-		double statef = 0.0;
-		if(mpg123_getstate(mh, MPG123_FRESH_DECODER, &statei, &statef))
-		{
-			return false;
-		}
-		int new_decoder = statei;
-		if(new_decoder == 1)
-		{
-			// new decoder state, need to account for decoder delay
-		}
-#endif
 		buf_bytes.resize(mpg123_outblock(mh));
 		buf_samples.resize(buf_bytes.size() / sizeof(int16));
 		mpg123_size_t buf_bytes_decoded = 0;
 		int mpg123_read_result = mpg123_read(mh, mpt::byte_cast<unsigned char*>(buf_bytes.data()), buf_bytes.size(), &buf_bytes_decoded);
 		std::memcpy(buf_samples.data(), buf_bytes.data(), buf_bytes_decoded);
 		data.insert(data.end(), buf_samples.data(), buf_samples.data() + buf_bytes_decoded / sizeof(int16));
-#if 0
-		// This would work if libmpg123 would actually account for decoder
-		// delay if MPG123_GAPLESS also for files without info frame header.
-		mpg123_off_t frame_pos = mpg123_tell(mh);
-		if(data_skip_frames == 0)
-		{
-			// account for decoder delay
-			if(frame_pos > 0)
-			{
-				data_skip_frames = (data.size() / channels) - frame_pos;
-			}
-		}
-#endif
 		if(mpg123_read_result == MPG123_OK)
 		{
 			// continue
